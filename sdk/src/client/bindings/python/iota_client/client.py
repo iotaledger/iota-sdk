@@ -125,10 +125,13 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
             immutable_features = humps.camelize(
                 [immutable_feature.as_dict() for immutable_feature in immutable_features])
 
+        if amount:
+            amount = str(amount)
+
         return self.send_message('buildAliasOutput', {
             'aliasId': alias_id,
             'unlockConditions': unlock_conditions,
-            'amount': str(amount),
+            'amount': amount,
             'nativeTokens': native_tokens,
             'stateIndex': state_index,
             'stateMetadata': state_metadata,
@@ -154,9 +157,12 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
         if features:
             features = humps.camelize([feature.as_dict() for feature in features])
 
+        if amount:
+            amount = str(amount)
+
         return self.send_message('buildBasicOutput', {
             'unlockConditions': unlock_conditions,
-            'amount': str(amount),
+            'amount': amount,
             'nativeTokens': native_tokens,
             'features': features,
         })
@@ -186,11 +192,14 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
             immutable_features = humps.camelize(
                 [immutable_feature.as_dict() for immutable_feature in immutable_features])
 
+        if amount:
+            amount = str(amount)
+
         return self.send_message('buildFoundryOutput', {
             'serialNumber': serial_number,
             'tokenScheme': token_scheme,
             'unlockConditions': unlock_conditions,
-            'amount': str(amount),
+            'amount': amount,
             'nativeTokens': native_tokens,
             'features': features,
             'immutableFeatures': immutable_features
@@ -219,10 +228,13 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
             immutable_features = humps.camelize(
                 [immutable_feature.as_dict() for immutable_feature in immutable_features])
 
+        if amount:
+            amount = str(amount)
+
         return self.send_message('buildNftOutput', {
             'nftId': nft_id,
             'unlockConditions': unlock_conditions,
-            'amount': str(amount),
+            'amount': amount,
             'nativeTokens': native_tokens,
             'features': features,
             'immutableFeatures': immutable_features
