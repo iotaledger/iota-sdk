@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MQTT `Error`;
 - `Message::HashTransactionEssence`;
 - `Response::TransactionEssenceHash`;
+- Derive `Eq, PartialEq` for `input_select::Error`;
+- ISA `Error::{InvalidOutputCount, InvalidOutputCount}` variants;
 
 ### Changed
 
@@ -36,6 +38,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `Client::get_output_ids_with_pagination()` to `Client::get_output_ids()`;
 - All MQTT related functions return an MQTT `Error`;
 - Re-export `mqtt` module instead of all its symbols;
+
+### Fixed
+
+- ISA will not select more than max inputs;
 
 ## 2.0.1-rc.7 - 2023-03-09
 
