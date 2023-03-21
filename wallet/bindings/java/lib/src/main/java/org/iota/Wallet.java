@@ -9,6 +9,7 @@ import org.iota.api.CustomGson;
 import org.iota.api.NativeApi;
 import org.iota.external.logger.LoggerOutputConfigBuilder;
 import org.iota.types.*;
+import org.iota.types.addresses.Address;
 import org.iota.types.events.Event;
 import org.iota.types.events.EventListener;
 import org.iota.types.events.transaction.TransactionProgressEvent;
@@ -18,6 +19,7 @@ import org.iota.types.exceptions.InitializeWalletException;
 import org.iota.types.exceptions.WalletException;
 import org.iota.types.ids.account.AccountIdentifier;
 import org.iota.types.ids.account.AccountIndex;
+import org.iota.types.account_methods.AddressGenerationOptions;
 
 public class Wallet extends NativeApi {
 
@@ -298,6 +300,23 @@ public class Wallet extends NativeApi {
         o.add("event", CustomGson.get().toJsonTree(event));
 
         callBaseApi(new WalletCommand("emitTestEvent", o));
+    }
+
+    /**
+     * Generate addresses.
+     *
+     * @param options The options.
+     * @return The generated addresses.
+     */
+    public String generateAddress(int accountIndex, boolean internal, int addressIndex, AddressGenerationOptions.GenerateAddressOptions options, String bechHrp) throws WalletException {
+        JsonObject o = new JsonObject();
+        o.addProperty("accountIndex", accountIndex);
+        o.addProperty("internal", internal);
+        o.addProperty("addressIndex", addressIndex);
+        o.add("options", CustomGson.get().toJsonTree(options));
+        o.addProperty("bechHrp", bechHrp);
+        
+        return callBaseApi(new WalletCommand("generateAddress", o)).getAsString();
     }
 
     /**
