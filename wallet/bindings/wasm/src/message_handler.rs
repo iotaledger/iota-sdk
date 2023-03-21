@@ -24,7 +24,7 @@ pub struct MessageHandler {
 #[allow(non_snake_case)]
 pub fn message_handler_new(options: String) -> Result<MessageHandler, JsValue> {
     let manager_options = match serde_json::from_str::<ManagerOptions>(&options) {
-        Ok(options) => Some(options),
+        Ok(options) => options,
         Err(e) => return Err(e.to_string().into()),
     };
 

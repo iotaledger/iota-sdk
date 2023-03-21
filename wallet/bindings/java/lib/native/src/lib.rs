@@ -107,12 +107,12 @@ pub extern "system" fn Java_org_iota_api_NativeApi_createMessageHandler(
     if let Ok(mut message_handler_store) = MESSAGE_HANDLER.lock() {
         message_handler_store.replace(jni_err_assert!(
             env,
-            crate::block_on(create_message_handler(Some(jni_from_json_make!(
+            crate::block_on(create_message_handler(jni_from_json_make!(
                 env,
                 config,
                 ManagerOptions,
                 ()
-            ),))),
+            ),)),
             ()
         ));
     };

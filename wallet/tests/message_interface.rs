@@ -47,7 +47,7 @@ async fn message_interface_validate_mnemonic() -> Result<()> {
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
 
-    let wallet_handle = create_message_handler(Some(options)).await.unwrap();
+    let wallet_handle = create_message_handler(options).await.unwrap();
     let response = wallet_handle.send_message(Message::GenerateMnemonic).await;
 
     match response {
@@ -103,7 +103,7 @@ async fn message_interface_create_account() -> Result<()> {
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
 
-    let wallet_handle = create_message_handler(Some(options)).await.unwrap();
+    let wallet_handle = create_message_handler(options).await.unwrap();
 
     // create an account
     let response = wallet_handle
@@ -151,7 +151,7 @@ async fn message_interface_events() -> Result<()> {
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
 
-    let wallet_handle = create_message_handler(Some(options)).await.unwrap();
+    let wallet_handle = create_message_handler(options).await.unwrap();
 
     wallet_handle
         .listen(vec![], |event| {
@@ -241,7 +241,7 @@ async fn message_interface_emit_event() -> Result<()> {
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
 
-    let wallet_handle = create_message_handler(Some(options)).await.unwrap();
+    let wallet_handle = create_message_handler(options).await.unwrap();
 
     let event_counter = Arc::new(std::sync::atomic::AtomicUsize::new(0));
     let event_counter_clone = Arc::clone(&event_counter);
@@ -307,7 +307,7 @@ async fn message_interface_stronghold() -> Result<()> {
         secret_manager: Some(serde_json::from_str(&secret_manager).unwrap()),
     };
 
-    let wallet_handle = create_message_handler(Some(options)).await.unwrap();
+    let wallet_handle = create_message_handler(options).await.unwrap();
 
     // Set password and store mnemonic
     let _ = wallet_handle
@@ -355,7 +355,7 @@ async fn address_conversion_methods() -> Result<()> {
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
 
-    let wallet_handle = create_message_handler(Some(options)).await.unwrap();
+    let wallet_handle = create_message_handler(options).await.unwrap();
 
     let bech32_address = "rms1qqk4svqpc89lxx89w7vksv9jgjjm2vwnrhad2j3cds9ev4cu434wjapdsxs";
     let hex_address = "0x2d583001c1cbf318e577996830b244a5b531d31dfad54a386c0b96571cac6ae9";
@@ -407,7 +407,7 @@ async fn message_interface_address_generation() -> Result<()> {
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
 
-    let wallet_handle = create_message_handler(Some(options)).await.unwrap();
+    let wallet_handle = create_message_handler(options).await.unwrap();
 
     let response = wallet_handle
         .send_message(Message::GenerateAddress {

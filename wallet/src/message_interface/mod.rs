@@ -63,35 +63,29 @@ pub fn init_logger(config: String) -> Result<(), fern_logger::Error> {
     logger_init(config)
 }
 
-pub async fn create_message_handler(options: Option<ManagerOptions>) -> crate::Result<WalletMessageHandler> {
+pub async fn create_message_handler(options: ManagerOptions) -> crate::Result<WalletMessageHandler> {
     log::debug!(
         "create_message_handler with options: {}",
         serde_json::to_string(&options)?,
     );
-    let manager = if let Some(options) = options {
-        let mut builder = AccountManager::builder();
+    let mut builder = AccountManager::builder();
 
-        #[cfg(feature = "storage")]
-        if let Some(storage_path) = options.storage_path {
-            builder = builder.with_storage_path(&storage_path);
-        }
+    #[cfg(feature = "storage")]
+    if let Some(storage_path) = options.storage_path {
+        builder = builder.with_storage_path(&storage_path);
+    }
 
-        if let Some(secret_manager) = options.secret_manager {
-            builder = builder.with_secret_manager(SecretManager::try_from(&secret_manager)?);
-        }
+    if let Some(secret_manager) = options.secret_manager {
+        builder = builder.with_secret_manager(SecretManager::try_from(&secret_manager)?);
+    }
 
-        if let Some(client_options) = options.client_options {
-            builder = builder.with_client_options(client_options);
-        }
+    if let Some(client_options) = options.client_options {
+        builder = builder.with_client_options(client_options);
+    }
 
-        if let Some(coin_type) = options.coin_type {
-            builder = builder.with_coin_type(coin_type);
-        }
+    if let Some(coin_type) = options.coin_type {
+        builder = builder.with_coin_type(coin_type);
+    }
 
-        builder.finish().await?
-    } else {
-        AccountManager::builder().finish().await?
-    };
-
-    Ok(WalletMessageHandler::with_manager(manager))
+    Ok(WalletMessageHandler::with_manager(builder.finish().await?))
 }

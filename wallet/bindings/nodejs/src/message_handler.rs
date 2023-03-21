@@ -32,7 +32,7 @@ impl MessageHandler {
         let manager_options = serde_json::from_str::<ManagerOptions>(&options)?;
 
         let wallet_message_handler = crate::RUNTIME
-            .block_on(async move { create_message_handler(Some(manager_options)).await })
+            .block_on(async move { create_message_handler(manager_options).await })
             .expect("error initializing account manager");
 
         Ok(Self {

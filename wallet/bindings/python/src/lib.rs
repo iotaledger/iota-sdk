@@ -39,16 +39,8 @@ pub fn destroy() -> PyResult<()> {
 
 #[pyfunction]
 /// Create message handler for python-side usage.
-pub fn create_message_handler(options: Option<String>) -> Result<WalletMessageHandler> {
-    let options = match options {
-        Some(ops) => match serde_json::from_str::<ManagerOptions>(&ops) {
-            Ok(options) => Some(options),
-            Err(e) => {
-                panic!("Wrong options input! {e:?}");
-            }
-        },
-        _ => None,
-    };
+pub fn create_message_handler(options: String) -> Result<WalletMessageHandler> {
+    let options = serde_json::from_str::<ManagerOptions>(&options)?;
     let message_handler =
         crate::block_on(async { ::iota_wallet::message_interface::create_message_handler(options).await })?;
 

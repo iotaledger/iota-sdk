@@ -68,19 +68,14 @@ pub unsafe extern "C" fn iota_initialize(
     error_buffer: *mut c_char,
     error_buffer_size: usize,
 ) -> *mut IotaWalletHandle {
-    let manager_options = if manager_options.is_null() {
-        None
-    } else {
-        let manager_options = CStr::from_ptr(manager_options);
-        let manager_options = match manager_options.to_str() {
-            Ok(manager_options) => manager_options,
-            Err(e) => return null_with_error_message(error_buffer, Box::new(e), error_buffer_size),
-        };
-        let manager_options: ManagerOptions = match serde_json::from_str(manager_options) {
-            Ok(manager_options) => manager_options,
-            Err(e) => return null_with_error_message(error_buffer, Box::new(e), error_buffer_size),
-        };
-        Some(manager_options)
+    let manager_options = CStr::from_ptr(manager_options);
+    let manager_options = match manager_options.to_str() {
+        Ok(manager_options) => manager_options,
+        Err(e) => return null_with_error_message(error_buffer, Box::new(e), error_buffer_size),
+    };
+    let manager_options: ManagerOptions = match serde_json::from_str(manager_options) {
+        Ok(manager_options) => manager_options,
+        Err(e) => return null_with_error_message(error_buffer, Box::new(e), error_buffer_size),
     };
 
     let handle = runtime().block_on(message_interface::create_message_handler(manager_options));

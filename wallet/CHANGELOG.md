@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cache participations for spent outputs;
 - Make `{Storage, StorageManager}::get` generic over a `T: Deserialize` and return a `T`, avoiding always having to deserialize after;
 - Make `AddressWrapper` accessible via `account::types::AddressWrapper`;
+- Change options parameter in `create_message_handler()` from `Option<ManagerOptions>` to `ManagerOptions`;
 
 ### Fixed
 
