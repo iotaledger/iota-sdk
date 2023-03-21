@@ -1,5 +1,5 @@
 ---
-"nodejs-binding": patch
+"wallet-nodejs-binding": patch
 ---
 
 Allow voting output in inputs if required.

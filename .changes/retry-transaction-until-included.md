@@ -1,5 +1,5 @@
 ---
-"nodejs-binding": patch
+"wallet-nodejs-binding": patch
 ---
 
 Add `Account.retryTransactionUntilIncluded()`.

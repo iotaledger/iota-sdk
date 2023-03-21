@@ -1,5 +1,5 @@
 ---
-"nodejs-binding": patch
+"wallet-nodejs-binding": patch
 ---
 
 Remove `list` prefix from functions.

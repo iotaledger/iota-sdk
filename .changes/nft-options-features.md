@@ -1,5 +1,5 @@
 ---
-"nodejs-binding": patch
+"wallet-nodejs-binding": patch
 ---
 
 Add `sender`, `tag` and `issuer` fields to `NftOptions`.

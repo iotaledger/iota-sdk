@@ -1,0 +1,59 @@
+{
+    "type": 6,
+    "essence": {
+        "type": 1,
+        "networkId": "6983037938332331227",
+        "inputs": [
+            {
+                "type": 0,
+                "transactionId": "0x317841bb2f2113745cac0fdd523a7764c23eb0a3ee0b1b22e19e68cd1ca242cb",
+                "transactionOutputIndex": 1
+            }
+        ],
+        "inputsCommitment": "0x0c60d55af808fb89ebb517ecc07869cf278f8fcf53f89257ddbcd3a077410e12",
+        "outputs": [
+            {
+                "type": 3,
+                "amount": "1000000",
+                "unlockConditions": [
+                    {
+                        "type": 0,
+                        "address": {
+                            "type": 0,
+                            "pubKeyHash": "0x194eb32b9b6c61207192c7073562a0b3adf50a7c1f268182b552ec8999380acb"
+                        }
+                    }
+                ]
+            },
+            {
+                "type": 3,
+                "amount": "1064765900",
+                "nativeTokens": [
+                    {
+                        "id": "0x081e6439529b020328c08224b43172f282cb16649d50c891fa156365323667e47a0100000000",
+                        "amount": "0x32"
+                    }
+                ],
+                "unlockConditions": [
+                    {
+                        "type": 0,
+                        "address": {
+                            "type": 0,
+                            "pubKeyHash": "0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    "unlocks": [
+        {
+            "type": 0,
+            "signature": {
+                "type": 0,
+                "publicKey": "0x67b7fc3f78763c9394fc4fcdb52cf3a973b6e064bdc3defb40a6cb2c880e6f5c",
+                "signature": "0xbefb97e76f5c1a5b6aab16b8ab2f79895db522df16c8ab61a48129f11cd331367607cc106e15806fb19642125af06b49cfadcad51473d34f94fd1119af7fad0a"
+            }
+        }
+    ]
+}

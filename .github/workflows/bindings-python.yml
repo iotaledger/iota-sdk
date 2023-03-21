@@ -1,0 +1,117 @@
+name: Python bindings checks
+on:
+  push:
+    branches: [develop, production]
+    paths:
+      - ".github/workflows/bindings-python.yml"
+      - ".github/actions/**"
+      - "**.rs" # Include all rust files
+      - "**Cargo.toml" # Include all Cargo.toml files
+      - "**Cargo.lock" # Include all Cargo.lock files
+      - "!**/examples/**" # Exclude all examples
+      - "!**/tests/**" # Exclude all tests
+      - "!client/bindings/**" # Exclude all bindings
+      - "client/bindings/python/**" # Re-include python bindings
+  pull_request:
+    branches: [develop, production]
+    paths:
+      - ".github/workflows/bindings-python.yml"
+      - ".github/actions/**"
+      - "**.rs" # Include all rust files
+      - "**Cargo.toml" # Include all Cargo.toml files
+      - "**Cargo.lock" # Include all Cargo.lock files
+      - "!**/examples/**" # Exclude all examples
+      - "!**/tests/**" # Exclude all tests
+      - "!client/bindings/**" # Exclude all bindings
+      - "client/bindings/python/**" # Re-include python bindings
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test
+    if: ${{ ! github.event.schedule }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2019, macos-latest, ubuntu-latest]
+        python-version: ["3.10"]
+
+    steps:
+      - name: Checkout the Source Code
+        uses: actions/checkout@v3
+
+      - name: Set Up Nightly Rust
+        uses: ./.github/actions/setup-rust
+        with:
+          toolchain: nightly
+          cache: true
+          cache-root: client/bindings/python
+          cache-job-id: ${{ github.workflow }}-${{ github.job }}-${{ matrix.os }}-${{ matrix.python }}
+          cache-hash: ${{ hashFiles('.github/workflows/bindings-python.yml') }}
+
+      - name: Set Up Python ${{ matrix.python }} and Pip Cache
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: client/bindings/python/requirements-dev.txt
+
+      # This step is required for bindgen to work on Windows.
+      - name: Set Up Clang/LLVM (Windows)
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        uses: ./.github/actions/setup-clang
+
+      - name: Install Dependencies for Python Binding Tests
+        run: |
+          python3 -m pip install --upgrade setuptools pip wheel
+          python3 -m pip install tox-gh-actions
+
+      - name: Install required packages (Ubuntu)
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install libudev-dev libusb-1.0-0-dev
+
+      - name: Run Tox
+        working-directory: client/bindings/python
+        run: tox
+
+  lint:
+    name: Lint
+    if: ${{ ! github.event.schedule }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the Source Code
+        uses: actions/checkout@v3
+
+      - name: Set Up Beta Clippy
+        uses: ./.github/actions/setup-rust
+        with:
+          toolchain: beta
+          components: clippy
+          cache: true
+          cache-root: client/bindings/python
+          cache-job-id: ${{ github.workflow }}-${{ github.job }}
+          cache-hash: ${{ hashFiles('.github/workflows/bindings-python.yml') }}
+
+      - name: Install required packages (Ubuntu)
+        run: |
+          sudo apt-get update
+          sudo apt-get install libudev-dev libusb-1.0-0-dev
+
+      - name: Run Clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --manifest-path client/bindings/python/Cargo.toml --all-features --all-targets -- --deny warnings
+          name: Clippy Results for the Python Bindings
+
+      # TODO: Lint the Python code too

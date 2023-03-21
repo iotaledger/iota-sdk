@@ -1,5 +1,5 @@
 {
-  "gitSiteUrl": "https://github.com/iotaledger/wallet.rs/",
+  "gitSiteUrl": "https://github.com/iotaledger/iota-sdk",
   "pkgManagers": {
     "javascript": {
       "version": true,
@@ -7,7 +7,43 @@
     }
   },
   "packages": {
-    "nodejs-binding": {
+    "client-nodejs-binding": {
+      "path": "./client/bindings/nodejs",
+      "manager": "javascript",
+      "getPublishedVersion": "npm view ${ pkgFile.pkg.name }@develop version",
+      "prepublish": [
+        {
+          "command": "false || dasel put -f Cargo.toml '.dependencies.iota-client.rev' -v $GITHUB_SHA"
+        },
+        {
+          "command": "dasel put -f Cargo.toml '.dependencies.iota-client.git' -v https://github.com/iotaledger/iota-sdk.rs"
+        },
+        {
+          "command": "dasel put -t json -f Cargo.toml '.dependencies.iota-client.features' -v '[\"message_interface\", \"mqtt\"]'"
+        },
+        {
+          "command": "dasel delete -f Cargo.toml '.dependencies.iota-client.path'"
+        },
+        {
+          "command": "dasel delete -f Cargo.toml '.dependencies.iota-client.default-features'"
+        },
+        {
+          "command": "yarn --ignore-scripts"
+        },
+        {
+          "command": "tsc"
+        },
+        {
+          "command": "cat Cargo.toml"
+        }
+      ],
+      "publish": [
+        {
+          "command": "yarn publish --access public --loglevel silly --tag develop"
+        }
+      ]
+    },
+    "wallet-nodejs-binding": {
       "path": "./wallet/bindings/nodejs",
       "manager": "javascript",
       "getPublishedVersion": "npm view ${ pkgFile.pkg.name } version",
@@ -16,7 +52,7 @@
           "command": "false || dasel put -f Cargo.toml '.dependencies.iota-wallet.rev' -v $GITHUB_SHA"
         },
         {
-          "command": "dasel put -f Cargo.toml '.dependencies.iota-wallet.git' -v https://github.com/iotaledger/wallet.rs"
+          "command": "dasel put -f Cargo.toml '.dependencies.iota-wallet.git' -v https://github.com/iotaledger/iota-sdk.rs"
         },
         {
           "command": "dasel delete -f Cargo.toml '.dependencies.iota-wallet.path'"

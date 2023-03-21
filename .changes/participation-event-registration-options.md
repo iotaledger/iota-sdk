@@ -1,5 +1,5 @@
 ---
-"nodejs-binding": patch
+"wallet-nodejs-binding": patch
 ---
 
 Renamed `registerParticipationEvent` to `registerParticipationEvents` and added a `ParticipationEventRegistrationOptions` parameter.

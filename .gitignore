@@ -1,23 +1,37 @@
-/target
-/test-storage
-/storage
-backup
-.DS_Store
-book
+
+# Build files
+**/target
 *.pyc
-.env
+**/*.rs.bk
+
+# IDE files
 .vscode
+.idea
 *.ipynb
-*.stronghold
-/.idea
+
+# Storages/databases
+storage
 alice-database
-*.log
+test-storage
+wallet/test-storage
 */walletdb
-/pingdb
-/pongdb
 offline_walletdb
 online_walletdb
+/pingdb
+/pongdb
+backup
+
+# JSON files
+address.json
 addresses.json
 prepared_transaction.json
 signed_transaction.json
-wallet/test-storage
+
+# Miscellaneous
+*.log
+.env
+*.stronghold
+.DS_Store
+book
+
+

@@ -148,5 +148,5 @@ jobs:
         working-directory: wallet/bindings/nodejs
 
       - name: Upload prebuild to GitHub release
-        run: npx prebuild --upload-all ${{ secrets.GITHUB_TOKEN }} --tag-prefix nodejs-binding-v
+        run: npx prebuild --upload-all ${{ secrets.GITHUB_TOKEN }} --tag-prefix wallet-nodejs-binding-v
         working-directory: wallet/bindings/nodejs

@@ -1,0 +1,167 @@
+name: Python bindings release
+
+on: workflow_dispatch
+
+jobs:
+  build-wheels:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Get current date
+        run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+        if: matrix.os == 'macos-latest' || matrix.os == 'ubuntu-latest'
+
+      - name: Get current date
+        if: matrix.os == 'windows-2019'
+        run: echo "CURRENT_DATE=$(Get-Date -Format "yyyy-MM-dd")" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Cache cargo registry
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/registry
+          # Add date to the cache to keep it up to date
+          key: ${{ matrix.os }}-stable-cargo-registry-${{ hashFiles('**/Cargo.lock') }}-${{ env.CURRENT_DATE }}
+          # Restore from outdated cache for speed
+          restore-keys: |
+            ${{ matrix.os }}-stable-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+            ${{ matrix.os }}-stable-cargo-registry-
+
+      - name: Cache cargo index
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/git
+          # Add date to the cache to keep it up to date
+          key: ${{ matrix.os }}-stable-cargo-index-${{ hashFiles('**/Cargo.lock') }}-${{ env.CURRENT_DATE }}
+          # Restore from outdated cache for speed
+          restore-keys: |
+            ${{ matrix.os }}-stable-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+            ${{ matrix.os }}-stable-cargo-index-
+
+      - name: Install required packages (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install libudev-dev libusb-1.0-0-dev
+
+      - name: Build wheels
+        if: matrix.os == 'macos-latest' || matrix.os == 'windows-latest'
+        uses: PyO3/maturin-action@v1
+        with:
+          args: --release --out dist -m client/bindings/python/Cargo.toml -i python${{ matrix.python-version }}
+
+      - name: Build wheels for --target aarch64-apple-darwin
+        if: matrix.os == 'macos-latest'
+        uses: PyO3/maturin-action@v1
+        with:
+          args: --target aarch64-apple-darwin --release --out dist -m client/bindings/python/Cargo.toml -i python${{ matrix.python-version }}
+
+      # Build without container on linux
+      - name: Build wheels
+        if: matrix.os == 'ubuntu-latest'
+        uses: PyO3/maturin-action@v1
+        with:
+          manylinux: auto
+          container: off
+          args: --release --out dist -m client/bindings/python/Cargo.toml -i python${{ matrix.python-version }}
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: dist
+
+  build-wheels-aarch64:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        docker-container:
+          [
+            "python:3.9.12-slim-bullseye",
+            "python:3.10.10-slim-bullseye",
+            "python:3.11.1-slim-bullseye",
+          ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3 # Required to mount the Github Workspace to a volume
+      - uses: addnab/docker-run-action@v3
+        with:
+          image: ${{ matrix.docker-container }}
+          options: -v ${{ github.workspace }}:/root
+          run: |
+            cd root
+
+            apt-get update 
+            apt-get install -y git curl build-essential libudev-dev libusb-1.0-0-dev pkg-config clang
+            curl https://sh.rustup.rs -sSf | sh -s -- -y 
+            . "$HOME/.cargo/env" 
+
+            cd client/bindings/python 
+            pip install -r requirements-dev.txt 
+            pip install patchelf
+            pip install maturin
+            maturin build --out ../../../dist --release
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: dist
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [build-wheels, build-wheels-aarch64]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get tag name
+        id: tagname
+        run: |
+          cd client/bindings/python
+          tagName="iota-client-python-$(cargo read-manifest | jq -r '.version')"
+          echo $tagName
+          echo "TAG_NAME=$tagName" >> $GITHUB_OUTPUT
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: wheels
+          path: wheels
+      - run: ls -R
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: wheels
+          path: wheels
+      - run: ls -R
+
+      - name: Upload Wheels to Github
+        uses: softprops/action-gh-release@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: wheels/*
+          tag_name: ${{ steps.tagname.outputs.TAG_NAME }}
+          append_body: true
+          prerelease: true
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          pip install --upgrade twine
+          twine upload --skip-existing wheels/*

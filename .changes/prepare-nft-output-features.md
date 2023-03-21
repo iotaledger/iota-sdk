@@ -1,5 +1,5 @@
 ---
-"nodejs-binding": patch
+"wallet-nodejs-binding": patch
 ---
 
 `prepareOutputs` uses newly provided tag/metadata instead of previous ones from unspent NFT output.

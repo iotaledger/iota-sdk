@@ -1,0 +1,12 @@
+target
+index.node
+**/*~
+**/node_modules
+**/.DS_Store
+build
+out/
+**/dist
+**/client.log
+stronghold
+package-lock.json
+prebuilds/
