@@ -1,6 +1,6 @@
 
 ---
-"nodejs-binding": patch
+"client-nodejs-binding": patch
 ---
 
 Removed `signatureUnlock` parameter `remainderData`.
