@@ -97,8 +97,8 @@ describe('Offline signing examples', () => {
 
         const unlock = await offlineClient.signatureUnlock(
             secretManager,
-            preparedTx.inputsData[0],
             hexToBytes(txEssenceHash),
+            preparedTx.inputsData[0].chain!,
         );
 
         expect(unlock).toStrictEqual({

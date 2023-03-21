@@ -7,14 +7,10 @@ use std::ops::Range;
 
 use async_trait::async_trait;
 use crypto::keys::slip10::Chain;
-use iota_types::block::{
-    address::Address,
-    signature::Ed25519Signature,
-    unlock::{Unlock, Unlocks},
-};
+use iota_types::block::{address::Address, signature::Ed25519Signature, unlock::Unlocks};
 
-use super::{types::InputSigningData, GenerateAddressOptions, SecretManage, SecretManageExt};
-use crate::secret::{PreparedTransactionData, RemainderData};
+use super::{GenerateAddressOptions, SecretManage, SecretManageExt};
+use crate::secret::PreparedTransactionData;
 
 /// Secret manager that is only useful to prevent accidental address generation in a wallet
 /// that has an offline counterpart for address generation and signing.
@@ -30,15 +26,6 @@ impl SecretManage for PlaceholderSecretManager {
         _internal: bool,
         _: Option<GenerateAddressOptions>,
     ) -> crate::Result<Vec<Address>> {
-        return Err(crate::Error::PlaceholderSecretManager);
-    }
-
-    async fn signature_unlock(
-        &self,
-        _input: &InputSigningData,
-        _essence_hash: &[u8; 32],
-        _: &Option<RemainderData>,
-    ) -> crate::Result<Unlock> {
         return Err(crate::Error::PlaceholderSecretManager);
     }
 

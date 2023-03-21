@@ -23,13 +23,13 @@ use iota_types::block::{
 use packable::{unpacker::SliceUnpacker, Packable, PackableExt};
 use tokio::sync::Mutex;
 
-use super::{types::InputSigningData, GenerateAddressOptions, SecretManage, SecretManageExt};
+use super::{GenerateAddressOptions, SecretManage, SecretManageExt};
 use crate::{
     api::input_selection::Error as InputSelectionError,
     secret::{
         is_alias_transition,
         types::{LedgerApp, LedgerDeviceType},
-        LedgerNanoStatus, PreparedTransactionData, RemainderData,
+        LedgerNanoStatus, PreparedTransactionData,
     },
     unix_timestamp_now, Error, Result,
 };
@@ -100,16 +100,6 @@ impl SecretManage for LedgerSecretManager {
             ed25519_addresses.push(Address::Ed25519(Ed25519Address::new(address)));
         }
         Ok(ed25519_addresses)
-    }
-
-    // Ledger Nano will use `sign_transaction_essence`
-    async fn signature_unlock(
-        &self,
-        _input: &InputSigningData,
-        _essence_hash: &[u8; 32],
-        _metadata: &Option<RemainderData>,
-    ) -> crate::Result<Unlock> {
-        panic!("signature_unlock is not supported with ledger")
     }
 
     async fn sign_ed25519(&self, _msg: &[u8], _chain: &Chain) -> crate::Result<Ed25519Signature> {

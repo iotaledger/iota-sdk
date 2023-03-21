@@ -31,10 +31,10 @@ use {
 #[cfg(feature = "ledger_nano")]
 use crate::secret::ledger_nano::LedgerSecretManager;
 use crate::{
-    api::{PreparedTransactionData, PreparedTransactionDataDto, RemainderData},
+    api::{PreparedTransactionData, PreparedTransactionDataDto},
     message_interface::{message::Message, response::Response},
     request_funds_from_faucet,
-    secret::{types::InputSigningData, SecretManage, SecretManager},
+    secret::{SecretManage, SecretManager},
     Client, Result,
 };
 
@@ -424,23 +424,16 @@ impl ClientMessageHandler {
             }
             Message::SignatureUnlock {
                 secret_manager,
-                input_signing_data,
                 transaction_essence_hash,
-                remainder_data,
+                chain,
             } => {
-                let token_supply: u64 = self.client.get_token_supply().await?;
                 let secret_manager: SecretManager = (&secret_manager).try_into()?;
-                let input_signing_data: InputSigningData =
-                    InputSigningData::try_from_dto(&input_signing_data, token_supply)?;
                 let transaction_essence_hash: [u8; 32] = transaction_essence_hash
                     .try_into()
                     .map_err(|_| DtoError::InvalidField("expected 32 bytes for transactionEssenceHash"))?;
-                let remainder_data: Option<RemainderData> = remainder_data
-                    .map(|remainder| RemainderData::try_from_dto(&remainder, token_supply))
-                    .transpose()?;
 
                 let unlock: Unlock = secret_manager
-                    .signature_unlock(&input_signing_data, &transaction_essence_hash, &remainder_data)
+                    .signature_unlock(&transaction_essence_hash, &chain)
                     .await?;
 
                 Ok(Response::SignatureUnlock((&unlock).into()))
