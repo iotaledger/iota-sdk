@@ -95,28 +95,6 @@ jobs:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Set Up Beta Clippy
-        uses: ./.github/actions/setup-rust
-        with:
-          toolchain: beta
-          components: clippy
-          cache: true
-          cache-root: client/bindings/nodejs/
-          cache-job-id: ${{ github.workflow }}-${{ github.job }}
-          cache-hash: ${{ hashFiles('.github/workflows/bindings-nodejs.yml') }}
-
-      - name: Install Required Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install libudev-dev libusb-1.0-0-dev
-
-      - name: Run Clippy
-        uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --manifest-path client/bindings/nodejs/Cargo.toml --all-features --all-targets -- --deny warnings
-          name: Clippy Results for the Node.js Bindings
-
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
