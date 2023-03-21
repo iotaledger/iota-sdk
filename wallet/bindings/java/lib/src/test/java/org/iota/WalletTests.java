@@ -81,5 +81,4 @@ public class WalletTests extends TestSettings {
         addresses = account.generateAddresses(new GenerateAddresses().withAmount(1).withAddressGenerationOptions(addressOptions));
         assertEquals(address, addresses[0].getAddress());
     }
-
 }
