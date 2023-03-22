@@ -347,7 +347,7 @@ impl SecretManager {
                         return Err(InputSelectionError::MissingInputWithEd25519Address)?;
                     }
 
-                    let chain = input.chain.as_ref().ok_or(Error::MissingChain)?;
+                    let chain = input.chain.as_ref().ok_or(Error::MissingBip32Chain)?;
 
                     let block = self.signature_unlock(&hashed_essence, chain).await?;
                     blocks.push(block);
