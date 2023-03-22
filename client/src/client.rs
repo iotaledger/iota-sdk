@@ -22,6 +22,7 @@ use crate::{
     builder::{ClientBuilder, NetworkInfo},
     constants::DEFAULT_TIPS_INTERVAL,
     error::Result,
+    Error,
 };
 
 /// An instance of the client using HORNET or Bee URI
@@ -199,5 +200,17 @@ impl Client {
             .map_or(NetworkInfo::default().fallback_to_local_pow, |info| {
                 info.fallback_to_local_pow
             })
+    }
+
+    /// Validates if a bech32 HRP matches the one from the connected network.
+    pub async fn validate_bech32_hrp(&self, bech32_hrp: &str) -> Result<()> {
+        let expected_bech32_hrp = self.get_bech32_hrp().await?;
+        if bech32_hrp != expected_bech32_hrp {
+            return Err(Error::InvalidBech32Hrp {
+                provided_bech32_hrp: bech32_hrp.to_string(),
+                expected_bech32_hrp,
+            });
+        };
+        Ok(())
     }
 }

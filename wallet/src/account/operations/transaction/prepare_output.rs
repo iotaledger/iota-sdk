@@ -42,6 +42,9 @@ impl AccountHandle {
         log::debug!("[OUTPUT] prepare_output {options:?}");
         let token_supply = self.client.get_token_supply().await?;
 
+        let (recipient_address, bech32_hrp) = Address::try_from_bech32_with_hrp(&options.recipient_address)?;
+        self.client.validate_bech32_hrp(&bech32_hrp).await?;
+
         if let Some(assets) = &options.assets {
             if let Some(nft_id) = assets.nft_id {
                 return self.prepare_nft_output(options, transaction_options, nft_id).await;
@@ -52,9 +55,7 @@ impl AccountHandle {
         // We start building with minimum storage deposit, so we know the minimum required amount and can later replace
         // it, if needed
         let mut first_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                Address::try_from_bech32(options.recipient_address.clone())?,
-            )));
+            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(recipient_address)));
 
         if let Some(assets) = options.assets {
             if let Some(native_tokens) = assets.native_tokens {

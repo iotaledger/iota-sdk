@@ -97,7 +97,8 @@ impl AccountHandle {
 
         let mut outputs = Vec::new();
         for address_with_amount in addresses_native_tokens {
-            let address = Address::try_from_bech32(&address_with_amount.address)?;
+            let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address_with_amount.address)?;
+            self.client.validate_bech32_hrp(&bech32_hrp).await?;
             // get minimum required amount for such an output, so we don't lock more than required
             // We have to check it for every output individually, because different address types and amount of
             // different native tokens require a different storage deposit

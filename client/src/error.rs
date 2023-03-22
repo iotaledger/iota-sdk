@@ -53,6 +53,14 @@ pub enum Error {
     /// Invalid BIP32 chain data
     #[error("invalid BIP32 chain data")]
     InvalidBIP32ChainData,
+    /// Invalid bech32 HRP, should match the one from the used network
+    #[error("invalid bech32 hrp for the connected network: {provided_bech32_hrp}, expected: {expected_bech32_hrp}")]
+    InvalidBech32Hrp {
+        /// The bech32 human readable part from the provided address.
+        provided_bech32_hrp: String,
+        /// The expected bech32 human readable part.
+        expected_bech32_hrp: String,
+    },
     /// Invalid mnemonic error
     #[error("invalid mnemonic {0}")]
     InvalidMnemonic(String),

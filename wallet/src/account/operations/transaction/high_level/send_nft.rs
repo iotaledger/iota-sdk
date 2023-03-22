@@ -72,7 +72,9 @@ impl AccountHandle {
         let mut outputs = Vec::new();
 
         for address_and_nft_id in addresses_nft_ids {
-            let address = Address::try_from_bech32(&address_and_nft_id.address)?;
+            let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address_and_nft_id.address)?;
+            self.client.validate_bech32_hrp(&bech32_hrp).await?;
+
             // Find nft output from the inputs
             if let Some(nft_output_data) = unspent_outputs.iter().find(|o| {
                 if let Output::Nft(nft_output) = &o.output {
