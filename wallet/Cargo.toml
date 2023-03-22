@@ -17,18 +17,18 @@ all-features = true
 rustdoc-args = [ "--cfg", "docsrs" ]
 
 [dependencies]
+iota-client = { version = "2.0.1-rc.7", path = "../client", default-features = false, features = [ "message_interface", "tls" ] }
+
 async-trait = { version = "0.1.66", default-features = false }
 backtrace = { version = "0.3.67", default-features = false, features = [ "std" ] }
 fern-logger = { version = "0.5.0", default-features = false }
 futures = { version = "0.3.26", default-features = false }
 getset = { version = "0.1.2", default-features = false }
 instant = { version = "0.1.12", default-features = false }
-# iota-client = { version = "2.0.1-rc.7", default-features = false, features = [ "message_interface", "tls" ] }
-iota-client = { git = "https://github.com/iotaledger/iota.rs", rev = "95153f58502d89761800e35251db2aee508fb6ad", default-features = false, features = [ "message_interface", "tls" ] }
 iota-crypto = { version = "0.15.3", default-features = false, features = [ "std", "chacha", "blake2b", "ed25519", "random", "slip10", "bip39", "bip39-en" ] }
 log = { version = "0.4.17", default-features = false }
 packable = { version = "0.7.0", default-features = false, features = [ "serde", "primitive-types" ] }
-prefix-hex = { version = "0.6.0", default-features = false, features = [ "std" ] }
+prefix-hex = { version = "0.7.0", default-features = false, features = [ "std" ] }
 primitive-types = { version = "0.12.1", default-features = false }
 rocksdb = { version = "0.20.1", default-features = false, features = [ "lz4" ], optional = true }
 serde = { version = "1.0.154", default-features = false, features = [ "derive" ] }
