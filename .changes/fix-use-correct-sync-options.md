@@ -1,6 +1,6 @@
 
 ---
-"client-nodejs-binding": patch
+"wallet-nodejs-binding": patch
 ---
 
 Use SyncOptions instead of AccountSyncOptions in startBackgroundSync() & recoverAccounts().
