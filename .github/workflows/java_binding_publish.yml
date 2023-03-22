@@ -74,7 +74,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java }}
-          distribution: 'temurin'
+          distribution: "temurin"
 
       - name: Read build.gradle
         shell: bash
@@ -83,7 +83,7 @@ jobs:
         run: |
           buildGradle="$(cat build.gradle)"
           buildGradle=$(echo $buildGradle | tr '\n' ' ')
-          echo "build-gradle=$buildGradle" >> $GITHUB_OUTPUT   
+          echo "build-gradle=$buildGradle" >> $GITHUB_OUTPUT
 
       - name: Extract version from build.gradle
         uses: actions-ecosystem/action-regex-match@v2
@@ -232,7 +232,7 @@ jobs:
         run: |
           buildGradle="$(cat build.gradle)"
           buildGradle=$(echo $buildGradle | tr '\n' ' ')
-          echo "build-gradle=$buildGradle" >> $GITHUB_OUTPUT 
+          echo "build-gradle=$buildGradle" >> $GITHUB_OUTPUT
 
       - name: Extract version from build.gradle
         uses: actions-ecosystem/action-regex-match@v2
@@ -264,12 +264,12 @@ jobs:
           cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/arm-linux-androideabi/libc++_shared.so armeabi-v7a/libc++_shared.so
           cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/x86_64-linux-android/libc++_shared.so x86_64/libc++_shared.so
           cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/i686-linux-android/libc++_shared.so x86/libc++_shared.so
-          
+
       - name: Archive Release
         uses: thedoctor0/zip-release@0.7.0
         with:
-          type: 'zip'
-          filename: 'jniLibs.zip'
+          type: "zip"
+          filename: "jniLibs.zip"
           directory: wallet/bindings/java/lib/native/cargo-ndk
 
       - name: Upload ZIP to Github
