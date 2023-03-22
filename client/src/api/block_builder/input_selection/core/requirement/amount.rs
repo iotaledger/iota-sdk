@@ -306,7 +306,7 @@ impl InputSelection {
         self.available_inputs
             .sort_by(|left, right| left.output.amount().cmp(&right.output.amount()));
 
-        if let Some(r) = self.fulfill_amount_requirement_loop(&mut amount_selection) {
+        if let Some(r) = self.fulfill_amount_requirement_inner(&mut amount_selection) {
             return Ok(r);
         }
 
@@ -320,7 +320,7 @@ impl InputSelection {
             self.available_inputs
                 .sort_by(|left, right| right.output.amount().cmp(&left.output.amount()));
 
-            if let Some(r) = self.fulfill_amount_requirement_loop(&mut amount_selection) {
+            if let Some(r) = self.fulfill_amount_requirement_inner(&mut amount_selection) {
                 return Ok(r);
             }
         }
@@ -346,7 +346,7 @@ impl InputSelection {
         Ok(amount_selection.into_newly_selected_inputs())
     }
 
-    fn fulfill_amount_requirement_loop(
+    fn fulfill_amount_requirement_inner(
         &mut self,
         amount_selection: &mut AmountSelection,
     ) -> Option<Vec<(InputSigningData, Option<AliasTransition>)>> {
