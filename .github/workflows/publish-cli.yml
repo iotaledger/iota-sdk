@@ -55,10 +55,10 @@ jobs:
         include:
           - os: ubuntu-latest
             identifier: linux
-            ext: ''
+            ext: ""
           - os: macos-latest
             identifier: macos
-            ext: ''
+            ext: ""
           - os: windows-latest
             identifier: windows
             ext: .exe
@@ -98,7 +98,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args:  --manifest-path ./cli/Cargo.toml --profile production
+          args: --manifest-path ./cli/Cargo.toml --profile production
 
       - name: Import code signing assets (macOS)
         # Based on https://github.com/Apple-Actions/import-codesign-certs/blob/master/src/security.ts
