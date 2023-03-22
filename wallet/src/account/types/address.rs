@@ -80,7 +80,7 @@ impl AddressWrapper {
 
     /// Parses a bech32 address string.
     pub fn try_from_bech32<A: AsRef<str>>(address: A) -> crate::Result<Self> {
-        let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
+        let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
 
         Ok(AddressWrapper::new(address, bech32_hrp))
     }
