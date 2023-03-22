@@ -65,7 +65,7 @@ fn no_outputs() {
     )
     .select();
 
-    assert!(matches!(selected, Err(Error::NoOutputsProvided)));
+    assert!(matches!(selected, Err(Error::InvalidOutputCount(0))));
 }
 
 #[test]

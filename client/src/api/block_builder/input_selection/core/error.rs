@@ -52,9 +52,6 @@ pub enum Error {
     /// No available inputs were provided to input selection.
     #[error("no available inputs provided")]
     NoAvailableInputsProvided,
-    /// No outputs were provided to input selection.
-    #[error("no outputs provided")]
-    NoOutputsProvided,
     /// Required input is forbidden.
     #[error("required input {0} is forbidden")]
     RequiredInputIsForbidden(OutputId),

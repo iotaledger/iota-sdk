@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `alias_id_to_bech32` and `nft_id_to_bech32` moved to `types` crate;
 - `is_address_valid` moved to `types` crate;
 - `parse_bech32_address`;
+- `input_selection::Error::NoOutputsProvided`;
 
 ### Fixed
 

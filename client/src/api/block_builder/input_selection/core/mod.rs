@@ -361,16 +361,16 @@ impl InputSelection {
     /// transaction. Also creates a remainder output and chain transition outputs if required.
     pub fn select(mut self) -> Result<Selected, Error> {
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
-            return Err(Error::InvalidOutputCount(self.outputs.len()));
+            // If burn is provided, outputs will be added later
+            if !(self.outputs.is_empty() && self.burn.is_some()) {
+                return Err(Error::InvalidOutputCount(self.outputs.len()));
+            }
         }
 
         self.filter_inputs();
 
         if self.available_inputs.is_empty() {
             return Err(Error::NoAvailableInputsProvided);
-        }
-        if self.outputs.is_empty() && self.burn.is_none() {
-            return Err(Error::NoOutputsProvided);
         }
 
         // Creates the initial state, selected inputs and requirements, based on the provided outputs.
