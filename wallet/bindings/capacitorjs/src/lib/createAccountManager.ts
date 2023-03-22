@@ -7,7 +7,6 @@ import { createAccount } from './createAccount';
 import type {
     AccountId,
     AccountManagerOptions,
-    AccountSyncOptions,
     Auth,
     ClientOptions,
     CreateAccountPayload,
@@ -15,6 +14,7 @@ import type {
     GenerateAddressOptions,
     LedgerNanoStatus,
     NodeInfoWrapper,
+    SyncOptions,
     WalletEvent,
 } from '../types';
 
@@ -258,7 +258,7 @@ export async function createAccountManager(options: AccountManagerOptions) {
             accountStartIndex: number,
             accountGapLimit: number,
             addressGapLimit: number,
-            syncOptions: AccountSyncOptions,
+            syncOptions: SyncOptions,
         ): Promise<Account[]> {
             const response = await messageHandler.sendMessage({
                 cmd: 'recoverAccounts',
@@ -339,7 +339,7 @@ export async function createAccountManager(options: AccountManagerOptions) {
          * Start the background syncing process for all accounts.
          */
         async startBackgroundSync(
-            options?: AccountSyncOptions,
+            options?: SyncOptions,
             intervalInMilliseconds?: number,
         ): Promise<void> {
             await messageHandler.sendMessage({
