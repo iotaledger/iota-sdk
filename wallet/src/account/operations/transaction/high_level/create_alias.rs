@@ -116,7 +116,7 @@ impl AccountHandle {
             .as_ref()
             .and_then(|options| options.address.as_ref())
         {
-            Some(bech32_address) => Address::try_from_bech32(bech32_address)?.1,
+            Some(bech32_address) => Address::try_from_bech32(bech32_address)?,
             None => {
                 self.public_addresses()
                     .await

@@ -544,7 +544,7 @@ pub async fn send_native_token_command(
         let outputs = vec![
             BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
                 .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                    Address::try_from_bech32(address)?.1,
+                    Address::try_from_bech32(address)?,
                 )))
                 .with_native_tokens(vec![NativeToken::new(
                     TokenId::from_str(&token_id)?,

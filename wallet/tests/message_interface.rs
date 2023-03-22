@@ -202,9 +202,7 @@ async fn message_interface_events() -> Result<()> {
         &BasicOutputBuilder::new_with_amount(1_000_000)
             .unwrap()
             .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                Address::try_from_bech32("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")
-                    .unwrap()
-                    .1,
+                Address::try_from_bech32("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu").unwrap(),
             )))
             .finish_output(TOKEN_SUPPLY)
             .unwrap(),
