@@ -504,7 +504,7 @@ fn missing_ed25519_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap().1
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()
     ));
 }
 
@@ -545,7 +545,7 @@ fn missing_ed25519_issuer_created() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap().1
+        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()
     ));
 }
 
@@ -626,7 +626,7 @@ fn missing_alias_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap().1
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
     ));
 }
 
@@ -667,7 +667,7 @@ fn missing_alias_issuer_created() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap().1
+        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
     ));
 }
 
@@ -748,7 +748,7 @@ fn missing_nft_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap().1
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()
     ));
 }
 
@@ -789,7 +789,7 @@ fn missing_nft_issuer_created() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap().1
+        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()
     ));
 }
 
@@ -1027,7 +1027,7 @@ fn take_amount_from_nft_to_fund_basic() {
             assert_eq!(output.as_nft().features().len(), 0);
             assert_eq!(
                 *output.as_nft().address(),
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap().1
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
         }
     });
@@ -1170,7 +1170,7 @@ fn transitioned_zero_nft_id_no_longer_is_zero() {
             assert_eq!(output.as_nft().features().len(), 0);
             assert_eq!(
                 *output.as_nft().address(),
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap().1
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
         }
     });

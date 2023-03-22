@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
     let token_supply = client.get_token_supply().await?;
     let rent_structure = client.get_rent_structure().await?;
 
-    let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?.1;
+    let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
 
     // Alias id needs to be null the first time
     let alias_output = AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())?

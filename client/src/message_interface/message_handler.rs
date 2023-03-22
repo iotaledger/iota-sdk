@@ -640,7 +640,7 @@ impl ClientMessageHandler {
                     .await?,
             )),
             Message::ParseBech32Address { address } => Ok(Response::ParsedBech32Address(AddressDto::from(
-                &Client::parse_bech32_address(&address)?,
+                &Address::try_from_bech32(address)?,
             ))),
             Message::IsAddressValid { address } => Ok(Response::IsAddressValid(Address::is_valid_bech32(&address))),
             Message::GenerateMnemonic => Ok(Response::GeneratedMnemonic(Client::generate_mnemonic()?)),

@@ -93,7 +93,7 @@ impl Client {
 
                     let consolidation_output = BasicOutputBuilder::new_with_amount(total_amount)?
                         .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                            Address::try_from_bech32(&consolidation_address)?.1,
+                            Address::try_from_bech32(&consolidation_address)?,
                         )))
                         .with_native_tokens(total_native_tokens.finish()?)
                         .finish_output(token_supply)?;

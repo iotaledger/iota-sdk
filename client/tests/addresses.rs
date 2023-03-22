@@ -177,7 +177,7 @@ async fn address_generation() {
             .unwrap();
 
         assert_eq!(addresses[0], address.bech32_address);
-        if let (_bech32_hrp, Address::Ed25519(ed25519_address)) = Address::try_from_bech32(&addresses[0]).unwrap() {
+        if let Address::Ed25519(ed25519_address) = Address::try_from_bech32(&addresses[0]).unwrap() {
             assert_eq!(ed25519_address.to_string(), address.ed25519_address);
         } else {
             panic!("Invalid address type")
@@ -208,7 +208,7 @@ async fn address_generation() {
             .unwrap();
 
         assert_eq!(addresses[0], address.bech32_address);
-        if let (_bech32_hrp, Address::Ed25519(ed25519_address)) = Address::try_from_bech32(&addresses[0]).unwrap() {
+        if let Address::Ed25519(ed25519_address) = Address::try_from_bech32(&addresses[0]).unwrap() {
             assert_eq!(ed25519_address.to_string(), address.ed25519_address);
         } else {
             panic!("Invalid address type")
@@ -240,9 +240,7 @@ async fn address_generation() {
             match response {
                 Response::GeneratedAddresses(addresses) => {
                     assert_eq!(addresses[0], address.bech32_address);
-                    if let (_bech32_hrp, Address::Ed25519(ed25519_address)) =
-                        Address::try_from_bech32(&addresses[0]).unwrap()
-                    {
+                    if let Address::Ed25519(ed25519_address) = Address::try_from_bech32(&addresses[0]).unwrap() {
                         assert_eq!(ed25519_address.to_string(), address.ed25519_address);
                     } else {
                         panic!("Invalid address type")
@@ -289,9 +287,7 @@ async fn address_generation() {
             match response {
                 Response::GeneratedAddresses(addresses) => {
                     assert_eq!(addresses[0], address.bech32_address);
-                    if let (_bech32_hrp, Address::Ed25519(ed25519_address)) =
-                        Address::try_from_bech32(&addresses[0]).unwrap()
-                    {
+                    if let Address::Ed25519(ed25519_address) = Address::try_from_bech32(&addresses[0]).unwrap() {
                         assert_eq!(ed25519_address.to_string(), address.ed25519_address);
                     } else {
                         panic!("Invalid address type")

@@ -658,11 +658,11 @@ fn burn_foundry_present() {
                 assert_eq!(output.as_alias().immutable_features().len(), 0);
                 assert_eq!(
                     *output.as_alias().state_controller_address(),
-                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap().1
+                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
                 );
                 assert_eq!(
                     *output.as_alias().governor_address(),
-                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap().1
+                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
                 );
             } else {
                 panic!("unexpected output type")
@@ -796,11 +796,11 @@ fn burn_foundries_present() {
             assert_eq!(output.as_alias().immutable_features().len(), 0);
             assert_eq!(
                 *output.as_alias().state_controller_address(),
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap().1
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
             assert_eq!(
                 *output.as_alias().governor_address(),
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap().1
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
         }
     });

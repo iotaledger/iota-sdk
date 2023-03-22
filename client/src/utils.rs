@@ -22,7 +22,7 @@ use crate::error::{Error, Result};
 
 /// Transforms bech32 to hex
 pub fn bech32_to_hex(bech32: &str) -> Result<String> {
-    let (_bech32_hrp, address) = Address::try_from_bech32(bech32)?;
+    let address = Address::try_from_bech32(bech32)?;
     let hex_string = match address {
         Address::Ed25519(ed) => ed.to_string(),
         Address::Alias(alias) => alias.to_string(),
@@ -46,11 +46,6 @@ pub fn hex_public_key_to_bech32_address(hex: &str, bech32_hrp: &str) -> Result<S
         .map_err(|_e| Error::Blake2b256("hashing the public key failed."))?;
     let address: Ed25519Address = Ed25519Address::new(address);
     Ok(Address::Ed25519(address).to_bech32(bech32_hrp))
-}
-
-/// Returns a valid Address parsed from a String.
-pub fn parse_bech32_address(address: &str) -> Result<Address> {
-    Ok(Address::try_from_bech32(address)?.1)
 }
 
 /// Generates a new mnemonic.
@@ -133,11 +128,6 @@ impl Client {
             Some(hrp) => Ok(hex_public_key_to_bech32_address(hex, hrp)?),
             None => Ok(hex_public_key_to_bech32_address(hex, &self.get_bech32_hrp().await?)?),
         }
-    }
-
-    /// Returns a valid Address parsed from a String.
-    pub fn parse_bech32_address(address: &str) -> crate::Result<Address> {
-        parse_bech32_address(address)
     }
 
     /// Generates a new mnemonic.
