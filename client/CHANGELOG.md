@@ -27,8 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MQTT `Error`;
 - `Message::HashTransactionEssence`;
 - `Response::TransactionEssenceHash`;
-- Derive `Eq, PartialEq` for `input_select::Error`;
-- ISA `Error::{InvalidOutputCount, InvalidOutputCount}` variants;
+- Derive `Eq, PartialEq` for `input_selection::Error`;
+- `input_selection::Error::{InvalidOutputCount, InvalidOutputCount}` variants;
 
 ### Changed
 

@@ -41,10 +41,10 @@ pub enum Error {
         required: U256,
     },
     /// Invalid amount of inputs.
-    #[error("{0} is an invalid amount of inputs")]
+    #[error("invalid amount of inputs: {0}")]
     InvalidInputCount(usize),
     /// Invalid amount of outputs.
-    #[error("{0} is an invalid amount of outputs")]
+    #[error("invalid amount of outputs: {0}")]
     InvalidOutputCount(usize),
     /// No input with matching ed25519 address provided.
     #[error("no input with matching ed25519 address provided")]

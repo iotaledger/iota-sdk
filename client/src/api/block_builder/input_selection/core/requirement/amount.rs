@@ -29,7 +29,11 @@ pub(crate) fn sdruc_not_expired(output: &Output, current_time: u32) -> Option<&S
             .map_or(false, |expiration| current_time >= expiration.timestamp());
 
         // We only have to send the storage deposit return back if the output is not expired
-        if !expired { Some(sdr) } else { None }
+        if !expired {
+            Some(sdr)
+        } else {
+            None
+        }
     })
 }
 
@@ -299,24 +303,27 @@ impl InputSelection {
         // TODO if consolidate strategy: sum all the lowest amount until diff is covered.
         // TODO this would be lowest amount of input strategy.
 
-        // Try to select outputs first with ordering from low to high amount, if that fails, try reversed
+        // Try to select outputs first with ordering from low to high amount, if that fails, try reversed.
+
         log::debug!("Ordering inputs from low to high amount");
-        // low to high
+        // Sort inputs per amount, low to high.
         self.available_inputs
             .sort_by(|left, right| left.output.amount().cmp(&right.output.amount()));
+
         if let Some(r) = self.fulfill_amount_requirement_loop(&mut amount_selection) {
             return Ok(r);
         }
 
         if self.selected_inputs.len() + amount_selection.newly_selected_inputs.len() > INPUT_COUNT_MAX.into() {
-            // Clear before trying with reversed ordering
+            // Clear before trying with reversed ordering.
             log::debug!("Clearing amount selection");
             amount_selection = AmountSelection::new(self)?;
 
             log::debug!("Ordering inputs from high to low amount");
-            // high to low
+            // Sort inputs per amount, high to low.
             self.available_inputs
                 .sort_by(|left, right| right.output.amount().cmp(&left.output.amount()));
+
             if let Some(r) = self.fulfill_amount_requirement_loop(&mut amount_selection) {
                 return Ok(r);
             }
