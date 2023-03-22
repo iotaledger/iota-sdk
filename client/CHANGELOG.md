@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MQTT `Error`;
 - `Message::HashTransactionEssence`;
 - `Response::TransactionEssenceHash`;
+- Derive `Eq, PartialEq` for `input_select::Error`;
+- ISA `Error::{InvalidOutputCount, InvalidOutputCount}` variants;
 
 ### Changed
 
@@ -42,6 +44,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `alias_id_to_bech32` and `nft_id_to_bech32` moved to `types` crate;
 - `is_address_valid` moved to `types` crate;
 - `parse_bech32_address`;
+
+### Fixed
+
+- ISA will not select more than max inputs;
 
 ## 2.0.1-rc.7 - 2023-03-09
 

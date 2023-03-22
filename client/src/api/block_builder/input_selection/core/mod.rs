@@ -9,6 +9,7 @@ pub(crate) mod transition;
 
 use std::collections::{HashMap, HashSet};
 
+use iota_types::block::{input::INPUT_COUNT_RANGE, output::OUTPUT_COUNT_RANGE};
 use packable::PackableExt;
 pub(crate) use requirement::is_alias_transition;
 
@@ -359,6 +360,10 @@ impl InputSelection {
     /// Selects inputs that meet the requirements of the outputs to satisfy the semantic validation of the overall
     /// transaction. Also creates a remainder output and chain transition outputs if required.
     pub fn select(mut self) -> Result<Selected, Error> {
+        if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
+            return Err(Error::InvalidOutputCount(self.outputs.len()));
+        }
+
         self.filter_inputs();
 
         if self.available_inputs.is_empty() {
@@ -382,6 +387,10 @@ impl InputSelection {
             }
         }
 
+        if !INPUT_COUNT_RANGE.contains(&(self.selected_inputs.len() as u16)) {
+            return Err(Error::InvalidInputCount(self.selected_inputs.len()));
+        }
+
         let (remainder, storage_deposit_returns) = self.remainder_and_storage_deposit_return_outputs()?;
 
         if let Some(remainder) = &remainder {
@@ -389,6 +398,11 @@ impl InputSelection {
         }
 
         self.outputs.extend(storage_deposit_returns);
+
+        // Check again, because more outputs may have been added.
+        if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
+            return Err(Error::InvalidOutputCount(self.outputs.len()));
+        }
 
         Ok(Selected {
             inputs: Self::sort_input_signing_data(self.selected_inputs, &self.outputs, Some(self.timestamp))?,
