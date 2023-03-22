@@ -1,15 +1,11 @@
 import type {
     AccountId,
-    AccountSyncOptions,
     CreateAccountPayload,
+    SyncOptions,
 } from '../account';
 import type { GenerateAddressOptions } from '../address';
 import type { EventType, WalletEvent } from '../event';
 import type { Auth, ClientOptions } from '../network';
-import type {
-    ParticipationEventId,
-    ParticipationEventType,
-} from '../participation';
 
 export type __BackupMessage__ = {
     cmd: 'backup';
@@ -111,7 +107,7 @@ export type __RecoverAccountsMessage__ = {
         accountStartIndex: number;
         accountGapLimit: number;
         addressGapLimit: number;
-        syncOptions?: AccountSyncOptions;
+        syncOptions?: SyncOptions;
     };
 };
 
@@ -146,7 +142,7 @@ export type __SetStrongholdPasswordClearIntervalMessage__ = {
 export type __StartBackgroundSyncMessage__ = {
     cmd: 'startBackgroundSync';
     payload: {
-        options?: AccountSyncOptions;
+        options?: SyncOptions;
         intervalInMilliseconds?: number;
     };
 };
