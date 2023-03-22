@@ -41,7 +41,7 @@ export interface IInputSigningData {
     /**
      * The chain derived from seed, only for ed25519 addresses
      */
-    chain?: ISegment[];
+    chain?: IBip32Chain;
 }
 
 export interface IRemainder {
@@ -52,13 +52,19 @@ export interface IRemainder {
     /**
      * The chain derived from seed, for the remainder addresses
      */
-    chain?: ISegment[];
+    chain?: IBip32Chain;
     /**
      * The remainder address
      */
     address: AddressTypes;
 }
+
 export interface ISegment {
     hardened: boolean;
     bs: number[];
 }
+
+/**
+ * BIP 32 chain.
+ */
+ export type IBip32Chain = ISegment[];
