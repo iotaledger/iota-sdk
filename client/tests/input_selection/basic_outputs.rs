@@ -188,7 +188,7 @@ fn input_amount_greater_than_output_amount() {
 #[test]
 fn input_amount_greater_than_output_amount_with_remainder_address() {
     let protocol_parameters = protocol_parameters();
-    let remainder_address = Address::try_from_bech32(BECH32_ADDRESS_REMAINDER).unwrap().1;
+    let remainder_address = Address::try_from_bech32(BECH32_ADDRESS_REMAINDER).unwrap();
 
     let inputs = build_inputs(vec![Basic(
         2_000_000,
@@ -462,7 +462,7 @@ fn not_enough_storage_deposit_for_remainder() {
 #[test]
 fn ed25519_sender() {
     let protocol_parameters = protocol_parameters();
-    let sender = Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap().1;
+    let sender = Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap();
 
     let inputs = build_inputs(vec![
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
@@ -538,7 +538,7 @@ fn missing_ed25519_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap().1
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()
     ));
 }
 
@@ -683,7 +683,7 @@ fn missing_alias_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap().1
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
     ));
 }
 
@@ -828,7 +828,7 @@ fn missing_nft_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap().1
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()
     ));
 }
 

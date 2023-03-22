@@ -164,7 +164,7 @@ impl<'a> ClientBlockBuilder<'a> {
     pub async fn with_output(mut self, address: &str, amount: u64) -> Result<ClientBlockBuilder<'a>> {
         let output = BasicOutputBuilder::new_with_amount(amount)?
             .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                Address::try_from_bech32(address)?.1,
+                Address::try_from_bech32(address)?,
             )))
             .finish_output(self.client.get_token_supply().await?)?;
         self.outputs.push(output);
@@ -205,7 +205,7 @@ impl<'a> ClientBlockBuilder<'a> {
 
     /// Set a custom remainder address
     pub fn with_custom_remainder_address(mut self, address: &str) -> Result<Self> {
-        let address = Address::try_from_bech32(address)?.1;
+        let address = Address::try_from_bech32(address)?;
         self.custom_remainder_address.replace(address);
         Ok(self)
     }

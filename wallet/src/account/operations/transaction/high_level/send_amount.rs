@@ -65,7 +65,7 @@ impl AccountHandle {
             outputs.push(
                 BasicOutputBuilder::new_with_amount(address_with_amount.amount)?
                     .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                        Address::try_from_bech32(&address_with_amount.address)?.1,
+                        Address::try_from_bech32(&address_with_amount.address)?,
                     )))
                     .finish_output(token_supply)?,
             )

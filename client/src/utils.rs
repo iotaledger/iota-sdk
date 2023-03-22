@@ -11,7 +11,7 @@ use crypto::{
     utils,
 };
 use iota_types::block::{
-    address::{Address, AliasAddress, Ed25519Address, NftAddress},
+    address::{Address, Ed25519Address},
     output::{AliasId, NftId},
     payload::TaggedDataPayload,
 };
@@ -22,7 +22,7 @@ use crate::error::{Error, Result};
 
 /// Transforms bech32 to hex
 pub fn bech32_to_hex(bech32: &str) -> Result<String> {
-    let (_bech32_hrp, address) = Address::try_from_bech32(bech32)?;
+    let address = Address::try_from_bech32(bech32)?;
     let hex_string = match address {
         Address::Ed25519(ed) => ed.to_string(),
         Address::Alias(alias) => alias.to_string(),
@@ -37,16 +37,6 @@ pub fn hex_to_bech32(hex: &str, bech32_hrp: &str) -> Result<String> {
     Ok(Address::Ed25519(address).to_bech32(bech32_hrp))
 }
 
-/// Transforms an alias id to a bech32 encoded address
-pub fn alias_id_to_bech32(alias_id: AliasId, bech32_hrp: &str) -> String {
-    Address::Alias(AliasAddress::new(alias_id)).to_bech32(bech32_hrp)
-}
-
-/// Transforms an nft id to a bech32 encoded address
-pub fn nft_id_to_bech32(nft_id: NftId, bech32_hrp: &str) -> String {
-    Address::Nft(NftAddress::new(nft_id)).to_bech32(bech32_hrp)
-}
-
 /// Transforms a prefix hex encoded public key to a bech32 encoded address
 pub fn hex_public_key_to_bech32_address(hex: &str, bech32_hrp: &str) -> Result<String> {
     let public_key: [u8; Ed25519Address::LENGTH] = prefix_hex::decode(hex)?;
@@ -56,16 +46,6 @@ pub fn hex_public_key_to_bech32_address(hex: &str, bech32_hrp: &str) -> Result<S
         .map_err(|_e| Error::Blake2b256("hashing the public key failed."))?;
     let address: Ed25519Address = Ed25519Address::new(address);
     Ok(Address::Ed25519(address).to_bech32(bech32_hrp))
-}
-
-/// Returns a valid Address parsed from a String.
-pub fn parse_bech32_address(address: &str) -> Result<Address> {
-    Ok(Address::try_from_bech32(address)?.1)
-}
-
-/// Checks if a String is a valid bech32 encoded address.
-pub fn is_address_valid(address: &str) -> bool {
-    Address::try_from_bech32(address).is_ok()
 }
 
 /// Generates a new mnemonic.
@@ -129,16 +109,16 @@ impl Client {
     /// Transforms an alias id to a bech32 encoded address
     pub async fn alias_id_to_bech32(&self, alias_id: AliasId, bech32_hrp: Option<&str>) -> crate::Result<String> {
         match bech32_hrp {
-            Some(hrp) => Ok(alias_id_to_bech32(alias_id, hrp)),
-            None => Ok(alias_id_to_bech32(alias_id, &self.get_bech32_hrp().await?)),
+            Some(hrp) => Ok(alias_id.to_bech32(hrp)),
+            None => Ok(alias_id.to_bech32(&self.get_bech32_hrp().await?)),
         }
     }
 
     /// Transforms an nft id to a bech32 encoded address
     pub async fn nft_id_to_bech32(&self, nft_id: NftId, bech32_hrp: Option<&str>) -> crate::Result<String> {
         match bech32_hrp {
-            Some(hrp) => Ok(nft_id_to_bech32(nft_id, hrp)),
-            None => Ok(nft_id_to_bech32(nft_id, &self.get_bech32_hrp().await?)),
+            Some(hrp) => Ok(nft_id.to_bech32(hrp)),
+            None => Ok(nft_id.to_bech32(&self.get_bech32_hrp().await?)),
         }
     }
 
@@ -148,17 +128,6 @@ impl Client {
             Some(hrp) => Ok(hex_public_key_to_bech32_address(hex, hrp)?),
             None => Ok(hex_public_key_to_bech32_address(hex, &self.get_bech32_hrp().await?)?),
         }
-    }
-
-    /// Returns a valid Address parsed from a String.
-    pub fn parse_bech32_address(address: &str) -> crate::Result<Address> {
-        parse_bech32_address(address)
-    }
-
-    /// Checks if a String is a valid bech32 encoded address.
-    #[must_use]
-    pub fn is_address_valid(address: &str) -> bool {
-        is_address_valid(address)
     }
 
     /// Generates a new mnemonic.

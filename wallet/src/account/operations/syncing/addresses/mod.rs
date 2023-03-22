@@ -28,7 +28,7 @@ impl AccountHandle {
         if !options.addresses.is_empty() {
             let mut specific_addresses_to_sync = HashSet::new();
             for bech32_address in &options.addresses {
-                let (_bech32_hrp, address) = Address::try_from_bech32(bech32_address)?;
+                let address = Address::try_from_bech32(bech32_address)?;
                 match addresses_before_syncing.iter().find(|a| a.address.inner == address) {
                     Some(address) => {
                         specific_addresses_to_sync.insert(address.clone());
