@@ -12,7 +12,7 @@ use iota_wallet::{
     message_interface::{create_message_handler, init_logger, ManagerOptions, Message, WalletMessageHandler},
 };
 use jni::{
-    objects::{GlobalRef, JClass, JObject, JStaticMethodID, JString, JValue, JObjectArray},
+    objects::{GlobalRef, JClass, JObject, JObjectArray, JStaticMethodID, JString, JValue},
     signature::{Primitive, ReturnType},
     sys::{jclass, jobject, jstring},
     JNIEnv, JavaVM,
@@ -77,7 +77,11 @@ macro_rules! env_assert {
 
 // This keeps rust from "mangling" the name and making it unique for this crate.
 #[no_mangle]
-pub unsafe extern "system" fn Java_org_iota_api_NativeApi_initLogger(mut env: JNIEnv, _class: JClass, command: JString) {
+pub unsafe extern "system" fn Java_org_iota_api_NativeApi_initLogger(
+    mut env: JNIEnv,
+    _class: JClass,
+    command: JString,
+) {
     // This is a safety check to make sure that the JNIEnv is not in an exception state.
     env_assert!(env, ());
     let ret = init_logger(string_from_jni!(env, command, ()));
@@ -220,7 +224,10 @@ pub unsafe extern "system" fn Java_org_iota_api_NativeApi_listen(
     };
 
     // exceptions return early, now we let the client know that we registered successfully
-    make_jni_string(&mut env, "{\"type\": \"success\", \"payload\": \"success\"}".to_string())
+    make_jni_string(
+        &mut env,
+        "{\"type\": \"success\", \"payload\": \"success\"}".to_string(),
+    )
 }
 
 unsafe fn event_handle(clazz: GlobalRef, callback_ref: GlobalRef, event: Event) {
