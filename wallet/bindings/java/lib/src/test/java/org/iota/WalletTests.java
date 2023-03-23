@@ -61,7 +61,7 @@ public class WalletTests extends TestSettings {
         String address = wallet.generateAddress(0, false, 0, options, "rms");
         assertEquals("rms1qpx0mcrqq7t6up73n4na0zgsuuy4p0767ut0qq67ngctj7pg4tm2ynsuynp", address);
 
-        // generated account at line 77 has first 2 pre-made, so we check against the third
+        // generated alice account later has 2 addresses ppremade, so we check against the third
         address = wallet.generateAddress(0, false, 2, options, "rms");
         assertEquals("rms1qzjq2jwzp8ddh0gawgdskvtd6awlv82c8y0a9s6g7kgszn6ts95u6r4kx2n", address);
 
