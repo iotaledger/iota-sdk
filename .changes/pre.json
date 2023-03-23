@@ -30,6 +30,8 @@
     ".changes/faucet.md",
     ".changes/fix-build-script.md",
     ".changes/fix-burn-mismatch.md",
+    ".changes/fix-dependency-url-wallet.md",
+    ".changes/fix-dependency-url.md",
     ".changes/fix-not-synced-timestamp.md",
     ".changes/fix-participation-function-enum-variant.md",
     ".changes/fix-rebuild-script.md",

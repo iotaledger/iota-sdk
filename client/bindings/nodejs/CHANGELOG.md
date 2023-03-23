@@ -1,5 +1,10 @@
 # Changelog
 
+## \[3.0.0-rc.11]
+
+- Fix dependency URL.
+  - [372a8b71](https://github.com/iotaledger/iota-sdk/commit/372a8b71b82319a53de040e6e6443c8ecd792d7c) Fix dependency url ([#23](https://github.com/iotaledger/iota-sdk/pull/23)) on 2023-03-23
+
 ## \[3.0.0-rc.10]
 
 - IAliasOutputBuilderOptions::stateMetadata is now a HexEncodedString instead of Uint8Array.
