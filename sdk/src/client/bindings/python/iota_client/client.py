@@ -111,6 +111,31 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
                            features=None,
                            immutable_features=None):
         """Build an AliasOutput.
+
+        Parameters
+        ----------
+        alias_id : string
+            Hex encoded alias id
+        unlock_conditions : array of UnlockCondition
+            The unlock conditions for this output
+        amount : int
+            Amount of base token
+        native_tokens : array of NativeToken
+            The native token to add to the output
+        state_index : int
+            Index of the state
+        state_metadata : string
+            Hex encoded state metadata
+        foundry_counter : int
+            Counter of foundry outputs created
+        features : array of Feature
+            Features for this outputs
+        immutable_features : array of Feature
+            Immutable features
+
+        Returns
+        -------
+        Output as dict
         """
 
         unlock_conditions = humps.camelize([unlock_condition.as_dict() for unlock_condition in unlock_conditions])
@@ -146,6 +171,21 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
                            native_tokens=None,
                            features=None):
         """Build a BasicOutput.
+
+        Parameters
+        ----------
+        unlock_conditions : array of UnlockCondition
+            The unlock conditions for this output
+        amount : int
+            Amount of base token
+        native_tokens : array of NativeToken
+            The native token to add to the output
+        features : array of Feature
+            Features for this outputs
+
+        Returns
+        -------
+        Output as dict
         """
 
         unlock_conditions = humps.camelize([unlock_condition.as_dict() for unlock_condition in unlock_conditions])
@@ -176,6 +216,27 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
                              features=None,
                              immutable_features=None):
         """Build a FoundryOutput.
+
+        Parameters
+        ----------
+        serial_number : int
+            The serial number of the foundry
+        token_scheme : TokenScheme
+            The Token scheme. Currently only a simple scheme is supported
+        unlock_conditions : array of UnlockCondition
+            The unlock conditions for this output
+        amount : int
+            Amount of base token
+        native_tokens : array of NativeToken
+            The native token to add to the output
+        features : array of Feature
+            Features for this outputs
+        immutable_features : array of Feature
+            Immutable features
+
+        Returns
+        -------
+        Output as dict
         """
 
         token_scheme = humps.camelize(token_scheme.as_dict())
@@ -213,6 +274,25 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
                          features=None,
                          immutable_features=None):
         """Build an NftOutput.
+
+        Parameters
+        ----------
+        nft_id : string
+            Hex encoded nft id
+        unlock_conditions : array of UnlockCondition
+            The unlock conditions for this output
+        amount : int
+            Amount of base token
+        native_tokens : array of NativeToken
+            The native token to add to the output
+        features : array of Feature
+            Features for this outputs
+        immutable_features : array of Feature
+            Immutable features
+
+        Returns
+        -------
+        Output as dict
         """
 
         unlock_conditions = humps.camelize([unlock_condition.as_dict() for unlock_condition in unlock_conditions])
