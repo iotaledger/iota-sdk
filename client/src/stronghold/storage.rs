@@ -8,13 +8,15 @@ use std::ops::Deref;
 use async_trait::async_trait;
 use crypto::ciphers::chacha;
 
-use super::{common::PRIVATE_DATA_CLIENT_PATH, StrongholdAdapter};
-use crate::{storage::StorageProvider, Error, Result};
+use super::{common::PRIVATE_DATA_CLIENT_PATH, Error, StrongholdAdapter};
+use crate::storage::StorageProvider;
 
 #[async_trait]
 impl StorageProvider for StrongholdAdapter {
+    type Error = Error;
+
     #[allow(clippy::significant_drop_tightening)]
-    async fn get(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>> {
+    async fn get(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
         let data = match self
             .stronghold
             .lock()
@@ -39,7 +41,7 @@ impl StorageProvider for StrongholdAdapter {
         Ok(Some(chacha::aead_decrypt(buffer_ref.deref(), &data)?))
     }
 
-    async fn insert(&mut self, k: &[u8], v: &[u8]) -> Result<Option<Vec<u8>>> {
+    async fn insert(&mut self, k: &[u8], v: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
         let encrypted_value = {
             let locked_key_provider = self.key_provider.lock().await;
             let key_provider = if let Some(key_provider) = &*locked_key_provider {
@@ -62,7 +64,7 @@ impl StorageProvider for StrongholdAdapter {
             .insert(k.to_vec(), encrypted_value, None)?)
     }
 
-    async fn delete(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>> {
+    async fn delete(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
         Ok(self
             .stronghold
             .lock()

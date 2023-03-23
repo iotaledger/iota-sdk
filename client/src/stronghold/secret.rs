@@ -20,16 +20,17 @@ use zeroize::Zeroize;
 
 use super::{
     common::{DERIVE_OUTPUT_RECORD_PATH, PRIVATE_DATA_CLIENT_PATH, SECRET_VAULT_PATH, SEED_RECORD_PATH},
-    StrongholdAdapter,
+    Error, StrongholdAdapter,
 };
 use crate::{
     api::RemainderData,
     secret::{types::InputSigningData, GenerateAddressOptions, SecretManage},
-    Error, Result,
 };
 
 #[async_trait]
 impl SecretManage for StrongholdAdapter {
+    type Error = Error;
+
     async fn generate_addresses(
         &self,
         coin_type: u32,
@@ -37,7 +38,7 @@ impl SecretManage for StrongholdAdapter {
         address_indexes: Range<u32>,
         internal: bool,
         _options: Option<GenerateAddressOptions>,
-    ) -> Result<Vec<Address>> {
+    ) -> Result<Vec<Address>, Self::Error> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
         // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
@@ -82,7 +83,7 @@ impl SecretManage for StrongholdAdapter {
         input: &InputSigningData,
         essence_hash: &[u8; 32],
         _: &Option<RemainderData>,
-    ) -> Result<Unlock> {
+    ) -> Result<Unlock, Self::Error> {
         let chain = input.chain.as_ref().unwrap();
         let ed25519_sig = self.sign_ed25519(essence_hash, chain).await?;
 
@@ -92,7 +93,7 @@ impl SecretManage for StrongholdAdapter {
         Ok(unlock)
     }
 
-    async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature> {
+    async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
         // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
@@ -133,7 +134,7 @@ impl SecretManage for StrongholdAdapter {
 /// Private methods for the secret manager implementation.
 impl StrongholdAdapter {
     /// Execute [Procedure::BIP39Recover] in Stronghold to put a mnemonic into the Stronghold vault.
-    async fn bip39_recover(&self, mnemonic: String, passphrase: Option<String>, output: Location) -> Result<()> {
+    async fn bip39_recover(&self, mnemonic: String, passphrase: Option<String>, output: Location) -> Result<(), Error> {
         self.stronghold
             .lock()
             .await
@@ -148,7 +149,7 @@ impl StrongholdAdapter {
     }
 
     /// Execute [Procedure::SLIP10Derive] in Stronghold to derive a SLIP-10 private key in the Stronghold vault.
-    async fn slip10_derive(&self, chain: Chain, input: Slip10DeriveInput, output: Location) -> Result<()> {
+    async fn slip10_derive(&self, chain: Chain, input: Slip10DeriveInput, output: Location) -> Result<(), Error> {
         if let Err(err) = self
             .stronghold
             .lock()
@@ -177,7 +178,7 @@ impl StrongholdAdapter {
 
     /// Execute [Procedure::Ed25519PublicKey] in Stronghold to get an Ed25519 public key from the SLIP-10 private key
     /// located in `private_key`.
-    async fn ed25519_public_key(&self, private_key: Location) -> Result<[u8; 32]> {
+    async fn ed25519_public_key(&self, private_key: Location) -> Result<[u8; 32], Error> {
         Ok(self
             .stronghold
             .lock()
@@ -190,7 +191,7 @@ impl StrongholdAdapter {
     }
 
     /// Execute [Procedure::Ed25519Sign] in Stronghold to sign `msg` with `private_key` stored in the Stronghold vault.
-    async fn ed25519_sign(&self, private_key: Location, msg: &[u8]) -> Result<[u8; 64]> {
+    async fn ed25519_sign(&self, private_key: Location, msg: &[u8]) -> Result<[u8; 64], Error> {
         Ok(self
             .stronghold
             .lock()
@@ -203,7 +204,7 @@ impl StrongholdAdapter {
     }
 
     /// Store a mnemonic into the Stronghold vault.
-    pub async fn store_mnemonic(&mut self, mut mnemonic: String) -> Result<()> {
+    pub async fn store_mnemonic(&mut self, mut mnemonic: String) -> Result<(), Error> {
         // The key needs to be supplied first.
         if self.key_provider.lock().await.is_none() {
             return Err(Error::StrongholdKeyCleared);
@@ -217,8 +218,8 @@ impl StrongholdAdapter {
         mnemonic.zeroize();
 
         // Check if the mnemonic is valid.
-        crypto::keys::bip39::wordlist::verify(&trimmed_mnemonic, &crypto::keys::bip39::wordlist::ENGLISH)
-            .map_err(|e| crate::Error::InvalidMnemonic(format!("{e:?}")))?;
+        crypto::keys::bip39::wordlist::verify(&trimmed_mnemonic, &crypto::keys::bip39::wordlist::ENGLISH)?;
+        // .map_err(|e| crate::Error::InvalidMnemonic(format!("{e:?}")))?;
 
         // We need to check if there has been a mnemonic stored in Stronghold or not to prevent overwriting it.
         if self
@@ -228,7 +229,7 @@ impl StrongholdAdapter {
             .get_client(PRIVATE_DATA_CLIENT_PATH)?
             .record_exists(&output)?
         {
-            return Err(crate::Error::StrongholdMnemonicAlreadyStored);
+            return Err(Error::StrongholdMnemonicAlreadyStored);
         }
 
         // Execute the BIP-39 recovery procedure to put it into the vault (in memory).
@@ -301,12 +302,10 @@ mod tests {
         stronghold_adapter.clear_key().await;
 
         // Address generation returns an error when the key is cleared.
-        assert!(
-            stronghold_adapter
-                .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, false, None,)
-                .await
-                .is_err()
-        );
+        assert!(stronghold_adapter
+            .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, false, None,)
+            .await
+            .is_err());
 
         stronghold_adapter.set_password("drowssap").await.unwrap();
 
