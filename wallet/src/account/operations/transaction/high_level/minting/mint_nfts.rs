@@ -134,7 +134,11 @@ impl AccountHandle {
 
         for nft_options in nfts_options {
             let address = match nft_options.address {
-                Some(address) => Address::try_from_bech32(address)?,
+                Some(address) => {
+                    let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
+                    self.client.bech32_hrp_matches(&bech32_hrp).await?;
+                    address
+                }
                 // todo other error message
                 None => {
                     account_addresses

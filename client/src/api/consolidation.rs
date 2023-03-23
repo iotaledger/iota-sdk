@@ -72,6 +72,9 @@ impl Client {
 
                 let outputs_chunks = basic_outputs_responses.chunks(INPUT_COUNT_MAX.into());
 
+                let (consolidation_address, bech32_hrp) = Address::try_from_bech32_with_hrp(&consolidation_address)?;
+                self.bech32_hrp_matches(&bech32_hrp).await?;
+
                 for chunk in outputs_chunks {
                     let mut block_builder = self.block().with_secret_manager(secret_manager);
                     let mut total_amount = 0;
@@ -93,7 +96,7 @@ impl Client {
 
                     let consolidation_output = BasicOutputBuilder::new_with_amount(total_amount)?
                         .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                            Address::try_from_bech32(&consolidation_address)?,
+                            consolidation_address,
                         )))
                         .with_native_tokens(total_native_tokens.finish()?)
                         .finish_output(token_supply)?;

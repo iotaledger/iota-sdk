@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Response::TransactionEssenceHash`;
 - Derive `Eq, PartialEq` for `input_selection::Error`;
 - `input_selection::Error::{InvalidOutputCount, InvalidOutputCount}` variants;
+- `Error::InvalidBech32Hrp`;
+- `Client::bech32_hrp_matches()`;
+- Bech32 HRP validation for provided addresses;
 
 ### Changed
 
