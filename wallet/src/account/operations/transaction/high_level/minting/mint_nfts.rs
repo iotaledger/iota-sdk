@@ -136,7 +136,7 @@ impl AccountHandle {
             let address = match nft_options.address {
                 Some(address) => {
                     let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
-                    self.client.validate_bech32_hrp(&bech32_hrp).await?;
+                    self.client.bech32_hrp_matches(&bech32_hrp).await?;
                     address
                 }
                 // todo other error message

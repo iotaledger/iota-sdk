@@ -43,7 +43,7 @@ impl AccountHandle {
         let token_supply = self.client.get_token_supply().await?;
 
         let (recipient_address, bech32_hrp) = Address::try_from_bech32_with_hrp(&options.recipient_address)?;
-        self.client.validate_bech32_hrp(&bech32_hrp).await?;
+        self.client.bech32_hrp_matches(&bech32_hrp).await?;
 
         if let Some(assets) = &options.assets {
             if let Some(nft_id) = assets.nft_id {

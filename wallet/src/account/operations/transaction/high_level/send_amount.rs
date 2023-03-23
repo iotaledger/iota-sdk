@@ -63,7 +63,7 @@ impl AccountHandle {
 
         for address_with_amount in addresses_with_amount {
             let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address_with_amount.address)?;
-            self.client.validate_bech32_hrp(&bech32_hrp).await?;
+            self.client.bech32_hrp_matches(&bech32_hrp).await?;
             outputs.push(
                 BasicOutputBuilder::new_with_amount(address_with_amount.amount)?
                     .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))

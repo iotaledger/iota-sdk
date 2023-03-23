@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Derive `Eq, PartialEq` for `input_selection::Error`;
 - `input_selection::Error::{InvalidOutputCount, InvalidOutputCount}` variants;
 - `Error::InvalidBech32Hrp`;
-- `Client::validate_bech32_hrp()`;
+- `Client::bech32_hrp_matches()`;
 
 ### Changed
 
