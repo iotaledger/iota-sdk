@@ -4,4 +4,4 @@
 ---
 
 Removed `signatureUnlock` parameter `remainderData`.
-`signatureUnlock` parameter `IInputSigningData` replaced by `ISegment[]`.
+`signatureUnlock` parameter `IInputSigningData` replaced by `IBip32Chain`.
