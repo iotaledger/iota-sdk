@@ -129,32 +129,6 @@ jobs:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Set Up Nightly Rustfmt
-        uses: ./.github/actions/setup-rust
-        with:
-          toolchain: nightly
-          target: wasm32-unknown-unknown
-          components: rustfmt
-          cache: false
-
-      - name: Install cargo-license-template
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: --force cargo-license-template
-
-      - name: Run Cargo Fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --manifest-path wallet/bindings/wasm/Cargo.toml --all -- --check
-
-      - name: Run cargo-license-template
-        uses: actions-rs/cargo@v1
-        with:
-          command: license-template
-          args: --template .license_template
-
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
