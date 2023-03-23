@@ -38,12 +38,13 @@ impl AccountHandle {
     /// Send a transaction, if sending a block fails, the function will return None for the block_id, but the wallet
     /// will retry sending the transaction during syncing.
     /// ```ignore
-    /// let outputs = vec![TransactionOutput {
-    ///     address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
-    ///     amount: 1_000_000,
-    ///     output_kind: None,
-    /// }];
-    ///
+    /// let outputs = vec![
+    ///    BasicOutputBuilder::new_with_amount(1_000_000)?
+    ///    .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
+    ///        Address::try_from_bech32("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
+    ///    )))
+    ///    .finish_output(account_handle.client.get_token_supply().await?;)?,
+    /// ];
     /// let tx = account_handle
     ///     .send(
     ///         outputs,
