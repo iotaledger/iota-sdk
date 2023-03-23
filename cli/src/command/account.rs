@@ -29,10 +29,9 @@ use iota_sdk::{
 use crate::error::Error;
 
 #[derive(Debug, Parser)]
-#[clap(version, long_about = None)]
-#[clap(propagate_version = true)]
+#[command(author, version, about, long_about = None, propagate_version = true)]
 pub struct AccountCli {
-    #[clap(subcommand)]
+    #[command(subcommand)]
     pub command: AccountCommand,
 }
 
@@ -71,9 +70,9 @@ pub enum AccountCommand {
     MintNativeToken {
         circulating_supply: String,
         maximum_supply: String,
-        #[clap(long, group = "foundry_metadata")]
+        #[arg(long, group = "foundry_metadata")]
         foundry_metadata_hex: Option<String>,
-        #[clap(long, group = "foundry_metadata")]
+        #[arg(long, group = "foundry_metadata")]
         foundry_metadata_file: Option<String>,
     },
     /// Mint an NFT to an optional bech32 encoded address: `mint-nft
@@ -81,19 +80,19 @@ pub enum AccountCommand {
     /// IOTA NFT Standard - TIP27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md
     MintNft {
         address: Option<String>,
-        #[clap(long, group = "immutable_metadata")]
+        #[arg(long, group = "immutable_metadata")]
         immutable_metadata_hex: Option<String>,
-        #[clap(long, group = "immutable_metadata")]
+        #[arg(long, group = "immutable_metadata")]
         immutable_metadata_file: Option<String>,
-        #[clap(long, group = "metadata")]
+        #[arg(long, group = "metadata")]
         metadata_hex: Option<String>,
-        #[clap(long, group = "metadata")]
+        #[arg(long, group = "metadata")]
         metadata_file: Option<String>,
-        #[clap(long)]
+        #[arg(long)]
         tag: Option<String>,
-        #[clap(long)]
+        #[arg(long)]
         sender: Option<String>,
-        #[clap(long)]
+        #[arg(long)]
         issuer: Option<String>,
     },
     /// Generate a new address.
@@ -136,7 +135,7 @@ pub enum AccountCommand {
     StopParticipating { event_id: ParticipationEventId },
     /// Calculate the participation overview of the account
     ParticipationOverview {
-        #[clap(short, long, value_parser, num_args = 1.., value_delimiter = ' ')]
+        #[arg(short, long, num_args = 1.., value_delimiter = ' ')]
         event_ids: Vec<ParticipationEventId>,
     },
     /// Get the voting power of the account
@@ -545,6 +544,7 @@ pub async fn send_native_token_command(
 
         let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
         account_handle.client().bech32_hrp_matches(&bech32_hrp).await?;
+
         let outputs = vec![
             BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
                 .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))

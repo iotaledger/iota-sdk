@@ -14,11 +14,11 @@ path = "src/main.rs"
 [dependencies]
 iota-sdk = { path = "../sdk", default-features = false, features = [ "wallet", "storage", "rocksdb", "stronghold", "participation" ] }
 
-clap = { version = "4.1.6", default-features = false, features = [ "derive", "std" ] }
+clap = { version = "4.1.11", default-features = false, features = [ "derive", "std" ] }
 dialoguer = { version = "0.10.3", default-features = false, features = [ "password", "history" ] }
 fern-logger = { version = "0.5.0", default-features = false }
 log = { version = "0.4.17", default-features = false }
 prefix-hex = { version = "0.7.0", default-features = false, features = [ "std" ] }
-serde_json = { version = "1.0.93", default-features = false }
-thiserror = { version = "1.0.38", default-features = false }
-tokio = { version = "1.25.0", default-features = false, features = [ "fs" ] }
+serde_json = { version = "1.0.94", default-features = false }
+thiserror = { version = "1.0.40", default-features = false }
+tokio = { version = "1.26.0", default-features = false, features = [ "fs" ] }
