@@ -529,11 +529,11 @@ fn simple_foundry_transition_basic_not_needed() {
             assert_eq!(output.as_alias().immutable_features().len(), 0);
             assert_eq!(
                 *output.as_alias().state_controller_address(),
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap().1
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
             assert_eq!(
                 *output.as_alias().governor_address(),
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap().1
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
         }
     });
@@ -598,11 +598,11 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
                 assert_eq!(output.as_alias().immutable_features().len(), 0);
                 assert_eq!(
                     *output.as_alias().state_controller_address(),
-                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap().1
+                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
                 );
                 assert_eq!(
                     *output.as_alias().governor_address(),
-                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap().1
+                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
                 );
             } else if output.is_basic() {
                 assert!(is_remainder_or_return(
@@ -745,11 +745,11 @@ fn mint_and_burn_at_the_same_time() {
                 assert_eq!(output.as_alias().immutable_features().len(), 0);
                 assert_eq!(
                     *output.as_alias().state_controller_address(),
-                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap().1
+                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
                 );
                 assert_eq!(
                     *output.as_alias().governor_address(),
-                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap().1
+                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
                 );
             } else {
                 panic!("unexpected output type")

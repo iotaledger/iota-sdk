@@ -140,14 +140,14 @@ impl<'a> ClientBlockBuilder<'a> {
                 addresses
                     .public
                     .iter()
-                    .map(|bech32_address| Ok(Address::try_from_bech32(bech32_address)?.1))
+                    .map(|bech32_address| Ok(Address::try_from_bech32(bech32_address)?))
                     .collect::<Result<Vec<Address>>>()?,
             );
             available_input_addresses.extend(
                 addresses
                     .internal
                     .iter()
-                    .map(|bech32_address| Ok(Address::try_from_bech32(bech32_address)?.1))
+                    .map(|bech32_address| Ok(Address::try_from_bech32(bech32_address)?))
                     .collect::<Result<Vec<Address>>>()?,
             );
 
@@ -180,7 +180,7 @@ impl<'a> ClientBlockBuilder<'a> {
 
                     for output_response in address_outputs {
                         let output = Output::try_from_dto(&output_response.output, token_supply)?;
-                        let address = Address::try_from_bech32(str_address)?.1;
+                        let address = Address::try_from_bech32(str_address)?;
 
                         // We can ignore the unlocked_alias_or_nft_address, since we only requested basic outputs
                         let (required_unlock_address, _unlocked_alias_or_nft_address) = output

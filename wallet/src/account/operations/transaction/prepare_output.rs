@@ -53,7 +53,7 @@ impl AccountHandle {
         // it, if needed
         let mut first_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())?
             .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                Address::try_from_bech32(options.recipient_address.clone())?.1,
+                Address::try_from_bech32(options.recipient_address.clone())?,
             )));
 
         if let Some(assets) = options.assets {
@@ -81,7 +81,7 @@ impl AccountHandle {
 
             if let Some(sender) = features.sender {
                 first_output_builder = first_output_builder
-                    .add_feature(Feature::Sender(SenderFeature::new(Address::try_from_bech32(sender)?.1)))
+                    .add_feature(Feature::Sender(SenderFeature::new(Address::try_from_bech32(sender)?)))
             }
         }
 
@@ -228,7 +228,7 @@ impl AccountHandle {
 
         // Set new address unlock condition
         first_output_builder = first_output_builder.with_unlock_conditions(vec![UnlockCondition::Address(
-            AddressUnlockCondition::new(Address::try_from_bech32(options.recipient_address.clone())?.1),
+            AddressUnlockCondition::new(Address::try_from_bech32(options.recipient_address.clone())?),
         )]);
 
         if let Some(assets) = options.assets {
@@ -252,12 +252,12 @@ impl AccountHandle {
 
             if let Some(sender) = features.sender {
                 first_output_builder = first_output_builder
-                    .add_feature(Feature::Sender(SenderFeature::new(Address::try_from_bech32(sender)?.1)))
+                    .add_feature(Feature::Sender(SenderFeature::new(Address::try_from_bech32(sender)?)))
             }
 
             if let Some(issuer) = features.issuer {
                 first_output_builder = first_output_builder
-                    .add_immutable_feature(Feature::Issuer(IssuerFeature::new(Address::try_from_bech32(issuer)?.1)));
+                    .add_immutable_feature(Feature::Issuer(IssuerFeature::new(Address::try_from_bech32(issuer)?)));
             }
         }
 

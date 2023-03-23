@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MQTT `Error`;
 - `Message::HashTransactionEssence`;
 - `Response::TransactionEssenceHash`;
+- Derive `Eq, PartialEq` for `input_selection::Error`;
+- `input_selection::Error::{InvalidOutputCount, InvalidOutputCount}` variants;
 - `Error::MissingBip32Chain` variant;
 
 ### Changed
@@ -45,6 +47,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `SecretManage::signature_unlock`'s `remainder` parameter;
 - `Message::SignatureUnlock`'s `remainder_data` field;
+
+### Removed
+
+- `alias_id_to_bech32` and `nft_id_to_bech32` moved to `types` crate;
+- `is_address_valid` moved to `types` crate;
+- `parse_bech32_address`;
+- `input_selection::Error::NoOutputsProvided`;
+
+### Fixed
+
+- ISA will not select more than max inputs;
 
 ## 2.0.1-rc.7 - 2023-03-09
 

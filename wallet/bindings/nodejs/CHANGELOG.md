@@ -1,5 +1,19 @@
 # Changelog
 
+## \[2.0.3-rc.29]
+
+- Fix dependency URL.
+  - [372a8b71](https://github.com/iotaledger/iota-sdk/commit/372a8b71b82319a53de040e6e6443c8ecd792d7c) Fix dependency url ([#23](https://github.com/iotaledger/iota-sdk/pull/23)) on 2023-03-23
+
+## \[2.0.3-rc.28]
+
+- Made account manager `listen` async.
+  - [dbc9540](https://github.com/iotaledger/iota-sdk/commit/dbc9540cb62f5c1b3b9d1da939d9f8f2cf171c91) Java: Updated JNI ([#19](https://github.com/iotaledger/iota-sdk/pull/19)) on 2023-03-23
+- Use SyncOptions instead of AccountSyncOptions in startBackgroundSync() & recoverAccounts().
+  - [dbc9540](https://github.com/iotaledger/iota-sdk/commit/dbc9540cb62f5c1b3b9d1da939d9f8f2cf171c91) Java: Updated JNI ([#19](https://github.com/iotaledger/iota-sdk/pull/19)) on 2023-03-23
+- Add `PlaceholderSecretManager` type;
+  - [dbc9540](https://github.com/iotaledger/iota-sdk/commit/dbc9540cb62f5c1b3b9d1da939d9f8f2cf171c91) Java: Updated JNI ([#19](https://github.com/iotaledger/iota-sdk/pull/19)) on 2023-03-23
+
 ## \[2.0.3-rc.27]
 
 - Fix deadlock when syncing and another function which locked the storage_manager are running at the same time

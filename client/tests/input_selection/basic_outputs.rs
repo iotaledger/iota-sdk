@@ -188,7 +188,7 @@ fn input_amount_greater_than_output_amount() {
 #[test]
 fn input_amount_greater_than_output_amount_with_remainder_address() {
     let protocol_parameters = protocol_parameters();
-    let remainder_address = Address::try_from_bech32(BECH32_ADDRESS_REMAINDER).unwrap().1;
+    let remainder_address = Address::try_from_bech32(BECH32_ADDRESS_REMAINDER).unwrap();
 
     let inputs = build_inputs(vec![Basic(
         2_000_000,
@@ -462,7 +462,7 @@ fn not_enough_storage_deposit_for_remainder() {
 #[test]
 fn ed25519_sender() {
     let protocol_parameters = protocol_parameters();
-    let sender = Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap().1;
+    let sender = Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap();
 
     let inputs = build_inputs(vec![
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
@@ -538,7 +538,7 @@ fn missing_ed25519_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap().1
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()
     ));
 }
 
@@ -683,7 +683,7 @@ fn missing_alias_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap().1
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
     ));
 }
 
@@ -828,7 +828,7 @@ fn missing_nft_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap().1
+        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()
     ));
 }
 
@@ -1231,4 +1231,190 @@ fn single_mandatory_input() {
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert!(unsorted_eq(&selected.outputs, &outputs));
+}
+
+#[test]
+fn too_many_inputs() {
+    let protocol_parameters = protocol_parameters();
+
+    // 129 inputs that would be required for the amount, but that's above max inputs
+    let inputs = build_inputs(vec![
+        Basic(
+            1_000_000,
+            BECH32_ADDRESS_ED25519_0,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        );
+        129
+    ]);
+
+    let outputs = build_outputs(vec![Basic(
+        129_000_000,
+        BECH32_ADDRESS_ED25519_0,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )]);
+
+    let selected = InputSelection::new(
+        inputs,
+        outputs,
+        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        protocol_parameters,
+    )
+    .select();
+
+    assert_eq!(
+        selected.unwrap_err(),
+        iota_client::api::input_selection::Error::InvalidInputCount(129)
+    )
+}
+
+#[test]
+fn more_than_max_inputs_only_one_needed() {
+    let protocol_parameters = protocol_parameters();
+
+    // 1000 inputs where 129 would be needed for the required amount which is above the max inputs
+    let mut inputs = build_inputs(vec![
+        Basic(
+            1_000_000,
+            BECH32_ADDRESS_ED25519_0,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        );
+        1000
+    ]);
+    // Add the needed input
+    let needed_input = build_inputs(vec![Basic(
+        129_000_000,
+        BECH32_ADDRESS_ED25519_0,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )]);
+    inputs.push(needed_input[0].clone());
+
+    let outputs = build_outputs(vec![Basic(
+        129_000_000,
+        BECH32_ADDRESS_ED25519_0,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )]);
+
+    let selected = InputSelection::new(
+        inputs,
+        outputs.clone(),
+        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        protocol_parameters,
+    )
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs, &needed_input));
+    assert!(unsorted_eq(&selected.outputs, &outputs));
+}
+
+#[test]
+fn too_many_outputs() {
+    let protocol_parameters = protocol_parameters();
+
+    let inputs = build_inputs(vec![Basic(
+        2_000_000_000,
+        BECH32_ADDRESS_ED25519_0,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )]);
+
+    let outputs = build_outputs(vec![
+        Basic(
+            1_000_000,
+            BECH32_ADDRESS_ED25519_0,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        );
+        129
+    ]);
+
+    let selected = InputSelection::new(
+        inputs,
+        outputs,
+        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        protocol_parameters,
+    )
+    .select();
+
+    assert_eq!(
+        selected.unwrap_err(),
+        iota_client::api::input_selection::Error::InvalidOutputCount(129)
+    )
+}
+
+#[test]
+fn too_many_outputs_with_remainder() {
+    let protocol_parameters = protocol_parameters();
+
+    let inputs = build_inputs(vec![Basic(
+        2_000_000_000,
+        BECH32_ADDRESS_ED25519_0,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )]);
+
+    let outputs = build_outputs(vec![
+        Basic(
+            1_000_000,
+            BECH32_ADDRESS_ED25519_0,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        );
+        128
+    ]);
+
+    let selected = InputSelection::new(
+        inputs,
+        outputs,
+        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        protocol_parameters,
+    )
+    .select();
+
+    assert_eq!(
+        selected.unwrap_err(),
+        // 129 because of required remainder
+        iota_client::api::input_selection::Error::InvalidOutputCount(129)
+    )
 }

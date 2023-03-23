@@ -97,13 +97,18 @@ impl Address {
     }
 
     /// Tries to create an [`Address`] from a bech32 encoded string.
-    pub fn try_from_bech32<T: AsRef<str>>(address: T) -> Result<(String, Self), Error> {
+    pub fn try_from_bech32<T: AsRef<str>>(address: T) -> Result<Self, Error> {
+        Self::try_from_bech32_with_hrp(address).map(|res| res.0)
+    }
+
+    /// Tries to create an [`Address`] from a bech32 encoded string, also returns the HRP.
+    pub fn try_from_bech32_with_hrp<T: AsRef<str>>(address: T) -> Result<(Self, String), Error> {
         match bech32::decode(address.as_ref()) {
             Ok((hrp, data, _)) => {
                 let bytes = Vec::<u8>::from_base32(&data).map_err(|_| Error::InvalidAddress)?;
                 Self::unpack_verified(bytes.as_slice(), &())
                     .map_err(|_| Error::InvalidAddress)
-                    .map(|address| (hrp, address))
+                    .map(|address| (address, hrp))
             }
             Err(_) => Err(Error::InvalidAddress),
         }
@@ -113,6 +118,12 @@ impl Address {
     pub fn to_bech32<T: AsRef<str>>(&self, hrp: T) -> String {
         // PANIC: encoding can't fail as `self` has already been validated and built.
         bech32::encode(hrp.as_ref(), self.pack_to_vec().to_base32(), Variant::Bech32).unwrap()
+    }
+
+    /// Checks if an string is a valid bech32 encoded address.
+    #[must_use]
+    pub fn is_valid_bech32(address: &str) -> bool {
+        Address::try_from_bech32(address).is_ok()
     }
 
     ///

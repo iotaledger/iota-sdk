@@ -12,7 +12,7 @@ use serde::{Serialize, Serializer};
 use crate::api::input_selection::Requirement;
 
 /// Errors related to input selection.
-#[derive(Debug, thiserror::Error, Serialize)]
+#[derive(Debug, Eq, PartialEq, thiserror::Error, Serialize)]
 #[serde(tag = "type", content = "error", rename_all = "camelCase")]
 pub enum Error {
     /// Block error.
@@ -40,15 +40,18 @@ pub enum Error {
         /// The required amount.
         required: U256,
     },
+    /// Invalid amount of inputs.
+    #[error("invalid amount of inputs: {0}")]
+    InvalidInputCount(usize),
+    /// Invalid amount of outputs.
+    #[error("invalid amount of outputs: {0}")]
+    InvalidOutputCount(usize),
     /// No input with matching ed25519 address provided.
     #[error("no input with matching ed25519 address provided")]
     MissingInputWithEd25519Address,
     /// No available inputs were provided to input selection.
     #[error("no available inputs provided")]
     NoAvailableInputsProvided,
-    /// No outputs were provided to input selection.
-    #[error("no outputs provided")]
-    NoOutputsProvided,
     /// Required input is forbidden.
     #[error("required input {0} is forbidden")]
     RequiredInputIsForbidden(OutputId),

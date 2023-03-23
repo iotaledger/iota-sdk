@@ -1,5 +1,37 @@
 # Changelog
 
+## \[3.0.0-rc.11]
+
+- Fix dependency URL.
+  - [372a8b71](https://github.com/iotaledger/iota-sdk/commit/372a8b71b82319a53de040e6e6443c8ecd792d7c) Fix dependency url ([#23](https://github.com/iotaledger/iota-sdk/pull/23)) on 2023-03-23
+
+## \[3.0.0-rc.10]
+
+- IAliasOutputBuilderOptions::stateMetadata is now a HexEncodedString instead of Uint8Array.
+  - [dbc9540](https://github.com/iotaledger/iota-sdk/commit/dbc9540cb62f5c1b3b9d1da939d9f8f2cf171c91) Java: Updated JNI ([#19](https://github.com/iotaledger/iota-sdk/pull/19)) on 2023-03-23
+
+- Removed `IInputSigningData::bech32Address`;
+  - [dbc9540](https://github.com/iotaledger/iota-sdk/commit/dbc9540cb62f5c1b3b9d1da939d9f8f2cf171c91) Java: Updated JNI ([#19](https://github.com/iotaledger/iota-sdk/pull/19)) on 2023-03-23
+
+- `Burn` fields are now optional.
+  `Burn::nativeTokens` is now an array.
+  - [dbc9540](https://github.com/iotaledger/iota-sdk/commit/dbc9540cb62f5c1b3b9d1da939d9f8f2cf171c91) Java: Updated JNI ([#19](https://github.com/iotaledger/iota-sdk/pull/19)) on 2023-03-23
+
+- Add `Client::hashTransactionEssence()`;
+  - [dbc9540](https://github.com/iotaledger/iota-sdk/commit/dbc9540cb62f5c1b3b9d1da939d9f8f2cf171c91) Java: Updated JNI ([#19](https://github.com/iotaledger/iota-sdk/pull/19)) on 2023-03-23
+
+- Fix install command;
+  - [dbc9540](https://github.com/iotaledger/iota-sdk/commit/dbc9540cb62f5c1b3b9d1da939d9f8f2cf171c91) Java: Updated JNI ([#19](https://github.com/iotaledger/iota-sdk/pull/19)) on 2023-03-23
+
+- ### Added
+
+- `OutputIdsResponse`;
+
+### Changed
+
+- `Client::{aliasOutputIds, basicOutputIds, foundryOutputIds, nftOutputIds}` will not do automatic pagination if `QueryParameter::Cursor(_)` is provided and return type from `string[]` to `OutputIdsResponse`;
+- [dbc9540](https://github.com/iotaledger/iota-sdk/commit/dbc9540cb62f5c1b3b9d1da939d9f8f2cf171c91) Java: Updated JNI ([#19](https://github.com/iotaledger/iota-sdk/pull/19)) on 2023-03-23
+
 ## \[3.0.0-rc.9]
 
 - Merged `IAuth::{username, password}` into `IAuth::basicAuthNamePwd`;

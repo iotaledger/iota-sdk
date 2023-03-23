@@ -239,7 +239,7 @@ async fn output_preparation() -> Result<()> {
     }
 
     let issuer_and_sender_address = String::from("rms1qq724zgvdujt3jdcd3xzsuqq7wl9pwq3dvsa5zvx49rj9tme8cat6qptyfm");
-    let expected_address = Address::try_from_bech32(&issuer_and_sender_address)?.1;
+    let expected_address = Address::try_from_bech32(&issuer_and_sender_address)?;
 
     // sender address present when building basic output
     let output = account
@@ -331,7 +331,7 @@ async fn output_preparation() -> Result<()> {
     let immutable_features = output.immutable_features().unwrap();
     // issuer feature
     assert_eq!(immutable_features.len(), 1);
-    let issuer_and_sender_address = Address::try_from_bech32(&issuer_and_sender_address)?.1;
+    let issuer_and_sender_address = Address::try_from_bech32(&issuer_and_sender_address)?;
     let issuer_feature = immutable_features.issuer().unwrap();
     assert_eq!(issuer_feature.address(), &issuer_and_sender_address);
     let sender_feature = features.sender().unwrap();

@@ -12,9 +12,9 @@ use iota_wallet::{
     message_interface::{create_message_handler, init_logger, ManagerOptions, Message, WalletMessageHandler},
 };
 use jni::{
-    objects::{GlobalRef, JClass, JObject, JStaticMethodID, JString, JValue},
+    objects::{GlobalRef, JClass, JObject, JObjectArray, JStaticMethodID, JString, JValue},
     signature::{Primitive, ReturnType},
-    sys::{jclass, jobject, jobjectArray, jstring},
+    sys::{jclass, jobject, jstring},
     JNIEnv, JavaVM,
 };
 #[cfg(target_os = "android")]
@@ -37,7 +37,7 @@ macro_rules! jni_err_assert {
     ($env:ident, $result:expr, $ret:expr ) => {{
         match $result {
             Err(err) => {
-                throw_exception(&$env, err.to_string());
+                throw_exception(&mut $env, err.to_string());
                 return $ret;
             }
             Ok(res) => res,
@@ -49,7 +49,7 @@ macro_rules! jni_err_assert {
 // it throws an exception and returns the value of r. Otherwise returns a String.
 macro_rules! string_from_jni {
     ($env:ident, $x:ident, $r:expr ) => {{
-        let string = $env.get_string($x);
+        let string = $env.get_string_unchecked(&$x);
         String::from(jni_err_assert!($env, string, $r))
     }};
 }
@@ -77,7 +77,11 @@ macro_rules! env_assert {
 
 // This keeps rust from "mangling" the name and making it unique for this crate.
 #[no_mangle]
-pub extern "system" fn Java_org_iota_api_NativeApi_initLogger(env: JNIEnv, _class: JClass, command: JString) {
+pub unsafe extern "system" fn Java_org_iota_api_NativeApi_initLogger(
+    mut env: JNIEnv,
+    _class: JClass,
+    command: JString,
+) {
     // This is a safety check to make sure that the JNIEnv is not in an exception state.
     env_assert!(env, ());
     let ret = init_logger(string_from_jni!(env, command, ()));
@@ -86,8 +90,8 @@ pub extern "system" fn Java_org_iota_api_NativeApi_initLogger(env: JNIEnv, _clas
 
 // This keeps rust from "mangling" the name and making it unique for this crate.
 #[no_mangle]
-pub extern "system" fn Java_org_iota_api_NativeApi_createMessageHandler(
-    env: JNIEnv,
+pub unsafe extern "system" fn Java_org_iota_api_NativeApi_createMessageHandler(
+    mut env: JNIEnv,
     // this is the class that owns our
     // static method. Not going to be
     // used, but still needs to have
@@ -136,7 +140,7 @@ pub extern "system" fn Java_org_iota_api_NativeApi_createMessageHandler(
 
 // Destroy the required parts for messaging. Needs to call createMessageHandler again before resuming
 #[no_mangle]
-pub extern "system" fn Java_org_iota_api_NativeApi_destroyHandle(env: JNIEnv, _class: JClass) {
+pub extern "system" fn Java_org_iota_api_NativeApi_destroyHandle(mut env: JNIEnv, _class: JClass) {
     env_assert!(env, ());
 
     *jni_err_assert!(env, MESSAGE_HANDLER.lock(), ()) = None;
@@ -146,8 +150,8 @@ pub extern "system" fn Java_org_iota_api_NativeApi_destroyHandle(env: JNIEnv, _c
 
 // This keeps rust from "mangling" the name and making it unique for this crate.
 #[no_mangle]
-pub extern "system" fn Java_org_iota_api_NativeApi_sendMessage(
-    env: JNIEnv,
+pub unsafe extern "system" fn Java_org_iota_api_NativeApi_sendMessage(
+    mut env: JNIEnv,
     _class: JClass,
     command: JString,
 ) -> jstring {
@@ -161,15 +165,15 @@ pub extern "system" fn Java_org_iota_api_NativeApi_sendMessage(
                 Some(message_handler) => {
                     let res = crate::block_on(message_handler.send_message(message));
                     // We assume response is valid json from our own client
-                    return make_jni_string(&env, serde_json::to_string(&res).unwrap());
+                    return make_jni_string(&mut env, serde_json::to_string(&res).unwrap());
                 }
-                _ => throw_nullpointer(&env, "Wallet not initialised."),
+                _ => throw_nullpointer(&mut env, "Wallet not initialised."),
             }
         }
-        Err(err) => throw_exception(&env, err.to_string()),
+        Err(err) => throw_exception(&mut env, err.to_string()),
     };
 
-    throw_nullpointer(&env, "Wallet not initialised.");
+    throw_nullpointer(&mut env, "Wallet not initialised.");
     std::ptr::null_mut()
 }
 
@@ -179,20 +183,20 @@ pub extern "system" fn Java_org_iota_api_NativeApi_sendMessage(
 /// This will crash if callback is java null
 #[no_mangle]
 pub unsafe extern "system" fn Java_org_iota_api_NativeApi_listen(
-    env: JNIEnv,
+    mut env: JNIEnv,
     _class: jclass,
-    events: jobjectArray,
+    events: JObjectArray,
     callback: jobject,
 ) -> jstring {
     env_assert!(env, std::ptr::null_mut());
 
-    let string_count = jni_err_assert!(env, env.get_array_length(events), std::ptr::null_mut());
+    let string_count = jni_err_assert!(env, env.get_array_length(&events), std::ptr::null_mut());
 
     // Safe cast as we dont have that many events
     let mut events_list: Vec<WalletEventType> = Vec::with_capacity(string_count as usize);
 
     for i in 0..string_count {
-        let arr_obj = jni_err_assert!(env, env.get_object_array_element(events, i), std::ptr::null_mut()).into();
+        let arr_obj = jni_err_assert!(env, env.get_object_array_element(&events, i), std::ptr::null_mut()).into();
         let java_str = string_from_jni!(env, arr_obj, std::ptr::null_mut());
 
         let event = jni_err_assert!(env, WalletEventType::try_from(&*java_str), std::ptr::null_mut());
@@ -214,13 +218,16 @@ pub unsafe extern "system" fn Java_org_iota_api_NativeApi_listen(
             Some(message_handler) => crate::block_on(message_handler.listen(events_list, move |e| {
                 event_handle(global_obj_class.clone(), global_obj.clone(), e.clone());
             })),
-            _ => throw_nullpointer(&env, "Wallet not initialised."),
+            _ => throw_nullpointer(&mut env, "Wallet not initialised."),
         },
-        Err(err) => throw_exception(&env, err.to_string()),
+        Err(err) => throw_exception(&mut env, err.to_string()),
     };
 
     // exceptions return early, now we let the client know that we registered successfully
-    make_jni_string(&env, "{\"type\": \"success\", \"payload\": \"success\"}".to_string())
+    make_jni_string(
+        &mut env,
+        "{\"type\": \"success\", \"payload\": \"success\"}".to_string(),
+    )
 }
 
 unsafe fn event_handle(clazz: GlobalRef, callback_ref: GlobalRef, event: Event) {
@@ -236,7 +243,7 @@ unsafe fn event_handle(clazz: GlobalRef, callback_ref: GlobalRef, event: Event) 
         .expect("Wallet not initialised, but an event was called");
 
     // Generate link back to the java env
-    let env = vm
+    let mut env = vm
         .attach_current_thread()
         .expect("Failed to get Java env for event callback");
 
@@ -247,16 +254,15 @@ unsafe fn event_handle(clazz: GlobalRef, callback_ref: GlobalRef, event: Event) 
 
     // Make the Jni object to send back
     let event = jni::sys::jvalue {
-        l: make_jni_string(&env, ev_ser),
+        l: make_jni_string(&mut env, ev_ser),
     };
 
     // Get a ref back to the callback we call on the java side
-    let cb = JValue::Object(callback_ref.as_obj()).to_jni();
-    let clazz = JClass::from_raw(*clazz.as_obj());
+    let cb = JValue::Object(callback_ref.as_obj()).as_jni();
 
     // Call NativeApi, METHOD_CACHE assumed initialised if we received a VM
     let res = env.call_static_method_unchecked(
-        clazz,
+        &clazz,
         METHOD_CACHE.lock().unwrap().unwrap(),
         ReturnType::Primitive(Primitive::Void),
         &[event, cb],
@@ -277,7 +283,7 @@ pub(crate) fn block_on<C: futures::Future>(cb: C) -> C::Output {
     runtime.lock().unwrap().block_on(cb)
 }
 
-fn make_jni_string(env: &JNIEnv, rust_str: std::string::String) -> jstring {
+fn make_jni_string(env: &mut JNIEnv, rust_str: std::string::String) -> jstring {
     match env.new_string(rust_str) {
         Ok(s) => s.into_raw(),
         Err(err) => {
@@ -287,14 +293,14 @@ fn make_jni_string(env: &JNIEnv, rust_str: std::string::String) -> jstring {
     }
 }
 
-fn throw_exception(env: &JNIEnv, err: std::string::String) {
+fn throw_exception(env: &mut JNIEnv, err: std::string::String) {
     throw("java/lang/Exception", env, &err)
 }
 
-fn throw_nullpointer(env: &JNIEnv, err: &str) {
+fn throw_nullpointer(env: &mut JNIEnv, err: &str) {
     throw("java/lang/NullPointerException", env, err)
 }
 
-fn throw(exception: &str, env: &JNIEnv, err: &str) {
+fn throw(exception: &str, env: &mut JNIEnv, err: &str) {
     env.throw_new(exception, err.to_string()).unwrap()
 }
