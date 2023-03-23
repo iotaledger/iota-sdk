@@ -204,11 +204,11 @@ impl Client {
 
     /// Validates if a bech32 HRP matches the one from the connected network.
     pub async fn bech32_hrp_matches(&self, bech32_hrp: &str) -> Result<()> {
-        let expected_bech32_hrp = self.get_bech32_hrp().await?;
-        if bech32_hrp != expected_bech32_hrp {
+        let expected = self.get_bech32_hrp().await?;
+        if bech32_hrp != expected {
             return Err(Error::InvalidBech32Hrp {
-                provided_bech32_hrp: bech32_hrp.to_string(),
-                expected_bech32_hrp,
+                provided: bech32_hrp.to_string(),
+                expected,
             });
         };
         Ok(())

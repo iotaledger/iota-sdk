@@ -31,12 +31,9 @@ async fn bech32_hrp_send_amount() -> Result<()> {
 
     match error {
         Error::Client(error) => match *error {
-            ClientError::InvalidBech32Hrp {
-                provided_bech32_hrp,
-                expected_bech32_hrp,
-            } => {
-                assert_eq!(provided_bech32_hrp, "wronghrp".to_string());
-                assert_eq!(expected_bech32_hrp, bech32_hrp);
+            ClientError::InvalidBech32Hrp { provided, expected } => {
+                assert_eq!(provided, "wronghrp".to_string());
+                assert_eq!(expected, bech32_hrp);
             }
             _ => panic!("expected InvalidBech32Hrp error variant"),
         },
@@ -74,12 +71,9 @@ async fn bech32_hrp_prepare_output() -> Result<()> {
 
     match error {
         Error::Client(error) => match *error {
-            ClientError::InvalidBech32Hrp {
-                provided_bech32_hrp,
-                expected_bech32_hrp,
-            } => {
-                assert_eq!(provided_bech32_hrp, "wronghrp".to_string());
-                assert_eq!(expected_bech32_hrp, bech32_hrp);
+            ClientError::InvalidBech32Hrp { provided, expected } => {
+                assert_eq!(provided, "wronghrp".to_string());
+                assert_eq!(expected, bech32_hrp);
             }
             _ => panic!("expected InvalidBech32Hrp error variant"),
         },
