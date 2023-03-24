@@ -5,14 +5,12 @@
 
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use iota_sdk::client::{
-    block::output::{
+use iota_sdk::{
+    client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
+    types::block::output::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, UnlockCondition},
         BasicOutputBuilder,
     },
-    request_funds_from_faucet,
-    secret::SecretManager,
-    Client, Result,
 };
 
 /// In this example we will create a basic output with an expiration unlock condition.

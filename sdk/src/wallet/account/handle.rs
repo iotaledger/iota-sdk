@@ -11,13 +11,10 @@ use crate::events::EventEmitter;
 #[cfg(feature = "storage")]
 use crate::storage::manager::StorageManagerHandle;
 use crate::{
-    client::{
-        block::{
-            output::{FoundryId, Output, OutputId, TokenId},
-            payload::transaction::TransactionId,
-        },
-        secret::SecretManager,
-        Client,
+    client::{secret::SecretManager, Client},
+    types::block::{
+        output::{FoundryId, Output, OutputId, TokenId},
+        payload::transaction::TransactionId,
     },
     wallet::{
         account::{

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::{
-        api_types::core::dto::LedgerInclusionStateDto,
+    types::{
+        api::core::dto::LedgerInclusionStateDto,
         block::{
             payload::{transaction::TransactionId, Payload},
             Block, BlockId,

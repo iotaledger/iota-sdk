@@ -9,14 +9,12 @@ use std::{
 use primitive_types::U256;
 
 use crate::{
-    client::{
-        api::input_selection::Burn,
-        block::{
-            input::INPUT_COUNT_MAX,
-            output::{
-                AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken,
-                NativeTokensBuilder, NftOutputBuilder, Output, OutputId, TokenId, OUTPUT_COUNT_MAX,
-            },
+    client::api::input_selection::Burn,
+    types::block::{
+        input::INPUT_COUNT_MAX,
+        output::{
+            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NativeTokensBuilder,
+            NftOutputBuilder, Output, OutputId, TokenId, OUTPUT_COUNT_MAX,
         },
     },
     wallet::account::{

@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::{
-        api::input_selection::Burn,
-        block::output::{AliasId, AliasOutputBuilder, FoundryId, NativeTokensBuilder, Output, TokenScheme},
-    },
+    client::api::input_selection::Burn,
+    types::block::output::{AliasId, AliasOutputBuilder, FoundryId, NativeTokensBuilder, Output, TokenScheme},
     wallet::{
         account::{handle::AccountHandle, operations::transaction::Transaction, types::OutputData, TransactionOptions},
         Error,

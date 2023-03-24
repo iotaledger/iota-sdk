@@ -5,9 +5,12 @@
 //! This address belongs to the first seed in .env.example.
 //! Run: `cargo run --example custom_inputs --release`.
 
-use iota_sdk::client::{
-    block::input::UtxoInput, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
-    secret::SecretManager, Client, Result,
+use iota_sdk::{
+    client::{
+        node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet, secret::SecretManager, Client,
+        Result,
+    },
+    types::block::input::UtxoInput,
 };
 
 #[tokio::main]

@@ -7,7 +7,10 @@
 
 use std::str::FromStr;
 
-use iota_sdk::client::{block::BlockId, Client, Result};
+use iota_sdk::{
+    client::{Client, Result},
+    types::block::BlockId,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {

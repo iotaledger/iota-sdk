@@ -6,7 +6,10 @@
 
 use std::str::FromStr;
 
-use iota_sdk::client::{block::output::NftId, Client, Result};
+use iota_sdk::{
+    client::{Client, Result},
+    types::block::output::NftId,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {

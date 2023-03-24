@@ -9,12 +9,10 @@ use packable::bounded::TryIntoBoundedU16Error;
 #[cfg(feature = "events")]
 use crate::events::types::{AddressData, TransactionProgressEvent, WalletEvent};
 use crate::{
-    client::{
-        api::PreparedTransactionData,
-        block::{
-            input::INPUT_COUNT_RANGE,
-            output::{Output, OUTPUT_COUNT_RANGE},
-        },
+    client::api::PreparedTransactionData,
+    types::block::{
+        input::INPUT_COUNT_RANGE,
+        output::{Output, OUTPUT_COUNT_RANGE},
     },
     wallet::account::{
         handle::AccountHandle,
@@ -41,7 +39,7 @@ impl AccountHandle {
 
         // validate amounts
         if !OUTPUT_COUNT_RANGE.contains(&(outputs.len() as u16)) {
-            return Err(crate::client::block::Error::InvalidOutputCount(
+            return Err(crate::types::block::Error::InvalidOutputCount(
                 TryIntoBoundedU16Error::Truncated(outputs.len()),
             ))?;
         }
@@ -49,7 +47,7 @@ impl AccountHandle {
         if let Some(custom_inputs) = options.as_ref().and_then(|options| options.custom_inputs.as_ref()) {
             // validate inputs amount
             if !INPUT_COUNT_RANGE.contains(&(custom_inputs.len() as u16)) {
-                return Err(crate::client::block::Error::InvalidInputCount(
+                return Err(crate::types::block::Error::InvalidInputCount(
                     TryIntoBoundedU16Error::Truncated(custom_inputs.len()),
                 ))?;
             }
@@ -58,7 +56,7 @@ impl AccountHandle {
         if let Some(mandatory_inputs) = options.as_ref().and_then(|options| options.mandatory_inputs.as_ref()) {
             // validate inputs amount
             if !INPUT_COUNT_RANGE.contains(&(mandatory_inputs.len() as u16)) {
-                return Err(crate::client::block::Error::InvalidInputCount(
+                return Err(crate::types::block::Error::InvalidInputCount(
                     TryIntoBoundedU16Error::Truncated(mandatory_inputs.len()),
                 ))?;
             }

@@ -12,7 +12,7 @@ use futures::FutureExt;
 use instant::Instant;
 
 use crate::{
-    client::block::{address::Address, output::OutputId},
+    types::block::{address::Address, output::OutputId},
     wallet::account::{
         constants::PARALLEL_REQUESTS_AMOUNT, handle::AccountHandle, operations::syncing::SyncOptions,
         types::address::AddressWithUnspentOutputs,

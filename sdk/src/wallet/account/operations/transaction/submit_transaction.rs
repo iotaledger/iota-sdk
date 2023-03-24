@@ -4,7 +4,7 @@
 #[cfg(feature = "events")]
 use crate::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
-    client::block::{payload::Payload, BlockId},
+    types::block::{payload::Payload, BlockId},
     wallet::account::{handle::AccountHandle, operations::transaction::TransactionPayload},
 };
 

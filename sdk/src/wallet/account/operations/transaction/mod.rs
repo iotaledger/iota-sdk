@@ -16,7 +16,11 @@ pub use self::options::{RemainderValueStrategy, TransactionOptions, TransactionO
 use crate::{
     client::{
         api::{verify_semantic, PreparedTransactionData, SignedTransactionData},
-        api_types::core::response::OutputWithMetadataResponse,
+        secret::types::InputSigningData,
+        Error,
+    },
+    types::{
+        api::core::response::OutputWithMetadataResponse,
         block::{
             output::{
                 dto::{OutputDto, OutputMetadataDto},
@@ -25,8 +29,6 @@ use crate::{
             payload::transaction::TransactionPayload,
             semantic::ConflictReason,
         },
-        secret::types::InputSigningData,
-        Error,
     },
     wallet::account::{
         handle::AccountHandle,

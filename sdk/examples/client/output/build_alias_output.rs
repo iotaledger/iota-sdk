@@ -3,8 +3,9 @@
 
 //! cargo run --example build_alias_output --release
 
-use iota_sdk::client::{
-    block::{
+use iota_sdk::{
+    client::{Client, Result},
+    types::block::{
         address::Address,
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
@@ -14,7 +15,6 @@ use iota_sdk::client::{
             AliasId, AliasOutputBuilder, Feature,
         },
     },
-    Client, Result,
 };
 
 /// In this example we will build an alias output

@@ -8,11 +8,11 @@ use crate::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
         api::input_selection::{Burn, InputSelection, Selected},
-        block::{
-            address::Address,
-            output::{AliasTransition, Output, OutputId},
-        },
         secret::types::InputSigningData,
+    },
+    types::block::{
+        address::Address,
+        output::{AliasTransition, Output, OutputId},
     },
     wallet::account::{
         handle::AccountHandle, operations::helpers::time::can_output_be_unlocked_forever_from_now_on, Account,

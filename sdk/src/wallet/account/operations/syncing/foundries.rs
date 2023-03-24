@@ -4,7 +4,7 @@
 use std::collections::HashSet;
 
 use crate::{
-    client::block::output::{FoundryId, Output},
+    types::block::output::{FoundryId, Output},
     wallet::{account::handle::AccountHandle, task},
 };
 

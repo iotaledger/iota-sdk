@@ -22,8 +22,9 @@ pub use self::{
     },
 };
 use crate::{
-    client::{
-        api_types::core::response::OutputWithMetadataResponse,
+    client::secret::types::InputSigningData,
+    types::{
+        api::core::response::OutputWithMetadataResponse,
         block::{
             address::{dto::AddressDto, Address},
             output::{
@@ -33,7 +34,6 @@ use crate::{
             payload::transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
             BlockId,
         },
-        secret::types::InputSigningData,
     },
     wallet::account::Account,
 };

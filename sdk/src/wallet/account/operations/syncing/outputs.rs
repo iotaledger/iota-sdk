@@ -7,8 +7,9 @@ use crypto::keys::slip10::Chain;
 use instant::Instant;
 
 use crate::{
-    client::{
-        api_types::core::response::OutputWithMetadataResponse,
+    client::Client,
+    types::{
+        api::core::response::OutputWithMetadataResponse,
         block::{
             input::Input,
             output::{dto::OutputDto, Output, OutputId},
@@ -17,7 +18,6 @@ use crate::{
                 Payload, TransactionPayload,
             },
         },
-        Client,
     },
     wallet::{
         account::{

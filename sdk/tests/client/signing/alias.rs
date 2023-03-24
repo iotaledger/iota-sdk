@@ -4,9 +4,14 @@
 use std::str::FromStr;
 
 use crypto::keys::slip10::Chain;
-use iota_sdk::client::{
-    api::{transaction::validate_transaction_payload_length, verify_semantic, PreparedTransactionData},
-    block::{
+use iota_sdk::{
+    client::{
+        api::{transaction::validate_transaction_payload_length, verify_semantic, PreparedTransactionData},
+        constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
+        secret::{SecretManage, SecretManageExt, SecretManager},
+        Client, Result,
+    },
+    types::block::{
         address::{Address, AliasAddress},
         input::{Input, UtxoInput},
         output::{AliasId, InputsCommitment},
@@ -18,9 +23,6 @@ use iota_sdk::client::{
         semantic::ConflictReason,
         unlock::{SignatureUnlock, Unlock},
     },
-    constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-    secret::{SecretManage, SecretManageExt, SecretManager},
-    Client, Result,
 };
 
 use crate::client::{

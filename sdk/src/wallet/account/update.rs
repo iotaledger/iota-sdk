@@ -11,10 +11,8 @@ use crate::{
     events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
 };
 use crate::{
-    client::{
-        block::output::{dto::OutputMetadataDto, OutputId},
-        Client,
-    },
+    client::Client,
+    types::block::output::{dto::OutputMetadataDto, OutputId},
     wallet::account::{
         handle::AccountHandle,
         operations::syncing::options::SyncOptions,

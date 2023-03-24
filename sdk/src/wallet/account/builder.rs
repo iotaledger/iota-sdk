@@ -15,10 +15,8 @@ use crate::events::EventEmitter;
 #[cfg(feature = "storage")]
 use crate::storage::manager::StorageManagerHandle;
 use crate::{
-    client::{
-        block::address::Address,
-        secret::{SecretManage, SecretManager},
-    },
+    client::secret::{SecretManage, SecretManager},
+    types::block::address::Address,
     wallet::{
         account::{
             handle::AccountHandle,

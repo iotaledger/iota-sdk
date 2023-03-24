@@ -4,19 +4,17 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{
-        api::PreparedTransactionData,
-        block::{
-            address::Address,
-            output::{
-                feature::{Feature, MetadataFeature},
-                unlock_condition::{
-                    GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition, UnlockCondition,
-                },
-                AliasId, AliasOutputBuilder, Output,
+    client::api::PreparedTransactionData,
+    types::block::{
+        address::Address,
+        output::{
+            feature::{Feature, MetadataFeature},
+            unlock_condition::{
+                GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition, UnlockCondition,
             },
-            DtoError,
+            AliasId, AliasOutputBuilder, Output,
         },
+        DtoError,
     },
     wallet::account::{handle::AccountHandle, types::Transaction, OutputData, TransactionOptions},
 };

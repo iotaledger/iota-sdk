@@ -4,7 +4,7 @@
 use primitive_types::U256;
 
 use crate::{
-    client::block::{
+    types::block::{
         address::Address,
         output::{
             unlock_condition::{

@@ -5,17 +5,14 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{
-        api::PreparedTransactionData,
-        block::{
-            address::Address,
-            output::{
-                unlock_condition::{
-                    AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-                    UnlockCondition,
-                },
-                BasicOutputBuilder, NativeToken, TokenId,
+    client::api::PreparedTransactionData,
+    types::block::{
+        address::Address,
+        output::{
+            unlock_condition::{
+                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition, UnlockCondition,
             },
+            BasicOutputBuilder, NativeToken, TokenId,
         },
     },
     wallet::{

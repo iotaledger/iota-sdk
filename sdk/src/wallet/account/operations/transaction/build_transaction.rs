@@ -9,15 +9,15 @@ use crate::{
             input_selection::Selected, transaction::validate_regular_transaction_essence_length,
             PreparedTransactionData,
         },
-        block::{
-            input::{Input, UtxoInput},
-            output::{InputsCommitment, Output},
-            payload::{
-                transaction::{RegularTransactionEssence, TransactionEssence},
-                Payload,
-            },
-        },
         secret::types::InputSigningData,
+    },
+    types::block::{
+        input::{Input, UtxoInput},
+        output::{InputsCommitment, Output},
+        payload::{
+            transaction::{RegularTransactionEssence, TransactionEssence},
+            Payload,
+        },
     },
     wallet::account::{handle::AccountHandle, operations::transaction::TransactionOptions},
 };

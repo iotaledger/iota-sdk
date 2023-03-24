@@ -4,13 +4,11 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{
-        api::input_selection::{Burn, BurnDto},
-        block::{
-            output::OutputId,
-            payload::{dto::TaggedDataPayloadDto, tagged_data::TaggedDataPayload},
-            DtoError,
-        },
+    client::api::input_selection::{Burn, BurnDto},
+    types::block::{
+        output::OutputId,
+        payload::{dto::TaggedDataPayloadDto, tagged_data::TaggedDataPayload},
+        DtoError,
     },
     wallet::account::types::address::AccountAddress,
 };

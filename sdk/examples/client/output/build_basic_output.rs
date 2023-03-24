@@ -3,8 +3,9 @@
 
 //! cargo run --example build_basic_output --release
 
-use iota_sdk::client::{
-    block::{
+use iota_sdk::{
+    client::{Client, Result},
+    types::block::{
         address::Address,
         output::{
             feature::MetadataFeature,
@@ -15,7 +16,6 @@ use iota_sdk::client::{
             BasicOutputBuilder, Feature,
         },
     },
-    Client, Result,
 };
 
 /// In this example we will send basic outputs with different feature blocks

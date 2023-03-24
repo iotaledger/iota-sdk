@@ -4,17 +4,14 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{
-        api::PreparedTransactionData,
-        block::{
-            address::Address,
-            output::{
-                unlock_condition::{
-                    AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-                    UnlockCondition,
-                },
-                BasicOutputBuilder,
+    client::api::PreparedTransactionData,
+    types::block::{
+        address::Address,
+        output::{
+            unlock_condition::{
+                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition, UnlockCondition,
             },
+            BasicOutputBuilder,
         },
     },
     wallet::{

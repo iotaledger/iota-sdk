@@ -3,9 +3,12 @@
 
 //! cargo run --example foundry --release
 
-use iota_sdk::client::{
-    api::input_selection::Burn,
-    block::{
+use iota_sdk::{
+    client::{
+        api::input_selection::Burn, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
+        secret::SecretManager, Client, Result,
+    },
+    types::block::{
         address::AliasAddress,
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
@@ -18,10 +21,6 @@ use iota_sdk::client::{
         },
         payload::{transaction::TransactionEssence, Payload},
     },
-    node_api::indexer::query_parameters::QueryParameter,
-    request_funds_from_faucet,
-    secret::SecretManager,
-    Client, Result,
 };
 use primitive_types::U256;
 

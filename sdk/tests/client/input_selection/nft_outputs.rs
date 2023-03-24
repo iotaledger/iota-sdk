@@ -3,9 +3,9 @@
 
 use std::str::FromStr;
 
-use iota_sdk::client::{
-    api::input_selection::{Burn, Error, InputSelection, Requirement},
-    block::{
+use iota_sdk::{
+    client::api::input_selection::{Burn, Error, InputSelection, Requirement},
+    types::block::{
         address::Address,
         output::{NftId, Output},
         protocol::protocol_parameters,

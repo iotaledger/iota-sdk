@@ -8,7 +8,7 @@ use serde::{
     Serialize,
 };
 
-use crate::client::block::payload::transaction::TransactionId;
+use crate::types::block::payload::transaction::TransactionId;
 
 /// The wallet error type.
 #[derive(Debug, thiserror::Error)]
@@ -27,10 +27,10 @@ pub enum Error {
     Backup(&'static str),
     /// Error from block crate.
     #[error("{0}")]
-    Block(Box<crate::client::block::Error>),
+    Block(Box<crate::types::block::Error>),
     /// Block dtos error
     #[error("{0}")]
-    BlockDto(#[from] crate::client::block::DtoError),
+    BlockDto(#[from] crate::types::block::DtoError),
     /// Burning or melting failed
     #[error("burning or melting failed: {0}")]
     BurningOrMeltingFailed(String),
@@ -137,8 +137,8 @@ impl Serialize for Error {
     }
 }
 
-impl From<crate::client::block::Error> for Error {
-    fn from(error: crate::client::block::Error) -> Self {
+impl From<crate::types::block::Error> for Error {
+    fn from(error: crate::types::block::Error) -> Self {
         Self::Block(Box::new(error))
     }
 }

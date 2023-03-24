@@ -3,9 +3,9 @@
 
 use std::str::FromStr;
 
-use iota_sdk::client::{
-    api::input_selection::{Burn, Error, InputSelection},
-    block::{output::TokenId, protocol::protocol_parameters},
+use iota_sdk::{
+    client::api::input_selection::{Burn, Error, InputSelection},
+    types::block::{output::TokenId, protocol::protocol_parameters},
 };
 use primitive_types::U256;
 

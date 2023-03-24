@@ -3,9 +3,9 @@
 
 use std::str::FromStr;
 
-use iota_sdk::client::{
-    api::input_selection::{Error, InputSelection},
-    block::{output::AliasId, protocol::protocol_parameters},
+use iota_sdk::{
+    client::api::input_selection::{Error, InputSelection},
+    types::block::{output::AliasId, protocol::protocol_parameters},
 };
 
 use crate::client::{

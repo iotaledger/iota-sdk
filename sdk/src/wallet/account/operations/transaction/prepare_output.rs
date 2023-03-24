@@ -6,21 +6,19 @@ use std::{cmp::Ordering, str::FromStr};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{
-        api::input_selection::minimum_storage_deposit_basic_output,
-        block::{
-            address::Address,
-            output::{
-                dto::NativeTokenDto,
-                feature::{Feature, IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
-                unlock_condition::{
-                    AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-                    TimelockUnlockCondition, UnlockCondition,
-                },
-                BasicOutputBuilder, NativeToken, NftId, NftOutput, NftOutputBuilder, Output, Rent,
+    client::api::input_selection::minimum_storage_deposit_basic_output,
+    types::block::{
+        address::Address,
+        output::{
+            dto::NativeTokenDto,
+            feature::{Feature, IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
+            unlock_condition::{
+                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
+                TimelockUnlockCondition, UnlockCondition,
             },
-            DtoError,
+            BasicOutputBuilder, NativeToken, NftId, NftOutput, NftOutputBuilder, Output, Rent,
         },
+        DtoError,
     },
     wallet::account::{
         handle::{AccountHandle, FilterOptions},

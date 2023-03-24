@@ -3,9 +3,9 @@
 
 use std::{collections::HashSet, str::FromStr};
 
-use iota_sdk::client::{
-    api::input_selection::{Burn, Error, InputSelection, Requirement},
-    block::{
+use iota_sdk::{
+    client::api::input_selection::{Burn, Error, InputSelection, Requirement},
+    types::block::{
         address::Address,
         output::{AliasId, AliasOutputBuilder, AliasTransition, Output},
         protocol::protocol_parameters,

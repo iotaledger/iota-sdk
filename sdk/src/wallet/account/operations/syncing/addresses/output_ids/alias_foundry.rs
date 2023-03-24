@@ -7,13 +7,13 @@ use std::collections::HashSet;
 use futures::FutureExt;
 
 use crate::{
-    client::{
-        api_types::plugins::indexer::OutputIdsResponse,
+    client::node_api::indexer::query_parameters::QueryParameter,
+    types::{
+        api::plugins::indexer::OutputIdsResponse,
         block::{
             address::{Address, AliasAddress},
             output::{Output, OutputId},
         },
-        node_api::indexer::query_parameters::QueryParameter,
     },
     wallet::{
         account::{handle::AccountHandle, SyncOptions},

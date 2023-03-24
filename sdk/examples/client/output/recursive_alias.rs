@@ -6,8 +6,9 @@
 use std::env;
 
 use dotenv::dotenv;
-use iota_sdk::client::{
-    block::{
+use iota_sdk::{
+    client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
+    types::block::{
         address::{Address, AliasAddress},
         output::{
             feature::{IssuerFeature, SenderFeature},
@@ -18,9 +19,6 @@ use iota_sdk::client::{
         },
         payload::{transaction::TransactionEssence, Payload},
     },
-    request_funds_from_faucet,
-    secret::SecretManager,
-    Client, Result,
 };
 
 /// In this example we will create three alias outputs, where the first one can control the other two (recursively)

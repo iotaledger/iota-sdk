@@ -2,14 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::{
-        api::input_selection::Burn,
-        block::{
-            address::{Address, NftAddress},
-            output::{
-                unlock_condition::{AddressUnlockCondition, UnlockCondition},
-                BasicOutputBuilder, NftId, Output, OutputId,
-            },
+    client::api::input_selection::Burn,
+    types::block::{
+        address::{Address, NftAddress},
+        output::{
+            unlock_condition::{AddressUnlockCondition, UnlockCondition},
+            BasicOutputBuilder, NftId, Output, OutputId,
         },
     },
     wallet::{

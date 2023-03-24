@@ -1,9 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::client::{
-    api::input_selection::{Error, InputSelection},
-    block::protocol::protocol_parameters,
+use iota_sdk::{
+    client::api::input_selection::{Error, InputSelection},
+    types::block::protocol::protocol_parameters,
 };
 
 use crate::client::{

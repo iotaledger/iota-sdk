@@ -5,16 +5,14 @@
 
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use iota_sdk::client::{
-    block::output::{
+use iota_sdk::{
+    client::{secret::SecretManager, utils::request_funds_from_faucet, Client, Result},
+    types::block::output::{
         unlock_condition::{
             AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition, UnlockCondition,
         },
         BasicOutputBuilder, NativeToken, TokenId,
     },
-    secret::SecretManager,
-    utils::request_funds_from_faucet,
-    Client, Result,
 };
 use primitive_types::U256;
 

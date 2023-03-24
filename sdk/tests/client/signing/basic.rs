@@ -2,9 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crypto::keys::slip10::Chain;
-use iota_sdk::client::{
-    api::{transaction::validate_transaction_payload_length, verify_semantic, PreparedTransactionData},
-    block::{
+use iota_sdk::{
+    client::{
+        api::{transaction::validate_transaction_payload_length, verify_semantic, PreparedTransactionData},
+        constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
+        secret::{SecretManage, SecretManageExt, SecretManager},
+        Client, Result,
+    },
+    types::block::{
         input::{Input, UtxoInput},
         output::InputsCommitment,
         payload::{
@@ -15,9 +20,6 @@ use iota_sdk::client::{
         semantic::ConflictReason,
         unlock::{SignatureUnlock, Unlock},
     },
-    constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-    secret::{SecretManage, SecretManageExt, SecretManager},
-    Client, Result,
 };
 
 use crate::client::{build_inputs, build_outputs, Build::Basic};

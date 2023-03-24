@@ -64,7 +64,6 @@ pub use self::{
     node_api::core::routes::NodeInfoWrapper,
     utils::*,
 };
-pub use crate::types::{api as api_types, block};
 
 #[cfg(feature = "mqtt")]
 mod async_runtime {

@@ -8,9 +8,9 @@ use std::collections::HashSet;
 use futures::FutureExt;
 
 #[cfg(not(target_family = "wasm"))]
-use crate::client::api_types::plugins::indexer::OutputIdsResponse;
+use crate::types::api::plugins::indexer::OutputIdsResponse;
 use crate::{
-    client::{block::output::OutputId, node_api::indexer::query_parameters::QueryParameter},
+    client::node_api::indexer::query_parameters::QueryParameter, types::block::output::OutputId,
     wallet::account::handle::AccountHandle,
 };
 

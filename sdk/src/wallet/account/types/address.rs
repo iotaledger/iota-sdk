@@ -6,7 +6,7 @@ use std::hash::Hash;
 use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 
-use crate::client::block::{address::Address, output::OutputId};
+use crate::types::block::{address::Address, output::OutputId};
 
 /// An account address.
 #[derive(Debug, Getters, Setters, Clone, Serialize, Deserialize, Eq, PartialEq, Hash)]

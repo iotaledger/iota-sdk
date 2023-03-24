@@ -6,10 +6,12 @@
 
 use std::{fs::File, io::prelude::*, path::Path};
 
-use iota_sdk::client::{
-    api::{verify_semantic, SignedTransactionData, SignedTransactionDataDto},
-    block::{payload::Payload, semantic::ConflictReason},
-    Client, Error, Result,
+use iota_sdk::{
+    client::{
+        api::{verify_semantic, SignedTransactionData, SignedTransactionDataDto},
+        Client, Error, Result,
+    },
+    types::block::{payload::Payload, semantic::ConflictReason},
 };
 
 const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/signed_transaction.json";

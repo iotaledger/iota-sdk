@@ -4,17 +4,15 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{
-        api::PreparedTransactionData,
-        block::{
-            address::Address,
-            output::{
-                feature::{Feature, IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
-                unlock_condition::{AddressUnlockCondition, UnlockCondition},
-                NftId, NftOutputBuilder,
-            },
-            DtoError,
+    client::api::PreparedTransactionData,
+    types::block::{
+        address::Address,
+        output::{
+            feature::{Feature, IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
+            unlock_condition::{AddressUnlockCondition, UnlockCondition},
+            NftId, NftOutputBuilder,
         },
+        DtoError,
     },
     wallet::{
         account::{handle::AccountHandle, operations::transaction::Transaction, TransactionOptions},

@@ -6,10 +6,8 @@ use std::sync::atomic::Ordering;
 #[cfg(all(feature = "events", feature = "ledger_nano"))]
 use crate::events::types::{AddressData, WalletEvent};
 use crate::{
-    client::{
-        block::address::Address,
-        secret::{GenerateAddressOptions, SecretManage, SecretManager},
-    },
+    client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
+    types::block::address::Address,
     wallet::account_manager::AccountManager,
 };
 

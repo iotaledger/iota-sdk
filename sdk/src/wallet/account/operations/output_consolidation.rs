@@ -1,15 +1,15 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::client::block::{
+#[cfg(feature = "ledger_nano")]
+use crate::client::secret::SecretManager;
+use crate::types::block::{
     input::INPUT_COUNT_MAX,
     output::{
         unlock_condition::{AddressUnlockCondition, UnlockCondition},
         BasicOutputBuilder, NativeTokens, NativeTokensBuilder, Output,
     },
 };
-#[cfg(feature = "ledger_nano")]
-use crate::client::secret::SecretManager;
 
 // Constants for the calculation of the amount of inputs we can use with a ledger nano
 #[cfg(feature = "ledger_nano")]

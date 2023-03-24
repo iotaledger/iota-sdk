@@ -5,9 +5,7 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::block::output::{
-        AliasOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
-    },
+    types::block::output::{AliasOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme},
     wallet::{
         account::{
             handle::AccountHandle,

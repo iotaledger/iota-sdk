@@ -13,7 +13,7 @@ use instant::{Instant, SystemTime};
 
 pub use self::options::SyncOptions;
 use crate::{
-    client::block::{
+    types::block::{
         address::{Address, AliasAddress, NftAddress},
         output::{dto::OutputMetadataDto, FoundryId, Output, OutputId},
     },

@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use primitive_types::U256;
 
 use crate::{
-    client::block::output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
+    types::block::output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
     wallet::account::{
         handle::AccountHandle,
         operations::helpers::time::can_output_be_unlocked_forever_from_now_on,

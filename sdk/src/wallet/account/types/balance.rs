@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
-use crate::client::block::{
+use crate::types::block::{
     dto::U256Dto,
     output::{dto::TokenIdDto, feature::MetadataFeature, AliasId, FoundryId, NftId, OutputId, TokenId},
 };

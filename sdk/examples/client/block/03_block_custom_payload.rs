@@ -4,9 +4,9 @@
 //! This example sends a block with a custom payload.
 //! Run: `cargo run --example block_custom_payload --release -- [NODE URL]`.
 
-use iota_sdk::client::{
-    block::payload::{Payload, TaggedDataPayload},
-    Client, Result,
+use iota_sdk::{
+    client::{Client, Result},
+    types::block::payload::{Payload, TaggedDataPayload},
 };
 
 #[tokio::main]

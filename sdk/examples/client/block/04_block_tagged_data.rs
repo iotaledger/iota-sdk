@@ -4,7 +4,10 @@
 //! This example sends a block with a tagged data payload.
 //! Run: `cargo run --example block_tagged_data --release -- [NODE URL]`.
 
-use iota_sdk::client::{block::payload::Payload, Client, Result};
+use iota_sdk::{
+    client::{Client, Result},
+    types::block::payload::Payload,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {

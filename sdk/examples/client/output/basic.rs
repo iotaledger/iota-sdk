@@ -3,8 +3,9 @@
 
 //! cargo run --example basic --release
 
-use iota_sdk::client::{
-    block::output::{
+use iota_sdk::{
+    client::{secret::SecretManager, utils::request_funds_from_faucet, Client, Result},
+    types::block::output::{
         feature::MetadataFeature,
         unlock_condition::{
             AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
@@ -12,9 +13,6 @@ use iota_sdk::client::{
         },
         BasicOutputBuilder, Feature,
     },
-    secret::SecretManager,
-    utils::request_funds_from_faucet,
-    Client, Result,
 };
 
 /// In this example we will send basic outputs with different feature blocks

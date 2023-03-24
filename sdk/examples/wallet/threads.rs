@@ -9,12 +9,10 @@ use std::env;
 
 use dotenv::dotenv;
 use iota_sdk::{
-    client::{
-        block::output::{
-            unlock_condition::{AddressUnlockCondition, UnlockCondition},
-            BasicOutputBuilder,
-        },
-        constants::SHIMMER_COIN_TYPE,
+    client::constants::SHIMMER_COIN_TYPE,
+    types::block::output::{
+        unlock_condition::{AddressUnlockCondition, UnlockCondition},
+        BasicOutputBuilder,
     },
     wallet::{
         account_manager::AccountManager,

@@ -4,14 +4,12 @@
 //! In this example we will send a transaction.
 //! Run: `cargo run --example output --release`.
 
-use iota_sdk::client::{
-    block::output::{
+use iota_sdk::{
+    client::{secret::SecretManager, utils::request_funds_from_faucet, Client, Result},
+    types::block::output::{
         unlock_condition::{AddressUnlockCondition, UnlockCondition},
         BasicOutputBuilder,
     },
-    secret::SecretManager,
-    utils::request_funds_from_faucet,
-    Client, Result,
 };
 
 #[tokio::main]

@@ -6,14 +6,12 @@ use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{
-        api::input_selection::minimum_storage_deposit_basic_output,
-        block::{
-            address::Address,
-            output::{
-                unlock_condition::{AddressUnlockCondition, StorageDepositReturnUnlockCondition, UnlockCondition},
-                BasicOutputBuilder, NativeTokens, NativeTokensBuilder, NftOutputBuilder, Output, OutputId,
-            },
+    client::api::input_selection::minimum_storage_deposit_basic_output,
+    types::block::{
+        address::Address,
+        output::{
+            unlock_condition::{AddressUnlockCondition, StorageDepositReturnUnlockCondition, UnlockCondition},
+            BasicOutputBuilder, NativeTokens, NativeTokensBuilder, NftOutputBuilder, Output, OutputId,
         },
     },
     wallet::account::{

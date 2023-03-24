@@ -9,8 +9,9 @@ mod signing;
 use std::{collections::HashMap, hash::Hash, str::FromStr};
 
 use crypto::keys::slip10::Chain;
-use iota_sdk::client::{
-    block::{
+use iota_sdk::{
+    client::secret::types::InputSigningData,
+    types::block::{
         address::{Address, AliasAddress},
         output::{
             feature::{Feature, IssuerFeature, SenderFeature},
@@ -24,7 +25,6 @@ use iota_sdk::client::{
         },
         rand::{block::rand_block_id, transaction::rand_transaction_id},
     },
-    secret::types::InputSigningData,
 };
 use primitive_types::U256;
 

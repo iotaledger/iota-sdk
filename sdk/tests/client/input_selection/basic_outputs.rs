@@ -3,9 +3,9 @@
 
 use std::{collections::HashSet, str::FromStr};
 
-use iota_sdk::client::{
-    api::input_selection::{Error, InputSelection, Requirement},
-    block::{
+use iota_sdk::{
+    client::api::input_selection::{Error, InputSelection, Requirement},
+    types::block::{
         address::{Address, AliasAddress, NftAddress},
         output::{AliasId, NftId},
         protocol::protocol_parameters,

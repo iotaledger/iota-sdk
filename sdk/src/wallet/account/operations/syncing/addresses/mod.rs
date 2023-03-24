@@ -7,7 +7,7 @@ mod outputs;
 use std::collections::HashSet;
 
 use crate::{
-    client::block::address::Address,
+    types::block::address::Address,
     wallet::account::{
         handle::AccountHandle, operations::syncing::SyncOptions, types::address::AddressWithUnspentOutputs,
     },

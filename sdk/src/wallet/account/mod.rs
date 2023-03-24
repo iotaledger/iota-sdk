@@ -45,8 +45,8 @@ pub use self::{
     types::OutputDataDto,
 };
 use crate::{
-    client::{
-        api_types::core::response::OutputWithMetadataResponse,
+    types::{
+        api::core::response::OutputWithMetadataResponse,
         block::{
             output::{FoundryId, FoundryOutput, OutputId},
             payload::{
@@ -166,7 +166,7 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
 
 #[test]
 fn serialize() {
-    use crate::client::block::{
+    use crate::types::block::{
         address::{Address, Ed25519Address},
         input::{Input, UtxoInput},
         output::{unlock_condition::AddressUnlockCondition, BasicOutput, InputsCommitment, Output},
@@ -190,7 +190,7 @@ fn serialize() {
         String::from("rms"),
         1500,
         15,
-        crate::client::block::output::RentStructure::new(500, 10, 1),
+        crate::types::block::output::RentStructure::new(500, 10, 1),
         1_813_620_509_061_365,
     )
     .unwrap();

@@ -14,23 +14,22 @@ use iota_sdk::{
             input_selection::InputSelection, transaction::validate_transaction_payload_length, verify_semantic,
             PreparedTransactionData,
         },
-        block::{
-            address::{Address, AliasAddress, NftAddress},
-            input::{Input, UtxoInput},
-            output::{InputsCommitment, NftId},
-            payload::{
-                transaction::{RegularTransactionEssence, TransactionEssence},
-                TransactionPayload,
-            },
-            protocol::protocol_parameters,
-            semantic::ConflictReason,
-            unlock::{SignatureUnlock, Unlock},
-        },
         constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
         secret::{SecretManage, SecretManageExt, SecretManager},
         Result,
     },
-    types::block::output::AliasId,
+    types::block::{
+        address::{Address, AliasAddress, NftAddress},
+        input::{Input, UtxoInput},
+        output::{AliasId, InputsCommitment, NftId},
+        payload::{
+            transaction::{RegularTransactionEssence, TransactionEssence},
+            TransactionPayload,
+        },
+        protocol::protocol_parameters,
+        semantic::ConflictReason,
+        unlock::{SignatureUnlock, Unlock},
+    },
 };
 
 use crate::client::{

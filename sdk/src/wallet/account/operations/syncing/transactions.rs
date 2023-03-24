@@ -6,10 +6,10 @@ use std::str::FromStr;
 use instant::SystemTime;
 
 use crate::{
-    client::{
-        api_types::core::dto::LedgerInclusionStateDto,
+    client::Error as ClientError,
+    types::{
+        api::core::dto::LedgerInclusionStateDto,
         block::{input::Input, output::OutputId, payload::transaction::TransactionEssence, BlockId},
-        Error as ClientError,
     },
     wallet::account::{
         handle::AccountHandle,

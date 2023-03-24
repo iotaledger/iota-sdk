@@ -3,8 +3,9 @@
 
 //! cargo run --example alias --release
 
-use iota_sdk::client::{
-    block::{
+use iota_sdk::{
+    client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
+    types::block::{
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
             unlock_condition::{
@@ -14,9 +15,6 @@ use iota_sdk::client::{
         },
         payload::{transaction::TransactionEssence, Payload},
     },
-    request_funds_from_faucet,
-    secret::SecretManager,
-    Client, Result,
 };
 
 /// In this example we will create an alias output

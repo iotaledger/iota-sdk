@@ -4,7 +4,7 @@
 use primitive_types::U256;
 
 use crate::{
-    client::block::output::{
+    types::block::output::{
         AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
     wallet::account::{handle::AccountHandle, operations::transaction::Transaction, TransactionOptions},
