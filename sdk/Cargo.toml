@@ -318,7 +318,7 @@ path = "examples/client/output/nft.rs"
 
 [[example]]
 name = "participation"
-path = "examples/client/output/participation.rs"
+path = "examples/client/participation.rs"
 required-features = [ "participation" ]
 
 ### Wallet

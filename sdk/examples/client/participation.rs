@@ -98,9 +98,11 @@ async fn participate(client: &Client, event_id: ParticipationEventId, node_url: 
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
     request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?;
 
-    let outputs = vec![BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
-        .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
-        .finish_output(token_supply)?];
+    let outputs = vec![
+        BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
+            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
+            .finish_output(token_supply)?,
+    ];
 
     let block = client
         .block()
