@@ -1,20 +1,21 @@
 [workspace]
 resolver = "2"
 members = [
-	"cli",
-	"client",
-	"client/bindings/java/lib/native",
-	"client/bindings/nodejs",
-	"client/bindings/python",
-	"client/bindings/wasm",
-	"pow",
-	"types",
-	"wallet",
-	"wallet/bindings/java/lib/native",
-	"wallet/bindings/nodejs",
-	"wallet/bindings/python",
-	"wallet/bindings/swift",
-	"wallet/bindings/wasm",
+	"sdk",
+	# "cli",
+	# "client",
+	# "client/bindings/java/lib/native",
+	# "client/bindings/nodejs",
+	# "client/bindings/python",
+	# "client/bindings/wasm",
+	# "pow",
+	# "types",
+	# "wallet",
+	# "wallet/bindings/java/lib/native",
+	# "wallet/bindings/nodejs",
+	# "wallet/bindings/python",
+	# "wallet/bindings/swift",
+	# "wallet/bindings/wasm",
 ]
 
 [profile.dev]
