@@ -190,3 +190,21 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
         return self.send_message('postBlockPayload', {
             'payloadDto': payload_dto
         })
+
+    def sign_ed25519(self, secret_manager, message, chain):
+        """Signs a message with an Ed25519 private key.
+        """
+        return self.send_message('signEd25519', {
+            'secretManager': secret_manager,
+            'message': message,
+            'chain': chain,
+        })
+
+    def verify_ed25519_signature(self, signature, message, address):
+        """Verifies the Ed25519Signature for a message against an Ed25519Address.
+        """
+        return self.send_message('verifyEd25519Signature', {
+            'signature': signature,
+            'message': message,
+            'address': address,
+        })

@@ -97,4 +97,39 @@ describe('Client utility methods', () => {
             '0x08cf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f0000000000',
         );
     });
+
+    it('sign and verify Ed25519', async () => {
+        const secretManager = {
+            mnemonic: await offlineClient.generateMnemonic(),
+        };
+
+        // `IOTA` hex encoded
+        let message = '0x494f5441';
+        let signature = await offlineClient.signEd25519(
+            secretManager,
+            message,
+            // [44, 4218, 0, 0, 0] IOTA coin type, first account, first public address
+            [
+                { hardened: true, bs: [128, 0, 0, 44] },
+                { hardened: true, bs: [128, 0, 16, 123] },
+                { hardened: true, bs: [128, 0, 0, 0] },
+                { hardened: true, bs: [128, 0, 0, 0] },
+                { hardened: true, bs: [128, 0, 0, 0] },
+            ],
+        );
+
+        const bech32Address = await offlineClient.hexPublicKeyToBech32Address(
+            signature.publicKey,
+            'rms',
+        );
+
+        const pubKeyHash = await offlineClient.bech32ToHex(bech32Address);
+
+        let validSignature = await offlineClient.verifyEd25519Signature(
+            signature,
+            message,
+            { type: 0, pubKeyHash },
+        );
+        expect(validSignature).toBeTruthy();
+    });
 });

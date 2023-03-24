@@ -190,6 +190,25 @@ pub enum Message {
         /// Chain to sign the essence hash with
         chain: Chain,
     },
+    /// Signs a message with an Ed25519 private key.
+    SignEd25519 {
+        /// Secret manager
+        #[serde(rename = "secretManager")]
+        secret_manager: SecretManagerDto,
+        /// The message to sign, hex encoded String
+        message: String,
+        /// Chain to sign the essence hash with
+        chain: Chain,
+    },
+    /// Verifies the Ed25519Signature for a message against an Ed25519Address.
+    VerifyEd25519Signature {
+        /// The Ed25519 Signature
+        signature: Ed25519SignatureDto,
+        /// The signed message, hex encoded String
+        message: String,
+        /// The hex encoded Ed25519 address
+        address: Ed25519AddressDto,
+    },
     /// Store a mnemonic in the Stronghold vault
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]

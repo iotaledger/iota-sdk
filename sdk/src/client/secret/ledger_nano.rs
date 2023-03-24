@@ -105,7 +105,7 @@ impl SecretManage for LedgerSecretManager {
     }
 
     async fn sign_ed25519(&self, _msg: &[u8], _chain: &Chain) -> crate::client::Result<Ed25519Signature> {
-        panic!("sign_ed25519 is not supported with ledger")
+        Err(crate::client::Error::SecretManagerMismatch)
     }
 }
 

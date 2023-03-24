@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OutputIdsResponse`;
 - `Client::hashTransactionEssence()`;
+- `Client::signEd25519()`;
+- `Client::verifyEd25519Signature()`;
 
 ### Changed
 

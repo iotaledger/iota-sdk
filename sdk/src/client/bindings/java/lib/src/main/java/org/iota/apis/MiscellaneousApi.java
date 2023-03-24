@@ -5,7 +5,11 @@ package org.iota.apis;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.*;
+
 import org.iota.types.*;
+import org.iota.types.Segment;
+import org.iota.types.addresses.Ed25519Address;
 import org.iota.types.expections.ClientException;
 import org.iota.types.expections.InitializeClientException;
 import org.iota.types.ids.BlockId;
@@ -17,6 +21,8 @@ import org.iota.types.responses.ProtocolParametersResponse;
 import org.iota.types.secret.GenerateAddressesOptions;
 import org.iota.types.secret.BuildBlockOptions;
 import org.iota.types.secret.SecretManager;
+import org.iota.types.signature.Ed25519Signature;
+import org.iota.types.signature.Signature;
 
 import java.util.AbstractMap;
 import java.util.Map;
@@ -197,5 +203,26 @@ public class MiscellaneousApi {
         return new ProtocolParametersResponse(responsePayload);
     }
 
+    public Ed25519Signature signEd25519(SecretManager secretManager, String message, Segment[] chain) throws ClientException {
+        JsonObject o = new JsonObject();
+        o.add("secretManager", secretManager.getJson());
+        o.addProperty("message", message);
+        o.add("chain", new Gson().toJsonTree(chain));
+
+        JsonObject responsePayload = (JsonObject) nativeApi.sendCommand(new ClientCommand("signEd25519", o));
+
+        return new Ed25519Signature(responsePayload.get("publicKey").getAsString(), responsePayload.get("signature").getAsString());
+    }
+
+    public Boolean verifyEd25519Signature(Ed25519Signature signature, String message, Ed25519Address address) throws ClientException {
+        JsonObject o = new JsonObject();
+        o.add("signature", new Gson().toJsonTree(signature));
+        o.addProperty("message", message);
+        o.add("address", new Gson().toJsonTree(address));
+
+        Boolean responsePayload = nativeApi.sendCommand(new ClientCommand("verifyEd25519Signature", o)).getAsBoolean();
+
+        return responsePayload;
+    }
 }
 

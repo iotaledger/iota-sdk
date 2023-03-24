@@ -23,7 +23,7 @@ use crate::{
         Client, Result,
     },
     types::block::{
-        address::{dto::AddressDto, Address},
+        address::{dto::AddressDto, Address, Ed25519Address},
         input::dto::UtxoInputDto,
         output::{
             dto::{OutputBuilderAmountDto, OutputDto, RentStructureDto},
@@ -36,7 +36,7 @@ use crate::{
         },
         protocol::dto::ProtocolParametersDto,
         unlock::Unlock,
-        Block, BlockDto, DtoError,
+        Block, BlockDto, DtoError, signature::{Ed25519Signature, dto::Ed25519SignatureDto},
     },
 };
 
@@ -439,6 +439,32 @@ impl ClientMessageHandler {
                     .await?;
 
                 Ok(Response::SignatureUnlock((&unlock).into()))
+            }
+            Message::SignEd25519 {
+                secret_manager,
+                message,
+                chain,
+            } => {
+                let secret_manager: SecretManager = (&secret_manager).try_into()?;
+
+                let msg: Vec<u8> = prefix_hex::decode(message)?;
+
+                let signature = secret_manager.sign_ed25519(&msg, &chain).await?;
+
+                Ok(Response::Ed25519Signature(Ed25519SignatureDto::from(&signature)))
+            }
+            Message::VerifyEd25519Signature {
+                signature,
+                message,
+                address,
+            } => {
+                let signature = Ed25519Signature::try_from(&signature)?;
+
+                let msg: Vec<u8> = prefix_hex::decode(message)?;
+
+                let address = Ed25519Address::try_from(&address)?;
+
+                Ok(Response::ValidSignature(signature.is_valid(&msg, &address).is_ok()))
             }
             #[cfg(feature = "stronghold")]
             Message::StoreMnemonic {

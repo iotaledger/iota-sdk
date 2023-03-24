@@ -28,11 +28,11 @@ impl SecretManage for PlaceholderSecretManager {
         _internal: bool,
         _: Option<GenerateAddressOptions>,
     ) -> crate::client::Result<Vec<Address>> {
-        return Err(crate::client::Error::PlaceholderSecretManager);
+        Err(crate::client::Error::PlaceholderSecretManager)
     }
 
     async fn sign_ed25519(&self, _msg: &[u8], _chain: &Chain) -> crate::client::Result<Ed25519Signature> {
-        return Err(crate::client::Error::PlaceholderSecretManager);
+        Err(crate::client::Error::PlaceholderSecretManager)
     }
 }
 
@@ -43,6 +43,6 @@ impl SecretManageExt for PlaceholderSecretManager {
         _prepared_transaction_data: &PreparedTransactionData,
         _time: Option<u32>,
     ) -> crate::client::Result<Unlocks> {
-        return Err(crate::client::Error::PlaceholderSecretManager);
+        Err(crate::client::Error::PlaceholderSecretManager)
     }
 }

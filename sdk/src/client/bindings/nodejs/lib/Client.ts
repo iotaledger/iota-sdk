@@ -43,6 +43,9 @@ import type {
     INodeInfoProtocol,
     UnlockTypes,
     ITransactionEssence,
+    HexEncodedString,
+    IEd25519Signature,
+    IEd25519Address,
 } from '@iota/types';
 import type { INodeInfoWrapper } from '../types/nodeInfo';
 
@@ -394,7 +397,7 @@ export class Client {
             data: {
                 secretManager,
                 transactionEssenceHash,
-                chain
+                chain,
             },
         });
 
@@ -1160,5 +1163,43 @@ export class Client {
                 topics,
             },
         });
+    }
+
+    /**
+     * Signs a message with an Ed25519 private key.
+     */
+    async signEd25519(
+        secretManager: SecretManager,
+        message: HexEncodedString,
+        chain: IBip32Chain,
+    ): Promise<IEd25519Signature> {
+        let response = await this.messageHandler.sendMessage({
+            name: 'signEd25519',
+            data: {
+                secretManager,
+                message,
+                chain,
+            },
+        });
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Verifies the Ed25519Signature for a message against an Ed25519Address.
+     */
+    async verifyEd25519Signature(
+        signature: IEd25519Signature,
+        message: HexEncodedString,
+        address: IEd25519Address,
+    ): Promise<boolean> {
+        let response = await this.messageHandler.sendMessage({
+            name: 'verifyEd25519Signature',
+            data: {
+                signature,
+                message,
+                address,
+            },
+        });
+        return JSON.parse(response).payload;
     }
 }

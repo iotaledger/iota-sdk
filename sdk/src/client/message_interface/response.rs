@@ -34,7 +34,7 @@ use crate::{
             },
             protocol::dto::ProtocolParametersDto,
             unlock::dto::UnlockDto,
-            BlockDto, BlockId,
+            BlockDto, BlockId, signature::dto::Ed25519SignatureDto,
         },
     },
 };
@@ -93,6 +93,12 @@ pub enum Response {
     /// Response for:
     /// - [`SignatureUnlock`](crate::message_interface::Message::SignatureUnlock)
     SignatureUnlock(UnlockDto),
+    /// Response for:
+    /// - [`SignEd25519`](crate::message_interface::Message::SignEd25519)
+    Ed25519Signature(Ed25519SignatureDto),
+    /// Response for:
+    /// - [`VerifyEd25519Signature`](crate::message_interface::Message::VerifyEd25519Signature)
+    ValidSignature(bool),
     /// Response for:
     /// - [`UnhealthyNodes`](crate::message_interface::Message::UnhealthyNodes)
     #[cfg(not(target_family = "wasm"))]
