@@ -48,6 +48,7 @@ iterator-sorted = { version = "0.1.0", default-features = false }
 
 [dev-dependencies]
 dotenv = { version = "0.15.0", default-features = false }
+fern-logger = { version = "0.5.0", default-features = false }
 
 [features]
 default = [ "api", "block", "std" ]
@@ -319,3 +320,180 @@ path = "examples/client/output/nft.rs"
 name = "participation"
 path = "examples/client/output/participation.rs"
 required-features = [ "participation" ]
+
+### Wallet
+
+[[example]]
+name = "mint_issuer_nft"
+path = "examples/wallet/nft_collection/00_mint_issuer_nft.rs"
+required-features = [ "storage", "stronghold" ]
+
+[[example]]
+name = "mint_collection_nft"
+path = "examples/wallet/nft_collection/01_mint_collection_nft.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "0_generate_addresses"
+path = "examples/wallet/offline_signing/0_generate_addresses.rs"
+required-features = [ "storage", "stronghold" ]
+
+[[example]]
+name = "1_prepare_transaction"
+path = "examples/wallet/offline_signing/1_prepare_transaction.rs"
+required-features = [ "storage" ]
+
+[[example]]
+name = "2_sign_transaction"
+path = "examples/wallet/offline_signing/2_sign_transaction.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "3_send_transaction"
+path = "examples/wallet/offline_signing/3_send_transaction.rs"
+required-features = [ "storage" ]
+
+[[example]]
+name = "create_wallet"
+path = "examples/wallet/01_create_wallet.rs"
+required-features = [ "storage", "stronghold" ]
+
+[[example]]
+name = "generate_address"
+path = "examples/wallet/02_generate_address.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "get_funds"
+path = "examples/wallet/03_get_funds.rs"
+
+[[example]]
+name = "get_balance"
+path = "examples/wallet/04_get_balance.rs"
+
+[[example]]
+name = "wallet_transaction"
+path = "examples/wallet/05_transaction.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "send_micro_transaction"
+path = "examples/wallet/06_send_micro_transaction.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "send_native_tokens"
+path = "examples/wallet/07_send_native_tokens.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "send_nft"
+path = "examples/wallet/08_send_nft.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "mint_native_token"
+path = "examples/wallet/09_mint_native_token.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "mint_nft"
+path = "examples/wallet/10_mint_nft.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "decrease_native_token_supply"
+path = "examples/wallet/11_decrease_native_token_supply.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "increase_native_token_supply"
+path = "examples/wallet/12_increase_native_token_supply.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "burn_native_token"
+path = "examples/wallet/13_burn_native_token.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "burn_nft"
+path = "examples/wallet/14_burn_nft.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "destroy_foundry"
+path = "examples/wallet/15_destroy_foundry.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "destroy_alias"
+path = "examples/wallet/16_destroy_alias.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "check_unlock_conditions"
+path = "examples/wallet/17_check_unlock_conditions.rs"
+
+[[example]]
+name = "accounts"
+path = "examples/wallet/accounts.rs"
+
+[[example]]
+name = "background_syncing"
+path = "examples/wallet/background_syncing.rs"
+
+[[example]]
+name = "events"
+path = "examples/wallet/events.rs"
+required-features = [ "events" ]
+
+[[example]]
+name = "wallet_ledger_nano"
+path = "examples/wallet/ledger_nano.rs"
+required-features = [ "ledger_nano" ]
+
+[[example]]
+name = "wallet_participation"
+path = "examples/wallet/participation.rs"
+required-features = [ "participation" ]
+
+[[example]]
+name = "logger"
+path = "examples/wallet/logger.rs"
+
+[[example]]
+name = "output_consolidation"
+path = "examples/wallet/output_consolidation.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "ping"
+path = "examples/wallet/ping.rs"
+required-features = [ "storage" ]
+
+[[example]]
+name = "pong"
+path = "examples/wallet/pong.rs"
+required-features = [ "storage" ]
+
+[[example]]
+name = "recover_accounts"
+path = "examples/wallet/recover_accounts.rs"
+
+[[example]]
+name = "split_funds"
+path = "examples/wallet/split_funds.rs"
+
+[[example]]
+name = "storage"
+path = "examples/wallet/storage.rs"
+required-features = [ "storage" ]
+
+[[example]]
+name = "threads"
+path = "examples/wallet/threads.rs"
+
+[[example]]
+name = "wallet"
+path = "examples/wallet/wallet.rs"

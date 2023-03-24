@@ -3,6 +3,9 @@
 
 use std::collections::HashSet;
 
+#[cfg(feature = "storage")]
+use wallet::account_manager::builder::AccountManagerBuilder;
+
 use crate::{
     client::{
         node_manager::node::{Node, NodeAuth, NodeDto},
@@ -10,8 +13,6 @@ use crate::{
     },
     wallet::{account_manager::AccountManager, ClientOptions},
 };
-#[cfg(feature = "storage")]
-use wallet::account_manager::builder::AccountManagerBuilder;
 
 impl AccountManager {
     /// Sets the client options for all accounts and sets the new bech32_hrp for the addresses.

@@ -25,13 +25,15 @@ use crate::events::{
 use crate::storage::manager::StorageManagerHandle;
 use crate::{
     client::{secret::SecretManager, Client},
-    wallet::account::{
-        builder::AccountBuilder,
-        handle::AccountHandle,
-        operations::{balance::add_balances, syncing::SyncOptions},
-        types::AccountBalance,
+    wallet::{
+        account::{
+            builder::AccountBuilder,
+            handle::AccountHandle,
+            operations::{balance::add_balances, syncing::SyncOptions},
+            types::AccountBalance,
+        },
+        ClientOptions,
     },
-    wallet::ClientOptions,
 };
 
 /// The account manager, used to create and get accounts. One account manager can hold many accounts, but they should
