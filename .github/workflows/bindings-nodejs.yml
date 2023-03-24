@@ -102,6 +102,12 @@ jobs:
           cache-dependency-path: sdk/src/client/bindings/nodejs/yarn.lock
           node-version: 14.x
 
+      - name: Install Required Dependencies (Ubuntu)
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install libudev-dev libusb-1.0-0-dev
+
       - name: Install Dependencies
         working-directory: sdk/src/client/bindings/nodejs/
         run: yarn
@@ -125,6 +131,12 @@ jobs:
           cache: yarn
           cache-dependency-path: sdk/src/client/bindings/nodejs/yarn.lock
           node-version: 14.x
+
+      - name: Install Required Dependencies (Ubuntu)
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install libudev-dev libusb-1.0-0-dev
 
       - name: Install Dependencies
         working-directory: sdk/src/client/bindings/nodejs/
