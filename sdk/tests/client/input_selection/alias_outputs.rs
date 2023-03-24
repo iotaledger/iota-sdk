@@ -3,7 +3,7 @@
 
 use std::{collections::HashSet, str::FromStr};
 
-use iota_client::{
+use iota_sdk::client::{
     api::input_selection::{Burn, Error, InputSelection, Requirement},
     block::{
         address::Address,
@@ -12,7 +12,7 @@ use iota_client::{
     },
 };
 
-use crate::{
+use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Alias, Basic},
     ALIAS_ID_0, ALIAS_ID_1, ALIAS_ID_2, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ALIAS_2, BECH32_ADDRESS_ED25519_0,

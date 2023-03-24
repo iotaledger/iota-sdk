@@ -4,7 +4,7 @@
 use std::str::FromStr;
 
 use crypto::keys::slip10::Chain;
-use iota_client::{
+use iota_sdk::client::{
     api::{transaction::validate_transaction_payload_length, verify_semantic, PreparedTransactionData},
     block::{
         address::{Address, NftAddress},
@@ -23,7 +23,7 @@ use iota_client::{
     Client, Result,
 };
 
-use crate::{
+use crate::client::{
     build_inputs, build_outputs,
     Build::{Basic, Nft},
     NFT_ID_1,

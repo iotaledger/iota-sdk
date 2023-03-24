@@ -6,7 +6,7 @@ use std::{
     str::FromStr,
 };
 
-use iota_client::{
+use iota_sdk::client::{
     api::input_selection::{Burn, Error, InputSelection, Requirement},
     block::{
         address::Address,
@@ -16,7 +16,7 @@ use iota_client::{
 };
 use primitive_types::U256;
 
-use crate::{
+use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Alias, Basic, Foundry, Nft},
     ALIAS_ID_0, ALIAS_ID_1, ALIAS_ID_2, BECH32_ADDRESS_ED25519_0, NFT_ID_0, NFT_ID_1, NFT_ID_2, TOKEN_ID_1, TOKEN_ID_2,

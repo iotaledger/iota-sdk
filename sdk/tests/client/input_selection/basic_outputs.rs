@@ -3,7 +3,7 @@
 
 use std::{collections::HashSet, str::FromStr};
 
-use iota_client::{
+use iota_sdk::client::{
     api::input_selection::{Error, InputSelection, Requirement},
     block::{
         address::{Address, AliasAddress, NftAddress},
@@ -12,7 +12,7 @@ use iota_client::{
     },
 };
 
-use crate::{
+use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Alias, Basic, Nft},
     ALIAS_ID_0, ALIAS_ID_1, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
@@ -1273,7 +1273,7 @@ fn too_many_inputs() {
 
     assert_eq!(
         selected.unwrap_err(),
-        iota_client::api::input_selection::Error::InvalidInputCount(129)
+        iota_sdk::client::api::input_selection::Error::InvalidInputCount(129)
     )
 }
 
@@ -1371,7 +1371,7 @@ fn too_many_outputs() {
 
     assert_eq!(
         selected.unwrap_err(),
-        iota_client::api::input_selection::Error::InvalidOutputCount(129)
+        iota_sdk::client::api::input_selection::Error::InvalidOutputCount(129)
     )
 }
 
@@ -1415,6 +1415,6 @@ fn too_many_outputs_with_remainder() {
     assert_eq!(
         selected.unwrap_err(),
         // 129 because of required remainder
-        iota_client::api::input_selection::Error::InvalidOutputCount(129)
+        iota_sdk::client::api::input_selection::Error::InvalidOutputCount(129)
     )
 }

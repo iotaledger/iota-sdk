@@ -775,6 +775,7 @@ dependencies = [
  "hex",
  "instant",
  "iota-crypto",
+ "iota-sdk",
  "iterator-sorted",
  "log",
  "num_cpus",

@@ -9,7 +9,7 @@ mod signing;
 use std::{collections::HashMap, hash::Hash, str::FromStr};
 
 use crypto::keys::slip10::Chain;
-use iota_client::{
+use iota_sdk::client::{
     block::{
         address::{Address, AliasAddress},
         output::{

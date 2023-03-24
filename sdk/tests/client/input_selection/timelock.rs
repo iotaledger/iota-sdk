@@ -1,12 +1,12 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_client::{
+use iota_sdk::client::{
     api::input_selection::{Error, InputSelection},
     block::protocol::protocol_parameters,
 };
 
-use crate::{
+use crate::client::{
     addresses, build_inputs, build_outputs, unsorted_eq, Build::Basic, BECH32_ADDRESS_ED25519_0,
     BECH32_ADDRESS_ED25519_1,
 };

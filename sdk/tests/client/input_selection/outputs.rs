@@ -3,12 +3,12 @@
 
 use std::str::FromStr;
 
-use iota_client::{
+use iota_sdk::client::{
     api::input_selection::{Burn, Error, InputSelection},
     block::{output::AliasId, protocol::protocol_parameters},
 };
 
-use crate::{
+use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Alias, Basic},
     ALIAS_ID_2, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
