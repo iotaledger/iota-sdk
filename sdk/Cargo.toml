@@ -46,6 +46,9 @@ bech32 = { version = "0.9.1", default-features = false }
 bitflags = { version = "1.3.2", default-features = false }
 iterator-sorted = { version = "0.1.0", default-features = false }
 
+[dev-dependencies]
+dotenv = { version = "0.15.0", default-features = false }
+
 [features]
 default = [ "api", "block", "std" ]
 
@@ -55,3 +58,264 @@ dto = [ "serde", "dep:serde_json" ]
 rand = [ "dep:rand", "std" ]
 serde = [ "dep:serde", "serde-big-array" ]
 std = [  ]
+
+# Block examples
+
+[[example]]
+name = "block_no_payload"
+path = "examples/client/block/00_block_no_payload.rs"
+
+[[example]]
+name = "block_confirmation_time"
+path = "examples/client/block/01_block_confirmation_time.rs"
+
+[[example]]
+name = "block_custom_parents"
+path = "examples/client/block/02_block_custom_parents.rs"
+
+[[example]]
+name = "block_custom_payload"
+path = "examples/client/block/03_block_custom_payload.rs"
+
+[[example]]
+name = "block_tagged_data"
+path = "examples/client/block/04_block_tagged_data.rs"
+
+[[example]]
+name = "custom_inputs"
+path = "examples/client/block/custom_inputs.rs"
+
+[[example]]
+name = "output"
+path = "examples/client/block/output.rs"
+
+[[example]]
+name = "transaction"
+path = "examples/client/block/transaction.rs"
+
+# Node API core examples
+
+[[example]]
+name = "node_api_core_get_health"
+path = "examples/client/node_api_core/00_get_health.rs"
+
+[[example]]
+name = "node_api_core_get_routes"
+path = "examples/client/node_api_core/01_get_routes.rs"
+
+[[example]]
+name = "node_api_core_get_info"
+path = "examples/client/node_api_core/02_get_info.rs"
+
+[[example]]
+name = "node_api_core_get_tips"
+path = "examples/client/node_api_core/03_get_tips.rs"
+
+[[example]]
+name = "node_api_core_post_block"
+path = "examples/client/node_api_core/04_post_block.rs"
+
+[[example]]
+name = "node_api_core_post_block_raw"
+path = "examples/client/node_api_core/05_post_block_raw.rs"
+
+[[example]]
+name = "node_api_core_get_block"
+path = "examples/client/node_api_core/06_get_block.rs"
+
+[[example]]
+name = "node_api_core_get_block_raw"
+path = "examples/client/node_api_core/07_get_block_raw.rs"
+
+[[example]]
+name = "node_api_core_get_block_metadata"
+path = "examples/client/node_api_core/08_get_block_metadata.rs"
+
+[[example]]
+name = "node_api_core_get_output"
+path = "examples/client/node_api_core/09_get_output.rs"
+
+[[example]]
+name = "node_api_core_get_output_raw"
+path = "examples/client/node_api_core/10_get_output_raw.rs"
+
+[[example]]
+name = "node_api_core_get_output_metadata"
+path = "examples/client/node_api_core/11_get_output_metadata.rs"
+
+[[example]]
+name = "node_api_core_get_receipts"
+path = "examples/client/node_api_core/12_get_receipts.rs"
+
+[[example]]
+name = "node_api_core_get_receipts_migrated_at"
+path = "examples/client/node_api_core/13_get_receipts_migrated_at.rs"
+
+[[example]]
+name = "node_api_core_get_treasury"
+path = "examples/client/node_api_core/14_get_treasury.rs"
+
+[[example]]
+name = "node_api_core_get_included_block"
+path = "examples/client/node_api_core/15_get_included_block.rs"
+
+[[example]]
+name = "node_api_core_get_included_block_raw"
+path = "examples/client/node_api_core/16_get_included_block_raw.rs"
+
+[[example]]
+name = "node_api_core_get_milestone_by_id"
+path = "examples/client/node_api_core/17_get_milestone_by_id.rs"
+
+[[example]]
+name = "node_api_core_get_milestone_by_id_raw"
+path = "examples/client/node_api_core/18_get_milestone_by_id_raw.rs"
+
+[[example]]
+name = "node_api_core_get_utxo_changes_by_id"
+path = "examples/client/node_api_core/19_get_utxo_changes_by_id.rs"
+
+[[example]]
+name = "node_api_core_get_milestone_by_index"
+path = "examples/client/node_api_core/20_get_milestone_by_index.rs"
+
+[[example]]
+name = "node_api_core_get_milestone_by_index_raw"
+path = "examples/client/node_api_core/21_get_milestone_by_index_raw.rs"
+
+[[example]]
+name = "node_api_core_get_utxo_changes_by_index"
+path = "examples/client/node_api_core/22_get_utxo_changes_by_index.rs"
+
+# Node API indexer examples
+
+[[example]]
+name = "node_api_indexer_get_basic_outputs"
+path = "examples/client/node_api_indexer/00_get_basic_outputs.rs"
+
+[[example]]
+name = "node_api_indexer_get_alias_output"
+path = "examples/client/node_api_indexer/01_get_alias_output.rs"
+
+[[example]]
+name = "node_api_indexer_get_alias_outputs"
+path = "examples/client/node_api_indexer/02_get_alias_outputs.rs"
+
+[[example]]
+name = "node_api_indexer_get_foundry_output"
+path = "examples/client/node_api_indexer/03_get_foundry_output.rs"
+
+[[example]]
+name = "node_api_indexer_get_foundry_outputs"
+path = "examples/client/node_api_indexer/04_get_foundry_outputs.rs"
+
+[[example]]
+name = "node_api_indexer_get_nft_output"
+path = "examples/client/node_api_indexer/05_get_nft_output.rs"
+
+[[example]]
+name = "node_api_indexer_get_nft_outputs"
+path = "examples/client/node_api_indexer/06_get_nft_outputs.rs"
+
+[[example]]
+name = "node_api_indexer_get_random_basic_outputs"
+path = "examples/client/node_api_indexer/07_get_random_basic_outputs.rs"
+
+#######
+
+[[example]]
+name = "generate_mnemonic"
+path = "examples/client/00_generate_mnemonic.rs"
+
+[[example]]
+name = "generate_addresses"
+path = "examples/client/01_generate_addresses.rs"
+
+[[example]]
+name = "07_mqtt"
+path = "examples/client/07_mqtt.rs"
+required-features = [ "mqtt" ]
+
+[[example]]
+name = "ledger_nano"
+path = "examples/client/ledger_nano.rs"
+required-features = [ "ledger_nano" ]
+
+[[example]]
+name = "ledger_nano_transaction"
+path = "examples/client/ledger_nano_transaction.rs"
+required-features = [ "ledger_nano" ]
+
+[[example]]
+name = "stronghold"
+path = "examples/client/stronghold.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "0_address_generation"
+path = "examples/client/offline_signing/0_address_generation.rs"
+
+[[example]]
+name = "1_transaction_preparation"
+path = "examples/client/offline_signing/1_transaction_preparation.rs"
+
+[[example]]
+name = "2_transaction_signing"
+path = "examples/client/offline_signing/2_transaction_signing.rs"
+
+[[example]]
+name = "3_send_block"
+path = "examples/client/offline_signing/3_send_block.rs"
+
+[[example]]
+name = "all"
+path = "examples/client/output/all.rs"
+
+[[example]]
+name = "all_automatic_input_selection"
+path = "examples/client/output/all_automatic_input_selection.rs"
+
+[[example]]
+name = "alias"
+path = "examples/client/output/alias.rs"
+
+[[example]]
+name = "build_alias_output"
+path = "examples/client/output/build_alias_output.rs"
+
+[[example]]
+name = "recursive_alias"
+path = "examples/client/output/recursive_alias.rs"
+
+[[example]]
+name = "basic"
+path = "examples/client/output/basic.rs"
+
+[[example]]
+name = "build_basic_output"
+path = "examples/client/output/build_basic_output.rs"
+
+[[example]]
+name = "expiration"
+path = "examples/client/output/expiration.rs"
+
+[[example]]
+name = "foundry"
+path = "examples/client/output/foundry.rs"
+
+[[example]]
+name = "micro_transaction"
+path = "examples/client/output/micro_transaction.rs"
+
+[[example]]
+name = "native_tokens"
+path = "examples/client/output/native_tokens.rs"
+
+[[example]]
+name = "nft"
+path = "examples/client/output/nft.rs"
+
+[[example]]
+name = "participation"
+path = "examples/client/output/participation.rs"
+required-features = [ "participation" ]
