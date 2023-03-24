@@ -189,6 +189,9 @@ pub enum Error {
     /// Input selection error.
     #[error("{0}")]
     InputSelection(#[from] InputSelectionError),
+    /// Missing BIP32 chain to sign with.
+    #[error("missing BIP32 chain to sign with")]
+    MissingBip32Chain,
 
     /// Participation error
     #[cfg(feature = "participation")]

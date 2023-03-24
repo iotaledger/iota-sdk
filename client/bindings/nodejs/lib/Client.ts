@@ -20,8 +20,8 @@ import type {
     NftQueryParameter,
     AliasQueryParameter,
     LedgerNanoStatus,
-    IInputSigningData,
     OutputIdsResponse,
+    IBip32Chain,
 } from '../types';
 import type {
     IUTXOInput,
@@ -384,18 +384,17 @@ export class Client {
      */
     async signatureUnlock(
         secretManager: SecretManager,
-        inputSigningData: IInputSigningData,
         // Uses `Array<number>` instead of `Uint8Array` because the latter serializes
         // as an object rather than an array, which results in errors with serde.
         transactionEssenceHash: Array<number>,
+        chain: IBip32Chain,
     ): Promise<UnlockTypes> {
         const response = await this.messageHandler.sendMessage({
             name: 'signatureUnlock',
             data: {
                 secretManager,
-                inputSigningData,
                 transactionEssenceHash,
-                remainderData: undefined,
+                chain
             },
         });
 
