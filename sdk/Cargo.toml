@@ -521,6 +521,11 @@ path = "examples/wallet/15_destroy_foundry.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
+name = "create_alias"
+path = "examples/create_alias.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
 name = "destroy_alias"
 path = "examples/wallet/16_destroy_alias.rs"
 required-features = [ "wallet", "stronghold" ]
