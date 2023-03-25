@@ -6,7 +6,7 @@
 use std::{env, str::FromStr};
 
 use dotenv::dotenv;
-use iota_client::{
+use iota_sdk::client::{
     api::GetAddressesBuilderOptions as GenerateAddressesOptions,
     block::{block::dto::BlockDto, payload::transaction::dto::TransactionEssenceDto, BlockId},
     message_interface::{self, Message, Response},

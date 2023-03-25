@@ -1,7 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_client::{api::input_selection::Error as IsaError, block::Error as BlockError, Error};
+use iota_sdk::{
+    client::{api::input_selection::Error as IsaError, Error},
+    types::block::Error as BlockError,
+};
 
 #[test]
 fn stringified_error() {

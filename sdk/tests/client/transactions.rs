@@ -3,19 +3,15 @@
 
 // These are E2E test samples, so they are ignored by default.
 
-mod common;
-
-use crate::types::block::{output::OutputId, payload::Payload};
-use iota_client::{
-    block::{
-        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
-        payload::transaction::TransactionEssence,
+use iota_sdk::{
+    client::{node_api::indexer::query_parameters::QueryParameter, Result},
+    types::block::{
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, OutputId, UnlockCondition},
+        payload::{transaction::TransactionEssence, Payload},
     },
-    node_api::indexer::query_parameters::QueryParameter,
-    Result,
 };
 
-use self::common::create_client_and_secret_manager_with_funds;
+use crate::client::common::create_client_and_secret_manager_with_funds;
 
 #[ignore]
 #[tokio::test]

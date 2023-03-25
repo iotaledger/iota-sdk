@@ -1,7 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::address::Address;
 #[cfg(feature = "message_interface")]
 use iota_client::api::GetAddressesBuilderOptions;
 #[cfg(feature = "message_interface")]
@@ -14,11 +13,14 @@ use iota_client::secret::stronghold::StrongholdSecretManager;
 use iota_client::secret::types::StrongholdDto;
 #[cfg(feature = "message_interface")]
 use iota_client::secret::SecretManagerDto;
-use iota_client::{
-    api::GetAddressesBuilder,
-    constants::{IOTA_BECH32_HRP, IOTA_COIN_TYPE, IOTA_TESTNET_BECH32_HRP, SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
-    secret::{mnemonic::MnemonicSecretManager, SecretManager},
-    Client,
+use iota_sdk::{
+    client::{
+        api::GetAddressesBuilder,
+        constants::{IOTA_BECH32_HRP, IOTA_COIN_TYPE, IOTA_TESTNET_BECH32_HRP, SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
+        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        Client,
+    },
+    types::block::address::Address,
 };
 use serde::{Deserialize, Serialize};
 

@@ -3,18 +3,19 @@
 
 // These are E2E test samples, so they are ignored by default.
 
-mod common;
+use iota_sdk::{
+    client::{
+        bech32_to_hex, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
+        secret::SecretManager, Client,
+    },
+    types::block::{
+        output::OutputId,
+        payload::{transaction::TransactionId, Payload},
+        BlockId,
+    },
+};
 
-use crate::types::block::{
-    output::OutputId,
-    payload::{transaction::TransactionId, Payload},
-    BlockId,
-};
-use common::{setup_client_with_node_health_ignored, FAUCET_URL, NODE_LOCAL};
-use iota_client::{
-    bech32_to_hex, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
-    secret::SecretManager, Client,
-};
+use crate::client::common::{setup_client_with_node_health_ignored, FAUCET_URL, NODE_LOCAL};
 
 // THIS SEED SERVES FOR TESTING PURPOSES! DON'T USE THIS SEED IN PRODUCTION!
 const DEFAULT_DEVELOPMENT_SEED: &str = "0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2";

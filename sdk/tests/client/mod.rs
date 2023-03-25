@@ -1,10 +1,19 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod addresses;
+mod client_builder;
+mod common;
+mod error;
 mod input_selection;
+mod message_interface;
+mod mnemonic;
 #[cfg(feature = "mqtt")]
 mod mqtt;
+mod node_api;
+mod secret_manager;
 mod signing;
+mod transactions;
 
 use std::{collections::HashMap, hash::Hash, str::FromStr};
 

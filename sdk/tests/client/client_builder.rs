@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_client::{Client, ClientBuilder};
+use iota_sdk::client::{Client, ClientBuilder};
 
 #[tokio::test]
 async fn invalid_url() {

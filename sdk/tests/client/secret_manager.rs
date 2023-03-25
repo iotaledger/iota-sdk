@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_client::{api::GetAddressesBuilder, constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Result};
+use iota_sdk::client::{
+    api::GetAddressesBuilder, constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Result,
+};
 
 #[tokio::test]
 async fn mnemonic_secret_manager_dto() -> Result<()> {
