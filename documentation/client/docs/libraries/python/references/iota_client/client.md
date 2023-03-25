@@ -82,7 +82,18 @@ Generate addresses.
 ### build\_and\_post\_block
 
 ```python
-def build_and_post_block(secret_manager=None, options=None)
+def build_and_post_block(secret_manager=None, 
+                         account_index=None,
+                         coin_type=None,
+                         custom_remainder_address=None,
+                         data=None,
+                         initial_address_index=None,
+                         input_range_start=None,
+                         input_range_end=None,
+                         inputs=None,
+                         output=None,
+                         outputs=None,
+                         tag=None)
 ```
 
 Build and post a block.

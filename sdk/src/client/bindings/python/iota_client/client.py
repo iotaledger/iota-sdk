@@ -175,9 +175,59 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
             'immutableFeatures': immutable_features
         })
 
-    def generate_addresses(self, secret_manager, options):
+    def generate_addresses(self,
+                           secret_manager, 
+                           account_index=None,
+                           start=None,
+                           end=None,
+                           internal=None,
+                           coin_type=None,
+                           bech32_hrp=None,
+                           ledger_nano_prompt=None):
         """Generate addresses.
+
+        Parameters
+        ----------
+        secret_manager : Any type of SecretManager.
+            The secret manager to use. Can be (MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager or LedgerNanoSecretManager.
+        account_index : int
+            Account index.
+        start : int
+            Start index of generated addresses
+        end : int
+            End index of generated addresses
+        internal : bool
+            Internal addresses
+        coin_type : int
+            Coin type. IOTA = 4218. Shimmer = 4219.
+        bech32_hrp : string
+            Bech32 human readable part.
+        ledger_nano_prompt : bool
+            Display the address on ledger devices.
+
+        Returns
+        -------
+        Addresses as array of strings.
         """
+        options = dict(locals())
+        del options['self']
+        del options['secret_manager']
+
+        options = {k:v for k,v in options.items() if v != None}
+
+        is_start_set = 'start' in options
+        is_end_set = 'end' in options
+        if is_start_set or is_end_set:
+            options['range'] = {}
+            if is_start_set:
+                options['range']['start'] = options.pop('start')
+            if is_end_set:
+                options['range']['end'] = options.pop('end')
+        if 'ledger_nano_prompt' in options:
+            options['options'] = { 'ledger_nano_prompt': options.pop('ledger_nano_prompt')}
+
+        options = humps.camelize(options)
+
         return self.send_message('generateAddresses', {
             'secretManager': secret_manager,
             'options': options

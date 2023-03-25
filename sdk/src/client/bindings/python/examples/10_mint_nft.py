@@ -36,5 +36,5 @@ nft_output = client.build_nft_output(
 )
 
 # Create and post a block with the nft output
-block = client.build_and_post_block(secret_manager, {"outputs": [nft_output]})
+block = client.build_and_post_block(secret_manager, outputs = [nft_output])
 print(f'{block}')
