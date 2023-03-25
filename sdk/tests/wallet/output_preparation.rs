@@ -1,23 +1,27 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod common;
-
 use std::str::FromStr;
 
-use crate::client::block::address::Address;
-use iota_wallet::{
-    crate::client::block::output::{NativeToken, NftId, TokenId},
-    account::{Assets, Features, OutputOptions, ReturnStrategy, StorageDeposit, Unlocks},
-    NftOptions, Result, U256,
+use iota_sdk::{
+    types::block::{
+        address::Address,
+        output::{NativeToken, NftId, TokenId},
+    },
+    wallet::{
+        account::{Assets, Features, OutputOptions, ReturnStrategy, StorageDeposit, Unlocks},
+        NftOptions, Result, U256,
+    },
 };
+
+use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
 
 #[tokio::test]
 async fn output_preparation() -> Result<()> {
     let storage_path = "test-storage/output_preparation";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
     let account = manager.create_account().finish().await?;
 
     let recipient_address = String::from("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu");
@@ -209,7 +213,7 @@ async fn output_preparation() -> Result<()> {
         .await
         .unwrap_err();
     match error {
-        iota_wallet::Error::NftNotFoundInUnspentOutputs => {}
+        iota_sdk::wallet::Error::NftNotFoundInUnspentOutputs => {}
         _ => panic!("should return NftNotFoundInUnspentOutputs error"),
     }
 
@@ -232,10 +236,7 @@ async fn output_preparation() -> Result<()> {
         )
         .await
     {
-        assert_eq!(
-            output.kind(),
-            iota_wallet::crate::client::block::output::NftOutput::KIND
-        );
+        assert_eq!(output.kind(), iota_sdk::types::block::output::NftOutput::KIND);
         assert_eq!(output.amount(), 500000);
         // only address condition
         assert_eq!(output.unlock_conditions().unwrap().len(), 1);
@@ -267,10 +268,7 @@ async fn output_preparation() -> Result<()> {
         )
         .await?;
 
-    assert_eq!(
-        output.kind(),
-        iota_wallet::crate::client::block::output::BasicOutput::KIND
-    );
+    assert_eq!(output.kind(), iota_sdk::types::block::output::BasicOutput::KIND);
     assert_eq!(output.amount(), 500000);
     assert_eq!(output.unlock_conditions().unwrap().len(), 1);
     let features = output.features().unwrap();
@@ -298,7 +296,7 @@ async fn output_preparation() -> Result<()> {
         .await
         .unwrap_err();
     match error {
-        iota_wallet::Error::MissingParameter(_) => {}
+        iota_sdk::wallet::Error::MissingParameter(_) => {}
         _ => panic!("should return MissingParameter error"),
     }
 
@@ -326,10 +324,7 @@ async fn output_preparation() -> Result<()> {
             None,
         )
         .await?;
-    assert_eq!(
-        output.kind(),
-        iota_wallet::crate::client::block::output::NftOutput::KIND
-    );
+    assert_eq!(output.kind(), iota_sdk::types::block::output::NftOutput::KIND);
     assert_eq!(output.amount(), 500000);
     let features = output.features().unwrap();
     // sender feature
@@ -370,23 +365,20 @@ async fn output_preparation() -> Result<()> {
             None,
         )
         .await?;
-    assert_eq!(
-        output.kind(),
-        iota_wallet::crate::client::block::output::NftOutput::KIND
-    );
+    assert_eq!(output.kind(), iota_sdk::types::block::output::NftOutput::KIND);
     assert_eq!(output.amount(), 53900);
     // address, sdr, expiration
     assert_eq!(output.unlock_conditions().unwrap().len(), 3);
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[tokio::test]
 async fn output_preparation_sdr() -> Result<()> {
     let storage_path = "test-storage/output_preparation_sdr";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
     let account = manager.create_account().finish().await?;
 
     let rent_structure = account.client().get_rent_structure().await?;
@@ -485,17 +477,17 @@ async fn output_preparation_sdr() -> Result<()> {
     // storage deposit gifted, only address unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 1);
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[ignore]
 #[tokio::test]
 async fn prepare_nft_output_features_update() -> Result<()> {
     let storage_path = "test-storage/output_preparation";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
-    let accounts = &common::create_accounts_with_funds(&manager, 1).await?;
+    let manager = make_manager(storage_path, None, None).await?;
+    let accounts = &create_accounts_with_funds(&manager, 1).await?;
     let address = accounts[0].addresses().await?[0].address().to_bech32();
 
     let nft_options = vec![NftOptions {
@@ -552,5 +544,5 @@ async fn prepare_nft_output_features_update() -> Result<()> {
         accounts[0].addresses().await?[0].address().as_ref()
     );
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }

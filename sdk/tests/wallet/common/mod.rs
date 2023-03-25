@@ -5,12 +5,14 @@
 
 mod constants;
 
-use crate::client::{constants::SHIMMER_COIN_TYPE, request_funds_from_faucet, Client};
-use iota_wallet::{
-    account::AccountHandle,
-    account_manager::AccountManager,
-    secret::{mnemonic::MnemonicSecretManager, SecretManager},
-    ClientOptions, Result,
+use iota_sdk::{
+    client::{constants::SHIMMER_COIN_TYPE, request_funds_from_faucet, Client},
+    wallet::{
+        account::AccountHandle,
+        account_manager::AccountManager,
+        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        ClientOptions, Result,
+    },
 };
 
 pub use self::constants::*;

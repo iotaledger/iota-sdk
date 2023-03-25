@@ -1,9 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod common;
-
-use iota_wallet::Result;
+use iota_sdk::wallet::Result;
 #[cfg(feature = "stronghold")]
 use {
     crate::client::{constants::SHIMMER_COIN_TYPE, secret::stronghold::StrongholdSecretManager},
@@ -11,12 +9,14 @@ use {
     std::path::PathBuf,
 };
 
+use crate::wallet::common::{make_manager, setup, tear_down};
+
 #[tokio::test]
 async fn account_ordering() -> Result<()> {
     let storage_path = "test-storage/account_ordering";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
     for _ in 0..100 {
         let _account = manager.create_account().finish().await?;
@@ -24,17 +24,17 @@ async fn account_ordering() -> Result<()> {
     std::fs::remove_dir_all("test-storage/account_ordering").unwrap_or(());
     #[cfg(debug_assertions)]
     manager.verify_integrity().await?;
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[cfg(feature = "storage")]
 #[tokio::test]
 async fn remove_latest_account() -> Result<()> {
     let storage_path = "test-storage/remove_latest_account";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
     let recreated_account_index = {
-        let manager = common::make_manager(storage_path, None, None).await?;
+        let manager = make_manager(storage_path, None, None).await?;
 
         // Create two accounts.
         let first_account = manager.create_account().finish().await?;
@@ -84,7 +84,7 @@ async fn remove_latest_account() -> Result<()> {
     };
 
     // Restore dropped `AccountManager` from above.
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
     let accounts = manager.get_accounts().await.unwrap();
 
@@ -95,55 +95,63 @@ async fn remove_latest_account() -> Result<()> {
     #[cfg(debug_assertions)]
     manager.verify_integrity().await?;
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[tokio::test]
 async fn account_alias_already_exists() -> Result<()> {
     let storage_path = "test-storage/account_alias_already_exists";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
     let _account = manager
         .create_account()
         .with_alias("Alice".to_string())
         .finish()
         .await?;
-    assert!(&manager
-        .create_account()
-        .with_alias("Alice".to_string())
-        .finish()
-        .await
-        .is_err());
-    assert!(&manager
-        .create_account()
-        .with_alias("alice".to_string())
-        .finish()
-        .await
-        .is_err());
-    assert!(&manager
-        .create_account()
-        .with_alias("ALICE".to_string())
-        .finish()
-        .await
-        .is_err());
+    assert!(
+        &manager
+            .create_account()
+            .with_alias("Alice".to_string())
+            .finish()
+            .await
+            .is_err()
+    );
+    assert!(
+        &manager
+            .create_account()
+            .with_alias("alice".to_string())
+            .finish()
+            .await
+            .is_err()
+    );
+    assert!(
+        &manager
+            .create_account()
+            .with_alias("ALICE".to_string())
+            .finish()
+            .await
+            .is_err()
+    );
     // Other alias works
-    assert!(&manager
-        .create_account()
-        .with_alias("Bob".to_string())
-        .finish()
-        .await
-        .is_ok());
+    assert!(
+        &manager
+            .create_account()
+            .with_alias("Bob".to_string())
+            .finish()
+            .await
+            .is_ok()
+    );
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[tokio::test]
 async fn account_rename_alias() -> Result<()> {
     let storage_path = "test-storage/account_rename_alias";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
     let account = manager
         .create_account()
         .with_alias("Alice".to_string())
@@ -157,15 +165,15 @@ async fn account_rename_alias() -> Result<()> {
 
     assert_eq!(account.alias().await, "Bob".to_string());
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[tokio::test]
 async fn account_first_address_exists() -> Result<()> {
     let storage_path = "test-storage/account_first_address_exists";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
     let account = manager
         .create_account()
         .with_alias("Alice".to_string())
@@ -177,14 +185,14 @@ async fn account_first_address_exists() -> Result<()> {
     // First address is a public address
     assert_eq!(account.addresses().await?.first().unwrap().internal(), &false);
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn account_creation_stronghold() -> Result<()> {
     let storage_path = "test-storage/account_creation_stronghold";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node("http://localhost:14265")?;
     let mnemonic = "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak";
@@ -212,5 +220,5 @@ async fn account_creation_stronghold() -> Result<()> {
 
     let _account = account_manager.create_account().finish().await?;
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }

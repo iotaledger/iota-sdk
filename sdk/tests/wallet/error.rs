@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_wallet::Error;
+use iota_sdk::wallet::Error;
 
 #[test]
 fn stringified_error() {

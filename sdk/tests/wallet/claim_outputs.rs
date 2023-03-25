@@ -1,25 +1,25 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod common;
+use iota_sdk::{
+    types::block::output::{
+        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
+        BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, UnlockCondition,
+    },
+    wallet::{account::OutputsToClaim, AddressNativeTokens, AddressWithMicroAmount, NativeTokenOptions, Result, U256},
+};
 
-use crate::client::block::output::{
-    unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-    BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, UnlockCondition,
-};
-use iota_wallet::{
-    account::OutputsToClaim, AddressNativeTokens, AddressWithMicroAmount, NativeTokenOptions, Result, U256,
-};
+use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
 async fn claim_2_basic_outputs() -> Result<()> {
     let storage_path = "test-storage/claim_2_basic_outputs";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
-    let accounts = common::create_accounts_with_funds(&manager, 2).await?;
+    let accounts = create_accounts_with_funds(&manager, 2).await?;
 
     let micro_amount = 1;
     let tx = accounts[1]
@@ -69,18 +69,18 @@ async fn claim_2_basic_outputs() -> Result<()> {
         base_coin_amount_before_claiming + 2 * micro_amount
     );
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[ignore]
 #[tokio::test]
 async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     let storage_path = "test-storage/claim_2_basic_outputs_no_outputs_in_claim_account";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
-    let account_0 = &common::create_accounts_with_funds(&manager, 1).await?[0];
+    let account_0 = &create_accounts_with_funds(&manager, 1).await?[0];
     let account_1 = manager.create_account().finish().await?;
 
     // Equal to minimum required storage deposit for a basic output
@@ -132,18 +132,18 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
         base_coin_amount_before_claiming + 2 * micro_amount
     );
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[ignore]
 #[tokio::test]
 async fn claim_2_native_tokens() -> Result<()> {
     let storage_path = "test-storage/claim_2_native_tokens";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
-    let accounts = common::create_accounts_with_funds(&manager, 2).await?;
+    let accounts = create_accounts_with_funds(&manager, 2).await?;
 
     let native_token_amount = U256::from(100);
 
@@ -239,18 +239,18 @@ async fn claim_2_native_tokens() -> Result<()> {
         .unwrap();
     assert_eq!(native_token_1.total, native_token_amount);
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[ignore]
 #[tokio::test]
 async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
     let storage_path = "test-storage/claim_2_native_tokens_no_outputs_in_claim_account";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
-    let account_0 = &common::create_accounts_with_funds(&manager, 1).await?[0];
+    let account_0 = &create_accounts_with_funds(&manager, 1).await?[0];
     let account_1 = manager.create_account().finish().await?;
 
     let native_token_amount = U256::from(100);
@@ -358,18 +358,18 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         .unwrap();
     assert_eq!(native_token_1.total, native_token_amount);
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[ignore]
 #[tokio::test]
 async fn claim_2_nft_outputs() -> Result<()> {
     let storage_path = "test-storage/claim_2_nft_outputs";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
-    let accounts = common::create_accounts_with_funds(&manager, 2).await?;
+    let accounts = create_accounts_with_funds(&manager, 2).await?;
 
     let token_supply = accounts[1].client().get_token_supply().await?;
     let outputs = vec![
@@ -422,18 +422,18 @@ async fn claim_2_nft_outputs() -> Result<()> {
     assert_eq!(balance.potentially_locked_outputs.len(), 0);
     assert_eq!(balance.nfts.len(), 2);
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[ignore]
 #[tokio::test]
 async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
     let storage_path = "test-storage/claim_2_nft_outputs_no_outputs_in_claim_account";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
-    let account_0 = &common::create_accounts_with_funds(&manager, 1).await?[0];
+    let account_0 = &create_accounts_with_funds(&manager, 1).await?[0];
     let account_1 = manager.create_account().finish().await?;
 
     let token_supply = account_0.client().get_token_supply().await?;
@@ -487,5 +487,5 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
     assert_eq!(balance.potentially_locked_outputs.len(), 0);
     assert_eq!(balance.nfts.len(), 2);
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }

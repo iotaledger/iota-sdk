@@ -1,45 +1,49 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod common;
-
-use crate::client::block::output::{
-    feature::SenderFeature,
-    unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-    BasicOutputBuilder, Feature, UnlockCondition,
+use iota_sdk::{
+    types::block::output::{
+        feature::SenderFeature,
+        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
+        BasicOutputBuilder, Feature, UnlockCondition,
+    },
+    wallet::Result,
 };
-use iota_wallet::Result;
+
+use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
 async fn balance_expiration() -> Result<()> {
     let storage_path = "test-storage/balance_expiration";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
-    let account_0 = &common::create_accounts_with_funds(&manager, 1).await?[0];
+    let account_0 = &create_accounts_with_funds(&manager, 1).await?[0];
     let account_1 = manager.create_account().finish().await?;
     let account_2 = manager.create_account().finish().await?;
 
     let seconds_until_expired = 20;
     let token_supply = account_0.client().get_token_supply().await?;
-    let outputs = vec![BasicOutputBuilder::new_with_amount(1_000_000)?
-        // Send to account 1 with expiration to account 2, both have no amount yet
-        .with_unlock_conditions(vec![
-            UnlockCondition::Address(AddressUnlockCondition::new(
-                *account_1.addresses().await?[0].address().as_ref(),
-            )),
-            UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                *account_2.addresses().await?[0].address().as_ref(),
-                // Current time + 20s
-                account_0.client().get_time_checked().await? + seconds_until_expired,
-            )?),
-        ])
-        .with_features(vec![Feature::Sender(SenderFeature::new(
-            *account_0.addresses().await?[0].address().as_ref(),
-        ))])
-        .finish_output(token_supply)?];
+    let outputs = vec![
+        BasicOutputBuilder::new_with_amount(1_000_000)?
+            // Send to account 1 with expiration to account 2, both have no amount yet
+            .with_unlock_conditions(vec![
+                UnlockCondition::Address(AddressUnlockCondition::new(
+                    *account_1.addresses().await?[0].address().as_ref(),
+                )),
+                UnlockCondition::Expiration(ExpirationUnlockCondition::new(
+                    *account_2.addresses().await?[0].address().as_ref(),
+                    // Current time + 20s
+                    account_0.client().get_time_checked().await? + seconds_until_expired,
+                )?),
+            ])
+            .with_features(vec![Feature::Sender(SenderFeature::new(
+                *account_0.addresses().await?[0].address().as_ref(),
+            ))])
+            .finish_output(token_supply)?,
+    ];
 
     let balance_before_tx = account_0.balance().await?;
     let tx = account_0.send(outputs, None).await?;
@@ -80,15 +84,17 @@ async fn balance_expiration() -> Result<()> {
     assert_eq!(balance.base_coin.available, 1_000_000);
 
     // It's possible to send the expired output
-    let outputs = vec![BasicOutputBuilder::new_with_amount(1_000_000)?
-        // Send to account 1 with expiration to account 2, both have no amount yet
-        .with_unlock_conditions(vec![UnlockCondition::Address(AddressUnlockCondition::new(
-            *account_1.addresses().await?[0].address().as_ref(),
-        ))])
-        .finish_output(token_supply)?];
+    let outputs = vec![
+        BasicOutputBuilder::new_with_amount(1_000_000)?
+            // Send to account 1 with expiration to account 2, both have no amount yet
+            .with_unlock_conditions(vec![UnlockCondition::Address(AddressUnlockCondition::new(
+                *account_1.addresses().await?[0].address().as_ref(),
+            ))])
+            .finish_output(token_supply)?,
+    ];
     let _tx = account_2.send(outputs, None).await?;
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[ignore]
@@ -96,11 +102,11 @@ async fn balance_expiration() -> Result<()> {
 #[cfg(feature = "participation")]
 async fn balance_voting_power() -> Result<()> {
     let storage_path = "test-storage/balance_voting_power";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
-    let account = &common::create_accounts_with_funds(&manager, 1).await?[0];
+    let account = &create_accounts_with_funds(&manager, 1).await?[0];
 
     let faucet_amount = 100_000_000_000;
 
@@ -131,5 +137,5 @@ async fn balance_voting_power() -> Result<()> {
     let account_voting_power = account.get_voting_power().await?;
     assert_eq!(account_voting_power, faucet_amount);
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }

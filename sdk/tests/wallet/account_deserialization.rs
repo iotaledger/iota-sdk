@@ -3,8 +3,10 @@
 
 use std::str::FromStr;
 
-use crate::client::block::payload::transaction::TransactionId;
-use iota_wallet::{account::Account, Result};
+use iota_sdk::{
+    types::block::payload::transaction::TransactionId,
+    wallet::{account::Account, Result},
+};
 
 #[test]
 fn account_deserialization_incoming_transactions() -> Result<()> {

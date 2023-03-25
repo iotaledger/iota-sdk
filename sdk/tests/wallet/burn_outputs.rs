@@ -1,22 +1,24 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod common;
-
-use crate::client::block::output::{
-    unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-    NftId, NftOutputBuilder, OutputId, UnlockCondition,
+use iota_sdk::{
+    types::block::output::{
+        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
+        NftId, NftOutputBuilder, OutputId, UnlockCondition,
+    },
+    wallet::{account::AccountHandle, NativeTokenOptions, NftOptions, Result, U256},
 };
-use iota_wallet::{account::AccountHandle, NativeTokenOptions, NftOptions, Result, U256};
+
+use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
 async fn mint_and_burn_nft() -> Result<()> {
     let storage_path = "test-storage/mint_and_burn_outputs";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
-    let account = &common::create_accounts_with_funds(&manager, 1).await?[0];
+    let manager = make_manager(storage_path, None, None).await?;
+    let account = &create_accounts_with_funds(&manager, 1).await?[0];
 
     let nft_options = vec![NftOptions {
         address: Some(account.addresses().await?[0].address().to_bech32()),
@@ -49,34 +51,36 @@ async fn mint_and_burn_nft() -> Result<()> {
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
     assert!(search.is_none());
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[ignore]
 #[tokio::test]
 async fn mint_and_burn_expired_nft() -> Result<()> {
     let storage_path = "test-storage/mint_and_burn_expired_nft";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
-    let account_0 = &common::create_accounts_with_funds(&manager, 1).await?[0];
+    let manager = make_manager(storage_path, None, None).await?;
+    let account_0 = &create_accounts_with_funds(&manager, 1).await?[0];
     let account_1 = manager.create_account().finish().await?;
 
     let token_supply = account_0.client().get_token_supply().await?;
 
     let amount = 1_000_000;
-    let outputs = vec![NftOutputBuilder::new_with_amount(amount, NftId::null())?
-        .with_unlock_conditions(vec![
-            UnlockCondition::Address(AddressUnlockCondition::new(
-                *account_0.addresses().await?[0].address().as_ref(),
-            )),
-            // immediately expired to account_1
-            UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                *account_1.addresses().await?[0].address().as_ref(),
-                1,
-            )?),
-        ])
-        .finish_output(token_supply)?];
+    let outputs = vec![
+        NftOutputBuilder::new_with_amount(amount, NftId::null())?
+            .with_unlock_conditions(vec![
+                UnlockCondition::Address(AddressUnlockCondition::new(
+                    *account_0.addresses().await?[0].address().as_ref(),
+                )),
+                // immediately expired to account_1
+                UnlockCondition::Expiration(ExpirationUnlockCondition::new(
+                    *account_1.addresses().await?[0].address().as_ref(),
+                    1,
+                )?),
+            ])
+            .finish_output(token_supply)?,
+    ];
 
     let transaction = account_0.send(outputs, None).await?;
     account_0
@@ -95,17 +99,17 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
     // After burning the amount is available on account_1
     assert_eq!(balance.base_coin.available, amount);
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[ignore]
 #[tokio::test]
 async fn mint_and_decrease_native_token_supply() -> Result<()> {
     let storage_path = "test-storage/mint_and_decrease_native_token_supply";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
-    let account = &common::create_accounts_with_funds(&manager, 1).await?[0];
+    let manager = make_manager(storage_path, None, None).await?;
+    let account = &create_accounts_with_funds(&manager, 1).await?[0];
 
     // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs
     let transaction = account.create_alias_output(None, None).await?;
@@ -179,7 +183,7 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     destroy_foundry(account).await?;
     destroy_alias(account).await?;
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 async fn destroy_foundry(account: &AccountHandle) -> Result<()> {
@@ -231,13 +235,13 @@ async fn destroy_alias(account: &AccountHandle) -> Result<()> {
 #[tokio::test]
 async fn mint_and_burn_native_tokens() -> Result<()> {
     let storage_path = "test-storage/mint_and_burn_native_tokens";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
-    let account = &common::create_accounts_with_funds(&manager, 1).await?[0];
+    let account = &create_accounts_with_funds(&manager, 1).await?[0];
 
     let native_token_amount = U256::from(100);
 
@@ -273,5 +277,5 @@ async fn mint_and_burn_native_tokens() -> Result<()> {
 
     assert!(balance.native_tokens.is_empty());
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }

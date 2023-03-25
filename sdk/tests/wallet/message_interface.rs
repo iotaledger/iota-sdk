@@ -1,10 +1,16 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod common;
-
 #[cfg(feature = "message_interface")]
 use std::sync::{atomic::Ordering, Arc};
+
+#[cfg(feature = "events")]
+use iota_wallet::events::types::WalletEvent;
+#[cfg(feature = "message_interface")]
+use iota_wallet::{
+    message_interface::{create_message_handler, AccountMethod, ManagerOptions, Message, Response},
+    Result,
+};
 
 #[cfg(feature = "message_interface")]
 use crate::client::{
@@ -19,13 +25,6 @@ use crate::client::{
     constants::SHIMMER_COIN_TYPE,
     ClientBuilder,
 };
-#[cfg(feature = "events")]
-use iota_wallet::events::types::WalletEvent;
-#[cfg(feature = "message_interface")]
-use iota_wallet::{
-    message_interface::{create_message_handler, AccountMethod, ManagerOptions, Message, Response},
-    Result,
-};
 
 #[cfg(feature = "message_interface")]
 const TOKEN_SUPPLY: u64 = 1_813_620_509_061_365;
@@ -34,7 +33,7 @@ const TOKEN_SUPPLY: u64 = 1_813_620_509_061_365;
 #[tokio::test]
 async fn message_interface_validate_mnemonic() -> Result<()> {
     let storage_path = "test-storage/message_interface_validate_mnemonic";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
     let secret_manager = r#"{"Mnemonic":"acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast"}"#;
     let client_options = r#"{"nodes":["http://localhost:14265"]}"#;
@@ -65,14 +64,14 @@ async fn message_interface_validate_mnemonic() -> Result<()> {
         response_type => panic!("Unexpected response type: {response_type:?}"),
     }
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[cfg(feature = "message_interface")]
 #[tokio::test]
 async fn message_interface_create_account() -> Result<()> {
     let storage_path = "test-storage/message_interface_create_account";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
     let secret_manager = r#"{"Mnemonic":"about solution utility exist rail budget vacuum major survey clerk pave ankle wealth gym gossip still medal expect strong rely amazing inspire lazy lunar"}"#;
     let client_options = r#"{
@@ -122,7 +121,7 @@ async fn message_interface_create_account() -> Result<()> {
         _ => panic!("unexpected response {response:?}"),
     }
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[ignore]
@@ -130,7 +129,7 @@ async fn message_interface_create_account() -> Result<()> {
 #[tokio::test]
 async fn message_interface_events() -> Result<()> {
     let storage_path = "test-storage/message_interface_events";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
     let secret_manager = r#"{"Mnemonic":"member captain exotic police quit giraffe oval album proof skin fame cannon soccer cinnamon gaze mango fetch identify vocal cause drink stem produce twice"}"#;
     let client_options = r#"{
@@ -219,14 +218,14 @@ async fn message_interface_events() -> Result<()> {
         panic!("unexpected response {response:?}");
     };
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[cfg(all(feature = "message_interface", feature = "events"))]
 #[tokio::test]
 async fn message_interface_emit_event() -> Result<()> {
     let storage_path = "test-storage/message_interface_emit_event";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
     let secret_manager = r#"{"Mnemonic":"father defy final warm illness local fetch property staff boss diamond icon burger people lemon scene silent slender never vacant lab lazy tube tomato"}"#;
     let client_options = r#"{"nodes":["http://localhost:14265"]}"#;
@@ -276,14 +275,14 @@ async fn message_interface_emit_event() -> Result<()> {
     // Event should not have fired, so we are still on 10 calls
     assert_eq!(10, event_counter.load(Ordering::SeqCst));
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[cfg(all(feature = "message_interface", feature = "stronghold"))]
 #[tokio::test]
 async fn message_interface_stronghold() -> Result<()> {
     let storage_path = "test-storage/message_interface_stronghold";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
     let snapshot_path = "test-storage/message_interface_stronghold/message_interface.stronghold";
     let secret_manager = format!("{{\"Stronghold\": {{\"snapshotPath\": \"{snapshot_path}\"}}}}");
 
@@ -333,14 +332,14 @@ async fn message_interface_stronghold() -> Result<()> {
         _ => panic!("unexpected response {response:?}"),
     }
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[cfg(feature = "message_interface")]
 #[tokio::test]
 async fn address_conversion_methods() -> Result<()> {
     let storage_path = "test-storage/address_conversion_methods";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
     let secret_manager = r#"{"Mnemonic":"acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast"}"#;
     let client_options = r#"{"nodes":["http://localhost:14265"]}"#;
@@ -385,14 +384,14 @@ async fn address_conversion_methods() -> Result<()> {
         response_type => panic!("Unexpected response type: {response_type:?}"),
     }
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[cfg(feature = "message_interface")]
 #[tokio::test]
 async fn message_interface_address_generation() -> Result<()> {
     let storage_path = "test-storage/message_interface_address_generation";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
     let secret_manager = r#"{"Mnemonic":"acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast"}"#;
     let client_options = r#"{"nodes":["http://localhost:14265"]}"#;
@@ -447,5 +446,5 @@ async fn message_interface_address_generation() -> Result<()> {
         response_type => panic!("Unexpected response type: {response_type:?}"),
     }
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }

@@ -8,20 +8,21 @@ mod common;
 use std::path::PathBuf;
 
 #[cfg(all(feature = "stronghold", feature = "storage"))]
+use iota_wallet::{account_manager::AccountManager, ClientOptions, Result};
+
+#[cfg(all(feature = "stronghold", feature = "storage"))]
 use crate::client::{
     constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
     node_manager::node::{Node, NodeDto, Url},
     secret::{mnemonic::MnemonicSecretManager, stronghold::StrongholdSecretManager, SecretManager},
 };
-#[cfg(all(feature = "stronghold", feature = "storage"))]
-use iota_wallet::{account_manager::AccountManager, ClientOptions, Result};
 
 #[tokio::test]
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore() -> Result<()> {
     let storage_path = "test-storage/backup_and_restore";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(common::NODE_LOCAL)?;
 
@@ -109,7 +110,7 @@ async fn backup_and_restore() -> Result<()> {
         account.generate_addresses(1, None).await?,
         recovered_account.generate_addresses(1, None).await?
     );
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[tokio::test]
@@ -117,7 +118,7 @@ async fn backup_and_restore() -> Result<()> {
 // Backup and restore with Stronghold and MnemonicSecretManager
 async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
     let storage_path = "test-storage/backup_and_restore_mnemonic_secret_manager";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(common::NODE_LOCAL)?;
 
@@ -193,7 +194,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
         account.generate_addresses(1, None).await?,
         recovered_account.generate_addresses(1, None).await?
     );
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[tokio::test]
@@ -201,7 +202,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
 // Backup and restore with Stronghold
 async fn backup_and_restore_different_coin_type() -> Result<()> {
     let storage_path = "test-storage/backup_and_restore_different_coin_type";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(common::NODE_LOCAL)?;
 
@@ -282,7 +283,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
     let node_dto = NodeDto::Node(Node::from(Url::parse(common::NODE_OTHER).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[tokio::test]
@@ -290,7 +291,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
 // Backup and restore with Stronghold
 async fn backup_and_restore_same_coin_type() -> Result<()> {
     let storage_path = "test-storage/backup_and_restore_same_coin_type";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(common::NODE_LOCAL)?;
 
@@ -369,7 +370,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
     let node_dto = NodeDto::Node(Node::from(Url::parse(common::NODE_OTHER).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[tokio::test]
@@ -377,7 +378,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
 // Backup and restore with Stronghold
 async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     let storage_path = "test-storage/backup_and_restore_different_coin_type_dont_ignore";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(common::NODE_OTHER)?;
 
@@ -462,5 +463,5 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     let node_dto = NodeDto::Node(Node::from(Url::parse(common::NODE_LOCAL).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }

@@ -1,26 +1,28 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod common;
-
-use crate::client::block::output::{
-    unlock_condition::{
-        AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
-        StateControllerAddressUnlockCondition, StorageDepositReturnUnlockCondition,
+use iota_sdk::{
+    types::block::output::{
+        unlock_condition::{
+            AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
+            StateControllerAddressUnlockCondition, StorageDepositReturnUnlockCondition,
+        },
+        AliasId, AliasOutputBuilder, BasicOutputBuilder, NftId, NftOutputBuilder, UnlockCondition,
     },
-    AliasId, AliasOutputBuilder, BasicOutputBuilder, NftId, NftOutputBuilder, UnlockCondition,
+    wallet::{account::SyncOptions, Result},
 };
-use iota_wallet::{account::SyncOptions, Result};
+
+use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
 async fn sync_only_most_basic_outputs() -> Result<()> {
     let storage_path = "test-storage/sync_only_most_basic_outputs";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
-    let account_0 = &common::create_accounts_with_funds(&manager, 1).await?[0];
+    let account_0 = &create_accounts_with_funds(&manager, 1).await?[0];
     let account_1 = manager.create_account().finish().await?;
 
     let account_1_address = *account_1.addresses().await?[0].address().as_ref();
@@ -117,5 +119,5 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
         );
     });
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }

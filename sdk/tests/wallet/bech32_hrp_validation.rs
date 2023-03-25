@@ -1,18 +1,20 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod common;
+use iota_sdk::{
+    client::Error as ClientError,
+    wallet::{account::OutputOptions, AddressWithAmount, Error, Result},
+};
 
-use crate::client::Error as ClientError;
-use iota_wallet::{account::OutputOptions, AddressWithAmount, Error, Result};
+use crate::wallet::common::{make_manager, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
 async fn bech32_hrp_send_amount() -> Result<()> {
     let storage_path = "test-storage/bech32_hrp_send_amount";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
     let account = manager.create_account().finish().await?;
 
@@ -40,16 +42,16 @@ async fn bech32_hrp_send_amount() -> Result<()> {
         _ => panic!("expected Client error variant"),
     }
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[ignore]
 #[tokio::test]
 async fn bech32_hrp_prepare_output() -> Result<()> {
     let storage_path = "test-storage/bech32_hrp_prepare_output";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
     let account = manager.create_account().finish().await?;
 
     let error = account
@@ -80,5 +82,5 @@ async fn bech32_hrp_prepare_output() -> Result<()> {
         _ => panic!("expected Client error variant"),
     }
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }

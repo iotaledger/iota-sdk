@@ -1,19 +1,19 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod common;
+use iota_sdk::wallet::{account::SyncOptions, NativeTokenOptions, Result, U256};
 
-use iota_wallet::{account::SyncOptions, NativeTokenOptions, Result, U256};
+use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
 async fn mint_and_increase_native_token_supply() -> Result<()> {
     let storage_path = "test-storage/mint_and_increase_native_token_supply";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
-    let account = &common::create_accounts_with_funds(&manager, 1).await?[0];
+    let account = &create_accounts_with_funds(&manager, 1).await?[0];
 
     let tx = account.create_alias_output(None, None).await?;
     account
@@ -65,18 +65,18 @@ async fn mint_and_increase_native_token_supply() -> Result<()> {
         U256::from(100)
     );
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[ignore]
 #[tokio::test]
 async fn native_token_foundry_metadata() -> Result<()> {
     let storage_path = "test-storage/native_token_foundry_metadata";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
-    let account = &common::create_accounts_with_funds(&manager, 1).await?[0];
+    let account = &create_accounts_with_funds(&manager, 1).await?[0];
 
     let tx = account.create_alias_output(None, None).await?;
     account
@@ -122,5 +122,5 @@ async fn native_token_foundry_metadata() -> Result<()> {
         &foundry_metadata
     );
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }

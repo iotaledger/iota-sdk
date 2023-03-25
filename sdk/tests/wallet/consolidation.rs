@@ -1,19 +1,19 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod common;
+use iota_sdk::wallet::{AddressWithAmount, Result};
 
-use iota_wallet::{AddressWithAmount, Result};
+use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
 async fn consolidation() -> Result<()> {
     let storage_path = "test-storage/consolidation";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
-    let account_0 = &common::create_accounts_with_funds(&manager, 1).await?[0];
+    let account_0 = &create_accounts_with_funds(&manager, 1).await?[0];
     let account_1 = manager.create_account().finish().await?;
 
     // Send 10 outputs to account_1
@@ -50,5 +50,5 @@ async fn consolidation() -> Result<()> {
     // Only one unspent output
     assert_eq!(account_1.unspent_outputs(None).await?.len(), 1);
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }

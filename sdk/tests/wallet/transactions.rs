@@ -1,19 +1,19 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod common;
+use iota_sdk::wallet::{account::TransactionOptions, AddressAndNftId, AddressWithAmount, NftOptions, Result};
 
-use iota_wallet::{account::TransactionOptions, AddressAndNftId, AddressWithAmount, NftOptions, Result};
+use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
 async fn send_amount() -> Result<()> {
     let storage_path = "test-storage/send_amount";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
-    let account_0 = &common::create_accounts_with_funds(&manager, 1).await?[0];
+    let account_0 = &create_accounts_with_funds(&manager, 1).await?[0];
     let account_1 = manager.create_account().finish().await?;
 
     let amount = 1_000_000;
@@ -34,18 +34,18 @@ async fn send_amount() -> Result<()> {
     let balance = account_1.sync(None).await.unwrap();
     assert_eq!(balance.base_coin.available, amount);
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[ignore]
 #[tokio::test]
 async fn send_amount_127_outputs() -> Result<()> {
     let storage_path = "test-storage/send_amount_127_outputs";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
-    let account_0 = &common::create_accounts_with_funds(&manager, 1).await?[0];
+    let account_0 = &create_accounts_with_funds(&manager, 1).await?[0];
     let account_1 = manager.create_account().finish().await?;
 
     let amount = 1_000_000;
@@ -70,18 +70,18 @@ async fn send_amount_127_outputs() -> Result<()> {
     let balance = account_1.sync(None).await.unwrap();
     assert_eq!(balance.base_coin.available, 127 * amount);
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[ignore]
 #[tokio::test]
 async fn send_amount_custom_input() -> Result<()> {
     let storage_path = "test-storage/send_amount_custom_input";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
+    let manager = make_manager(storage_path, None, None).await?;
 
-    let account_0 = &common::create_accounts_with_funds(&manager, 1).await?[0];
+    let account_0 = &create_accounts_with_funds(&manager, 1).await?[0];
     let account_1 = manager.create_account().finish().await?;
 
     // Send 10 outputs to account_1
@@ -124,17 +124,17 @@ async fn send_amount_custom_input() -> Result<()> {
     assert_eq!(tx.inputs.len(), 1);
     assert_eq!(tx.inputs.first().unwrap().metadata.output_id()?, custom_input.output_id);
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
 
 #[ignore]
 #[tokio::test]
 async fn send_nft() -> Result<()> {
     let storage_path = "test-storage/send_nft";
-    common::setup(storage_path)?;
+    setup(storage_path)?;
 
-    let manager = common::make_manager(storage_path, None, None).await?;
-    let accounts = &common::create_accounts_with_funds(&manager, 2).await?;
+    let manager = make_manager(storage_path, None, None).await?;
+    let accounts = &create_accounts_with_funds(&manager, 2).await?;
 
     let nft_options = vec![NftOptions {
         address: Some(accounts[0].addresses().await?[0].address().to_bech32()),
@@ -170,5 +170,5 @@ async fn send_nft() -> Result<()> {
     assert_eq!(balance.nfts.len(), 1);
     assert_eq!(*balance.nfts.first().unwrap(), nft_id);
 
-    common::tear_down(storage_path)
+    tear_down(storage_path)
 }
