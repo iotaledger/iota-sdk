@@ -9,12 +9,11 @@ use iota_sdk::client::node_manager::node::{Node, NodeDto, Url};
 #[cfg(feature = "stronghold")]
 use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
 use iota_sdk::{
-    client::constants::IOTA_COIN_TYPE,
-    wallet::{
-        account_manager::AccountManager,
+    client::{
+        constants::IOTA_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        ClientOptions, Result,
     },
+    wallet::{account_manager::AccountManager, ClientOptions, Result},
 };
 
 use crate::wallet::common::{make_manager, setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL, NODE_OTHER};

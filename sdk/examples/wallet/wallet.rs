@@ -7,12 +7,11 @@ use std::{env, time::Instant};
 
 use dotenv::dotenv;
 use iota_sdk::{
-    client::constants::SHIMMER_COIN_TYPE,
-    wallet::{
-        account_manager::AccountManager,
+    client::{
+        constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        AddressWithAmount, ClientOptions, Result,
     },
+    wallet::{account_manager::AccountManager, AddressWithAmount, ClientOptions, Result},
 };
 
 #[tokio::main]

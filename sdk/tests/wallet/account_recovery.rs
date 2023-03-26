@@ -6,11 +6,12 @@
 use std::time::Duration;
 
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, Client},
-    wallet::{
+    client::{
+        constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        Result,
+        Client,
     },
+    wallet::Result,
 };
 
 use crate::wallet::common::{make_manager, setup, tear_down};

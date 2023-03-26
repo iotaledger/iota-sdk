@@ -46,7 +46,6 @@ pub use self::{
     },
     error::Error,
 };
-pub use crate::client::{self, secret};
 
 /// The wallet Result type.
 pub type Result<T> = std::result::Result<T, Error>;

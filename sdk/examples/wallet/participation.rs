@@ -7,11 +7,12 @@ use std::{env, str::FromStr};
 
 use dotenv::dotenv;
 use iota_sdk::{
-    client::constants::SHIMMER_COIN_TYPE,
-    wallet::{
-        account::types::participation::ParticipationEventRegistrationOptions,
-        account_manager::AccountManager,
+    client::{
+        constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
+    },
+    wallet::{
+        account::types::participation::ParticipationEventRegistrationOptions, account_manager::AccountManager,
         ClientOptions, Result,
     },
 };

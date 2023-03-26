@@ -10,16 +10,16 @@ use std::env;
 
 use dotenv::dotenv;
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, request_funds_from_faucet},
+    client::{
+        constants::SHIMMER_COIN_TYPE,
+        request_funds_from_faucet,
+        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+    },
     types::block::output::{
         unlock_condition::{AddressUnlockCondition, UnlockCondition},
         BasicOutputBuilder,
     },
-    wallet::{
-        account_manager::AccountManager,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        ClientOptions, Result,
-    },
+    wallet::{account_manager::AccountManager, ClientOptions, Result},
 };
 
 #[tokio::main]

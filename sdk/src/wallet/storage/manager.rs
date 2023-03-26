@@ -6,11 +6,13 @@ use std::sync::Arc;
 use serde::{Deserialize, Serialize};
 use tokio::sync::{Mutex, RwLock};
 
-use crate::wallet::{
-    account::Account,
-    account_manager::builder::AccountManagerBuilder,
+use crate::{
     client::secret::{SecretManager, SecretManagerDto},
-    storage::{constants::*, Storage, StorageAdapter},
+    wallet::{
+        account::Account,
+        account_manager::builder::AccountManagerBuilder,
+        storage::{constants::*, Storage, StorageAdapter},
+    },
 };
 
 /// The storage used by the manager.

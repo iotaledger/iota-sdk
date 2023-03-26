@@ -16,12 +16,9 @@ use iota_sdk::{
             },
         },
         constants::SHIMMER_COIN_TYPE,
-    },
-    wallet::{
-        account_manager::AccountManager,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        ClientOptions, Result,
     },
+    wallet::{account_manager::AccountManager, ClientOptions, Result},
 };
 
 #[tokio::main]

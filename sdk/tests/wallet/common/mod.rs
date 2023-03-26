@@ -6,13 +6,13 @@
 mod constants;
 
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, request_funds_from_faucet, Client},
-    wallet::{
-        account::AccountHandle,
-        account_manager::AccountManager,
+    client::{
+        constants::SHIMMER_COIN_TYPE,
+        request_funds_from_faucet,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        ClientOptions, Result,
+        Client,
     },
+    wallet::{account::AccountHandle, account_manager::AccountManager, ClientOptions, Result},
 };
 
 pub use self::constants::*;

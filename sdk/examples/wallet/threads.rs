@@ -9,16 +9,15 @@ use std::env;
 
 use dotenv::dotenv;
 use iota_sdk::{
-    client::constants::SHIMMER_COIN_TYPE,
+    client::{
+        constants::SHIMMER_COIN_TYPE,
+        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+    },
     types::block::output::{
         unlock_condition::{AddressUnlockCondition, UnlockCondition},
         BasicOutputBuilder,
     },
-    wallet::{
-        account_manager::AccountManager,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        ClientOptions, Result,
-    },
+    wallet::{account_manager::AccountManager, ClientOptions, Result},
 };
 
 #[tokio::main]
