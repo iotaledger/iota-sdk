@@ -3,7 +3,7 @@
 
 use std::sync::Mutex;
 
-use iota_client::message_interface::{ClientMessageHandler, Message};
+use iota_sdk::client::message_interface::{ClientMessageHandler, Message};
 use jni::{
     objects::{JClass, JString},
     sys::jstring,
@@ -44,7 +44,7 @@ pub extern "system" fn Java_org_iota_apis_NativeApi_createMessageHandler(
                 return;
             }
 
-            match iota_client::message_interface::create_message_handler(Some(config)) {
+            match iota_sdk::client::message_interface::create_message_handler(Some(config)) {
                 Ok(message_handler) => {
                     message_handler_store.replace(message_handler);
                 }

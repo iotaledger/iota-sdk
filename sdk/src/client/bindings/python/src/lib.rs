@@ -11,7 +11,7 @@ pub mod types;
 
 use std::sync::Mutex;
 
-use ::iota_client::message_interface::{Message, Response};
+use ::iota_sdk::client::message_interface::{Message, Response};
 use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
 use once_cell::sync::OnceCell;
 use pyo3::{prelude::*, wrap_pyfunction};
@@ -39,7 +39,7 @@ pub fn init_logger(config: String) -> PyResult<()> {
 #[pyfunction]
 /// Create message handler for python-side usage.
 pub fn create_message_handler(options: Option<String>) -> Result<ClientMessageHandler> {
-    let message_handler = ::iota_client::message_interface::create_message_handler(options)?;
+    let message_handler = ::iota_sdk::client::message_interface::create_message_handler(options)?;
 
     Ok(ClientMessageHandler {
         client_message_handler: message_handler,

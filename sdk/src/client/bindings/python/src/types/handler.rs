@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_client::message_interface::ClientMessageHandler as RustClientMessageHandler;
+use iota_sdk::client::message_interface::ClientMessageHandler as RustClientMessageHandler;
 use pyo3::prelude::*;
 
 #[pyclass]

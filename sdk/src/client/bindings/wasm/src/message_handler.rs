@@ -3,7 +3,7 @@
 
 use std::rc::Rc;
 
-use iota_client::message_interface::{create_message_handler, ClientMessageHandler, Message, Response};
+use iota_sdk::client::message_interface::{create_message_handler, ClientMessageHandler, Message, Response};
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use wasm_bindgen_futures::future_to_promise;
 
@@ -56,7 +56,7 @@ pub fn send_message_async(message: String, messageHandler: &WasmMessageHandler) 
 async fn send_message_inner(handler: &ClientMessageHandler, serialized_message: String) -> Result<Response, JsValue> {
     let message: Message = match serde_json::from_str(&serialized_message) {
         Ok(msg) => msg,
-        Err(err) => return Ok(Response::Error(iota_client::Error::Json(err))),
+        Err(err) => return Ok(Response::Error(iota_sdk::client::Error::Json(err))),
     };
 
     let response = handler.send_message(message).await;

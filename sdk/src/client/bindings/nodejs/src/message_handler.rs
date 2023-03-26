@@ -3,7 +3,7 @@
 
 use std::sync::Arc;
 
-use iota_client::{
+use iota_sdk::client::{
     message_interface::{create_message_handler, ClientMessageHandler, Message, Response},
     mqtt::Topic,
 };

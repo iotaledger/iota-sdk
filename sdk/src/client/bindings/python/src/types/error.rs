@@ -15,8 +15,8 @@ pub struct Error {
     pub error: PyErr,
 }
 
-impl From<iota_client::error::Error> for Error {
-    fn from(err: iota_client::error::Error) -> Self {
+impl From<iota_sdk::client::error::Error> for Error {
+    fn from(err: iota_sdk::client::error::Error) -> Self {
         Error {
             error: PyErr::new::<exceptions::PyValueError, _>(err.to_string()),
         }
@@ -45,8 +45,8 @@ impl From<std::io::Error> for Error {
     }
 }
 
-impl From<iota_client::block::Error> for Error {
-    fn from(err: iota_client::block::Error) -> Self {
+impl From<iota_sdk::types::block::Error> for Error {
+    fn from(err: iota_sdk::types::block::Error) -> Self {
         Error {
             error: PyErr::new::<exceptions::PyValueError, _>(err.to_string()),
         }
