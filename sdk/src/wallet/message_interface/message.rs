@@ -9,11 +9,13 @@ use serde::{Deserialize, Serialize};
 
 use super::account_method::AccountMethod;
 #[cfg(feature = "events")]
-use crate::events::types::{WalletEvent, WalletEventType};
+use crate::wallet::events::types::{WalletEvent, WalletEventType};
 use crate::{
-    account::{operations::syncing::SyncOptions, types::AccountIdentifier},
     client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions, Url},
-    ClientOptions,
+    wallet::{
+        account::{operations::syncing::SyncOptions, types::AccountIdentifier},
+        ClientOptions,
+    },
 };
 
 /// The messages that can be sent to the actor.

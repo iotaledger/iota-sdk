@@ -11,10 +11,10 @@ use iota_sdk::wallet::{
     message_interface::{create_message_handler, AccountMethod, ManagerOptions, Message, Response},
     Result,
 };
-
 #[cfg(feature = "message_interface")]
-use crate::client::{
-    block::{
+use iota_sdk::{
+    client::{constants::SHIMMER_COIN_TYPE, ClientBuilder},
+    types::block::{
         address::Address,
         output::{
             dto::OutputDto,
@@ -22,9 +22,9 @@ use crate::client::{
             BasicOutputBuilder,
         },
     },
-    constants::SHIMMER_COIN_TYPE,
-    ClientBuilder,
 };
+
+use crate::wallet::common::{setup, tear_down, FAUCET_URL};
 
 #[cfg(feature = "message_interface")]
 const TOKEN_SUPPLY: u64 = 1_813_620_509_061_365;
@@ -176,7 +176,7 @@ async fn message_interface_events() -> Result<()> {
             let transaction = Message::CallAccountMethod {
                 account_id: "alias".into(),
                 method: AccountMethod::RequestFundsFromFaucet {
-                    url: common::FAUCET_URL.to_string(),
+                    url: FAUCET_URL.to_string(),
                     address: account.public_addresses[0].address().to_bech32(),
                 },
             };

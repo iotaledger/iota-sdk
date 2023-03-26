@@ -11,15 +11,17 @@ use std::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    account::{
-        types::{address::AddressWrapper, AccountAddress, AddressWithUnspentOutputs, TransactionDto},
-        Account, OutputDataDto,
-    },
-    client::block::{
+    types::block::{
         output::{dto::FoundryOutputDto, FoundryId, OutputId},
         payload::transaction::TransactionId,
     },
-    AddressWithAmount, AddressWithMicroAmount,
+    wallet::{
+        account::{
+            types::{address::AddressWrapper, AccountAddress, AddressWithUnspentOutputs, TransactionDto},
+            Account, OutputDataDto,
+        },
+        AddressWithAmount, AddressWithMicroAmount,
+    },
 };
 
 /// Dto for address with amount for `send_amount()`
@@ -77,7 +79,7 @@ impl TryFrom<&AddressWithMicroAmountDto> for AddressWithMicroAmount {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct AddressWithUnspentOutputsDto {
     /// The address.
-    #[serde(with = "crate::account::types::address_serde")]
+    #[serde(with = "crate::wallet::account::types::address_serde")]
     pub address: AddressWrapper,
     /// The address key index.
     #[serde(rename = "keyIndex")]

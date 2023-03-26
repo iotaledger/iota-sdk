@@ -17,7 +17,7 @@ url = { version = "2.3.1", default-features = false, features = [ "serde" ] }
 zeroize = { version = "1.5.7", default-features = false, features = [ "zeroize_derive" ] }
 
 # message_interface
-backtrace = { version = "0.3.67", default-features = false, features = [ "std" ], optional = true }
+
 tokio = { version = "1.26.0", default-features = false, features = [ "sync" ], optional = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
@@ -35,7 +35,6 @@ fern-logger = { version = "0.5.0", default-features = false }
 [features]
 default = [ "tls" ]
 tls = [ "reqwest/rustls-tls" ]
-message_interface = [ "backtrace", "tokio" ]
 
 [package.metadata.cargo-udeps.ignore]
 normal = [ "async-trait", "derive_builder" ]

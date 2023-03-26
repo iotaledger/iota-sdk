@@ -6,11 +6,13 @@
 use std::{env, str::FromStr};
 
 use dotenv::dotenv;
-use iota_sdk::client::{
-    api::GetAddressesBuilderOptions as GenerateAddressesOptions,
-    block::{block::dto::BlockDto, payload::transaction::dto::TransactionEssenceDto, BlockId},
-    message_interface::{self, Message, Response},
-    secret::SecretManagerDto,
+use iota_sdk::{
+    client::{
+        api::GetAddressesBuilderOptions as GenerateAddressesOptions,
+        message_interface::{self, Message, Response},
+        secret::SecretManagerDto,
+    },
+    types::block::{block::dto::BlockDto, payload::transaction::dto::TransactionEssenceDto, BlockId},
 };
 
 #[tokio::test]

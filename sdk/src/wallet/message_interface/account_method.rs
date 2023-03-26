@@ -4,47 +4,47 @@
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "participation")]
-use crate::account::types::participation::ParticipationEventRegistrationOptions;
-#[cfg(feature = "participation")]
-use crate::client::{
-    api_types::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
-    node_manager::node::Node,
-};
+use crate::wallet::account::types::participation::ParticipationEventRegistrationOptions;
 use crate::{
-    account::{
-        handle::FilterOptions,
-        operations::{
-            address_generation::AddressGenerationOptions,
-            output_claiming::OutputsToClaim,
-            syncing::SyncOptions,
-            transaction::{
-                high_level::{
-                    create_alias::AliasOutputOptionsDto,
-                    minting::{
-                        increase_native_token_supply::IncreaseNativeTokenSupplyOptionsDto,
-                        mint_native_token::NativeTokenOptionsDto, mint_nfts::NftOptionsDto,
+    client::api::{PreparedTransactionDataDto, SignedTransactionDataDto},
+    types::block::{
+        dto::U256Dto,
+        output::{
+            dto::{AliasIdDto, NativeTokenDto, NftIdDto, OutputDto, TokenIdDto, TokenSchemeDto},
+            feature::dto::FeatureDto,
+            unlock_condition::dto::UnlockConditionDto,
+            FoundryId, OutputId,
+        },
+        payload::transaction::TransactionId,
+    },
+    wallet::{
+        account::{
+            handle::FilterOptions,
+            operations::{
+                address_generation::AddressGenerationOptions,
+                output_claiming::OutputsToClaim,
+                syncing::SyncOptions,
+                transaction::{
+                    high_level::{
+                        create_alias::AliasOutputOptionsDto,
+                        minting::{
+                            increase_native_token_supply::IncreaseNativeTokenSupplyOptionsDto,
+                            mint_native_token::NativeTokenOptionsDto, mint_nfts::NftOptionsDto,
+                        },
                     },
+                    prepare_output::OutputOptionsDto,
+                    TransactionOptionsDto,
                 },
-                prepare_output::OutputOptionsDto,
-                TransactionOptionsDto,
             },
         },
+        message_interface::dtos::{AddressWithAmountDto, AddressWithMicroAmountDto},
+        AddressAndNftId, AddressNativeTokens,
     },
-    client::{
-        api::{PreparedTransactionDataDto, SignedTransactionDataDto},
-        block::{
-            dto::U256Dto,
-            output::{
-                dto::{AliasIdDto, NativeTokenDto, NftIdDto, OutputDto, TokenIdDto, TokenSchemeDto},
-                feature::dto::FeatureDto,
-                unlock_condition::dto::UnlockConditionDto,
-                FoundryId, OutputId,
-            },
-            payload::transaction::TransactionId,
-        },
-    },
-    message_interface::dtos::{AddressWithAmountDto, AddressWithMicroAmountDto},
-    AddressAndNftId, AddressNativeTokens,
+};
+#[cfg(feature = "participation")]
+use crate::{
+    client::node_manager::node::Node,
+    types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
 };
 
 /// Each public account method.

@@ -5,15 +5,17 @@ use crypto::keys::slip10::Chain;
 use serde::Deserialize;
 
 #[cfg(feature = "mqtt")]
-use crate::mqtt::Topic;
+use crate::client::mqtt::Topic;
 use crate::{
-    api::{
-        ClientBlockBuilderOptions as BuildBlockOptions, GetAddressesBuilderOptions as GenerateAddressesOptions,
-        PreparedTransactionDataDto,
+    client::{
+        api::{
+            ClientBlockBuilderOptions as BuildBlockOptions, GetAddressesBuilderOptions as GenerateAddressesOptions,
+            PreparedTransactionDataDto,
+        },
+        node_api::indexer::query_parameters::QueryParameter,
+        node_manager::node::NodeAuth,
+        secret::SecretManagerDto,
     },
-    node_api::indexer::query_parameters::QueryParameter,
-    node_manager::node::NodeAuth,
-    secret::SecretManagerDto,
     types::block::{
         address::AliasAddress,
         output::{

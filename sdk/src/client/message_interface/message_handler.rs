@@ -8,17 +8,20 @@ use futures::{Future, FutureExt};
 use zeroize::Zeroize;
 #[cfg(feature = "mqtt")]
 use {
-    crate::mqtt::{MqttPayload, Topic},
+    crate::client::mqtt::{MqttPayload, Topic},
     crate::types::block::payload::milestone::option::dto::ReceiptMilestoneOptionDto,
 };
 
 #[cfg(feature = "ledger_nano")]
-use crate::secret::ledger_nano::LedgerSecretManager;
+use crate::client::secret::ledger_nano::LedgerSecretManager;
 use crate::{
-    api::{PreparedTransactionData, PreparedTransactionDataDto},
-    message_interface::{message::Message, response::Response},
-    request_funds_from_faucet,
-    secret::{SecretManage, SecretManager},
+    client::{
+        api::{PreparedTransactionData, PreparedTransactionDataDto},
+        message_interface::{message::Message, response::Response},
+        request_funds_from_faucet,
+        secret::{SecretManage, SecretManager},
+        Client, Result,
+    },
     types::block::{
         address::{dto::AddressDto, Address},
         input::dto::UtxoInputDto,
@@ -35,7 +38,6 @@ use crate::{
         unlock::Unlock,
         Block, BlockDto, DtoError,
     },
-    Client, Result,
 };
 
 fn panic_to_response_message(panic: Box<dyn Any>) -> Response {

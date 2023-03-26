@@ -18,9 +18,8 @@ pub use self::{
     response::Response,
 };
 use crate::{
-    account_manager::AccountManager,
     client::secret::{SecretManager, SecretManagerDto},
-    ClientOptions,
+    wallet::{account_manager::AccountManager, ClientOptions},
 };
 
 #[derive(Serialize, Deserialize, Debug)]

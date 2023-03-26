@@ -1,6 +1,5 @@
 [dependencies]
 backtrace = { version = "0.3.67", default-features = false, features = [ "std" ] }
-fern-logger = { version = "0.5.0", default-features = false }
 futures = { version = "0.3.26", default-features = false }
 getset = { version = "0.1.2", default-features = false }
 instant = { version = "0.1.12", default-features = false }
@@ -26,7 +25,6 @@ dotenv = { version = "0.15.0", default-features = false }
 
 [features]
 default = [ "storage", "rocksdb" ]
-message_interface = []
 
 # udeps returns a false positive for this, so we add it here
 [package.metadata.cargo-udeps.ignore]

@@ -7,10 +7,9 @@ use std::collections::HashSet;
 use serde::Serialize;
 
 #[cfg(feature = "ledger_nano")]
-use crate::secret::LedgerNanoStatus;
+use crate::client::secret::LedgerNanoStatus;
 use crate::{
-    api::PreparedTransactionDataDto,
-    node_manager::node::Node,
+    client::{api::PreparedTransactionDataDto, node_manager::node::Node, Error, NetworkInfoDto, NodeInfoWrapper},
     types::{
         api::{
             core::{
@@ -38,7 +37,6 @@ use crate::{
             BlockDto, BlockId,
         },
     },
-    Error, NetworkInfoDto, NodeInfoWrapper,
 };
 
 /// The response message.

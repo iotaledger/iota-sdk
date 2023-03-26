@@ -17,36 +17,38 @@ use primitive_types::U256;
 use zeroize::Zeroize;
 
 #[cfg(feature = "events")]
-use crate::events::types::{Event, WalletEventType};
+use crate::wallet::events::types::{Event, WalletEventType};
 use crate::{
-    account::{
-        operations::transaction::{
-            high_level::{create_alias::AliasOutputOptions, minting::mint_native_token::MintTokenTransactionDto},
-            prepare_output::OutputOptions,
-            TransactionOptions,
-        },
-        types::{AccountBalanceDto, AccountIdentifier, TransactionDto},
-        OutputDataDto,
-    },
-    account_manager::AccountManager,
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
-        block::{
-            output::{
-                dto::{OutputBuilderAmountDto, OutputDto},
-                AliasId, AliasOutput, BasicOutput, FoundryOutput, NftId, NftOutput, Output, Rent, TokenId,
-            },
-            DtoError,
-        },
         constants::SHIMMER_TESTNET_BECH32_HRP,
         request_funds_from_faucet, utils, Client, NodeInfoWrapper,
     },
-    message_interface::{
-        account_method::AccountMethod, dtos::AccountDto, message::Message, response::Response,
-        AddressWithUnspentOutputsDto,
+    types::block::{
+        output::{
+            dto::{OutputBuilderAmountDto, OutputDto},
+            AliasId, AliasOutput, BasicOutput, FoundryOutput, NftId, NftOutput, Output, Rent, TokenId,
+        },
+        DtoError,
     },
-    AddressWithAmount, AddressWithMicroAmount, IncreaseNativeTokenSupplyOptions, NativeTokenOptions, NftOptions,
-    Result,
+    wallet::{
+        account::{
+            operations::transaction::{
+                high_level::{create_alias::AliasOutputOptions, minting::mint_native_token::MintTokenTransactionDto},
+                prepare_output::OutputOptions,
+                TransactionOptions,
+            },
+            types::{AccountBalanceDto, AccountIdentifier, TransactionDto},
+            OutputDataDto,
+        },
+        account_manager::AccountManager,
+        message_interface::{
+            account_method::AccountMethod, dtos::AccountDto, message::Message, response::Response,
+            AddressWithUnspentOutputsDto,
+        },
+        AddressWithAmount, AddressWithMicroAmount, IncreaseNativeTokenSupplyOptions, NativeTokenOptions, NftOptions,
+        Result,
+    },
 };
 
 fn panic_to_response_message(panic: Box<dyn Any>) -> Response {

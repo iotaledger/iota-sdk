@@ -6,30 +6,32 @@ use std::fmt::{Debug, Formatter, Result};
 use serde::Serialize;
 #[cfg(feature = "participation")]
 use {
-    crate::account::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes},
-    crate::client::api_types::plugins::participation::types::{ParticipationEventId, ParticipationEventStatus},
+    crate::types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventStatus},
+    crate::wallet::account::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes},
     std::collections::HashMap,
 };
 
 #[cfg(feature = "ledger_nano")]
 use crate::client::secret::LedgerNanoStatus;
 use crate::{
-    account::{
-        operations::transaction::high_level::minting::mint_native_token::MintTokenTransactionDto,
-        types::{address::AccountAddress, AccountBalanceDto, TransactionDto},
-        OutputDataDto,
-    },
     client::{
         api::{PreparedTransactionDataDto, SignedTransactionDataDto},
-        block::{
-            output::{dto::OutputDto, OutputId},
-            payload::transaction::TransactionId,
-            BlockId,
-        },
         NodeInfoWrapper,
     },
-    message_interface::dtos::{AccountDto, AddressWithUnspentOutputsDto},
-    Error,
+    types::block::{
+        output::{dto::OutputDto, OutputId},
+        payload::transaction::TransactionId,
+        BlockId,
+    },
+    wallet::{
+        account::{
+            operations::transaction::high_level::minting::mint_native_token::MintTokenTransactionDto,
+            types::{address::AccountAddress, AccountBalanceDto, TransactionDto},
+            OutputDataDto,
+        },
+        message_interface::dtos::{AccountDto, AddressWithUnspentOutputsDto},
+        Error,
+    },
 };
 
 /// The response message.

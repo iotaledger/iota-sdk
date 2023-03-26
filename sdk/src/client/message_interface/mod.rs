@@ -8,7 +8,7 @@ mod message_handler;
 mod response;
 
 pub use self::{message::Message, message_handler::ClientMessageHandler, response::Response};
-use crate::{ClientBuilder, Result};
+use crate::client::{ClientBuilder, Result};
 
 /// Create message handler with client options
 pub fn create_message_handler(client_config: Option<String>) -> Result<ClientMessageHandler> {
