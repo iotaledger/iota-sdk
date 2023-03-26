@@ -9,12 +9,11 @@ use std::{env, path::PathBuf};
 
 use dotenv::dotenv;
 use iota_sdk::{
-    client::constants::SHIMMER_COIN_TYPE,
-    wallet::{
-        account_manager::AccountManager,
+    client::{
+        constants::SHIMMER_COIN_TYPE,
         secret::{stronghold::StrongholdSecretManager, SecretManager},
-        ClientOptions, Result,
     },
+    wallet::{account_manager::AccountManager, ClientOptions, Result},
 };
 
 #[tokio::main]

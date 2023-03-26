@@ -2,20 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[cfg(all(feature = "stronghold", feature = "storage"))]
-mod common;
-
-#[cfg(all(feature = "stronghold", feature = "storage"))]
 use std::path::PathBuf;
 
 #[cfg(all(feature = "stronghold", feature = "storage"))]
-use iota_wallet::{account_manager::AccountManager, ClientOptions, Result};
-
-#[cfg(all(feature = "stronghold", feature = "storage"))]
-use crate::client::{
+use iota_sdk::client::{
     constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
     node_manager::node::{Node, NodeDto, Url},
     secret::{mnemonic::MnemonicSecretManager, stronghold::StrongholdSecretManager, SecretManager},
 };
+#[cfg(all(feature = "stronghold", feature = "storage"))]
+use iota_sdk::wallet::{account_manager::AccountManager, ClientOptions, Result};
+
+use crate::wallet::common::{setup, tear_down, NODE_LOCAL, NODE_OTHER};
 
 #[tokio::test]
 #[cfg(all(feature = "stronghold", feature = "storage"))]
@@ -24,7 +22,7 @@ async fn backup_and_restore() -> Result<()> {
     let storage_path = "test-storage/backup_and_restore";
     setup(storage_path)?;
 
-    let client_options = ClientOptions::new().with_node(common::NODE_LOCAL)?;
+    let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
     let stronghold_password = "some_hopefully_secure_password";
 
@@ -65,7 +63,7 @@ async fn backup_and_restore() -> Result<()> {
     let restore_manager = AccountManager::builder()
         .with_storage_path("test-storage/backup_and_restore/2")
         .with_secret_manager(SecretManager::Stronghold(stronghold))
-        .with_client_options(ClientOptions::new().with_node(common::NODE_OTHER)?)
+        .with_client_options(ClientOptions::new().with_node(NODE_OTHER)?)
         // Build with a different coin type, to check if it gets replaced by the one from the backup
         .with_coin_type(IOTA_COIN_TYPE)
         .finish()
@@ -98,7 +96,7 @@ async fn backup_and_restore() -> Result<()> {
 
     // compare restored client options
     let client_options = restore_manager.get_client_options().await;
-    let node_dto = NodeDto::Node(Node::from(Url::parse(common::NODE_LOCAL).unwrap()));
+    let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
     // Get account
@@ -120,7 +118,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
     let storage_path = "test-storage/backup_and_restore_mnemonic_secret_manager";
     setup(storage_path)?;
 
-    let client_options = ClientOptions::new().with_node(common::NODE_LOCAL)?;
+    let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(
         "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak",
@@ -162,7 +160,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         // Build with a different coin type, to check if it gets replaced by the one from the backup
         .with_coin_type(IOTA_COIN_TYPE)
-        .with_client_options(ClientOptions::new().with_node(common::NODE_OTHER)?)
+        .with_client_options(ClientOptions::new().with_node(NODE_OTHER)?)
         .finish()
         .await?;
 
@@ -182,7 +180,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
 
     // compare restored client options
     let client_options = restore_manager.get_client_options().await;
-    let node_dto = NodeDto::Node(Node::from(Url::parse(common::NODE_LOCAL).unwrap()));
+    let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
     // Get account
@@ -204,7 +202,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
     let storage_path = "test-storage/backup_and_restore_different_coin_type";
     setup(storage_path)?;
 
-    let client_options = ClientOptions::new().with_node(common::NODE_LOCAL)?;
+    let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
     let stronghold_password = "some_hopefully_secure_password";
 
@@ -249,7 +247,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
     let restore_manager = AccountManager::builder()
         .with_storage_path("test-storage/backup_and_restore_different_coin_type/2")
         .with_secret_manager(SecretManager::Stronghold(stronghold))
-        .with_client_options(ClientOptions::new().with_node(common::NODE_OTHER)?)
+        .with_client_options(ClientOptions::new().with_node(NODE_OTHER)?)
         // Build with a different coin type, to check if it gets replaced by the one from the backup
         .with_coin_type(IOTA_COIN_TYPE)
         .finish()
@@ -280,7 +278,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
 
     // compare restored client options
     let client_options = restore_manager.get_client_options().await;
-    let node_dto = NodeDto::Node(Node::from(Url::parse(common::NODE_OTHER).unwrap()));
+    let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_OTHER).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
     tear_down(storage_path)
@@ -293,7 +291,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
     let storage_path = "test-storage/backup_and_restore_same_coin_type";
     setup(storage_path)?;
 
-    let client_options = ClientOptions::new().with_node(common::NODE_LOCAL)?;
+    let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
     let stronghold_password = "some_hopefully_secure_password";
 
@@ -338,7 +336,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
     let restore_manager = AccountManager::builder()
         .with_storage_path("test-storage/backup_and_restore_same_coin_type/2")
         .with_secret_manager(SecretManager::Stronghold(stronghold))
-        .with_client_options(ClientOptions::new().with_node(common::NODE_OTHER)?)
+        .with_client_options(ClientOptions::new().with_node(NODE_OTHER)?)
         // Build with same coin type
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
@@ -367,7 +365,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
 
     // compare client options, they are not restored
     let client_options = restore_manager.get_client_options().await;
-    let node_dto = NodeDto::Node(Node::from(Url::parse(common::NODE_OTHER).unwrap()));
+    let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_OTHER).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
     tear_down(storage_path)
@@ -380,7 +378,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     let storage_path = "test-storage/backup_and_restore_different_coin_type_dont_ignore";
     setup(storage_path)?;
 
-    let client_options = ClientOptions::new().with_node(common::NODE_OTHER)?;
+    let client_options = ClientOptions::new().with_node(NODE_OTHER)?;
 
     let stronghold_password = "some_hopefully_secure_password";
 
@@ -425,7 +423,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     let restore_manager = AccountManager::builder()
         .with_storage_path("test-storage/backup_and_restore_different_coin_type_dont_ignore/2")
         .with_secret_manager(SecretManager::Stronghold(stronghold))
-        .with_client_options(ClientOptions::new().with_node(common::NODE_LOCAL)?)
+        .with_client_options(ClientOptions::new().with_node(NODE_LOCAL)?)
         // Build with a different coin type, to check if it gets replaced by the one from the backup
         .with_coin_type(IOTA_COIN_TYPE)
         .finish()
@@ -460,7 +458,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
 
     // compare client options, they are not restored
     let client_options = restore_manager.get_client_options().await;
-    let node_dto = NodeDto::Node(Node::from(Url::parse(common::NODE_LOCAL).unwrap()));
+    let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
     tear_down(storage_path)

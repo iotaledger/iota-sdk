@@ -9,7 +9,7 @@ use async_trait::async_trait;
 use crypto::ciphers::chacha;
 
 use super::{common::PRIVATE_DATA_CLIENT_PATH, StrongholdAdapter};
-use crate::{storage::StorageProvider, Error, Result};
+use crate::client::{storage::StorageProvider, Error, Result};
 
 #[async_trait]
 impl StorageProvider for StrongholdAdapter {
@@ -79,7 +79,7 @@ mod tests {
         use std::fs;
 
         use super::StrongholdAdapter;
-        use crate::storage::StorageProvider;
+        use crate::client::storage::StorageProvider;
 
         let snapshot_path = "test_stronghold_db.stronghold";
         let mut stronghold = StrongholdAdapter::builder()

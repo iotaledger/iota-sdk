@@ -8,11 +8,12 @@
 use std::env;
 
 use dotenv::dotenv;
-use iota_sdk::wallet::{account_manager::AccountManager, NftOptions, Result};
-
-use crate::client::block::{
-    output::{NftId, Output, OutputId},
-    payload::transaction::TransactionEssence,
+use iota_sdk::{
+    types::block::{
+        output::{NftId, Output, OutputId},
+        payload::transaction::TransactionEssence,
+    },
+    wallet::{account_manager::AccountManager, NftOptions, Result},
 };
 
 #[tokio::main]

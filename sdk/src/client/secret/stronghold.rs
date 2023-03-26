@@ -3,7 +3,7 @@
 
 //! Stronghold-as-a-Secret-Manager.
 
-use crate::stronghold::StrongholdAdapter;
+use crate::client::stronghold::StrongholdAdapter;
 
 /// Secret manager that uses [`iota_stronghold`] as the backing storage.
 ///

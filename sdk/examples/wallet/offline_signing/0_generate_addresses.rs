@@ -13,14 +13,13 @@ use std::{
 };
 
 use dotenv::dotenv;
-use iota_sdk::wallet::{
-    account::types::AccountAddress,
-    account_manager::AccountManager,
-    secret::{stronghold::StrongholdSecretManager, SecretManager},
-    ClientOptions, Result,
+use iota_sdk::{
+    client::{
+        constants::{SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
+        secret::{stronghold::StrongholdSecretManager, SecretManager},
+    },
+    wallet::{account::types::AccountAddress, account_manager::AccountManager, ClientOptions, Result},
 };
-
-use crate::client::constants::{SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE};
 
 const ADDRESS_FILE_NAME: &str = "examples/offline_signing/addresses.json";
 

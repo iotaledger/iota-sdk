@@ -3,7 +3,7 @@
 
 //! Stronghold-as-a-Database implementation.
 
-use crate::stronghold::StrongholdAdapter;
+use crate::client::stronghold::StrongholdAdapter;
 
 /// Stronghold as a database provider.
 ///

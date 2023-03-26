@@ -9,7 +9,7 @@ use std::env;
 
 use dotenv::dotenv;
 use iota_sdk::{
-    client::block::output::{
+    types::block::output::{
         feature::{IssuerFeature, SenderFeature},
         unlock_condition::AddressUnlockCondition,
         Feature, NftId, NftOutputBuilder, UnlockCondition,

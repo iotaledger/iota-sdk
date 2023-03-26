@@ -4,10 +4,8 @@
 use std::sync::atomic::Ordering;
 
 use crate::{
-    account::Account,
-    account_manager::AccountManager,
     client::{secret::SecretManagerDto, storage::StorageProvider, stronghold::StrongholdAdapter},
-    ClientOptions,
+    wallet::{account::Account, account_manager::AccountManager, ClientOptions},
 };
 
 pub(crate) const CLIENT_OPTIONS_KEY: &str = "client_options";

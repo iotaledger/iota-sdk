@@ -4,8 +4,11 @@
 use iota_sdk::wallet::Result;
 #[cfg(feature = "stronghold")]
 use {
-    crate::client::{constants::SHIMMER_COIN_TYPE, secret::stronghold::StrongholdSecretManager},
-    iota_wallet::{account_manager::AccountManager, secret::SecretManager, ClientOptions},
+    iota_sdk::client::{
+        constants::SHIMMER_COIN_TYPE,
+        secret::{stronghold::StrongholdSecretManager, SecretManager},
+    },
+    iota_sdk::wallet::{account_manager::AccountManager, ClientOptions},
     std::path::PathBuf,
 };
 

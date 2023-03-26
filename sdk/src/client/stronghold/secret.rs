@@ -18,12 +18,14 @@ use super::{
     StrongholdAdapter,
 };
 use crate::{
-    client::secret::{GenerateAddressOptions, SecretManage},
+    client::{
+        secret::{GenerateAddressOptions, SecretManage},
+        Error, Result,
+    },
     types::block::{
         address::{Address, Ed25519Address},
         signature::Ed25519Signature,
     },
-    Error, Result,
 };
 
 #[async_trait]
@@ -229,7 +231,7 @@ mod tests {
     use std::path::Path;
 
     use super::*;
-    use crate::constants::IOTA_COIN_TYPE;
+    use crate::client::constants::IOTA_COIN_TYPE;
 
     #[tokio::test]
     async fn test_address_generation() {

@@ -19,9 +19,6 @@ zeroize = { version = "1.5.7", default-features = false, features = [ "zeroize_d
 # ledger hardware wallets
 iota-ledger-nano = { version = "1.0.0-alpha.2", default-features = false, optional = true }
 
-# stronghold secret manager integration
-iota_stronghold = { version = "1.0.5", default-features = false, features = [ "std" ], optional = true }
-
 # message_interface
 backtrace = { version = "0.3.67", default-features = false, features = [ "std" ], optional = true }
 tokio = { version = "1.26.0", default-features = false, features = [ "sync" ], optional = true }
@@ -42,7 +39,6 @@ fern-logger = { version = "0.5.0", default-features = false }
 default = [ "tls" ]
 ledger_nano = [ "iota-ledger-nano" ]
 tls = [ "reqwest/rustls-tls" ]
-stronghold = [ "iota_stronghold" ]
 message_interface = [ "backtrace", "tokio" ]
 participation = [ ]
 

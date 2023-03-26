@@ -9,7 +9,7 @@ use std::{env, str::FromStr};
 
 use dotenv::dotenv;
 use iota_sdk::{
-    client::block::output::NftId,
+    types::block::output::NftId,
     wallet::{account_manager::AccountManager, AddressAndNftId, Result},
 };
 

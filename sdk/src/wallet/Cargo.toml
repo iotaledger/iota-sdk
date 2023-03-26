@@ -25,11 +25,8 @@ wasm-bindgen-futures = { version = "0.4.34", default-features = false }
 dotenv = { version = "0.15.0", default-features = false }
 
 [features]
-# only default for now, should later be replaced by stronghold since stronghold is more secure
-default = [ "storage", "rocksdb", "stronghold" ]
+default = [ "storage", "rocksdb" ]
 ledger_nano = [ "iota-client/ledger_nano" ]
-stronghold = [ "iota-client/stronghold", "gloo-storage" ]
-storage = []
 message_interface = []
 events = []
 participation = [ "iota-client/participation", "storage" ]

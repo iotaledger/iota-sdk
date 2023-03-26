@@ -19,9 +19,9 @@ use iota_sdk::{
             transaction::validate_transaction_payload_length, PreparedTransactionData, PreparedTransactionDataDto,
             SignedTransactionData, SignedTransactionDataDto,
         },
-        block::{output::RentStructureBuilder, payload::TransactionPayload, protocol::ProtocolParameters},
         secret::{stronghold::StrongholdSecretManager, SecretManageExt, SecretManager},
     },
+    types::block::{output::RentStructureBuilder, payload::TransactionPayload, protocol::ProtocolParameters},
     wallet::Result,
 };
 

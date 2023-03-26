@@ -74,20 +74,20 @@ async fn stronghold_mnemonic_missing() -> Result<()> {
     // Cleanup of a possibly failed run
     std::fs::remove_dir_all("stronghold_mnemonic_missing").unwrap_or(());
 
-    let stronghold_secret_manager = iota_client::secret::stronghold::StrongholdSecretManager::builder()
+    let stronghold_secret_manager = iota_sdk::client::secret::stronghold::StrongholdSecretManager::builder()
         .password("some_hopefully_secure_password")
         .build("stronghold_mnemonic_missing/test.stronghold")?;
 
     // Generating addresses will fail because no mnemonic has been stored
     let error = GetAddressesBuilder::new(&SecretManager::Stronghold(stronghold_secret_manager))
         // .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
-        // .with_coin_type(iota_client::constants::SHIMMER_COIN_TYPE)
+        // .with_coin_type(iota_sdk::client::constants::SHIMMER_COIN_TYPE)
         .finish()
         .await
         .unwrap_err();
 
     match error {
-        iota_client::Error::StrongholdMnemonicMissing => {}
+        iota_sdk::client::Error::StrongholdMnemonicMissing => {}
         _ => panic!("expected StrongholdMnemonicMissing error"),
     }
 

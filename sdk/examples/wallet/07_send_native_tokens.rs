@@ -9,7 +9,7 @@ use std::{env, str::FromStr};
 
 use dotenv::dotenv;
 use iota_sdk::{
-    client::block::{
+    types::block::{
         address::Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken, TokenId, UnlockCondition},
     },

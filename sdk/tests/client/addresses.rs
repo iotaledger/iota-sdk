@@ -2,17 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[cfg(feature = "message_interface")]
-use iota_client::api::GetAddressesBuilderOptions;
+use iota_sdk::client::api::GetAddressesBuilderOptions;
 #[cfg(feature = "message_interface")]
-use iota_client::message_interface;
+use iota_sdk::client::message_interface;
 #[cfg(feature = "message_interface")]
-use iota_client::message_interface::{Message, Response};
+use iota_sdk::client::message_interface::{Message, Response};
 #[cfg(feature = "stronghold")]
-use iota_client::secret::stronghold::StrongholdSecretManager;
+use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
 #[cfg(all(feature = "message_interface", feature = "stronghold"))]
-use iota_client::secret::types::StrongholdDto;
+use iota_sdk::client::secret::types::StrongholdDto;
 #[cfg(feature = "message_interface")]
-use iota_client::secret::SecretManagerDto;
+use iota_sdk::client::secret::SecretManagerDto;
 use iota_sdk::{
     client::{
         api::GetAddressesBuilder,

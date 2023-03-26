@@ -9,11 +9,12 @@
 use std::env;
 
 use dotenv::dotenv;
-use iota_sdk::wallet::{account_manager::AccountManager, ClientOptions, Result};
-
-use crate::client::{
-    constants::SHIMMER_COIN_TYPE,
-    secret::{mnemonic::MnemonicSecretManager, SecretManager},
+use iota_sdk::{
+    client::{
+        constants::SHIMMER_COIN_TYPE,
+        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+    },
+    wallet::{account_manager::AccountManager, ClientOptions, Result},
 };
 
 #[tokio::main]

@@ -63,7 +63,7 @@ use tokio::{sync::Mutex, task::JoinHandle};
 use zeroize::Zeroizing;
 
 use self::common::PRIVATE_DATA_CLIENT_PATH;
-use crate::{storage::StorageProvider, Error, Result};
+use crate::client::{storage::StorageProvider, Error, Result};
 
 /// A wrapper on [Stronghold].
 ///

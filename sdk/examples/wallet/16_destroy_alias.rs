@@ -8,9 +8,10 @@
 use std::{env, str::FromStr};
 
 use dotenv::dotenv;
-use iota_sdk::wallet::{account_manager::AccountManager, Result};
-
-use crate::client::block::output::AliasId;
+use iota_sdk::{
+    types::block::output::AliasId,
+    wallet::{account_manager::AccountManager, Result},
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {

@@ -21,6 +21,7 @@ async-trait = { version = "0.1.67", default-features = false, optional = true }
 regex = { version = "1.7.1", default-features = false, features = [ "std", "unicode-perl" ], optional = true }
 rumqttc = { version = "0.20.0", default-features = false, features = [ "websocket" ], optional = true }
 once_cell = { version = "1.17.1", default-features = false, features = [ "std" ], optional = true }
+iota_stronghold = { version = "1.0.5", default-features = false, features = [ "std" ], optional = true }
 
 prefix-hex = { version = "0.7.0", default-features = false, features = [ "std", "primitive-types" ] }
 # tokio = { version = "1.26.0", default-features = false, features = [ "sync", "rt", "time" ] }
@@ -62,6 +63,7 @@ pow = [ ]
 wallet = [ ]
 storage = [ "async-trait" ]
 mqtt = [ "regex", "rumqttc", "once_cell" ]
+stronghold = [ "iota_stronghold" ]
 
 default = [ "api", "block", "std" ]
 api = [ "block", "dto", "getset", "serde_repr" ]

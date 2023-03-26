@@ -32,7 +32,7 @@ use self::stronghold::StrongholdSecretManager;
 pub use self::types::{GenerateAddressOptions, LedgerNanoStatus};
 use self::{mnemonic::MnemonicSecretManager, placeholder::PlaceholderSecretManager};
 #[cfg(feature = "stronghold")]
-use crate::secret::types::StrongholdDto;
+use crate::client::secret::types::StrongholdDto;
 use crate::{
     client::{
         api::{
