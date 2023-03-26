@@ -5,7 +5,7 @@ pub mod types;
 
 use std::sync::Mutex;
 
-use ::iota_wallet::{
+use ::iota_sdk::wallet::{
     events::types::WalletEventType,
     message_interface::{init_logger as init_logger_rust, ManagerOptions, Message},
 };
@@ -50,7 +50,7 @@ pub fn create_message_handler(options: Option<String>) -> Result<WalletMessageHa
         _ => None,
     };
     let message_handler =
-        crate::block_on(async { ::iota_wallet::message_interface::create_message_handler(options).await })?;
+        crate::block_on(async { ::iota_sdk::wallet::message_interface::create_message_handler(options).await })?;
 
     Ok(WalletMessageHandler {
         wallet_message_handler: message_handler,

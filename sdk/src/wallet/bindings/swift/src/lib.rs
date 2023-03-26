@@ -9,7 +9,7 @@ use std::{
     sync::Arc,
 };
 
-use iota_wallet::{
+use iota_sdk::wallet::{
     events::types::{Event, WalletEventType},
     message_interface::{self, init_logger, ManagerOptions, Message, WalletMessageHandler},
 };

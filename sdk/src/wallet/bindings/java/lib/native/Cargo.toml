@@ -16,7 +16,7 @@ name = "iota_wallet"
 crate-type = [ "cdylib" ]
 
 [dependencies]
-iota-wallet = { path = "../../../..", features = [ "message_interface", "events", "rocksdb"] }
+iota-sdk = { path = "../../../../../..", features = [ "message_interface", "events", "rocksdb"] }
 
 futures = { version = "0.3.26", default-features = false }
 jni = { version = "0.21.1", default-features = false }
@@ -30,4 +30,4 @@ log = { version = "0.4.0", default-features = false }
 android_logger = { version = "0.13", default-features = false }
 
 [features]
-ledger_nano = [ "iota-wallet/ledger_nano" ]
+ledger_nano = [ "iota-sdk/ledger_nano" ]

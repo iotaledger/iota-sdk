@@ -7,7 +7,7 @@ use std::{convert::TryFrom, sync::Mutex};
 
 #[cfg(target_os = "android")]
 use android_logger::Config;
-use iota_wallet::{
+use iota_sdk::wallet::{
     events::types::{Event, WalletEventType},
     message_interface::{create_message_handler, init_logger, ManagerOptions, Message, WalletMessageHandler},
 };

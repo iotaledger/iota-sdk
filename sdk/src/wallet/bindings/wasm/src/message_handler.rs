@@ -3,7 +3,7 @@
 
 use std::{cell::RefCell, rc::Rc};
 
-use iota_wallet::{
+use iota_sdk::wallet::{
     events::types::{Event, WalletEventType},
     message_interface::{
         create_message_handler, init_logger as init_logger_rust, ManagerOptions, Message, Response,

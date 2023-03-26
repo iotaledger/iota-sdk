@@ -3,7 +3,7 @@
 
 use std::convert::From;
 
-use iota_wallet::Error as RustError;
+use iota_sdk::wallet::Error as RustError;
 use pyo3::{exceptions, prelude::*};
 
 pub type Result<T> = std::result::Result<T, Error>;

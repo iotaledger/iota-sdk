@@ -1,7 +1,7 @@
 // Copyright 2020 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_wallet::message_interface::WalletMessageHandler as RustWalletMessageHandler;
+use iota_sdk::wallet::message_interface::WalletMessageHandler as RustWalletMessageHandler;
 use pyo3::prelude::*;
 
 #[pyclass]
