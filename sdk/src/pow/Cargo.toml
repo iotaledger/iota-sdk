@@ -4,6 +4,3 @@ num_cpus = { version = "1.15.0", default-features = false }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
 instant = { version = "0.1.12", default-features = false, features = [ "wasm-bindgen" ] }
-
-[dev-dependencies]
-iota-types = { path = "../types", default-features = false, features = [ "rand", "block" ] }

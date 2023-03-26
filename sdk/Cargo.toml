@@ -25,6 +25,7 @@ iota_stronghold = { version = "1.0.5", default-features = false, features = [ "s
 iota-ledger-nano = { version = "1.0.0-alpha.2", default-features = false, optional = true }
 backtrace = { version = "0.3.67", default-features = false, features = [ "std" ], optional = true }
 fern-logger = { version = "0.5.0", default-features = false, optional = true }
+log = { version = "0.4.17", default-features = false, optional = true }
 
 prefix-hex = { version = "0.7.0", default-features = false, features = [ "std", "primitive-types" ] }
 # tokio = { version = "1.26.0", default-features = false, features = [ "sync", "rt", "time" ] }
@@ -32,7 +33,6 @@ tokio = { version = "1.26.0", default-features = false, features = [ "macros", "
 instant = { version = "0.1.12", default-features = false, features = [ "wasm-bindgen" ] }
 serde = { version = "1.0.152", default-features = false, features = [ "derive" ], optional = true }
 thiserror = { version = "1.0.39", default-features = false }
-log = { version = "0.4.17", default-features = false }
 num_cpus = { version = "1.15.0", default-features = false }
 hashbrown = { version = "0.13.2", default-features = false, features = [ "ahash", "inline-more", "serde" ] }
 derive_builder = { version = "0.12.0", default-features = false, features = [ "std" ]}
@@ -59,11 +59,12 @@ iterator-sorted = { version = "0.1.0", default-features = false }
 iota-sdk = { version = "0.1.0", path = ".", default-features = false, features = [ "rand" ] }
 dotenv = { version = "0.15.0", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
+# num_cpus = { version = "1.15.0", default-features = false }
 
 [features]
-client = [ "async-trait" ]
+client = [ "async-trait", "log" ]
 pow = [ ]
-wallet = [ ]
+wallet = [ "log" ]
 storage = [ "async-trait" ]
 mqtt = [ "regex", "rumqttc", "once_cell" ]
 stronghold = [ "iota_stronghold" ]
@@ -71,6 +72,7 @@ events = [ ]
 ledger_nano = [ "iota-ledger-nano" ]
 participation = [ "storage" ]
 message_interface = [ "backtrace", "fern-logger" ]
+tls = [ "reqwest/rustls-tls" ]
 
 default = [ "api", "block", "std" ]
 api = [ "block", "dto", "getset", "serde_repr" ]

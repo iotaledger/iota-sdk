@@ -5,7 +5,6 @@ futures = { version = "0.3.26", default-features = false, features = [ "thread-p
 hashbrown = { version = "0.13.2", default-features = false, features = [ "ahash", "inline-more" ] }
 instant = { version = "0.1.12", default-features = false, features = [ "wasm-bindgen" ] }
 iota-crypto = { version = "0.15.3", default-features = false, features = [ "std", "chacha", "blake2b", "ed25519", "random", "slip10", "bip39", "bip39-en", "ternary_encoding" ] }
-log = { version = "0.4.17", default-features = false }
 packable = { version = "0.7.0", default-features = false, features = [ "serde", "primitive-types", "std" ] }
 prefix-hex = { version = "0.7.0", default-features = false, features = [ "std" ] }
 primitive-types = { version = "0.12.1", default-features = false }
@@ -26,15 +25,8 @@ tokio = { version = "1.26.0", default-features = false, features = [ "macros", "
 [target.'cfg(target_family = "wasm")'.dependencies]
 gloo-timers = { version = "0.2.6", default-features = false, features = [ "futures" ] }
 
-[dev-dependencies]
-iota-types = { version = "1.0.0-rc.7", path = "../types", default-features = false, features = [ "rand" ] }
-
-dotenv = { version = "0.15.0", default-features = false }
-fern-logger = { version = "0.5.0", default-features = false }
-
 [features]
 default = [ "tls" ]
-tls = [ "reqwest/rustls-tls" ]
 
 [package.metadata.cargo-udeps.ignore]
 normal = [ "async-trait", "derive_builder" ]

@@ -17,10 +17,6 @@ serde-big-array = { version = "0.5.1", default-features = false, optional = true
 serde_json = { version = "1.0.94", default-features = false, features = [ "alloc" ], optional = true }
 serde_repr = { version = "0.1.11", default-features = false, optional = true }
 
-[dev-dependencies]
-iota-pow = { version = "1.0.0-rc.4", path = "../pow", default-features = false }
-num_cpus = { version = "1.15.0", default-features = false }
-
 [features]
 default = [ "api", "block", "std" ]
 
