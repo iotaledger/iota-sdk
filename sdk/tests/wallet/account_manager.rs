@@ -17,7 +17,7 @@ use iota_sdk::{
     },
 };
 
-use crate::wallet::common::{make_manager, setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL};
+use crate::wallet::common::{make_manager, setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL, NODE_OTHER};
 
 #[cfg(feature = "storage")]
 #[tokio::test]

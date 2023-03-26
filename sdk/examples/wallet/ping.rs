@@ -10,20 +10,16 @@ use std::env;
 
 use dotenv::dotenv;
 use iota_sdk::{
-    client::constants::SHIMMER_COIN_TYPE,
+    client::{constants::SHIMMER_COIN_TYPE, request_funds_from_faucet},
+    types::block::output::{
+        unlock_condition::{AddressUnlockCondition, UnlockCondition},
+        BasicOutputBuilder,
+    },
     wallet::{
         account_manager::AccountManager,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
         ClientOptions, Result,
     },
-};
-
-use crate::client::{
-    block::output::{
-        unlock_condition::{AddressUnlockCondition, UnlockCondition},
-        BasicOutputBuilder,
-    },
-    request_funds_from_faucet,
 };
 
 #[tokio::main]
@@ -117,7 +113,7 @@ async fn main() -> Result<()> {
                         &env::var("NODE_URL").unwrap(),
                         tx.block_id.expect("no block created yet")
                     );
-                    iota_wallet::Result::Ok(n)
+                    iota_sdk::wallet::Result::Ok(n)
                 })
                 .await
             });

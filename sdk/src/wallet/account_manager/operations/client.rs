@@ -4,8 +4,7 @@
 use std::collections::HashSet;
 
 #[cfg(feature = "storage")]
-use wallet::account_manager::builder::AccountManagerBuilder;
-
+use crate::wallet::account_manager::builder::AccountManagerBuilder;
 use crate::{
     client::{
         node_manager::node::{Node, NodeAuth, NodeDto},

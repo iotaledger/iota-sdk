@@ -7,9 +7,9 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::{Mutex, RwLock};
 
 #[cfg(feature = "events")]
-use crate::events::EventEmitter;
+use crate::wallet::events::EventEmitter;
 #[cfg(feature = "storage")]
-use crate::storage::manager::StorageManagerHandle;
+use crate::wallet::storage::manager::StorageManagerHandle;
 use crate::{
     client::{secret::SecretManager, Client},
     types::block::{

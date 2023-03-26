@@ -11,9 +11,9 @@ use tokio::sync::Mutex;
 use tokio::sync::RwLock;
 
 #[cfg(feature = "events")]
-use crate::events::EventEmitter;
+use crate::wallet::events::EventEmitter;
 #[cfg(feature = "storage")]
-use crate::storage::manager::StorageManagerHandle;
+use crate::wallet::storage::manager::StorageManagerHandle;
 use crate::{
     client::secret::{SecretManage, SecretManager},
     types::block::address::Address,

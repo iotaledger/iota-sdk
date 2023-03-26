@@ -17,6 +17,8 @@ all-features = true
 rustdoc-args = [ "--cfg", "docsrs" ]
 
 [dependencies]
+async-trait = { version = "0.1.67", default-features = false, optional = true }
+
 prefix-hex = { version = "0.7.0", default-features = false, features = [ "std", "primitive-types" ] }
 # tokio = { version = "1.26.0", default-features = false, features = [ "sync", "rt", "time" ] }
 tokio = { version = "1.26.0", default-features = false, features = [ "macros", "rt-multi-thread", "time", "sync" ] }
@@ -24,7 +26,6 @@ instant = { version = "0.1.12", default-features = false, features = [ "wasm-bin
 serde = { version = "1.0.152", default-features = false, features = [ "derive" ], optional = true }
 thiserror = { version = "1.0.39", default-features = false }
 log = { version = "0.4.17", default-features = false }
-async-trait = { version = "0.1.66", default-features = false }
 num_cpus = { version = "1.15.0", default-features = false }
 hashbrown = { version = "0.13.2", default-features = false, features = [ "ahash", "inline-more", "serde" ] }
 derive_builder = { version = "0.12.0", default-features = false, features = [ "std" ]}
@@ -53,12 +54,12 @@ dotenv = { version = "0.15.0", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 
 [features]
-client = [ ]
+client = [ "async-trait" ]
 pow = [ ]
 wallet = [ ]
+storage = [ "async-trait" ]
 
 default = [ "api", "block", "std" ]
-
 api = [ "block", "dto", "getset", "serde_repr" ]
 block = [  ]
 dto = [ "serde", "dep:serde_json" ]

@@ -1,5 +1,4 @@
 [dependencies]
-async-trait = { version = "0.1.66", default-features = false }
 backtrace = { version = "0.3.67", default-features = false, features = [ "std" ] }
 fern-logger = { version = "0.5.0", default-features = false }
 futures = { version = "0.3.26", default-features = false }

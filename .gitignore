@@ -10,7 +10,7 @@
 *.ipynb
 
 # Storages/databases
-storage
+/storage
 alice-database
 test-storage
 wallet/test-storage

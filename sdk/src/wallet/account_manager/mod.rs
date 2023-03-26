@@ -17,12 +17,12 @@ use self::builder::AccountManagerBuilder;
 #[cfg(feature = "storage")]
 use self::builder::StorageOptions;
 #[cfg(feature = "events")]
-use crate::events::{
+use crate::wallet::events::{
     types::{Event, WalletEventType},
     EventEmitter,
 };
 #[cfg(feature = "storage")]
-use crate::storage::manager::StorageManagerHandle;
+use crate::wallet::storage::manager::StorageManagerHandle;
 use crate::{
     client::{secret::SecretManager, Client},
     wallet::{

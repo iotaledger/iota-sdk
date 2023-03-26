@@ -14,11 +14,11 @@ use tokio::sync::Mutex;
 use tokio::sync::RwLock;
 
 #[cfg(feature = "events")]
-use crate::events::EventEmitter;
+use crate::wallet::events::EventEmitter;
 #[cfg(all(feature = "storage", not(feature = "rocksdb")))]
-use crate::storage::adapter::memory::Memory;
+use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
-use crate::storage::{constants::default_storage_path, manager::ManagerStorage};
+use crate::wallet::storage::{constants::default_storage_path, manager::ManagerStorage};
 use crate::{
     client::secret::SecretManager,
     wallet::{account::handle::AccountHandle, account_manager::AccountManager, ClientOptions},
@@ -125,14 +125,14 @@ impl AccountManagerBuilder {
         }
         #[cfg(all(feature = "rocksdb", feature = "storage"))]
         let storage =
-            crate::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.storage_path.clone())?;
+            crate::wallet::storage::adapter::rocksdb::RocksdbStorageAdapter::new(storage_options.storage_path.clone())?;
         #[cfg(all(not(feature = "rocksdb"), feature = "storage"))]
         let storage = Memory::default();
 
         #[cfg(feature = "storage")]
-        let storage_manager = crate::storage::manager::new_storage_manager(
+        let storage_manager = crate::wallet::storage::manager::new_storage_manager(
             None,
-            Box::new(storage) as Box<dyn crate::storage::adapter::StorageAdapter + Send + Sync>,
+            Box::new(storage) as Box<dyn crate::wallet::storage::adapter::StorageAdapter + Send + Sync>,
         )
         .await?;
 
@@ -141,7 +141,7 @@ impl AccountManagerBuilder {
         #[cfg(not(feature = "storage"))]
         let read_manager_builder: Option<AccountManagerBuilder> = None;
 
-        // prioritise provided client_options and secret_manager over stored ones
+        // Prioritize provided client_options and secret_manager over stored ones
         let new_provided_client_options = if self.client_options.is_none() {
             let loaded_client_options = read_manager_builder
                 .as_ref()
