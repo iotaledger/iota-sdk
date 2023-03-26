@@ -8,7 +8,7 @@ use {
 };
 
 #[cfg(feature = "events")]
-use crate::events::types::{TransactionProgressEvent, WalletEvent};
+use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
         api::{transaction::validate_transaction_payload_length, PreparedTransactionData, SignedTransactionData},

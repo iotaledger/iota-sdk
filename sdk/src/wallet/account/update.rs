@@ -3,13 +3,6 @@
 
 use std::collections::HashMap;
 
-#[cfg(feature = "events")]
-use crate::{
-    account::types::OutputDataDto,
-    client::api_types::core::response::OutputWithMetadataResponse,
-    client::block::payload::transaction::dto::TransactionPayloadDto,
-    events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
-};
 use crate::{
     client::Client,
     types::block::output::{dto::OutputMetadataDto, OutputId},
@@ -18,6 +11,14 @@ use crate::{
         operations::syncing::options::SyncOptions,
         types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, Transaction},
         AccountAddress,
+    },
+};
+#[cfg(feature = "events")]
+use crate::{
+    types::{api::core::response::OutputWithMetadataResponse, block::payload::transaction::dto::TransactionPayloadDto},
+    wallet::{
+        account::types::OutputDataDto,
+        events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
     },
 };
 

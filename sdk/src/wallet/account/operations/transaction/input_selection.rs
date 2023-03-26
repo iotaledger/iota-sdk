@@ -4,7 +4,7 @@
 use std::collections::{hash_map::Values, HashSet};
 
 #[cfg(feature = "events")]
-use crate::events::types::{TransactionProgressEvent, WalletEvent};
+use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
         api::input_selection::{Burn, InputSelection, Selected},

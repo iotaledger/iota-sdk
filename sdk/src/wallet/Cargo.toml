@@ -28,7 +28,6 @@ dotenv = { version = "0.15.0", default-features = false }
 default = [ "storage", "rocksdb" ]
 ledger_nano = [ "iota-client/ledger_nano" ]
 message_interface = []
-events = []
 participation = [ "iota-client/participation", "storage" ]
 
 # udeps returns a false positive for this, so we add it here

@@ -115,7 +115,7 @@ mod tests {
         types::{TransactionInclusionEvent, TransactionProgressEvent, WalletEvent, WalletEventType},
         EventEmitter,
     };
-    use crate::{account::types::InclusionState, client::block::payload::transaction::TransactionId};
+    use crate::{types::block::payload::transaction::TransactionId, wallet::account::types::InclusionState};
 
     #[test]
     fn events() {

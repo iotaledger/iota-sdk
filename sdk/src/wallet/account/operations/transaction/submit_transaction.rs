@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[cfg(feature = "events")]
-use crate::events::types::{TransactionProgressEvent, WalletEvent};
+use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     types::block::{payload::Payload, BlockId},
     wallet::account::{handle::AccountHandle, operations::transaction::TransactionPayload},

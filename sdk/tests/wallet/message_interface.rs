@@ -4,10 +4,10 @@
 #[cfg(feature = "message_interface")]
 use std::sync::{atomic::Ordering, Arc};
 
-#[cfg(feature = "events")]
-use iota_wallet::events::types::WalletEvent;
+#[cfg(all(feature = "message_interface", feature = "events"))]
+use iota_sdk::wallet::events::types::WalletEvent;
 #[cfg(feature = "message_interface")]
-use iota_wallet::{
+use iota_sdk::wallet::{
     message_interface::{create_message_handler, AccountMethod, ManagerOptions, Message, Response},
     Result,
 };

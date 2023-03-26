@@ -8,15 +8,15 @@ use std::env;
 use dotenv::dotenv;
 use iota_sdk::{
     client::{
-        block::{
-            address::Address,
-            output::{
-                unlock_condition::{AddressUnlockCondition, UnlockCondition},
-                BasicOutputBuilder,
-            },
-        },
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
+    },
+    types::block::{
+        address::Address,
+        output::{
+            unlock_condition::{AddressUnlockCondition, UnlockCondition},
+            BasicOutputBuilder,
+        },
     },
     wallet::{account_manager::AccountManager, ClientOptions, Result},
 };

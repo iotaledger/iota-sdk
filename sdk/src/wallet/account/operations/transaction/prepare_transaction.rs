@@ -7,7 +7,7 @@ use instant::Instant;
 use packable::bounded::TryIntoBoundedU16Error;
 
 #[cfg(feature = "events")]
-use crate::events::types::{AddressData, TransactionProgressEvent, WalletEvent};
+use crate::wallet::events::types::{AddressData, TransactionProgressEvent, WalletEvent};
 use crate::{
     client::api::PreparedTransactionData,
     types::block::{

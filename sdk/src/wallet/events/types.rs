@@ -5,12 +5,12 @@ use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    account::types::{address::AddressWrapper, InclusionState, OutputDataDto},
-    client::{
-        api::PreparedTransactionDataDto,
-        api_types::core::response::OutputWithMetadataResponse,
+    client::api::PreparedTransactionDataDto,
+    types::{
+        api::core::response::OutputWithMetadataResponse,
         block::payload::transaction::{dto::TransactionPayloadDto, TransactionId},
     },
+    wallet::account::types::{address::AddressWrapper, InclusionState, OutputDataDto},
 };
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Event {
@@ -110,7 +110,7 @@ pub enum TransactionProgressEvent {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct AddressConsolidationNeeded {
     /// The associated address.
-    #[serde(with = "crate::account::types::address_serde")]
+    #[serde(with = "crate::wallet::account::types::address_serde")]
     pub address: AddressWrapper,
 }
 
