@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use fern_logger::Error as LoggerError;
-use iota_wallet::{
-    error::Error as WalletError,
-    iota_client::{block::Error as BlockError, error::Error as ClientError},
+use iota_sdk::{
+    client::error::Error as ClientError, types::block::Error as BlockError, wallet::error::Error as WalletError,
 };
 use serde_json::Error as SerdeJsonError;
 

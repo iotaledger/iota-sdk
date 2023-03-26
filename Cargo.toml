@@ -2,7 +2,7 @@
 resolver = "2"
 members = [
 	"sdk",
-	# "cli",
+	"cli",
 	# "client",
 	# "client/bindings/java/lib/native",
 	# "client/bindings/nodejs",

@@ -12,7 +12,7 @@ name = "wallet"
 path = "src/main.rs"
 
 [dependencies]
-iota-wallet = { path = "../wallet", default-features = false, features = [ "storage", "rocksdb", "stronghold", "participation" ] }
+iota-sdk = { path = "../sdk", default-features = false, features = [ "storage", "rocksdb", "stronghold", "participation" ] }
 
 clap = { version = "4.1.6", default-features = false, features = [ "derive", "std" ] }
 dialoguer = { version = "0.10.3", default-features = false, features = [ "password", "history" ] }
