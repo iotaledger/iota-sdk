@@ -15,7 +15,13 @@
 extern crate serde;
 extern crate alloc;
 
+#[cfg(feature = "client")]
+#[cfg_attr(docsrs, doc(cfg(feature = "client")))]
 pub mod client;
+#[cfg(feature = "pow")]
+#[cfg_attr(docsrs, doc(cfg(feature = "pow")))]
 pub mod pow;
 pub mod types;
+#[cfg(feature = "wallet")]
+#[cfg_attr(docsrs, doc(cfg(feature = "wallet")))]
 pub mod wallet;

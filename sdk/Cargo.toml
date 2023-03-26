@@ -52,6 +52,10 @@ dotenv = { version = "0.15.0", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 
 [features]
+client = [ ]
+pow = [ ]
+wallet = [ ]
+
 default = [ "api", "block", "std" ]
 
 api = [ "block", "dto", "getset", "serde_repr" ]
