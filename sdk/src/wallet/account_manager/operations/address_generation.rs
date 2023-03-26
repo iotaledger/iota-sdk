@@ -4,7 +4,7 @@
 use std::sync::atomic::Ordering;
 
 #[cfg(all(feature = "events", feature = "ledger_nano"))]
-use crate::events::types::{AddressData, WalletEvent};
+use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
     types::block::address::Address,

@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 #[cfg(all(feature = "events", any(feature = "ledger_nano", feature = "ledger_nano")))]
-use crate::events::types::{AddressData, WalletEvent};
+use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
     wallet::account::{

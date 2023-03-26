@@ -18,11 +18,14 @@ use tokio::sync::Mutex;
 
 use super::{GenerateAddressOptions, SecretManage, SecretManageExt};
 use crate::{
-    api::input_selection::Error as InputSelectionError,
-    secret::{
-        is_alias_transition,
-        types::{LedgerApp, LedgerDeviceType},
-        LedgerNanoStatus, PreparedTransactionData,
+    client::{
+        api::input_selection::Error as InputSelectionError,
+        secret::{
+            is_alias_transition,
+            types::{LedgerApp, LedgerDeviceType},
+            LedgerNanoStatus, PreparedTransactionData,
+        },
+        unix_timestamp_now, Error, Result,
     },
     types::block::{
         address::{Address, AliasAddress, Ed25519Address, NftAddress},
@@ -31,7 +34,6 @@ use crate::{
         signature::{Ed25519Signature, Signature},
         unlock::{AliasUnlock, NftUnlock, ReferenceUnlock, Unlock, Unlocks},
     },
-    unix_timestamp_now, Error, Result,
 };
 
 /// Hardened const for the bip path.

@@ -26,7 +26,6 @@ dotenv = { version = "0.15.0", default-features = false }
 
 [features]
 default = [ "storage", "rocksdb" ]
-ledger_nano = [ "iota-client/ledger_nano" ]
 message_interface = []
 participation = [ "iota-client/participation", "storage" ]
 

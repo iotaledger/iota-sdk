@@ -21,7 +21,7 @@ const INPUT_SIZE: usize = 43;
 const MIN_OUTPUT_SIZE_IN_ESSENCE: usize = 46;
 
 #[cfg(feature = "ledger_nano")]
-use crate::account::constants::DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD;
+use crate::wallet::account::constants::DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD;
 use crate::wallet::{
     account::{
         constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,

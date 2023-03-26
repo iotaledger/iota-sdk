@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    account_manager::AccountManager,
     client::secret::{LedgerNanoStatus, SecretManager},
+    wallet::account_manager::AccountManager,
 };
 
 impl AccountManager {
