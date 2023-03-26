@@ -17,17 +17,18 @@ use std::collections::{hash_map::Entry, HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    account::{handle::AccountHandle, OutputData},
-    client::{
-        api_types::plugins::participation::{
+    client::{node_manager::node::Node, Client},
+    types::{
+        api::plugins::participation::{
             responses::TrackedParticipation,
             types::{ParticipationEventData, ParticipationEventId, Participations, PARTICIPATION_TAG},
         },
         block::output::{unlock_condition::UnlockCondition, Output, OutputId},
-        node_manager::node::Node,
-        Client,
     },
-    task, Result,
+    wallet::{
+        account::{handle::AccountHandle, OutputData},
+        task, Result,
+    },
 };
 
 /// An object containing an account's entire participation overview.

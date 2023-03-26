@@ -5,12 +5,14 @@ use std::collections::HashMap;
 
 use super::manager::StorageManager;
 use crate::{
-    account::operations::participation::ParticipationEventWithNodes,
-    client::{
-        api_types::plugins::participation::{responses::OutputStatusResponse, types::ParticipationEventId},
+    types::{
+        api::plugins::participation::{responses::OutputStatusResponse, types::ParticipationEventId},
         block::output::OutputId,
     },
-    storage::constants::{PARTICIPATION_CACHED_OUTPUTS, PARTICIPATION_EVENTS},
+    wallet::{
+        account::operations::participation::ParticipationEventWithNodes,
+        storage::constants::{PARTICIPATION_CACHED_OUTPUTS, PARTICIPATION_EVENTS},
+    },
 };
 
 impl StorageManager {

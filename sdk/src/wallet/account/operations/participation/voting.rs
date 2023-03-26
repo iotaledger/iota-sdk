@@ -2,11 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    account::{types::Transaction, AccountHandle, TransactionOptions},
-    client::{
-        api_types::plugins::participation::types::{
-            Participation, ParticipationEventId, Participations, PARTICIPATION_TAG,
-        },
+    types::{
+        api::plugins::participation::types::{Participation, ParticipationEventId, Participations, PARTICIPATION_TAG},
         block::{
             output::{
                 feature::{MetadataFeature, TagFeature},
@@ -15,7 +12,10 @@ use crate::{
             payload::TaggedDataPayload,
         },
     },
-    Result,
+    wallet::{
+        account::{types::Transaction, AccountHandle, TransactionOptions},
+        Result,
+    },
 };
 
 impl AccountHandle {

@@ -89,7 +89,7 @@ pub enum Error {
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[error("participation error {0}")]
-    Participation(#[from] crate::client::api_types::plugins::participation::error::Error),
+    Participation(#[from] crate::types::api::plugins::participation::error::Error),
     /// No outputs available for consolidating
     #[error(
         "nothing to consolidate: available outputs: {available_outputs}, consolidation threshold: {consolidation_threshold}"

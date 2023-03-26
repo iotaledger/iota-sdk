@@ -9,17 +9,16 @@ use dotenv::dotenv;
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
+        node_manager::node::Node,
+        request_funds_from_faucet,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        Url,
     },
+    types::api::plugins::participation::types::ParticipationEventId,
     wallet::{
         account::types::participation::ParticipationEventRegistrationOptions, account_manager::AccountManager,
         ClientOptions, Result,
     },
-};
-
-use crate::client::{
-    api_types::plugins::participation::types::ParticipationEventId, node_manager::node::Node,
-    request_funds_from_faucet, Url,
 };
 
 #[tokio::main]
@@ -68,7 +67,7 @@ async fn main() -> Result<()> {
     let event_id =
         ParticipationEventId::from_str("0x80f57f6368933b61af9b3d8e1b152cf5d23bf4537f6362778b0a7302a7000d48")?;
     let node = Node {
-        url: Url::parse("http://localhost:14265").map_err(crate::client::Error::Url)?,
+        url: Url::parse("http://localhost:14265").map_err(iota_sdk::client::Error::Url)?,
         auth: None,
         disabled: false,
     };

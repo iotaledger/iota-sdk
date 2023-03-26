@@ -27,7 +27,6 @@ dotenv = { version = "0.15.0", default-features = false }
 [features]
 default = [ "storage", "rocksdb" ]
 message_interface = []
-participation = [ "iota-client/participation", "storage" ]
 
 # udeps returns a false positive for this, so we add it here
 [package.metadata.cargo-udeps.ignore]

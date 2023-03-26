@@ -6,6 +6,7 @@
 //! <https://github.com/iotaledger/inx-participation/blob/develop/core/participation/routes.go>
 
 use crate::{
+    client::{Client, Result},
     types::{
         api::plugins::participation::{
             responses::{AddressOutputsResponse, EventsResponse, OutputStatusResponse},
@@ -16,7 +17,6 @@ use crate::{
         },
         block::output::OutputId,
     },
-    Client, Result,
 };
 
 impl Client {

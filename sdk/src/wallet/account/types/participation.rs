@@ -3,7 +3,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::client::{api_types::plugins::participation::types::ParticipationEventId, node_manager::node::Node};
+use crate::{client::node_manager::node::Node, types::api::plugins::participation::types::ParticipationEventId};
 
 /// Options when registering participation events.
 /// If `events_to_register` is an empty `Vec` or `None`, then every event being tracked by the node will be registered.

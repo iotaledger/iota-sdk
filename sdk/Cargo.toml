@@ -67,6 +67,7 @@ mqtt = [ "regex", "rumqttc", "once_cell" ]
 stronghold = [ "iota_stronghold" ]
 events = [ ]
 ledger_nano = [ "iota-ledger-nano" ]
+participation = [ "storage" ]
 
 default = [ "api", "block", "std" ]
 api = [ "block", "dto", "getset", "serde_repr" ]
