@@ -12,7 +12,7 @@ use std::{
 use tokio::runtime::Runtime;
 #[cfg(feature = "mqtt")]
 use {
-    crate::node_api::mqtt::{BrokerOptions, MqttEvent, TopicHandlerMap},
+    crate::client::node_api::mqtt::{BrokerOptions, MqttEvent, TopicHandlerMap},
     rumqttc::AsyncClient as MqttClient,
     tokio::sync::watch::{Receiver as WatchReceiver, Sender as WatchSender},
 };
@@ -90,7 +90,7 @@ impl Drop for Client {
         let mqtt_client = self.mqtt_client.clone();
         #[cfg(feature = "mqtt")]
         std::thread::spawn(move || {
-            crate::async_runtime::block_on(async move {
+            crate::client::async_runtime::block_on(async move {
                 if let Some(mqtt_client) = mqtt_client.write().await.take() {
                     mqtt_client.disconnect().await.unwrap();
                 }

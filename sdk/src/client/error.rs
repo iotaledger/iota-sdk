@@ -234,7 +234,7 @@ pub enum Error {
     #[cfg(feature = "mqtt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "mqtt")))]
     #[error("MQTT error {0}")]
-    Mqtt(#[from] crate::node_api::mqtt::Error),
+    Mqtt(#[from] crate::client::node_api::mqtt::Error),
 
     //////////////////////////////////////////////////////////////////////
     // Stronghold

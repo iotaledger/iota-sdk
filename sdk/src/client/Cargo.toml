@@ -6,21 +6,15 @@ hashbrown = { version = "0.13.2", default-features = false, features = [ "ahash"
 instant = { version = "0.1.12", default-features = false, features = [ "wasm-bindgen" ] }
 iota-crypto = { version = "0.15.3", default-features = false, features = [ "std", "chacha", "blake2b", "ed25519", "random", "slip10", "bip39", "bip39-en", "ternary_encoding" ] }
 log = { version = "0.4.17", default-features = false }
-num_cpus = { version = "1.15.0", default-features = false }
 packable = { version = "0.7.0", default-features = false, features = [ "serde", "primitive-types", "std" ] }
 prefix-hex = { version = "0.7.0", default-features = false, features = [ "std" ] }
 primitive-types = { version = "0.12.1", default-features = false }
-regex = { version = "1.7.1", default-features = false, features = [ "std", "unicode-perl" ], optional = true }
 reqwest = { version = "0.11.14", default-features = false, features = [ "json" ] }
 serde = { version = "1.0.152", default-features = false, features = [ "derive" ] }
 serde_json = { version = "1.0.94", default-features = false }
 thiserror = { version = "1.0.39", default-features = false }
 url = { version = "2.3.1", default-features = false, features = [ "serde" ] }
 zeroize = { version = "1.5.7", default-features = false, features = [ "zeroize_derive" ] }
-
-# MQTT
-rumqttc = { version = "0.20.0", default-features = false, features = [ "websocket" ], optional = true }
-once_cell = { version = "1.17.1", default-features = false, features = [ "std" ], optional = true }
 
 # ledger hardware wallets
 iota-ledger-nano = { version = "1.0.0-alpha.2", default-features = false, optional = true }
@@ -46,7 +40,6 @@ fern-logger = { version = "0.5.0", default-features = false }
 
 [features]
 default = [ "tls" ]
-mqtt = [ "rumqttc", "once_cell", "regex" ]
 ledger_nano = [ "iota-ledger-nano" ]
 tls = [ "reqwest/rustls-tls" ]
 stronghold = [ "iota_stronghold" ]

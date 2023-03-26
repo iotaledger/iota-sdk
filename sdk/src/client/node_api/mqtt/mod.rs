@@ -22,11 +22,11 @@ use tokio::sync::{
 
 pub use self::{error::Error, types::*};
 use crate::{
+    client::{Client, NetworkInfo},
     types::block::{
         payload::{milestone::ReceiptMilestoneOption, MilestonePayload},
         Block,
     },
-    Client, NetworkInfo,
 };
 
 impl Client {
@@ -182,7 +182,7 @@ fn poll_mqtt(
                         let topic = p.topic.clone();
                         let network_info = network_info.clone();
 
-                        crate::async_runtime::spawn(async move {
+                        crate::client::async_runtime::spawn(async move {
                             let mqtt_topic_handlers = mqtt_topic_handlers_guard.read().await;
 
                             if let Some(handlers) = mqtt_topic_handlers.get(&Topic::new_unchecked(topic.clone())) {
@@ -338,12 +338,15 @@ impl<'a> MqttTopicManager<'a> {
     }
 
     /// Subscribe to the given topics with the callback.
-    pub async fn subscribe<C: Fn(&crate::node_api::mqtt::TopicEvent) + Send + Sync + 'static>(
+    pub async fn subscribe<C: Fn(&crate::client::node_api::mqtt::TopicEvent) + Send + Sync + 'static>(
         self,
         callback: C,
     ) -> Result<(), Error> {
         let cb =
-            Arc::new(Box::new(callback) as Box<dyn Fn(&crate::node_api::mqtt::TopicEvent) + Send + Sync + 'static>);
+            Arc::new(Box::new(callback)
+                as Box<
+                    dyn Fn(&crate::client::node_api::mqtt::TopicEvent) + Send + Sync + 'static,
+                >);
         set_mqtt_client(self.client).await?;
         self.client
             .mqtt_client

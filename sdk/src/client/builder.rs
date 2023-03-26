@@ -12,7 +12,7 @@ use std::{
 use tokio::runtime::Runtime;
 
 #[cfg(feature = "mqtt")]
-use crate::node_api::mqtt::{BrokerOptions, MqttEvent};
+use crate::client::node_api::mqtt::{BrokerOptions, MqttEvent};
 use crate::{
     client::{
         constants::{DEFAULT_API_TIMEOUT, DEFAULT_REMOTE_POW_API_TIMEOUT, DEFAULT_TIPS_INTERVAL},

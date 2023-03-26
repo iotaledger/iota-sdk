@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_client::mqtt::{Error, Topic};
+use iota_sdk::client::mqtt::{Error, Topic};
 
 #[test]
 fn valid_topics() {
