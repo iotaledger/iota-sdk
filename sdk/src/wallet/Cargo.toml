@@ -14,18 +14,5 @@ thiserror = { version = "1.0.39", default-features = false }
 tokio = { version = "1.26.0", default-features = false, features = [ "sync", "rt", "time" ] }
 zeroize = { version = "1.5.7", default-features = false, features = [ "zeroize_derive" ] }
 
-[target.'cfg(target_family = "wasm")'.dependencies]
-gloo-storage = { version = "0.2.2", default-features = false, optional = true }
-gloo-timers = { version = "0.2.6", default-features = false, features = [ "futures" ] }
-wasm-bindgen-futures = { version = "0.4.34", default-features = false }
-
-[dev-dependencies]
-dotenv = { version = "0.15.0", default-features = false }
-
 [features]
 default = [ "storage", "rocksdb" ]
-
-# udeps returns a false positive for this, so we add it here
-[package.metadata.cargo-udeps.ignore]
-normal = ["backtrace"]
-
