@@ -349,7 +349,7 @@ jobs:
       - name: Cache python binding cargo target
         uses: actions/cache@v3
         with:
-          path: wallet/bindings/python/target
+          path: sdk/src/wallet/bindings/python/target
           # Add date to the cache to keep it up to date
           key: ${{ matrix.os }}-stable-cargo-build-python-target-${{ hashFiles('**/Cargo.lock') }}-${{ env.CURRENT_DATE }}
           # Restore from outdated cache for speed
@@ -359,7 +359,7 @@ jobs:
 
       - name: Build and test python binding
         run: tox
-        working-directory: wallet/bindings/python
+        working-directory: sdk/src/wallet/bindings/python
 
   test-java:
     name: Test Java binding
@@ -434,7 +434,7 @@ jobs:
 
       - name: Test
         shell: bash
-        working-directory: wallet/bindings/java/
+        working-directory: sdk/src/wallet/bindings/java/
         run: |
           chmod +x gradlew
           ./gradlew test -i
