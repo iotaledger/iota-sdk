@@ -41,6 +41,7 @@ zeroize = { version = "1.5.7", default-features = false, features = [ "zeroize_d
 gloo-storage = { version = "0.2.2", default-features = false, optional = true }
 gloo-timers = { version = "0.2.6", default-features = false, features = [ "futures" ] }
 wasm-bindgen-futures = { version = "0.4.34", default-features = false }
+instant = { version = "0.1.12", default-features = false, features = [ "wasm-bindgen" ] }
 
 [dev-dependencies]
 dotenv = { version = "0.15.0", default-features = false }

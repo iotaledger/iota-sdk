@@ -59,3 +59,10 @@ pub use self::{
 
 /// The wallet Result type.
 pub type Result<T> = std::result::Result<T, Error>;
+
+fn unix_timestamp_now() -> u128 {
+    instant::SystemTime::now()
+        .duration_since(instant::SystemTime::UNIX_EPOCH)
+        .expect("time went backwards")
+        .as_millis()
+}

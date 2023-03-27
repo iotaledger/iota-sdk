@@ -3,7 +3,6 @@
 
 use std::str::FromStr;
 
-use instant::SystemTime;
 use iota_client::{
     api_types::core::dto::LedgerInclusionStateDto,
     block::{input::Input, output::OutputId, payload::transaction::TransactionEssence, BlockId},
@@ -158,10 +157,7 @@ impl AccountHandle {
                                     &mut output_ids_to_unlock,
                                 )?;
                             } else {
-                                let time_now = SystemTime::now()
-                                    .duration_since(SystemTime::UNIX_EPOCH)
-                                    .expect("time went backwards")
-                                    .as_millis();
+                                let time_now = crate::unix_timestamp_now() * 1000;
                                 // Reattach if older than 30 seconds
                                 if transaction.timestamp + 30000 < time_now {
                                     // only reattach if inputs are still unspent
@@ -180,10 +176,7 @@ impl AccountHandle {
                                 &mut output_ids_to_unlock,
                             )?;
                         } else {
-                            let time_now = SystemTime::now()
-                                .duration_since(SystemTime::UNIX_EPOCH)
-                                .expect("time went backwards")
-                                .as_millis();
+                            let time_now = crate::unix_timestamp_now();
                             // Reattach if older than 30 seconds
                             if transaction.timestamp + 30000 < time_now {
                                 // only reattach if inputs are still unspent

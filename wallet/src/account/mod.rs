@@ -20,7 +20,6 @@ use std::{
 };
 
 use getset::{Getters, Setters};
-use instant::SystemTime;
 use iota_client::{
     api_types::core::response::OutputWithMetadataResponse,
     block::{
@@ -149,10 +148,7 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
             .first()
             .and_then(|i| i.metadata.milestone_timestamp_spent.map(|t| t as u128 * 1000))
             .unwrap_or_else(|| {
-                SystemTime::now()
-                    .duration_since(SystemTime::UNIX_EPOCH)
-                    .expect("time went backwards")
-                    .as_millis()
+                crate::unix_timestamp_now()
             }),
         transaction_id: tx_id,
         network_id: tx_essence.network_id(),

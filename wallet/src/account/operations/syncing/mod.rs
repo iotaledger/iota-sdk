@@ -9,7 +9,7 @@ pub(crate) mod transactions;
 
 use std::collections::{HashMap, HashSet};
 
-use instant::{Instant, SystemTime};
+use instant::Instant;
 use iota_client::block::{
     address::{Address, AliasAddress, NftAddress},
     output::{dto::OutputMetadataDto, FoundryId, Output, OutputId},
@@ -32,10 +32,7 @@ impl AccountHandle {
         let syc_start_time = Instant::now();
 
         // Prevent syncing the account multiple times simultaneously
-        let time_now = SystemTime::now()
-            .duration_since(SystemTime::UNIX_EPOCH)
-            .expect("time went backwards")
-            .as_millis();
+        let time_now = crate::unix_timestamp_now();
         let mut last_synced = self.last_synced.lock().await;
         log::debug!("[SYNC] last time synced before {}ms", time_now - *last_synced);
         if !options.force_syncing && time_now - *last_synced < MIN_SYNC_INTERVAL {
@@ -63,10 +60,7 @@ impl AccountHandle {
 
         let account_balance = self.balance().await?;
         // Update last_synced mutex
-        let time_now = SystemTime::now()
-            .duration_since(SystemTime::UNIX_EPOCH)
-            .expect("time went backwards")
-            .as_millis();
+        let time_now = crate::unix_timestamp_now();
         *last_synced = time_now;
         log::debug!("[SYNC] finished syncing in {:.2?}", syc_start_time.elapsed());
         Ok(account_balance)
