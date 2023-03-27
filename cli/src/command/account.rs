@@ -4,13 +4,10 @@
 use std::str::FromStr;
 
 use clap::{Parser, Subcommand};
-use iota_wallet::{
-    account::{
-        types::{AccountAddress, TransactionDto},
-        AccountHandle, OutputsToClaim,
-    },
-    iota_client::{
-        api_types::plugins::participation::types::ParticipationEventId,
+use iota_sdk::{
+    client::request_funds_from_faucet,
+    types::{
+        api::plugins::participation::types::ParticipationEventId,
         block::{
             address::Address,
             output::{
@@ -18,10 +15,15 @@ use iota_wallet::{
                 OutputId, TokenId, UnlockCondition,
             },
         },
-        request_funds_from_faucet,
     },
-    AddressAndNftId, AddressNativeTokens, AddressWithAmount, AddressWithMicroAmount, NativeTokenOptions, NftOptions,
-    U256,
+    wallet::{
+        account::{
+            types::{AccountAddress, TransactionDto},
+            AccountHandle, OutputsToClaim,
+        },
+        AddressAndNftId, AddressNativeTokens, AddressWithAmount, AddressWithMicroAmount, NativeTokenOptions,
+        NftOptions, U256,
+    },
 };
 
 use crate::error::Error;
@@ -541,11 +543,11 @@ pub async fn send_native_token_command(
         let rent_structure = account_handle.client().get_rent_structure().await?;
         let token_supply = account_handle.client().get_token_supply().await?;
 
+        let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
+        account_handle.client().bech32_hrp_matches(&bech32_hrp).await?;
         let outputs = vec![
             BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
-                .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                    Address::try_from_bech32(address)?.1,
-                )))
+                .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
                 .with_native_tokens(vec![NativeToken::new(
                     TokenId::from_str(&token_id)?,
                     U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,

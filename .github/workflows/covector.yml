@@ -120,13 +120,13 @@ jobs:
           python-version: "3.10"
 
       - name: Run Yarn Install
-        working-directory: client/bindings/nodejs/
+        working-directory: sdk/src/client/bindings/nodejs/
         run: yarn install
 
       - name: Build Node.js Prebuilds
-        working-directory: client/bindings/nodejs/
+        working-directory: sdk/src/client/bindings/nodejs/
         run: yarn prebuild
 
       - name: Upload Prebuilds to GitHub Release
-        working-directory: client/bindings/nodejs/
+        working-directory: sdk/src/client/bindings/nodejs/
         run: yarn prebuild --upload-all ${{ secrets.GITHUB_TOKEN }} --tag-prefix client-nodejs-binding-v

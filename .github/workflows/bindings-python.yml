@@ -11,7 +11,7 @@ on:
       - "!**/examples/**" # Exclude all examples
       - "!**/tests/**" # Exclude all tests
       - "!client/bindings/**" # Exclude all bindings
-      - "client/bindings/python/**" # Re-include python bindings
+      - "sdk/src/client/bindings/python/**" # Re-include python bindings
   pull_request:
     branches: [develop, production]
     paths:
@@ -23,7 +23,7 @@ on:
       - "!**/examples/**" # Exclude all examples
       - "!**/tests/**" # Exclude all tests
       - "!client/bindings/**" # Exclude all bindings
-      - "client/bindings/python/**" # Re-include python bindings
+      - "sdk/src/client/bindings/python/**" # Re-include python bindings
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch:
@@ -52,7 +52,7 @@ jobs:
         with:
           toolchain: nightly
           cache: true
-          cache-root: client/bindings/python
+          cache-root: sdk/src/client/bindings/python
           cache-job-id: ${{ github.workflow }}-${{ github.job }}-${{ matrix.os }}-${{ matrix.python }}
           cache-hash: ${{ hashFiles('.github/workflows/bindings-python.yml') }}
 
@@ -61,7 +61,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
-          cache-dependency-path: client/bindings/python/requirements-dev.txt
+          cache-dependency-path: sdk/src/client/bindings/python/requirements-dev.txt
 
       # This step is required for bindgen to work on Windows.
       - name: Set Up Clang/LLVM (Windows)
@@ -80,5 +80,5 @@ jobs:
           sudo apt-get install libudev-dev libusb-1.0-0-dev
 
       - name: Run Tox
-        working-directory: client/bindings/python
+        working-directory: sdk/src/client/bindings/python
         run: tox

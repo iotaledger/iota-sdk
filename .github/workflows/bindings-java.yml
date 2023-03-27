@@ -11,7 +11,7 @@ on:
       - "!**/examples/**" # Exclude all examples
       - "!**/tests/**" # Exclude all tests
       - "!client/bindings/**" # Exclude all bindings
-      - "client/bindings/java/**" # Re-include java bindings
+      - "sdk/src/client/bindings/java/**" # Re-include java bindings
   pull_request:
     branches: [develop, production]
     paths:
@@ -23,7 +23,7 @@ on:
       - "!**/examples/**" # Exclude all examples
       - "!**/tests/**" # Exclude all tests
       - "!client/bindings/**" # Exclude all bindings
-      - "client/bindings/java/**" # Re-include java bindings
+      - "sdk/src/client/bindings/java/**" # Re-include java bindings
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch:
@@ -52,7 +52,7 @@ jobs:
         with:
           toolchain: nightly
           cache: true
-          cache-root: client/bindings/java/lib/native/
+          cache-root: sdk/src/client/bindings/java/lib/native/
           cache-job-id: ${{ github.workflow }}-${{ github.job }}-${{ matrix.os }}-${{ matrix.java }}
           cache-hash: ${{ hashFiles('.github/workflows/bindings-java.yml') }}
 
@@ -81,7 +81,7 @@ jobs:
 
       - name: Run Gradle Test (macos, windows)
         if: ${{ !startsWith(matrix.os, 'ubuntu') }}
-        working-directory: client/bindings/java/
+        working-directory: sdk/src/client/bindings/java/
         run: |
           chmod +x gradlew
           # Only run test that doesn't require a node because we can't use the private tangle script on macos and windows
@@ -89,7 +89,7 @@ jobs:
 
       - name: Run Gradle Test
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        working-directory: client/bindings/java/
+        working-directory: sdk/src/client/bindings/java/
         run: |
           chmod +x gradlew
           ./gradlew test -i

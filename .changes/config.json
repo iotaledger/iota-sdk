@@ -8,7 +8,7 @@
   },
   "packages": {
     "client-nodejs-binding": {
-      "path": "./client/bindings/nodejs",
+      "path": "./sdk/src/client/bindings/nodejs",
       "manager": "javascript",
       "getPublishedVersion": "npm view ${ pkgFile.pkg.name }@develop version",
       "prepublish": [
@@ -16,7 +16,7 @@
           "command": "false || dasel put -f Cargo.toml '.dependencies.iota-client.rev' -v $GITHUB_SHA"
         },
         {
-          "command": "dasel put -f Cargo.toml '.dependencies.iota-client.git' -v https://github.com/iotaledger/iota-sdk.rs"
+          "command": "dasel put -f Cargo.toml '.dependencies.iota-client.git' -v https://github.com/iotaledger/iota-sdk"
         },
         {
           "command": "dasel put -t json -f Cargo.toml '.dependencies.iota-client.features' -v '[\"message_interface\", \"mqtt\"]'"
@@ -44,7 +44,7 @@
       ]
     },
     "wallet-nodejs-binding": {
-      "path": "./wallet/bindings/nodejs",
+      "path": "./sdk/src/wallet/bindings/nodejs",
       "manager": "javascript",
       "getPublishedVersion": "npm view ${ pkgFile.pkg.name } version",
       "prepublish": [
@@ -52,7 +52,7 @@
           "command": "false || dasel put -f Cargo.toml '.dependencies.iota-wallet.rev' -v $GITHUB_SHA"
         },
         {
-          "command": "dasel put -f Cargo.toml '.dependencies.iota-wallet.git' -v https://github.com/iotaledger/iota-sdk.rs"
+          "command": "dasel put -f Cargo.toml '.dependencies.iota-wallet.git' -v https://github.com/iotaledger/iota-sdk"
         },
         {
           "command": "dasel delete -f Cargo.toml '.dependencies.iota-wallet.path'"

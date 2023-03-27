@@ -3,7 +3,7 @@
 
 use clap::Parser;
 use dialoguer::Input;
-use iota_wallet::account::AccountHandle;
+use iota_sdk::wallet::account::AccountHandle;
 
 use crate::{
     account_history::AccountHistory,
