@@ -3,7 +3,7 @@
 
 const console = require('console');
 const fs = require('fs');
-const { AccountManager, CoinType } = require('../node/lib');
+const { AccountManager, CoinType, initLogger } = require('../node/lib');
 
 async function run() {
     try {
@@ -11,6 +11,13 @@ async function run() {
     } catch (e) {
         // ignore it
     }
+
+    // Config doenst work yet but this is an example for the future
+    await initLogger({
+        name: "stdout",
+        levelFilter: 'debug',
+        colorEnabled: true,
+    });
 
     const manager = new AccountManager({
         storagePath: './alice-database',
@@ -26,14 +33,15 @@ async function run() {
 
     const account = await manager.createAccount({
         alias: 'Alice',
-    });
-
-    await manager.listen(['TransactionProgress'], (event) => {
-        console.log(event);
+        bech32Hrp: "rms",
     });
 
     console.log('Account created:', account);
     account.setAlias('new alias');
+
+    console.log(await account.addresses());
+    console.log(await account.addressesWithUnspentOutputs());
+    console.log(await account.generateAddress());
 
     const balance = await account.sync();
     console.log(balance);

@@ -46,8 +46,7 @@ pub async fn destroy(message_handler: &MessageHandler) -> Result<(), JsValue> {
 }
 
 pub async fn init_logger(config: String) -> Result<(), JsValue> {
-    init_logger_rust(config).map_err(|e| e.to_string())?;
-    Ok(())
+    Ok(init_logger_rust(config).map_err(|e| e.to_string())?)
 }
 
 /// Handles a message, returns the response as a JSON-encoded string.

@@ -25,6 +25,7 @@ serde_json = { version = "1.0.94", default-features = false }
 tokio = { version = "1.26.0", default-features = false, features = [ "sync" ] }
 wasm-bindgen = { version = "0.2.84", default-features = false, features = [ "spans", "std", "serde-serialize" ] }
 wasm-bindgen-futures = { version = "0.4.34", default-features = false }
+wasm-logger = { version = "0.2.0", default-features = false }
 
 [target.'cfg(all(target_arch = "wasm32", not(target_os = "wasi")))'.dependencies]
 getrandom = { version = "0.2.8", default-features = false, features = [ "js" ] }
