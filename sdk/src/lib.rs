@@ -21,6 +21,8 @@ extern crate alloc;
 #[cfg(feature = "client")]
 #[cfg_attr(docsrs, doc(cfg(feature = "client")))]
 pub mod client;
+#[cfg(all(feature = "wallet", feature = "client"))]
+pub mod message_interface;
 #[cfg(feature = "pow")]
 #[cfg_attr(docsrs, doc(cfg(feature = "pow")))]
 pub mod pow;
