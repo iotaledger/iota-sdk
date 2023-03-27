@@ -162,10 +162,11 @@ impl<'a> ClientBlockBuilder<'a> {
 
     /// Set a transfer to the builder
     pub async fn with_output(mut self, address: &str, amount: u64) -> Result<ClientBlockBuilder<'a>> {
+        let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
+        self.client.bech32_hrp_matches(&bech32_hrp).await?;
+
         let output = BasicOutputBuilder::new_with_amount(amount)?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                Address::try_from_bech32(address)?,
-            )))
+            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
             .finish_output(self.client.get_token_supply().await?)?;
         self.outputs.push(output);
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {

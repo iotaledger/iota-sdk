@@ -29,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Response::TransactionEssenceHash`;
 - Derive `Eq, PartialEq` for `input_selection::Error`;
 - `input_selection::Error::{InvalidOutputCount, InvalidOutputCount}` variants;
+- `Error::InvalidBech32Hrp`;
+- `Client::bech32_hrp_matches()`;
+- Bech32 HRP validation for provided addresses;
+- `Error::MissingBip32Chain` variant;
 
 ### Changed
 
@@ -38,6 +42,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `Client::get_output_ids_with_pagination()` to `Client::get_output_ids()`;
 - All MQTT related functions return an MQTT `Error`;
 - Re-export `mqtt` module instead of all its symbols;
+- `SecretManage::signature_unlock` is now auto-implemented in the trait;
+- `SecretManage::signature_unlock`'s parameter `&InputSigningData` replaced with `&Chain`;
+- `Message::SignatureUnlock`'s parameter `Box<InputSigningDataDto>` replaced with `Chain`;
+
+### Removed
+
+- `SecretManage::signature_unlock`'s `remainder` parameter;
+- `Message::SignatureUnlock`'s `remainder_data` field;
 
 ### Removed
 

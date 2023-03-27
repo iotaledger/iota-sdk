@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `AddressWrapper::try_from_bech32`;
+- Bech32 HRP validation for provided addresses;
 
 ### Changed
 

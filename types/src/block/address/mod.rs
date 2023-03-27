@@ -123,7 +123,7 @@ impl Address {
     /// Checks if an string is a valid bech32 encoded address.
     #[must_use]
     pub fn is_valid_bech32(address: &str) -> bool {
-        Address::try_from_bech32(address).is_ok()
+        Self::try_from_bech32(address).is_ok()
     }
 
     ///

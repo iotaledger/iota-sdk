@@ -541,11 +541,11 @@ pub async fn send_native_token_command(
         let rent_structure = account_handle.client().get_rent_structure().await?;
         let token_supply = account_handle.client().get_token_supply().await?;
 
+        let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
+        account_handle.client().bech32_hrp_matches(&bech32_hrp).await?;
         let outputs = vec![
             BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
-                .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                    Address::try_from_bech32(address)?,
-                )))
+                .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
                 .with_native_tokens(vec![NativeToken::new(
                     TokenId::from_str(&token_id)?,
                     U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
