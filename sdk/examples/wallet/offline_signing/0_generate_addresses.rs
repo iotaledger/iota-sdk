@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
         .password(&env::var("STRONGHOLD_PASSWORD").unwrap())
         .build(PathBuf::from("examples/offline_signing/offline_signing.stronghold"))?;
     // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
-    let mnemonic = env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC").unwrap();
+    let mnemonic = env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
 
     // The mnemonic only needs to be stored the first time
     secret_manager.store_mnemonic(mnemonic).await?;
