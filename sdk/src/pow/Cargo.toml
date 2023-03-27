@@ -1,3 +1,0 @@
-[dependencies]
-iota-crypto = { version = "0.15.3", default-features = false, features = [ "blake2b", "digest", "curl-p", "ternary_encoding" ] }
-num_cpus = { version = "1.15.0", default-features = false }
