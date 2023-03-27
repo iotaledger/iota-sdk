@@ -8,10 +8,9 @@ use iota_client::{
     NodeInfoWrapper, Url,
 };
 
-use crate::{
-    account_manager::{builder::AccountManagerBuilder, AccountManager},
-    ClientOptions,
-};
+#[cfg(feature = "storage")]
+use crate::account_manager::builder::AccountManagerBuilder;
+use crate::{account_manager::AccountManager, ClientOptions};
 
 impl AccountManager {
     /// Sets the client options for all accounts and sets the new bech32_hrp for the addresses.
