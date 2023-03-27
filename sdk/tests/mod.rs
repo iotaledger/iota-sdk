@@ -3,5 +3,6 @@
 
 #[cfg(feature = "client")]
 mod client;
+mod types;
 #[cfg(feature = "wallet")]
 mod wallet;
