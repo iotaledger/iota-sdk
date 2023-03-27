@@ -5,7 +5,7 @@
 // https://github.com/iotaledger/tips/blob/main/tips/TIP-0012/tip-0012.md#example
 // https://github.com/Wollac/iota-crypto-demo/blob/master/pkg/pow/pow_test.go#L26
 
-use iota_pow::score::PowScorer;
+use iota_sdk::pow::score::PowScorer;
 
 #[test]
 fn pow_score() {

@@ -1,10 +1,12 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::rand::bytes::rand_bytes;
-use iota_pow::{
-    miner::{get_miner, get_miner_num_workers, MinerBuilder, MinerCancel},
-    score::PowScorer,
+use iota_sdk::{
+    pow::{
+        miner::{get_miner, get_miner_num_workers, MinerBuilder, MinerCancel},
+        score::PowScorer,
+    },
+    types::block::rand::bytes::rand_bytes,
 };
 
 #[test]
