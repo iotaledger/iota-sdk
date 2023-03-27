@@ -8,7 +8,7 @@
   },
   "packages": {
     "client-nodejs-binding": {
-      "path": "./client/bindings/nodejs",
+      "path": "./sdk/src/client/bindings/nodejs",
       "manager": "javascript",
       "getPublishedVersion": "npm view ${ pkgFile.pkg.name }@develop version",
       "prepublish": [
@@ -44,7 +44,7 @@
       ]
     },
     "wallet-nodejs-binding": {
-      "path": "./wallet/bindings/nodejs",
+      "path": "./sdk/src/wallet/bindings/nodejs",
       "manager": "javascript",
       "getPublishedVersion": "npm view ${ pkgFile.pkg.name } version",
       "prepublish": [
