@@ -66,9 +66,9 @@ dotenv = { version = "0.15.0", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 
 [features]
-client = [ "async-trait", "log", "derive_builder" ]
+client = [ "block", "dto", "api", "pow", "std", "async-trait", "log", "derive_builder" ]
 pow = [ ]
-wallet = [ "log" ]
+wallet = [ "client", "log" ]
 storage = [ "async-trait" ]
 mqtt = [ "regex", "rumqttc", "once_cell" ]
 stronghold = [ "iota_stronghold" ]
