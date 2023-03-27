@@ -16,7 +16,7 @@ name = "iota_client"
 crate-type = [ "cdylib" ]
 
 [dependencies]
-iota-sdk = { path = "../../../../../..", features = [ "message_interface", "stronghold", "tls" ] }
+iota-sdk = { path = "../../../../../..", features = [ "client", "message_interface", "stronghold", "tls" ] }
 
 futures = { version = "0.3.26", default-features = false }
 jni = { version = "0.21.0", default-features = false }

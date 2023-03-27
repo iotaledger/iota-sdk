@@ -17,7 +17,7 @@ publish = false
 crate-type = [ "cdylib" ]
 
 [dependencies]
-iota-sdk = { path = "../../../..", default-features = false, features = [ "ledger_nano", "message_interface", "mqtt", "stronghold", "tls" ] }
+iota-sdk = { path = "../../../..", default-features = false, features = [ "client", "ledger_nano", "message_interface", "mqtt", "stronghold", "tls" ] }
 
 backtrace = { version = "0.3.67", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }

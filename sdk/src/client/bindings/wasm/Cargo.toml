@@ -16,7 +16,7 @@ publish = false
 crate-type = [ "cdylib" ]
 
 [dependencies]
-iota-sdk = { path = "../../../..", default-features = false, features = [ "message_interface", "tls" ] }
+iota-sdk = { path = "../../../..", default-features = false, features = [ "client", "message_interface", "tls" ] }
 
 console_error_panic_hook = { version = "0.1.7", default-features = false }
 js-sys = { version = "0.3.61", default-features = false, features = [] }
