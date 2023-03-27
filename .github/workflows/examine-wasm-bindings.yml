@@ -7,7 +7,7 @@ on:
     paths:
       - ".github/workflows/examine-wasm-bindings.yml"
       - ".github/actions/**"
-      - "wallet/bindings/wasm/**"
+      - "sdk/src/wallet/bindings/wasm/**"
       # Watch the Rust core too
       - "src/**"
       - "Cargo.toml"
@@ -19,7 +19,7 @@ on:
     paths:
       - ".github/workflows/examine-wasm-bindings.yml"
       - ".github/actions/**"
-      - "wallet/bindings/wasm/**"
+      - "sdk/src/wallet/bindings/wasm/**"
       # Watch the Rust core too
       - "src/**"
       - "Cargo.toml"
@@ -52,7 +52,7 @@ jobs:
         with:
           toolchain: nightly
           target: wasm32-unknown-unknown
-          cache-root: wallet/bindings/wasm/
+          cache-root: sdk/src/wallet/bindings/wasm/
           cache-job-id: ${{ github.workflow }}-${{ github.job }}-${{ matrix.os }}-${{ matrix.node }}
           cache-hash: ${{ hashFiles('.github/workflows/examine-wasm-bindings.yml') }}
 
@@ -67,14 +67,14 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
-          cache-dependency-path: wallet/bindings/wasm/yarn.lock
+          cache-dependency-path: sdk/src/wallet/bindings/wasm/yarn.lock
 
       - name: Run Yarn Install
-        working-directory: wallet/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn install
 
       - name: Run Yarn Build
-        working-directory: wallet/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn build
 
       - name: Start private tangle
@@ -83,12 +83,12 @@ jobs:
 
       - name: Run Yarn Test
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        working-directory: wallet/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn test
 
       - name: Run Yarn Test
         if: ${{ !startsWith(matrix.os, 'ubuntu') }}
-        working-directory: wallet/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         # Only run test that doesn't require a node because we can't use the private tangle script on macos and windows
         run: yarn test -t 'Wallet methods'
 
@@ -109,15 +109,15 @@ jobs:
         uses: actions/setup-node@v2
         with:
           cache: yarn
-          cache-dependency-path: wallet/bindings/wasm/yarn.lock
+          cache-dependency-path: sdk/src/wallet/bindings/wasm/yarn.lock
           node-version: 16.x
 
       - name: Install Dependencies
-        working-directory: wallet/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn
 
       - name: Lint
-        working-directory: wallet/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn lint
 
   check-format:
@@ -133,13 +133,13 @@ jobs:
         uses: actions/setup-node@v2
         with:
           cache: yarn
-          cache-dependency-path: wallet/bindings/wasm/yarn.lock
+          cache-dependency-path: sdk/src/wallet/bindings/wasm/yarn.lock
           node-version: 16.x
 
       - name: Install Dependencies
-        working-directory: wallet/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn
 
       - name: Format
-        working-directory: wallet/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn format-check

@@ -182,8 +182,8 @@ jobs:
         # https://github.com/iotaledger/wallet.rs/pull/467/checks?check_run_id=2214108362#step:11:41
         with:
           path: |
-            wallet/bindings/nodejs/target
-            wallet/bindings/nodejs/artifacts.json
+            sdk/src/wallet/bindings/nodejs/target
+            sdk/src/wallet/bindings/nodejs/artifacts.json
           # Add date to the cache to keep it up to date
           key: ${{ matrix.os }}-stable-cargo-build-node-target-${{ hashFiles('**/Cargo.lock') }}-${{ env.CURRENT_DATE }}
           # Restore from outdated cache for speed
@@ -193,11 +193,11 @@ jobs:
 
       - name: Build nodejs binding
         run: npm ci --build-from-source
-        working-directory: wallet/bindings/nodejs
+        working-directory: sdk/src/wallet/bindings/nodejs
 
       - name: Run npm test
         run: npm test
-        working-directory: wallet/bindings/nodejs
+        working-directory: sdk/src/wallet/bindings/nodejs
 
   swift-bindings:
     runs-on: ${{ matrix.os }}

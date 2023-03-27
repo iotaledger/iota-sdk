@@ -8,7 +8,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: client/bindings/wasm
+        working-directory: sdk/src/client/bindings/wasm
 
     steps:
       - uses: actions/checkout@v3

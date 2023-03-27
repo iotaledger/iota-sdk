@@ -73,13 +73,13 @@ jobs:
         if: matrix.os == 'macos-latest' || matrix.os == 'windows-latest'
         uses: PyO3/maturin-action@v1
         with:
-          args: --release --out dist -m wallet/bindings/python/Cargo.toml -i python${{ matrix.python-version }}
+          args: --release --out dist -m sdk/src/wallet/bindings/python/Cargo.toml -i python${{ matrix.python-version }}
 
       - name: Build wheels for --target aarch64-apple-darwin
         if: matrix.os == 'macos-latest'
         uses: PyO3/maturin-action@v1
         with:
-          args: --target aarch64-apple-darwin --release --out dist -m wallet/bindings/python/Cargo.toml -i python${{ matrix.python-version }}
+          args: --target aarch64-apple-darwin --release --out dist -m sdk/src/wallet/bindings/python/Cargo.toml -i python${{ matrix.python-version }}
 
       # Build without container on linux
       - name: Build wheels
@@ -88,7 +88,7 @@ jobs:
         with:
           manylinux: auto
           container: off
-          args: --release --out dist -m wallet/bindings/python/Cargo.toml -i python${{ matrix.python-version }}
+          args: --release --out dist -m sdk/src/wallet/bindings/python/Cargo.toml -i python${{ matrix.python-version }}
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3
@@ -123,7 +123,7 @@ jobs:
             curl https://sh.rustup.rs -sSf | sh -s -- -y 
             . "$HOME/.cargo/env" 
 
-            cd wallet/bindings/python 
+            cd sdk/src/wallet/bindings/python 
             pip install -r requirements-dev.txt 
             pip install patchelf
             pip install maturin
@@ -144,7 +144,7 @@ jobs:
       - name: Get tag name
         id: tagname
         run: |
-          cd wallet/bindings/python
+          cd sdk/src/wallet/bindings/python
           tagName="iota-wallet-python-$(cargo read-manifest | jq -r '.version')"
           echo $tagName
           echo "TAG_NAME=$tagName" >> $GITHUB_OUTPUT
