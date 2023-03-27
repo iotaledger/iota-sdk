@@ -88,25 +88,37 @@ it.
 ```python
 from iota_wallet import IotaWallet, StrongholdSecretManager
 
-# This example creates a new database and account
+NODE_URL = "https://api.testnet.shimmer.network"
+STORAGE_PATH = "walletdb"
+STRONGHOLD_SNAPSHOT_PATH = "vault.stronghold"
+SHIMMER_COIN_TYPE = 4219
+
+# Change to a secure password.
+password = "some-secure-password"
+
+# Setup Stronghold secret manager
+secret_manager = StrongholdSecretManager(STRONGHOLD_SNAPSHOT_PATH, password)
 
 client_options = {
-    'nodes': ['https://api.testnet.shimmer.network'],
+    'nodes': [NODE_URL],
 }
 
-# Shimmer coin type
-coin_type = 4219
+# Set up and store the wallet.
+wallet = IotaWallet(STORAGE_PATH, client_options, SHIMMER_COIN_TYPE, secret_manager)
 
-secret_manager = StrongholdSecretManager("wallet.stronghold", "some_hopefully_secure_password")
+# Generate a mnemonic and store it in the Stronghold vault.
+mnemonic = wallet.generate_mnemonic()
+wallet.store_mnemonic(mnemonic)
 
-wallet = IotaWallet('./alice-database', client_options, coin_type, secret_manager)
+# Create an account and get the first address.
+wallet.create_account('Alice')
+account = wallet.get_account('Alice')
 
-# Store the mnemonic in the Stronghold snapshot, this only needs to be done once
-account = wallet.store_mnemonic("flame fever pig forward exact dash body idea link scrub tennis minute " +
-          "surge unaware prosper over waste kitten ceiling human knife arch situate civil")
+address = account.addresses()[0]
 
-account = wallet.create_account('Alice')
-print(account)
+# Print the account data.
+print(f'Mnemonic:\n{mnemonic}\n')
+print(f'Address:\n{address["address"]}\n')
 ```
 
 ## What's Next?
