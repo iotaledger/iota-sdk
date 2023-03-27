@@ -4,13 +4,10 @@
 use std::str::FromStr;
 
 use clap::{Parser, Subcommand};
-use iota_wallet::{
-    account::{
-        types::{AccountAddress, TransactionDto},
-        AccountHandle, OutputsToClaim,
-    },
-    iota_client::{
-        api_types::plugins::participation::types::ParticipationEventId,
+use iota_sdk::{
+    client::request_funds_from_faucet,
+    types::{
+        api::plugins::participation::types::ParticipationEventId,
         block::{
             address::Address,
             output::{
@@ -18,10 +15,15 @@ use iota_wallet::{
                 OutputId, TokenId, UnlockCondition,
             },
         },
-        request_funds_from_faucet,
     },
-    AddressAndNftId, AddressNativeTokens, AddressWithAmount, AddressWithMicroAmount, NativeTokenOptions, NftOptions,
-    U256,
+    wallet::{
+        account::{
+            types::{AccountAddress, TransactionDto},
+            AccountHandle, OutputsToClaim,
+        },
+        AddressAndNftId, AddressNativeTokens, AddressWithAmount, AddressWithMicroAmount, NativeTokenOptions,
+        NftOptions, U256,
+    },
 };
 
 use crate::error::Error;

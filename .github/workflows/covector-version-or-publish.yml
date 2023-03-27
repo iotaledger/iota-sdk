@@ -141,12 +141,12 @@ jobs:
 
       - name: Install dependencies
         run: npm install typescript && npm ci
-        working-directory: wallet/bindings/nodejs
+        working-directory: sdk/src/wallet/bindings/nodejs
 
       - name: Build Node.js prebuild
         run: npm run prebuild
-        working-directory: wallet/bindings/nodejs
+        working-directory: sdk/src/wallet/bindings/nodejs
 
       - name: Upload prebuild to GitHub release
         run: npx prebuild --upload-all ${{ secrets.GITHUB_TOKEN }} --tag-prefix wallet-nodejs-binding-v
-        working-directory: wallet/bindings/nodejs
+        working-directory: sdk/src/wallet/bindings/nodejs
