@@ -3,11 +3,10 @@
 
 //! PoW functions.
 
-#[cfg(target_family = "wasm")]
-use iota_pow::wasm_miner::{SingleThreadedMiner, SingleThreadedMinerBuilder};
-
 #[cfg(not(target_family = "wasm"))]
 use crate::pow::miner::{Miner, MinerBuilder, MinerCancel};
+#[cfg(target_family = "wasm")]
+use crate::pow::wasm_miner::{SingleThreadedMiner, SingleThreadedMinerBuilder};
 use crate::{
     client::{Client, Error, Result},
     types::block::{parent::Parents, payload::Payload, Block, BlockBuilder, Error as BlockError},
