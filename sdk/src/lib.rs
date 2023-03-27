@@ -11,6 +11,7 @@
     clippy::significant_drop_in_scrutinee
 )]
 
+#[cfg(feature = "client")]
 #[macro_use]
 extern crate serde;
 extern crate alloc;

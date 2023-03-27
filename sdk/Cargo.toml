@@ -66,7 +66,7 @@ dotenv = { version = "0.15.0", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 
 [features]
-client = [ "block", "dto", "api", "pow", "std", "async-trait", "log", "derive_builder" ]
+client = [ "serde", "block", "dto", "api", "pow", "std", "async-trait", "log", "derive_builder" ]
 pow = [ ]
 wallet = [ "client", "log" ]
 storage = [ "async-trait" ]
@@ -78,7 +78,7 @@ participation = [ "storage" ]
 message_interface = [ "backtrace", "fern-logger" ]
 tls = [ "reqwest/rustls-tls" ]
 
-default = [ "api", "block", "std" ]
+default = [ "api", "block", "std", "serde" ]
 api = [ "block", "dto" ]
 block = [  ]
 dto = [ "serde" ]
