@@ -14,6 +14,7 @@
 #[cfg(feature = "client")]
 #[macro_use]
 extern crate serde;
+#[cfg(not(target_family = "wasm"))]
 extern crate alloc;
 
 #[cfg(feature = "client")]
