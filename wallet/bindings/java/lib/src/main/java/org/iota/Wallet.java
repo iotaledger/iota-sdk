@@ -303,10 +303,10 @@ public class Wallet extends NativeApi {
     }
 
     /**
-     * Generate addresses.
+     * Generate an address.
      *
      * @param options The options.
-     * @return The generated addresses.
+     * @return The generated address.
      */
     public String generateAddress(int accountIndex, boolean internal, int addressIndex, AddressGenerationOptions.GenerateAddressOptions options, String bechHrp) throws WalletException {
         JsonObject o = new JsonObject();
