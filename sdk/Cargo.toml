@@ -64,7 +64,6 @@ instant = { version = "0.1.12", default-features = false, features = [ "wasm-bin
 iota-sdk = { version = "0.1.0", path = ".", default-features = false, features = [ "rand" ] }
 dotenv = { version = "0.15.0", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
-# num_cpus = { version = "1.15.0", default-features = false }
 
 [features]
 client = [ "async-trait", "log", "derive_builder" ]
