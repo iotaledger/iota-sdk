@@ -33,8 +33,9 @@ use crate::{
                 transaction::TransactionId,
             },
             protocol::dto::ProtocolParametersDto,
+            signature::dto::Ed25519SignatureDto,
             unlock::dto::UnlockDto,
-            BlockDto, BlockId, signature::dto::Ed25519SignatureDto,
+            BlockDto, BlockId,
         },
     },
 };

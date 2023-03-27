@@ -17,7 +17,7 @@ use crate::{
         secret::SecretManagerDto,
     },
     types::block::{
-        address::AliasAddress,
+        address::{dto::Ed25519AddressDto, AliasAddress},
         output::{
             dto::{AliasIdDto, NativeTokenDto, NftIdDto, TokenSchemeDto},
             feature::dto::FeatureDto,
@@ -32,6 +32,7 @@ use crate::{
                 TransactionId,
             },
         },
+        signature::dto::Ed25519SignatureDto,
         BlockDto, BlockId,
     },
 };

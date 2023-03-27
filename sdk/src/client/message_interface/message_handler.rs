@@ -35,8 +35,9 @@ use crate::{
             Payload, TransactionPayload,
         },
         protocol::dto::ProtocolParametersDto,
+        signature::{dto::Ed25519SignatureDto, Ed25519Signature},
         unlock::Unlock,
-        Block, BlockDto, DtoError, signature::{Ed25519Signature, dto::Ed25519SignatureDto},
+        Block, BlockDto, DtoError,
     },
 };
 
