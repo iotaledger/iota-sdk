@@ -51,6 +51,13 @@ pub enum Response {
     /// - [`BuildNftOutput`](crate::message_interface::Message::BuildNftOutput)
     BuiltOutput(OutputDto),
     /// Response for:
+    /// - [`GetLocalPow`](crate::message_interface::Message::GetLocalPow)
+    /// - [`GetFallbackToLocalPow`](crate::message_interface::Message::GetFallbackToLocalPow)
+    /// - [`VerifyEd25519Signature`](crate::message_interface::Message::VerifyEd25519Signature)
+    /// - [`GetHealth`](crate::message_interface::Message::GetHealth)
+    /// - [`IsAddressValid`](crate::message_interface::Message::IsAddressValid)
+    Bool(bool),
+    /// Response for:
     /// - [`GenerateAddresses`](crate::message_interface::Message::GenerateAddresses)
     GeneratedAddresses(Vec<String>),
     /// Response for:
@@ -75,12 +82,6 @@ pub enum Response {
     /// - [`GetProtocolParameters`](crate::message_interface::Message::GetProtocolParameters)
     ProtocolParameters(ProtocolParametersDto),
     /// Response for:
-    /// - [`GetLocalPow`](crate::message_interface::Message::GetLocalPow)
-    LocalPow(bool),
-    /// Response for:
-    /// - [`GetFallbackToLocalPow`](crate::message_interface::Message::GetFallbackToLocalPow)
-    FallbackToLocalPow(bool),
-    /// Response for:
     /// - [`GetLedgerNanoStatus`](crate::message_interface::Message::GetLedgerNanoStatus)
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
@@ -98,15 +99,9 @@ pub enum Response {
     /// - [`SignEd25519`](crate::message_interface::Message::SignEd25519)
     Ed25519Signature(Ed25519SignatureDto),
     /// Response for:
-    /// - [`VerifyEd25519Signature`](crate::message_interface::Message::VerifyEd25519Signature)
-    ValidSignature(bool),
-    /// Response for:
     /// - [`UnhealthyNodes`](crate::message_interface::Message::UnhealthyNodes)
     #[cfg(not(target_family = "wasm"))]
     UnhealthyNodes(HashSet<Node>),
-    /// Response for:
-    /// - [`GetHealth`](crate::message_interface::Message::GetHealth)
-    Health(bool),
     /// Response for:
     /// - [`GetNodeInfo`](crate::message_interface::Message::GetNodeInfo)
     NodeInfo(NodeInfo),
@@ -207,9 +202,6 @@ pub enum Response {
     /// Response for:
     /// - [`ParseBech32Address`](crate::message_interface::Message::ParseBech32Address)
     ParsedBech32Address(AddressDto),
-    /// Response for:
-    /// - [`IsAddressValid`](crate::message_interface::Message::IsAddressValid)
-    IsAddressValid(bool),
     /// Response for:
     /// - [`GenerateMnemonic`](crate::message_interface::Message::GenerateMnemonic)
     GeneratedMnemonic(String),
