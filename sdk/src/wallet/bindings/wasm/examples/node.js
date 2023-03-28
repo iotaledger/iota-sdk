@@ -39,10 +39,6 @@ async function run() {
     console.log('Account created:', account);
     account.setAlias('new alias');
 
-    console.log(await account.addresses());
-    console.log(await account.addressesWithUnspentOutputs());
-    console.log(await account.generateAddress());
-
     const balance = await account.sync();
     console.log(balance);
 

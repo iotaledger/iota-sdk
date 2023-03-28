@@ -24,7 +24,7 @@ pub(crate) const MAX_PARALLEL_API_REQUESTS: usize = 100;
 pub(crate) const FIVE_MINUTES_IN_SECONDS: u32 = 300;
 /// Delay for caching a node info response in WASM runtime
 #[cfg(target_family = "wasm")]
-pub(crate) const CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS: u32 = 1;
+pub(crate) const CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS: u32 = 60;
 
 /// Bech32 hrp for the IOTA mainnet <https://github.com/satoshilabs/slips/blob/master/slip-0173.md>
 pub const IOTA_BECH32_HRP: &str = "iota";
