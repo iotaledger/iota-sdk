@@ -4,11 +4,7 @@
 use packable::error::UnexpectedEOF;
 use serde::{Serialize, Serializer};
 
-pub use super::{
-    message::{AccountMethod, Message},
-    message_handler::MessageHandler,
-    response::Response,
-};
+pub use super::{message::AccountMethod, response::Response};
 use crate::serde::ser::SerializeMap;
 
 // TODO: SDK Error instead?

@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use zeroize::Zeroize;
+#[cfg(feature = "mqtt")]
+use {
+    crate::client::mqtt::{MqttPayload, Topic},
+    crate::types::block::payload::milestone::option::dto::ReceiptMilestoneOptionDto,
+};
 
 #[cfg(feature = "ledger_nano")]
 use crate::client::secret::ledger_nano::LedgerSecretManager;
@@ -32,6 +37,40 @@ use crate::{
 };
 
 impl Client {
+    /// Listen to MQTT events
+    #[cfg(feature = "mqtt")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "mqtt")))]
+    pub async fn listen<F>(&self, topics: Vec<Topic>, handler: F)
+    where
+        F: Fn(String) + 'static + Clone + Send + Sync,
+    {
+        self.subscribe(topics, move |topic_event| {
+            #[derive(Serialize)]
+            struct MqttResponse {
+                topic: String,
+                payload: String,
+            }
+            // convert types to DTOs
+            let payload = match &topic_event.payload {
+                MqttPayload::Json(val) => serde_json::to_string(&val).expect("failed to serialize MqttPayload::Json"),
+                MqttPayload::Block(block) => {
+                    serde_json::to_string(&BlockDto::from(block)).expect("failed to serialize MqttPayload::Block")
+                }
+                MqttPayload::MilestonePayload(ms) => serde_json::to_string(&MilestonePayloadDto::from(ms))
+                    .expect("failed to serialize MqttPayload::MilestonePayload"),
+                MqttPayload::Receipt(receipt) => serde_json::to_string(&ReceiptMilestoneOptionDto::from(receipt))
+                    .expect("failed to serialize MqttPayload::Receipt"),
+            };
+            let response = MqttResponse {
+                topic: topic_event.topic.clone(),
+                payload,
+            };
+
+            handler(serde_json::to_string(&response).expect("failed to serialize MQTT response"))
+        })
+        .await
+        .expect("failed to listen to MQTT events");
+    }
     /// Handle a message.
     pub(crate) async fn handle_message(&self, message: ClientMessage) -> Result<Response> {
         match message {
