@@ -3,14 +3,13 @@
 
 use std::str::FromStr;
 
-use instant::SystemTime;
-
 use crate::{
     client::Error as ClientError,
     types::{
         api::core::dto::LedgerInclusionStateDto,
         block::{input::Input, output::OutputId, payload::transaction::TransactionEssence, BlockId},
     },
+    utils::unix_timestamp_now,
     wallet::account::{
         handle::AccountHandle,
         types::{InclusionState, Transaction},
@@ -160,10 +159,7 @@ impl AccountHandle {
                                     &mut output_ids_to_unlock,
                                 )?;
                             } else {
-                                let time_now = SystemTime::now()
-                                    .duration_since(SystemTime::UNIX_EPOCH)
-                                    .expect("time went backwards")
-                                    .as_millis();
+                                let time_now = unix_timestamp_now().as_millis();
                                 // Reattach if older than 30 seconds
                                 if transaction.timestamp + 30000 < time_now {
                                     // only reattach if inputs are still unspent
@@ -182,10 +178,7 @@ impl AccountHandle {
                                 &mut output_ids_to_unlock,
                             )?;
                         } else {
-                            let time_now = SystemTime::now()
-                                .duration_since(SystemTime::UNIX_EPOCH)
-                                .expect("time went backwards")
-                                .as_millis();
+                            let time_now = unix_timestamp_now().as_millis();
                             // Reattach if older than 30 seconds
                             if transaction.timestamp + 30000 < time_now {
                                 // only reattach if inputs are still unspent

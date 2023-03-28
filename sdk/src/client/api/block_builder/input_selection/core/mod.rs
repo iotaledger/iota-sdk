@@ -18,13 +18,14 @@ pub use self::{
     requirement::Requirement,
 };
 use crate::{
-    client::{api::types::RemainderData, secret::types::InputSigningData, unix_timestamp_now},
+    client::{api::types::RemainderData, secret::types::InputSigningData},
     types::block::{
         address::{Address, AliasAddress, NftAddress},
         input::INPUT_COUNT_RANGE,
         output::{AliasTransition, ChainId, Output, OutputId, OUTPUT_COUNT_RANGE},
         protocol::ProtocolParameters,
     },
+    utils::unix_timestamp_now,
 };
 
 // TODO make methods actually take self? There was a mut issue.
@@ -186,7 +187,7 @@ impl InputSelection {
             burn: None,
             remainder_address: None,
             protocol_parameters,
-            timestamp: unix_timestamp_now(),
+            timestamp: unix_timestamp_now().as_secs() as u32,
             requirements: Vec::new(),
             automatically_transitioned: HashMap::new(),
         }
@@ -258,7 +259,7 @@ impl InputSelection {
         outputs: &[Output],
         time: Option<u32>,
     ) -> Result<Vec<InputSigningData>, Error> {
-        let time = time.unwrap_or_else(unix_timestamp_now);
+        let time = time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32);
         // initially sort by output to make it deterministic
         // TODO: rethink this, we only need it deterministic for tests, for the protocol it doesn't matter, also there
         // might be a more efficient way to do this

@@ -60,8 +60,9 @@ tokio = { version = "1.26.0", default-features = false, features = [ "macros", "
 [target.'cfg(target_family = "wasm")'.dependencies]
 gloo-timers = { version = "0.2.6", default-features = false, features = [ "futures" ] }
 gloo-storage = { version = "0.2.2", default-features = false, optional = true }
-wasm-bindgen-futures = { version = "0.4.34", default-features = false }
 instant = { version = "0.1.12", default-features = false, features = [ "wasm-bindgen" ] }
+lazy_static = { version = "1.4.0", default-features = false }
+wasm-bindgen-futures = { version = "0.4.34", default-features = false }
 
 [dev-dependencies]
 iota-sdk = { version = "0.1.0", path = ".", default-features = false, features = [ "rand" ] }

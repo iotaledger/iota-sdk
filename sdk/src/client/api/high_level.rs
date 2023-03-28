@@ -12,7 +12,7 @@ use crate::{
         error::{Error, Result},
         node_api::indexer::query_parameters::QueryParameter,
         secret::SecretManager,
-        unix_timestamp_now, Client,
+        Client,
     },
     types::{
         api::core::{dto::LedgerInclusionStateDto, response::OutputWithMetadataResponse},
@@ -27,6 +27,7 @@ use crate::{
             Block, BlockId,
         },
     },
+    utils::unix_timestamp_now,
 };
 
 impl Client {
@@ -335,7 +336,7 @@ impl Client {
     /// Returns the local time checked with the timestamp of the latest milestone, if the difference is larger than 5
     /// minutes an error is returned to prevent locking outputs by accident for a wrong time.
     pub async fn get_time_checked(&self) -> Result<u32> {
-        let current_time = unix_timestamp_now();
+        let current_time = unix_timestamp_now().as_secs() as u32;
 
         let network_info = self.get_network_info().await?;
 

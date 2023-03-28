@@ -10,8 +10,6 @@ mod prepare_transaction;
 mod sign_transaction;
 pub(crate) mod submit_transaction;
 
-use instant::SystemTime;
-
 pub use self::options::{RemainderValueStrategy, TransactionOptions, TransactionOptionsDto};
 use crate::{
     client::{
@@ -171,10 +169,7 @@ impl AccountHandle {
             payload: signed_transaction_data.transaction_payload,
             block_id,
             network_id,
-            timestamp: SystemTime::now()
-                .duration_since(SystemTime::UNIX_EPOCH)
-                .expect("time went backwards")
-                .as_millis(),
+            timestamp: crate::utils::unix_timestamp_now().as_millis(),
             inclusion_state: InclusionState::Pending,
             incoming: false,
             note: None,
