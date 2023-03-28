@@ -11,7 +11,7 @@ body:
     - type: markdown
       attributes:
           value: |
-              Thank you for helping us make the iota-sdk better, by reporting a bug you have found. This issue may already be reported! Please search on the [issue tracker](https://github.com/iotaledger/iota-sdk/issues) before creating one. This form is for bugs only and not for help or support using this application. Please join our [discord](https://discord.iota.org/) for help.
+              Thank you for helping us to make the iota-sdk better by reporting a bug you have found. This issue may have been reported already! Please search the [issue tracker](https://github.com/iotaledger/iota-sdk/issues) before creating one. This form is for bugs only and not for help or support using this application. Please join our [discord](https://discord.iota.org/) for help.
 
     - type: textarea
       id: description
