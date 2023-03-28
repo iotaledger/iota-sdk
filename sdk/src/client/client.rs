@@ -18,7 +18,7 @@ use {
 };
 
 #[cfg(target_family = "wasm")]
-use crate::constants::CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS;
+use crate::client::constants::CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS;
 use crate::{
     client::{
         builder::{ClientBuilder, NetworkInfo},
@@ -120,10 +120,14 @@ impl Client {
             lazy_static::lazy_static! {
                 static ref LAST_SYNC: std::sync::Mutex<Option<u32>> = std::sync::Mutex::new(None);
             };
-            let current_time = crate::unix_timestamp_now();
+            let current_time = crate::utils::unix_timestamp_now().as_secs() as u32;
             if let Some(last_sync) = *LAST_SYNC.lock().unwrap() {
                 if current_time < last_sync {
-                    return Ok(self.network_info.read().map_err(|_| crate::Error::PoisonError)?.clone());
+                    return Ok(self
+                        .network_info
+                        .read()
+                        .map_err(|_| crate::client::Error::PoisonError)?
+                        .clone());
                 }
             }
             let info = self.get_info().await?.node_info;
