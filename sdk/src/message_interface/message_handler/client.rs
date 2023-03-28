@@ -337,9 +337,7 @@ impl Client {
                 self.unhealthy_nodes().into_iter().cloned().collect(),
             )),
             ClientMessage::GetHealth { url } => Ok(Response::Health(self.get_health(&url).await?)),
-            ClientMessage::GetNodeInfo { url, auth } => {
-                Ok(Response::NodeInfo(Client::get_node_info(&url, auth).await?))
-            }
+            ClientMessage::GetNodeInfo { url, auth } => Ok(Response::NodeInfo(Self::get_node_info(&url, auth).await?)),
             ClientMessage::GetInfo => Ok(Response::Info(self.get_info().await?)),
             ClientMessage::GetPeers => Ok(Response::Peers(self.get_peers().await?)),
             ClientMessage::GetTips => Ok(Response::Tips(self.get_tips().await?)),
@@ -492,9 +490,9 @@ impl Client {
             ClientMessage::IsAddressValid { address } => {
                 Ok(Response::IsAddressValid(Address::is_valid_bech32(&address)))
             }
-            ClientMessage::GenerateMnemonic => Ok(Response::GeneratedMnemonic(Client::generate_mnemonic()?)),
+            ClientMessage::GenerateMnemonic => Ok(Response::GeneratedMnemonic(Self::generate_mnemonic()?)),
             ClientMessage::MnemonicToHexSeed { mut mnemonic } => {
-                let response = Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(&mnemonic)?);
+                let response = Response::MnemonicHexSeed(Self::mnemonic_to_hex_seed(&mnemonic)?);
 
                 mnemonic.zeroize();
 

@@ -108,3 +108,61 @@ async fn new_message_interface_create_account() -> Result<()> {
 
     Ok(std::fs::remove_dir_all(storage_path).unwrap_or(()))
 }
+
+#[cfg(feature = "message_interface")]
+#[tokio::test]
+async fn new_message_interface_client_from_wallet() -> Result<()> {
+    let storage_path = "test-storage/new_message_interface_client_from_wallet";
+    std::fs::remove_dir_all(storage_path).unwrap_or(());
+
+    let secret_manager = r#"{"Mnemonic":"about solution utility exist rail budget vacuum major survey clerk pave ankle wealth gym gossip still medal expect strong rely amazing inspire lazy lunar"}"#;
+    let client_options = r#"{
+            "nodes":[
+               {
+                  "url":"http://localhost:14265",
+                  "auth":null,
+                  "disabled":false
+               }
+            ]
+         }"#;
+
+    let options = ManagerOptions {
+        #[cfg(feature = "storage")]
+        storage_path: Some(storage_path.to_string()),
+        client_options: Some(ClientBuilder::new().from_json(client_options).unwrap()),
+        coin_type: Some(SHIMMER_COIN_TYPE),
+        secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
+    };
+
+    let wallet = options.build_manager().await?;
+
+    // create an account
+    let response = wallet
+        .send_message(WalletMessage::CreateAccount {
+            alias: None,
+            bech32_hrp: None,
+        })
+        .await;
+
+    match response {
+        Response::Account(account) => {
+            assert_eq!(account.index, 0);
+            let id = account.index;
+            println!("Created account index: {id}")
+        }
+        _ => panic!("unexpected response {response:?}"),
+    }
+
+    // Send ClientMessage via the client from the wallet
+    let response = wallet.get_accounts().await?[0]
+        .client()
+        .send_message(ClientMessage::GenerateMnemonic)
+        .await;
+
+    match response {
+        Response::GeneratedMnemonic(_) => {}
+        _ => panic!("unexpected response {response:?}"),
+    }
+
+    Ok(std::fs::remove_dir_all(storage_path).unwrap_or(()))
+}
