@@ -79,21 +79,24 @@ impl Client {
 
         for node in nodes {
             // Put the healthy node url into the network_nodes
-            if let Ok(info) = Self::get_node_info(node.url.as_ref(), node.auth.clone()).await {
-                if info.status.is_healthy || ignore_node_health {
-                    match network_nodes.get_mut(&info.protocol.network_name) {
-                        Some(network_node_entry) => {
-                            network_node_entry.push((info, node.clone()));
+            match Self::get_node_info(node.url.as_ref(), node.auth.clone()).await {
+                Ok(info) => {
+                    if info.status.is_healthy || ignore_node_health {
+                        match network_nodes.get_mut(&info.protocol.network_name) {
+                            Some(network_node_entry) => {
+                                network_node_entry.push((info, node.clone()));
+                            }
+                            None => {
+                                network_nodes.insert(info.protocol.network_name.clone(), vec![(info, node.clone())]);
+                            }
                         }
-                        None => {
-                            network_nodes.insert(info.protocol.network_name.clone(), vec![(info, node.clone())]);
-                        }
+                    } else {
+                        log::debug!("{} is not healthy: {:?}", node.url, info);
                     }
-                } else {
-                    log::debug!("{} is not healthy: {:?}", node.url, info);
                 }
-            } else {
-                log::error!("Couldn't get the node info from {}", node.url);
+                Err(err) => {
+                    log::error!("Couldn't get node info: {err}");
+                }
             }
         }
 
