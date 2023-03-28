@@ -26,7 +26,7 @@ use iota_sdk::{
     },
 };
 
-use crate::error::Error;
+use crate::{error::Error, println_log_info};
 
 #[derive(Debug, Parser)]
 #[command(author, version, about, long_about = None, propagate_version = true)]
@@ -153,7 +153,7 @@ pub async fn addresses_command(account_handle: &AccountHandle) -> Result<(), Err
     let addresses = account_handle.addresses().await?;
 
     if addresses.is_empty() {
-        log::info!("No addresses found");
+        println_log_info!("No addresses found");
     } else {
         for address in addresses {
             print_address(account_handle, &address).await?;
@@ -169,7 +169,7 @@ pub async fn burn_native_token_command(
     token_id: String,
     amount: String,
 ) -> Result<(), Error> {
-    log::info!("Burning native token {token_id} {amount}.");
+    println_log_info!("Burning native token {token_id} {amount}.");
 
     let transaction = account_handle
         .burn_native_token(
@@ -179,7 +179,7 @@ pub async fn burn_native_token_command(
         )
         .await?;
 
-    log::info!(
+    println_log_info!(
         "Burning transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
@@ -190,11 +190,11 @@ pub async fn burn_native_token_command(
 
 // `burn-nft` command
 pub async fn burn_nft_command(account_handle: &AccountHandle, nft_id: String) -> Result<(), Error> {
-    log::info!("Burning nft {nft_id}.");
+    println_log_info!("Burning nft {nft_id}.");
 
     let transaction = account_handle.burn_nft(NftId::from_str(&nft_id)?, None).await?;
 
-    log::info!(
+    println_log_info!(
         "Burning transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
@@ -205,7 +205,7 @@ pub async fn burn_nft_command(account_handle: &AccountHandle, nft_id: String) ->
 
 // `balance` command
 pub async fn balance_command(account_handle: &AccountHandle) -> Result<(), Error> {
-    log::info!("{:?}", account_handle.balance().await?);
+    println_log_info!("{:?}", account_handle.balance().await?);
 
     Ok(())
 }
@@ -213,33 +213,33 @@ pub async fn balance_command(account_handle: &AccountHandle) -> Result<(), Error
 // `claim` command
 pub async fn claim_command(account_handle: &AccountHandle, output_id: Option<String>) -> Result<(), Error> {
     if let Some(output_id) = output_id {
-        log::info!("Claiming output {output_id}");
+        println_log_info!("Claiming output {output_id}");
 
         let transaction = account_handle
             .claim_outputs(vec![OutputId::from_str(&output_id)?])
             .await?;
 
-        log::info!(
+        println_log_info!(
             "Claiming transaction sent:\n{:?}\n{:?}",
             transaction.transaction_id,
             transaction.block_id
         );
     } else {
-        log::info!("Claiming outputs.");
+        println_log_info!("Claiming outputs.");
 
         let output_ids = account_handle
             .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::All)
             .await?;
 
         if output_ids.is_empty() {
-            log::info!("No outputs available to claim.");
+            println_log_info!("No outputs available to claim.");
         }
 
         // Doing chunks of only 60, because we might need to create the double amount of outputs, because of potential
         // storage deposit return unlock conditions and also consider the remainder output.
         for output_ids_chunk in output_ids.chunks(60) {
             let transaction = account_handle.claim_outputs(output_ids_chunk.to_vec()).await?;
-            log::info!(
+            println_log_info!(
                 "Claiming transaction sent:\n{:?}\n{:?}",
                 transaction.transaction_id,
                 transaction.block_id
@@ -252,11 +252,11 @@ pub async fn claim_command(account_handle: &AccountHandle, output_id: Option<Str
 
 // `consolidate` command
 pub async fn consolidate_command(account_handle: &AccountHandle) -> Result<(), Error> {
-    log::info!("Consolidating outputs.");
+    println_log_info!("Consolidating outputs.");
 
     let transaction = account_handle.consolidate_outputs(true, None).await?;
 
-    log::info!(
+    println_log_info!(
         "Consolidation transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
@@ -267,11 +267,11 @@ pub async fn consolidate_command(account_handle: &AccountHandle) -> Result<(), E
 
 // `create-alias-output` command
 pub async fn create_alias_outputs_command(account_handle: &AccountHandle) -> Result<(), Error> {
-    log::info!("Creating alias output.");
+    println_log_info!("Creating alias output.");
 
     let transaction = account_handle.create_alias_output(None, None).await?;
 
-    log::info!(
+    println_log_info!(
         "Alias output creation transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
@@ -294,7 +294,7 @@ pub async fn decrease_native_token_command(
         )
         .await?;
 
-    log::info!(
+    println_log_info!(
         "Native token melting transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
@@ -305,13 +305,13 @@ pub async fn decrease_native_token_command(
 
 // `destroy-alias` command
 pub async fn destroy_alias_command(account_handle: &AccountHandle, alias_id: String) -> Result<(), Error> {
-    log::info!("Destroying alias {alias_id}.");
+    println_log_info!("Destroying alias {alias_id}.");
 
     let transaction = account_handle
         .destroy_alias(AliasId::from_str(&alias_id)?, None)
         .await?;
 
-    log::info!(
+    println_log_info!(
         "Destroying alias transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
@@ -322,13 +322,13 @@ pub async fn destroy_alias_command(account_handle: &AccountHandle, alias_id: Str
 
 // `destroy-foundry` command
 pub async fn destroy_foundry_command(account_handle: &AccountHandle, foundry_id: String) -> Result<(), Error> {
-    log::info!("Destroying foundry {foundry_id}.");
+    println_log_info!("Destroying foundry {foundry_id}.");
 
     let transaction = account_handle
         .destroy_foundry(FoundryId::from_str(&foundry_id)?, None)
         .await?;
 
-    log::info!(
+    println_log_info!(
         "Destroying foundry transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
@@ -356,7 +356,7 @@ pub async fn faucet_command(
         None => "https://faucet.testnet.shimmer.network/api/enqueue",
     };
 
-    log::info!("{}", request_funds_from_faucet(faucet_url, &address).await?);
+    println_log_info!("{}", request_funds_from_faucet(faucet_url, &address).await?);
 
     Ok(())
 }
@@ -376,7 +376,7 @@ pub async fn increase_native_token_command(
         )
         .await?;
 
-    log::info!(
+    println_log_info!(
         "Minting more native token transaction sent:\n{:?}\n{:?}",
         mint_transaction.transaction.transaction_id,
         mint_transaction.transaction.block_id
@@ -395,7 +395,7 @@ pub async fn mint_native_token_command(
     // If no alias output exists, create one first
     if account_handle.balance().await?.aliases.is_empty() {
         let transaction = account_handle.create_alias_output(None, None).await?;
-        log::info!(
+        println_log_info!(
             "Alias output minting transaction sent:\n{:?}\n{:?}",
             transaction.transaction_id,
             transaction.block_id
@@ -416,7 +416,7 @@ pub async fn mint_native_token_command(
 
     let mint_transaction = account_handle.mint_native_token(native_token_options, None).await?;
 
-    log::info!(
+    println_log_info!(
         "Native token minting transaction sent:\n{:?}\n{:?}",
         mint_transaction.transaction.transaction_id,
         mint_transaction.transaction.block_id
@@ -450,7 +450,7 @@ pub async fn mint_nft_command(
     }];
     let transaction = account_handle.mint_nfts(nft_options, None).await?;
 
-    log::info!(
+    println_log_info!(
         "NFT minting transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
@@ -473,9 +473,9 @@ pub async fn output_command(account_handle: &AccountHandle, output_id: String) -
     let output = account_handle.get_output(&OutputId::from_str(&output_id)?).await;
 
     if let Some(output) = output {
-        log::info!("{output:#?}");
+        println_log_info!("{output:#?}");
     } else {
-        log::info!("Output not found");
+        println_log_info!("Output not found");
     }
 
     Ok(())
@@ -486,10 +486,10 @@ pub async fn outputs_command(account_handle: &AccountHandle) -> Result<(), Error
     let outputs = account_handle.outputs(None).await?;
 
     if outputs.is_empty() {
-        log::info!("No outputs found");
+        println_log_info!("No outputs found");
     } else {
         let output_ids: Vec<OutputId> = outputs.iter().map(|o| o.output_id).collect();
-        log::info!("Outputs: {output_ids:#?}");
+        println_log_info!("Outputs: {output_ids:#?}");
     }
 
     Ok(())
@@ -500,7 +500,7 @@ pub async fn send_command(account_handle: &AccountHandle, address: String, amoun
     let outputs = vec![AddressWithAmount { address, amount }];
     let transaction = account_handle.send_amount(outputs, None).await?;
 
-    log::info!(
+    println_log_info!(
         "Transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
@@ -520,7 +520,7 @@ pub async fn send_micro_command(account_handle: &AccountHandle, address: String,
 
     let transaction = account_handle.send_micro_transaction(outputs, None).await?;
 
-    log::info!(
+    println_log_info!(
         "Micro transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
@@ -569,7 +569,7 @@ pub async fn send_native_token_command(
         account_handle.send_native_tokens(outputs, None).await?
     };
 
-    log::info!(
+    println_log_info!(
         "Native token transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
@@ -586,7 +586,7 @@ pub async fn send_nft_command(account_handle: &AccountHandle, address: String, n
     }];
     let transaction = account_handle.send_nft(outputs, None).await?;
 
-    log::info!(
+    println_log_info!(
         "Nft transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
@@ -599,7 +599,7 @@ pub async fn send_nft_command(account_handle: &AccountHandle, address: String, n
 pub async fn sync_command(account_handle: &AccountHandle) -> Result<(), Error> {
     let sync = account_handle.sync(None).await?;
 
-    log::info!("Synced: {sync:?}");
+    println_log_info!("Synced: {sync:?}");
 
     Ok(())
 }
@@ -609,10 +609,10 @@ pub async fn transactions_command(account_handle: &AccountHandle) -> Result<(), 
     let transactions = account_handle.transactions().await?;
 
     if transactions.is_empty() {
-        log::info!("No transactions found");
+        println_log_info!("No transactions found");
     } else {
         for tx in transactions {
-            log::info!("{}", serde_json::to_string(&TransactionDto::from(&tx))?);
+            println_log_info!("{}", serde_json::to_string(&TransactionDto::from(&tx))?);
         }
     }
 
@@ -624,10 +624,10 @@ pub async fn unspent_outputs_command(account_handle: &AccountHandle) -> Result<(
     let outputs = account_handle.unspent_outputs(None).await?;
 
     if outputs.is_empty() {
-        log::info!("No outputs found");
+        println_log_info!("No outputs found");
     } else {
         let output_ids: Vec<OutputId> = outputs.iter().map(|o| o.output_id).collect();
-        log::info!("Unspent outputs: {output_ids:#?}");
+        println_log_info!("Unspent outputs: {output_ids:#?}");
     }
 
     Ok(())
@@ -640,7 +640,7 @@ pub async fn vote_command(
 ) -> Result<(), Error> {
     let transaction = account_handle.vote(Some(event_id), Some(answers)).await?;
 
-    log::info!(
+    println_log_info!(
         "Voting transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
@@ -655,7 +655,7 @@ pub async fn stop_participating_command(
 ) -> Result<(), Error> {
     let transaction = account_handle.stop_participating(event_id).await?;
 
-    log::info!(
+    println_log_info!(
         "Stop participating transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
@@ -670,7 +670,7 @@ pub async fn participation_overview_command(
 ) -> Result<(), Error> {
     let participation_overview = account_handle.get_participation_overview(event_ids).await?;
 
-    log::info!("Participation overview: {participation_overview:?}");
+    println_log_info!("Participation overview: {participation_overview:?}");
 
     Ok(())
 }
@@ -678,7 +678,7 @@ pub async fn participation_overview_command(
 pub async fn voting_power_command(account_handle: &AccountHandle) -> Result<(), Error> {
     let voting_power = account_handle.get_voting_power().await?;
 
-    log::info!("Voting power: {voting_power}");
+    println_log_info!("Voting power: {voting_power}");
 
     Ok(())
 }
@@ -686,7 +686,7 @@ pub async fn voting_power_command(account_handle: &AccountHandle) -> Result<(), 
 pub async fn increase_voting_power_command(account_handle: &AccountHandle, amount: u64) -> Result<(), Error> {
     let transaction = account_handle.increase_voting_power(amount).await?;
 
-    log::info!(
+    println_log_info!(
         "Increase voting power transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
@@ -698,7 +698,7 @@ pub async fn increase_voting_power_command(account_handle: &AccountHandle, amoun
 pub async fn decrease_voting_power_command(account_handle: &AccountHandle, amount: u64) -> Result<(), Error> {
     let transaction = account_handle.decrease_voting_power(amount).await?;
 
-    log::info!(
+    println_log_info!(
         "Decrease voting power transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
@@ -710,7 +710,7 @@ pub async fn decrease_voting_power_command(account_handle: &AccountHandle, amoun
 pub async fn voting_output_command(account_handle: &AccountHandle) -> Result<(), Error> {
     let output = account_handle.get_voting_output().await?;
 
-    log::info!("Voting output: {output:?}");
+    println_log_info!("Voting output: {output:?}");
 
     Ok(())
 }
@@ -730,7 +730,7 @@ async fn print_address(account_handle: &AccountHandle, address: &AccountAddress)
         log = format!("{log}\nOutputs: {:#?}", addresses[index].output_ids());
     }
 
-    log::info!("{log}");
+    println_log_info!("{log}");
 
     Ok(())
 }
