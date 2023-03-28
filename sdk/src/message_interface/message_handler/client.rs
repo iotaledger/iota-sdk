@@ -470,7 +470,7 @@ impl Client {
                 let (block_id, block) = self.promote_unchecked(&block_id).await?;
                 Ok(Response::Promoted((block_id, BlockDto::from(&block))))
             }
-            ClientMessage::Bech32ToHex { bech32 } => Ok(Response::Bech32ToHex(Client::bech32_to_hex(&bech32)?)),
+            ClientMessage::Bech32ToHex { bech32 } => Ok(Response::Bech32ToHex(Self::bech32_to_hex(&bech32)?)),
             ClientMessage::HexToBech32 { hex, bech32_hrp } => Ok(Response::Bech32Address(
                 self.hex_to_bech32(&hex, bech32_hrp.as_deref()).await?,
             )),
