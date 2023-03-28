@@ -1,11 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod call_account_method;
+mod account_handle;
+mod client;
 mod send_message;
-
-#[cfg(feature = "stronghold")]
-use std::path::PathBuf;
+mod wallet;
 
 #[cfg(feature = "mqtt")]
 use {
@@ -18,11 +17,7 @@ use {
 
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{Event, WalletEventType};
-use crate::{
-    client::Client,
-    message_interface::response::Response,
-    wallet::{account::types::AccountIdentifier, account_manager::AccountManager, message_interface::dtos::AccountDto},
-};
+use crate::{client::Client, wallet::account_manager::AccountManager};
 
 /// Result type of the message interface.
 pub type Result<T> = std::result::Result<T, super::error::MessageInterfaceError>;
@@ -92,62 +87,6 @@ impl MessageHandler {
         F: Fn(&Event) + 'static + Clone + Send + Sync,
     {
         self.account_manager.listen(events, handler).await;
-    }
-
-    #[cfg(feature = "stronghold")]
-    async fn backup(&self, backup_path: PathBuf, stronghold_password: String) -> Result<Response> {
-        self.account_manager.backup(backup_path, stronghold_password).await?;
-        Ok(Response::Ok)
-    }
-
-    #[cfg(feature = "stronghold")]
-    async fn restore_backup(
-        &self,
-        backup_path: PathBuf,
-        stronghold_password: String,
-        ignore_if_coin_type_mismatch: Option<bool>,
-    ) -> Result<Response> {
-        self.account_manager
-            .restore_backup(backup_path, stronghold_password, ignore_if_coin_type_mismatch)
-            .await?;
-        Ok(Response::Ok)
-    }
-
-    /// The create account message handler.
-    async fn create_account(&self, alias: Option<String>, bech32_hrp: Option<String>) -> Result<Response> {
-        let mut builder = self.account_manager.create_account();
-
-        if let Some(alias) = alias {
-            builder = builder.with_alias(alias);
-        }
-
-        if let Some(bech32_hrp) = bech32_hrp {
-            builder = builder.with_bech32_hrp(bech32_hrp);
-        }
-
-        match builder.finish().await {
-            Ok(account_handle) => {
-                let account = account_handle.read().await;
-                Ok(Response::Account(AccountDto::from(&*account)))
-            }
-            Err(e) => Err(e.into()),
-        }
-    }
-
-    async fn get_account(&self, account_id: &AccountIdentifier) -> Result<Response> {
-        let account_handle = self.account_manager.get_account(account_id.clone()).await?;
-        let account = account_handle.read().await;
-        Ok(Response::Account(AccountDto::from(&*account)))
-    }
-
-    async fn get_accounts(&self) -> Result<Response> {
-        let account_handles = self.account_manager.get_accounts().await?;
-        let mut accounts = Vec::new();
-        for account_handle in account_handles {
-            let account = account_handle.read().await;
-            accounts.push(AccountDto::from(&*account));
-        }
-        Ok(Response::Accounts(accounts))
     }
 }
 

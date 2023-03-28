@@ -6,7 +6,7 @@ use std::str::FromStr;
 
 use primitive_types::U256;
 
-use super::{MessageHandler, Result};
+use super::Result;
 use crate::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
@@ -27,22 +27,16 @@ use crate::{
                 prepare_output::OutputOptions,
                 TransactionOptions,
             },
-            types::{AccountBalanceDto, AccountIdentifier, TransactionDto},
-            OutputDataDto,
+            types::{AccountBalanceDto, TransactionDto},
+            AccountHandle, OutputDataDto,
         },
         message_interface::AddressWithUnspentOutputsDto,
         AddressWithAmount, AddressWithMicroAmount, IncreaseNativeTokenSupplyOptions, NativeTokenOptions, NftOptions,
     },
 };
 
-impl MessageHandler {
-    pub(crate) async fn call_account_method(
-        &self,
-        account_id: &AccountIdentifier,
-        method: AccountMethod,
-    ) -> Result<Response> {
-        let account_handle = self.account_manager.get_account(account_id.clone()).await?;
-
+impl AccountHandle {
+    pub(crate) async fn handle_message(&self, method: AccountMethod) -> Result<Response> {
         match method {
             AccountMethod::BuildAliasOutput {
                 amount,
@@ -59,7 +53,7 @@ impl MessageHandler {
                     if let Some(amount) = amount {
                         OutputBuilderAmountDto::Amount(amount)
                     } else {
-                        OutputBuilderAmountDto::MinimumStorageDeposit(account_handle.client.get_rent_structure().await?)
+                        OutputBuilderAmountDto::MinimumStorageDeposit(self.client.get_rent_structure().await?)
                     },
                     native_tokens,
                     &alias_id,
@@ -69,7 +63,7 @@ impl MessageHandler {
                     unlock_conditions,
                     features,
                     immutable_features,
-                    account_handle.client.get_token_supply().await?,
+                    self.client.get_token_supply().await?,
                 )?);
 
                 Ok(Response::Output(OutputDto::from(&output)))
@@ -84,12 +78,12 @@ impl MessageHandler {
                     if let Some(amount) = amount {
                         OutputBuilderAmountDto::Amount(amount)
                     } else {
-                        OutputBuilderAmountDto::MinimumStorageDeposit(account_handle.client.get_rent_structure().await?)
+                        OutputBuilderAmountDto::MinimumStorageDeposit(self.client.get_rent_structure().await?)
                     },
                     native_tokens,
                     unlock_conditions,
                     features,
-                    account_handle.client.get_token_supply().await?,
+                    self.client.get_token_supply().await?,
                 )?);
 
                 Ok(Response::Output(OutputDto::from(&output)))
@@ -107,7 +101,7 @@ impl MessageHandler {
                     if let Some(amount) = amount {
                         OutputBuilderAmountDto::Amount(amount)
                     } else {
-                        OutputBuilderAmountDto::MinimumStorageDeposit(account_handle.client.get_rent_structure().await?)
+                        OutputBuilderAmountDto::MinimumStorageDeposit(self.client.get_rent_structure().await?)
                     },
                     native_tokens,
                     serial_number,
@@ -115,7 +109,7 @@ impl MessageHandler {
                     unlock_conditions,
                     features,
                     immutable_features,
-                    account_handle.client.get_token_supply().await?,
+                    self.client.get_token_supply().await?,
                 )?);
 
                 Ok(Response::Output(OutputDto::from(&output)))
@@ -132,14 +126,14 @@ impl MessageHandler {
                     if let Some(amount) = amount {
                         OutputBuilderAmountDto::Amount(amount)
                     } else {
-                        OutputBuilderAmountDto::MinimumStorageDeposit(account_handle.client.get_rent_structure().await?)
+                        OutputBuilderAmountDto::MinimumStorageDeposit(self.client.get_rent_structure().await?)
                     },
                     native_tokens,
                     &nft_id,
                     unlock_conditions,
                     features,
                     immutable_features,
-                    account_handle.client.get_token_supply().await?,
+                    self.client.get_token_supply().await?,
                 )?);
 
                 Ok(Response::Output(OutputDto::from(&output)))
@@ -150,7 +144,7 @@ impl MessageHandler {
                 options,
             } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle
+                    let transaction = self
                         .burn_native_token(
                             TokenId::try_from(&token_id)?,
                             U256::try_from(&burn_amount).map_err(|_| DtoError::InvalidField("burn_amount"))?,
@@ -163,7 +157,7 @@ impl MessageHandler {
             }
             AccountMethod::BurnNft { nft_id, options } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle
+                    let transaction = self
                         .burn_nft(
                             NftId::try_from(&nft_id)?,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
@@ -178,9 +172,7 @@ impl MessageHandler {
                 output_consolidation_threshold,
             } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle
-                        .consolidate_outputs(force, output_consolidation_threshold)
-                        .await?;
+                    let transaction = self.consolidate_outputs(force, output_consolidation_threshold).await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
@@ -194,7 +186,7 @@ impl MessageHandler {
                         .map(|options| AliasOutputOptions::try_from(&options))
                         .transpose()?;
 
-                    let transaction = account_handle
+                    let transaction = self
                         .create_alias_output(
                             alias_output_options,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
@@ -206,7 +198,7 @@ impl MessageHandler {
             }
             AccountMethod::DestroyAlias { alias_id, options } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle
+                    let transaction = self
                         .destroy_alias(
                             AliasId::try_from(&alias_id)?,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
@@ -218,7 +210,7 @@ impl MessageHandler {
             }
             AccountMethod::DestroyFoundry { foundry_id, options } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle
+                    let transaction = self
                         .destroy_foundry(
                             foundry_id,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
@@ -229,34 +221,34 @@ impl MessageHandler {
                 .await
             }
             AccountMethod::GenerateAddresses { amount, options } => {
-                let address = account_handle.generate_addresses(amount, options).await?;
+                let address = self.generate_addresses(amount, options).await?;
                 Ok(Response::GeneratedAddress(address))
             }
             AccountMethod::GetOutputsWithAdditionalUnlockConditions { outputs_to_claim } => {
-                let output_ids = account_handle
+                let output_ids = self
                     .get_unlockable_outputs_with_additional_unlock_conditions(outputs_to_claim)
                     .await?;
                 Ok(Response::OutputIds(output_ids))
             }
             AccountMethod::GetOutput { output_id } => {
-                let output_data = account_handle.get_output(&output_id).await;
+                let output_data = self.get_output(&output_id).await;
                 Ok(Response::OutputData(
                     output_data.as_ref().map(OutputDataDto::from).map(Box::new),
                 ))
             }
             AccountMethod::GetFoundryOutput { token_id } => {
                 let token_id = TokenId::try_from(&token_id)?;
-                let output = account_handle.get_foundry_output(token_id).await?;
+                let output = self.get_foundry_output(token_id).await?;
                 Ok(Response::Output(OutputDto::from(&output)))
             }
             AccountMethod::GetTransaction { transaction_id } => {
-                let transaction = account_handle.get_transaction(&transaction_id).await;
+                let transaction = self.get_transaction(&transaction_id).await;
                 Ok(Response::Transaction(
                     transaction.as_ref().map(TransactionDto::from).map(Box::new),
                 ))
             }
             AccountMethod::GetIncomingTransactionData { transaction_id } => {
-                let transaction = account_handle.get_incoming_transaction_data(&transaction_id).await;
+                let transaction = self.get_incoming_transaction_data(&transaction_id).await;
 
                 transaction.map_or_else(
                     || Ok(Response::IncomingTransactionData(None)),
@@ -269,25 +261,25 @@ impl MessageHandler {
                 )
             }
             AccountMethod::Addresses => {
-                let addresses = account_handle.addresses().await?;
+                let addresses = self.addresses().await?;
                 Ok(Response::Addresses(addresses))
             }
             AccountMethod::AddressesWithUnspentOutputs => {
-                let addresses = account_handle.addresses_with_unspent_outputs().await?;
+                let addresses = self.addresses_with_unspent_outputs().await?;
                 Ok(Response::AddressesWithUnspentOutputs(
                     addresses.iter().map(AddressWithUnspentOutputsDto::from).collect(),
                 ))
             }
             AccountMethod::Outputs { filter_options } => {
-                let outputs = account_handle.outputs(filter_options).await?;
+                let outputs = self.outputs(filter_options).await?;
                 Ok(Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect()))
             }
             AccountMethod::UnspentOutputs { filter_options } => {
-                let outputs = account_handle.unspent_outputs(filter_options).await?;
+                let outputs = self.unspent_outputs(filter_options).await?;
                 Ok(Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect()))
             }
             AccountMethod::IncomingTransactions => {
-                let transactions = account_handle.incoming_transactions().await?;
+                let transactions = self.incoming_transactions().await?;
                 Ok(Response::IncomingTransactionsData(
                     transactions
                         .into_iter()
@@ -296,13 +288,13 @@ impl MessageHandler {
                 ))
             }
             AccountMethod::Transactions => {
-                let transactions = account_handle.transactions().await?;
+                let transactions = self.transactions().await?;
                 Ok(Response::Transactions(
                     transactions.iter().map(TransactionDto::from).collect(),
                 ))
             }
             AccountMethod::PendingTransactions => {
-                let transactions = account_handle.pending_transactions().await?;
+                let transactions = self.pending_transactions().await?;
                 Ok(Response::Transactions(
                     transactions.iter().map(TransactionDto::from).collect(),
                 ))
@@ -313,7 +305,7 @@ impl MessageHandler {
                 options,
             } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle
+                    let transaction = self
                         .decrease_native_token_supply(
                             TokenId::try_from(&token_id)?,
                             U256::try_from(&melt_amount).map_err(|_| DtoError::InvalidField("melt_amount"))?,
@@ -337,7 +329,7 @@ impl MessageHandler {
                         }
                         None => None,
                     };
-                    let transaction = account_handle
+                    let transaction = self
                         .increase_native_token_supply(
                             TokenId::try_from(&token_id)?,
                             U256::try_from(&mint_amount).map_err(|_| DtoError::InvalidField("mint_amount"))?,
@@ -356,7 +348,7 @@ impl MessageHandler {
                 options,
             } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle
+                    let transaction = self
                         .mint_native_token(
                             NativeTokenOptions::try_from(&native_token_options)?,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
@@ -370,8 +362,8 @@ impl MessageHandler {
             }
             AccountMethod::MinimumRequiredStorageDeposit { output } => {
                 convert_async_panics(|| async {
-                    let output = Output::try_from_dto(&output, account_handle.client.get_token_supply().await?)?;
-                    let rent_structure = account_handle.client.get_rent_structure().await?;
+                    let output = Output::try_from_dto(&output, self.client.get_token_supply().await?)?;
+                    let rent_structure = self.client.get_rent_structure().await?;
 
                     let minimum_storage_deposit = output.rent_cost(&rent_structure);
 
@@ -383,7 +375,7 @@ impl MessageHandler {
             }
             AccountMethod::MintNfts { nfts_options, options } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle
+                    let transaction = self
                         .mint_nfts(
                             nfts_options
                                 .iter()
@@ -398,9 +390,7 @@ impl MessageHandler {
             }
             AccountMethod::GetBalance => {
                 convert_async_panics(|| async {
-                    Ok(Response::Balance(AccountBalanceDto::from(
-                        &account_handle.balance().await?,
-                    )))
+                    Ok(Response::Balance(AccountBalanceDto::from(&self.balance().await?)))
                 })
                 .await
             }
@@ -409,7 +399,7 @@ impl MessageHandler {
                 transaction_options,
             } => {
                 convert_async_panics(|| async {
-                    let output = account_handle
+                    let output = self
                         .prepare_output(
                             OutputOptions::try_from(&options)?,
                             transaction_options
@@ -427,7 +417,7 @@ impl MessageHandler {
                 options,
             } => {
                 convert_async_panics(|| async {
-                    let data = account_handle
+                    let data = self
                         .prepare_send_amount(
                             addresses_with_amount
                                 .iter()
@@ -442,8 +432,8 @@ impl MessageHandler {
             }
             AccountMethod::PrepareTransaction { outputs, options } => {
                 convert_async_panics(|| async {
-                    let token_supply = account_handle.client.get_token_supply().await?;
-                    let data = account_handle
+                    let token_supply = self.client.get_token_supply().await?;
+                    let data = self
                         .prepare_transaction(
                             outputs
                                 .iter()
@@ -462,7 +452,7 @@ impl MessageHandler {
                 max_attempts,
             } => {
                 convert_async_panics(|| async {
-                    let block_id = account_handle
+                    let block_id = self
                         .retry_transaction_until_included(&transaction_id, interval, max_attempts)
                         .await?;
                     Ok(Response::BlockId(block_id))
@@ -471,9 +461,7 @@ impl MessageHandler {
             }
             AccountMethod::SyncAccount { options } => {
                 convert_async_panics(|| async {
-                    Ok(Response::Balance(AccountBalanceDto::from(
-                        &account_handle.sync(options).await?,
-                    )))
+                    Ok(Response::Balance(AccountBalanceDto::from(&self.sync(options).await?)))
                 })
                 .await
             }
@@ -482,7 +470,7 @@ impl MessageHandler {
                 options,
             } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle
+                    let transaction = self
                         .send_amount(
                             addresses_with_amount
                                 .iter()
@@ -500,7 +488,7 @@ impl MessageHandler {
                 options,
             } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle
+                    let transaction = self
                         .send_micro_transaction(
                             addresses_with_micro_amount
                                 .iter()
@@ -518,7 +506,7 @@ impl MessageHandler {
                 options,
             } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle
+                    let transaction = self
                         .send_native_tokens(
                             addresses_native_tokens.clone(),
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
@@ -533,7 +521,7 @@ impl MessageHandler {
                 options,
             } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle
+                    let transaction = self
                         .send_nft(
                             addresses_nft_ids.clone(),
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
@@ -545,15 +533,15 @@ impl MessageHandler {
             }
             AccountMethod::SetAlias { alias } => {
                 convert_async_panics(|| async {
-                    account_handle.set_alias(&alias).await?;
+                    self.set_alias(&alias).await?;
                     Ok(Response::Ok)
                 })
                 .await
             }
             AccountMethod::SendOutputs { outputs, options } => {
                 convert_async_panics(|| async {
-                    let token_supply = account_handle.client.get_token_supply().await?;
-                    let transaction = account_handle
+                    let token_supply = self.client.get_token_supply().await?;
+                    let transaction = self
                         .send(
                             outputs
                                 .iter()
@@ -570,10 +558,10 @@ impl MessageHandler {
                 prepared_transaction_data,
             } => {
                 convert_async_panics(|| async {
-                    let signed_transaction_data = account_handle
+                    let signed_transaction_data = self
                         .sign_transaction_essence(&PreparedTransactionData::try_from_dto(
                             &prepared_transaction_data,
-                            &account_handle.client.get_protocol_parameters().await?,
+                            &self.client.get_protocol_parameters().await?,
                         )?)
                         .await?;
                     Ok(Response::SignedTransactionData(SignedTransactionDataDto::from(
@@ -588,18 +576,16 @@ impl MessageHandler {
                 convert_async_panics(|| async {
                     let signed_transaction_data = SignedTransactionData::try_from_dto(
                         &signed_transaction_data,
-                        &account_handle.client.get_protocol_parameters().await?,
+                        &self.client.get_protocol_parameters().await?,
                     )?;
-                    let transaction = account_handle
-                        .submit_and_store_transaction(signed_transaction_data)
-                        .await?;
+                    let transaction = self.submit_and_store_transaction(signed_transaction_data).await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
             }
             AccountMethod::ClaimOutputs { output_ids_to_claim } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle.claim_outputs(output_ids_to_claim.to_vec()).await?;
+                    let transaction = self.claim_outputs(output_ids_to_claim.to_vec()).await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
@@ -607,7 +593,7 @@ impl MessageHandler {
             #[cfg(feature = "participation")]
             AccountMethod::Vote { event_id, answers } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle.vote(event_id, answers).await?;
+                    let transaction = self.vote(event_id, answers).await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
@@ -615,7 +601,7 @@ impl MessageHandler {
             #[cfg(feature = "participation")]
             AccountMethod::StopParticipating { event_id } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle.stop_participating(event_id).await?;
+                    let transaction = self.stop_participating(event_id).await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
@@ -623,7 +609,7 @@ impl MessageHandler {
             #[cfg(feature = "participation")]
             AccountMethod::GetVotingPower => {
                 convert_async_panics(|| async {
-                    let voting_power = account_handle.get_voting_power().await?;
+                    let voting_power = self.get_voting_power().await?;
                     Ok(Response::VotingPower(voting_power.to_string()))
                 })
                 .await
@@ -631,7 +617,7 @@ impl MessageHandler {
             #[cfg(feature = "participation")]
             AccountMethod::GetParticipationOverview { event_ids } => {
                 convert_async_panics(|| async {
-                    let overview = account_handle.get_participation_overview(event_ids).await?;
+                    let overview = self.get_participation_overview(event_ids).await?;
                     Ok(Response::AccountParticipationOverview(overview))
                 })
                 .await
@@ -639,7 +625,7 @@ impl MessageHandler {
             #[cfg(feature = "participation")]
             AccountMethod::IncreaseVotingPower { amount } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle
+                    let transaction = self
                         .increase_voting_power(
                             u64::from_str(&amount).map_err(|_| crate::client::Error::InvalidAmount(amount.clone()))?,
                         )
@@ -651,7 +637,7 @@ impl MessageHandler {
             #[cfg(feature = "participation")]
             AccountMethod::DecreaseVotingPower { amount } => {
                 convert_async_panics(|| async {
-                    let transaction = account_handle
+                    let transaction = self
                         .decrease_voting_power(
                             u64::from_str(&amount).map_err(|_| crate::client::Error::InvalidAmount(amount.clone()))?,
                         )
@@ -663,7 +649,7 @@ impl MessageHandler {
             #[cfg(feature = "participation")]
             AccountMethod::RegisterParticipationEvents { options } => {
                 convert_async_panics(|| async {
-                    let events = account_handle.register_participation_events(&options).await?;
+                    let events = self.register_participation_events(&options).await?;
                     Ok(Response::ParticipationEvents(events))
                 })
                 .await
@@ -671,7 +657,7 @@ impl MessageHandler {
             #[cfg(feature = "participation")]
             AccountMethod::DeregisterParticipationEvent { event_id } => {
                 convert_async_panics(|| async {
-                    account_handle.deregister_participation_event(&event_id).await?;
+                    self.deregister_participation_event(&event_id).await?;
                     Ok(Response::Ok)
                 })
                 .await
@@ -679,7 +665,7 @@ impl MessageHandler {
             #[cfg(feature = "participation")]
             AccountMethod::GetParticipationEvent { event_id } => {
                 convert_async_panics(|| async {
-                    let event_and_nodes = account_handle.get_participation_event(event_id).await?;
+                    let event_and_nodes = self.get_participation_event(event_id).await?;
                     Ok(Response::ParticipationEvent(event_and_nodes))
                 })
                 .await
@@ -687,7 +673,7 @@ impl MessageHandler {
             #[cfg(feature = "participation")]
             AccountMethod::GetParticipationEventIds { node, event_type } => {
                 convert_async_panics(|| async {
-                    let event_ids = account_handle.get_participation_event_ids(&node, event_type).await?;
+                    let event_ids = self.get_participation_event_ids(&node, event_type).await?;
                     Ok(Response::ParticipationEventIds(event_ids))
                 })
                 .await
@@ -695,7 +681,7 @@ impl MessageHandler {
             #[cfg(feature = "participation")]
             AccountMethod::GetParticipationEventStatus { event_id } => {
                 convert_async_panics(|| async {
-                    let event_status = account_handle.get_participation_event_status(&event_id).await?;
+                    let event_status = self.get_participation_event_status(&event_id).await?;
                     Ok(Response::ParticipationEventStatus(event_status))
                 })
                 .await
@@ -703,7 +689,7 @@ impl MessageHandler {
             #[cfg(feature = "participation")]
             AccountMethod::GetParticipationEvents => {
                 convert_async_panics(|| async {
-                    let events = account_handle.get_participation_events().await?;
+                    let events = self.get_participation_events().await?;
                     Ok(Response::ParticipationEvents(events))
                 })
                 .await

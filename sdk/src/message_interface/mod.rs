@@ -69,27 +69,25 @@ pub fn init_logger(config: String) -> Result<(), fern_logger::Error> {
 }
 
 pub async fn create_message_handler(
-    options: Option<ManagerOptions>,
+    wallet: Option<ManagerOptions>,
     client: Option<ClientBuilder>,
 ) -> message_handler::Result<MessageHandler> {
-    log::debug!(
-        "create_message_handler with options: {}",
-        serde_json::to_string(&options)?,
-    );
-    let manager = if let Some(options) = options {
+    log::debug!("create_message_handler with wallet: {wallet:?} client: {client:?}");
+
+    let manager = if let Some(options) = &wallet {
         let mut builder = AccountManager::builder();
 
         #[cfg(feature = "storage")]
-        if let Some(storage_path) = options.storage_path {
-            builder = builder.with_storage_path(&storage_path);
+        if let Some(storage_path) = &options.storage_path {
+            builder = builder.with_storage_path(storage_path);
         }
 
-        if let Some(secret_manager) = options.secret_manager {
-            builder = builder.with_secret_manager(SecretManager::try_from(&secret_manager)?);
+        if let Some(secret_manager) = &options.secret_manager {
+            builder = builder.with_secret_manager(SecretManager::try_from(secret_manager)?);
         }
 
-        if let Some(client_options) = options.client_options {
-            builder = builder.with_client_options(client_options);
+        if let Some(client_options) = &options.client_options {
+            builder = builder.with_client_options(client_options.clone());
         }
 
         if let Some(coin_type) = options.coin_type {
@@ -101,5 +99,22 @@ pub async fn create_message_handler(
         AccountManager::builder().finish().await?
     };
 
-    MessageHandler::new(manager, client.unwrap_or_else(ClientBuilder::new).finish()?).await
+    let client = match client {
+        Some(client_builder) => client_builder.finish()?,
+        None => {
+            if wallet.is_some() {
+                // If no client is provided, but wallet, try to get the client from the first account or build it from
+                // the client options
+                let accounts = manager.get_accounts().await?;
+                match accounts.first() {
+                    Some(account) => account.client().clone(),
+                    None => manager.get_client_options().await.finish()?,
+                }
+            } else {
+                ClientBuilder::new().finish()?
+            }
+        }
+    };
+
+    MessageHandler::new(manager, client).await
 }
