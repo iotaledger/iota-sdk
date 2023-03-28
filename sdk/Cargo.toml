@@ -46,13 +46,16 @@ log = { version = "0.4.17", default-features = false, optional = true }
 derive_builder = { version = "0.12.0", default-features = false, features = [ "std" ], optional = true}
 rocksdb = { version = "0.20.1", default-features = false, features = [ "lz4" ], optional = true }
 instant = { version = "0.1.12", default-features = false }
-tokio = { version = "1.26.0", default-features = false, features = [ "macros", "rt", "rt-multi-thread", "time", "sync" ] }
+tokio = { version = "1.26.0", default-features = false, features = [ "macros", "rt", "time", "sync" ] }
 thiserror = { version = "1.0.39", default-features = false }
 num_cpus = { version = "1.15.0", default-features = false }
 url = { version = "2.3.1", default-features = false, features = [ "serde" ] }
 futures = { version = "0.3.26", default-features = false, features = [ "thread-pool" ] }
 reqwest = { version = "0.11.14", default-features = false, features = [ "json" ] }
 zeroize = { version = "1.5.7", default-features = false, features = [ "zeroize_derive" ] }
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+tokio = { version = "1.26.0", default-features = false, features = [ "macros", "rt-multi-thread", "time", "sync" ] }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
 gloo-timers = { version = "0.2.6", default-features = false, features = [ "futures" ] }

@@ -17,26 +17,26 @@ use self::{
     helper::pick_account,
 };
 
+#[macro_export]
+macro_rules! println_log_info {
+    ($($arg:tt)+) => {
+        println!($($arg)+);
+        log::info!($($arg)+);
+    };
+}
+
 fn logger_init(cli: &AccountManagerCli) -> Result<(), Error> {
-    let stdout_level_filter = if let Some(log_level) = cli.log_level {
+    let level_filter = if let Some(log_level) = cli.log_level {
         log_level
     } else {
-        LevelFilter::Info
+        LevelFilter::Debug
     };
-    let stdout = LoggerOutputConfigBuilder::default()
-        .name("stdout")
-        .level_filter(stdout_level_filter)
-        .target_exclusions(&["rustls"])
-        .color_enabled(true);
     let archive = LoggerOutputConfigBuilder::default()
         .name("archive.log")
-        .level_filter(LevelFilter::Debug)
+        .level_filter(level_filter)
         .target_exclusions(&["rustls"])
         .color_enabled(false);
-    let config = LoggerConfigBuilder::default()
-        .with_output(stdout)
-        .with_output(archive)
-        .finish();
+    let config = LoggerConfigBuilder::default().with_output(archive).finish();
 
     fern_logger::logger_init(config)?;
 
