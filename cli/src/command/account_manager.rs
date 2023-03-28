@@ -13,13 +13,12 @@ use log::LevelFilter;
 use crate::{error::Error, helper::get_password};
 
 #[derive(Debug, Clone, Parser)]
-#[clap(version, long_about = None)]
-#[clap(propagate_version = true)]
+#[command(author, version, about, long_about = None, propagate_version = true)]
 pub struct AccountManagerCli {
-    #[clap(subcommand)]
+    #[command(subcommand)]
     pub command: Option<AccountManagerCommand>,
     pub account: Option<String>,
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub log_level: Option<LevelFilter>,
 }
 
@@ -45,11 +44,11 @@ pub enum AccountManagerCommand {
 
 #[derive(Debug, Clone, Args)]
 pub struct InitParameters {
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub mnemonic: Option<String>,
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub node: Option<String>,
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub coin_type: Option<u32>,
 }
 

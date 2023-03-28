@@ -12,13 +12,13 @@ name = "wallet"
 path = "src/main.rs"
 
 [dependencies]
-iota-sdk = { path = "../sdk", default-features = false, features = [ "wallet", "storage", "rocksdb", "stronghold", "participation" ] }
+iota-sdk = { path = "../sdk", default-features = false, features = [ "wallet", "tls", "storage", "rocksdb", "stronghold", "participation" ] }
 
-clap = { version = "4.1.6", default-features = false, features = [ "derive", "std" ] }
-dialoguer = { version = "0.10.3", default-features = false, features = [ "password", "history" ] }
+clap = { version = "4.1.14", default-features = false, features = [ "std", "color", "help", "usage", "error-context", "suggestions", "derive" ] }
+dialoguer = { version = "0.10.3", default-features = false, features = [ "history", "password" ] }
 fern-logger = { version = "0.5.0", default-features = false }
 log = { version = "0.4.17", default-features = false }
 prefix-hex = { version = "0.7.0", default-features = false, features = [ "std" ] }
-serde_json = { version = "1.0.93", default-features = false }
-thiserror = { version = "1.0.38", default-features = false }
-tokio = { version = "1.25.0", default-features = false, features = [ "fs" ] }
+serde_json = { version = "1.0.95", default-features = false }
+thiserror = { version = "1.0.40", default-features = false }
+tokio = { version = "1.27.0", default-features = false, features = [ "fs" ] }
