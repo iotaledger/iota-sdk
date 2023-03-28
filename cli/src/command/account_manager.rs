@@ -10,7 +10,7 @@ use iota_sdk::{
 };
 use log::LevelFilter;
 
-use crate::{error::Error, helper::get_password};
+use crate::{error::Error, helper::get_password, println_log_info};
 
 #[derive(Debug, Clone, Parser)]
 #[command(author, version, about, long_about = None, propagate_version = true)]
@@ -55,7 +55,7 @@ pub struct InitParameters {
 pub async fn backup_command(manager: &AccountManager, path: String, password: &str) -> Result<(), Error> {
     manager.backup(path.clone().into(), password.into()).await?;
 
-    log::info!("Wallet has been backed up to \"{path}\".");
+    println_log_info!("Wallet has been backed up to \"{path}\".");
 
     Ok(())
 }
@@ -97,8 +97,8 @@ pub async fn init_command(
     // Write mnemonic with new line
     file.write_all(format!("init_command: {mnemonic}\n").as_bytes())?;
 
-    log::info!("IMPORTANT: mnemonic has been written to \"mnemonic.txt\", handle it safely.");
-    log::info!(
+    println_log_info!("IMPORTANT: mnemonic has been written to \"mnemonic.txt\", handle it safely.");
+    println_log_info!(
         "It is the only way to recover your account if you ever forget your password and/or lose the stronghold file."
     );
 
@@ -107,7 +107,7 @@ pub async fn init_command(
     } else {
         panic!("cli-wallet only supports Stronghold-backed secret managers at the moment.");
     }
-    log::info!("Mnemonic stored successfully");
+    println_log_info!("Mnemonic stored successfully");
 
     Ok(account_manager)
 }
@@ -119,8 +119,8 @@ pub async fn mnemonic_command() -> Result<(), Error> {
     // Write mnemonic with new line
     file.write_all(format!("mnemonic_command: {mnemonic}\n").as_bytes())?;
 
-    log::info!("IMPORTANT: mnemonic has been written to \"mnemonic.txt\", handle it safely.");
-    log::info!(
+    println_log_info!("IMPORTANT: mnemonic has been written to \"mnemonic.txt\", handle it safely.");
+    println_log_info!(
         "It is the only way to recover your account if you ever forget your password and/or lose the stronghold file."
     );
 
@@ -137,7 +137,7 @@ pub async fn new_command(manager: &AccountManager, alias: Option<String>) -> Res
     let account_handle = builder.finish().await?;
     let alias = account_handle.read().await.alias().to_string();
 
-    log::info!("Created account \"{alias}\"");
+    println_log_info!("Created account \"{alias}\"");
 
     Ok(alias)
 }
@@ -176,7 +176,7 @@ pub async fn set_node_command(manager: &AccountManager, url: String) -> Result<(
 pub async fn sync_command(manager: &AccountManager) -> Result<(), Error> {
     let total_balance = manager.sync(None).await?;
 
-    log::info!("Synchronized all accounts: {:?}", total_balance);
+    println_log_info!("Synchronized all accounts: {:?}", total_balance);
 
     Ok(())
 }
