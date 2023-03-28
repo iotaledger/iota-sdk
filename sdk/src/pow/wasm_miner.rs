@@ -15,7 +15,7 @@ use crypto::{
     },
 };
 
-use crate::{score::count_trailing_zeros, LN_3};
+use super::{score::count_trailing_zeros, LN_3};
 
 // Should take around one second to reach on an average CPU, so shouldn't cause a noticeable delay on
 // `timeout_in_seconds`.

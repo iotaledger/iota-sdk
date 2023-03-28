@@ -2,6 +2,7 @@
 gradle.properties
 lib/build
 lib/bin
+lib/walletdb
 examples/build/
 examples/bin/
 examples/walletdb
