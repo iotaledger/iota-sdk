@@ -5,8 +5,7 @@
 use iota_sdk::client::{api::GetAddressesBuilderOptions, secret::SecretManagerDto};
 #[cfg(feature = "message_interface")]
 use iota_sdk::message_interface::{
-    create_message_handler, message_handler::Result, AccountMethod, ClientMessage, ManagerOptions, Message, Response,
-    WalletMessage,
+    message_handler::Result, AccountMethod, ClientMessage, ManagerOptions, Response, WalletMessage,
 };
 #[cfg(feature = "message_interface")]
 use iota_sdk::{
@@ -22,7 +21,8 @@ async fn new_message_interface_generate_addresses() -> Result<()> {
             "fallbackToLocalPow": true
     }"#
     .to_string();
-    let message_handler = create_message_handler(None, Some(ClientBuilder::new().from_json(&client_config)?)).await?;
+
+    let client = ClientBuilder::new().from_json(&client_config)?.finish()?;
 
     let secret_manager = format!(
         "{{\"mnemonic\":\"{}\"}}",
@@ -36,12 +36,12 @@ async fn new_message_interface_generate_addresses() -> Result<()> {
         bech32_hrp: Some("atoi".to_string()),
         options: None,
     };
-    let message = Message::Client(ClientMessage::GenerateAddresses {
+    let message = ClientMessage::GenerateAddresses {
         secret_manager: serde_json::from_str::<SecretManagerDto>(&secret_manager).unwrap(),
         options,
-    });
+    };
 
-    let response = message_handler.send_message(message).await;
+    let response = client.send_message(message).await;
     match response {
         Response::GeneratedAddresses(addresses) => println!("{:?}", serde_json::to_string(&addresses).unwrap()),
         _ => panic!("Unexpected response type"),
@@ -75,14 +75,14 @@ async fn new_message_interface_create_account() -> Result<()> {
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
 
-    let wallet_handle = create_message_handler(Some(options), None).await?;
+    let wallet = options.build_manager().await?;
 
     // create an account
-    let response = wallet_handle
-        .send_message(Message::Wallet(WalletMessage::CreateAccount {
+    let response = wallet
+        .send_message(WalletMessage::CreateAccount {
             alias: None,
             bech32_hrp: None,
-        }))
+        })
         .await;
 
     match response {
@@ -94,11 +94,11 @@ async fn new_message_interface_create_account() -> Result<()> {
         _ => panic!("unexpected response {response:?}"),
     }
 
-    let response = wallet_handle
-        .send_message(Message::Wallet(WalletMessage::CallAccountMethod {
+    let response = wallet
+        .send_message(WalletMessage::CallAccountMethod {
             account_id: AccountIdentifier::Index(0),
             method: AccountMethod::UnspentOutputs { filter_options: None },
-        }))
+        })
         .await;
 
     match response {
