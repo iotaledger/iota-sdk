@@ -104,8 +104,8 @@ describe('Client utility methods', () => {
         };
 
         // `IOTA` hex encoded
-        let message = '0x494f5441';
-        let signature = await offlineClient.signEd25519(
+        const message = '0x494f5441';
+        const signature = await offlineClient.signEd25519(
             secretManager,
             message,
             // [44, 4218, 0, 0, 0] IOTA coin type, first account, first public address
@@ -125,7 +125,7 @@ describe('Client utility methods', () => {
 
         const pubKeyHash = await offlineClient.bech32ToHex(bech32Address);
 
-        let validSignature = await offlineClient.verifyEd25519Signature(
+        const validSignature = await offlineClient.verifyEd25519Signature(
             signature,
             message,
             { type: 0, pubKeyHash },

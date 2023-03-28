@@ -447,11 +447,8 @@ impl ClientMessageHandler {
                 chain,
             } => {
                 let secret_manager: SecretManager = (&secret_manager).try_into()?;
-
                 let msg: Vec<u8> = prefix_hex::decode(message)?;
-
                 let signature = secret_manager.sign_ed25519(&msg, &chain).await?;
-
                 Ok(Response::Ed25519Signature(Ed25519SignatureDto::from(&signature)))
             }
             Message::VerifyEd25519Signature {
@@ -460,11 +457,8 @@ impl ClientMessageHandler {
                 address,
             } => {
                 let signature = Ed25519Signature::try_from(&signature)?;
-
                 let msg: Vec<u8> = prefix_hex::decode(message)?;
-
                 let address = Ed25519Address::try_from(&address)?;
-
                 Ok(Response::ValidSignature(signature.is_valid(&msg, &address).is_ok()))
             }
             #[cfg(feature = "stronghold")]

@@ -1173,7 +1173,7 @@ export class Client {
         message: HexEncodedString,
         chain: IBip32Chain,
     ): Promise<IEd25519Signature> {
-        let response = await this.messageHandler.sendMessage({
+        const response = await this.messageHandler.sendMessage({
             name: 'signEd25519',
             data: {
                 secretManager,
@@ -1192,7 +1192,7 @@ export class Client {
         message: HexEncodedString,
         address: IEd25519Address,
     ): Promise<boolean> {
-        let response = await this.messageHandler.sendMessage({
+        const response = await this.messageHandler.sendMessage({
             name: 'verifyEd25519Signature',
             data: {
                 signature,
