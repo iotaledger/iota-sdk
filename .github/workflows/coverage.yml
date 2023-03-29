@@ -11,6 +11,7 @@ on:
       - "**Cargo.toml" # Include all Cargo.toml files
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/bindings/**" # Exclude all bindings
+      - "!cli" # Exclude CLI
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}

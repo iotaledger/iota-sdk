@@ -11,6 +11,7 @@ on:
       - "**/test/**"
       - "**Cargo.toml"
       - "**Cargo.lock"
+      - "!cli" # Exclude CLI
   pull_request:
     branches: [develop, production]
     paths:
@@ -21,6 +22,7 @@ on:
       - "**/test/**"
       - "**Cargo.toml"
       - "**Cargo.lock"
+      - "!cli" # Exclude CLI
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
