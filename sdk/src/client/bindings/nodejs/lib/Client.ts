@@ -394,7 +394,7 @@ export class Client {
             data: {
                 secretManager,
                 transactionEssenceHash,
-                chain
+                chain,
             },
         });
 
