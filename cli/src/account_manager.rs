@@ -11,10 +11,11 @@ use iota_sdk::{
 use crate::{
     command::account_manager::{
         backup_command, change_password_command, init_command, mnemonic_command, new_command, restore_command,
-        set_node_command, sync_command, AccountManagerCli, AccountManagerCommand,
+        set_node_command, sync_command, AccountManagerCli, AccountManagerCommand, InitParameters,
     },
     error::Error,
     helper::get_password,
+    println_log_info,
 };
 
 pub async fn new_account_manager(cli: AccountManagerCli) -> Result<(Option<AccountManager>, Option<String>), Error> {
@@ -28,6 +29,7 @@ pub async fn new_account_manager(cli: AccountManagerCli) -> Result<(Option<Accou
         |os_str| os_str.into_string().expect("invalid WALLET_DATABASE_PATH"),
     );
     let snapshot_path = std::path::Path::new("./stardust-cli-wallet.stronghold");
+    let snapshot_exists = snapshot_path.exists();
     let password = if let Some(AccountManagerCommand::Restore { .. }) = &cli.command {
         get_password("Stronghold password", false)?
     } else {
@@ -40,8 +42,8 @@ pub async fn new_account_manager(cli: AccountManagerCli) -> Result<(Option<Accou
     );
 
     let (account_manager, account) = if let Some(command) = cli.command {
-        if let AccountManagerCommand::Init(mnemonic_url) = command {
-            (init_command(secret_manager, storage_path, mnemonic_url).await?, None)
+        if let AccountManagerCommand::Init(init_parameters) = command {
+            (init_command(secret_manager, storage_path, init_parameters).await?, None)
         } else if let AccountManagerCommand::Restore { backup_path } = command {
             (
                 restore_command(secret_manager, storage_path, backup_path, password).await?,
@@ -73,14 +75,22 @@ pub async fn new_account_manager(cli: AccountManagerCli) -> Result<(Option<Accou
             (account_manager, account)
         }
     } else {
-        (
-            AccountManager::builder()
-                .with_secret_manager(secret_manager)
-                .with_storage_path(&storage_path)
-                .finish()
-                .await?,
-            None,
-        )
+        if snapshot_exists {
+            (
+                AccountManager::builder()
+                    .with_secret_manager(secret_manager)
+                    .with_storage_path(&storage_path)
+                    .finish()
+                    .await?,
+                None,
+            )
+        } else {
+            println_log_info!("Initializing wallet with default values.");
+            (
+                init_command(secret_manager, storage_path, InitParameters::default()).await?,
+                None,
+            )
+        }
     };
 
     Ok((Some(account_manager), account))
