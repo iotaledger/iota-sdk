@@ -178,6 +178,24 @@ fn message_interface_secrets_debug() {
         "MnemonicToHexSeed { mnemonic: <omitted> }"
     );
 
+    let client_message = ClientMessage::BuildAndPostBlock {
+        secret_manager: None,
+        options: None,
+    };
+    assert_eq!(
+        format!("{:?}", client_message),
+        "BuildAndPostBlock { secret_manager: None, options: None }"
+    );
+
+    let client_message = ClientMessage::BuildAndPostBlock {
+        secret_manager: Some(SecretManagerDto::LedgerNano(false)),
+        options: None,
+    };
+    assert_eq!(
+        format!("{:?}", client_message),
+        "BuildAndPostBlock { secret_manager: Some(<omitted>), options: None }"
+    );
+
     let wallet_message = WalletMessage::VerifyMnemonic {
         mnemonic: "mnemonic".to_string(),
     };
