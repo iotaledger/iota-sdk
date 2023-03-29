@@ -14,7 +14,7 @@ async function run() {
 
     // Config doenst work yet but this is an example for the future
     await initLogger({
-        name: "stdout",
+        name: 'stdout',
         levelFilter: 'debug',
         colorEnabled: true,
     });
@@ -33,7 +33,7 @@ async function run() {
 
     const account = await manager.createAccount({
         alias: 'Alice',
-        bech32Hrp: "rms",
+        bech32Hrp: 'rms',
     });
 
     console.log('Account created:', account);

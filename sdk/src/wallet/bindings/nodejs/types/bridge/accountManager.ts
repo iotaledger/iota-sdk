@@ -1,8 +1,4 @@
-import type {
-    AccountId,
-    CreateAccountPayload,
-    SyncOptions,
-} from '../account';
+import type { AccountId, CreateAccountPayload, SyncOptions } from '../account';
 import type { GenerateAddressOptions } from '../address';
 import type { EventType, WalletEvent } from '../event';
 import type { Auth, ClientOptions } from '../network';
