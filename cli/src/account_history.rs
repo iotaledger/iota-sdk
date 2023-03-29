@@ -21,7 +21,7 @@ impl Default for AccountHistory {
 
 impl<T: ToString> History<T> for AccountHistory {
     fn read(&self, pos: usize) -> Option<String> {
-        println!("test");
+        println!("tet");
         self.history.get(pos).cloned()
     }
 
