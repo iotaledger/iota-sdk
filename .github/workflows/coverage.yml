@@ -10,7 +10,7 @@ on:
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
       - "**Cargo.lock" # Include all Cargo.lock files
-      - "!client/bindings/**" # Exclude all bindings
+      - "!**/bindings/**" # Exclude all bindings
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}

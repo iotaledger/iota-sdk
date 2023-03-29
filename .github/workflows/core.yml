@@ -8,7 +8,7 @@ on:
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
       - "**Cargo.lock" # Include all Cargo.lock files
-      - "!client/bindings/**" # Exclude all bindings
+      - "!**/bindings/**" # Exclude all bindings
   pull_request:
     branches: [develop, production]
     paths:
@@ -17,7 +17,7 @@ on:
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
       - "**Cargo.lock" # Include all Cargo.lock files
-      - "!client/bindings/**" # Exclude all bindings
+      - "!**/bindings/**" # Exclude all bindings
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch:

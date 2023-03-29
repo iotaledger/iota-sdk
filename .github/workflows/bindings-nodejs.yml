@@ -10,7 +10,7 @@ on:
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/examples/**" # Exclude all examples
       - "!**/tests/**" # Exclude all tests
-      - "!client/bindings/**" # Exclude all bindings
+      - "!**/bindings/**" # Exclude all bindings
       - "sdk/src/client/bindings/nodejs/**" # Re-include nodejs bindings
   pull_request:
     branches: [develop, production]
@@ -22,7 +22,7 @@ on:
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/examples/**" # Exclude all examples
       - "!**/tests/**" # Exclude all tests
-      - "!client/bindings/**" # Exclude all bindings
+      - "!**/bindings/**" # Exclude all bindings
       - "sdk/src/client/bindings/nodejs/**" # Re-include nodejs bindings
   schedule:
     - cron: "0 1 * * *"
