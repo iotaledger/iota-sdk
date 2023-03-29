@@ -13,11 +13,11 @@ pub use wallet_message::WalletMessage;
 
 use crate::client::secret::SecretManagerDto;
 
-pub(crate) trait OmmittedDebug {
+pub(crate) trait OmittedDebug {
     fn omitted_fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         f.write_str("<omitted>")
     }
 }
-impl OmmittedDebug for String {}
-impl OmmittedDebug for SecretManagerDto {}
-impl OmmittedDebug for Option<SecretManagerDto> {}
+impl OmittedDebug for String {}
+impl OmittedDebug for SecretManagerDto {}
+impl OmittedDebug for Option<SecretManagerDto> {}

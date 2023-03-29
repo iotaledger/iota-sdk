@@ -13,7 +13,7 @@ use {
     std::collections::HashMap,
 };
 
-use super::{error::MessageInterfaceError, message::OmmittedDebug};
+use super::{error::MessageInterfaceError, message::OmittedDebug};
 #[cfg(feature = "ledger_nano")]
 use crate::client::secret::LedgerNanoStatus;
 use crate::{
@@ -216,7 +216,7 @@ pub enum Response {
     IsAddressValid(bool),
     /// Response for:
     /// - [`MnemonicToHexSeed`](crate::message_interface::Message::MnemonicToHexSeed)
-    MnemonicHexSeed(#[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))] String),
+    MnemonicHexSeed(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
     /// Response for:
     /// - [`TransactionId`](crate::message_interface::Message::TransactionId)
     TransactionId(TransactionId),
@@ -248,7 +248,7 @@ pub enum Response {
     /// Response for:
     /// - [`GenerateMnemonic`](crate::message_interface::Message::GenerateMnemonic)
     /// [`GenerateMnemonic`](crate::message_interface::Message::GenerateMnemonic)
-    GeneratedMnemonic(#[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))] String),
+    GeneratedMnemonic(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
     /// Response for
     /// - [`GetLedgerNanoStatus`](crate::message_interface::Message::GetLedgerNanoStatus)
     /// [`GetLedgerNanoStatus`](crate::message_interface::Message::GetLedgerNanoStatus),

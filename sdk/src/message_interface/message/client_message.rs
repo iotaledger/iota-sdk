@@ -5,7 +5,7 @@ use crypto::keys::slip10::Chain;
 use derivative::Derivative;
 use serde::Deserialize;
 
-use super::OmmittedDebug;
+use super::OmittedDebug;
 #[cfg(feature = "mqtt")]
 use crate::client::mqtt::Topic;
 use crate::{
@@ -122,7 +122,7 @@ pub enum ClientMessage {
     /// Generate addresses.
     GenerateAddresses {
         /// Create secret manager from json
-        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         #[serde(rename = "secretManager")]
         secret_manager: SecretManagerDto,
         /// Addresses generation options
@@ -131,7 +131,7 @@ pub enum ClientMessage {
     /// Build and post a block
     BuildAndPostBlock {
         /// Secret manager
-        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         #[serde(rename = "secretManager")]
         secret_manager: Option<SecretManagerDto>,
         /// Options
@@ -170,7 +170,7 @@ pub enum ClientMessage {
     /// Prepare a transaction for signing
     PrepareTransaction {
         /// Secret manager
-        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         #[serde(rename = "secretManager")]
         secret_manager: Option<SecretManagerDto>,
         /// Options
@@ -180,7 +180,7 @@ pub enum ClientMessage {
     SignTransaction {
         /// Secret manager
         #[serde(rename = "secretManager")]
-        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         secret_manager: SecretManagerDto,
         /// Prepared transaction data
         #[serde(rename = "preparedTransactionData")]
@@ -190,7 +190,7 @@ pub enum ClientMessage {
     SignatureUnlock {
         /// Secret manager
         #[serde(rename = "secretManager")]
-        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         secret_manager: SecretManagerDto,
         /// Transaction Essence Hash
         #[serde(rename = "transactionEssenceHash")]
@@ -204,10 +204,10 @@ pub enum ClientMessage {
     StoreMnemonic {
         /// Stronghold secret manager
         #[serde(rename = "secretManager")]
-        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         secret_manager: SecretManagerDto,
         /// Mnemonic
-        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         mnemonic: String,
     },
     /// Build a block containing the specified payload and post it to the network.
@@ -426,7 +426,7 @@ pub enum ClientMessage {
     /// Returns the address to which the funds got consolidated, if any were available
     ConsolidateFunds {
         /// Secret manager
-        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         #[serde(rename = "secretManager")]
         secret_manager: SecretManagerDto,
         /// Addresses generation options
@@ -533,7 +533,7 @@ pub enum ClientMessage {
     /// Returns a hex encoded seed for a mnemonic.
     MnemonicToHexSeed {
         /// Mnemonic
-        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         mnemonic: String,
     },
     /// Returns a block ID (Blake2b256 hash of block bytes) from a block

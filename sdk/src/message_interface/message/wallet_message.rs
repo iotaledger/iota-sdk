@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
 
-use super::{account_method::AccountMethod, OmmittedDebug};
+use super::{account_method::AccountMethod, OmittedDebug};
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{WalletEvent, WalletEventType};
 use crate::{
@@ -62,7 +62,7 @@ pub enum WalletMessage {
         /// The backup destination.
         destination: PathBuf,
         /// Stronghold file password.
-        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         password: String,
     },
     /// Change the Stronghold password to another one and also re-encrypt the values in the loaded snapshot with it.
@@ -70,10 +70,10 @@ pub enum WalletMessage {
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
     ChangeStrongholdPassword {
-        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         #[serde(rename = "currentPassword")]
         current_password: String,
-        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         #[serde(rename = "newPassword")]
         new_password: String,
     },
@@ -119,7 +119,7 @@ pub enum WalletMessage {
         /// The path to the backed up Stronghold.
         source: PathBuf,
         /// Stronghold file password.
-        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         password: String,
         #[serde(rename = "ignoreIfCoinTypeMismatch")]
         ignore_if_coin_type_mismatch: Option<bool>,
@@ -133,7 +133,7 @@ pub enum WalletMessage {
     /// Checks if the given mnemonic is valid.
     /// Expected response: [`Ok`](crate::message_interface::Response::Ok)
     VerifyMnemonic {
-        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         mnemonic: String,
     },
     /// Updates the client options for all accounts.
@@ -177,7 +177,7 @@ pub enum WalletMessage {
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
     SetStrongholdPassword {
-        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         password: String,
     },
     /// Set the stronghold password clear interval.
@@ -193,7 +193,7 @@ pub enum WalletMessage {
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
     StoreMnemonic {
-        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         mnemonic: String,
     },
     /// Start background syncing.
