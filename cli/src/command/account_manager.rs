@@ -42,7 +42,7 @@ pub enum AccountManagerCommand {
     Sync,
 }
 
-#[derive(Debug, Clone, Args)]
+#[derive(Debug, Default, Clone, Args)]
 pub struct InitParameters {
     #[arg(short, long)]
     pub mnemonic: Option<String>,

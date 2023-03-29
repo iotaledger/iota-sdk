@@ -12,6 +12,7 @@ on:
       - "src/**"
       - "Cargo.toml"
       - "Cargo.lock"
+      - "!cli/**" # Exclude CLI
   pull_request:
     branches:
       - develop
@@ -24,6 +25,7 @@ on:
       - "src/**"
       - "Cargo.toml"
       - "Cargo.lock"
+      - "!cli/**" # Exclude CLI
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch:
