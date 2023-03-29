@@ -11,7 +11,7 @@ on:
       - "!**/examples/**" # Exclude all examples
       - "!**/tests/**" # Exclude all tests
       - "!**/bindings/**" # Exclude all bindings
-      - "!cli" # Exclude CLI
+      - "!cli/**" # Exclude CLI
       - "sdk/src/client/bindings/nodejs/**" # Re-include nodejs bindings
   pull_request:
     branches: [develop, production]
@@ -24,7 +24,7 @@ on:
       - "!**/examples/**" # Exclude all examples
       - "!**/tests/**" # Exclude all tests
       - "!**/bindings/**" # Exclude all bindings
-      - "!cli" # Exclude CLI
+      - "!cli/**" # Exclude CLI
       - "sdk/src/client/bindings/nodejs/**" # Re-include nodejs bindings
   schedule:
     - cron: "0 1 * * *"
