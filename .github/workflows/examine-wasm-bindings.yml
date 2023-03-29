@@ -21,7 +21,7 @@ on:
       - ".github/workflows/examine-wasm-bindings.yml"
       - ".github/actions/**"
       - "sdk/src/wallet/bindings/wasm/**"
-      # Watch the Rust core too
+      # Watch the Rust core to
       - "src/**"
       - "Cargo.toml"
       - "Cargo.lock"
