@@ -41,49 +41,79 @@ pub enum AccountCommand {
     Addresses,
     /// Print the account balance.
     Balance,
-    /// Burn a native token: `burn-native-token 0x... 100`
-    BurnNativeToken { token_id: String, amount: String },
-    /// Burn an NFT: `burn-nft 0x...`
-    BurnNft { nft_id: String },
+    /// Burn a native token.
+    BurnNativeToken {
+        /// 0x...
+        token_id: String,
+        /// 100
+        amount: String,
+    },
+    /// Burn an NFT.
+    BurnNft {
+        /// 0x...
+        nft_id: String,
+    },
     /// Claim outputs with storage deposit return, expiration or timelock unlock conditions.
     Claim { output_id: Option<String> },
     /// Consolidate all basic outputs into one address.
     Consolidate,
     /// Create a new alias output.
     CreateAliasOutput,
-    /// Melt a native token: `decrease-native-token-supply 0x... 100`
-    DecreaseNativeTokenSupply { token_id: String, amount: String },
-    /// Destroy an alias: `destroy-alias 0x...`
-    DestroyAlias { alias_id: String },
-    /// Destroy a foundry: `destroy-foundry 0x...`
-    DestroyFoundry { foundry_id: String },
+    /// Melt a native token.
+    DecreaseNativeTokenSupply {
+        /// 0x...
+        token_id: String,
+        /// 100
+        amount: String,
+    },
+    /// Destroy an alias.
+    DestroyAlias {
+        /// 0x...
+        alias_id: String,
+    },
+    /// Destroy a foundry.
+    DestroyFoundry {
+        /// 0x...
+        foundry_id: String,
+    },
     /// Exit from the account prompt.
     Exit,
-    /// Request funds from the faucet to the latest address, `url` is optional, default is `https://faucet.testnet.shimmer.network/api/enqueue`
+    /// Request funds from the faucet to the latest address.
     Faucet {
+        /// `url` is optional, default is `https://faucet.testnet.shimmer.network/api/enqueue`
         url: Option<String>,
         address: Option<String>,
     },
-    /// Mint more of a native token: `increase-native-token-supply 0x... 100`
-    IncreaseNativeTokenSupply { token_id: String, amount: String },
-    /// Mint a native token: `mint-native-token 100 100 --foundry-metadata-hex 0x...`
+    /// Mint more of a native token.
+    IncreaseNativeTokenSupply {
+        /// 0x...
+        token_id: String,
+        /// 100
+        amount: String,
+    },
+    /// Mint a native token.
     MintNativeToken {
+        /// 100
         circulating_supply: String,
+        /// 100
         maximum_supply: String,
+        /// --foundry-metadata-hex 0x...
         #[arg(long, group = "foundry_metadata")]
         foundry_metadata_hex: Option<String>,
         #[arg(long, group = "foundry_metadata")]
         foundry_metadata_file: Option<String>,
     },
-    /// Mint an NFT to an optional bech32 encoded address: `mint-nft
-    /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 "immutable metadata" "metadata"`
+    /// Mint an NFT.
     /// IOTA NFT Standard - TIP27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md
     MintNft {
+        /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
         address: Option<String>,
         #[arg(long, group = "immutable_metadata")]
+        /// "immutable metadata"
         immutable_metadata_hex: Option<String>,
         #[arg(long, group = "immutable_metadata")]
         immutable_metadata_file: Option<String>,
+        /// "metadata"
         #[arg(long, group = "metadata")]
         metadata_hex: Option<String>,
         #[arg(long, group = "metadata")]
@@ -101,24 +131,33 @@ pub enum AccountCommand {
     Output { output_id: String },
     /// List all outputs.
     Outputs,
-    /// Send an amount to a bech32 encoded address: `send
-    /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 1000000`
-    Send { address: String, amount: u64 },
-    /// Send an amount below the storage deposit minimum to a bech32 address: `send
-    /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 1`
-    SendMicro { address: String, amount: u64 },
-    /// Send native tokens to a bech32 address: `send-native-token
-    /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
-    /// 0x08e3a2f76cc934bc0cc21575b4610c1d7d4eb589ae0100000000000000000000000000000000 10`
-    /// This will create an output with an expiration and storage deposit return unlock condition. To gift the storage
-    /// deposit for the output, add ` true`.
-    SendNativeToken {
+    /// Send an amount.
+    Send {
+        /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
         address: String,
+        /// 1000000
+        amount: u64,
+    },
+    /// Send an amount below the storage deposit minimum.
+    SendMicro {
+        /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
+        address: String,
+        /// 1
+        amount: u64,
+    },
+    /// Send native tokens.
+    /// This will create an output with an expiration and storage deposit return unlock condition.
+    SendNativeToken {
+        /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
+        address: String,
+        /// 0x08e3a2f76cc934bc0cc21575b4610c1d7d4eb589ae0100000000000000000000000000000000
         token_id: String,
+        /// 10
         amount: String,
+        /// To gift the storage deposit for the output, add ` true`.
         gift_storage_deposit: Option<bool>,
     },
-    /// Send an NFT to a bech32 encoded address
+    /// Send an NFT.
     SendNft { address: String, nft_id: String },
     /// Sync the account with the Tangle.
     Sync,
