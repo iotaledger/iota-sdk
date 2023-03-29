@@ -75,6 +75,8 @@ import type {
     __HashTransactionEssenceMessage__,
     __ClearListenersMessage__,
     __SignatureUnlockMessage__,
+    __SignEd25519Message__,
+    __VerifyEd25519SignatureMessage__,
 } from './client';
 
 export type __ClientMessages__ =
@@ -153,4 +155,6 @@ export type __ClientMessages__ =
     | __BuildFoundryOutputMessage__
     | __BuildNftOutputMessage__
     | __HashTransactionEssenceMessage__
-    | __ClearListenersMessage__;
+    | __ClearListenersMessage__
+    | __SignEd25519Message__
+    | __VerifyEd25519SignatureMessage__;
