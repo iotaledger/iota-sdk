@@ -25,29 +25,44 @@ pub struct AccountManagerCli {
 #[derive(Debug, Clone, Subcommand)]
 pub enum AccountManagerCommand {
     /// Create a stronghold backup file.
-    Backup { path: String },
+    Backup {
+        /// Path of the created stronghold backup file.
+        backup_path: String,
+    },
     /// Change the stronghold password.
     ChangePassword,
-    /// Parameters for the init command.
+    /// Initialize the wallet.
     Init(InitParameters),
     /// Generate a random mnemonic.
     Mnemonic,
-    /// Create a new account with an optional alias.
-    New { alias: Option<String> },
-    /// Restore accounts from a stronghold backup file.
-    Restore { backup_path: String },
+    /// Create a new account.
+    New {
+        /// Account alias, next available account index if not provided.
+        alias: Option<String>,
+    },
+    /// Restore a stronghold backup file.
+    Restore {
+        /// Path of the to be restored stronghold backup file.
+        backup_path: String,
+    },
     /// Set the node to use.
-    SetNode { url: String },
-    /// Sync all accounts.
+    SetNode {
+        /// Node URL to use for all future operations.
+        url: String,
+    },
+    /// Synchronize all accounts.
     Sync,
 }
 
 #[derive(Debug, Default, Clone, Args)]
 pub struct InitParameters {
+    /// Mnemonic, randomly generated if not provided.
     #[arg(short, long)]
     pub mnemonic: Option<String>,
+    /// Node URL, "https://api.testnet.shimmer.network" if not provided.
     #[arg(short, long)]
     pub node: Option<String>,
+    /// Coin type, SHIMMER_COIN_TYPE (4219) if not provided.
     #[arg(short, long)]
     pub coin_type: Option<u32>,
 }

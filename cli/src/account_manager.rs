@@ -58,8 +58,8 @@ pub async fn new_account_manager(cli: AccountManagerCli) -> Result<(Option<Accou
             let mut account = None;
 
             match command {
-                AccountManagerCommand::Backup { path } => {
-                    backup_command(&account_manager, path, &password).await?;
+                AccountManagerCommand::Backup { backup_path } => {
+                    backup_command(&account_manager, backup_path, &password).await?;
                     return Ok((None, None));
                 }
                 AccountManagerCommand::ChangePassword => change_password_command(&account_manager, &password).await?,

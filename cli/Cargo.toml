@@ -4,7 +4,7 @@ version = "1.0.0-rc.2"
 authors = [ "IOTA Stiftung" ]
 edition = "2021"
 homepage = "https://iota.org"
-description = "Command line interface application for the IOTA wallet library."
+description = "Command line interface wallet application based on the IOTA SDK"
 license = "Apache-2.0"
 
 [[bin]]
@@ -14,7 +14,7 @@ path = "src/main.rs"
 [dependencies]
 iota-sdk = { path = "../sdk", default-features = false, features = [ "wallet", "tls", "storage", "rocksdb", "stronghold", "participation" ] }
 
-clap = { version = "4.1.14", default-features = false, features = [ "std", "color", "help", "usage", "error-context", "suggestions", "derive" ] }
+clap = { version = "4.2.0", default-features = false, features = [ "std", "color", "help", "usage", "error-context", "suggestions", "derive" ] }
 dialoguer = { version = "0.10.3", default-features = false, features = [ "history", "password" ] }
 fern-logger = { version = "0.5.0", default-features = false }
 log = { version = "0.4.17", default-features = false }
