@@ -1,13 +1,13 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::fmt::{Debug, Formatter, Result};
 #[cfg(feature = "stronghold")]
 use std::path::PathBuf;
 
+use derivative::Derivative;
 use serde::{Deserialize, Serialize};
 
-use super::account_method::AccountMethod;
+use super::{account_method::AccountMethod, OmmittedDebug};
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{WalletEvent, WalletEventType};
 use crate::{
@@ -19,7 +19,8 @@ use crate::{
 };
 
 /// The messages that can be sent to the actor.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Derivative, Serialize, Deserialize)]
+#[derivative(Debug)]
 #[serde(tag = "cmd", content = "payload", rename_all = "camelCase")]
 #[allow(clippy::large_enum_variant)]
 pub enum WalletMessage {
@@ -61,6 +62,7 @@ pub enum WalletMessage {
         /// The backup destination.
         destination: PathBuf,
         /// Stronghold file password.
+        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
         password: String,
     },
     /// Change the Stronghold password to another one and also re-encrypt the values in the loaded snapshot with it.
@@ -68,8 +70,10 @@ pub enum WalletMessage {
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
     ChangeStrongholdPassword {
+        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
         #[serde(rename = "currentPassword")]
         current_password: String,
+        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
         #[serde(rename = "newPassword")]
         new_password: String,
     },
@@ -115,6 +119,7 @@ pub enum WalletMessage {
         /// The path to the backed up Stronghold.
         source: PathBuf,
         /// Stronghold file password.
+        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
         password: String,
         #[serde(rename = "ignoreIfCoinTypeMismatch")]
         ignore_if_coin_type_mismatch: Option<bool>,
@@ -127,7 +132,10 @@ pub enum WalletMessage {
     GenerateMnemonic,
     /// Checks if the given mnemonic is valid.
     /// Expected response: [`Ok`](crate::message_interface::Response::Ok)
-    VerifyMnemonic { mnemonic: String },
+    VerifyMnemonic {
+        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        mnemonic: String,
+    },
     /// Updates the client options for all accounts.
     /// Expected response: [`Ok`](crate::message_interface::Response::Ok)
     SetClientOptions {
@@ -168,7 +176,10 @@ pub enum WalletMessage {
     /// Expected response: [`Ok`](crate::message_interface::Response::Ok)
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-    SetStrongholdPassword { password: String },
+    SetStrongholdPassword {
+        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        password: String,
+    },
     /// Set the stronghold password clear interval.
     /// Expected response: [`Ok`](crate::message_interface::Response::Ok)
     #[cfg(feature = "stronghold")]
@@ -181,7 +192,10 @@ pub enum WalletMessage {
     /// Expected response: [`Ok`](crate::message_interface::Response::Ok)
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-    StoreMnemonic { mnemonic: String },
+    StoreMnemonic {
+        #[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))]
+        mnemonic: String,
+    },
     /// Start background syncing.
     /// Expected response: [`Ok`](crate::message_interface::Response::Ok)
     StartBackgroundSync {
@@ -230,108 +244,4 @@ pub enum WalletMessage {
         /// Authentication options
         auth: Option<NodeAuth>,
     },
-}
-
-// Custom Debug implementation to not log secrets
-impl Debug for WalletMessage {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        match self {
-            Self::CreateAccount { alias, bech32_hrp } => {
-                write!(f, "CreateAccount{{ alias: {alias:?}, bech32_hrp: {bech32_hrp:?} }}")
-            }
-            Self::GetAccountIndexes => write!(f, "GetAccountIndexes"),
-            Self::GetAccount { account_id } => write!(f, "GetAccount{{ account_id: {account_id:?} }}"),
-            Self::GetAccounts => write!(f, "GetAccounts"),
-            Self::CallAccountMethod { account_id, method } => write!(
-                f,
-                "CallAccountMethod{{ account_id: {account_id:?}, method: {method:?} }}"
-            ),
-            #[cfg(feature = "stronghold")]
-            Self::ChangeStrongholdPassword {
-                current_password: _,
-                new_password: _,
-            } => write!(
-                f,
-                "ChangeStrongholdPassword{{ current_password: <omitted>, new_password: <omitted> }}"
-            ),
-            #[cfg(feature = "stronghold")]
-            Self::ClearStrongholdPassword => write!(f, "ClearStrongholdPassword"),
-            #[cfg(feature = "stronghold")]
-            Self::IsStrongholdPasswordAvailable => write!(f, "IsStrongholdPasswordAvailable"),
-            #[cfg(feature = "stronghold")]
-            Self::Backup {
-                destination,
-                password: _,
-            } => write!(f, "Backup{{ destination: {destination:?} }}"),
-            Self::RecoverAccounts {
-                account_start_index,
-                account_gap_limit,
-                address_gap_limit,
-                sync_options,
-            } => write!(
-                f,
-                "RecoverAccounts{{ account_start_index: {account_start_index:?}, account_gap_limit: {account_gap_limit:?}, address_gap_limit: {address_gap_limit:?}, sync_options: {sync_options:?} }}"
-            ),
-            Self::RemoveLatestAccount => write!(f, "RemoveLatestAccount"),
-            #[cfg(feature = "stronghold")]
-            Self::RestoreBackup {
-                source,
-                password: _,
-                ignore_if_coin_type_mismatch,
-            } => write!(
-                f,
-                "RestoreBackup{{ source: {source:?}, password: <ommited>, ignore_if_coin_type_mismatch: {ignore_if_coin_type_mismatch:?} }}"
-            ),
-            Self::GenerateMnemonic => write!(f, "GenerateMnemonic"),
-            Self::VerifyMnemonic { mnemonic: _ } => write!(f, "VerifyMnemonic{{ mnemonic: <omitted> }}"),
-            Self::SetClientOptions { client_options } => {
-                write!(f, "SetClientOptions{{ client_options: {client_options:?} }}")
-            }
-            #[cfg(feature = "ledger_nano")]
-            Self::GetLedgerNanoStatus => write!(f, "GetLedgerNanoStatus"),
-            Self::GenerateAddress {
-                account_index,
-                internal,
-                address_index,
-                options,
-                bech32_hrp,
-            } => write!(
-                f,
-                "GenerateAddress{{ account_index: {account_index:?}, internal: {internal:?}, address_index: {address_index:?}, options: {options:?}, bech32_hrp: {bech32_hrp:?} }}"
-            ),
-            Self::GetNodeInfo { url, auth: _ } => write!(f, "GetNodeInfo{{ url: {url:?} }}"),
-            #[cfg(feature = "stronghold")]
-            Self::SetStrongholdPassword { password: _ } => {
-                write!(f, "SetStrongholdPassword{{  password: <omitted> }}")
-            }
-            #[cfg(feature = "stronghold")]
-            Self::SetStrongholdPasswordClearInterval {
-                interval_in_milliseconds,
-            } => {
-                write!(
-                    f,
-                    "SetStrongholdPasswordClearInterval{{ interval_in_milliseconds: {interval_in_milliseconds:?} }}"
-                )
-            }
-            #[cfg(feature = "stronghold")]
-            Self::StoreMnemonic { mnemonic: _ } => write!(f, "StoreMnemonic{{ mnemonic: <omitted> }}"),
-            Self::StartBackgroundSync {
-                options,
-                interval_in_milliseconds,
-            } => write!(
-                f,
-                "StartBackgroundSync{{ options: {options:?}, interval: {interval_in_milliseconds:?} }}"
-            ),
-            Self::StopBackgroundSync => write!(f, "StopBackgroundSync"),
-            #[cfg(feature = "events")]
-            Self::EmitTestEvent { event } => write!(f, "EmitTestEvent{{ event: {event:?} }}"),
-            Self::Bech32ToHex { bech32_address } => write!(f, "Bech32ToHex{{ bech32_address: {bech32_address:?} }}"),
-            Self::HexToBech32 { hex, bech32_hrp } => {
-                write!(f, "HexToBech32{{ hex: {hex:?}, bech32_hrp: {bech32_hrp:?} }}")
-            }
-            #[cfg(feature = "events")]
-            Self::ClearListeners { event_types } => write!(f, "ClearListeners{{ event_types: {event_types:?} }}"),
-            Self::UpdateNodeAuth { url, auth: _ } => write!(f, "UpdateNodeAuth{{ url: {url}, auth: <omitted> }}"),
-        }
-    }
 }

@@ -4,6 +4,7 @@
 #[cfg(not(target_family = "wasm"))]
 use std::collections::HashSet;
 
+use derivative::Derivative;
 use serde::Serialize;
 #[cfg(feature = "participation")]
 use {
@@ -12,7 +13,7 @@ use {
     std::collections::HashMap,
 };
 
-use super::error::MessageInterfaceError;
+use super::{error::MessageInterfaceError, message::OmmittedDebug};
 #[cfg(feature = "ledger_nano")]
 use crate::client::secret::LedgerNanoStatus;
 use crate::{
@@ -59,7 +60,8 @@ use crate::{
 };
 
 /// The response message.
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Derivative)]
+#[derivative(Debug)]
 #[serde(tag = "type", content = "payload", rename_all = "camelCase")]
 pub enum Response {
     // Client responses
@@ -214,7 +216,7 @@ pub enum Response {
     IsAddressValid(bool),
     /// Response for:
     /// - [`MnemonicToHexSeed`](crate::message_interface::Message::MnemonicToHexSeed)
-    MnemonicHexSeed(String),
+    MnemonicHexSeed(#[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))] String),
     /// Response for:
     /// - [`TransactionId`](crate::message_interface::Message::TransactionId)
     TransactionId(TransactionId),
@@ -246,7 +248,7 @@ pub enum Response {
     /// Response for:
     /// - [`GenerateMnemonic`](crate::message_interface::Message::GenerateMnemonic)
     /// [`GenerateMnemonic`](crate::message_interface::Message::GenerateMnemonic)
-    GeneratedMnemonic(String),
+    GeneratedMnemonic(#[derivative(Debug(format_with = "OmmittedDebug::omitted_fmt"))] String),
     /// Response for
     /// - [`GetLedgerNanoStatus`](crate::message_interface::Message::GetLedgerNanoStatus)
     /// [`GetLedgerNanoStatus`](crate::message_interface::Message::GetLedgerNanoStatus),

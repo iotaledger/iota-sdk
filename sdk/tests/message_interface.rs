@@ -166,3 +166,26 @@ async fn new_message_interface_client_from_wallet() -> Result<()> {
 
     Ok(std::fs::remove_dir_all(storage_path).unwrap_or(()))
 }
+
+#[cfg(feature = "message_interface")]
+#[test]
+fn message_interface_secrets_debug() {
+    let client_message = ClientMessage::MnemonicToHexSeed {
+        mnemonic: "mnemonic".to_string(),
+    };
+    assert_eq!(
+        format!("{:?}", client_message),
+        "MnemonicToHexSeed { mnemonic: <omitted> }"
+    );
+
+    let wallet_message = WalletMessage::VerifyMnemonic {
+        mnemonic: "mnemonic".to_string(),
+    };
+    assert_eq!(
+        format!("{:?}", wallet_message),
+        "VerifyMnemonic { mnemonic: <omitted> }"
+    );
+
+    let response = Response::GeneratedMnemonic("mnemonic".to_string());
+    assert_eq!(format!("{:?}", response), "GeneratedMnemonic(<omitted>)");
+}
