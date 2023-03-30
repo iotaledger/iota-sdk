@@ -1,8 +1,9 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { createMessageHandler } from './createMessageHandler'
+import type { createMessageHandler } from './createMessageHandler';
 import type {
+    Account,
     AccountBalance,
     AccountMetadata,
     SyncOptions,
@@ -31,15 +32,17 @@ import type {
     ParticipationEventId,
     ParticipationEventStatus,
     ParticipationEventType,
-    ParticipationEventWithNodes, ParticipationEventRegistrationOptions, ParticipationEventMap,
-} from '../types'
-import type { SignedTransactionEssence } from '../types/signedTransactionEssence'
+    ParticipationEventWithNodes,
+    ParticipationEventRegistrationOptions,
+    ParticipationEventMap,
+} from '../types';
+import type { SignedTransactionEssence } from '../types/signedTransactionEssence';
 import type {
     BuildAliasOutputData,
     BuildBasicOutputData,
     BuildFoundryOutputData,
     BuildNftOutputData,
-} from '../types/buildOutputData'
+} from '../types/buildOutputData';
 import type {
     HexEncodedAmount,
     IAliasOutput,
@@ -47,12 +50,12 @@ import type {
     IFoundryOutput,
     INftOutput,
     OutputTypes,
-} from '@iota/types'
+} from '@iota/types';
+
 type MessageHandler = Awaited<ReturnType<typeof createMessageHandler>>
 
-/** The Account factory function. */
-export function createAccount(accountMeta: AccountMeta, messageHandler: MessageHandler) {
-    
+/** The factory function to create an Account. */
+export function createAccount(meta: AccountMeta, messageHandler: MessageHandler): Account {
     return {
         /**
          * Build an `AliasOutput`.
@@ -61,7 +64,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async buildAliasOutput(data: BuildAliasOutputData): Promise<IAliasOutput> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'buildAliasOutput',
                     data,
@@ -77,7 +80,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async buildBasicOutput(data: BuildBasicOutputData): Promise<IBasicOutput> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'buildBasicOutput',
                     data,
@@ -95,7 +98,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             data: BuildFoundryOutputData,
         ): Promise<IFoundryOutput> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'buildFoundryOutput',
                     data,
@@ -111,7 +114,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async buildNftOutput(data: BuildNftOutputData): Promise<INftOutput> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'buildNftOutput',
                     data,
@@ -119,7 +122,6 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             );
             return JSON.parse(resp).payload;
         },
-
         /**
          * Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
          * the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
@@ -136,7 +138,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'burnNativeToken',
                     data: {
@@ -163,7 +165,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'burnNft',
                     data: {
@@ -183,7 +185,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async claimOutputs(outputIds: string[]): Promise<Transaction> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'claimOutputs',
                     data: {
@@ -207,7 +209,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             outputConsolidationThreshold?: number,
         ): Promise<Transaction> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'consolidateOutputs',
                     data: {
@@ -231,7 +233,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'createAliasOutput',
                     data: {
@@ -258,7 +260,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'decreaseNativeTokenSupply',
                     data: {
@@ -275,7 +277,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             eventId: ParticipationEventId,
         ): Promise<void> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'deregisterParticipationEvent',
                     data: {
@@ -300,7 +302,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'destroyAlias',
                     data: {
@@ -325,7 +327,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'destroyFoundry',
                     data: {
@@ -360,7 +362,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             options?: AddressGenerationOptions,
         ): Promise<Address[]> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'generateAddresses',
                     data: {
@@ -378,7 +380,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async getBalance(): Promise<AccountBalance> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'getBalance',
                 },
@@ -394,7 +396,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async getOutput(outputId: string): Promise<OutputData> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'getOutput',
                     data: {
@@ -409,7 +411,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             eventId: ParticipationEventId,
         ): Promise<ParticipationEventWithNodes> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'getParticipationEvent',
                     data: {
@@ -425,7 +427,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             eventType?: ParticipationEventType,
         ): Promise<ParticipationEventId[]> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'getParticipationEventIds',
                     data: {
@@ -439,7 +441,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
 
         async getParticipationEvents(): Promise<ParticipationEventMap> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'getParticipationEvents',
                 },
@@ -451,7 +453,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             eventId: ParticipationEventId,
         ): Promise<ParticipationEventStatus> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'getParticipationEventStatus',
                     data: {
@@ -470,7 +472,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async getFoundryOutput(tokenId: string): Promise<IFoundryOutput> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'getFoundryOutput',
                     data: {
@@ -490,7 +492,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             outputs: OutputsToClaim,
         ): Promise<string[]> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'getOutputsWithAdditionalUnlockConditions',
                     data: {
@@ -508,7 +510,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async getTransaction(transactionId: string): Promise<Transaction> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'getTransaction',
                     data: {
@@ -529,7 +531,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             transactionId: string,
         ): Promise<Transaction> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'getIncomingTransactionData',
                     data: {
@@ -546,7 +548,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async addresses(): Promise<Address[]> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'addresses',
                 },
@@ -561,7 +563,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async addressesWithUnspentOutputs(): Promise<AddressWithUnspentOutputs[]> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'addressesWithUnspentOutputs',
                 },
@@ -577,7 +579,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async outputs(filterOptions?: FilterOptions): Promise<OutputData[]> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'outputs',
                     data: { filterOptions },
@@ -593,7 +595,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async pendingTransactions(): Promise<Transaction[]> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'pendingTransactions',
                 },
@@ -607,7 +609,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async incomingTransactions(): Promise<[string, Transaction][]> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'incomingTransactions',
                 },
@@ -622,7 +624,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async transactions(): Promise<Transaction[]> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'transactions',
                 },
@@ -638,7 +640,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async unspentOutputs(filterOptions?: FilterOptions): Promise<OutputData[]> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'unspentOutputs',
                     data: { filterOptions },
@@ -654,9 +656,9 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         getMetadata(): AccountMetadata {
             return {
-                alias: accountMeta.alias,
-                coinType: accountMeta.coinType,
-                index: accountMeta.index,
+                alias: meta.alias,
+                coinType: meta.coinType,
+                index: meta.index,
             };
         },
 
@@ -667,7 +669,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async minimumRequiredStorageDeposit(output: OutputTypes): Promise<string> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'minimumRequiredStorageDeposit',
                     data: {
@@ -694,7 +696,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             transactionOptions?: TransactionOptions,
         ): Promise<MintTokenTransaction> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'increaseNativeTokenSupply',
                     data: {
@@ -721,7 +723,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             transactionOptions?: TransactionOptions,
         ): Promise<MintTokenTransaction> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'mintNativeToken',
                     data: {
@@ -746,7 +748,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'mintNfts',
                     data: {
@@ -777,7 +779,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             transactionOptions?: TransactionOptions,
         ): Promise<OutputTypes> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'prepareOutput',
                     data: {
@@ -801,7 +803,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             options?: TransactionOptions,
         ): Promise<PreparedTransactionData> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'prepareSendAmount',
                     data: {
@@ -825,7 +827,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             options?: TransactionOptions,
         ): Promise<PreparedTransactionData> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'prepareTransaction',
                     data: {
@@ -841,7 +843,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             options: ParticipationEventRegistrationOptions,
         ): Promise<ParticipationEventMap> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'registerParticipationEvents',
                     data: {
@@ -860,7 +862,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             address: string,
         ): Promise<string> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'requestFundsFromFaucet',
                     data: { url, address },
@@ -879,7 +881,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             maxAttempts?: number,
         ): Promise<PreparedTransactionData> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'retryTransactionUntilIncluded',
                     data: {
@@ -904,7 +906,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'sendAmount',
                     data: {
@@ -929,7 +931,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'sendMicroTransaction',
                     data: {
@@ -954,7 +956,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'sendNativeTokens',
                     data: {
@@ -979,7 +981,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'sendNft',
                     data: {
@@ -1004,7 +1006,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'sendOutputs',
                     data: {
@@ -1022,7 +1024,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          * @param alias The account alias to set.
          */
         async setAlias(alias: string): Promise<void> {
-            await messageHandler.callAccountMethod(accountMeta.index, {
+            await messageHandler.callAccountMethod(meta.index, {
                 name: 'setAlias',
                 data: {
                     alias,
@@ -1039,7 +1041,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             preparedTransactionData: PreparedTransactionData,
         ): Promise<SignedTransactionEssence> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'signTransactionEssence',
                     data: {
@@ -1059,7 +1061,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             signedTransactionData: SignedTransactionEssence,
         ): Promise<Transaction> {
             const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'submitAndStoreTransaction',
                     data: {
@@ -1078,7 +1080,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async sync(options?: SyncOptions): Promise<AccountBalance> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'syncAccount',
                     data: {
@@ -1094,7 +1096,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             answers?: number[],
         ): Promise<Transaction> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'vote',
                     data: {
@@ -1110,7 +1112,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             eventId: ParticipationEventId,
         ): Promise<Transaction> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'stopParticipating',
                     data: {
@@ -1123,7 +1125,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
 
         async getVotingPower(): Promise<string> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'getVotingPower',
                 },
@@ -1131,11 +1133,21 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             return JSON.parse(resp).payload;
         },
 
-        async getParticipationOverview(): Promise<ParticipationOverview> {
+        /**
+         * Calculates the voting overview of an account.
+         * @param eventIds Optional, filters participations only for provided events.
+         * @returns ParticipationOverview
+         */
+        async getParticipationOverview(
+            eventIds?: ParticipationEventId[],
+        ): Promise<ParticipationOverview> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'getParticipationOverview',
+                    data: {
+                        eventIds,
+                    },
                 },
             );
             return JSON.parse(resp).payload;
@@ -1143,7 +1155,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
 
         async increaseVotingPower(amount: string): Promise<Transaction> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'increaseVotingPower',
                     data: {
@@ -1153,10 +1165,10 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             );
             return JSON.parse(resp).payload;
         },
-
+        
         async decreaseVotingPower(amount: string): Promise<Transaction> {
             const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
+                meta.index,
                 {
                     name: 'decreaseVotingPower',
                     data: {

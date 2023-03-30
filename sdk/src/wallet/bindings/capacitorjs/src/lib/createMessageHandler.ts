@@ -15,8 +15,8 @@ import type {
     AccountId,
 } from '../types';
 
-// The MessageHandler class interacts with messages with the rust bindings.
-export async function MessageHandler(options?: AccountManagerOptions) {
+// The factory function that creates the MessageHandler that interacts with the rust bindings.
+export async function createMessageHandler(options?: AccountManagerOptions) {
     
     const messageOptions = {
             storagePath: options?.storagePath,

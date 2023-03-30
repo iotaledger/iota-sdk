@@ -4,9 +4,9 @@
 import { internalInitLogger } from './bindings';
 import type { LoggerConfig } from '../types';
 
-export * from './AccountManager';
-export * from './MessageHandler';
-export * from './Account';
+export * from './createAccountManager';
+export * from './createMessageHandler';
+export * from './createAccount';
 export * from '../types';
 
 /** Function to create wallet logs */

@@ -5,7 +5,9 @@ import { createMessageHandler } from './createMessageHandler';
 import { createAccount } from './createAccount';
 
 import type {
+    Account,
     AccountId,
+    AccountManager,
     AccountManagerOptions,
     Auth,
     ClientOptions,
@@ -18,18 +20,15 @@ import type {
     WalletEvent,
 } from '../types';
 
-type Account = ReturnType<typeof createAccount>
-
-/** The AccountManager class. */
-export async function createAccountManager(options: AccountManagerOptions) {
+/** The factory function that creates the AccountManager. */
+export async function createAccountManager(options: AccountManagerOptions): Promise<AccountManager> {
     
-    let id: AccountId
+    let id: AccountId = ''
     
     let messageHandler = await createMessageHandler(options);
 
     return {
         id,
-
         /**
          * Backup the data to a Stronghold snapshot.
          */
@@ -269,7 +268,6 @@ export async function createAccountManager(options: AccountManagerOptions) {
                     syncOptions,
                 },
             });
-
             const accounts: Account[] = [];
 
             for (const account of JSON.parse(response).payload) {
@@ -292,13 +290,20 @@ export async function createAccountManager(options: AccountManagerOptions) {
          * Replaces client_options, coin_type, secret_manager and accounts. Returns an error if accounts were already created
          * If Stronghold is used as secret_manager, the existing Stronghold file will be overwritten. If a mnemonic was
          * stored, it will be gone.
+         * if ignore_if_coin_type_mismatch is provided client options will not be restored
+         * if ignore_if_coin_type_mismatch == true, client options coin type and accounts will not be restored if the cointype doesn't match
          */
-        async restoreBackup(source: string, password: string): Promise<void> {
+        async restoreBackup(
+            source: string,
+            password: string,
+            ignoreIfCoinTypeMismatch?: boolean,
+        ): Promise<void> {
             await messageHandler.sendMessage({
                 cmd: 'restoreBackup',
                 payload: {
                     source,
                     password,
+                    ignoreIfCoinTypeMismatch,
                 },
             });
         },
@@ -388,6 +393,6 @@ export async function createAccountManager(options: AccountManagerOptions) {
                 cmd: 'updateNodeAuth',
                 payload: { url, auth },
             });
-        },
+        }
     }
 }

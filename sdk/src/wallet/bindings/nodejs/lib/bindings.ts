@@ -1,9 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { EventType } from '../types';
-import type { MessageHandler } from './MessageHandler';
-
+import type { EventType, MessageHandler } from '../types';
 // @ts-ignore: path is set to match runtime transpiled js path
 import addon = require('../../build/Release/index.node');
 
