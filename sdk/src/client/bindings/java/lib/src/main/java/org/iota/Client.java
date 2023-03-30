@@ -888,7 +888,7 @@ public class Client extends NativeApi {
      * Signs a message with an Ed25519 private key.
      *
      * @param secretManager The secret manager that holds the secret key for the account that will sign the message.
-     * @param String The message to sign.
+     * @param message The message to sign.
      * @param chain The Bip32Path for signing.
      * @return The Ed25519Signature.
      * @throws ClientException on error.
