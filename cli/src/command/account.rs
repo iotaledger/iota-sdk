@@ -76,7 +76,8 @@ pub enum AccountCommand {
     },
     /// Destroy a foundry.
     DestroyFoundry {
-        /// Foundry ID to be destroyed, e.g. 0x08cb54928954c3eb7ece1bf1cc0c68eb179dc1c4634ae5d23df1c70643d0911c3d0200000000.
+        /// Foundry ID to be destroyed, e.g.
+        /// 0x08cb54928954c3eb7ece1bf1cc0c68eb179dc1c4634ae5d23df1c70643d0911c3d0200000000.
         foundry_id: String,
     },
     /// Exit the CLI wallet.
@@ -192,12 +193,14 @@ pub enum AccountCommand {
     },
     /// Stop participating to an event.
     StopParticipating {
-        /// Event ID for which to stop participation, e.g. 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2.
+        /// Event ID for which to stop participation, e.g.
+        /// 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2.
         event_id: ParticipationEventId,
     },
     /// Get the participation overview of the account.
     ParticipationOverview {
-        /// Event IDs for which to get the participation overview, e.g. 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2...
+        /// Event IDs for which to get the participation overview, e.g.
+        /// 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2...
         #[arg(short, long, num_args = 1.., value_delimiter = ' ')]
         event_ids: Vec<ParticipationEventId>,
     },
@@ -614,13 +617,15 @@ pub async fn send_native_token_command(
         let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
         account_handle.client().bech32_hrp_matches(&bech32_hrp).await?;
 
-        let outputs = vec![BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
-            .with_native_tokens(vec![NativeToken::new(
-                TokenId::from_str(&token_id)?,
-                U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-            )?])
-            .finish_output(token_supply)?];
+        let outputs = vec![
+            BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
+                .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
+                .with_native_tokens(vec![NativeToken::new(
+                    TokenId::from_str(&token_id)?,
+                    U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+                )?])
+                .finish_output(token_supply)?,
+        ];
 
         account_handle.send(outputs, None).await?
     } else {
