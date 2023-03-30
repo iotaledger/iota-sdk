@@ -314,7 +314,7 @@ public class Wallet extends NativeApi {
         o.addProperty("internal", internal);
         o.addProperty("addressIndex", addressIndex);
         o.add("options", CustomGson.get().toJsonTree(options));
-        o.addProperty("bechHrp", bechHrp);
+        o.addProperty("bech32Hrp", bechHrp);
         
         return callBaseApi(new WalletCommand("generateAddress", o)).getAsString();
     }
