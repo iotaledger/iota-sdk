@@ -55,7 +55,7 @@ pub enum AccountCommand {
     },
     /// Claim outputs with storage deposit return, expiration or timelock unlock conditions.
     Claim {
-        /// Output IDs to be claimed.
+        /// Output ID to be claimed.
         output_id: Option<String>,
     },
     /// Consolidate all basic outputs into one address.
