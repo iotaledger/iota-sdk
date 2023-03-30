@@ -44,8 +44,9 @@ pub enum AccountCommand {
     /// Burn a native token.
     BurnNativeToken {
         /// 0x...
+        /// Token ID to be burnt, e.g.
         token_id: String,
-        /// 100
+        /// Amount to be burnt, e.g. 100.
         amount: String,
     },
     /// Burn an NFT.
@@ -244,7 +245,7 @@ pub async fn burn_nft_command(account_handle: &AccountHandle, nft_id: String) ->
 
 // `balance` command
 pub async fn balance_command(account_handle: &AccountHandle) -> Result<(), Error> {
-    println_log_info!("{:?}", account_handle.balance().await?);
+    println_log_info!("{:#?}", account_handle.balance().await?);
 
     Ok(())
 }
@@ -584,15 +585,13 @@ pub async fn send_native_token_command(
         let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
         account_handle.client().bech32_hrp_matches(&bech32_hrp).await?;
 
-        let outputs = vec![
-            BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
-                .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
-                .with_native_tokens(vec![NativeToken::new(
-                    TokenId::from_str(&token_id)?,
-                    U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-                )?])
-                .finish_output(token_supply)?,
-        ];
+        let outputs = vec![BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
+            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
+            .with_native_tokens(vec![NativeToken::new(
+                TokenId::from_str(&token_id)?,
+                U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+            )?])
+            .finish_output(token_supply)?];
 
         account_handle.send(outputs, None).await?
     } else {
@@ -636,9 +635,7 @@ pub async fn send_nft_command(account_handle: &AccountHandle, address: String, n
 
 // `sync` command
 pub async fn sync_command(account_handle: &AccountHandle) -> Result<(), Error> {
-    let sync = account_handle.sync(None).await?;
-
-    println_log_info!("Synced: {sync:?}");
+    println_log_info!("Synced: {:#?}", account_handle.sync(None).await?);
 
     Ok(())
 }
