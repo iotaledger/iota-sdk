@@ -41,10 +41,9 @@ pub enum AccountCommand {
     Addresses,
     /// Print the account balance.
     Balance,
-    /// Burn a native token.
+    /// Burn an amount of native token.
     BurnNativeToken {
-        /// 0x...
-        /// Token ID to be burnt, e.g.
+        /// Token ID to be burnt, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
         token_id: String,
         /// Amount to be burnt, e.g. 100.
         amount: String,

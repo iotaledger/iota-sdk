@@ -6,6 +6,7 @@ use dialoguer::Input;
 use iota_sdk::wallet::account::AccountHandle;
 
 use crate::{
+    account_completion::ACCOUNT_COMPLETION,
     account_history::AccountHistory,
     command::account::{
         addresses_command, balance_command, burn_native_token_command, burn_nft_command, claim_command,
@@ -49,6 +50,7 @@ pub async fn account_prompt_internal(
     let command: String = Input::new()
         .with_prompt(format!("Account \"{}\"", alias))
         .history_with(history)
+        .completion_with(&ACCOUNT_COMPLETION)
         .interact_text()?;
     match command.as_str() {
         "h" => {
