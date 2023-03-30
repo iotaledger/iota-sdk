@@ -32,7 +32,7 @@ pub use self::{
 use crate::types::block::{protocol::ProtocolParameters, Error};
 
 /// A generic payload that can represent different types defining block payloads.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -47,6 +47,17 @@ pub enum Payload {
     TreasuryTransaction(Box<TreasuryTransactionPayload>),
     /// A tagged data payload.
     TaggedData(Box<TaggedDataPayload>),
+}
+
+impl core::fmt::Debug for Payload {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::Transaction(payload) => write!(f, "{payload:?}"),
+            Self::Milestone(payload) => write!(f, "{payload:?}"),
+            Self::TreasuryTransaction(payload) => write!(f, "{payload:?}"),
+            Self::TaggedData(payload) => write!(f, "{payload:?}"),
+        }
+    }
 }
 
 impl From<TransactionPayload> for Payload {

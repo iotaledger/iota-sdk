@@ -84,7 +84,7 @@ pub(crate) enum OutputBuilderAmount {
 }
 
 /// A generic output that can represent different types defining the deposit of funds.
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -101,6 +101,18 @@ pub enum Output {
     Foundry(FoundryOutput),
     /// An NFT output.
     Nft(NftOutput),
+}
+
+impl core::fmt::Debug for Output {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::Treasury(output) => write!(f, "{output:?}"),
+            Self::Basic(output) => write!(f, "{output:?}"),
+            Self::Alias(output) => write!(f, "{output:?}"),
+            Self::Foundry(output) => write!(f, "{output:?}"),
+            Self::Nft(output) => write!(f, "{output:?}"),
+        }
+    }
 }
 
 impl Output {
