@@ -7,7 +7,7 @@
 //!
 //! ## Sending a block without a payload
 //!  ```no_run
-//! # use iota_client::{Client, Result};
+//! # use iota_sdk::client::{Client, Result};
 //! # #[tokio::main]
 //! # async fn main() -> Result<()> {
 //! let client = Client::builder()
