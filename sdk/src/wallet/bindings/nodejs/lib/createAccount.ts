@@ -1,7 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { createMessageHandler } from './createMessageHandler';
 import type {
     Account,
     AccountBalance,
@@ -16,8 +15,13 @@ import type {
     AddressGenerationOptions,
     AddressWithUnspentOutputs,
     AliasOutputOptions,
+    BuildAliasOutputData,
+    BuildBasicOutputData,
+    BuildFoundryOutputData,
+    BuildNftOutputData,
     FilterOptions,
     IncreaseNativeTokenSupplyOptions,
+    MessageHandler,
     MintTokenTransaction,
     NativeTokenOptions,
     NftOptions,
@@ -35,14 +39,9 @@ import type {
     ParticipationEventWithNodes,
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
+    SignedTransactionEssence,
 } from '../types';
-import type { SignedTransactionEssence } from '../types/signedTransactionEssence';
-import type {
-    BuildAliasOutputData,
-    BuildBasicOutputData,
-    BuildFoundryOutputData,
-    BuildNftOutputData,
-} from '../types/buildOutputData';
+
 import type {
     HexEncodedAmount,
     IAliasOutput,
@@ -51,8 +50,6 @@ import type {
     INftOutput,
     OutputTypes,
 } from '@iota/types';
-
-type MessageHandler = Awaited<ReturnType<typeof createMessageHandler>>
 
 /** The factory function to create an Account. */
 export function createAccount(meta: AccountMeta, messageHandler: MessageHandler): Account {

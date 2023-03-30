@@ -22,13 +22,10 @@ import type {
 
 /** The factory function that creates the AccountManager. */
 export async function createAccountManager(options: AccountManagerOptions): Promise<AccountManager> {
-    
-    let id: AccountId = ''
-    
-    let messageHandler = await createMessageHandler(options);
+        
+    const messageHandler = await createMessageHandler(options);
 
     return {
-        id,
         /**
          * Backup the data to a Stronghold snapshot.
          */
