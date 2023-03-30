@@ -60,8 +60,9 @@ tokio = { version = "1.26.0", default-features = false, features = [ "macros", "
 [target.'cfg(target_family = "wasm")'.dependencies]
 gloo-timers = { version = "0.2.6", default-features = false, features = [ "futures" ] }
 gloo-storage = { version = "0.2.2", default-features = false, optional = true }
-wasm-bindgen-futures = { version = "0.4.34", default-features = false }
 instant = { version = "0.1.12", default-features = false, features = [ "wasm-bindgen" ] }
+lazy_static = { version = "1.4.0", default-features = false }
+wasm-bindgen-futures = { version = "0.4.34", default-features = false }
 
 [dev-dependencies]
 iota-sdk = { version = "0.1.0", path = ".", default-features = false, features = [ "rand" ] }
@@ -94,435 +95,502 @@ std = [  ]
 [[example]]
 name = "block_no_payload"
 path = "examples/client/block/00_block_no_payload.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "block_confirmation_time"
 path = "examples/client/block/01_block_confirmation_time.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "block_custom_parents"
 path = "examples/client/block/02_block_custom_parents.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "block_custom_payload"
 path = "examples/client/block/03_block_custom_payload.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "block_tagged_data"
 path = "examples/client/block/04_block_tagged_data.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "custom_inputs"
 path = "examples/client/block/custom_inputs.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "output"
 path = "examples/client/block/output.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "transaction"
 path = "examples/client/block/transaction.rs"
+required-features = [ "client" ]
 
 # Node API core examples
 
 [[example]]
 name = "node_api_core_get_health"
 path = "examples/client/node_api_core/00_get_health.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_routes"
 path = "examples/client/node_api_core/01_get_routes.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_info"
 path = "examples/client/node_api_core/02_get_info.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_tips"
 path = "examples/client/node_api_core/03_get_tips.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_post_block"
 path = "examples/client/node_api_core/04_post_block.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_post_block_raw"
 path = "examples/client/node_api_core/05_post_block_raw.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_block"
 path = "examples/client/node_api_core/06_get_block.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_block_raw"
 path = "examples/client/node_api_core/07_get_block_raw.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_block_metadata"
 path = "examples/client/node_api_core/08_get_block_metadata.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_output"
 path = "examples/client/node_api_core/09_get_output.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_output_raw"
 path = "examples/client/node_api_core/10_get_output_raw.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_output_metadata"
 path = "examples/client/node_api_core/11_get_output_metadata.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_receipts"
 path = "examples/client/node_api_core/12_get_receipts.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_receipts_migrated_at"
 path = "examples/client/node_api_core/13_get_receipts_migrated_at.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_treasury"
 path = "examples/client/node_api_core/14_get_treasury.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_included_block"
 path = "examples/client/node_api_core/15_get_included_block.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_included_block_raw"
 path = "examples/client/node_api_core/16_get_included_block_raw.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_milestone_by_id"
 path = "examples/client/node_api_core/17_get_milestone_by_id.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_milestone_by_id_raw"
 path = "examples/client/node_api_core/18_get_milestone_by_id_raw.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_utxo_changes_by_id"
 path = "examples/client/node_api_core/19_get_utxo_changes_by_id.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_milestone_by_index"
 path = "examples/client/node_api_core/20_get_milestone_by_index.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_milestone_by_index_raw"
 path = "examples/client/node_api_core/21_get_milestone_by_index_raw.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_core_get_utxo_changes_by_index"
 path = "examples/client/node_api_core/22_get_utxo_changes_by_index.rs"
+required-features = [ "client" ]
 
 # Node API indexer examples
 
 [[example]]
 name = "node_api_indexer_get_basic_outputs"
 path = "examples/client/node_api_indexer/00_get_basic_outputs.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_indexer_get_alias_output"
 path = "examples/client/node_api_indexer/01_get_alias_output.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_indexer_get_alias_outputs"
 path = "examples/client/node_api_indexer/02_get_alias_outputs.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_indexer_get_foundry_output"
 path = "examples/client/node_api_indexer/03_get_foundry_output.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_indexer_get_foundry_outputs"
 path = "examples/client/node_api_indexer/04_get_foundry_outputs.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_indexer_get_nft_output"
 path = "examples/client/node_api_indexer/05_get_nft_output.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_indexer_get_nft_outputs"
 path = "examples/client/node_api_indexer/06_get_nft_outputs.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "node_api_indexer_get_random_basic_outputs"
 path = "examples/client/node_api_indexer/07_get_random_basic_outputs.rs"
+required-features = [ "client" ]
 
 #######
 
 [[example]]
 name = "generate_mnemonic"
 path = "examples/client/00_generate_mnemonic.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "generate_addresses"
 path = "examples/client/01_generate_addresses.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "07_mqtt"
 path = "examples/client/07_mqtt.rs"
-required-features = [ "mqtt" ]
+required-features = [ "client", "mqtt" ]
 
 [[example]]
 name = "ledger_nano"
 path = "examples/client/ledger_nano.rs"
-required-features = [ "ledger_nano" ]
+required-features = [ "client", "ledger_nano" ]
 
 [[example]]
 name = "ledger_nano_transaction"
 path = "examples/client/ledger_nano_transaction.rs"
-required-features = [ "ledger_nano" ]
+required-features = [ "client", "ledger_nano" ]
 
 [[example]]
 name = "stronghold"
 path = "examples/client/stronghold.rs"
-required-features = [ "stronghold" ]
+required-features = [ "client", "stronghold" ]
 
 [[example]]
 name = "0_address_generation"
 path = "examples/client/offline_signing/0_address_generation.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "1_transaction_preparation"
 path = "examples/client/offline_signing/1_transaction_preparation.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "2_transaction_signing"
 path = "examples/client/offline_signing/2_transaction_signing.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "3_send_block"
 path = "examples/client/offline_signing/3_send_block.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "all"
 path = "examples/client/output/all.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "all_automatic_input_selection"
 path = "examples/client/output/all_automatic_input_selection.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "alias"
 path = "examples/client/output/alias.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "build_alias_output"
 path = "examples/client/output/build_alias_output.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "recursive_alias"
 path = "examples/client/output/recursive_alias.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "basic"
 path = "examples/client/output/basic.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "build_basic_output"
 path = "examples/client/output/build_basic_output.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "expiration"
 path = "examples/client/output/expiration.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "foundry"
 path = "examples/client/output/foundry.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "micro_transaction"
 path = "examples/client/output/micro_transaction.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "native_tokens"
 path = "examples/client/output/native_tokens.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "nft"
 path = "examples/client/output/nft.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "participation"
 path = "examples/client/participation.rs"
-required-features = [ "participation" ]
+required-features = [ "client", "participation" ]
 
 ### Wallet
 
 [[example]]
 name = "mint_issuer_nft"
 path = "examples/wallet/nft_collection/00_mint_issuer_nft.rs"
-required-features = [ "storage", "stronghold" ]
+required-features = [ "wallet", "storage", "stronghold" ]
 
 [[example]]
 name = "mint_collection_nft"
 path = "examples/wallet/nft_collection/01_mint_collection_nft.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "0_generate_addresses"
 path = "examples/wallet/offline_signing/0_generate_addresses.rs"
-required-features = [ "storage", "stronghold" ]
+required-features = [ "wallet", "storage", "stronghold" ]
 
 [[example]]
 name = "1_prepare_transaction"
 path = "examples/wallet/offline_signing/1_prepare_transaction.rs"
-required-features = [ "storage" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "2_sign_transaction"
 path = "examples/wallet/offline_signing/2_sign_transaction.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "3_send_transaction"
 path = "examples/wallet/offline_signing/3_send_transaction.rs"
-required-features = [ "storage" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "create_wallet"
 path = "examples/wallet/01_create_wallet.rs"
-required-features = [ "storage", "stronghold" ]
+required-features = [ "wallet", "storage", "stronghold" ]
 
 [[example]]
 name = "generate_address"
 path = "examples/wallet/02_generate_address.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "get_funds"
 path = "examples/wallet/03_get_funds.rs"
+required-features = [ "wallet" ]
 
 [[example]]
 name = "get_balance"
 path = "examples/wallet/04_get_balance.rs"
+required-features = [ "wallet" ]
 
 [[example]]
 name = "wallet_transaction"
 path = "examples/wallet/05_transaction.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "send_micro_transaction"
 path = "examples/wallet/06_send_micro_transaction.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "send_native_tokens"
 path = "examples/wallet/07_send_native_tokens.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "send_nft"
 path = "examples/wallet/08_send_nft.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "mint_native_token"
 path = "examples/wallet/09_mint_native_token.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "mint_nft"
 path = "examples/wallet/10_mint_nft.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "decrease_native_token_supply"
 path = "examples/wallet/11_decrease_native_token_supply.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "increase_native_token_supply"
 path = "examples/wallet/12_increase_native_token_supply.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "burn_native_token"
 path = "examples/wallet/13_burn_native_token.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "burn_nft"
 path = "examples/wallet/14_burn_nft.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "destroy_foundry"
 path = "examples/wallet/15_destroy_foundry.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "destroy_alias"
 path = "examples/wallet/16_destroy_alias.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "check_unlock_conditions"
 path = "examples/wallet/17_check_unlock_conditions.rs"
+required-features = [ "wallet" ]
 
 [[example]]
 name = "accounts"
 path = "examples/wallet/accounts.rs"
+required-features = [ "wallet" ]
 
 [[example]]
 name = "background_syncing"
 path = "examples/wallet/background_syncing.rs"
+required-features = [ "wallet" ]
 
 [[example]]
 name = "events"
 path = "examples/wallet/events.rs"
-required-features = [ "events" ]
+required-features = [ "wallet", "events" ]
 
 [[example]]
 name = "wallet_ledger_nano"
 path = "examples/wallet/ledger_nano.rs"
-required-features = [ "ledger_nano" ]
+required-features = [ "wallet", "ledger_nano" ]
 
 [[example]]
 name = "wallet_participation"
 path = "examples/wallet/participation.rs"
-required-features = [ "participation" ]
+required-features = [ "wallet", "participation" ]
 
 [[example]]
 name = "logger"
 path = "examples/wallet/logger.rs"
+required-features = [ "wallet" ]
 
 [[example]]
 name = "output_consolidation"
 path = "examples/wallet/output_consolidation.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "ping"
 path = "examples/wallet/ping.rs"
-required-features = [ "storage" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "pong"
 path = "examples/wallet/pong.rs"
-required-features = [ "storage" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "recover_accounts"
 path = "examples/wallet/recover_accounts.rs"
+required-features = [ "wallet" ]
 
 [[example]]
 name = "split_funds"
 path = "examples/wallet/split_funds.rs"
+required-features = [ "wallet" ]
 
 [[example]]
 name = "storage"
 path = "examples/wallet/storage.rs"
-required-features = [ "storage" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "threads"
 path = "examples/wallet/threads.rs"
+required-features = [ "wallet" ]
 
 [[example]]
 name = "wallet"
 path = "examples/wallet/wallet.rs"
+required-features = [ "wallet" ]

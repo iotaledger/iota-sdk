@@ -67,4 +67,4 @@ export interface ISegment {
 /**
  * BIP 32 chain.
  */
- export type IBip32Chain = ISegment[];
+export type IBip32Chain = ISegment[];

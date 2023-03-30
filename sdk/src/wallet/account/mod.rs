@@ -20,7 +20,6 @@ use std::{
 };
 
 use getset::{Getters, Setters};
-use instant::SystemTime;
 use serde::{de, Deserialize, Deserializer, Serialize};
 
 use self::types::{
@@ -150,12 +149,7 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
         timestamp: inputs
             .first()
             .and_then(|i| i.metadata.milestone_timestamp_spent.map(|t| t as u128 * 1000))
-            .unwrap_or_else(|| {
-                SystemTime::now()
-                    .duration_since(SystemTime::UNIX_EPOCH)
-                    .expect("time went backwards")
-                    .as_millis()
-            }),
+            .unwrap_or_else(|| crate::utils::unix_timestamp_now().as_millis()),
         transaction_id: tx_id,
         network_id: tx_essence.network_id(),
         incoming: true,

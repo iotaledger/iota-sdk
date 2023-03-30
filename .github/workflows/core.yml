@@ -8,7 +8,7 @@ on:
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
       - "**Cargo.lock" # Include all Cargo.lock files
-      - "!client/bindings/**" # Exclude all bindings
+      - "!**/bindings/**" # Exclude all bindings
   pull_request:
     branches: [develop, production]
     paths:
@@ -17,7 +17,7 @@ on:
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
       - "**Cargo.lock" # Include all Cargo.lock files
-      - "!client/bindings/**" # Exclude all bindings
+      - "!**/bindings/**" # Exclude all bindings
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch:
@@ -93,6 +93,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install libudev-dev libusb-1.0-0-dev
 
+      # A first run without features to detect feature releated issues.
+      - name: Run Clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-targets -- --deny warnings
+          name: Clippy Results for the Rust Core
+
+      # The second run will continue from where the first left off.
       - name: Run Clippy
         uses: actions-rs/clippy-check@v1
         with:

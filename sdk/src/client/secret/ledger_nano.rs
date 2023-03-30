@@ -25,7 +25,7 @@ use crate::{
             types::{LedgerApp, LedgerDeviceType},
             LedgerNanoStatus, PreparedTransactionData,
         },
-        unix_timestamp_now, Error, Result,
+        Error, Result,
     },
     types::block::{
         address::{Address, AliasAddress, Ed25519Address, NftAddress},
@@ -34,6 +34,7 @@ use crate::{
         signature::{Ed25519Signature, Signature},
         unlock::{AliasUnlock, NftUnlock, ReferenceUnlock, Unlock, Unlocks},
     },
+    utils::unix_timestamp_now,
 };
 
 /// Hardened const for the bip path.
@@ -105,7 +106,7 @@ impl SecretManage for LedgerSecretManager {
     }
 
     async fn sign_ed25519(&self, _msg: &[u8], _chain: &Chain) -> crate::client::Result<Ed25519Signature> {
-        panic!("sign_ed25519 is not supported with ledger")
+        Err(crate::client::Error::SecretManagerMismatch)
     }
 }
 
@@ -393,7 +394,7 @@ fn merge_unlocks(
     // The hashed_essence gets signed
     let hashed_essence = prepared_transaction_data.essence.hash();
 
-    let time = time.unwrap_or_else(unix_timestamp_now);
+    let time = time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32);
 
     let mut merged_unlocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();

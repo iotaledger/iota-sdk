@@ -8,16 +8,18 @@ pub mod message_handler;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
 /// Initializes the console error panic hook for better panic messages.
+/// Gets automatically called when using wasm
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
     console_error_panic_hook::set_once();
     Ok(())
 }
 
-/// The Wasm bindings do not support internal logging yet.
+/// The Wasm bindings do not support internal logging configuration yet.
 ///
-/// Calling this is a no-op, only included for compatibility with the Neon Node.js bindings TypeScript definitions.
+/// Calling this will enable all rust logs to be show
 #[wasm_bindgen(js_name = initLogger)]
-pub async fn init_logger(config: String) -> Result<(), JsValue> {
-    message_handler::init_logger(config).await
+pub async fn init_logger(_config: String) -> Result<(), JsValue> {
+    wasm_logger::init(wasm_logger::Config::default());
+    Ok(())
 }

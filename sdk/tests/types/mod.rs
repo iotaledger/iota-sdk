@@ -3,6 +3,7 @@
 
 mod address;
 mod api;
+#[cfg(feature = "pow")]
 mod block;
 mod block_id;
 mod ed25519_signature;

@@ -9,8 +9,6 @@ pub(crate) mod transactions;
 
 use std::collections::{HashMap, HashSet};
 
-use instant::{Instant, SystemTime};
-
 pub use self::options::SyncOptions;
 use crate::{
     types::block::{
@@ -31,13 +29,10 @@ impl AccountHandle {
     pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<AccountBalance> {
         let options = options.unwrap_or_default();
         log::debug!("[SYNC] start syncing with {:?}", options);
-        let syc_start_time = Instant::now();
+        let syc_start_time = instant::Instant::now();
 
         // Prevent syncing the account multiple times simultaneously
-        let time_now = SystemTime::now()
-            .duration_since(SystemTime::UNIX_EPOCH)
-            .expect("time went backwards")
-            .as_millis();
+        let time_now = crate::utils::unix_timestamp_now().as_millis();
         let mut last_synced = self.last_synced.lock().await;
         log::debug!("[SYNC] last time synced before {}ms", time_now - *last_synced);
         if !options.force_syncing && time_now - *last_synced < MIN_SYNC_INTERVAL {
@@ -65,10 +60,7 @@ impl AccountHandle {
 
         let account_balance = self.balance().await?;
         // Update last_synced mutex
-        let time_now = SystemTime::now()
-            .duration_since(SystemTime::UNIX_EPOCH)
-            .expect("time went backwards")
-            .as_millis();
+        let time_now = crate::utils::unix_timestamp_now().as_millis();
         *last_synced = time_now;
         log::debug!("[SYNC] finished syncing in {:.2?}", syc_start_time.elapsed());
         Ok(account_balance)

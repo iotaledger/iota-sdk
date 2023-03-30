@@ -26,3 +26,5 @@ pub mod types;
 #[cfg(feature = "wallet")]
 #[cfg_attr(docsrs, doc(cfg(feature = "wallet")))]
 pub mod wallet;
+// Utilities used in multiple submodules
+pub mod utils;

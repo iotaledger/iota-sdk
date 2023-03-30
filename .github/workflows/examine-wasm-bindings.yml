@@ -12,6 +12,7 @@ on:
       - "src/**"
       - "Cargo.toml"
       - "Cargo.lock"
+      - "!cli/**" # Exclude CLI
   pull_request:
     branches:
       - develop
@@ -24,6 +25,7 @@ on:
       - "src/**"
       - "Cargo.toml"
       - "Cargo.lock"
+      - "!cli/**" # Exclude CLI
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch:
@@ -114,7 +116,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: sdk/src/wallet/bindings/wasm/
-        run: yarn
+        run: yarn install --ignore-scripts
 
       - name: Lint
         working-directory: sdk/src/wallet/bindings/wasm/
@@ -138,7 +140,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: sdk/src/wallet/bindings/wasm/
-        run: yarn
+        run: yarn install --ignore-scripts
 
       - name: Format
         working-directory: sdk/src/wallet/bindings/wasm/

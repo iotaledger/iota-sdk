@@ -10,7 +10,8 @@ on:
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/examples/**" # Exclude all examples
       - "!**/tests/**" # Exclude all tests
-      - "!client/bindings/**" # Exclude all bindings
+      - "!**/bindings/**" # Exclude all bindings
+      - "!cli/**" # Exclude CLI
       - "sdk/src/client/bindings/nodejs/**" # Re-include nodejs bindings
   pull_request:
     branches: [develop, production]
@@ -22,7 +23,8 @@ on:
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/examples/**" # Exclude all examples
       - "!**/tests/**" # Exclude all tests
-      - "!client/bindings/**" # Exclude all bindings
+      - "!**/bindings/**" # Exclude all bindings
+      - "!cli/**" # Exclude CLI
       - "sdk/src/client/bindings/nodejs/**" # Re-include nodejs bindings
   schedule:
     - cron: "0 1 * * *"
@@ -104,7 +106,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: sdk/src/client/bindings/nodejs/
-        run: yarn
+        run: yarn install --ignore-scripts
 
       - name: Lint
         working-directory: sdk/src/client/bindings/nodejs/
@@ -128,7 +130,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: sdk/src/client/bindings/nodejs/
-        run: yarn
+        run: yarn install --ignore-scripts
 
       - name: Format
         working-directory: sdk/src/client/bindings/nodejs/

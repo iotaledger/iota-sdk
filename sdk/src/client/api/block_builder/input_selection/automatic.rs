@@ -17,7 +17,7 @@ use crate::{
         constants::HD_WALLET_TYPE,
         node_api::indexer::query_parameters::QueryParameter,
         secret::types::InputSigningData,
-        unix_timestamp_now, Error, Result,
+        Error, Result,
     },
     types::{
         api::core::response::OutputWithMetadataResponse,
@@ -27,6 +27,7 @@ use crate::{
             protocol::ProtocolParameters,
         },
     },
+    utils::unix_timestamp_now,
 };
 
 impl<'a> ClientBlockBuilder<'a> {
@@ -53,7 +54,7 @@ impl<'a> ClientBlockBuilder<'a> {
                     QueryParameter::HasExpiration(true),
                     QueryParameter::HasStorageDepositReturn(false),
                     // Ignore outputs that aren't expired yet
-                    QueryParameter::ExpiresBefore(unix_timestamp_now()),
+                    QueryParameter::ExpiresBefore(unix_timestamp_now().as_secs() as u32),
                 ])
                 .await?
                 .items,

@@ -22,6 +22,8 @@ import org.iota.types.responses.UtxoChangesResponse;
 import org.iota.types.secret.BuildBlockOptions;
 import org.iota.types.secret.GenerateAddressesOptions;
 import org.iota.types.secret.SecretManager;
+import org.iota.types.addresses.Ed25519Address;
+import org.iota.types.signature.Ed25519Signature;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -880,6 +882,32 @@ public class Client extends NativeApi {
      */
     public TransactionPayload signTransaction(SecretManager secretManager, PreparedTransactionData preparedTransactionData) throws ClientException {
         return miscellaneousApi.signTransaction(secretManager, preparedTransactionData);
+    }
+
+    /**
+     * Signs a message with an Ed25519 private key.
+     *
+     * @param secretManager The secret manager that holds the secret key for the account that will sign the message.
+     * @param String The message to sign.
+     * @param chain The Bip32Path for signing.
+     * @return The Ed25519Signature.
+     * @throws ClientException on error.
+     */
+    public Ed25519Signature signEd25519(SecretManager secretManager, String message, Segment[] chain) throws ClientException {
+        return miscellaneousApi.signEd25519(secretManager, message, chain);
+    }
+
+    /**
+     * Verifies the Ed25519Signature for a message against an Ed25519Address.
+     *
+     * @param signature The Ed25519Signature.
+     * @param message The signed message.
+     * @param address The Ed25519Address to validate the signature against.
+     * @return If the signature is valid for the provided message and address or not.
+     * @throws ClientException on error.
+     */
+    public Boolean verifyEd25519Signature(Ed25519Signature signature, String message, Ed25519Address address) throws ClientException {
+        return miscellaneousApi.verifyEd25519Signature(signature, message, address);
     }
 
     /**

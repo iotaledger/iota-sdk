@@ -17,6 +17,8 @@ use {
     tokio::sync::watch::{Receiver as WatchReceiver, Sender as WatchSender},
 };
 
+#[cfg(target_family = "wasm")]
+use crate::client::constants::CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS;
 use crate::{
     client::{
         builder::{ClientBuilder, NetworkInfo},
@@ -115,12 +117,27 @@ impl Client {
         // create invalid transactions/blocks.
         #[cfg(target_family = "wasm")]
         {
+            lazy_static::lazy_static! {
+                static ref LAST_SYNC: std::sync::Mutex<Option<u32>> = std::sync::Mutex::new(None);
+            };
+            let current_time = crate::utils::unix_timestamp_now().as_secs() as u32;
+            if let Some(last_sync) = *LAST_SYNC.lock().unwrap() {
+                if current_time < last_sync {
+                    return Ok(self
+                        .network_info
+                        .read()
+                        .map_err(|_| crate::client::Error::PoisonError)?
+                        .clone());
+                }
+            }
             let info = self.get_info().await?.node_info;
             let mut client_network_info = self
                 .network_info
                 .write()
                 .map_err(|_| crate::client::Error::PoisonError)?;
             client_network_info.protocol_parameters = info.protocol.try_into()?;
+
+            *LAST_SYNC.lock().unwrap() = Some(current_time + CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS);
         }
 
         Ok(self

@@ -1,4 +1,11 @@
-import type { IBlock, ITransactionEssence, PayloadTypes } from '@iota/types';
+import type {
+    IBlock,
+    ITransactionEssence,
+    PayloadTypes,
+    HexEncodedString,
+    IEd25519Signature,
+    IEd25519Address,
+} from '@iota/types';
 import type { SecretManager } from '../secretManager';
 import type { IGenerateAddressesOptions } from '../generateAddressesOptions';
 import type { IBuildBlockOptions } from '../buildBlockOptions';
@@ -510,5 +517,23 @@ export interface __ClearListenersMessage__ {
     name: 'clearListeners';
     data: {
         topics: string[];
+    };
+}
+
+export interface __SignEd25519Message__ {
+    name: 'signEd25519';
+    data: {
+        secretManager: SecretManager;
+        message: HexEncodedString;
+        chain: IBip32Chain;
+    };
+}
+
+export interface __VerifyEd25519SignatureMessage__ {
+    name: 'verifyEd25519Signature';
+    data: {
+        signature: IEd25519Signature;
+        message: HexEncodedString;
+        address: IEd25519Address;
     };
 }
