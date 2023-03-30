@@ -30,6 +30,7 @@
     "@sideway/formula": "^3.0.1",
     "cacheable-request": "^10.2.7",
     "dns-packet": "^5.4.0",
-    "webpack": "^5.76.0"
+    "webpack": "^5.76.0",
+    "minimatch": "^3.0.5"
   }
 }
