@@ -10,7 +10,7 @@ from datetime import timedelta
 class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
     def __init__(
         self,
-        nodes=None,
+        nodes = None,
         primary_node = None,
         primary_pow_node = None,
         permanode = None,
