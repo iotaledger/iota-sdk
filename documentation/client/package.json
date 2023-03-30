@@ -29,6 +29,7 @@
     "http-cache-semantics": "^4.1.1",
     "@sideway/formula": "^3.0.1",
     "dns-packet": "^5.4.0",
-    "webpack": "^5.76.0"
+    "webpack": "^5.76.0",
+    "minimatch": "^3.0.5"
   }
 }
