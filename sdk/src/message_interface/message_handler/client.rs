@@ -19,7 +19,7 @@ use crate::{
     },
     message_interface::{message::ClientMessage, message_handler::Result, response::Response},
     types::block::{
-        address::{dto::AddressDto, Address},
+        address::{dto::AddressDto, Address, Ed25519Address},
         input::dto::UtxoInputDto,
         output::{
             dto::{OutputBuilderAmountDto, OutputDto, RentStructureDto},
@@ -31,6 +31,7 @@ use crate::{
             Payload, TransactionPayload,
         },
         protocol::dto::ProtocolParametersDto,
+        signature::{dto::Ed25519SignatureDto, Ed25519Signature},
         unlock::Unlock,
         Block, BlockDto, DtoError,
     },
@@ -239,8 +240,8 @@ impl Client {
                 };
                 Ok(Response::ProtocolParameters(protocol_response))
             }
-            ClientMessage::GetLocalPow => Ok(Response::LocalPow(self.get_local_pow())),
-            ClientMessage::GetFallbackToLocalPow => Ok(Response::FallbackToLocalPow(self.get_fallback_to_local_pow())),
+            ClientMessage::GetLocalPow => Ok(Response::Bool(self.get_local_pow())),
+            ClientMessage::GetFallbackToLocalPow => Ok(Response::Bool(self.get_fallback_to_local_pow())),
             #[cfg(feature = "ledger_nano")]
             ClientMessage::GetLedgerNanoStatus { is_simulator } => {
                 let ledger_nano = LedgerSecretManager::new(is_simulator);
@@ -304,6 +305,26 @@ impl Client {
 
                 Ok(Response::SignatureUnlock((&unlock).into()))
             }
+            ClientMessage::SignEd25519 {
+                secret_manager,
+                message,
+                chain,
+            } => {
+                let secret_manager: SecretManager = (&secret_manager).try_into()?;
+                let msg: Vec<u8> = prefix_hex::decode(message)?;
+                let signature = secret_manager.sign_ed25519(&msg, &chain).await?;
+                Ok(Response::Ed25519Signature(Ed25519SignatureDto::from(&signature)))
+            }
+            ClientMessage::VerifyEd25519Signature {
+                signature,
+                message,
+                address,
+            } => {
+                let signature = Ed25519Signature::try_from(&signature)?;
+                let msg: Vec<u8> = prefix_hex::decode(message)?;
+                let address = Ed25519Address::try_from(&address)?;
+                Ok(Response::Bool(signature.is_valid(&msg, &address).is_ok()))
+            }
             #[cfg(feature = "stronghold")]
             ClientMessage::StoreMnemonic {
                 secret_manager,
@@ -336,7 +357,7 @@ impl Client {
             ClientMessage::UnhealthyNodes => Ok(Response::UnhealthyNodes(
                 self.unhealthy_nodes().into_iter().cloned().collect(),
             )),
-            ClientMessage::GetHealth { url } => Ok(Response::Health(self.get_health(&url).await?)),
+            ClientMessage::GetHealth { url } => Ok(Response::Bool(self.get_health(&url).await?)),
             ClientMessage::GetNodeInfo { url, auth } => Ok(Response::NodeInfo(Self::get_node_info(&url, auth).await?)),
             ClientMessage::GetInfo => Ok(Response::Info(self.get_info().await?)),
             ClientMessage::GetPeers => Ok(Response::Peers(self.get_peers().await?)),
@@ -487,9 +508,7 @@ impl Client {
             ClientMessage::ParseBech32Address { address } => Ok(Response::ParsedBech32Address(AddressDto::from(
                 &Address::try_from_bech32(address)?,
             ))),
-            ClientMessage::IsAddressValid { address } => {
-                Ok(Response::IsAddressValid(Address::is_valid_bech32(&address)))
-            }
+            ClientMessage::IsAddressValid { address } => Ok(Response::Bool(Address::is_valid_bech32(&address))),
             ClientMessage::GenerateMnemonic => Ok(Response::GeneratedMnemonic(Self::generate_mnemonic()?)),
             ClientMessage::MnemonicToHexSeed { mut mnemonic } => {
                 let response = Response::MnemonicHexSeed(Self::mnemonic_to_hex_seed(&mnemonic)?);

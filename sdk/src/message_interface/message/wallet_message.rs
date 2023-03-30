@@ -84,7 +84,7 @@ pub enum WalletMessage {
     ClearStrongholdPassword,
     /// Checks if the Stronghold password is available.
     /// Expected response:
-    /// [`StrongholdPasswordIsAvailable`](crate::message_interface::Response::StrongholdPasswordIsAvailable)
+    /// [`Bool`](crate::message_interface::Response::Bool)
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
     IsStrongholdPasswordAvailable,

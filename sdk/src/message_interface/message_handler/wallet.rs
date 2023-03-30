@@ -84,7 +84,7 @@ impl AccountManager {
             #[cfg(feature = "stronghold")]
             WalletMessage::IsStrongholdPasswordAvailable => {
                 let is_available = self.is_stronghold_password_available().await?;
-                Ok(Response::StrongholdPasswordIsAvailable(is_available))
+                Ok(Response::Bool(is_available))
             }
             WalletMessage::RecoverAccounts {
                 account_start_index,

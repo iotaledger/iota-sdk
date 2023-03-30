@@ -45,6 +45,7 @@ use crate::{
                 transaction::TransactionId,
             },
             protocol::dto::ProtocolParametersDto,
+            signature::dto::Ed25519SignatureDto,
             unlock::dto::UnlockDto,
             BlockDto, BlockId,
         },
@@ -96,12 +97,6 @@ pub enum Response {
     /// - [`GetProtocolParameters`](crate::message_interface::Message::GetProtocolParameters)
     ProtocolParameters(ProtocolParametersDto),
     /// Response for:
-    /// - [`GetLocalPow`](crate::message_interface::Message::GetLocalPow)
-    LocalPow(bool),
-    /// Response for:
-    /// - [`GetFallbackToLocalPow`](crate::message_interface::Message::GetFallbackToLocalPow)
-    FallbackToLocalPow(bool),
-    /// Response for:
     /// - [`PrepareTransaction`](crate::message_interface::Message::PrepareTransaction)
     PreparedTransactionData(PreparedTransactionDataDto),
     /// Response for:
@@ -111,12 +106,12 @@ pub enum Response {
     /// - [`SignatureUnlock`](crate::message_interface::Message::SignatureUnlock)
     SignatureUnlock(UnlockDto),
     /// Response for:
+    /// - [`SignEd25519`](crate::message_interface::Message::SignEd25519)
+    Ed25519Signature(Ed25519SignatureDto),
+    /// Response for:
     /// - [`UnhealthyNodes`](crate::message_interface::Message::UnhealthyNodes)
     #[cfg(not(target_family = "wasm"))]
     UnhealthyNodes(HashSet<Node>),
-    /// Response for:
-    /// - [`GetHealth`](crate::message_interface::Message::GetHealth)
-    Health(bool),
     /// Response for:
     /// - [`GetNodeInfo`](crate::message_interface::Message::GetNodeInfo)
     NodeInfo(NodeInfo),
@@ -212,9 +207,6 @@ pub enum Response {
     /// - [`ParseBech32Address`](crate::message_interface::Message::ParseBech32Address)
     ParsedBech32Address(AddressDto),
     /// Response for:
-    /// - [`IsAddressValid`](crate::message_interface::Message::IsAddressValid)
-    IsAddressValid(bool),
-    /// Response for:
     /// - [`MnemonicToHexSeed`](crate::message_interface::Message::MnemonicToHexSeed)
     MnemonicHexSeed(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
     /// Response for:
@@ -261,6 +253,13 @@ pub enum Response {
     /// - [`PostBlockRaw`](crate::message_interface::Message::PostBlockRaw)
     /// [`RetryTransactionUntilIncluded`](crate::message_interface::AccountMethod::RetryTransactionUntilIncluded)
     BlockId(BlockId),
+    /// Response for
+    /// - [`GetLocalPow`](crate::message_interface::Message::GetLocalPow)
+    /// - [`GetFallbackToLocalPow`](crate::message_interface::Message::GetFallbackToLocalPow)
+    /// - [`VerifyEd25519Signature`](crate::message_interface::Message::VerifyEd25519Signature)
+    /// - [`GetHealth`](crate::message_interface::Message::GetHealth)
+    /// - [`IsAddressValid`](crate::message_interface::Message::IsAddressValid)
+    Bool(bool),
     /// Response for
     /// [`Backup`](crate::message_interface::Message::Backup),
     /// [`ClearStrongholdPassword`](crate::message_interface::Message::ClearStrongholdPassword),
@@ -364,9 +363,6 @@ pub enum Response {
     /// Response for
     /// [`MintNativeToken`](crate::message_interface::AccountMethod::MintNativeToken),
     MintTokenTransaction(MintTokenTransactionDto),
-    /// Response for
-    /// [`IsStrongholdPasswordAvailable`](crate::message_interface::Message::IsStrongholdPasswordAvailable)
-    StrongholdPasswordIsAvailable(bool),
     /// Response for [`GetNodeInfo`](crate::message_interface::Message::GetNodeInfo)
     NodeInfoWrapper(NodeInfoWrapper),
     /// Response for
