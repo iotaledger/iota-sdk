@@ -81,33 +81,35 @@ pub enum AccountCommand {
     },
     /// Exit the CLI wallet.
     Exit,
-    /// Request funds from the faucet to the latest address.
+    /// Request funds from the faucet.
     Faucet {
-        /// `url` is optional, default is `https://faucet.testnet.shimmer.network/api/enqueue`
+        /// URL of the faucet, default to https://faucet.testnet.shimmer.network/api/enqueue.
         url: Option<String>,
+        /// Address the faucet sends the funds to, defaults to the latest address.
         address: Option<String>,
     },
     /// Mint more of a native token.
     IncreaseNativeTokenSupply {
-        /// 0x...
+        /// Token ID to be minted, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
         token_id: String,
-        /// 100
+        /// Amount to be minted, e.g. 100.
         amount: String,
     },
     /// Mint a native token.
     MintNativeToken {
-        /// 100
+        /// Circulating supply of the native token to be minted, e.g. 100.
         circulating_supply: String,
-        /// 100
+        /// Maximum supply of the native token to be minted, e.g. 500.
         maximum_supply: String,
-        /// --foundry-metadata-hex 0x...
+        /// Metadata to attach to the associated foundry, e.g. --foundry-metadata-hex 0xdeadbeef.
         #[arg(long, group = "foundry_metadata")]
         foundry_metadata_hex: Option<String>,
+        /// Metadata to attach to the associated foundry, e.g. --foundry-metadata-hex ./foundry-metadata.json.
         #[arg(long, group = "foundry_metadata")]
         foundry_metadata_file: Option<String>,
     },
     /// Mint an NFT.
-    /// IOTA NFT Standard - TIP27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md
+    /// IOTA NFT Standard - TIP27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md.
     MintNft {
         /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
         address: Option<String>,
@@ -131,21 +133,24 @@ pub enum AccountCommand {
     /// Generate a new address.
     NewAddress,
     /// Display an output.
-    Output { output_id: String },
+    Output {
+        /// Output ID to be displayed.
+        output_id: String,
+    },
     /// List all outputs.
     Outputs,
     /// Send an amount.
     Send {
-        /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
+        /// Address to send funds to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         address: String,
-        /// 1000000
+        /// Amount to send, e.g. 1000000.
         amount: u64,
     },
     /// Send an amount below the storage deposit minimum.
     SendMicro {
-        /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
+        /// Address to send funds to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         address: String,
-        /// 1
+        /// Amount to send, e.g. 1.
         amount: u64,
     },
     /// Send native tokens.
