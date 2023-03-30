@@ -26,6 +26,14 @@ macro_rules! println_log_info {
     };
 }
 
+#[macro_export]
+macro_rules! println_log_error {
+    ($($arg:tt)+) => {
+        println!($($arg)+);
+        log::error!($($arg)+);
+    };
+}
+
 fn logger_init(cli: &AccountManagerCli) -> Result<(), Error> {
     let level_filter = if let Some(log_level) = cli.log_level {
         log_level
@@ -77,6 +85,6 @@ async fn main() {
     }
 
     if let Err(e) = run(cli).await {
-        log::error!("{e}");
+        println_log_error!("{e}");
     }
 }

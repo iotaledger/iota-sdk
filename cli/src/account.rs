@@ -20,6 +20,7 @@ use crate::{
     },
     error::Error,
     helper::bytes_from_hex_or_file,
+    println_log_error,
 };
 
 // loop on the account prompt
@@ -31,7 +32,7 @@ pub async fn account_prompt(account_handle: AccountHandle) -> Result<(), Error> 
                 return Ok(());
             }
             Err(e) => {
-                log::error!("{e}");
+                println_log_error!("{e}");
             }
             _ => {}
         }
@@ -165,7 +166,7 @@ pub async fn account_prompt_internal(
                 }
                 AccountCommand::VotingOutput => voting_output_command(&account_handle).await,
             } {
-                log::error!("{}", err);
+                println_log_error!("{err}");
             }
         }
     }
