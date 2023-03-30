@@ -50,33 +50,36 @@ pub enum AccountCommand {
     },
     /// Burn an NFT.
     BurnNft {
-        /// 0x...
+        /// NFT ID to be burnt, e.g. 0xecadf10e6545aa82da4df2dfd2a496b457c8850d2cab49b7464cb273d3dffb07.
         nft_id: String,
     },
     /// Claim outputs with storage deposit return, expiration or timelock unlock conditions.
-    Claim { output_id: Option<String> },
+    Claim {
+        /// Output IDs to be claimed.
+        output_id: Option<String>,
+    },
     /// Consolidate all basic outputs into one address.
     Consolidate,
     /// Create a new alias output.
     CreateAliasOutput,
-    /// Melt a native token.
+    /// Melt an amount of native token.
     DecreaseNativeTokenSupply {
-        /// 0x...
+        /// Token ID to be melted, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
         token_id: String,
-        /// 100
+        /// Amount to be melted, e.g. 100.
         amount: String,
     },
     /// Destroy an alias.
     DestroyAlias {
-        /// 0x...
+        /// Alias ID to be destroyed, e.g. 0xed5a90106ae5d402ebaecb9ba36f32658872df789f7a29b9f6d695b912ec6a1e.
         alias_id: String,
     },
     /// Destroy a foundry.
     DestroyFoundry {
-        /// 0x...
+        /// Foundry ID to be destroyed, e.g. 0x08cb54928954c3eb7ece1bf1cc0c68eb179dc1c4634ae5d23df1c70643d0911c3d0200000000.
         foundry_id: String,
     },
-    /// Exit from the account prompt.
+    /// Exit the CLI wallet.
     Exit,
     /// Request funds from the faucet to the latest address.
     Faucet {
@@ -584,15 +587,13 @@ pub async fn send_native_token_command(
         let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
         account_handle.client().bech32_hrp_matches(&bech32_hrp).await?;
 
-        let outputs = vec![
-            BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
-                .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
-                .with_native_tokens(vec![NativeToken::new(
-                    TokenId::from_str(&token_id)?,
-                    U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-                )?])
-                .finish_output(token_supply)?,
-        ];
+        let outputs = vec![BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
+            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
+            .with_native_tokens(vec![NativeToken::new(
+                TokenId::from_str(&token_id)?,
+                U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+            )?])
+            .finish_output(token_supply)?];
 
         account_handle.send(outputs, None).await?
     } else {
