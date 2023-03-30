@@ -93,6 +93,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install libudev-dev libusb-1.0-0-dev
 
+      # A first run without features to detect feature releated issues.
+      - name: Run Clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-targets -- --deny warnings
+          name: Clippy Results for the Rust Core
+
+      # The second run will continue from where the first left off.
       - name: Run Clippy
         uses: actions-rs/clippy-check@v1
         with:

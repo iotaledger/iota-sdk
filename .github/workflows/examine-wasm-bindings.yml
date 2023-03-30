@@ -116,7 +116,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: sdk/src/wallet/bindings/wasm/
-        run: yarn
+        run: yarn install --ignore-scripts
 
       - name: Lint
         working-directory: sdk/src/wallet/bindings/wasm/
@@ -140,7 +140,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: sdk/src/wallet/bindings/wasm/
-        run: yarn
+        run: yarn install --ignore-scripts
 
       - name: Format
         working-directory: sdk/src/wallet/bindings/wasm/
