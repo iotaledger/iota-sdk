@@ -104,29 +104,34 @@ pub enum AccountCommand {
         /// Metadata to attach to the associated foundry, e.g. --foundry-metadata-hex 0xdeadbeef.
         #[arg(long, group = "foundry_metadata")]
         foundry_metadata_hex: Option<String>,
-        /// Metadata to attach to the associated foundry, e.g. --foundry-metadata-hex ./foundry-metadata.json.
+        /// Metadata to attach to the associated foundry, e.g. --foundry-metadata-file ./foundry-metadata.json.
         #[arg(long, group = "foundry_metadata")]
         foundry_metadata_file: Option<String>,
     },
     /// Mint an NFT.
     /// IOTA NFT Standard - TIP27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md.
     MintNft {
-        /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
+        /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         address: Option<String>,
         #[arg(long, group = "immutable_metadata")]
-        /// "immutable metadata"
+        /// Immutable metadata to attach to the NFT, e.g. --immutable-metadata-hex 0xdeadbeef.
         immutable_metadata_hex: Option<String>,
+        /// Immutable metadata to attach to the NFT, e.g. --immutable-metadata-file ./nft-immutable-metadata.json.
         #[arg(long, group = "immutable_metadata")]
         immutable_metadata_file: Option<String>,
-        /// "metadata"
+        /// Metadata to attach to the NFT, e.g. --metadata-hex 0xdeadbeef.
         #[arg(long, group = "metadata")]
         metadata_hex: Option<String>,
+        /// Metadata to attach to the NFT, e.g. --metadata-file ./nft-metadata.json.
         #[arg(long, group = "metadata")]
         metadata_file: Option<String>,
         #[arg(long)]
+        /// Tag feature to attach to the NFT, e.g. 0xdeadbeef.
         tag: Option<String>,
+        /// Sender feature to attach to the NFT, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         #[arg(long)]
         sender: Option<String>,
+        /// Issuer feature to attach to the NFT, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         #[arg(long)]
         issuer: Option<String>,
     },
@@ -156,42 +161,59 @@ pub enum AccountCommand {
     /// Send native tokens.
     /// This will create an output with an expiration and storage deposit return unlock condition.
     SendNativeToken {
-        /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
+        /// Address to send the native tokens to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         address: String,
-        /// 0x08e3a2f76cc934bc0cc21575b4610c1d7d4eb589ae0100000000000000000000000000000000
+        /// Token ID to be sent, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
         token_id: String,
-        /// 10
+        /// Amount to send, e.g. 1000000.
         amount: String,
-        /// To gift the storage deposit for the output, add ` true`.
+        /// Whether to gift the storage deposit for the output or not, e.g. ` true`.
         gift_storage_deposit: Option<bool>,
     },
     /// Send an NFT.
-    SendNft { address: String, nft_id: String },
-    /// Sync the account with the Tangle.
+    SendNft {
+        /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
+        address: String,
+        /// NFT ID to be sent, e.g. 0xecadf10e6545aa82da4df2dfd2a496b457c8850d2cab49b7464cb273d3dffb07.
+        nft_id: String,
+    },
+    /// Synchronize the account.
     Sync,
     /// List the account transactions.
     Transactions,
-    /// List the unspent outputs.
+    /// List the account unspent outputs.
     UnspentOutputs,
-    /// Cast given votes for a given event
+    /// Cast votes for an event.
     Vote {
+        /// Event ID for which to cast votes, e.g. 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2.
         event_id: ParticipationEventId,
+        /// Answers to the event questions.
         answers: Vec<u8>,
     },
-    /// Stop participating to a given event
-    StopParticipating { event_id: ParticipationEventId },
-    /// Calculate the participation overview of the account
+    /// Stop participating to an event.
+    StopParticipating {
+        /// Event ID for which to stop participation, e.g. 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2.
+        event_id: ParticipationEventId,
+    },
+    /// Get the participation overview of the account.
     ParticipationOverview {
+        /// Event IDs for which to get the participation overview, e.g. 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2...
         #[arg(short, long, num_args = 1.., value_delimiter = ' ')]
         event_ids: Vec<ParticipationEventId>,
     },
-    /// Get the voting power of the account
+    /// Get the voting power of the account.
     VotingPower,
-    /// Increase the voting power of the account
-    IncreaseVotingPower { amount: u64 },
-    /// Decrease the voting power of the account
-    DecreaseVotingPower { amount: u64 },
-    /// Get the voting output of the account
+    /// Increase the voting power of the account.
+    IncreaseVotingPower {
+        /// Amount to increase the voting power by, e.g. 100.
+        amount: u64,
+    },
+    /// Decrease the voting power of the account.
+    DecreaseVotingPower {
+        /// Amount to decrease the voting power by, e.g. 100.
+        amount: u64,
+    },
+    /// Get the voting output of the account.
     VotingOutput,
 }
 
