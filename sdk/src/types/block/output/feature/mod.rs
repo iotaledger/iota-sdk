@@ -18,7 +18,7 @@ pub(crate) use self::{metadata::MetadataFeatureLength, tag::TagFeatureLength};
 use crate::types::block::{create_bitflags, Error};
 
 ///
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, Packable)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Packable)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -39,6 +39,17 @@ pub enum Feature {
     /// A tag feature.
     #[packable(tag = TagFeature::KIND)]
     Tag(TagFeature),
+}
+
+impl core::fmt::Debug for Feature {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::Sender(feature) => write!(f, "{feature:?}"),
+            Self::Issuer(feature) => write!(f, "{feature:?}"),
+            Self::Metadata(feature) => write!(f, "{feature:?}"),
+            Self::Tag(feature) => write!(f, "{feature:?}"),
+        }
+    }
 }
 
 impl Feature {

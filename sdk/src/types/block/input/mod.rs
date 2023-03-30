@@ -21,7 +21,7 @@ pub const INPUT_INDEX_MAX: u16 = INPUT_COUNT_MAX - 1; // 127
 pub const INPUT_INDEX_RANGE: RangeInclusive<u16> = 0..=INPUT_INDEX_MAX; // [0..127]
 
 /// A generic input supporting different input kinds.
-#[derive(Clone, Debug, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
+#[derive(Clone, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -36,6 +36,15 @@ pub enum Input {
     /// A treasury input.
     #[packable(tag = TreasuryInput::KIND)]
     Treasury(TreasuryInput),
+}
+
+impl core::fmt::Debug for Input {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::Utxo(input) => write!(f, "{input:?}"),
+            Self::Treasury(input) => write!(f, "{input:?}"),
+        }
+    }
 }
 
 impl Input {

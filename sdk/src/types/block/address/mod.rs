@@ -21,7 +21,7 @@ use crate::types::block::{
 };
 
 /// A generic address supporting different address kinds.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -39,6 +39,16 @@ pub enum Address {
     /// An NFT address.
     #[packable(tag = NftAddress::KIND)]
     Nft(NftAddress),
+}
+
+impl core::fmt::Debug for Address {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::Ed25519(address) => write!(f, "{address:?}"),
+            Self::Alias(address) => write!(f, "{address:?}"),
+            Self::Nft(address) => write!(f, "{address:?}"),
+        }
+    }
 }
 
 impl Address {

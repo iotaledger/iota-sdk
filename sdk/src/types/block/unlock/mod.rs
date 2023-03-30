@@ -31,7 +31,7 @@ pub const UNLOCK_INDEX_RANGE: RangeInclusive<u16> = INPUT_INDEX_RANGE; // [0..12
 pub(crate) type UnlockIndex = BoundedU16<{ *UNLOCK_INDEX_RANGE.start() }, { *UNLOCK_INDEX_RANGE.end() }>;
 
 /// Defines the mechanism by which a transaction input is authorized to be consumed.
-#[derive(Clone, Debug, Eq, PartialEq, Hash, From, Packable)]
+#[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -52,6 +52,17 @@ pub enum Unlock {
     /// An NFT unlock.
     #[packable(tag = NftUnlock::KIND)]
     Nft(NftUnlock),
+}
+
+impl core::fmt::Debug for Unlock {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::Signature(unlock) => write!(f, "{unlock:?}"),
+            Self::Reference(unlock) => write!(f, "{unlock:?}"),
+            Self::Alias(unlock) => write!(f, "{unlock:?}"),
+            Self::Nft(unlock) => write!(f, "{unlock:?}"),
+        }
+    }
 }
 
 impl Unlock {
