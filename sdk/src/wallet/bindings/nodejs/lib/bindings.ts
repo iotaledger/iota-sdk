@@ -7,7 +7,7 @@ import type { MessageHandler } from './MessageHandler';
 // @ts-ignore: path is set to match runtime transpiled js path
 import addon = require('../../build/Release/index.node');
 
-const { initLogger, sendMessage, messageHandlerNew, listenRust, destroy } =
+const { initLogger, sendMessage, messageHandlerNew, listenRust, destroy, migrateStrongholdSnapshotV2ToV3 } =
     addon;
 
 const listen = (
@@ -39,4 +39,5 @@ export {
     messageHandlerNew,
     listen,
     destroy,
+    migrateStrongholdSnapshotV2ToV3
 };

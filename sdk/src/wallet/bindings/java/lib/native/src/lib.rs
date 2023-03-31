@@ -7,9 +7,12 @@ use std::{convert::TryFrom, sync::Mutex};
 
 #[cfg(target_os = "android")]
 use android_logger::Config;
-use iota_sdk::wallet::{
-    events::types::{Event, WalletEventType},
-    message_interface::{create_message_handler, init_logger, ManagerOptions, Message, WalletMessageHandler},
+use iota_sdk::{
+    client::stronghold::StrongholdAdapter,
+    wallet::{
+        events::types::{Event, WalletEventType},
+        message_interface::{create_message_handler, init_logger, ManagerOptions, Message, WalletMessageHandler},
+    },
 };
 use jni::{
     objects::{GlobalRef, JClass, JObject, JObjectArray, JStaticMethodID, JString, JValue},
@@ -228,6 +231,35 @@ pub unsafe extern "system" fn Java_org_iota_api_NativeApi_listen(
         &mut env,
         "{\"type\": \"success\", \"payload\": \"success\"}".to_string(),
     )
+}
+
+// This keeps rust from "mangling" the name and making it unique for this crate.
+#[no_mangle]
+pub unsafe extern "system" fn Java_org_iota_api_NativeApi_migrateStrongholdSnapshotV2ToV3(
+    mut env: JNIEnv,
+    _class: JClass,
+    current_path: JString,
+    current_password: JString,
+    new_path: JString,
+    new_password: JString,
+) -> jstring {
+    env_assert!(env, std::ptr::null_mut());
+
+    let current_path = string_from_jni!(env, current_path, std::ptr::null_mut());
+    let current_password = string_from_jni!(env, current_password, std::ptr::null_mut());
+    let new_path = env.get_string(&new_path).map(String::from).ok();
+    let new_password = env.get_string(&new_password).map(String::from).ok();
+
+    let ret = StrongholdAdapter::migrate_v2_to_v3(
+        &current_path,
+        &current_password,
+        new_path.as_ref(),
+        new_password.as_deref(),
+    );
+
+    jni_err_assert!(env, ret, std::ptr::null_mut());
+
+    std::ptr::null_mut()
 }
 
 unsafe fn event_handle(clazz: GlobalRef, callback_ref: GlobalRef, event: Event) {

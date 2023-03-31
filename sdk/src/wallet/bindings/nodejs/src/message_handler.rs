@@ -3,13 +3,16 @@
 
 use std::sync::Arc;
 
-use iota_sdk::wallet::{
-    events::types::{Event, WalletEventType},
-    message_interface::{
-        create_message_handler, init_logger as init_logger_rust, ManagerOptions, Message, Response,
-        WalletMessageHandler,
+use iota_sdk::{
+    client::stronghold::StrongholdAdapter,
+    wallet::{
+        events::types::{Event, WalletEventType},
+        message_interface::{
+            create_message_handler, init_logger as init_logger_rust, ManagerOptions, Message, Response,
+            WalletMessageHandler,
+        },
+        Result,
     },
-    Result,
 };
 use neon::prelude::*;
 use tokio::sync::RwLock;
@@ -31,9 +34,8 @@ impl MessageHandler {
     fn new(channel: Channel, options: String) -> Result<Self> {
         let manager_options = serde_json::from_str::<ManagerOptions>(&options)?;
 
-        let wallet_message_handler = crate::RUNTIME
-            .block_on(async move { create_message_handler(Some(manager_options)).await })
-            .expect("error initializing account manager");
+        let wallet_message_handler =
+            crate::RUNTIME.block_on(async move { create_message_handler(Some(manager_options)).await })?;
 
         Ok(Self {
             channel,
@@ -181,4 +183,34 @@ pub fn destroy(mut cx: FunctionContext) -> JsResult<JsPromise> {
         deferred.settle_with(&channel, move |mut cx| Ok(cx.undefined()));
     });
     Ok(promise)
+}
+
+pub fn migrate_stronghold_snapshot_v2_to_v3(mut cx: FunctionContext) -> JsResult<JsUndefined> {
+    let current_path = cx.argument::<JsString>(0)?.value(&mut cx);
+    let current_password = cx.argument::<JsString>(1)?.value(&mut cx);
+    let new_path = cx
+        .argument_opt(2)
+        .map(|opt| opt.downcast_or_throw::<JsString, _>(&mut cx))
+        .transpose()?
+        .map(|opt| opt.value(&mut cx));
+    let new_password = cx
+        .argument_opt(3)
+        .map(|opt| opt.downcast_or_throw::<JsString, _>(&mut cx))
+        .transpose()?
+        .map(|opt| opt.value(&mut cx));
+
+    StrongholdAdapter::migrate_v2_to_v3(
+        &current_path,
+        &current_password,
+        new_path.as_ref(),
+        new_password.as_deref(),
+    )
+    .or_else(|e| {
+        cx.throw_error(
+            serde_json::to_string(&Response::Error(e.into()))
+                .expect("the response is generated manually, so unwrap is safe."),
+        )
+    })?;
+
+    Ok(cx.undefined())
 }

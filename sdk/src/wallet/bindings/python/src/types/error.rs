@@ -3,7 +3,7 @@
 
 use std::convert::From;
 
-use iota_sdk::wallet::Error as RustError;
+use iota_sdk::{client::Error as ClientError, wallet::Error as WalletError};
 use pyo3::{exceptions, prelude::*};
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -13,8 +13,16 @@ pub struct Error {
     pub error: PyErr,
 }
 
-impl From<RustError> for Error {
-    fn from(err: RustError) -> Self {
+impl From<ClientError> for Error {
+    fn from(err: ClientError) -> Self {
+        Error {
+            error: PyErr::new::<exceptions::PyValueError, _>(err.to_string()),
+        }
+    }
+}
+
+impl From<WalletError> for Error {
+    fn from(err: WalletError) -> Self {
         Error {
             error: PyErr::new::<exceptions::PyValueError, _>(err.to_string()),
         }

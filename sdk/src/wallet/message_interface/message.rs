@@ -177,6 +177,20 @@ pub enum Message {
         #[serde(rename = "intervalInMilliseconds")]
         interval_in_milliseconds: Option<u64>,
     },
+    /// Migrates a stronghold snapshot from v2 to v3.
+    /// Expected response: [`Ok`](crate::message_interface::Response::Ok)
+    #[cfg(feature = "stronghold")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
+    MigrateStrongholdSnapshotV2ToV3 {
+        #[serde(rename = "currentPath")]
+        current_path: String,
+        #[serde(rename = "currentPassword")]
+        current_password: String,
+        #[serde(rename = "newPath")]
+        new_path: Option<String>,
+        #[serde(rename = "newPassword")]
+        new_password: Option<String>,
+    },
     /// Store a mnemonic into the Stronghold vault.
     /// Expected response: [`Ok`](crate::message_interface::Response::Ok)
     #[cfg(feature = "stronghold")]
@@ -313,6 +327,18 @@ impl Debug for Message {
                     "SetStrongholdPasswordClearInterval{{ interval_in_milliseconds: {interval_in_milliseconds:?} }}"
                 )
             }
+            Self::MigrateStrongholdSnapshotV2ToV3 {
+                current_path,
+                new_path,
+                current_password: _,
+                new_password: _,
+            } => {
+                write!(
+                    f,
+                    "MigrateStrongholdSnapshotV2ToV3{{ current_path: {current_path}, new_path: {new_path:?}, current_password: <omitted>, new_password: <omitted> }}"
+                )
+            }
+            #[cfg(feature = "stronghold")]
             #[cfg(feature = "stronghold")]
             Self::StoreMnemonic { mnemonic: _ } => write!(f, "StoreMnemonic{{ mnemonic: <omitted> }}"),
             Self::StartBackgroundSync {

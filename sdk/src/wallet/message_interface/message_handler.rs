@@ -22,7 +22,9 @@ use crate::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
         constants::SHIMMER_TESTNET_BECH32_HRP,
-        request_funds_from_faucet, utils, Client, NodeInfoWrapper,
+        request_funds_from_faucet,
+        stronghold::StrongholdAdapter,
+        utils, Client, NodeInfoWrapper,
     },
     types::block::{
         output::{
@@ -302,6 +304,25 @@ impl WalletMessageHandler {
                     self.account_manager
                         .set_stronghold_password_clear_interval(duration)
                         .await?;
+                    Ok(Response::Ok(()))
+                })
+                .await
+            }
+            #[cfg(feature = "stronghold")]
+            Message::MigrateStrongholdSnapshotV2ToV3 {
+                current_path,
+                current_password,
+                new_path,
+                new_password,
+            } => {
+                convert_async_panics(|| async {
+                    StrongholdAdapter::migrate_v2_to_v3(
+                        &current_path,
+                        &current_password,
+                        new_path.as_ref(),
+                        new_password.as_deref(),
+                    )?;
+                    // TODO another response?
                     Ok(Response::Ok(()))
                 })
                 .await

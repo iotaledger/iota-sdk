@@ -84,6 +84,9 @@ public class NativeApi {
 
     private static native String listen(String[] events, EventListener listener);
 
+    // TODO public ?
+    public static native String migrateStrongholdSnapshotV2ToV3(String currentPath, String currentPassword, String newPath, String newPassword);
+
     private static JsonElement handleClientResponse(String methodName, String jsonResponse) throws WalletException {
         WalletResponse response = CustomGson.get().fromJson(jsonResponse, WalletResponse.class);
 

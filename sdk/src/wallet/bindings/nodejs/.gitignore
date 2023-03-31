@@ -8,3 +8,4 @@ build/
 prebuilds/
 out/
 yarn.lock
+!examples/fixtures/v2.stronghold
