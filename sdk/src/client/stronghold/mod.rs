@@ -47,6 +47,7 @@
 //! [`write_stronghold_snapshot()`]: self::StrongholdAdapter::write_stronghold_snapshot()
 
 mod common;
+mod migration;
 mod secret;
 mod storage;
 
@@ -124,8 +125,14 @@ fn check_or_create_snapshot(
         }
         Err(iota_stronghold::ClientError::Inner(ref err_msg)) => {
             // Matching the error string is not ideal but stronghold doesn't wrap the error types at the moment.
-            if err_msg.to_string().contains("XCHACHA20-POLY1305") {
+            if err_msg.contains("XCHACHA20-POLY1305") {
                 return Err(Error::StrongholdInvalidPassword);
+            } else if err_msg.contains("Unsupported version") {
+                if err_msg.contains("expected [3, 0], found [2, 0]") {
+                    return Err(Error::StrongholdUnsupportedSnapshotVersion { found: 2, expected: 3 });
+                } else {
+                    panic!("unsupported version mismatch");
+                }
             }
         }
         _ => {}

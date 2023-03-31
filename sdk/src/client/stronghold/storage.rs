@@ -3,63 +3,67 @@
 
 //! The `StorageProvider` implementation for `StrongholdAdapter`.
 
-use std::ops::Deref;
-
 use async_trait::async_trait;
-use crypto::ciphers::chacha;
+use crypto::ciphers::{chacha::XChaCha20Poly1305, traits::Aead};
+use iota_stronghold::{
+    procedures::{self, AeadCipher},
+    Client, Location,
+};
+use zeroize::Zeroizing;
 
-use super::{common::PRIVATE_DATA_CLIENT_PATH, StrongholdAdapter};
-use crate::client::{storage::StorageProvider, Error, Result};
+use super::{
+    common::{PRIVATE_DATA_CLIENT_PATH, SECRET_VAULT_PATH, USERDATA_STORE_KEY_RECORD_PATH},
+    StrongholdAdapter,
+};
+use crate::client::{storage::StorageProvider, Result};
 
 #[async_trait]
 impl StorageProvider for StrongholdAdapter {
     #[allow(clippy::significant_drop_tightening)]
     async fn get(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>> {
-        let data = match self
-            .stronghold
-            .lock()
-            .await
-            .get_client(PRIVATE_DATA_CLIENT_PATH)?
-            .store()
-            .get(k)?
-        {
+        let stronghold_client = self.stronghold.lock().await.get_client(PRIVATE_DATA_CLIENT_PATH)?;
+
+        let mut data = match stronghold_client.store().get(k)? {
             Some(data) => data,
             None => return Ok(None),
         };
 
-        let locked_key_provider = self.key_provider.lock().await;
-        let key_provider = if let Some(key_provider) = &*locked_key_provider {
-            key_provider
-        } else {
-            return Err(Error::StrongholdKeyCleared);
-        };
-        let buffer = key_provider.try_unlock()?;
-        let buffer_ref = buffer.borrow();
+        let store_key_location = Location::generic(SECRET_VAULT_PATH, USERDATA_STORE_KEY_RECORD_PATH);
 
-        Ok(Some(chacha::aead_decrypt(buffer_ref.deref(), &data)?))
+        let decrypted_value = stronghold_client.execute_procedure(procedures::AeadDecrypt {
+            cipher: AeadCipher::XChaCha20Poly1305,
+            associated_data: Vec::new(),
+            nonce: data.drain(..XChaCha20Poly1305::NONCE_LENGTH).collect(),
+            tag: data.drain(..XChaCha20Poly1305::TAG_LENGTH).collect(),
+            ciphertext: data,
+            key: store_key_location,
+        })?;
+
+        Ok(Some(decrypted_value))
     }
 
     async fn insert(&mut self, k: &[u8], v: &[u8]) -> Result<Option<Vec<u8>>> {
-        let encrypted_value = {
-            let locked_key_provider = self.key_provider.lock().await;
-            let key_provider = if let Some(key_provider) = &*locked_key_provider {
-                key_provider
-            } else {
-                return Err(Error::StrongholdKeyCleared);
-            };
-            let buffer = key_provider.try_unlock()?;
-            let buffer_ref = buffer.borrow();
+        let store_key_location = Location::generic(SECRET_VAULT_PATH, USERDATA_STORE_KEY_RECORD_PATH);
 
-            chacha::aead_encrypt(buffer_ref.deref(), v)?
-        };
+        let stronghold_client = self.stronghold.lock().await.get_client(PRIVATE_DATA_CLIENT_PATH)?;
 
-        Ok(self
-            .stronghold
-            .lock()
-            .await
-            .get_client(PRIVATE_DATA_CLIENT_PATH)?
-            .store()
-            .insert(k.to_vec(), encrypted_value, None)?)
+        let previous_data = insert(&stronghold_client, k, v)?;
+
+        let decrypted_previous_data = previous_data
+            .map(|mut previous_data| {
+                // The value is assumed to be `nonce || tag || ciphertext`
+                stronghold_client.execute_procedure(procedures::AeadDecrypt {
+                    cipher: AeadCipher::XChaCha20Poly1305,
+                    associated_data: Vec::new(),
+                    nonce: previous_data.drain(..XChaCha20Poly1305::NONCE_LENGTH).collect(),
+                    tag: previous_data.drain(..XChaCha20Poly1305::TAG_LENGTH).collect(),
+                    ciphertext: previous_data,
+                    key: store_key_location,
+                })
+            })
+            .transpose()?;
+
+        Ok(decrypted_previous_data)
     }
 
     async fn delete(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>> {
@@ -73,6 +77,35 @@ impl StorageProvider for StrongholdAdapter {
     }
 }
 
+pub(crate) fn insert(stronghold_client: &Client, k: &[u8], v: &[u8]) -> Result<Option<Vec<u8>>> {
+    let store_key_location = Location::generic(SECRET_VAULT_PATH, USERDATA_STORE_KEY_RECORD_PATH);
+
+    // Generate and store encryption key if not existent yet.
+    if !stronghold_client.record_exists(&store_key_location)? {
+        let mut key = Zeroizing::new(vec![0_u8; 32]);
+        crypto::utils::rand::fill(key.as_mut())?;
+        let vault_path = store_key_location.vault_path();
+        let vault = stronghold_client.vault(vault_path);
+        vault.write_secret(store_key_location.clone(), key)?;
+    }
+
+    let mut nonce = [0; XChaCha20Poly1305::NONCE_LENGTH];
+    crypto::utils::rand::fill(&mut nonce)?;
+
+    let encrypted_value = stronghold_client.execute_procedure(procedures::AeadEncrypt {
+        cipher: AeadCipher::XChaCha20Poly1305,
+        associated_data: Vec::new(),
+        nonce: nonce.to_vec(),
+        plaintext: v.to_vec(),
+        key: store_key_location,
+    })?;
+
+    // The value is assumed to be `nonce || tag || ciphertext`
+    let final_data = [nonce.to_vec(), encrypted_value].concat();
+
+    Ok(stronghold_client.store().insert(k.to_vec(), final_data, None)?)
+}
+
 mod tests {
     #[tokio::test]
     async fn test_stronghold_db() {
@@ -82,6 +115,9 @@ mod tests {
         use crate::client::storage::StorageProvider;
 
         let snapshot_path = "test_stronghold_db.stronghold";
+
+        fs::remove_file(snapshot_path).unwrap_or(());
+
         let mut stronghold = StrongholdAdapter::builder()
             .password("drowssap")
             .build(snapshot_path)
@@ -99,7 +135,8 @@ mod tests {
         assert!(matches!(stronghold.get(b"test-1").await, Ok(Some(_))));
         assert!(matches!(stronghold.get(b"test-2").await, Ok(Some(_))));
 
-        assert!(matches!(stronghold.insert(b"test-0", b"0-tset").await, Ok(Some(_))));
+        let previous_value = stronghold.insert(b"test-0", b"0-tset").await.unwrap();
+        assert_eq!(Some(b"test-0".to_vec()), previous_value);
         assert!(matches!(stronghold.insert(b"test-1", b"1-tset").await, Ok(Some(_))));
         assert!(matches!(stronghold.insert(b"test-2", b"2-tset").await, Ok(Some(_))));
 

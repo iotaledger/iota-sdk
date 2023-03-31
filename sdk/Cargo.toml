@@ -28,7 +28,7 @@ iterator-sorted = { version = "0.1.0", default-features = false }
 hashbrown = { version = "0.13.2", default-features = false, features = [ "ahash", "inline-more", "serde" ] }
 getset = { version = "0.1.2", default-features = false }
 hex = { version = "0.4.3", default-features = false, features = [ "alloc" ] }
-iota-crypto = { version = "0.15.3", default-features = false, features = [ "std", "chacha", "digest", "curl-p", "blake2b", "ed25519", "random", "slip10", "bip39", "bip39-en", "ternary_encoding" ] }
+iota-crypto = { version = "0.17.0", default-features = false, features = [ "std", "chacha", "digest", "curl-p", "blake2b", "ed25519", "random", "slip10", "bip39", "bip39-en", "ternary_encoding" ] }
 rand = { version = "0.8.5", default-features = false, features = [ "min_const_gen", "std_rng" ] }
 serde = { version = "1.0.159", default-features = false, features = [ "derive" ] }
 serde-big-array = { version = "0.5.1", default-features = false }
@@ -38,7 +38,9 @@ async-trait = { version = "0.1.68", default-features = false, optional = true }
 regex = { version = "1.7.3", default-features = false, features = [ "std", "unicode-perl" ], optional = true }
 rumqttc = { version = "0.20.0", default-features = false, features = [ "websocket" ], optional = true }
 once_cell = { version = "1.17.1", default-features = false, features = [ "std" ], optional = true }
-iota_stronghold = { version = "1.0.5", default-features = false, features = [ "std" ], optional = true }
+# iota_stronghold = { version = "1.0.5", default-features = false, features = [ "std" ], optional = true }
+iota_stronghold = { git = "ssh://git@github.com/semenov-vladyslav/stronghold.rs", branch = "snapshot-migration-v3age", default-features = false, features = [ "std" ], optional = true }
+stronghold_engine = { git = "ssh://git@github.com/semenov-vladyslav/stronghold.rs", branch = "snapshot-migration-v3age", default-features = false, optional = true }
 iota-ledger-nano = { version = "1.0.0-alpha.2", default-features = false, optional = true }
 backtrace = { version = "0.3.67", default-features = false, features = [ "std" ], optional = true }
 fern-logger = { version = "0.5.0", default-features = false, optional = true }
@@ -75,7 +77,7 @@ pow = [ ]
 wallet = [ "client", "log" ]
 storage = [ "async-trait" ]
 mqtt = [ "regex", "rumqttc", "once_cell" ]
-stronghold = [ "iota_stronghold" ]
+stronghold = [ "iota_stronghold", "stronghold_engine" ]
 events = [ ]
 ledger_nano = [ "iota-ledger-nano" ]
 participation = [ "storage" ]
@@ -290,6 +292,11 @@ required-features = [ "client" ]
 name = "node_api_indexer_get_random_basic_outputs"
 path = "examples/client/node_api_indexer/07_get_random_basic_outputs.rs"
 required-features = [ "client" ]
+
+[[example]]
+name = "migrate_stronghold_snapshot_v2_to_v3"
+path = "examples/client/migrate_stronghold_snapshot_v2_to_v3.rs"
+required-features = [ "stronghold" ]
 
 #######
 

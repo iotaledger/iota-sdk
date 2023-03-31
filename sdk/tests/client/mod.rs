@@ -7,6 +7,7 @@ mod common;
 mod error;
 mod input_selection;
 mod message_interface;
+mod migrate_stronghold_snapshot_v2_to_v3;
 mod mnemonic;
 #[cfg(feature = "mqtt")]
 mod mqtt;

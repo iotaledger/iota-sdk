@@ -274,6 +274,21 @@ pub enum Error {
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
     #[error("Stronghold reported a procedure error: {0}")]
     StrongholdProcedure(#[from] iota_stronghold::procedures::ProcedureError),
+    /// Unsupported snapshot version
+    #[cfg(feature = "stronghold")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
+    #[error("Unsupported snapshot version, migration required")]
+    StrongholdUnsupportedSnapshotVersion {
+        /// Found version
+        found: u16,
+        /// Expected version
+        expected: u16,
+    },
+    /// Migration error from Stronghold
+    #[cfg(feature = "stronghold")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
+    #[error("Stronghold migration error: {0}")]
+    StrongholdMigration(#[from] engine::snapshot::migration::Error),
 }
 
 // map most errors to a single error but there are some errors that
