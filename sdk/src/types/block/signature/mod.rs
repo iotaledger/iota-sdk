@@ -30,7 +30,7 @@ pub enum Signature {
 impl core::fmt::Debug for Signature {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Ed25519(signature) => write!(f, "{signature:?}"),
+            Self::Ed25519(signature) => signature.fmt(f),
         }
     }
 }
