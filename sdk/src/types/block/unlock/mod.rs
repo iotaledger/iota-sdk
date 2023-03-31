@@ -57,10 +57,10 @@ pub enum Unlock {
 impl core::fmt::Debug for Unlock {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Signature(unlock) => write!(f, "{unlock:?}"),
-            Self::Reference(unlock) => write!(f, "{unlock:?}"),
-            Self::Alias(unlock) => write!(f, "{unlock:?}"),
-            Self::Nft(unlock) => write!(f, "{unlock:?}"),
+            Self::Signature(unlock) => unlock.fmt(f),
+            Self::Reference(unlock) => unlock.fmt(f),
+            Self::Alias(unlock) => unlock.fmt(f),
+            Self::Nft(unlock) => unlock.fmt(f),
         }
     }
 }

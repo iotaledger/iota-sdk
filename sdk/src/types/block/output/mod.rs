@@ -106,11 +106,11 @@ pub enum Output {
 impl core::fmt::Debug for Output {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Treasury(output) => write!(f, "{output:?}"),
-            Self::Basic(output) => write!(f, "{output:?}"),
-            Self::Alias(output) => write!(f, "{output:?}"),
-            Self::Foundry(output) => write!(f, "{output:?}"),
-            Self::Nft(output) => write!(f, "{output:?}"),
+            Self::Treasury(output) => output.fmt(f),
+            Self::Basic(output) => output.fmt(f),
+            Self::Alias(output) => output.fmt(f),
+            Self::Foundry(output) => output.fmt(f),
+            Self::Nft(output) => output.fmt(f),
         }
     }
 }
