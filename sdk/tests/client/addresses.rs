@@ -160,7 +160,7 @@ async fn address_generation() {
         bech32_address: String,
     }
 
-    let file = std::fs::File::open("./tests/fixtures/test_vectors.json").unwrap();
+    let file = std::fs::File::open("./tests/client/fixtures/test_vectors.json").unwrap();
     let json: serde_json::Value = serde_json::from_reader(file).unwrap();
     let general = json.get("general").unwrap();
     let addresses_data: Vec<AddressData> =

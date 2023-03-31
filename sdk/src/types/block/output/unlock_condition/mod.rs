@@ -32,7 +32,7 @@ pub use self::{
 use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, Error};
 
 ///
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -53,6 +53,20 @@ pub enum UnlockCondition {
     GovernorAddress(GovernorAddressUnlockCondition),
     /// An immutable alias address unlock condition.
     ImmutableAliasAddress(ImmutableAliasAddressUnlockCondition),
+}
+
+impl core::fmt::Debug for UnlockCondition {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::Address(unlock_condition) => write!(f, "{unlock_condition:?}"),
+            Self::StorageDepositReturn(unlock_condition) => write!(f, "{unlock_condition:?}"),
+            Self::Timelock(unlock_condition) => write!(f, "{unlock_condition:?}"),
+            Self::Expiration(unlock_condition) => write!(f, "{unlock_condition:?}"),
+            Self::StateControllerAddress(unlock_condition) => write!(f, "{unlock_condition:?}"),
+            Self::GovernorAddress(unlock_condition) => write!(f, "{unlock_condition:?}"),
+            Self::ImmutableAliasAddress(unlock_condition) => write!(f, "{unlock_condition:?}"),
+        }
+    }
 }
 
 impl UnlockCondition {

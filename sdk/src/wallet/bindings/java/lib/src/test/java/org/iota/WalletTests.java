@@ -75,10 +75,13 @@ public class WalletTests extends TestSettings {
         AccountAddress[] addresses = account.generateAddresses(new GenerateAddresses().withAmount(1).withAddressGenerationOptions(addressOptions));
 
         assertEquals(1, addresses.length);
-        assertEquals("rms1qz8jdgvrerzv35s43pkdkawdr9x4t6xfnhcrt5tlgsyltgpwyx9ks4c5kct", addresses[0].getAddress());
+        String addrHex = wallet.bech32ToHex(addresses[0].getAddress());
+        assertEquals("rms1qz8jdgvrerzv35s43pkdkawdr9x4t6xfnhcrt5tlgsyltgpwyx9ks4c5kct",
+                wallet.hexToBech32(addrHex, "rms"));
 
         account = wallet.getAccounts()[0];
         addresses = account.generateAddresses(new GenerateAddresses().withAmount(1).withAddressGenerationOptions(addressOptions));
-        assertEquals(address, addresses[0].getAddress());
+        addrHex = wallet.bech32ToHex(addresses[0].getAddress());
+        assertEquals(address, wallet.hexToBech32(addrHex, "rms"));
     }
 }

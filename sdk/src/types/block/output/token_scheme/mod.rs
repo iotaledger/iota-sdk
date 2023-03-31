@@ -7,7 +7,7 @@ pub use self::simple::SimpleTokenScheme;
 use crate::types::block::Error;
 
 ///
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, derive_more::From, packable::Packable)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, derive_more::From, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidTokenSchemeKind)]
@@ -15,6 +15,14 @@ pub enum TokenScheme {
     ///
     #[packable(tag = SimpleTokenScheme::KIND)]
     Simple(SimpleTokenScheme),
+}
+
+impl core::fmt::Debug for TokenScheme {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::Simple(scheme) => write!(f, "{scheme:?}"),
+        }
+    }
 }
 
 impl TokenScheme {

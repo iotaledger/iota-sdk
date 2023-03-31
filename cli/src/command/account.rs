@@ -41,110 +41,182 @@ pub enum AccountCommand {
     Addresses,
     /// Print the account balance.
     Balance,
-    /// Burn a native token: `burn-native-token 0x... 100`
-    BurnNativeToken { token_id: String, amount: String },
-    /// Burn an NFT: `burn-nft 0x...`
-    BurnNft { nft_id: String },
+    /// Burn an amount of native token.
+    BurnNativeToken {
+        /// Token ID to be burnt, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
+        token_id: String,
+        /// Amount to be burnt, e.g. 100.
+        amount: String,
+    },
+    /// Burn an NFT.
+    BurnNft {
+        /// NFT ID to be burnt, e.g. 0xecadf10e6545aa82da4df2dfd2a496b457c8850d2cab49b7464cb273d3dffb07.
+        nft_id: String,
+    },
     /// Claim outputs with storage deposit return, expiration or timelock unlock conditions.
-    Claim { output_id: Option<String> },
+    Claim {
+        /// Output ID to be claimed.
+        output_id: Option<String>,
+    },
     /// Consolidate all basic outputs into one address.
     Consolidate,
     /// Create a new alias output.
     CreateAliasOutput,
-    /// Melt a native token: `decrease-native-token-supply 0x... 100`
-    DecreaseNativeTokenSupply { token_id: String, amount: String },
-    /// Destroy an alias: `destroy-alias 0x...`
-    DestroyAlias { alias_id: String },
-    /// Destroy a foundry: `destroy-foundry 0x...`
-    DestroyFoundry { foundry_id: String },
-    /// Exit from the account prompt.
+    /// Melt an amount of native token.
+    DecreaseNativeTokenSupply {
+        /// Token ID to be melted, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
+        token_id: String,
+        /// Amount to be melted, e.g. 100.
+        amount: String,
+    },
+    /// Destroy an alias.
+    DestroyAlias {
+        /// Alias ID to be destroyed, e.g. 0xed5a90106ae5d402ebaecb9ba36f32658872df789f7a29b9f6d695b912ec6a1e.
+        alias_id: String,
+    },
+    /// Destroy a foundry.
+    DestroyFoundry {
+        /// Foundry ID to be destroyed, e.g.
+        /// 0x08cb54928954c3eb7ece1bf1cc0c68eb179dc1c4634ae5d23df1c70643d0911c3d0200000000.
+        foundry_id: String,
+    },
+    /// Exit the CLI wallet.
     Exit,
-    /// Request funds from the faucet to the latest address, `url` is optional, default is `https://faucet.testnet.shimmer.network/api/enqueue`
+    /// Request funds from the faucet.
     Faucet {
+        /// URL of the faucet, default to https://faucet.testnet.shimmer.network/api/enqueue.
         url: Option<String>,
+        /// Address the faucet sends the funds to, defaults to the latest address.
         address: Option<String>,
     },
-    /// Mint more of a native token: `increase-native-token-supply 0x... 100`
-    IncreaseNativeTokenSupply { token_id: String, amount: String },
-    /// Mint a native token: `mint-native-token 100 100 --foundry-metadata-hex 0x...`
+    /// Mint more of a native token.
+    IncreaseNativeTokenSupply {
+        /// Token ID to be minted, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
+        token_id: String,
+        /// Amount to be minted, e.g. 100.
+        amount: String,
+    },
+    /// Mint a native token.
     MintNativeToken {
+        /// Circulating supply of the native token to be minted, e.g. 100.
         circulating_supply: String,
+        /// Maximum supply of the native token to be minted, e.g. 500.
         maximum_supply: String,
+        /// Metadata to attach to the associated foundry, e.g. --foundry-metadata-hex 0xdeadbeef.
         #[arg(long, group = "foundry_metadata")]
         foundry_metadata_hex: Option<String>,
+        /// Metadata to attach to the associated foundry, e.g. --foundry-metadata-file ./foundry-metadata.json.
         #[arg(long, group = "foundry_metadata")]
         foundry_metadata_file: Option<String>,
     },
-    /// Mint an NFT to an optional bech32 encoded address: `mint-nft
-    /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 "immutable metadata" "metadata"`
-    /// IOTA NFT Standard - TIP27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md
+    /// Mint an NFT.
+    /// IOTA NFT Standard - TIP27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md.
     MintNft {
+        /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         address: Option<String>,
         #[arg(long, group = "immutable_metadata")]
+        /// Immutable metadata to attach to the NFT, e.g. --immutable-metadata-hex 0xdeadbeef.
         immutable_metadata_hex: Option<String>,
+        /// Immutable metadata to attach to the NFT, e.g. --immutable-metadata-file ./nft-immutable-metadata.json.
         #[arg(long, group = "immutable_metadata")]
         immutable_metadata_file: Option<String>,
+        /// Metadata to attach to the NFT, e.g. --metadata-hex 0xdeadbeef.
         #[arg(long, group = "metadata")]
         metadata_hex: Option<String>,
+        /// Metadata to attach to the NFT, e.g. --metadata-file ./nft-metadata.json.
         #[arg(long, group = "metadata")]
         metadata_file: Option<String>,
         #[arg(long)]
+        /// Tag feature to attach to the NFT, e.g. 0xdeadbeef.
         tag: Option<String>,
+        /// Sender feature to attach to the NFT, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         #[arg(long)]
         sender: Option<String>,
+        /// Issuer feature to attach to the NFT, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         #[arg(long)]
         issuer: Option<String>,
     },
     /// Generate a new address.
     NewAddress,
     /// Display an output.
-    Output { output_id: String },
+    Output {
+        /// Output ID to be displayed.
+        output_id: String,
+    },
     /// List all outputs.
     Outputs,
-    /// Send an amount to a bech32 encoded address: `send
-    /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 1000000`
-    Send { address: String, amount: u64 },
-    /// Send an amount below the storage deposit minimum to a bech32 address: `send
-    /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 1`
-    SendMicro { address: String, amount: u64 },
-    /// Send native tokens to a bech32 address: `send-native-token
-    /// rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
-    /// 0x08e3a2f76cc934bc0cc21575b4610c1d7d4eb589ae0100000000000000000000000000000000 10`
-    /// This will create an output with an expiration and storage deposit return unlock condition. To gift the storage
-    /// deposit for the output, add ` true`.
-    SendNativeToken {
+    /// Send an amount.
+    Send {
+        /// Address to send funds to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         address: String,
+        /// Amount to send, e.g. 1000000.
+        amount: u64,
+    },
+    /// Send an amount below the storage deposit minimum.
+    SendMicro {
+        /// Address to send funds to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
+        address: String,
+        /// Amount to send, e.g. 1.
+        amount: u64,
+    },
+    /// Send native tokens.
+    /// This will create an output with an expiration and storage deposit return unlock condition.
+    SendNativeToken {
+        /// Address to send the native tokens to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
+        address: String,
+        /// Token ID to be sent, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
         token_id: String,
+        /// Amount to send, e.g. 1000000.
         amount: String,
+        /// Whether to gift the storage deposit for the output or not, e.g. ` true`.
         gift_storage_deposit: Option<bool>,
     },
-    /// Send an NFT to a bech32 encoded address
-    SendNft { address: String, nft_id: String },
-    /// Sync the account with the Tangle.
+    /// Send an NFT.
+    SendNft {
+        /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
+        address: String,
+        /// NFT ID to be sent, e.g. 0xecadf10e6545aa82da4df2dfd2a496b457c8850d2cab49b7464cb273d3dffb07.
+        nft_id: String,
+    },
+    /// Synchronize the account.
     Sync,
     /// List the account transactions.
     Transactions,
-    /// List the unspent outputs.
+    /// List the account unspent outputs.
     UnspentOutputs,
-    /// Cast given votes for a given event
+    /// Cast votes for an event.
     Vote {
+        /// Event ID for which to cast votes, e.g. 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2.
         event_id: ParticipationEventId,
+        /// Answers to the event questions.
         answers: Vec<u8>,
     },
-    /// Stop participating to a given event
-    StopParticipating { event_id: ParticipationEventId },
-    /// Calculate the participation overview of the account
+    /// Stop participating to an event.
+    StopParticipating {
+        /// Event ID for which to stop participation, e.g.
+        /// 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2.
+        event_id: ParticipationEventId,
+    },
+    /// Get the participation overview of the account.
     ParticipationOverview {
+        /// Event IDs for which to get the participation overview, e.g.
+        /// 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2...
         #[arg(short, long, num_args = 1.., value_delimiter = ' ')]
         event_ids: Vec<ParticipationEventId>,
     },
-    /// Get the voting power of the account
+    /// Get the voting power of the account.
     VotingPower,
-    /// Increase the voting power of the account
-    IncreaseVotingPower { amount: u64 },
-    /// Decrease the voting power of the account
-    DecreaseVotingPower { amount: u64 },
-    /// Get the voting output of the account
+    /// Increase the voting power of the account.
+    IncreaseVotingPower {
+        /// Amount to increase the voting power by, e.g. 100.
+        amount: u64,
+    },
+    /// Decrease the voting power of the account.
+    DecreaseVotingPower {
+        /// Amount to decrease the voting power by, e.g. 100.
+        amount: u64,
+    },
+    /// Get the voting output of the account.
     VotingOutput,
 }
 
@@ -205,7 +277,7 @@ pub async fn burn_nft_command(account_handle: &AccountHandle, nft_id: String) ->
 
 // `balance` command
 pub async fn balance_command(account_handle: &AccountHandle) -> Result<(), Error> {
-    println_log_info!("{:?}", account_handle.balance().await?);
+    println_log_info!("{:#?}", account_handle.balance().await?);
 
     Ok(())
 }
@@ -597,9 +669,7 @@ pub async fn send_nft_command(account_handle: &AccountHandle, address: String, n
 
 // `sync` command
 pub async fn sync_command(account_handle: &AccountHandle) -> Result<(), Error> {
-    let sync = account_handle.sync(None).await?;
-
-    println_log_info!("Synced: {sync:?}");
+    println_log_info!("Synced: {:#?}", account_handle.sync(None).await?);
 
     Ok(())
 }

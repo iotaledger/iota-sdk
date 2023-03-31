@@ -24,7 +24,11 @@ async fn output_preparation() -> Result<()> {
     let manager = make_manager(storage_path, None, None).await?;
     let account = manager.create_account().finish().await?;
 
-    let recipient_address = String::from("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu");
+    let recipient_address_bech32 = String::from("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu");
+    // Roundtrip to get the correct bech32 HRP
+    let recipient_address =
+        Address::try_from_bech32(&recipient_address_bech32)?.to_bech32(account.client().get_bech32_hrp().await?);
+
     let output = account
         .prepare_output(
             OutputOptions {
@@ -242,7 +246,11 @@ async fn output_preparation() -> Result<()> {
         assert_eq!(output.unlock_conditions().unwrap().len(), 1);
     }
 
-    let issuer_and_sender_address = String::from("rms1qq724zgvdujt3jdcd3xzsuqq7wl9pwq3dvsa5zvx49rj9tme8cat6qptyfm");
+    let issuer_and_sender_address_bech32 =
+        String::from("rms1qq724zgvdujt3jdcd3xzsuqq7wl9pwq3dvsa5zvx49rj9tme8cat6qptyfm");
+    // Roundtrip to get the correct bech32 HRP
+    let issuer_and_sender_address = Address::try_from_bech32(&issuer_and_sender_address_bech32)?
+        .to_bech32(account.client().get_bech32_hrp().await?);
     let expected_address = Address::try_from_bech32(&issuer_and_sender_address)?;
 
     // sender address present when building basic output
@@ -384,7 +392,10 @@ async fn output_preparation_sdr() -> Result<()> {
     let rent_structure = account.client().get_rent_structure().await?;
     let token_supply = account.client().get_token_supply().await?;
 
-    let recipient_address = String::from("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu");
+    let recipient_address_bech32 = String::from("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu");
+    // Roundtrip to get the correct bech32 HRP
+    let recipient_address =
+        Address::try_from_bech32(&recipient_address_bech32)?.to_bech32(account.client().get_bech32_hrp().await?);
 
     let output = account
         .prepare_output(

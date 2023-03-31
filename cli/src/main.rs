@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod account;
+mod account_completion;
 mod account_history;
 mod account_manager;
 mod command;
@@ -22,6 +23,14 @@ macro_rules! println_log_info {
     ($($arg:tt)+) => {
         println!($($arg)+);
         log::info!($($arg)+);
+    };
+}
+
+#[macro_export]
+macro_rules! println_log_error {
+    ($($arg:tt)+) => {
+        println!($($arg)+);
+        log::error!($($arg)+);
     };
 }
 
@@ -76,6 +85,6 @@ async fn main() {
     }
 
     if let Err(e) = run(cli).await {
-        log::error!("{e}");
+        println_log_error!("{e}");
     }
 }

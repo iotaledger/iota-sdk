@@ -13,7 +13,7 @@ use crate::types::block::Error;
 /// This is defined as part of the Unspent Transaction Output (UTXO) transaction protocol.
 ///
 /// RFC: <https://github.com/luca-moser/protocol-rfcs/blob/signed-tx-payload/text/0000-transaction-payload/0000-transaction-payload.md#signature-unlock-block>
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -25,6 +25,14 @@ pub enum Signature {
     /// An Ed25519 signature.
     #[packable(tag = Ed25519Signature::KIND)]
     Ed25519(Ed25519Signature),
+}
+
+impl core::fmt::Debug for Signature {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::Ed25519(signature) => write!(f, "{signature:?}"),
+        }
+    }
 }
 
 impl Signature {
