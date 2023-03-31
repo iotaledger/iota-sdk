@@ -5,7 +5,7 @@ const getUnlockedManager = require('./account-manager');
 
 async function run() {
     // Replace with an existing alias ID in your account
-    const ALIAS_ID = '0x08e6210d29881310db2afde095e594f6f006fcdbd06e7a83b74bd2bdf3b5190d0e0200000000'
+    const ALIAS_ID = '0x982667c59ade8ab8a99188f4de38c68b97fc2ca7ba28a1e9d8d683996247e152'
     
     try {
         const manager = await getUnlockedManager();
