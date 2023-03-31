@@ -70,8 +70,8 @@ impl StrongholdAdapter {
 
         // If there are keys to re-encrypt, we iterate over the requested keys and attempt to re-encrypt the
         // corresponding values.
-        let keys_to_re_encrypt = stronghold.get_client(PRIVATE_DATA_CLIENT_PATH)?.store().keys()?;
         let stronghold_client = stronghold.get_client(PRIVATE_DATA_CLIENT_PATH)?;
+        let keys_to_re_encrypt = stronghold_client.store().keys()?;
 
         for key in keys_to_re_encrypt {
             if let Some(value) = v2_get(&stronghold_client, &key, v2_password_hash)? {
