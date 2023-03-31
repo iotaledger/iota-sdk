@@ -1,5 +1,10 @@
 # Changelog
 
+## \[2.0.3-rc.30]
+
+- Add signEd25519() and verifyEd25519Signature() methods.
+  - [ae335c4](https://github.com/iotaledger/iota-sdk/commit/ae335c4cb64ca67017dc56ef9ed1d1c98b2a9aae) Allow enum debug impls to respect format configs ([#164](https://github.com/iotaledger/iota-sdk/pull/164)) on 2023-03-31
+
 ## \[2.0.3-rc.29]
 
 - Fix dependency URL.

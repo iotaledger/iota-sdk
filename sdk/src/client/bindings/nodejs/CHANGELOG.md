@@ -1,5 +1,13 @@
 # Changelog
 
+## \[3.0.0-rc.12]
+
+- Add `IBip32Chain` and use it instead of `ISegement[]`.
+  - [ae335c4](https://github.com/iotaledger/iota-sdk/commit/ae335c4cb64ca67017dc56ef9ed1d1c98b2a9aae) Allow enum debug impls to respect format configs ([#164](https://github.com/iotaledger/iota-sdk/pull/164)) on 2023-03-31
+- Removed `signatureUnlock` parameter `remainderData`.
+  `signatureUnlock` parameter `IInputSigningData` replaced by `IBip32Chain`.
+  - [ae335c4](https://github.com/iotaledger/iota-sdk/commit/ae335c4cb64ca67017dc56ef9ed1d1c98b2a9aae) Allow enum debug impls to respect format configs ([#164](https://github.com/iotaledger/iota-sdk/pull/164)) on 2023-03-31
+
 ## \[3.0.0-rc.11]
 
 - Fix dependency URL.

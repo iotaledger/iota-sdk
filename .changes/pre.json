@@ -1,6 +1,7 @@
 {
   "tag": "rc",
   "changes": [
+    ".changes/IBip32Chain.md",
     ".changes/ParticipationEventWithNodes.md",
     ".changes/account-bech32-hrp.md",
     ".changes/account-manager-listen-async.md",
@@ -89,6 +90,8 @@
     ".changes/revoting.md",
     ".changes/rocksdb-19.md",
     ".changes/sdr-prepare-output.md",
+    ".changes/sign-verify-ed25519.md",
+    ".changes/signature-unlock.md",
     ".changes/signatureUnlock.md",
     ".changes/stop-background-sync.md",
     ".changes/stop-background-syncing.md",
