@@ -53,7 +53,7 @@ impl Serialize for WalletEvent {
         struct TypedWalletEvent_<'a> {
             #[serde(rename = "type")]
             kind: u8,
-            #[serde(flatten)]
+            // #[serde(flatten)]
             event: WalletEvent_<'a>,
         }
         let event = match self {

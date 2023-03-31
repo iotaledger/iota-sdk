@@ -13,6 +13,8 @@ mod claim_outputs;
 mod common;
 mod consolidation;
 mod error;
+#[cfg(feature = "events")]
+mod events;
 mod message_interface;
 mod native_tokens;
 mod output_preparation;
