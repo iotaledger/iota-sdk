@@ -24,11 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `Client::hash_transaction_essence()`;
+- `Node` class;
 
 ### Changed
 
 - Changes from the Rust library;
 - `Client::build_alias_output()` state_metadata parameter is now a string;
+- `IotaClient` now uses multiple arguments instead of a single dictionary;
 
 ### Fixed
 
