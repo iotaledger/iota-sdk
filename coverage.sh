@@ -5,9 +5,11 @@ set -e
 rm -rf coverage
 mkdir coverage
 
+TEST_FEATURES="client,pow,wallet,stronghold,message_interface,events,storage"
+
 # Run tests with profiling instrumentation
 echo "Running instrumented unit tests..."
-RUSTFLAGS="-C instrument-coverage" LLVM_PROFILE_FILE="iota-%m.profraw" cargo +nightly test --package iota-sdk --all-features -- --include-ignored
+RUSTFLAGS="-C instrument-coverage" LLVM_PROFILE_FILE="iota-%m.profraw" cargo +nightly test --package iota-sdk --features ${TEST_FEATURES} -- --include-ignored
 
 # Merge all .profraw files into "iota.profdata"
 echo "Merging coverage data..."
@@ -27,7 +29,7 @@ BINARIES=""
 for file in \
   $( \
     RUSTFLAGS="-C instrument-coverage" \
-      cargo +nightly test --tests --package iota-sdk --all-features --no-run --message-format=json -- --include-ignored \
+      cargo +nightly test --tests --package iota-sdk --features ${TEST_FEATURES} --no-run --message-format=json -- --include-ignored \
         | jq -r "select(.profile.test == true) | .filenames[]" \
         | grep -v dSYM - \
   ); \
