@@ -173,10 +173,9 @@ impl AccountHandle {
             // add newly added amount also to the storage deposit return unlock condition, if that was added
             if let Some(sdr) = second_output.unlock_conditions().storage_deposit_return() {
                 // create a new sdr unlock_condition with the updated amount and replace it
-                let new_sdr_unlock_condition = UnlockCondition::StorageDepositReturn(
+                third_output_builder = third_output_builder.replace_unlock_condition(
                     StorageDepositReturnUnlockCondition::new(*sdr.return_address(), new_sdr_amount, token_supply)?,
                 );
-                third_output_builder = third_output_builder.replace_unlock_condition(new_sdr_unlock_condition);
             }
         }
 
@@ -348,10 +347,9 @@ impl AccountHandle {
             // add newly added amount also to the storage deposit return unlock condition, if that was added
             if let Some(sdr) = second_output.unlock_conditions().storage_deposit_return() {
                 // create a new sdr unlock_condition with the updated amount and replace it
-                let new_sdr_unlock_condition = UnlockCondition::StorageDepositReturn(
+                third_output_builder = third_output_builder.replace_unlock_condition(
                     StorageDepositReturnUnlockCondition::new(*sdr.return_address(), new_sdr_amount, token_supply)?,
                 );
-                third_output_builder = third_output_builder.replace_unlock_condition(new_sdr_unlock_condition);
             }
         }
 

@@ -168,8 +168,10 @@ impl AliasOutputBuilder {
         self
     }
 
-    ///
-    pub fn replace_unlock_condition(mut self, unlock_condition: UnlockCondition) -> Self {
+    /// Replaces an [`UnlockCondition`] of the builder with a new one, or adds it.
+    pub fn replace_unlock_condition<T: Into<UnlockCondition>>(mut self, unlock_condition: T) -> Self {
+        let unlock_condition = unlock_condition.into();
+
         match self
             .unlock_conditions
             .iter_mut()

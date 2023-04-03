@@ -7,7 +7,7 @@ use iota_sdk::types::block::{
     output::{
         unlock_condition::{
             AddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition,
-            StateControllerAddressUnlockCondition, UnlockCondition,
+            StateControllerAddressUnlockCondition,
         },
         AliasId, AliasOutput, BasicOutput, ChainId, FoundryId, FoundryOutput, NativeToken, NftId, NftOutput, Output,
         SimpleTokenScheme, TokenId, TokenScheme, TreasuryOutput,
@@ -380,7 +380,7 @@ fn duplicate_output_nft() {
     let nft_id = NftId::from(bytes);
     let nft = NftOutput::build_with_amount(1_000_000, nft_id)
         .unwrap()
-        .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
+        .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
