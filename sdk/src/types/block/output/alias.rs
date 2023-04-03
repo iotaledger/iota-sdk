@@ -218,10 +218,10 @@ impl AliasOutputBuilder {
         self
     }
 
-    ///
+    /// Sets a collection of immutable [`Feature`] to the builder.
     #[inline(always)]
-    pub fn with_immutable_features(mut self, immutable_features: impl IntoIterator<Item = Feature>) -> Self {
-        self.immutable_features = immutable_features.into_iter().collect();
+    pub fn with_immutable_features(mut self, immutable_features: impl IntoIterator<Item = impl Into<Feature>>) -> Self {
+        self.immutable_features = immutable_features.into_iter().map(Into::into).collect();
         self
     }
 
