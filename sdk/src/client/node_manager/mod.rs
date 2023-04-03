@@ -140,6 +140,10 @@ impl NodeManager {
         nodes_with_modified_url.retain(|n| !n.disabled);
 
         if nodes_with_modified_url.is_empty() {
+            return Err(Error::Node("no available nodes with remote Pow".into()));
+        }
+
+        if nodes_with_modified_url.is_empty() {
             return Err(crate::client::Error::HealthyNodePoolEmpty);
         }
 
@@ -346,9 +350,6 @@ impl NodeManager {
     ) -> Result<T> {
         // primary_pow_node should only be used for post request with remote PoW
         let nodes = self.get_nodes(path, None, !local_pow, false)?;
-        if nodes.is_empty() {
-            return Err(Error::Node("no available nodes with remote Pow".into()));
-        }
         let mut error = None;
         // Send requests
         for node in nodes {
@@ -383,9 +384,6 @@ impl NodeManager {
     ) -> Result<T> {
         // primary_pow_node should only be used for post request with remote PoW
         let nodes = self.get_nodes(path, None, !local_pow, false)?;
-        if nodes.is_empty() {
-            return Err(Error::Node("no available nodes with remote Pow".into()));
-        }
         let mut error = None;
         // Send requests
         for node in nodes {
