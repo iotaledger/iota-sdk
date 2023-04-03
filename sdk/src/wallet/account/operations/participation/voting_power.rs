@@ -8,7 +8,7 @@ use crate::{
             output::{
                 feature::{MetadataFeature, TagFeature},
                 unlock_condition::AddressUnlockCondition,
-                BasicOutput, BasicOutputBuilder, Feature, Output,
+                BasicOutput, BasicOutputBuilder, Output,
             },
             payload::TaggedDataPayload,
         },
@@ -144,8 +144,7 @@ impl AccountHandle {
 
             let participation_bytes = participations.to_bytes()?;
 
-            output_builder =
-                output_builder.replace_feature(Feature::Metadata(MetadataFeature::new(participation_bytes.clone())?));
+            output_builder = output_builder.replace_feature(MetadataFeature::new(participation_bytes.clone())?);
 
             participation_bytes
         } else {

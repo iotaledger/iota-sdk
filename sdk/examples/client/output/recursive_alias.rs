@@ -92,7 +92,7 @@ async fn main() -> Result<()> {
             .clone()
             .with_alias_id(alias_id_1)
             // add a sender feature with the first alias
-            .replace_feature(Feature::Sender(SenderFeature::new(alias_0_address)))
+            .replace_feature(SenderFeature::new(alias_0_address))
             .with_state_index(0)
             .replace_unlock_condition(StateControllerAddressUnlockCondition::new(alias_0_address))
             .replace_unlock_condition(GovernorAddressUnlockCondition::new(alias_0_address))

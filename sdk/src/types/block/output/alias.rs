@@ -200,8 +200,10 @@ impl AliasOutputBuilder {
         self
     }
 
-    ///
-    pub fn replace_feature(mut self, feature: Feature) -> Self {
+    /// Replaces a [`Feature`] of the builder with a new one, or adds it.
+    pub fn replace_feature(mut self, feature: impl Into<Feature>) -> Self {
+        let feature = feature.into();
+
         match self.features.iter_mut().find(|f| f.kind() == feature.kind()) {
             Some(f) => *f = feature,
             None => self.features.push(feature),
