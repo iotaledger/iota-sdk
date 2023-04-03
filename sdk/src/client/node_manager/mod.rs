@@ -140,10 +140,9 @@ impl NodeManager {
         nodes_with_modified_url.retain(|n| !n.disabled);
 
         if nodes_with_modified_url.is_empty() {
-            return Err(Error::Node("no available nodes with remote Pow".into()));
-        }
-
-        if nodes_with_modified_url.is_empty() {
+            if use_pow_nodes {
+                return Err(Error::Node("no available nodes with remote Pow".into()));
+            }
             return Err(crate::client::Error::HealthyNodePoolEmpty);
         }
 
