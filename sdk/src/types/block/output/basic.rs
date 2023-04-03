@@ -80,10 +80,10 @@ impl BasicOutputBuilder {
         self
     }
 
-    ///
+    /// Adds an [`UnlockCondition`] to the builder.
     #[inline(always)]
-    pub fn add_unlock_condition(mut self, unlock_condition: UnlockCondition) -> Self {
-        self.unlock_conditions.push(unlock_condition);
+    pub fn add_unlock_condition<T: Into<UnlockCondition>>(mut self, unlock_condition: T) -> Self {
+        self.unlock_conditions.push(unlock_condition.into());
         self
     }
 

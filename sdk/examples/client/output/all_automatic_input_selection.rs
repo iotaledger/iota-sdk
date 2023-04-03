@@ -12,7 +12,7 @@ use iota_sdk::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
                 ImmutableAliasAddressUnlockCondition, StateControllerAddressUnlockCondition,
-                StorageDepositReturnUnlockCondition, TimelockUnlockCondition, UnlockCondition,
+                StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
             },
             AliasId, AliasOutputBuilder, BasicOutputBuilder, Feature, FoundryId, FoundryOutputBuilder, NativeToken,
             NftId, NftOutputBuilder, Output, OutputId, SimpleTokenScheme, TokenId, TokenScheme,
@@ -56,16 +56,12 @@ async fn main() -> Result<()> {
         .add_feature(Feature::Sender(SenderFeature::new(address)))
         .add_feature(Feature::Metadata(MetadataFeature::new(vec![1, 2, 3])?))
         .add_immutable_feature(Feature::Issuer(IssuerFeature::new(address)))
-        .add_unlock_condition(UnlockCondition::StateControllerAddress(
-            StateControllerAddressUnlockCondition::new(address),
-        ))
-        .add_unlock_condition(UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(
-            address,
-        )));
+        .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
+        .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
 
     // address of the owner of the NFT
     let nft_output_builder = NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
-        .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)));
+        .add_unlock_condition(AddressUnlockCondition::new(address));
 
     let outputs = vec![
         alias_output_builder.clone().finish_output(token_supply)?,
@@ -105,9 +101,7 @@ async fn main() -> Result<()> {
     let token_id = TokenId::from(foundry_id);
 
     let foundry_output_builder = FoundryOutputBuilder::new_with_amount(1_000_000, 1, token_scheme)?
-        .add_unlock_condition(UnlockCondition::ImmutableAliasAddress(
-            ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)),
-        ));
+        .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
 
     let outputs = vec![
         alias_output_builder
@@ -144,8 +138,8 @@ async fn main() -> Result<()> {
     // create all outputs
     //////////////////////////////////
 
-    let basic_output_builder = BasicOutputBuilder::new_with_amount(1_000_000)?
-        .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)));
+    let basic_output_builder =
+        BasicOutputBuilder::new_with_amount(1_000_000)?.add_unlock_condition(AddressUnlockCondition::new(address));
 
     let outputs = vec![
         alias_output_builder
@@ -172,19 +166,21 @@ async fn main() -> Result<()> {
         basic_output_builder
             .clone()
             .with_amount(234_100)?
-            .add_unlock_condition(UnlockCondition::StorageDepositReturn(
-                StorageDepositReturnUnlockCondition::new(address, 234_000, token_supply)?,
-            ))
+            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                address,
+                234_000,
+                token_supply,
+            )?)
             .finish_output(token_supply)?,
         // with expiration
         basic_output_builder
             .clone()
-            .add_unlock_condition(UnlockCondition::Expiration(ExpirationUnlockCondition::new(address, 1)?))
+            .add_unlock_condition(ExpirationUnlockCondition::new(address, 1)?)
             .finish_output(token_supply)?,
         // with timelock
         basic_output_builder
             .clone()
-            .add_unlock_condition(UnlockCondition::Timelock(TimelockUnlockCondition::new(1)?))
+            .add_unlock_condition(TimelockUnlockCondition::new(1)?)
             .finish_output(token_supply)?,
     ];
 

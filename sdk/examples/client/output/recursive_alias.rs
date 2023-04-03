@@ -58,12 +58,8 @@ async fn main() -> Result<()> {
             .add_feature(Feature::Sender(SenderFeature::new(address)))
             .with_state_metadata(vec![1, 2, 3])
             .add_immutable_feature(Feature::Issuer(IssuerFeature::new(address)))
-            .add_unlock_condition(UnlockCondition::StateControllerAddress(
-                StateControllerAddressUnlockCondition::new(address),
-            ))
-            .add_unlock_condition(UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(
-                address,
-            )));
+            .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
+            .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
 
     let outputs = vec![alias_output_builder.clone().finish_output(token_supply)?; 3];
 

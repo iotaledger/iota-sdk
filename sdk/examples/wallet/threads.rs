@@ -13,10 +13,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::output::{
-        unlock_condition::{AddressUnlockCondition, UnlockCondition},
-        BasicOutputBuilder,
-    },
+    types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
     wallet::{account_manager::AccountManager, ClientOptions, Result},
 };
 
@@ -73,7 +70,7 @@ async fn main() -> Result<()> {
                     // send transaction
                     let outputs = vec![
                         BasicOutputBuilder::new_with_amount(1_000_000)?
-                            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address_)))
+                            .add_unlock_condition(AddressUnlockCondition::new(address_))
                             .finish_output(account_.client().get_token_supply().await?)?;
                         // amount of outputs in the transaction (one additional output might be added for the remaining amount)
                         1

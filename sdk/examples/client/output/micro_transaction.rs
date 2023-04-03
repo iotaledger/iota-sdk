@@ -8,9 +8,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use iota_sdk::{
     client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::output::{
-        unlock_condition::{
-            AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition, UnlockCondition,
-        },
+        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
         BasicOutputBuilder,
     },
 };
@@ -55,17 +53,16 @@ async fn main() -> Result<()> {
     let outputs = vec![
         // with storage deposit return
         BasicOutputBuilder::new_with_amount(255_100)?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(receiver_address)))
+            .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
             // Return 100 less than the original amount.
-            .add_unlock_condition(UnlockCondition::StorageDepositReturn(
-                StorageDepositReturnUnlockCondition::new(sender_address, 255_000, token_supply)?,
-            ))
+            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                sender_address,
+                255_000,
+                token_supply,
+            )?)
             // If the receiver does not consume this output, we Unlock after a day to avoid
             // locking our funds forever.
-            .add_unlock_condition(UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                sender_address,
-                tomorrow,
-            )?))
+            .add_unlock_condition(ExpirationUnlockCondition::new(sender_address, tomorrow)?)
             .finish_output(token_supply)?,
     ];
 

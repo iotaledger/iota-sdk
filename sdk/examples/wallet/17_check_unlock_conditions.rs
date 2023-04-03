@@ -25,9 +25,7 @@ async fn main() -> Result<()> {
         .collect();
 
     let output = BasicOutputBuilder::new_with_amount(1_000_000)?
-        .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-            *account_addresses[0].as_ref(),
-        )))
+        .add_unlock_condition(AddressUnlockCondition::new(*account_addresses[0].as_ref()))
         .finish_output(account.client().get_token_supply().await?)?;
 
     let controlled_by_account = if let [UnlockCondition::Address(address_unlock_condition)] = output

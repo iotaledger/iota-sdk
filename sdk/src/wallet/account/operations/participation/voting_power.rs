@@ -8,7 +8,7 @@ use crate::{
             output::{
                 feature::{MetadataFeature, TagFeature},
                 unlock_condition::AddressUnlockCondition,
-                BasicOutput, BasicOutputBuilder, Feature, Output, UnlockCondition,
+                BasicOutput, BasicOutputBuilder, Feature, Output,
             },
             payload::TaggedDataPayload,
         },
@@ -64,14 +64,14 @@ impl AccountHandle {
             }
             None => (
                 BasicOutputBuilder::new_with_amount(amount)?
-                    .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
+                    .add_unlock_condition(AddressUnlockCondition::new(
                         self.public_addresses()
                             .await
                             .first()
                             .expect("account needs to have a public address")
                             .address
                             .inner,
-                    )))
+                    ))
                     .add_feature(Feature::Tag(TagFeature::new(PARTICIPATION_TAG.as_bytes().to_vec())?))
                     .finish_output(token_supply)?,
                 None,

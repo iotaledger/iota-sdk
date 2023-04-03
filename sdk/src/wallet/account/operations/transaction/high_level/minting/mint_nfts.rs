@@ -9,7 +9,7 @@ use crate::{
         address::Address,
         output::{
             feature::{Feature, IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
-            unlock_condition::{AddressUnlockCondition, UnlockCondition},
+            unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
         },
         DtoError,
@@ -153,7 +153,7 @@ impl AccountHandle {
             let mut nft_builder =
                 NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone(), NftId::null())?
                     // Address which will own the nft
-                    .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)));
+                    .add_unlock_condition(AddressUnlockCondition::new(address));
 
             if let Some(sender) = nft_options.sender {
                 nft_builder =

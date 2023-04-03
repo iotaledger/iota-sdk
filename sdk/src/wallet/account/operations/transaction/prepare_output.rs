@@ -55,7 +55,7 @@ impl AccountHandle {
         // We start building with minimum storage deposit, so we know the minimum required amount and can later replace
         // it, if needed
         let mut first_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(recipient_address)));
+            .add_unlock_condition(AddressUnlockCondition::new(recipient_address));
 
         if let Some(assets) = options.assets {
             if let Some(native_tokens) = assets.native_tokens {
@@ -90,14 +90,12 @@ impl AccountHandle {
             if let Some(expiration_unix_time) = unlocks.expiration_unix_time {
                 let remainder_address = self.get_remainder_address(transaction_options.clone()).await?;
 
-                first_output_builder = first_output_builder.add_unlock_condition(UnlockCondition::Expiration(
-                    ExpirationUnlockCondition::new(remainder_address, expiration_unix_time)?,
-                ));
+                first_output_builder = first_output_builder
+                    .add_unlock_condition(ExpirationUnlockCondition::new(remainder_address, expiration_unix_time)?);
             }
             if let Some(timelock_unix_time) = unlocks.timelock_unix_time {
-                first_output_builder = first_output_builder.add_unlock_condition(UnlockCondition::Timelock(
-                    TimelockUnlockCondition::new(timelock_unix_time)?,
-                ));
+                first_output_builder =
+                    first_output_builder.add_unlock_condition(TimelockUnlockCondition::new(timelock_unix_time)?);
             }
         }
 
@@ -122,14 +120,13 @@ impl AccountHandle {
                     let min_storage_deposit_return_amount =
                         minimum_storage_deposit_basic_output(&rent_structure, &None, token_supply)?;
 
-                    second_output_builder = second_output_builder.add_unlock_condition(
-                        UnlockCondition::StorageDepositReturn(StorageDepositReturnUnlockCondition::new(
+                    second_output_builder =
+                        second_output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                             remainder_address,
                             // Return minimum storage deposit
                             min_storage_deposit_return_amount,
                             token_supply,
-                        )?),
-                    );
+                        )?);
                 }
 
                 // Check if the remainder balance wouldn't leave dust behind, which wouldn't allow the creation of this
@@ -266,14 +263,12 @@ impl AccountHandle {
             if let Some(expiration_unix_time) = unlocks.expiration_unix_time {
                 let remainder_address = self.get_remainder_address(transaction_options.clone()).await?;
 
-                first_output_builder = first_output_builder.add_unlock_condition(UnlockCondition::Expiration(
-                    ExpirationUnlockCondition::new(remainder_address, expiration_unix_time)?,
-                ));
+                first_output_builder = first_output_builder
+                    .add_unlock_condition(ExpirationUnlockCondition::new(remainder_address, expiration_unix_time)?);
             }
             if let Some(timelock_unix_time) = unlocks.timelock_unix_time {
-                first_output_builder = first_output_builder.add_unlock_condition(UnlockCondition::Timelock(
-                    TimelockUnlockCondition::new(timelock_unix_time)?,
-                ));
+                first_output_builder =
+                    first_output_builder.add_unlock_condition(TimelockUnlockCondition::new(timelock_unix_time)?);
             }
         }
 
@@ -300,14 +295,13 @@ impl AccountHandle {
                     let min_storage_deposit_return_amount =
                         minimum_storage_deposit_basic_output(&rent_structure, &None, token_supply)?;
 
-                    second_output_builder = second_output_builder.add_unlock_condition(
-                        UnlockCondition::StorageDepositReturn(StorageDepositReturnUnlockCondition::new(
+                    second_output_builder =
+                        second_output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                             remainder_address,
                             // Return minimum storage deposit
                             min_storage_deposit_return_amount,
                             token_supply,
-                        )?),
-                    );
+                        )?);
                 }
 
                 // Check if the remaining balance wouldn't leave dust behind, which wouldn't allow the creation of this

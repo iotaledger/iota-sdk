@@ -10,7 +10,7 @@ use crate::{
         address::Address,
         output::{
             unlock_condition::{
-                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition, UnlockCondition,
+                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
             },
             BasicOutputBuilder, NativeToken, TokenId,
         },
@@ -128,8 +128,8 @@ impl AccountHandle {
                             })
                             .collect::<Result<Vec<NativeToken>>>()?,
                     )
-                    .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
-                    .add_unlock_condition(UnlockCondition::StorageDepositReturn(
+                    .add_unlock_condition(AddressUnlockCondition::new(address))
+                    .add_unlock_condition(
                         // We send the full storage_deposit_amount back to the sender, so only the native tokens are
                         // sent
                         StorageDepositReturnUnlockCondition::new(
@@ -137,11 +137,11 @@ impl AccountHandle {
                             storage_deposit_amount,
                             token_supply,
                         )?,
-                    ))
-                    .add_unlock_condition(UnlockCondition::Expiration(ExpirationUnlockCondition::new(
+                    )
+                    .add_unlock_condition(ExpirationUnlockCondition::new(
                         return_address.address.inner,
                         expiration_time,
-                    )?))
+                    )?)
                     .finish_output(token_supply)?,
             )
         }

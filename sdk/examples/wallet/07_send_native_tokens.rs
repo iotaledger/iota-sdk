@@ -11,7 +11,7 @@ use dotenv::dotenv;
 use iota_sdk::{
     types::block::{
         address::Address,
-        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken, TokenId, UnlockCondition},
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken, TokenId},
     },
     wallet::{account_manager::AccountManager, AddressNativeTokens, Result},
 };
@@ -57,9 +57,7 @@ async fn main() -> Result<()> {
 
     let outputs = vec![
         BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                Address::try_from_bech32(bech32_address)?,
-            )))
+            .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(bech32_address)?))
             .with_native_tokens(vec![NativeToken::new(token_id, U256::from(10))?])
             .finish_output(account.client().get_token_supply().await?)?,
     ];

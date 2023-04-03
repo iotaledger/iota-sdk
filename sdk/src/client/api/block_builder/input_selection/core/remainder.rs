@@ -65,8 +65,8 @@ impl InputSelection {
 
         let mut remainder_builder =
             BasicOutputBuilder::new_with_minimum_storage_deposit(self.protocol_parameters.rent_structure().clone())?
-                .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(Address::from(
-                    Ed25519Address::from([0; 32]),
+                .add_unlock_condition(AddressUnlockCondition::new(Address::from(Ed25519Address::from(
+                    [0; 32],
                 ))));
 
         if let Some(native_tokens) = native_tokens_diff {
@@ -132,8 +132,7 @@ impl InputSelection {
         let diff = inputs_sum - outputs_sum;
         let mut remainder_builder = BasicOutputBuilder::new_with_amount(diff)?;
 
-        remainder_builder = remainder_builder
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(remainder_address)));
+        remainder_builder = remainder_builder.add_unlock_condition(AddressUnlockCondition::new(remainder_address));
 
         if let Some(native_tokens) = native_tokens_diff {
             log::debug!("Adding {native_tokens:?} to remainder output for {remainder_address:?}");

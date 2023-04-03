@@ -15,10 +15,7 @@ use iota_sdk::{
         request_funds_from_faucet,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::output::{
-        unlock_condition::{AddressUnlockCondition, UnlockCondition},
-        BasicOutputBuilder,
-    },
+    types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
     wallet::{account_manager::AccountManager, ClientOptions, Result},
 };
 
@@ -101,9 +98,9 @@ async fn main() -> Result<()> {
                     let outputs = vec![
                         // send one or two Mi for more different transactions
                         BasicOutputBuilder::new_with_amount(n * 1_000_000)?
-                            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
+                            .add_unlock_condition(AddressUnlockCondition::new(
                                 *ping_addresses_[address_index % amount_addresses].address().as_ref(),
-                            )))
+                            ))
                             .finish_output(pong_account_.client().get_token_supply().await?)?,
                     ];
                     let tx = pong_account_.send(outputs, None).await?;

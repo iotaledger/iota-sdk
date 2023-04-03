@@ -9,9 +9,7 @@ use crate::{
         address::Address,
         output::{
             feature::{Feature, MetadataFeature},
-            unlock_condition::{
-                GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition, UnlockCondition,
-            },
+            unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
             AliasId, AliasOutputBuilder, Output,
         },
         DtoError,
@@ -135,12 +133,8 @@ impl AccountHandle {
             AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())?
                 .with_state_index(0)
                 .with_foundry_counter(0)
-                .add_unlock_condition(UnlockCondition::StateControllerAddress(
-                    StateControllerAddressUnlockCondition::new(controller_address),
-                ))
-                .add_unlock_condition(UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(
-                    controller_address,
-                )));
+                .add_unlock_condition(StateControllerAddressUnlockCondition::new(controller_address))
+                .add_unlock_condition(GovernorAddressUnlockCondition::new(controller_address));
         if let Some(options) = alias_output_options {
             if let Some(immutable_metadata) = options.immutable_metadata {
                 alias_output_builder = alias_output_builder

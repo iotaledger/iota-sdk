@@ -105,9 +105,9 @@ fn build_basic_output(
 ) -> Output {
     let mut builder = BasicOutputBuilder::new_with_amount(amount)
         .unwrap()
-        .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
+        .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(bech32_address).unwrap(),
-        )));
+        ));
 
     if let Some(native_tokens) = native_tokens {
         builder = builder.with_native_tokens(
@@ -124,22 +124,20 @@ fn build_basic_output(
     }
 
     if let Some((address, amount)) = sdruc {
-        builder = builder.add_unlock_condition(UnlockCondition::StorageDepositReturn(
+        builder = builder.add_unlock_condition(
             StorageDepositReturnUnlockCondition::new(Address::try_from_bech32(address).unwrap(), amount, TOKEN_SUPPLY)
                 .unwrap(),
-        ));
+        );
     }
 
     if let Some(timelock) = timelock {
-        builder = builder.add_unlock_condition(UnlockCondition::Timelock(
-            TimelockUnlockCondition::new(timelock).unwrap(),
-        ));
+        builder = builder.add_unlock_condition(TimelockUnlockCondition::new(timelock).unwrap());
     }
 
     if let Some((address, timestamp)) = expiration {
-        builder = builder.add_unlock_condition(UnlockCondition::Expiration(
+        builder = builder.add_unlock_condition(
             ExpirationUnlockCondition::new(Address::try_from_bech32(address).unwrap(), timestamp).unwrap(),
-        ));
+        );
     }
 
     builder.finish_output(TOKEN_SUPPLY).unwrap()
@@ -158,9 +156,9 @@ fn build_nft_output(
 ) -> Output {
     let mut builder = NftOutputBuilder::new_with_amount(amount, nft_id)
         .unwrap()
-        .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
+        .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(bech32_address).unwrap(),
-        )));
+        ));
 
     if let Some(native_tokens) = native_tokens {
         builder = builder.with_native_tokens(
@@ -183,16 +181,16 @@ fn build_nft_output(
     }
 
     if let Some((address, amount)) = sdruc {
-        builder = builder.add_unlock_condition(UnlockCondition::StorageDepositReturn(
+        builder = builder.add_unlock_condition(
             StorageDepositReturnUnlockCondition::new(Address::try_from_bech32(address).unwrap(), amount, TOKEN_SUPPLY)
                 .unwrap(),
-        ));
+        );
     }
 
     if let Some((address, timestamp)) = expiration {
-        builder = builder.add_unlock_condition(UnlockCondition::Expiration(
+        builder = builder.add_unlock_condition(
             ExpirationUnlockCondition::new(Address::try_from_bech32(address).unwrap(), timestamp).unwrap(),
-        ));
+        );
     }
 
     builder.finish_output(TOKEN_SUPPLY).unwrap()
@@ -215,12 +213,8 @@ fn build_alias_output(
     let mut builder = AliasOutputBuilder::new_with_amount(amount, alias_id)
         .unwrap()
         .with_state_index(state_index)
-        .add_unlock_condition(UnlockCondition::StateControllerAddress(
-            StateControllerAddressUnlockCondition::new(state_address),
-        ))
-        .add_unlock_condition(UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(
-            governor_address,
-        )));
+        .add_unlock_condition(StateControllerAddressUnlockCondition::new(state_address))
+        .add_unlock_condition(GovernorAddressUnlockCondition::new(governor_address));
 
     if let Some(native_tokens) = native_tokens {
         builder = builder.with_native_tokens(
@@ -254,9 +248,7 @@ fn build_foundry_output(
 ) -> Output {
     let mut builder = FoundryOutputBuilder::new_with_amount(amount, serial_number, TokenScheme::Simple(token_scheme))
         .unwrap()
-        .add_unlock_condition(UnlockCondition::ImmutableAliasAddress(
-            ImmutableAliasAddressUnlockCondition::new(AliasAddress::new(alias_id)),
-        ));
+        .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::new(alias_id)));
 
     if let Some(native_tokens) = native_tokens {
         builder = builder.with_native_tokens(
