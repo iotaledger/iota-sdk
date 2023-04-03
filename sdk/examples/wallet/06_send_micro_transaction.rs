@@ -7,7 +7,7 @@
 
 use std::env;
 
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use iota_sdk::wallet::{account_manager::AccountManager, AddressWithMicroAmount, Result};
 
 #[tokio::main]

@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production.
     // Configure your own mnemonic in ".env". Since the output amount cannot be zero, the mnemonic must contain non-zero
     // balance
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();

@@ -9,7 +9,7 @@ use iota_sdk::client::{block::payload::transaction::TransactionId, Client, Resul
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
 

@@ -18,7 +18,7 @@ async fn main() -> Result<()> {
         .build("test.stronghold")?;
 
     // This example uses dotenv, which is not safe for use in production
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
     let mnemonic = std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
     // The mnemonic only needs to be stored the first time
     stronghold_secret_manager.store_mnemonic(mnemonic).await?;

@@ -5,7 +5,7 @@
 
 use std::{env, str::FromStr};
 
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use iota_sdk::{
     client::{
         api::GetAddressesBuilderOptions as GenerateAddressesOptions,

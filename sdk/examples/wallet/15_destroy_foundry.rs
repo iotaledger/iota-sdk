@@ -7,7 +7,7 @@
 
 use std::{env, str::FromStr};
 
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use iota_sdk::{
     types::block::output::FoundryId,
     wallet::{account_manager::AccountManager, Result},

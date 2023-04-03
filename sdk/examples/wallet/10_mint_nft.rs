@@ -7,7 +7,7 @@
 
 use std::env;
 
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use iota_sdk::{
     types::block::output::{
         feature::{IssuerFeature, SenderFeature},

@@ -12,7 +12,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use iota_sdk::{
     client::{
         api::{

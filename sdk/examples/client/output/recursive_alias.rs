@@ -5,7 +5,7 @@
 
 use std::env;
 
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use iota_sdk::{
     client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::{

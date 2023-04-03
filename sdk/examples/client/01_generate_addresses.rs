@@ -8,7 +8,7 @@ use iota_sdk::client::{api::GetAddressesBuilder, secret::SecretManager, Client, 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args()

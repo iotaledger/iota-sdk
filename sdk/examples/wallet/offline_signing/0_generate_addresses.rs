@@ -12,7 +12,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use iota_sdk::{
     client::{
         constants::{SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},

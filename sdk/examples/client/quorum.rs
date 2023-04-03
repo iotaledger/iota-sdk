@@ -9,7 +9,7 @@ use iota_sdk::client::{node_api::indexer::query_parameters::QueryParameter, secr
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
 

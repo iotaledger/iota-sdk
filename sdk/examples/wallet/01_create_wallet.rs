@@ -7,7 +7,7 @@
 
 use std::{env, path::PathBuf};
 
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,

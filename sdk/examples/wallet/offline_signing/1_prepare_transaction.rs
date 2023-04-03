@@ -11,7 +11,7 @@ use std::{
     path::Path,
 };
 
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
