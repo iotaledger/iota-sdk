@@ -161,7 +161,7 @@ impl AliasOutputBuilder {
         self
     }
 
-    /// Sets a collection of [`UnlockCondition`] to the builder.
+    /// Sets the [`UnlockConditions`]s in the builder, overwriting any existing values.
     #[inline(always)]
     pub fn with_unlock_conditions(
         mut self,
@@ -193,7 +193,7 @@ impl AliasOutputBuilder {
         self
     }
 
-    /// Sets a collection of [`Feature`] to the builder.
+    /// Sets the [`Feature`]s in the builder, overwriting any existing values.
     #[inline(always)]
     pub fn with_features(mut self, features: impl IntoIterator<Item = impl Into<Feature>>) -> Self {
         self.features = features.into_iter().map(Into::into).collect();
@@ -218,7 +218,7 @@ impl AliasOutputBuilder {
         self
     }
 
-    /// Sets a collection of immutable [`Feature`] to the builder.
+    /// Sets the immutable [`Feature`]s in the builder, overwriting any existing values.
     #[inline(always)]
     pub fn with_immutable_features(mut self, immutable_features: impl IntoIterator<Item = impl Into<Feature>>) -> Self {
         self.immutable_features = immutable_features.into_iter().map(Into::into).collect();
