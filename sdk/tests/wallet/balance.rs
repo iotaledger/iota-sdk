@@ -5,7 +5,7 @@ use iota_sdk::{
     types::block::output::{
         feature::SenderFeature,
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-        BasicOutputBuilder, Feature, UnlockCondition,
+        BasicOutputBuilder, UnlockCondition,
     },
     wallet::Result,
 };
@@ -39,9 +39,9 @@ async fn balance_expiration() -> Result<()> {
                     account_0.client().get_time_checked().await? + seconds_until_expired,
                 )?),
             ])
-            .with_features(vec![Feature::Sender(SenderFeature::new(
+            .with_features(vec![SenderFeature::new(
                 *account_0.addresses().await?[0].address().as_ref(),
-            ))])
+            )])
             .finish_output(token_supply)?,
     ];
 

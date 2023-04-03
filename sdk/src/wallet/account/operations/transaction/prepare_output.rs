@@ -221,7 +221,7 @@ impl AccountHandle {
         };
 
         // Remove potentially existing features.
-        first_output_builder = first_output_builder.with_features(vec![]);
+        first_output_builder = first_output_builder.with_features(Vec::<Feature>::new());
 
         // Set new address unlock condition
         first_output_builder = first_output_builder.with_unlock_conditions(vec![AddressUnlockCondition::new(

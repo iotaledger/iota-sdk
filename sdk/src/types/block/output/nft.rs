@@ -133,10 +133,10 @@ impl NftOutputBuilder {
         self
     }
 
-    ///
+    /// Sets a collection of [`Feature`] to the builder.
     #[inline(always)]
-    pub fn with_features(mut self, features: impl IntoIterator<Item = Feature>) -> Self {
-        self.features = features.into_iter().collect();
+    pub fn with_features(mut self, features: impl IntoIterator<Item = impl Into<Feature>>) -> Self {
+        self.features = features.into_iter().map(Into::into).collect();
         self
     }
 
