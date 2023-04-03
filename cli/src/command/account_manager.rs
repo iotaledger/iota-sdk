@@ -4,13 +4,17 @@
 use std::{fs::File, io::prelude::*};
 
 use clap::{Args, Parser, Subcommand};
+use dialoguer::Password;
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, secret::SecretManager, utils::generate_mnemonic},
+    client::{
+        constants::SHIMMER_COIN_TYPE, secret::SecretManager, stronghold::StrongholdAdapter, utils::generate_mnemonic,
+    },
     wallet::{account_manager::AccountManager, ClientOptions},
 };
 use log::LevelFilter;
+use zeroize::Zeroize;
 
-use crate::{error::Error, helper::get_password, println_log_info};
+use crate::{account_manager::DEFAULT_STRONHGOLD_PATH, error::Error, helper::get_password, println_log_info};
 
 #[derive(Debug, Clone, Parser)]
 #[command(author, version, about, long_about = None, propagate_version = true)]
@@ -33,6 +37,11 @@ pub enum AccountManagerCommand {
     ChangePassword,
     /// Initialize the wallet.
     Init(InitParameters),
+    /// Migrate a stronghold v2 snapshot to v3.
+    MigrateStronghold {
+        /// Path of the to be migrated stronghold file. "./stardust-cli-wallet.stronghold" if nothing provided.
+        path: Option<String>,
+    },
     /// Generate a random mnemonic.
     Mnemonic,
     /// Create a new account.
@@ -125,6 +134,20 @@ pub async fn init_command(
     println_log_info!("Mnemonic stored successfully");
 
     Ok(account_manager)
+}
+
+pub async fn migrate_command(path: Option<String>) -> Result<(), Error> {
+    let mut password = Password::new().with_prompt("Stronghold password").interact()?;
+    StrongholdAdapter::migrate_v2_to_v3(
+        path.unwrap_or(DEFAULT_STRONHGOLD_PATH.to_string()),
+        &password,
+        None,
+        None,
+    )?;
+    password.zeroize();
+    println_log_info!("Stronghold successfully migrated from v2 to v3.");
+
+    Ok(())
 }
 
 pub async fn mnemonic_command() -> Result<(), Error> {
