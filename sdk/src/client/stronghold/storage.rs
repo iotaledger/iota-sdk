@@ -86,7 +86,7 @@ pub(crate) fn insert(stronghold_client: &Client, k: &[u8], v: &[u8]) -> Result<O
         crypto::utils::rand::fill(key.as_mut())?;
         let vault_path = store_key_location.vault_path();
         let vault = stronghold_client.vault(vault_path);
-        vault.write_secret(store_key_location.clone(), key.to_vec())?;
+        vault.write_secret(store_key_location.clone(), key)?;
     }
 
     let mut nonce = [0; XChaCha20Poly1305::NONCE_LENGTH];
