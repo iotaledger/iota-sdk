@@ -8,10 +8,8 @@ use crate::{
     types::block::{
         address::Address,
         output::{
-            feature::{Feature, MetadataFeature},
-            unlock_condition::{
-                GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition, UnlockCondition,
-            },
+            feature::MetadataFeature,
+            unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
             AliasId, AliasOutputBuilder, Output,
         },
         DtoError,
@@ -135,20 +133,15 @@ impl AccountHandle {
             AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())?
                 .with_state_index(0)
                 .with_foundry_counter(0)
-                .add_unlock_condition(UnlockCondition::StateControllerAddress(
-                    StateControllerAddressUnlockCondition::new(controller_address),
-                ))
-                .add_unlock_condition(UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(
-                    controller_address,
-                )));
+                .add_unlock_condition(StateControllerAddressUnlockCondition::new(controller_address))
+                .add_unlock_condition(GovernorAddressUnlockCondition::new(controller_address));
         if let Some(options) = alias_output_options {
             if let Some(immutable_metadata) = options.immutable_metadata {
-                alias_output_builder = alias_output_builder
-                    .add_immutable_feature(Feature::Metadata(MetadataFeature::new(immutable_metadata)?));
+                alias_output_builder =
+                    alias_output_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
             }
             if let Some(metadata) = options.metadata {
-                alias_output_builder =
-                    alias_output_builder.add_feature(Feature::Metadata(MetadataFeature::new(metadata)?));
+                alias_output_builder = alias_output_builder.add_feature(MetadataFeature::new(metadata)?);
             }
             if let Some(state_metadata) = options.state_metadata {
                 alias_output_builder = alias_output_builder.with_state_metadata(state_metadata);

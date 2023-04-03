@@ -80,22 +80,27 @@ impl BasicOutputBuilder {
         self
     }
 
-    ///
+    /// Adds an [`UnlockCondition`] to the builder.
     #[inline(always)]
-    pub fn add_unlock_condition(mut self, unlock_condition: UnlockCondition) -> Self {
-        self.unlock_conditions.push(unlock_condition);
+    pub fn add_unlock_condition(mut self, unlock_condition: impl Into<UnlockCondition>) -> Self {
+        self.unlock_conditions.push(unlock_condition.into());
         self
     }
 
-    ///
+    /// Sets the [`UnlockConditions`]s in the builder, overwriting any existing values.
     #[inline(always)]
-    pub fn with_unlock_conditions(mut self, unlock_conditions: impl IntoIterator<Item = UnlockCondition>) -> Self {
-        self.unlock_conditions = unlock_conditions.into_iter().collect();
+    pub fn with_unlock_conditions(
+        mut self,
+        unlock_conditions: impl IntoIterator<Item = impl Into<UnlockCondition>>,
+    ) -> Self {
+        self.unlock_conditions = unlock_conditions.into_iter().map(Into::into).collect();
         self
     }
 
-    ///
-    pub fn replace_unlock_condition(mut self, unlock_condition: UnlockCondition) -> Self {
+    /// Replaces an [`UnlockCondition`] of the builder with a new one, or adds it.
+    pub fn replace_unlock_condition(mut self, unlock_condition: impl Into<UnlockCondition>) -> Self {
+        let unlock_condition = unlock_condition.into();
+
         match self
             .unlock_conditions
             .iter_mut()
@@ -107,22 +112,24 @@ impl BasicOutputBuilder {
         self
     }
 
-    ///
+    /// Adds a [`Feature`] to the builder.
     #[inline(always)]
-    pub fn add_feature(mut self, feature: Feature) -> Self {
-        self.features.push(feature);
+    pub fn add_feature(mut self, feature: impl Into<Feature>) -> Self {
+        self.features.push(feature.into());
         self
     }
 
-    ///
+    /// Sets the [`Feature`]s in the builder, overwriting any existing values.
     #[inline(always)]
-    pub fn with_features(mut self, features: impl IntoIterator<Item = Feature>) -> Self {
-        self.features = features.into_iter().collect();
+    pub fn with_features(mut self, features: impl IntoIterator<Item = impl Into<Feature>>) -> Self {
+        self.features = features.into_iter().map(Into::into).collect();
         self
     }
 
-    ///
-    pub fn replace_feature(mut self, feature: Feature) -> Self {
+    /// Replaces a [`Feature`] of the builder with a new one, or adds it.
+    pub fn replace_feature(mut self, feature: impl Into<Feature>) -> Self {
+        let feature = feature.into();
+
         match self.features.iter_mut().find(|f| f.kind() == feature.kind()) {
             Some(f) => *f = feature,
             None => self.features.push(feature),
@@ -385,7 +392,7 @@ pub mod dto {
             }
 
             for b in &value.features {
-                builder = builder.add_feature(b.try_into()?);
+                builder = builder.add_feature(Feature::try_from(b)?);
             }
 
             Ok(builder)

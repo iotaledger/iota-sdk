@@ -8,10 +8,8 @@ use iota_sdk::{
     types::block::{
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
-            unlock_condition::{
-                GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition, UnlockCondition,
-            },
-            AliasId, AliasOutputBuilder, Feature, Output, OutputId,
+            unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
+            AliasId, AliasOutputBuilder, Output, OutputId,
         },
         payload::{transaction::TransactionEssence, Payload},
     },
@@ -45,15 +43,11 @@ async fn main() -> Result<()> {
     // create new alias output
     //////////////////////////////////
     let alias_output_builder = AliasOutputBuilder::new_with_amount(1_000_000, AliasId::null())?
-        .add_feature(Feature::Sender(SenderFeature::new(address)))
-        .add_feature(Feature::Metadata(MetadataFeature::new(vec![1, 2, 3])?))
-        .add_immutable_feature(Feature::Issuer(IssuerFeature::new(address)))
-        .add_unlock_condition(UnlockCondition::StateControllerAddress(
-            StateControllerAddressUnlockCondition::new(address),
-        ))
-        .add_unlock_condition(UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(
-            address,
-        )));
+        .add_feature(SenderFeature::new(address))
+        .add_feature(MetadataFeature::new(vec![1, 2, 3])?)
+        .add_immutable_feature(IssuerFeature::new(address))
+        .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
+        .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
 
     let outputs = vec![alias_output_builder.clone().finish_output(token_supply)?];
 

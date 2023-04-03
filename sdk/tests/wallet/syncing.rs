@@ -31,9 +31,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
     // Only one basic output without further unlock conditions
     let outputs = vec![
         BasicOutputBuilder::new_with_amount(1_000_000)?
-            .with_unlock_conditions(vec![UnlockCondition::Address(AddressUnlockCondition::new(
-                account_1_address,
-            ))])
+            .with_unlock_conditions(vec![AddressUnlockCondition::new(account_1_address)])
             .finish_output(token_supply)?,
         BasicOutputBuilder::new_with_amount(1_000_000)?
             .with_unlock_conditions(vec![
@@ -66,9 +64,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
             ])
             .finish_output(token_supply)?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
-            .with_unlock_conditions(vec![UnlockCondition::Address(AddressUnlockCondition::new(
-                account_1_address,
-            ))])
+            .with_unlock_conditions(vec![AddressUnlockCondition::new(account_1_address)])
             .finish_output(token_supply)?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
             .with_unlock_conditions(vec![

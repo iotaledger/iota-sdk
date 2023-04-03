@@ -13,10 +13,7 @@ use iota_sdk::{
     },
     types::block::{
         address::Address,
-        output::{
-            unlock_condition::{AddressUnlockCondition, UnlockCondition},
-            BasicOutputBuilder,
-        },
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
     },
     wallet::{account_manager::AccountManager, ClientOptions, Result},
 };
@@ -66,9 +63,9 @@ async fn main() -> Result<()> {
     // send transaction
     let outputs = vec![
         BasicOutputBuilder::new_with_amount(1_000_000)?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                Address::try_from_bech32("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
-            )))
+            .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(
+                "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
+            )?))
             .finish_output(account.client().get_token_supply().await?)?,
     ];
 

@@ -300,23 +300,23 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         .send(
             vec![
                 BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())?
-                    .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
+                    .add_unlock_condition(AddressUnlockCondition::new(
                         *account_1.addresses().await?[0].address().as_ref(),
-                    )))
-                    .add_unlock_condition(UnlockCondition::Expiration(ExpirationUnlockCondition::new(
+                    ))
+                    .add_unlock_condition(ExpirationUnlockCondition::new(
                         *account_0.addresses().await?[0].address().as_ref(),
                         account_0.client().get_time_checked().await? + 5000,
-                    )?))
+                    )?)
                     .add_native_token(NativeToken::new(mint_tx_0.token_id, native_token_amount)?)
                     .finish_output(token_supply)?,
                 BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())?
-                    .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
+                    .add_unlock_condition(AddressUnlockCondition::new(
                         *account_1.addresses().await?[0].address().as_ref(),
-                    )))
-                    .add_unlock_condition(UnlockCondition::Expiration(ExpirationUnlockCondition::new(
+                    ))
+                    .add_unlock_condition(ExpirationUnlockCondition::new(
                         *account_0.addresses().await?[0].address().as_ref(),
                         account_0.client().get_time_checked().await? + 5000,
-                    )?))
+                    )?)
                     .add_native_token(NativeToken::new(mint_tx_1.token_id, native_token_amount)?)
                     .finish_output(token_supply)?,
             ],

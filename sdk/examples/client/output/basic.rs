@@ -9,9 +9,9 @@ use iota_sdk::{
         feature::MetadataFeature,
         unlock_condition::{
             AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-            TimelockUnlockCondition, UnlockCondition,
+            TimelockUnlockCondition,
         },
-        BasicOutputBuilder, Feature,
+        BasicOutputBuilder,
     },
 };
 
@@ -41,8 +41,8 @@ async fn main() -> Result<()> {
         request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?
     );
 
-    let basic_output_builder = BasicOutputBuilder::new_with_amount(1_000_000)?
-        .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)));
+    let basic_output_builder =
+        BasicOutputBuilder::new_with_amount(1_000_000)?.add_unlock_condition(AddressUnlockCondition::new(address));
 
     let outputs = vec![
         // most simple output
@@ -50,25 +50,27 @@ async fn main() -> Result<()> {
         // with metadata feature block
         basic_output_builder
             .clone()
-            .add_feature(Feature::Metadata(MetadataFeature::new(vec![13, 37])?))
+            .add_feature(MetadataFeature::new(vec![13, 37])?)
             .finish_output(token_supply)?,
         // with storage deposit return
         basic_output_builder
             .clone()
             .with_amount(234_100)?
-            .add_unlock_condition(UnlockCondition::StorageDepositReturn(
-                StorageDepositReturnUnlockCondition::new(address, 234_000, token_supply)?,
-            ))
+            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                address,
+                234_000,
+                token_supply,
+            )?)
             .finish_output(token_supply)?,
         // with expiration
         basic_output_builder
             .clone()
-            .add_unlock_condition(UnlockCondition::Expiration(ExpirationUnlockCondition::new(address, 1)?))
+            .add_unlock_condition(ExpirationUnlockCondition::new(address, 1)?)
             .finish_output(token_supply)?,
         // with timelock
         basic_output_builder
             .clone()
-            .add_unlock_condition(UnlockCondition::Timelock(TimelockUnlockCondition::new(1)?))
+            .add_unlock_condition(TimelockUnlockCondition::new(1)?)
             .finish_output(token_supply)?,
     ];
 

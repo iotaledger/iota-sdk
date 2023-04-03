@@ -6,9 +6,9 @@ use crate::{
         api::plugins::participation::types::{Participations, PARTICIPATION_TAG},
         block::{
             output::{
-                feature::{MetadataFeature, TagFeature},
+                feature::{Feature, MetadataFeature, TagFeature},
                 unlock_condition::AddressUnlockCondition,
-                BasicOutput, BasicOutputBuilder, Feature, Output, UnlockCondition,
+                BasicOutput, BasicOutputBuilder, Output,
             },
             payload::TaggedDataPayload,
         },
@@ -64,15 +64,15 @@ impl AccountHandle {
             }
             None => (
                 BasicOutputBuilder::new_with_amount(amount)?
-                    .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
+                    .add_unlock_condition(AddressUnlockCondition::new(
                         self.public_addresses()
                             .await
                             .first()
                             .expect("account needs to have a public address")
                             .address
                             .inner,
-                    )))
-                    .add_feature(Feature::Tag(TagFeature::new(PARTICIPATION_TAG.as_bytes().to_vec())?))
+                    ))
+                    .add_feature(TagFeature::new(PARTICIPATION_TAG.as_bytes().to_vec())?)
                     .finish_output(token_supply)?,
                 None,
             ),
@@ -103,7 +103,7 @@ impl AccountHandle {
         let (new_output, tagged_data_payload) = if amount == output.amount() {
             (
                 BasicOutputBuilder::from(output)
-                    .with_features([])
+                    .with_features(Vec::<Feature>::new())
                     .finish_output(token_supply)?,
                 None,
             )
@@ -144,8 +144,7 @@ impl AccountHandle {
 
             let participation_bytes = participations.to_bytes()?;
 
-            output_builder =
-                output_builder.replace_feature(Feature::Metadata(MetadataFeature::new(participation_bytes.clone())?));
+            output_builder = output_builder.replace_feature(MetadataFeature::new(participation_bytes.clone())?);
 
             participation_bytes
         } else {
