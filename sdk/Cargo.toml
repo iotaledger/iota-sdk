@@ -364,6 +364,11 @@ path = "examples/client/output/build_alias_output.rs"
 required-features = [ "client" ]
 
 [[example]]
+name = "build_nft_output"
+path = "examples/client/output/build_nft_output.rs"
+required-features = [ "client" ]
+
+[[example]]
 name = "recursive_alias"
 path = "examples/client/output/recursive_alias.rs"
 required-features = [ "client" ]
