@@ -117,9 +117,9 @@ Migrates a stronghold snapshot from v2 to v3.
 
 #### Parameters
 
-| Name   | Optional  | Default                            | Example |
-| ------ | --------- | ---------------------------------- | ------- |
-| `path` | ✓         | "./stardust-cli-wallet.stronghold" | main    |
+| Name   | Optional | Default                            | Example           |
+| ------ | -------- | ---------------------------------- | ----------------- |
+| `path` | ✓        | "./stardust-cli-wallet.stronghold" | backup.stronghold |
 
 #### Example
 
