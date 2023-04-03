@@ -32,16 +32,16 @@ async fn main() -> Result<()> {
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
 
     // IOTA NFT Standard - IRC27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md
-    let tip_27_immutable_metadata = r#"{
+    let tip_27_immutable_metadata = serde_json::from_str::<serde_json::Value>(
+        r#"{
     "standard": "IRC27",
     "version": "v1.0",
     "type":"image/jpeg",
     "uri":"https://mywebsite.com/my-nft-files-1.jpeg",
     "name":"My NFT #0001"
-    }"#
-    .replace("  ", "")
-    .replace("\n", "")
-    .replace(": ", ":")
+    }"#,
+    )?
+    .to_string()
     .as_bytes()
     .to_vec();
 
