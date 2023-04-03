@@ -87,9 +87,9 @@ async fn balance_expiration() -> Result<()> {
     let outputs = vec![
         BasicOutputBuilder::new_with_amount(1_000_000)?
             // Send to account 1 with expiration to account 2, both have no amount yet
-            .with_unlock_conditions(vec![UnlockCondition::Address(AddressUnlockCondition::new(
+            .with_unlock_conditions(vec![AddressUnlockCondition::new(
                 *account_1.addresses().await?[0].address().as_ref(),
-            ))])
+            )])
             .finish_output(token_supply)?,
     ];
     let _tx = account_2.send(outputs, None).await?;

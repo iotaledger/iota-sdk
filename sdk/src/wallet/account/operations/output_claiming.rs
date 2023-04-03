@@ -10,7 +10,7 @@ use crate::{
     types::block::{
         address::Address,
         output::{
-            unlock_condition::{AddressUnlockCondition, StorageDepositReturnUnlockCondition, UnlockCondition},
+            unlock_condition::{AddressUnlockCondition, StorageDepositReturnUnlockCondition},
             BasicOutputBuilder, NativeTokens, NativeTokensBuilder, NftOutputBuilder, Output, OutputId,
         },
     },
@@ -264,17 +264,13 @@ impl AccountHandle {
                     // deposit for the remaining amount and possible NTs
                     NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([UnlockCondition::Address(AddressUnlockCondition::new(
-                            first_account_address.address.inner,
-                        ))])
+                        .with_unlock_conditions([AddressUnlockCondition::new(first_account_address.address.inner)])
                         .finish_output(token_supply)?
                 } else {
                     NftOutputBuilder::from(nft_output)
                         .with_minimum_storage_deposit(rent_structure.clone())
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([UnlockCondition::Address(AddressUnlockCondition::new(
-                            first_account_address.address.inner,
-                        ))])
+                        .with_unlock_conditions([AddressUnlockCondition::new(first_account_address.address.inner)])
                         // Set native tokens empty, we will collect them from all inputs later
                         .with_native_tokens([])
                         .finish_output(token_supply)?

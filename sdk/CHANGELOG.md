@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Builder methods `add_unlock_condition`, `replace_unlock_condition` are now generic;
+- Builder methods `add_unlock_condition`, `replace_unlock_condition`, `with_unlock_conditions` are now generic;
 
 ## 0.1.0 - 2023-04-03
 

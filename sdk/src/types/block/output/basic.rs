@@ -82,20 +82,23 @@ impl BasicOutputBuilder {
 
     /// Adds an [`UnlockCondition`] to the builder.
     #[inline(always)]
-    pub fn add_unlock_condition<T: Into<UnlockCondition>>(mut self, unlock_condition: T) -> Self {
+    pub fn add_unlock_condition(mut self, unlock_condition: impl Into<UnlockCondition>) -> Self {
         self.unlock_conditions.push(unlock_condition.into());
         self
     }
 
-    ///
+    /// Sets a collection of [`UnlockCondition`] to the builder.
     #[inline(always)]
-    pub fn with_unlock_conditions(mut self, unlock_conditions: impl IntoIterator<Item = UnlockCondition>) -> Self {
-        self.unlock_conditions = unlock_conditions.into_iter().collect();
+    pub fn with_unlock_conditions(
+        mut self,
+        unlock_conditions: impl IntoIterator<Item = impl Into<UnlockCondition>>,
+    ) -> Self {
+        self.unlock_conditions = unlock_conditions.into_iter().map(Into::into).collect();
         self
     }
 
     /// Replaces an [`UnlockCondition`] of the builder with a new one, or adds it.
-    pub fn replace_unlock_condition<T: Into<UnlockCondition>>(mut self, unlock_condition: T) -> Self {
+    pub fn replace_unlock_condition(mut self, unlock_condition: impl Into<UnlockCondition>) -> Self {
         let unlock_condition = unlock_condition.into();
 
         match self

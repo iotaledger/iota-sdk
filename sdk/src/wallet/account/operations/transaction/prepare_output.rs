@@ -14,7 +14,7 @@ use crate::{
             feature::{Feature, IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-                TimelockUnlockCondition, UnlockCondition,
+                TimelockUnlockCondition,
             },
             BasicOutputBuilder, NativeToken, NftId, NftOutput, NftOutputBuilder, Output, Rent,
         },
@@ -224,8 +224,8 @@ impl AccountHandle {
         first_output_builder = first_output_builder.with_features(vec![]);
 
         // Set new address unlock condition
-        first_output_builder = first_output_builder.with_unlock_conditions(vec![UnlockCondition::Address(
-            AddressUnlockCondition::new(Address::try_from_bech32(options.recipient_address.clone())?),
+        first_output_builder = first_output_builder.with_unlock_conditions(vec![AddressUnlockCondition::new(
+            Address::try_from_bech32(options.recipient_address.clone())?,
         )]);
 
         if let Some(assets) = options.assets {

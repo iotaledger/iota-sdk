@@ -15,10 +15,7 @@ use crate::{
     client::api::RemainderData,
     types::block::{
         address::{Address, Ed25519Address},
-        output::{
-            unlock_condition::{AddressUnlockCondition, UnlockCondition},
-            BasicOutputBuilder, NativeTokensBuilder, Output,
-        },
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder, Output},
     },
 };
 
@@ -94,7 +91,7 @@ impl InputSelection {
             if amount > output_sdr_amount {
                 let diff = amount - output_sdr_amount;
                 let srd_output = BasicOutputBuilder::new_with_amount(diff)?
-                    .with_unlock_conditions([UnlockCondition::Address(AddressUnlockCondition::new(address))])
+                    .with_unlock_conditions([AddressUnlockCondition::new(address)])
                     .finish_output(self.protocol_parameters.token_supply())?;
 
                 // TODO verify_storage_deposit ?
