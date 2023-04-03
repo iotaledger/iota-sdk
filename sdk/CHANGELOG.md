@@ -18,3 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 ### Security -->
+
+## 0.1.0 - 2023-04-03
+
+First release of the `iota-sdk` crate.
