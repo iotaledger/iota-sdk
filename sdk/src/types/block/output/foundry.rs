@@ -183,8 +183,10 @@ impl FoundryOutputBuilder {
         self
     }
 
-    ///
-    pub fn replace_immutable_feature(mut self, immutable_feature: Feature) -> Self {
+    /// Replaces an immutable [`Feature`] of the builder with a new one, or adds it.
+    pub fn replace_immutable_feature(mut self, immutable_feature: impl Into<Feature>) -> Self {
+        let immutable_feature = immutable_feature.into();
+
         match self
             .immutable_features
             .iter_mut()
