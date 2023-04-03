@@ -7,6 +7,7 @@ use iota_sdk::{
     client::secret::{stronghold::StrongholdSecretManager, SecretManager},
     wallet::account_manager::AccountManager,
 };
+use zeroize::Zeroize;
 
 use crate::{
     command::account_manager::{
@@ -37,7 +38,7 @@ pub async fn new_account_manager(cli: AccountManagerCli) -> Result<(Option<Accou
     );
     let snapshot_path = std::path::Path::new(DEFAULT_STRONHGOLD_PATH);
     let snapshot_exists = snapshot_path.exists();
-    let password = if let Some(AccountManagerCommand::Restore { .. }) = &cli.command {
+    let mut password = if let Some(AccountManagerCommand::Restore { .. }) = &cli.command {
         get_password("Stronghold password", false)?
     } else {
         get_password("Stronghold password", !snapshot_path.exists())?
@@ -53,7 +54,7 @@ pub async fn new_account_manager(cli: AccountManagerCli) -> Result<(Option<Accou
             (init_command(secret_manager, storage_path, init_parameters).await?, None)
         } else if let AccountManagerCommand::Restore { backup_path } = command {
             (
-                restore_command(secret_manager, storage_path, backup_path, password).await?,
+                restore_command(secret_manager, storage_path, backup_path, &password).await?,
                 None,
             )
         } else {
@@ -100,6 +101,8 @@ pub async fn new_account_manager(cli: AccountManagerCli) -> Result<(Option<Accou
             )
         }
     };
+
+    password.zeroize();
 
     Ok((Some(account_manager), account))
 }

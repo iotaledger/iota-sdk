@@ -4,7 +4,6 @@
 use std::{fs::File, io::prelude::*};
 
 use clap::{Args, Parser, Subcommand};
-use dialoguer::Password;
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE, secret::SecretManager, stronghold::StrongholdAdapter, utils::generate_mnemonic,
@@ -85,9 +84,10 @@ pub async fn backup_command(manager: &AccountManager, path: String, password: &s
 }
 
 pub async fn change_password_command(manager: &AccountManager, current: &str) -> Result<(), Error> {
-    let new = get_password("Stronghold new password", true)?;
+    let mut new = get_password("Stronghold new password", true)?;
 
     manager.change_stronghold_password(current, &new).await?;
+    new.zeroize();
 
     Ok(())
 }
@@ -137,9 +137,9 @@ pub async fn init_command(
 }
 
 pub async fn migrate_command(path: Option<String>) -> Result<(), Error> {
-    let mut password = Password::new().with_prompt("Stronghold password").interact()?;
+    let mut password = get_password("Stronghold password", false)?;
     StrongholdAdapter::migrate_v2_to_v3(
-        path.unwrap_or(DEFAULT_STRONHGOLD_PATH.to_string()),
+        path.as_deref().unwrap_or(DEFAULT_STRONHGOLD_PATH),
         &password,
         None,
         None,
@@ -184,7 +184,7 @@ pub async fn restore_command(
     secret_manager: SecretManager,
     storage_path: String,
     backup_path: String,
-    password: String,
+    password: &str,
 ) -> Result<AccountManager, Error> {
     let account_manager = AccountManager::builder()
         .with_secret_manager(secret_manager)
@@ -197,7 +197,7 @@ pub async fn restore_command(
         .await?;
 
     account_manager
-        .restore_backup(backup_path.into(), password, None)
+        .restore_backup(backup_path.into(), password.to_string(), None)
         .await?;
 
     Ok(account_manager)
