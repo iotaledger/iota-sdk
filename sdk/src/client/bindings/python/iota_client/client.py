@@ -6,6 +6,7 @@ from iota_client._utils import Utils
 from json import dumps
 import humps
 from datetime import timedelta
+from enum import Enum
 
 class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
     def __init__(
@@ -199,7 +200,7 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
         internal : bool
             Internal addresses
         coin_type : int
-            Coin type. IOTA = 4218. Shimmer = 4219.
+            Coin type. The CoinType enum can be used
         bech32_hrp : string
             Bech32 human readable part.
         ledger_nano_prompt : bool
@@ -378,3 +379,7 @@ class Node():
                     basic_auth.append(config.pop('password'))
 
         return config
+
+class CoinType(Enum):
+    IOTA = 4218
+    SHIMMER = 4219

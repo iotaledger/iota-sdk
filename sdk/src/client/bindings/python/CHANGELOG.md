@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Client::hash_transaction_essence()`;
 - `Node` class;
+- `CoinType` enum class;
 
 ### Changed
 

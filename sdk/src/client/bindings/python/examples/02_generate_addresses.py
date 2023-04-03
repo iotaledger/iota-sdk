@@ -1,4 +1,4 @@
-from iota_client import IotaClient, MnemonicSecretManager
+from iota_client import IotaClient, MnemonicSecretManager, CoinType
 
 # Create an IotaClient instance
 client = IotaClient(nodes = ['https://api.testnet.shimmer.network'])
@@ -34,7 +34,7 @@ print()
 
 # Generate addresses with providing all inputs, that way it can also be done offline without a node.
 addresses = client.generate_addresses(secret_manager, 
-    coin_type=4219, # Shimmer coin type
+    coin_type=CoinType.SHIMMER,
     account_index=0,
     start=0,
     end=4,
