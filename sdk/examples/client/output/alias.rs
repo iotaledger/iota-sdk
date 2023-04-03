@@ -9,7 +9,7 @@ use iota_sdk::{
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-            AliasId, AliasOutputBuilder, Feature, Output, OutputId,
+            AliasId, AliasOutputBuilder, Output, OutputId,
         },
         payload::{transaction::TransactionEssence, Payload},
     },
@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
     let alias_output_builder = AliasOutputBuilder::new_with_amount(1_000_000, AliasId::null())?
         .add_feature(SenderFeature::new(address))
         .add_feature(MetadataFeature::new(vec![1, 2, 3])?)
-        .add_immutable_feature(Feature::Issuer(IssuerFeature::new(address)))
+        .add_immutable_feature(IssuerFeature::new(address))
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
 
@@ -69,12 +69,10 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
     let alias_id = AliasId::from(&alias_output_id);
-    let outputs = vec![
-        alias_output_builder
-            .with_alias_id(alias_id)
-            .with_state_index(1)
-            .finish_output(token_supply)?,
-    ];
+    let outputs = vec![alias_output_builder
+        .with_alias_id(alias_id)
+        .with_state_index(1)
+        .finish_output(token_supply)?];
 
     let block = client
         .block()

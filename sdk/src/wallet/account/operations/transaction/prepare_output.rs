@@ -253,8 +253,8 @@ impl AccountHandle {
             }
 
             if let Some(issuer) = features.issuer {
-                first_output_builder = first_output_builder
-                    .add_immutable_feature(Feature::Issuer(IssuerFeature::new(Address::try_from_bech32(issuer)?)));
+                first_output_builder =
+                    first_output_builder.add_immutable_feature(IssuerFeature::new(Address::try_from_bech32(issuer)?));
             }
         }
 

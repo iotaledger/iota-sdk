@@ -8,7 +8,7 @@ use crate::{
     types::block::{
         address::Address,
         output::{
-            feature::{Feature, MetadataFeature},
+            feature::MetadataFeature,
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
             AliasId, AliasOutputBuilder, Output,
         },
@@ -137,8 +137,8 @@ impl AccountHandle {
                 .add_unlock_condition(GovernorAddressUnlockCondition::new(controller_address));
         if let Some(options) = alias_output_options {
             if let Some(immutable_metadata) = options.immutable_metadata {
-                alias_output_builder = alias_output_builder
-                    .add_immutable_feature(Feature::Metadata(MetadataFeature::new(immutable_metadata)?));
+                alias_output_builder =
+                    alias_output_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
             }
             if let Some(metadata) = options.metadata {
                 alias_output_builder = alias_output_builder.add_feature(MetadataFeature::new(metadata)?);

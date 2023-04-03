@@ -151,10 +151,10 @@ impl NftOutputBuilder {
         self
     }
 
-    ///
+    /// Adds an immutable [`Feature`] to the builder.
     #[inline(always)]
-    pub fn add_immutable_feature(mut self, immutable_feature: Feature) -> Self {
-        self.immutable_features.push(immutable_feature);
+    pub fn add_immutable_feature(mut self, immutable_feature: impl Into<Feature>) -> Self {
+        self.immutable_features.push(immutable_feature.into());
         self
     }
 
@@ -560,7 +560,7 @@ pub mod dto {
             }
 
             for b in &value.immutable_features {
-                builder = builder.add_immutable_feature(b.try_into()?);
+                builder = builder.add_immutable_feature(Feature::try_from(b)?);
             }
 
             Ok(builder)

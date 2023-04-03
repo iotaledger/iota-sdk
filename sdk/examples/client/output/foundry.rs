@@ -16,8 +16,8 @@ use iota_sdk::{
                 AddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition,
                 StateControllerAddressUnlockCondition,
             },
-            AliasId, AliasOutputBuilder, BasicOutputBuilder, Feature, FoundryId, FoundryOutputBuilder, NativeToken,
-            Output, OutputId, SimpleTokenScheme, TokenId, TokenScheme,
+            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryId, FoundryOutputBuilder, NativeToken, Output,
+            OutputId, SimpleTokenScheme, TokenId, TokenScheme,
         },
         payload::{transaction::TransactionEssence, Payload},
     },
@@ -58,7 +58,7 @@ async fn main() -> Result<()> {
     let alias_output_builder = AliasOutputBuilder::new_with_amount(2_000_000, AliasId::null())?
         .add_feature(SenderFeature::new(address))
         .add_feature(MetadataFeature::new(vec![1, 2, 3])?)
-        .add_immutable_feature(Feature::Issuer(IssuerFeature::new(address)))
+        .add_immutable_feature(IssuerFeature::new(address))
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
 
@@ -217,12 +217,10 @@ async fn main() -> Result<()> {
     //////////////////////////////////
 
     let basic_output_id = get_basic_output_id_with_native_tokens(block.payload().unwrap())?;
-    let outputs = vec![
-        basic_output_builder
-            .clone()
-            .add_native_token(NativeToken::new(token_id, U256::from(50u8))?)
-            .finish_output(token_supply)?,
-    ];
+    let outputs = vec![basic_output_builder
+        .clone()
+        .add_native_token(NativeToken::new(token_id, U256::from(50u8))?)
+        .finish_output(token_supply)?];
 
     let block = client
         .block()
@@ -242,11 +240,9 @@ async fn main() -> Result<()> {
     //////////////////////////////////
 
     let basic_output_id = get_basic_output_id_with_native_tokens(block.payload().unwrap())?;
-    let outputs = vec![
-        basic_output_builder
-            .add_native_token(NativeToken::new(token_id, U256::from(30u8))?)
-            .finish_output(token_supply)?,
-    ];
+    let outputs = vec![basic_output_builder
+        .add_native_token(NativeToken::new(token_id, U256::from(30u8))?)
+        .finish_output(token_supply)?];
 
     let block = client
         .block()

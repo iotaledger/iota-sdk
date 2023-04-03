@@ -12,7 +12,7 @@ use iota_sdk::{
     types::block::output::{
         feature::{IssuerFeature, SenderFeature},
         unlock_condition::AddressUnlockCondition,
-        Feature, NftId, NftOutputBuilder,
+        NftId, NftOutputBuilder,
     },
     wallet::{account_manager::AccountManager, NftOptions, Result},
 };
@@ -61,7 +61,7 @@ async fn main() -> Result<()> {
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
             .add_unlock_condition(AddressUnlockCondition::new(*sender_address.as_ref()))
             .add_feature(SenderFeature::new(*sender_address.as_ref()))
-            .add_immutable_feature(Feature::Issuer(IssuerFeature::new(*sender_address.as_ref())))
+            .add_immutable_feature(IssuerFeature::new(*sender_address.as_ref()))
             .finish_output(token_supply)?,
     ];
 

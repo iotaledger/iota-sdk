@@ -13,7 +13,7 @@ use iota_sdk::{
         output::{
             feature::{IssuerFeature, SenderFeature},
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-            AliasId, AliasOutputBuilder, Feature, Output, OutputId,
+            AliasId, AliasOutputBuilder, Output, OutputId,
         },
         payload::{transaction::TransactionEssence, Payload},
     },
@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
         AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone(), AliasId::null())?
             .add_feature(SenderFeature::new(address))
             .with_state_metadata(vec![1, 2, 3])
-            .add_immutable_feature(Feature::Issuer(IssuerFeature::new(address)))
+            .add_immutable_feature(IssuerFeature::new(address))
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
             .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
 
@@ -122,16 +122,14 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     // create third transaction with the third alias output updated
     //////////////////////////////////
-    let outputs = vec![
-        alias_output_builder
-            .clone()
-            .with_alias_id(alias_id_2)
-            .with_state_index(1)
-            .with_state_metadata(vec![3, 2, 1])
-            .replace_unlock_condition(StateControllerAddressUnlockCondition::new(alias_1_address))
-            .replace_unlock_condition(GovernorAddressUnlockCondition::new(alias_1_address))
-            .finish_output(token_supply)?,
-    ];
+    let outputs = vec![alias_output_builder
+        .clone()
+        .with_alias_id(alias_id_2)
+        .with_state_index(1)
+        .with_state_metadata(vec![3, 2, 1])
+        .replace_unlock_condition(StateControllerAddressUnlockCondition::new(alias_1_address))
+        .replace_unlock_condition(GovernorAddressUnlockCondition::new(alias_1_address))
+        .finish_output(token_supply)?];
 
     let block_3 = client
         .block()
@@ -148,15 +146,13 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     // create fourth transaction with the third alias output updated again
     //////////////////////////////////
-    let outputs = vec![
-        alias_output_builder
-            .with_alias_id(alias_id_2)
-            .with_state_index(2)
-            .with_state_metadata(vec![2, 1, 3])
-            .replace_unlock_condition(StateControllerAddressUnlockCondition::new(alias_1_address))
-            .replace_unlock_condition(GovernorAddressUnlockCondition::new(alias_1_address))
-            .finish_output(token_supply)?,
-    ];
+    let outputs = vec![alias_output_builder
+        .with_alias_id(alias_id_2)
+        .with_state_index(2)
+        .with_state_metadata(vec![2, 1, 3])
+        .replace_unlock_condition(StateControllerAddressUnlockCondition::new(alias_1_address))
+        .replace_unlock_condition(GovernorAddressUnlockCondition::new(alias_1_address))
+        .finish_output(token_supply)?];
 
     let block_3 = client
         .block()

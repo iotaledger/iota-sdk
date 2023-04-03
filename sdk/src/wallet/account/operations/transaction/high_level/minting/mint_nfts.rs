@@ -8,7 +8,7 @@ use crate::{
     types::block::{
         address::Address,
         output::{
-            feature::{Feature, IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
+            feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
         },
@@ -168,13 +168,11 @@ impl AccountHandle {
             }
 
             if let Some(issuer) = nft_options.issuer {
-                nft_builder = nft_builder
-                    .add_immutable_feature(Feature::Issuer(IssuerFeature::new(Address::try_from_bech32(issuer)?)));
+                nft_builder = nft_builder.add_immutable_feature(IssuerFeature::new(Address::try_from_bech32(issuer)?));
             }
 
             if let Some(immutable_metadata) = nft_options.immutable_metadata {
-                nft_builder =
-                    nft_builder.add_immutable_feature(Feature::Metadata(MetadataFeature::new(immutable_metadata)?));
+                nft_builder = nft_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
             }
 
             outputs.push(nft_builder.finish_output(token_supply)?);

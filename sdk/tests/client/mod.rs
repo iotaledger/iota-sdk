@@ -23,7 +23,7 @@ use iota_sdk::{
     types::block::{
         address::{Address, AliasAddress},
         output::{
-            feature::{Feature, IssuerFeature, SenderFeature},
+            feature::{IssuerFeature, SenderFeature},
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
                 ImmutableAliasAddressUnlockCondition, StateControllerAddressUnlockCondition,
@@ -171,9 +171,7 @@ fn build_nft_output(
     }
 
     if let Some(bech32_issuer) = bech32_issuer {
-        builder = builder.add_immutable_feature(Feature::Issuer(IssuerFeature::new(
-            Address::try_from_bech32(bech32_issuer).unwrap(),
-        )));
+        builder = builder.add_immutable_feature(IssuerFeature::new(Address::try_from_bech32(bech32_issuer).unwrap()));
     }
 
     if let Some((address, amount)) = sdruc {
@@ -225,9 +223,7 @@ fn build_alias_output(
     }
 
     if let Some(bech32_issuer) = bech32_issuer {
-        builder = builder.add_immutable_feature(Feature::Issuer(IssuerFeature::new(
-            Address::try_from_bech32(bech32_issuer).unwrap(),
-        )));
+        builder = builder.add_immutable_feature(IssuerFeature::new(Address::try_from_bech32(bech32_issuer).unwrap()));
     }
 
     builder.finish_output(TOKEN_SUPPLY).unwrap()
