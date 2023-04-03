@@ -82,7 +82,7 @@ participation = [ "storage" ]
 message_interface = [ "backtrace", "fern-logger" ]
 tls = [ "reqwest/rustls-tls" ]
 
-default = [ "api", "block", "std", "serde" ]
+default = [ "api", "block", "std", "serde", "tls" ]
 api = [ "block", "dto" ]
 block = [  ]
 dto = [ "serde" ]
