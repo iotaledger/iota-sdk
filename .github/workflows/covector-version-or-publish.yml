@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version: 18
           registry-url: "https://registry.npmjs.org"
 
       - name: git config
@@ -65,7 +65,7 @@ jobs:
         # (which is used by neon-sys) sadly fails to recognize it. As a mitigation, we still run the
         # tests on Windows 2019, until we can figure out a way to fix the problem.
         os: [ubuntu-20.04, macos-11, windows-2019]
-        node-version: ["16.x"]
+        node-version: ["18.x"]
 
     steps:
       - uses: actions/checkout@v3
