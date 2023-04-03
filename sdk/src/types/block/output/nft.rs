@@ -126,10 +126,10 @@ impl NftOutputBuilder {
         self
     }
 
-    ///
+    /// Adds a [`Feature`] to the builder.
     #[inline(always)]
-    pub fn add_feature(mut self, feature: Feature) -> Self {
-        self.features.push(feature);
+    pub fn add_feature(mut self, feature: impl Into<Feature>) -> Self {
+        self.features.push(feature.into());
         self
     }
 
@@ -554,7 +554,7 @@ pub mod dto {
             }
 
             for b in &value.features {
-                builder = builder.add_feature(b.try_into()?);
+                builder = builder.add_feature(Feature::try_from(b)?);
             }
 
             for b in &value.immutable_features {

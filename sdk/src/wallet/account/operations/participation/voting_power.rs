@@ -72,7 +72,7 @@ impl AccountHandle {
                             .address
                             .inner,
                     ))
-                    .add_feature(Feature::Tag(TagFeature::new(PARTICIPATION_TAG.as_bytes().to_vec())?))
+                    .add_feature(TagFeature::new(PARTICIPATION_TAG.as_bytes().to_vec())?)
                     .finish_output(token_supply)?,
                 None,
             ),

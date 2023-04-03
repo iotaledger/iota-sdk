@@ -141,8 +141,7 @@ impl AccountHandle {
                     .add_immutable_feature(Feature::Metadata(MetadataFeature::new(immutable_metadata)?));
             }
             if let Some(metadata) = options.metadata {
-                alias_output_builder =
-                    alias_output_builder.add_feature(Feature::Metadata(MetadataFeature::new(metadata)?));
+                alias_output_builder = alias_output_builder.add_feature(MetadataFeature::new(metadata)?);
             }
             if let Some(state_metadata) = options.state_metadata {
                 alias_output_builder = alias_output_builder.with_state_metadata(state_metadata);

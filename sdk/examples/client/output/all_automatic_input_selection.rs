@@ -53,8 +53,8 @@ async fn main() -> Result<()> {
     // create new alias and nft output
     //////////////////////////////////
     let alias_output_builder = AliasOutputBuilder::new_with_amount(2_000_000, AliasId::null())?
-        .add_feature(Feature::Sender(SenderFeature::new(address)))
-        .add_feature(Feature::Metadata(MetadataFeature::new(vec![1, 2, 3])?))
+        .add_feature(SenderFeature::new(address))
+        .add_feature(MetadataFeature::new(vec![1, 2, 3])?)
         .add_immutable_feature(Feature::Issuer(IssuerFeature::new(address)))
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
@@ -68,7 +68,7 @@ async fn main() -> Result<()> {
         nft_output_builder
             .clone()
             // address of the minter of the NFT
-            // .add_feature(Feature::Issuer(IssuerFeature::new(address)))
+            // .add_feature(IssuerFeature::new(address))
             .finish_output(token_supply)?,
     ];
 
@@ -160,7 +160,7 @@ async fn main() -> Result<()> {
         // with metadata feature block
         basic_output_builder
             .clone()
-            .add_feature(Feature::Metadata(MetadataFeature::new(vec![13, 37])?))
+            .add_feature(MetadataFeature::new(vec![13, 37])?)
             .finish_output(token_supply)?,
         // with storage deposit return
         basic_output_builder

@@ -118,9 +118,7 @@ fn build_basic_output(
     }
 
     if let Some(bech32_sender) = bech32_sender {
-        builder = builder.add_feature(Feature::Sender(SenderFeature::new(
-            Address::try_from_bech32(bech32_sender).unwrap(),
-        )));
+        builder = builder.add_feature(SenderFeature::new(Address::try_from_bech32(bech32_sender).unwrap()));
     }
 
     if let Some((address, amount)) = sdruc {
@@ -169,9 +167,7 @@ fn build_nft_output(
     }
 
     if let Some(bech32_sender) = bech32_sender {
-        builder = builder.add_feature(Feature::Sender(SenderFeature::new(
-            Address::try_from_bech32(bech32_sender).unwrap(),
-        )));
+        builder = builder.add_feature(SenderFeature::new(Address::try_from_bech32(bech32_sender).unwrap()));
     }
 
     if let Some(bech32_issuer) = bech32_issuer {
@@ -225,9 +221,7 @@ fn build_alias_output(
     }
 
     if let Some(bech32_sender) = bech32_sender {
-        builder = builder.add_feature(Feature::Sender(SenderFeature::new(
-            Address::try_from_bech32(bech32_sender).unwrap(),
-        )));
+        builder = builder.add_feature(SenderFeature::new(Address::try_from_bech32(bech32_sender).unwrap()));
     }
 
     if let Some(bech32_issuer) = bech32_issuer {

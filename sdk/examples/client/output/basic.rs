@@ -11,7 +11,7 @@ use iota_sdk::{
             AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
             TimelockUnlockCondition,
         },
-        BasicOutputBuilder, Feature,
+        BasicOutputBuilder,
     },
 };
 
@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
         // with metadata feature block
         basic_output_builder
             .clone()
-            .add_feature(Feature::Metadata(MetadataFeature::new(vec![13, 37])?))
+            .add_feature(MetadataFeature::new(vec![13, 37])?)
             .finish_output(token_supply)?,
         // with storage deposit return
         basic_output_builder

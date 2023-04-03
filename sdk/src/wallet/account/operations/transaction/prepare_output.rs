@@ -69,20 +69,20 @@ impl AccountHandle {
             }
 
             if let Some(tag) = features.tag {
-                first_output_builder = first_output_builder.add_feature(Feature::Tag(TagFeature::new(
+                first_output_builder = first_output_builder.add_feature(TagFeature::new(
                     prefix_hex::decode(tag).map_err(|_| DtoError::InvalidField("tag"))?,
-                )?));
+                )?);
             }
 
             if let Some(metadata) = features.metadata {
-                first_output_builder = first_output_builder.add_feature(Feature::Metadata(MetadataFeature::new(
+                first_output_builder = first_output_builder.add_feature(MetadataFeature::new(
                     prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("metadata"))?,
-                )?));
+                )?);
             }
 
             if let Some(sender) = features.sender {
-                first_output_builder = first_output_builder
-                    .add_feature(Feature::Sender(SenderFeature::new(Address::try_from_bech32(sender)?)))
+                first_output_builder =
+                    first_output_builder.add_feature(SenderFeature::new(Address::try_from_bech32(sender)?))
             }
         }
 
@@ -236,20 +236,20 @@ impl AccountHandle {
 
         if let Some(features) = options.features {
             if let Some(tag) = features.tag {
-                first_output_builder = first_output_builder.add_feature(Feature::Tag(TagFeature::new(
+                first_output_builder = first_output_builder.add_feature(TagFeature::new(
                     prefix_hex::decode(tag).map_err(|_| DtoError::InvalidField("tag"))?,
-                )?));
+                )?);
             }
 
             if let Some(metadata) = features.metadata {
-                first_output_builder = first_output_builder.add_feature(Feature::Metadata(MetadataFeature::new(
+                first_output_builder = first_output_builder.add_feature(MetadataFeature::new(
                     prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("metadata"))?,
-                )?));
+                )?);
             }
 
             if let Some(sender) = features.sender {
-                first_output_builder = first_output_builder
-                    .add_feature(Feature::Sender(SenderFeature::new(Address::try_from_bech32(sender)?)))
+                first_output_builder =
+                    first_output_builder.add_feature(SenderFeature::new(Address::try_from_bech32(sender)?))
             }
 
             if let Some(issuer) = features.issuer {

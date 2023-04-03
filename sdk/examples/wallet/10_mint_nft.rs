@@ -60,7 +60,7 @@ async fn main() -> Result<()> {
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
             .add_unlock_condition(AddressUnlockCondition::new(*sender_address.as_ref()))
-            .add_feature(Feature::Sender(SenderFeature::new(*sender_address.as_ref())))
+            .add_feature(SenderFeature::new(*sender_address.as_ref()))
             .add_immutable_feature(Feature::Issuer(IssuerFeature::new(*sender_address.as_ref())))
             .finish_output(token_supply)?,
     ];

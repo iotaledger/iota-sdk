@@ -156,16 +156,15 @@ impl AccountHandle {
                     .add_unlock_condition(AddressUnlockCondition::new(address));
 
             if let Some(sender) = nft_options.sender {
-                nft_builder =
-                    nft_builder.add_feature(Feature::Sender(SenderFeature::new(Address::try_from_bech32(sender)?)));
+                nft_builder = nft_builder.add_feature(SenderFeature::new(Address::try_from_bech32(sender)?));
             }
 
             if let Some(metadata) = nft_options.metadata {
-                nft_builder = nft_builder.add_feature(Feature::Metadata(MetadataFeature::new(metadata)?));
+                nft_builder = nft_builder.add_feature(MetadataFeature::new(metadata)?);
             }
 
             if let Some(tag) = nft_options.tag {
-                nft_builder = nft_builder.add_feature(Feature::Tag(TagFeature::new(tag)?));
+                nft_builder = nft_builder.add_feature(TagFeature::new(tag)?);
             }
 
             if let Some(issuer) = nft_options.issuer {
