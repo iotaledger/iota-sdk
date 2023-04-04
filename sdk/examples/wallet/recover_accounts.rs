@@ -24,14 +24,14 @@ async fn main() -> Result<()> {
     let secret_manager =
         MnemonicSecretManager::try_from_mnemonic(&env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let manager = Wallet::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
         .await?;
 
-    let accounts = manager.recover_accounts(0, 2, 2, None).await?;
+    let accounts = wallet.recover_accounts(0, 2, 2, None).await?;
 
     for account in accounts.iter() {
         println!("{}", account.read().await.index());

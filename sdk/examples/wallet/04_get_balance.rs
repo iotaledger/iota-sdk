@@ -10,10 +10,10 @@ use iota_sdk::wallet::{Result, Wallet};
 #[tokio::main]
 async fn main() -> Result<()> {
     // Create the wallet
-    let manager = Wallet::builder().finish().await?;
+    let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = manager.get_account("Alice").await?;
+    let account = wallet.get_account("Alice").await?;
 
     // Sync and get the balance
     let _account_balance = account.sync(None).await?;

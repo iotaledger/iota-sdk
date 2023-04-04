@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
     let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
 
     // Create the wallet
-    let manager = Wallet::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -37,10 +37,10 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = manager.get_account("Alice").await?;
+    let account = wallet.get_account("Alice").await?;
 
     // Set the stronghold password
-    manager
+    wallet
         .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 

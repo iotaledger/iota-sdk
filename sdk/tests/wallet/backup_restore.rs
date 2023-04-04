@@ -34,7 +34,7 @@ async fn backup_and_restore() -> Result<()> {
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
 
-    let manager = Wallet::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(stronghold))
         .with_client_options(client_options.clone())
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -42,13 +42,9 @@ async fn backup_and_restore() -> Result<()> {
         .finish()
         .await?;
 
-    let account = manager
-        .create_account()
-        .with_alias("Alice".to_string())
-        .finish()
-        .await?;
+    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
 
-    manager
+    wallet
         .backup(
             PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
             stronghold_password.to_string(),
@@ -60,7 +56,7 @@ async fn backup_and_restore() -> Result<()> {
     let stronghold =
         StrongholdSecretManager::builder().build(PathBuf::from("test-storage/backup_and_restore/2.stronghold"))?;
 
-    let restore_manager = Wallet::builder()
+    let restore_wallet = Wallet::builder()
         .with_storage_path("test-storage/backup_and_restore/2")
         .with_secret_manager(SecretManager::Stronghold(stronghold))
         .with_client_options(ClientOptions::new().with_node(NODE_OTHER)?)
@@ -70,7 +66,7 @@ async fn backup_and_restore() -> Result<()> {
         .await?;
 
     // Wrong password fails
-    restore_manager
+    restore_wallet
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
             "wrong password".to_string(),
@@ -80,7 +76,7 @@ async fn backup_and_restore() -> Result<()> {
         .unwrap_err();
 
     // Correct password works, even after trying with a wrong one before
-    restore_manager
+    restore_wallet
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
             stronghold_password.to_string(),
@@ -91,16 +87,16 @@ async fn backup_and_restore() -> Result<()> {
     // Validate restored data
 
     // Restored coin type is used
-    let new_account = restore_manager.create_account().finish().await?;
+    let new_account = restore_wallet.create_account().finish().await?;
     assert_eq!(new_account.read().await.coin_type(), &SHIMMER_COIN_TYPE);
 
     // compare restored client options
-    let client_options = restore_manager.get_client_options().await;
+    let client_options = restore_wallet.get_client_options().await;
     let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
     // Get account
-    let recovered_account = restore_manager.get_account("Alice").await?;
+    let recovered_account = restore_wallet.get_account("Alice").await?;
     assert_eq!(account.addresses().await?, recovered_account.addresses().await?);
 
     // secret manager is the same
@@ -124,7 +120,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
         "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak",
     )?;
 
-    let manager = Wallet::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options.clone())
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -132,17 +128,13 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
         .finish()
         .await?;
 
-    let account = manager
-        .create_account()
-        .with_alias("Alice".to_string())
-        .finish()
-        .await?;
+    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
 
     let stronghold_password = "some_hopefully_secure_password";
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).unwrap_or(());
-    manager
+    wallet
         .backup(
             PathBuf::from("test-storage/backup_and_restore_mnemonic_secret_manager/backup.stronghold"),
             stronghold_password.to_string(),
@@ -155,7 +147,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
         "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak",
     )?;
 
-    let restore_manager = Wallet::builder()
+    let restore_wallet = Wallet::builder()
         .with_storage_path("test-storage/backup_and_restore_mnemonic_secret_manager/2")
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         // Build with a different coin type, to check if it gets replaced by the one from the backup
@@ -164,7 +156,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
         .finish()
         .await?;
 
-    restore_manager
+    restore_wallet
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore_mnemonic_secret_manager/backup.stronghold"),
             stronghold_password.to_string(),
@@ -175,16 +167,16 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
     // Validate restored data
 
     // Restored coin type is used
-    let new_account = restore_manager.create_account().finish().await?;
+    let new_account = restore_wallet.create_account().finish().await?;
     assert_eq!(new_account.read().await.coin_type(), &SHIMMER_COIN_TYPE);
 
     // compare restored client options
-    let client_options = restore_manager.get_client_options().await;
+    let client_options = restore_wallet.get_client_options().await;
     let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
     // Get account
-    let recovered_account = restore_manager.get_account("Alice").await?;
+    let recovered_account = restore_wallet.get_account("Alice").await?;
     assert_eq!(account.addresses().await?, recovered_account.addresses().await?);
 
     // secret manager is the same
@@ -216,7 +208,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
 
-    let manager = Wallet::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(stronghold))
         .with_client_options(client_options.clone())
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -225,13 +217,9 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
         .await?;
 
     // Create one account
-    manager
-        .create_account()
-        .with_alias("Alice".to_string())
-        .finish()
-        .await?;
+    wallet.create_account().with_alias("Alice".to_string()).finish().await?;
 
-    manager
+    wallet
         .backup(
             PathBuf::from("test-storage/backup_and_restore_different_coin_type/backup.stronghold"),
             stronghold_password.to_string(),
@@ -244,7 +232,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
         "test-storage/backup_and_restore_different_coin_type/2.stronghold",
     ))?;
 
-    let restore_manager = Wallet::builder()
+    let restore_wallet = Wallet::builder()
         .with_storage_path("test-storage/backup_and_restore_different_coin_type/2")
         .with_secret_manager(SecretManager::Stronghold(stronghold))
         .with_client_options(ClientOptions::new().with_node(NODE_OTHER)?)
@@ -254,7 +242,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
         .await?;
 
     // restore with ignore_if_coin_type_mismatch: Some(true) to not overwrite the coin type
-    restore_manager
+    restore_wallet
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore_different_coin_type/backup.stronghold"),
             stronghold_password.to_string(),
@@ -265,10 +253,10 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
     // Validate restored data
 
     // No accounts restored, because the coin type was different
-    assert!(restore_manager.get_accounts().await?.is_empty());
+    assert!(restore_wallet.get_accounts().await?.is_empty());
 
     // Restored coin type is not used and it's still the same one
-    let new_account = restore_manager.create_account().finish().await?;
+    let new_account = restore_wallet.create_account().finish().await?;
     assert_eq!(new_account.read().await.coin_type(), &IOTA_COIN_TYPE);
     // secret manager is the same
     assert_eq!(
@@ -277,7 +265,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
     );
 
     // compare restored client options
-    let client_options = restore_manager.get_client_options().await;
+    let client_options = restore_wallet.get_client_options().await;
     let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_OTHER).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
@@ -305,7 +293,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
 
-    let manager = Wallet::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(stronghold))
         .with_client_options(client_options.clone())
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -314,13 +302,9 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
         .await?;
 
     // Create one account
-    let account_before_backup = manager
-        .create_account()
-        .with_alias("Alice".to_string())
-        .finish()
-        .await?;
+    let account_before_backup = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
 
-    manager
+    wallet
         .backup(
             PathBuf::from("test-storage/backup_and_restore_same_coin_type/backup.stronghold"),
             stronghold_password.to_string(),
@@ -333,7 +317,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
         "test-storage/backup_and_restore_same_coin_type/2.stronghold",
     ))?;
 
-    let restore_manager = Wallet::builder()
+    let restore_wallet = Wallet::builder()
         .with_storage_path("test-storage/backup_and_restore_same_coin_type/2")
         .with_secret_manager(SecretManager::Stronghold(stronghold))
         .with_client_options(ClientOptions::new().with_node(NODE_OTHER)?)
@@ -343,7 +327,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
         .await?;
 
     // restore with ignore_if_coin_type_mismatch: Some(true) to not overwrite the coin type
-    restore_manager
+    restore_wallet
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore_same_coin_type/backup.stronghold"),
             stronghold_password.to_string(),
@@ -354,7 +338,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
     // Validate restored data
 
     // The account is restored, because the coin type is the same
-    let restored_accounts = restore_manager.get_accounts().await?;
+    let restored_accounts = restore_wallet.get_accounts().await?;
     assert_eq!(restored_accounts.len(), 1);
 
     // addresses are still there
@@ -364,7 +348,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
     );
 
     // compare client options, they are not restored
-    let client_options = restore_manager.get_client_options().await;
+    let client_options = restore_wallet.get_client_options().await;
     let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_OTHER).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
@@ -392,7 +376,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
 
-    let manager = Wallet::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(stronghold))
         .with_client_options(client_options.clone())
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -401,13 +385,9 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
         .await?;
 
     // Create one account
-    let account = manager
-        .create_account()
-        .with_alias("Alice".to_string())
-        .finish()
-        .await?;
+    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
 
-    manager
+    wallet
         .backup(
             PathBuf::from("test-storage/backup_and_restore_different_coin_type_dont_ignore/backup.stronghold"),
             stronghold_password.to_string(),
@@ -420,7 +400,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
         "test-storage/backup_and_restore_different_coin_type_dont_ignore/2.stronghold",
     ))?;
 
-    let restore_manager = Wallet::builder()
+    let restore_wallet = Wallet::builder()
         .with_storage_path("test-storage/backup_and_restore_different_coin_type_dont_ignore/2")
         .with_secret_manager(SecretManager::Stronghold(stronghold))
         .with_client_options(ClientOptions::new().with_node(NODE_LOCAL)?)
@@ -430,7 +410,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
         .await?;
 
     // restore with ignore_if_coin_type_mismatch: Some(true) to not overwrite the coin type
-    restore_manager
+    restore_wallet
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore_different_coin_type_dont_ignore/backup.stronghold"),
             stronghold_password.to_string(),
@@ -441,14 +421,14 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     // Validate restored data
 
     // No accounts restored, because the coin type was different
-    let restored_account = restore_manager.get_account("Alice").await?;
+    let restored_account = restore_wallet.get_account("Alice").await?;
     assert_eq!(
         account.addresses().await?[0].address().to_bech32(),
         restored_account.addresses().await?[0].address().to_bech32(),
     );
 
     // Restored coin type is used
-    let new_account = restore_manager.create_account().finish().await?;
+    let new_account = restore_wallet.create_account().finish().await?;
     assert_eq!(new_account.read().await.coin_type(), &SHIMMER_COIN_TYPE);
     // secret manager is restored
     assert_eq!(
@@ -457,7 +437,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     );
 
     // compare client options, they are not restored
-    let client_options = restore_manager.get_client_options().await;
+    let client_options = restore_wallet.get_client_options().await;
     let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 

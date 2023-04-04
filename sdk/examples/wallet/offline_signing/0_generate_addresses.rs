@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
     secret_manager.store_mnemonic(mnemonic).await?;
 
     // Create the wallet with the secret_manager and client options
-    let manager = Wallet::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .with_client_options(offline_client)
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Create a new account
-    let account = manager
+    let account = wallet
         .create_account()
         .with_alias("Alice".to_string())
         .with_bech32_hrp(SHIMMER_BECH32_HRP.to_string())

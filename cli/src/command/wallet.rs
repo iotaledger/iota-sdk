@@ -142,8 +142,8 @@ pub async fn mnemonic_command() -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn new_command(manager: &Wallet, alias: Option<String>) -> Result<String, Error> {
-    let mut builder = manager.create_account();
+pub async fn new_command(wallet: &Wallet, alias: Option<String>) -> Result<String, Error> {
+    let mut builder = wallet.create_account();
 
     if let Some(alias) = alias {
         builder = builder.with_alias(alias);
@@ -178,16 +178,14 @@ pub async fn restore_command(
     Ok(wallet)
 }
 
-pub async fn set_node_command(manager: &Wallet, url: String) -> Result<(), Error> {
-    manager
-        .set_client_options(ClientOptions::new().with_node(&url)?)
-        .await?;
+pub async fn set_node_command(wallet: &Wallet, url: String) -> Result<(), Error> {
+    wallet.set_client_options(ClientOptions::new().with_node(&url)?).await?;
 
     Ok(())
 }
 
-pub async fn sync_command(manager: &Wallet) -> Result<(), Error> {
-    let total_balance = manager.sync(None).await?;
+pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
+    let total_balance = wallet.sync(None).await?;
 
     println_log_info!("Synchronized all accounts: {:?}", total_balance);
 

@@ -18,8 +18,8 @@ pub fn get_password(prompt: &str, confirmation: bool) -> Result<String, Error> {
     Ok(password.interact()?)
 }
 
-pub async fn pick_account(manager: &Wallet) -> Result<Option<u32>, Error> {
-    let accounts = manager.get_accounts().await?;
+pub async fn pick_account(wallet: &Wallet) -> Result<Option<u32>, Error> {
+    let accounts = wallet.get_accounts().await?;
 
     match accounts.len() {
         0 => Ok(None),

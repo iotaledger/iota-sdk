@@ -21,16 +21,16 @@ async fn main() -> Result<()> {
     dotenv().ok();
 
     // Create the wallet
-    let manager = Wallet::builder().finish().await?;
+    let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = manager.get_account("Alice").await?;
+    let account = wallet.get_account("Alice").await?;
 
     let balance = account.balance().await?;
     println!("Balance before burning:\n{balance:?}",);
 
     // Set the stronghold password
-    manager
+    wallet
         .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 

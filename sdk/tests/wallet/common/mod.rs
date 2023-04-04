@@ -30,7 +30,7 @@ pub use self::constants::*;
 ///
 /// An Wallet
 #[allow(dead_code, unused_variables)]
-pub(crate) async fn make_manager(storage_path: &str, mnemonic: Option<&str>, node: Option<&str>) -> Result<Wallet> {
+pub(crate) async fn make_wallet(storage_path: &str, mnemonic: Option<&str>, node: Option<&str>) -> Result<Wallet> {
     let client_options = ClientOptions::new().with_node(node.unwrap_or(NODE_LOCAL))?;
     let secret_manager =
         MnemonicSecretManager::try_from_mnemonic(mnemonic.unwrap_or(&Client::generate_mnemonic().unwrap()))?;

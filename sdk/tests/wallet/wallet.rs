@@ -16,7 +16,7 @@ use iota_sdk::{
     wallet::{ClientOptions, Result, Wallet},
 };
 
-use crate::wallet::common::{make_manager, setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL, NODE_OTHER};
+use crate::wallet::common::{make_wallet, setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL, NODE_OTHER};
 
 #[cfg(feature = "storage")]
 #[tokio::test]
@@ -24,20 +24,20 @@ async fn update_client_options() -> Result<()> {
     let storage_path = "test-storage/update_client_options";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, Some(NODE_OTHER)).await?;
+    let wallet = make_wallet(storage_path, None, Some(NODE_OTHER)).await?;
 
     let node_dto_old = NodeDto::Node(Node::from(Url::parse(NODE_OTHER).unwrap()));
     let node_dto_new = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
 
-    let client_options = manager.get_client_options().await;
+    let client_options = wallet.get_client_options().await;
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto_old));
     assert!(!client_options.node_manager_builder.nodes.contains(&node_dto_new));
 
-    manager
+    wallet
         .set_client_options(ClientOptions::new().with_node(NODE_LOCAL)?)
         .await?;
 
-    let client_options = manager.get_client_options().await;
+    let client_options = wallet.get_client_options().await;
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto_new));
     assert!(!client_options.node_manager_builder.nodes.contains(&node_dto_old));
 
@@ -50,22 +50,18 @@ async fn different_seed() -> Result<()> {
     let storage_path = "test-storage/different_seed";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
-    let _account = manager
-        .create_account()
-        .with_alias("Alice".to_string())
-        .finish()
-        .await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let _account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
 
     drop(_account);
-    drop(manager);
+    drop(wallet);
 
     // Recreate Wallet with a different mnemonic
-    let manager = make_manager(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
     // Generating a new account needs to return an error, because the seed from the secret_manager is different
     assert!(
-        manager
+        wallet
             .create_account()
             .with_alias("Bob".to_string())
             .finish()
@@ -82,19 +78,15 @@ async fn changed_coin_type() -> Result<()> {
     let storage_path = "test-storage/changed_coin_type";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, Some(DEFAULT_MNEMONIC), None).await?;
-    let _account = manager
-        .create_account()
-        .with_alias("Alice".to_string())
-        .finish()
-        .await?;
+    let wallet = make_wallet(storage_path, Some(DEFAULT_MNEMONIC), None).await?;
+    let _account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
 
     drop(_account);
-    drop(manager);
+    drop(wallet);
 
     // Recreate Wallet with same mnemonic
     let secret_manager2 = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC)?;
-    let manager = Wallet::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager2))
         .with_coin_type(IOTA_COIN_TYPE)
         .with_storage_path(storage_path)
@@ -104,7 +96,7 @@ async fn changed_coin_type() -> Result<()> {
     // Generating a new account needs to return an error, because a different coin type was set and we require all
     // accounts to have the same coin type
     assert!(
-        manager
+        wallet
             .create_account()
             .with_alias("Bob".to_string())
             .finish()
@@ -120,8 +112,8 @@ async fn shimmer_coin_type() -> Result<()> {
     let storage_path = "test-storage/shimmer_coin_type";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, Some(DEFAULT_MNEMONIC), None).await?;
-    let account = manager.create_account().finish().await?;
+    let wallet = make_wallet(storage_path, Some(DEFAULT_MNEMONIC), None).await?;
+    let account = wallet.create_account().finish().await?;
 
     // Creating a new account with providing a coin type will use the Shimmer coin type with shimmer testnet bech32 hrp
     assert_eq!(
@@ -232,17 +224,17 @@ async fn update_node_auth() -> Result<()> {
     let storage_path = "test-storage/update_node_auth";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, Some(NODE_OTHER)).await?;
+    let wallet = make_wallet(storage_path, None, Some(NODE_OTHER)).await?;
 
     let node_auth = iota_sdk::client::node_manager::node::NodeAuth {
         jwt: Some("jwt".to_string()),
         basic_auth_name_pwd: None,
     };
-    manager
+    wallet
         .update_node_auth(Url::parse(NODE_OTHER).unwrap(), Some(node_auth.clone()))
         .await?;
 
-    let client_options = manager.get_client_options().await;
+    let client_options = wallet.get_client_options().await;
 
     let node = client_options.node_manager_builder.nodes.into_iter().next().unwrap();
     if let NodeDto::Node(node) = node {
