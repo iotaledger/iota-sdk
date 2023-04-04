@@ -75,6 +75,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        if: matrix.os == 'macos-11'
+        with:
+          xcode-version: '14.3'
+
         # Temporary fix for "ValueError: invalid mode: 'rU' while trying to load binding.gyp"
         # See <PR link>
         # This can be removed when "prebuild" updates "node-gyp"

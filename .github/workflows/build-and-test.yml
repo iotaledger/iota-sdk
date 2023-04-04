@@ -126,6 +126,12 @@ jobs:
         run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
         if: matrix.os == 'windows-latest'
 
+      - name: Select Xcode (macOS)
+        uses: maxim-lobanov/setup-xcode@
+        if: matrix.os == 'macos-latest'
+        with:
+          xcode-version: '14.3'
+
       - name: Set Up Node.js ${{ matrix.node }} and Yarn Cache
         uses: actions/setup-node@v2
         with:
