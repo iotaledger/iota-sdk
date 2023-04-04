@@ -126,6 +126,13 @@ impl NftOutputBuilder {
         self
     }
 
+    /// Clears all [`UnlockConditions`]s from the builder.
+    #[inline(always)]
+    pub fn clear_unlock_conditions(mut self) -> Self {
+        self.unlock_conditions.clear();
+        self
+    }
+
     /// Adds a [`Feature`] to the builder.
     #[inline(always)]
     pub fn add_feature(mut self, feature: impl Into<Feature>) -> Self {
@@ -148,6 +155,13 @@ impl NftOutputBuilder {
             Some(f) => *f = feature,
             None => self.features.push(feature),
         }
+        self
+    }
+
+    /// Clears all [`Feature`]s from the builder.
+    #[inline(always)]
+    pub fn clear_features(mut self) -> Self {
+        self.features.clear();
         self
     }
 
@@ -177,6 +191,13 @@ impl NftOutputBuilder {
             Some(f) => *f = immutable_feature,
             None => self.immutable_features.push(immutable_feature),
         }
+        self
+    }
+
+    /// Clears all immutable [`Feature`]s from the builder.
+    #[inline(always)]
+    pub fn clear_immutable_features(mut self) -> Self {
+        self.immutable_features.clear();
         self
     }
 

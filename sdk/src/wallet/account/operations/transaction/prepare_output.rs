@@ -11,7 +11,7 @@ use crate::{
         address::Address,
         output::{
             dto::NativeTokenDto,
-            feature::{Feature, IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
+            feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                 TimelockUnlockCondition,
@@ -221,7 +221,7 @@ impl AccountHandle {
         };
 
         // Remove potentially existing features.
-        first_output_builder = first_output_builder.with_features(Vec::<Feature>::new());
+        first_output_builder = first_output_builder.clear_features();
 
         // Set new address unlock condition
         first_output_builder = first_output_builder.with_unlock_conditions(vec![AddressUnlockCondition::new(
