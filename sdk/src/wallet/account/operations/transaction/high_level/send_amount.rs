@@ -32,11 +32,13 @@ pub struct AddressWithAmount {
     address: String,
     /// Amount
     amount: u64,
-    /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
-    /// first address of the account
+    /// Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
+    /// given the provided amount. If a storage deposit is needed and a return address is not provided, it will
+    /// default to the first address of the account.
     return_address: Option<String>,
     /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
-    /// receiver before. Default is 1 day
+    /// receiver already. The expiration will only be used if one is necessary given the provided amount. If an
+    /// expiration is needed but not provided, it will default to one day.
     expiration: Option<u32>,
 }
 
@@ -117,9 +119,8 @@ impl AccountHandle {
                 .transpose()?
                 .unwrap_or(default_return_address.address.inner);
             self.client.bech32_hrp_matches(&bech32_hrp).await?;
-            // get minimum required amount for such an output, so we don't lock more than required
-            // We have to check it for every output individually, because different address types and amount of
-            // different native tokens require a different storage deposit
+
+            // Get the minimum required amount for an output assuming it does not need a storage deposit.
             let output = BasicOutputBuilder::new_with_amount(amount)?
                 .add_unlock_condition(AddressUnlockCondition::new(address))
                 .finish_output(token_supply)?;
@@ -132,6 +133,7 @@ impl AccountHandle {
                     local_time + expiration_time
                 });
 
+                // Since it does need a storage deposit, calculate how much that should be
                 let storage_deposit_amount = minimum_storage_deposit_basic_native_tokens(
                     &rent_structure,
                     &address,
