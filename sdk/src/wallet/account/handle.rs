@@ -80,7 +80,11 @@ impl AccountHandle {
             account: Arc::new(RwLock::new(account)),
             client,
             secret_manager,
+<<<<<<< HEAD
             fallback_sync_options: Arc::new(Mutex::new(fallback_sync_options)),
+=======
+            fallback_sync_options: Default::default(),
+>>>>>>> syncoptions to main crate
             last_synced: Default::default(),
             #[cfg(feature = "events")]
             event_emitter,
