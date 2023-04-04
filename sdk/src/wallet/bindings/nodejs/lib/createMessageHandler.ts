@@ -25,8 +25,8 @@ export async function createMessageHandler(options?: AccountManagerOptions): Pro
         coinType: options?.coinType,
         secretManager: options?.secretManager
     };
-    const { messageHandler } = await messageHandlerNew(JSON.stringify(messageOptions));
-    
+    const messageHandler = await messageHandlerNew(JSON.stringify(messageOptions));
+    console.error('messageHandler type returned from neon:', typeof messageHandler)
     async function sendMessage(message: __Message__): Promise<string> {
         return sendMessageAsync(
             JSON.stringify(message),
@@ -34,12 +34,15 @@ export async function createMessageHandler(options?: AccountManagerOptions): Pro
         ).catch((error: Error) => {
             try {
                 error = JSON.parse(error.toString()).payload;
-            } catch (e) {}
+            } catch (e) {
+                console.error(e);
+            }
             return Promise.reject(error);
         });
     }
     
     return {
+        messageHandler,
         sendMessage,
     
         async callAccountMethod(
