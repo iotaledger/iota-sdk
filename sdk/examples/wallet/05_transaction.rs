@@ -20,25 +20,29 @@ async fn main() -> Result<()> {
 
     // Get the account we generated with `01_create_wallet`
     let account = manager.get_account("Alice").await?;
+    // May want to ensure the account is synced before sending a transaction.
+    let balance = account.sync(None).await?;
 
-    // Set the stronghold password
-    manager
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
-        .await?;
+    if balance.base_coin.available >= 1_000_000 {
+        // Set the stronghold password
+        manager
+            .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+            .await?;
 
-    // Send a transaction with 1 Mi
-    let outputs = vec![AddressWithAmount {
-        address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
-        amount: 1_000_000,
-    }];
-    let transaction = account.send_amount(outputs, None).await?;
+        // Send a transaction with 1 Mi
+        let outputs = vec![AddressWithAmount {
+            address: "tst1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vlupxvxq2".to_string(),
+            amount: 1_000_000,
+        }];
+        let transaction = account.send_amount(outputs, None).await?;
 
-    println!(
-        "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
-        transaction.transaction_id,
-        &env::var("NODE_URL").unwrap(),
-        transaction.block_id.expect("no block created yet")
-    );
+        println!(
+            "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
+            transaction.transaction_id,
+            &env::var("NODE_URL").unwrap(),
+            transaction.block_id.expect("no block created yet")
+        );
+    }
 
     Ok(())
 }

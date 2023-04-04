@@ -23,6 +23,8 @@ async fn main() -> Result<()> {
 
     // Get the account we generated with `01_create_wallet`
     let account = manager.get_account("Alice").await?;
+    // May want to ensure the account is synced before sending a transaction.
+    account.sync(None).await?;
 
     let balance = account.balance().await?;
     println!("Balance before melting:\n{balance:?}",);

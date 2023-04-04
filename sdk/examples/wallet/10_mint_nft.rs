@@ -28,8 +28,6 @@ async fn main() -> Result<()> {
     // Get the account we generated with `01_create_wallet`
     let account = manager.get_account("Alice").await?;
 
-    account.sync(None).await?;
-
     // Set the stronghold password
     manager
         .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
@@ -66,6 +64,9 @@ async fn main() -> Result<()> {
     ];
 
     let transaction = account.send(outputs, None).await?;
+
+    // Ensure the account is synced after minting.
+    account.sync(None).await?;
 
     println!(
         "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",

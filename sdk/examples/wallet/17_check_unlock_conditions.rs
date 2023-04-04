@@ -16,6 +16,8 @@ async fn main() -> Result<()> {
 
     // Get the account we generated with `01_create_wallet`
     let account = manager.get_account("Alice").await?;
+    // May want to ensure the account is synced before using output information.
+    account.sync(None).await?;
 
     let account_addresses: Vec<AddressWrapper> = account
         .addresses()

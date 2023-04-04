@@ -7,13 +7,10 @@
 // output that minted it.
 // Rename `.env.example` to `.env` first
 
-use std::{env, str::FromStr};
+use std::env;
 
 use dotenv::dotenv;
-use iota_sdk::{
-    types::block::output::TokenId,
-    wallet::{account_manager::AccountManager, Result, U256},
-};
+use iota_sdk::wallet::{account_manager::AccountManager, Result, U256};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -25,29 +22,35 @@ async fn main() -> Result<()> {
 
     // Get the account we generated with `01_create_wallet`
     let account = manager.get_account("Alice").await?;
-
-    let balance = account.balance().await?;
-    println!("Balance before burning:\n{balance:?}",);
-
-    // Set the stronghold password
-    manager
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
-        .await?;
-
-    // Replace with a TokenId that is available in the account
-    let token_id = TokenId::from_str("0x08847bd287c912fadedb6bf38900bda9f2d377b75b2a0bece8738699f56ebca4130100000000")?;
-
-    // Burn a native token
-    let burn_amount = U256::from(1);
-    let transaction = account.burn_native_token(token_id, burn_amount, None).await?;
-
-    account
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
-        .await?;
-
+    // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
 
-    println!("Balance after burning:\n{balance:?}",);
+    // Get a token with sufficient balance
+    if let Some(token_id) = balance
+        .native_tokens
+        .iter()
+        .find(|t| t.available >= U256::from(11))
+        .map(|t| t.token_id)
+    {
+        println!("Balance before burning:\n{balance:?}",);
+
+        // Set the stronghold password
+        manager
+            .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+            .await?;
+
+        // Burn a native token
+        let burn_amount = U256::from(1);
+        let transaction = account.burn_native_token(token_id, burn_amount, None).await?;
+
+        account
+            .retry_transaction_until_included(&transaction.transaction_id, None, None)
+            .await?;
+
+        let balance = account.sync(None).await?;
+
+        println!("Balance after burning:\n{balance:?}",);
+    }
 
     Ok(())
 }
