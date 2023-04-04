@@ -3,11 +3,11 @@
  */
 const path = require('path')
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
-const { AccountManager, CoinType } = require('@iota/wallet');
+const { createAccountManager, CoinType } = require('@iota/wallet');
 
 async function run() {
     try {
-        const manager = await createAccountManager();
+        const manager = await _createAccountManager();
 
         const account = await manager.createAccount({
             alias: 'Alice',
@@ -24,7 +24,7 @@ async function run() {
     process.exit(0);
 }
 
-async function createAccountManager() {
+async function _createAccountManager() {
     const accountManagerOptions = {
         storagePath: './alice-database',
         clientOptions: {
@@ -40,7 +40,7 @@ async function createAccountManager() {
         },
     };
 
-    const manager = new AccountManager(accountManagerOptions);
+    const manager = await createAccountManager(accountManagerOptions);
     await manager.storeMnemonic(process.env.MNEMONIC);
     return manager;
 }

@@ -1,6 +1,6 @@
 const path = require('path')
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
-const { AccountManager, CoinType } = require('@iota/wallet');
+const { createAccountManager, CoinType } = require('@iota/wallet');
 
 async function getUnlockedManager() {
     if (!process.env.NODE_URL) {
@@ -10,7 +10,7 @@ async function getUnlockedManager() {
         throw new Error('.env SH_PASSWORD is undefined, see .env.example');
     }
 
-    const manager = new AccountManager({
+    const manager = createAccountManager({
         storagePath: './alice-database',
         clientOptions: {
             nodes: [process.env.NODE_URL],
