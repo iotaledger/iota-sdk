@@ -127,7 +127,7 @@ jobs:
         if: matrix.os == 'windows-latest'
 
       - name: Select Xcode (macOS)
-        uses: maxim-lobanov/setup-xcode@
+        uses: maxim-lobanov/setup-xcode@v1
         if: matrix.os == 'macos-latest'
         with:
           xcode-version: '14.3'
