@@ -11,7 +11,7 @@ use iota_sdk::client::{
     secret::{mnemonic::MnemonicSecretManager, stronghold::StrongholdSecretManager, SecretManager},
 };
 #[cfg(all(feature = "stronghold", feature = "storage"))]
-use iota_sdk::wallet::{account_manager::Wallet, ClientOptions, Result};
+use iota_sdk::wallet::{ClientOptions, Result, Wallet};
 
 use crate::wallet::common::{setup, tear_down, NODE_LOCAL, NODE_OTHER};
 

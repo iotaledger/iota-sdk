@@ -14,7 +14,7 @@ use iota_sdk::{
         unlock_condition::AddressUnlockCondition,
         NftId, NftOutputBuilder,
     },
-    wallet::{account_manager::Wallet, NftOptions, Result},
+    wallet::{NftOptions, Result, Wallet},
 };
 
 #[tokio::main]

@@ -12,7 +12,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
         utils::request_funds_from_faucet,
     },
-    wallet::{account_manager::Wallet, ClientOptions, Result},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
 #[tokio::main]

@@ -11,7 +11,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{ledger_nano::LedgerSecretManager, SecretManager},
     },
-    wallet::{account_manager::Wallet, AddressWithAmount, ClientOptions, Result},
+    wallet::{AddressWithAmount, ClientOptions, Result, Wallet},
 };
 
 // In this example we will create addresses with a ledger nano hardware wallet

@@ -5,8 +5,8 @@ use instant::Instant;
 
 use crate::wallet::{
     account::handle::AccountHandle,
-    account_manager::{SyncOptions, Wallet},
     task,
+    wallet::{SyncOptions, Wallet},
 };
 
 impl Wallet {

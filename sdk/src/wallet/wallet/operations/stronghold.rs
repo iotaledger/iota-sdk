@@ -3,7 +3,7 @@
 
 use std::time::Duration;
 
-use crate::{client::secret::SecretManager, wallet::account_manager::Wallet};
+use crate::{client::secret::SecretManager, wallet::Wallet};
 
 impl Wallet {
     /// Sets the Stronghold password

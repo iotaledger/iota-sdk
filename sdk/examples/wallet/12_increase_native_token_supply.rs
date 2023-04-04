@@ -10,7 +10,7 @@ use std::{env, str::FromStr};
 use dotenv::dotenv;
 use iota_sdk::{
     types::block::output::TokenId,
-    wallet::{account_manager::Wallet, Result, U256},
+    wallet::{Result, Wallet, U256},
 };
 
 #[tokio::main]

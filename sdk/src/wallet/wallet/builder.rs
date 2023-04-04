@@ -21,7 +21,7 @@ use crate::wallet::storage::adapter::memory::Memory;
 use crate::wallet::storage::{constants::default_storage_path, manager::ManagerStorage};
 use crate::{
     client::secret::SecretManager,
-    wallet::{account::handle::AccountHandle, account_manager::Wallet, ClientOptions},
+    wallet::{AccountHandle, ClientOptions, Wallet},
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]

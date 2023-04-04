@@ -8,7 +8,7 @@
 use std::env;
 
 use dotenv::dotenv;
-use iota_sdk::wallet::{account_manager::Wallet, NativeTokenOptions, Result, U256};
+use iota_sdk::wallet::{NativeTokenOptions, Result, Wallet, U256};
 
 #[tokio::main]
 async fn main() -> Result<()> {

@@ -5,7 +5,7 @@ use std::env::var_os;
 
 use iota_sdk::{
     client::secret::{stronghold::StrongholdSecretManager, SecretManager},
-    wallet::account_manager::Wallet,
+    wallet::Wallet,
 };
 
 use crate::{

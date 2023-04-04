@@ -8,7 +8,7 @@ use {
         constants::SHIMMER_COIN_TYPE,
         secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
-    iota_sdk::wallet::{account_manager::Wallet, ClientOptions},
+    iota_sdk::wallet::{ClientOptions, Wallet},
     std::path::PathBuf,
 };
 

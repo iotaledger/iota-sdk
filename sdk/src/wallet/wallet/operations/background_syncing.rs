@@ -5,7 +5,7 @@ use std::{sync::atomic::Ordering, time::Duration};
 
 use tokio::time::sleep;
 
-use crate::wallet::{account::operations::syncing::SyncOptions, account_manager::Wallet};
+use crate::wallet::{account::operations::syncing::SyncOptions, Wallet};
 
 /// The default interval for background syncing
 pub(crate) const DEFAULT_BACKGROUNDSYNCING_INTERVAL: Duration = Duration::from_secs(7);

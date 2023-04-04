@@ -41,13 +41,12 @@ use crate::{
             types::{AccountBalanceDto, AccountIdentifier, TransactionDto},
             OutputDataDto,
         },
-        account_manager::Wallet,
         message_interface::{
             account_method::AccountMethod, dtos::AccountDto, message::Message, response::Response,
             AddressWithUnspentOutputsDto,
         },
         AddressWithAmount, AddressWithMicroAmount, IncreaseNativeTokenSupplyOptions, NativeTokenOptions, NftOptions,
-        Result,
+        Result, Wallet,
     },
 };
 

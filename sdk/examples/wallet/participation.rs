@@ -15,10 +15,7 @@ use iota_sdk::{
         Url,
     },
     types::api::plugins::participation::types::ParticipationEventId,
-    wallet::{
-        account::types::participation::ParticipationEventRegistrationOptions, account_manager::Wallet, ClientOptions,
-        Result,
-    },
+    wallet::{account::types::participation::ParticipationEventRegistrationOptions, ClientOptions, Result, Wallet},
 };
 
 #[tokio::main]

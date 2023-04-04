@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use dialoguer::{console::Term, theme::ColorfulTheme, Password, Select};
-use iota_sdk::wallet::account_manager::Wallet;
+use iota_sdk::wallet::Wallet;
 
 use crate::error::Error;
 

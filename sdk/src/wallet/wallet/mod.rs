@@ -15,7 +15,7 @@ use tokio::sync::RwLock;
 
 #[cfg(feature = "storage")]
 use self::builder::StorageOptions;
-use self::builder::WalletBuilder;
+pub use self::builder::WalletBuilder;
 #[cfg(feature = "events")]
 use crate::wallet::events::{
     types::{Event, WalletEventType},

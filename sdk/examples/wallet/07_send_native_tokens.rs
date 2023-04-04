@@ -13,7 +13,7 @@ use iota_sdk::{
         address::Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken, TokenId},
     },
-    wallet::{account_manager::Wallet, AddressNativeTokens, Result},
+    wallet::{AddressNativeTokens, Result, Wallet},
 };
 use primitive_types::U256;
 

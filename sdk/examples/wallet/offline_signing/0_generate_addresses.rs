@@ -18,7 +18,7 @@ use iota_sdk::{
         constants::{SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
         secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
-    wallet::{account::types::AccountAddress, account_manager::Wallet, ClientOptions, Result},
+    wallet::{account::types::AccountAddress, ClientOptions, Result, Wallet},
 };
 
 const ADDRESS_FILE_NAME: &str = "examples/offline_signing/addresses.json";

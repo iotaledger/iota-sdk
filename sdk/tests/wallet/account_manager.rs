@@ -13,7 +13,7 @@ use iota_sdk::{
         constants::IOTA_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    wallet::{account_manager::Wallet, ClientOptions, Result},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
 use crate::wallet::common::{make_manager, setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL, NODE_OTHER};

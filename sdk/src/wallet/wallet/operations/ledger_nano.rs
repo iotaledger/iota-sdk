@@ -3,7 +3,7 @@
 
 use crate::{
     client::secret::{LedgerNanoStatus, SecretManager},
-    wallet::account_manager::Wallet,
+    wallet::Wallet,
 };
 
 impl Wallet {

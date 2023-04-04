@@ -10,8 +10,8 @@ use crate::{
     client::secret::{SecretManager, SecretManagerDto},
     wallet::{
         account::Account,
-        account_manager::builder::WalletBuilder,
         storage::{constants::*, Storage, StorageAdapter},
+        WalletBuilder,
     },
 };
 

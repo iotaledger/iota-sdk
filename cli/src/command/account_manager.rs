@@ -6,7 +6,7 @@ use std::{fs::File, io::prelude::*};
 use clap::{Args, Parser, Subcommand};
 use iota_sdk::{
     client::{constants::SHIMMER_COIN_TYPE, secret::SecretManager, utils::generate_mnemonic},
-    wallet::{account_manager::Wallet, ClientOptions},
+    wallet::{ClientOptions, Wallet},
 };
 use log::LevelFilter;
 

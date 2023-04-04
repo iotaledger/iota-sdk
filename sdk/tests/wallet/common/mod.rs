@@ -12,7 +12,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
         Client,
     },
-    wallet::{account::AccountHandle, account_manager::Wallet, ClientOptions, Result},
+    wallet::{account::AccountHandle, ClientOptions, Result, Wallet},
 };
 
 pub use self::constants::*;

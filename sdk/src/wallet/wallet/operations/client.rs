@@ -4,13 +4,13 @@
 use std::collections::HashSet;
 
 #[cfg(feature = "storage")]
-use crate::wallet::account_manager::builder::WalletBuilder;
+use crate::wallet::WalletBuilder;
 use crate::{
     client::{
         node_manager::node::{Node, NodeAuth, NodeDto},
         NodeInfoWrapper, Url,
     },
-    wallet::{account_manager::Wallet, ClientOptions},
+    wallet::{ClientOptions, Wallet},
 };
 
 impl Wallet {

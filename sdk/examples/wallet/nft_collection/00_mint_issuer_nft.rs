@@ -13,7 +13,7 @@ use iota_sdk::{
         output::{NftId, Output, OutputId},
         payload::transaction::TransactionEssence,
     },
-    wallet::{account_manager::Wallet, NftOptions, Result},
+    wallet::{NftOptions, Result, Wallet},
 };
 
 #[tokio::main]

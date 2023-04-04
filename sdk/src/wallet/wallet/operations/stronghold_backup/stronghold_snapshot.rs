@@ -5,7 +5,7 @@ use std::sync::atomic::Ordering;
 
 use crate::{
     client::{secret::SecretManagerDto, storage::StorageProvider, stronghold::StrongholdAdapter},
-    wallet::{account::Account, account_manager::Wallet, ClientOptions},
+    wallet::{account::Account, ClientOptions, Wallet},
 };
 
 pub(crate) const CLIENT_OPTIONS_KEY: &str = "client_options";

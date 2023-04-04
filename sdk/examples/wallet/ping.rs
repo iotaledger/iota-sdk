@@ -16,7 +16,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
-    wallet::{account_manager::Wallet, ClientOptions, Result},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
 #[tokio::main]

@@ -6,7 +6,7 @@
 
 use iota_sdk::{
     types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
-    wallet::{account::types::AddressWrapper, account_manager::Wallet, Result},
+    wallet::{account::types::AddressWrapper, Result, Wallet},
 };
 
 #[tokio::main]

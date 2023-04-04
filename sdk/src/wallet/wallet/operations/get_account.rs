@@ -3,7 +3,7 @@
 
 use crate::wallet::{
     account::{handle::AccountHandle, types::AccountIdentifier},
-    account_manager::Wallet,
+    Wallet,
 };
 
 impl Wallet {

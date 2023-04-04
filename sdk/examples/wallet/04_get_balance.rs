@@ -5,7 +5,7 @@
 // In this example we sync the account and get the balance
 // Rename `.env.example` to `.env` first
 
-use iota_sdk::wallet::{account_manager::Wallet, Result};
+use iota_sdk::wallet::{Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {

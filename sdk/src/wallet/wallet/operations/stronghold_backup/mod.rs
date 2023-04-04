@@ -9,10 +9,10 @@ use zeroize::Zeroize;
 
 use self::stronghold_snapshot::{read_data_from_stronghold_snapshot, store_data_to_stronghold};
 #[cfg(feature = "storage")]
-use crate::wallet::account_manager::WalletBuilder;
+use crate::wallet::WalletBuilder;
 use crate::{
     client::secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerDto},
-    wallet::account_manager::{AccountHandle, Wallet},
+    wallet::{AccountHandle, Wallet},
 };
 
 impl Wallet {

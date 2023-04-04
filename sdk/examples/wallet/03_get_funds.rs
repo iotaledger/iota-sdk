@@ -10,7 +10,7 @@ use std::env;
 use dotenv::dotenv;
 use iota_sdk::{
     client::request_funds_from_faucet,
-    wallet::{account_manager::Wallet, Result},
+    wallet::{Result, Wallet},
 };
 
 #[tokio::main]

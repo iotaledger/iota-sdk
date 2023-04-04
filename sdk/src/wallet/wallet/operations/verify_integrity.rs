@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::wallet::account_manager::Wallet;
+use crate::wallet::Wallet;
 
 impl Wallet {
     /// Checks if there is no missing account for example indexes [0, 1, 3] should panic (for now, later return error,

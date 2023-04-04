@@ -19,7 +19,7 @@ pub use self::{
 };
 use crate::{
     client::secret::{SecretManager, SecretManagerDto},
-    wallet::{account_manager::Wallet, ClientOptions},
+    wallet::{ClientOptions, Wallet},
 };
 
 #[derive(Serialize, Deserialize, Debug)]

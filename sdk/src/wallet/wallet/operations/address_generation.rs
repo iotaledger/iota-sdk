@@ -8,7 +8,7 @@ use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
     types::block::address::Address,
-    wallet::account_manager::Wallet,
+    wallet::Wallet,
 };
 
 impl Wallet {
