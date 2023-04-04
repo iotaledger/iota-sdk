@@ -132,6 +132,10 @@ jobs:
         with:
           xcode-version: '14.3'
 
+      - name: Set deployment target (macOS)
+        run: echo "MACOSX_DEPLOYMENT_TARGET=10.13" >> $GITHUB_ENV
+        if: matrix.os == 'macos-latest'
+
       - name: Set Up Node.js ${{ matrix.node }} and Yarn Cache
         uses: actions/setup-node@v2
         with:
