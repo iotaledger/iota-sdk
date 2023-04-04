@@ -20,7 +20,12 @@ async fn main() -> Result<()> {
     // If already synced, just get the balance
     let account_balance = account.balance().await?;
 
-    println!("{account_balance:?}");
+    println!("{account_balance:#?}");
+
+    println!("Addresses:");
+    for address in account.addresses().await? {
+        println!(" - {}", address.address().to_bech32());
+    }
 
     Ok(())
 }
