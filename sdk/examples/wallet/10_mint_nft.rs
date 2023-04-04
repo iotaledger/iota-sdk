@@ -65,6 +65,11 @@ async fn main() -> Result<()> {
 
     let transaction = account.send(outputs, None).await?;
 
+    // Wait for transaction to get included
+    account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
+
     // Ensure the account is synced after minting.
     account.sync(None).await?;
 

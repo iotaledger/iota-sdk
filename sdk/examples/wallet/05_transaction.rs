@@ -36,6 +36,11 @@ async fn main() -> Result<()> {
         }];
         let transaction = account.send_amount(outputs, None).await?;
 
+        // Wait for transaction to get included
+        account
+            .retry_transaction_until_included(&transaction.transaction_id, None, None)
+            .await?;
+
         println!(
             "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
             transaction.transaction_id,
