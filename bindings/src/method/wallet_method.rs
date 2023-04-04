@@ -16,14 +16,14 @@ use iota_sdk::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::message::{account_method::AccountMethod, OmittedDebug};
+use crate::method::{account_method::AccountMethod, OmittedDebug};
 
 /// The messages that can be sent to the actor.
 #[derive(Clone, Derivative, Serialize, Deserialize)]
 #[derivative(Debug)]
 #[serde(tag = "cmd", content = "payload", rename_all = "camelCase")]
 #[allow(clippy::large_enum_variant)]
-pub enum WalletMessage {
+pub enum WalletMethod {
     /// Creates an account.
     /// Expected response: [`Account`](crate::message_interface::Response::Account)
     CreateAccount {

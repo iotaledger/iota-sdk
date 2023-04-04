@@ -57,7 +57,7 @@ use {
     std::collections::HashMap,
 };
 
-use super::{error::MessageInterfaceError, message::OmittedDebug};
+use super::{error::MessageInterfaceError, method::OmittedDebug};
 
 /// The response message.
 #[derive(Serialize, Derivative)]

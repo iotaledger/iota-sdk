@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod account_method;
-mod client_message;
-mod wallet_message;
+mod client_method;
+mod wallet_method;
 
 use std::fmt::{Formatter, Result as FmtResult};
 
 pub use account_method::AccountMethod;
-pub use client_message::ClientMessage;
+pub use client_method::ClientMethod;
 use iota_sdk::client::secret::SecretManagerDto;
-pub use wallet_message::WalletMessage;
+pub use wallet_method::WalletMethod;
 
 pub(crate) trait OmittedDebug {
     fn omitted_fmt(&self, f: &mut Formatter<'_>) -> FmtResult {

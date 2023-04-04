@@ -43,7 +43,7 @@ use super::OmittedDebug;
 #[derive(Clone, Derivative, Serialize, Deserialize)]
 #[derivative(Debug)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
-pub enum ClientMessage {
+pub enum ClientMethod {
     /// Build an AliasOutput.
     /// Expected response: [`BuiltOutput`](crate::message_interface::Response::BuiltOutput)
     #[allow(missing_docs)]

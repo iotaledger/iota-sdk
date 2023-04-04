@@ -4,8 +4,8 @@
 //! Message interface for bindings
 
 mod error;
-mod message;
 pub mod message_handler;
+mod method;
 mod panic;
 mod response;
 
@@ -17,8 +17,8 @@ use iota_sdk::{
 use serde::{Deserialize, Serialize, Serializer};
 
 pub use crate::{
-    message::{AccountMethod, ClientMessage, WalletMessage},
     message_handler::{call_client_method, call_wallet_method},
+    method::{AccountMethod, ClientMethod, WalletMethod},
     response::Response,
 };
 

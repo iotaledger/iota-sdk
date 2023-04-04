@@ -6,8 +6,8 @@ use iota_sdk::{
     wallet::account::types::AccountIdentifier,
 };
 use iota_sdk_bindings::{
-    call_client_method, call_wallet_method, message_handler::Result, AccountMethod, ClientMessage, ManagerOptions,
-    Response, WalletMessage,
+    call_client_method, call_wallet_method, message_handler::Result, AccountMethod, ClientMethod, ManagerOptions,
+    Response, WalletMethod,
 };
 
 #[tokio::test]
@@ -33,7 +33,7 @@ async fn generate_addresses() -> Result<()> {
         bech32_hrp: Some("atoi".to_string()),
         options: None,
     };
-    let message = ClientMessage::GenerateAddresses {
+    let message = ClientMethod::GenerateAddresses {
         secret_manager: serde_json::from_str::<SecretManagerDto>(&secret_manager).unwrap(),
         options,
     };
@@ -75,7 +75,7 @@ async fn create_account() -> Result<()> {
     // create an account
     let response = call_wallet_method(
         &wallet,
-        WalletMessage::CreateAccount {
+        WalletMethod::CreateAccount {
             alias: None,
             bech32_hrp: None,
         },
@@ -93,7 +93,7 @@ async fn create_account() -> Result<()> {
 
     let response = call_wallet_method(
         &wallet,
-        WalletMessage::CallAccountMethod {
+        WalletMethod::CallAccountMethod {
             account_id: AccountIdentifier::Index(0),
             method: AccountMethod::UnspentOutputs { filter_options: None },
         },
@@ -136,7 +136,7 @@ async fn client_from_wallet() -> Result<()> {
     // create an account
     let response = call_wallet_method(
         &wallet,
-        WalletMessage::CreateAccount {
+        WalletMethod::CreateAccount {
             alias: None,
             bech32_hrp: None,
         },
@@ -152,12 +152,8 @@ async fn client_from_wallet() -> Result<()> {
         _ => panic!("unexpected response {response:?}"),
     }
 
-    // Send ClientMessage via the client from the wallet
-    let response = call_client_method(
-        wallet.get_accounts().await?[0].client(),
-        ClientMessage::GenerateMnemonic,
-    )
-    .await;
+    // Send ClientMethod via the client from the wallet
+    let response = call_client_method(wallet.get_accounts().await?[0].client(), ClientMethod::GenerateMnemonic).await;
 
     match response {
         Response::GeneratedMnemonic(_) => {}
@@ -169,7 +165,7 @@ async fn client_from_wallet() -> Result<()> {
 
 #[test]
 fn message_interface_secrets_debug() {
-    let client_message = ClientMessage::MnemonicToHexSeed {
+    let client_message = ClientMethod::MnemonicToHexSeed {
         mnemonic: "mnemonic".to_string(),
     };
     assert_eq!(
@@ -177,7 +173,7 @@ fn message_interface_secrets_debug() {
         "MnemonicToHexSeed { mnemonic: <omitted> }"
     );
 
-    let client_message = ClientMessage::BuildAndPostBlock {
+    let client_message = ClientMethod::BuildAndPostBlock {
         secret_manager: None,
         options: None,
     };
@@ -188,7 +184,7 @@ fn message_interface_secrets_debug() {
 
     #[cfg(feature = "ledger_nano")]
     {
-        let client_message = ClientMessage::BuildAndPostBlock {
+        let client_message = ClientMethod::BuildAndPostBlock {
             secret_manager: Some(SecretManagerDto::LedgerNano(false)),
             options: None,
         };
@@ -198,7 +194,7 @@ fn message_interface_secrets_debug() {
         );
     }
 
-    let wallet_message = WalletMessage::VerifyMnemonic {
+    let wallet_message = WalletMethod::VerifyMnemonic {
         mnemonic: "mnemonic".to_string(),
     };
     assert_eq!(

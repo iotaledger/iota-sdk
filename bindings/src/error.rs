@@ -4,7 +4,7 @@
 use packable::error::UnexpectedEOF;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 
-pub use super::{message::AccountMethod, response::Response};
+pub use super::{method::AccountMethod, response::Response};
 
 // TODO: SDK Error instead?
 /// Error type of the message interface.

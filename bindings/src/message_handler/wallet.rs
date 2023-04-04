@@ -10,16 +10,16 @@ use iota_sdk::{
 use zeroize::Zeroize;
 
 use crate::{
-    message::WalletMessage,
     message_handler::{account_handle::call_account_method, Result},
+    method::WalletMethod,
     panic::convert_panics,
     response::Response,
 };
 
 /// Call a wallet method.
-pub(crate) async fn call_wallet_method_internal(wallet: &AccountManager, message: WalletMessage) -> Result<Response> {
+pub(crate) async fn call_wallet_method_internal(wallet: &AccountManager, message: WalletMethod) -> Result<Response> {
     match message {
-        WalletMessage::CreateAccount { alias, bech32_hrp } => {
+        WalletMethod::CreateAccount { alias, bech32_hrp } => {
             let mut builder = wallet.create_account();
 
             if let Some(alias) = alias {
@@ -38,12 +38,12 @@ pub(crate) async fn call_wallet_method_internal(wallet: &AccountManager, message
                 Err(e) => Err(e.into()),
             }
         }
-        WalletMessage::GetAccount { account_id } => {
+        WalletMethod::GetAccount { account_id } => {
             let account_handle = wallet.get_account(account_id.clone()).await?;
             let account = account_handle.read().await;
             Ok(Response::Account(AccountDto::from(&*account)))
         }
-        WalletMessage::GetAccountIndexes => {
+        WalletMethod::GetAccountIndexes => {
             let accounts = wallet.get_accounts().await?;
             let mut account_indexes = Vec::new();
             for account in accounts.iter() {
@@ -51,7 +51,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &AccountManager, message
             }
             Ok(Response::AccountIndexes(account_indexes))
         }
-        WalletMessage::GetAccounts => {
+        WalletMethod::GetAccounts => {
             let account_handles = wallet.get_accounts().await?;
             let mut accounts = Vec::new();
             for account_handle in account_handles {
@@ -60,17 +60,17 @@ pub(crate) async fn call_wallet_method_internal(wallet: &AccountManager, message
             }
             Ok(Response::Accounts(accounts))
         }
-        WalletMessage::CallAccountMethod { account_id, method } => {
+        WalletMethod::CallAccountMethod { account_id, method } => {
             let account_handle = wallet.get_account(account_id).await?;
             call_account_method(&account_handle, method).await
         }
         #[cfg(feature = "stronghold")]
-        WalletMessage::Backup { destination, password } => {
+        WalletMethod::Backup { destination, password } => {
             wallet.backup(destination, password).await?;
             Ok(Response::Ok)
         }
         #[cfg(feature = "stronghold")]
-        WalletMessage::ChangeStrongholdPassword {
+        WalletMethod::ChangeStrongholdPassword {
             mut current_password,
             mut new_password,
         } => {
@@ -82,16 +82,16 @@ pub(crate) async fn call_wallet_method_internal(wallet: &AccountManager, message
             Ok(Response::Ok)
         }
         #[cfg(feature = "stronghold")]
-        WalletMessage::ClearStrongholdPassword => {
+        WalletMethod::ClearStrongholdPassword => {
             wallet.clear_stronghold_password().await?;
             Ok(Response::Ok)
         }
         #[cfg(feature = "stronghold")]
-        WalletMessage::IsStrongholdPasswordAvailable => {
+        WalletMethod::IsStrongholdPasswordAvailable => {
             let is_available = wallet.is_stronghold_password_available().await?;
             Ok(Response::Bool(is_available))
         }
-        WalletMessage::RecoverAccounts {
+        WalletMethod::RecoverAccounts {
             account_start_index,
             account_gap_limit,
             address_gap_limit,
@@ -107,12 +107,12 @@ pub(crate) async fn call_wallet_method_internal(wallet: &AccountManager, message
             }
             Ok(Response::Accounts(accounts))
         }
-        WalletMessage::RemoveLatestAccount => {
+        WalletMethod::RemoveLatestAccount => {
             wallet.remove_latest_account().await?;
             Ok(Response::Ok)
         }
         #[cfg(feature = "stronghold")]
-        WalletMessage::RestoreBackup {
+        WalletMethod::RestoreBackup {
             source,
             password,
             ignore_if_coin_type_mismatch,
@@ -122,27 +122,27 @@ pub(crate) async fn call_wallet_method_internal(wallet: &AccountManager, message
                 .await?;
             Ok(Response::Ok)
         }
-        WalletMessage::GenerateMnemonic => convert_panics(|| {
+        WalletMethod::GenerateMnemonic => convert_panics(|| {
             wallet
                 .generate_mnemonic()
                 .map(Response::GeneratedMnemonic)
                 .map_err(Into::into)
         }),
-        WalletMessage::VerifyMnemonic { mut mnemonic } => convert_panics(|| {
+        WalletMethod::VerifyMnemonic { mut mnemonic } => convert_panics(|| {
             wallet.verify_mnemonic(&mnemonic)?;
             mnemonic.zeroize();
             Ok(Response::Ok)
         }),
-        WalletMessage::SetClientOptions { client_options } => {
+        WalletMethod::SetClientOptions { client_options } => {
             wallet.set_client_options(*client_options).await?;
             Ok(Response::Ok)
         }
         #[cfg(feature = "ledger_nano")]
-        WalletMessage::GetLedgerNanoStatus => {
+        WalletMethod::GetLedgerNanoStatus => {
             let ledger_nano_status = wallet.get_ledger_nano_status().await?;
             Ok(Response::LedgerNanoStatus(ledger_nano_status))
         }
-        WalletMessage::GenerateAddress {
+        WalletMethod::GenerateAddress {
             account_index,
             internal,
             address_index,
@@ -160,7 +160,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &AccountManager, message
 
             Ok(Response::Bech32Address(address.to_bech32(bech32_hrp)))
         }
-        WalletMessage::GetNodeInfo { url, auth } => match url {
+        WalletMethod::GetNodeInfo { url, auth } => match url {
             Some(url) => {
                 let node_info = Client::get_node_info(&url, auth).await?;
                 Ok(Response::NodeInfoWrapper(NodeInfoWrapper { node_info, url }))
@@ -172,13 +172,13 @@ pub(crate) async fn call_wallet_method_internal(wallet: &AccountManager, message
                 .map_err(Into::into),
         },
         #[cfg(feature = "stronghold")]
-        WalletMessage::SetStrongholdPassword { mut password } => {
+        WalletMethod::SetStrongholdPassword { mut password } => {
             wallet.set_stronghold_password(&password).await?;
             password.zeroize();
             Ok(Response::Ok)
         }
         #[cfg(feature = "stronghold")]
-        WalletMessage::SetStrongholdPasswordClearInterval {
+        WalletMethod::SetStrongholdPasswordClearInterval {
             interval_in_milliseconds,
         } => {
             let duration = interval_in_milliseconds.map(Duration::from_millis);
@@ -186,11 +186,11 @@ pub(crate) async fn call_wallet_method_internal(wallet: &AccountManager, message
             Ok(Response::Ok)
         }
         #[cfg(feature = "stronghold")]
-        WalletMessage::StoreMnemonic { mnemonic } => {
+        WalletMethod::StoreMnemonic { mnemonic } => {
             wallet.store_mnemonic(mnemonic).await?;
             Ok(Response::Ok)
         }
-        WalletMessage::StartBackgroundSync {
+        WalletMethod::StartBackgroundSync {
             options,
             interval_in_milliseconds,
         } => {
@@ -198,19 +198,19 @@ pub(crate) async fn call_wallet_method_internal(wallet: &AccountManager, message
             wallet.start_background_syncing(options, duration).await?;
             Ok(Response::Ok)
         }
-        WalletMessage::StopBackgroundSync => {
+        WalletMethod::StopBackgroundSync => {
             wallet.stop_background_syncing().await?;
             Ok(Response::Ok)
         }
         #[cfg(feature = "events")]
-        WalletMessage::EmitTestEvent { event } => {
+        WalletMethod::EmitTestEvent { event } => {
             wallet.emit_test_event(event.clone()).await?;
             Ok(Response::Ok)
         }
-        WalletMessage::Bech32ToHex { bech32_address } => {
+        WalletMethod::Bech32ToHex { bech32_address } => {
             convert_panics(|| Ok(Response::HexAddress(utils::bech32_to_hex(&bech32_address)?)))
         }
-        WalletMessage::HexToBech32 { hex, bech32_hrp } => {
+        WalletMethod::HexToBech32 { hex, bech32_hrp } => {
             let bech32_hrp = match bech32_hrp {
                 Some(bech32_hrp) => bech32_hrp,
                 None => match wallet.get_node_info().await {
@@ -222,11 +222,11 @@ pub(crate) async fn call_wallet_method_internal(wallet: &AccountManager, message
             Ok(Response::Bech32Address(utils::hex_to_bech32(&hex, &bech32_hrp)?))
         }
         #[cfg(feature = "events")]
-        WalletMessage::ClearListeners { event_types } => {
+        WalletMethod::ClearListeners { event_types } => {
             wallet.clear_listeners(event_types).await;
             Ok(Response::Ok)
         }
-        WalletMessage::UpdateNodeAuth { url, auth } => {
+        WalletMethod::UpdateNodeAuth { url, auth } => {
             wallet.update_node_auth(url, auth).await?;
             Ok(Response::Ok)
         }
