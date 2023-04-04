@@ -9,7 +9,7 @@ use crate::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
             },
-            BasicOutputBuilder,
+            BasicOutputBuilder, Rent,
         },
     },
     wallet::{
@@ -120,30 +120,31 @@ impl AccountHandle {
             // get minimum required amount for such an output, so we don't lock more than required
             // We have to check it for every output individually, because different address types and amount of
             // different native tokens require a different storage deposit
-            let storage_deposit_amount = minimum_storage_deposit_basic_native_tokens(
-                &rent_structure,
-                &address,
-                &return_address,
-                None,
-                token_supply,
-            )?;
+            let output = BasicOutputBuilder::new_with_amount(amount)?
+                .add_unlock_condition(AddressUnlockCondition::new(address))
+                .finish_output(token_supply)?;
+            let rent_cost = output.rent_cost(&rent_structure);
 
-            if amount >= storage_deposit_amount {
-                outputs.push(
-                    BasicOutputBuilder::new_with_amount(amount)?
-                        .add_unlock_condition(AddressUnlockCondition::new(address))
-                        .finish_output(token_supply)?,
-                )
+            if amount >= rent_cost {
+                outputs.push(output)
             } else {
                 let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
                     local_time + expiration_time
                 });
 
+                let storage_deposit_amount = minimum_storage_deposit_basic_native_tokens(
+                    &rent_structure,
+                    &address,
+                    &return_address,
+                    None,
+                    token_supply,
+                )?;
+
                 outputs.push(
                     // Add address_and_amount.amount+storage_deposit_amount, so receiver can get
                     // address_and_amount.amount
-                    BasicOutputBuilder::new_with_amount(amount + storage_deposit_amount)?
-                        .add_unlock_condition(AddressUnlockCondition::new(address))
+                    BasicOutputBuilder::from(output.as_basic())
+                        .with_amount(amount + storage_deposit_amount)?
                         .add_unlock_condition(
                             // We send the storage_deposit_amount back to the sender, so only the additional amount is
                             // sent
