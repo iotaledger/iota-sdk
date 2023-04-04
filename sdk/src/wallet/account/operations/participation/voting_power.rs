@@ -6,7 +6,7 @@ use crate::{
         api::plugins::participation::types::{Participations, PARTICIPATION_TAG},
         block::{
             output::{
-                feature::{Feature, MetadataFeature, TagFeature},
+                feature::{MetadataFeature, TagFeature},
                 unlock_condition::AddressUnlockCondition,
                 BasicOutput, BasicOutputBuilder, Output,
             },
@@ -103,7 +103,7 @@ impl AccountHandle {
         let (new_output, tagged_data_payload) = if amount == output.amount() {
             (
                 BasicOutputBuilder::from(output)
-                    .with_features(Vec::<Feature>::new())
+                    .clear_features()
                     .finish_output(token_supply)?,
                 None,
             )

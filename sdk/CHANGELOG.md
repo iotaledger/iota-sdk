@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `tls` as default feature;
+- `{Alias, Basic, Foundry, Nft}Output::clear_unlock_conditions` method;
+- `{Alias, Basic, Foundry, Nft}Output::clear_features` method;
+- `{Alias, Foundry, Nft}Output::clear_immutable_features` method;
 
 ### Changed
 
