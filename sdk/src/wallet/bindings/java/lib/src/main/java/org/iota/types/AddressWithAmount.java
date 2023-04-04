@@ -36,7 +36,7 @@ public class AddressWithAmount extends AbstractObject {
         return returnAddress;
     }
 
-    public AddressWithMicroAmount withReturnAddress(String returnAddress) {
+    public AddressWithAmount withReturnAddress(String returnAddress) {
         this.returnAddress = returnAddress;
         return this;
     }
@@ -45,7 +45,7 @@ public class AddressWithAmount extends AbstractObject {
         return expiration;
     }
 
-    public AddressWithMicroAmount withExpiration(int expiration) {
+    public AddressWithAmount withExpiration(int expiration) {
         this.expiration = expiration;
         return this;
     }
