@@ -127,7 +127,7 @@ jobs:
         if: matrix.os == 'windows-latest'
 
       - name: Set deployment target (macOS)
-        run: echo "MACOSX_DEPLOYMENT_TARGET=10.13" >> $GITHUB_ENV
+        run: echo "MACOSX_DEPLOYMENT_TARGET=10.14" >> $GITHUB_ENV # 10.12 should be supported, but waiting for new rocksDB/XCode 14.3 to test this
         if: matrix.os == 'macos-latest'
 
       - name: Set Up Node.js ${{ matrix.node }} and Yarn Cache
