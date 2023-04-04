@@ -50,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fallback to local PoW;
 - Unlock unused inputs;
+- Derive location in Stronghold for parallel usage;
 
 ## 0.1.0 - 2023-04-03
 

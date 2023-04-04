@@ -49,13 +49,22 @@ impl SecretManage for StrongholdAdapter {
 
         // Stronghold arguments.
         let seed_location = Slip10DeriveInput::Seed(Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH));
-        let derive_location = Location::generic(SECRET_VAULT_PATH, DERIVE_OUTPUT_RECORD_PATH);
 
         // Addresses to return.
         let mut addresses = Vec::new();
 
         for address_index in address_indexes {
-            let chain = Chain::from_u32_hardened(vec![44u32, coin_type, account_index, internal as u32, address_index]);
+            let bip_path = vec![44u32, coin_type, account_index, internal as u32, address_index];
+            let chain = Chain::from_u32_hardened(bip_path);
+
+            let derive_location = Location::generic(
+                SECRET_VAULT_PATH,
+                [
+                    DERIVE_OUTPUT_RECORD_PATH,
+                    &chain.segments().iter().flat_map(|seg| seg.bs()).collect::<Vec<u8>>(),
+                ]
+                .concat(),
+            );
 
             // Derive a SLIP-10 private key in the vault.
             self.slip10_derive(chain, seed_location.clone(), derive_location.clone())
@@ -89,7 +98,6 @@ impl SecretManage for StrongholdAdapter {
 
         // Stronghold arguments.
         let seed_location = Slip10DeriveInput::Seed(Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH));
-        let derive_location = Location::generic(SECRET_VAULT_PATH, DERIVE_OUTPUT_RECORD_PATH);
 
         // Stronghold asks for an older version of [Chain], so we have to perform a conversion here.
         let chain = {
@@ -102,6 +110,15 @@ impl SecretManage for StrongholdAdapter {
 
             Chain::from_u32_hardened(raw)
         };
+
+        let derive_location = Location::generic(
+            SECRET_VAULT_PATH,
+            [
+                DERIVE_OUTPUT_RECORD_PATH,
+                &chain.segments().iter().flat_map(|seg| seg.bs()).collect::<Vec<u8>>(),
+            ]
+            .concat(),
+        );
 
         // Derive a SLIP-10 private key in the vault.
         self.slip10_derive(chain, seed_location, derive_location.clone())
