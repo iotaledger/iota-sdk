@@ -21,35 +21,33 @@ async fn main() -> Result<()> {
     // Get the account we generated with `01_create_wallet`
     let account = manager.get_account("Alice").await?;
     // May want to ensure the account is synced before sending a transaction.
-    let balance = account.sync(None).await?;
+    account.sync(None).await?;
 
-    if balance.base_coin.available >= 1 {
-        // Set the stronghold password
-        manager
-            .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
-            .await?;
+    // Set the stronghold password
+    manager
+        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .await?;
 
-        let outputs = vec![AddressWithMicroAmount {
-            address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
-            amount: 1,
-            return_address: None,
-            expiration: None,
-        }];
+    let outputs = vec![AddressWithMicroAmount {
+        address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
+        amount: 1,
+        return_address: None,
+        expiration: None,
+    }];
 
-        let transaction = account.send_micro_transaction(outputs, None).await?;
+    let transaction = account.send_micro_transaction(outputs, None).await?;
 
-        // Wait for transaction to get included
-        account
-            .retry_transaction_until_included(&transaction.transaction_id, None, None)
-            .await?;
+    // Wait for transaction to get included
+    account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
 
-        println!(
-            "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
-            transaction.transaction_id,
-            &env::var("NODE_URL").unwrap(),
-            transaction.block_id.expect("no block created yet")
-        );
-    }
+    println!(
+        "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
+        transaction.transaction_id,
+        &env::var("NODE_URL").unwrap(),
+        transaction.block_id.expect("no block created yet")
+    );
 
     Ok(())
 }
