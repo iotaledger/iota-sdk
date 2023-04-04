@@ -49,16 +49,21 @@ async fn main() -> Result<()> {
         foundry_metadata: None,
     };
 
-    let transaction = account.mint_native_token(native_token_options, None).await?;
+    let mint_txn = account.mint_native_token(native_token_options, None).await?;
+
+    // Wait for transaction to get included
+    account
+        .retry_transaction_until_included(&mint_txn.transaction.transaction_id, None, None)
+        .await?;
 
     // Ensure the account is synced after minting.
     account.sync(None).await?;
 
     println!(
         "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
-        transaction.transaction.transaction_id,
+        mint_txn.transaction.transaction_id,
         &env::var("NODE_URL").unwrap(),
-        transaction.transaction.block_id.expect("no block created yet")
+        mint_txn.transaction.block_id.expect("no block created yet")
     );
     Ok(())
 }
