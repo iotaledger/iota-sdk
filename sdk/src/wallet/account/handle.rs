@@ -22,7 +22,7 @@ use crate::{
                 address::{AccountAddress, AddressWithUnspentOutputs},
                 OutputData, Transaction,
             },
-            Account,
+            Account, SyncOptions,
         },
         Result,
     },
@@ -44,6 +44,7 @@ pub struct FilterOptions {
 #[derive(Debug, Clone)]
 pub struct AccountHandle {
     account: Arc<RwLock<Account>>,
+    pub(crate) fallback_sync_options: Arc<Mutex<SyncOptions>>,
     pub(crate) client: Client,
     pub(crate) secret_manager: Arc<RwLock<SecretManager>>,
     // mutex to prevent multiple sync calls at the same or almost the same time, the u128 is a timestamp
@@ -69,6 +70,7 @@ impl AccountHandle {
             account: Arc::new(RwLock::new(account)),
             client,
             secret_manager,
+            fallback_sync_options: Default::default(),
             last_synced: Default::default(),
             #[cfg(feature = "events")]
             event_emitter,

@@ -24,10 +24,24 @@ use crate::{
 };
 
 impl AccountHandle {
+    /// Set the fallback SyncOptions for account syncing
+    pub async fn set_default_sync_options(&self, options: SyncOptions) {
+        *self.fallback_sync_options.lock().await = options;
+    }
+
+    // Get the default sync options we use when none are provided
+    pub async fn sync_options(&self) -> SyncOptions {
+        self.fallback_sync_options.lock().await.clone()
+    }
+
     /// Sync the account by fetching new information from the nodes. Will also retry pending transactions
     /// if necessary.
     pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<AccountBalance> {
-        let options = options.unwrap_or_default();
+        let options = match options {
+            Some(opt) => opt,
+            None => self.sync_options().await.clone()
+        };
+        
         log::debug!("[SYNC] start syncing with {:?}", options);
         let syc_start_time = instant::Instant::now();
 
