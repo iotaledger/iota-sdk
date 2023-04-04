@@ -211,7 +211,7 @@ impl WalletBuilder {
             })
             .collect::<_>();
 
-        // If the manager builder is not set, it means the user provided it and we need to update the addresses.
+        // If the wallet builder is not set, it means the user provided it and we need to update the addresses.
         // In the other case it was loaded from the database and addresses are up to date.
         if new_provided_client_options {
             for account in account_handles.iter_mut() {

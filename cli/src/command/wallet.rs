@@ -67,18 +67,18 @@ pub struct InitParameters {
     pub coin_type: Option<u32>,
 }
 
-pub async fn backup_command(manager: &Wallet, path: String, password: &str) -> Result<(), Error> {
-    manager.backup(path.clone().into(), password.into()).await?;
+pub async fn backup_command(wallet: &Wallet, path: String, password: &str) -> Result<(), Error> {
+    wallet.backup(path.clone().into(), password.into()).await?;
 
     println_log_info!("Wallet has been backed up to \"{path}\".");
 
     Ok(())
 }
 
-pub async fn change_password_command(manager: &Wallet, current: &str) -> Result<(), Error> {
+pub async fn change_password_command(wallet: &Wallet, current: &str) -> Result<(), Error> {
     let new = get_password("Stronghold new password", true)?;
 
-    manager.change_stronghold_password(current, &new).await?;
+    wallet.change_stronghold_password(current, &new).await?;
 
     Ok(())
 }

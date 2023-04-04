@@ -70,7 +70,7 @@ pub async fn create_message_handler(options: Option<ManagerOptions>) -> crate::w
         "create_message_handler with options: {}",
         serde_json::to_string(&options)?,
     );
-    let manager = if let Some(options) = options {
+    let wallet = if let Some(options) = options {
         let mut builder = Wallet::builder();
 
         #[cfg(feature = "storage")]
@@ -95,5 +95,5 @@ pub async fn create_message_handler(options: Option<ManagerOptions>) -> crate::w
         Wallet::builder().finish().await?
     };
 
-    Ok(WalletMessageHandler::with_manager(manager))
+    Ok(WalletMessageHandler::with_manager(wallet))
 }
