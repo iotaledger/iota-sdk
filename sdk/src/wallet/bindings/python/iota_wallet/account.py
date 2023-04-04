@@ -417,16 +417,6 @@ class Account:
             }
         )
 
-    def send_micro_transaction(self, addresses_with_micro_amount, options=None):
-        """Send micro transaction.
-        """
-        return self._call_account_method(
-            'sendMicroTransaction', {
-                'addressesWithMicroAmount': addresses_with_micro_amount,
-                'options': options
-            }
-        )
-
     def send_native_tokens(self, addresses_native_tokens, options=None):
         """Send native tokens.
         """

@@ -17,6 +17,6 @@ outputs = [{
     "amount": "1",
 }]
 
-transaction = account.send_micro_transaction(outputs, None)
+transaction = account.send_amount(outputs, None)
 
 print(f'Sent transaction: {transaction}')

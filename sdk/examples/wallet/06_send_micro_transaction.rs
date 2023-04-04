@@ -8,7 +8,7 @@
 use std::env;
 
 use dotenv::dotenv;
-use iota_sdk::wallet::{account_manager::AccountManager, AddressWithMicroAmount, Result};
+use iota_sdk::wallet::{account_manager::AccountManager, AddressWithAmount, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -26,14 +26,12 @@ async fn main() -> Result<()> {
         .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let outputs = vec![AddressWithMicroAmount {
-        address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
-        amount: 1,
-        return_address: None,
-        expiration: None,
-    }];
+    let outputs = vec![AddressWithAmount::new(
+        "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
+        1,
+    )];
 
-    let transaction = account.send_micro_transaction(outputs, None).await?;
+    let transaction = account.send_amount(outputs, None).await?;
 
     println!(
         "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",

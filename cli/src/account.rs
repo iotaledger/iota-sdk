@@ -14,9 +14,8 @@ use crate::{
         decrease_voting_power_command, destroy_alias_command, destroy_foundry_command, faucet_command,
         increase_native_token_command, increase_voting_power_command, mint_native_token_command, mint_nft_command,
         new_address_command, output_command, outputs_command, participation_overview_command, send_command,
-        send_micro_command, send_native_token_command, send_nft_command, stop_participating_command, sync_command,
-        transactions_command, unspent_outputs_command, vote_command, voting_output_command, voting_power_command,
-        AccountCli, AccountCommand,
+        send_native_token_command, send_nft_command, stop_participating_command, sync_command, transactions_command,
+        unspent_outputs_command, vote_command, voting_output_command, voting_power_command, AccountCli, AccountCommand,
     },
     error::Error,
     helper::bytes_from_hex_or_file,
@@ -135,10 +134,12 @@ pub async fn account_prompt_internal(
                 AccountCommand::NewAddress => new_address_command(&account_handle).await,
                 AccountCommand::Output { output_id } => output_command(&account_handle, output_id).await,
                 AccountCommand::Outputs => outputs_command(&account_handle).await,
-                AccountCommand::Send { address, amount } => send_command(&account_handle, address, amount).await,
-                AccountCommand::SendMicro { address, amount } => {
-                    send_micro_command(&account_handle, address, amount).await
-                }
+                AccountCommand::Send {
+                    address,
+                    amount,
+                    return_address,
+                    expiration,
+                } => send_command(&account_handle, address, amount, return_address, expiration).await,
                 AccountCommand::SendNativeToken {
                     address,
                     token_id,

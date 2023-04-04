@@ -40,7 +40,6 @@ pub use self::{
             mint_nfts::NftOptions,
         },
         send_amount::AddressWithAmount,
-        send_micro_transaction::AddressWithMicroAmount,
         send_native_tokens::AddressNativeTokens,
         send_nft::AddressAndNftId,
     },

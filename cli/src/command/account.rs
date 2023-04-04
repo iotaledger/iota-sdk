@@ -21,8 +21,7 @@ use iota_sdk::{
             types::{AccountAddress, TransactionDto},
             AccountHandle, OutputsToClaim,
         },
-        AddressAndNftId, AddressNativeTokens, AddressWithAmount, AddressWithMicroAmount, NativeTokenOptions,
-        NftOptions, U256,
+        AddressAndNftId, AddressNativeTokens, AddressWithAmount, NativeTokenOptions, NftOptions, U256,
     },
 };
 
@@ -151,13 +150,12 @@ pub enum AccountCommand {
         address: String,
         /// Amount to send, e.g. 1000000.
         amount: u64,
-    },
-    /// Send an amount below the storage deposit minimum.
-    SendMicro {
-        /// Address to send funds to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
-        address: String,
-        /// Amount to send, e.g. 1.
-        amount: u64,
+        /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
+        /// first address of the account
+        return_address: Option<String>,
+        /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
+        /// receiver before. Default is 1 day
+        expiration: Option<u32>,
     },
     /// Send native tokens.
     /// This will create an output with an expiration and storage deposit return unlock condition.
@@ -568,32 +566,22 @@ pub async fn outputs_command(account_handle: &AccountHandle) -> Result<(), Error
 }
 
 // `send` command
-pub async fn send_command(account_handle: &AccountHandle, address: String, amount: u64) -> Result<(), Error> {
-    let outputs = vec![AddressWithAmount { address, amount }];
+pub async fn send_command(
+    account_handle: &AccountHandle,
+    address: String,
+    amount: u64,
+    return_address: Option<String>,
+    expiration: Option<u32>,
+) -> Result<(), Error> {
+    let outputs = vec![
+        AddressWithAmount::new(address, amount)
+            .with_return_address(return_address)
+            .with_expiration(expiration),
+    ];
     let transaction = account_handle.send_amount(outputs, None).await?;
 
     println_log_info!(
         "Transaction sent:\n{:?}\n{:?}",
-        transaction.transaction_id,
-        transaction.block_id
-    );
-
-    Ok(())
-}
-
-// `send-micro` command
-pub async fn send_micro_command(account_handle: &AccountHandle, address: String, amount: u64) -> Result<(), Error> {
-    let outputs = vec![AddressWithMicroAmount {
-        address,
-        amount,
-        return_address: None,
-        expiration: None,
-    }];
-
-    let transaction = account_handle.send_micro_transaction(outputs, None).await?;
-
-    println_log_info!(
-        "Micro transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
     );

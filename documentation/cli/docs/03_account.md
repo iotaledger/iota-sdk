@@ -392,7 +392,8 @@ Get the participation overview only for a specific event.
 
 ### `send`
 
-Sends an amount to an address.
+Sends an amount to an address. May include a StorageDepositReturn and Expiration Unlock Conditions if
+the amount is small.
 
 #### Parameters
 
@@ -405,23 +406,6 @@ Sends an amount to an address.
 
 ```sh
 > Account "main": send rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 1000000
-```
-
-### `send-micro`
-
-Sends a micro amount to an address with StorageDepositReturn and Expiration Unlock Conditions.
-
-#### Parameters
-
-| Name      | Optional  | Default | Example                                                         |
-| --------- | --------- | ------- | --------------------------------------------------------------- |
-| `address` | ✘         | N/A     | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 |
-| `amount`  | ✘         | N/A     | 1                                                               |
-
-#### Example
-
-```sh
-> Account "main": send-micro rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 1
 ```
 
 ### `send-native-token`

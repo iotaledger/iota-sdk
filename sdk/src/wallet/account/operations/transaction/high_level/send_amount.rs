@@ -1,24 +1,64 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use serde::{Deserialize, Serialize};
-
 use crate::{
     client::api::PreparedTransactionData,
     types::block::{
         address::Address,
-        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
+        output::{
+            unlock_condition::{
+                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
+            },
+            BasicOutputBuilder,
+        },
     },
-    wallet::account::{handle::AccountHandle, operations::transaction::Transaction, TransactionOptions},
+    wallet::{
+        account::{
+            constants::DEFAULT_EXPIRATION_TIME,
+            handle::AccountHandle,
+            operations::transaction::{
+                high_level::minimum_storage_deposit::minimum_storage_deposit_basic_native_tokens, Transaction,
+            },
+            TransactionOptions,
+        },
+        Error,
+    },
 };
 
 /// address with amount for `send_amount()`
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct AddressWithAmount {
     /// Bech32 encoded address
-    pub address: String,
+    address: String,
     /// Amount
-    pub amount: u64,
+    amount: u64,
+    /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
+    /// first address of the account
+    return_address: Option<String>,
+    /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
+    /// receiver before. Default is 1 day
+    expiration: Option<u32>,
+}
+
+impl AddressWithAmount {
+    pub fn new(address: String, amount: u64) -> Self {
+        Self {
+            address,
+            amount,
+            return_address: None,
+            expiration: None,
+        }
+    }
+
+    pub fn with_return_address(mut self, address: impl Into<Option<String>>) -> Self {
+        self.return_address = address.into();
+        self
+    }
+
+    pub fn with_expiration(mut self, expiration: impl Into<Option<u32>>) -> Self {
+        self.expiration = expiration.into();
+        self
+    }
 }
 
 impl AccountHandle {
@@ -55,17 +95,68 @@ impl AccountHandle {
         options: Option<TransactionOptions>,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_send_amount");
-        let mut outputs = Vec::new();
+        let rent_structure = self.client.get_rent_structure().await?;
         let token_supply = self.client.get_token_supply().await?;
 
-        for address_with_amount in addresses_with_amount {
-            let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address_with_amount.address)?;
+        let account_addresses = self.addresses().await?;
+        let default_return_address = account_addresses.first().ok_or(Error::FailedToGetRemainder)?;
+
+        let local_time = self.client.get_time_checked().await?;
+
+        let mut outputs = Vec::new();
+        for AddressWithAmount {
+            address,
+            amount,
+            return_address,
+            expiration,
+        } in addresses_with_amount
+        {
+            let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
+            let return_address = return_address
+                .map(|address| Ok::<_, Error>(Address::try_from_bech32_with_hrp(address)?.0))
+                .transpose()?
+                .unwrap_or(default_return_address.address.inner);
             self.client.bech32_hrp_matches(&bech32_hrp).await?;
-            outputs.push(
-                BasicOutputBuilder::new_with_amount(address_with_amount.amount)?
-                    .add_unlock_condition(AddressUnlockCondition::new(address))
-                    .finish_output(token_supply)?,
-            )
+            // get minimum required amount for such an output, so we don't lock more than required
+            // We have to check it for every output individually, because different address types and amount of
+            // different native tokens require a different storage deposit
+            let storage_deposit_amount = minimum_storage_deposit_basic_native_tokens(
+                &rent_structure,
+                &address,
+                &return_address,
+                None,
+                token_supply,
+            )?;
+
+            if amount >= storage_deposit_amount {
+                outputs.push(
+                    BasicOutputBuilder::new_with_amount(amount)?
+                        .add_unlock_condition(AddressUnlockCondition::new(address))
+                        .finish_output(token_supply)?,
+                )
+            } else {
+                let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
+                    local_time + expiration_time
+                });
+
+                outputs.push(
+                    // Add address_and_amount.amount+storage_deposit_amount, so receiver can get
+                    // address_and_amount.amount
+                    BasicOutputBuilder::new_with_amount(amount + storage_deposit_amount)?
+                        .add_unlock_condition(AddressUnlockCondition::new(address))
+                        .add_unlock_condition(
+                            // We send the storage_deposit_amount back to the sender, so only the additional amount is
+                            // sent
+                            StorageDepositReturnUnlockCondition::new(
+                                return_address,
+                                storage_deposit_amount,
+                                token_supply,
+                            )?,
+                        )
+                        .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_time)?)
+                        .finish_output(token_supply)?,
+                )
+            }
         }
 
         self.prepare_transaction(outputs, options).await

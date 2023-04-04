@@ -6,7 +6,7 @@ use iota_sdk::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, UnlockCondition,
     },
-    wallet::{account::OutputsToClaim, AddressNativeTokens, AddressWithMicroAmount, NativeTokenOptions, Result, U256},
+    wallet::{account::OutputsToClaim, AddressNativeTokens, AddressWithAmount, NativeTokenOptions, Result, U256},
 };
 
 use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
@@ -23,20 +23,10 @@ async fn claim_2_basic_outputs() -> Result<()> {
 
     let micro_amount = 1;
     let tx = accounts[1]
-        .send_micro_transaction(
+        .send_amount(
             vec![
-                AddressWithMicroAmount {
-                    address: accounts[0].addresses().await?[0].address().to_bech32(),
-                    amount: micro_amount,
-                    return_address: None,
-                    expiration: None,
-                },
-                AddressWithMicroAmount {
-                    address: accounts[0].addresses().await?[0].address().to_bech32(),
-                    amount: micro_amount,
-                    return_address: None,
-                    expiration: None,
-                },
+                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_bech32(), micro_amount),
+                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_bech32(), micro_amount),
             ],
             None,
         )
@@ -86,20 +76,10 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     // Equal to minimum required storage deposit for a basic output
     let micro_amount = 42600;
     let tx = account_0
-        .send_micro_transaction(
+        .send_amount(
             vec![
-                AddressWithMicroAmount {
-                    address: account_1.addresses().await?[0].address().to_bech32(),
-                    amount: micro_amount,
-                    return_address: None,
-                    expiration: None,
-                },
-                AddressWithMicroAmount {
-                    address: account_1.addresses().await?[0].address().to_bech32(),
-                    amount: micro_amount,
-                    return_address: None,
-                    expiration: None,
-                },
+                AddressWithAmount::new(account_1.addresses().await?[0].address().to_bech32(), micro_amount),
+                AddressWithAmount::new(account_1.addresses().await?[0].address().to_bech32(), micro_amount),
             ],
             None,
         )

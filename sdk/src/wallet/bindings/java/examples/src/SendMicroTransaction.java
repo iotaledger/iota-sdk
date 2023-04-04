@@ -32,7 +32,7 @@ public class SendMicroTransaction {
         String amount = "1";
 
         // Configure outputs
-        Transaction t = a.sendMicroTransaction(new org.iota.types.account_methods.SendMicroTransaction().withAddressesWithMicroAmount(new AddressWithMicroAmount[]{new AddressWithMicroAmount()
+        Transaction t = a.sendAmount(new org.iota.types.account_methods.SendAmounts().withAddressesWithAmount(new AddressWithAmount[]{new AddressWithAmount()
                 .withAddress(receiverAddress)
                 .withAmount(amount)
         }));

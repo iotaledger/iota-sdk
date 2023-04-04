@@ -2,7 +2,6 @@ import type { OutputTypes, HexEncodedAmount } from '@iota/types';
 import type { SyncOptions, FilterOptions } from '../account';
 import type {
     AddressWithAmount,
-    AddressWithMicroAmount,
     AddressNativeTokens,
     AddressNftId,
     AddressGenerationOptions,
@@ -289,14 +288,6 @@ export type __SendAmountMethod__ = {
     name: 'sendAmount';
     data: {
         addressesWithAmount: AddressWithAmount[];
-        options?: TransactionOptions;
-    };
-};
-
-export type __SendMicroTransactionMethod__ = {
-    name: 'sendMicroTransaction';
-    data: {
-        addressesWithMicroAmount: AddressWithMicroAmount[];
         options?: TransactionOptions;
     };
 };

@@ -42,7 +42,7 @@ Get some funds from the faucet to the main account.
 > Account "main": exit
 ```
 
-### Send a regular amount
+### Send an amount
 
 Get an address from the savings account.
 ```sh
@@ -52,34 +52,12 @@ Get an address from the savings account.
 > Account "savings": exit
 ```
 
-Send a regular amount from the main account to the savings address.
+Send an amount from the main account to the savings address.
 ```sh
 ./wallet main
 > Account "main": send [ADDRESS] 1000000
 > ...
 > INFO  Transaction sent:
-> transaction id: 0x...
-> Some(BlockId(0x...))
-> Account "main": exit
-```
-
-### Send a micro amount
-
-Generate a new address from the savings account.
-```sh
-./wallet savings
-> Account "savings": new-address
-> ...
-> INFO  Address 1: [ADDRESS]
-> Account "savings": exit
-```
-
-Send a micro amount from the main account to the savings address.
-```sh
-./wallet main
-> Account "main": send-micro [ADDRESS] 1
-> ...
-> INFO  Micro transaction sent:
 > transaction id: 0x...
 > Some(BlockId(0x...))
 > Account "main": exit
