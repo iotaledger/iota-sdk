@@ -76,6 +76,7 @@ macro_rules! env_assert {
 }
 
 // This keeps rust from "mangling" the name and making it unique for this crate.
+#[allow(clippy::missing_safety_doc)]
 #[no_mangle]
 pub unsafe extern "system" fn Java_org_iota_api_NativeApi_initLogger(
     mut env: JNIEnv,
@@ -89,6 +90,7 @@ pub unsafe extern "system" fn Java_org_iota_api_NativeApi_initLogger(
 }
 
 // This keeps rust from "mangling" the name and making it unique for this crate.
+#[allow(clippy::missing_safety_doc)]
 #[no_mangle]
 pub unsafe extern "system" fn Java_org_iota_api_NativeApi_createMessageHandler(
     mut env: JNIEnv,
@@ -149,6 +151,7 @@ pub extern "system" fn Java_org_iota_api_NativeApi_destroyHandle(mut env: JNIEnv
 }
 
 // This keeps rust from "mangling" the name and making it unique for this crate.
+#[allow(clippy::missing_safety_doc)]
 #[no_mangle]
 pub unsafe extern "system" fn Java_org_iota_api_NativeApi_sendMessage(
     mut env: JNIEnv,

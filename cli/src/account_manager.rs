@@ -74,23 +74,21 @@ pub async fn new_account_manager(cli: AccountManagerCli) -> Result<(Option<Accou
 
             (account_manager, account)
         }
+    } else if snapshot_exists {
+        (
+            AccountManager::builder()
+                .with_secret_manager(secret_manager)
+                .with_storage_path(&storage_path)
+                .finish()
+                .await?,
+            None,
+        )
     } else {
-        if snapshot_exists {
-            (
-                AccountManager::builder()
-                    .with_secret_manager(secret_manager)
-                    .with_storage_path(&storage_path)
-                    .finish()
-                    .await?,
-                None,
-            )
-        } else {
-            println_log_info!("Initializing wallet with default values.");
-            (
-                init_command(secret_manager, storage_path, InitParameters::default()).await?,
-                None,
-            )
-        }
+        println_log_info!("Initializing wallet with default values.");
+        (
+            init_command(secret_manager, storage_path, InitParameters::default()).await?,
+            None,
+        )
     };
 
     Ok((Some(account_manager), account))

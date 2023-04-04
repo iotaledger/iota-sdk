@@ -83,6 +83,6 @@ impl AddressWrapper {
     pub fn try_from_bech32<A: AsRef<str>>(address: A) -> crate::wallet::Result<Self> {
         let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
 
-        Ok(AddressWrapper::new(address, bech32_hrp))
+        Ok(Self::new(address, bech32_hrp))
     }
 }

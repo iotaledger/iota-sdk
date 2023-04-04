@@ -44,7 +44,7 @@ pub async fn pick_account(manager: &AccountManager) -> Result<Option<u32>, Error
 
 pub async fn bytes_from_hex_or_file(hex: Option<String>, file: Option<String>) -> Result<Option<Vec<u8>>, Error> {
     Ok(if let Some(hex) = hex {
-        Some(prefix_hex::decode(&hex).map_err(|e| Error::Miscellaneous(e.to_string()))?)
+        Some(prefix_hex::decode(hex).map_err(|e| Error::Miscellaneous(e.to_string()))?)
     } else if let Some(file) = file {
         Some(tokio::fs::read(file).await?)
     } else {
