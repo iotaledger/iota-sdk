@@ -30,15 +30,13 @@ impl Wallet {
 
         #[cfg(feature = "storage")]
         {
-            // Update account manager data with new client options
-            let account_manager_builder = WalletBuilder::from_account_manager(self)
-                .await
-                .with_client_options(options);
+            // Update wallet data with new client options
+            let wallet_builder = WalletBuilder::from_wallet(self).await.with_client_options(options);
 
             self.storage_manager
                 .lock()
                 .await
-                .save_account_manager_data(&account_manager_builder)
+                .save_wallet_data(&wallet_builder)
                 .await?;
         }
 
@@ -144,15 +142,15 @@ impl Wallet {
 
         #[cfg(feature = "storage")]
         {
-            // Update account manager data with new client options
-            let account_manager_builder = WalletBuilder::from_account_manager(self)
+            // Update wallet data with new client options
+            let wallet_builder = WalletBuilder::from_wallet(self)
                 .await
                 .with_client_options(new_client_options.clone());
 
             self.storage_manager
                 .lock()
                 .await
-                .save_account_manager_data(&account_manager_builder)
+                .save_wallet_data(&wallet_builder)
                 .await?;
         }
 

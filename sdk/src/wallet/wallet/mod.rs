@@ -36,7 +36,7 @@ use crate::{
     },
 };
 
-/// The account manager, used to create and get accounts. One account manager can hold many accounts, but they should
+/// The wallet, used to create and get accounts. One wallet can hold many accounts, but they should
 /// all share the same secret_manager type with the same seed/mnemonic.
 #[derive(Debug)]
 pub struct Wallet {
@@ -56,7 +56,7 @@ pub struct Wallet {
 }
 
 impl Wallet {
-    /// Initialises the account manager builder.
+    /// Initialises the wallet builder.
     pub fn builder() -> WalletBuilder {
         WalletBuilder::new()
     }

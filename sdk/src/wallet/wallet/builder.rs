@@ -25,7 +25,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
-/// Builder for the account manager.
+/// Builder for the wallet.
 pub struct WalletBuilder {
     client_options: Option<ClientOptions>,
     coin_type: Option<u32>,
@@ -58,7 +58,7 @@ impl Default for StorageOptions {
 }
 
 impl WalletBuilder {
-    /// Initialises a new instance of the account manager builder with the default storage adapter.
+    /// Initialises a new instance of the wallet builder with the default storage adapter.
     pub fn new() -> Self {
         Self {
             secret_manager: None,
@@ -72,7 +72,7 @@ impl WalletBuilder {
         self
     }
 
-    /// Set the coin type for the account manager. Registered coin types can be found at https://github.com/satoshilabs/slips/blob/master/slip-0044.md.
+    /// Set the coin type for the wallet. Registered coin types can be found at https://github.com/satoshilabs/slips/blob/master/slip-0044.md.
     pub fn with_coin_type(mut self, coin_type: u32) -> Self {
         self.coin_type.replace(coin_type);
         self
@@ -102,7 +102,7 @@ impl WalletBuilder {
         self
     }
 
-    /// Builds the account manager
+    /// Builds the wallet
     #[allow(unreachable_code, unused_mut)]
     pub async fn finish(mut self) -> crate::wallet::Result<Wallet> {
         log::debug!("[WalletBuilder]");
@@ -137,7 +137,7 @@ impl WalletBuilder {
         .await?;
 
         #[cfg(feature = "storage")]
-        let read_manager_builder = storage_manager.lock().await.get_account_manager_data().await?;
+        let read_manager_builder = storage_manager.lock().await.get_wallet_data().await?;
         #[cfg(not(feature = "storage"))]
         let read_manager_builder: Option<WalletBuilder> = None;
 
@@ -177,9 +177,9 @@ impl WalletBuilder {
             self.coin_type.replace(coin_type);
         }
 
-        // Store account manager data in storage
+        // Store wallet data in storage
         #[cfg(feature = "storage")]
-        storage_manager.lock().await.save_account_manager_data(&self).await?;
+        storage_manager.lock().await.save_wallet_data(&self).await?;
 
         let client = self
             .client_options
@@ -242,12 +242,12 @@ impl WalletBuilder {
     }
 
     #[cfg(feature = "storage")]
-    pub(crate) async fn from_account_manager(account_manager: &Wallet) -> Self {
+    pub(crate) async fn from_wallet(wallet: &Wallet) -> Self {
         Self {
-            client_options: Some(account_manager.client_options.read().await.clone()),
-            coin_type: Some(account_manager.coin_type.load(Ordering::Relaxed)),
-            storage_options: Some(account_manager.storage_options.clone()),
-            secret_manager: Some(account_manager.secret_manager.clone()),
+            client_options: Some(wallet.client_options.read().await.clone()),
+            coin_type: Some(wallet.coin_type.load(Ordering::Relaxed)),
+            storage_options: Some(wallet.storage_options.clone()),
+            secret_manager: Some(wallet.secret_manager.clone()),
         }
     }
 }

@@ -11,7 +11,7 @@ pub mod account;
 #[cfg(feature = "message_interface")]
 #[cfg_attr(docsrs, doc(cfg(feature = "message_interface")))]
 pub mod message_interface;
-/// The account manager module.
+/// The wallet module.
 pub mod wallet;
 
 /// The ClientOptions to build the iota_client for interactions with the IOTA Tangle.

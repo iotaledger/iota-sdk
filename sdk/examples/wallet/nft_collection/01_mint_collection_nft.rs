@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
     // Set this to the NFT id from the mint_issuer_nft example
     let issuer_nft_id = NftId::from_str("0x13c490ac052e575cffd40e170c2d46c6029b8b68cdf0e899b34cde93d2a7b28a")?;
 
-    // Create the account manager
+    // Create the wallet
     let manager = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`

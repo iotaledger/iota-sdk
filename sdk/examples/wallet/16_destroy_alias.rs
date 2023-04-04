@@ -18,7 +18,7 @@ async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
     dotenv().ok();
 
-    // Create the account manager
+    // Create the wallet
     let manager = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`

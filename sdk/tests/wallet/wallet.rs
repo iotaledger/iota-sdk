@@ -64,12 +64,14 @@ async fn different_seed() -> Result<()> {
     let manager = make_manager(storage_path, None, None).await?;
 
     // Generating a new account needs to return an error, because the seed from the secret_manager is different
-    assert!(manager
-        .create_account()
-        .with_alias("Bob".to_string())
-        .finish()
-        .await
-        .is_err());
+    assert!(
+        manager
+            .create_account()
+            .with_alias("Bob".to_string())
+            .finish()
+            .await
+            .is_err()
+    );
 
     tear_down(storage_path)
 }
@@ -101,12 +103,14 @@ async fn changed_coin_type() -> Result<()> {
 
     // Generating a new account needs to return an error, because a different coin type was set and we require all
     // accounts to have the same coin type
-    assert!(manager
-        .create_account()
-        .with_alias("Bob".to_string())
-        .finish()
-        .await
-        .is_err());
+    assert!(
+        manager
+            .create_account()
+            .with_alias("Bob".to_string())
+            .finish()
+            .await
+            .is_err()
+    );
 
     tear_down(storage_path)
 }
@@ -138,18 +142,18 @@ async fn iota_coin_type() -> Result<()> {
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC)?;
 
     #[allow(unused_mut)]
-    let mut account_manager_builder = Wallet::builder()
+    let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(IOTA_COIN_TYPE);
 
     #[cfg(feature = "storage")]
     {
-        account_manager_builder = account_manager_builder.with_storage_path(storage_path);
+        wallet_builder = wallet_builder.with_storage_path(storage_path);
     }
-    let account_manager = account_manager_builder.finish().await?;
+    let wallet = wallet_builder.finish().await?;
 
-    let account = account_manager.create_account().finish().await?;
+    let account = wallet.create_account().finish().await?;
 
     // Creating a new account with providing a coin type will use the iota coin type with shimmer testnet bech32 hrp
     assert_eq!(
@@ -162,26 +166,26 @@ async fn iota_coin_type() -> Result<()> {
 }
 
 #[tokio::test]
-async fn account_manager_address_generation() -> Result<()> {
-    let storage_path = "test-storage/account_manager_address_generation";
+async fn wallet_address_generation() -> Result<()> {
+    let storage_path = "test-storage/wallet_address_generation";
     setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC)?;
 
     #[allow(unused_mut)]
-    let mut account_manager_builder = Wallet::builder()
+    let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(IOTA_COIN_TYPE);
 
     #[cfg(feature = "storage")]
     {
-        account_manager_builder = account_manager_builder.with_storage_path(storage_path);
+        wallet_builder = wallet_builder.with_storage_path(storage_path);
     }
-    let account_manager = account_manager_builder.finish().await?;
+    let wallet = wallet_builder.finish().await?;
 
-    let address = account_manager.generate_address(0, false, 0, None).await?;
+    let address = wallet.generate_address(0, false, 0, None).await?;
 
     assert_eq!(
         &address.to_bech32("smr"),
@@ -189,30 +193,28 @@ async fn account_manager_address_generation() -> Result<()> {
         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
     );
 
-    drop(account_manager);
+    drop(wallet);
 
     #[cfg(feature = "stronghold")]
     {
         let mut secret_manager = StrongholdSecretManager::builder()
             .password("some_hopefully_secure_password")
-            .build(PathBuf::from(
-                "test-storage/account_manager_address_generation/test.stronghold",
-            ))?;
+            .build(PathBuf::from("test-storage/wallet_address_generation/test.stronghold"))?;
         secret_manager.store_mnemonic(DEFAULT_MNEMONIC.to_string()).await?;
 
         let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
         #[allow(unused_mut)]
-        let mut account_manager_builder = Wallet::builder()
+        let mut wallet_builder = Wallet::builder()
             .with_secret_manager(SecretManager::Stronghold(secret_manager))
             .with_client_options(client_options)
             .with_coin_type(IOTA_COIN_TYPE);
         #[cfg(feature = "storage")]
         {
-            account_manager_builder = account_manager_builder.with_storage_path(storage_path);
+            wallet_builder = wallet_builder.with_storage_path(storage_path);
         }
-        let account_manager = account_manager_builder.finish().await?;
+        let wallet = wallet_builder.finish().await?;
 
-        let address = account_manager.generate_address(0, false, 0, None).await?;
+        let address = wallet.generate_address(0, false, 0, None).await?;
 
         assert_eq!(
             &address.to_bech32("smr"),

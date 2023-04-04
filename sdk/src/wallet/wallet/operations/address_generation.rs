@@ -14,7 +14,7 @@ use crate::{
 impl Wallet {
     /// Generate an address without storing it
     /// ```ignore
-    /// let public_addresses = account_manager
+    /// let public_addresses = wallet
     ///     .generate_address(
     ///         0,
     ///         false,

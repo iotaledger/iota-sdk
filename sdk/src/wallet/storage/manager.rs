@@ -95,16 +95,11 @@ impl StorageManager {
         self.storage.get(key).await
     }
 
-    pub async fn save_account_manager_data(
-        &mut self,
-        account_manager_builder: &WalletBuilder,
-    ) -> crate::wallet::Result<()> {
-        log::debug!("save_account_manager_data");
-        self.storage
-            .set(ACCOUNT_MANAGER_INDEXATION_KEY, account_manager_builder)
-            .await?;
+    pub async fn save_wallet_data(&mut self, wallet_builder: &WalletBuilder) -> crate::wallet::Result<()> {
+        log::debug!("save_wallet_data");
+        self.storage.set(ACCOUNT_MANAGER_INDEXATION_KEY, wallet_builder).await?;
 
-        if let Some(secret_manager) = &account_manager_builder.secret_manager {
+        if let Some(secret_manager) = &wallet_builder.secret_manager {
             let secret_manager = secret_manager.read().await;
             let secret_manager_dto = SecretManagerDto::from(&*secret_manager);
             // Only store secret_managers that aren't SecretManagerDto::Mnemonic, because there the Seed can't be
@@ -119,14 +114,14 @@ impl StorageManager {
         Ok(())
     }
 
-    pub async fn get_account_manager_data(&self) -> crate::wallet::Result<Option<WalletBuilder>> {
-        log::debug!("get_account_manager_data");
+    pub async fn get_wallet_data(&self) -> crate::wallet::Result<Option<WalletBuilder>> {
+        log::debug!("get_wallet_data");
         if let Some(mut builder) = self
             .storage
             .get::<WalletBuilder>(ACCOUNT_MANAGER_INDEXATION_KEY)
             .await?
         {
-            log::debug!("get_account_manager_data {builder:?}");
+            log::debug!("get_wallet_data {builder:?}");
 
             if let Some(secret_manager_dto) = self.storage.get::<SecretManagerDto>(SECRET_MANAGER_KEY).await? {
                 log::debug!("get_secret_manager {secret_manager_dto:?}");

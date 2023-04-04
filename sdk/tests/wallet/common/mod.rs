@@ -17,12 +17,12 @@ use iota_sdk::{
 
 pub use self::constants::*;
 
-/// It creates a new account manager with a mnemonic secret manager, a client options object,
+/// It creates a new wallet with a mnemonic secret manager, a client options object,
 /// SHIMMER_COIN_TYPE, and a storage path
 ///
 /// Arguments:
 ///
-/// * `storage_path`: The path to the directory where the account manager will store its data.
+/// * `storage_path`: The path to the directory where the wallet will store its data.
 /// * `mnemonic`: The mnemonic phrase that you want to use to generate the account. Defaults to a random one.
 /// * `node`: The node to connect to. Defaults to `constants::NODE_LOCAL`
 ///
@@ -36,25 +36,25 @@ pub(crate) async fn make_manager(storage_path: &str, mnemonic: Option<&str>, nod
         MnemonicSecretManager::try_from_mnemonic(mnemonic.unwrap_or(&Client::generate_mnemonic().unwrap()))?;
 
     #[allow(unused_mut)]
-    let mut account_manager_builder = Wallet::builder()
+    let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE);
     #[cfg(feature = "storage")]
     {
-        account_manager_builder = account_manager_builder.with_storage_path(storage_path);
+        wallet_builder = wallet_builder.with_storage_path(storage_path);
     }
 
-    account_manager_builder.finish().await
+    wallet_builder.finish().await
 }
 
 /// Create `amount` new accounts, request funds from the faucet and sync the accounts afterwards until the faucet output
 /// is available. Returns the new accounts.
 #[allow(dead_code)]
-pub(crate) async fn create_accounts_with_funds(account_manager: &Wallet, amount: usize) -> Result<Vec<AccountHandle>> {
+pub(crate) async fn create_accounts_with_funds(wallet: &Wallet, amount: usize) -> Result<Vec<AccountHandle>> {
     let mut new_accounts = Vec::new();
     'accounts: for _ in 0..amount {
-        let account = account_manager.create_account().finish().await?;
+        let account = wallet.create_account().finish().await?;
         request_funds_from_faucet(FAUCET_URL, &account.addresses().await?[0].address().to_bech32()).await?;
 
         // Continue only after funds are received

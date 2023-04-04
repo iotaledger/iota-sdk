@@ -16,7 +16,7 @@ use crate::{
 };
 
 impl Wallet {
-    /// Backup the account manager data in a Stronghold file
+    /// Backup the wallet data in a Stronghold file
     /// stronghold_password must be the current one when Stronghold is used as SecretManager.
     pub async fn backup(&self, backup_path: PathBuf, mut stronghold_password: String) -> crate::wallet::Result<()> {
         log::debug!("[backup] creating a stronghold backup");
@@ -166,7 +166,7 @@ impl Wallet {
         // store new data
         #[cfg(feature = "storage")]
         {
-            let account_manager_builder = WalletBuilder::new()
+            let wallet_builder = WalletBuilder::new()
                 .with_secret_manager_arc(self.secret_manager.clone())
                 .with_storage_path(
                     &self
@@ -179,12 +179,12 @@ impl Wallet {
                 )
                 .with_client_options(self.client_options.read().await.clone())
                 .with_coin_type(self.coin_type.load(Ordering::Relaxed));
-            // drop secret manager, otherwise we get a deadlock in save_account_manager_data
+            // drop secret manager, otherwise we get a deadlock in save_wallet_data
             drop(secret_manager);
             self.storage_manager
                 .lock()
                 .await
-                .save_account_manager_data(&account_manager_builder)
+                .save_wallet_data(&wallet_builder)
                 .await?;
             // also save account to db
             for account in accounts.iter() {

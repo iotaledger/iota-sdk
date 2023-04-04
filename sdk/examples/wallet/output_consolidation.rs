@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
 
     let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
 
-    // Create the account manager
+    // Create the wallet
     let manager = Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_client_options(client_options)

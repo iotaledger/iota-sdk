@@ -9,7 +9,7 @@ use iota_sdk::wallet::{Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Create the account manager
+    // Create the wallet
     let manager = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`

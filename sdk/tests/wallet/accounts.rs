@@ -112,31 +112,39 @@ async fn account_alias_already_exists() -> Result<()> {
         .with_alias("Alice".to_string())
         .finish()
         .await?;
-    assert!(&manager
-        .create_account()
-        .with_alias("Alice".to_string())
-        .finish()
-        .await
-        .is_err());
-    assert!(&manager
-        .create_account()
-        .with_alias("alice".to_string())
-        .finish()
-        .await
-        .is_err());
-    assert!(&manager
-        .create_account()
-        .with_alias("ALICE".to_string())
-        .finish()
-        .await
-        .is_err());
+    assert!(
+        &manager
+            .create_account()
+            .with_alias("Alice".to_string())
+            .finish()
+            .await
+            .is_err()
+    );
+    assert!(
+        &manager
+            .create_account()
+            .with_alias("alice".to_string())
+            .finish()
+            .await
+            .is_err()
+    );
+    assert!(
+        &manager
+            .create_account()
+            .with_alias("ALICE".to_string())
+            .finish()
+            .await
+            .is_err()
+    );
     // Other alias works
-    assert!(&manager
-        .create_account()
-        .with_alias("Bob".to_string())
-        .finish()
-        .await
-        .is_ok());
+    assert!(
+        &manager
+            .create_account()
+            .with_alias("Bob".to_string())
+            .finish()
+            .await
+            .is_ok()
+    );
 
     tear_down(storage_path)
 }
@@ -203,17 +211,17 @@ async fn account_creation_stronghold() -> Result<()> {
     let secret_manager = SecretManager::Stronghold(stronghold_secret_manager);
 
     #[allow(unused_mut)]
-    let mut account_manager_builder = Wallet::builder()
+    let mut wallet_builder = Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE);
     #[cfg(feature = "storage")]
     {
-        account_manager_builder = account_manager_builder.with_storage_path(storage_path);
+        wallet_builder = wallet_builder.with_storage_path(storage_path);
     }
-    let account_manager = account_manager_builder.finish().await?;
+    let wallet = wallet_builder.finish().await?;
 
-    let _account = account_manager.create_account().finish().await?;
+    let _account = wallet.create_account().finish().await?;
 
     tear_down(storage_path)
 }
