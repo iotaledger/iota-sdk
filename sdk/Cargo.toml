@@ -522,7 +522,7 @@ required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "create_alias"
-path = "examples/create_alias.rs"
+path = "examples/wallet/create_alias.rs"
 required-features = [ "stronghold" ]
 
 [[example]]
