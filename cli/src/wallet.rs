@@ -9,7 +9,7 @@ use iota_sdk::{
 };
 
 use crate::{
-    command::account_manager::{
+    command::wallet::{
         backup_command, change_password_command, init_command, mnemonic_command, new_command, restore_command,
         set_node_command, sync_command, InitParameters, WalletCli, WalletCommand,
     },
@@ -18,7 +18,7 @@ use crate::{
     println_log_info,
 };
 
-pub async fn new_account_manager(cli: WalletCli) -> Result<(Option<Wallet>, Option<String>), Error> {
+pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String>), Error> {
     if let Some(WalletCommand::Mnemonic) = cli.command {
         mnemonic_command().await?;
         return Ok((None, None));
@@ -41,7 +41,7 @@ pub async fn new_account_manager(cli: WalletCli) -> Result<(Option<Wallet>, Opti
             .build(snapshot_path)?,
     );
 
-    let (account_manager, account) = if let Some(command) = cli.command {
+    let (wallet, account) = if let Some(command) = cli.command {
         if let WalletCommand::Init(init_parameters) = command {
             (init_command(secret_manager, storage_path, init_parameters).await?, None)
         } else if let WalletCommand::Restore { backup_path } = command {
@@ -50,7 +50,7 @@ pub async fn new_account_manager(cli: WalletCli) -> Result<(Option<Wallet>, Opti
                 None,
             )
         } else {
-            let account_manager = Wallet::builder()
+            let wallet = Wallet::builder()
                 .with_secret_manager(secret_manager)
                 .with_storage_path(&storage_path)
                 .finish()
@@ -59,18 +59,18 @@ pub async fn new_account_manager(cli: WalletCli) -> Result<(Option<Wallet>, Opti
 
             match command {
                 WalletCommand::Backup { backup_path } => {
-                    backup_command(&account_manager, backup_path, &password).await?;
+                    backup_command(&wallet, backup_path, &password).await?;
                     return Ok((None, None));
                 }
-                WalletCommand::ChangePassword => change_password_command(&account_manager, &password).await?,
-                WalletCommand::New { alias } => account = Some(new_command(&account_manager, alias).await?),
-                WalletCommand::SetNode { url } => set_node_command(&account_manager, url).await?,
-                WalletCommand::Sync => sync_command(&account_manager).await?,
+                WalletCommand::ChangePassword => change_password_command(&wallet, &password).await?,
+                WalletCommand::New { alias } => account = Some(new_command(&wallet, alias).await?),
+                WalletCommand::SetNode { url } => set_node_command(&wallet, url).await?,
+                WalletCommand::Sync => sync_command(&wallet).await?,
                 // PANIC: this will never happen because these variants have already been checked.
                 WalletCommand::Init(_) | WalletCommand::Mnemonic | WalletCommand::Restore { .. } => unreachable!(),
             };
 
-            (account_manager, account)
+            (wallet, account)
         }
     } else {
         if snapshot_exists {
@@ -91,5 +91,5 @@ pub async fn new_account_manager(cli: WalletCli) -> Result<(Option<Wallet>, Opti
         }
     };
 
-    Ok((Some(account_manager), account))
+    Ok((Some(wallet), account))
 }

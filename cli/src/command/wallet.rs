@@ -88,7 +88,7 @@ pub async fn init_command(
     storage_path: String,
     parameters: InitParameters,
 ) -> Result<Wallet, Error> {
-    let account_manager = Wallet::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_client_options(
             ClientOptions::new().with_node(
@@ -117,14 +117,14 @@ pub async fn init_command(
         "It is the only way to recover your account if you ever forget your password and/or lose the stronghold file."
     );
 
-    if let SecretManager::Stronghold(secret_manager) = &mut *account_manager.get_secret_manager().write().await {
+    if let SecretManager::Stronghold(secret_manager) = &mut *wallet.get_secret_manager().write().await {
         secret_manager.store_mnemonic(mnemonic).await?;
     } else {
         panic!("cli-wallet only supports Stronghold-backed secret managers at the moment.");
     }
     println_log_info!("Mnemonic stored successfully");
 
-    Ok(account_manager)
+    Ok(wallet)
 }
 
 pub async fn mnemonic_command() -> Result<(), Error> {
@@ -163,7 +163,7 @@ pub async fn restore_command(
     backup_path: String,
     password: String,
 ) -> Result<Wallet, Error> {
-    let account_manager = Wallet::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         // Will be overwritten by the backup's value.
         .with_client_options(ClientOptions::new().with_node("https://api.testnet.shimmer.network")?)
@@ -173,11 +173,9 @@ pub async fn restore_command(
         .finish()
         .await?;
 
-    account_manager
-        .restore_backup(backup_path.into(), password, None)
-        .await?;
+    wallet.restore_backup(backup_path.into(), password, None).await?;
 
-    Ok(account_manager)
+    Ok(wallet)
 }
 
 pub async fn set_node_command(manager: &Wallet, url: String) -> Result<(), Error> {

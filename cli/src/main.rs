@@ -4,18 +4,16 @@
 mod account;
 mod account_completion;
 mod account_history;
-mod account_manager;
 mod command;
 mod error;
 mod helper;
+mod wallet;
 
 use clap::Parser;
 use fern_logger::{LoggerConfigBuilder, LoggerOutputConfigBuilder};
 use log::LevelFilter;
 
-use self::{
-    account_manager::new_account_manager, command::account_manager::WalletCli, error::Error, helper::pick_account,
-};
+use self::{command::wallet::WalletCli, error::Error, helper::pick_account, wallet::new_wallet};
 
 #[macro_export]
 macro_rules! println_log_info {
@@ -52,14 +50,14 @@ fn logger_init(cli: &WalletCli) -> Result<(), Error> {
 }
 
 async fn run(cli: WalletCli) -> Result<(), Error> {
-    let (account_manager, account) = new_account_manager(cli.clone()).await?;
+    let (wallet, account) = new_wallet(cli.clone()).await?;
 
-    if let Some(account_manager) = account_manager {
+    if let Some(wallet) = wallet {
         match cli.account.or(account) {
-            Some(account) => account::account_prompt(account_manager.get_account(account).await?).await?,
+            Some(account) => account::account_prompt(wallet.get_account(account).await?).await?,
             None => {
-                if let Some(account) = pick_account(&account_manager).await? {
-                    account::account_prompt(account_manager.get_account(account).await?).await?;
+                if let Some(account) = pick_account(&wallet).await? {
+                    account::account_prompt(wallet.get_account(account).await?).await?;
                 }
             }
         }
