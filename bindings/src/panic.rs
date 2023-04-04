@@ -10,7 +10,7 @@ use backtrace::Backtrace;
 use futures::{Future, FutureExt};
 
 use super::message_handler::Result;
-use crate::message_interface::response::Response;
+use crate::response::Response;
 
 fn panic_to_response_message(panic: Box<dyn Any>) -> Response {
     let msg = panic.downcast_ref::<String>().map_or_else(

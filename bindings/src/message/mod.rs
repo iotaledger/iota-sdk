@@ -9,9 +9,8 @@ use std::fmt::{Formatter, Result as FmtResult};
 
 pub use account_method::AccountMethod;
 pub use client_message::ClientMessage;
+use iota_sdk::client::secret::SecretManagerDto;
 pub use wallet_message::WalletMessage;
-
-use crate::client::secret::SecretManagerDto;
 
 pub(crate) trait OmittedDebug {
     fn omitted_fmt(&self, f: &mut Formatter<'_>) -> FmtResult {

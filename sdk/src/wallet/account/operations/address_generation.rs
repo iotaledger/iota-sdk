@@ -75,6 +75,7 @@ impl AccountHandle {
                 // needs to have it visible on the computer first, so we need to generate it without the
                 // prompt first
                 if options.options.clone().unwrap_or_default().ledger_nano_prompt {
+                    #[cfg(feature = "events")]
                     let changed_options = options.options.clone().map(|mut options| {
                         // Change options so ledger will not show the prompt the first time
                         options.ledger_nano_prompt = false;

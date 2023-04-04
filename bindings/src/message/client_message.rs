@@ -3,12 +3,9 @@
 
 use crypto::keys::slip10::Chain;
 use derivative::Derivative;
-use serde::Deserialize;
-
-use super::OmittedDebug;
 #[cfg(feature = "mqtt")]
-use crate::client::mqtt::Topic;
-use crate::{
+use iota_sdk::client::mqtt::Topic;
+use iota_sdk::{
     client::{
         api::{
             ClientBlockBuilderOptions as BuildBlockOptions, GetAddressesBuilderOptions as GenerateAddressesOptions,
@@ -38,6 +35,9 @@ use crate::{
         BlockDto, BlockId,
     },
 };
+use serde::{Deserialize, Serialize};
+
+use super::OmittedDebug;
 
 /// Each public client method.
 #[derive(Clone, Derivative, Serialize, Deserialize)]

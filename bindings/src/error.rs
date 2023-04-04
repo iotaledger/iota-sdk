@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use packable::error::UnexpectedEOF;
-use serde::{Serialize, Serializer};
+use serde::{ser::SerializeMap, Serialize, Serializer};
 
 pub use super::{message::AccountMethod, response::Response};
-use crate::serde::ser::SerializeMap;
 
 // TODO: SDK Error instead?
 /// Error type of the message interface.
@@ -14,16 +13,16 @@ use crate::serde::ser::SerializeMap;
 pub enum MessageInterfaceError {
     /// Client error
     #[error("{0}")]
-    Client(#[from] crate::client::Error),
+    Client(#[from] iota_sdk::client::Error),
     /// Wallet error
     #[error("{0}")]
-    Wallet(#[from] crate::wallet::Error),
+    Wallet(#[from] iota_sdk::wallet::Error),
     /// Block dtos error
     #[error("{0}")]
-    BlockDto(#[from] crate::types::block::DtoError),
+    BlockDto(#[from] iota_sdk::types::block::DtoError),
     /// Error from block crate.
     #[error("{0}")]
-    Block(Box<crate::types::block::Error>),
+    Block(Box<iota_sdk::types::block::Error>),
     /// JSON error
     #[error("{0}")]
     Json(#[from] serde_json::Error),
@@ -34,10 +33,10 @@ pub enum MessageInterfaceError {
     #[cfg(feature = "mqtt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "mqtt")))]
     #[error("MQTT error {0}")]
-    Mqtt(#[from] crate::client::node_api::mqtt::Error),
+    Mqtt(#[from] iota_sdk::client::node_api::mqtt::Error),
     /// Unpack error
     #[error("{0}")]
-    Unpack(#[from] packable::error::UnpackError<crate::types::block::Error, UnexpectedEOF>),
+    Unpack(#[from] packable::error::UnpackError<iota_sdk::types::block::Error, UnexpectedEOF>),
 }
 
 // Serialize type with Display error
@@ -61,8 +60,8 @@ impl Serialize for MessageInterfaceError {
     }
 }
 
-impl From<crate::types::block::Error> for MessageInterfaceError {
-    fn from(error: crate::types::block::Error) -> Self {
+impl From<iota_sdk::types::block::Error> for MessageInterfaceError {
+    fn from(error: iota_sdk::types::block::Error) -> Self {
         Self::Block(Box::new(error))
     }
 }

@@ -36,13 +36,24 @@ pub use self::{
             SyncOptions,
         },
         transaction::{
+            high_level::create_alias::AliasOutputOptionsDto,
             high_level::minting::mint_native_token::MintTokenTransactionDto,
             prepare_output::{Assets, Features, OutputOptions, ReturnStrategy, StorageDeposit, Unlocks},
-            RemainderValueStrategy, TransactionOptions, TransactionOptionsDto,
+            RemainderValueStrategy, TransactionOptions, TransactionOptionsDto, high_level::create_alias::AliasOutputOptions,
+            high_level::minting::increase_native_token_supply::IncreaseNativeTokenSupplyOptionsDto,
+            high_level::minting::increase_native_token_supply::IncreaseNativeTokenSupplyOptions,
+            high_level::minting::mint_native_token::NativeTokenOptionsDto,
+            high_level::minting::mint_native_token::NativeTokenOptions,
+            high_level::minting::mint_nfts::NftOptions,
+            high_level::minting::mint_nfts::NftOptionsDto,
+            prepare_output::OutputOptionsDto,
         },
     },
+    
     types::OutputDataDto,
 };
+#[cfg(feature = "participation")]
+pub use self::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes};
 use crate::{
     types::{
         api::core::response::OutputWithMetadataResponse,

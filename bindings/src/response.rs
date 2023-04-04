@@ -5,18 +5,9 @@
 use std::collections::HashSet;
 
 use derivative::Derivative;
-use serde::Serialize;
-#[cfg(feature = "participation")]
-use {
-    crate::types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventStatus},
-    crate::wallet::account::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes},
-    std::collections::HashMap,
-};
-
-use super::{error::MessageInterfaceError, message::OmittedDebug};
 #[cfg(feature = "ledger_nano")]
-use crate::client::secret::LedgerNanoStatus;
-use crate::{
+use iota_sdk::client::secret::LedgerNanoStatus;
+use iota_sdk::{
     client::{
         api::{PreparedTransactionDataDto, SignedTransactionDataDto},
         node_manager::node::Node,
@@ -52,13 +43,21 @@ use crate::{
     },
     wallet::{
         account::{
-            operations::transaction::high_level::minting::mint_native_token::MintTokenTransactionDto,
-            types::{address::AccountAddress, AccountBalanceDto, TransactionDto},
-            OutputDataDto,
+            types::{AccountAddress, AccountBalanceDto, TransactionDto},
+            MintTokenTransactionDto, OutputDataDto,
         },
         message_interface::dtos::{AccountDto, AddressWithUnspentOutputsDto},
     },
 };
+use serde::Serialize;
+#[cfg(feature = "participation")]
+use {
+    iota_sdk::types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventStatus},
+    iota_sdk::wallet::account::{AccountParticipationOverview, ParticipationEventWithNodes},
+    std::collections::HashMap,
+};
+
+use super::{error::MessageInterfaceError, message::OmittedDebug};
 
 /// The response message.
 #[derive(Serialize, Derivative)]

@@ -1571,6 +1571,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "iota-sdk-bindings"
+version = "0.1.0"
+dependencies = [
+ "backtrace",
+ "derivative",
+ "fern-logger",
+ "futures",
+ "iota-crypto",
+ "iota-sdk",
+ "log",
+ "packable",
+ "prefix-hex",
+ "primitive-types",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "zeroize",
+]
+
+[[package]]
 name = "iota-wallet-java"
 version = "0.1.0"
 dependencies = [

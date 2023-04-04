@@ -5,18 +5,18 @@
 use std::path::PathBuf;
 
 use derivative::Derivative;
-use serde::{Deserialize, Serialize};
-
-use super::{account_method::AccountMethod, OmittedDebug};
 #[cfg(feature = "events")]
-use crate::wallet::events::types::{WalletEvent, WalletEventType};
-use crate::{
+use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
+use iota_sdk::{
     client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions, Url},
     wallet::{
-        account::{operations::syncing::SyncOptions, types::AccountIdentifier},
+        account::{types::AccountIdentifier, SyncOptions},
         ClientOptions,
     },
 };
+use serde::{Deserialize, Serialize};
+
+use crate::message::{account_method::AccountMethod, OmittedDebug};
 
 /// The messages that can be sent to the actor.
 #[derive(Clone, Derivative, Serialize, Deserialize)]

@@ -10,15 +10,16 @@ mod panic;
 mod response;
 
 use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
-use serde::{Deserialize, Serialize, Serializer};
-
-pub use self::{
-    message::{AccountMethod, ClientMessage, WalletMessage},
-    response::Response,
-};
-use crate::{
+use iota_sdk::{
     client::secret::{SecretManager, SecretManagerDto},
     wallet::{account_manager::AccountManager, ClientOptions},
+};
+use serde::{Deserialize, Serialize, Serializer};
+
+pub use crate::{
+    message::{AccountMethod, ClientMessage, WalletMessage},
+    message_handler::{call_client_method, call_wallet_method},
+    response::Response,
 };
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -34,7 +35,7 @@ pub struct ManagerOptions {
 }
 
 impl ManagerOptions {
-    pub async fn build_manager(&self) -> crate::wallet::Result<AccountManager> {
+    pub async fn build_manager(&self) -> iota_sdk::wallet::Result<AccountManager> {
         log::debug!("build_manager");
         let mut builder = AccountManager::builder();
 

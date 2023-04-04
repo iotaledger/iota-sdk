@@ -1,20 +1,17 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "message_interface")]
-use iota_sdk::client::{api::GetAddressesBuilderOptions, secret::SecretManagerDto};
-#[cfg(feature = "message_interface")]
-use iota_sdk::message_interface::{
-    message_handler::Result, AccountMethod, ClientMessage, ManagerOptions, Response, WalletMessage,
-};
-#[cfg(feature = "message_interface")]
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, ClientBuilder},
+    client::{api::GetAddressesBuilderOptions, constants::SHIMMER_COIN_TYPE, secret::SecretManagerDto, ClientBuilder},
     wallet::account::types::AccountIdentifier,
+};
+use iota_sdk_bindings::{
+    call_client_method, call_wallet_method, message_handler::Result, AccountMethod, ClientMessage, ManagerOptions,
+    Response, WalletMessage,
 };
 
 #[tokio::test]
-async fn new_message_interface_generate_addresses() -> Result<()> {
+async fn generate_addresses() -> Result<()> {
     let client_config = r#"{
             "nodes":[],
             "localPow":true,
@@ -41,7 +38,7 @@ async fn new_message_interface_generate_addresses() -> Result<()> {
         options,
     };
 
-    let response = client.send_message(message).await;
+    let response = call_client_method(&client, message).await;
     match response {
         Response::GeneratedAddresses(addresses) => println!("{:?}", serde_json::to_string(&addresses).unwrap()),
         _ => panic!("Unexpected response type"),
@@ -50,10 +47,9 @@ async fn new_message_interface_generate_addresses() -> Result<()> {
     Ok(())
 }
 
-#[cfg(feature = "message_interface")]
 #[tokio::test]
-async fn new_message_interface_create_account() -> Result<()> {
-    let storage_path = "test-storage/new_message_interface_create_account";
+async fn create_account() -> Result<()> {
+    let storage_path = "test-storage/create_account";
     std::fs::remove_dir_all(storage_path).unwrap_or(());
 
     let secret_manager = r#"{"Mnemonic":"about solution utility exist rail budget vacuum major survey clerk pave ankle wealth gym gossip still medal expect strong rely amazing inspire lazy lunar"}"#;
@@ -68,7 +64,6 @@ async fn new_message_interface_create_account() -> Result<()> {
          }"#;
 
     let options = ManagerOptions {
-        #[cfg(feature = "storage")]
         storage_path: Some(storage_path.to_string()),
         client_options: Some(ClientBuilder::new().from_json(client_options).unwrap()),
         coin_type: Some(SHIMMER_COIN_TYPE),
@@ -78,12 +73,14 @@ async fn new_message_interface_create_account() -> Result<()> {
     let wallet = options.build_manager().await?;
 
     // create an account
-    let response = wallet
-        .send_message(WalletMessage::CreateAccount {
+    let response = call_wallet_method(
+        &wallet,
+        WalletMessage::CreateAccount {
             alias: None,
             bech32_hrp: None,
-        })
-        .await;
+        },
+    )
+    .await;
 
     match response {
         Response::Account(account) => {
@@ -94,12 +91,14 @@ async fn new_message_interface_create_account() -> Result<()> {
         _ => panic!("unexpected response {response:?}"),
     }
 
-    let response = wallet
-        .send_message(WalletMessage::CallAccountMethod {
+    let response = call_wallet_method(
+        &wallet,
+        WalletMessage::CallAccountMethod {
             account_id: AccountIdentifier::Index(0),
             method: AccountMethod::UnspentOutputs { filter_options: None },
-        })
-        .await;
+        },
+    )
+    .await;
 
     match response {
         Response::OutputsData(_) => {}
@@ -109,10 +108,9 @@ async fn new_message_interface_create_account() -> Result<()> {
     Ok(std::fs::remove_dir_all(storage_path).unwrap_or(()))
 }
 
-#[cfg(feature = "message_interface")]
 #[tokio::test]
-async fn new_message_interface_client_from_wallet() -> Result<()> {
-    let storage_path = "test-storage/new_message_interface_client_from_wallet";
+async fn client_from_wallet() -> Result<()> {
+    let storage_path = "test-storage/client_from_wallet";
     std::fs::remove_dir_all(storage_path).unwrap_or(());
 
     let secret_manager = r#"{"Mnemonic":"about solution utility exist rail budget vacuum major survey clerk pave ankle wealth gym gossip still medal expect strong rely amazing inspire lazy lunar"}"#;
@@ -127,7 +125,6 @@ async fn new_message_interface_client_from_wallet() -> Result<()> {
          }"#;
 
     let options = ManagerOptions {
-        #[cfg(feature = "storage")]
         storage_path: Some(storage_path.to_string()),
         client_options: Some(ClientBuilder::new().from_json(client_options).unwrap()),
         coin_type: Some(SHIMMER_COIN_TYPE),
@@ -137,12 +134,14 @@ async fn new_message_interface_client_from_wallet() -> Result<()> {
     let wallet = options.build_manager().await?;
 
     // create an account
-    let response = wallet
-        .send_message(WalletMessage::CreateAccount {
+    let response = call_wallet_method(
+        &wallet,
+        WalletMessage::CreateAccount {
             alias: None,
             bech32_hrp: None,
-        })
-        .await;
+        },
+    )
+    .await;
 
     match response {
         Response::Account(account) => {
@@ -154,10 +153,11 @@ async fn new_message_interface_client_from_wallet() -> Result<()> {
     }
 
     // Send ClientMessage via the client from the wallet
-    let response = wallet.get_accounts().await?[0]
-        .client()
-        .send_message(ClientMessage::GenerateMnemonic)
-        .await;
+    let response = call_client_method(
+        wallet.get_accounts().await?[0].client(),
+        ClientMessage::GenerateMnemonic,
+    )
+    .await;
 
     match response {
         Response::GeneratedMnemonic(_) => {}
@@ -167,7 +167,6 @@ async fn new_message_interface_client_from_wallet() -> Result<()> {
     Ok(std::fs::remove_dir_all(storage_path).unwrap_or(()))
 }
 
-#[cfg(feature = "message_interface")]
 #[test]
 fn message_interface_secrets_debug() {
     let client_message = ClientMessage::MnemonicToHexSeed {
@@ -187,14 +186,17 @@ fn message_interface_secrets_debug() {
         "BuildAndPostBlock { secret_manager: None, options: None }"
     );
 
-    let client_message = ClientMessage::BuildAndPostBlock {
-        secret_manager: Some(SecretManagerDto::LedgerNano(false)),
-        options: None,
-    };
-    assert_eq!(
-        format!("{:?}", client_message),
-        "BuildAndPostBlock { secret_manager: Some(<omitted>), options: None }"
-    );
+    #[cfg(feature = "ledger_nano")]
+    {
+        let client_message = ClientMessage::BuildAndPostBlock {
+            secret_manager: Some(SecretManagerDto::LedgerNano(false)),
+            options: None,
+        };
+        assert_eq!(
+            format!("{:?}", client_message),
+            "BuildAndPostBlock { secret_manager: Some(<omitted>), options: None }"
+        );
+    }
 
     let wallet_message = WalletMessage::VerifyMnemonic {
         mnemonic: "mnemonic".to_string(),

@@ -6,6 +6,10 @@ mod client;
 mod send_message;
 mod wallet;
 
+#[cfg(feature = "mqtt")]
+pub use client::listen_mqtt;
+pub use send_message::{call_client_method, call_wallet_method};
+
 /// Result type of the message interface.
 pub type Result<T> = std::result::Result<T, super::error::MessageInterfaceError>;
 
