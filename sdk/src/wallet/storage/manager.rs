@@ -10,7 +10,7 @@ use crate::{
     client::secret::{SecretManager, SecretManagerDto},
     wallet::{
         account::Account,
-        account_manager::builder::AccountManagerBuilder,
+        account_manager::builder::WalletBuilder,
         storage::{constants::*, Storage, StorageAdapter},
     },
 };
@@ -97,7 +97,7 @@ impl StorageManager {
 
     pub async fn save_account_manager_data(
         &mut self,
-        account_manager_builder: &AccountManagerBuilder,
+        account_manager_builder: &WalletBuilder,
     ) -> crate::wallet::Result<()> {
         log::debug!("save_account_manager_data");
         self.storage
@@ -119,11 +119,11 @@ impl StorageManager {
         Ok(())
     }
 
-    pub async fn get_account_manager_data(&self) -> crate::wallet::Result<Option<AccountManagerBuilder>> {
+    pub async fn get_account_manager_data(&self) -> crate::wallet::Result<Option<WalletBuilder>> {
         log::debug!("get_account_manager_data");
         if let Some(mut builder) = self
             .storage
-            .get::<AccountManagerBuilder>(ACCOUNT_MANAGER_INDEXATION_KEY)
+            .get::<WalletBuilder>(ACCOUNT_MANAGER_INDEXATION_KEY)
             .await?
         {
             log::debug!("get_account_manager_data {builder:?}");

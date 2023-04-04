@@ -11,7 +11,7 @@ use iota_sdk::client::{
     secret::{mnemonic::MnemonicSecretManager, stronghold::StrongholdSecretManager, SecretManager},
 };
 #[cfg(all(feature = "stronghold", feature = "storage"))]
-use iota_sdk::wallet::{account_manager::AccountManager, ClientOptions, Result};
+use iota_sdk::wallet::{account_manager::Wallet, ClientOptions, Result};
 
 use crate::wallet::common::{setup, tear_down, NODE_LOCAL, NODE_OTHER};
 
@@ -34,7 +34,7 @@ async fn backup_and_restore() -> Result<()> {
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
 
-    let manager = AccountManager::builder()
+    let manager = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(stronghold))
         .with_client_options(client_options.clone())
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -60,7 +60,7 @@ async fn backup_and_restore() -> Result<()> {
     let stronghold =
         StrongholdSecretManager::builder().build(PathBuf::from("test-storage/backup_and_restore/2.stronghold"))?;
 
-    let restore_manager = AccountManager::builder()
+    let restore_manager = Wallet::builder()
         .with_storage_path("test-storage/backup_and_restore/2")
         .with_secret_manager(SecretManager::Stronghold(stronghold))
         .with_client_options(ClientOptions::new().with_node(NODE_OTHER)?)
@@ -124,7 +124,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
         "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak",
     )?;
 
-    let manager = AccountManager::builder()
+    let manager = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options.clone())
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -155,7 +155,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
         "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak",
     )?;
 
-    let restore_manager = AccountManager::builder()
+    let restore_manager = Wallet::builder()
         .with_storage_path("test-storage/backup_and_restore_mnemonic_secret_manager/2")
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         // Build with a different coin type, to check if it gets replaced by the one from the backup
@@ -216,7 +216,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
 
-    let manager = AccountManager::builder()
+    let manager = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(stronghold))
         .with_client_options(client_options.clone())
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -244,7 +244,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
         "test-storage/backup_and_restore_different_coin_type/2.stronghold",
     ))?;
 
-    let restore_manager = AccountManager::builder()
+    let restore_manager = Wallet::builder()
         .with_storage_path("test-storage/backup_and_restore_different_coin_type/2")
         .with_secret_manager(SecretManager::Stronghold(stronghold))
         .with_client_options(ClientOptions::new().with_node(NODE_OTHER)?)
@@ -305,7 +305,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
 
-    let manager = AccountManager::builder()
+    let manager = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(stronghold))
         .with_client_options(client_options.clone())
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -333,7 +333,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
         "test-storage/backup_and_restore_same_coin_type/2.stronghold",
     ))?;
 
-    let restore_manager = AccountManager::builder()
+    let restore_manager = Wallet::builder()
         .with_storage_path("test-storage/backup_and_restore_same_coin_type/2")
         .with_secret_manager(SecretManager::Stronghold(stronghold))
         .with_client_options(ClientOptions::new().with_node(NODE_OTHER)?)
@@ -392,7 +392,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
 
-    let manager = AccountManager::builder()
+    let manager = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(stronghold))
         .with_client_options(client_options.clone())
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -420,7 +420,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
         "test-storage/backup_and_restore_different_coin_type_dont_ignore/2.stronghold",
     ))?;
 
-    let restore_manager = AccountManager::builder()
+    let restore_manager = Wallet::builder()
         .with_storage_path("test-storage/backup_and_restore_different_coin_type_dont_ignore/2")
         .with_secret_manager(SecretManager::Stronghold(stronghold))
         .with_client_options(ClientOptions::new().with_node(NODE_LOCAL)?)

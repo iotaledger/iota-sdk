@@ -13,7 +13,7 @@ use iota_sdk::{
         address::Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken, TokenId},
     },
-    wallet::{account_manager::AccountManager, AddressNativeTokens, Result},
+    wallet::{account_manager::Wallet, AddressNativeTokens, Result},
 };
 use primitive_types::U256;
 
@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
     dotenv().ok();
 
     // Create the account manager
-    let manager = AccountManager::builder().finish().await?;
+    let manager = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
     let account = manager.get_account("Alice").await?;
@@ -55,12 +55,10 @@ async fn main() -> Result<()> {
     // Send native tokens together with the required storage deposit
     let rent_structure = account.client().get_rent_structure().await?;
 
-    let outputs = vec![
-        BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
-            .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(bech32_address)?))
-            .with_native_tokens(vec![NativeToken::new(token_id, U256::from(10))?])
-            .finish_output(account.client().get_token_supply().await?)?,
-    ];
+    let outputs = vec![BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
+        .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(bech32_address)?))
+        .with_native_tokens(vec![NativeToken::new(token_id, U256::from(10))?])
+        .finish_output(account.client().get_token_supply().await?)?];
 
     let transaction = account.send(outputs, None).await?;
 

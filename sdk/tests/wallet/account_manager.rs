@@ -13,7 +13,7 @@ use iota_sdk::{
         constants::IOTA_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    wallet::{account_manager::AccountManager, ClientOptions, Result},
+    wallet::{account_manager::Wallet, ClientOptions, Result},
 };
 
 use crate::wallet::common::{make_manager, setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL, NODE_OTHER};
@@ -60,18 +60,16 @@ async fn different_seed() -> Result<()> {
     drop(_account);
     drop(manager);
 
-    // Recreate AccountManager with a different mnemonic
+    // Recreate Wallet with a different mnemonic
     let manager = make_manager(storage_path, None, None).await?;
 
     // Generating a new account needs to return an error, because the seed from the secret_manager is different
-    assert!(
-        manager
-            .create_account()
-            .with_alias("Bob".to_string())
-            .finish()
-            .await
-            .is_err()
-    );
+    assert!(manager
+        .create_account()
+        .with_alias("Bob".to_string())
+        .finish()
+        .await
+        .is_err());
 
     tear_down(storage_path)
 }
@@ -92,9 +90,9 @@ async fn changed_coin_type() -> Result<()> {
     drop(_account);
     drop(manager);
 
-    // Recreate AccountManager with same mnemonic
+    // Recreate Wallet with same mnemonic
     let secret_manager2 = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC)?;
-    let manager = AccountManager::builder()
+    let manager = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager2))
         .with_coin_type(IOTA_COIN_TYPE)
         .with_storage_path(storage_path)
@@ -103,14 +101,12 @@ async fn changed_coin_type() -> Result<()> {
 
     // Generating a new account needs to return an error, because a different coin type was set and we require all
     // accounts to have the same coin type
-    assert!(
-        manager
-            .create_account()
-            .with_alias("Bob".to_string())
-            .finish()
-            .await
-            .is_err()
-    );
+    assert!(manager
+        .create_account()
+        .with_alias("Bob".to_string())
+        .finish()
+        .await
+        .is_err());
 
     tear_down(storage_path)
 }
@@ -142,7 +138,7 @@ async fn iota_coin_type() -> Result<()> {
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC)?;
 
     #[allow(unused_mut)]
-    let mut account_manager_builder = AccountManager::builder()
+    let mut account_manager_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(IOTA_COIN_TYPE);
@@ -174,7 +170,7 @@ async fn account_manager_address_generation() -> Result<()> {
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC)?;
 
     #[allow(unused_mut)]
-    let mut account_manager_builder = AccountManager::builder()
+    let mut account_manager_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(IOTA_COIN_TYPE);
@@ -206,7 +202,7 @@ async fn account_manager_address_generation() -> Result<()> {
 
         let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
         #[allow(unused_mut)]
-        let mut account_manager_builder = AccountManager::builder()
+        let mut account_manager_builder = Wallet::builder()
             .with_secret_manager(SecretManager::Stronghold(secret_manager))
             .with_client_options(client_options)
             .with_coin_type(IOTA_COIN_TYPE);

@@ -11,7 +11,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    wallet::{account_manager::AccountManager, ClientOptions, Result},
+    wallet::{account_manager::Wallet, ClientOptions, Result},
 };
 
 #[tokio::main]
@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
 
     let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
 
-    let manager = AccountManager::builder()
+    let manager = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)

@@ -11,7 +11,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{ledger_nano::LedgerSecretManager, SecretManager},
     },
-    wallet::{account_manager::AccountManager, AddressWithAmount, ClientOptions, Result},
+    wallet::{account_manager::Wallet, AddressWithAmount, ClientOptions, Result},
 };
 
 // In this example we will create addresses with a ledger nano hardware wallet
@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
 
     let secret_manager = LedgerSecretManager::new(true);
 
-    let manager = AccountManager::builder()
+    let manager = Wallet::builder()
         .with_secret_manager(SecretManager::LedgerNano(secret_manager))
         .with_storage_path("ledger_nano_walletdb")
         .with_client_options(client_options)

@@ -12,7 +12,7 @@ use std::{env, str::FromStr};
 use dotenv::dotenv;
 use iota_sdk::{
     types::block::output::TokenId,
-    wallet::{account_manager::AccountManager, Result, U256},
+    wallet::{account_manager::Wallet, Result, U256},
 };
 
 #[tokio::main]
@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
     dotenv().ok();
 
     // Create the account manager
-    let manager = AccountManager::builder().finish().await?;
+    let manager = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
     let account = manager.get_account("Alice").await?;

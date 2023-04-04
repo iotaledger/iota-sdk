@@ -21,12 +21,12 @@ use crate::wallet::storage::adapter::memory::Memory;
 use crate::wallet::storage::{constants::default_storage_path, manager::ManagerStorage};
 use crate::{
     client::secret::SecretManager,
-    wallet::{account::handle::AccountHandle, account_manager::AccountManager, ClientOptions},
+    wallet::{account::handle::AccountHandle, account_manager::Wallet, ClientOptions},
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 /// Builder for the account manager.
-pub struct AccountManagerBuilder {
+pub struct WalletBuilder {
     client_options: Option<ClientOptions>,
     coin_type: Option<u32>,
     #[cfg(feature = "storage")]
@@ -57,7 +57,7 @@ impl Default for StorageOptions {
     }
 }
 
-impl AccountManagerBuilder {
+impl WalletBuilder {
     /// Initialises a new instance of the account manager builder with the default storage adapter.
     pub fn new() -> Self {
         Self {
@@ -85,7 +85,7 @@ impl AccountManagerBuilder {
     }
 
     /// Set the secret_manager to be used wrapped in an Arc<RwLock<>> so it can be cloned and mutated also outside of
-    /// the AccountManager.
+    /// the Wallet.
     pub fn with_secret_manager_arc(mut self, secret_manager: Arc<RwLock<SecretManager>>) -> Self {
         self.secret_manager.replace(secret_manager);
         self
@@ -104,8 +104,8 @@ impl AccountManagerBuilder {
 
     /// Builds the account manager
     #[allow(unreachable_code, unused_mut)]
-    pub async fn finish(mut self) -> crate::wallet::Result<AccountManager> {
-        log::debug!("[AccountManagerBuilder]");
+    pub async fn finish(mut self) -> crate::wallet::Result<Wallet> {
+        log::debug!("[WalletBuilder]");
 
         #[cfg(feature = "storage")]
         let storage_options = self.storage_options.clone().unwrap_or_default();
@@ -139,7 +139,7 @@ impl AccountManagerBuilder {
         #[cfg(feature = "storage")]
         let read_manager_builder = storage_manager.lock().await.get_account_manager_data().await?;
         #[cfg(not(feature = "storage"))]
-        let read_manager_builder: Option<AccountManagerBuilder> = None;
+        let read_manager_builder: Option<WalletBuilder> = None;
 
         // Prioritize provided client_options and secret_manager over stored ones
         let new_provided_client_options = if self.client_options.is_none() {
@@ -219,7 +219,7 @@ impl AccountManagerBuilder {
             }
         }
 
-        Ok(AccountManager {
+        Ok(Wallet {
             accounts: Arc::new(RwLock::new(account_handles)),
             background_syncing_status: Arc::new(AtomicUsize::new(0)),
             client_options: Arc::new(RwLock::new(
@@ -242,7 +242,7 @@ impl AccountManagerBuilder {
     }
 
     #[cfg(feature = "storage")]
-    pub(crate) async fn from_account_manager(account_manager: &AccountManager) -> Self {
+    pub(crate) async fn from_account_manager(account_manager: &Wallet) -> Self {
         Self {
             client_options: Some(account_manager.client_options.read().await.clone()),
             coin_type: Some(account_manager.coin_type.load(Ordering::Relaxed)),

@@ -4,16 +4,16 @@
 use std::collections::HashSet;
 
 #[cfg(feature = "storage")]
-use crate::wallet::account_manager::builder::AccountManagerBuilder;
+use crate::wallet::account_manager::builder::WalletBuilder;
 use crate::{
     client::{
         node_manager::node::{Node, NodeAuth, NodeDto},
         NodeInfoWrapper, Url,
     },
-    wallet::{account_manager::AccountManager, ClientOptions},
+    wallet::{account_manager::Wallet, ClientOptions},
 };
 
-impl AccountManager {
+impl Wallet {
     /// Sets the client options for all accounts and sets the new bech32_hrp for the addresses.
     pub async fn set_client_options(&self, options: ClientOptions) -> crate::wallet::Result<()> {
         log::debug!("[set_client_options]");
@@ -31,7 +31,7 @@ impl AccountManager {
         #[cfg(feature = "storage")]
         {
             // Update account manager data with new client options
-            let account_manager_builder = AccountManagerBuilder::from_account_manager(self)
+            let account_manager_builder = WalletBuilder::from_account_manager(self)
                 .await
                 .with_client_options(options);
 
@@ -145,7 +145,7 @@ impl AccountManager {
         #[cfg(feature = "storage")]
         {
             // Update account manager data with new client options
-            let account_manager_builder = AccountManagerBuilder::from_account_manager(self)
+            let account_manager_builder = WalletBuilder::from_account_manager(self)
                 .await
                 .with_client_options(new_client_options.clone());
 

@@ -13,9 +13,9 @@ use std::sync::{
 use tokio::sync::Mutex;
 use tokio::sync::RwLock;
 
-use self::builder::AccountManagerBuilder;
 #[cfg(feature = "storage")]
 use self::builder::StorageOptions;
+use self::builder::WalletBuilder;
 #[cfg(feature = "events")]
 use crate::wallet::events::{
     types::{Event, WalletEventType},
@@ -39,7 +39,7 @@ use crate::{
 /// The account manager, used to create and get accounts. One account manager can hold many accounts, but they should
 /// all share the same secret_manager type with the same seed/mnemonic.
 #[derive(Debug)]
-pub struct AccountManager {
+pub struct Wallet {
     // should we use a hashmap instead of a vec like in wallet.rs?
     pub(crate) accounts: Arc<RwLock<Vec<AccountHandle>>>,
     // 0 = not running, 1 = running, 2 = stopping
@@ -55,10 +55,10 @@ pub struct AccountManager {
     pub(crate) storage_manager: StorageManagerHandle,
 }
 
-impl AccountManager {
+impl Wallet {
     /// Initialises the account manager builder.
-    pub fn builder() -> AccountManagerBuilder {
-        AccountManagerBuilder::new()
+    pub fn builder() -> WalletBuilder {
+        WalletBuilder::new()
     }
 
     /// Create a new account
@@ -190,8 +190,8 @@ impl AccountManager {
     }
 }
 
-impl Drop for AccountManager {
+impl Drop for Wallet {
     fn drop(&mut self) {
-        log::debug!("drop AccountManager");
+        log::debug!("drop Wallet");
     }
 }

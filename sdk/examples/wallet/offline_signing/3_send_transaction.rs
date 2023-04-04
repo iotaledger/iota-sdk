@@ -11,7 +11,7 @@ use iota_sdk::{
         api::{SignedTransactionData, SignedTransactionDataDto},
         Client,
     },
-    wallet::{account_manager::AccountManager, Result},
+    wallet::{account_manager::Wallet, Result},
 };
 
 const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/signed_transaction.json";
@@ -19,7 +19,7 @@ const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/signed_tran
 #[tokio::main]
 async fn main() -> Result<()> {
     // Create the account manager with the secret_manager and client options
-    let manager = AccountManager::builder()
+    let manager = Wallet::builder()
         .with_storage_path("examples/offline_signing/online_walletdb")
         .finish()
         .await?;

@@ -5,7 +5,7 @@ use std::sync::atomic::Ordering;
 
 use crate::{
     client::{secret::SecretManagerDto, storage::StorageProvider, stronghold::StrongholdAdapter},
-    wallet::{account::Account, account_manager::AccountManager, ClientOptions},
+    wallet::{account::Account, account_manager::Wallet, ClientOptions},
 };
 
 pub(crate) const CLIENT_OPTIONS_KEY: &str = "client_options";
@@ -16,7 +16,7 @@ pub(crate) const BACKUP_SCHEMA_VERSION_KEY: &str = "backup_schema_version";
 pub(crate) const BACKUP_SCHEMA_VERSION: u8 = 1;
 
 pub(crate) async fn store_data_to_stronghold(
-    account_manager: &AccountManager,
+    account_manager: &Wallet,
     stronghold: &mut StrongholdAdapter,
     secret_manager_dto: SecretManagerDto,
 ) -> crate::wallet::Result<()> {

@@ -41,7 +41,7 @@ use crate::{
             types::{AccountBalanceDto, AccountIdentifier, TransactionDto},
             OutputDataDto,
         },
-        account_manager::AccountManager,
+        account_manager::Wallet,
         message_interface::{
             account_method::AccountMethod, dtos::AccountDto, message::Message, response::Response,
             AddressWithUnspentOutputsDto,
@@ -98,20 +98,20 @@ where
 
 /// The Wallet message handler.
 pub struct WalletMessageHandler {
-    account_manager: AccountManager,
+    account_manager: Wallet,
 }
 
 impl WalletMessageHandler {
     /// Creates a new instance of the message handler with the default account manager.
     pub async fn new() -> Result<Self> {
         let instance = Self {
-            account_manager: AccountManager::builder().finish().await?,
+            account_manager: Wallet::builder().finish().await?,
         };
         Ok(instance)
     }
 
     /// Creates a new instance of the message handler with the specified account manager.
-    pub fn with_manager(account_manager: AccountManager) -> Self {
+    pub fn with_manager(account_manager: Wallet) -> Self {
         Self { account_manager }
     }
 

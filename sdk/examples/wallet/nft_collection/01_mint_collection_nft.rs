@@ -13,7 +13,7 @@ use iota_sdk::{
         address::{Address, NftAddress},
         output::NftId,
     },
-    wallet::{account_manager::AccountManager, NftOptions, Result},
+    wallet::{account_manager::Wallet, NftOptions, Result},
 };
 
 #[tokio::main]
@@ -26,7 +26,7 @@ async fn main() -> Result<()> {
     let issuer_nft_id = NftId::from_str("0x13c490ac052e575cffd40e170c2d46c6029b8b68cdf0e899b34cde93d2a7b28a")?;
 
     // Create the account manager
-    let manager = AccountManager::builder().finish().await?;
+    let manager = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
     let account = manager.get_account("Alice").await?;

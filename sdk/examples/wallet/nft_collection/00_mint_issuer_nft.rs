@@ -13,7 +13,7 @@ use iota_sdk::{
         output::{NftId, Output, OutputId},
         payload::transaction::TransactionEssence,
     },
-    wallet::{account_manager::AccountManager, NftOptions, Result},
+    wallet::{account_manager::Wallet, NftOptions, Result},
 };
 
 #[tokio::main]
@@ -22,7 +22,7 @@ async fn main() -> Result<()> {
     dotenv().ok();
 
     // Create the account manager
-    let manager = AccountManager::builder().finish().await?;
+    let manager = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
     let account = manager.get_account("Alice").await?;

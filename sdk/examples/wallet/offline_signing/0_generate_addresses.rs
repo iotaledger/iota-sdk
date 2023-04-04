@@ -18,7 +18,7 @@ use iota_sdk::{
         constants::{SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
         secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
-    wallet::{account::types::AccountAddress, account_manager::AccountManager, ClientOptions, Result},
+    wallet::{account::types::AccountAddress, account_manager::Wallet, ClientOptions, Result},
 };
 
 const ADDRESS_FILE_NAME: &str = "examples/offline_signing/addresses.json";
@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
     secret_manager.store_mnemonic(mnemonic).await?;
 
     // Create the account manager with the secret_manager and client options
-    let manager = AccountManager::builder()
+    let manager = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .with_client_options(offline_client)
         .with_coin_type(SHIMMER_COIN_TYPE)

@@ -9,13 +9,13 @@ use zeroize::Zeroize;
 
 use self::stronghold_snapshot::{read_data_from_stronghold_snapshot, store_data_to_stronghold};
 #[cfg(feature = "storage")]
-use crate::wallet::account_manager::AccountManagerBuilder;
+use crate::wallet::account_manager::WalletBuilder;
 use crate::{
     client::secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerDto},
-    wallet::account_manager::{AccountHandle, AccountManager},
+    wallet::account_manager::{AccountHandle, Wallet},
 };
 
-impl AccountManager {
+impl Wallet {
     /// Backup the account manager data in a Stronghold file
     /// stronghold_password must be the current one when Stronghold is used as SecretManager.
     pub async fn backup(&self, backup_path: PathBuf, mut stronghold_password: String) -> crate::wallet::Result<()> {
@@ -108,7 +108,7 @@ impl AccountManager {
             }
         });
 
-        // Update AccountManager with read data
+        // Update Wallet with read data
         if ignore_if_coin_type_mismatch.is_none() {
             if let Some(read_client_options) = read_client_options {
                 // If the nodes are from the same network as the current client options, then extend it
@@ -166,7 +166,7 @@ impl AccountManager {
         // store new data
         #[cfg(feature = "storage")]
         {
-            let account_manager_builder = AccountManagerBuilder::new()
+            let account_manager_builder = WalletBuilder::new()
                 .with_secret_manager_arc(self.secret_manager.clone())
                 .with_storage_path(
                     &self

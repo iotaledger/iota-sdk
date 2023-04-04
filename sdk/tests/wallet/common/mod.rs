@@ -12,7 +12,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
         Client,
     },
-    wallet::{account::AccountHandle, account_manager::AccountManager, ClientOptions, Result},
+    wallet::{account::AccountHandle, account_manager::Wallet, ClientOptions, Result},
 };
 
 pub use self::constants::*;
@@ -28,19 +28,15 @@ pub use self::constants::*;
 ///
 /// Returns:
 ///
-/// An AccountManager
+/// An Wallet
 #[allow(dead_code, unused_variables)]
-pub(crate) async fn make_manager(
-    storage_path: &str,
-    mnemonic: Option<&str>,
-    node: Option<&str>,
-) -> Result<AccountManager> {
+pub(crate) async fn make_manager(storage_path: &str, mnemonic: Option<&str>, node: Option<&str>) -> Result<Wallet> {
     let client_options = ClientOptions::new().with_node(node.unwrap_or(NODE_LOCAL))?;
     let secret_manager =
         MnemonicSecretManager::try_from_mnemonic(mnemonic.unwrap_or(&Client::generate_mnemonic().unwrap()))?;
 
     #[allow(unused_mut)]
-    let mut account_manager_builder = AccountManager::builder()
+    let mut account_manager_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE);
@@ -55,10 +51,7 @@ pub(crate) async fn make_manager(
 /// Create `amount` new accounts, request funds from the faucet and sync the accounts afterwards until the faucet output
 /// is available. Returns the new accounts.
 #[allow(dead_code)]
-pub(crate) async fn create_accounts_with_funds(
-    account_manager: &AccountManager,
-    amount: usize,
-) -> Result<Vec<AccountHandle>> {
+pub(crate) async fn create_accounts_with_funds(account_manager: &Wallet, amount: usize) -> Result<Vec<AccountHandle>> {
     let mut new_accounts = Vec::new();
     'accounts: for _ in 0..amount {
         let account = account_manager.create_account().finish().await?;

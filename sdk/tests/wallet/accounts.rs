@@ -8,7 +8,7 @@ use {
         constants::SHIMMER_COIN_TYPE,
         secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
-    iota_sdk::wallet::{account_manager::AccountManager, ClientOptions},
+    iota_sdk::wallet::{account_manager::Wallet, ClientOptions},
     std::path::PathBuf,
 };
 
@@ -86,7 +86,7 @@ async fn remove_latest_account() -> Result<()> {
         recreated_account_index
     };
 
-    // Restore dropped `AccountManager` from above.
+    // Restore dropped `Wallet` from above.
     let manager = make_manager(storage_path, None, None).await?;
 
     let accounts = manager.get_accounts().await.unwrap();
@@ -112,39 +112,31 @@ async fn account_alias_already_exists() -> Result<()> {
         .with_alias("Alice".to_string())
         .finish()
         .await?;
-    assert!(
-        &manager
-            .create_account()
-            .with_alias("Alice".to_string())
-            .finish()
-            .await
-            .is_err()
-    );
-    assert!(
-        &manager
-            .create_account()
-            .with_alias("alice".to_string())
-            .finish()
-            .await
-            .is_err()
-    );
-    assert!(
-        &manager
-            .create_account()
-            .with_alias("ALICE".to_string())
-            .finish()
-            .await
-            .is_err()
-    );
+    assert!(&manager
+        .create_account()
+        .with_alias("Alice".to_string())
+        .finish()
+        .await
+        .is_err());
+    assert!(&manager
+        .create_account()
+        .with_alias("alice".to_string())
+        .finish()
+        .await
+        .is_err());
+    assert!(&manager
+        .create_account()
+        .with_alias("ALICE".to_string())
+        .finish()
+        .await
+        .is_err());
     // Other alias works
-    assert!(
-        &manager
-            .create_account()
-            .with_alias("Bob".to_string())
-            .finish()
-            .await
-            .is_ok()
-    );
+    assert!(&manager
+        .create_account()
+        .with_alias("Bob".to_string())
+        .finish()
+        .await
+        .is_ok());
 
     tear_down(storage_path)
 }
@@ -211,7 +203,7 @@ async fn account_creation_stronghold() -> Result<()> {
     let secret_manager = SecretManager::Stronghold(stronghold_secret_manager);
 
     #[allow(unused_mut)]
-    let mut account_manager_builder = AccountManager::builder()
+    let mut account_manager_builder = Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE);

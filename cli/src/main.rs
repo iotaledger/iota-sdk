@@ -14,8 +14,7 @@ use fern_logger::{LoggerConfigBuilder, LoggerOutputConfigBuilder};
 use log::LevelFilter;
 
 use self::{
-    account_manager::new_account_manager, command::account_manager::AccountManagerCli, error::Error,
-    helper::pick_account,
+    account_manager::new_account_manager, command::account_manager::WalletCli, error::Error, helper::pick_account,
 };
 
 #[macro_export]
@@ -34,7 +33,7 @@ macro_rules! println_log_error {
     };
 }
 
-fn logger_init(cli: &AccountManagerCli) -> Result<(), Error> {
+fn logger_init(cli: &WalletCli) -> Result<(), Error> {
     let level_filter = if let Some(log_level) = cli.log_level {
         log_level
     } else {
@@ -52,7 +51,7 @@ fn logger_init(cli: &AccountManagerCli) -> Result<(), Error> {
     Ok(())
 }
 
-async fn run(cli: AccountManagerCli) -> Result<(), Error> {
+async fn run(cli: WalletCli) -> Result<(), Error> {
     let (account_manager, account) = new_account_manager(cli.clone()).await?;
 
     if let Some(account_manager) = account_manager {
@@ -71,7 +70,7 @@ async fn run(cli: AccountManagerCli) -> Result<(), Error> {
 
 #[tokio::main]
 async fn main() {
-    let cli = match AccountManagerCli::try_parse() {
+    let cli = match WalletCli::try_parse() {
         Ok(cli) => cli,
         Err(e) => {
             println!("{e}");

@@ -3,10 +3,10 @@
 
 use crate::wallet::{
     account::{handle::AccountHandle, types::AccountIdentifier},
-    account_manager::AccountManager,
+    account_manager::Wallet,
 };
 
-impl AccountManager {
+impl Wallet {
     /// Get an account with an AccountIdentifier
     pub async fn get_account<I: Into<AccountIdentifier> + Send>(
         &self,
