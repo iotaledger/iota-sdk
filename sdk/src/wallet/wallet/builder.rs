@@ -1,9 +1,12 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::sync::{
-    atomic::{AtomicU32, AtomicUsize},
-    Arc,
+use std::{
+    collections::HashSet,
+    sync::{
+        atomic::{AtomicU32, AtomicUsize},
+        Arc,
+    },
 };
 #[cfg(feature = "storage")]
 use std::{path::PathBuf, sync::atomic::Ordering};
@@ -21,7 +24,7 @@ use crate::wallet::storage::adapter::memory::Memory;
 use crate::wallet::storage::{constants::default_storage_path, manager::ManagerStorage};
 use crate::{
     client::secret::SecretManager,
-    wallet::{AccountHandle, ClientOptions, Wallet},
+    wallet::{account::Account, AccountHandle, ClientOptions, Wallet},
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -191,7 +194,11 @@ impl WalletBuilder {
         let event_emitter = Arc::new(Mutex::new(EventEmitter::new()));
 
         #[cfg(feature = "storage")]
-        let accounts = storage_manager.lock().await.get_accounts().await.unwrap_or_default();
+        let mut accounts = storage_manager.lock().await.get_accounts().await.unwrap_or_default();
+        #[cfg(feature = "storage")]
+        // It happened that inputs got locked, the transaction failed, but they weren't unlocked again, so we do this
+        // here
+        unlock_unused_inputs(&mut accounts)?;
         #[cfg(not(feature = "storage"))]
         let accounts = Vec::new();
         let mut account_handles: Vec<AccountHandle> = accounts
@@ -250,4 +257,27 @@ impl WalletBuilder {
             secret_manager: Some(wallet.secret_manager.clone()),
         }
     }
+}
+
+// Check if any of the locked inputs is not used in a transaction and unlock them, so they get available for new
+// transactions
+fn unlock_unused_inputs(accounts: &mut [Account]) -> crate::wallet::Result<()> {
+    log::debug!("[unlock_unused_inputs]");
+    for account in accounts.iter_mut() {
+        let mut used_inputs = HashSet::new();
+        for transaction_id in account.pending_transactions() {
+            if let Some(tx) = account.transactions().get(transaction_id) {
+                for input in &tx.inputs {
+                    used_inputs.insert(input.metadata.output_id()?);
+                }
+            }
+        }
+        for input in account.locked_outputs().clone() {
+            if !used_inputs.contains(&input) {
+                log::debug!("unlocking unused input {input}");
+                account.locked_outputs.remove(&input);
+            }
+        }
+    }
+    Ok(())
 }

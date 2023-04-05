@@ -114,7 +114,7 @@ impl AccountHandle {
             Ok(res) => res,
             Err(err) => {
                 // unlock outputs so they are available for a new transaction
-                self.unlock_inputs(selected_transaction_data.inputs).await?;
+                self.unlock_inputs(&selected_transaction_data.inputs).await?;
                 return Err(err);
             }
         };

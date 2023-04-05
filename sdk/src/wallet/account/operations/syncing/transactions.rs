@@ -118,7 +118,6 @@ impl AccountHandle {
                                     );
                                 }
                                 LedgerInclusionStateDto::Conflicting => {
-                                    log::debug!("[SYNC] conflicting transaction {}", transaction_id);
                                     // try to get the included block, because maybe only this attachment is
                                     // conflicting because it got confirmed in another block
                                     if let Ok(included_block) =
@@ -134,6 +133,7 @@ impl AccountHandle {
                                             &mut spent_output_ids,
                                         );
                                     } else {
+                                        log::debug!("[SYNC] conflicting transaction {}", transaction_id);
                                         updated_transaction_and_outputs(
                                             transaction,
                                             None,
@@ -262,6 +262,7 @@ fn process_transaction_with_unknown_state(
     if all_inputs_spent {
         transaction.inclusion_state = InclusionState::UnknownPruned;
     } else {
+        log::debug!("[SYNC] conflicting transaction {}", transaction.transaction_id);
         transaction.inclusion_state = InclusionState::Conflicting;
     }
     updated_transactions.push(transaction);
