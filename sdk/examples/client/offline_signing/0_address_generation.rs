@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we generate an address which will be used later to find inputs.
-//! This example uses secrets in environment variables for simplicity but should generally not be done in production.
+//! This example uses secrets in environment variables for simplicity but should not be done in production.
 //! `cargo run --example 0_address_generation --release`.
 
 use std::{

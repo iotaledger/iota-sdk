@@ -16,7 +16,7 @@ use iota_sdk::client::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses secrets in environment variables for simplicity but should generally not be done in production
+    // This example uses secrets in environment variables for simplicity but should not be done in production
     // Configure your own mnemonic in ".env". Since the output amount cannot be zero, the mnemonic must contain non-zero
     // balance
     dotenvy::dotenv().ok();
