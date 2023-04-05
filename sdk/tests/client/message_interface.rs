@@ -5,7 +5,6 @@
 
 use std::{env, str::FromStr};
 
-use dotenvy::dotenv;
 use iota_sdk::{
     client::{
         api::GetAddressesBuilderOptions as GenerateAddressesOptions,
@@ -53,7 +52,7 @@ async fn generate_addresses() {
 #[should_panic]
 async fn build_and_post_block() {
     // This test uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    dotenvy::dotenv().ok();
 
     // Create a client message handler with node health ignored
     let client_config = r#"{

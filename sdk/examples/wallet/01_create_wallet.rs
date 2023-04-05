@@ -7,7 +7,6 @@
 
 use std::{env, path::PathBuf};
 
-use dotenvy::dotenv;
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -19,7 +18,7 @@ use iota_sdk::{
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    dotenvy::dotenv().ok();
 
     // Setup Stronghold secret_manager
     let mut secret_manager = StrongholdSecretManager::builder()

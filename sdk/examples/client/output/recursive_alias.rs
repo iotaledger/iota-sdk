@@ -5,7 +5,6 @@
 
 use std::env;
 
-use dotenvy::dotenv;
 use iota_sdk::{
     client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::{
@@ -28,7 +27,7 @@ async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production!
     // Configure your own mnemonic in the ".env" file. Since the output amount cannot be zero, the seed must contain
     // non-zero balance.
-    dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = env::var("NODE_URL").unwrap();
     let faucet_url = env::var("FAUCET_URL").unwrap();

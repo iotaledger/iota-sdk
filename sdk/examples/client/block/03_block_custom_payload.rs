@@ -14,7 +14,7 @@ async fn main() -> Result<()> {
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args().nth(1).unwrap_or_else(|| {
         // This example uses dotenv, which is not safe for use in production.
-        dotenvy::dotenv().ok();
+        dotenvy::dotenvy::dotenv().ok();
         std::env::var("NODE_URL").unwrap()
     });
 

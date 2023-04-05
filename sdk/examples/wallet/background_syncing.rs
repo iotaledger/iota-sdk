@@ -5,7 +5,6 @@
 
 use std::env;
 
-use dotenvy::dotenv;
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -18,7 +17,7 @@ use tokio::time::{sleep, Duration};
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
 

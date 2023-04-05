@@ -8,7 +8,6 @@
 
 use std::env;
 
-use dotenvy::dotenv;
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -20,7 +19,7 @@ use iota_sdk::{
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let mnemonic: &str = &env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
     let mnemonic_secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic).unwrap();

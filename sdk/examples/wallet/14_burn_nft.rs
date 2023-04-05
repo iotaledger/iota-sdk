@@ -7,7 +7,6 @@
 
 use std::{env, str::FromStr};
 
-use dotenvy::dotenv;
 use iota_sdk::{
     types::block::output::NftId,
     wallet::{account_manager::AccountManager, Result},
@@ -16,7 +15,7 @@ use iota_sdk::{
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    dotenvy::dotenv().ok();
 
     // Create the account manager
     let manager = AccountManager::builder().finish().await?;

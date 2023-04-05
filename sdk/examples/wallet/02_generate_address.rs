@@ -7,13 +7,12 @@
 
 use std::env;
 
-use dotenvy::dotenv;
 use iota_sdk::wallet::{account_manager::AccountManager, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    dotenvy::dotenv().ok();
 
     // Create the account manager
     let manager = AccountManager::builder().finish().await?;

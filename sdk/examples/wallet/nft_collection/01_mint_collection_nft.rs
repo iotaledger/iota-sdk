@@ -7,7 +7,6 @@
 
 use std::{env, str::FromStr};
 
-use dotenvy::dotenv;
 use iota_sdk::{
     types::block::{
         address::{Address, NftAddress},
@@ -19,7 +18,7 @@ use iota_sdk::{
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let nft_collection_size = 15;
     // Set this to the NFT id from the mint_issuer_nft example

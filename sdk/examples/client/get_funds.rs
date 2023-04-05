@@ -8,7 +8,7 @@ use iota_sdk::client::{secret::SecretManager, utils::request_funds_from_faucet, 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
-    dotenvy::dotenv().ok();
+    dotenvy::dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();

@@ -12,7 +12,6 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use dotenvy::dotenv;
 use iota_sdk::{
     client::{
         constants::{SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
@@ -26,7 +25,7 @@ const ADDRESS_FILE_NAME: &str = "examples/offline_signing/addresses.json";
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let offline_client = ClientOptions::new();
 

@@ -12,7 +12,6 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use dotenvy::dotenv;
 use iota_sdk::{
     client::{
         api::{
@@ -30,7 +29,7 @@ const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/signed_tran
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    dotenv().ok();
+    dotenvy::dotenv().ok();
 
     // Setup Stronghold secret_manager
     let mut secret_manager = StrongholdSecretManager::builder()
