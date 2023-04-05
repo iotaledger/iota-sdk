@@ -4,7 +4,7 @@
 use iota_sdk::{
     types::block::output::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-        BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, Rent, UnlockCondition,
+        BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, UnlockCondition,
     },
     wallet::{account::OutputsToClaim, AddressNativeTokens, AddressWithAmount, NativeTokenOptions, Result, U256},
 };
@@ -73,15 +73,12 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
     let account_1 = wallet.create_account().finish().await?;
 
-    // Equal to minimum required storage deposit for a basic output
-    let micro_amount = 42600;
-
     let token_supply = account_0.client().get_token_supply().await?;
     let rent_structure = account_0.client().get_rent_structure().await?;
     let expiration_time = account_0.client().get_time_checked().await? + 86400; // 1 Day from now
 
     // Get the output's rent cost
-    let output = BasicOutputBuilder::new_with_amount(micro_amount)?
+    let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
         .add_unlock_condition(AddressUnlockCondition::new(
             *account_1.addresses().await?[0].address().as_ref(),
         ))
@@ -90,12 +87,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
             expiration_time,
         )?)
         .finish_output(token_supply)?;
-    let rent_cost = output.rent_cost(&rent_structure);
-
-    // Update the amount to include the rent cost of the expiration condition
-    let output = BasicOutputBuilder::from(output.as_basic())
-        .with_amount(micro_amount + rent_cost)?
-        .finish_output(token_supply)?;
+    let amount = output.amount();
 
     let outputs = vec![output; 2];
 
@@ -125,7 +117,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     assert_eq!(balance.potentially_locked_outputs.len(), 0);
     assert_eq!(
         balance.base_coin.available,
-        base_coin_amount_before_claiming + 2 * micro_amount
+        base_coin_amount_before_claiming + 2 * amount
     );
 
     tear_down(storage_path)
