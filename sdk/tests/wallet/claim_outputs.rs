@@ -4,7 +4,7 @@
 use iota_sdk::{
     types::block::output::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-        BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, UnlockCondition,
+        BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, Rent, UnlockCondition,
     },
     wallet::{account::OutputsToClaim, AddressNativeTokens, AddressWithAmount, NativeTokenOptions, Result, U256},
 };
@@ -75,15 +75,31 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
 
     // Equal to minimum required storage deposit for a basic output
     let micro_amount = 42600;
-    let tx = account_0
-        .send_amount(
-            vec![
-                AddressWithAmount::new(account_1.addresses().await?[0].address().to_bech32(), micro_amount),
-                AddressWithAmount::new(account_1.addresses().await?[0].address().to_bech32(), micro_amount),
-            ],
-            None,
-        )
-        .await?;
+
+    let token_supply = account_0.client().get_token_supply().await?;
+    let rent_structure = account_0.client().get_rent_structure().await?;
+    let expiration_time = account_0.client().get_time_checked().await? + 86400; // 1 Day from now
+
+    // Get the output's rent cost
+    let output = BasicOutputBuilder::new_with_amount(micro_amount)?
+        .add_unlock_condition(AddressUnlockCondition::new(
+            *account_1.addresses().await?[0].address().as_ref(),
+        ))
+        .add_unlock_condition(ExpirationUnlockCondition::new(
+            *account_0.addresses().await?[0].address().as_ref(),
+            expiration_time,
+        )?)
+        .finish_output(token_supply)?;
+    let rent_cost = output.rent_cost(&rent_structure);
+
+    // Update the amount to include the rent cost of the expiration condition
+    let output = BasicOutputBuilder::from(output.as_basic())
+        .with_amount(micro_amount + rent_cost)?
+        .finish_output(token_supply)?;
+
+    let outputs = vec![output; 2];
+
+    let tx = account_0.send(outputs, None).await?;
 
     account_0
         .retry_transaction_until_included(&tx.transaction_id, None, None)
