@@ -113,7 +113,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     let tx = account_1
         .claim_outputs(
             account_1
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::MicroTransactions)
+                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::All)
                 .await?,
         )
         .await?;
