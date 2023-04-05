@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
         .finish();
     fern_logger::logger_init(config).unwrap();
 
-    // This example uses dotenv, which is not safe for use in production.
+    // This example uses secrets in environment variables for simplicity but should generally not be done in production.
     dotenvy::dotenv().ok();
 
     let client_options = ClientOptions::new()

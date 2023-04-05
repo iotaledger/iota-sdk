@@ -1,5 +1,5 @@
 :::warning Dotenv
 
-This example uses dotenv, which is not safe to use in production environments.
+This example uses secrets in environment variables for simplicity but should generally not be done in production.
 
 :::

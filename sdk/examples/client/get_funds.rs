@@ -7,7 +7,7 @@ use iota_sdk::client::{secret::SecretManager, utils::request_funds_from_faucet, 
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
+    // This example uses secrets in environment variables for simplicity but should generally not be done in production
     dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();

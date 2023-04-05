@@ -14,7 +14,7 @@ use tokio::time::{sleep, Duration};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
+    // This example uses secrets in environment variables for simplicity but should generally not be done in production
     dotenvy::dotenv().ok();
 
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we sign the prepared transaction.
-//! This example uses dotenv, which is not safe for use in production.
+//! This example uses secrets in environment variables for simplicity but should generally not be done in production.
 //! `cargo run --example 2_transaction_signing --release`.
 
 use std::{
