@@ -13,13 +13,13 @@ use iota_sdk::{
     wallet::{AddressWithAmount, ClientOptions, Result, Wallet},
 };
 
-// In this example we will create addresses with a ledger nano hardware wallet
+// In this example we will create addresses with a ledger nano hardware wallet.
 // To use the ledger nano simulator clone https://github.com/iotaledger/ledger-shimmer-app, run `git submodule init && git submodule update --recursive`,
 // then `./build.sh -m nanos|nanox|nanosplus -s` and use `true` in `LedgerSecretManager::new(true)`.
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses secrets in environment variables for simplicity but should not be done in production
+    // This example uses secrets in environment variables for simplicity but should not be done in production.
     dotenvy::dotenv().ok();
 
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;

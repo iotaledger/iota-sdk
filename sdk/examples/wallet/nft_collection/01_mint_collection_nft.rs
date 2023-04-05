@@ -17,7 +17,7 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses secrets in environment variables for simplicity but should not be done in production
+    // This example uses secrets in environment variables for simplicity but should not be done in production.
     dotenvy::dotenv().ok();
 
     let nft_collection_size = 15;

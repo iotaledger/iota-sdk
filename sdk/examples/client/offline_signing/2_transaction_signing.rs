@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we sign the prepared transaction.
-//! This example uses secrets in environment variables for simplicity but should not be done in production.
+//! This example uses secrets in environment variables for simplicity which should not be done in production.
 //! `cargo run --example 2_transaction_signing --release`.
 
 use std::{

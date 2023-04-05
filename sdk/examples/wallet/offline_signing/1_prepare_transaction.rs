@@ -24,7 +24,7 @@ const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/prepared_
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses secrets in environment variables for simplicity but should not be done in production
+    // This example uses secrets in environment variables for simplicity but should not be done in production.
     dotenvy::dotenv().ok();
 
     let outputs = vec![AddressWithAmount {

@@ -13,7 +13,7 @@ use iota_sdk::{
 async fn main() -> Result<()> {
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses secrets in environment variables for simplicity but should not be done in production.
+        // This example uses secrets in environment variables for simplicity which should not be done in production.
         dotenvy::dotenv().ok();
         std::env::var("NODE_URL").unwrap()
     });

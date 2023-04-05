@@ -9,7 +9,7 @@ use iota_sdk::wallet::{AddressWithAmount, Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses secrets in environment variables for simplicity but should not be done in production
+    // This example uses secrets in environment variables for simplicity but should not be done in production.
     dotenvy::dotenv().ok();
 
     // Create the wallet

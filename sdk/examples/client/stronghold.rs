@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
         .password("some_hopefully_secure_password")
         .build("test.stronghold")?;
 
-    // This example uses secrets in environment variables for simplicity but should not be done in production
+    // This example uses secrets in environment variables for simplicity but should not be done in production.
     dotenvy::dotenv().ok();
     let mnemonic = std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
     // The mnemonic only needs to be stored the first time
