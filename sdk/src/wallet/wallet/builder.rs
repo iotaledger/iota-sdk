@@ -195,9 +195,9 @@ impl WalletBuilder {
 
         #[cfg(feature = "storage")]
         let mut accounts = storage_manager.lock().await.get_accounts().await.unwrap_or_default();
-        #[cfg(feature = "storage")]
         // It happened that inputs got locked, the transaction failed, but they weren't unlocked again, so we do this
         // here
+        #[cfg(feature = "storage")]
         unlock_unused_inputs(&mut accounts)?;
         #[cfg(not(feature = "storage"))]
         let accounts = Vec::new();
