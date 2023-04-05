@@ -3,8 +3,8 @@
 
 package org.iota;
 
-import org.iota.types.expections.ClientException;
-import org.iota.types.expections.InitializeClientException;
+import org.iota.types.exceptions.ClientException;
+import org.iota.types.exceptions.InitializeClientException;
 import org.iota.types.Segment;
 import org.iota.types.secret.GenerateAddressesOptions;
 import org.iota.types.secret.Range;

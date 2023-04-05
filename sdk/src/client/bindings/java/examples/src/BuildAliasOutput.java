@@ -1,10 +1,10 @@
 import org.iota.Client;
 import org.iota.types.ClientConfig;
-import org.iota.types.expections.ClientException;
+import org.iota.types.exceptions.ClientException;
 import org.iota.types.Feature;
 import org.iota.types.Output;
 import org.iota.types.UnlockCondition;
-import org.iota.types.expections.InitializeClientException;
+import org.iota.types.exceptions.InitializeClientException;
 import org.iota.types.ids.AliasId;
 import org.iota.types.output_builder.AliasOutputBuilderParams;
 import org.iota.types.secret.GenerateAddressesOptions;
