@@ -14,15 +14,15 @@ use iota_sdk::{
     },
 };
 
-use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
+use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
 #[tokio::test]
 async fn output_preparation() -> Result<()> {
     let storage_path = "test-storage/output_preparation";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
-    let account = manager.create_account().finish().await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account = wallet.create_account().finish().await?;
 
     let recipient_address_bech32 = String::from("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu");
     // Roundtrip to get the correct bech32 HRP
@@ -386,8 +386,8 @@ async fn output_preparation_sdr() -> Result<()> {
     let storage_path = "test-storage/output_preparation_sdr";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
-    let account = manager.create_account().finish().await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account = wallet.create_account().finish().await?;
 
     let rent_structure = account.client().get_rent_structure().await?;
     let token_supply = account.client().get_token_supply().await?;
@@ -497,8 +497,8 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     let storage_path = "test-storage/output_preparation";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
-    let accounts = &create_accounts_with_funds(&manager, 1).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let accounts = &create_accounts_with_funds(&wallet, 1).await?;
     let address = accounts[0].addresses().await?[0].address().to_bech32();
 
     let nft_options = vec![NftOptions {

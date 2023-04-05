@@ -6,16 +6,16 @@
 
 use iota_sdk::{
     types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
-    wallet::{account::types::AddressWrapper, account_manager::AccountManager, Result},
+    wallet::{account::types::AddressWrapper, Result, Wallet},
 };
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Create the account manager
-    let manager = AccountManager::builder().finish().await?;
+    // Create the wallet
+    let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = manager.get_account("Alice").await?;
+    let account = wallet.get_account("Alice").await?;
 
     let account_addresses: Vec<AddressWrapper> = account
         .addresses()

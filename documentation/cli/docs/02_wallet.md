@@ -1,6 +1,6 @@
-# Account Manager Interface
+# Wallet Interface
 
-The Account Manager Interface is evaluated through the Command Line Interface of the `wallet` binary, once per
+The Wallet Interface is evaluated through the Command Line Interface of the `wallet` binary, once per
 execution.
 
 It is responsible for the creation and management of the wallet and its accounts.
@@ -63,7 +63,7 @@ Change the stronghold password.
 
 ### `./wallet help`
 
-Displays the account manager interface usage and exits.
+Displays the wallet interface usage and exits.
 
 #### Example
 

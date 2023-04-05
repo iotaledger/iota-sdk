@@ -30,6 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `AccountManager` and `AccountManagerBuilder` renamed to `Wallet` and `WalletBuilder`;
+- `save_account_manager_data` renamed to `save_wallet_data`;
+- `get_account_manager_data` renamed to `get_wallet_data`;
 - Builder methods `add_unlock_condition`, `replace_unlock_condition`, `with_unlock_conditions` are now generic;
 - Builder methods `add_feature`, `replace_feature`, `with_features` are now generic;
 - Builder methods `add_immutable_feature`, `replace_immutable_feature`, `with_immutable_features` are now generic;

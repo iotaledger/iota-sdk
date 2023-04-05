@@ -13,7 +13,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
-    wallet::{account_manager::AccountManager, ClientOptions, Result},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
 #[tokio::main]
@@ -32,10 +32,10 @@ async fn main() -> Result<()> {
     // The mnemonic only needs to be stored the first time
     secret_manager.store_mnemonic(mnemonic).await?;
 
-    // Create the account manager with the secret_manager and client options
+    // Create the wallet with the secret_manager and client options
     let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
 
-    let manager = AccountManager::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -43,11 +43,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Create a new account
-    let _account = manager
-        .create_account()
-        .with_alias("Alice".to_string())
-        .finish()
-        .await?;
+    let _account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
 
     println!("Generated a new account");
 
