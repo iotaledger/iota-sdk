@@ -7,8 +7,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import org.apache.commons.lang3.SystemUtils;
 import org.iota.types.ClientConfig;
-import org.iota.types.expections.ClientException;
-import org.iota.types.expections.InitializeClientException;
+import org.iota.types.exceptions.ClientException;
+import org.iota.types.exceptions.InitializeClientException;
 
 public abstract class NativeApi {
 

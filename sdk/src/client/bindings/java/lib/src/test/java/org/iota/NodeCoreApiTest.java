@@ -4,9 +4,9 @@
 package org.iota;
 
 import org.iota.types.*;
-import org.iota.types.expections.ClientException;
-import org.iota.types.expections.NoFundsReceivedFromFaucetException;
-import org.iota.types.expections.InitializeClientException;
+import org.iota.types.exceptions.ClientException;
+import org.iota.types.exceptions.NoFundsReceivedFromFaucetException;
+import org.iota.types.exceptions.InitializeClientException;
 import org.iota.types.ids.BlockId;
 import org.iota.types.ids.MilestoneId;
 import org.iota.types.ids.OutputId;
