@@ -37,7 +37,6 @@ import type {
     __RequestFundsFromFaucetMethod__,
     __RetryTransactionUntilIncludedMethod__,
     __SendAmountMethod__,
-    __SendMicroTransactionMethod__,
     __SendNativeTokensMethod__,
     __SendNftMethod__,
     __SendOutputsMethod__,
@@ -130,7 +129,6 @@ export type __AccountMethod__ =
     | __RequestFundsFromFaucetMethod__
     | __RetryTransactionUntilIncludedMethod__
     | __SendAmountMethod__
-    | __SendMicroTransactionMethod__
     | __SendNativeTokensMethod__
     | __SendNftMethod__
     | __SendOutputsMethod__

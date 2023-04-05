@@ -23,7 +23,7 @@ async function run() {
         await manager.listen(['TransactionProgress'], callback);
 
         // send transaction
-        await account.sendMicroTransaction([
+        await account.sendAmount([
             {
                 address:
                     'rms1qph3f6y3ps7zccucatf70y37kz7udzp94aefg6mzxdgpa5xxerg9u4s0xyz',
