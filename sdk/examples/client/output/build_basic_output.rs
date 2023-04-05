@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will send basic outputs with different feature blocks.
+//! In this example we will build basic outputs with different feature blocks.
 //!
 //! `cargo run --example build_basic_output --release`
 

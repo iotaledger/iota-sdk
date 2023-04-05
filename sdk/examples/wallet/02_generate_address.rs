@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will generate an address.
-//! Rename `.env.example` to `.env` first
+//! Rename `.env.example` to `.env` first.
 //!
 //! `cargo run --example generate_address --release`
 
