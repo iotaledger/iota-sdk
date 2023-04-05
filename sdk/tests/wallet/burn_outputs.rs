@@ -9,7 +9,7 @@ use iota_sdk::{
     wallet::{account::AccountHandle, NativeTokenOptions, NftOptions, Result, U256},
 };
 
-use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
+use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
@@ -17,8 +17,8 @@ async fn mint_and_burn_nft() -> Result<()> {
     let storage_path = "test-storage/mint_and_burn_outputs";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
-    let account = &create_accounts_with_funds(&manager, 1).await?[0];
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
     let nft_options = vec![NftOptions {
         address: Some(account.addresses().await?[0].address().to_bech32()),
@@ -60,9 +60,9 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
     let storage_path = "test-storage/mint_and_burn_expired_nft";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
-    let account_0 = &create_accounts_with_funds(&manager, 1).await?[0];
-    let account_1 = manager.create_account().finish().await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_1 = wallet.create_account().finish().await?;
 
     let token_supply = account_0.client().get_token_supply().await?;
 
@@ -108,8 +108,8 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     let storage_path = "test-storage/mint_and_decrease_native_token_supply";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
-    let account = &create_accounts_with_funds(&manager, 1).await?[0];
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
     // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs
     let transaction = account.create_alias_output(None, None).await?;
@@ -239,9 +239,9 @@ async fn mint_and_burn_native_tokens() -> Result<()> {
 
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
-    let account = &create_accounts_with_funds(&manager, 1).await?[0];
+    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
     let native_token_amount = U256::from(100);
 

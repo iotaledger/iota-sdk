@@ -15,10 +15,7 @@ use iota_sdk::{
         Url,
     },
     types::api::plugins::participation::types::ParticipationEventId,
-    wallet::{
-        account::types::participation::ParticipationEventRegistrationOptions, account_manager::AccountManager,
-        ClientOptions, Result,
-    },
+    wallet::{account::types::participation::ParticipationEventRegistrationOptions, ClientOptions, Result, Wallet},
 };
 
 #[tokio::main]
@@ -43,7 +40,7 @@ async fn main() -> Result<()> {
     let secret_manager =
         MnemonicSecretManager::try_from_mnemonic(&env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let manager = AccountManager::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -52,11 +49,11 @@ async fn main() -> Result<()> {
 
     // Get account or create a new one.
     let account_alias = "participation";
-    let account = match manager.get_account(account_alias).await {
+    let account = match wallet.get_account(account_alias).await {
         Ok(account) => account,
         _ => {
             // First we'll create an example account and store it.
-            manager
+            wallet
                 .create_account()
                 .with_alias(account_alias.to_string())
                 .finish()

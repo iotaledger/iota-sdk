@@ -1,6 +1,6 @@
 # Account Interface
 
-The Account Interface is evaluated, after the Account Manager Interface, repeatedly through a prompt within the `wallet`
+The Account Interface is evaluated, after the Wallet Interface, repeatedly through a prompt within the `wallet`
 binary.
 
 It is responsible for the creation and management of account addresses and their outputs, tokens, native tokens, NFTs...

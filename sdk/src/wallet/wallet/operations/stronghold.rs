@@ -3,9 +3,9 @@
 
 use std::time::Duration;
 
-use crate::{client::secret::SecretManager, wallet::account_manager::AccountManager};
+use crate::{client::secret::SecretManager, wallet::Wallet};
 
-impl AccountManager {
+impl Wallet {
     /// Sets the Stronghold password
     pub async fn set_stronghold_password(&self, password: &str) -> crate::wallet::Result<()> {
         if let SecretManager::Stronghold(stronghold) = &mut *self.secret_manager.write().await {

@@ -10,7 +10,7 @@ use std::env;
 use dotenv::dotenv;
 use iota_sdk::{
     client::request_funds_from_faucet,
-    wallet::{account_manager::AccountManager, Result},
+    wallet::{Result, Wallet},
 };
 
 #[tokio::main]
@@ -18,11 +18,11 @@ async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
     dotenv().ok();
 
-    // Create the account manager
-    let manager = AccountManager::builder().finish().await?;
+    // Create the wallet
+    let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = manager.get_account("Alice").await?;
+    let account = wallet.get_account("Alice").await?;
     let balance = account.sync(None).await?;
 
     let address = account.addresses().await?;
