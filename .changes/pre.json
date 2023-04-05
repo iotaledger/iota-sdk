@@ -28,6 +28,7 @@
     ".changes/enum-serialization-attributes.md",
     ".changes/expiredNftBurn.md",
     ".changes/expose-participation-type.md",
+    ".changes/fallbackToLocalPow.md",
     ".changes/faucet.md",
     ".changes/fix-build-script.md",
     ".changes/fix-burn-mismatch.md",

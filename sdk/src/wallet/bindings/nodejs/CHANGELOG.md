@@ -1,5 +1,10 @@
 # Changelog
 
+## \[2.0.3-rc.31]
+
+- Fix fallback to local PoW.
+  - [1d4c88e](https://github.com/iotaledger/iota-sdk/commit/1d4c88ead460e3c38e7107ca8ceb645f6296abf4) Rename AccountManager to Wallet ([#197](https://github.com/iotaledger/iota-sdk/pull/197)) on 2023-04-05
+
 ## \[2.0.3-rc.30]
 
 - Add signEd25519() and verifyEd25519Signature() methods.
