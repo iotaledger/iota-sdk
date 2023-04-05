@@ -10,7 +10,7 @@ use iota_sdk::{
     },
     types::{
         api::plugins::participation::types::{Participation, ParticipationEventId, Participations, PARTICIPATION_TAG},
-        block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
+        block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
     },
 };
 
@@ -100,7 +100,7 @@ async fn participate(client: &Client, event_id: ParticipationEventId, node_url: 
 
     let outputs = vec![
         BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
+            .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish_output(token_supply)?,
     ];
 

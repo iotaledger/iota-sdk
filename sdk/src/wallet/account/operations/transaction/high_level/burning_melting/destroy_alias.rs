@@ -5,9 +5,7 @@ use crate::{
     client::api::input_selection::Burn,
     types::block::{
         address::{Address, AliasAddress},
-        output::{
-            unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, Output, OutputId, UnlockCondition,
-        },
+        output::{unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, Output, OutputId},
     },
     wallet::{
         account::{
@@ -102,9 +100,7 @@ impl AccountHandle {
 
         let basic_output = Output::Basic(
             BasicOutputBuilder::new_with_amount(alias_output.amount())?
-                .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                    *alias_output.governor_address(),
-                )))
+                .add_unlock_condition(AddressUnlockCondition::new(*alias_output.governor_address()))
                 .with_native_tokens(alias_output.native_tokens().clone())
                 .finish(token_supply)?,
         );

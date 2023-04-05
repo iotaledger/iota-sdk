@@ -5,11 +5,11 @@ use instant::Instant;
 
 use crate::wallet::{
     account::handle::AccountHandle,
-    account_manager::{AccountManager, SyncOptions},
     task,
+    wallet::{SyncOptions, Wallet},
 };
 
-impl AccountManager {
+impl Wallet {
     /// Find accounts with unspent outputs.
     ///
     /// Arguments:

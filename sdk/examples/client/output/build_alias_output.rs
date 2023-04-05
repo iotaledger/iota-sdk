@@ -9,10 +9,8 @@ use iota_sdk::{
         address::Address,
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
-            unlock_condition::{
-                GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition, UnlockCondition,
-            },
-            AliasId, AliasOutputBuilder, Feature,
+            unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
+            AliasId, AliasOutputBuilder,
         },
     },
 };
@@ -37,16 +35,12 @@ async fn main() -> Result<()> {
     let alias_output = AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())?
         // `hello` in bytes
         .with_state_metadata(vec![104, 101, 108, 108, 111])
-        .add_feature(Feature::Sender(SenderFeature::new(address)))
-        .add_feature(Feature::Metadata(MetadataFeature::new(vec![104, 101, 108, 108, 111])?))
-        .add_immutable_feature(Feature::Issuer(IssuerFeature::new(address)))
-        .add_immutable_feature(Feature::Metadata(MetadataFeature::new(vec![104, 101, 108, 108, 111])?))
-        .add_unlock_condition(UnlockCondition::StateControllerAddress(
-            StateControllerAddressUnlockCondition::new(address),
-        ))
-        .add_unlock_condition(UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(
-            address,
-        )))
+        .add_feature(SenderFeature::new(address))
+        .add_feature(MetadataFeature::new(vec![104, 101, 108, 108, 111])?)
+        .add_immutable_feature(IssuerFeature::new(address))
+        .add_immutable_feature(MetadataFeature::new(vec![104, 101, 108, 108, 111])?)
+        .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
+        .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
         .finish_output(token_supply)?;
 
     println!("{alias_output:#?}");

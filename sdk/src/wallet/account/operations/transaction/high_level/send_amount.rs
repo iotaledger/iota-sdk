@@ -7,10 +7,7 @@ use crate::{
     client::api::PreparedTransactionData,
     types::block::{
         address::Address,
-        output::{
-            unlock_condition::{AddressUnlockCondition, UnlockCondition},
-            BasicOutputBuilder,
-        },
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
     },
     wallet::account::{handle::AccountHandle, operations::transaction::Transaction, TransactionOptions},
 };
@@ -66,7 +63,7 @@ impl AccountHandle {
             self.client.bech32_hrp_matches(&bech32_hrp).await?;
             outputs.push(
                 BasicOutputBuilder::new_with_amount(address_with_amount.amount)?
-                    .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
+                    .add_unlock_condition(AddressUnlockCondition::new(address))
                     .finish_output(token_supply)?,
             )
         }

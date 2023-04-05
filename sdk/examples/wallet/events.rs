@@ -10,12 +10,9 @@ use iota_sdk::{
     },
     types::block::{
         address::Address,
-        output::{
-            unlock_condition::{AddressUnlockCondition, UnlockCondition},
-            BasicOutputBuilder,
-        },
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
     },
-    wallet::{account_manager::AccountManager, ClientOptions, Result},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
 #[tokio::main]
@@ -28,14 +25,14 @@ async fn main() -> Result<()> {
     let secret_manager =
         MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let manager = AccountManager::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
         .await?;
 
-    manager
+    wallet
         .listen(vec![], move |event| {
             println!("Received an event {event:?}");
         })
@@ -43,11 +40,11 @@ async fn main() -> Result<()> {
 
     // Get account or create a new one
     let account_alias = "event_account";
-    let account = match manager.get_account(account_alias.to_string()).await {
+    let account = match wallet.get_account(account_alias.to_string()).await {
         Ok(account) => account,
         _ => {
             // first we'll create an example account and store it
-            manager
+            wallet
                 .create_account()
                 .with_alias(account_alias.to_string())
                 .finish()
@@ -63,9 +60,9 @@ async fn main() -> Result<()> {
     // send transaction
     let outputs = vec![
         BasicOutputBuilder::new_with_amount(1_000_000)?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                Address::try_from_bech32("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
-            )))
+            .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(
+                "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
+            )?))
             .finish_output(account.client().get_token_supply().await?)?,
     ];
 

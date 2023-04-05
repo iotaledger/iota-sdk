@@ -112,22 +112,27 @@ impl FoundryOutputBuilder {
         self
     }
 
-    ///
+    /// Adds an [`UnlockCondition`] to the builder.
     #[inline(always)]
-    pub fn add_unlock_condition(mut self, unlock_condition: UnlockCondition) -> Self {
-        self.unlock_conditions.push(unlock_condition);
+    pub fn add_unlock_condition(mut self, unlock_condition: impl Into<UnlockCondition>) -> Self {
+        self.unlock_conditions.push(unlock_condition.into());
         self
     }
 
-    ///
+    /// Sets the [`UnlockConditions`]s in the builder, overwriting any existing values.
     #[inline(always)]
-    pub fn with_unlock_conditions(mut self, unlock_conditions: impl IntoIterator<Item = UnlockCondition>) -> Self {
-        self.unlock_conditions = unlock_conditions.into_iter().collect();
+    pub fn with_unlock_conditions(
+        mut self,
+        unlock_conditions: impl IntoIterator<Item = impl Into<UnlockCondition>>,
+    ) -> Self {
+        self.unlock_conditions = unlock_conditions.into_iter().map(Into::into).collect();
         self
     }
 
-    ///
-    pub fn replace_unlock_condition(mut self, unlock_condition: UnlockCondition) -> Self {
+    /// Replaces an [`UnlockCondition`] of the builder with a new one, or adds it.
+    pub fn replace_unlock_condition(mut self, unlock_condition: impl Into<UnlockCondition>) -> Self {
+        let unlock_condition = unlock_condition.into();
+
         match self
             .unlock_conditions
             .iter_mut()
@@ -139,22 +144,31 @@ impl FoundryOutputBuilder {
         self
     }
 
-    ///
+    /// Clears all [`UnlockConditions`]s from the builder.
     #[inline(always)]
-    pub fn add_feature(mut self, feature: Feature) -> Self {
-        self.features.push(feature);
+    pub fn clear_unlock_conditions(mut self) -> Self {
+        self.unlock_conditions.clear();
         self
     }
 
-    ///
+    /// Adds a [`Feature`] to the builder.
     #[inline(always)]
-    pub fn with_features(mut self, features: impl IntoIterator<Item = Feature>) -> Self {
-        self.features = features.into_iter().collect();
+    pub fn add_feature(mut self, feature: impl Into<Feature>) -> Self {
+        self.features.push(feature.into());
         self
     }
 
-    ///
-    pub fn replace_feature(mut self, feature: Feature) -> Self {
+    /// Sets the [`Feature`]s in the builder, overwriting any existing values.
+    #[inline(always)]
+    pub fn with_features(mut self, features: impl IntoIterator<Item = impl Into<Feature>>) -> Self {
+        self.features = features.into_iter().map(Into::into).collect();
+        self
+    }
+
+    /// Replaces a [`Feature`] of the builder with a new one, or adds it.
+    pub fn replace_feature(mut self, feature: impl Into<Feature>) -> Self {
+        let feature = feature.into();
+
         match self.features.iter_mut().find(|f| f.kind() == feature.kind()) {
             Some(f) => *f = feature,
             None => self.features.push(feature),
@@ -162,22 +176,31 @@ impl FoundryOutputBuilder {
         self
     }
 
-    ///
+    /// Clears all [`Feature`]s from the builder.
     #[inline(always)]
-    pub fn add_immutable_feature(mut self, immutable_feature: Feature) -> Self {
-        self.immutable_features.push(immutable_feature);
+    pub fn clear_features(mut self) -> Self {
+        self.features.clear();
         self
     }
 
-    ///
+    /// Adds an immutable [`Feature`] to the builder.
     #[inline(always)]
-    pub fn with_immutable_features(mut self, immutable_features: impl IntoIterator<Item = Feature>) -> Self {
-        self.immutable_features = immutable_features.into_iter().collect();
+    pub fn add_immutable_feature(mut self, immutable_feature: impl Into<Feature>) -> Self {
+        self.immutable_features.push(immutable_feature.into());
         self
     }
 
-    ///
-    pub fn replace_immutable_feature(mut self, immutable_feature: Feature) -> Self {
+    /// Sets the immutable [`Feature`]s in the builder, overwriting any existing values.
+    #[inline(always)]
+    pub fn with_immutable_features(mut self, immutable_features: impl IntoIterator<Item = impl Into<Feature>>) -> Self {
+        self.immutable_features = immutable_features.into_iter().map(Into::into).collect();
+        self
+    }
+
+    /// Replaces an immutable [`Feature`] of the builder with a new one, or adds it.
+    pub fn replace_immutable_feature(mut self, immutable_feature: impl Into<Feature>) -> Self {
+        let immutable_feature = immutable_feature.into();
+
         match self
             .immutable_features
             .iter_mut()
@@ -186,6 +209,13 @@ impl FoundryOutputBuilder {
             Some(f) => *f = immutable_feature,
             None => self.immutable_features.push(immutable_feature),
         }
+        self
+    }
+
+    /// Clears all immutable [`Feature`]s from the builder.
+    #[inline(always)]
+    pub fn clear_immutable_features(mut self) -> Self {
+        self.immutable_features.clear();
         self
     }
 
@@ -669,11 +699,11 @@ pub mod dto {
             }
 
             for b in &value.features {
-                builder = builder.add_feature(b.try_into()?);
+                builder = builder.add_feature(Feature::try_from(b)?);
             }
 
             for b in &value.immutable_features {
-                builder = builder.add_immutable_feature(b.try_into()?);
+                builder = builder.add_immutable_feature(Feature::try_from(b)?);
             }
 
             Ok(builder)

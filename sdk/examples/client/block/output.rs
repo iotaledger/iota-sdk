@@ -6,10 +6,7 @@
 
 use iota_sdk::{
     client::{secret::SecretManager, utils::request_funds_from_faucet, Client, Result},
-    types::block::output::{
-        unlock_condition::{AddressUnlockCondition, UnlockCondition},
-        BasicOutputBuilder,
-    },
+    types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
 };
 
 #[tokio::main]
@@ -34,7 +31,7 @@ async fn main() -> Result<()> {
 
     let outputs = vec![
         BasicOutputBuilder::new_with_amount(1_000_000)?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
+            .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish_output(token_supply)?,
     ];
 

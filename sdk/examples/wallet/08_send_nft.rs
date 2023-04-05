@@ -9,7 +9,7 @@ use std::str::FromStr;
 
 use iota_sdk::{
     types::block::output::NftId,
-    wallet::{account_manager::AccountManager, AddressAndNftId, Result},
+    wallet::{AddressAndNftId, Result, Wallet},
 };
 
 #[tokio::main]
@@ -17,14 +17,14 @@ async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
     dotenvy::dotenv().ok();
 
-    // Create the account manager
-    let manager = AccountManager::builder().finish().await?;
+    // Create the wallet
+    let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = manager.get_account("Alice").await?;
+    let account = wallet.get_account("Alice").await?;
 
     // Set the stronghold password
-    manager
+    wallet
         .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 

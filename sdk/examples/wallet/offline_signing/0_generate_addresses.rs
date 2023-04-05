@@ -16,7 +16,7 @@ use iota_sdk::{
         constants::{SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
         secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
-    wallet::{account::types::AccountAddress, account_manager::AccountManager, ClientOptions, Result},
+    wallet::{account::types::AccountAddress, ClientOptions, Result, Wallet},
 };
 
 const ADDRESS_FILE_NAME: &str = "examples/offline_signing/addresses.json";
@@ -38,8 +38,8 @@ async fn main() -> Result<()> {
     // The mnemonic only needs to be stored the first time
     secret_manager.store_mnemonic(mnemonic).await?;
 
-    // Create the account manager with the secret_manager and client options
-    let manager = AccountManager::builder()
+    // Create the wallet with the secret_manager and client options
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .with_client_options(offline_client)
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Create a new account
-    let account = manager
+    let account = wallet
         .create_account()
         .with_alias("Alice".to_string())
         .with_bech32_hrp(SHIMMER_BECH32_HRP.to_string())

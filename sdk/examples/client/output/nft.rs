@@ -11,8 +11,7 @@ use iota_sdk::{
     types::block::{
         address::{Address, NftAddress},
         output::{
-            unlock_condition::{AddressUnlockCondition, UnlockCondition},
-            BasicOutputBuilder, NftId, NftOutputBuilder, Output, OutputId,
+            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NftId, NftOutputBuilder, Output, OutputId,
         },
         payload::{transaction::TransactionEssence, Payload},
     },
@@ -49,9 +48,9 @@ async fn main() -> Result<()> {
     let outputs = vec![
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
+            .add_unlock_condition(AddressUnlockCondition::new(address))
             // address of the minter of the NFT
-            // .add_feature(Feature::Issuer(IssuerFeature::new(address)))
+            // .add_feature(IssuerFeature::new(address))
             .finish_output(token_supply)?,
     ];
 
@@ -97,7 +96,7 @@ async fn main() -> Result<()> {
         .with_input(output_ids_response.items[0].into())?
         .with_outputs(vec![
             NftOutputBuilder::new_with_amount(1_000_000 + output.amount(), nft_id)?
-                .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
+                .add_unlock_condition(AddressUnlockCondition::new(address))
                 .finish_output(token_supply)?,
         ])?
         .finish()
@@ -119,7 +118,7 @@ async fn main() -> Result<()> {
     let output = Output::try_from_dto(&output_response.output, token_supply)?;
     let outputs = vec![
         BasicOutputBuilder::new_with_amount(output.amount())?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
+            .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish_output(token_supply)?,
     ];
 

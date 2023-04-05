@@ -72,15 +72,14 @@ async fn main() -> Result<()> {
 
     println!("Total amount: {total_amount}");
 
-    let mut basic_output_builder = BasicOutputBuilder::new_with_amount(total_amount)?.add_unlock_condition(
-        UnlockCondition::Address(AddressUnlockCondition::new(
+    let mut basic_output_builder =
+        BasicOutputBuilder::new_with_amount(total_amount)?.add_unlock_condition(AddressUnlockCondition::new(
             client
                 .get_addresses(&secret_manager_2)
                 .with_range(0..1)
                 .get_raw()
                 .await?[0],
-        )),
-    );
+        ));
 
     for native_token in total_native_tokens {
         basic_output_builder = basic_output_builder.add_native_token(native_token);
