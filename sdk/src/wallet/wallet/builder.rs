@@ -274,7 +274,7 @@ fn unlock_unused_inputs(accounts: &mut [Account]) -> crate::wallet::Result<()> {
             }
         }
         account.locked_outputs.retain(|input| {
-            let used = used_inputs.contains(&input);
+            let used = used_inputs.contains(input);
             if !used {
                 log::debug!("unlocking unused input {input}");
             }
