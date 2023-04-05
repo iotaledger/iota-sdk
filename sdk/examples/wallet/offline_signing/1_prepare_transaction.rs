@@ -1,17 +1,16 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will get inputs and prepare a transaction
-//! `cargo run --example 1_prepare_transaction --release`.
+//! In this example we will get inputs and prepare a transaction.
+//!
+//! `cargo run --example 1_prepare_transaction --release`
 
 use std::{
-    env,
     fs::File,
     io::{BufWriter, Read, Write},
     path::Path,
 };
 
-use dotenv::dotenv;
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
@@ -26,8 +25,8 @@ const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/prepared_
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     let outputs = vec![AddressWithAmount {
         // Address to which we want to send the amount.
@@ -39,7 +38,7 @@ async fn main() -> Result<()> {
     // Recovers addresses from example `0_address_generation`.
     let addresses = read_addresses_from_file(ADDRESS_FILE_NAME)?;
 
-    let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     // Create the wallet with the secret_manager and client options
     let wallet = Wallet::builder()

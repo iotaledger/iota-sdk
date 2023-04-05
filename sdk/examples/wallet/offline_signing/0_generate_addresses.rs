@@ -2,17 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we generate addresses which will be used later to find inputs.
-//! This example uses dotenv, which is not safe for use in production.
-//! `cargo run --example 0_generate_addresses --release`.
+//!
+//! `cargo run --example 0_generate_addresses --release`
 
 use std::{
-    env,
     fs::File,
     io::{BufWriter, Write},
     path::{Path, PathBuf},
 };
 
-use dotenv::dotenv;
 use iota_sdk::{
     client::{
         constants::{SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
@@ -25,17 +23,17 @@ const ADDRESS_FILE_NAME: &str = "examples/offline_signing/addresses.json";
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     let offline_client = ClientOptions::new();
 
     // Setup Stronghold secret_manager
     let mut secret_manager = StrongholdSecretManager::builder()
-        .password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .build(PathBuf::from("examples/offline_signing/offline_signing.stronghold"))?;
     // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
-    let mnemonic = env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
+    let mnemonic = std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
 
     // The mnemonic only needs to be stored the first time
     secret_manager.store_mnemonic(mnemonic).await?;

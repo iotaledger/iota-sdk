@@ -66,7 +66,7 @@ wasm-bindgen-futures = { version = "0.4.34", default-features = false }
 
 [dev-dependencies]
 iota-sdk = { version = "0.1.0", path = ".", default-features = false, features = [ "rand" ] }
-dotenv = { version = "0.15.0", default-features = false }
+dotenvy = { version = "0.15.0", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 
 [features]

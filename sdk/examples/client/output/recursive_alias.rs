@@ -1,11 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example recursive_alias --release
+//! In this example we will create three alias outputs, where the first one can control the other two (recursively).
+//!
+//! `cargo run --example recursive_alias --release`
 
-use std::env;
-
-use dotenv::dotenv;
 use iota_sdk::{
     client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::{
@@ -19,17 +18,15 @@ use iota_sdk::{
     },
 };
 
-/// In this example we will create three alias outputs, where the first one can control the other two (recursively)
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production!
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     // Configure your own mnemonic in the ".env" file. Since the output amount cannot be zero, the seed must contain
     // non-zero balance.
-    dotenv().ok();
+    dotenvy::dotenv().ok();
 
-    let node_url = env::var("NODE_URL").unwrap();
-    let faucet_url = env::var("FAUCET_URL").unwrap();
+    let node_url = std::env::var("NODE_URL").unwrap();
+    let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance.
     let client = Client::builder().with_node(&node_url)?.finish()?;

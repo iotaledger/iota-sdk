@@ -1,15 +1,15 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example burn_native_token --release
-// In this example we will burn an existing native token, this will not increase the melted supply in the foundry,
-// therefore the foundry output is also not required. But this will also make it impossible to destroy the foundry
-// output that minted it.
-// Rename `.env.example` to `.env` first
+//! In this example we will burn an existing native token, this will not increase the melted supply in the foundry,
+//! therefore the foundry output is also not required. But this will also make it impossible to destroy the foundry
+//! output that minted it.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example burn_native_token --release`
 
-use std::{env, str::FromStr};
+use std::str::FromStr;
 
-use dotenv::dotenv;
 use iota_sdk::{
     types::block::output::TokenId,
     wallet::{Result, Wallet, U256},
@@ -17,8 +17,8 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     // Create the wallet
     let wallet = Wallet::builder().finish().await?;
@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Replace with a TokenId that is available in the account

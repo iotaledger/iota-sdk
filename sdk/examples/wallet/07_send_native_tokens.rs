@@ -1,13 +1,13 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example send_native_tokens --release
-// In this example we will send native tokens
-// Rename `.env.example` to `.env` first
+//! In this example we will send native tokens.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example send_native_tokens --release`
 
-use std::{env, str::FromStr};
+use std::str::FromStr;
 
-use dotenv::dotenv;
 use iota_sdk::{
     types::block::{
         address::Address,
@@ -19,8 +19,8 @@ use primitive_types::U256;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     // Create the wallet
     let wallet = Wallet::builder().finish().await?;
@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     let bech32_address = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string();
@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
     println!(
         "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
         transaction.transaction_id,
-        &env::var("NODE_URL").unwrap(),
+        &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
 
@@ -67,7 +67,7 @@ async fn main() -> Result<()> {
     println!(
         "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
         transaction.transaction_id,
-        &env::var("NODE_URL").unwrap(),
+        &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
 

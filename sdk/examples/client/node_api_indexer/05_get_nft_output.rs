@@ -1,8 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET api/indexer/v1/outputs/nft/{nftId}`.
-//! Run: `cargo run --example node_api_indexer_get_nft_output --release -- [NODE URL] [NFT ID]`.
+//! TODO: <insert example description> by calling
+//! `GET api/indexer/v1/outputs/nft/{nftId}`.
+//!
+//! `cargo run --example node_api_indexer_get_nft_output --release -- [NODE URL] [NFT ID]`
 
 use std::str::FromStr;
 
@@ -15,8 +17,8 @@ use iota_sdk::{
 async fn main() -> Result<()> {
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses dotenv, which is not safe for use in production.
-        dotenv::dotenv().ok();
+        // This example uses secrets in environment variables for simplicity which should not be done in production.
+        dotenvy::dotenv().ok();
         std::env::var("NODE_URL").unwrap()
     });
 
