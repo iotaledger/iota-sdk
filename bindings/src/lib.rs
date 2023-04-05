@@ -12,7 +12,7 @@ mod response;
 use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
 use iota_sdk::{
     client::secret::{SecretManager, SecretManagerDto},
-    wallet::{account_manager::AccountManager, ClientOptions},
+    wallet::{wallet::Wallet, ClientOptions},
 };
 use serde::{Deserialize, Serialize, Serializer};
 
@@ -35,9 +35,9 @@ pub struct ManagerOptions {
 }
 
 impl ManagerOptions {
-    pub async fn build_manager(&self) -> iota_sdk::wallet::Result<AccountManager> {
+    pub async fn build_manager(&self) -> iota_sdk::wallet::Result<Wallet> {
         log::debug!("build_manager");
-        let mut builder = AccountManager::builder();
+        let mut builder = Wallet::builder();
 
         #[cfg(feature = "storage")]
         if let Some(storage_path) = &self.storage_path {

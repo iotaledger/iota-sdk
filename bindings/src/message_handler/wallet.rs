@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use iota_sdk::{
     client::{constants::SHIMMER_TESTNET_BECH32_HRP, utils, Client, NodeInfoWrapper},
-    wallet::{account_manager::AccountManager, message_interface::dtos::AccountDto},
+    wallet::{message_interface::dtos::AccountDto, wallet::Wallet},
 };
 use zeroize::Zeroize;
 
@@ -17,7 +17,7 @@ use crate::{
 };
 
 /// Call a wallet method.
-pub(crate) async fn call_wallet_method_internal(wallet: &AccountManager, message: WalletMethod) -> Result<Response> {
+pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, message: WalletMethod) -> Result<Response> {
     match message {
         WalletMethod::CreateAccount { alias, bech32_hrp } => {
             let mut builder = wallet.create_account();
