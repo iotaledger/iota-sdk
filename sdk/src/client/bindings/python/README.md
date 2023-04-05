@@ -1,6 +1,6 @@
 # IOTA Client Library - Python binding
 
-Python binding to the iota.rs client library.
+Python binding to the iota-sdk client library.
 
 ## Requirements
 
@@ -10,7 +10,7 @@ Python binding to the iota.rs client library.
 
 ## Installation
 
-- Go to `iota.rs/bindings/python`
+- Go to `iota-sdk/sdk/src/client/bindings/python`
 
 ### Create a virtual environment and use it (optional)
 - `python3 -m venv iota_client_venv`
