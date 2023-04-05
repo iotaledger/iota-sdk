@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! This example sends a block and returns the time at which it got confirmed.
-//! Run: `cargo run --example block_confirmation_time --release -- [NODE URL]`.
+//!
+//! `cargo run --example block_confirmation_time --release -- [NODE URL]`
 
 use iota_sdk::client::{Client, Result};
 

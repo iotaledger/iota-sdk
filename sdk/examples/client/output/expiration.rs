@@ -1,7 +1,12 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example expiration --release
+//! In this example we will create a basic output with an expiration unlock condition.
+//!
+//! When the receiver (address in AddressUnlockCondition) doesn't consume the output before it gets expired, the sender
+//! (address in ExpirationUnlockCondition) will get the full control back.
+//!
+//! `cargo run --example expiration --release`
 
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -12,11 +17,6 @@ use iota_sdk::{
         BasicOutputBuilder,
     },
 };
-
-/// In this example we will create a basic output with an expiration unlock condition.
-///
-/// When the receiver (address in AddressUnlockCondition) doesn't consume the output before it gets expired, the sender
-/// (address in ExpirationUnlockCondition) will get the full control back.
 
 #[tokio::main]
 async fn main() -> Result<()> {

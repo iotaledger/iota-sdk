@@ -1,9 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET /api/core/v2/blocks/{blockId}`.
-//! Returns block data as JSON by its identifier.
-//! Run: `cargo run --example node_api_core_get_block --release -- [NODE URL] [BLOCK ID]`.
+//! Returns block data as JSON by its identifier by calling `GET /api/core/v2/blocks/{blockId}`.
+//!
+//! `cargo run --example node_api_core_get_block --release -- [NODE URL] [BLOCK ID]`
 
 use std::str::FromStr;
 

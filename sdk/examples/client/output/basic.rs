@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example basic --release
+//! In this example we will send basic outputs with different feature blocks.
+//!
+//! `cargo run --example basic --release`
 
 use iota_sdk::{
     client::{secret::SecretManager, utils::request_funds_from_faucet, Client, Result},
@@ -14,8 +16,6 @@ use iota_sdk::{
         BasicOutputBuilder,
     },
 };
-
-/// In this example we will send basic outputs with different feature blocks
 
 #[tokio::main]
 async fn main() -> Result<()> {

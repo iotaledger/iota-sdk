@@ -1,8 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will get inputs and prepare a transaction
-//! `cargo run --example 1_prepare_transaction --release`.
+//! In this example we will get inputs and prepare a transaction.
+//!
+//! `cargo run --example 1_prepare_transaction --release`
 
 use std::{
     fs::File,

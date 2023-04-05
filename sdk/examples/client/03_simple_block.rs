@@ -1,8 +1,9 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example 03_simple_block --release
 //! In this example we will send a block without a payload.
+//! 
+//! `cargo run --example 03_simple_block --release`
 
 use iota_sdk::client::{Client, Result};
 

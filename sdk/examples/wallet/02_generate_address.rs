@@ -1,9 +1,10 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example generate_address --release
-// In this example we will generate an address
-// Rename `.env.example` to `.env` first
+//! In this example we will generate an address.
+//! Rename `.env.example` to `.env` first
+//!
+//! `cargo run --example generate_address --release`
 
 use iota_sdk::wallet::{Result, Wallet};
 

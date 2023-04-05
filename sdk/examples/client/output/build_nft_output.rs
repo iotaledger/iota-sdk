@@ -1,7 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example build_nft_output --release --features="client"
+//! In this example we will build an NFT output.
+//!
+//! `cargo run --example build_nft_output --release --features="client"`
 
 use iota_sdk::{
     client::{Client, Result},
@@ -15,7 +17,6 @@ use iota_sdk::{
     },
 };
 
-/// In this example we will build an NFT output
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.

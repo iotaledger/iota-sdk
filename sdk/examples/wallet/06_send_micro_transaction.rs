@@ -1,9 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example send_micro_transaction --release
-// In this example we will send an amount below the minimum storage deposit
-// Rename `.env.example` to `.env` first
+//! In this example we will send an amount below the minimum storage deposit.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example send_micro_transaction --release`
 
 use iota_sdk::wallet::{AddressWithMicroAmount, Result, Wallet};
 

@@ -1,9 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example mint_issuer_nft --release
-// In this example we will mint the issuer nft.
-// Rename `.env.example` to `.env` and run 01_create_wallet.rs before
+//! In this example we will mint the issuer nft.
+//! Rename `.env.example` to `.env` and run 01_create_wallet.rs before.
+//!
+//! `cargo run --example mint_issuer_nft --release`
 
 use iota_sdk::{
     types::block::{

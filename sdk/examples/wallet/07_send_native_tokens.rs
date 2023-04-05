@@ -1,9 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example send_native_tokens --release
-// In this example we will send native tokens
-// Rename `.env.example` to `.env` first
+//! In this example we will send native tokens.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example send_native_tokens --release`
 
 use std::str::FromStr;
 

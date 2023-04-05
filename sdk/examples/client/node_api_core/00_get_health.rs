@@ -1,9 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET /health`.
-//! Returns the health of the node.
-//! Run: `cargo run --example node_api_core_get_health --release -- [NODE URL]`.
+//! This example returns the health of the node by calling `GET /health`.
+//!
+//! `cargo run --example node_api_core_get_health --release -- [NODE URL]`
 
 use iota_sdk::client::{Client, Result};
 

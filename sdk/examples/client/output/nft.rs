@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example nft --release
+//! In this example we will create an NFT output.
+//!
+//! `cargo run --example nft --release`
 
 use iota_sdk::{
     client::{
@@ -16,8 +18,6 @@ use iota_sdk::{
         payload::{transaction::TransactionEssence, Payload},
     },
 };
-
-/// In this example we will create an NFT output
 
 #[tokio::main]
 async fn main() -> Result<()> {

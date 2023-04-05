@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we generate an address which will be used later to find inputs.
-//! This example uses secrets in environment variables for simplicity which should not be done in production.
-//! `cargo run --example 0_address_generation --release`.
+//!
+//! `cargo run --example 0_address_generation --release`
 
 use std::{
     fs::File,
@@ -17,6 +17,7 @@ const ADDRESS_FILE_NAME: &str = "examples/offline_signing/address.json";
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
     // Creates a client instance.

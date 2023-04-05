@@ -1,8 +1,9 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example split_funds --release
-//! In this example we will send 100 basic outputs to our first address
+//! In this example we will send 100 basic outputs to our first address.
+//! 
+//! `cargo run --example split_funds --release`
 
 use iota_sdk::client::{request_funds_from_faucet, secret::SecretManager, Client, Result};
 

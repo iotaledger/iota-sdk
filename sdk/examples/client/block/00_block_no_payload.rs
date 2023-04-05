@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! This example sends a block with no payload.
-//! Run: `cargo run --example block_no_payload --release -- [NODE URL]`.
+//!
+//! `cargo run --example block_no_payload --release -- [NODE URL]`
 
 use iota_sdk::client::{Client, Result};
 

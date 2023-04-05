@@ -1,9 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET /api/core/v2/milestones/{milestoneId}/utxo-changes`.
-//! Gets all UTXO changes of a given milestone by milestone identifier.
-//! Run: `cargo run --example node_api_core_get_utxo_changes_by_id --release -- [NODE URL]`.
+//! Gets all UTXO changes of a given milestone by milestone identifier by calling
+//! `GET /api/core/v2/milestones/{milestoneId}/utxo-changes`.
+//!
+//! `cargo run --example node_api_core_get_utxo_changes_by_id --release -- [NODE URL]`
 
 use std::str::FromStr;
 

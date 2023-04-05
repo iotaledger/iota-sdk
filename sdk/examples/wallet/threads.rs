@@ -1,9 +1,9 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example threads --release
-
-// In this example we will spam transactions from multiple threads simultaneously to our own address
+//! In this example we will spam transactions from multiple threads simultaneously to our own address.
+//!
+//! `cargo run --example threads --release`
 
 use iota_sdk::{
     client::{

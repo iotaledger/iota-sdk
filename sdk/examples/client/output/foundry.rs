@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example foundry --release
+//! In this example we will create a foundry output.
+//!
+//! `cargo run --example foundry --release`
 
 use iota_sdk::{
     client::{
@@ -23,8 +25,6 @@ use iota_sdk::{
     },
 };
 use primitive_types::U256;
-
-/// In this example we will create a foundry output
 
 #[tokio::main]
 async fn main() -> Result<()> {

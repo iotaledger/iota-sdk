@@ -1,15 +1,15 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example consolidation --release
+//! In this example we will consolidate all funds in a range of addresses.
+//! 
+//! `cargo run --example consolidation --release`
 
 use iota_sdk::client::{
     api::GetAddressesBuilderOptions,
     secret::{mnemonic::MnemonicSecretManager, SecretManager},
     Client, Result,
 };
-
-/// In this example we will consolidate all funds in a range of addresses
 
 #[tokio::main]
 async fn main() -> Result<()> {

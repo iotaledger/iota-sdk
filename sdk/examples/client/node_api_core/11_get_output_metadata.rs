@@ -1,9 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET /api/core/v2/outputs/{outputId}`.
-//! Returns metadata about an output by its identifier.
-//! Run: `cargo run --example node_api_core_get_output_metadata --release -- [NODE URL] [OUTPUT ID]`.
+//! Returns metadata about an output by its identifier by calling `GET /api/core/v2/outputs/{outputId}`.
+//!
+//! `cargo run --example node_api_core_get_output_metadata --release -- [NODE URL] [OUTPUT ID]`
 
 use std::str::FromStr;
 

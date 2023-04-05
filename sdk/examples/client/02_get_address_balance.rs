@@ -1,9 +1,10 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example 02_get_address_balance --release
 //! In this example we will get the outputs of an address that have no additional unlock conditions and sum the amounts
 //! and native tokens.
+//! 
+//! `cargo run --example 02_get_address_balance --release`
 
 use iota_sdk::client::{
     block::output::{NativeTokensBuilder, Output},

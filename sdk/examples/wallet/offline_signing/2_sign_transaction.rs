@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we sign the prepared transaction.
-//! This example uses secrets in environment variables for simplicity which should not be done in production.
-//! `cargo run --example 2_sign_transaction --release`.
+//!
+//! `cargo run --example 2_sign_transaction --release`
 
 use std::{
     fs::File,
@@ -28,6 +28,7 @@ const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/signed_tran
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
     // Setup Stronghold secret_manager

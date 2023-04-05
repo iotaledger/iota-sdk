@@ -1,9 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET /api/core/v2/receipts`.
-//! Returns all stored receipts.
-//! Run: `cargo run --example node_api_core_get_receipts --release -- [NODE URL]`.
+//! Returns all stored receipts by calling `GET /api/core/v2/receipts`.
+//!
+//! `cargo run --example node_api_core_get_receipts --release -- [NODE URL]`
 
 use iota_sdk::client::{Client, Result};
 

@@ -1,9 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET /api/core/v2/transactions/{transactionId}/included-block`.
-//! Returns the included block, as raw bytes, of a transaction.
-//! Run: `cargo run --example node_api_core_get_included_block_raw --release -- [NODE URL]`.
+//! Returns the included block, as raw bytes, of a transaction by calling
+//! `GET /api/core/v2/transactions/{transactionId}/included-block`.
+//!
+//! `cargo run --example node_api_core_get_included_block_raw --release -- [NODE URL]`
 
 use std::str::FromStr;
 

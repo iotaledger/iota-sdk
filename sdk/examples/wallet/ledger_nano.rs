@@ -1,7 +1,11 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example ledger_nano --release --features=ledger_nano
+//! In this example we will create addresses with a ledger nano hardware wallet.
+//! To use the ledger nano simulator clone https://github.com/iotaledger/ledger-shimmer-app, run `git submodule init && git submodule update --recursive`,
+//! then `./build.sh -m nanos|nanox|nanosplus -s` and use `true` in `LedgerSecretManager::new(true)`.
+//!
+//! `cargo run --example ledger_nano --release --features=ledger_nano`
 
 use std::time::Instant;
 
@@ -12,10 +16,6 @@ use iota_sdk::{
     },
     wallet::{AddressWithAmount, ClientOptions, Result, Wallet},
 };
-
-// In this example we will create addresses with a ledger nano hardware wallet.
-// To use the ledger nano simulator clone https://github.com/iotaledger/ledger-shimmer-app, run `git submodule init && git submodule update --recursive`,
-// then `./build.sh -m nanos|nanox|nanosplus -s` and use `true` in `LedgerSecretManager::new(true)`.
 
 #[tokio::main]
 async fn main() -> Result<()> {

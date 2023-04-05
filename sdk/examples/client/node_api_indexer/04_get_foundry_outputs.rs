@@ -1,8 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET api/indexer/v1/outputs/foundry`.
-//! Run: `cargo run --example node_api_indexer_get_foundry_outputs --release -- [NODE URL] [ADDRESS]`.
+//! TODO: <insert example description> by calling
+//! `GET api/indexer/v1/outputs/foundry`.
+//!
+//! `cargo run --example node_api_indexer_get_foundry_outputs --release -- [NODE URL] [ADDRESS]`
 
 use iota_sdk::client::{node_api::indexer::query_parameters::QueryParameter, Client, Result};
 

@@ -1,8 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET api/indexer/v1/outputs/alias/{aliasId}`.
-//! RUn: `cargo run --example node_api_indexer_get_alias_output --release -- [NODE URL] [ALIAS ID]`.
+//! TODO: <insert example description> by calling
+//! `GET api/indexer/v1/outputs/alias/{aliasId}`.
+//!
+//! `cargo run --example node_api_indexer_get_alias_output --release -- [NODE URL] [ALIAS ID]`
 
 use std::str::FromStr;
 

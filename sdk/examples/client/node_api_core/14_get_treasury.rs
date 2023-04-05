@@ -1,9 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET /api/core/v2/treasury`.
-//! Returns information about the treasury.
-//! Run: `cargo run --example node_api_core_get_treasury --release -- [NODE URL]`.
+//! Returns information about the treasury by calling `GET /api/core/v2/treasury`.
+//!
+//! `cargo run --example node_api_core_get_treasury --release -- [NODE URL]`
 
 use iota_sdk::client::{Client, Result};
 

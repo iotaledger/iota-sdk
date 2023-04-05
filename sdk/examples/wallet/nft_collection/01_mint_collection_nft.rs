@@ -1,9 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example mint_collection_nft --release
-// In this example we will mint the 150 nfts with issuer feature.
-// Rename `.env.example` to `.env` and run 01_create_wallet.rs before
+//! In this example we will mint the 150 nfts with issuer feature.
+//! Rename `.env.example` to `.env` and run 01_create_wallet.rs before.
+//!
+//! `cargo run --example mint_collection_nft --release`
 
 use std::str::FromStr;
 

@@ -1,7 +1,13 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example microtransaction --release
+//! In this example we will do a micro transaction using unlock conditions to an output.
+//!
+//! Due to the required storage deposit, it is not possible to send a small amount of tokens.
+//! However, it is possible to send a large amount and ask a slightly smaller amount in return to
+//! effectively transfer a small amount.
+//!
+//! `cargo run --example microtransaction --release`
 
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -12,12 +18,6 @@ use iota_sdk::{
         BasicOutputBuilder,
     },
 };
-
-/// In this example we will do a micro transaction using unlock conditions to an output.
-///
-/// Due to the required storage deposit, it is not possible to send a small amount of tokens.
-/// However, it is possible to send a large amount and ask a slightly smaller amount in return to
-/// effectively transfer a small amount.
 
 #[tokio::main]
 async fn main() -> Result<()> {

@@ -1,9 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET /api/core/v2/milestones/by-index/{index}/utxo-changes`.
-//! Gets all UTXO changes of a given milestone by milestone index.
-//! Run: `cargo run --example node_api_core_get_utxo_changes_by_index --release -- [NODE URL]`.
+//! Gets all UTXO changes of a given milestone by milestone index by calling
+//! `GET /api/core/v2/milestones/by-index/{index}/utxo-changes`.
+//!
+//! `cargo run --example node_api_core_get_utxo_changes_by_index --release -- [NODE URL]`
 
 use iota_sdk::client::{Client, Result};
 

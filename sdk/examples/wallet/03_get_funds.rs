@@ -1,9 +1,10 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example get_funds --release
-// In this example we request funds from the faucet to our address
-// Rename `.env.example` to `.env` first
+//! In this example we request funds from the faucet to our address.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example get_funds --release`
 
 use iota_sdk::{
     client::request_funds_from_faucet,

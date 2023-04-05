@@ -1,8 +1,9 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example quorum --release
 //! In this example we will get outputs with quorum, which will compare the responses from the nodes.
+//! 
+//! `cargo run --example quorum --release`
 
 use iota_sdk::client::{node_api::indexer::query_parameters::QueryParameter, secret::SecretManager, Client, Result};
 

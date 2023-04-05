@@ -1,9 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET /api/core/v2/milestones/{milestoneId}`.
-//! Returns milestone data as JSON by its identifier.
-//! Run: `cargo run --example node_api_core_get_milestone_by_id --release -- [NODE URL]`.
+//! Returns milestone data as JSON by its identifier by calling
+//! `GET /api/core/v2/milestones/{milestoneId}`.
+//!
+//! `cargo run --example node_api_core_get_milestone_by_id --release -- [NODE URL]`
 
 use std::str::FromStr;
 

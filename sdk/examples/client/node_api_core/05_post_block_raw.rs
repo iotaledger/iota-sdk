@@ -1,9 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `POST /api/core/v2/blocks`.
-//! Submits a block as raw bytes.
-//! Run: `cargo run --example node_api_core_post_block_raw --release -- [NODE URL]`.
+//! Submits a block as raw bytes by calling `POST /api/core/v2/blocks`.
+//!
+//! `cargo run --example node_api_core_post_block_raw --release -- [NODE URL]`
 
 use iota_sdk::client::{Client, Result};
 

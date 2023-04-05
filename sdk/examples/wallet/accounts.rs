@@ -1,7 +1,9 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example accounts --release
+//! TODO: Example description
+//!
+//! `cargo run --example accounts --release`
 
 use std::time::Instant;
 

@@ -3,7 +3,8 @@
 
 //! In this example we will send 1_000_000 tokens to atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r.
 //! This address belongs to the first seed in .env.example.
-//! Run: `cargo run --example custom_inputs --release`.
+//!
+//! `cargo run --example custom_inputs --release`
 
 use iota_sdk::{
     client::{

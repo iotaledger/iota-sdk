@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example participation --features=participation --release
+//! TODO: Example description
+//!
+//! `cargo run --example participation --features=participation --release`
 
 use std::str::FromStr;
 

@@ -1,8 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example stronghold --features=stronghold --release
 //! In this example we will create an address with a stronghold secret manager.
+//!
+//! `cargo run --example stronghold --features=stronghold --release`
 
 use iota_sdk::client::{
     api::GetAddressesBuilder,

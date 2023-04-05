@@ -1,7 +1,9 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example search_address --release
+//! In this example we will try to find the index and address type of an address.
+//! 
+//! `cargo run --example search_address --release`
 
 use iota_sdk::client::{
     api::search_address,
@@ -9,8 +11,6 @@ use iota_sdk::client::{
     secret::{mnemonic::MnemonicSecretManager, SecretManager},
     Client, Result,
 };
-
-/// In this example we will try to find the index and address type of an address
 
 #[tokio::main]
 async fn main() -> Result<()> {

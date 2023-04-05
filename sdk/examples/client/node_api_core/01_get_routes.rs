@@ -1,9 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET /api/routes`.
-//! Returns the available API route groups of the node.
-//! Run: `cargo run --example node_api_core_get_routes --release -- [NODE URL]`.
+//! Returns the available API route groups of the node by calling `GET /api/routes`.
+//!
+//! `cargo run --example node_api_core_get_routes --release -- [NODE URL]`
 
 use iota_sdk::client::{Client, Result};
 

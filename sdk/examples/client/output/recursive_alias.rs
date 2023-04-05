@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example recursive_alias --release
+//! In this example we will create three alias outputs, where the first one can control the other two (recursively).
+//!
+//! `cargo run --example recursive_alias --release`
 
 use iota_sdk::{
     client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
@@ -15,8 +17,6 @@ use iota_sdk::{
         payload::{transaction::TransactionEssence, Payload},
     },
 };
-
-/// In this example we will create three alias outputs, where the first one can control the other two (recursively)
 
 #[tokio::main]
 async fn main() -> Result<()> {

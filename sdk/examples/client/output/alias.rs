@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example alias --release
+//! In this example we will create an alias output.
+//!
+//! `cargo run --example alias --release`
 
 use iota_sdk::{
     client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
@@ -14,8 +16,6 @@ use iota_sdk::{
         payload::{transaction::TransactionEssence, Payload},
     },
 };
-
-/// In this example we will create an alias output
 
 #[tokio::main]
 async fn main() -> Result<()> {

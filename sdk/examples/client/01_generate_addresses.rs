@@ -1,7 +1,9 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example generate_addresses --release -- [NODE URL]
+//! TODO: Example description
+//!
+//! `cargo run --example generate_addresses --release -- [NODE URL]`
 
 use iota_sdk::client::{api::GetAddressesBuilder, secret::SecretManager, Client, Result};
 

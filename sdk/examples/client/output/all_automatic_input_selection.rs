@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example all_automatic_input_selection --release
+//! In this example we will create all output types in a single transaction.
+//!
+//! `cargo run --example all_automatic_input_selection --release`
 
 use iota_sdk::{
     client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
@@ -21,8 +23,6 @@ use iota_sdk::{
     },
 };
 use primitive_types::U256;
-
-/// In this example we will create all output types in a single transaction
 
 #[tokio::main]
 async fn main() -> Result<()> {

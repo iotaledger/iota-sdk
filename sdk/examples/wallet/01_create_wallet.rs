@@ -1,9 +1,10 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example create_wallet --release
-// In this example we will create a new wallet
-// Rename `.env.example` to `.env` first
+//! In this example we will create a new wallet.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example create_wallet --release`
 
 use std::path::PathBuf;
 

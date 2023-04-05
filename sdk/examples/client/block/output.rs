@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will send a transaction.
-//! Run: `cargo run --example output --release`.
+//!
+//! `cargo run --example output --release`
 
 use iota_sdk::{
     client::{secret::SecretManager, utils::request_funds_from_faucet, Client, Result},

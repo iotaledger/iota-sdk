@@ -51,7 +51,7 @@ async fn generate_addresses() {
 #[tokio::test]
 #[should_panic]
 async fn build_and_post_block() {
-    //This test uses secrets in environment variables for simplicity which should not be done in production.
+    // This test uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
     // Create a client message handler with node health ignored

@@ -1,9 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example increase_native_token_supply --release
-// In this example we will melt an existing native token with its foundry
-// Rename `.env.example` to `.env` first
+//! In this example we will melt an existing native token with its foundry.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example increase_native_token_supply --release`
 
 use std::str::FromStr;
 

@@ -1,10 +1,11 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example output_consolidation --release
-// In this example we will consolidate basic outputs from an account with only an AddressUnlockCondition by sending them
-// to the same address again
-// Rename `.env.example` to `.env` first
+//! In this example we will consolidate basic outputs from an account with only an AddressUnlockCondition by sending
+//! them to the same address again.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example output_consolidation --release`
 
 use iota_sdk::{
     client::{

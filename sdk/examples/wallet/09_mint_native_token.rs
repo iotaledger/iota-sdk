@@ -1,9 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example mint_native_token --release
-// In this example we will mint a native token
-// Rename `.env.example` to `.env` first
+//! In this example we will mint a native token.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example mint_native_token --release`
 
 use iota_sdk::wallet::{NativeTokenOptions, Result, Wallet, U256};
 

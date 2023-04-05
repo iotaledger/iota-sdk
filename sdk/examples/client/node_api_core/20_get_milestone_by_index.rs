@@ -1,9 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET /api/core/v2/milestones/by-index/{index}`.
-//! Returns milestone data as JSON by its index.
-//! Run: `cargo run --example node_api_core_get_milestone_by_index --release -- [NODE URL]`.
+//! Returns milestone data as JSON by its index by calling
+//! `GET /api/core/v2/milestones/by-index/{index}`.
+//!
+//! `cargo run --example node_api_core_get_milestone_by_index --release -- [NODE URL]`
 
 use iota_sdk::client::{Client, Result};
 

@@ -1,7 +1,9 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example wallet --release
+//! TODO: Example description
+//!
+//! `cargo run --example wallet --release`
 
 use std::time::Instant;
 
