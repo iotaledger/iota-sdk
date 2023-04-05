@@ -12,7 +12,7 @@ use crate::{
 
 /// Call a client method.
 pub async fn call_client_method(client: &Client, message: ClientMethod) -> Response {
-    log::debug!("Message: {:?}", message);
+    log::debug!("Message: {message:?}");
 
     let result = convert_async_panics(|| async { call_client_method_internal(client, message).await }).await;
 
@@ -21,14 +21,14 @@ pub async fn call_client_method(client: &Client, message: ClientMethod) -> Respo
         Err(e) => Response::Error(e),
     };
 
-    log::debug!("Response: {:?}", response);
+    log::debug!("Response: {response:?}");
 
     response
 }
 
 /// Call a wallet method.
 pub async fn call_wallet_method(wallet: &Wallet, message: WalletMethod) -> Response {
-    log::debug!("Message: {:?}", message);
+    log::debug!("Message: {message:?}");
 
     let result = convert_async_panics(|| async { call_wallet_method_internal(wallet, message).await }).await;
 
@@ -37,7 +37,7 @@ pub async fn call_wallet_method(wallet: &Wallet, message: WalletMethod) -> Respo
         Err(e) => Response::Error(e),
     };
 
-    log::debug!("Response: {:?}", response);
+    log::debug!("Response: {response:?}");
 
     response
 }
