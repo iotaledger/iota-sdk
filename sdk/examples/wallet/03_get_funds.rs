@@ -23,16 +23,33 @@ async fn main() -> Result<()> {
 
     // Get the account we generated with `01_create_wallet`
     let account = manager.get_account("Alice").await?;
+    let balance = account.sync(None).await?;
 
     let address = account.addresses().await?;
+
+    let funds_before = balance.base_coin.available;
+
+    println!("Starting available funds: {funds_before}");
 
     let faucet_response =
         request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &address[0].address().to_bech32()).await?;
 
-    // Ensure the account is synced after receiving funds.
-    account.sync(None).await?;
+    println!("Response from faucet: {faucet_response}");
 
-    println!("{faucet_response}");
+    println!("Waiting for funds...");
+    // Check for changes to the balance
+    let start = std::time::Instant::now();
+    let balance = loop {
+        if start.elapsed().as_secs() > 60 {
+            panic!("took too long waiting for funds")
+        };
+        let balance = account.sync(None).await?;
+        if balance.base_coin.available > funds_before {
+            break balance;
+        }
+    };
+
+    println!("New available funds: {}", balance.base_coin.available);
 
     Ok(())
 }
