@@ -1,15 +1,12 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{
-    collections::HashSet,
-    sync::{
-        atomic::{AtomicU32, AtomicUsize},
-        Arc,
-    },
+use std::sync::{
+    atomic::{AtomicU32, AtomicUsize},
+    Arc,
 };
 #[cfg(feature = "storage")]
-use std::{path::PathBuf, sync::atomic::Ordering};
+use std::{collections::HashSet, path::PathBuf, sync::atomic::Ordering};
 
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "events")]
@@ -21,10 +18,13 @@ use crate::wallet::events::EventEmitter;
 #[cfg(all(feature = "storage", not(feature = "rocksdb")))]
 use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
-use crate::wallet::storage::{constants::default_storage_path, manager::ManagerStorage};
+use crate::wallet::{
+    account::Account,
+    storage::{constants::default_storage_path, manager::ManagerStorage},
+};
 use crate::{
     client::secret::SecretManager,
-    wallet::{account::Account, AccountHandle, ClientOptions, Wallet},
+    wallet::{AccountHandle, ClientOptions, Wallet},
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -261,6 +261,7 @@ impl WalletBuilder {
 
 // Check if any of the locked inputs is not used in a transaction and unlock them, so they get available for new
 // transactions
+#[cfg(feature = "storage")]
 fn unlock_unused_inputs(accounts: &mut [Account]) -> crate::wallet::Result<()> {
     log::debug!("[unlock_unused_inputs]");
     for account in accounts.iter_mut() {
