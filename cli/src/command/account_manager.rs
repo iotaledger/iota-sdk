@@ -5,12 +5,15 @@ use std::{fs::File, io::prelude::*};
 
 use clap::{Args, Parser, Subcommand};
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, secret::SecretManager, utils::generate_mnemonic},
+    client::{
+        constants::SHIMMER_COIN_TYPE, secret::SecretManager, stronghold::StrongholdAdapter, utils::generate_mnemonic,
+    },
     wallet::{account_manager::AccountManager, ClientOptions},
 };
 use log::LevelFilter;
+use zeroize::Zeroize;
 
-use crate::{error::Error, helper::get_password, println_log_info};
+use crate::{account_manager::DEFAULT_STRONHGOLD_PATH, error::Error, helper::get_password, println_log_info};
 
 #[derive(Debug, Clone, Parser)]
 #[command(author, version, about, long_about = None, propagate_version = true)]
@@ -33,6 +36,11 @@ pub enum AccountManagerCommand {
     ChangePassword,
     /// Initialize the wallet.
     Init(InitParameters),
+    /// Migrate a stronghold v2 snapshot to v3.
+    MigrateStronghold {
+        /// Path of the to be migrated stronghold file. "./stardust-cli-wallet.stronghold" if nothing provided.
+        path: Option<String>,
+    },
     /// Generate a random mnemonic.
     Mnemonic,
     /// Create a new account.
@@ -76,9 +84,10 @@ pub async fn backup_command(manager: &AccountManager, path: String, password: &s
 }
 
 pub async fn change_password_command(manager: &AccountManager, current: &str) -> Result<(), Error> {
-    let new = get_password("Stronghold new password", true)?;
+    let mut new = get_password("Stronghold new password", true)?;
 
     manager.change_stronghold_password(current, &new).await?;
+    new.zeroize();
 
     Ok(())
 }
@@ -127,6 +136,20 @@ pub async fn init_command(
     Ok(account_manager)
 }
 
+pub async fn migrate_command(path: Option<String>) -> Result<(), Error> {
+    let mut password = get_password("Stronghold password", false)?;
+    StrongholdAdapter::migrate_v2_to_v3(
+        path.as_deref().unwrap_or(DEFAULT_STRONHGOLD_PATH),
+        &password,
+        None,
+        None,
+    )?;
+    password.zeroize();
+    println_log_info!("Stronghold successfully migrated from v2 to v3.");
+
+    Ok(())
+}
+
 pub async fn mnemonic_command() -> Result<(), Error> {
     let mnemonic = generate_mnemonic()?;
 
@@ -161,7 +184,7 @@ pub async fn restore_command(
     secret_manager: SecretManager,
     storage_path: String,
     backup_path: String,
-    password: String,
+    password: &str,
 ) -> Result<AccountManager, Error> {
     let account_manager = AccountManager::builder()
         .with_secret_manager(secret_manager)
@@ -174,7 +197,7 @@ pub async fn restore_command(
         .await?;
 
     account_manager
-        .restore_backup(backup_path.into(), password, None)
+        .restore_backup(backup_path.into(), password.to_string(), None)
         .await?;
 
     Ok(account_manager)

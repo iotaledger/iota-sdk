@@ -7,18 +7,26 @@ use iota_sdk::{
     client::secret::{stronghold::StrongholdSecretManager, SecretManager},
     wallet::account_manager::AccountManager,
 };
+use zeroize::Zeroize;
 
 use crate::{
     command::account_manager::{
-        backup_command, change_password_command, init_command, mnemonic_command, new_command, restore_command,
-        set_node_command, sync_command, AccountManagerCli, AccountManagerCommand, InitParameters,
+        backup_command, change_password_command, init_command, migrate_command, mnemonic_command, new_command,
+        restore_command, set_node_command, sync_command, AccountManagerCli, AccountManagerCommand, InitParameters,
     },
     error::Error,
     helper::get_password,
     println_log_info,
 };
 
+pub(crate) const DEFAULT_STRONHGOLD_PATH: &str = "./stardust-cli-wallet.stronghold";
+
 pub async fn new_account_manager(cli: AccountManagerCli) -> Result<(Option<AccountManager>, Option<String>), Error> {
+    if let Some(AccountManagerCommand::MigrateStronghold { path }) = cli.command {
+        migrate_command(path).await?;
+        return Ok((None, None));
+    }
+
     if let Some(AccountManagerCommand::Mnemonic) = cli.command {
         mnemonic_command().await?;
         return Ok((None, None));
@@ -28,9 +36,9 @@ pub async fn new_account_manager(cli: AccountManagerCli) -> Result<(Option<Accou
         || "./stardust-cli-wallet-db".to_string(),
         |os_str| os_str.into_string().expect("invalid WALLET_DATABASE_PATH"),
     );
-    let snapshot_path = std::path::Path::new("./stardust-cli-wallet.stronghold");
+    let snapshot_path = std::path::Path::new(DEFAULT_STRONHGOLD_PATH);
     let snapshot_exists = snapshot_path.exists();
-    let password = if let Some(AccountManagerCommand::Restore { .. }) = &cli.command {
+    let mut password = if let Some(AccountManagerCommand::Restore { .. }) = &cli.command {
         get_password("Stronghold password", false)?
     } else {
         get_password("Stronghold password", !snapshot_path.exists())?
@@ -46,7 +54,7 @@ pub async fn new_account_manager(cli: AccountManagerCli) -> Result<(Option<Accou
             (init_command(secret_manager, storage_path, init_parameters).await?, None)
         } else if let AccountManagerCommand::Restore { backup_path } = command {
             (
-                restore_command(secret_manager, storage_path, backup_path, password).await?,
+                restore_command(secret_manager, storage_path, backup_path, &password).await?,
                 None,
             )
         } else {
@@ -68,6 +76,7 @@ pub async fn new_account_manager(cli: AccountManagerCli) -> Result<(Option<Accou
                 AccountManagerCommand::Sync => sync_command(&account_manager).await?,
                 // PANIC: this will never happen because these variants have already been checked.
                 AccountManagerCommand::Init(_)
+                | AccountManagerCommand::MigrateStronghold { .. }
                 | AccountManagerCommand::Mnemonic
                 | AccountManagerCommand::Restore { .. } => unreachable!(),
             };
@@ -92,6 +101,8 @@ pub async fn new_account_manager(cli: AccountManagerCli) -> Result<(Option<Accou
             )
         }
     };
+
+    password.zeroize();
 
     Ok((Some(account_manager), account))
 }
