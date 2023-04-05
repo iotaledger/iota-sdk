@@ -455,12 +455,11 @@ pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
 /// Computes the minimum amount that a storage deposit has to match to allow creating a return [`Output`] back to the
 /// sender [`Address`].
 fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, token_supply: u64) -> u64 {
-    let address_condition = UnlockCondition::Address(AddressUnlockCondition::new(*address));
     // PANIC: This can never fail because the amount will always be within the valid range. Also, the actual value is
     // not important, we are only interested in the storage requirements of the type.
     BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
         .unwrap()
-        .add_unlock_condition(address_condition)
+        .add_unlock_condition(AddressUnlockCondition::new(*address))
         .finish(token_supply)
         .unwrap()
         .amount()

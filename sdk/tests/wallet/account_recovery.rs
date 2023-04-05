@@ -14,7 +14,7 @@ use iota_sdk::{
     wallet::Result,
 };
 
-use crate::wallet::common::{make_manager, setup, tear_down};
+use crate::wallet::common::{make_wallet, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
@@ -22,8 +22,8 @@ async fn account_recovery_empty() -> Result<()> {
     let storage_path = "test-storage/account_recovery_empty";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
-    let accounts = manager.recover_accounts(0, 2, 2, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let accounts = wallet.recover_accounts(0, 2, 2, None).await?;
 
     // accounts should be empty if no account was created before and no account was found with balance
     assert_eq!(0, accounts.len());
@@ -36,13 +36,13 @@ async fn account_recovery_existing_accounts() -> Result<()> {
     let storage_path = "test-storage/account_recovery_existing_accounts";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
     // create two accounts
-    manager.create_account().finish().await?;
-    manager.create_account().finish().await?;
+    wallet.create_account().finish().await?;
+    wallet.create_account().finish().await?;
 
-    let accounts = manager.recover_accounts(0, 2, 2, None).await?;
+    let accounts = wallet.recover_accounts(0, 2, 2, None).await?;
 
     // accounts should still be ordered
     for (index, account) in accounts.iter().enumerate() {
@@ -81,9 +81,9 @@ async fn account_recovery_with_balance_and_empty_addresses() -> Result<()> {
     // Wait for faucet transaction
     tokio::time::sleep(Duration::new(10, 0)).await;
 
-    let manager = make_manager(storage_path, Some(&mnemonic), None).await?;
+    let wallet = make_wallet(storage_path, Some(&mnemonic), None).await?;
 
-    let accounts = manager.recover_accounts(0, 3, 2, None).await?;
+    let accounts = wallet.recover_accounts(0, 3, 2, None).await?;
 
     // accounts should still be ordered
     for (index, account) in accounts.iter().enumerate() {

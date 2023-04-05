@@ -11,10 +11,7 @@ use crate::{
     types::block::{
         address::Address,
         input::{UtxoInput, INPUT_COUNT_MAX},
-        output::{
-            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder, Output, OutputId,
-            UnlockCondition,
-        },
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder, Output, OutputId},
         payload::transaction::TransactionId,
     },
 };
@@ -96,9 +93,7 @@ impl Client {
                     }
 
                     let consolidation_output = BasicOutputBuilder::new_with_amount(total_amount)?
-                        .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                            consolidation_address,
-                        )))
+                        .add_unlock_condition(AddressUnlockCondition::new(consolidation_address))
                         .with_native_tokens(total_native_tokens.finish()?)
                         .finish_output(token_supply)?;
 

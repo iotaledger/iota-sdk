@@ -3,7 +3,7 @@
 
 use iota_sdk::wallet::{account::SyncOptions, NativeTokenOptions, Result, U256};
 
-use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
+use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
@@ -11,9 +11,9 @@ async fn mint_and_increase_native_token_supply() -> Result<()> {
     let storage_path = "test-storage/mint_and_increase_native_token_supply";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
-    let account = &create_accounts_with_funds(&manager, 1).await?[0];
+    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
     let tx = account.create_alias_output(None, None).await?;
     account
@@ -74,9 +74,9 @@ async fn native_token_foundry_metadata() -> Result<()> {
     let storage_path = "test-storage/native_token_foundry_metadata";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
-    let account = &create_accounts_with_funds(&manager, 1).await?[0];
+    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
     let tx = account.create_alias_output(None, None).await?;
     account

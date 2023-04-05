@@ -5,12 +5,12 @@ use iota_sdk::{
     types::block::output::{
         feature::SenderFeature,
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-        BasicOutputBuilder, Feature, UnlockCondition,
+        BasicOutputBuilder, UnlockCondition,
     },
     wallet::Result,
 };
 
-use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
+use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
@@ -18,11 +18,11 @@ async fn balance_expiration() -> Result<()> {
     let storage_path = "test-storage/balance_expiration";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&manager, 1).await?[0];
-    let account_1 = manager.create_account().finish().await?;
-    let account_2 = manager.create_account().finish().await?;
+    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_1 = wallet.create_account().finish().await?;
+    let account_2 = wallet.create_account().finish().await?;
 
     let seconds_until_expired = 20;
     let token_supply = account_0.client().get_token_supply().await?;
@@ -39,9 +39,9 @@ async fn balance_expiration() -> Result<()> {
                     account_0.client().get_time_checked().await? + seconds_until_expired,
                 )?),
             ])
-            .with_features(vec![Feature::Sender(SenderFeature::new(
+            .with_features(vec![SenderFeature::new(
                 *account_0.addresses().await?[0].address().as_ref(),
-            ))])
+            )])
             .finish_output(token_supply)?,
     ];
 
@@ -87,9 +87,9 @@ async fn balance_expiration() -> Result<()> {
     let outputs = vec![
         BasicOutputBuilder::new_with_amount(1_000_000)?
             // Send to account 1 with expiration to account 2, both have no amount yet
-            .with_unlock_conditions(vec![UnlockCondition::Address(AddressUnlockCondition::new(
+            .with_unlock_conditions(vec![AddressUnlockCondition::new(
                 *account_1.addresses().await?[0].address().as_ref(),
-            ))])
+            )])
             .finish_output(token_supply)?,
     ];
     let _tx = account_2.send(outputs, None).await?;
@@ -104,9 +104,9 @@ async fn balance_voting_power() -> Result<()> {
     let storage_path = "test-storage/balance_voting_power";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
-    let account = &create_accounts_with_funds(&manager, 1).await?[0];
+    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
     let faucet_amount = 100_000_000_000;
 

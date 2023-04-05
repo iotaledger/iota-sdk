@@ -12,9 +12,9 @@ use iota_sdk::{
     types::block::output::{
         feature::{IssuerFeature, SenderFeature},
         unlock_condition::AddressUnlockCondition,
-        Feature, NftId, NftOutputBuilder, UnlockCondition,
+        NftId, NftOutputBuilder,
     },
-    wallet::{account_manager::AccountManager, NftOptions, Result},
+    wallet::{NftOptions, Result, Wallet},
 };
 
 #[tokio::main]
@@ -22,16 +22,16 @@ async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
     dotenv().ok();
 
-    // Create the account manager
-    let manager = AccountManager::builder().finish().await?;
+    // Create the wallet
+    let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = manager.get_account("Alice").await?;
+    let account = wallet.get_account("Alice").await?;
 
     account.sync(None).await?;
 
     // Set the stronghold password
-    manager
+    wallet
         .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
@@ -59,11 +59,9 @@ async fn main() -> Result<()> {
     let outputs = vec![
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                *sender_address.as_ref(),
-            )))
-            .add_feature(Feature::Sender(SenderFeature::new(*sender_address.as_ref())))
-            .add_immutable_feature(Feature::Issuer(IssuerFeature::new(*sender_address.as_ref())))
+            .add_unlock_condition(AddressUnlockCondition::new(*sender_address.as_ref()))
+            .add_feature(SenderFeature::new(*sender_address.as_ref()))
+            .add_immutable_feature(IssuerFeature::new(*sender_address.as_ref()))
             .finish_output(token_supply)?,
     ];
 

@@ -11,11 +11,8 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::output::{
-        unlock_condition::{AddressUnlockCondition, UnlockCondition},
-        BasicOutputBuilder,
-    },
-    wallet::{account_manager::AccountManager, ClientOptions, Result},
+    types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
 #[tokio::main]
@@ -28,7 +25,7 @@ async fn main() -> Result<()> {
     let secret_manager =
         MnemonicSecretManager::try_from_mnemonic(&env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let manager = AccountManager::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -37,11 +34,11 @@ async fn main() -> Result<()> {
 
     // Get account or create a new one
     let account_alias = "logger";
-    let account = match manager.get_account(account_alias.to_string()).await {
+    let account = match wallet.get_account(account_alias.to_string()).await {
         Ok(account) => account,
         _ => {
             // first we'll create an example account and store it
-            manager
+            wallet
                 .create_account()
                 .with_alias(account_alias.to_string())
                 .finish()
@@ -76,9 +73,7 @@ async fn main() -> Result<()> {
             .map(|a| {
                 BasicOutputBuilder::new_with_amount(1_000_000)
                     .unwrap()
-                    .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                        *a.address().as_ref(),
-                    )))
+                    .add_unlock_condition(AddressUnlockCondition::new(*a.address().as_ref()))
                     .finish_output(token_supply)
                     .unwrap()
             })

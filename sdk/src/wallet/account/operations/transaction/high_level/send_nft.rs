@@ -8,10 +8,7 @@ use crate::{
     client::api::PreparedTransactionData,
     types::block::{
         address::Address,
-        output::{
-            unlock_condition::{AddressUnlockCondition, UnlockCondition},
-            NftId, NftOutputBuilder, Output,
-        },
+        output::{unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
     },
     wallet::account::{handle::AccountHandle, operations::transaction::Transaction, TransactionOptions},
 };
@@ -87,7 +84,7 @@ impl AccountHandle {
                     // Set the nft id and new address unlock condition
                     let nft_builder = NftOutputBuilder::from(nft_output)
                         .with_nft_id(address_and_nft_id.nft_id)
-                        .with_unlock_conditions(vec![UnlockCondition::Address(AddressUnlockCondition::new(address))]);
+                        .with_unlock_conditions(vec![AddressUnlockCondition::new(address)]);
                     outputs.push(nft_builder.finish_output(token_supply)?);
                 }
             } else {

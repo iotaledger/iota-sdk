@@ -11,7 +11,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    wallet::{account_manager::AccountManager, ClientOptions, Result},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
 #[tokio::main]
@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
 
     let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
 
-    let manager = AccountManager::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -34,11 +34,11 @@ async fn main() -> Result<()> {
 
     // Get account or create a new one
     let account_alias = "logger";
-    let account = match manager.get_account(account_alias.to_string()).await {
+    let account = match wallet.get_account(account_alias.to_string()).await {
         Ok(account) => account,
         _ => {
             // first we'll create an example account and store it
-            manager
+            wallet
                 .create_account()
                 .with_alias(account_alias.to_string())
                 .finish()
@@ -60,6 +60,6 @@ async fn main() -> Result<()> {
     println!("Balance: {balance:?}");
 
     #[cfg(debug_assertions)]
-    manager.verify_integrity().await?;
+    wallet.verify_integrity().await?;
     Ok(())
 }
