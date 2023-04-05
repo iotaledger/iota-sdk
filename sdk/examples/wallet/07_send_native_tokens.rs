@@ -18,7 +18,7 @@ use primitive_types::U256;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses secrets in environment variables for simplicity but should not be done in production.
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
     // Create the wallet

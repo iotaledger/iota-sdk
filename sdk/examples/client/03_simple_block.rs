@@ -8,6 +8,7 @@ use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();

@@ -23,7 +23,7 @@ const ADDRESS_FILE_NAME: &str = "examples/offline_signing/addresses.json";
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses secrets in environment variables for simplicity but should not be done in production.
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
     let offline_client = ClientOptions::new();
