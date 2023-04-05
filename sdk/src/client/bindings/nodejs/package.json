@@ -6,7 +6,7 @@
   "types": "out/lib/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/iotaledger/iota.rs"
+    "url": "https://github.com/iotaledger/iota-sdk"
   },
   "author": "IOTA Foundation <contact@iota.org>",
   "license": "Apache-2.0",

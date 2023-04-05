@@ -1,13 +1,13 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example create_wallet --release
-// In this example we will create a new wallet
-// Rename `.env.example` to `.env` first
+//! In this example we will create a new wallet.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example create_wallet --release`
 
-use std::{env, path::PathBuf};
+use std::path::PathBuf;
 
-use dotenv::dotenv;
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -18,22 +18,22 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     // Setup Stronghold secret_manager
     let mut secret_manager = StrongholdSecretManager::builder()
-        .password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .build(PathBuf::from("wallet.stronghold"))?;
 
     // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
-    let mnemonic = env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
+    let mnemonic = std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
 
     // The mnemonic only needs to be stored the first time
     secret_manager.store_mnemonic(mnemonic).await?;
 
     // Create the wallet with the secret_manager and client options
-    let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))

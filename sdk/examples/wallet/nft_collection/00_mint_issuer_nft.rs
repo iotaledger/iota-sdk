@@ -1,13 +1,11 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example mint_issuer_nft --release
-// In this example we will mint the issuer nft.
-// Rename `.env.example` to `.env` and run 01_create_wallet.rs before
+//! In this example we will mint the issuer nft.
+//! Rename `.env.example` to `.env` and run 01_create_wallet.rs before.
+//!
+//! `cargo run --example mint_issuer_nft --release`
 
-use std::env;
-
-use dotenv::dotenv;
 use iota_sdk::{
     types::block::{
         output::{NftId, Output, OutputId},
@@ -18,8 +16,8 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     // Create the wallet
     let wallet = Wallet::builder().finish().await?;
@@ -31,7 +29,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     let nft_options = vec![NftOptions {
@@ -48,7 +46,7 @@ async fn main() -> Result<()> {
     println!("Transaction: {}.", transaction.transaction_id,);
     println!(
         "Block sent: {}/api/core/v2/blocks/{}.",
-        &env::var("NODE_URL").unwrap(),
+        &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
 

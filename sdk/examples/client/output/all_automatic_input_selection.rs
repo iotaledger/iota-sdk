@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example all_automatic_input_selection --release
+//! In this example we will create all output types in a single transaction.
+//!
+//! `cargo run --example all_automatic_input_selection --release`
 
 use iota_sdk::{
     client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
@@ -22,14 +24,12 @@ use iota_sdk::{
 };
 use primitive_types::U256;
 
-/// In this example we will create all output types in a single transaction
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production!
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     // Configure your own mnemonic in the ".env" file. Since the output amount cannot be zero, the seed must contain
     // non-zero balance.
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();

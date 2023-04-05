@@ -1,11 +1,12 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example participation --features=participation --release
+//! TODO: Example description
+//!
+//! `cargo run --example participation --features=participation --release`
 
-use std::{env, str::FromStr};
+use std::str::FromStr;
 
-use dotenv::dotenv;
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -30,15 +31,15 @@ async fn main() -> Result<()> {
         .finish();
     fern_logger::logger_init(config).unwrap();
 
-    // This example uses dotenv, which is not safe for use in production.
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     let client_options = ClientOptions::new()
-        .with_node(&env::var("NODE_URL").unwrap())?
+        .with_node(&std::env::var("NODE_URL").unwrap())?
         .with_ignore_node_health();
 
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(&env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
@@ -92,7 +93,7 @@ async fn main() -> Result<()> {
 
     let address = account.addresses().await?;
     let faucet_response =
-        request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &address[0].address().to_bech32()).await?;
+        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &address[0].address().to_bech32()).await?;
     println!("{faucet_response}");
 
     account.sync(None).await?;
@@ -105,7 +106,7 @@ async fn main() -> Result<()> {
     println!(
         "Increase voting power transaction: {} Block sent: {}/api/core/v2/blocks/{}",
         transaction.transaction_id,
-        &env::var("NODE_URL").unwrap(),
+        &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
 
@@ -125,7 +126,7 @@ async fn main() -> Result<()> {
     // println!(
     //     "Decrease voting power Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
     //     transaction.transaction_id,
-    //     &env::var("NODE_URL").unwrap(),
+    //     &std::env::var("NODE_URL").unwrap(),
     //     transaction.block_id.expect("no block created yet")
     // );
 
@@ -142,7 +143,7 @@ async fn main() -> Result<()> {
     println!(
         "Vote transaction: {} Block sent: {}/api/core/v2/blocks/{}",
         transaction.transaction_id,
-        &env::var("NODE_URL").unwrap(),
+        &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
     account
@@ -165,7 +166,7 @@ async fn main() -> Result<()> {
     println!(
         "Stop participating transaction: {} Block sent: {}/api/core/v2/blocks/{}",
         transaction.transaction_id,
-        &env::var("NODE_URL").unwrap(),
+        &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
     account
@@ -185,7 +186,7 @@ async fn main() -> Result<()> {
     // println!(
     //     "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
     //     transaction.transaction_id,
-    //     &env::var("NODE_URL").unwrap(),
+    //     &std::env::var("NODE_URL").unwrap(),
     //     transaction.block_id.expect("no block created yet")
     // );
 
