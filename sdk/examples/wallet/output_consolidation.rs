@@ -6,8 +6,6 @@
 // to the same address again
 // Rename `.env.example` to `.env` first
 
-use std::env;
-
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -21,11 +19,11 @@ async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
     dotenvy::dotenv().ok();
 
-    let mnemonic: &str = &env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
+    let mnemonic: &str = &std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
     let mnemonic_secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic).unwrap();
     let secret_manager = SecretManager::Mnemonic(mnemonic_secret_manager);
 
-    let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     // Create the account manager
     let manager = AccountManager::builder()
@@ -40,7 +38,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     manager
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Sync account to make sure account is updated with outputs from previous examples

@@ -5,8 +5,6 @@
 // In this example we will generate an address
 // Rename `.env.example` to `.env` first
 
-use std::env;
-
 use iota_sdk::wallet::{account_manager::AccountManager, Result};
 
 #[tokio::main]
@@ -22,7 +20,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     manager
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     let address = account.generate_addresses(1, None).await?;

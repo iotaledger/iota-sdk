@@ -3,7 +3,7 @@
 
 #![cfg(feature = "message_interface")]
 
-use std::{env, str::FromStr};
+use std::str::FromStr;
 
 use iota_sdk::{
     client::{
@@ -73,7 +73,7 @@ async fn build_and_post_block() {
     // Generate addresses
     let secret_manager = format!(
         "{{\"mnemonic\":\"{}\"}}",
-        &env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap()
+        &std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap()
     );
     let options = GenerateAddressesOptions {
         coin_type: None,

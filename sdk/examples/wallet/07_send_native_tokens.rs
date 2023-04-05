@@ -5,7 +5,7 @@
 // In this example we will send native tokens
 // Rename `.env.example` to `.env` first
 
-use std::{env, str::FromStr};
+use std::str::FromStr;
 
 use iota_sdk::{
     types::block::{
@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     manager
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     let bech32_address = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string();
@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
     println!(
         "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
         transaction.transaction_id,
-        &env::var("NODE_URL").unwrap(),
+        &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
 
@@ -68,7 +68,7 @@ async fn main() -> Result<()> {
     println!(
         "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
         transaction.transaction_id,
-        &env::var("NODE_URL").unwrap(),
+        &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
 

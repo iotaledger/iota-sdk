@@ -5,8 +5,6 @@
 // In this example we will send a transaction
 // Rename `.env.example` to `.env` first
 
-use std::env;
-
 use iota_sdk::wallet::{account_manager::AccountManager, AddressWithAmount, Result};
 
 #[tokio::main]
@@ -22,7 +20,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     manager
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Send a transaction with 1 Mi
@@ -35,7 +33,7 @@ async fn main() -> Result<()> {
     println!(
         "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
         transaction.transaction_id,
-        &env::var("NODE_URL").unwrap(),
+        &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
 

@@ -5,7 +5,6 @@
 //! `cargo run --example 1_prepare_transaction --release`.
 
 use std::{
-    env,
     fs::File,
     io::{BufWriter, Read, Write},
     path::Path,
@@ -40,7 +39,7 @@ async fn main() -> Result<()> {
     // Recovers addresses from example `0_address_generation`.
     let addresses = read_addresses_from_file(ADDRESS_FILE_NAME)?;
 
-    let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     // Create the account manager with the secret_manager and client options
     let manager = AccountManager::builder()

@@ -21,7 +21,7 @@ use iota_sdk::{
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production!
-    dotenvy::dotenvy::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
 

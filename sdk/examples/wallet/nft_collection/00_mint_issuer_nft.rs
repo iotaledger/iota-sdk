@@ -5,8 +5,6 @@
 // In this example we will mint the issuer nft.
 // Rename `.env.example` to `.env` and run 01_create_wallet.rs before
 
-use std::env;
-
 use iota_sdk::{
     types::block::{
         output::{NftId, Output, OutputId},
@@ -30,7 +28,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     manager
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     let nft_options = vec![NftOptions {
@@ -47,7 +45,7 @@ async fn main() -> Result<()> {
     println!("Transaction: {}.", transaction.transaction_id,);
     println!(
         "Block sent: {}/api/core/v2/blocks/{}.",
-        &env::var("NODE_URL").unwrap(),
+        &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
 

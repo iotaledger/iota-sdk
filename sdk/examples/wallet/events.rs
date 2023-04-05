@@ -3,8 +3,6 @@
 
 //! cargo run --example events --features=events --release
 
-use std::env;
-
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -25,10 +23,10 @@ async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
     dotenvy::dotenv().ok();
 
-    let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(&env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let manager = AccountManager::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
@@ -76,7 +74,7 @@ async fn main() -> Result<()> {
     println!(
         "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
         transaction.transaction_id,
-        &env::var("NODE_URL").unwrap(),
+        &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
 

@@ -17,7 +17,7 @@ const ADDRESS_FILE_NAME: &str = "examples/offline_signing/address.json";
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    dotenvy::dotenvy::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     // Creates a client instance.
     let offline_client = Client::builder().finish()?;

@@ -5,7 +5,7 @@
 // In this example we will destroy an existing alias output. This is only possible if possible foundry outputs have
 // circulating supply of 0. Rename `.env.example` to `.env` first
 
-use std::{env, str::FromStr};
+use std::str::FromStr;
 
 use iota_sdk::{
     types::block::output::AliasId,
@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     manager
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Replace with an AliasId that is available in the account

@@ -5,7 +5,7 @@
 // In this example we will create a new wallet
 // Rename `.env.example` to `.env` first
 
-use std::{env, path::PathBuf};
+use std::path::PathBuf;
 
 use iota_sdk::{
     client::{
@@ -22,17 +22,17 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let mut secret_manager = StrongholdSecretManager::builder()
-        .password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .build(PathBuf::from("wallet.stronghold"))?;
 
     // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
-    let mnemonic = env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
+    let mnemonic = std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
 
     // The mnemonic only needs to be stored the first time
     secret_manager.store_mnemonic(mnemonic).await?;
 
     // Create the account manager with the secret_manager and client options
-    let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     let manager = AccountManager::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))

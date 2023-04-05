@@ -3,7 +3,7 @@
 
 //! cargo run --example ledger_nano --release --features=ledger_nano
 
-use std::{env, time::Instant};
+use std::time::Instant;
 
 use iota_sdk::{
     client::{
@@ -22,7 +22,7 @@ async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
     dotenvy::dotenv().ok();
 
-    let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     let secret_manager = LedgerSecretManager::new(true);
 
@@ -69,7 +69,7 @@ async fn main() -> Result<()> {
     println!(
         "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
         transaction.transaction_id,
-        &env::var("NODE_URL").unwrap(),
+        &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
 

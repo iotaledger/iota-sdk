@@ -25,7 +25,7 @@ const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/signed_tran
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    dotenvy::dotenvy::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let secret_manager =
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;

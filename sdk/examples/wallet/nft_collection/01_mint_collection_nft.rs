@@ -5,7 +5,7 @@
 // In this example we will mint the 150 nfts with issuer feature.
 // Rename `.env.example` to `.env` and run 01_create_wallet.rs before
 
-use std::{env, str::FromStr};
+use std::str::FromStr;
 
 use iota_sdk::{
     types::block::{
@@ -34,7 +34,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     manager
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     let bech32_hrp = account.client().get_bech32_hrp().await?;
@@ -61,7 +61,7 @@ async fn main() -> Result<()> {
         if let Some(block_id) = transaction.block_id {
             println!(
                 "Block sent: {}/api/core/v2/blocks/{}",
-                &env::var("NODE_URL").unwrap(),
+                &std::env::var("NODE_URL").unwrap(),
                 block_id
             );
         }

@@ -3,7 +3,7 @@
 
 //! cargo run --example accounts --release
 
-use std::{env, time::Instant};
+use std::time::Instant;
 
 use iota_sdk::{
     client::{
@@ -19,10 +19,10 @@ async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
     dotenvy::dotenv().ok();
 
-    let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(&env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let manager = AccountManager::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
@@ -70,7 +70,11 @@ async fn main() -> Result<()> {
 
     println!(
         "{}",
-        request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &addresses[0].address().to_bech32()).await?
+        request_funds_from_faucet(
+            &std::env::var("FAUCET_URL").unwrap(),
+            &addresses[0].address().to_bech32()
+        )
+        .await?
     );
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 

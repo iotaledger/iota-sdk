@@ -6,7 +6,6 @@
 //! `cargo run --example 2_sign_transaction --release`.
 
 use std::{
-    env,
     fs::File,
     io::{prelude::*, BufWriter},
     path::{Path, PathBuf},
@@ -33,7 +32,7 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let mut secret_manager = StrongholdSecretManager::builder()
-        .password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .build(PathBuf::from("examples/offline_signing/offline_signing.stronghold"))?;
 
     // Load snapshot file

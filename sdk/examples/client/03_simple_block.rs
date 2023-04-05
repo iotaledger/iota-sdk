@@ -8,7 +8,7 @@ use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    dotenvy::dotenvy::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
 

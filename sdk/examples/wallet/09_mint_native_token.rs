@@ -5,8 +5,6 @@
 // In this example we will mint a native token
 // Rename `.env.example` to `.env` first
 
-use std::env;
-
 use iota_sdk::wallet::{account_manager::AccountManager, NativeTokenOptions, Result, U256};
 
 #[tokio::main]
@@ -24,7 +22,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     manager
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs
@@ -32,7 +30,7 @@ async fn main() -> Result<()> {
     println!(
         "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
         transaction.transaction_id,
-        &env::var("NODE_URL").unwrap(),
+        &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
 
@@ -54,7 +52,7 @@ async fn main() -> Result<()> {
     println!(
         "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
         transaction.transaction.transaction_id,
-        &env::var("NODE_URL").unwrap(),
+        &std::env::var("NODE_URL").unwrap(),
         transaction.transaction.block_id.expect("no block created yet")
     );
     Ok(())

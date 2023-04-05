@@ -3,8 +3,6 @@
 
 //! cargo run --example recursive_alias --release
 
-use std::env;
-
 use iota_sdk::{
     client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::{
@@ -29,8 +27,8 @@ async fn main() -> Result<()> {
     // non-zero balance.
     dotenvy::dotenv().ok();
 
-    let node_url = env::var("NODE_URL").unwrap();
-    let faucet_url = env::var("FAUCET_URL").unwrap();
+    let node_url = std::env::var("NODE_URL").unwrap();
+    let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance.
     let client = Client::builder().with_node(&node_url)?.finish()?;
