@@ -8,21 +8,21 @@
 use std::env;
 
 use dotenv::dotenv;
-use iota_sdk::wallet::{account_manager::AccountManager, AddressWithAmount, Result};
+use iota_sdk::wallet::{AddressWithAmount, Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses dotenv, which is not safe for use in production
     dotenv().ok();
 
-    // Create the account manager
-    let manager = AccountManager::builder().finish().await?;
+    // Create the wallet
+    let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = manager.get_account("Alice").await?;
+    let account = wallet.get_account("Alice").await?;
 
     // Set the stronghold password
-    manager
+    wallet
         .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 

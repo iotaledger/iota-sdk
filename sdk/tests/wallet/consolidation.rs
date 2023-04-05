@@ -3,7 +3,7 @@
 
 use iota_sdk::wallet::{AddressWithAmount, Result};
 
-use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
+use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
@@ -11,10 +11,10 @@ async fn consolidation() -> Result<()> {
     let storage_path = "test-storage/consolidation";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&manager, 1).await?[0];
-    let account_1 = manager.create_account().finish().await?;
+    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_1 = wallet.create_account().finish().await?;
 
     // Send 10 outputs to account_1
     let amount = 1_000_000;

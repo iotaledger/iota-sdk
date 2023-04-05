@@ -26,8 +26,8 @@ const sidebars = {
       },
       {
         type: 'doc',
-        id: 'account_manager',
-        label: 'Account manager'
+        id: 'wallet',
+        label: 'Wallet'
       },
       {
         type: 'doc',
