@@ -16,7 +16,7 @@ use iota_sdk::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::method::{account_method::AccountMethod, OmittedDebug};
+use crate::method::{account::AccountMethod, OmittedDebug};
 
 /// The messages that can be sent to the actor.
 #[derive(Clone, Derivative, Serialize, Deserialize)]
