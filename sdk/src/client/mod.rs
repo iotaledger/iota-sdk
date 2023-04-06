@@ -36,6 +36,7 @@ macro_rules! lazy_static {
 
 pub mod api;
 pub mod builder;
+#[allow(clippy::module_inception)]
 pub mod client;
 pub mod constants;
 pub mod error;
