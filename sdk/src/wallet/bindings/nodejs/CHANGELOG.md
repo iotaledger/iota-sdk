@@ -1,5 +1,12 @@
 # Changelog
 
+## \[2.0.3-rc.30]
+
+- Fix fallback to local PoW.
+  - [1d4c88e](https://github.com/iotaledger/iota-sdk/commit/1d4c88ead460e3c38e7107ca8ceb645f6296abf4) Rename AccountManager to Wallet ([#197](https://github.com/iotaledger/iota-sdk/pull/197)) on 2023-04-05
+  - [c35d83a](https://github.com/iotaledger/iota-sdk/commit/c35d83ae6817aee7317e7b0b769a9e73d73d7d41) Add OutputBuilder clear methods ([#201](https://github.com/iotaledger/iota-sdk/pull/201)) on 2023-04-04
+- Add signEd25519() and verifyEd25519Signature() methods.
+
 ## \[2.0.3-rc.29]
 
 - Fix dependency URL.

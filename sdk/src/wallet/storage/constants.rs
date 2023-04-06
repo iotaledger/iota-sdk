@@ -15,7 +15,7 @@ pub const fn default_storage_path() -> &'static str {
     DEFAULT_STORAGE_PATH
 }
 
-pub(crate) const ACCOUNT_MANAGER_INDEXATION_KEY: &str = "iota-wallet-account-manager";
+pub(crate) const WALLET_INDEXATION_KEY: &str = "iota-wallet-account-manager";
 
 pub(crate) const SECRET_MANAGER_KEY: &str = "secret_manager";
 

@@ -103,10 +103,8 @@ pub enum Error {
     /// Storage access error.
     #[error("error accessing storage: {0}")]
     Storage(String),
-    /// Can't use AccountManager API because the storage is encrypted
-    #[error(
-        "can't perform operation while storage is encrypted; use AccountManager::set_storage_password to decrypt storage"
-    )]
+    /// Can't use Wallet API because the storage is encrypted
+    #[error("can't perform operation while storage is encrypted; use Wallet::set_storage_password to decrypt storage")]
     StorageIsEncrypted,
     /// Tokio task join error
     #[error("{0}")]

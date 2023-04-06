@@ -19,11 +19,13 @@ pub enum ChainId {
 
 impl core::fmt::Debug for ChainId {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut formatter = f.debug_tuple("ChainId");
         match self {
-            Self::Alias(id) => write!(f, "ChainId({id:?})"),
-            Self::Foundry(id) => write!(f, "ChainId({id:?})"),
-            Self::Nft(id) => write!(f, "ChainId({id:?})"),
-        }
+            Self::Alias(id) => formatter.field(id),
+            Self::Foundry(id) => formatter.field(id),
+            Self::Nft(id) => formatter.field(id),
+        };
+        formatter.finish()
     }
 }
 

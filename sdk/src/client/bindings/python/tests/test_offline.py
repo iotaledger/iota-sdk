@@ -19,16 +19,14 @@ def test_mnemonic_address_generation():
     for test in mnemonic_address_test_cases:
         secret_manager = MnemonicSecretManager(test['mnemonic'])
 
-        generated_address = client.generate_addresses(secret_manager, {
-            "coinType": test['coin_type'],
-            "accountIndex": test['account_index'],
-            "bech32Hrp": test['bech32_hrp'],
-            "internal": test['internal'],
-            "range": {
-                "start": test['address_index'],
-                "end": test['address_index']+1,
-            },
-        })
+        generated_address = client.generate_addresses(secret_manager, 
+            coin_type = test['coin_type'],
+            account_index = test['account_index'],
+            bech32_hrp = test['bech32_hrp'],
+            internal = test['internal'],
+            start = test['address_index'],
+            end = test['address_index']+1
+        )
 
         assert test['bech32_address'] == generated_address[0]
 

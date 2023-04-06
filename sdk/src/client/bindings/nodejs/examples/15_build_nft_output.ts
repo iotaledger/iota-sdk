@@ -1,7 +1,7 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Client, initLogger } from '@iota/client';
+import { Client, initLogger, utf8ToHex } from '@iota/client';
 require('dotenv').config({ path: '../.env' });
 
 // Run with command:
@@ -19,33 +19,22 @@ async function run() {
     });
 
     try {
-        if (!process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1) {
-            throw new Error('.env mnemonic is undefined, see .env.example');
-        }
-        const secretManager = {
-            mnemonic: process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1,
+        const hexAddress = await client.bech32ToHex(
+            'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
+        );
+
+        // IOTA NFT Standard - IRC27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md
+        const tip27ImmutableMetadata = {
+            standard: 'IRC27',
+            version: 'v1.0',
+            type: 'image/jpeg',
+            uri: 'https://mywebsite.com/my-nft-files-1.jpeg',
+            name: 'My NFT #0001',
         };
 
-        const addresses = await client.generateAddresses(secretManager, {
-            range: {
-                start: 0,
-                end: 1,
-            },
-        });
-
-        const hexAddress = await client.bech32ToHex(addresses[0]);
-
         const nftOutput = await client.buildNftOutput({
+            // NftId needs to be null the first time
             nftId: '0x0000000000000000000000000000000000000000000000000000000000000000',
-            amount: '1000000',
-            immutableFeatures: [
-                {
-                    // MetadataFeature
-                    type: 2,
-                    // `hello` hex encoded
-                    data: '0x68656c6c6f',
-                },
-            ],
             unlockConditions: [
                 {
                     type: 0,
@@ -55,9 +44,45 @@ async function run() {
                     },
                 },
             ],
+            immutableFeatures: [
+                {
+                    // issuer feature
+                    type: 1,
+                    address: {
+                        type: 0,
+                        pubKeyHash: hexAddress,
+                    },
+                },
+                {
+                    // metadata feature
+                    type: 2,
+                    data: utf8ToHex(JSON.stringify(tip27ImmutableMetadata)),
+                },
+            ],
+            features: [
+                {
+                    // sender feature
+                    type: 0,
+                    address: {
+                        type: 0,
+                        pubKeyHash: hexAddress,
+                    },
+                },
+                {
+                    // metadata feature
+                    type: 2,
+                    data: utf8ToHex('mutable metadata'),
+                },
+                {
+                    // tag feature
+                    type: 3,
+                    tag: utf8ToHex('my tag'),
+                },
+            ],
         });
 
-        console.log(nftOutput);
+        console.log(JSON.stringify(nftOutput, null, 2));
+        process.exit();
     } catch (error) {
         console.error('Error: ', error);
     }

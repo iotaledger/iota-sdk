@@ -38,10 +38,10 @@ jobs:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Set Up Node.js 14
+      - name: Set Up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "14"
+          node-version: "18"
           registry-url: "https://registry.npmjs.org"
 
       - name: Configure the Git User to Use
@@ -101,10 +101,10 @@ jobs:
           toolchain: stable
           cache: false
 
-      - name: Set up Node.js 16.x
+      - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "16.x"
+          node-version: "18.x"
 
       - name: Install required packages (Ubuntu)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}

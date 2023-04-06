@@ -12,7 +12,7 @@ use iota_sdk::{
             address::Address,
             output::{
                 unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken, NftId,
-                OutputId, TokenId, UnlockCondition,
+                OutputId, TokenId,
             },
         },
     },
@@ -619,7 +619,7 @@ pub async fn send_native_token_command(
 
         let outputs = vec![
             BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
-                .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
+                .add_unlock_condition(AddressUnlockCondition::new(address))
                 .with_native_tokens(vec![NativeToken::new(
                     TokenId::from_str(&token_id)?,
                     U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,

@@ -12,5 +12,5 @@ Directly from your terminal, it allows you to:
 - Mint, melt, burn, send and receive native tokens;
 - Mint, burn, send and receive NFTs;
 
-This documentation explains how to install the `cli-wallet`, describes its Account Manager Interface and Account
+This documentation explains how to install the `cli-wallet`, describes its Wallet Interface and Account
 Interface and provides detailed step by step examples.

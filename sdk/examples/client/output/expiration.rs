@@ -1,29 +1,29 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example expiration --release
+//! In this example we will create a basic output with an expiration unlock condition.
+//!
+//! When the receiver (address in AddressUnlockCondition) doesn't consume the output before it gets expired, the sender
+//! (address in ExpirationUnlockCondition) will get the full control back.
+//!
+//! `cargo run --example expiration --release`
 
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use iota_sdk::{
     client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::output::{
-        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, UnlockCondition},
+        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         BasicOutputBuilder,
     },
 };
 
-/// In this example we will create a basic output with an expiration unlock condition.
-///
-/// When the receiver (address in AddressUnlockCondition) doesn't consume the output before it gets expired, the sender
-/// (address in ExpirationUnlockCondition) will get the full control back.
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production!
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     // Configure your own mnemonic in the ".env" file. Since the output amount cannot be zero, the seed must contain
     // non-zero balance.
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
@@ -53,13 +53,10 @@ async fn main() -> Result<()> {
     let outputs = vec![
         // with storage deposit return
         BasicOutputBuilder::new_with_amount(255_100)?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(receiver_address)))
+            .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
             // If the receiver does not consume this output, we Unlock after a day to avoid
             // locking our funds forever.
-            .add_unlock_condition(UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                sender_address,
-                tomorrow,
-            )?))
+            .add_unlock_condition(ExpirationUnlockCondition::new(sender_address, tomorrow)?)
             .finish_output(token_supply)?,
     ];
 

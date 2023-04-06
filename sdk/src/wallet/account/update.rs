@@ -267,7 +267,7 @@ impl AccountHandle {
         Ok(())
     }
 
-    // Should only be called from the AccountManager so all accounts are on the same state
+    // Should only be called from the Wallet so all accounts are on the same state
     // Will update the addresses with a possible new Bech32 HRP and clear the inaccessible_incoming_transactions.
     pub(crate) async fn update_account_with_new_client(&mut self, client: Client) -> crate::wallet::Result<()> {
         self.client = client;
