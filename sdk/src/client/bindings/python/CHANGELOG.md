@@ -43,7 +43,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Client::generate_addresses` now uses multiple arguments instead of a single dictionary;
 - `Client::{build_alias_output, build_basic_output, build_foundry_output, build_nft_output}` now use specific classes instead of dictionaries to pass properties and amount is properly passed as integer;
 
-
 ### Fixed
 
 - Error raising;
