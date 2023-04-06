@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
 
-    // Get the first foundry
+    // Get the first alias
     if let Some(alias_id) = balance.aliases.first() {
         println!("Balance before destroying:\n{balance:?}",);
 
