@@ -77,7 +77,6 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     let rent_structure = account_0.client().get_rent_structure().await?;
     let expiration_time = account_0.client().get_time_checked().await? + 86400; // 1 Day from now
 
-    // Get the output's rent cost
     let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
         .add_unlock_condition(AddressUnlockCondition::new(
             *account_1.addresses().await?[0].address().as_ref(),
