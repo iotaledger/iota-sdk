@@ -1,5 +1,10 @@
 # Changelog
 
+## \[2.0.3-rc.31]
+
+- Unlock inputs that aren't used in transactions.
+  - [77f235f1](https://github.com/iotaledger/iota-sdk/commit/77f235f1c86077bd31098b7bf6371aa8de6b66c8) Unlock unused inputs ([#207](https://github.com/iotaledger/iota-sdk/pull/207)) on 2023-04-06
+
 ## \[2.0.3-rc.30]
 
 - Fix fallback to local PoW.
