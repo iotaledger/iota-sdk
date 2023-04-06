@@ -6,7 +6,7 @@ use std::sync::{
     Arc,
 };
 #[cfg(feature = "storage")]
-use std::{path::PathBuf, sync::atomic::Ordering};
+use std::{collections::HashSet, path::PathBuf, sync::atomic::Ordering};
 
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "events")]
@@ -18,15 +18,18 @@ use crate::wallet::events::EventEmitter;
 #[cfg(all(feature = "storage", not(feature = "rocksdb")))]
 use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
-use crate::wallet::storage::{constants::default_storage_path, manager::ManagerStorage};
+use crate::wallet::{
+    account::Account,
+    storage::{constants::default_storage_path, manager::ManagerStorage},
+};
 use crate::{
     client::secret::SecretManager,
-    wallet::{account::handle::AccountHandle, account_manager::AccountManager, ClientOptions},
+    wallet::{AccountHandle, ClientOptions, Wallet},
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
-/// Builder for the account manager.
-pub struct AccountManagerBuilder {
+/// Builder for the wallet.
+pub struct WalletBuilder {
     client_options: Option<ClientOptions>,
     coin_type: Option<u32>,
     #[cfg(feature = "storage")]
@@ -57,8 +60,8 @@ impl Default for StorageOptions {
     }
 }
 
-impl AccountManagerBuilder {
-    /// Initialises a new instance of the account manager builder with the default storage adapter.
+impl WalletBuilder {
+    /// Initialises a new instance of the wallet builder with the default storage adapter.
     pub fn new() -> Self {
         Self {
             secret_manager: None,
@@ -72,7 +75,7 @@ impl AccountManagerBuilder {
         self
     }
 
-    /// Set the coin type for the account manager. Registered coin types can be found at https://github.com/satoshilabs/slips/blob/master/slip-0044.md.
+    /// Set the coin type for the wallet. Registered coin types can be found at https://github.com/satoshilabs/slips/blob/master/slip-0044.md.
     pub fn with_coin_type(mut self, coin_type: u32) -> Self {
         self.coin_type.replace(coin_type);
         self
@@ -85,7 +88,7 @@ impl AccountManagerBuilder {
     }
 
     /// Set the secret_manager to be used wrapped in an Arc<RwLock<>> so it can be cloned and mutated also outside of
-    /// the AccountManager.
+    /// the Wallet.
     pub fn with_secret_manager_arc(mut self, secret_manager: Arc<RwLock<SecretManager>>) -> Self {
         self.secret_manager.replace(secret_manager);
         self
@@ -102,10 +105,10 @@ impl AccountManagerBuilder {
         self
     }
 
-    /// Builds the account manager
+    /// Builds the wallet
     #[allow(unreachable_code, unused_mut)]
-    pub async fn finish(mut self) -> crate::wallet::Result<AccountManager> {
-        log::debug!("[AccountManagerBuilder]");
+    pub async fn finish(mut self) -> crate::wallet::Result<Wallet> {
+        log::debug!("[WalletBuilder]");
 
         #[cfg(feature = "storage")]
         let storage_options = self.storage_options.clone().unwrap_or_default();
@@ -137,9 +140,9 @@ impl AccountManagerBuilder {
         .await?;
 
         #[cfg(feature = "storage")]
-        let read_manager_builder = storage_manager.lock().await.get_account_manager_data().await?;
+        let read_manager_builder = storage_manager.lock().await.get_wallet_data().await?;
         #[cfg(not(feature = "storage"))]
-        let read_manager_builder: Option<AccountManagerBuilder> = None;
+        let read_manager_builder: Option<WalletBuilder> = None;
 
         // Prioritize provided client_options and secret_manager over stored ones
         let new_provided_client_options = if self.client_options.is_none() {
@@ -177,9 +180,9 @@ impl AccountManagerBuilder {
             self.coin_type.replace(coin_type);
         }
 
-        // Store account manager data in storage
+        // Store wallet data in storage
         #[cfg(feature = "storage")]
-        storage_manager.lock().await.save_account_manager_data(&self).await?;
+        storage_manager.lock().await.save_wallet_data(&self).await?;
 
         let client = self
             .client_options
@@ -191,7 +194,11 @@ impl AccountManagerBuilder {
         let event_emitter = Arc::new(Mutex::new(EventEmitter::new()));
 
         #[cfg(feature = "storage")]
-        let accounts = storage_manager.lock().await.get_accounts().await.unwrap_or_default();
+        let mut accounts = storage_manager.lock().await.get_accounts().await.unwrap_or_default();
+        // It happened that inputs got locked, the transaction failed, but they weren't unlocked again, so we do this
+        // here
+        #[cfg(feature = "storage")]
+        unlock_unused_inputs(&mut accounts)?;
         #[cfg(not(feature = "storage"))]
         let accounts = Vec::new();
         let mut account_handles: Vec<AccountHandle> = accounts
@@ -211,7 +218,7 @@ impl AccountManagerBuilder {
             })
             .collect::<_>();
 
-        // If the manager builder is not set, it means the user provided it and we need to update the addresses.
+        // If the wallet builder is not set, it means the user provided it and we need to update the addresses.
         // In the other case it was loaded from the database and addresses are up to date.
         if new_provided_client_options {
             for account in account_handles.iter_mut() {
@@ -219,7 +226,7 @@ impl AccountManagerBuilder {
             }
         }
 
-        Ok(AccountManager {
+        Ok(Wallet {
             accounts: Arc::new(RwLock::new(account_handles)),
             background_syncing_status: Arc::new(AtomicUsize::new(0)),
             client_options: Arc::new(RwLock::new(
@@ -242,12 +249,37 @@ impl AccountManagerBuilder {
     }
 
     #[cfg(feature = "storage")]
-    pub(crate) async fn from_account_manager(account_manager: &AccountManager) -> Self {
+    pub(crate) async fn from_wallet(wallet: &Wallet) -> Self {
         Self {
-            client_options: Some(account_manager.client_options.read().await.clone()),
-            coin_type: Some(account_manager.coin_type.load(Ordering::Relaxed)),
-            storage_options: Some(account_manager.storage_options.clone()),
-            secret_manager: Some(account_manager.secret_manager.clone()),
+            client_options: Some(wallet.client_options.read().await.clone()),
+            coin_type: Some(wallet.coin_type.load(Ordering::Relaxed)),
+            storage_options: Some(wallet.storage_options.clone()),
+            secret_manager: Some(wallet.secret_manager.clone()),
         }
     }
+}
+
+// Check if any of the locked inputs is not used in a transaction and unlock them, so they get available for new
+// transactions
+#[cfg(feature = "storage")]
+fn unlock_unused_inputs(accounts: &mut [Account]) -> crate::wallet::Result<()> {
+    log::debug!("[unlock_unused_inputs]");
+    for account in accounts.iter_mut() {
+        let mut used_inputs = HashSet::new();
+        for transaction_id in account.pending_transactions() {
+            if let Some(tx) = account.transactions().get(transaction_id) {
+                for input in &tx.inputs {
+                    used_inputs.insert(input.metadata.output_id()?);
+                }
+            }
+        }
+        account.locked_outputs.retain(|input| {
+            let used = used_inputs.contains(input);
+            if !used {
+                log::debug!("unlocking unused input {input}");
+            }
+            used
+        })
+    }
+    Ok(())
 }

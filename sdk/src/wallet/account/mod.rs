@@ -83,7 +83,7 @@ pub struct Account {
     /// Unspent outputs that are currently used as input for transactions
     // outputs used in transactions should be locked here so they don't get used again, which would result in a
     // conflicting transaction
-    locked_outputs: HashSet<OutputId>,
+    pub(crate) locked_outputs: HashSet<OutputId>,
     /// Unspent outputs
     // have unspent outputs in a separated hashmap so we don't need to iterate over all outputs we have
     unspent_outputs: HashMap<OutputId, OutputData>,

@@ -9,14 +9,14 @@ use zeroize::Zeroize;
 
 use self::stronghold_snapshot::{read_data_from_stronghold_snapshot, store_data_to_stronghold};
 #[cfg(feature = "storage")]
-use crate::wallet::account_manager::AccountManagerBuilder;
+use crate::wallet::WalletBuilder;
 use crate::{
     client::secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerDto},
-    wallet::account_manager::{AccountHandle, AccountManager},
+    wallet::{AccountHandle, Wallet},
 };
 
-impl AccountManager {
-    /// Backup the account manager data in a Stronghold file
+impl Wallet {
+    /// Backup the wallet data in a Stronghold file
     /// stronghold_password must be the current one when Stronghold is used as SecretManager.
     pub async fn backup(&self, backup_path: PathBuf, mut stronghold_password: String) -> crate::wallet::Result<()> {
         log::debug!("[backup] creating a stronghold backup");
@@ -108,7 +108,7 @@ impl AccountManager {
             }
         });
 
-        // Update AccountManager with read data
+        // Update Wallet with read data
         if ignore_if_coin_type_mismatch.is_none() {
             if let Some(read_client_options) = read_client_options {
                 // If the nodes are from the same network as the current client options, then extend it
@@ -166,7 +166,7 @@ impl AccountManager {
         // store new data
         #[cfg(feature = "storage")]
         {
-            let account_manager_builder = AccountManagerBuilder::new()
+            let wallet_builder = WalletBuilder::new()
                 .with_secret_manager_arc(self.secret_manager.clone())
                 .with_storage_path(
                     &self
@@ -179,12 +179,12 @@ impl AccountManager {
                 )
                 .with_client_options(self.client_options.read().await.clone())
                 .with_coin_type(self.coin_type.load(Ordering::Relaxed));
-            // drop secret manager, otherwise we get a deadlock in save_account_manager_data
+            // drop secret manager, otherwise we get a deadlock in save_wallet_data
             drop(secret_manager);
             self.storage_manager
                 .lock()
                 .await
-                .save_account_manager_data(&account_manager_builder)
+                .save_wallet_data(&wallet_builder)
                 .await?;
             // also save account to db
             for account in accounts.iter() {

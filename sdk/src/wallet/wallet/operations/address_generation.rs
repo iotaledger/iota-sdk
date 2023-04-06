@@ -8,13 +8,13 @@ use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
     types::block::address::Address,
-    wallet::account_manager::AccountManager,
+    wallet::Wallet,
 };
 
-impl AccountManager {
+impl Wallet {
     /// Generate an address without storing it
     /// ```ignore
-    /// let public_addresses = account_manager
+    /// let public_addresses = wallet
     ///     .generate_address(
     ///         0,
     ///         false,

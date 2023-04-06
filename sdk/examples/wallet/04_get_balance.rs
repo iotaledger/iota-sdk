@@ -5,15 +5,15 @@
 // In this example we sync the account and get the balance
 // Rename `.env.example` to `.env` first
 
-use iota_sdk::wallet::{account_manager::AccountManager, Result};
+use iota_sdk::wallet::{Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Create the account manager
-    let manager = AccountManager::builder().finish().await?;
+    // Create the wallet
+    let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = manager.get_account("Alice").await?;
+    let account = wallet.get_account("Alice").await?;
 
     // Sync and get the balance
     let _account_balance = account.sync(None).await?;

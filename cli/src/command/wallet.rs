@@ -6,7 +6,7 @@ use std::{fs::File, io::prelude::*};
 use clap::{Args, Parser, Subcommand};
 use iota_sdk::{
     client::{constants::SHIMMER_COIN_TYPE, secret::SecretManager, utils::generate_mnemonic},
-    wallet::{account_manager::AccountManager, ClientOptions},
+    wallet::{ClientOptions, Wallet},
 };
 use log::LevelFilter;
 
@@ -14,16 +14,16 @@ use crate::{error::Error, helper::get_password, println_log_info};
 
 #[derive(Debug, Clone, Parser)]
 #[command(author, version, about, long_about = None, propagate_version = true)]
-pub struct AccountManagerCli {
+pub struct WalletCli {
     #[command(subcommand)]
-    pub command: Option<AccountManagerCommand>,
+    pub command: Option<WalletCommand>,
     pub account: Option<String>,
     #[arg(short, long)]
     pub log_level: Option<LevelFilter>,
 }
 
 #[derive(Debug, Clone, Subcommand)]
-pub enum AccountManagerCommand {
+pub enum WalletCommand {
     /// Create a stronghold backup file.
     Backup {
         /// Path of the created stronghold backup file.
@@ -67,18 +67,18 @@ pub struct InitParameters {
     pub coin_type: Option<u32>,
 }
 
-pub async fn backup_command(manager: &AccountManager, path: String, password: &str) -> Result<(), Error> {
-    manager.backup(path.clone().into(), password.into()).await?;
+pub async fn backup_command(wallet: &Wallet, path: String, password: &str) -> Result<(), Error> {
+    wallet.backup(path.clone().into(), password.into()).await?;
 
     println_log_info!("Wallet has been backed up to \"{path}\".");
 
     Ok(())
 }
 
-pub async fn change_password_command(manager: &AccountManager, current: &str) -> Result<(), Error> {
+pub async fn change_password_command(wallet: &Wallet, current: &str) -> Result<(), Error> {
     let new = get_password("Stronghold new password", true)?;
 
-    manager.change_stronghold_password(current, &new).await?;
+    wallet.change_stronghold_password(current, &new).await?;
 
     Ok(())
 }
@@ -87,8 +87,8 @@ pub async fn init_command(
     secret_manager: SecretManager,
     storage_path: String,
     parameters: InitParameters,
-) -> Result<AccountManager, Error> {
-    let account_manager = AccountManager::builder()
+) -> Result<Wallet, Error> {
+    let wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_client_options(
             ClientOptions::new().with_node(
@@ -117,14 +117,14 @@ pub async fn init_command(
         "It is the only way to recover your account if you ever forget your password and/or lose the stronghold file."
     );
 
-    if let SecretManager::Stronghold(secret_manager) = &mut *account_manager.get_secret_manager().write().await {
+    if let SecretManager::Stronghold(secret_manager) = &mut *wallet.get_secret_manager().write().await {
         secret_manager.store_mnemonic(mnemonic).await?;
     } else {
         panic!("cli-wallet only supports Stronghold-backed secret managers at the moment.");
     }
     println_log_info!("Mnemonic stored successfully");
 
-    Ok(account_manager)
+    Ok(wallet)
 }
 
 pub async fn mnemonic_command() -> Result<(), Error> {
@@ -142,8 +142,8 @@ pub async fn mnemonic_command() -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn new_command(manager: &AccountManager, alias: Option<String>) -> Result<String, Error> {
-    let mut builder = manager.create_account();
+pub async fn new_command(wallet: &Wallet, alias: Option<String>) -> Result<String, Error> {
+    let mut builder = wallet.create_account();
 
     if let Some(alias) = alias {
         builder = builder.with_alias(alias);
@@ -162,8 +162,8 @@ pub async fn restore_command(
     storage_path: String,
     backup_path: String,
     password: String,
-) -> Result<AccountManager, Error> {
-    let account_manager = AccountManager::builder()
+) -> Result<Wallet, Error> {
+    let wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         // Will be overwritten by the backup's value.
         .with_client_options(ClientOptions::new().with_node("https://api.testnet.shimmer.network")?)
@@ -173,23 +173,19 @@ pub async fn restore_command(
         .finish()
         .await?;
 
-    account_manager
-        .restore_backup(backup_path.into(), password, None)
-        .await?;
+    wallet.restore_backup(backup_path.into(), password, None).await?;
 
-    Ok(account_manager)
+    Ok(wallet)
 }
 
-pub async fn set_node_command(manager: &AccountManager, url: String) -> Result<(), Error> {
-    manager
-        .set_client_options(ClientOptions::new().with_node(&url)?)
-        .await?;
+pub async fn set_node_command(wallet: &Wallet, url: String) -> Result<(), Error> {
+    wallet.set_client_options(ClientOptions::new().with_node(&url)?).await?;
 
     Ok(())
 }
 
-pub async fn sync_command(manager: &AccountManager) -> Result<(), Error> {
-    let total_balance = manager.sync(None).await?;
+pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
+    let total_balance = wallet.sync(None).await?;
 
     println_log_info!("Synchronized all accounts: {:?}", total_balance);
 

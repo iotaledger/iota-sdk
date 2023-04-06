@@ -1,14 +1,11 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example pong --release
+//! In this example we will try to send transactions from multiple threads simultaneously to the first 300 addresses of
+//! the first account (ping_account).
+//!
+//! `cargo run --example pong --release`
 
-// In this example we will try to send transactions from multiple threads simultaneously to the first 300 addresses of
-// the first account (ping_account)
-
-use std::env;
-
-use dotenv::dotenv;
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -16,20 +13,20 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
-    wallet::{account_manager::AccountManager, ClientOptions, Result},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
-    let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(&env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let manager = AccountManager::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -39,11 +36,11 @@ async fn main() -> Result<()> {
 
     // Get account or create a new one
     let account_alias = "ping";
-    let ping_account = match manager.get_account(account_alias.to_string()).await {
+    let ping_account = match wallet.get_account(account_alias.to_string()).await {
         Ok(account) => account,
         _ => {
             // first we'll create an example account and store it
-            manager
+            wallet
                 .create_account()
                 .with_alias(account_alias.to_string())
                 .finish()
@@ -51,11 +48,11 @@ async fn main() -> Result<()> {
         }
     };
     let account_alias = "pong";
-    let pong_account = match manager.get_account(account_alias.to_string()).await {
+    let pong_account = match wallet.get_account(account_alias.to_string()).await {
         Ok(account) => account,
         _ => {
             // first we'll create an example account and store it
-            manager
+            wallet
                 .create_account()
                 .with_alias(account_alias.to_string())
                 .finish()
@@ -82,7 +79,11 @@ async fn main() -> Result<()> {
         };
         println!(
             "{}",
-            request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &addresses[0].address().to_bech32()).await?
+            request_funds_from_faucet(
+                &std::env::var("FAUCET_URL").unwrap(),
+                &addresses[0].address().to_bech32()
+            )
+            .await?
         );
         addresses
     };
@@ -107,7 +108,7 @@ async fn main() -> Result<()> {
                     println!(
                         "Block from thread {} sent: {}/api/core/v2/blocks/{}",
                         n,
-                        &env::var("NODE_URL").unwrap(),
+                        &std::env::var("NODE_URL").unwrap(),
                         tx.block_id.expect("no block created yet")
                     );
                     iota_sdk::wallet::Result::Ok(n)

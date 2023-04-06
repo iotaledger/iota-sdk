@@ -1,6 +1,6 @@
 {
   "name": "@iota/wallet",
-  "version": "2.0.3-rc.30",
+  "version": "2.0.3-rc.31",
   "description": "Node.js binding to the wallet library",
   "main": "out/lib/index.js",
   "types": "out/lib/index.d.ts",
@@ -13,7 +13,7 @@
     "docs-wiki-build": "typedoc --githubPages false --disableSources --excludePrivate --excludeInternal --excludeNotDocumented --plugin typedoc-plugin-markdown --theme markdown --hideBreadcrumbs --entryDocument api_ref.md --readme none --hideGenerator --sort source-order --exclude ./**/src/index.ts --out ../../documentation/docs/references/nodejs ./lib/index.ts ",
     "prebuild": "prebuild --runtime napi --target 6 --prepack scripts/neon-build.js --strip",
     "rebuild": "node scripts/neon-build && tsc && node scripts/strip.js",
-    "install": "prebuild-install --runtime napi --tag-prefix='nodejs-binding-v' && tsc || npm run rebuild",
+    "install": "prebuild-install --runtime napi --tag-prefix='wallet-nodejs-binding-v' && tsc || npm run rebuild",
     "test": "jest --forceExit"
   },
   "author": "IOTA Foundation <contact@iota.org>",
@@ -49,7 +49,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iotaledger/wallet.rs.git"
+    "url": "git+https://github.com/iotaledger/iota-sdk.git"
   },
   "binary": {
     "napi_versions": [
@@ -57,7 +57,7 @@
     ]
   },
   "bugs": {
-    "url": "https://github.com/iotaledger/wallet.rs/issues"
+    "url": "https://github.com/iotaledger/iota-sdk/issues"
   },
-  "homepage": "https://github.com/iotaledger/wallet.rs#readme"
+  "homepage": "https://github.com/iotaledger/iota-sdk#readme"
 }

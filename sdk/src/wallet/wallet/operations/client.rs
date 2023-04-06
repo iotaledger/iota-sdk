@@ -4,16 +4,16 @@
 use std::collections::HashSet;
 
 #[cfg(feature = "storage")]
-use crate::wallet::account_manager::builder::AccountManagerBuilder;
+use crate::wallet::WalletBuilder;
 use crate::{
     client::{
         node_manager::node::{Node, NodeAuth, NodeDto},
         NodeInfoWrapper, Url,
     },
-    wallet::{account_manager::AccountManager, ClientOptions},
+    wallet::{ClientOptions, Wallet},
 };
 
-impl AccountManager {
+impl Wallet {
     /// Sets the client options for all accounts and sets the new bech32_hrp for the addresses.
     pub async fn set_client_options(&self, options: ClientOptions) -> crate::wallet::Result<()> {
         log::debug!("[set_client_options]");
@@ -30,15 +30,13 @@ impl AccountManager {
 
         #[cfg(feature = "storage")]
         {
-            // Update account manager data with new client options
-            let account_manager_builder = AccountManagerBuilder::from_account_manager(self)
-                .await
-                .with_client_options(options);
+            // Update wallet data with new client options
+            let wallet_builder = WalletBuilder::from_wallet(self).await.with_client_options(options);
 
             self.storage_manager
                 .lock()
                 .await
-                .save_account_manager_data(&account_manager_builder)
+                .save_wallet_data(&wallet_builder)
                 .await?;
         }
 
@@ -144,15 +142,15 @@ impl AccountManager {
 
         #[cfg(feature = "storage")]
         {
-            // Update account manager data with new client options
-            let account_manager_builder = AccountManagerBuilder::from_account_manager(self)
+            // Update wallet data with new client options
+            let wallet_builder = WalletBuilder::from_wallet(self)
                 .await
                 .with_client_options(new_client_options.clone());
 
             self.storage_manager
                 .lock()
                 .await
-                .save_account_manager_data(&account_manager_builder)
+                .save_wallet_data(&wallet_builder)
                 .await?;
         }
 

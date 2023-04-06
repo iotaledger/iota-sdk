@@ -1,9 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET /api/core/v2/info`.
-//! Returns general information about the node.
-//! Run: `cargo run --example node_api_core_get_info --release -- [NODE URL]`.
+//! Returns general information about the node by calling `GET /api/core/v2/info`.
+//!
+//! `cargo run --example node_api_core_get_info --release -- [NODE URL]`
 
 use iota_sdk::client::{Client, Result};
 
@@ -11,8 +11,8 @@ use iota_sdk::client::{Client, Result};
 async fn main() -> Result<()> {
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses dotenv, which is not safe for use in production.
-        dotenv::dotenv().ok();
+        // This example uses secrets in environment variables for simplicity which should not be done in production.
+        dotenvy::dotenv().ok();
         std::env::var("NODE_URL").unwrap()
     });
 

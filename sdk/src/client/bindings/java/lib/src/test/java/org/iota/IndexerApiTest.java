@@ -5,8 +5,8 @@ package org.iota;
 
 import org.iota.apis.NodeIndexerApi;
 import org.iota.types.*;
-import org.iota.types.expections.ClientException;
-import org.iota.types.expections.NoFundsReceivedFromFaucetException;
+import org.iota.types.exceptions.ClientException;
+import org.iota.types.exceptions.NoFundsReceivedFromFaucetException;
 import org.iota.types.ids.*;
 import org.iota.types.output_builder.AliasOutputBuilderParams;
 import org.iota.types.output_builder.FoundryOutputBuilderParams;
