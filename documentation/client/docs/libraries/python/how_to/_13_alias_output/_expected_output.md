@@ -1,10 +1,10 @@
 ```json
 {
     "type": 4,
-    "amount": "59200",
+    "amount": "61600",
     "aliasId": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "stateIndex": 0,
-    "stateMetadata": "0x68656c6c6f",
+    "stateMetadata": "0x48656c6c6f2c20576f726c6421",
     "foundryCounter": 0,
     "unlockConditions": [
         {
@@ -32,7 +32,7 @@
         },
         {
             "type": 2,
-            "data": "0x68656c6c6f"
+            "data": "0x48656c6c6f2c20576f726c6421"
         }
     ],
     "immutableFeatures": [
@@ -45,7 +45,7 @@
         },
         {
             "type": 2,
-            "data": "0x68656c6c6f"
+            "data": "0x48656c6c6f2c20576f726c6421"
         }
     ]
 }
