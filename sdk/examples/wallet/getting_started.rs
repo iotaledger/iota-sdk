@@ -8,7 +8,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
-    wallet::{account_manager::AccountManager, ClientOptions, Result},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
 const NODE_URL: &str = "https://api.testnet.shimmer.network";
@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
     let client_options = ClientOptions::new().with_node(NODE_URL)?;
 
     // Set up and store the wallet.
-    let manager = AccountManager::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -35,15 +35,11 @@ async fn main() -> Result<()> {
         .await?;
 
     // Generate a mnemonic and store it in the Stronghold vault.
-    let mnemonic = manager.generate_mnemonic()?;
-    manager.store_mnemonic(mnemonic.clone()).await?;
+    let mnemonic = wallet.generate_mnemonic()?;
+    wallet.store_mnemonic(mnemonic.clone()).await?;
 
     // Create an account and get the first address.
-    let account = manager
-        .create_account()
-        .with_alias("Alice".to_string())
-        .finish()
-        .await?;
+    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
     let address = &account.addresses().await?[0];
 
     // Print the account data.
