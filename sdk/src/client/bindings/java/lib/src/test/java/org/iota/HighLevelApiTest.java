@@ -5,9 +5,9 @@ package org.iota;
 
 import org.iota.types.Block;
 import org.iota.types.UtxoInput;
-import org.iota.types.expections.ClientException;
-import org.iota.types.expections.NoFundsReceivedFromFaucetException;
-import org.iota.types.expections.InitializeClientException;
+import org.iota.types.exceptions.ClientException;
+import org.iota.types.exceptions.NoFundsReceivedFromFaucetException;
+import org.iota.types.exceptions.InitializeClientException;
 import org.iota.types.ids.BlockId;
 import org.iota.types.ids.OutputId;
 import org.iota.types.secret.*;
