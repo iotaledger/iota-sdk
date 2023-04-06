@@ -284,14 +284,6 @@ def send_amount(addresses_with_amount, options=None)
 
 Send amount.
 
-### send\_micro\_transaction
-
-```python
-def send_micro_transaction(addresses_with_micro_amount, options=None)
-```
-
-Send micro transaction.
-
 ### send\_native\_tokens
 
 ```python
@@ -356,4 +348,3 @@ def request_funds_from_faucet(url=None, address=None)
 ```
 
 Requests funds from the faucet
-

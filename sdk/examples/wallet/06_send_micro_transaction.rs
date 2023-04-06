@@ -6,7 +6,7 @@
 //!
 //! `cargo run --example send_micro_transaction --release`
 
-use iota_sdk::wallet::{AddressWithMicroAmount, Result, Wallet};
+use iota_sdk::wallet::{account::TransactionOptions, AddressWithAmount, Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -24,14 +24,20 @@ async fn main() -> Result<()> {
         .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let outputs = vec![AddressWithMicroAmount {
-        address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
-        amount: 1,
-        return_address: None,
-        expiration: None,
-    }];
+    let outputs = vec![AddressWithAmount::new(
+        "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
+        1,
+    )];
 
-    let transaction = account.send_micro_transaction(outputs, None).await?;
+    let transaction = account
+        .send_amount(
+            outputs,
+            TransactionOptions {
+                allow_micro_amount: true,
+                ..Default::default()
+            },
+        )
+        .await?;
 
     println!(
         "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",

@@ -9,7 +9,6 @@ import type {
     AccountMeta,
     Address,
     AddressWithAmount,
-    AddressWithMicroAmount,
     AddressNativeTokens,
     AddressNftId,
     AddressGenerationOptions,
@@ -52,7 +51,7 @@ type MessageHandler = Awaited<ReturnType<typeof MessageHandler>>
 
 /** The Account factory function. */
 export function createAccount(accountMeta: AccountMeta, messageHandler: MessageHandler) {
-    
+
     return {
         /**
          * Build an `AliasOutput`.
@@ -909,31 +908,6 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
                     name: 'sendAmount',
                     data: {
                         addressesWithAmount,
-                        options: transactionOptions,
-                    },
-                },
-            );
-
-            return JSON.parse(response).payload;
-        },
-
-        /**
-         * Send a micro transaction with amount below minimum storage deposit.
-         * @param addressesWithMicroAmount Addresses with micro amounts.
-         * @param transactionOptions The options to define a `RemainderValueStrategy`
-         * or custom inputs.
-         * @returns The sent transaction.
-         */
-        async sendMicroTransaction(
-            addressesWithMicroAmount: AddressWithMicroAmount[],
-            transactionOptions?: TransactionOptions,
-        ): Promise<Transaction> {
-            const response = await messageHandler.callAccountMethod(
-                accountMeta.index,
-                {
-                    name: 'sendMicroTransaction',
-                    data: {
-                        addressesWithMicroAmount,
                         options: transactionOptions,
                     },
                 },

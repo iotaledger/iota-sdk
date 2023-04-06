@@ -28,6 +28,8 @@ pub struct TransactionOptions {
     pub mandatory_inputs: Option<Vec<OutputId>>,
     pub burn: Option<Burn>,
     pub note: Option<String>,
+    #[serde(rename = "allowMicroAmount", default)]
+    pub allow_micro_amount: bool,
 }
 
 impl TransactionOptions {
@@ -44,6 +46,7 @@ impl TransactionOptions {
             mandatory_inputs: value.mandatory_inputs.clone(),
             burn: value.burn.as_ref().map(Burn::try_from).transpose()?,
             note: value.note.clone(),
+            allow_micro_amount: value.allow_micro_amount,
         })
     }
 }
@@ -63,6 +66,8 @@ pub struct TransactionOptionsDto {
     pub mandatory_inputs: Option<Vec<OutputId>>,
     pub burn: Option<BurnDto>,
     pub note: Option<String>,
+    #[serde(rename = "allowMicroAmount", default)]
+    pub allow_micro_amount: bool,
 }
 
 #[allow(clippy::enum_variant_names)]

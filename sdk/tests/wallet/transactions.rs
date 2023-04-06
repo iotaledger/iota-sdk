@@ -19,10 +19,10 @@ async fn send_amount() -> Result<()> {
     let amount = 1_000_000;
     let tx = account_0
         .send_amount(
-            vec![AddressWithAmount {
-                address: account_1.addresses().await?[0].address().to_bech32(),
+            vec![AddressWithAmount::new(
+                account_1.addresses().await?[0].address().to_bech32(),
                 amount,
-            }],
+            )],
             None,
         )
         .await?;
@@ -52,11 +52,11 @@ async fn send_amount_127_outputs() -> Result<()> {
     let tx = account_0
         .send_amount(
             vec![
-                AddressWithAmount {
-                    address: account_1.addresses().await?[0].address().to_bech32(),
+                AddressWithAmount::new(
+                    account_1.addresses().await?[0].address().to_bech32(),
                     amount,
-                    // Only 127, because we need one remainder
-                };
+                );
+                // Only 127, because we need one remainder
                 127
             ],
             None,
@@ -88,13 +88,7 @@ async fn send_amount_custom_input() -> Result<()> {
     let amount = 1_000_000;
     let tx = account_0
         .send_amount(
-            vec![
-                AddressWithAmount {
-                    address: account_1.addresses().await?[0].address().to_bech32(),
-                    amount,
-                };
-                10
-            ],
+            vec![AddressWithAmount::new(account_1.addresses().await?[0].address().to_bech32(), amount); 10],
             None,
         )
         .await?;
@@ -110,10 +104,10 @@ async fn send_amount_custom_input() -> Result<()> {
     let custom_input = &account_1.unspent_outputs(None).await?[5];
     let tx = account_1
         .send_amount(
-            vec![AddressWithAmount {
-                address: account_0.addresses().await?[0].address().to_bech32(),
+            vec![AddressWithAmount::new(
+                account_0.addresses().await?[0].address().to_bech32(),
                 amount,
-            }],
+            )],
             Some(TransactionOptions {
                 custom_inputs: Some(vec![custom_input.output_id]),
                 ..Default::default()

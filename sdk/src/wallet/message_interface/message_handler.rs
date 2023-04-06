@@ -45,8 +45,7 @@ use crate::{
             account_method::AccountMethod, dtos::AccountDto, message::Message, response::Response,
             AddressWithUnspentOutputsDto,
         },
-        AddressWithAmount, AddressWithMicroAmount, IncreaseNativeTokenSupplyOptions, NativeTokenOptions, NftOptions,
-        Result, Wallet,
+        AddressWithAmount, IncreaseNativeTokenSupplyOptions, NativeTokenOptions, NftOptions, Result, Wallet,
     },
 };
 
@@ -836,24 +835,6 @@ impl WalletMessageHandler {
                                 .iter()
                                 .map(AddressWithAmount::try_from)
                                 .collect::<Result<Vec<AddressWithAmount>>>()?,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
-                        .await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
-                })
-                .await
-            }
-            AccountMethod::SendMicroTransaction {
-                addresses_with_micro_amount,
-                options,
-            } => {
-                convert_async_panics(|| async {
-                    let transaction = account_handle
-                        .send_micro_transaction(
-                            addresses_with_micro_amount
-                                .iter()
-                                .map(AddressWithMicroAmount::try_from)
-                                .collect::<Result<Vec<AddressWithMicroAmount>>>()?,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;

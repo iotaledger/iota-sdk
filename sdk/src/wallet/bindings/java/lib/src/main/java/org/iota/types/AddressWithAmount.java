@@ -7,6 +7,12 @@ public class AddressWithAmount extends AbstractObject {
     private String address;
     /// Amount
     private String amount;
+    /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
+    /// first address of the account
+    private String returnAddress;
+    /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
+    /// receiver before. Default is 1 day
+    private int expiration;
 
     public String getAddress() {
         return address;
@@ -23,6 +29,24 @@ public class AddressWithAmount extends AbstractObject {
 
     public AddressWithAmount withAmount(String amount) {
         this.amount = amount;
+        return this;
+    }
+
+    public String getReturnAddress() {
+        return returnAddress;
+    }
+
+    public AddressWithAmount withReturnAddress(String returnAddress) {
+        this.returnAddress = returnAddress;
+        return this;
+    }
+
+    public int getExpiration() {
+        return expiration;
+    }
+
+    public AddressWithAmount withExpiration(int expiration) {
+        this.expiration = expiration;
         return this;
     }
 }

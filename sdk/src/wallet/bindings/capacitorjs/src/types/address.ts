@@ -19,6 +19,8 @@ export interface Address {
 export interface AddressWithAmount {
     address: string;
     amount: string;
+    returnAddress?: string;
+    expiration?: number;
 }
 
 /** Address with unspent outputs */
@@ -27,14 +29,6 @@ export interface AddressWithUnspentOutputs {
     keyIndex: number;
     internal: boolean;
     outputIds: string[];
-}
-
-/** Address with a base token amount for a micro transaction */
-export interface AddressWithMicroAmount {
-    address: string;
-    amount: string;
-    returnAddress?: string;
-    expiration?: number;
 }
 
 /** Address with native tokens */

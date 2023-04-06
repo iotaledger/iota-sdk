@@ -20,7 +20,7 @@ use crate::{
             types::{address::AddressWrapper, AccountAddress, AddressWithUnspentOutputs, TransactionDto},
             Account, OutputDataDto,
         },
-        AddressWithAmount, AddressWithMicroAmount,
+        AddressWithAmount,
     },
 };
 
@@ -31,27 +31,6 @@ pub struct AddressWithAmountDto {
     pub address: String,
     /// Amount
     pub amount: String,
-}
-
-impl TryFrom<&AddressWithAmountDto> for AddressWithAmount {
-    type Error = crate::wallet::Error;
-
-    fn try_from(value: &AddressWithAmountDto) -> crate::wallet::Result<Self> {
-        Ok(Self {
-            address: value.address.clone(),
-            amount: u64::from_str(&value.amount)
-                .map_err(|_| crate::client::Error::InvalidAmount(value.amount.clone()))?,
-        })
-    }
-}
-
-/// Dto for address with amount for `send_micro_transaction()`
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub struct AddressWithMicroAmountDto {
-    /// Bech32 encoded address
-    pub address: String,
-    /// Amount below the minimum storage deposit
-    pub amount: String,
     /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
     /// first address of the account
     #[serde(rename = "returnAddress")]
@@ -61,17 +40,16 @@ pub struct AddressWithMicroAmountDto {
     pub expiration: Option<u32>,
 }
 
-impl TryFrom<&AddressWithMicroAmountDto> for AddressWithMicroAmount {
+impl TryFrom<&AddressWithAmountDto> for AddressWithAmount {
     type Error = crate::wallet::Error;
 
-    fn try_from(value: &AddressWithMicroAmountDto) -> crate::wallet::Result<Self> {
-        Ok(Self {
-            address: value.address.clone(),
-            amount: u64::from_str(&value.amount)
-                .map_err(|_| crate::client::Error::InvalidAmount(value.amount.clone()))?,
-            return_address: value.return_address.clone(),
-            expiration: value.expiration,
-        })
+    fn try_from(value: &AddressWithAmountDto) -> crate::wallet::Result<Self> {
+        Ok(Self::new(
+            value.address.clone(),
+            u64::from_str(&value.amount).map_err(|_| crate::client::Error::InvalidAmount(value.amount.clone()))?,
+        )
+        .with_return_address(value.return_address.clone())
+        .with_expiration(value.expiration))
     }
 }
 
