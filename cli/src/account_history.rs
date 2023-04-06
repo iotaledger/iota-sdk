@@ -32,7 +32,7 @@ impl<T: ToString> History<T> for AccountHistory {
             return;
         }
 
-        // We only need to check size if we dont remove an item
+        // Check if we have used this command before
         match self.history.iter().position(|e| e == &entry) {
             Some(index) => {
                 // Remove the old command
