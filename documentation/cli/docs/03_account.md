@@ -396,10 +396,13 @@ Sends an amount to an address.
 
 #### Parameters
 
-| Name      | Optional  | Default | Example                                                         |
-| --------- | --------- | ------- | --------------------------------------------------------------- |
-| `address` | ✘         | N/A     | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 |
-| `amount`  | ✘         | N/A     | 1000000                                                         |
+| Name                 | Optional  | Default | Example                                                         |
+| -------------------- | --------- | ------- | --------------------------------------------------------------- |
+| `address`            | ✘         | N/A     | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 |
+| `amount`             | ✘         | N/A     | 1000000                                                         |
+| `return_address`     | ✓         | 1st     | smr1qrvddncqclzrxrkxhuy4cjr9aqth5nu0h5kuzhr4phj5u67mmq29zmywk33 |
+| `expiration`         | ✓         | 86400   | 86400                                                           |
+| `allow_micro_amount` | ✓         | false   | N/A                                                             |
 
 #### Example
 
