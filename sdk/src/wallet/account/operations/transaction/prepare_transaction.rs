@@ -25,7 +25,7 @@ impl AccountHandle {
     pub async fn prepare_transaction(
         &self,
         outputs: Vec<Output>,
-        options: impl Into<Option<TransactionOptions>>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_transaction");
         let options = options.into();

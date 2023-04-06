@@ -83,7 +83,7 @@ impl AccountHandle {
     pub async fn send_amount(
         &self,
         addresses_with_amount: Vec<AddressWithAmount>,
-        options: impl Into<Option<TransactionOptions>>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         let prepared_transaction = self.prepare_send_amount(addresses_with_amount, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
@@ -94,7 +94,7 @@ impl AccountHandle {
     pub async fn prepare_send_amount(
         &self,
         addresses_with_amount: Vec<AddressWithAmount>,
-        options: impl Into<Option<TransactionOptions>>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_send_amount");
         let options = options.into();
