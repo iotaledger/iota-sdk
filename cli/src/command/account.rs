@@ -508,7 +508,7 @@ pub async fn mint_nft_command(
     issuer: Option<String>,
 ) -> Result<(), Error> {
     let tag = if let Some(hex) = tag {
-        Some(prefix_hex::decode(&hex).map_err(|e| Error::Miscellaneous(e.to_string()))?)
+        Some(prefix_hex::decode(hex).map_err(|e| Error::Miscellaneous(e.to_string()))?)
     } else {
         None
     };

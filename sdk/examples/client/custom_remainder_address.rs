@@ -1,9 +1,10 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example custom_remainder_address --release
 //! In this example we will send 9_000_000 tokens to a given receiver and 1_000_000 tokens to a custom remainder
 //! address. The used addresses belong to the first seed in .env.example.
+//! 
+//! `cargo run --example custom_remainder_address --release`
 
 use iota_sdk::client::{
     node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet, secret::SecretManager, Client,
@@ -12,8 +13,8 @@ use iota_sdk::client::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv::dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
 

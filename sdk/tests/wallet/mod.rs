@@ -17,4 +17,5 @@ mod native_tokens;
 mod output_preparation;
 mod syncing;
 mod transactions;
+#[allow(clippy::module_inception)]
 mod wallet;

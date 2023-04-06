@@ -1,14 +1,12 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example output_consolidation --release
-// In this example we will consolidate basic outputs from an account with only an AddressUnlockCondition by sending them
-// to the same address again
-// Rename `.env.example` to `.env` first
+//! In this example we will consolidate basic outputs from an account with only an AddressUnlockCondition by sending
+//! them to the same address again.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example output_consolidation --release`
 
-use std::env;
-
-use dotenv::dotenv;
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -19,14 +17,14 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
-    let mnemonic: &str = &env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
+    let mnemonic: &str = &std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
     let mnemonic_secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic).unwrap();
     let secret_manager = SecretManager::Mnemonic(mnemonic_secret_manager);
 
-    let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     // Create the wallet
     let wallet = Wallet::builder()
@@ -41,7 +39,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Sync account to make sure account is updated with outputs from previous examples

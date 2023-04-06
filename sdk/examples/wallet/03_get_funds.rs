@@ -1,13 +1,11 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example get_funds --release
-// In this example we request funds from the faucet to our address
-// Rename `.env.example` to `.env` first
+//! In this example we request funds from the faucet to our address.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example get_funds --release`
 
-use std::env;
-
-use dotenv::dotenv;
 use iota_sdk::{
     client::request_funds_from_faucet,
     wallet::{Result, Wallet},
@@ -15,8 +13,8 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     // Create the wallet
     let wallet = Wallet::builder().finish().await?;
@@ -32,7 +30,7 @@ async fn main() -> Result<()> {
     println!("Starting available funds: {funds_before}");
 
     let faucet_response =
-        request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &address[0].address().to_bech32()).await?;
+        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &address[0].address().to_bech32()).await?;
 
     println!("Response from faucet: {faucet_response}");
 

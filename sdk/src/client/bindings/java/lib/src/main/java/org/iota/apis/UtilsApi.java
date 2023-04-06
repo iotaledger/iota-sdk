@@ -5,8 +5,8 @@ package org.iota.apis;
 
 import com.google.gson.JsonObject;
 import org.iota.types.*;
-import org.iota.types.expections.ClientException;
-import org.iota.types.expections.InitializeClientException;
+import org.iota.types.exceptions.ClientException;
+import org.iota.types.exceptions.InitializeClientException;
 import org.iota.types.ids.*;
 
 public class UtilsApi {

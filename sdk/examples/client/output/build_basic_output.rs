@@ -1,7 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example build_basic_output --release
+//! In this example we will build basic outputs with different feature blocks.
+//!
+//! `cargo run --example build_basic_output --release`
 
 use iota_sdk::{
     client::{Client, Result},
@@ -18,12 +20,10 @@ use iota_sdk::{
     },
 };
 
-/// In this example we will send basic outputs with different feature blocks
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production!
-    dotenv::dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
 

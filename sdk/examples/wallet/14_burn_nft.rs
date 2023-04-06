@@ -1,19 +1,17 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example burn_nft --release
-// In this example we will burn an existing nft output
-// Rename `.env.example` to `.env` first
+//! In this example we will burn an existing nft output.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example burn_nft --release`
 
-use std::env;
-
-use dotenv::dotenv;
 use iota_sdk::wallet::{Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     // Create the wallet
     let wallet = Wallet::builder().finish().await?;
@@ -29,7 +27,7 @@ async fn main() -> Result<()> {
 
         // Set the stronghold password
         wallet
-            .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+            .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
         let transaction = account.burn_nft(*nft_id, None).await?;
