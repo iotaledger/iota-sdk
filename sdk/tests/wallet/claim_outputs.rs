@@ -6,7 +6,10 @@ use iota_sdk::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, UnlockCondition,
     },
-    wallet::{account::OutputsToClaim, AddressNativeTokens, AddressWithAmount, NativeTokenOptions, Result, U256},
+    wallet::{
+        account::{OutputsToClaim, TransactionOptions},
+        AddressNativeTokens, AddressWithAmount, NativeTokenOptions, Result, U256,
+    },
 };
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
@@ -28,7 +31,10 @@ async fn claim_2_basic_outputs() -> Result<()> {
                 AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_bech32(), micro_amount),
                 AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_bech32(), micro_amount),
             ],
-            None,
+            TransactionOptions {
+                allow_micro_amount: true,
+                ..Default::default()
+            },
         )
         .await?;
 

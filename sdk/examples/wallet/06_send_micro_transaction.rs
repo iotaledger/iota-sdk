@@ -6,7 +6,7 @@
 //!
 //! `cargo run --example send_micro_transaction --release`
 
-use iota_sdk::wallet::{AddressWithAmount, Result, Wallet};
+use iota_sdk::wallet::{account::TransactionOptions, AddressWithAmount, Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -29,7 +29,15 @@ async fn main() -> Result<()> {
         1,
     )];
 
-    let transaction = account.send_amount(outputs, None).await?;
+    let transaction = account
+        .send_amount(
+            outputs,
+            TransactionOptions {
+                allow_micro_amount: true,
+                ..Default::default()
+            },
+        )
+        .await?;
 
     println!(
         "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",

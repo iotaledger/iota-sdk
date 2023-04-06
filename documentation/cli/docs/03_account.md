@@ -392,8 +392,7 @@ Get the participation overview only for a specific event.
 
 ### `send`
 
-Sends an amount to an address. May include a StorageDepositReturn and Expiration Unlock Conditions if
-the amount is small.
+Sends an amount to an address.
 
 #### Parameters
 

@@ -713,7 +713,8 @@ Prepare a send amount transaction, useful for offline signing.
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `addressesWithAmount` | [`AddressWithAmount`](../interfaces/AddressWithAmount.md)[] | Address with amounts to send. |
-| `options?` | [`TransactionOptions`](../interfaces/TransactionOptions.md) | The options to define a `RemainderValueStrategy` or custom inputs. |
+| `options?` | [`TransactionOptions`](../interfaces/TransactionOptions.md) | The options to define a `RemainderValueStrategy`,
+ `allowSendMicro` or custom inputs. |
 
 #### Returns
 
@@ -795,7 +796,7 @@ Send a transaction with amounts from input addresses.
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `addressesWithAmount` | [`AddressWithAmount`](../interfaces/AddressWithAmount.md)[] | Addresses with amounts. |
-| `transactionOptions?` | [`TransactionOptions`](../interfaces/TransactionOptions.md) | The options to define a `RemainderValueStrategy` or custom inputs. |
+| `transactionOptions?` | [`TransactionOptions`](../interfaces/TransactionOptions.md) | The options to define a `RemainderValueStrategy`, `allowSendMicro` or custom inputs. |
 
 #### Returns
 

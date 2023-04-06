@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Builder methods `add_unlock_condition`, `replace_unlock_condition`, `with_unlock_conditions` are now generic;
 - Builder methods `add_feature`, `replace_feature`, `with_features` are now generic;
 - Builder methods `add_immutable_feature`, `replace_immutable_feature`, `with_immutable_features` are now generic;
+- Merge `send_amount` and `send_micro_transaction`;
 
 ### Fixed
 

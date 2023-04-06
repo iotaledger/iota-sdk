@@ -15,8 +15,10 @@ public class TransactionOptions extends AbstractObject {
     private RemainderValueStrategy remainderValueStrategy = new ReuseAddress();
     private TaggedDataPayload taggedDataPayload;
     private OutputId[] customInputs;
+    private OutputId[] mandatoryInputs;
     private boolean allowBurning;
     private String note;
+    private boolean allowMicroAmount;
 
     public RemainderValueStrategy getRemainderValueStrategy() {
         return remainderValueStrategy;
@@ -45,6 +47,15 @@ public class TransactionOptions extends AbstractObject {
         return this;
     }
 
+    public OutputId[] getMandatoryInputs() {
+        return mandatoryInputs;
+    }
+
+    public TransactionOptions withMandatoryInputs(OutputId[] mandatoryInputs) {
+        this.mandatoryInputs = mandatoryInputs;
+        return this;
+    }
+
     public boolean isAllowBurning() {
         return allowBurning;
     }
@@ -63,17 +74,27 @@ public class TransactionOptions extends AbstractObject {
         return this;
     }
 
+    public boolean isAllowMicroAmount() {
+        return allowMicroAmount;
+    }
+
+    public TransactionOptions withAllowMicroAmount(boolean allowMicroAmount) {
+        this.allowMicroAmount = allowMicroAmount;
+        return this;
+    }
+
     @JsonAdapter(RemainderValueStrategyAdapter.class)
-    public static abstract class RemainderValueStrategy {}
+    public static abstract class RemainderValueStrategy {
+    }
 
     class RemainderValueStrategyAdapter implements JsonSerializer<RemainderValueStrategy> {
         @Override
         public JsonElement serialize(RemainderValueStrategy src, Type typeOfSrc, JsonSerializationContext context) {
-            if(src instanceof ReuseAddress) {
+            if (src instanceof ReuseAddress) {
                 return new Gson().toJsonTree(src, ReuseAddress.class);
-            } else if(src instanceof ChangeAddress) {
+            } else if (src instanceof ChangeAddress) {
                 return new Gson().toJsonTree(src, ChangeAddress.class);
-            } else if(src instanceof CustomAddress) {
+            } else if (src instanceof CustomAddress) {
                 return new Gson().toJsonTree(src, CustomAddress.class);
             } else {
                 throw new JsonParseException("unknown type: " + src.getClass().getSimpleName());
@@ -82,9 +103,13 @@ public class TransactionOptions extends AbstractObject {
     }
 
     @JsonAdapter(ReuseAddressAdapter.class)
-    public static class ReuseAddress extends RemainderValueStrategy {}
+    public static class ReuseAddress extends RemainderValueStrategy {
+    }
+
     @JsonAdapter(ChangeAddressAdapter.class)
-    public static class ChangeAddress extends RemainderValueStrategy {}
+    public static class ChangeAddress extends RemainderValueStrategy {
+    }
+
     @JsonAdapter(CustomAddressAdapter.class)
     public static class CustomAddress extends RemainderValueStrategy {
         private AccountAddress content;

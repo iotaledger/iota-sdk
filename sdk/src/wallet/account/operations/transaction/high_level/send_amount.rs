@@ -83,7 +83,7 @@ impl AccountHandle {
     pub async fn send_amount(
         &self,
         addresses_with_amount: Vec<AddressWithAmount>,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>>,
     ) -> crate::wallet::Result<Transaction> {
         let prepared_transaction = self.prepare_send_amount(addresses_with_amount, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
@@ -94,9 +94,10 @@ impl AccountHandle {
     pub async fn prepare_send_amount(
         &self,
         addresses_with_amount: Vec<AddressWithAmount>,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>>,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_send_amount");
+        let options = options.into();
         let rent_structure = self.client.get_rent_structure().await?;
         let token_supply = self.client.get_token_supply().await?;
 
@@ -141,6 +142,13 @@ impl AccountHandle {
                     None,
                     token_supply,
                 )?;
+
+                if !options.as_ref().map(|o| o.allow_micro_amount).unwrap_or_default() {
+                    return Err(Error::InsufficientFunds {
+                        available: amount,
+                        required: amount + storage_deposit_amount,
+                    });
+                }
 
                 outputs.push(
                     // Add address_and_amount.amount+storage_deposit_amount, so receiver can get

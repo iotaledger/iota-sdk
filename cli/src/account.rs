@@ -139,7 +139,18 @@ pub async fn account_prompt_internal(
                     amount,
                     return_address,
                     expiration,
-                } => send_command(&account_handle, address, amount, return_address, expiration).await,
+                    allow_micro_amount,
+                } => {
+                    send_command(
+                        &account_handle,
+                        address,
+                        amount,
+                        return_address,
+                        expiration,
+                        allow_micro_amount,
+                    )
+                    .await
+                }
                 AccountCommand::SendNativeToken {
                     address,
                     token_id,

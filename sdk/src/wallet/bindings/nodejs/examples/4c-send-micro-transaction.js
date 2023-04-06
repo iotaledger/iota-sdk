@@ -21,6 +21,9 @@ async function run() {
                 address,
                 amount,
             },
+            {
+                allowMicroAmount: true,
+            }
         ]);
 
         console.log(response);

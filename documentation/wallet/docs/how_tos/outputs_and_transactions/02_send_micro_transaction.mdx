@@ -26,7 +26,8 @@ import RustCode from "../../libraries/rust/how_to/outputs_and_transactions/_06_s
 import RustOutput from "../../libraries/rust/how_to/outputs_and_transactions/_06_send_micro_transaction/_expected_output.md";
 import TipFaucet from "../../_admonitions/_tip_faucet.md";
 
-If you attempt to send an amount below the minimum storage deposit, the wallet will create a microtransaction.
+If you attempt to send an amount below the minimum storage deposit, the wallet will either fail or create a microtransaction
+depending on the `allow_micro_amount` option.
 
 <TipFaucet/>
 

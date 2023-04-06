@@ -19,7 +19,7 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{AccountAddress, TransactionDto},
-            AccountHandle, OutputsToClaim,
+            AccountHandle, OutputsToClaim, TransactionOptions,
         },
         AddressAndNftId, AddressNativeTokens, AddressWithAmount, NativeTokenOptions, NftOptions, U256,
     },
@@ -158,6 +158,10 @@ pub enum AccountCommand {
         /// receiver already. The expiration will only be used if one is necessary given the provided amount. If an
         /// expiration is needed but not provided, it will default to one day.
         expiration: Option<u32>,
+        /// Whether to send micro amounts. This will automatically add Storage Deposit Return and Expiration unlock
+        /// conditions if necessary.
+        #[arg(default_value_t = false)]
+        allow_micro_amount: bool,
     },
     /// Send native tokens.
     /// This will create an output with an expiration and storage deposit return unlock condition.
@@ -574,13 +578,22 @@ pub async fn send_command(
     amount: u64,
     return_address: Option<String>,
     expiration: Option<u32>,
+    allow_micro_amount: bool,
 ) -> Result<(), Error> {
     let outputs = vec![
         AddressWithAmount::new(address, amount)
             .with_return_address(return_address)
             .with_expiration(expiration),
     ];
-    let transaction = account_handle.send_amount(outputs, None).await?;
+    let transaction = account_handle
+        .send_amount(
+            outputs,
+            TransactionOptions {
+                allow_micro_amount,
+                ..Default::default()
+            },
+        )
+        .await?;
 
     println_log_info!(
         "Transaction sent:\n{:?}\n{:?}",
