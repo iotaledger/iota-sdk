@@ -1,4 +1,5 @@
-import type { ITaggedDataPayload, HexEncodedAmount, Burn } from '@iota/types';
+import type { ITaggedDataPayload, HexEncodedAmount } from '@iota/types';
+import type { Burn } from './burn';
 
 /** Options for the transaction creation */
 export interface TransactionOptions {
