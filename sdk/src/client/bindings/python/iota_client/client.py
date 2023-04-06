@@ -284,7 +284,7 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
         amount : int
             Amount of base token
         native_tokens : array of NativeToken
-            The native token to add to the output
+            The native tokens to add to the output
         features : array of Feature
             Features for this outputs
         immutable_features : array of Feature
