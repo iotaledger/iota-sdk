@@ -5,7 +5,7 @@ use iota_sdk::{
     client::{api::GetAddressesBuilderOptions, constants::SHIMMER_COIN_TYPE, secret::SecretManagerDto, ClientBuilder},
     wallet::account::types::AccountIdentifier,
 };
-use iota_sdk_bindings::{
+use iota_sdk_bindings_core::{
     call_client_method, call_wallet_method, message_handler::Result, AccountMethod, ClientMethod, ManagerOptions,
     Response, WalletMethod,
 };

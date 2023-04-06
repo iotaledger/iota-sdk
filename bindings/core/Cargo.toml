@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = [ "IOTA Stiftung" ]
 edition = "2021"
 homepage = "https://iota.org"
-description = "Bindings-core for the IOTA SDK"
+description = "Bindings core for the IOTA SDK"
 license = "Apache-2.0"
 
 [dependencies]

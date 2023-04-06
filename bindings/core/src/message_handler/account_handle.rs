@@ -138,6 +138,7 @@ pub async fn call_account_method(account_handle: &AccountHandle, method: Account
             burn_amount,
             options,
         } => {
+            // TODO: remove convert_async_panics().await from the individual variants
             convert_async_panics(|| async {
                 let transaction = account_handle
                     .burn_native_token(
