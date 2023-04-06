@@ -121,7 +121,7 @@ impl AccountHandle {
                     let (address, hrp) = Address::try_from_bech32_with_hrp(address)?;
                     if bech32_hrp != hrp {
                         Err(crate::client::Error::InvalidBech32Hrp {
-                            provided: hrp.to_string(),
+                            provided: hrp,
                             expected: bech32_hrp,
                         })?;
                     }
