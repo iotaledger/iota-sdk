@@ -6,7 +6,7 @@ use std::sync::{
     Arc,
 };
 #[cfg(feature = "storage")]
-use std::{path::PathBuf, sync::atomic::Ordering};
+use std::{collections::HashSet, path::PathBuf, sync::atomic::Ordering};
 
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "events")]
@@ -18,7 +18,10 @@ use crate::wallet::events::EventEmitter;
 #[cfg(all(feature = "storage", not(feature = "rocksdb")))]
 use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
-use crate::wallet::storage::{constants::default_storage_path, manager::ManagerStorage};
+use crate::wallet::{
+    account::Account,
+    storage::{constants::default_storage_path, manager::ManagerStorage},
+};
 use crate::{
     client::secret::SecretManager,
     wallet::{AccountHandle, ClientOptions, Wallet},
@@ -191,7 +194,11 @@ impl WalletBuilder {
         let event_emitter = Arc::new(Mutex::new(EventEmitter::new()));
 
         #[cfg(feature = "storage")]
-        let accounts = storage_manager.lock().await.get_accounts().await.unwrap_or_default();
+        let mut accounts = storage_manager.lock().await.get_accounts().await.unwrap_or_default();
+        // It happened that inputs got locked, the transaction failed, but they weren't unlocked again, so we do this
+        // here
+        #[cfg(feature = "storage")]
+        unlock_unused_inputs(&mut accounts)?;
         #[cfg(not(feature = "storage"))]
         let accounts = Vec::new();
         let mut account_handles: Vec<AccountHandle> = accounts
@@ -250,4 +257,29 @@ impl WalletBuilder {
             secret_manager: Some(wallet.secret_manager.clone()),
         }
     }
+}
+
+// Check if any of the locked inputs is not used in a transaction and unlock them, so they get available for new
+// transactions
+#[cfg(feature = "storage")]
+fn unlock_unused_inputs(accounts: &mut [Account]) -> crate::wallet::Result<()> {
+    log::debug!("[unlock_unused_inputs]");
+    for account in accounts.iter_mut() {
+        let mut used_inputs = HashSet::new();
+        for transaction_id in account.pending_transactions() {
+            if let Some(tx) = account.transactions().get(transaction_id) {
+                for input in &tx.inputs {
+                    used_inputs.insert(input.metadata.output_id()?);
+                }
+            }
+        }
+        account.locked_outputs.retain(|input| {
+            let used = used_inputs.contains(input);
+            if !used {
+                log::debug!("unlocking unused input {input}");
+            }
+            used
+        })
+    }
+    Ok(())
 }

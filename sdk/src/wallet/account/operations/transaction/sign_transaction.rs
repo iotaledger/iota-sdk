@@ -53,13 +53,20 @@ impl AccountHandle {
             }
         }
 
-        let unlocks = self
+        let unlocks = match self
             .secret_manager
             .read()
             .await
             .sign_transaction_essence(prepared_transaction_data, None)
-            .await?;
-
+            .await
+        {
+            Ok(res) => res,
+            Err(err) => {
+                // unlock outputs so they are available for a new transaction
+                self.unlock_inputs(&prepared_transaction_data.inputs_data).await?;
+                return Err(err.into());
+            }
+        };
         let transaction_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
 
         log::debug!("[TRANSACTION] signed transaction: {:?}", transaction_payload);
