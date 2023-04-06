@@ -3,11 +3,12 @@
 
 use std::path::PathBuf;
 
-use iota_sdk::wallet::{
-    account_manager::AccountManager,
-    iota_client::constants::SHIMMER_COIN_TYPE,
-    secret::{stronghold::StrongholdSecretManager, SecretManager},
-    ClientOptions, Result,
+use iota_sdk::{
+    client::{
+        constants::SHIMMER_COIN_TYPE,
+        secret::{stronghold::StrongholdSecretManager, SecretManager},
+    },
+    wallet::{account_manager::AccountManager, ClientOptions, Result},
 };
 
 const NODE_URL: &str = "https://api.testnet.shimmer.network";
