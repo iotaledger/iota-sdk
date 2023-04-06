@@ -27,17 +27,27 @@ impl<T: ToString> History<T> for AccountHistory {
     fn write(&mut self, val: &T) {
         let entry = val.to_string();
 
-        if let Some(command) = self.history.front() {
-            // If the last used command is the same, dont add it
-            if command == &entry {
-                return;
+        // If the last used command is the same, dont change anything
+        if matches!(self.history.front(), Some(command) if command == &entry) {
+            return;
+        }
+
+        // We only need to check size if we dont remove an item
+        match self.history.binary_search(&entry) {
+            Ok(index) => {
+                // Remove the old command
+                self.history.remove(index);
+            }
+            Err(_) => {
+                // We have not used this command
+                if self.history.len() == self.max {
+                    // Remove the oldest used command
+                    self.history.pop_back();
+                }
             }
         }
 
-        if self.history.len() == self.max {
-            self.history.pop_back();
-        }
-
+        // Add command as most recent used
         self.history.push_front(entry);
     }
 }
