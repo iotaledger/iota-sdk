@@ -631,6 +631,7 @@ class Feature():
         data : string
             Hex encoded metadata
         tag : string
+            Hex encoded tag used to index the output
         """
         self.type = type
         self.sender = sender
