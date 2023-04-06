@@ -1,8 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example stronghold --features=stronghold --release
 //! In this example we will create an address with a stronghold secret manager.
+//!
+//! `cargo run --example stronghold --features=stronghold --release`
 
 use iota_sdk::client::{
     api::GetAddressesBuilder,
@@ -17,8 +18,8 @@ async fn main() -> Result<()> {
         .password("some_hopefully_secure_password")
         .build("test.stronghold")?;
 
-    // This example uses dotenv, which is not safe for use in production
-    dotenv::dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
     let mnemonic = std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
     // The mnemonic only needs to be stored the first time
     stronghold_secret_manager.store_mnemonic(mnemonic).await?;

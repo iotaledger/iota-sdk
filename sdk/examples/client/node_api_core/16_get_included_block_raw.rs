@@ -1,9 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET /api/core/v2/transactions/{transactionId}/included-block`.
-//! Returns the included block, as raw bytes, of a transaction.
-//! Run: `cargo run --example node_api_core_get_included_block_raw --release -- [NODE URL]`.
+//! Returns the included block, as raw bytes, of a transaction by calling
+//! `GET /api/core/v2/transactions/{transactionId}/included-block`.
+//!
+//! `cargo run --example node_api_core_get_included_block_raw --release -- [NODE URL]`
 
 use std::str::FromStr;
 
@@ -16,8 +17,8 @@ use iota_sdk::{
 async fn main() -> Result<()> {
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses dotenv, which is not safe for use in production.
-        dotenv::dotenv().ok();
+        // This example uses secrets in environment variables for simplicity which should not be done in production.
+        dotenvy::dotenv().ok();
         std::env::var("NODE_URL").unwrap()
     });
 

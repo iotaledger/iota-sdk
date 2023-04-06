@@ -1,9 +1,10 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example send_all --release
 //! In this example we will get the outputs of the first address of the seed and send everything.
 //! Run the consolidation example first if there are more than 128 outputs.
+//! 
+//! `cargo run --example send_all --release`
 
 use iota_sdk::client::{
     block::output::{
@@ -16,10 +17,10 @@ use iota_sdk::client::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     // Configure your own mnemonic in ".env". Since the output amount cannot be zero, the mnemonic must contain non-zero
-    // balance
-    dotenv::dotenv().ok();
+    // balance.
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
 

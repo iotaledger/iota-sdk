@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! This example sends a block with a tagged data payload.
-//! Run: `cargo run --example block_tagged_data --release -- [NODE URL]`.
+//!
+//! `cargo run --example block_tagged_data --release -- [NODE URL]`
 
 use iota_sdk::{
     client::{Client, Result},
@@ -13,8 +14,8 @@ use iota_sdk::{
 async fn main() -> Result<()> {
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses dotenv, which is not safe for use in production.
-        dotenv::dotenv().ok();
+        // This example uses secrets in environment variables for simplicity which should not be done in production.
+        dotenvy::dotenv().ok();
         std::env::var("NODE_URL").unwrap()
     });
 

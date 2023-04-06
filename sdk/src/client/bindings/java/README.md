@@ -63,8 +63,8 @@ In order to use the library, you need to create a `Client` instance as illustrat
 ```java
 import org.iota.Client;
 import org.iota.types.ClientConfig;
-import org.iota.types.expections.InitializeClientException;
-import org.iota.types.expections.ClientException;
+import org.iota.types.exceptions.InitializeClientException;
+import org.iota.types.exceptions.ClientException;
 import org.iota.types.responses.NodeInfoResponse;
 
 public class HelloWorld {

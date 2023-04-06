@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will send a transaction.
-//! Run: `cargo run --example output --release`.
+//!
+//! `cargo run --example output --release`
 
 use iota_sdk::{
     client::{secret::SecretManager, utils::request_funds_from_faucet, Client, Result},
@@ -11,10 +12,10 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production.
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     // Configure your own mnemonic in ".env". Since the output amount cannot be zero, the mnemonic must contain non-zero
-    // balance
-    dotenv::dotenv().ok();
+    // balance.
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();

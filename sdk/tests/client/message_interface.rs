@@ -3,9 +3,8 @@
 
 #![cfg(feature = "message_interface")]
 
-use std::{env, str::FromStr};
+use std::str::FromStr;
 
-use dotenv::dotenv;
 use iota_sdk::{
     client::{
         api::GetAddressesBuilderOptions as GenerateAddressesOptions,
@@ -52,8 +51,8 @@ async fn generate_addresses() {
 #[tokio::test]
 #[should_panic]
 async fn build_and_post_block() {
-    // This test uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This test uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     // Create a client message handler with node health ignored
     let client_config = r#"{
@@ -74,7 +73,7 @@ async fn build_and_post_block() {
     // Generate addresses
     let secret_manager = format!(
         "{{\"mnemonic\":\"{}\"}}",
-        &env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap()
+        &std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap()
     );
     let options = GenerateAddressesOptions {
         coin_type: None,

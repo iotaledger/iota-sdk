@@ -1,8 +1,8 @@
 import org.iota.Client;
 import org.iota.types.BlockMetadata;
 import org.iota.types.ClientConfig;
-import org.iota.types.expections.ClientException;
-import org.iota.types.expections.InitializeClientException;
+import org.iota.types.exceptions.ClientException;
+import org.iota.types.exceptions.InitializeClientException;
 import org.iota.types.ids.BlockId;
 
 public class GetBlockMetadata {
