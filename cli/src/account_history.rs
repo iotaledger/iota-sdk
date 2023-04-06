@@ -33,12 +33,12 @@ impl<T: ToString> History<T> for AccountHistory {
         }
 
         // We only need to check size if we dont remove an item
-        match self.history.binary_search(&entry) {
-            Ok(index) => {
+        match self.history.iter().position(|e| e == &entry) {
+            Some(index) => {
                 // Remove the old command
                 self.history.remove(index);
             }
-            Err(_) => {
+            None => {
                 // We have not used this command
                 if self.history.len() == self.max {
                     // Remove the oldest used command
