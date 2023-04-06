@@ -1582,7 +1582,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "iota-sdk-bindings"
+name = "iota-sdk-bindings-core"
 version = "0.1.0"
 dependencies = [
  "backtrace",

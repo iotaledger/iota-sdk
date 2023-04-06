@@ -1,14 +1,14 @@
 [package]
-name = "iota-sdk-bindings"
+name = "iota-sdk-bindings-core"
 version = "0.1.0"
 authors = [ "IOTA Stiftung" ]
 edition = "2021"
 homepage = "https://iota.org"
-description = "Bindings for the IOTA SDK"
+description = "Bindings-core for the IOTA SDK"
 license = "Apache-2.0"
 
 [dependencies]
-iota-sdk = { path = "../sdk", default-features = false, features = [ "client", "wallet", "tls", "message_interface" ] }
+iota-sdk = { path = "../../sdk", default-features = false, features = [ "client", "wallet", "tls", "message_interface" ] }
 
 backtrace = { version = "0.3.67", default-features = false, features = [ "std" ] }
 derivative = { version = "2.2.0", default-features = false}
