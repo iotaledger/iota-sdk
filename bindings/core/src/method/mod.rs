@@ -7,10 +7,9 @@ mod wallet;
 
 use std::fmt::{Formatter, Result as FmtResult};
 
-pub use account::AccountMethod;
-pub use client::ClientMethod;
 use iota_sdk::client::secret::SecretManagerDto;
-pub use wallet::WalletMethod;
+
+pub use self::{account::AccountMethod, client::ClientMethod, wallet::WalletMethod};
 
 pub(crate) trait OmittedDebug {
     fn omitted_fmt(&self, f: &mut Formatter<'_>) -> FmtResult {

@@ -16,7 +16,7 @@ use iota_sdk::{
 };
 use serde::{Deserialize, Serialize, Serializer};
 
-pub use crate::{
+pub use self::{
     message_handler::{call_client_method, call_wallet_method},
     method::{AccountMethod, ClientMethod, WalletMethod},
     response::Response,
