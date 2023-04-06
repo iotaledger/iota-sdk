@@ -157,7 +157,7 @@ pub enum AccountCommand {
         /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
         /// receiver already. The expiration will only be used if one is necessary given the provided amount. If an
         /// expiration is needed but not provided, it will default to one day.
-        expiration: Option<u32>,
+        expiration: Option<humantime::Duration>,
         /// Whether to send micro amounts. This will automatically add Storage Deposit Return and Expiration unlock
         /// conditions if necessary.
         #[arg(default_value_t = false)]

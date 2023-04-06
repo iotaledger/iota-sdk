@@ -146,7 +146,7 @@ pub async fn account_prompt_internal(
                         address,
                         amount,
                         return_address,
-                        expiration,
+                        expiration.map(|e| e.as_secs() as u32),
                         allow_micro_amount,
                     )
                     .await
