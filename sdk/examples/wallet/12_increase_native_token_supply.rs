@@ -24,9 +24,7 @@ async fn main() -> Result<()> {
     // Get the account we generated with `01_create_wallet`
     let account = wallet.get_account("Alice").await?;
     // May want to ensure the account is synced before sending a transaction.
-    account.sync(None).await?;
-
-    let balance = account.balance().await?;
+    let balance = account.sync(None).await?;
     println!("Balance before melting:\n{balance:?}",);
 
     // Set the stronghold password
