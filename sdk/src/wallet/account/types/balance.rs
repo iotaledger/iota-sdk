@@ -90,6 +90,9 @@ pub struct BaseCoinBalance {
     pub total: u64,
     /// Balance that can currently be spent
     pub available: u64,
+    /// Voting power
+    #[cfg(feature = "participation")]
+    pub voting_power: u64,
 }
 
 /// Base coin fields for [`AccountBalance`]
@@ -99,6 +102,9 @@ pub struct BaseCoinBalanceDto {
     pub total: String,
     /// Balance that can currently be spent
     pub available: String,
+    /// Voting power
+    #[cfg(feature = "participation")]
+    pub voting_power: String,
 }
 
 impl From<&BaseCoinBalance> for BaseCoinBalanceDto {
@@ -106,6 +112,8 @@ impl From<&BaseCoinBalance> for BaseCoinBalanceDto {
         Self {
             total: value.total.to_string(),
             available: value.available.to_string(),
+            #[cfg(feature = "participation")]
+            voting_power: value.voting_power.to_string(),
         }
     }
 }

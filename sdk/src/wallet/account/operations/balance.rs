@@ -281,15 +281,18 @@ impl AccountHandle {
             })
         }
 
+        #[cfg(feature = "participation")]
+        let voting_power = self.get_voting_power().await?;
+
         Ok(AccountBalance {
             base_coin: BaseCoinBalance {
                 total: total_amount,
                 #[cfg(not(feature = "participation"))]
                 available: total_amount.saturating_sub(locked_amount),
                 #[cfg(feature = "participation")]
-                available: total_amount
-                    .saturating_sub(locked_amount)
-                    .saturating_sub(self.get_voting_power().await?),
+                available: total_amount.saturating_sub(locked_amount).saturating_sub(voting_power),
+                #[cfg(feature = "participation")]
+                voting_power,
             },
             native_tokens: native_tokens_balance,
             required_storage_deposit,
