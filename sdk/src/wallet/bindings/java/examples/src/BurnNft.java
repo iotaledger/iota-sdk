@@ -29,12 +29,15 @@ public class BurnNft {
         NftId nftId = new NftId("0xf95f4d5344217a2ba19a6c19a47f97d267edf8c4d76a7b8c08072ad35acbebbe");
 
         // Send transaction.
-        Transaction t = a.burnNft(new org.iota.types.account_methods.BurnNft()
+        Transaction transaction = a.burnNft(new org.iota.types.account_methods.BurnNft()
                 .withNftId(nftId)
         );
 
         // Print transaction.
-        System.out.println(t);
+        System.out.println(
+                "Transaction: " + transaction.getTransactionId() +
+                        " Block sent: " + Env.NODE + "/api/core/v2/blocks/" +
+                        transaction.getBlockId());
 
         // In case you are done and don't need the wallet instance anymore you can destroy the instance to clean up memory.
         // For this, check out the ´DestroyWallet.java´ example.

@@ -33,10 +33,12 @@ public class MintNativeToken {
         options.withMaximumSupply("0x45"); // number 69 hex encoded
 
         // Send transaction.
-        MintTokenTransaction t = a.mintNativeToken(new org.iota.types.account_methods.MintNativeToken().withNativeTokenOptions(options));
+        MintTokenTransaction transaction = a.mintNativeToken(new org.iota.types.account_methods.MintNativeToken().withNativeTokenOptions(options));
 
-        // Print transaction.
-        System.out.println(t);
+        // Print transaction.System.out.println(
+                        "Transaction: " + transaction.getTransactionId() +
+                        " Block sent: " + Env.NODE + "/api/core/v2/blocks/" +
+                        transaction.getBlockId());
 
         // In case you are done and don't need the wallet instance anymore you can destroy the instance to clean up memory.
         // For this, check out the ´DestroyWallet.java´ example.

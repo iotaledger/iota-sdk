@@ -22,6 +22,8 @@ public class RequestFundsFromFaucet {
                 .withStoragePath(Env.STORAGE_PATH)
         );
 
+        wallet.setStrongholdPassword(Env.STRONGHOLD_PASSWORD);
+
         // Get account and sync it with the registered node to ensure that its balances are up-to-date.
         AccountHandle a = wallet.getAccount(new AccountAlias(Env.ACCOUNT_NAME));
         AccountBalance balance = a.syncAccount(new SyncAccount().withOptions(new SyncOptions()));

@@ -31,13 +31,16 @@ public class MeltNativeToken {
         String meltAmount = "0x20";
 
         // Send transaction.
-        Transaction t = a.meltNativeToken(new DecreaseNativeTokenSupply()
+        Transaction transaction = a.meltNativeToken(new DecreaseNativeTokenSupply()
                 .withTokenId(tokenId)
                 .withMeltAmount(meltAmount)
         );
 
         // Print transaction.
-        System.out.println(t);
+        System.out.println(
+                "Transaction: " + transaction.getTransactionId() +
+                        " Block sent: " + Env.NODE + "/api/core/v2/blocks/" +
+                        transaction.getBlockId());
 
         // In case you are done and don't need the wallet instance anymore you can destroy the instance to clean up memory.
         // For this, check out the ´DestroyWallet.java´ example.
