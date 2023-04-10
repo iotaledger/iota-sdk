@@ -27,7 +27,7 @@ impl<T: ToString> History<T> for AccountHistory {
     fn write(&mut self, val: &T) {
         let entry = val.to_string();
 
-        // If the last used command is the same, dont change anything
+        // If the last used command is the same, don't change anything
         if matches!(self.history.front(), Some(command) if command == &entry) {
             return;
         }
