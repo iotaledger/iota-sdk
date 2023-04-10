@@ -19,16 +19,16 @@ tip_27_immutable_metadata = {
 # Build NFT output
 nft_output = client.build_nft_output(
     unlock_conditions=[
-        UnlockCondition(UnlockConditionType.Address, Address(AddressType.ED25519, hexAddress))
+        UnlockCondition(UnlockConditionType.Address, Ed25519Address(hexAddress))
     ],
     # NftId needs to be null the first time
     nft_id='0x0000000000000000000000000000000000000000000000000000000000000000',
     immutable_features=[
-        Feature(FeatureType.Issuer, issuer=Address(AddressType.ED25519, hexAddress)),
+        Feature(FeatureType.Issuer, issuer=Ed25519Address(hexAddress)),
         Feature(FeatureType.Metadata, data='0x'+json.dumps(tip_27_immutable_metadata, separators=(',', ':')).encode('utf-8').hex())
     ],
     features=[
-        Feature(FeatureType.Sender, Address(AddressType.ED25519, hexAddress)),
+        Feature(FeatureType.Sender, Ed25519Address(hexAddress)),
         Feature(FeatureType.Metadata, data='0x'+'mutable metadata'.encode('utf-8').hex()),
         Feature(FeatureType.Tag, tag='0x'+'my tag'.encode("utf-8").hex())
     ]

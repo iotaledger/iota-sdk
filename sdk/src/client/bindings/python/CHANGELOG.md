@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `UnlockContition` class;
 - `UnlockContitionType` enum class;
 - `Address` class;
+- `Ed25519Address`, `AliasAddress` and `NFTAddress` as `Address` wrapper classes;
 - `AddressType` enum class;
 - `Feature` class;
 - `FeatureType` enum class;

@@ -610,6 +610,39 @@ class Address():
 
         return config
 
+class Ed25519Address(Address):
+    def __init__(self, address_or_id):
+        """Initialize an Ed25519Address
+        
+        Parameters
+        ----------
+        address_or_id : string
+            The hex encoded address to use.
+        """
+        super().__init__(AddressType.ED25519, address_or_id)
+
+class AliasAddress(Address):
+    def __init__(self, address_or_id):
+        """Initialize an AliasAddress
+        
+        Parameters
+        ----------
+        address_or_id : string
+            The hex encoded address to use.
+        """
+        super().__init__(AddressType.ALIAS, address_or_id)
+
+class NFTAddress(Address):
+    def __init__(self, address_or_id):
+        """Initialize an NFTokenAddress
+        
+        Parameters
+        ----------
+        address_or_id : string
+            The hex encoded address to use.
+        """
+        super().__init__(AddressType.NFT, address_or_id)
+
 class FeatureType(Enum):
     Sender=0
     Issuer=1

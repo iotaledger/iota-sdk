@@ -8,7 +8,7 @@ hex_address = client.bech32_to_hex('rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgx
 
 address_unlock_condition = UnlockCondition(
     UnlockConditionType.Address,
-    Address(AddressType.ED25519, hex_address)
+    Ed25519Address(hex_address)
 )
 
 # Build most basic output with amound and a single address unlock condition
@@ -38,7 +38,7 @@ basic_output = client.build_basic_output(
         address_unlock_condition,
         UnlockCondition(
             UnlockConditionType.StorageDepositReturn,
-            return_address=Address(AddressType.ED25519, hex_address),
+            return_address=Ed25519Address(hex_address),
             amount=1000000
         )
     ],
@@ -52,7 +52,7 @@ basic_output = client.build_basic_output(
         address_unlock_condition,
         UnlockCondition(
             UnlockConditionType.Expiration,
-            return_address=Address(AddressType.ED25519, hex_address),
+            return_address=Ed25519Address(hex_address),
             unix_time=1
         )
     ],

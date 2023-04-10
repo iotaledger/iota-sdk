@@ -10,7 +10,7 @@ nft_output = client.build_nft_output(
     unlock_conditions=[
         UnlockCondition(
             UnlockConditionType.Address, 
-            Address(AddressType.ED25519, client.bech32_to_hex('rms1qzpf0tzpf8yqej5zyhjl9k3km7y6j0xjnxxh7m2g3jtj2z5grej67sl6l46')),
+            Ed25519Address(client.bech32_to_hex('rms1qzpf0tzpf8yqej5zyhjl9k3km7y6j0xjnxxh7m2g3jtj2z5grej67sl6l46')),
         )
     ],
     nft_id='0x0000000000000000000000000000000000000000000000000000000000000000',
