@@ -611,15 +611,15 @@ class Address():
         return config
 
 class Ed25519Address(Address):
-    def __init__(self, address_or_id):
+    def __init__(self, address):
         """Initialize an Ed25519Address
         
         Parameters
         ----------
-        address_or_id : string
+        address : string
             The hex encoded address to use.
         """
-        super().__init__(AddressType.ED25519, address_or_id)
+        super().__init__(AddressType.ED25519, address)
 
 class AliasAddress(Address):
     def __init__(self, address_or_id):
