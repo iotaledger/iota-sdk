@@ -349,7 +349,6 @@ pub enum Response {
     /// [`SendAmount`](crate::message_interface::AccountMethod::SendAmount),
     /// [`MintNfts`](crate::message_interface::AccountMethod::MintNfts),
     /// [`SendAmount`](crate::message_interface::AccountMethod::SendAmount),
-    /// [`SendMicroTransaction`](crate::message_interface::AccountMethod::SendMicroTransaction),
     /// [`SendNativeTokens`](crate::message_interface::AccountMethod::SendNativeTokens),
     /// [`SendNft`](crate::message_interface::AccountMethod::SendNft),
     /// [`SendOutputs`](crate::message_interface::AccountMethod::SendOutputs)

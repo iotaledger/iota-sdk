@@ -20,7 +20,7 @@ use iota_sdk::{
             AddressGenerationOptions, AliasOutputOptionsDto, FilterOptions, IncreaseNativeTokenSupplyOptionsDto,
             NativeTokenOptionsDto, NftOptionsDto, OutputOptionsDto, OutputsToClaim, SyncOptions, TransactionOptionsDto,
         },
-        message_interface::dtos::{AddressWithAmountDto, AddressWithMicroAmountDto},
+        message_interface::dtos::AddressWithAmountDto,
         AddressAndNftId, AddressNativeTokens,
     },
 };
@@ -313,13 +313,6 @@ pub enum AccountMethod {
     SendAmount {
         #[serde(rename = "addressesWithAmount")]
         addresses_with_amount: Vec<AddressWithAmountDto>,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Send amount below minimum storage deposit.
-    /// Expected response: [`SentTransaction`](iota_sdk::message_interface::Response::SentTransaction)
-    SendMicroTransaction {
-        #[serde(rename = "addressesWithMicroAmount")]
-        addresses_with_micro_amount: Vec<AddressWithMicroAmountDto>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send native tokens.

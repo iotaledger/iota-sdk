@@ -23,7 +23,7 @@ use iota_sdk::{
             TransactionOptions,
         },
         message_interface::AddressWithUnspentOutputsDto,
-        AddressWithAmount, AddressWithMicroAmount, IncreaseNativeTokenSupplyOptions, NativeTokenOptions, NftOptions,
+        AddressWithAmount, IncreaseNativeTokenSupplyOptions, NativeTokenOptions, NftOptions,
     },
 };
 use primitive_types::U256;
@@ -478,24 +478,6 @@ pub async fn call_account_method(account_handle: &AccountHandle, method: Account
                             .iter()
                             .map(AddressWithAmount::try_from)
                             .collect::<iota_sdk::wallet::Result<Vec<AddressWithAmount>>>()?,
-                        options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                    )
-                    .await?;
-                Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
-            })
-            .await
-        }
-        AccountMethod::SendMicroTransaction {
-            addresses_with_micro_amount,
-            options,
-        } => {
-            convert_async_panics(|| async {
-                let transaction = account_handle
-                    .send_micro_transaction(
-                        addresses_with_micro_amount
-                            .iter()
-                            .map(AddressWithMicroAmount::try_from)
-                            .collect::<iota_sdk::wallet::Result<Vec<AddressWithMicroAmount>>>()?,
                         options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                     )
                     .await?;
