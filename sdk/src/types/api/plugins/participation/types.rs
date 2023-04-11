@@ -23,7 +23,7 @@ pub const PARTICIPATION_TAG: &str = "PARTICIPATE";
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize_repr, serde::Deserialize_repr),
+    derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr),
     serde(untagged)
 )]
 #[repr(u8)]
@@ -248,12 +248,11 @@ impl Participations {
 
     /// Serialize to bytes.
     pub fn to_bytes(&self) -> Result<Vec<u8>, Error> {
-        let mut bytes: Vec<u8> = vec![
-            self.participations
-                .len()
-                .try_into()
-                .map_err(|_| Error::InvalidParticipations)?,
-        ];
+        let mut bytes: Vec<u8> = vec![self
+            .participations
+            .len()
+            .try_into()
+            .map_err(|_| Error::InvalidParticipations)?];
 
         for participation in &self.participations {
             let event_id: Vec<u8> = participation.event_id.pack_to_vec();
@@ -274,7 +273,7 @@ impl Participations {
 
     /// Deserialize from bytes.
     #[cfg(feature = "std")]
-    pub fn from_bytes<R: io::Read + ?Sized>(bytes: &mut R) -> Result<Self, Error> {
+    pub fn from_bytes<R: std::io::Read + ?Sized>(bytes: &mut R) -> Result<Self, Error> {
         let mut participations = Vec::new();
         let mut participations_len = [0u8; 1];
         bytes.read_exact(&mut participations_len)?;

@@ -16,7 +16,6 @@
 #[cfg(feature = "client")]
 #[macro_use]
 extern crate serde;
-#[cfg(not(feature = "std"))]
 extern crate alloc;
 
 #[cfg(feature = "client")]
