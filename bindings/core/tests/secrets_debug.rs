@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[cfg(feature = "ledger_nano")]
+use iota_sdk::client::secret::SecretManagerDto;
 use iota_sdk_bindings_core::{ClientMethod, Response, WalletMethod};
 
 #[test]
