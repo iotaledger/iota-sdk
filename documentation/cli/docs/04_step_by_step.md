@@ -22,10 +22,11 @@ Create a main account.
 > INFO  Created account "main"
 ```
 
-Exit from an account, in this case from "main".
+Exit from from the "main" account.
 ```sh title=Input
 > Account "main": exit
 ```
+Note: exiting from an account is omitted from now on for the rest of this guide.
 
 Create a savings account.
 ```sh title=Input
@@ -60,7 +61,7 @@ Enter the "savings" account, and get an address from the savings account.
 > INFO  Address 0: <tst123abc...>
 ```
 
-Enter the "main" account, and send an amount from the main account to the savings address, then exit.
+Enter the "main" account, and send an amount from the main account to the savings address.
 ```sh title=Input
 ./wallet main
 
