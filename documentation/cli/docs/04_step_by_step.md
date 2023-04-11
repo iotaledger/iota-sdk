@@ -38,7 +38,7 @@ Create a savings account.
 
 ## Tokens
 
-Enter the "main" account, and get some funds from the faucet.
+Enter the "main" account and get some funds from the faucet.
 ```sh title=Input
 ./wallet main
 
@@ -51,7 +51,7 @@ Enter the "main" account, and get some funds from the faucet.
 
 ### Send an amount
 
-Enter the "savings" account, and get an address.
+Enter the "savings" account and get an address.
 ```sh title=Input
 ./wallet savings
 
@@ -61,7 +61,7 @@ Enter the "savings" account, and get an address.
 > INFO  Address 0: <rms123abc...>
 ```
 
-Enter the "main" account, and send some amount to the "savings" address.
+Enter the "main" account and send some amount to the "savings" address.
 ```sh title=Input
 ./wallet main
 
@@ -73,7 +73,7 @@ Enter the "main" account, and send some amount to the "savings" address.
 > Some(BlockId(0x...))
 ```
 
-Enter the "savings" account, and check the balance.
+Enter the "savings" account and check the balance.
 ```sh title=Input
 ./wallet savings
 
@@ -87,7 +87,7 @@ Enter the "savings" account, and check the balance.
 
 ### Mint
 
-Enter the "main" account, and mint native tokens with foundry metadata.
+Enter the "main" account and mint native tokens with foundry metadata.
 ```sh title=Input
 ./wallet main
 
@@ -102,7 +102,7 @@ Enter the "main" account, and mint native tokens with foundry metadata.
 
 ### Send
 
-Enter the "savings" account, and generate a new address.
+Enter the "savings" account and generate a new address.
 ```sh title=Input
 ./wallet savings
 
@@ -112,7 +112,7 @@ Enter the "savings" account, and generate a new address.
 > INFO  Address 2: <rms456def...>
 ```
 
-Enter the "main" account, and synchronize the account balances.
+Enter the "main" account and synchronize the account balances.
 ```sh title=Input
 ./wallet main
 
@@ -136,7 +136,7 @@ Send native tokens from the "main" account to the new "savings" address.
 
 ### Mint
 
-Enter the "main" account, and mint an NFT.
+Enter the "main" account and mint an NFT.
 ```sh title=Input
 ./wallet main
 
@@ -150,7 +150,7 @@ Enter the "main" account, and mint an NFT.
 
 ### Send
 
-Enter the "savings" account, and generate a new address.
+Enter the "savings" account and generate a new address.
 ```sh title=Input
 ./wallet savings
 
@@ -161,7 +161,7 @@ Enter the "savings" account, and generate a new address.
 > INFO  Address 3: <rms789ghi...>
 ```
 
-Enter the "main" account, and synchronize the account balances.
+Enter the "main" account and synchronize the account balances.
 ```sh title=Input
 ./wallet main
 
@@ -183,7 +183,7 @@ Send the NFT to the new "savings" address.
 
 ## Transactions
 
-Enter the "main" account, and list all transactions.
+Enter the "main" account and list all transactions.
 ```sh title=Input
 ./wallet main
 
