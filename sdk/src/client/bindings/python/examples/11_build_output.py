@@ -6,8 +6,7 @@ client = IotaClient(nodes = ['https://api.testnet.shimmer.network'])
 
 hex_address = client.bech32_to_hex('rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy')
 
-address_unlock_condition = UnlockCondition(
-    UnlockConditionType.Address,
+address_unlock_condition = AddressUnlockCondition(
     Ed25519Address(hex_address)
 )
 
@@ -36,8 +35,7 @@ print(json.dumps(basic_output, indent=4))
 basic_output = client.build_basic_output(
     unlock_conditions=[
         address_unlock_condition,
-        UnlockCondition(
-            UnlockConditionType.StorageDepositReturn,
+        StorageDepositReturnUnlockCondition(
             return_address=Ed25519Address(hex_address),
             amount=1000000
         )
@@ -50,8 +48,7 @@ print(json.dumps(basic_output, indent=4))
 basic_output = client.build_basic_output(
     unlock_conditions=[
         address_unlock_condition,
-        UnlockCondition(
-            UnlockConditionType.Expiration,
+        ExpirationUnlockCondition(
             return_address=Ed25519Address(hex_address),
             unix_time=1
         )
@@ -64,8 +61,7 @@ print(json.dumps(basic_output, indent=4))
 basic_output = client.build_basic_output(
     unlock_conditions=[
         address_unlock_condition,
-        UnlockCondition(
-            UnlockConditionType.Timelock,
+        TimelockUnlockCondition(
             unix_time=1
         )
     ],

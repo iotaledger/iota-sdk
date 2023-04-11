@@ -19,7 +19,7 @@ tip_27_immutable_metadata = {
 # Build NFT output
 nft_output = client.build_nft_output(
     unlock_conditions=[
-        UnlockCondition(UnlockConditionType.Address, Ed25519Address(hexAddress))
+        AddressUnlockCondition(Ed25519Address(hexAddress))
     ],
     # NftId needs to be null the first time
     nft_id='0x0000000000000000000000000000000000000000000000000000000000000000',

@@ -8,8 +8,7 @@ secret_manager = MnemonicSecretManager('flame fever pig forward exact dash body 
 
 nft_output = client.build_nft_output(
     unlock_conditions=[
-        UnlockCondition(
-            UnlockConditionType.Address, 
+        AddressUnlockCondition(
             Ed25519Address(client.bech32_to_hex('rms1qzpf0tzpf8yqej5zyhjl9k3km7y6j0xjnxxh7m2g3jtj2z5grej67sl6l46')),
         )
     ],

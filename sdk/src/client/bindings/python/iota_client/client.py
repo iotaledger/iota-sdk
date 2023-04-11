@@ -577,6 +577,87 @@ class UnlockCondition():
 
         return config
 
+class AddressUnlockCondition(UnlockCondition):
+    def __init__(self, address):
+        """Initialize an AddressUnlockCondition
+        
+        Parameters
+        ----------
+        address : Address
+            Address
+        """
+        super().__init__(type=UnlockConditionType.Address, address=address)
+
+class StorageDepositReturnUnlockCondition(UnlockCondition):
+    def __init__(self, amount, return_address):
+        """Initialize a StorageDepositReturnUnlockCondition
+        
+        Parameters
+        ----------
+        amount : int
+            Amount
+        return_address : Address
+            Return address
+        """
+        super().__init__(type=UnlockConditionType.StorageDepositReturn, amount=amount, return_address=return_address)
+
+class TimelockUnlockCondition(UnlockCondition):
+    def __init__(self, unix_time):
+        """Initialize a TimelockUnlockCondition
+        
+        Parameters
+        ----------
+        unix_time : int
+            Unix timestamp at which to unlock output
+        """
+        super().__init__(type=UnlockConditionType.Timelock, unix_time=unix_time)
+
+class ExpirationUnlockCondition(UnlockCondition):
+    def __init__(self, unix_time, return_address):
+        """Initialize an ExpirationUnlockCondition
+        
+        Parameters
+        ----------
+        unix_time : int
+            Unix timestamp
+        return_address : Address
+            Return address
+        """
+        super().__init__(type=UnlockConditionType.Expiration, unix_time=unix_time, return_address=return_address)
+
+class StateControllerAddressUnlockCondition(UnlockCondition):
+    def __init__(self, address):
+        """Initialize a StateControllerAddressUnlockCondition
+        
+        Parameters
+        ----------
+        address : Address
+            Address for unlock condition
+        """
+        super().__init__(type=UnlockConditionType.StateControllerAddress, address=address)
+
+class GovernorAddressUnlockCondition(UnlockCondition):
+    def __init__(self, address):
+        """Initialize a GovernorAddressUnlockCondition
+        
+        Parameters
+        ----------
+        address : Address
+            Address for unlock condition
+        """
+        super().__init__(type=UnlockConditionType.GovernorAddress, address=address)
+
+class ImmutableAliasAddressUnlockCondition(UnlockCondition):
+    def __init__(self, address):
+        """Initialize an ImmutableAliasAddressUnlockCondition
+        
+        Parameters
+        ----------
+        address : Address
+            Address for unlock condition
+        """
+        super().__init__(type=UnlockConditionType.ImmutableAliasAddress, address=address)
+
 class AddressType(Enum):
     ED25519 = 0
     ALIAS = 8

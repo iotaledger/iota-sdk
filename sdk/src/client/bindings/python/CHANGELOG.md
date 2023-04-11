@@ -28,6 +28,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CoinType` enum class;
 - `UnlockContition` class;
 - `UnlockContitionType` enum class;
+- `AddressUnlockCondition`, 
+  `StorageDepositReturnUnlockCondition`, 
+  `TimelockUnlockCondition`, 
+  `ExpirationUnlockCondition`, 
+  `StateControllerAddressUnlockCondition`, 
+  `GovernorAddressUnlockCondition`, 
+  `ImmutableAliasAddressUnlockCondition` wrapper classes;
 - `Address` class;
 - `Ed25519Address`, `AliasAddress` and `NFTAddress` as `Address` wrapper classes;
 - `AddressType` enum class;

@@ -10,8 +10,8 @@ hexAddress = client.bech32_to_hex(
 alias_id = '0x0000000000000000000000000000000000000000000000000000000000000000'
 state_metadata = data='0x'+'Hello, World!'.encode('utf-8').hex()
 unlock_conditions = [
-    UnlockCondition(UnlockConditionType.StateControllerAddress, Ed25519Address(hexAddress)),
-    UnlockCondition(UnlockConditionType.GovernorAddress, Ed25519Address(hexAddress))
+    StateControllerAddressUnlockCondition(Ed25519Address(hexAddress)),
+    GovernorAddressUnlockCondition(Ed25519Address(hexAddress))
 ]
 features = [
     Feature(FeatureType.Sender, Ed25519Address(hexAddress)),

@@ -9,8 +9,7 @@ client = IotaClient(nodes = ['https://api.testnet.shimmer.network'])
 serial_number = 1
 token_scheme = TokenScheme(0, 32, 64)
 unlock_conditions = [
-    UnlockCondition(
-        UnlockConditionType.ImmutableAliasAddress,
+    ImmutableAliasAddressUnlockCondition(
         AliasAddress('0xa5c28d5baa951de05e375fb19134ea51a918f03acc2d0cee011a42b298d3effa')
     )
 ]
