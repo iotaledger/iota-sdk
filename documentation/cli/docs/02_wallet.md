@@ -7,7 +7,7 @@ It is responsible for the creation and management of the wallet and its accounts
 
 ## Commands
 
-### `./wallet help`
+### `./wallet --help`
 
 Displays the wallet interface usage and exits.
 
@@ -73,12 +73,6 @@ Changes the stronghold password.
 Change the stronghold password.
 ```sh
 ./wallet change-password
-```
-
-#### Example
-
-```sh
-./wallet help
 ```
 
 ### `./wallet init`
