@@ -23,16 +23,16 @@ bitflags = { version = "2.1.0", default-features = false }
 bytemuck = { version = "1.13.1", default-features = false }
 derive_more = { version = "0.99.17", default-features = false, features = [ "from", "as_ref", "deref", "deref_mut" ] }
 getset = { version = "0.1.2", default-features = false }
-hashbrown = { version = "0.13.2", default-features = false, features = [ "ahash", "inline-more", "serde" ] }
-hex = { version = "0.4.3", default-features = false, features = [ "alloc" ] }
+hashbrown = { version = "0.13.2", default-features = false, features = [ "ahash", "inline-more" ] }
+hex = { version = "0.4.3", default-features = false }
 instant = { version = "0.1.12", default-features = false }
 iota-crypto = { version = "0.15.3", default-features = false, features = [ "std", "chacha", "digest", "curl-p", "blake2b", "ed25519", "random", "slip10", "bip39", "bip39-en", "ternary_encoding" ] }
 iterator-sorted = { version = "0.1.0", default-features = false }
-packable = { version = "0.8.0", default-features = false, features = [ "serde", "primitive-types", "std" ] }
-prefix-hex = { version = "0.7.0", default-features = false, features = [ "std", "primitive-types" ] }
-primitive-types = { version = "0.12.1", default-features = false, features = [ "serde" ] }
+packable = { version = "0.8.0", default-features = false, features = [ "primitive-types" ] }
+prefix-hex = { version = "0.7.0", default-features = false, features = [ "primitive-types" ] }
+primitive-types = { version = "0.12.1", default-features = false }
 serde = { version = "1.0.160", default-features = false, features = [ "derive" ] }
-serde_json = { version = "1.0.95", default-features = false, features = [ "alloc", "std" ] }
+serde_json = { version = "1.0.95", default-features = false, features = [ "alloc" ] }
 
 # Optional dependencies
 async-trait = { version = "0.1.68", default-features = false, optional = true }
@@ -84,8 +84,8 @@ mqtt = [ "regex", "rumqttc", "once_cell" ]
 participation = [ "storage" ]
 pow = [ "std", "num_cpus" ]
 rand = [ "std", "dep:rand" ]
-serde = [ "serde_repr", "serde-big-array" ]
-std = [  ]
+serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde" ]
+std = [ "packable/std", "prefix-hex/std" ]
 storage = [  ]
 stronghold = [ "iota_stronghold", "derive_builder" ]
 tls = [ "reqwest/rustls-tls" ]
