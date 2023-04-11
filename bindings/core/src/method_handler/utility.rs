@@ -38,9 +38,7 @@ pub(crate) async fn call_utility_method_internal(method: UtilityMethod) -> Resul
         UtilityMethod::GenerateMnemonic => Ok(Response::GeneratedMnemonic(Client::generate_mnemonic()?)),
         UtilityMethod::MnemonicToHexSeed { mut mnemonic } => {
             let response = Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(&mnemonic)?);
-
             mnemonic.zeroize();
-
             Ok(response)
         }
         UtilityMethod::BlockId { block } => {
