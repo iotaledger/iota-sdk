@@ -73,7 +73,7 @@ Enter the "main" account, and send an amount from the main account to the saving
 > Some(BlockId(0x...))
 ```
 
-Check the savings balance.
+Enter the "savings" account, and check the balance.
 ```sh title=Input
 ./wallet savings
 
@@ -87,7 +87,7 @@ Check the savings balance.
 
 ### Mint
 
-Mint native tokens, with foundry metadata, from the main account.
+Enter the "main" account, and mint native tokens with foundry metadata.
 ```sh title=Input
 ./wallet main
 
@@ -102,7 +102,7 @@ Mint native tokens, with foundry metadata, from the main account.
 
 ### Send
 
-Generate a new address from the savings account.
+Enter the "savings" account, and generate a new address.
 ```sh title=Input
 ./wallet savings
 
@@ -112,7 +112,7 @@ Generate a new address from the savings account.
 > INFO  Address 2: <tst456def...>
 ```
 
-Synchronize the "main" account.
+Enter the "main" account, and synchronize the account balances.
 ```sh title=Input
 ./wallet main
 
@@ -122,7 +122,7 @@ Synchronize the "main" account.
 > INFO  Synced: AccountBalance ...TokenId([TOKEN_ID])...
 ```
 
-Send native tokens to the savings address.
+Send native tokens from the "main" account to the created "savings" address.
 ```sh title=Input
 > Account "main": send-native-token <tst456def> <TOKEN_ID> 100
 ```
@@ -161,7 +161,7 @@ Enter the "savings" account, and generate a new address.
 > INFO  Address 3: <tst789ghi...>
 ```
 
-Enter the "main" account, and synchronize the balances.
+Enter the "main" account, and synchronize the account balances.
 ```sh title=Input
 ./wallet main
 
@@ -171,7 +171,7 @@ Enter the "main" account, and synchronize the balances.
 > INFO  Synced: AccountBalance ...NftId([NFT_ID])...
 ```
 
-Send the NFT to the savings address.
+Send the NFT to the created "savings" address.
 ```sh title=Input
 > Account "main": send-nft <tst789ghi...> <NFT_ID>
 ```
