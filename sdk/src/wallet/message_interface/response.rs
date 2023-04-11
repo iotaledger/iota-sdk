@@ -159,11 +159,6 @@ pub enum Response {
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     ParticipationEvents(HashMap<ParticipationEventId, ParticipationEventWithNodes>),
     /// Response for
-    /// [`GetVotingPower`](crate::message_interface::AccountMethod::GetVotingPower)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    VotingPower(String),
-    /// Response for
     /// [`GetParticipationOverview`](crate::message_interface::AccountMethod::GetParticipationOverview)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
@@ -248,8 +243,6 @@ impl Debug for Response {
             Self::ParticipationEvents(events) => write!(f, "ParticipationEvents({events:?})"),
             #[cfg(feature = "participation")]
             Self::ParticipationEventIds(event_ids) => write!(f, "ParticipationEventIds({event_ids:?})"),
-            #[cfg(feature = "participation")]
-            Self::VotingPower(amount) => write!(f, "VotingPower({amount:?})"),
             #[cfg(feature = "participation")]
             Self::AccountParticipationOverview(overview) => {
                 write!(f, "AccountParticipationOverview({overview:?})")
