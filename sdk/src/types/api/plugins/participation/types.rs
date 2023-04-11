@@ -248,11 +248,12 @@ impl Participations {
 
     /// Serialize to bytes.
     pub fn to_bytes(&self) -> Result<Vec<u8>, Error> {
-        let mut bytes: Vec<u8> = vec![self
-            .participations
-            .len()
-            .try_into()
-            .map_err(|_| Error::InvalidParticipations)?];
+        let mut bytes: Vec<u8> = vec![
+            self.participations
+                .len()
+                .try_into()
+                .map_err(|_| Error::InvalidParticipations)?,
+        ];
 
         for participation in &self.participations {
             let event_id: Vec<u8> = participation.event_id.pack_to_vec();
