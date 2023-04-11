@@ -54,7 +54,7 @@ iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, option
 backtrace = { version = "0.3.67", default-features = false, features = [ "std" ], optional = true }
 fern-logger = { version = "0.5.0", default-features = false, optional = true }
 log = { version = "0.4.17", default-features = false, optional = true }
-derive_builder = { version = "0.12.0", default-features = false, features = [ "std" ], optional = true}
+derive_builder = { version = "0.12.0", default-features = false, features = [ "std" ], optional = true }
 rocksdb = { version = "0.20.1", default-features = false, features = [ "lz4" ], optional = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
@@ -75,20 +75,21 @@ fern-logger = { version = "0.5.0", default-features = false }
 [features]
 default = [ "std", "serde", "tls" ]
 
-client = [ "serde", "pow", "std", "async-trait", "log", "derive_builder" ]
-pow = [ ]
-wallet = [ "client", "log" ]
-storage = [ "async-trait" ]
-mqtt = [ "regex", "rumqttc", "once_cell" ]
-stronghold = [ "iota_stronghold" ]
-events = [ ]
+events = [  ]
 ledger_nano = [ "iota-ledger-nano" ]
-participation = [ "storage" ]
 message_interface = [ "backtrace", "fern-logger" ]
-tls = [ "reqwest/rustls-tls" ]
+mqtt = [ "regex", "rumqttc", "once_cell" ]
+participation = [ "storage" ]
+pow = [ "std", "num_cpus" ]
 rand = [ "std", "dep:rand" ]
 serde = [ "serde_repr", "serde-big-array" ]
 std = [  ]
+storage = [  ]
+stronghold = [ "iota_stronghold", "derive_builder" ]
+tls = [ "reqwest/rustls-tls" ]
+
+client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde" ]
+wallet = [ "client" ]
 
 # Block examples
 
