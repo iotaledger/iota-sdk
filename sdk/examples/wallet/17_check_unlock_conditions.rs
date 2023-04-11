@@ -1,8 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example check_unlock_conditions --release
-// In this example we check if an output has only an address unlock condition and that the address is from the account.
+//! In this example we check if an output has only an address unlock condition and that the address is from the account.
+//! 
+//! `cargo run --example check_unlock_conditions --release`
 
 use iota_sdk::{
     types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},

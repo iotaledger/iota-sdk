@@ -84,7 +84,7 @@ When just initialised, the wallet has no account yet, use the `new` command to c
 | Name        | Optional    | Default                             | Example                                                                                                                                                                             |
 | ----------- | ----------- |------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `mnemonic`  | ✓           | Randomly generated                  | "aunt middle impose faith ramp kid olive good practice motor grab ready group episode oven matrix silver rhythm avocado assume humble tiger shiver hurt" (DO NOT USE THIS MNEMONIC) |
-| `node`      | ✓           | https://api.testnet.shimmer.network | http://localhost:14265                                                                                                                                                              |
+| `node_url`      | ✓           | https://api.testnet.shimmer.network | http://localhost:14265                                                                                                                                                              |
 | `coin-type` | ✓           | 4219 (=Shimmer)                     | 4218 (=IOTA)                                                                                                                                                                        |
 
 #### Examples

@@ -1,9 +1,10 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example get_balance --release
-// In this example we sync the account and get the balance
-// Rename `.env.example` to `.env` first
+//! In this example we sync the account and get the balance.
+//! Rename `.env.example` to `.env` first.
+//! 
+//! `cargo run --example get_balance --release`
 
 use iota_sdk::wallet::{Result, Wallet};
 
