@@ -766,6 +766,50 @@ class Feature():
 
         return config
 
+class SenderFeature(Feature):
+    def __init__(self, sender):
+        """Initialise a SenderFeature
+
+        Parameters
+        ----------
+        sender : Address
+            Sender address
+        """
+        super().__init__(FeatureType.Sender, sender=sender)
+
+class IssuerFeature(Feature):
+    def __init__(self, issuer):
+        """Initialise an IssuerFeature
+
+        Parameters
+        ----------
+        issuer : Address
+            Issuer address
+        """
+        super().__init__(FeatureType.Issuer, issuer=issuer)
+
+class MetadataFeature(Feature):
+    def __init__(self, data):
+        """Initialise a MetadataFeature
+
+        Parameters
+        ----------
+        data : string
+            Hex encoded metadata
+        """
+        super().__init__(FeatureType.Metadata, data=data)
+
+class TagFeature(Feature):
+    def __init__(self, tag):
+        """Initialise a TagFeature
+
+        Parameters
+        ----------
+        tag : string
+            Hex encoded tag used to index the output
+        """
+        super().__init__(FeatureType.Tag, tag=tag)
+
 class NativeToken():
     def __init__(self, id, amount):
         """Initialise NativeToken

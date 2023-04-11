@@ -14,12 +14,12 @@ unlock_conditions = [
     GovernorAddressUnlockCondition(Ed25519Address(hexAddress))
 ]
 features = [
-    Feature(FeatureType.Sender, Ed25519Address(hexAddress)),
-    Feature(FeatureType.Metadata, data='0x'+'Hello, World!'.encode('utf-8').hex())
+    SenderFeature(Ed25519Address(hexAddress)),
+    MetadataFeature(data='0x'+'Hello, World!'.encode('utf-8').hex())
 ]
 immutable_features = [
-    Feature(FeatureType.Issuer, issuer=Ed25519Address(hexAddress)),
-    Feature(FeatureType.Metadata, data='0x'+'Hello, World!'.encode('utf-8').hex())
+    IssuerFeature(issuer=Ed25519Address(hexAddress)),
+    MetadataFeature(data='0x'+'Hello, World!'.encode('utf-8').hex())
 ]
 
 # Build alias output

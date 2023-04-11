@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Ed25519Address`, `AliasAddress` and `NFTAddress` as `Address` wrapper classes;
 - `AddressType` enum class;
 - `Feature` class;
+- `SenderFeature`, `IssuerFeature`, `MetadataFeature`, `TagFeature` wrapper classes;
 - `FeatureType` enum class;
 - `NativeToken` class;
 - `TokenScheme` class;

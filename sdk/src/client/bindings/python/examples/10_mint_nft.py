@@ -15,10 +15,10 @@ nft_output = client.build_nft_output(
     nft_id='0x0000000000000000000000000000000000000000000000000000000000000000',
     amount=1000000,
     immutable_features=[
-        Feature(FeatureType.Metadata, data='0x'+'Hello, World!'.encode('utf-8').hex())
+        MetadataFeature(data='0x'+'Hello, World!'.encode('utf-8').hex())
     ],
     features=[
-        Feature(FeatureType.Metadata, data='0x'+'Hello, World!'.encode('utf-8').hex())
+        MetadataFeature(data='0x'+'Hello, World!'.encode('utf-8').hex())
     ]
 )
 

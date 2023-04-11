@@ -25,7 +25,7 @@ basic_output = client.build_basic_output(
         address_unlock_condition,
     ],
     features=[
-        Feature(FeatureType.Metadata, data='0x'+'Hello, World!'.encode('utf-8').hex())
+        MetadataFeature(data='0x'+'Hello, World!'.encode('utf-8').hex())
     ],
     amount=1000000,
 )
