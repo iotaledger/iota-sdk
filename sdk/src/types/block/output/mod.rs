@@ -489,7 +489,8 @@ pub mod dto {
     };
     use crate::types::block::error::dto::DtoError;
 
-    #[derive(Clone, Debug, Deserialize, From)]
+    #[derive(Clone, Debug, From)]
+    #[cfg_attr(feature = "serde", derive(serde::Deserialize))]
     pub enum OutputBuilderAmountDto {
         Amount(String),
         MinimumStorageDeposit(RentStructure),
