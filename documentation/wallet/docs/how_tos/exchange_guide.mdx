@@ -163,7 +163,7 @@ There are two types of addresses, `internal` and `public` (external). This appro
 
 * Each set of addresses is independent of each other and has an independent `index` id.
 * Addresses that are created by `account.generateAddress()` are indicated as `internal=false` (public).
-* Internal addresses (`internal=true`) are called `change` addresses and are used to send the excess funds to them.
+* Internal addresses (`internal=true`) are called `change` addresses and can be used to send the excess funds to them by providing `RemainderValueStrategy::ChangeAddress` to the TransactionOptions.
 
 ### 4. Check the Account Balance
 
