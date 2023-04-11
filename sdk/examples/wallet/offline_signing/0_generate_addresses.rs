@@ -19,7 +19,7 @@ use iota_sdk::{
     wallet::{account::types::AccountAddress, ClientOptions, Result, Wallet},
 };
 
-const ADDRESS_FILE_NAME: &str = "examples/offline_signing/addresses.json";
+const ADDRESS_FILE_NAME: &str = "examples/wallet/offline_signing/addresses.json";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -30,8 +30,8 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let mut secret_manager = StrongholdSecretManager::builder()
-        .password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
-        .build(PathBuf::from("examples/offline_signing/offline_signing.stronghold"))?;
+        .password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .build(PathBuf::from("examples/wallet/offline_signing/offline_signing.stronghold"))?;
     // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
     let mnemonic = std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
 
@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .with_client_options(offline_client)
         .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_storage_path("examples/offline_signing/offline_walletdb")
+        .with_storage_path("examples/wallet/offline_signing/offline_walletdb")
         .finish()
         .await?;
 
