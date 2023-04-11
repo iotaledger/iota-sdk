@@ -7,6 +7,20 @@ It is responsible for the creation and management of the wallet and its accounts
 
 ## Commands
 
+### `./wallet help`
+
+Displays the wallet interface usage and exits.
+
+#### Options
+
+| Name                         | Description | Environment Variable | 
+| ---------------------------- | ----------- | -------------------- |
+| `--wallet-db-path`           | Sets the path to the wallet database | `WALLET_DATABASE_PATH` |
+| `--stronghold-snapshot-path` | Sets the path to the Stronghold snapshot file | `STRONGHOLD_SNAPSHOT_PATH`|
+| `--log-level` (`-l`)         | Sets the log verbosity level (error, warn, info, debug, trace) | ✘ |
+| `--help` (`-h`)              | Shows all available commands, arguments and options  | ✘ |
+| `--version` (`-V`)           | Shows the current version | ✘ |
+
 ### `./wallet`
 
 Starts the wallet without a specified account:
@@ -61,10 +75,6 @@ Change the stronghold password.
 ./wallet change-password
 ```
 
-### `./wallet help`
-
-Displays the wallet interface usage and exits.
-
 #### Example
 
 ```sh
@@ -79,13 +89,13 @@ The wallet can only be initialised once.
 
 When just initialised, the wallet has no account yet, use the `new` command to create one.
 
-#### Parameters
+#### Options
 
-| Name        | Optional    | Default                             | Example                                                                                                                                                                             |
-| ----------- | ----------- |------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mnemonic`  | ✓           | Randomly generated                  | "aunt middle impose faith ramp kid olive good practice motor grab ready group episode oven matrix silver rhythm avocado assume humble tiger shiver hurt" (DO NOT USE THIS MNEMONIC) |
-| `node_url`      | ✓           | https://api.testnet.shimmer.network | http://localhost:14265                                                                                                                                                              |
-| `coin-type` | ✓           | 4219 (=Shimmer)                     | 4218 (=IOTA)                                                                                                                                                                        |
+| Name                 | Description    | Default    | Environment Variable | Example |
+| -------------------- | -------------- |----------- |----------------------| ------- |
+| `--mnemonic` (`-m`)  | Generates a random mnemonic | ✘ | ✘ |"aunt middle impose ..." |
+| `--node_url` (`-n`)  | Sets the node to connect to | https://api.testnet.shimmer.network | `NODE_URL` | http://localhost:14265 |
+| `--coin-type` (`-c`) | Sets the coin type associated with the wallet  | 4219 (=Shimmer) | ✘ | 4218(=IOTA) |
 
 #### Examples
 
