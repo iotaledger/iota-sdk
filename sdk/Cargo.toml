@@ -26,8 +26,8 @@ getset = { version = "0.1.2", default-features = false }
 hashbrown = { version = "0.13.2", default-features = false, features = [ "ahash", "inline-more", "serde" ] }
 hex = { version = "0.4.3", default-features = false, features = [ "alloc" ] }
 instant = { version = "0.1.12", default-features = false }
-iterator-sorted = { version = "0.1.0", default-features = false }
 iota-crypto = { version = "0.15.3", default-features = false, features = [ "std", "chacha", "digest", "curl-p", "blake2b", "ed25519", "random", "slip10", "bip39", "bip39-en", "ternary_encoding" ] }
+iterator-sorted = { version = "0.1.0", default-features = false }
 packable = { version = "0.8.0", default-features = false, features = [ "serde", "primitive-types", "std" ] }
 prefix-hex = { version = "0.7.0", default-features = false, features = [ "std", "primitive-types" ] }
 primitive-types = { version = "0.12.1", default-features = false, features = [ "serde" ] }
