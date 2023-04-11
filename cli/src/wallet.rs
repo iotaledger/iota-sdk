@@ -14,7 +14,7 @@ use crate::{
         set_node_command, sync_command, InitParameters, WalletCli, WalletCommand,
     },
     error::Error,
-    helper::get_password,
+    helper::{get_password, get_decision},
     println_log_info,
 };
 
@@ -28,25 +28,25 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
         || "./stardust-cli-wallet-db".to_string(),
         |os_str| os_str.into_string().expect("invalid WALLET_DATABASE_PATH"),
     );
-    let snapshot_path = std::path::Path::new("./stardust-cli-wallet.stronghold");
-    let snapshot_exists = snapshot_path.exists();
+    let stronghold_path = std::path::Path::new("./stardust-cli-wallet.stronghold");
+    let stronghold_exists = stronghold_path.exists();
     let password = if let Some(WalletCommand::Restore { .. }) = &cli.command {
         get_password("Stronghold password", false)?
     } else {
-        get_password("Stronghold password", !snapshot_path.exists())?
+        get_password("Stronghold password", !stronghold_path.exists())?
     };
     let secret_manager = SecretManager::Stronghold(
         StrongholdSecretManager::builder()
             .password(&password)
-            .build(snapshot_path)?,
+            .build(stronghold_path)?,
     );
 
     let (wallet, account) = if let Some(command) = cli.command {
         if let WalletCommand::Init(init_parameters) = command {
-            (init_command(secret_manager, storage_path, init_parameters).await?, None)
+            (Some(init_command(secret_manager, storage_path, init_parameters).await?), None)
         } else if let WalletCommand::Restore { backup_path } = command {
             (
-                restore_command(secret_manager, storage_path, backup_path, password).await?,
+                Some(restore_command(secret_manager, storage_path, backup_path, password).await?),
                 None,
             )
         } else {
@@ -70,24 +70,34 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                 WalletCommand::Init(_) | WalletCommand::Mnemonic | WalletCommand::Restore { .. } => unreachable!(),
             };
 
-            (wallet, account)
+            (Some(wallet), account)
         }
-    } else if snapshot_exists {
+    } else if stronghold_exists {
         (
-            Wallet::builder()
+            Some(Wallet::builder()
                 .with_secret_manager(secret_manager)
                 .with_storage_path(&storage_path)
                 .finish()
-                .await?,
+                .await?),
             None,
         )
     } else {
-        println_log_info!("Initializing wallet with default values.");
-        (
-            init_command(secret_manager, storage_path, InitParameters::default()).await?,
-            None,
-        )
-    };
+        // first run
+        if get_decision("Initialize a new wallet with default values?")? {
+            println_log_info!("Initializing wallet with default values.");
+            let wallet = init_command(secret_manager, storage_path, InitParameters::default()).await?;
 
-    Ok((Some(wallet), account))
+            // ask the new user whether a default account should be created
+            if get_decision("Initialize a default account?")? {
+                println_log_info!("Initializing default account.");
+                let account = new_command(&wallet, None).await?;
+                (Some(wallet), Some(account))
+            } else {
+                (Some(wallet), None)
+            }
+        } else {
+            (None, None)
+        }
+    };
+    Ok((wallet, account))
 }

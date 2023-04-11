@@ -1,7 +1,7 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use dialoguer::{console::Term, theme::ColorfulTheme, Password, Select};
+use dialoguer::{console::Term, theme::ColorfulTheme, Password, Select, Input};
 use iota_sdk::wallet::Wallet;
 
 use crate::error::Error;
@@ -16,6 +16,19 @@ pub fn get_password(prompt: &str, confirmation: bool) -> Result<String, Error> {
     }
 
     Ok(password.interact()?)
+}
+
+pub fn get_decision(prompt: &str) -> Result<bool, Error> {
+    let input = Input::<String>::new()
+        .with_prompt(prompt)
+        .default("Yes".into())
+        .interact_text()?;
+
+    match input.as_str() {
+        "Yes" | "yes" | "y" => Ok(true),
+        "No" | "no" | "n" => Ok(false),
+        _ => Err(Error::InvalidInput { expected: "Yes|yes|y or No|no|n".to_string(), found: input }),
+    }
 }
 
 pub async fn pick_account(wallet: &Wallet) -> Result<Option<u32>, Error> {
