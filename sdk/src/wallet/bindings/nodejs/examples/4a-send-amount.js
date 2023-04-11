@@ -8,9 +8,6 @@ async function run() {
     try {
         const manager = await getUnlockedManager();
         const account = await manager.getAccount('Alice');
-        console.log('Account:', account);
-
-        await account.sync();
 
         //TODO: Replace with the address of your choice!
         const address =
@@ -23,8 +20,6 @@ async function run() {
                 amount,
             },
         ]);
-
-        console.log(response);
 
         console.log(
             `Check your block on ${process.env.NODE_URL}/api/core/v2/blocks/${response.blockId}`,

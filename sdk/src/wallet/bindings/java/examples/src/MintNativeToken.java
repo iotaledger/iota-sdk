@@ -33,10 +33,13 @@ public class MintNativeToken {
         options.withMaximumSupply("0x45"); // number 69 hex encoded
 
         // Send transaction.
-        MintTokenTransaction transaction = a.mintNativeToken(new org.iota.types.account_methods.MintNativeToken().withNativeTokenOptions(options));
+        MintTokenTransaction mint = a
+                .mintNativeToken(new org.iota.types.account_methods.MintNativeToken().withNativeTokenOptions(options));
+        Transaction transaction = mint.getTransaction();
 
-        // Print transaction.System.out.println(
-                        "Transaction: " + transaction.getTransactionId() +
+        // Print transaction.
+        System.out.println(
+                "Transaction: " + transaction.getTransactionId() +
                         " Block sent: " + Env.NODE + "/api/core/v2/blocks/" +
                         transaction.getBlockId());
 

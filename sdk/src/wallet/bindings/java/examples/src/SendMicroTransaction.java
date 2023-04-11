@@ -31,7 +31,7 @@ public class SendMicroTransaction {
         AddressWithAmount[] outputs = new AddressWithAmount[] {
                 new AddressWithAmount()
                         .withAddress("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")
-                        .withAmount("1")
+                                        .withAmount("1")
         };
 
         // Configure outputs
