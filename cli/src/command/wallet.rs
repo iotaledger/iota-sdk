@@ -15,6 +15,7 @@ use crate::{error::Error, helper::get_password, println_log_info};
 const DEFAULT_NODE_URL: &str = "https://api.testnet.shimmer.network";
 const DEFAULT_WALLET_DATABASE_PATH: &str = "./stardust-cli-wallet-db";
 const DEFAULT_STRONGHOLD_SNAPSHOT_PATH: &str = "./stardust-cli-wallet.stronghold";
+const DEFAULT_LOG_LEVEL: &str = "debug";
 
 #[derive(Debug, Clone, Parser)]
 #[command(author, version, about, long_about = None, propagate_version = true)]
@@ -28,7 +29,7 @@ pub struct WalletCli {
     /// Set the account to enter.
     pub account: Option<String>,
     /// Set the log level.
-    #[arg(short, long, default_value = "Info")]
+    #[arg(short, long, default_value = DEFAULT_LOG_LEVEL)]
     pub log_level: LevelFilter,
     #[command(subcommand)]
     pub command: Option<WalletCommand>,
