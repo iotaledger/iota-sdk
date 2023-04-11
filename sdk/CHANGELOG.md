@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `{Alias, Basic, Foundry, Nft}Output::clear_unlock_conditions` method;
 - `{Alias, Basic, Foundry, Nft}Output::clear_features` method;
 - `{Alias, Foundry, Nft}Output::clear_immutable_features` method;
+- `{TransactionOptions, TransactionOptionsDto}::allow_micro_amount` field;
+- `AddressWithAmount::{new, with_return_address, with_expiration}` methods;
 
 ### Changed
 
@@ -37,6 +39,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Builder methods `add_feature`, `replace_feature`, `with_features` are now generic;
 - Builder methods `add_immutable_feature`, `replace_immutable_feature`, `with_immutable_features` are now generic;
 - Merge `send_amount` and `send_micro_transaction`;
+- `AddressWithAmount::{address, amount}` fields are no longer public;
+
+### Removed
+
+- `AddressWithMicroAmount` and `AddressWithAmountDto`;
 
 ### Fixed
 
