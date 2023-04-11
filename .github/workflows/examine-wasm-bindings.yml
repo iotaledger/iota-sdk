@@ -21,6 +21,7 @@ on:
       - ".github/workflows/examine-wasm-bindings.yml"
       - ".github/actions/**"
       - "sdk/src/wallet/bindings/wasm/**"
+      - "sdk/src/wallet/bindings/nodejs/**" # Re-include nodejs bindings, b/c lib is copied from there
       # Watch the Rust core too
       - "src/**"
       - "Cargo.toml"

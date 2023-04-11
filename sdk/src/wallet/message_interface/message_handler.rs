@@ -950,14 +950,6 @@ impl WalletMessageHandler {
                 .await
             }
             #[cfg(feature = "participation")]
-            AccountMethod::GetVotingPower => {
-                convert_async_panics(|| async {
-                    let voting_power = account_handle.get_voting_power().await?;
-                    Ok(Response::VotingPower(voting_power.to_string()))
-                })
-                .await
-            }
-            #[cfg(feature = "participation")]
             AccountMethod::GetParticipationOverview { event_ids } => {
                 convert_async_panics(|| async {
                     let overview = account_handle.get_participation_overview(event_ids).await?;

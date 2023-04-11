@@ -388,11 +388,6 @@ pub enum AccountMethod {
         #[serde(rename = "eventId")]
         event_id: ParticipationEventId,
     },
-    /// Get the account's total voting power (voting or NOT voting).
-    /// Expected response: [`VotingPower`](crate::message_interface::Response::VotingPower)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    GetVotingPower,
     /// Calculates a participation overview for an account. If event_ids are provided, only return outputs and tracked
     /// participations for them.
     /// Expected response:
