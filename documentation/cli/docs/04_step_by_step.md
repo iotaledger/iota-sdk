@@ -58,14 +58,14 @@ Enter the "savings" account, and get an address.
 > Account "savings": addresses
 ```
 ```sh title=Output
-> INFO  Address 0: <tst123abc...>
+> INFO  Address 0: <rms123abc...>
 ```
 
 Enter the "main" account, and send some amount to the "savings" address.
 ```sh title=Input
 ./wallet main
 
-> Account "main": send <tst123abc...> 1000000
+> Account "main": send <rms123abc...> 1000000
 ```
 ```sh title=Output
 > INFO  Transaction sent:
@@ -91,7 +91,7 @@ Enter the "main" account, and mint native tokens with foundry metadata.
 ```sh title=Input
 ./wallet main
 
-> Account "main": mint-native-token 1000 1000 --foundry-metadata-hex <0xabcdef>
+> Account "main": mint-native-token 1000 1000 --foundry-metadata-hex <0xabcdef...>
 ```
 
 ```sh title=Output
@@ -109,7 +109,7 @@ Enter the "savings" account, and generate a new address.
 > Account "savings": new-address
 ```
 ```sh title=Output
-> INFO  Address 2: <tst456def...>
+> INFO  Address 2: <rms456def...>
 ```
 
 Enter the "main" account, and synchronize the account balances.
@@ -124,7 +124,7 @@ Enter the "main" account, and synchronize the account balances.
 
 Send native tokens from the "main" account to the new "savings" address.
 ```sh title=Input
-> Account "main": send-native-token <tst456def> <TOKEN_ID> 100
+> Account "main": send-native-token <rms456def...> <TOKEN_ID> 100
 ```
 ```sh title=Output
 > INFO  Native token transaction sent:
@@ -158,7 +158,7 @@ Enter the "savings" account, and generate a new address.
 ```
 
 ```sh title=Output
-> INFO  Address 3: <tst789ghi...>
+> INFO  Address 3: <rms789ghi...>
 ```
 
 Enter the "main" account, and synchronize the account balances.
@@ -173,7 +173,7 @@ Enter the "main" account, and synchronize the account balances.
 
 Send the NFT to the new "savings" address.
 ```sh title=Input
-> Account "main": send-nft <tst789ghi...> <NFT_ID>
+> Account "main": send-nft <rms789ghi...> <NFT_ID>
 ```
 ```sh title=Output
 > INFO  Nft transaction sent:
