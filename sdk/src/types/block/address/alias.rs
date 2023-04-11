@@ -63,6 +63,7 @@ impl core::fmt::Debug for AliasAddress {
 #[allow(missing_docs)]
 pub mod dto {
     use alloc::string::{String, ToString};
+
     use serde::{Deserialize, Serialize};
 
     use super::*;

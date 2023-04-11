@@ -65,6 +65,7 @@ impl core::fmt::Debug for MetadataFeature {
 #[allow(missing_docs)]
 pub mod dto {
     use alloc::string::String;
+
     use serde::{Deserialize, Serialize};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]

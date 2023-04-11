@@ -12,10 +12,9 @@ use getset::Getters;
 use hashbrown::HashMap;
 use packable::PackableExt;
 
-use crate::types::{
-    api::plugins::participation::error::Error,
-    block::{impl_id, string_serde_impl},
-};
+#[cfg(feature = "serde")]
+use crate::types::block::string_serde_impl;
+use crate::types::{api::plugins::participation::error::Error, block::impl_id};
 
 /// Participation tag.
 pub const PARTICIPATION_TAG: &str = "PARTICIPATE";
@@ -50,6 +49,7 @@ pub struct ParticipationEvent {
 }
 
 impl_id!(pub ParticipationEventId, 32, "A participation event id.");
+#[cfg(feature = "serde")]
 string_serde_impl!(ParticipationEventId);
 
 /// Information about a voting or staking event.
@@ -248,11 +248,12 @@ impl Participations {
 
     /// Serialize to bytes.
     pub fn to_bytes(&self) -> Result<Vec<u8>, Error> {
-        let mut bytes: Vec<u8> = vec![self
-            .participations
-            .len()
-            .try_into()
-            .map_err(|_| Error::InvalidParticipations)?];
+        let mut bytes: Vec<u8> = vec![
+            self.participations
+                .len()
+                .try_into()
+                .map_err(|_| Error::InvalidParticipations)?,
+        ];
 
         for participation in &self.participations {
             let event_id: Vec<u8> = participation.event_id.pack_to_vec();
