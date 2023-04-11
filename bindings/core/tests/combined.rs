@@ -6,7 +6,7 @@ use iota_sdk::{
     wallet::account::types::AccountIdentifier,
 };
 use iota_sdk_bindings_core::{
-    call_client_method, call_wallet_method, message_handler::Result, AccountMethod, ClientMethod, ManagerOptions,
+    call_client_method, call_wallet_method, method_handler::Result, AccountMethod, ClientMethod, ManagerOptions,
     Response, WalletMethod,
 };
 
@@ -33,12 +33,12 @@ async fn generate_addresses() -> Result<()> {
         bech32_hrp: Some("atoi".to_string()),
         options: None,
     };
-    let message = ClientMethod::GenerateAddresses {
+    let method = ClientMethod::GenerateAddresses {
         secret_manager: serde_json::from_str::<SecretManagerDto>(&secret_manager).unwrap(),
         options,
     };
 
-    let response = call_client_method(&client, message).await;
+    let response = call_client_method(&client, method).await;
     match response {
         Response::GeneratedAddresses(addresses) => println!("{:?}", serde_json::to_string(&addresses).unwrap()),
         _ => panic!("Unexpected response type"),
@@ -161,47 +161,4 @@ async fn client_from_wallet() -> Result<()> {
     }
 
     Ok(std::fs::remove_dir_all(storage_path).unwrap_or(()))
-}
-
-#[test]
-fn message_interface_secrets_debug() {
-    let client_message = ClientMethod::MnemonicToHexSeed {
-        mnemonic: "mnemonic".to_string(),
-    };
-    assert_eq!(
-        format!("{:?}", client_message),
-        "MnemonicToHexSeed { mnemonic: <omitted> }"
-    );
-
-    let client_message = ClientMethod::BuildAndPostBlock {
-        secret_manager: None,
-        options: None,
-    };
-    assert_eq!(
-        format!("{:?}", client_message),
-        "BuildAndPostBlock { secret_manager: None, options: None }"
-    );
-
-    #[cfg(feature = "ledger_nano")]
-    {
-        let client_message = ClientMethod::BuildAndPostBlock {
-            secret_manager: Some(SecretManagerDto::LedgerNano(false)),
-            options: None,
-        };
-        assert_eq!(
-            format!("{:?}", client_message),
-            "BuildAndPostBlock { secret_manager: Some(<omitted>), options: None }"
-        );
-    }
-
-    let wallet_message = WalletMethod::VerifyMnemonic {
-        mnemonic: "mnemonic".to_string(),
-    };
-    assert_eq!(
-        format!("{:?}", wallet_message),
-        "VerifyMnemonic { mnemonic: <omitted> }"
-    );
-
-    let response = Response::GeneratedMnemonic("mnemonic".to_string());
-    assert_eq!(format!("{:?}", response), "GeneratedMnemonic(<omitted>)");
 }

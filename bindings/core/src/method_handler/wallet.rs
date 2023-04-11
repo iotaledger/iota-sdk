@@ -10,15 +10,15 @@ use iota_sdk::{
 use zeroize::Zeroize;
 
 use crate::{
-    message_handler::{account_handle::call_account_method, Result},
     method::WalletMethod,
+    method_handler::{account_handle::call_account_method, Result},
     panic::convert_panics,
     response::Response,
 };
 
 /// Call a wallet method.
-pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, message: WalletMethod) -> Result<Response> {
-    match message {
+pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> Result<Response> {
+    match method {
         WalletMethod::CreateAccount { alias, bech32_hrp } => {
             let mut builder = wallet.create_account();
 

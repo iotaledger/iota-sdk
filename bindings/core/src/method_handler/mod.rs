@@ -4,9 +4,11 @@
 mod account_handle;
 mod call_method;
 mod client;
+mod utility;
 mod wallet;
+// TODO: mod secret_manager;
 
-pub use call_method::{call_client_method, call_wallet_method};
+pub use call_method::{call_client_method, call_utility_method, call_wallet_method};
 #[cfg(feature = "mqtt")]
 pub use client::listen_mqtt;
 

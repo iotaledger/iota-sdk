@@ -35,7 +35,7 @@ use {
     iota_sdk::types::block::payload::milestone::option::dto::ReceiptMilestoneOptionDto,
 };
 
-use crate::{message_handler::Result, method::ClientMethod, response::Response};
+use crate::{method::ClientMethod, method_handler::Result, response::Response};
 
 /// Listen to MQTT events
 #[cfg(feature = "mqtt")]
@@ -74,7 +74,7 @@ where
 }
 
 /// Call a client method.
-pub async fn call_client_method_internal(client: &Client, message: ClientMethod) -> Result<Response> {
+pub(crate) async fn call_client_method_internal(client: &Client, message: ClientMethod) -> Result<Response> {
     match message {
         ClientMethod::BuildAliasOutput {
             amount,

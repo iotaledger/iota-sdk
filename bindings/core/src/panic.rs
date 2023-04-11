@@ -9,7 +9,7 @@ use std::{
 use backtrace::Backtrace;
 use futures::{Future, FutureExt};
 
-use super::message_handler::Result;
+use super::method_handler::Result;
 use crate::response::Response;
 
 fn panic_to_response_message(panic: Box<dyn Any>) -> Response {

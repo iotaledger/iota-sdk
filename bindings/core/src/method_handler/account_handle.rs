@@ -31,7 +31,7 @@ use primitive_types::U256;
 use super::Result;
 use crate::{method::AccountMethod, panic::convert_async_panics, Response};
 
-pub async fn call_account_method(account_handle: &AccountHandle, method: AccountMethod) -> Result<Response> {
+pub(crate) async fn call_account_method(account_handle: &AccountHandle, method: AccountMethod) -> Result<Response> {
     match method {
         AccountMethod::BuildAliasOutput {
             amount,
