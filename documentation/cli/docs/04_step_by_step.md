@@ -22,7 +22,7 @@ Create a main account.
 > INFO  Created account "main"
 ```
 
-Exit from from the "main" account.
+Exit from the "main" account.
 ```sh title=Input
 > Account "main": exit
 ```
@@ -38,7 +38,7 @@ Create a savings account.
 
 ## Tokens
 
-Enter the "main" account, and get some funds from the faucet to the main account.
+Enter the "main" account, and get some funds from the faucet.
 ```sh title=Input
 ./wallet main
 
@@ -51,7 +51,7 @@ Enter the "main" account, and get some funds from the faucet to the main account
 
 ### Send an amount
 
-Enter the "savings" account, and get an address from the savings account.
+Enter the "savings" account, and get an address.
 ```sh title=Input
 ./wallet savings
 
@@ -61,7 +61,7 @@ Enter the "savings" account, and get an address from the savings account.
 > INFO  Address 0: <tst123abc...>
 ```
 
-Enter the "main" account, and send an amount from the main account to the savings address.
+Enter the "main" account, and send some amount to the "savings" address.
 ```sh title=Input
 ./wallet main
 
@@ -122,7 +122,7 @@ Enter the "main" account, and synchronize the account balances.
 > INFO  Synced: AccountBalance ...TokenId([TOKEN_ID])...
 ```
 
-Send native tokens from the "main" account to the created "savings" address.
+Send native tokens from the "main" account to the new "savings" address.
 ```sh title=Input
 > Account "main": send-native-token <tst456def> <TOKEN_ID> 100
 ```
@@ -171,7 +171,7 @@ Enter the "main" account, and synchronize the account balances.
 > INFO  Synced: AccountBalance ...NftId([NFT_ID])...
 ```
 
-Send the NFT to the created "savings" address.
+Send the NFT to the new "savings" address.
 ```sh title=Input
 > Account "main": send-nft <tst789ghi...> <NFT_ID>
 ```
