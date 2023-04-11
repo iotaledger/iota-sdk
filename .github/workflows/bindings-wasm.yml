@@ -13,9 +13,7 @@ on:
       - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
       - "sdk/src/client/bindings/wasm/**" # Re-include wasm client bindings
-      - "sdk/src/wallet/bindings/wasm/**" # Re-include wasm wallet bindings
       - "sdk/src/client/bindings/nodejs/**" # Re-include node client bindings, b/c lib copied from there
-      - "sdk/src/wallet/bindings/nodejs/**" # Re-include node wallet bindings, b/c lib copied from there
   pull_request:
     branches: [develop, production]
     paths:
