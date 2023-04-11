@@ -28,8 +28,8 @@ pub struct WalletCli {
     /// Set the account to enter.
     pub account: Option<String>,
     /// Set the log level.
-    #[arg(short, long)]
-    pub log_level: Option<LevelFilter>,
+    #[arg(short, long, default_value = "Info")]
+    pub log_level: LevelFilter,
     #[command(subcommand)]
     pub command: Option<WalletCommand>,
 }

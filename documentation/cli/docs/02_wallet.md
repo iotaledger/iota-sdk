@@ -13,13 +13,13 @@ Displays the wallet interface usage and exits.
 
 #### Options
 
-| Name                         | Description | Environment Variable | 
-| ---------------------------- | ----------- | -------------------- |
-| `--wallet-db-path`           | Sets the path to the wallet database | `WALLET_DATABASE_PATH` |
-| `--stronghold-snapshot-path` | Sets the path to the Stronghold snapshot file | `STRONGHOLD_SNAPSHOT_PATH`|
-| `--log-level` (`-l`)         | Sets the log verbosity level (error, warn, info, debug, trace) | ✘ |
-| `--help` (`-h`)              | Shows all available commands, arguments and options  | ✘ |
-| `--version` (`-V`)           | Shows the current version | ✘ |
+| Name                         | Description | Default | Environment Variable | Example |
+| ---------------------------- | ----------- | -------------------- | --- | --- |
+| `--wallet-db-path`           | Sets the path to the wallet database | `./stardust-cli-wallet-db` | `WALLET_DATABASE_PATH` | `/path/to/wallet-db` |
+| `--stronghold-snapshot-path` | Sets the path to the Stronghold snapshot file | `./stardust-cli-wallet.stronghold` | `STRONGHOLD_SNAPSHOT_PATH`| `/path/to/stronghold-snapshot` |
+| `--log-level` (`-l`)         | Sets the log verbosity level (error, warn, info, debug, trace) | `info` | ✘ | `debug` |
+| `--help` (`-h`)              | Shows all available commands, arguments and options  | ✘ | ✘ | TODO |
+| `--version` (`-V`)           | Shows the current version | ✘ | ✘ | TODO |
 
 ### `./wallet`
 
