@@ -5,13 +5,7 @@ execution.
 
 It is responsible for the creation and management of the wallet and its accounts.
 
-## Commands
-
-### `./wallet --help`
-
-Displays the wallet interface usage and exits.
-
-#### Options
+You can run `./wallet --help` to print all available CLI commands, arguments, and options. The available options are listed in the table below:
 
 | Name                         | Description | Default | Environment Variable | Example |
 | ---------------------------- | ----------- | -------------------- | --- | --- |
@@ -20,6 +14,8 @@ Displays the wallet interface usage and exits.
 | `--log-level` (`-l`)         | Sets the log verbosity level (error, warn, info, debug, trace) | `debug` | ✘ | `trace` |
 | `--help` (`-h`)              | Shows all available commands, arguments and options  | ✘ | ✘ | ✘ |
 | `--version` (`-V`)           | Shows the current version | ✘ | ✘ | ✘ |
+
+## Usage Examples
 
 ### `./wallet`
 
