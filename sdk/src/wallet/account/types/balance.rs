@@ -92,6 +92,7 @@ pub struct BaseCoinBalance {
     pub available: u64,
     /// Voting power
     #[cfg(feature = "participation")]
+    #[serde(rename = "votingPower")]
     pub voting_power: u64,
 }
 
@@ -104,6 +105,7 @@ pub struct BaseCoinBalanceDto {
     pub available: String,
     /// Voting power
     #[cfg(feature = "participation")]
+    #[serde(rename = "votingPower")]
     pub voting_power: String,
 }
 

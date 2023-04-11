@@ -3,3 +3,4 @@
 ---
 
 Add `BaseCoinBalance.voting_power` field.
+Remove `getVotingPower`.

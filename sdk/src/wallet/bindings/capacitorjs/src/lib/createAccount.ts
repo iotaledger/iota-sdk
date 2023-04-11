@@ -1095,16 +1095,6 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             return JSON.parse(resp).payload;
         },
 
-        async getVotingPower(): Promise<string> {
-            const resp = await messageHandler.callAccountMethod(
-                accountMeta.index,
-                {
-                    name: 'getVotingPower',
-                },
-            );
-            return JSON.parse(resp).payload;
-        },
-
         async getParticipationOverview(): Promise<ParticipationOverview> {
             const resp = await messageHandler.callAccountMethod(
                 accountMeta.index,
