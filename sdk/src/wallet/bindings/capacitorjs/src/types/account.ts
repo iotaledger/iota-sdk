@@ -41,7 +41,7 @@ export interface BaseCoinBalance {
     /** The amount of the outputs that aren't used in a transaction */
     available: string;
     /** Voting power */
-    voting_power: string;
+    votingPower: string;
 }
 
 /** The required storage deposit per output type */
