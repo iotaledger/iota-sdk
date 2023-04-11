@@ -140,7 +140,6 @@ pub fn protocol_parameters() -> ProtocolParameters {
     .unwrap()
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
 

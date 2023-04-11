@@ -48,8 +48,8 @@ impl AliasTransition {
     }
 }
 
-impl std::fmt::Display for AliasTransition {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for AliasTransition {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::State => write!(f, "state"),
             Self::Governance => write!(f, "governance"),
@@ -726,9 +726,10 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, alias_id: &Ali
     verify_allowed_unlock_conditions(unlock_conditions, AliasOutput::ALLOWED_UNLOCK_CONDITIONS)
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::string::{String, ToString};
+
     use serde::{Deserialize, Serialize};
 
     use super::*;

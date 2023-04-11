@@ -14,7 +14,6 @@ pub mod address;
 #[allow(clippy::module_inception)]
 pub mod block;
 /// A module that provides DTOs.
-#[cfg(feature = "dto")]
 pub mod dto;
 /// A module that contains helper functions and types.
 pub mod helper;
@@ -40,7 +39,6 @@ pub mod unlock;
 
 pub(crate) use r#macro::{create_bitflags, impl_id, string_serde_impl};
 
-#[cfg(feature = "dto")]
 pub use self::{block::dto::BlockDto, error::dto::DtoError};
 pub use self::{
     block::{Block, BlockBuilder},

@@ -163,9 +163,9 @@ fn verify_signatures_packable<const VERIFY: bool>(
     verify_signatures::<VERIFY>(signatures)
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::string::ToString;
     use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};

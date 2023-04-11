@@ -465,9 +465,10 @@ fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, tok
         .amount()
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::{format, string::String};
+
     use serde::{Deserialize, Serialize, Serializer};
     use serde_json::Value;
 

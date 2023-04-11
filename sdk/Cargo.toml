@@ -70,7 +70,9 @@ dotenvy = { version = "0.15.0", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 
 [features]
-client = [ "serde", "block", "dto", "api", "pow", "std", "async-trait", "log", "derive_builder" ]
+default = [ "std", "serde", "tls" ]
+
+client = [ "serde", "pow", "std", "async-trait", "log", "derive_builder" ]
 pow = [ ]
 wallet = [ "client", "log" ]
 storage = [ "async-trait" ]
@@ -81,11 +83,6 @@ ledger_nano = [ "iota-ledger-nano" ]
 participation = [ "storage" ]
 message_interface = [ "backtrace", "fern-logger" ]
 tls = [ "reqwest/rustls-tls" ]
-
-default = [ "api", "block", "std", "serde", "tls" ]
-api = [ "block", "dto" ]
-block = [  ]
-dto = [ "serde" ]
 rand = [ "std" ]
 serde = [  ]
 std = [  ]

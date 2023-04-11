@@ -184,7 +184,6 @@ fn v_byte_offset(v_byte_factor_key: u8, v_byte_factor_data: u8) -> u32 {
         + size_of::<ConfirmationUnixTimestamp>() as u32 * v_byte_factor_data as u32
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
 

@@ -1,6 +1,8 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::string::String;
+
 use crate::types::block::{
     address::{Address, NftAddress},
     output::OutputId,
@@ -20,7 +22,11 @@ impl From<&OutputId> for NftId {
 impl NftId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 
     /// Returns the bech32 encoding of the nft ID.
@@ -29,9 +35,10 @@ impl NftId {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::string::ToString;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;

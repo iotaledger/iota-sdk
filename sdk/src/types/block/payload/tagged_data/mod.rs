@@ -71,9 +71,10 @@ impl core::fmt::Debug for TaggedDataPayload {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::string::String;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
