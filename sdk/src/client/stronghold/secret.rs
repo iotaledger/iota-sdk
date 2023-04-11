@@ -73,6 +73,14 @@ impl SecretManage for StrongholdAdapter {
             // Get the Ed25519 public key from the derived SLIP-10 private key in the vault.
             let public_key = self.ed25519_public_key(derive_location.clone()).await?;
 
+            // Cleanup location afterwards
+            self.stronghold
+                .lock()
+                .await
+                .get_client(PRIVATE_DATA_CLIENT_PATH)?
+                .vault(SECRET_VAULT_PATH)
+                .delete_secret(derive_location.record_path())?;
+
             // Hash the public key to get the address.
             let hash = Blake2b256::digest(public_key);
 
@@ -126,7 +134,15 @@ impl SecretManage for StrongholdAdapter {
 
         // Get the Ed25519 public key from the derived SLIP-10 private key in the vault.
         let public_key = self.ed25519_public_key(derive_location.clone()).await?;
-        let signature = self.ed25519_sign(derive_location, msg).await?;
+        let signature = self.ed25519_sign(derive_location.clone(), msg).await?;
+
+        // Cleanup location afterwards
+        self.stronghold
+            .lock()
+            .await
+            .get_client(PRIVATE_DATA_CLIENT_PATH)?
+            .vault(SECRET_VAULT_PATH)
+            .delete_secret(derive_location.record_path())?;
 
         Ok(Ed25519Signature::new(public_key, signature))
     }
