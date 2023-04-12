@@ -238,7 +238,7 @@ impl AccountHandle {
         }
 
         log::debug!(
-            "[BALANCE] total_amount: {}, locked balance: {}, total_rent_amount: {}",
+            "[BALANCE] total_amount: {}, locked_amount: {}, total_rent_amount: {}",
             account_balance.base_coin.total,
             locked_amount,
             total_rent_amount,
