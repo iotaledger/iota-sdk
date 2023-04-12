@@ -26,10 +26,7 @@ pub enum Error {
     #[error("wallet error: {0}")]
     Wallet(#[from] WalletError),
     #[error("input error: expected {expected}, found {found}")]
-    InvalidInput {
-        expected: String,
-        found: String,
-    }
+    InvalidInput { expected: String, found: String },
 }
 
 impl From<ClientError> for Error {

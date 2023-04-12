@@ -14,7 +14,7 @@ use crate::{
         set_node_command, sync_command, InitParameters, WalletCli, WalletCommand,
     },
     error::Error,
-    helper::{get_password, get_decision},
+    helper::{get_decision, get_password},
     println_log_info,
 };
 
@@ -28,22 +28,25 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
         || "./stardust-cli-wallet-db".to_string(),
         |os_str| os_str.into_string().expect("invalid WALLET_DATABASE_PATH"),
     );
-    let stronghold_path = std::path::Path::new("./stardust-cli-wallet.stronghold");
-    let stronghold_exists = stronghold_path.exists();
+    let snapshot_path = std::path::Path::new("./stardust-cli-wallet.stronghold");
+    let snapshot_exists = snapshot_path.exists();
     let password = if let Some(WalletCommand::Restore { .. }) = &cli.command {
         get_password("Stronghold password", false)?
     } else {
-        get_password("Stronghold password", !stronghold_path.exists())?
+        get_password("Stronghold password", !snapshot_path.exists())?
     };
     let secret_manager = SecretManager::Stronghold(
         StrongholdSecretManager::builder()
             .password(&password)
-            .build(stronghold_path)?,
+            .build(snapshot_path)?,
     );
 
     let (wallet, account) = if let Some(command) = cli.command {
         if let WalletCommand::Init(init_parameters) = command {
-            (Some(init_command(secret_manager, storage_path, init_parameters).await?), None)
+            (
+                Some(init_command(secret_manager, storage_path, init_parameters).await?),
+                None,
+            )
         } else if let WalletCommand::Restore { backup_path } = command {
             (
                 Some(restore_command(secret_manager, storage_path, backup_path, password).await?),
@@ -72,13 +75,15 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
 
             (Some(wallet), account)
         }
-    } else if stronghold_exists {
+    } else if snapshot_exists {
         (
-            Some(Wallet::builder()
-                .with_secret_manager(secret_manager)
-                .with_storage_path(&storage_path)
-                .finish()
-                .await?),
+            Some(
+                Wallet::builder()
+                    .with_secret_manager(secret_manager)
+                    .with_storage_path(&storage_path)
+                    .finish()
+                    .await?,
+            ),
             None,
         )
     } else {
