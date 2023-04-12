@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::client::secret::SecretManagerDto;
-#[cfg(feature = "ledger_nano")]
-use iota_sdk::client::secret::SecretManagerDto;
 use iota_sdk_bindings_core::{ClientMethod, Response, WalletMethod, WalletOptions};
 
 #[test]

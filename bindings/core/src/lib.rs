@@ -20,6 +20,7 @@ use iota_sdk::{
 use serde::Deserialize;
 
 pub use self::{
+    error::Error,
     method::{AccountMethod, ClientMethod, UtilityMethod, WalletMethod},
     method_handler::{call_client_method, call_utility_method, call_wallet_method},
     response::Response,

@@ -13,19 +13,4 @@ pub use call_method::{call_client_method, call_utility_method, call_wallet_metho
 pub use client::listen_mqtt;
 
 /// Result type of the bindings core crate.
-pub type Result<T> = std::result::Result<T, super::error::BindingsError>;
-
-#[cfg(test)]
-mod tests {
-    use super::super::{panic::convert_async_panics, Response};
-
-    #[tokio::test]
-    async fn panic_to_response() {
-        match convert_async_panics(|| async { panic!("rekt") }).await.unwrap() {
-            Response::Panic(msg) => {
-                assert!(msg.contains("rekt"));
-            }
-            response_type => panic!("Unexpected response type: {response_type:?}"),
-        };
-    }
-}
+pub type Result<T> = std::result::Result<T, super::error::Error>;

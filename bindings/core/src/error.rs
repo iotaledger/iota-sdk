@@ -10,7 +10,7 @@ pub use super::{method::AccountMethod, response::Response};
 /// Error type for the bindings core crate.
 #[derive(Debug, thiserror::Error)]
 #[allow(clippy::large_enum_variant)]
-pub enum BindingsError {
+pub enum Error {
     /// Client error
     #[error("{0}")]
     Client(#[from] iota_sdk::client::Error),
@@ -40,7 +40,7 @@ pub enum BindingsError {
 }
 
 // Serialize type with Display error
-impl Serialize for BindingsError {
+impl Serialize for Error {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -60,7 +60,7 @@ impl Serialize for BindingsError {
     }
 }
 
-impl From<iota_sdk::types::block::Error> for BindingsError {
+impl From<iota_sdk::types::block::Error> for Error {
     fn from(error: iota_sdk::types::block::Error) -> Self {
         Self::Block(Box::new(error))
     }

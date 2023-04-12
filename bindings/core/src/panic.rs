@@ -56,3 +56,18 @@ where
         .await
         .unwrap_or_else(|panic| Ok(panic_to_response_message(panic)))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::super::{panic::convert_async_panics, Response};
+
+    #[tokio::test]
+    async fn panic_to_response() {
+        match convert_async_panics(|| async { panic!("rekt") }).await.unwrap() {
+            Response::Panic(msg) => {
+                assert!(msg.contains("rekt"));
+            }
+            response_type => panic!("Unexpected response type: {response_type:?}"),
+        };
+    }
+}
