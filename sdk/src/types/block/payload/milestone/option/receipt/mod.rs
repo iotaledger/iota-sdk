@@ -149,7 +149,6 @@ fn verify_transaction_packable<const VERIFY: bool>(transaction: &Payload, _: &Pr
     verify_transaction::<VERIFY>(transaction)
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
     use serde::{Deserialize, Serialize};

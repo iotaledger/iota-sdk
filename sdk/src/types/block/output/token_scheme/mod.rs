@@ -34,7 +34,6 @@ impl TokenScheme {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
     use derive_more::From;

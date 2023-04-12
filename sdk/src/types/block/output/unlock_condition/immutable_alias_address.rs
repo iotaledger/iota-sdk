@@ -48,7 +48,6 @@ fn verify_alias_address<const VERIFY: bool>(address: &Address, _: &()) -> Result
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
     use serde::{Deserialize, Serialize};

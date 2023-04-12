@@ -336,9 +336,12 @@ fn verify_payload_packable<const VERIFY: bool>(
     verify_payload::<VERIFY>(payload)
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::{
+        boxed::Box,
+        string::{String, ToString},
+    };
     use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
