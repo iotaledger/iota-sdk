@@ -26,9 +26,9 @@ async fn main() -> Result<()> {
 
     // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs
     let transaction = account.create_alias_output(None, None).await?;
+    println!("Transaction: {}", transaction.transaction_id);
     println!(
-        "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
-        transaction.transaction_id,
+        "Block sent: {}/api/core/v2/blocks/{}",
         &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
@@ -57,9 +57,9 @@ async fn main() -> Result<()> {
     // Ensure the account is synced after minting.
     account.sync(None).await?;
 
+    println!("Transaction: {}", mint_txn.transaction.transaction_id);
     println!(
-        "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
-        mint_txn.transaction.transaction_id,
+        "Block sent: {}/api/core/v2/blocks/{}",
         &std::env::var("NODE_URL").unwrap(),
         mint_txn.transaction.block_id.expect("no block created yet")
     );
