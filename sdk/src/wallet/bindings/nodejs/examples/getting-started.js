@@ -35,7 +35,7 @@ async function main() {
     const manager = new AccountManager(accountManagerOptions);
 
     // Generate a mnemonic and store it in the Stronghold vault.
-    // INFO: It is best practice to back up the Stronghold vault somewhere safe.
+    // INFO: It is best practice to back up the mnemonic somewhere secure.
     const mnemonic = await manager.generateMnemonic();
     await manager.storeMnemonic(mnemonic);
 

@@ -34,7 +34,7 @@ wallet = IotaWallet(
 )
 
 # Generate a mnemonic and store it in the Stronghold vault.
-# INFO: It is best practice to back up the Stronghold vault somewhere safe.
+# INFO: It is best practice to back up the mnemonic somewhere secure.
 mnemonic = wallet.generate_mnemonic()
 wallet.store_mnemonic(mnemonic)
 
