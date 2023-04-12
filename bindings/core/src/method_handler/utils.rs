@@ -13,45 +13,41 @@ use iota_sdk::{
 };
 use zeroize::Zeroize;
 
-use crate::{method::UtilityMethod, method_handler::Result, response::Response};
+use crate::{method::UtilsMethod, method_handler::Result, response::Response};
 
-/// Call a utility method.
-pub(crate) async fn call_utility_method_internal(method: UtilityMethod) -> Result<Response> {
+/// Call a utils method.
+pub(crate) async fn call_utils_method_internal(method: UtilsMethod) -> Result<Response> {
     match method {
-        UtilityMethod::Bech32ToHex { bech32 } => Ok(Response::Bech32ToHex(Client::bech32_to_hex(&bech32)?)),
-        UtilityMethod::HexToBech32 { hex, bech32_hrp } => {
-            Ok(Response::Bech32Address(hex_to_bech32(&hex, &bech32_hrp)?))
-        }
-        UtilityMethod::AliasIdToBech32 { alias_id, bech32_hrp } => {
+        UtilsMethod::Bech32ToHex { bech32 } => Ok(Response::Bech32ToHex(Client::bech32_to_hex(&bech32)?)),
+        UtilsMethod::HexToBech32 { hex, bech32_hrp } => Ok(Response::Bech32Address(hex_to_bech32(&hex, &bech32_hrp)?)),
+        UtilsMethod::AliasIdToBech32 { alias_id, bech32_hrp } => {
             Ok(Response::Bech32Address(alias_id.to_bech32(&bech32_hrp)))
         }
-        UtilityMethod::NftIdToBech32 { nft_id, bech32_hrp } => {
-            Ok(Response::Bech32Address(nft_id.to_bech32(&bech32_hrp)))
-        }
-        UtilityMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => Ok(Response::Bech32Address(
+        UtilsMethod::NftIdToBech32 { nft_id, bech32_hrp } => Ok(Response::Bech32Address(nft_id.to_bech32(&bech32_hrp))),
+        UtilsMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => Ok(Response::Bech32Address(
             hex_public_key_to_bech32_address(&hex, &bech32_hrp)?,
         )),
-        UtilityMethod::ParseBech32Address { address } => Ok(Response::ParsedBech32Address(AddressDto::from(
+        UtilsMethod::ParseBech32Address { address } => Ok(Response::ParsedBech32Address(AddressDto::from(
             &Address::try_from_bech32(address)?,
         ))),
-        UtilityMethod::IsAddressValid { address } => Ok(Response::Bool(Address::is_valid_bech32(&address))),
-        UtilityMethod::GenerateMnemonic => Ok(Response::GeneratedMnemonic(Client::generate_mnemonic()?)),
-        UtilityMethod::MnemonicToHexSeed { mut mnemonic } => {
+        UtilsMethod::IsAddressValid { address } => Ok(Response::Bool(Address::is_valid_bech32(&address))),
+        UtilsMethod::GenerateMnemonic => Ok(Response::GeneratedMnemonic(Client::generate_mnemonic()?)),
+        UtilsMethod::MnemonicToHexSeed { mut mnemonic } => {
             let response = Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(&mnemonic)?);
             mnemonic.zeroize();
             Ok(response)
         }
-        UtilityMethod::BlockId { block } => {
+        UtilsMethod::BlockId { block } => {
             let block = Block::try_from_dto_unverified(&block)?;
             Ok(Response::BlockId(block.id()))
         }
-        UtilityMethod::TransactionId { payload } => {
+        UtilsMethod::TransactionId { payload } => {
             let payload = TransactionPayload::try_from_dto_unverified(&payload)?;
             Ok(Response::TransactionId(payload.id()))
         }
-        UtilityMethod::ComputeAliasId { output_id } => Ok(Response::AliasId(AliasId::from(&output_id))),
-        UtilityMethod::ComputeNftId { output_id } => Ok(Response::NftId(NftId::from(&output_id))),
-        UtilityMethod::ComputeFoundryId {
+        UtilsMethod::ComputeAliasId { output_id } => Ok(Response::AliasId(AliasId::from(&output_id))),
+        UtilsMethod::ComputeNftId { output_id } => Ok(Response::NftId(NftId::from(&output_id))),
+        UtilsMethod::ComputeFoundryId {
             alias_address,
             serial_number,
             token_scheme_kind,
@@ -60,13 +56,11 @@ pub(crate) async fn call_utility_method_internal(method: UtilityMethod) -> Resul
             serial_number,
             token_scheme_kind,
         ))),
-        UtilityMethod::Faucet { url, address } => {
-            Ok(Response::Faucet(request_funds_from_faucet(&url, &address).await?))
-        }
-        UtilityMethod::HashTransactionEssence { essence } => Ok(Response::TransactionEssenceHash(prefix_hex::encode(
+        UtilsMethod::Faucet { url, address } => Ok(Response::Faucet(request_funds_from_faucet(&url, &address).await?)),
+        UtilsMethod::HashTransactionEssence { essence } => Ok(Response::TransactionEssenceHash(prefix_hex::encode(
             TransactionEssence::try_from_dto_unverified(&essence)?.hash(),
         ))),
-        UtilityMethod::VerifyEd25519Signature {
+        UtilsMethod::VerifyEd25519Signature {
             signature,
             message,
             address,

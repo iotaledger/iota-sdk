@@ -6,6 +6,7 @@ edition = "2021"
 homepage = "https://iota.org"
 description = "Bindings core for the IOTA SDK"
 license = "Apache-2.0"
+publish = false
 
 [dependencies]
 iota-sdk = { path = "../../sdk", default-features = false, features = [ "client", "wallet", "tls", "message_interface" ] }

@@ -13,11 +13,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::OmittedDebug;
 
-/// Each public utility method.
+/// Each public utils method.
 #[derive(Clone, Derivative, Serialize, Deserialize)]
 #[derivative(Debug)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
-pub enum UtilityMethod {
+pub enum UtilsMethod {
     /// Transforms bech32 to hex
     Bech32ToHex {
         /// Bech32 encoded address

@@ -1,25 +1,25 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk_bindings_core::{call_utility_method, method_handler::Result, Response, UtilityMethod};
+use iota_sdk_bindings_core::{call_utils_method, method_handler::Result, Response, UtilsMethod};
 
 #[tokio::test]
 async fn utils() -> Result<()> {
-    let response = call_utility_method(UtilityMethod::GenerateMnemonic).await;
+    let response = call_utils_method(UtilsMethod::GenerateMnemonic).await;
     match response {
         Response::GeneratedMnemonic(mnemonic) => println!("{:?}", serde_json::to_string(&mnemonic).unwrap()),
         _ => panic!("Unexpected response type"),
     };
 
     let bech32_adddress = "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string();
-    let method = UtilityMethod::Bech32ToHex {
+    let method = UtilsMethod::Bech32ToHex {
         bech32: bech32_adddress.clone(),
     };
 
-    let response = call_utility_method(method).await;
+    let response = call_utils_method(method).await;
     match response {
         Response::Bech32ToHex(hex) => {
-            match call_utility_method(UtilityMethod::HexToBech32 {
+            match call_utils_method(UtilsMethod::HexToBech32 {
                 hex,
                 bech32_hrp: "rms".to_string(),
             })

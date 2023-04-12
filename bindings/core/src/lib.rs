@@ -21,8 +21,8 @@ use serde::Deserialize;
 
 pub use self::{
     error::Error,
-    method::{AccountMethod, ClientMethod, UtilityMethod, WalletMethod},
-    method_handler::{call_client_method, call_utility_method, call_wallet_method},
+    method::{AccountMethod, ClientMethod, UtilsMethod, WalletMethod},
+    method_handler::{call_client_method, call_utils_method, call_wallet_method},
     response::Response,
 };
 

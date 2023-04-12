@@ -6,11 +6,11 @@ use iota_sdk::{client::Client, wallet::wallet::Wallet};
 use crate::{
     method::{ClientMethod, WalletMethod},
     method_handler::{
-        client::call_client_method_internal, utility::call_utility_method_internal, wallet::call_wallet_method_internal,
+        client::call_client_method_internal, utils::call_utils_method_internal, wallet::call_wallet_method_internal,
     },
     panic::convert_async_panics,
     response::Response,
-    UtilityMethod,
+    UtilsMethod,
 };
 
 /// Call a client method.
@@ -45,18 +45,18 @@ pub async fn call_wallet_method(wallet: &Wallet, method: WalletMethod) -> Respon
     response
 }
 
-/// Call a utility method.
-pub async fn call_utility_method(method: UtilityMethod) -> Response {
-    log::debug!("Utility method: {method:?}");
+/// Call a utils method.
+pub async fn call_utils_method(method: UtilsMethod) -> Response {
+    log::debug!("Utils method: {method:?}");
 
-    let result = convert_async_panics(|| async { call_utility_method_internal(method).await }).await;
+    let result = convert_async_panics(|| async { call_utils_method_internal(method).await }).await;
 
     let response = match result {
         Ok(r) => r,
         Err(e) => Response::Error(e),
     };
 
-    log::debug!("Utility response: {response:?}");
+    log::debug!("Utils response: {response:?}");
 
     response
 }
