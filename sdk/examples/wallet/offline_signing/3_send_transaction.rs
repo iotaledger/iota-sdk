@@ -18,8 +18,8 @@ const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/wallet/offline_signing/sign
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Create the account manager with the secret_manager and client options
-    let manager = AccountManager::builder()
+    // Create the wallet with the secret_manager and client options
+    let wallet = Wallet::builder()
         .with_storage_path("examples/wallet/offline_signing/online_walletdb")
         .finish()
         .await?;
