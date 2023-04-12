@@ -38,6 +38,31 @@ pub struct AccountBalance {
     pub potentially_locked_outputs: HashMap<OutputId, bool>,
 }
 
+impl std::ops::AddAssign for AccountBalance {
+    fn add_assign(&mut self, rhs: Self) {
+        self.base_coin += rhs.base_coin;
+        self.required_storage_deposit += rhs.required_storage_deposit;
+
+        for native_token_balance in rhs.native_tokens.into_iter() {
+            if let Some(total_native_token_balance) = self
+                .native_tokens
+                .iter_mut()
+                .find(|n| n.token_id == native_token_balance.token_id)
+            {
+                *total_native_token_balance += native_token_balance;
+            } else {
+                self.native_tokens.push(native_token_balance);
+            }
+        }
+
+        self.nfts.extend(rhs.nfts.into_iter());
+        self.aliases.extend(rhs.aliases.into_iter());
+        self.foundries.extend(rhs.foundries.into_iter());
+
+        // TODO Doesn't potentially_locked_outputs need to be summed as well?
+    }
+}
+
 /// Dto for the balance of an account, returned from [`crate::account::handle::AccountHandle::sync()`] and
 /// [`crate::account::handle::AccountHandle::balance()`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -94,6 +119,17 @@ pub struct BaseCoinBalance {
     #[cfg(feature = "participation")]
     #[serde(rename = "votingPower")]
     pub voting_power: u64,
+}
+
+impl std::ops::AddAssign for BaseCoinBalance {
+    fn add_assign(&mut self, rhs: Self) {
+        self.total += rhs.total;
+        self.available += rhs.available;
+        #[cfg(feature = "participation")]
+        {
+            self.voting_power += rhs.voting_power;
+        }
+    }
 }
 
 /// Base coin fields for [`AccountBalance`]
@@ -201,6 +237,14 @@ impl Default for NativeTokensBalance {
             total: U256::from(0u8),
             available: U256::from(0u8),
         }
+    }
+}
+
+impl std::ops::AddAssign for NativeTokensBalance {
+    fn add_assign(&mut self, rhs: Self) {
+        self.total += rhs.total;
+        self.available += rhs.available;
+        // TODO what about metadata?
     }
 }
 

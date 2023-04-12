@@ -308,30 +308,7 @@ pub(crate) fn add_balances(balances: Vec<AccountBalance>) -> crate::wallet::Resu
     let mut total_balance: AccountBalance = Default::default();
 
     for balance in balances {
-        total_balance.base_coin.total += balance.base_coin.total;
-        total_balance.base_coin.available += balance.base_coin.available;
-        total_balance.required_storage_deposit += balance.required_storage_deposit;
-        total_balance.nfts.extend(balance.nfts.into_iter());
-        total_balance.aliases.extend(balance.aliases.into_iter());
-        total_balance.foundries.extend(balance.foundries.into_iter());
-
-        for native_token_balance in &balance.native_tokens {
-            if let Some(total_native_token_balance) = total_balance
-                .native_tokens
-                .iter_mut()
-                .find(|n| n.token_id == native_token_balance.token_id)
-            {
-                total_native_token_balance.total += native_token_balance.total;
-                total_native_token_balance.available += native_token_balance.available;
-            } else {
-                total_balance.native_tokens.push(NativeTokensBalance {
-                    token_id: native_token_balance.token_id,
-                    metadata: native_token_balance.metadata.clone(),
-                    total: native_token_balance.total,
-                    available: native_token_balance.available,
-                })
-            }
-        }
+        total_balance += balance;
     }
 
     Ok(total_balance)
