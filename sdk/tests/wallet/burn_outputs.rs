@@ -138,7 +138,7 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     let search = balance
         .native_tokens()
         .iter()
-        .find(|token| token.token_id() == &mint_transaction.token_id && token.available() == &circulating_supply);
+        .find(|token| token.token_id() == &mint_transaction.token_id && token.available() == circulating_supply);
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
     assert!(search.is_some());
 
@@ -156,7 +156,7 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 
     let search = balance.native_tokens().iter().find(|token| {
-        (token.token_id() == &mint_transaction.token_id) && (token.available() == &(circulating_supply - melt_amount))
+        (token.token_id() == &mint_transaction.token_id) && (token.available() == circulating_supply - melt_amount)
     });
     assert!(search.is_some());
 

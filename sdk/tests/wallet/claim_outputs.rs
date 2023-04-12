@@ -224,13 +224,13 @@ async fn claim_2_native_tokens() -> Result<()> {
         .iter()
         .find(|t| t.token_id() == &mint_tx_0.token_id)
         .unwrap();
-    assert_eq!(native_token_0.total(), &native_token_amount);
+    assert_eq!(native_token_0.total(), native_token_amount);
     let native_token_1 = balance
         .native_tokens()
         .iter()
         .find(|t| t.token_id() == &mint_tx_1.token_id)
         .unwrap();
-    assert_eq!(native_token_1.total(), &native_token_amount);
+    assert_eq!(native_token_1.total(), native_token_amount);
 
     tear_down(storage_path)
 }
@@ -343,13 +343,13 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         .iter()
         .find(|t| t.token_id() == &mint_tx_0.token_id)
         .unwrap();
-    assert_eq!(native_token_0.total(), &native_token_amount);
+    assert_eq!(native_token_0.total(), native_token_amount);
     let native_token_1 = balance
         .native_tokens()
         .iter()
         .find(|t| t.token_id() == &mint_tx_1.token_id)
         .unwrap();
-    assert_eq!(native_token_1.total(), &native_token_amount);
+    assert_eq!(native_token_1.total(), native_token_amount);
 
     tear_down(storage_path)
 }

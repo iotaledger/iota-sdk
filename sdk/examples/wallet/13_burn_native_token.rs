@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
     if let Some(token_id) = balance
         .native_tokens()
         .iter()
-        .find(|t| t.available() >= &U256::from(11))
+        .find(|t| t.available() >= U256::from(11))
         .map(|t| t.token_id())
     {
         println!("Balance before burning:\n{balance:?}",);

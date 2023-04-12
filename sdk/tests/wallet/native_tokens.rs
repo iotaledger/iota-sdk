@@ -44,7 +44,7 @@ async fn mint_and_increase_native_token_supply() -> Result<()> {
             .find(|t| t.token_id() == &mint_tx.token_id)
             .unwrap()
             .available(),
-        &U256::from(50)
+        U256::from(50)
     );
 
     let mint_tx = account
@@ -62,7 +62,7 @@ async fn mint_and_increase_native_token_supply() -> Result<()> {
             .find(|t| t.token_id() == &mint_tx.token_id)
             .unwrap()
             .available(),
-        &U256::from(100)
+        U256::from(100)
     );
 
     tear_down(storage_path)

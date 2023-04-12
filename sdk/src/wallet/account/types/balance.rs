@@ -198,17 +198,20 @@ impl From<&RequiredStorageDeposit> for RequiredStorageDepositDto {
 }
 
 /// Native tokens fields for [`AccountBalance`]
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, Getters)]
-#[getset(get = "pub")]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, Getters, CopyGetters)]
 pub struct NativeTokensBalance {
     /// Token id
+    #[getset(get = "pub")]
     #[serde(rename = "tokenId")]
     pub(crate) token_id: TokenId,
     /// Token foundry immutable metadata
+    #[getset(get = "pub")]
     pub(crate) metadata: Option<MetadataFeature>,
     /// Total amount
+    #[getset(get_copy = "pub")]
     pub(crate) total: U256,
     /// Balance that can currently be spent
+    #[getset(get_copy = "pub")]
     pub(crate) available: U256,
 }
 
