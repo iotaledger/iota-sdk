@@ -40,7 +40,8 @@ async fn main() -> Result<()> {
             .await?;
 
         println!(
-            "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
+            "Transaction: {}\n\
+            Block sent: {}/api/core/v2/blocks/{}",
             transaction.transaction_id,
             &std::env::var("NODE_URL").unwrap(),
             transaction.block_id.expect("no block created yet")

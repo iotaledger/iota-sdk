@@ -44,6 +44,8 @@ async fn main() -> Result<()> {
         let balance = account.sync(None).await?;
         if balance.base_coin.available > funds_before {
             break balance;
+        } else {
+            tokio::time::sleep(instant::Duration::from_secs(2)).await;
         }
     };
 
