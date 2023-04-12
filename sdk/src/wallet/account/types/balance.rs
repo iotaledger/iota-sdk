@@ -60,8 +60,6 @@ impl std::ops::AddAssign for AccountBalance {
         self.nfts.extend(rhs.nfts.into_iter());
         self.aliases.extend(rhs.aliases.into_iter());
         self.foundries.extend(rhs.foundries.into_iter());
-
-        // TODO Doesn't potentially_locked_outputs need to be summed as well?
     }
 }
 
@@ -228,9 +226,11 @@ impl Default for NativeTokensBalance {
 
 impl std::ops::AddAssign for NativeTokensBalance {
     fn add_assign(&mut self, rhs: Self) {
+        if self.metadata.is_none() {
+            self.metadata = rhs.metadata;
+        }
         self.total += rhs.total;
         self.available += rhs.available;
-        // TODO what about metadata?
     }
 }
 
