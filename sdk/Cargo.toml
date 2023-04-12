@@ -75,7 +75,7 @@ fern-logger = { version = "0.5.0", default-features = false }
 
 
 [features]
-default = [ "std", "serde", "tls" ]
+default = [ "std", "serde" ]
 
 events = [  ]
 ledger_nano = [ "iota-ledger-nano" ]
@@ -90,7 +90,8 @@ storage = [ "iota-crypto/chacha" ]
 stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha" ]
 tls = [ "reqwest/rustls-tls" ]
 
-client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10", "iota-crypto/std" ]
+client_without_tls = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10", "iota-crypto/std" ]
+client = [ "client_without_tls", "tls" ]
 wallet = [ "client" ]
 
 # Block examples
