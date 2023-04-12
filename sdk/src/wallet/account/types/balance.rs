@@ -168,12 +168,6 @@ pub struct RequiredStorageDeposit {
     pub(crate) nft: u64,
 }
 
-impl RequiredStorageDeposit {
-    pub fn new() -> Self {
-        Self::default()
-    }
-}
-
 impl std::ops::AddAssign for RequiredStorageDeposit {
     fn add_assign(&mut self, rhs: Self) {
         self.alias += rhs.alias;
