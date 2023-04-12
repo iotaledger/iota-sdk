@@ -180,7 +180,6 @@ pub struct AnswerStatus {
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-
 pub struct AddressStakingStatus {
     /// Rewards for staking events.
     pub rewards: HashMap<String, StakingStatus>,
