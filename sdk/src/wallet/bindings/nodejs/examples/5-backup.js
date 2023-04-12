@@ -9,7 +9,7 @@ const getUnlockedManager = require('./account-manager');
 async function run() {
     try {
         const manager = await getUnlockedManager();
-        await manager.backup('./backup', process.env.SH_PASSWORD);
+        await manager.backup('./backup', process.env.STRONGHOLD_PASSWORD);
         console.log('Successfully created backup');
     } catch (error) {
         console.log('Error: ', error);
