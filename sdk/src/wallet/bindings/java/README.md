@@ -91,7 +91,7 @@ public class GettingStarted {
     private static final String STRONGHOLD_PASSWORD = "a-secure-password";
 
     // The path to store the account snapshot.
-    private static final String STRONGHOLD_SNAPSHOT_PATH = "stronghold/vault.stronghold";
+    private static final String STRONGHOLD_SNAPSHOT_PATH = "vault.stronghold";
 
     public static void main(String[] args) throws WalletException, InitializeWalletException {
         // Set up and store the wallet.
