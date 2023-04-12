@@ -3,7 +3,7 @@
 
 //! In this example we sync the account and get the balance.
 //! Rename `.env.example` to `.env` first.
-//! 
+//!
 //! `cargo run --example get_balance --release`
 
 use iota_sdk::wallet::{Result, Wallet};

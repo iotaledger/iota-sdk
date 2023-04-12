@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we check if an output has only an address unlock condition and that the address is from the account.
-//! 
+//!
 //! `cargo run --example check_unlock_conditions --release`
 
 use iota_sdk::{
