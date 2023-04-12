@@ -67,7 +67,7 @@ async fn main() -> Result<()> {
         "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
         1_000_000,
     )];
-    let tx = account.send_amount(outputs, None).await?;
+    let transaction = account.send_amount(outputs, None).await?;
     println!("Transaction: {}", transaction.transaction_id);
     println!(
         "Block sent: {}/api/core/v2/blocks/{}",
