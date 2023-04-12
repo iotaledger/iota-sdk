@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Password, Select};
-use iota_sdk::wallet::Wallet;
+use iota_sdk::wallet::{AccountHandle, Wallet};
 
 use crate::error::Error;
 
@@ -34,26 +34,26 @@ pub fn get_decision(prompt: &str) -> Result<bool, Error> {
     }
 }
 
-pub async fn pick_account(wallet: &Wallet) -> Result<Option<u32>, Error> {
-    let accounts = wallet.get_accounts().await?;
+pub async fn pick_account(wallet: &Wallet) -> Result<Option<AccountHandle>, Error> {
+    let mut accounts = wallet.get_accounts().await?;
 
     match accounts.len() {
         0 => Ok(None),
-        1 => Ok(Some(0)),
+        1 => Ok(Some(accounts.swap_remove(0))),
         _ => {
-            let mut items = Vec::new();
-
-            for account_handle in accounts {
-                items.push(account_handle.read().await.alias().clone());
+            // fetch all available account aliases to display to the user
+            let mut aliases = Vec::with_capacity(accounts.len());
+            for account_handle in &accounts {
+                let alias = account_handle.read().await.alias().clone();
+                aliases.push(alias);
             }
-
             let index = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("Select an account:")
-                .items(&items)
+                .items(&aliases)
                 .default(0)
                 .interact_on(&Term::stderr())?;
 
-            Ok(Some(index as u32))
+            Ok(Some(accounts.swap_remove(index)))
         }
     }
 }

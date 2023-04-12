@@ -56,8 +56,8 @@ async fn run(cli: WalletCli) -> Result<(), Error> {
         match cli.account.or(account) {
             Some(account) => account::account_prompt(wallet.get_account(account).await?).await?,
             None => {
-                if let Some(account) = pick_account(&wallet).await? {
-                    account::account_prompt(wallet.get_account(account).await?).await?;
+                if let Some(account_handle) = pick_account(&wallet).await? {
+                    account::account_prompt(account_handle).await?;
                 }
             }
         }
