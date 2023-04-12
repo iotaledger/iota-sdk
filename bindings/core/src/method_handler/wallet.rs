@@ -9,7 +9,7 @@ use zeroize::Zeroize;
 
 use crate::{
     method::WalletMethod,
-    method_handler::{account_handle::call_account_method, Result},
+    method_handler::{account::call_account_method, Result},
     response::Response,
 };
 
