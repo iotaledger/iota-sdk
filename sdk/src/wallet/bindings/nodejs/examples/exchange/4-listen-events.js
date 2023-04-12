@@ -38,7 +38,7 @@ async function run() {
         
             // Sync to detect new outputs
             // syncOnlyMostBasicOutputs if not interested in outputs that are timelocked, 
-            // have a storage deposit return or are nft/alias/foundry outputs
+            // have a storage deposit return, expiration or are nft/alias/foundry outputs
             await account.sync({ syncOnlyMostBasicOutputs: true });
         }
 

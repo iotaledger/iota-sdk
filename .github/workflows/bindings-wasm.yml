@@ -12,7 +12,8 @@ on:
       - "!**/tests/**" # Exclude all tests
       - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
-      - "sdk/src/client/bindings/wasm/**" # Re-include wasm bindings
+      - "sdk/src/client/bindings/wasm/**" # Re-include wasm client bindings
+      - "sdk/src/client/bindings/nodejs/**" # Re-include node client bindings, b/c lib copied from there
   pull_request:
     branches: [develop, production]
     paths:
@@ -25,7 +26,8 @@ on:
       - "!**/tests/**" # Exclude all tests
       - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
-      - "sdk/src/client/bindings/wasm/**" # Re-include wasm bindings
+      - "sdk/src/client/bindings/wasm/**" # Re-include wasm client bindings
+      - "sdk/src/client/bindings/nodejs/**" # Re-include node client bindings, b/c lib copied from there
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch:

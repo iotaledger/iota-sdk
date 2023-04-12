@@ -201,9 +201,10 @@ fn verify_unique_sorted<const VERIFY: bool>(native_tokens: &[NativeToken], _: &(
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::string::ToString;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;

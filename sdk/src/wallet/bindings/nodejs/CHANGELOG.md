@@ -1,5 +1,15 @@
 # Changelog
 
+## \[2.0.3-rc.32]
+
+- Add `BaseCoinBalance.voting_power` field.
+  Remove `getVotingPower`.
+  - [e034756](https://github.com/iotaledger/iota-sdk/commit/e0347568b9e384f19abf7e48fd757caed9aa0f9e) fix: listen function ([#227](https://github.com/iotaledger/iota-sdk/pull/227)) on 2023-04-11
+- Fix listen() function.
+  - [e034756](https://github.com/iotaledger/iota-sdk/commit/e0347568b9e384f19abf7e48fd757caed9aa0f9e) fix: listen function ([#227](https://github.com/iotaledger/iota-sdk/pull/227)) on 2023-04-11
+- Merge `Account::sendAmount` and `Account::sendMicroTransaction`. Add `allowMicroAmount` option to send micro transactions.
+  - [e034756](https://github.com/iotaledger/iota-sdk/commit/e0347568b9e384f19abf7e48fd757caed9aa0f9e) fix: listen function ([#227](https://github.com/iotaledger/iota-sdk/pull/227)) on 2023-04-11
+
 ## \[2.0.3-rc.31]
 
 - Unlock inputs that aren't used in transactions.

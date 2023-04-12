@@ -7,178 +7,189 @@ It is advised to do them all at least once in the given order to understand the 
 ## Setup
 
 Initialise the wallet with a given node and a randomly generated mnemonic.
-```sh
-./wallet init --node [NODE API URL]
-> ...
+```sh title=Input
+./wallet init --node <NODE_API_URL>
+```
+```sh title=Output
 > INFO  Mnemonic stored successfully
 ```
 
 Create a main account.
-```sh
+```sh title=Input
 ./wallet new main
-> ...
+```
+```sh title=Output
 > INFO  Created account "main"
-> Account "main": exit
 ```
 
+Exit from the "main" account.
+```sh title=Input
+> Account "main": exit
+```
+Note: exiting from an account is omitted from now on for the rest of this guide.
+
 Create a savings account.
-```sh
+```sh title=Input
 ./wallet new savings
-> ...
+```
+```sh title=Output
 > INFO  Created account "savings"
-> Account "savings": exit
 ```
 
 ## Tokens
 
-Get some funds from the faucet to the main account.
-```sh
+Enter the "main" account and get some funds from the faucet.
+```sh title=Input
 ./wallet main
-> Account "main": faucet [FAUCET ENQUEUE API URL]
-> ...
+
+> Account "main": faucet <FAUCET_ENQUEUE_API_URL>
 > Account "main": sync
-> ...
+```
+```sh title=Output
 > INFO  Synced: AccountBalance ...
-> Account "main": exit
 ```
 
-### Send a regular amount
+### Send an amount
 
-Get an address from the savings account.
-```sh
+Enter the "savings" account and get an address.
+```sh title=Input
 ./wallet savings
+
 > Account "savings": addresses
-> INFO  Address 0: [ADDRESS]
-> Account "savings": exit
+```
+```sh title=Output
+> INFO  Address 0: <rms123abc...>
 ```
 
-Send a regular amount from the main account to the savings address.
-```sh
+Enter the "main" account and send some amount to the "savings" address.
+```sh title=Input
 ./wallet main
-> Account "main": send [ADDRESS] 1000000
-> ...
+
+> Account "main": send <rms123abc...> 1000000
+```
+```sh title=Output
 > INFO  Transaction sent:
 > transaction id: 0x...
 > Some(BlockId(0x...))
-> Account "main": exit
 ```
 
-### Send a micro amount
-
-Generate a new address from the savings account.
-```sh
+Enter the "savings" account and check the balance.
+```sh title=Input
 ./wallet savings
-> Account "savings": new-address
-> ...
-> INFO  Address 1: [ADDRESS]
-> Account "savings": exit
-```
 
-Send a micro amount from the main account to the savings address.
-```sh
-./wallet main
-> Account "main": send-micro [ADDRESS] 1
-> ...
-> INFO  Micro transaction sent:
-> transaction id: 0x...
-> Some(BlockId(0x...))
-> Account "main": exit
-```
-
-Check the savings balance.
-```sh
-./wallet savings
 > Account "savings": balance
-> ...
+```
+```sh title=Output
 > INFO  AccountBalance ...
-> Account "savings": exit
 ```
 
 ## Native tokens
 
 ### Mint
 
-Mint native tokens, with foundry metadata, from the main account.
-```sh
+Enter the "main" account and mint native tokens with foundry metadata.
+```sh title=Input
 ./wallet main
-> Account "main": mint-native-token 1000 1000 --foundry-metadata-hex 0xabcdef
-> ...
+
+> Account "main": mint-native-token 1000 1000 --foundry-metadata-hex <0xabcdef...>
+```
+
+```sh title=Output
 > INFO  Native token minting transaction sent:
 > transaction id: 0x...
 > Some(BlockId(0x...))
-> Account "main": exit
 ```
 
 ### Send
 
-Generate a new address from the savings account.
-```sh
+Enter the "savings" account and generate a new address.
+```sh title=Input
 ./wallet savings
+
 > Account "savings": new-address
-> ...
-> INFO  Address 2: [ADDRESS]
-> Account "savings": exit
+```
+```sh title=Output
+> INFO  Address 2: <rms456def...>
 ```
 
-Send native tokens to the savings address.
-```sh
+Enter the "main" account and synchronize the account balances.
+```sh title=Input
 ./wallet main
+
 > Account "main": sync
-> ...
-> INFO  Synced: AccountBalance ...TokenId([TOKEN ID])...
-> Account "main": send-native-token [ADDRESS] [TOKEN ID] 100
+```
+```sh title=Output
+> INFO  Synced: AccountBalance ...TokenId([TOKEN_ID])...
+```
+
+Send native tokens from the "main" account to the new "savings" address.
+```sh title=Input
+> Account "main": send-native-token <rms456def...> <TOKEN_ID> 100
+```
+```sh title=Output
 > INFO  Native token transaction sent:
 > transaction id: 0x...
 > Some(BlockId(0x...))
-> Account "main": exit
 ```
 
 ## NFTs
 
 ### Mint
 
-Mint an NFT.
-```sh
+Enter the "main" account and mint an NFT.
+```sh title=Input
 ./wallet main
+
 > Account "main": mint-nft
-> ...
+```
+```sh title=Output
 > INFO  NFT minting transaction sent:
 > transaction id: 0x...
 > Some(BlockId(0x...))
-> Account "main": exit
 ```
 
 ### Send
 
-Generate a new address from the savings account.
-```sh
+Enter the "savings" account and generate a new address.
+```sh title=Input
 ./wallet savings
+
 > Account "savings": new-address
-> ...
-> INFO  Address 3: [ADDRESS]
-> Account "savings": exit
 ```
 
-Send the NFT to the savings address.
-```sh
+```sh title=Output
+> INFO  Address 3: <rms789ghi...>
+```
+
+Enter the "main" account and synchronize the account balances.
+```sh title=Input
 ./wallet main
+
 > Account "main": sync
-> ...
-> INFO  Synced: AccountBalance ...NftId([NFT ID])...
-> Account "main": send-nft [ADDRESS] [NFT ID]
+```
+```sh title=Output
+> INFO  Synced: AccountBalance ...NftId([NFT_ID])...
+```
+
+Send the NFT to the new "savings" address.
+```sh title=Input
+> Account "main": send-nft <rms789ghi...> <NFT_ID>
+```
+```sh title=Output
 > INFO  Nft transaction sent:
 > transaction id: 0x...
 > Some(BlockId(0x...))
-> Account "main": exit
 ```
 
 ## Transactions
 
-List the transactions of the main account.
-```sh
+Enter the "main" account and list all transactions.
+```sh title=Input
 ./wallet main
+
 > Account "main": transactions
-> ...
+```
+
+```sh title=Output
 > INFO  Transaction...
-> Account "main": exit
 ```

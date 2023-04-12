@@ -44,7 +44,6 @@ The Account class.
 - [requestFundsFromFaucet](Account.md#requestfundsfromfaucet)
 - [retryTransactionUntilIncluded](Account.md#retrytransactionuntilincluded)
 - [sendAmount](Account.md#sendamount)
-- [sendMicroTransaction](Account.md#sendmicrotransaction)
 - [sendNativeTokens](Account.md#sendnativetokens)
 - [sendNft](Account.md#sendnft)
 - [sendOutputs](Account.md#sendoutputs)
@@ -714,7 +713,8 @@ Prepare a send amount transaction, useful for offline signing.
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `addressesWithAmount` | [`AddressWithAmount`](../interfaces/AddressWithAmount.md)[] | Address with amounts to send. |
-| `options?` | [`TransactionOptions`](../interfaces/TransactionOptions.md) | The options to define a `RemainderValueStrategy` or custom inputs. |
+| `options?` | [`TransactionOptions`](../interfaces/TransactionOptions.md) | The options to define a `RemainderValueStrategy`,
+ `allowSendMicro` or custom inputs. |
 
 #### Returns
 
@@ -796,28 +796,7 @@ Send a transaction with amounts from input addresses.
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `addressesWithAmount` | [`AddressWithAmount`](../interfaces/AddressWithAmount.md)[] | Addresses with amounts. |
-| `transactionOptions?` | [`TransactionOptions`](../interfaces/TransactionOptions.md) | The options to define a `RemainderValueStrategy` or custom inputs. |
-
-#### Returns
-
-`Promise`<[`Transaction`](../interfaces/Transaction.md)\>
-
-The sent transaction.
-
-___
-
-### sendMicroTransaction
-
-▸ **sendMicroTransaction**(`addressesWithMicroAmount`, `transactionOptions?`): `Promise`<[`Transaction`](../interfaces/Transaction.md)\>
-
-Send a micro transaction with amount below minimum storage deposit.
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `addressesWithMicroAmount` | [`AddressWithMicroAmount`](../interfaces/AddressWithMicroAmount.md)[] | Addresses with micro amounts. |
-| `transactionOptions?` | [`TransactionOptions`](../interfaces/TransactionOptions.md) | The options to define a `RemainderValueStrategy` or custom inputs. |
+| `transactionOptions?` | [`TransactionOptions`](../interfaces/TransactionOptions.md) | The options to define a `RemainderValueStrategy`, `allowSendMicro` or custom inputs. |
 
 #### Returns
 

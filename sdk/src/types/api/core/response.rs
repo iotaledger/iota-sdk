@@ -1,6 +1,8 @@
 // Copyright 2020-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::{boxed::Box, string::String, vec::Vec};
+
 use crate::types::{
     api::core::dto::{LedgerInclusionStateDto, PeerDto, ReceiptDto},
     block::{
