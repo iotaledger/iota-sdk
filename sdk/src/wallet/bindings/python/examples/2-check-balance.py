@@ -13,3 +13,7 @@ print(f'Synced: {response}')
 # Just calculate the balance with the known state
 balance = account.get_balance()
 print(f'Balance: {balance}')
+
+print('Addresses:')
+for address in account.addresses():
+    print(' - {}'.format(address['address']))

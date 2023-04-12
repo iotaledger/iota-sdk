@@ -20,7 +20,15 @@ async fn main() -> Result<()> {
     // If already synced, just get the balance
     let account_balance = account.balance().await?;
 
-    println!("{account_balance:?}");
+    println!("{account_balance:#?}");
+
+    let explorer_url = std::env::var("EXPLORER_URL").ok();
+    let prepended = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
+
+    println!("Addresses:");
+    for address in account.addresses().await? {
+        println!(" - {prepended}{}", address.address().to_bech32());
+    }
 
     Ok(())
 }

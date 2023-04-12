@@ -1,12 +1,12 @@
 ---
-description: Easily integrate with your exchange, custody solution, or product using the wallet.rs library.
-sidebar_label: Integrate wallet.rs With Your Exchange
+description: Easily integrate with your exchange, custody solution, or product using the iota-sdk library.
+sidebar_label: Integrate iota-sdk With Your Exchange
 keywords:
 - integrate
 - exchange
 - account model
 - addresses
-- wallet.rs
+- iota-sdk
 - setup
 - NodeJS
 - explanation
@@ -24,7 +24,7 @@ import send_amount from '!!raw-loader!./../../../../sdk/src/wallet/bindings/node
 
 :::note
 
-You can easily integrate wallet.rs with your exchange, custody solution, or product.
+You can easily integrate iota-sdk with your exchange, custody solution, or product.
 
 :::
 
@@ -53,13 +53,15 @@ The Wallet Library is a stateful package with a standardized interface for devel
 
 :::note
 
-If you are not familiar with the wallet.rs library, you can find more information in the [documentation](../welcome.md).
+If you are not familiar with the iota-sdk library, you can find more information in the [documentation](../welcome.md).
 
 :::
 
+For changes since the wallet.rs version for chrysalis (version 1.x) see the [changelog](https://github.com/iotaledger/iota-sdk/blob/develop/sdk/src/wallet/bindings/nodejs/CHANGELOG.md).
+
 You can use the following examples as a guide to implementing *the multi-account approach* using the `NodeJS` binding:
 
-1. [Set up the wallet.rs library](#1-set-up-the-wallet-library).
+1. [Set up the iota-sdk library](#1-set-up-the-wallet-library).
 2. [Create an account for each user](#2-create-an-account-for-a-user).
 3. [Generate a user address to deposit funds](#3-generate-a-user-address-to-deposit-funds).
 4. [Check the user balance](#4-check-the-account-balance).
@@ -68,15 +70,15 @@ You can use the following examples as a guide to implementing *the multi-account
 
 :::note
 
-If you are looking for other languages, please read the [wallet.rs library overview](./../explanations/library_overview.md).
+If you are looking for other languages, please read the [iota-sdk library overview](./../explanations/library_overview.md).
 
 :::
 
-Since all `wallet.rs` bindings are based on core principles provided by the `wallet.rs` library, the outlined approach is very similar regardless of the programming language you choose.
+Since all `iota-sdk` bindings are based on core principles provided by the `iota-sdk` library, the outlined approach is very similar regardless of the programming language you choose.
 
-### 1. Set Up the Wallet.rs Library
+### 1. Set Up the iota-sdk Library
 
-First, you should install the components that are needed to use `wallet.rs` and the binding of your choice; it may vary a bit from language to language. In the case of the [NodeJs binding](./../getting_started/nodejs.mdx), it is straightforward since it is distributed via the `npm` package manager.
+First, you should install the components that are needed to use `iota-sdk` and the binding of your choice; it may vary a bit from language to language. In the case of the [NodeJs binding](./../getting_started/nodejs.mdx), it is straightforward since it is distributed via the `npm` package manager.
 
 You can read more about [backup and security in this guide](https://wiki.iota.org/shimmer/introduction/how_tos/backup_security).
 
@@ -96,14 +98,14 @@ You can then create a `.env` by running the following command:
 touch .env
 ```
 
-You can now add your `SH_PASSWORD` and `MNEMONIC` to the `.env` file. 
+You can now add your `STRONGHOLD_PASSWORD` and `MNEMONIC` to the `.env` file. 
 
 ```bash
-SH_PASSWORD="here is your super secure password"
+STRONGHOLD_PASSWORD="here is your super secure password"
 MNEMONIC="here is your super secure 24 word mnemonic, it's only needed here the first time"
 ```
 
-After you have updated the `.env` file, you can initialize the `AccountManager` instance with a secret manager([`Stronghold`](https://wiki.iota.org/stronghold.rs/welcome) by default) and client options.
+After you have updated the `.env` file, you can initialize the `AccountManager` instance with a secret manager(like [`Stronghold`](https://wiki.iota.org/stronghold.rs/welcome) or LedgerNano) and client options.
 
 :::note
 
@@ -142,7 +144,7 @@ Common methods of `account` instance include:
 
 ### 3. Generate a User Address to Deposit Funds
 
-`Wallet.rs` is a stateful library. This means it caches all relevant information in storage to provide performance benefits while dealing with, potentially, many accounts and addresses.
+The wallet is a stateful library. This means it caches all relevant information in storage to provide performance benefits while dealing with, potentially, many accounts and addresses.
 <CodeBlock className="language-javascript">
   {generate_address}
 </CodeBlock>
@@ -161,7 +163,7 @@ There are two types of addresses, `internal` and `public` (external). This appro
 
 * Each set of addresses is independent of each other and has an independent `index` id.
 * Addresses that are created by `account.generateAddress()` are indicated as `internal=false` (public).
-* Internal addresses (`internal=true`) are called `change` addresses and are used to send the excess funds to them.
+* Internal addresses (`internal=true`) are called `change` addresses and can be used to send the excess funds to them by providing `RemainderValueStrategy::ChangeAddress` to the TransactionOptions.
 
 ### 4. Check the Account Balance
 
@@ -177,7 +179,7 @@ You can get the available account balance across all addresses of the given acco
 
 <WarningUnlockConditions/>
 
-The `Wallet.rs` library supports several events for listening. A provided callback is triggered as soon as an event occurs (which usually happens during syncing).
+The `iota-sdk` library supports several events for listening. A provided callback is triggered as soon as an event occurs (which usually happens during syncing).
 
 You can use the following example to listen to new output events:
 
@@ -238,6 +240,8 @@ The `account.sendAmount()` function returns a `transaction` with its id. The `bl
 
 :::note Dust Protection
 
-When sending tokens, you should consider a [dust protection](https://github.com/muXxer/tips/blob/master/tips/TIP-0019/tip-0019.md) mechanism.
-  
+When sending tokens, you should consider the [dust protection based on byte cost](https://wiki.iota.org/shimmer/tips/tips/TIP-0019).
+Amounts below the minimum storage deposit can only be sent with a storage deposit return unlock condition, which require the receiver to send the storage deposit back when consuming the output.
+In the shimmer network the minimum amount for a basic output is 42600.
+
 :::
