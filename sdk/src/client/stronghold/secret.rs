@@ -107,18 +107,6 @@ impl SecretManage for StrongholdAdapter {
         // Stronghold arguments.
         let seed_location = Slip10DeriveInput::Seed(Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH));
 
-        // Stronghold asks for an older version of [Chain], so we have to perform a conversion here.
-        let chain = {
-            let raw: Vec<u32> = chain
-                .segments()
-                .iter()
-                // XXX: "ser32(i)". RTFSC: [crypto::keys::slip10::Segment::from_u32()]
-                .map(|seg| u32::from_be_bytes(seg.bs()))
-                .collect();
-
-            Chain::from_u32_hardened(raw)
-        };
-
         let derive_location = Location::generic(
             SECRET_VAULT_PATH,
             [
@@ -129,7 +117,7 @@ impl SecretManage for StrongholdAdapter {
         );
 
         // Derive a SLIP-10 private key in the vault.
-        self.slip10_derive(chain, seed_location, derive_location.clone())
+        self.slip10_derive(chain.clone(), seed_location, derive_location.clone())
             .await?;
 
         // Get the Ed25519 public key from the derived SLIP-10 private key in the vault.
