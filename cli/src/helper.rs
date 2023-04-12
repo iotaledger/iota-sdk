@@ -65,35 +65,26 @@ pub async fn get_mnemonic() -> Result<String, Error> {
         "Write To File Only",
         "Write To Console and File",
     ];
-    loop {
-        let selected_choice = Select::with_theme(&ColorfulTheme::default())
-            .items(&choices)
-            .default(0)
-            .interact_on_opt(&Term::stderr())?;
+    let selected_choice = Select::with_theme(&ColorfulTheme::default())
+        .items(&choices)
+        .default(0)
+        .interact_on_opt(&Term::stderr())?;
 
-        match selected_choice {
-            Some(index) => match index {
-                0 => {
-                    println!("{}", mnemonic);
-                    break;
-                }
-                1 => {
-                    write_mnemonic_to_file(MNEMONIC_FILE_NAME, &mnemonic).await?;
-                    break;
-                }
-                2 => {
-                    println!("{}", mnemonic);
-                    write_mnemonic_to_file(MNEMONIC_FILE_NAME, &mnemonic).await?;
-                    break;
-                }
-                _ => {
-                    println!("Invalid input.")
-                }
-            },
-            None => {
-                println!("Invalid input.")
+    match selected_choice {
+        Some(index) => match index {
+            0 => {
+                println!("{}", mnemonic);
             }
-        }
+            1 => {
+                write_mnemonic_to_file(MNEMONIC_FILE_NAME, &mnemonic).await?;
+            }
+            2 => {
+                println!("{}", mnemonic);
+                write_mnemonic_to_file(MNEMONIC_FILE_NAME, &mnemonic).await?;
+            }
+            _ => unreachable!(),
+        },
+        None => unreachable!(),
     }
     Ok(mnemonic)
 }
