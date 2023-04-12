@@ -6,12 +6,7 @@
 //!
 //! `cargo run --example destroy_foundry --release`
 
-use std::str::FromStr;
-
-use iota_sdk::{
-    types::block::output::FoundryId,
-    wallet::{Result, Wallet},
-};
+use iota_sdk::wallet::{Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -23,27 +18,28 @@ async fn main() -> Result<()> {
 
     // Get the account we generated with `01_create_wallet`
     let account = wallet.get_account("Alice").await?;
-
-    let balance = account.balance().await?;
-    println!("Balance before destroying:\n{balance:?}",);
-
-    // Set the stronghold password
-    wallet
-        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
-        .await?;
-
-    // Replace with an FoundryId that is available in the account
-    let foundry_id =
-        FoundryId::from_str("0x0857f1bafae0ef43190597a0dfe72ef1477b769560203c1854c6fb427c486e65300100000000")?;
-    let transaction = account.destroy_foundry(foundry_id, None).await?;
-
-    account
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
-        .await?;
-
+    // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
 
-    println!("Balance after destroying:\n{balance:?}",);
+    // Get the first foundry
+    if let Some(foundry_id) = balance.foundries.first() {
+        println!("Balance before destroying:\n{balance:?}",);
+
+        // Set the stronghold password
+        wallet
+            .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+            .await?;
+
+        let transaction = account.destroy_foundry(*foundry_id, None).await?;
+
+        account
+            .retry_transaction_until_included(&transaction.transaction_id, None, None)
+            .await?;
+
+        let balance = account.sync(None).await?;
+
+        println!("Balance after destroying:\n{balance:?}",);
+    }
 
     Ok(())
 }
