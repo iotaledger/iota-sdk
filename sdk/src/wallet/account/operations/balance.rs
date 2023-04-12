@@ -303,13 +303,3 @@ impl AccountHandle {
         })
     }
 }
-
-pub(crate) fn add_balances(balances: Vec<AccountBalance>) -> crate::wallet::Result<AccountBalance> {
-    let mut total_balance: AccountBalance = Default::default();
-
-    for balance in balances {
-        total_balance += balance;
-    }
-
-    Ok(total_balance)
-}
