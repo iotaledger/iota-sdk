@@ -1,8 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "ledger_nano")]
-use iota_sdk::client::secret::ledger_nano::LedgerSecretManager;
 use iota_sdk::{
     client::{
         api::GetAddressesBuilder,
@@ -10,17 +8,12 @@ use iota_sdk::{
     },
     types::block::{signature::dto::Ed25519SignatureDto, unlock::Unlock, DtoError},
 };
-#[cfg(feature = "mqtt")]
-use {
-    iota_sdk::client::mqtt::{MqttPayload, Topic},
-    iota_sdk::types::block::payload::milestone::option::dto::ReceiptMilestoneOptionDto,
-};
 
 use crate::{method::SecretManagerMethod, method_handler::Result, response::Response};
 
 /// Call a secret manager method.
 pub(crate) async fn call_secret_manager_method_internal(
-    secret_manager: &SecretManager,
+    secret_manager: &mut SecretManager,
     method: SecretManagerMethod,
 ) -> Result<Response> {
     match method {
@@ -32,9 +25,11 @@ pub(crate) async fn call_secret_manager_method_internal(
             Ok(Response::GeneratedAddresses(addresses))
         }
         #[cfg(feature = "ledger_nano")]
-        SecretManagerMethod::GetLedgerNanoStatus { is_simulator } => {
-            if let SecretManager::LedgerNano(secret_manager) = &mut secret_manager {
-                Ok(Response::LedgerNanoStatus(ledger_nano.get_ledger_nano_status().await));
+        SecretManagerMethod::GetLedgerNanoStatus => {
+            if let SecretManager::LedgerNano(secret_manager) = secret_manager {
+                Ok(Response::LedgerNanoStatus(
+                    secret_manager.get_ledger_nano_status().await,
+                ))
             } else {
                 Err(iota_sdk::client::Error::SecretManagerMismatch.into())
             }
@@ -79,7 +74,7 @@ pub(crate) async fn call_secret_manager_method_internal(
         }
         #[cfg(feature = "stronghold")]
         SecretManagerMethod::StoreMnemonic { mnemonic } => {
-            if let SecretManager::Stronghold(secret_manager) = &mut secret_manager {
+            if let SecretManager::Stronghold(secret_manager) = secret_manager {
                 secret_manager.store_mnemonic(mnemonic).await?;
                 Ok(Response::Ok)
             } else {

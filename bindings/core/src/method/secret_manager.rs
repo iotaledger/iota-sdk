@@ -23,11 +23,7 @@ pub enum SecretManagerMethod {
     /// Expected response: [`LedgerNanoStatus`](crate::message_interface::Response::LedgerNanoStatus)
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
-    GetLedgerNanoStatus {
-        /// To use a Ledger Speculos simulator, pass `true` to `is_simulator`; `false` otherwise.
-        #[serde(rename = "isSimulator")]
-        is_simulator: bool,
-    },
+    GetLedgerNanoStatus,
     /// Create a single Signature Unlock.
     SignatureUnlock {
         /// Transaction Essence Hash

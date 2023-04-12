@@ -6,13 +6,13 @@ use iota_sdk_bindings_core::{call_secret_manager_method, method_handler::Result,
 
 #[tokio::test]
 async fn generate_addresses() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(&generate_mnemonic()?)?;
+    let mut secret_manager = SecretManager::try_from_mnemonic(&generate_mnemonic()?)?;
 
     let method = SecretManagerMethod::GenerateAddresses {
         options: GetAddressesBuilderOptions::default(),
     };
 
-    let response = call_secret_manager_method(&secret_manager, method).await;
+    let response = call_secret_manager_method(&mut secret_manager, method).await;
     match response {
         Response::GeneratedAddresses(addresses) => println!("{addresses:?}"),
         _ => panic!("Unexpected response type"),

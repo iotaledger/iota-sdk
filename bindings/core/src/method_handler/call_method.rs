@@ -60,7 +60,7 @@ pub async fn call_utils_method(method: UtilsMethod) -> Response {
 }
 
 /// Call a secret manager method.
-pub async fn call_secret_manager_method(secret_manager: &SecretManager, method: SecretManagerMethod) -> Response {
+pub async fn call_secret_manager_method(secret_manager: &mut SecretManager, method: SecretManagerMethod) -> Response {
     log::debug!("Secret manager method: {method:?}");
     let result =
         convert_async_panics(|| async { call_secret_manager_method_internal(secret_manager, method).await }).await;
