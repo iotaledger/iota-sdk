@@ -392,9 +392,10 @@ mod test {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::format;
+
     use serde::{Deserialize, Serialize, Serializer};
     use serde_json::Value;
 

@@ -12,7 +12,7 @@ use iota_sdk::{
     wallet::{account::SyncOptions, Result},
 };
 
-use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
+use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
@@ -20,10 +20,10 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
     let storage_path = "test-storage/sync_only_most_basic_outputs";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&manager, 1).await?[0];
-    let account_1 = manager.create_account().finish().await?;
+    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_1 = wallet.create_account().finish().await?;
 
     let account_1_address = *account_1.addresses().await?[0].address().as_ref();
 
@@ -31,9 +31,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
     // Only one basic output without further unlock conditions
     let outputs = vec![
         BasicOutputBuilder::new_with_amount(1_000_000)?
-            .with_unlock_conditions(vec![UnlockCondition::Address(AddressUnlockCondition::new(
-                account_1_address,
-            ))])
+            .with_unlock_conditions(vec![AddressUnlockCondition::new(account_1_address)])
             .finish_output(token_supply)?,
         BasicOutputBuilder::new_with_amount(1_000_000)?
             .with_unlock_conditions(vec![
@@ -66,9 +64,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
             ])
             .finish_output(token_supply)?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
-            .with_unlock_conditions(vec![UnlockCondition::Address(AddressUnlockCondition::new(
-                account_1_address,
-            ))])
+            .with_unlock_conditions(vec![AddressUnlockCondition::new(account_1_address)])
             .finish_output(token_supply)?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
             .with_unlock_conditions(vec![

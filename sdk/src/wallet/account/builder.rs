@@ -86,7 +86,7 @@ impl AccountBuilder {
         self
     }
 
-    /// Build the Account and add it to the accounts from AccountManager
+    /// Build the Account and add it to the accounts from Wallet
     /// Also generates the first address of the account and if it's not the first account, the address for the first
     /// account will also be generated and compared, so no accounts get generated with different seeds
     pub async fn finish(&mut self) -> crate::wallet::Result<AccountHandle> {

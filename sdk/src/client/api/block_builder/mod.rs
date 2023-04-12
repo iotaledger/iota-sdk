@@ -19,9 +19,7 @@ use crate::{
         address::{Address, Ed25519Address},
         input::{dto::UtxoInputDto, UtxoInput, INPUT_COUNT_MAX},
         output::{
-            dto::OutputDto,
-            unlock_condition::{AddressUnlockCondition, UnlockCondition},
-            BasicOutputBuilder, Output, OUTPUT_COUNT_RANGE,
+            dto::OutputDto, unlock_condition::AddressUnlockCondition, BasicOutputBuilder, Output, OUTPUT_COUNT_RANGE,
         },
         parent::Parents,
         payload::{Payload, TaggedDataPayload},
@@ -168,7 +166,7 @@ impl<'a> ClientBlockBuilder<'a> {
         self.client.bech32_hrp_matches(&bech32_hrp).await?;
 
         let output = BasicOutputBuilder::new_with_amount(amount)?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
+            .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish_output(self.client.get_token_supply().await?)?;
         self.outputs.push(output);
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
@@ -193,9 +191,7 @@ impl<'a> ClientBlockBuilder<'a> {
     /// Set a transfer to the builder, address needs to be hex encoded
     pub async fn with_output_hex(mut self, address: &str, amount: u64) -> Result<ClientBlockBuilder<'a>> {
         let output = BasicOutputBuilder::new_with_amount(amount)?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                address.parse::<Ed25519Address>()?.into(),
-            )))
+            .add_unlock_condition(AddressUnlockCondition::new(address.parse::<Ed25519Address>()?.into()))
             .finish_output(self.client.get_token_supply().await?)?;
         self.outputs.push(output);
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {

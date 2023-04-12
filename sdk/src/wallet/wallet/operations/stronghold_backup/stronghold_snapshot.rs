@@ -5,7 +5,7 @@ use std::sync::atomic::Ordering;
 
 use crate::{
     client::{secret::SecretManagerDto, storage::StorageProvider, stronghold::StrongholdAdapter},
-    wallet::{account::Account, account_manager::AccountManager, ClientOptions},
+    wallet::{account::Account, ClientOptions, Wallet},
 };
 
 pub(crate) const CLIENT_OPTIONS_KEY: &str = "client_options";
@@ -16,7 +16,7 @@ pub(crate) const BACKUP_SCHEMA_VERSION_KEY: &str = "backup_schema_version";
 pub(crate) const BACKUP_SCHEMA_VERSION: u8 = 1;
 
 pub(crate) async fn store_data_to_stronghold(
-    account_manager: &AccountManager,
+    wallet: &Wallet,
     stronghold: &mut StrongholdAdapter,
     secret_manager_dto: SecretManagerDto,
 ) -> crate::wallet::Result<()> {
@@ -25,12 +25,12 @@ pub(crate) async fn store_data_to_stronghold(
         .insert(BACKUP_SCHEMA_VERSION_KEY.as_bytes(), &[BACKUP_SCHEMA_VERSION])
         .await?;
 
-    let client_options = account_manager.client_options.read().await.to_json()?;
+    let client_options = wallet.client_options.read().await.to_json()?;
     stronghold
         .insert(CLIENT_OPTIONS_KEY.as_bytes(), client_options.as_bytes())
         .await?;
 
-    let coin_type = account_manager.coin_type.load(Ordering::Relaxed);
+    let coin_type = wallet.coin_type.load(Ordering::Relaxed);
     stronghold
         .insert(COIN_TYPE_KEY.as_bytes(), &coin_type.to_le_bytes())
         .await?;
@@ -50,7 +50,7 @@ pub(crate) async fn store_data_to_stronghold(
     }
 
     let mut serialized_accounts = Vec::new();
-    for account in account_manager.accounts.read().await.iter() {
+    for account in wallet.accounts.read().await.iter() {
         serialized_accounts.push(serde_json::to_string(&*account.read().await)?);
     }
 

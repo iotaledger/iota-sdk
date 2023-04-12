@@ -1,7 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example build_nft_output --release --features="client"
+//! In this example we will build an NFT output.
+//!
+//! `cargo run --example build_nft_output --release --features="client"`
 
 use iota_sdk::{
     client::{Client, Result},
@@ -9,17 +11,16 @@ use iota_sdk::{
         address::Address,
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
-            unlock_condition::{AddressUnlockCondition, UnlockCondition},
-            Feature, NftId, NftOutputBuilder,
+            unlock_condition::AddressUnlockCondition,
+            NftId, NftOutputBuilder,
         },
     },
 };
 
-/// In this example we will build an NFT output
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production!
-    dotenv::dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
 
@@ -47,14 +48,12 @@ async fn main() -> Result<()> {
 
     // NftId needs to be null the first time
     let nft_output = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())?
-        .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
-        .add_feature(Feature::Sender(SenderFeature::new(address)))
-        .add_feature(Feature::Metadata(MetadataFeature::new(
-            "mutable metadata".as_bytes().to_vec(),
-        )?))
-        .add_feature(Feature::Tag(TagFeature::new("my tag".as_bytes().to_vec())?))
-        .add_immutable_feature(Feature::Issuer(IssuerFeature::new(address)))
-        .add_immutable_feature(Feature::Metadata(MetadataFeature::new(tip_27_immutable_metadata)?))
+        .add_unlock_condition(AddressUnlockCondition::new(address))
+        .add_feature(SenderFeature::new(address))
+        .add_feature(MetadataFeature::new("mutable metadata".as_bytes().to_vec())?)
+        .add_feature(TagFeature::new("my tag".as_bytes().to_vec())?)
+        .add_immutable_feature(IssuerFeature::new(address))
+        .add_immutable_feature(MetadataFeature::new(tip_27_immutable_metadata)?)
         .finish_output(token_supply)?;
 
     println!("{nft_output:#?}");

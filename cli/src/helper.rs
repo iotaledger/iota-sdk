@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use dialoguer::{console::Term, theme::ColorfulTheme, Password, Select};
-use iota_sdk::wallet::account_manager::AccountManager;
+use iota_sdk::wallet::Wallet;
 
 use crate::error::Error;
 
@@ -18,8 +18,8 @@ pub fn get_password(prompt: &str, confirmation: bool) -> Result<String, Error> {
     Ok(password.interact()?)
 }
 
-pub async fn pick_account(manager: &AccountManager) -> Result<Option<u32>, Error> {
-    let accounts = manager.get_accounts().await?;
+pub async fn pick_account(wallet: &Wallet) -> Result<Option<u32>, Error> {
+    let accounts = wallet.get_accounts().await?;
 
     match accounts.len() {
         0 => Ok(None),
@@ -44,7 +44,7 @@ pub async fn pick_account(manager: &AccountManager) -> Result<Option<u32>, Error
 
 pub async fn bytes_from_hex_or_file(hex: Option<String>, file: Option<String>) -> Result<Option<Vec<u8>>, Error> {
     Ok(if let Some(hex) = hex {
-        Some(prefix_hex::decode(&hex).map_err(|e| Error::Miscellaneous(e.to_string()))?)
+        Some(prefix_hex::decode(hex).map_err(|e| Error::Miscellaneous(e.to_string()))?)
     } else if let Some(file) = file {
         Some(tokio::fs::read(file).await?)
     } else {

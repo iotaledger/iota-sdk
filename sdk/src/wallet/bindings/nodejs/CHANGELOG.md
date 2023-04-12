@@ -1,9 +1,26 @@
 # Changelog
 
+## \[2.0.3-rc.32]
+
+- Add `BaseCoinBalance.voting_power` field.
+  Remove `getVotingPower`.
+  - [e034756](https://github.com/iotaledger/iota-sdk/commit/e0347568b9e384f19abf7e48fd757caed9aa0f9e) fix: listen function ([#227](https://github.com/iotaledger/iota-sdk/pull/227)) on 2023-04-11
+- Fix listen() function.
+  - [e034756](https://github.com/iotaledger/iota-sdk/commit/e0347568b9e384f19abf7e48fd757caed9aa0f9e) fix: listen function ([#227](https://github.com/iotaledger/iota-sdk/pull/227)) on 2023-04-11
+- Merge `Account::sendAmount` and `Account::sendMicroTransaction`. Add `allowMicroAmount` option to send micro transactions.
+  - [e034756](https://github.com/iotaledger/iota-sdk/commit/e0347568b9e384f19abf7e48fd757caed9aa0f9e) fix: listen function ([#227](https://github.com/iotaledger/iota-sdk/pull/227)) on 2023-04-11
+
+## \[2.0.3-rc.31]
+
+- Unlock inputs that aren't used in transactions.
+  - [77f235f1](https://github.com/iotaledger/iota-sdk/commit/77f235f1c86077bd31098b7bf6371aa8de6b66c8) Unlock unused inputs ([#207](https://github.com/iotaledger/iota-sdk/pull/207)) on 2023-04-06
+
 ## \[2.0.3-rc.30]
 
+- Fix fallback to local PoW.
+  - [1d4c88e](https://github.com/iotaledger/iota-sdk/commit/1d4c88ead460e3c38e7107ca8ceb645f6296abf4) Rename AccountManager to Wallet ([#197](https://github.com/iotaledger/iota-sdk/pull/197)) on 2023-04-05
+  - [c35d83a](https://github.com/iotaledger/iota-sdk/commit/c35d83ae6817aee7317e7b0b769a9e73d73d7d41) Add OutputBuilder clear methods ([#201](https://github.com/iotaledger/iota-sdk/pull/201)) on 2023-04-04
 - Add signEd25519() and verifyEd25519Signature() methods.
-  - [ae335c4](https://github.com/iotaledger/iota-sdk/commit/ae335c4cb64ca67017dc56ef9ed1d1c98b2a9aae) Allow enum debug impls to respect format configs ([#164](https://github.com/iotaledger/iota-sdk/pull/164)) on 2023-03-31
 
 ## \[2.0.3-rc.29]
 

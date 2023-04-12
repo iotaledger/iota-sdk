@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we send the signed transaction in a block.
-//! `cargo run --example 3_send_block --release`.
+//!
+//! `cargo run --example 3_send_block --release`
 
 use std::{fs::File, io::prelude::*, path::Path};
 
@@ -18,7 +19,8 @@ const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/signed_tran
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    dotenv::dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
 

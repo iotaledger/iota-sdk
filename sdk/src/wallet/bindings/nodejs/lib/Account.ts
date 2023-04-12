@@ -9,7 +9,6 @@ import type {
     AccountMeta,
     Address,
     AddressWithAmount,
-    AddressWithMicroAmount,
     AddressNativeTokens,
     AddressNftId,
     AddressGenerationOptions,
@@ -926,31 +925,6 @@ export class Account {
     }
 
     /**
-     * Send a micro transaction with amount below minimum storage deposit.
-     * @param addressesWithMicroAmount Addresses with micro amounts.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
-     * or custom inputs.
-     * @returns The sent transaction.
-     */
-    async sendMicroTransaction(
-        addressesWithMicroAmount: AddressWithMicroAmount[],
-        transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
-        const response = await this.messageHandler.callAccountMethod(
-            this.meta.index,
-            {
-                name: 'sendMicroTransaction',
-                data: {
-                    addressesWithMicroAmount,
-                    options: transactionOptions,
-                },
-            },
-        );
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
      * Send native tokens.
      * @param addressesNativeTokens Addresses amounts and native tokens.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
@@ -1124,16 +1098,6 @@ export class Account {
                 data: {
                     eventId,
                 },
-            },
-        );
-        return JSON.parse(resp).payload;
-    }
-
-    async getVotingPower(): Promise<string> {
-        const resp = await this.messageHandler.callAccountMethod(
-            this.meta.index,
-            {
-                name: 'getVotingPower',
             },
         );
         return JSON.parse(resp).payload;

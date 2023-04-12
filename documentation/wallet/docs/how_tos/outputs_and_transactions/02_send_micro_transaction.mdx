@@ -26,7 +26,8 @@ import RustCode from "../../libraries/rust/how_to/outputs_and_transactions/_06_s
 import RustOutput from "../../libraries/rust/how_to/outputs_and_transactions/_06_send_micro_transaction/_expected_output.md";
 import TipFaucet from "../../_admonitions/_tip_faucet.md";
 
-If you need to send an amount below the minimum storage deposit, you should use a microtransaction.
+If you attempt to send an amount below the minimum storage deposit, the wallet will either fail or create a microtransaction
+depending on the `allow_micro_amount` option.
 
 <TipFaucet/>
 
@@ -34,10 +35,10 @@ If you need to send an amount below the minimum storage deposit, you should use 
 
 The following example will:
 
-1. Create an account manager.
+1. Create a wallet.
 2. Get Alice's account which was [created in the first guide](../accounts_and_addresses/01_create_a_wallet_account.mdx).
 3. Create the outputs for a microtransaction.
-4. Send the micro-microtransaction using the `Account.send_micro_transaction(addresses_with_micro_amount, options)` function.
+4. Send the microtransaction using the `Account.send_amount(addresses_with_amount, options)` function.
 
 <Tabs groupId="language">
     <TabItem value="rust" label="Rust">
@@ -70,4 +71,3 @@ The following example will:
         <JavaOutput/>
     </TabItem>
 </Tabs>
-

@@ -5,10 +5,7 @@
 use crate::client::secret::SecretManager;
 use crate::types::block::{
     input::INPUT_COUNT_MAX,
-    output::{
-        unlock_condition::{AddressUnlockCondition, UnlockCondition},
-        BasicOutputBuilder, NativeTokens, NativeTokensBuilder, Output,
-    },
+    output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokens, NativeTokensBuilder, Output},
 };
 
 // Constants for the calculation of the amount of inputs we can use with a ledger nano
@@ -164,9 +161,7 @@ impl AccountHandle {
 
         let consolidation_output = vec![
             BasicOutputBuilder::new_with_amount(total_amount)?
-                .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-                    outputs_to_consolidate[0].address,
-                )))
+                .add_unlock_condition(AddressUnlockCondition::new(outputs_to_consolidate[0].address))
                 .with_native_tokens(total_native_tokens.finish()?)
                 .finish_output(token_supply)?,
         ];

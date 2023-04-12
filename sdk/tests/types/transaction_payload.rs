@@ -38,7 +38,7 @@ fn builder_no_essence_too_few_unlocks() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .unwrap()
-            .add_unlock_condition(AddressUnlockCondition::new(address).into())
+            .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
     );
@@ -76,7 +76,7 @@ fn builder_no_essence_too_many_unlocks() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .unwrap()
-            .add_unlock_condition(AddressUnlockCondition::new(address).into())
+            .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
     );
@@ -117,7 +117,7 @@ fn pack_unpack_valid() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .unwrap()
-            .add_unlock_condition(AddressUnlockCondition::new(address).into())
+            .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
     );
@@ -160,7 +160,7 @@ fn getters() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .unwrap()
-            .add_unlock_condition(AddressUnlockCondition::new(address).into())
+            .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
     );

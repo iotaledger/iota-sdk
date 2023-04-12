@@ -138,9 +138,10 @@ fn verify_unique_sorted_packable<const VERIFY: bool>(
     verify_unique_sorted::<VERIFY>(milestone_options)
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::format;
+
     use serde::{Deserialize, Serialize, Serializer};
     use serde_json::Value;
 

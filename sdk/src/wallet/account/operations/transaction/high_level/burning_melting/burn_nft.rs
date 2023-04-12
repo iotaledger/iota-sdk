@@ -5,10 +5,7 @@ use crate::{
     client::api::input_selection::Burn,
     types::block::{
         address::{Address, NftAddress},
-        output::{
-            unlock_condition::{AddressUnlockCondition, UnlockCondition},
-            BasicOutputBuilder, NftId, Output, OutputId,
-        },
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NftId, Output, OutputId},
     },
     wallet::{
         account::{
@@ -102,7 +99,7 @@ impl AccountHandle {
 
         let basic_output = Output::Basic(
             BasicOutputBuilder::new_with_amount(nft_output.amount())?
-                .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(*unlock_address)))
+                .add_unlock_condition(AddressUnlockCondition::new(*unlock_address))
                 .with_native_tokens(nft_output.native_tokens().clone())
                 .finish(token_supply)?,
         );

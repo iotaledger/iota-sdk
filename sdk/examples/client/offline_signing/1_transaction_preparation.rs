@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we get inputs and prepare a transaction.
-//! `cargo run --example 1_transaction_preparation --release`.
+//!
+//! `cargo run --example 1_transaction_preparation --release`
 
 use std::{
     fs::File,
@@ -20,7 +21,8 @@ const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/prepared_
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    dotenv::dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
 

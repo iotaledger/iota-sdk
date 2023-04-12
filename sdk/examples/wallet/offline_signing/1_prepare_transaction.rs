@@ -1,26 +1,23 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will get inputs and prepare a transaction
-//! `cargo run --example 1_prepare_transaction --release`.
+//! In this example we will get inputs and prepare a transaction.
+//!
+//! `cargo run --example 1_prepare_transaction --release`
 
 use std::{
-    env,
     fs::File,
     io::{BufWriter, Read, Write},
     path::Path,
 };
 
-use dotenv::dotenv;
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
         constants::SHIMMER_COIN_TYPE,
         secret::{placeholder::PlaceholderSecretManager, SecretManager},
     },
-    wallet::{
-        account::types::AccountAddress, account_manager::AccountManager, AddressWithAmount, ClientOptions, Result,
-    },
+    wallet::{account::types::AccountAddress, AddressWithAmount, ClientOptions, Result, Wallet},
 };
 
 const ADDRESS_FILE_NAME: &str = "examples/offline_signing/addresses.json";
@@ -28,23 +25,23 @@ const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/prepared_
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
-    let outputs = vec![AddressWithAmount {
+    let outputs = vec![AddressWithAmount::new(
         // Address to which we want to send the amount.
-        address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
+        "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
         // The amount to send.
-        amount: 1_000_000,
-    }];
+        1_000_000,
+    )];
 
     // Recovers addresses from example `0_address_generation`.
     let addresses = read_addresses_from_file(ADDRESS_FILE_NAME)?;
 
-    let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
-    // Create the account manager with the secret_manager and client options
-    let manager = AccountManager::builder()
+    // Create the wallet with the secret_manager and client options
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Placeholder(PlaceholderSecretManager))
         .with_client_options(client_options.clone())
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -53,7 +50,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Create a new account
-    let account = manager
+    let account = wallet
         .create_account()
         .with_alias("Alice".to_string())
         .with_addresses(addresses)

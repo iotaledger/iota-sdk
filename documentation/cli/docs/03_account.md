@@ -1,6 +1,6 @@
 # Account Interface
 
-The Account Interface is evaluated, after the Account Manager Interface, repeatedly through a prompt within the `wallet`
+The Account Interface is evaluated, after the Wallet Interface, repeatedly through a prompt within the `wallet`
 binary.
 
 It is responsible for the creation and management of account addresses and their outputs, tokens, native tokens, NFTs...
@@ -396,32 +396,18 @@ Sends an amount to an address.
 
 #### Parameters
 
-| Name      | Optional  | Default | Example                                                         |
-| --------- | --------- | ------- | --------------------------------------------------------------- |
-| `address` | ✘         | N/A     | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 |
-| `amount`  | ✘         | N/A     | 1000000                                                         |
+| Name                 | Optional  | Default | Example                                                         |
+| -------------------- | --------- | ------- | --------------------------------------------------------------- |
+| `address`            | ✘         | N/A     | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 |
+| `amount`             | ✘         | N/A     | 1000000                                                         |
+| `return_address`     | ✓         | 1st     | rms1qrvddncqclzrxrkxhuy4cjr9aqth5nu0h5kuzhr4phj5u67mmq29z0r9v2g |
+| `expiration`         | ✓         | 1d      | 72h                                                             |
+| `allow_micro_amount` | ✓         | false   | N/A                                                             |
 
 #### Example
 
 ```sh
 > Account "main": send rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 1000000
-```
-
-### `send-micro`
-
-Sends a micro amount to an address with StorageDepositReturn and Expiration Unlock Conditions.
-
-#### Parameters
-
-| Name      | Optional  | Default | Example                                                         |
-| --------- | --------- | ------- | --------------------------------------------------------------- |
-| `address` | ✘         | N/A     | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 |
-| `amount`  | ✘         | N/A     | 1                                                               |
-
-#### Example
-
-```sh
-> Account "main": send-micro rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 1
 ```
 
 ### `send-native-token`

@@ -8,8 +8,7 @@ use crate::{
     types::block::{
         address::{Address, Ed25519Address},
         output::{
-            unlock_condition::{AddressUnlockCondition, UnlockCondition},
-            BasicOutputBuilder, NativeTokens, Output, Rent, RentStructure,
+            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokens, Output, Rent, RentStructure,
         },
     },
 };
@@ -42,16 +41,15 @@ pub fn minimum_storage_deposit_basic_output(
     native_tokens: &Option<NativeTokens>,
     token_supply: u64,
 ) -> Result<u64> {
-    // Null address because we only care about the size and ed25519, alias and nft addresses have the same size.
-    let address_condition = UnlockCondition::Address(AddressUnlockCondition::new(Address::from(Ed25519Address::from(
-        [0; Ed25519Address::LENGTH],
-    ))));
     let mut basic_output_builder = BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN)?;
     if let Some(native_tokens) = native_tokens {
         basic_output_builder = basic_output_builder.with_native_tokens(native_tokens.clone());
     }
     let basic_output = basic_output_builder
-        .add_unlock_condition(address_condition)
+        // Null address because we only care about the size and ed25519, alias and nft addresses have the same size.
+        .add_unlock_condition(AddressUnlockCondition::new(Address::from(Ed25519Address::from(
+            [0; Ed25519Address::LENGTH],
+        ))))
         .finish_output(token_supply)?;
 
     Ok(basic_output.rent_cost(config))
