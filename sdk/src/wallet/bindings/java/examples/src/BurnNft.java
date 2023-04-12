@@ -34,10 +34,8 @@ public class BurnNft {
         );
 
         // Print transaction.
-        System.out.println(
-                "Transaction: " + transaction.getTransactionId() +
-                        " Block sent: " + Env.NODE + "/api/core/v2/blocks/" +
-                        transaction.getBlockId());
+        System.out.println("Transaction: " + transaction.getTransactionId());
+        System.out.println("Block sent: " + Env.NODE + "/api/core/v2/blocks/" + transaction.getBlockId());
 
         // In case you are done and don't need the wallet instance anymore you can destroy the instance to clean up memory.
         // For this, check out the ´DestroyWallet.java´ example.

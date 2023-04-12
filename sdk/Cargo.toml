@@ -72,7 +72,7 @@ fern-logger = { version = "0.5.0", default-features = false }
 [features]
 client = [ "serde", "block", "dto", "api", "pow", "std", "async-trait", "log", "derive_builder" ]
 pow = [ ]
-rocks_db = [ "rocksdb", "storage" ]
+rocksdb = [ "dep:rocksdb", "storage" ]
 wallet = [ "client", "log" ]
 storage = [ "async-trait" ]
 mqtt = [ "regex", "rumqttc", "once_cell" ]
