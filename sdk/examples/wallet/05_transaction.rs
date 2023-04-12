@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
     // May want to ensure the account is synced before sending a transaction.
     let balance = wallet.sync(None).await?;
 
-    if balance.base_coin.available >= 1_000_000 {
+    if balance.base_coin().available() >= 1_000_000 {
         // Set the stronghold password
         wallet
             .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())

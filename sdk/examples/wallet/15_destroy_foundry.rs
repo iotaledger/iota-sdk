@@ -22,7 +22,7 @@ async fn main() -> Result<()> {
     let balance = account.sync(None).await?;
 
     // Get the first foundry
-    if let Some(foundry_id) = balance.foundries.first() {
+    if let Some(foundry_id) = balance.foundries().first() {
         println!("Balance before destroying:\n{balance:?}",);
 
         // Set the stronghold password

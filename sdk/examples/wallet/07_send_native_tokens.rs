@@ -30,10 +30,10 @@ async fn main() -> Result<()> {
 
     // Get a token with sufficient balance
     if let Some(token_id) = balance
-        .native_tokens
+        .native_tokens()
         .iter()
-        .find(|t| t.available >= U256::from(10))
-        .map(|t| t.token_id)
+        .find(|t| t.available() >= &U256::from(10))
+        .map(|t| t.token_id())
     {
         // Set the stronghold password
         wallet
@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
 
         let outputs = vec![AddressNativeTokens {
             address: bech32_address.clone(),
-            native_tokens: vec![(token_id, U256::from(10))],
+            native_tokens: vec![(*token_id, U256::from(10))],
             ..Default::default()
         }];
 
@@ -63,7 +63,7 @@ async fn main() -> Result<()> {
         let outputs = vec![
             BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
                 .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(bech32_address)?))
-                .with_native_tokens(vec![NativeToken::new(token_id, U256::from(10))?])
+                .with_native_tokens(vec![NativeToken::new(*token_id, U256::from(10))?])
                 .finish_output(account.client().get_token_supply().await?)?,
         ];
 

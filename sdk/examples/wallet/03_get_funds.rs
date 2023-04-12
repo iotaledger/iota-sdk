@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
 
     let address = account.addresses().await?;
 
-    let funds_before = balance.base_coin.available;
+    let funds_before = balance.base_coin().available();
 
     println!("Starting available funds: {funds_before}");
 
@@ -42,14 +42,14 @@ async fn main() -> Result<()> {
             panic!("took too long waiting for funds")
         };
         let balance = account.sync(None).await?;
-        if balance.base_coin.available > funds_before {
+        if balance.base_coin().available() > funds_before {
             break balance;
         } else {
             tokio::time::sleep(instant::Duration::from_secs(2)).await;
         }
     };
 
-    println!("New available funds: {}", balance.base_coin.available);
+    println!("New available funds: {}", balance.base_coin().available());
 
     Ok(())
 }
