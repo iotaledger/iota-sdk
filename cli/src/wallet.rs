@@ -81,7 +81,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                     (Some(wallet), None)
                 }
             }
-            (false, _) => {
+            (false, false) => {
                 if get_decision("Initialize a new wallet with default values?")? {
                     println_log_info!("Initializing wallet with default values.");
                     let wallet = init_command(storage_path, snapshot_path, InitParameters::default()).await?;
@@ -100,6 +100,10 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
             }
             (true, false) => {
                 println_log_error!("Stronghold snapshot not found at '{}'.", snapshot_path.display());
+                (None, None)
+            }
+            (false, true) => {
+                println_log_error!("Wallet database not found at '{}'.", storage_path.display());
                 (None, None)
             }
         }
