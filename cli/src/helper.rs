@@ -70,21 +70,11 @@ pub async fn get_mnemonic() -> Result<String, Error> {
         .default(0)
         .interact_on_opt(&Term::stderr())?;
 
-    match selected_choice {
-        Some(index) => match index {
-            0 => {
-                println!("{}", mnemonic);
-            }
-            1 => {
-                write_mnemonic_to_file(MNEMONIC_FILE_NAME, &mnemonic).await?;
-            }
-            2 => {
-                println!("{}", mnemonic);
-                write_mnemonic_to_file(MNEMONIC_FILE_NAME, &mnemonic).await?;
-            }
-            _ => unreachable!(),
-        },
-        None => unreachable!(),
+    if matches!(selected_choice, Some(0 | 2)) {
+        println!("{}", mnemonic);
+    }
+    if matches!(selected_choice, Some(1 | 2)) {
+        write_mnemonic_to_file(MNEMONIC_FILE_NAME, &mnemonic).await?;
     }
     Ok(mnemonic)
 }
