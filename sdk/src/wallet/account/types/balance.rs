@@ -3,6 +3,7 @@
 
 use std::collections::HashMap;
 
+use getset::{CopyGetters, Getters};
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
@@ -13,29 +14,30 @@ use crate::types::block::{
 
 /// The balance of an account, returned from [`crate::account::handle::AccountHandle::sync()`] and
 /// [`crate::account::handle::AccountHandle::balance()`].
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, Getters)]
+#[getset(get = "pub")]
 pub struct AccountBalance {
     /// Total and available amount of the base coin
     #[serde(rename = "baseCoin")]
-    pub base_coin: BaseCoinBalance,
+    pub(crate) base_coin: BaseCoinBalance,
     /// Current required storage deposit amount
     #[serde(rename = "requiredStorageDeposit")]
-    pub required_storage_deposit: RequiredStorageDeposit,
+    pub(crate) required_storage_deposit: RequiredStorageDeposit,
     /// Native tokens
     #[serde(rename = "nativeTokens")]
-    pub native_tokens: Vec<NativeTokensBalance>,
+    pub(crate) native_tokens: Vec<NativeTokensBalance>,
     /// Nfts
-    pub nfts: Vec<NftId>,
+    pub(crate) nfts: Vec<NftId>,
     /// Aliases
-    pub aliases: Vec<AliasId>,
+    pub(crate) aliases: Vec<AliasId>,
     /// Foundries
-    pub foundries: Vec<FoundryId>,
+    pub(crate) foundries: Vec<FoundryId>,
     /// Outputs with multiple unlock conditions and if they can currently be spent or not. If there is a
     /// [`TimelockUnlockCondition`](crate::client::block::output::unlock_condition::TimelockUnlockCondition) or
     /// [`ExpirationUnlockCondition`](crate::client::block::output::unlock_condition::ExpirationUnlockCondition) this
     /// can change at any time
     #[serde(rename = "potentiallyLockedOutputs")]
-    pub potentially_locked_outputs: HashMap<OutputId, bool>,
+    pub(crate) potentially_locked_outputs: HashMap<OutputId, bool>,
 }
 
 impl std::ops::AddAssign for AccountBalance {
@@ -109,16 +111,17 @@ impl From<&AccountBalance> for AccountBalanceDto {
 }
 
 /// Base coin fields for [`AccountBalance`]
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters)]
+#[getset(get_copy = "pub")]
 pub struct BaseCoinBalance {
     /// Total amount
-    pub total: u64,
+    pub(crate) total: u64,
     /// Balance that can currently be spent
-    pub available: u64,
+    pub(crate) available: u64,
     /// Voting power
     #[cfg(feature = "participation")]
     #[serde(rename = "votingPower")]
-    pub voting_power: u64,
+    pub(crate) voting_power: u64,
 }
 
 impl std::ops::AddAssign for BaseCoinBalance {
@@ -156,7 +159,8 @@ impl From<&BaseCoinBalance> for BaseCoinBalanceDto {
     }
 }
 
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters)]
+#[getset(get_copy = "pub")]
 pub struct RequiredStorageDeposit {
     pub(crate) alias: u64,
     pub(crate) basic: u64,
@@ -167,22 +171,6 @@ pub struct RequiredStorageDeposit {
 impl RequiredStorageDeposit {
     pub fn new() -> Self {
         Self::default()
-    }
-
-    pub fn alias(&self) -> u64 {
-        self.alias
-    }
-
-    pub fn basic(&self) -> u64 {
-        self.basic
-    }
-
-    pub fn foundry(&self) -> u64 {
-        self.foundry
-    }
-
-    pub fn nft(&self) -> u64 {
-        self.nft
     }
 }
 
@@ -216,17 +204,18 @@ impl From<&RequiredStorageDeposit> for RequiredStorageDepositDto {
 }
 
 /// Native tokens fields for [`AccountBalance`]
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, Getters)]
+#[getset(get = "pub")]
 pub struct NativeTokensBalance {
     /// Token id
     #[serde(rename = "tokenId")]
-    pub token_id: TokenId,
+    pub(crate) token_id: TokenId,
     /// Token foundry immutable metadata
-    pub metadata: Option<MetadataFeature>,
+    pub(crate) metadata: Option<MetadataFeature>,
     /// Total amount
-    pub total: U256,
+    pub(crate) total: U256,
     /// Balance that can currently be spent
-    pub available: U256,
+    pub(crate) available: U256,
 }
 
 impl Default for NativeTokensBalance {
