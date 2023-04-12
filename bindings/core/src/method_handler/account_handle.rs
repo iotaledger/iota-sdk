@@ -5,15 +5,11 @@
 use std::str::FromStr;
 
 use iota_sdk::{
-    client::{
-        api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
-        request_funds_from_faucet,
+    client::api::{
+        PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
     },
     types::block::{
-        output::{
-            dto::{OutputBuilderAmountDto, OutputDto},
-            AliasId, AliasOutput, BasicOutput, FoundryOutput, NftId, NftOutput, Output, Rent, TokenId,
-        },
+        output::{dto::OutputDto, AliasId, NftId, Output, Rent, TokenId},
         DtoError,
     },
     wallet::{
@@ -33,106 +29,6 @@ use crate::{method::AccountMethod, panic::convert_async_panics, Response};
 
 pub(crate) async fn call_account_method(account_handle: &AccountHandle, method: AccountMethod) -> Result<Response> {
     match method {
-        AccountMethod::BuildAliasOutput {
-            amount,
-            native_tokens,
-            alias_id,
-            state_index,
-            state_metadata,
-            foundry_counter,
-            unlock_conditions,
-            features,
-            immutable_features,
-        } => {
-            let output = Output::from(AliasOutput::try_from_dtos(
-                if let Some(amount) = amount {
-                    OutputBuilderAmountDto::Amount(amount)
-                } else {
-                    OutputBuilderAmountDto::MinimumStorageDeposit(account_handle.client().get_rent_structure().await?)
-                },
-                native_tokens,
-                &alias_id,
-                state_index,
-                state_metadata,
-                foundry_counter,
-                unlock_conditions,
-                features,
-                immutable_features,
-                account_handle.client().get_token_supply().await?,
-            )?);
-
-            Ok(Response::Output(OutputDto::from(&output)))
-        }
-        AccountMethod::BuildBasicOutput {
-            amount,
-            native_tokens,
-            unlock_conditions,
-            features,
-        } => {
-            let output = Output::from(BasicOutput::try_from_dtos(
-                if let Some(amount) = amount {
-                    OutputBuilderAmountDto::Amount(amount)
-                } else {
-                    OutputBuilderAmountDto::MinimumStorageDeposit(account_handle.client().get_rent_structure().await?)
-                },
-                native_tokens,
-                unlock_conditions,
-                features,
-                account_handle.client().get_token_supply().await?,
-            )?);
-
-            Ok(Response::Output(OutputDto::from(&output)))
-        }
-        AccountMethod::BuildFoundryOutput {
-            amount,
-            native_tokens,
-            serial_number,
-            token_scheme,
-            unlock_conditions,
-            features,
-            immutable_features,
-        } => {
-            let output = Output::from(FoundryOutput::try_from_dtos(
-                if let Some(amount) = amount {
-                    OutputBuilderAmountDto::Amount(amount)
-                } else {
-                    OutputBuilderAmountDto::MinimumStorageDeposit(account_handle.client().get_rent_structure().await?)
-                },
-                native_tokens,
-                serial_number,
-                &token_scheme,
-                unlock_conditions,
-                features,
-                immutable_features,
-                account_handle.client().get_token_supply().await?,
-            )?);
-
-            Ok(Response::Output(OutputDto::from(&output)))
-        }
-        AccountMethod::BuildNftOutput {
-            amount,
-            native_tokens,
-            nft_id,
-            unlock_conditions,
-            features,
-            immutable_features,
-        } => {
-            let output = Output::from(NftOutput::try_from_dtos(
-                if let Some(amount) = amount {
-                    OutputBuilderAmountDto::Amount(amount)
-                } else {
-                    OutputBuilderAmountDto::MinimumStorageDeposit(account_handle.client().get_rent_structure().await?)
-                },
-                native_tokens,
-                &nft_id,
-                unlock_conditions,
-                features,
-                immutable_features,
-                account_handle.client().get_token_supply().await?,
-            )?);
-
-            Ok(Response::Output(OutputDto::from(&output)))
-        }
         AccountMethod::BurnNativeToken {
             token_id,
             burn_amount,
@@ -679,10 +575,6 @@ pub(crate) async fn call_account_method(account_handle: &AccountHandle, method: 
                 Ok(Response::ParticipationEvents(events))
             })
             .await
-        }
-        AccountMethod::RequestFundsFromFaucet { url, address } => {
-            convert_async_panics(|| async { Ok(Response::Faucet(request_funds_from_faucet(&url, &address).await?)) })
-                .await
         }
     }
 }

@@ -24,7 +24,7 @@ use crate::wallet::events::{
 #[cfg(feature = "storage")]
 use crate::wallet::storage::manager::StorageManagerHandle;
 use crate::{
-    client::{secret::SecretManager, Client},
+    client::{secret::SecretManager, verify_mnemonic, Client},
     wallet::{
         account::{
             builder::AccountBuilder, handle::AccountHandle, operations::syncing::SyncOptions, types::AccountBalance,
@@ -170,9 +170,7 @@ impl Wallet {
 
     /// Verify that a &str is a valid mnemonic.
     pub fn verify_mnemonic(&self, mnemonic: &str) -> crate::wallet::Result<()> {
-        // first we check if the mnemonic is valid to give meaningful errors
-        crypto::keys::bip39::wordlist::verify(mnemonic, &crypto::keys::bip39::wordlist::ENGLISH)
-            .map_err(|e| crate::wallet::Error::InvalidMnemonic(format!("{e:?}")))?;
+        verify_mnemonic(mnemonic)?;
         Ok(())
     }
 

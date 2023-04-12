@@ -16,7 +16,9 @@ use iota_sdk::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{method::account::AccountMethod, OmittedDebug};
+use crate::method::account::AccountMethod;
+#[cfg(feature = "stronghold")]
+use crate::OmittedDebug;
 
 /// The messages that can be sent to the actor.
 #[derive(Clone, Derivative, Serialize, Deserialize)]
@@ -127,15 +129,6 @@ pub enum WalletMethod {
     /// Removes the latest account (account with the largest account index).
     /// Expected response: [`Ok`](crate::message_interface::Response::Ok)
     RemoveLatestAccount,
-    /// Generates a new mnemonic.
-    /// Expected response: [`GeneratedMnemonic`](crate::message_interface::Response::GeneratedMnemonic)
-    GenerateMnemonic,
-    /// Checks if the given mnemonic is valid.
-    /// Expected response: [`Ok`](crate::message_interface::Response::Ok)
-    VerifyMnemonic {
-        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        mnemonic: String,
-    },
     /// Updates the client options for all accounts.
     /// Expected response: [`Ok`](crate::message_interface::Response::Ok)
     SetClientOptions {
@@ -164,14 +157,6 @@ pub enum WalletMethod {
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
     GetLedgerNanoStatus,
-    /// Get the node information
-    /// Expected response: [`NodeInfo`](crate::message_interface::Response::NodeInfo)
-    GetNodeInfo {
-        /// Url
-        url: Option<String>,
-        /// Node authentication
-        auth: Option<NodeAuth>,
-    },
     /// Set the stronghold password.
     /// Expected response: [`Ok`](crate::message_interface::Response::Ok)
     #[cfg(feature = "stronghold")]
@@ -213,21 +198,6 @@ pub enum WalletMethod {
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
     EmitTestEvent { event: WalletEvent },
-    /// Transforms a bech32 encoded address to hex
-    /// Expected response: [`HexAddress`](crate::message_interface::Response::HexAddress)
-    Bech32ToHex {
-        #[serde(rename = "bech32Address")]
-        bech32_address: String,
-    },
-    /// Transforms a hex encoded address to a bech32 encoded address
-    /// Expected response: [`Bech32Address`](crate::message_interface::Response::Bech32Address)
-    HexToBech32 {
-        /// Hex encoded bech32 address
-        hex: String,
-        /// Human readable part
-        #[serde(rename = "bech32Hrp")]
-        bech32_hrp: Option<String>,
-    },
     // Remove all listeners of this type. Empty vec clears all listeners
     /// Expected response: [`Ok`](crate::message_interface::Response::Ok)
     #[cfg(feature = "events")]

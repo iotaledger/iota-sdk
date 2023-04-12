@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `{TransactionOptions, TransactionOptionsDto}::allow_micro_amount` field;
 - `AddressWithAmount::{new, with_return_address, with_expiration}` methods;
 - `{BaseCoinBalance, BaseCoinBalanceDto}::voting_power` field;
+- `verify_mnemonic()`;
 
 ### Changed
 

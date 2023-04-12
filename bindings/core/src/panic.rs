@@ -1,10 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{
-    any::Any,
-    panic::{catch_unwind, AssertUnwindSafe},
-};
+use std::{any::Any, panic::AssertUnwindSafe};
 
 use backtrace::Backtrace;
 use futures::{Future, FutureExt};
@@ -25,13 +22,6 @@ fn panic_to_response_message(panic: Box<dyn Any>) -> Response {
 
     let current_backtrace = Backtrace::new();
     Response::Panic(format!("{msg}\n\n{current_backtrace:?}"))
-}
-
-pub(crate) fn convert_panics<F: FnOnce() -> Result<Response>>(f: F) -> Result<Response> {
-    match catch_unwind(AssertUnwindSafe(f)) {
-        Ok(result) => result,
-        Err(panic) => Ok(panic_to_response_message(panic)),
-    }
 }
 
 #[cfg(not(target_family = "wasm"))]

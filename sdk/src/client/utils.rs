@@ -65,8 +65,7 @@ pub fn mnemonic_to_hex_seed(mnemonic: &str) -> Result<String> {
     // trim because empty spaces could create a different seed https://github.com/iotaledger/crypto.rs/issues/125
     let mnemonic = mnemonic.trim();
     // first we check if the mnemonic is valid to give meaningful errors
-    crypto::keys::bip39::wordlist::verify(mnemonic, &crypto::keys::bip39::wordlist::ENGLISH)
-        .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
+    verify_mnemonic(mnemonic)?;
     let mut mnemonic_seed = [0u8; 64];
     crypto::keys::bip39::mnemonic_to_seed(mnemonic, "", &mut mnemonic_seed);
     Ok(prefix_hex::encode(mnemonic_seed))
@@ -77,11 +76,17 @@ pub fn mnemonic_to_seed(mnemonic: &str) -> Result<Seed> {
     // trim because empty spaces could create a different seed https://github.com/iotaledger/crypto.rs/issues/125
     let mnemonic = mnemonic.trim();
     // first we check if the mnemonic is valid to give meaningful errors
-    crypto::keys::bip39::wordlist::verify(mnemonic, &crypto::keys::bip39::wordlist::ENGLISH)
-        .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
+    verify_mnemonic(mnemonic)?;
     let mut mnemonic_seed = [0u8; 64];
     crypto::keys::bip39::mnemonic_to_seed(mnemonic, "", &mut mnemonic_seed);
     Ok(Seed::from_bytes(&mnemonic_seed))
+}
+
+/// Verify that a &str is a valid mnemonic.
+pub fn verify_mnemonic(mnemonic: &str) -> Result<()> {
+    crypto::keys::bip39::wordlist::verify(mnemonic, &crypto::keys::bip39::wordlist::ENGLISH)
+        .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
+    Ok(())
 }
 
 /// Requests funds from a faucet

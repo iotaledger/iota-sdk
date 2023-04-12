@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    client::{hex_public_key_to_bech32_address, hex_to_bech32, request_funds_from_faucet, Client},
+    client::{hex_public_key_to_bech32_address, hex_to_bech32, request_funds_from_faucet, verify_mnemonic, Client},
     types::block::{
         address::{dto::AddressDto, Address, Ed25519Address},
         output::{AliasId, FoundryId, NftId},
@@ -69,6 +69,11 @@ pub(crate) async fn call_utils_method_internal(method: UtilsMethod) -> Result<Re
             let msg: Vec<u8> = prefix_hex::decode(message)?;
             let address = Ed25519Address::try_from(&address)?;
             Ok(Response::Bool(signature.is_valid(&msg, &address).is_ok()))
+        }
+        UtilsMethod::VerifyMnemonic { mut mnemonic } => {
+            verify_mnemonic(&mnemonic)?;
+            mnemonic.zeroize();
+            Ok(Response::Ok)
         }
     }
 }

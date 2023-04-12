@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::client::secret::SecretManagerDto;
-use iota_sdk_bindings_core::{ClientMethod, Response, WalletMethod, WalletOptions};
+use iota_sdk_bindings_core::{ClientMethod, Response, UtilsMethod, WalletOptions};
 
 #[test]
 fn method_interface_secrets_debug() {
@@ -35,7 +35,7 @@ fn method_interface_secrets_debug() {
         );
     }
 
-    let wallet_method = WalletMethod::VerifyMnemonic {
+    let wallet_method = UtilsMethod::VerifyMnemonic {
         mnemonic: "mnemonic".to_string(),
     };
     assert_eq!(format!("{:?}", wallet_method), "VerifyMnemonic { mnemonic: <omitted> }");

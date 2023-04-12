@@ -130,4 +130,10 @@ pub enum UtilsMethod {
         /// The hex encoded Ed25519 address
         address: Ed25519AddressDto,
     },
+    /// Checks if the given mnemonic is valid.
+    /// Expected response: [`Ok`](crate::message_interface::Response::Ok)
+    VerifyMnemonic {
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
+        mnemonic: String,
+    },
 }

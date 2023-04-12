@@ -3,16 +3,13 @@
 
 use std::time::Duration;
 
-use iota_sdk::{
-    client::{constants::SHIMMER_TESTNET_BECH32_HRP, utils, Client, NodeInfoWrapper},
-    wallet::{message_interface::dtos::AccountDto, wallet::Wallet},
-};
+use iota_sdk::wallet::{message_interface::dtos::AccountDto, wallet::Wallet};
+#[cfg(feature = "stronghold")]
 use zeroize::Zeroize;
 
 use crate::{
     method::WalletMethod,
     method_handler::{account_handle::call_account_method, Result},
-    panic::convert_panics,
     response::Response,
 };
 
@@ -122,17 +119,6 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 .await?;
             Ok(Response::Ok)
         }
-        WalletMethod::GenerateMnemonic => convert_panics(|| {
-            wallet
-                .generate_mnemonic()
-                .map(Response::GeneratedMnemonic)
-                .map_err(Into::into)
-        }),
-        WalletMethod::VerifyMnemonic { mut mnemonic } => convert_panics(|| {
-            wallet.verify_mnemonic(&mnemonic)?;
-            mnemonic.zeroize();
-            Ok(Response::Ok)
-        }),
         WalletMethod::SetClientOptions { client_options } => {
             wallet.set_client_options(*client_options).await?;
             Ok(Response::Ok)
@@ -160,17 +146,6 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
 
             Ok(Response::Bech32Address(address.to_bech32(bech32_hrp)))
         }
-        WalletMethod::GetNodeInfo { url, auth } => match url {
-            Some(url) => {
-                let node_info = Client::get_node_info(&url, auth).await?;
-                Ok(Response::NodeInfoWrapper(NodeInfoWrapper { node_info, url }))
-            }
-            None => wallet
-                .get_node_info()
-                .await
-                .map(Response::NodeInfoWrapper)
-                .map_err(Into::into),
-        },
         #[cfg(feature = "stronghold")]
         WalletMethod::SetStrongholdPassword { mut password } => {
             wallet.set_stronghold_password(&password).await?;
@@ -206,20 +181,6 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         WalletMethod::EmitTestEvent { event } => {
             wallet.emit_test_event(event.clone()).await?;
             Ok(Response::Ok)
-        }
-        WalletMethod::Bech32ToHex { bech32_address } => {
-            convert_panics(|| Ok(Response::HexAddress(utils::bech32_to_hex(&bech32_address)?)))
-        }
-        WalletMethod::HexToBech32 { hex, bech32_hrp } => {
-            let bech32_hrp = match bech32_hrp {
-                Some(bech32_hrp) => bech32_hrp,
-                None => match wallet.get_node_info().await {
-                    Ok(node_info_wrapper) => node_info_wrapper.node_info.protocol.bech32_hrp,
-                    Err(_) => SHIMMER_TESTNET_BECH32_HRP.into(),
-                },
-            };
-
-            Ok(Response::Bech32Address(utils::hex_to_bech32(&hex, &bech32_hrp)?))
         }
         #[cfg(feature = "events")]
         WalletMethod::ClearListeners { event_types } => {
