@@ -74,8 +74,8 @@ where
 }
 
 /// Call a client method.
-pub(crate) async fn call_client_method_internal(client: &Client, message: ClientMethod) -> Result<Response> {
-    match message {
+pub(crate) async fn call_client_method_internal(client: &Client, method: ClientMethod) -> Result<Response> {
+    match method {
         ClientMethod::BuildAliasOutput {
             amount,
             native_tokens,

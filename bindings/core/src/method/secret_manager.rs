@@ -3,9 +3,10 @@
 
 use crypto::keys::slip10::Chain;
 use derivative::Derivative;
-use iota_sdk::client::{api::GetAddressesBuilderOptions, secret::SecretManagerDto};
+use iota_sdk::client::api::GetAddressesBuilderOptions;
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "stronghold")]
 use crate::OmittedDebug;
 
 /// Each public secret manager method.
@@ -15,10 +16,6 @@ use crate::OmittedDebug;
 pub enum SecretManagerMethod {
     /// Generate addresses.
     GenerateAddresses {
-        /// Create secret manager from json
-        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        #[serde(rename = "secretManager")]
-        secret_manager: SecretManagerDto,
         /// Addresses generation options
         options: GetAddressesBuilderOptions,
     },
@@ -33,10 +30,6 @@ pub enum SecretManagerMethod {
     },
     /// Create a single Signature Unlock.
     SignatureUnlock {
-        /// Secret manager
-        #[serde(rename = "secretManager")]
-        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        secret_manager: SecretManagerDto,
         /// Transaction Essence Hash
         #[serde(rename = "transactionEssenceHash")]
         transaction_essence_hash: Vec<u8>,
@@ -45,9 +38,6 @@ pub enum SecretManagerMethod {
     },
     /// Signs a message with an Ed25519 private key.
     SignEd25519 {
-        /// Secret manager
-        #[serde(rename = "secretManager")]
-        secret_manager: SecretManagerDto,
         /// The message to sign, hex encoded String
         message: String,
         /// Chain to sign the essence hash with
@@ -57,10 +47,6 @@ pub enum SecretManagerMethod {
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
     StoreMnemonic {
-        /// Stronghold secret manager
-        #[serde(rename = "secretManager")]
-        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        secret_manager: SecretManagerDto,
         /// Mnemonic
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         mnemonic: String,

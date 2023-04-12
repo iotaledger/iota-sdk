@@ -7,4 +7,7 @@ mod secret_manager;
 mod utils;
 mod wallet;
 
-pub use self::{account::AccountMethod, client::ClientMethod, utils::UtilsMethod, wallet::WalletMethod};
+pub use self::{
+    account::AccountMethod, client::ClientMethod, secret_manager::SecretManagerMethod, utils::UtilsMethod,
+    wallet::WalletMethod,
+};
