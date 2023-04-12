@@ -67,12 +67,21 @@ jobs:
       - name: Install binutils and rustfilt
         run: cargo install cargo-binutils rustfilt
 
+      - name: Build for tests
+        uses: actions-rs/cargo@v1
+        env:
+          RUSTFLAGS: "-C instrument-coverage"
+          LLVM_PROFILE_FILE: "iota-%m.profraw"
+        with:
+          command: +nightly test
+          args: --package iota-sdk --all-features --no-run -- --include-ignored
+
       - name: Start private tangle
         uses: "./.github/actions/private-tangle/setup"
 
-      - name: Run tests and collect coverage
+      - name: Collect coverage
         run: bash ./coverage.sh
-        timeout-minutes: 40
+        timeout-minutes: 5
 
       - name: Tear down private tangle
         if: always()
