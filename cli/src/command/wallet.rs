@@ -168,10 +168,7 @@ pub async fn new_command(
     Ok((wallet, alias))
 }
 
-pub async fn add_account(
-    wallet: &Wallet,
-    alias: Option<String>,
-) -> Result<String, Error> {
+pub async fn add_account(wallet: &Wallet, alias: Option<String>) -> Result<String, Error> {
     let mut builder = wallet.create_account();
     if let Some(alias) = alias {
         builder = builder.with_alias(alias);

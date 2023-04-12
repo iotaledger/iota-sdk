@@ -7,8 +7,8 @@ use iota_sdk::wallet::Wallet;
 
 use crate::{
     command::wallet::{
-        backup_command, change_password_command, init_command, mnemonic_command, new_command, restore_command,
-        set_node_command, sync_command, unlock_wallet, InitParameters, WalletCli, WalletCommand, add_account,
+        add_account, backup_command, change_password_command, init_command, mnemonic_command, new_command,
+        restore_command, set_node_command, sync_command, unlock_wallet, InitParameters, WalletCli, WalletCommand,
     },
     error::Error,
     helper::{get_decision, get_password, pick_account},
@@ -89,7 +89,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                     // ask the new user whether a default account should be created
                     if get_decision("Initialize a default account?")? {
                         println_log_info!("Initializing default account.");
-                        let account= add_account(&wallet, None).await?;
+                        let account = add_account(&wallet, None).await?;
                         (Some(wallet), Some(account))
                     } else {
                         (Some(wallet), None)
