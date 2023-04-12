@@ -64,7 +64,7 @@ impl AccountHandle {
                     // Add native tokens
                     total_native_tokens.add_native_tokens(output.native_tokens().clone())?;
 
-                    let alias_id = output.alias_id_non_null(&output_id);
+                    let alias_id = output.alias_id_non_null(output_id);
                     account_balance.aliases.push(alias_id);
                 }
                 Output::Foundry(output) => {
@@ -72,7 +72,7 @@ impl AccountHandle {
                     account_balance.base_coin.total += output.amount();
                     // Add storage deposit
                     account_balance.required_storage_deposit.foundry += rent;
-                    if !account.locked_outputs.contains(&output_id) {
+                    if !account.locked_outputs.contains(output_id) {
                         total_rent_amount += rent;
                     }
 
@@ -91,7 +91,7 @@ impl AccountHandle {
                     {
                         // add nft_id for nft outputs
                         if let Output::Nft(output) = &output {
-                            let nft_id = output.nft_id_non_null(&output_id);
+                            let nft_id = output.nft_id_non_null(output_id);
                             account_balance.nfts.push(nft_id);
                         }
 
@@ -105,13 +105,13 @@ impl AccountHandle {
                                 .native_tokens()
                                 .map(|native_tokens| !native_tokens.is_empty())
                                 .unwrap_or(false)
-                                && !account.locked_outputs.contains(&output_id)
+                                && !account.locked_outputs.contains(output_id)
                             {
                                 total_rent_amount += rent;
                             }
                         } else if output.is_nft() {
                             account_balance.required_storage_deposit.nft += rent;
-                            if !account.locked_outputs.contains(&output_id) {
+                            if !account.locked_outputs.contains(output_id) {
                                 total_rent_amount += rent;
                             }
                         }
@@ -125,7 +125,7 @@ impl AccountHandle {
                         // balance at the moment or in the future
 
                         let output_can_be_unlocked_now =
-                            unlockable_outputs_with_multiple_unlock_conditions.contains(&output_id);
+                            unlockable_outputs_with_multiple_unlock_conditions.contains(output_id);
 
                         // For outputs that are expired or have a timelock unlock condition, but no expiration unlock
                         // condition and we then can unlock them, then they can never be not available for us anymore
@@ -165,7 +165,7 @@ impl AccountHandle {
 
                                 // add nft_id for nft outputs
                                 if let Output::Nft(output) = &output {
-                                    let nft_id = output.nft_id_non_null(&output_id);
+                                    let nft_id = output.nft_id_non_null(output_id);
                                     account_balance.nfts.push(nft_id);
                                 }
 
@@ -181,13 +181,13 @@ impl AccountHandle {
                                         .native_tokens()
                                         .map(|native_tokens| !native_tokens.is_empty())
                                         .unwrap_or(false)
-                                        && !account.locked_outputs.contains(&output_id)
+                                        && !account.locked_outputs.contains(output_id)
                                     {
                                         total_rent_amount += rent;
                                     }
                                 } else if output.is_nft() {
                                     account_balance.required_storage_deposit.nft += rent;
-                                    if !account.locked_outputs.contains(&output_id) {
+                                    if !account.locked_outputs.contains(output_id) {
                                         total_rent_amount += rent;
                                     }
                                 }
