@@ -36,7 +36,7 @@ public class MintNft {
         Transaction transaction = a.mintNfts(new MintNfts().withNftsOptions(new NftOptions[] { options }));
 
         System.out.println("Transaction: " + transaction.getTransactionId());
-        System.out.println("Block sent: " + Env.NODE + "/api/core/v2/blocks/" + transaction.getBlockId());
+        System.out.println("Block sent: " + Env.EXPLORER + "/block/" + transaction.getBlockId());
 
         // In case you are done and don't need the wallet instance anymore you can destroy the instance to clean up memory.
         // For this, check out the ´DestroyWallet.java´ example.

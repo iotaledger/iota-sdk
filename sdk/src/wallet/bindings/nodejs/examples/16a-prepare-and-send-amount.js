@@ -24,7 +24,9 @@ async function run() {
         const signedTransactionEssence = await account.signTransactionEssence(preparedTransaction)
         const response = await account.submitAndStoreTransaction(signedTransactionEssence)
         
-        console.log(response)
+        console.log(
+            `Check block on ${process.env.EXPLORER_URL}/block/${response.blockId}`,
+        );
     } catch (error) {
         console.log('Error: ', error);
     }

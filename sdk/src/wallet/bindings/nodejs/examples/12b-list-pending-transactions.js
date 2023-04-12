@@ -12,7 +12,7 @@ async function run() {
         const { address } = bob.meta.publicAddresses[0];
         const amount = '1000000';
 
-        await account.sendAmount([
+        const response = await account.sendAmount([
             {
                 address,
                 amount,
@@ -20,6 +20,9 @@ async function run() {
         ]);
         const pendingTransactions = await account.pendingTransactions()
         console.log('Listing Pending Transactions:', pendingTransactions[0]?.payload);
+        console.log(
+            `Check your block on ${process.env.EXPLORER_URL}/block/${response.blockId}`,
+        );
     } catch (error) {
         console.log('Error: ', error);
     }
