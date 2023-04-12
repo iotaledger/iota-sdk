@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::path::PathBuf;
+
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -8,7 +10,6 @@ use iota_sdk::{
     },
     wallet::{ClientOptions, Result, Wallet},
 };
-use std::path::PathBuf;
 
 // A name to associate with the created account.
 const ACCOUNT_ALIAS: &str = "Alice";
