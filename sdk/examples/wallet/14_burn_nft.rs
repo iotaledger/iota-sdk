@@ -22,7 +22,7 @@ async fn main() -> Result<()> {
     let balance = account.sync(None).await?;
 
     // Get the first nft
-    if let Some(nft_id) = balance.nfts.first() {
+    if let Some(nft_id) = balance.nfts().first() {
         println!("Balance before burning:\n{balance:?}",);
 
         // Set the stronghold password

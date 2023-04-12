@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Builder methods `add_immutable_feature`, `replace_immutable_feature`, `with_immutable_features` are now generic;
 - Merge `send_amount` and `send_micro_transaction`;
 - `AddressWithAmount::{address, amount}` fields are no longer public;
+- Fields of `AccountBalance`, `BaseCoinBalance` and `NativeTokensBalance` have been made private and getters have been added;
 
 ### Removed
 

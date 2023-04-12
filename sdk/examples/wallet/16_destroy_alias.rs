@@ -22,7 +22,7 @@ async fn main() -> Result<()> {
     let balance = account.sync(None).await?;
 
     // Get the first alias
-    if let Some(alias_id) = balance.aliases.first() {
+    if let Some(alias_id) = balance.aliases().first() {
         println!("Balance before destroying:\n{balance:?}",);
 
         // Set the stronghold password

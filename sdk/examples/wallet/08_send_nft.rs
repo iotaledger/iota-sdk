@@ -22,7 +22,7 @@ async fn main() -> Result<()> {
     let balance = account.sync(None).await?;
 
     // Get the first nft
-    if let Some(nft_id) = balance.nfts.first() {
+    if let Some(nft_id) = balance.nfts().first() {
         // Set the stronghold password
         wallet
             .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())

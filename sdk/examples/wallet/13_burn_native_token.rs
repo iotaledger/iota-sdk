@@ -25,10 +25,10 @@ async fn main() -> Result<()> {
 
     // Get a token with sufficient balance
     if let Some(token_id) = balance
-        .native_tokens
+        .native_tokens()
         .iter()
-        .find(|t| t.available >= U256::from(11))
-        .map(|t| t.token_id)
+        .find(|t| t.available() >= U256::from(11))
+        .map(|t| t.token_id())
     {
         println!("Balance before burning:\n{balance:?}",);
 
@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
 
         // Burn a native token
         let burn_amount = U256::from(1);
-        let transaction = account.burn_native_token(token_id, burn_amount, None).await?;
+        let transaction = account.burn_native_token(*token_id, burn_amount, None).await?;
 
         account
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
