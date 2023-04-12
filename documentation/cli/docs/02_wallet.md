@@ -7,13 +7,13 @@ It is responsible for the creation and management of the wallet and its accounts
 
 You can run `./wallet --help` to print all available CLI commands, arguments, and options. The available options are listed in the table below:
 
-| Name                         | Description | Default | Environment Variable | Example |
-| ---------------------------- | ----------- | -------------------- | --- | --- |
-| `--wallet-db-path`           | Sets the path to the wallet database | `./stardust-cli-wallet-db` | `WALLET_DATABASE_PATH` | `/path/to/wallet-db` |
-| `--stronghold-snapshot-path` | Sets the path to the Stronghold snapshot file | `./stardust-cli-wallet.stronghold` | `STRONGHOLD_SNAPSHOT_PATH`| `/path/to/stronghold-snapshot` |
-| `--log-level` (`-l`)         | Sets the log verbosity level (error, warn, info, debug, trace) | `debug` | ✘ | `trace` |
-| `--help` (`-h`)              | Shows all available commands, arguments and options  | ✘ | ✘ | ✘ |
-| `--version` (`-V`)           | Shows the current version | ✘ | ✘ | ✘ |
+| Name                         | Description                                                    | Default                            | Environment Variable      | Example                        |
+| ---------------------------- | -------------------------------------------------------------- | ---------------------------------- | ------------------------- | ------------------------------ |
+| `--wallet-db-path`           | Sets the path to the wallet database                           | `./stardust-cli-wallet-db`         | `WALLET_DATABASE_PATH`    | `/path/to/wallet-db`           |
+| `--stronghold-snapshot-path` | Sets the path to the Stronghold snapshot file                  | `./stardust-cli-wallet.stronghold` | `STRONGHOLD_SNAPSHOT_PATH`| `/path/to/stronghold-snapshot` |
+| `--log-level` (`-l`)         | Sets the log verbosity level (error, warn, info, debug, trace) | `debug`                            | ✘                         | `trace`                        |
+| `--help` (`-h`)              | Shows all available commands, arguments and options            | ✘                                  | ✘                         | ✘                              |
+| `--version` (`-V`)           | Shows the current version                                      | ✘                                  | ✘                         | ✘                              |
 
 ## Usage Examples
 
@@ -81,11 +81,11 @@ When just initialised, the wallet has no account yet, use the `new` command to c
 
 #### Options
 
-| Name                 | Description    | Default    | Environment Variable | Example |
-| -------------------- | -------------- |----------- |----------------------| ------- |
-| `--mnemonic` (`-m`)  | Initialises a wallet from an existing mnemonic | ✘ | ✘ |"aunt middle impose ..." |
-| `--node-url` (`-n`)  | Sets the node to connect to | https://api.testnet.shimmer.network | `NODE_URL` | http://localhost:14265 |
-| `--coin-type` (`-c`) | Sets the coin type associated with the wallet  | 4219 (=Shimmer) | ✘ | 4218(=IOTA) |
+| Name                 | Description                                    | Default                             | Environment Variable | Example                 |
+| -------------------- | ---------------------------------------------- |------------------------------------ |----------------------| ----------------------- |
+| `--mnemonic` (`-m`)  | Initialises a wallet from an existing mnemonic | ✘                                   | ✘                    |"aunt middle impose ..." |
+| `--node-url` (`-n`)  | Sets the node to connect to                    | https://api.testnet.shimmer.network | `NODE_URL`           | http://localhost:14265  |
+| `--coin-type` (`-c`) | Sets the coin type associated with the wallet  | 4219 (=Shimmer)                     | ✘                    | 4218(=IOTA)             |
 
 #### Examples
 
