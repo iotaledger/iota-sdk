@@ -14,7 +14,7 @@ use crate::{
         set_node_command, sync_command, InitParameters, WalletCli, WalletCommand,
     },
     error::Error,
-    helper::{get_decision, get_password},
+    helper::{get_decision, get_password, pick_account},
     println_log_info,
 };
 
@@ -28,6 +28,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
         || "./stardust-cli-wallet-db".to_string(),
         |os_str| os_str.into_string().expect("invalid WALLET_DATABASE_PATH"),
     );
+    let storage_exists = std::path::Path::new(&storage_path).exists();
     let snapshot_path = std::path::Path::new("./stardust-cli-wallet.stronghold");
     let snapshot_exists = snapshot_path.exists();
     let password = if let Some(WalletCommand::Restore { .. }) = &cli.command {
@@ -75,17 +76,28 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
 
             (Some(wallet), account)
         }
-    } else if snapshot_exists {
-        (
-            Some(
-                Wallet::builder()
-                    .with_secret_manager(secret_manager)
-                    .with_storage_path(&storage_path)
-                    .finish()
-                    .await?,
-            ),
-            None,
-        )
+    } else if storage_exists && snapshot_exists {
+        let wallet = Wallet::builder()
+            .with_secret_manager(secret_manager)
+            .with_storage_path(&storage_path)
+            .finish()
+            .await?;
+        if wallet.get_accounts().await?.is_empty() {
+            // ask the new user whether a default account should be created
+            if get_decision("Initialize a default account?")? {
+                println_log_info!("Initializing default account.");
+                let account = new_command(&wallet, None).await?;
+                (Some(wallet), Some(account))
+            } else {
+                (Some(wallet), None)
+            }
+        } else if let Some(account_index) = pick_account(&wallet).await? {
+            let accounts = wallet.get_accounts().await?;
+            let account = accounts[account_index as usize].alias().await;
+            (Some(wallet), Some(account))
+        } else {
+            (Some(wallet), None)
+        }
     } else {
         // first run
         if get_decision("Initialize a new wallet with default values?")? {
