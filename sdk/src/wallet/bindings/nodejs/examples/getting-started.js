@@ -1,16 +1,24 @@
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 const { AccountManager, CoinType } = require('@iota/wallet');
 
-const NODE_URL = 'https://api.testnet.shimmer.network'
-const STORAGE_PATH = 'walletdb'
-const STRONGHOLD_SNAPSHOT_PATH = 'vault.stronghold'
+// A name to associate with the created account.
+const ACCOUNT_ALIAS = 'Alice';
+
+// The node to connect to.
+const NODE_URL = 'https://api.testnet.shimmer.network';
+
+// A password to encrypt the stored data.
+// WARNING: Never hardcode passwords in production code.
+const STRONGHOLD_PASSWORD = 'a-secure-password';
+
+// The path to store the account snapshot.
+const STRONGHOLD_SNAPSHOT_PATH = 'vault.stronghold';
 
 async function main() {
-    // Change to a secure password.
-    let password = 'some-secure-password'
-
     // Set up and store the wallet.
     const accountManagerOptions = {
-        storagePath: STORAGE_PATH,
         clientOptions: {
             nodes: [NODE_URL],
             localPow: true,
@@ -19,7 +27,7 @@ async function main() {
         secretManager: {
             stronghold: {
                 snapshotPath: STRONGHOLD_SNAPSHOT_PATH,
-                password: password,
+                password: STRONGHOLD_PASSWORD,
             },
         },
     };
@@ -27,17 +35,17 @@ async function main() {
     const manager = new AccountManager(accountManagerOptions);
 
     // Generate a mnemonic and store it in the Stronghold vault.
+    // INFO: It is best practice to back up the Stronghold vault somewhere safe.
     const mnemonic = await manager.generateMnemonic();
     await manager.storeMnemonic(mnemonic);
 
-    // Create an account and get the first address.
+    // Create an account.
     const account = await manager.createAccount({
-        alias: 'Alice',
+        alias: ACCOUNT_ALIAS,
     });
-    const address = await account.addresses().then(addresses => addresses[0]);
 
-    // Print the account data.
-    console.log(`Mnemonic:\n${mnemonic}\n`);
+    // Get the first address and print it.
+    const address = await account.addresses().then(addresses => addresses[0]);
     console.log(`Address:\n${address.address}\n`);
 
     process.exit(0);

@@ -62,7 +62,7 @@ In order to use the library, you need to create a `Wallet` instance.
 **Note**: Android applications must necessarily configure a suitable storage path for the wallet to avoid problems with file system permissions. Specify a suitable storage path as illustrated below:
 
 ```java
-// Copyright 2022 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 import org.iota.Wallet;
@@ -76,36 +76,43 @@ import org.iota.types.exceptions.WalletException;
 import org.iota.types.secret.StrongholdSecretManager;
 
 public class GettingStarted {
+    // A name to associate with the created account.
+    private static final String ACCOUNT_ALIAS = "Alice";
 
+    // The node to connect to.
     private static final String NODE_URL = "https://api.testnet.shimmer.network";
 
     // Set a suitable storage path for the wallet to avoid problems with file system permissions.
-    // Android applications must necessarily configure this: make sure you replace the ´com.example.myapplication´ with your own app naming.
+    // INFO: Android applications must necessarily configure this: make sure you replace the ´com.example.myapplication´ with your own app naming.
     private static final String STORAGE_PATH = "/data/data/com.example.myapplication/";
+
+    // A password to encrypt the stored data.
+    // WARNING: Never hardcode passwords in production code.
+    private static final String STRONGHOLD_PASSWORD = "a-secure-password";
+
+    // The path to store the account snapshot.
     private static final String STRONGHOLD_SNAPSHOT_PATH = "stronghold/vault.stronghold";
 
     public static void main(String[] args) throws WalletException, InitializeWalletException {
-        // Change to a secure password.
-        String password = "some-secure-password";
-
         // Set up and store the wallet.
         Wallet wallet = new Wallet(new WalletConfig()
-                .withClientOptions(new ClientConfig().withNodes(NODE_URL))
-                .withSecretManager(new StrongholdSecretManager(password, null, STORAGE_PATH + STRONGHOLD_SNAPSHOT_PATH))
-                .withCoinType(CoinType.Shimmer)
-                .withStoragePath(STORAGE_PATH)
+            .withClientOptions(new ClientConfig().withNodes(NODE_URL))
+            .withSecretManager(new StrongholdSecretManager(
+                STRONGHOLD_PASSWORD, null, STORAGE_PATH + STRONGHOLD_SNAPSHOT_PATH))
+            .withCoinType(CoinType.Shimmer)
+            .withStoragePath(STORAGE_PATH)
         );
 
         // Generate a mnemonic and store it in the Stronghold vault.
+        // INFO: It is best practice to back up the Stronghold vault somewhere safe.
         String mnemonic = wallet.generateMnemonic();
         wallet.storeMnemonic(mnemonic);
+    
+        // Create an account.
+        AccountHandle account = wallet.createAccount(ACCOUNT_ALIAS);
 
-        // Create an account and get the first address.
-        AccountHandle account = wallet.createAccount("Alice");
+        // Get the first address and print it.
         AccountAddress address = account.getAddresses()[0];
-
-        // Print the account data.
-        System.out.println("Mnemonic:\n" + mnemonic + "\n");
         System.out.println("Address:\n" + address.getAddress() + "\n");
     }
 }

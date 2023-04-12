@@ -1,8 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::path::PathBuf;
-
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -10,18 +8,26 @@ use iota_sdk::{
     },
     wallet::{ClientOptions, Result, Wallet},
 };
+use std::path::PathBuf;
 
+// A name to associate with the created account.
+const ACCOUNT_ALIAS: &str = "Alice";
+
+// The node to connect to.
 const NODE_URL: &str = "https://api.testnet.shimmer.network";
+
+// A password to encrypt the stored data.
+// WARNING: Never hardcode passwords in production code.
+const STRONGHOLD_PASSWORD: &str = "a-secure-password";
+
+// The path to store the account snapshot.
 const STRONGHOLD_SNAPSHOT_PATH: &str = "vault.stronghold";
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Change to a secure password.
-    let password = "some-secure-password";
-
-    // Setup Stronghold secret manager
+    // Setup Stronghold secret manager.
     let secret_manager = StrongholdSecretManager::builder()
-        .password(password)
+        .password(STRONGHOLD_PASSWORD)
         .build(PathBuf::from(STRONGHOLD_SNAPSHOT_PATH))?;
 
     let client_options = ClientOptions::new().with_node(NODE_URL)?;
@@ -35,15 +41,19 @@ async fn main() -> Result<()> {
         .await?;
 
     // Generate a mnemonic and store it in the Stronghold vault.
+    // INFO: It is best practice to back up the Stronghold vault somewhere safe.
     let mnemonic = wallet.generate_mnemonic()?;
-    wallet.store_mnemonic(mnemonic.clone()).await?;
+    wallet.store_mnemonic(mnemonic).await?;
 
-    // Create an account and get the first address.
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    // Create an account.
+    let account = wallet
+        .create_account()
+        .with_alias(ACCOUNT_ALIAS.to_string())
+        .finish()
+        .await?;
+
+    // Get the first address and print it.
     let address = &account.addresses().await?[0];
-
-    // Print the account data.
-    println!("Mnemonic:\n{}\n", mnemonic);
     println!("Address:\n{}\n", address.address().to_bech32());
 
     Ok(())
