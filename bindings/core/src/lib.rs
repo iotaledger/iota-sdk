@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Message interface for bindings
+//! Core library for iota-sdk bindings
 
 mod error;
 mod method;
@@ -9,12 +9,15 @@ pub mod method_handler;
 mod panic;
 mod response;
 
+use std::fmt::{Formatter, Result as FmtResult};
+
+use derivative::Derivative;
 use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
 use iota_sdk::{
     client::secret::{SecretManager, SecretManagerDto},
     wallet::{wallet::Wallet, ClientOptions},
 };
-use serde::{Deserialize, Serialize, Serializer};
+use serde::Deserialize;
 
 pub use self::{
     method::{AccountMethod, ClientMethod, UtilityMethod, WalletMethod},
@@ -22,21 +25,26 @@ pub use self::{
     response::Response,
 };
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct ManagerOptions {
-    #[serde(rename = "storagePath")]
+pub fn init_logger(config: String) -> Result<(), fern_logger::Error> {
+    let output_config: LoggerOutputConfigBuilder = serde_json::from_str(&config).expect("invalid logger config");
+    let config = LoggerConfig::build().with_output(output_config).finish();
+    logger_init(config)
+}
+
+#[derive(Derivative, Deserialize)]
+#[derivative(Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct WalletOptions {
     pub storage_path: Option<String>,
-    #[serde(rename = "clientOptions")]
     pub client_options: Option<ClientOptions>,
-    #[serde(rename = "coinType")]
     pub coin_type: Option<u32>,
-    #[serde(rename = "secretManager", serialize_with = "secret_manager_serialize")]
+    #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
     pub secret_manager: Option<SecretManagerDto>,
 }
 
-impl ManagerOptions {
+impl WalletOptions {
     pub async fn build_manager(&self) -> iota_sdk::wallet::Result<Wallet> {
-        log::debug!("build_manager");
+        log::debug!("build_manager {self:?}");
         let mut builder = Wallet::builder();
 
         #[cfg(feature = "storage")]
@@ -60,33 +68,18 @@ impl ManagerOptions {
     }
 }
 
-// Serialize secret manager with secrets removed
-fn secret_manager_serialize<S>(secret_manager: &Option<SecretManagerDto>, s: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    if let Some(secret_manager) = secret_manager {
-        match secret_manager {
-            SecretManagerDto::HexSeed(_) => s.serialize_str("hexSeed(<omitted>)"),
-            #[cfg(feature = "ledger_nano")]
-            SecretManagerDto::LedgerNano(is_simulator) => s.serialize_str(&format!("ledgerNano({is_simulator})")),
-            SecretManagerDto::Mnemonic(_) => s.serialize_str("mnemonic(<omitted>)"),
-            SecretManagerDto::Placeholder => s.serialize_str("placeholder"),
-            #[cfg(feature = "stronghold")]
-            SecretManagerDto::Stronghold(stronghold) => {
-                let mut stronghold_dto = stronghold.clone();
-                // Remove password
-                stronghold_dto.password = None;
-                s.serialize_str(&format!("{stronghold_dto:?}"))
-            }
-        }
-    } else {
-        s.serialize_str("null")
+pub(crate) trait OmittedDebug {
+    fn omitted_fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        f.write_str("<omitted>")
     }
 }
-
-pub fn init_logger(config: String) -> Result<(), fern_logger::Error> {
-    let output_config: LoggerOutputConfigBuilder = serde_json::from_str(&config).expect("invalid logger config");
-    let config = LoggerConfig::build().with_output(output_config).finish();
-    logger_init(config)
+impl OmittedDebug for String {}
+impl OmittedDebug for SecretManagerDto {}
+impl<T: OmittedDebug> OmittedDebug for Option<T> {
+    fn omitted_fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        match self {
+            Some(_) => f.write_str("Some(<omitted>)"),
+            None => f.write_str("None"),
+        }
+    }
 }

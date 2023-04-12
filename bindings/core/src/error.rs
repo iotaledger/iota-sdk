@@ -7,10 +7,10 @@ use serde::{ser::SerializeMap, Serialize, Serializer};
 pub use super::{method::AccountMethod, response::Response};
 
 // TODO: SDK Error instead?
-/// Error type of the message interface.
+/// Error type for the bindings core crate.
 #[derive(Debug, thiserror::Error)]
 #[allow(clippy::large_enum_variant)]
-pub enum MessageInterfaceError {
+pub enum BindingsError {
     /// Client error
     #[error("{0}")]
     Client(#[from] iota_sdk::client::Error),
@@ -40,7 +40,7 @@ pub enum MessageInterfaceError {
 }
 
 // Serialize type with Display error
-impl Serialize for MessageInterfaceError {
+impl Serialize for BindingsError {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -60,7 +60,7 @@ impl Serialize for MessageInterfaceError {
     }
 }
 
-impl From<iota_sdk::types::block::Error> for MessageInterfaceError {
+impl From<iota_sdk::types::block::Error> for BindingsError {
     fn from(error: iota_sdk::types::block::Error) -> Self {
         Self::Block(Box::new(error))
     }

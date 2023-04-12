@@ -6,8 +6,8 @@ use iota_sdk::{
     wallet::account::types::AccountIdentifier,
 };
 use iota_sdk_bindings_core::{
-    call_client_method, call_wallet_method, method_handler::Result, AccountMethod, ClientMethod, ManagerOptions,
-    Response, WalletMethod,
+    call_client_method, call_wallet_method, method_handler::Result, AccountMethod, ClientMethod, Response,
+    WalletMethod, WalletOptions,
 };
 
 #[tokio::test]
@@ -63,7 +63,7 @@ async fn create_account() -> Result<()> {
             ]
          }"#;
 
-    let options = ManagerOptions {
+    let options = WalletOptions {
         storage_path: Some(storage_path.to_string()),
         client_options: Some(ClientBuilder::new().from_json(client_options).unwrap()),
         coin_type: Some(SHIMMER_COIN_TYPE),
@@ -124,7 +124,7 @@ async fn client_from_wallet() -> Result<()> {
             ]
          }"#;
 
-    let options = ManagerOptions {
+    let options = WalletOptions {
         storage_path: Some(storage_path.to_string()),
         client_options: Some(ClientBuilder::new().from_json(client_options).unwrap()),
         coin_type: Some(SHIMMER_COIN_TYPE),

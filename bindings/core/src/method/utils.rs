@@ -11,7 +11,7 @@ use iota_sdk::types::block::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::OmittedDebug;
+use crate::OmittedDebug;
 
 /// Each public utility method.
 #[derive(Clone, Derivative, Serialize, Deserialize)]

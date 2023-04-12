@@ -57,7 +57,7 @@ use {
     std::collections::HashMap,
 };
 
-use super::{error::MessageInterfaceError, method::OmittedDebug};
+use crate::{error::BindingsError, OmittedDebug};
 
 /// The response message.
 #[derive(Serialize, Derivative)]
@@ -276,7 +276,7 @@ pub enum Response {
     /// - [`StoreMnemonic`](crate::message_interface::Message::StoreMnemonic)
     Ok,
     /// Response for any method that returns an error.
-    Error(MessageInterfaceError),
+    Error(BindingsError),
     /// Response for any method that panics.
     Panic(String),
 

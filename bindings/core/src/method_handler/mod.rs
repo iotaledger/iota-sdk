@@ -12,8 +12,8 @@ pub use call_method::{call_client_method, call_utility_method, call_wallet_metho
 #[cfg(feature = "mqtt")]
 pub use client::listen_mqtt;
 
-/// Result type of the message interface.
-pub type Result<T> = std::result::Result<T, super::error::MessageInterfaceError>;
+/// Result type of the bindings core crate.
+pub type Result<T> = std::result::Result<T, super::error::BindingsError>;
 
 #[cfg(test)]
 mod tests {

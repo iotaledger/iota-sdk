@@ -37,7 +37,7 @@ use iota_sdk::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::OmittedDebug;
+use crate::OmittedDebug;
 
 /// Each public client method.
 #[derive(Clone, Derivative, Serialize, Deserialize)]

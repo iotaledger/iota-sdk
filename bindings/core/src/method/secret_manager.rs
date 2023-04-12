@@ -6,7 +6,7 @@ use derivative::Derivative;
 use iota_sdk::client::{api::GetAddressesBuilderOptions, secret::SecretManagerDto};
 use serde::{Deserialize, Serialize};
 
-use super::OmittedDebug;
+use crate::OmittedDebug;
 
 /// Each public secret manager method.
 #[derive(Clone, Derivative, Serialize, Deserialize)]
