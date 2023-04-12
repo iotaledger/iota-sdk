@@ -7,15 +7,15 @@ import type { MessageHandler } from './MessageHandler';
 // @ts-ignore: path is set to match runtime transpiled js path
 import addon = require('../../build/Release/index.node');
 
-const { initLogger, sendMessage, messageHandlerNew, listenRust, destroy } =
+const { initLogger, sendMessage, messageHandlerNew, listen, destroy } =
     addon;
 
-const listen = (
+const listenTo = (
     eventTypes: EventType[],
     callback: (error: Error, result: string) => void,
     handler: MessageHandler,
 ): Promise<void> => {
-    listenRust(eventTypes, callback, handler);
+    listen(eventTypes, callback, handler);
     return Promise.resolve();
 };
 
@@ -37,6 +37,6 @@ export {
     initLogger as internalInitLogger,
     sendMessageAsync,
     messageHandlerNew,
-    listen,
+    listenTo,
     destroy,
 };

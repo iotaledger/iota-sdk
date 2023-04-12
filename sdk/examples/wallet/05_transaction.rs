@@ -28,10 +28,10 @@ async fn main() -> Result<()> {
             .await?;
 
         // Send a transaction with 1 Mi
-        let outputs = vec![AddressWithAmount {
-            address: "tst1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vlupxvxq2".to_string(),
-            amount: 1_000_000,
-        }];
+        let outputs = vec![AddressWithAmount::new(
+            "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
+            1_000_000,
+        )];
         let transaction = account.send_amount(outputs, None).await?;
 
         // Wait for transaction to get included

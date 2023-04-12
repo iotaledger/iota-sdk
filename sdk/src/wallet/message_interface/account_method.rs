@@ -37,7 +37,7 @@ use crate::{
                 },
             },
         },
-        message_interface::dtos::{AddressWithAmountDto, AddressWithMicroAmountDto},
+        message_interface::dtos::AddressWithAmountDto,
         AddressAndNftId, AddressNativeTokens,
     },
 };
@@ -330,13 +330,6 @@ pub enum AccountMethod {
         addresses_with_amount: Vec<AddressWithAmountDto>,
         options: Option<TransactionOptionsDto>,
     },
-    /// Send amount below minimum storage deposit.
-    /// Expected response: [`SentTransaction`](crate::message_interface::Response::SentTransaction)
-    SendMicroTransaction {
-        #[serde(rename = "addressesWithMicroAmount")]
-        addresses_with_micro_amount: Vec<AddressWithMicroAmountDto>,
-        options: Option<TransactionOptionsDto>,
-    },
     /// Send native tokens.
     /// Expected response: [`SentTransaction`](crate::message_interface::Response::SentTransaction)
     SendNativeTokens {
@@ -395,11 +388,6 @@ pub enum AccountMethod {
         #[serde(rename = "eventId")]
         event_id: ParticipationEventId,
     },
-    /// Get the account's total voting power (voting or NOT voting).
-    /// Expected response: [`VotingPower`](crate::message_interface::Response::VotingPower)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    GetVotingPower,
     /// Calculates a participation overview for an account. If event_ids are provided, only return outputs and tracked
     /// participations for them.
     /// Expected response:

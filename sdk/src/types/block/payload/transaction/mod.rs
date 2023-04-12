@@ -97,9 +97,10 @@ fn verify_essence_unlocks(essence: &TransactionEssence, unlocks: &Unlocks) -> Re
     Ok(())
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::vec::Vec;
+
     use serde::{Deserialize, Serialize};
 
     pub use super::essence::dto::{RegularTransactionEssenceDto, TransactionEssenceDto};

@@ -474,15 +474,6 @@ public class AccountHandle extends AbstractObject {
     }
 
     /**
-     * Sends a micro transaction.
-     *
-     * @param options The options.
-     */
-    public Transaction sendMicroTransaction(SendMicroTransaction options) throws WalletException {
-        return CustomGson.get().fromJson(callAccountMethod(options), Transaction.class);
-    }
-
-    /**
      * Sends Native Tokens.
      *
      * @param options The options.
@@ -601,4 +592,3 @@ class AccountHandleAdapter implements JsonSerializer<AccountHandle> {
         }
     }
 }
-

@@ -20,10 +20,10 @@ async fn bech32_hrp_send_amount() -> Result<()> {
 
     let error = account
         .send_amount(
-            vec![AddressWithAmount {
-                address: account.addresses().await?[0].address().as_ref().to_bech32("wronghrp"),
-                amount: 1_000_000,
-            }],
+            vec![AddressWithAmount::new(
+                account.addresses().await?[0].address().as_ref().to_bech32("wronghrp"),
+                1_000_000,
+            )],
             None,
         )
         .await

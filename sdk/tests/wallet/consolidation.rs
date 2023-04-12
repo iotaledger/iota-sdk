@@ -20,13 +20,7 @@ async fn consolidation() -> Result<()> {
     let amount = 1_000_000;
     let tx = account_0
         .send_amount(
-            vec![
-                AddressWithAmount {
-                    address: account_1.addresses().await?[0].address().to_bech32(),
-                    amount,
-                };
-                10
-            ],
+            vec![AddressWithAmount::new(account_1.addresses().await?[0].address().to_bech32(), amount); 10],
             None,
         )
         .await?;

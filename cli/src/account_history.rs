@@ -26,12 +26,28 @@ impl<T: ToString> History<T> for AccountHistory {
 
     fn write(&mut self, val: &T) {
         let entry = val.to_string();
-        if self.history.contains(&entry) {
+
+        // If the last used command is the same, don't change anything
+        if matches!(self.history.front(), Some(command) if command == &entry) {
             return;
         }
-        if self.history.len() == self.max {
-            self.history.pop_back();
+
+        // Check if we have used this command before
+        match self.history.iter().position(|e| e == &entry) {
+            Some(index) => {
+                // Remove the old command
+                self.history.remove(index);
+            }
+            None => {
+                // We have not used this command
+                if self.history.len() == self.max {
+                    // Remove the oldest used command
+                    self.history.pop_back();
+                }
+            }
         }
+
+        // Add command as most recent used
         self.history.push_front(entry);
     }
 }

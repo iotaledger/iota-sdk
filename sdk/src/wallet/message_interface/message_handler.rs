@@ -45,8 +45,7 @@ use crate::{
             account_method::AccountMethod, dtos::AccountDto, message::Message, response::Response,
             AddressWithUnspentOutputsDto,
         },
-        AddressWithAmount, AddressWithMicroAmount, IncreaseNativeTokenSupplyOptions, NativeTokenOptions, NftOptions,
-        Result, Wallet,
+        AddressWithAmount, IncreaseNativeTokenSupplyOptions, NativeTokenOptions, NftOptions, Result, Wallet,
     },
 };
 
@@ -843,24 +842,6 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::SendMicroTransaction {
-                addresses_with_micro_amount,
-                options,
-            } => {
-                convert_async_panics(|| async {
-                    let transaction = account_handle
-                        .send_micro_transaction(
-                            addresses_with_micro_amount
-                                .iter()
-                                .map(AddressWithMicroAmount::try_from)
-                                .collect::<Result<Vec<AddressWithMicroAmount>>>()?,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
-                        .await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
-                })
-                .await
-            }
             AccountMethod::SendNativeTokens {
                 addresses_native_tokens,
                 options,
@@ -965,14 +946,6 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let transaction = account_handle.stop_participating(event_id).await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
-                })
-                .await
-            }
-            #[cfg(feature = "participation")]
-            AccountMethod::GetVotingPower => {
-                convert_async_panics(|| async {
-                    let voting_power = account_handle.get_voting_power().await?;
-                    Ok(Response::VotingPower(voting_power.to_string()))
                 })
                 .await
             }
