@@ -35,7 +35,7 @@ public class CheckBalance {
 
         System.out.println("Addresses:");
         for (AccountAddress address : a.getAddresses()) {
-            System.out.println(" - " + address.getAddress());
+            System.out.println(" - " + Env.EXPLORER + "/addr/" + address.getAddress());
         }
 
         // In case you are done and don't need the wallet instance anymore you can

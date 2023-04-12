@@ -22,9 +22,12 @@ async fn main() -> Result<()> {
 
     println!("{account_balance:#?}");
 
+    let explorer_url = std::env::var("EXPLORER_URL").ok();
+    let prepended = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
+
     println!("Addresses:");
     for address in account.addresses().await? {
-        println!(" - {}", address.address().to_bech32());
+        println!(" - {prepended}{}", address.address().to_bech32());
     }
 
     Ok(())
