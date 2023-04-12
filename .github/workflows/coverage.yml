@@ -73,7 +73,7 @@ jobs:
           RUSTFLAGS: "-C instrument-coverage"
           LLVM_PROFILE_FILE: "iota-%m.profraw"
         with:
-          command: +nightly test
+          command: test
           args: --package iota-sdk --all-features --no-run -- --include-ignored
 
       - name: Start private tangle
