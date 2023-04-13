@@ -2,6 +2,9 @@ from iota_wallet import IotaWallet
 
 # In this example we will mint an nft
 
+# Explorer url
+EXPLORER = "https://explorer.shimmer.network/testnet"
+
 wallet = IotaWallet('./alice-database')
 
 account = wallet.get_account('Alice')
@@ -18,4 +21,5 @@ outputs = [{
 
 transaction = account.mint_nfts(outputs)
 
-print(f'Sent transaction: {transaction}')
+print(f'Transaction: {transaction.transaction_id}')
+print(f'Block sent: {EXPLORER}/block/" + {transaction.block_id});

@@ -19,4 +19,5 @@ outputs = [{
 
 transaction = account.send_amount(outputs, { "allowMicroAmount": True })
 
-print(f'Sent transaction: {transaction}')
+print(f'Transaction: {transaction.transaction_id}')
+print(f'Block sent: {EXPLORER}/block/" + {transaction.block_id});

@@ -2,8 +2,8 @@ from iota_wallet import IotaWallet
 
 # This example sends a transaction.
 
-# Shimmer coin type
-EXPLORER = ""
+# Explorer url
+EXPLORER = "https://explorer.shimmer.network/testnet"
 
 wallet = IotaWallet('./alice-database')
 
