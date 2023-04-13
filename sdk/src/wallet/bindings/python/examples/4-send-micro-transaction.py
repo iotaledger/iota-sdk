@@ -2,6 +2,9 @@ from iota_wallet import IotaWallet
 
 # In this example we will send an amount below the minimum storage deposit
 
+# Explorer url
+EXPLORER = "https://explorer.shimmer.network/testnet"
+
 wallet = IotaWallet('./alice-database')
 
 account = wallet.get_account('Alice')
