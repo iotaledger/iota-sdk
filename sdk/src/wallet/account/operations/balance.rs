@@ -77,6 +77,7 @@ impl AccountHandle {
 
         for (output_id, output) in relevant_unspent_outputs {
             let rent = output.rent_cost(&rent_structure);
+            let locked = account.locked_outputs.contains(output_id);
 
             // Add alias and foundry outputs here because they can't have a [`StorageDepositReturnUnlockCondition`]
             // or time related unlock conditions
@@ -86,7 +87,7 @@ impl AccountHandle {
                     balance_builder.base_coin.total += output.amount();
                     // Add storage deposit
                     balance_builder.required_storage_deposit.alias += rent;
-                    if !account.locked_outputs.contains(output_id) {
+                    if !locked {
                         total_rent_amount += rent;
                     }
 
@@ -101,7 +102,7 @@ impl AccountHandle {
                     balance_builder.base_coin.total += output.amount();
                     // Add storage deposit
                     balance_builder.required_storage_deposit.foundry += rent;
-                    if !account.locked_outputs.contains(output_id) {
+                    if !locked {
                         total_rent_amount += rent;
                     }
 
@@ -134,13 +135,13 @@ impl AccountHandle {
                                 .native_tokens()
                                 .map(|native_tokens| !native_tokens.is_empty())
                                 .unwrap_or(false)
-                                && !account.locked_outputs.contains(output_id)
+                                && !locked
                             {
                                 total_rent_amount += rent;
                             }
                         } else if output.is_nft() {
                             balance_builder.required_storage_deposit.nft += rent;
-                            if !account.locked_outputs.contains(output_id) {
+                            if !locked {
                                 total_rent_amount += rent;
                             }
                         }
@@ -210,13 +211,13 @@ impl AccountHandle {
                                         .native_tokens()
                                         .map(|native_tokens| !native_tokens.is_empty())
                                         .unwrap_or(false)
-                                        && !account.locked_outputs.contains(output_id)
+                                        && !locked
                                     {
                                         total_rent_amount += rent;
                                     }
                                 } else if output.is_nft() {
                                     balance_builder.required_storage_deposit.nft += rent;
-                                    if !account.locked_outputs.contains(output_id) {
+                                    if !locked {
                                         total_rent_amount += rent;
                                     }
                                 }
