@@ -61,9 +61,9 @@ pub async fn get_mnemonic() -> Result<String, Error> {
     println_log_info!("Mnemonic has been generated.");
 
     let choices = [
-        "Write To Console Only",
-        "Write To File Only",
-        "Write To Console and File",
+        "Write to console only",
+        "Write to file only",
+        "Write to console and file",
     ];
     let selected_choice = Select::with_theme(&ColorfulTheme::default())
         .items(&choices)
