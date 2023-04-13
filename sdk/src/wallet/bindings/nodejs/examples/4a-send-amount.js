@@ -9,6 +9,8 @@ async function run() {
         const manager = await getUnlockedManager();
         const account = await manager.getAccount('Alice');
 
+        await account.sync();
+
         //TODO: Replace with the address of your choice!
         const address =
             'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0';
