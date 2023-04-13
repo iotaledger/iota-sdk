@@ -38,8 +38,8 @@
 //! after creating a [`StrongholdAdapter`] with a non-existent snapshot path.
 //!
 //! [Stronghold]: iota_stronghold
-//! [`StorageProvider`]: crate::storage::StorageProvider
-//! [`SecretManage`]: crate::secret::SecretManage
+//! [`StorageProvider`]: crate::client::storage::StorageProvider
+//! [`SecretManage`]: crate::client::secret::SecretManage
 //! [`builder()`]: self::StrongholdAdapter::builder()
 //! [`set_password()`]: self::StrongholdAdapter::set_password()
 //! [`set_timeout()`]: self::StrongholdAdapter::set_timeout()

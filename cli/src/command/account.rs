@@ -83,7 +83,7 @@ pub enum AccountCommand {
     Exit,
     /// Request funds from the faucet.
     Faucet {
-        /// URL of the faucet, default to https://faucet.testnet.shimmer.network/api/enqueue.
+        /// URL of the faucet, default to <https://faucet.testnet.shimmer.network/api/enqueue>.
         url: Option<String>,
         /// Address the faucet sends the funds to, defaults to the latest address.
         address: Option<String>,
@@ -109,7 +109,7 @@ pub enum AccountCommand {
         foundry_metadata_file: Option<String>,
     },
     /// Mint an NFT.
-    /// IOTA NFT Standard - TIP27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md.
+    /// IOTA NFT Standard - TIP27: <https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md>.
     MintNft {
         /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         address: Option<String>,
