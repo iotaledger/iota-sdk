@@ -77,7 +77,7 @@ jobs:
           LLVM_PROFILE_FILE: "iota-%m.profraw"
         with:
           command: test
-          args: --package iota-sdk --all-features --no-run -- --include-ignored
+          args: --tests --package iota-sdk --all-features --no-run -- --include-ignored
 
       - name: Start private tangle
         uses: "./.github/actions/private-tangle/setup"
