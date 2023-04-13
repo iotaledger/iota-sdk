@@ -17,12 +17,10 @@ public class SendMicroTransaction {
         // to be able to load the wallet as shown below:
         Wallet wallet = new Wallet(new WalletConfig()
                 .withClientOptions(new ClientConfig().withNodes(Env.NODE))
-                .withSecretManager(
-                        new StrongholdSecretManager(Env.STRONGHOLD_PASSWORD, null, Env.STRONGHOLD_VAULT_PATH))
+                .withSecretManager(new StrongholdSecretManager(Env.STRONGHOLD_PASSWORD, null, Env.STRONGHOLD_VAULT_PATH))
                 .withCoinType(CoinType.Shimmer)
-                .withStoragePath(Env.STORAGE_PATH));
-
-        wallet.setStrongholdPassword(Env.STRONGHOLD_PASSWORD);
+                .withStoragePath(Env.STORAGE_PATH)
+        );
 
         // Get account and sync it with the registered node to ensure that its balances
         // are up-to-date.

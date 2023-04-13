@@ -23,8 +23,6 @@ public class SendAmount {
                 .withStoragePath(Env.STORAGE_PATH)
         );
 
-        wallet.setStrongholdPassword(Env.STRONGHOLD_PASSWORD);
-
         // Get account and sync it with the registered node to ensure that its balances are up-to-date.
         AccountHandle account = wallet.getAccount(Env.ACCOUNT_NAME);
 
