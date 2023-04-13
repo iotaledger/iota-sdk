@@ -220,7 +220,6 @@ impl Into<Option<Payload>> for OptionalPayload {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
     use serde::{Deserialize, Serialize};

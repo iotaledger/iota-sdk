@@ -6,7 +6,5 @@
 #[cfg(feature = "std")]
 extern crate std;
 
-#[cfg(feature = "api")]
 pub mod api;
-#[cfg(feature = "block")]
 pub mod block;

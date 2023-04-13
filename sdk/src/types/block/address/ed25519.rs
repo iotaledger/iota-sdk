@@ -49,9 +49,10 @@ impl core::fmt::Debug for Ed25519Address {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::string::{String, ToString};
+
     use serde::{Deserialize, Serialize};
 
     use super::*;

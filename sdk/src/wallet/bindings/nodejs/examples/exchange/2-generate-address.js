@@ -11,7 +11,7 @@ async function run() {
             storagePath: './alice-database',
         });
 
-        await manager.setStrongholdPassword(`${process.env.SH_PASSWORD}`)
+        await manager.setStrongholdPassword(`${process.env.STRONGHOLD_PASSWORD}`)
         
         const account = await manager.getAccount('Alice');
 
