@@ -1,6 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::vec::Vec;
 use core::ops::Deref;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
@@ -250,9 +251,10 @@ fn verify_payload(payload: Option<&Payload>) -> Result<(), Error> {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::string::{String, ToString};
+
     use serde::{Deserialize, Serialize};
 
     use super::*;

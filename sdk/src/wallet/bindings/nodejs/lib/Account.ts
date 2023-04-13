@@ -1103,16 +1103,6 @@ export class Account {
         return JSON.parse(resp).payload;
     }
 
-    async getVotingPower(): Promise<string> {
-        const resp = await this.messageHandler.callAccountMethod(
-            this.meta.index,
-            {
-                name: 'getVotingPower',
-            },
-        );
-        return JSON.parse(resp).payload;
-    }
-
     /**
      * Calculates the voting overview of an account.
      * @param eventIds Optional, filters participations only for provided events.

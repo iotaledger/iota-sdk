@@ -31,7 +31,7 @@ async function run() {
         await waitAndSync(account)
 
         // Check your available voting power
-        const votingPower = await account.getVotingPower()
+        const votingPower = (await account.getBalance()).baseCoin.votingPower
         console.log('Voting Power:', votingPower);
 
         // Once the transaction went through, call the vote method 

@@ -465,9 +465,10 @@ fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, tok
         .amount()
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::{format, string::String};
+
     use serde::{Deserialize, Serialize, Serializer};
     use serde_json::Value;
 
@@ -488,7 +489,8 @@ pub mod dto {
     };
     use crate::types::block::error::dto::DtoError;
 
-    #[derive(Clone, Debug, Deserialize, From)]
+    #[derive(Clone, Debug, From)]
+    #[cfg_attr(feature = "serde", derive(serde::Deserialize))]
     pub enum OutputBuilderAmountDto {
         Amount(String),
         MinimumStorageDeposit(RentStructure),

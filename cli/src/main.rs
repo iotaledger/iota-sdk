@@ -11,7 +11,6 @@ mod wallet;
 
 use clap::Parser;
 use fern_logger::{LoggerConfigBuilder, LoggerOutputConfigBuilder};
-use log::LevelFilter;
 
 use self::{command::wallet::WalletCli, error::Error, helper::pick_account, wallet::new_wallet};
 
@@ -32,14 +31,9 @@ macro_rules! println_log_error {
 }
 
 fn logger_init(cli: &WalletCli) -> Result<(), Error> {
-    let level_filter = if let Some(log_level) = cli.log_level {
-        log_level
-    } else {
-        LevelFilter::Debug
-    };
     let archive = LoggerOutputConfigBuilder::default()
         .name("archive.log")
-        .level_filter(level_filter)
+        .level_filter(cli.log_level)
         .target_exclusions(&["rustls"])
         .color_enabled(false);
     let config = LoggerConfigBuilder::default().with_output(archive).finish();
