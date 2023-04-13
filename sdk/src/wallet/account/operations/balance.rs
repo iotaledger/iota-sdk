@@ -63,10 +63,14 @@ impl AccountHandle {
 
         let local_time = self.client.get_time_checked().await?;
 
+        let account = self.read().await;
+
         let mut total_rent_amount = 0;
         let mut total_native_tokens = NativeTokensBuilder::new();
-
-        let account = self.read().await;
+        // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
+        log::debug!("[BALANCE] locked outputs: {:#?}", account.locked_outputs);
+        let mut locked_amount = 0;
+        let mut locked_native_tokens = NativeTokensBuilder::new();
 
         let relevant_unspent_outputs = account
             .unspent_outputs
@@ -78,6 +82,13 @@ impl AccountHandle {
         for (output_id, output) in relevant_unspent_outputs {
             let rent = output.rent_cost(&rent_structure);
             let locked = account.locked_outputs.contains(output_id);
+
+            if locked {
+                locked_amount += output.amount();
+                if let Some(native_tokens) = output.native_tokens() {
+                    locked_native_tokens.add_native_tokens(native_tokens.clone())?;
+                }
+            }
 
             // Add alias and foundry outputs here because they can't have a [`StorageDepositReturnUnlockCondition`]
             // or time related unlock conditions
@@ -245,23 +256,6 @@ impl AccountHandle {
                                 balance_builder.potentially_locked_outputs.insert(*output_id, false);
                             }
                         }
-                    }
-                }
-            }
-        }
-
-        // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
-        log::debug!("[BALANCE] locked outputs: {:#?}", account.locked_outputs);
-        let mut locked_amount = 0;
-        let mut locked_native_tokens = NativeTokensBuilder::new();
-
-        for locked_output in &account.locked_outputs {
-            if let Some(output_data) = account.unspent_outputs.get(locked_output) {
-                // Only check outputs that are in this network
-                if output_data.network_id == network_id {
-                    locked_amount += output_data.output.amount();
-                    if let Some(native_tokens) = output_data.output.native_tokens() {
-                        locked_native_tokens.add_native_tokens(native_tokens.clone())?;
                     }
                 }
             }
