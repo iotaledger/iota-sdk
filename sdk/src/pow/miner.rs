@@ -64,7 +64,7 @@ pub struct MinerBuilder {
 impl MinerBuilder {
     /// Creates a new [`MinerBuilder`].
     pub fn new() -> Self {
-        Self { ..Default::default() }
+        Self::default()
     }
 
     /// Sets the desired number of workers for the [`Miner`].
