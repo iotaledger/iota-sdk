@@ -105,7 +105,8 @@ async fn create_account() -> Result<()> {
         _ => panic!("unexpected response {response:?}"),
     }
 
-    Ok(std::fs::remove_dir_all(storage_path).unwrap_or(()))
+    std::fs::remove_dir_all(storage_path).unwrap_or(());
+    Ok(())
 }
 
 #[tokio::test]
@@ -160,5 +161,6 @@ async fn client_from_wallet() -> Result<()> {
         _ => panic!("unexpected response {response:?}"),
     }
 
-    Ok(std::fs::remove_dir_all(storage_path).unwrap_or(()))
+    std::fs::remove_dir_all(storage_path).unwrap_or(());
+    Ok(())
 }
