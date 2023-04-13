@@ -44,9 +44,16 @@ export type ParticipationEventMap = {
 
 export interface ParticipationEventStatus {
     milestoneIndex: number;
-    status: string;
+    status: EventStatus;
     questions?: QuestionStatus[];
     checksum: string;
+}
+
+export enum EventStatus {
+    Upcoming = 'upcoming',
+    Commencing = 'commencing',
+    Holding = 'holding',
+    Ended = 'ended',
 }
 
 export interface ParticipationEventData {
