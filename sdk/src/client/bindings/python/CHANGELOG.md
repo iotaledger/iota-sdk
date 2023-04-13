@@ -43,6 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `FeatureType` enum class;
 - `NativeToken` class;
 - `TokenScheme` class;
+- `OutputId` class;
+- `utf8_to_hex(), hex_to_utf()` functions;
 
 ### Changed
 
