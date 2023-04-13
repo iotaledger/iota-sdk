@@ -285,6 +285,46 @@ pub async fn burn_nft_command(account_handle: &AccountHandle, nft_id: String) ->
 pub async fn balance_command(account_handle: &AccountHandle) -> Result<(), Error> {
     println_log_info!("{:#?}", account_handle.balance().await?);
 
+    let balance = account_handle.balance().await?;
+
+    let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
+
+    if balance.potentially_locked_outputs().is_empty() {
+        println_log_info!("no locked outputs");
+    } else {
+        for (output_id, can_be_unlocked) in balance.potentially_locked_outputs() {
+            if *can_be_unlocked {
+                if let Some(output_data) = account_handle.get_output(output_id).await {
+                    let output = output_data.output;
+
+                    if output.is_nft() {
+                        println_log_info!("Basic output {} can be claimed", output_id);
+                    } else {
+                        println_log_info!("NFT output {} can be claimed", output_id);
+                    }
+
+                    if let Some(nts) = output.native_tokens() {
+                        println_log_info!("If you claim it, you get native tokens: {:?}", nts);
+                    }
+
+                    let unlock_conditions = output.unlock_conditions().expect("basic and nft must have some");
+
+                    if let Some(sdr) = unlock_conditions.storage_deposit_return() {
+                        let amount_we_get = output.amount() - sdr.amount();
+                        println_log_info!("If you claim it, you get {}", amount_we_get);
+                    } else {
+                        println_log_info!("If you claim it, you get {}", output.amount());
+                    }
+
+                    if let Some(expiration) = unlock_conditions.expiration() {
+                        let time_left = expiration.timestamp() - current_time;
+                        println_log_info!("Expires in {} seconds", time_left);
+                    }
+                }
+            }
+        }
+    }
+
     Ok(())
 }
 
