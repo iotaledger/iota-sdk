@@ -141,6 +141,11 @@ pub async fn account_prompt_internal(
                     expiration,
                     allow_micro_amount,
                 } => {
+                    let allow_micro_amount = if return_address.is_some() || expiration.is_some() {
+                        true
+                    } else {
+                        allow_micro_amount
+                    };
                     send_command(
                         &account_handle,
                         address,
