@@ -15,11 +15,11 @@ unlock_conditions = [
 ]
 features = [
     SenderFeature(Ed25519Address(hexAddress)),
-    MetadataFeature(data='0x'+'Hello, World!'.encode('utf-8').hex())
+    MetadataFeature('0x'+'Hello, World!'.encode('utf-8').hex())
 ]
 immutable_features = [
     IssuerFeature(issuer=Ed25519Address(hexAddress)),
-    MetadataFeature(data='0x'+'Hello, World!'.encode('utf-8').hex())
+    MetadataFeature('0x'+'Hello, World!'.encode('utf-8').hex())
 ]
 
 # Build alias output

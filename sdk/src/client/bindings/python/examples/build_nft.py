@@ -24,13 +24,13 @@ nft_output = client.build_nft_output(
     # NftId needs to be null the first time
     nft_id='0x0000000000000000000000000000000000000000000000000000000000000000',
     immutable_features=[
-        IssuerFeature(issuer=Ed25519Address(hexAddress)),
-        MetadataFeature(data='0x'+json.dumps(tip_27_immutable_metadata, separators=(',', ':')).encode('utf-8').hex())
+        IssuerFeature(Ed25519Address(hexAddress)),
+        MetadataFeature('0x'+json.dumps(tip_27_immutable_metadata, separators=(',', ':')).encode('utf-8').hex())
     ],
     features=[
         SenderFeature(Ed25519Address(hexAddress)),
-        MetadataFeature(data='0x'+'mutable metadata'.encode('utf-8').hex()),
-        TagFeature(tag='0x'+'my tag'.encode("utf-8").hex())
+        MetadataFeature('0x'+'mutable metadata'.encode('utf-8').hex()),
+        TagFeature('0x'+'my tag'.encode("utf-8").hex())
     ]
 )
 
