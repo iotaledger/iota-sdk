@@ -419,6 +419,11 @@ required-features = [ "client", "participation" ]
 ### Wallet
 
 [[example]]
+name = "wallet_getting_started"
+path = "examples/wallet/getting_started.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
 name = "mint_issuer_nft"
 path = "examples/wallet/nft_collection/00_mint_issuer_nft.rs"
 required-features = [ "wallet", "storage", "stronghold" ]
@@ -522,6 +527,11 @@ required-features = [ "wallet", "stronghold" ]
 name = "destroy_foundry"
 path = "examples/wallet/15_destroy_foundry.rs"
 required-features = [ "wallet", "stronghold" ]
+
+[[example]]
+name = "create_alias"
+path = "examples/wallet/create_alias.rs"
+required-features = [ "stronghold" ]
 
 [[example]]
 name = "destroy_alias"

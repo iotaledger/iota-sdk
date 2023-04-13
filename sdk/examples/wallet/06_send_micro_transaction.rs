@@ -18,6 +18,8 @@ async fn main() -> Result<()> {
 
     // Get the account we generated with `01_create_wallet`
     let account = wallet.get_account("Alice").await?;
+    // May want to ensure the account is synced before sending a transaction.
+    account.sync(None).await?;
 
     // Set the stronghold password
     wallet
@@ -39,9 +41,14 @@ async fn main() -> Result<()> {
         )
         .await?;
 
+    // Wait for transaction to get included
+    account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
+
+    println!("Transaction: {}", transaction.transaction_id);
     println!(
-        "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
-        transaction.transaction_id,
+        "Block sent: {}/api/core/v2/blocks/{}",
         &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );

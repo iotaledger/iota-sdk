@@ -515,7 +515,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
-    let nft_id = *accounts[0].sync(None).await?.nfts.first().unwrap();
+    let nft_id = *accounts[0].sync(None).await?.nfts().first().unwrap();
 
     let nft = accounts[0]
         .prepare_output(

@@ -242,7 +242,7 @@ fn filter_inputs(
                 // We use the addresses with unspent outputs, because other addresses of the
                 // account without unspent outputs can't be related to this output
                 &account.addresses_with_unspent_outputs,
-                output_data,
+                &output_data.output,
                 current_time,
             );
 

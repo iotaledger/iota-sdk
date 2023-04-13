@@ -1,8 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example tagged_data_to_utf8 --release
 //! In this example we will UTF-8 encode the tag and the data of an `TaggedDataPayload`.
+//! 
+//! `cargo run --example tagged_data_to_utf8 --release`
 
 use iota_sdk::client::{block::payload::TaggedDataPayload, Client, Result};
 

@@ -44,8 +44,8 @@ async fn claim_2_basic_outputs() -> Result<()> {
 
     // Claim with account 0
     let balance = accounts[0].sync(None).await.unwrap();
-    assert_eq!(balance.potentially_locked_outputs.len(), 2);
-    let base_coin_amount_before_claiming = balance.base_coin.available;
+    assert_eq!(balance.potentially_locked_outputs().len(), 2);
+    let base_coin_amount_before_claiming = balance.base_coin().available();
 
     let tx = accounts[0]
         .claim_outputs(
@@ -59,9 +59,9 @@ async fn claim_2_basic_outputs() -> Result<()> {
         .await?;
 
     let balance = accounts[0].sync(None).await.unwrap();
-    assert_eq!(balance.potentially_locked_outputs.len(), 0);
+    assert_eq!(balance.potentially_locked_outputs().len(), 0);
     assert_eq!(
-        balance.base_coin.available,
+        balance.base_coin().available(),
         base_coin_amount_before_claiming + 2 * micro_amount
     );
 
@@ -104,8 +104,8 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
 
     // Claim with account 1
     let balance = account_1.sync(None).await.unwrap();
-    assert_eq!(balance.potentially_locked_outputs.len(), 2);
-    let base_coin_amount_before_claiming = balance.base_coin.available;
+    assert_eq!(balance.potentially_locked_outputs().len(), 2);
+    let base_coin_amount_before_claiming = balance.base_coin().available();
 
     let tx = account_1
         .claim_outputs(
@@ -119,9 +119,9 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
-    assert_eq!(balance.potentially_locked_outputs.len(), 0);
+    assert_eq!(balance.potentially_locked_outputs().len(), 0);
     assert_eq!(
-        balance.base_coin.available,
+        balance.base_coin().available(),
         base_coin_amount_before_claiming + 2 * amount
     );
 
@@ -203,7 +203,7 @@ async fn claim_2_native_tokens() -> Result<()> {
 
     // Claim with account 0
     let balance = accounts[0].sync(None).await.unwrap();
-    assert_eq!(balance.potentially_locked_outputs.len(), 2);
+    assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
     let tx = accounts[0]
         .claim_outputs(
@@ -217,20 +217,20 @@ async fn claim_2_native_tokens() -> Result<()> {
         .await?;
 
     let balance = accounts[0].sync(None).await.unwrap();
-    assert_eq!(balance.potentially_locked_outputs.len(), 0);
-    assert_eq!(balance.native_tokens.len(), 2);
+    assert_eq!(balance.potentially_locked_outputs().len(), 0);
+    assert_eq!(balance.native_tokens().len(), 2);
     let native_token_0 = balance
-        .native_tokens
+        .native_tokens()
         .iter()
-        .find(|t| t.token_id == mint_tx_0.token_id)
+        .find(|t| t.token_id() == &mint_tx_0.token_id)
         .unwrap();
-    assert_eq!(native_token_0.total, native_token_amount);
+    assert_eq!(native_token_0.total(), native_token_amount);
     let native_token_1 = balance
-        .native_tokens
+        .native_tokens()
         .iter()
-        .find(|t| t.token_id == mint_tx_1.token_id)
+        .find(|t| t.token_id() == &mint_tx_1.token_id)
         .unwrap();
-    assert_eq!(native_token_1.total, native_token_amount);
+    assert_eq!(native_token_1.total(), native_token_amount);
 
     tear_down(storage_path)
 }
@@ -322,7 +322,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
 
     // Claim with account 1
     let balance = account_1.sync(None).await.unwrap();
-    assert_eq!(balance.potentially_locked_outputs.len(), 2);
+    assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
     let tx = account_1
         .claim_outputs(
@@ -336,20 +336,20 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
-    assert_eq!(balance.potentially_locked_outputs.len(), 0);
-    assert_eq!(balance.native_tokens.len(), 2);
+    assert_eq!(balance.potentially_locked_outputs().len(), 0);
+    assert_eq!(balance.native_tokens().len(), 2);
     let native_token_0 = balance
-        .native_tokens
+        .native_tokens()
         .iter()
-        .find(|t| t.token_id == mint_tx_0.token_id)
+        .find(|t| t.token_id() == &mint_tx_0.token_id)
         .unwrap();
-    assert_eq!(native_token_0.total, native_token_amount);
+    assert_eq!(native_token_0.total(), native_token_amount);
     let native_token_1 = balance
-        .native_tokens
+        .native_tokens()
         .iter()
-        .find(|t| t.token_id == mint_tx_1.token_id)
+        .find(|t| t.token_id() == &mint_tx_1.token_id)
         .unwrap();
-    assert_eq!(native_token_1.total, native_token_amount);
+    assert_eq!(native_token_1.total(), native_token_amount);
 
     tear_down(storage_path)
 }
@@ -398,7 +398,7 @@ async fn claim_2_nft_outputs() -> Result<()> {
 
     // Claim with account 0
     let balance = accounts[0].sync(None).await.unwrap();
-    assert_eq!(balance.potentially_locked_outputs.len(), 2);
+    assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
     let tx = accounts[0]
         .claim_outputs(
@@ -412,8 +412,8 @@ async fn claim_2_nft_outputs() -> Result<()> {
         .await?;
 
     let balance = accounts[0].sync(None).await.unwrap();
-    assert_eq!(balance.potentially_locked_outputs.len(), 0);
-    assert_eq!(balance.nfts.len(), 2);
+    assert_eq!(balance.potentially_locked_outputs().len(), 0);
+    assert_eq!(balance.nfts().len(), 2);
 
     tear_down(storage_path)
 }
@@ -463,7 +463,7 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
 
     // Claim with account 1
     let balance = account_1.sync(None).await.unwrap();
-    assert_eq!(balance.potentially_locked_outputs.len(), 2);
+    assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
     let tx = account_1
         .claim_outputs(
@@ -477,8 +477,8 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
-    assert_eq!(balance.potentially_locked_outputs.len(), 0);
-    assert_eq!(balance.nfts.len(), 2);
+    assert_eq!(balance.potentially_locked_outputs().len(), 0);
+    assert_eq!(balance.nfts().len(), 2);
 
     tear_down(storage_path)
 }

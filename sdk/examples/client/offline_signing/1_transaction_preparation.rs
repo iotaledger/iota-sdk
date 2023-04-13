@@ -16,8 +16,8 @@ use iota_sdk::client::{
     Client, Result,
 };
 
-const ADDRESS_FILE_NAME: &str = "examples/offline_signing/address.json";
-const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/prepared_transaction.json";
+const ADDRESS_FILE_NAME: &str = "examples/client/offline_signing/address.json";
+const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/client/offline_signing/prepared_transaction.json";
 
 #[tokio::main]
 async fn main() -> Result<()> {

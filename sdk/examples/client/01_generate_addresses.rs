@@ -3,7 +3,7 @@
 
 //! TODO: Example description
 //!
-//! `cargo run --example generate_addresses --release -- [NODE URL]`
+//! `cargo run --example generate_addresses --release -- [NODE_URL]`
 
 use iota_sdk::client::{api::GetAddressesBuilder, secret::SecretManager, Client, Result};
 
