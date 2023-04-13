@@ -1,8 +1,6 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::env::var_os;
-
 use iota_sdk::{
     client::secret::{stronghold::StrongholdSecretManager, SecretManager},
     wallet::Wallet,
@@ -24,11 +22,8 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
         return Ok((None, None));
     }
 
-    let storage_path = var_os("WALLET_DATABASE_PATH").map_or_else(
-        || "./stardust-cli-wallet-db".to_string(),
-        |os_str| os_str.into_string().expect("invalid WALLET_DATABASE_PATH"),
-    );
-    let snapshot_path = std::path::Path::new("./stardust-cli-wallet.stronghold");
+    let storage_path = cli.wallet_db_path;
+    let snapshot_path = std::path::Path::new(&cli.stronghold_snapshot_path);
     let snapshot_exists = snapshot_path.exists();
     let password = if let Some(WalletCommand::Restore { .. }) = &cli.command {
         get_password("Stronghold password", false)?

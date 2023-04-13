@@ -1,8 +1,9 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example client_config --release
 //! In this example we will create a client from a JSON config.
+//! 
+//! `cargo run --example client_config --release`
 
 use iota_sdk::client::{Client, Result};
 
