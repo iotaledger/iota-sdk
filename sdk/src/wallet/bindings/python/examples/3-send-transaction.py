@@ -2,6 +2,9 @@ from iota_wallet import IotaWallet
 
 # This example sends a transaction.
 
+# Shimmer coin type
+EXPLORER = ""
+
 wallet = IotaWallet('./alice-database')
 
 account = wallet.get_account('Alice')
@@ -19,4 +22,5 @@ outputs = [{
 
 transaction = account.send_amount(outputs)
 
-print(f'Sent transaction: {transaction}')
+print(f'Transaction: {transaction.transaction_id}')
+print(f'Block sent: {EXPLORER}/block/" + {transaction.block_id});
