@@ -82,7 +82,7 @@ pub fn mnemonic_to_seed(mnemonic: &str) -> Result<Seed> {
     Ok(Seed::from_bytes(&mnemonic_seed))
 }
 
-/// Verify that a &str is a valid mnemonic.
+/// Verifies that a &str is a valid mnemonic.
 pub fn verify_mnemonic(mnemonic: &str) -> Result<()> {
     crypto::keys::bip39::wordlist::verify(mnemonic, &crypto::keys::bip39::wordlist::ENGLISH)
         .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
