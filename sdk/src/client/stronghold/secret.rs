@@ -19,6 +19,7 @@ use super::{
 };
 use crate::{
     client::{
+        constants::HD_WALLET_TYPE,
         secret::{GenerateAddressOptions, SecretManage},
         Error, Result,
     },
@@ -54,7 +55,7 @@ impl SecretManage for StrongholdAdapter {
         let mut addresses = Vec::new();
 
         for address_index in address_indexes {
-            let bip_path = vec![44u32, coin_type, account_index, internal as u32, address_index];
+            let bip_path = vec![HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index];
             let chain = Chain::from_u32_hardened(bip_path);
 
             let derive_location = Location::generic(
