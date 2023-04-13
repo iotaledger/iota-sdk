@@ -214,7 +214,7 @@ async fn stronghold() {
     }
 
     // Remove garbage after test, but don't care about the result
-    std::fs::remove_file("teststronghold.stronghold").unwrap_or(());
+    std::fs::remove_file("teststronghold.stronghold").ok();
 }
 
 #[tokio::test]

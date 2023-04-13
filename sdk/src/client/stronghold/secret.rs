@@ -237,7 +237,7 @@ mod tests {
     async fn test_address_generation() {
         let stronghold_path = "test_address_generation.stronghold";
         // Remove potential old stronghold file
-        std::fs::remove_file(stronghold_path).unwrap_or(());
+        std::fs::remove_file(stronghold_path).ok();
         let mnemonic = String::from(
             "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally",
         );
@@ -262,14 +262,14 @@ mod tests {
         );
 
         // Remove garbage after test, but don't care about the result
-        std::fs::remove_file(stronghold_path).unwrap_or(());
+        std::fs::remove_file(stronghold_path).ok();
     }
 
     #[tokio::test]
     async fn test_key_cleared() {
         let stronghold_path = "test_key_cleared.stronghold";
         // Remove potential old stronghold file
-        std::fs::remove_file(stronghold_path).unwrap_or(());
+        std::fs::remove_file(stronghold_path).ok();
         let mnemonic = String::from(
             "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally",
         );
@@ -307,6 +307,6 @@ mod tests {
         );
 
         // Remove garbage after test, but don't care about the result
-        std::fs::remove_file(stronghold_path).unwrap_or(());
+        std::fs::remove_file(stronghold_path).ok();
     }
 }

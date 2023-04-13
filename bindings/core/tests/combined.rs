@@ -50,7 +50,7 @@ async fn generate_addresses() -> Result<()> {
 #[tokio::test]
 async fn create_account() -> Result<()> {
     let storage_path = "test-storage/create_account";
-    std::fs::remove_dir_all(storage_path).unwrap_or(());
+    std::fs::remove_dir_all(storage_path).ok();
 
     let secret_manager = r#"{"Mnemonic":"about solution utility exist rail budget vacuum major survey clerk pave ankle wealth gym gossip still medal expect strong rely amazing inspire lazy lunar"}"#;
     let client_options = r#"{
@@ -105,14 +105,14 @@ async fn create_account() -> Result<()> {
         _ => panic!("unexpected response {response:?}"),
     }
 
-    std::fs::remove_dir_all(storage_path).unwrap_or(());
+    std::fs::remove_dir_all(storage_path).ok();
     Ok(())
 }
 
 #[tokio::test]
 async fn client_from_wallet() -> Result<()> {
     let storage_path = "test-storage/client_from_wallet";
-    std::fs::remove_dir_all(storage_path).unwrap_or(());
+    std::fs::remove_dir_all(storage_path).ok();
 
     let secret_manager = r#"{"Mnemonic":"about solution utility exist rail budget vacuum major survey clerk pave ankle wealth gym gossip still medal expect strong rely amazing inspire lazy lunar"}"#;
     let client_options = r#"{
@@ -161,6 +161,6 @@ async fn client_from_wallet() -> Result<()> {
         _ => panic!("unexpected response {response:?}"),
     }
 
-    std::fs::remove_dir_all(storage_path).unwrap_or(());
+    std::fs::remove_dir_all(storage_path).ok();
     Ok(())
 }
