@@ -58,13 +58,13 @@ pub enum UnlockCondition {
 impl core::fmt::Debug for UnlockCondition {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Address(unlock_condition) => write!(f, "{unlock_condition:?}"),
-            Self::StorageDepositReturn(unlock_condition) => write!(f, "{unlock_condition:?}"),
-            Self::Timelock(unlock_condition) => write!(f, "{unlock_condition:?}"),
-            Self::Expiration(unlock_condition) => write!(f, "{unlock_condition:?}"),
-            Self::StateControllerAddress(unlock_condition) => write!(f, "{unlock_condition:?}"),
-            Self::GovernorAddress(unlock_condition) => write!(f, "{unlock_condition:?}"),
-            Self::ImmutableAliasAddress(unlock_condition) => write!(f, "{unlock_condition:?}"),
+            Self::Address(unlock_condition) => unlock_condition.fmt(f),
+            Self::StorageDepositReturn(unlock_condition) => unlock_condition.fmt(f),
+            Self::Timelock(unlock_condition) => unlock_condition.fmt(f),
+            Self::Expiration(unlock_condition) => unlock_condition.fmt(f),
+            Self::StateControllerAddress(unlock_condition) => unlock_condition.fmt(f),
+            Self::GovernorAddress(unlock_condition) => unlock_condition.fmt(f),
+            Self::ImmutableAliasAddress(unlock_condition) => unlock_condition.fmt(f),
         }
     }
 }
@@ -392,9 +392,10 @@ mod test {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::format;
+
     use serde::{Deserialize, Serialize, Serializer};
     use serde_json::Value;
 

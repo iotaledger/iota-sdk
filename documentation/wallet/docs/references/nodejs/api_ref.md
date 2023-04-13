@@ -37,7 +37,6 @@
 - [Address](interfaces/Address.md)
 - [AddressWithAmount](interfaces/AddressWithAmount.md)
 - [AddressWithUnspentOutputs](interfaces/AddressWithUnspentOutputs.md)
-- [AddressWithMicroAmount](interfaces/AddressWithMicroAmount.md)
 - [AddressNativeTokens](interfaces/AddressNativeTokens.md)
 - [AddressNftId](interfaces/AddressNftId.md)
 - [AddressGenerationOptions](interfaces/AddressGenerationOptions.md)

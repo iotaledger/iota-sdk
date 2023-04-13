@@ -44,10 +44,10 @@ pub enum Feature {
 impl core::fmt::Debug for Feature {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Sender(feature) => write!(f, "{feature:?}"),
-            Self::Issuer(feature) => write!(f, "{feature:?}"),
-            Self::Metadata(feature) => write!(f, "{feature:?}"),
-            Self::Tag(feature) => write!(f, "{feature:?}"),
+            Self::Sender(feature) => feature.fmt(f),
+            Self::Issuer(feature) => feature.fmt(f),
+            Self::Metadata(feature) => feature.fmt(f),
+            Self::Tag(feature) => feature.fmt(f),
         }
     }
 }
@@ -275,9 +275,10 @@ mod test {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::{format, string::ToString};
+
     use serde::{Deserialize, Serialize, Serializer};
     use serde_json::Value;
 

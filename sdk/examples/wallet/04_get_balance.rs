@@ -1,26 +1,35 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example get_balance --release
-// In this example we sync the account and get the balance
-// Rename `.env.example` to `.env` first
+//! In this example we sync the account and get the balance.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example get_balance --release`
 
-use iota_sdk::wallet::{account_manager::AccountManager, Result};
+use iota_sdk::wallet::{Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Create the account manager
-    let manager = AccountManager::builder().finish().await?;
+    // Create the wallet
+    let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = manager.get_account("Alice").await?;
+    let account = wallet.get_account("Alice").await?;
 
     // Sync and get the balance
     let _account_balance = account.sync(None).await?;
     // If already synced, just get the balance
     let account_balance = account.balance().await?;
 
-    println!("{account_balance:?}");
+    println!("{account_balance:#?}");
+
+    let explorer_url = std::env::var("EXPLORER_URL").ok();
+    let prepended = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
+
+    println!("Addresses:");
+    for address in account.addresses().await? {
+        println!(" - {prepended}{}", address.address().to_bech32());
+    }
 
     Ok(())
 }

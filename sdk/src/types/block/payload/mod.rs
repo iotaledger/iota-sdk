@@ -52,10 +52,10 @@ pub enum Payload {
 impl core::fmt::Debug for Payload {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Transaction(payload) => write!(f, "{payload:?}"),
-            Self::Milestone(payload) => write!(f, "{payload:?}"),
-            Self::TreasuryTransaction(payload) => write!(f, "{payload:?}"),
-            Self::TaggedData(payload) => write!(f, "{payload:?}"),
+            Self::Transaction(payload) => payload.fmt(f),
+            Self::Milestone(payload) => payload.fmt(f),
+            Self::TreasuryTransaction(payload) => payload.fmt(f),
+            Self::TaggedData(payload) => payload.fmt(f),
         }
     }
 }
@@ -220,7 +220,6 @@ impl Into<Option<Payload>> for OptionalPayload {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
     use serde::{Deserialize, Serialize};

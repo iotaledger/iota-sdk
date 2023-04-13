@@ -2,7 +2,7 @@
   "name": "@iota/wallet-mobile",
   "version": "1.0.0-alpha.0",
   "description": "Capacitor plugin binding to the wallet library",
-  "homepage": "https://github.com/iotaledger/wallet.rs#readme",
+  "homepage": "https://github.com/iotaledger/iota-sdk/tree/develop/sdk/src/wallet/bindings/capacitorjs/#readme",
   "main": "dist/api.js",
   "module": "dist/api.js",
   "types": "dist/esm/lib/index.d.ts",
@@ -27,10 +27,10 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iotaledger/wallet.rs.git"
+    "url": "git+https://github.com/iotaledger/iota-sdk.git"
   },
   "bugs": {
-    "url": "https://github.com/iotaledger/wallet.rs/issues"
+    "url": "https://github.com/iotaledger/iota-sdk/issues"
   },
   "dependencies": {
     "@capacitor/core": "^3.4.1",

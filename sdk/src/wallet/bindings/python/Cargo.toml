@@ -15,9 +15,10 @@ publish = false
 [lib]
 name = "iota_wallet"
 crate-type = [ "cdylib" ]
+doc = false
 
 [dependencies]
-iota-sdk = { path = "../../../..", features = [ "wallet", "message_interface", "events", "rocksdb", "ledger_nano" ] }
+iota-sdk = { path = "../../../..", features = [ "wallet", "message_interface", "events", "rocksdb", "ledger_nano", "stronghold" ] }
 
 futures = { version = "0.3.26", default-features = false }
 once_cell = { version = "1.17.1", default-features = false }

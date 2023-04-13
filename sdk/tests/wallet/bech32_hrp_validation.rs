@@ -6,7 +6,7 @@ use iota_sdk::{
     wallet::{account::OutputOptions, AddressWithAmount, Error, Result},
 };
 
-use crate::wallet::common::{make_manager, setup, tear_down};
+use crate::wallet::common::{make_wallet, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
@@ -14,16 +14,16 @@ async fn bech32_hrp_send_amount() -> Result<()> {
     let storage_path = "test-storage/bech32_hrp_send_amount";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
-    let account = manager.create_account().finish().await?;
+    let account = wallet.create_account().finish().await?;
 
     let error = account
         .send_amount(
-            vec![AddressWithAmount {
-                address: account.addresses().await?[0].address().as_ref().to_bech32("wronghrp"),
-                amount: 1_000_000,
-            }],
+            vec![AddressWithAmount::new(
+                account.addresses().await?[0].address().as_ref().to_bech32("wronghrp"),
+                1_000_000,
+            )],
             None,
         )
         .await
@@ -51,8 +51,8 @@ async fn bech32_hrp_prepare_output() -> Result<()> {
     let storage_path = "test-storage/bech32_hrp_prepare_output";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
-    let account = manager.create_account().finish().await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account = wallet.create_account().finish().await?;
 
     let error = account
         .prepare_output(

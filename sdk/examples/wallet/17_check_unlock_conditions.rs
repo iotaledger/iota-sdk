@@ -1,21 +1,22 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example check_unlock_conditions --release
-// In this example we check if an output has only an address unlock condition and that the address is from the account.
+//! In this example we check if an output has only an address unlock condition and that the address is from the account.
+//!
+//! `cargo run --example check_unlock_conditions --release`
 
 use iota_sdk::{
     types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
-    wallet::{account::types::AddressWrapper, account_manager::AccountManager, Result},
+    wallet::{account::types::AddressWrapper, Result, Wallet},
 };
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Create the account manager
-    let manager = AccountManager::builder().finish().await?;
+    // Create the wallet
+    let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = manager.get_account("Alice").await?;
+    let account = wallet.get_account("Alice").await?;
 
     let account_addresses: Vec<AddressWrapper> = account
         .addresses()
@@ -25,9 +26,7 @@ async fn main() -> Result<()> {
         .collect();
 
     let output = BasicOutputBuilder::new_with_amount(1_000_000)?
-        .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-            *account_addresses[0].as_ref(),
-        )))
+        .add_unlock_condition(AddressUnlockCondition::new(*account_addresses[0].as_ref()))
         .finish_output(account.client().get_token_supply().await?)?;
 
     let controlled_by_account = if let [UnlockCondition::Address(address_unlock_condition)] = output

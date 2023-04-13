@@ -14,7 +14,7 @@ import WarningPasswordStorage from '../_admonitions/_warning_safe_password_stora
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import CodeBlock from '@theme/CodeBlock';
-import CodeSample from '!!raw-loader!../../../../sdk/examples/wallet/01_create_wallet.rs';
+import CodeSample from '!!raw-loader!../../../../sdk/examples/wallet/getting_started.rs';
 
 The wallet.rs library is published on [crates.io](https://crates.io/crates/iota-wallet/versions). You can also download
 the source code from the [official GitHub repository](https://github.com/iotaledger/wallet.rs).
@@ -81,13 +81,10 @@ tokio = "1.21.2"
 
 ## Use the Library
 
-In order to use the library, you need to create an `AccountManager`:
+In order to use the library, you need to create a `Wallet`:
 
-<WarningPasswordStorage/>
-
-
-<CodeBlock className="language-rust" showLineNumbers metastring={'{12,37-42}'}>
-    {CodeSample}
+<CodeBlock className="language-rust">
+  {CodeSample}
 </CodeBlock>
 
 ## What's Next?

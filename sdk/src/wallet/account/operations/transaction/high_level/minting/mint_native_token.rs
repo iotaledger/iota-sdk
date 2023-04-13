@@ -9,11 +9,8 @@ use crate::{
         address::AliasAddress,
         dto::U256Dto,
         output::{
-            dto::AliasIdDto,
-            feature::{Feature, MetadataFeature},
-            unlock_condition::{ImmutableAliasAddressUnlockCondition, UnlockCondition},
-            AliasId, AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId,
-            TokenScheme,
+            dto::AliasIdDto, feature::MetadataFeature, unlock_condition::ImmutableAliasAddressUnlockCondition, AliasId,
+            AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
         },
         DtoError,
     },
@@ -166,13 +163,10 @@ impl AccountHandle {
                             native_token_options.maximum_supply,
                         )?),
                     )?
-                    .add_unlock_condition(UnlockCondition::ImmutableAliasAddress(
-                        ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)),
-                    ));
+                    .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
 
                     if let Some(foundry_metadata) = native_token_options.foundry_metadata {
-                        foundry_builder = foundry_builder
-                            .add_immutable_feature(Feature::Metadata(MetadataFeature::new(foundry_metadata)?))
+                        foundry_builder = foundry_builder.add_immutable_feature(MetadataFeature::new(foundry_metadata)?)
                     }
 
                     foundry_builder.finish_output(token_supply)?

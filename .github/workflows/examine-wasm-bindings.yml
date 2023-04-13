@@ -21,6 +21,7 @@ on:
       - ".github/workflows/examine-wasm-bindings.yml"
       - ".github/actions/**"
       - "sdk/src/wallet/bindings/wasm/**"
+      - "sdk/src/wallet/bindings/nodejs/**" # Re-include nodejs bindings, b/c lib is copied from there
       # Watch the Rust core too
       - "src/**"
       - "Cargo.toml"
@@ -43,7 +44,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
-        node: ["16"]
+        node: ["18"]
 
     steps:
       - name: Checkout the Source Code
@@ -112,7 +113,7 @@ jobs:
         with:
           cache: yarn
           cache-dependency-path: sdk/src/wallet/bindings/wasm/yarn.lock
-          node-version: 16.x
+          node-version: 18.x
 
       - name: Install Dependencies
         working-directory: sdk/src/wallet/bindings/wasm/
@@ -136,7 +137,7 @@ jobs:
         with:
           cache: yarn
           cache-dependency-path: sdk/src/wallet/bindings/wasm/yarn.lock
-          node-version: 16.x
+          node-version: 18.x
 
       - name: Install Dependencies
         working-directory: sdk/src/wallet/bindings/wasm/

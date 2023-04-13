@@ -1,6 +1,8 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::string::String;
+
 use crate::types::block::{
     address::{Address, NftAddress},
     output::OutputId,
@@ -29,9 +31,10 @@ impl NftId {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::string::ToString;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;

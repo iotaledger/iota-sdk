@@ -8,8 +8,8 @@ use crate::{
     types::block::{
         address::Address,
         output::{
-            feature::{Feature, IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
-            unlock_condition::{AddressUnlockCondition, UnlockCondition},
+            feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
+            unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
         },
         DtoError,
@@ -153,29 +153,26 @@ impl AccountHandle {
             let mut nft_builder =
                 NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone(), NftId::null())?
                     // Address which will own the nft
-                    .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)));
+                    .add_unlock_condition(AddressUnlockCondition::new(address));
 
             if let Some(sender) = nft_options.sender {
-                nft_builder =
-                    nft_builder.add_feature(Feature::Sender(SenderFeature::new(Address::try_from_bech32(sender)?)));
+                nft_builder = nft_builder.add_feature(SenderFeature::new(Address::try_from_bech32(sender)?));
             }
 
             if let Some(metadata) = nft_options.metadata {
-                nft_builder = nft_builder.add_feature(Feature::Metadata(MetadataFeature::new(metadata)?));
+                nft_builder = nft_builder.add_feature(MetadataFeature::new(metadata)?);
             }
 
             if let Some(tag) = nft_options.tag {
-                nft_builder = nft_builder.add_feature(Feature::Tag(TagFeature::new(tag)?));
+                nft_builder = nft_builder.add_feature(TagFeature::new(tag)?);
             }
 
             if let Some(issuer) = nft_options.issuer {
-                nft_builder = nft_builder
-                    .add_immutable_feature(Feature::Issuer(IssuerFeature::new(Address::try_from_bech32(issuer)?)));
+                nft_builder = nft_builder.add_immutable_feature(IssuerFeature::new(Address::try_from_bech32(issuer)?));
             }
 
             if let Some(immutable_metadata) = nft_options.immutable_metadata {
-                nft_builder =
-                    nft_builder.add_immutable_feature(Feature::Metadata(MetadataFeature::new(immutable_metadata)?));
+                nft_builder = nft_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
             }
 
             outputs.push(nft_builder.finish_output(token_supply)?);

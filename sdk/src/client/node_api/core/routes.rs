@@ -166,7 +166,7 @@ impl Client {
                 if let Error::Node(e) = e {
                     let fallback_to_local_pow = self.get_fallback_to_local_pow();
                     // hornet and bee return different error blocks
-                    if (e == *"No available nodes with remote Pow"
+                    if (e == *"no available nodes with remote Pow"
                         || e.contains("proof of work is not enabled")
                         || e.contains("`Pow` not enabled"))
                         && fallback_to_local_pow
@@ -240,7 +240,7 @@ impl Client {
                 if let Error::Node(e) = e {
                     let fallback_to_local_pow = self.get_fallback_to_local_pow();
                     // hornet and bee return different error blocks
-                    if (e == *"No available nodes with remote Pow"
+                    if (e == *"no available nodes with remote Pow"
                         || e.contains("proof of work is not enabled")
                         || e.contains("`Pow` not enabled"))
                         && fallback_to_local_pow

@@ -9,7 +9,7 @@ use iota_sdk::{
     wallet::{account::AccountHandle, NativeTokenOptions, NftOptions, Result, U256},
 };
 
-use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
+use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
@@ -17,8 +17,8 @@ async fn mint_and_burn_nft() -> Result<()> {
     let storage_path = "test-storage/mint_and_burn_outputs";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
-    let account = &create_accounts_with_funds(&manager, 1).await?[0];
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
     let nft_options = vec![NftOptions {
         address: Some(account.addresses().await?[0].address().to_bech32()),
@@ -38,7 +38,7 @@ async fn mint_and_burn_nft() -> Result<()> {
     let output_id = OutputId::new(transaction.transaction_id, 0u16).unwrap();
     let nft_id = NftId::from(&output_id);
 
-    let search = balance.nfts.iter().find(|&balance_nft_id| *balance_nft_id == nft_id);
+    let search = balance.nfts().iter().find(|&balance_nft_id| *balance_nft_id == nft_id);
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
     assert!(search.is_some());
 
@@ -47,7 +47,7 @@ async fn mint_and_burn_nft() -> Result<()> {
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await.unwrap();
-    let search = balance.nfts.iter().find(|&balance_nft_id| *balance_nft_id == nft_id);
+    let search = balance.nfts().iter().find(|&balance_nft_id| *balance_nft_id == nft_id);
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
     assert!(search.is_none());
 
@@ -60,9 +60,9 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
     let storage_path = "test-storage/mint_and_burn_expired_nft";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
-    let account_0 = &create_accounts_with_funds(&manager, 1).await?[0];
-    let account_1 = manager.create_account().finish().await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_1 = wallet.create_account().finish().await?;
 
     let token_supply = account_0.client().get_token_supply().await?;
 
@@ -97,7 +97,7 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
         .await?;
     let balance = account_1.sync(None).await?;
     // After burning the amount is available on account_1
-    assert_eq!(balance.base_coin.available, amount);
+    assert_eq!(balance.base_coin().available(), amount);
 
     tear_down(storage_path)
 }
@@ -108,8 +108,8 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     let storage_path = "test-storage/mint_and_decrease_native_token_supply";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
-    let account = &create_accounts_with_funds(&manager, 1).await?[0];
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
     // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs
     let transaction = account.create_alias_output(None, None).await?;
@@ -136,9 +136,9 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     let balance = account.sync(None).await.unwrap();
 
     let search = balance
-        .native_tokens
+        .native_tokens()
         .iter()
-        .find(|token| token.token_id == mint_transaction.token_id && token.available == circulating_supply);
+        .find(|token| token.token_id() == &mint_transaction.token_id && token.available() == circulating_supply);
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
     assert!(search.is_some());
 
@@ -155,8 +155,8 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     let balance = account.sync(None).await.unwrap();
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 
-    let search = balance.native_tokens.iter().find(|token| {
-        (token.token_id == mint_transaction.token_id) && (token.available == circulating_supply - melt_amount)
+    let search = balance.native_tokens().iter().find(|token| {
+        (token.token_id() == &mint_transaction.token_id) && (token.available() == circulating_supply - melt_amount)
     });
     assert!(search.is_some());
 
@@ -174,9 +174,9 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 
     let search = balance
-        .native_tokens
+        .native_tokens()
         .iter()
-        .find(|token| token.token_id == mint_transaction.token_id);
+        .find(|token| token.token_id() == &mint_transaction.token_id);
     assert!(search.is_none());
 
     // Call to run tests in sequence
@@ -192,7 +192,7 @@ async fn destroy_foundry(account: &AccountHandle) -> Result<()> {
 
     // Let's burn the first foundry we can find, although we may not find the required alias output so maybe not a good
     // idea
-    let foundry_id = *balance.foundries.first().unwrap();
+    let foundry_id = *balance.foundries().first().unwrap();
 
     let transaction = account.destroy_foundry(foundry_id, None).await.unwrap();
     account
@@ -200,7 +200,7 @@ async fn destroy_foundry(account: &AccountHandle) -> Result<()> {
         .await?;
     let balance = account.sync(None).await.unwrap();
     let search = balance
-        .foundries
+        .foundries()
         .iter()
         .find(|&balance_foundry_id| *balance_foundry_id == foundry_id);
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
@@ -214,7 +214,7 @@ async fn destroy_alias(account: &AccountHandle) -> Result<()> {
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 
     // Let's destroy the first alias we can find
-    let alias_id = *balance.aliases.first().unwrap();
+    let alias_id = *balance.aliases().first().unwrap();
     println!("alias_id -> {alias_id}");
     let transaction = account.destroy_alias(alias_id, None).await.unwrap();
     account
@@ -222,7 +222,7 @@ async fn destroy_alias(account: &AccountHandle) -> Result<()> {
         .await?;
     let balance = account.sync(None).await.unwrap();
     let search = balance
-        .aliases
+        .aliases()
         .iter()
         .find(|&balance_alias_id| *balance_alias_id == alias_id);
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
@@ -239,9 +239,9 @@ async fn mint_and_burn_native_tokens() -> Result<()> {
 
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
-    let account = &create_accounts_with_funds(&manager, 1).await?[0];
+    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
     let native_token_amount = U256::from(100);
 
@@ -275,7 +275,7 @@ async fn mint_and_burn_native_tokens() -> Result<()> {
         .await?;
     let balance = account.sync(None).await?;
 
-    assert!(balance.native_tokens.is_empty());
+    assert!(balance.native_tokens().is_empty());
 
     tear_down(storage_path)
 }

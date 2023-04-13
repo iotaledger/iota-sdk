@@ -3,16 +3,17 @@
 
 //! The IOTA Wallet Library
 
-/// [`AccountHandle`]: crate::account::handle::AccountHandle
+/// [`AccountHandle`]: crate::wallet::account::handle::AccountHandle
 /// The account module. Interaction with an Account happens via an [`AccountHandle`].
 pub mod account;
-/// The account manager module.
-pub mod account_manager;
 /// The message passing interface for the library. A different way to call the wallet functions, useful for bindings to
 /// other languages.
 #[cfg(feature = "message_interface")]
 #[cfg_attr(docsrs, doc(cfg(feature = "message_interface")))]
 pub mod message_interface;
+/// The wallet module.
+#[allow(clippy::module_inception)]
+pub mod wallet;
 
 /// The ClientOptions to build the iota_client for interactions with the IOTA Tangle.
 pub use crate::client::ClientBuilder as ClientOptions;
@@ -34,17 +35,20 @@ pub(crate) mod task;
 pub use primitive_types::U256;
 
 pub use self::{
-    account::operations::transaction::high_level::{
-        minting::{
-            increase_native_token_supply::IncreaseNativeTokenSupplyOptions, mint_native_token::NativeTokenOptions,
-            mint_nfts::NftOptions,
+    account::{
+        operations::transaction::high_level::{
+            minting::{
+                increase_native_token_supply::IncreaseNativeTokenSupplyOptions, mint_native_token::NativeTokenOptions,
+                mint_nfts::NftOptions,
+            },
+            send_amount::AddressWithAmount,
+            send_native_tokens::AddressNativeTokens,
+            send_nft::AddressAndNftId,
         },
-        send_amount::AddressWithAmount,
-        send_micro_transaction::AddressWithMicroAmount,
-        send_native_tokens::AddressNativeTokens,
-        send_nft::AddressAndNftId,
+        AccountHandle,
     },
     error::Error,
+    wallet::{Wallet, WalletBuilder},
 };
 
 /// The wallet Result type.

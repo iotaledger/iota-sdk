@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example foundry --release
+//! In this example we will create a foundry output.
+//!
+//! `cargo run --example foundry --release`
 
 use iota_sdk::{
     client::{
@@ -14,24 +16,22 @@ use iota_sdk::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
             unlock_condition::{
                 AddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition,
-                StateControllerAddressUnlockCondition, UnlockCondition,
+                StateControllerAddressUnlockCondition,
             },
-            AliasId, AliasOutputBuilder, BasicOutputBuilder, Feature, FoundryId, FoundryOutputBuilder, NativeToken,
-            Output, OutputId, SimpleTokenScheme, TokenId, TokenScheme,
+            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryId, FoundryOutputBuilder, NativeToken, Output,
+            OutputId, SimpleTokenScheme, TokenId, TokenScheme,
         },
         payload::{transaction::TransactionEssence, Payload},
     },
 };
 use primitive_types::U256;
 
-/// In this example we will create a foundry output
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production!
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     // Configure your own mnemonic in the ".env" file. Since the output amount cannot be zero, the seed must contain
     // non-zero balance.
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
@@ -56,15 +56,11 @@ async fn main() -> Result<()> {
     //////////////////////////////////
 
     let alias_output_builder = AliasOutputBuilder::new_with_amount(2_000_000, AliasId::null())?
-        .add_feature(Feature::Sender(SenderFeature::new(address)))
-        .add_feature(Feature::Metadata(MetadataFeature::new(vec![1, 2, 3])?))
-        .add_immutable_feature(Feature::Issuer(IssuerFeature::new(address)))
-        .add_unlock_condition(UnlockCondition::StateControllerAddress(
-            StateControllerAddressUnlockCondition::new(address),
-        ))
-        .add_unlock_condition(UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(
-            address,
-        )));
+        .add_feature(SenderFeature::new(address))
+        .add_feature(MetadataFeature::new(vec![1, 2, 3])?)
+        .add_immutable_feature(IssuerFeature::new(address))
+        .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
+        .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
 
     let outputs = vec![alias_output_builder.clone().finish_output(token_supply)?];
 
@@ -108,9 +104,7 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
         FoundryOutputBuilder::new_with_amount(1_000_000, 1, token_scheme)?
             .add_native_token(NativeToken::new(token_id, U256::from(70u8))?)
-            .add_unlock_condition(UnlockCondition::ImmutableAliasAddress(
-                ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)),
-            ))
+            .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)))
             .finish_output(token_supply)?,
     ];
 
@@ -140,9 +134,7 @@ async fn main() -> Result<()> {
             U256::from(100u8),
         )?),
     )?
-    .add_unlock_condition(UnlockCondition::ImmutableAliasAddress(
-        ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)),
-    ));
+    .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
 
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
     let foundry_output_id = get_foundry_output_id(block.payload().unwrap())?;
@@ -178,8 +170,8 @@ async fn main() -> Result<()> {
     // send native token
     //////////////////////////////////
 
-    let basic_output_builder = BasicOutputBuilder::new_with_amount(57_700)?
-        .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)));
+    let basic_output_builder =
+        BasicOutputBuilder::new_with_amount(57_700)?.add_unlock_condition(AddressUnlockCondition::new(address));
 
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
     let foundry_output_id = get_foundry_output_id(block.payload().unwrap())?;

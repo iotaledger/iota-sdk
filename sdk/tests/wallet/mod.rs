@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod account_deserialization;
-mod account_manager;
 mod account_recovery;
 mod accounts;
 mod backup_restore;
@@ -20,3 +19,5 @@ mod native_tokens;
 mod output_preparation;
 mod syncing;
 mod transactions;
+#[allow(clippy::module_inception)]
+mod wallet;

@@ -11,10 +11,10 @@ use crate::{
         address::Address,
         output::{
             dto::NativeTokenDto,
-            feature::{Feature, IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
+            feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-                TimelockUnlockCondition, UnlockCondition,
+                TimelockUnlockCondition,
             },
             BasicOutputBuilder, NativeToken, NftId, NftOutput, NftOutputBuilder, Output, Rent,
         },
@@ -55,7 +55,7 @@ impl AccountHandle {
         // We start building with minimum storage deposit, so we know the minimum required amount and can later replace
         // it, if needed
         let mut first_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(recipient_address)));
+            .add_unlock_condition(AddressUnlockCondition::new(recipient_address));
 
         if let Some(assets) = options.assets {
             if let Some(native_tokens) = assets.native_tokens {
@@ -69,20 +69,20 @@ impl AccountHandle {
             }
 
             if let Some(tag) = features.tag {
-                first_output_builder = first_output_builder.add_feature(Feature::Tag(TagFeature::new(
+                first_output_builder = first_output_builder.add_feature(TagFeature::new(
                     prefix_hex::decode(tag).map_err(|_| DtoError::InvalidField("tag"))?,
-                )?));
+                )?);
             }
 
             if let Some(metadata) = features.metadata {
-                first_output_builder = first_output_builder.add_feature(Feature::Metadata(MetadataFeature::new(
+                first_output_builder = first_output_builder.add_feature(MetadataFeature::new(
                     prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("metadata"))?,
-                )?));
+                )?);
             }
 
             if let Some(sender) = features.sender {
-                first_output_builder = first_output_builder
-                    .add_feature(Feature::Sender(SenderFeature::new(Address::try_from_bech32(sender)?)))
+                first_output_builder =
+                    first_output_builder.add_feature(SenderFeature::new(Address::try_from_bech32(sender)?))
             }
         }
 
@@ -90,14 +90,12 @@ impl AccountHandle {
             if let Some(expiration_unix_time) = unlocks.expiration_unix_time {
                 let remainder_address = self.get_remainder_address(transaction_options.clone()).await?;
 
-                first_output_builder = first_output_builder.add_unlock_condition(UnlockCondition::Expiration(
-                    ExpirationUnlockCondition::new(remainder_address, expiration_unix_time)?,
-                ));
+                first_output_builder = first_output_builder
+                    .add_unlock_condition(ExpirationUnlockCondition::new(remainder_address, expiration_unix_time)?);
             }
             if let Some(timelock_unix_time) = unlocks.timelock_unix_time {
-                first_output_builder = first_output_builder.add_unlock_condition(UnlockCondition::Timelock(
-                    TimelockUnlockCondition::new(timelock_unix_time)?,
-                ));
+                first_output_builder =
+                    first_output_builder.add_unlock_condition(TimelockUnlockCondition::new(timelock_unix_time)?);
             }
         }
 
@@ -122,14 +120,13 @@ impl AccountHandle {
                     let min_storage_deposit_return_amount =
                         minimum_storage_deposit_basic_output(&rent_structure, &None, token_supply)?;
 
-                    second_output_builder = second_output_builder.add_unlock_condition(
-                        UnlockCondition::StorageDepositReturn(StorageDepositReturnUnlockCondition::new(
+                    second_output_builder =
+                        second_output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                             remainder_address,
                             // Return minimum storage deposit
                             min_storage_deposit_return_amount,
                             token_supply,
-                        )?),
-                    );
+                        )?);
                 }
 
                 // Check if the remainder balance wouldn't leave dust behind, which wouldn't allow the creation of this
@@ -176,10 +173,9 @@ impl AccountHandle {
             // add newly added amount also to the storage deposit return unlock condition, if that was added
             if let Some(sdr) = second_output.unlock_conditions().storage_deposit_return() {
                 // create a new sdr unlock_condition with the updated amount and replace it
-                let new_sdr_unlock_condition = UnlockCondition::StorageDepositReturn(
+                third_output_builder = third_output_builder.replace_unlock_condition(
                     StorageDepositReturnUnlockCondition::new(*sdr.return_address(), new_sdr_amount, token_supply)?,
                 );
-                third_output_builder = third_output_builder.replace_unlock_condition(new_sdr_unlock_condition);
             }
         }
 
@@ -225,11 +221,11 @@ impl AccountHandle {
         };
 
         // Remove potentially existing features.
-        first_output_builder = first_output_builder.with_features(vec![]);
+        first_output_builder = first_output_builder.clear_features();
 
         // Set new address unlock condition
-        first_output_builder = first_output_builder.with_unlock_conditions(vec![UnlockCondition::Address(
-            AddressUnlockCondition::new(Address::try_from_bech32(options.recipient_address.clone())?),
+        first_output_builder = first_output_builder.with_unlock_conditions(vec![AddressUnlockCondition::new(
+            Address::try_from_bech32(options.recipient_address.clone())?,
         )]);
 
         if let Some(assets) = options.assets {
@@ -240,25 +236,25 @@ impl AccountHandle {
 
         if let Some(features) = options.features {
             if let Some(tag) = features.tag {
-                first_output_builder = first_output_builder.add_feature(Feature::Tag(TagFeature::new(
+                first_output_builder = first_output_builder.add_feature(TagFeature::new(
                     prefix_hex::decode(tag).map_err(|_| DtoError::InvalidField("tag"))?,
-                )?));
+                )?);
             }
 
             if let Some(metadata) = features.metadata {
-                first_output_builder = first_output_builder.add_feature(Feature::Metadata(MetadataFeature::new(
+                first_output_builder = first_output_builder.add_feature(MetadataFeature::new(
                     prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("metadata"))?,
-                )?));
+                )?);
             }
 
             if let Some(sender) = features.sender {
-                first_output_builder = first_output_builder
-                    .add_feature(Feature::Sender(SenderFeature::new(Address::try_from_bech32(sender)?)))
+                first_output_builder =
+                    first_output_builder.add_feature(SenderFeature::new(Address::try_from_bech32(sender)?))
             }
 
             if let Some(issuer) = features.issuer {
-                first_output_builder = first_output_builder
-                    .add_immutable_feature(Feature::Issuer(IssuerFeature::new(Address::try_from_bech32(issuer)?)));
+                first_output_builder =
+                    first_output_builder.add_immutable_feature(IssuerFeature::new(Address::try_from_bech32(issuer)?));
             }
         }
 
@@ -266,14 +262,12 @@ impl AccountHandle {
             if let Some(expiration_unix_time) = unlocks.expiration_unix_time {
                 let remainder_address = self.get_remainder_address(transaction_options.clone()).await?;
 
-                first_output_builder = first_output_builder.add_unlock_condition(UnlockCondition::Expiration(
-                    ExpirationUnlockCondition::new(remainder_address, expiration_unix_time)?,
-                ));
+                first_output_builder = first_output_builder
+                    .add_unlock_condition(ExpirationUnlockCondition::new(remainder_address, expiration_unix_time)?);
             }
             if let Some(timelock_unix_time) = unlocks.timelock_unix_time {
-                first_output_builder = first_output_builder.add_unlock_condition(UnlockCondition::Timelock(
-                    TimelockUnlockCondition::new(timelock_unix_time)?,
-                ));
+                first_output_builder =
+                    first_output_builder.add_unlock_condition(TimelockUnlockCondition::new(timelock_unix_time)?);
             }
         }
 
@@ -300,14 +294,13 @@ impl AccountHandle {
                     let min_storage_deposit_return_amount =
                         minimum_storage_deposit_basic_output(&rent_structure, &None, token_supply)?;
 
-                    second_output_builder = second_output_builder.add_unlock_condition(
-                        UnlockCondition::StorageDepositReturn(StorageDepositReturnUnlockCondition::new(
+                    second_output_builder =
+                        second_output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                             remainder_address,
                             // Return minimum storage deposit
                             min_storage_deposit_return_amount,
                             token_supply,
-                        )?),
-                    );
+                        )?);
                 }
 
                 // Check if the remaining balance wouldn't leave dust behind, which wouldn't allow the creation of this
@@ -354,10 +347,9 @@ impl AccountHandle {
             // add newly added amount also to the storage deposit return unlock condition, if that was added
             if let Some(sdr) = second_output.unlock_conditions().storage_deposit_return() {
                 // create a new sdr unlock_condition with the updated amount and replace it
-                let new_sdr_unlock_condition = UnlockCondition::StorageDepositReturn(
+                third_output_builder = third_output_builder.replace_unlock_condition(
                     StorageDepositReturnUnlockCondition::new(*sdr.return_address(), new_sdr_amount, token_supply)?,
                 );
-                third_output_builder = third_output_builder.replace_unlock_condition(new_sdr_unlock_condition);
             }
         }
 

@@ -13,6 +13,6 @@ export {
     initLogger as internalInitLogger,
     sendMessageAsync,
     messageHandlerNew,
-    listen,
+    listen as listenTo,
     destroy,
 };

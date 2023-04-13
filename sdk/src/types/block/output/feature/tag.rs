@@ -62,9 +62,10 @@ impl core::fmt::Debug for TagFeature {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::string::String;
+
     use serde::{Deserialize, Serialize};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]

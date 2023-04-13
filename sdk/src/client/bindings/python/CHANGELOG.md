@@ -25,12 +25,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Client::hash_transaction_essence()`;
 - `Node` class;
+- `CoinType` enum class;
+- `UnlockContition` class;
+- `UnlockContitionType` enum class;
+- `AddressUnlockCondition`, 
+  `StorageDepositReturnUnlockCondition`, 
+  `TimelockUnlockCondition`, 
+  `ExpirationUnlockCondition`, 
+  `StateControllerAddressUnlockCondition`, 
+  `GovernorAddressUnlockCondition`, 
+  `ImmutableAliasAddressUnlockCondition` wrapper classes;
+- `Address` class;
+- `Ed25519Address`, `AliasAddress` and `NFTAddress` as `Address` wrapper classes;
+- `AddressType` enum class;
+- `Feature` class;
+- `SenderFeature`, `IssuerFeature`, `MetadataFeature`, `TagFeature` wrapper classes;
+- `FeatureType` enum class;
+- `NativeToken` class;
+- `TokenScheme` class;
 
 ### Changed
 
 - Changes from the Rust library;
 - `Client::build_alias_output()` state_metadata parameter is now a string;
 - `IotaClient` now uses multiple arguments instead of a single dictionary;
+- `Client::generate_addresses` now uses multiple arguments instead of a single dictionary;
+- `Client::{build_alias_output, build_basic_output, build_foundry_output, build_nft_output}` now use specific classes instead of dictionaries to pass properties and amount is properly passed as integer;
 
 ### Fixed
 

@@ -1,14 +1,16 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example generate_addresses --release -- [NODE URL]
+//! TODO: Example description
+//!
+//! `cargo run --example generate_addresses --release -- [NODE_URL]`
 
 use iota_sdk::client::{api::GetAddressesBuilder, secret::SecretManager, Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv::dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args()

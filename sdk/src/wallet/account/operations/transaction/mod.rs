@@ -40,9 +40,9 @@ impl AccountHandle {
     /// ```ignore
     /// let outputs = vec![
     ///    BasicOutputBuilder::new_with_amount(1_000_000)?
-    ///    .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
+    ///    .add_unlock_condition(AddressUnlockCondition::new(
     ///        Address::try_from_bech32("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
-    ///    )))
+    ///    ))
     ///    .finish_output(account_handle.client.get_token_supply().await?;)?,
     /// ];
     /// let tx = account_handle
@@ -104,7 +104,7 @@ impl AccountHandle {
             Ok(res) => res,
             Err(err) => {
                 // unlock outputs so they are available for a new transaction
-                self.unlock_inputs(prepared_transaction_data.inputs_data).await?;
+                self.unlock_inputs(&prepared_transaction_data.inputs_data).await?;
                 return Err(err);
             }
         };
@@ -117,7 +117,10 @@ impl AccountHandle {
         &self,
         signed_transaction_data: SignedTransactionData,
     ) -> crate::wallet::Result<Transaction> {
-        log::debug!("[TRANSACTION] submit_and_store_transaction");
+        log::debug!(
+            "[TRANSACTION] submit_and_store_transaction {}",
+            signed_transaction_data.transaction_payload.id()
+        );
 
         // Validate transaction before sending and storing it
         let local_time = self.client.get_time_checked().await?;
@@ -134,7 +137,7 @@ impl AccountHandle {
                 signed_transaction_data.transaction_payload
             );
             // unlock outputs so they are available for a new transaction
-            self.unlock_inputs(signed_transaction_data.inputs_data).await?;
+            self.unlock_inputs(&signed_transaction_data.inputs_data).await?;
             return Err(Error::TransactionSemantic(conflict).into());
         }
 
@@ -190,9 +193,9 @@ impl AccountHandle {
     }
 
     // unlock outputs
-    async fn unlock_inputs(&self, inputs: Vec<InputSigningData>) -> crate::wallet::Result<()> {
+    async fn unlock_inputs(&self, inputs: &[InputSigningData]) -> crate::wallet::Result<()> {
         let mut account = self.write().await;
-        for input_signing_data in &inputs {
+        for input_signing_data in inputs {
             let output_id = input_signing_data.output_id();
             account.locked_outputs.remove(output_id);
             log::debug!(

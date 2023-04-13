@@ -12,17 +12,16 @@ use iota_sdk::{
             address::Address,
             output::{
                 unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken, NftId,
-                OutputId, TokenId, UnlockCondition,
+                OutputId, TokenId,
             },
         },
     },
     wallet::{
         account::{
             types::{AccountAddress, TransactionDto},
-            AccountHandle, OutputsToClaim,
+            AccountHandle, OutputsToClaim, TransactionOptions,
         },
-        AddressAndNftId, AddressNativeTokens, AddressWithAmount, AddressWithMicroAmount, NativeTokenOptions,
-        NftOptions, U256,
+        AddressAndNftId, AddressNativeTokens, AddressWithAmount, NativeTokenOptions, NftOptions, U256,
     },
 };
 
@@ -84,7 +83,7 @@ pub enum AccountCommand {
     Exit,
     /// Request funds from the faucet.
     Faucet {
-        /// URL of the faucet, default to https://faucet.testnet.shimmer.network/api/enqueue.
+        /// URL of the faucet, default to <https://faucet.testnet.shimmer.network/api/enqueue>.
         url: Option<String>,
         /// Address the faucet sends the funds to, defaults to the latest address.
         address: Option<String>,
@@ -110,7 +109,7 @@ pub enum AccountCommand {
         foundry_metadata_file: Option<String>,
     },
     /// Mint an NFT.
-    /// IOTA NFT Standard - TIP27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md.
+    /// IOTA NFT Standard - TIP27: <https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md>.
     MintNft {
         /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         address: Option<String>,
@@ -151,13 +150,20 @@ pub enum AccountCommand {
         address: String,
         /// Amount to send, e.g. 1000000.
         amount: u64,
-    },
-    /// Send an amount below the storage deposit minimum.
-    SendMicro {
-        /// Address to send funds to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
-        address: String,
-        /// Amount to send, e.g. 1.
-        amount: u64,
+        /// Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
+        /// given the provided amount. If a storage deposit is needed and a return address is not provided, it will
+        /// default to the first address of the account.
+        #[arg(long)]
+        return_address: Option<String>,
+        /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
+        /// receiver already. The expiration will only be used if one is necessary given the provided amount. If an
+        /// expiration is needed but not provided, it will default to one day.
+        #[arg(long)]
+        expiration: Option<humantime::Duration>,
+        /// Whether to send micro amounts. This will automatically add Storage Deposit Return and Expiration unlock
+        /// conditions if necessary. This flag is implied by the existence of a return address or expiration.
+        #[arg(long, default_value_t = false)]
+        allow_micro_amount: bool,
     },
     /// Send native tokens.
     /// This will create an output with an expiration and storage deposit return unlock condition.
@@ -465,7 +471,7 @@ pub async fn mint_native_token_command(
     foundry_metadata: Option<Vec<u8>>,
 ) -> Result<(), Error> {
     // If no alias output exists, create one first
-    if account_handle.balance().await?.aliases.is_empty() {
+    if account_handle.balance().await?.aliases().is_empty() {
         let transaction = account_handle.create_alias_output(None, None).await?;
         println_log_info!(
             "Alias output minting transaction sent:\n{:?}\n{:?}",
@@ -508,7 +514,7 @@ pub async fn mint_nft_command(
     issuer: Option<String>,
 ) -> Result<(), Error> {
     let tag = if let Some(hex) = tag {
-        Some(prefix_hex::decode(&hex).map_err(|e| Error::Miscellaneous(e.to_string()))?)
+        Some(prefix_hex::decode(hex).map_err(|e| Error::Miscellaneous(e.to_string()))?)
     } else {
         None
     };
@@ -568,32 +574,31 @@ pub async fn outputs_command(account_handle: &AccountHandle) -> Result<(), Error
 }
 
 // `send` command
-pub async fn send_command(account_handle: &AccountHandle, address: String, amount: u64) -> Result<(), Error> {
-    let outputs = vec![AddressWithAmount { address, amount }];
-    let transaction = account_handle.send_amount(outputs, None).await?;
+pub async fn send_command(
+    account_handle: &AccountHandle,
+    address: String,
+    amount: u64,
+    return_address: Option<String>,
+    expiration: Option<u32>,
+    allow_micro_amount: bool,
+) -> Result<(), Error> {
+    let outputs = vec![
+        AddressWithAmount::new(address, amount)
+            .with_return_address(return_address)
+            .with_expiration(expiration),
+    ];
+    let transaction = account_handle
+        .send_amount(
+            outputs,
+            TransactionOptions {
+                allow_micro_amount,
+                ..Default::default()
+            },
+        )
+        .await?;
 
     println_log_info!(
         "Transaction sent:\n{:?}\n{:?}",
-        transaction.transaction_id,
-        transaction.block_id
-    );
-
-    Ok(())
-}
-
-// `send-micro` command
-pub async fn send_micro_command(account_handle: &AccountHandle, address: String, amount: u64) -> Result<(), Error> {
-    let outputs = vec![AddressWithMicroAmount {
-        address,
-        amount,
-        return_address: None,
-        expiration: None,
-    }];
-
-    let transaction = account_handle.send_micro_transaction(outputs, None).await?;
-
-    println_log_info!(
-        "Micro transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
     );
@@ -619,7 +624,7 @@ pub async fn send_native_token_command(
 
         let outputs = vec![
             BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
-                .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
+                .add_unlock_condition(AddressUnlockCondition::new(address))
                 .with_native_tokens(vec![NativeToken::new(
                     TokenId::from_str(&token_id)?,
                     U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,

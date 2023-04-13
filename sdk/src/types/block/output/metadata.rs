@@ -117,10 +117,10 @@ impl OutputMetadata {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
-    use std::str::FromStr;
+    use alloc::string::{String, ToString};
+    use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
 

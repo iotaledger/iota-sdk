@@ -16,12 +16,15 @@ async function run() {
             'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0';
         const amount = '1000';
 
-        const response = await account.sendMicroTransaction([
-            {
+        const response = await account.sendAmount(
+            [{
                 address,
                 amount,
-            },
-        ]);
+            }],
+            {
+                allowMicroAmount: true,
+            }
+        );
 
         console.log(response);
 

@@ -44,9 +44,9 @@ pub enum Address {
 impl core::fmt::Debug for Address {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Ed25519(address) => write!(f, "{address:?}"),
-            Self::Alias(address) => write!(f, "{address:?}"),
-            Self::Nft(address) => write!(f, "{address:?}"),
+            Self::Ed25519(address) => address.fmt(f),
+            Self::Alias(address) => address.fmt(f),
+            Self::Nft(address) => address.fmt(f),
         }
     }
 }
@@ -196,9 +196,10 @@ impl Address {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::format;
+
     use serde::{Deserialize, Serialize, Serializer};
     use serde_json::Value;
 

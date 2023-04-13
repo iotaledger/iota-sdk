@@ -20,7 +20,7 @@ pub enum TokenScheme {
 impl core::fmt::Debug for TokenScheme {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Simple(scheme) => write!(f, "{scheme:?}"),
+            Self::Simple(scheme) => scheme.fmt(f),
         }
     }
 }
@@ -34,7 +34,6 @@ impl TokenScheme {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
     use derive_more::From;

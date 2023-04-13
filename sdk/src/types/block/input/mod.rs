@@ -41,8 +41,8 @@ pub enum Input {
 impl core::fmt::Debug for Input {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Utxo(input) => write!(f, "{input:?}"),
-            Self::Treasury(input) => write!(f, "{input:?}"),
+            Self::Utxo(input) => input.fmt(f),
+            Self::Treasury(input) => input.fmt(f),
         }
     }
 }
@@ -87,7 +87,6 @@ impl Input {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
     use serde::{Deserialize, Serialize};

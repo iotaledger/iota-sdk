@@ -2,7 +2,6 @@ import type { OutputTypes, HexEncodedAmount } from '@iota/types';
 import type { SyncOptions, FilterOptions } from '../account';
 import type {
     AddressWithAmount,
-    AddressWithMicroAmount,
     AddressNativeTokens,
     AddressNftId,
     AddressGenerationOptions,
@@ -293,14 +292,6 @@ export type __SendAmountMethod__ = {
     };
 };
 
-export type __SendMicroTransactionMethod__ = {
-    name: 'sendMicroTransaction';
-    data: {
-        addressesWithMicroAmount: AddressWithMicroAmount[];
-        options?: TransactionOptions;
-    };
-};
-
 export type __SendNativeTokensMethod__ = {
     name: 'sendNativeTokens';
     data: {
@@ -366,10 +357,6 @@ export type __StopParticipatingMethod__ = {
     data: {
         eventId: ParticipationEventId;
     };
-};
-
-export type __GetVotingPowerMethod__ = {
-    name: 'getVotingPower';
 };
 
 export type __GetParticipationOverviewMethod__ = {

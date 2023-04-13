@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example participation --features=participation --release
+//! TODO: Example description
+//!
+//! `cargo run --example participation --features=participation --release`
 
 use iota_sdk::{
     client::{
@@ -10,7 +12,7 @@ use iota_sdk::{
     },
     types::{
         api::plugins::participation::types::{Participation, ParticipationEventId, Participations, PARTICIPATION_TAG},
-        block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
+        block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
     },
 };
 
@@ -23,8 +25,8 @@ async fn main() -> Result<()> {
 
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses dotenv, which is not safe for use in production.
-        dotenv::dotenv().ok();
+        // This example uses secrets in environment variables for simplicity which should not be done in production.
+        dotenvy::dotenv().ok();
         std::env::var("NODE_URL").unwrap()
     });
 
@@ -100,7 +102,7 @@ async fn participate(client: &Client, event_id: ParticipationEventId, node_url: 
 
     let outputs = vec![
         BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)))
+            .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish_output(token_supply)?,
     ];
 

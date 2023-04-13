@@ -59,9 +59,10 @@ fn verify_amount_packable<const VERIFY: bool>(
     verify_amount::<VERIFY>(amount, &protocol_parameters.token_supply())
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::string::{String, ToString};
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
