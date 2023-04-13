@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use dialoguer::{console::Term, theme::ColorfulTheme, Password, Select};
-use iota_sdk::{client::generate_mnemonic, wallet::Wallet};
+use iota_sdk::wallet::Wallet;
 use tokio::{fs::OpenOptions, io::AsyncWriteExt};
 
 use crate::{error::Error, println_log_info};
@@ -56,8 +56,8 @@ pub async fn bytes_from_hex_or_file(hex: Option<String>, file: Option<String>) -
     })
 }
 
-pub async fn get_mnemonic() -> Result<String, Error> {
-    let mnemonic = generate_mnemonic()?;
+pub async fn generate_mnemonic() -> Result<String, Error> {
+    let mnemonic = iota_sdk::client::generate_mnemonic()?;
     println_log_info!("Mnemonic has been generated.");
 
     let choices = [

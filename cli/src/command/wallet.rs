@@ -10,7 +10,7 @@ use log::LevelFilter;
 
 use crate::{
     error::Error,
-    helper::{get_mnemonic, get_password},
+    helper::{generate_mnemonic, get_password},
     println_log_info,
 };
 
@@ -107,7 +107,7 @@ pub async fn init_command(
 
     let mnemonic = match parameters.mnemonic {
         Some(mnemonic) => mnemonic,
-        None => get_mnemonic().await?,
+        None => generate_mnemonic().await?,
     };
 
     if let SecretManager::Stronghold(secret_manager) = &mut *wallet.get_secret_manager().write().await {
@@ -121,7 +121,7 @@ pub async fn init_command(
 }
 
 pub async fn mnemonic_command() -> Result<(), Error> {
-    get_mnemonic().await?;
+    generate_mnemonic().await?;
 
     Ok(())
 }
