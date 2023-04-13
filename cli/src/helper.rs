@@ -75,21 +75,21 @@ pub async fn get_mnemonic() -> Result<String, Error> {
     }
     if matches!(selected_choice, Some(1 | 2)) {
         write_mnemonic_to_file(MNEMONIC_FILE_NAME, &mnemonic).await?;
+        println_log_info!("Mnemonic has been written to '{MNEMONIC_FILE_NAME}'.");
     }
+
+    println_log_info!("IMPORTANT:");
+    println_log_info!("Store this mnemonic in a secure location!");
+    println_log_info!(
+        "It is the only way to recover your account if you ever forget your password and/or lose the stronghold file."
+    );
+
     Ok(mnemonic)
 }
 
 async fn write_mnemonic_to_file(path: &str, mnemonic: &str) -> Result<(), Error> {
     let mut file = OpenOptions::new().create(true).append(true).open(path).await?;
     file.write_all(format!("{mnemonic}\n").as_bytes()).await?;
-
-    println_log_info!("IMPORTANT:");
-    println_log_info!(
-        "Mnemonic has been written to '{MNEMONIC_FILE_NAME}'. Make sure it resides in a secure location."
-    );
-    println_log_info!(
-        "It is the only way to recover your account if you ever forget your password and/or lose the stronghold file."
-    );
 
     Ok(())
 }
