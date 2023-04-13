@@ -83,7 +83,7 @@ pub enum AccountCommand {
     Exit,
     /// Request funds from the faucet.
     Faucet {
-        /// URL of the faucet, default to https://faucet.testnet.shimmer.network/api/enqueue.
+        /// URL of the faucet, default to <https://faucet.testnet.shimmer.network/api/enqueue>.
         url: Option<String>,
         /// Address the faucet sends the funds to, defaults to the latest address.
         address: Option<String>,
@@ -109,7 +109,7 @@ pub enum AccountCommand {
         foundry_metadata_file: Option<String>,
     },
     /// Mint an NFT.
-    /// IOTA NFT Standard - TIP27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md.
+    /// IOTA NFT Standard - TIP27: <https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md>.
     MintNft {
         /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         address: Option<String>,
@@ -153,14 +153,16 @@ pub enum AccountCommand {
         /// Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
         /// given the provided amount. If a storage deposit is needed and a return address is not provided, it will
         /// default to the first address of the account.
+        #[arg(long)]
         return_address: Option<String>,
         /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
         /// receiver already. The expiration will only be used if one is necessary given the provided amount. If an
         /// expiration is needed but not provided, it will default to one day.
+        #[arg(long)]
         expiration: Option<humantime::Duration>,
         /// Whether to send micro amounts. This will automatically add Storage Deposit Return and Expiration unlock
-        /// conditions if necessary.
-        #[arg(default_value_t = false)]
+        /// conditions if necessary. This flag is implied by the existence of a return address or expiration.
+        #[arg(long, default_value_t = false)]
         allow_micro_amount: bool,
     },
     /// Send native tokens.

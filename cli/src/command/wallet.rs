@@ -1,20 +1,23 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{fs::File, io::prelude::*, path::Path};
+use std::path::Path;
 
 use clap::{Args, Parser, Subcommand};
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
         secret::{stronghold::StrongholdSecretManager, SecretManager},
-        utils::generate_mnemonic,
     },
     wallet::{ClientOptions, Wallet},
 };
 use log::LevelFilter;
 
-use crate::{error::Error, helper::get_password, println_log_info};
+use crate::{
+    error::Error,
+    helper::{generate_mnemonic, get_password},
+    println_log_info,
+};
 
 const DEFAULT_NODE_URL: &str = "https://api.testnet.shimmer.network";
 const DEFAULT_WALLET_DATABASE_PATH: &str = "./stardust-cli-wallet-db";
@@ -124,17 +127,8 @@ pub async fn init_command(
 
     let mnemonic = match parameters.mnemonic {
         Some(mnemonic) => mnemonic,
-        None => generate_mnemonic()?,
+        None => generate_mnemonic().await?,
     };
-
-    let mut file = File::options().create(true).append(true).open("mnemonic.txt")?;
-    // Write mnemonic with new line
-    file.write_all(format!("init_command: {mnemonic}\n").as_bytes())?;
-
-    println_log_info!("IMPORTANT: mnemonic has been written to \"mnemonic.txt\", handle it safely.");
-    println_log_info!(
-        "It is the only way to recover your account if you ever forget your password and/or lose the stronghold file."
-    );
 
     if let SecretManager::Stronghold(secret_manager) = &mut *wallet.get_secret_manager().write().await {
         secret_manager.store_mnemonic(mnemonic).await?;
@@ -147,16 +141,7 @@ pub async fn init_command(
 }
 
 pub async fn mnemonic_command() -> Result<(), Error> {
-    let mnemonic = generate_mnemonic()?;
-
-    let mut file = File::options().create(true).append(true).open("mnemonic.txt")?;
-    // Write mnemonic with new line
-    file.write_all(format!("mnemonic_command: {mnemonic}\n").as_bytes())?;
-
-    println_log_info!("IMPORTANT: mnemonic has been written to \"mnemonic.txt\", handle it safely.");
-    println_log_info!(
-        "It is the only way to recover your account if you ever forget your password and/or lose the stronghold file."
-    );
+    generate_mnemonic().await?;
 
     Ok(())
 }
