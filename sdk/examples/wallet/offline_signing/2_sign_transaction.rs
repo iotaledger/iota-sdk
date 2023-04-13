@@ -8,7 +8,7 @@
 use std::{
     fs::File,
     io::{prelude::*, BufWriter},
-    path::{Path, PathBuf},
+    path::Path,
 };
 
 use iota_sdk::{
@@ -23,8 +23,8 @@ use iota_sdk::{
     wallet::Result,
 };
 
-const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/prepared_transaction.json";
-const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/signed_transaction.json";
+const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/wallet/offline_signing/prepared_transaction.json";
+const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/wallet/offline_signing/signed_transaction.json";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -34,7 +34,7 @@ async fn main() -> Result<()> {
     // Setup Stronghold secret_manager
     let mut secret_manager = StrongholdSecretManager::builder()
         .password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
-        .build(PathBuf::from("examples/offline_signing/offline_signing.stronghold"))?;
+        .build("examples/wallet/offline_signing/offline_signing.stronghold")?;
 
     // Load snapshot file
     secret_manager.read_stronghold_snapshot().await?;

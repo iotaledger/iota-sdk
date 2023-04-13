@@ -32,7 +32,7 @@ async fn send_amount() -> Result<()> {
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
-    assert_eq!(balance.base_coin.available, amount);
+    assert_eq!(balance.base_coin().available(), amount);
 
     tear_down(storage_path)
 }
@@ -68,7 +68,7 @@ async fn send_amount_127_outputs() -> Result<()> {
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
-    assert_eq!(balance.base_coin.available, 127 * amount);
+    assert_eq!(balance.base_coin().available(), 127 * amount);
 
     tear_down(storage_path)
 }
@@ -98,7 +98,7 @@ async fn send_amount_custom_input() -> Result<()> {
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
-    assert_eq!(balance.base_coin.available, 10 * amount);
+    assert_eq!(balance.base_coin().available(), 10 * amount);
 
     // Send back with custom provided input
     let custom_input = &account_1.unspent_outputs(None).await?[5];
@@ -143,7 +143,7 @@ async fn send_nft() -> Result<()> {
     accounts[0]
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
-    let nft_id = *accounts[0].sync(None).await?.nfts.first().unwrap();
+    let nft_id = *accounts[0].sync(None).await?.nfts().first().unwrap();
 
     // Send to account 1
     let transaction = accounts[0]
@@ -161,8 +161,8 @@ async fn send_nft() -> Result<()> {
         .await?;
 
     let balance = accounts[1].sync(None).await?;
-    assert_eq!(balance.nfts.len(), 1);
-    assert_eq!(*balance.nfts.first().unwrap(), nft_id);
+    assert_eq!(balance.nfts().len(), 1);
+    assert_eq!(*balance.nfts().first().unwrap(), nft_id);
 
     tear_down(storage_path)
 }

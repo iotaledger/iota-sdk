@@ -20,8 +20,8 @@ use iota_sdk::{
     types::block::payload::transaction::TransactionPayload,
 };
 
-const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/prepared_transaction.json";
-const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/signed_transaction.json";
+const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/client/offline_signing/prepared_transaction.json";
+const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/client/offline_signing/signed_transaction.json";
 
 #[tokio::main]
 async fn main() -> Result<()> {

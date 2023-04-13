@@ -19,6 +19,7 @@ use super::{
 };
 use crate::{
     client::{
+        constants::HD_WALLET_TYPE,
         secret::{GenerateAddressOptions, SecretManage},
         Error, Result,
     },
@@ -49,13 +50,22 @@ impl SecretManage for StrongholdAdapter {
 
         // Stronghold arguments.
         let seed_location = Slip10DeriveInput::Seed(Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH));
-        let derive_location = Location::generic(SECRET_VAULT_PATH, DERIVE_OUTPUT_RECORD_PATH);
 
         // Addresses to return.
         let mut addresses = Vec::new();
 
         for address_index in address_indexes {
-            let chain = Chain::from_u32_hardened(vec![44u32, coin_type, account_index, internal as u32, address_index]);
+            let bip_path = vec![HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index];
+            let chain = Chain::from_u32_hardened(bip_path);
+
+            let derive_location = Location::generic(
+                SECRET_VAULT_PATH,
+                [
+                    DERIVE_OUTPUT_RECORD_PATH,
+                    &chain.segments().iter().flat_map(|seg| seg.bs()).collect::<Vec<u8>>(),
+                ]
+                .concat(),
+            );
 
             // Derive a SLIP-10 private key in the vault.
             self.slip10_derive(chain, seed_location.clone(), derive_location.clone())
@@ -63,6 +73,14 @@ impl SecretManage for StrongholdAdapter {
 
             // Get the Ed25519 public key from the derived SLIP-10 private key in the vault.
             let public_key = self.ed25519_public_key(derive_location.clone()).await?;
+
+            // Cleanup location afterwards
+            self.stronghold
+                .lock()
+                .await
+                .get_client(PRIVATE_DATA_CLIENT_PATH)?
+                .vault(SECRET_VAULT_PATH)
+                .delete_secret(derive_location.record_path())?;
 
             // Hash the public key to get the address.
             let hash = Blake2b256::digest(public_key);
@@ -89,27 +107,31 @@ impl SecretManage for StrongholdAdapter {
 
         // Stronghold arguments.
         let seed_location = Slip10DeriveInput::Seed(Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH));
-        let derive_location = Location::generic(SECRET_VAULT_PATH, DERIVE_OUTPUT_RECORD_PATH);
 
-        // Stronghold asks for an older version of [Chain], so we have to perform a conversion here.
-        let chain = {
-            let raw: Vec<u32> = chain
-                .segments()
-                .iter()
-                // XXX: "ser32(i)". RTFSC: [crypto::keys::slip10::Segment::from_u32()]
-                .map(|seg| u32::from_be_bytes(seg.bs()))
-                .collect();
-
-            Chain::from_u32_hardened(raw)
-        };
+        let derive_location = Location::generic(
+            SECRET_VAULT_PATH,
+            [
+                DERIVE_OUTPUT_RECORD_PATH,
+                &chain.segments().iter().flat_map(|seg| seg.bs()).collect::<Vec<u8>>(),
+            ]
+            .concat(),
+        );
 
         // Derive a SLIP-10 private key in the vault.
-        self.slip10_derive(chain, seed_location, derive_location.clone())
+        self.slip10_derive(chain.clone(), seed_location, derive_location.clone())
             .await?;
 
         // Get the Ed25519 public key from the derived SLIP-10 private key in the vault.
         let public_key = self.ed25519_public_key(derive_location.clone()).await?;
-        let signature = self.ed25519_sign(derive_location, msg).await?;
+        let signature = self.ed25519_sign(derive_location.clone(), msg).await?;
+
+        // Cleanup location afterwards
+        self.stronghold
+            .lock()
+            .await
+            .get_client(PRIVATE_DATA_CLIENT_PATH)?
+            .vault(SECRET_VAULT_PATH)
+            .delete_secret(derive_location.record_path())?;
 
         Ok(Ed25519Signature::new(public_key, signature))
     }

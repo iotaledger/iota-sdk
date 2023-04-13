@@ -15,7 +15,7 @@ use iota_sdk::{
     types::block::{payload::Payload, semantic::ConflictReason},
 };
 
-const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/signed_transaction.json";
+const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/client/offline_signing/signed_transaction.json";
 
 #[tokio::main]
 async fn main() -> Result<()> {

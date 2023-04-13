@@ -469,7 +469,7 @@ pub async fn mint_native_token_command(
     foundry_metadata: Option<Vec<u8>>,
 ) -> Result<(), Error> {
     // If no alias output exists, create one first
-    if account_handle.balance().await?.aliases.is_empty() {
+    if account_handle.balance().await?.aliases().is_empty() {
         let transaction = account_handle.create_alias_output(None, None).await?;
         println_log_info!(
             "Alias output minting transaction sent:\n{:?}\n{:?}",
