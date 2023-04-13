@@ -18,7 +18,7 @@ features = [
     MetadataFeature('0x'+'Hello, World!'.encode('utf-8').hex())
 ]
 immutable_features = [
-    IssuerFeature(issuer=Ed25519Address(hexAddress)),
+    IssuerFeature(Ed25519Address(hexAddress)),
     MetadataFeature('0x'+'Hello, World!'.encode('utf-8').hex())
 ]
 

@@ -61,9 +61,7 @@ print(json.dumps(basic_output, indent=4))
 basic_output = client.build_basic_output(
     unlock_conditions=[
         address_unlock_condition,
-        TimelockUnlockCondition(
-            unix_time=1
-        )
+        TimelockUnlockCondition(1)
     ],
     amount=1000000,
 )
