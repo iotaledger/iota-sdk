@@ -15,13 +15,13 @@ use iota_sdk::{
     wallet::{Result, Wallet},
 };
 
-const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/signed_transaction.json";
+const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/wallet/offline_signing/signed_transaction.json";
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // Create the wallet with the secret_manager and client options
     let wallet = Wallet::builder()
-        .with_storage_path("examples/offline_signing/online_walletdb")
+        .with_storage_path("examples/wallet/offline_signing/online_walletdb")
         .finish()
         .await?;
 
