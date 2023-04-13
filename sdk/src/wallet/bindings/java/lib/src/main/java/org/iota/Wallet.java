@@ -17,6 +17,7 @@ import org.iota.types.events.wallet.WalletEvent;
 import org.iota.types.events.wallet.WalletEventType;
 import org.iota.types.exceptions.InitializeWalletException;
 import org.iota.types.exceptions.WalletException;
+import org.iota.types.ids.account.AccountAlias;
 import org.iota.types.ids.account.AccountIdentifier;
 import org.iota.types.ids.account.AccountIndex;
 import org.iota.types.account_methods.AddressGenerationOptions;
@@ -52,6 +53,16 @@ public class Wallet extends NativeApi {
         AccountHandle handle = new AccountHandle(this, new AccountIndex(a.getIndex()));
 
         return handle;
+    }
+
+    /**
+     * Return a given account from the wallet.
+     *
+     * @param accountIdentifier The account identifier by alias.
+     * @return An AccountHandle object.
+     */
+    public AccountHandle getAccount(String accountIdentifier) throws WalletException {
+        return this.getAccount(new AccountAlias(accountIdentifier));
     }
 
     /**

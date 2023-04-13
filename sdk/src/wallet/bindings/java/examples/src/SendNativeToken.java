@@ -32,15 +32,17 @@ public class SendNativeToken {
         String tokenAmount = "0x17"; // `100` hex encoded
 
         // Send transaction.
-        Transaction t = a.sendNativeTokens(new SendNativeTokens().withAddressesNativeTokens(new AddressNativeTokens[]{ new AddressNativeTokens()
-                .withAddress(receiverAddress)
-                .withNativeTokens(new AddressNativeTokens.NativeTokenTuple[] {
-                        new AddressNativeTokens.NativeTokenTuple(tokenId, tokenAmount)
-                })
-        }));
+        Transaction transaction = a.sendNativeTokens(new SendNativeTokens()
+                        .withAddressesNativeTokens(new AddressNativeTokens[] { new AddressNativeTokens()
+                                        .withAddress(receiverAddress)
+                                        .withNativeTokens(new AddressNativeTokens.NativeTokenTuple[] {
+                                                        new AddressNativeTokens.NativeTokenTuple(tokenId, tokenAmount)
+                                        })
+                        }));
 
         // Print transaction.
-        System.out.println(t);
+        System.out.println("Transaction: " + transaction.getTransactionId());
+        System.out.println("Block sent: " + Env.EXPLORER + "/block/" + transaction.getBlockId());
 
         // In case you are done and don't need the wallet instance anymore you can destroy the instance to clean up memory.
         // For this, check out the ´DestroyWallet.java´ example.
