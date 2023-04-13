@@ -1,4 +1,4 @@
-from iota_client import IotaClient
+from iota_client import *
 import json
 
 # Create an IotaClient instance
@@ -8,45 +8,18 @@ hexAddress = client.bech32_to_hex(
     'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy')
 
 alias_id = '0x0000000000000000000000000000000000000000000000000000000000000000'
-# `hello` hex encoded
-state_metadata = '0x68656c6c6f'
+state_metadata = data='0x'+'Hello, World!'.encode('utf-8').hex()
 unlock_conditions = [
-    # StateControllerAddressUnlockCondition
-    {'type': 4, 'address': {'type': 0, 'pubKeyHash': hexAddress}},
-    # GovernorAddressUnlockCondition
-    {'type': 5, 'address': {'type': 0, 'pubKeyHash': hexAddress}},
+    StateControllerAddressUnlockCondition(Ed25519Address(hexAddress)),
+    GovernorAddressUnlockCondition(Ed25519Address(hexAddress))
 ]
 features = [
-    {
-        # sender feature
-        'type': 0,
-        'address': {
-            'type': 0,
-            'pubKeyHash': hexAddress,
-        },
-    },
-    {
-        # MetadataFeature
-        'type': 2,
-        # `hello` hex encoded
-        'data': '0x68656c6c6f',
-    }
+    SenderFeature(Ed25519Address(hexAddress)),
+    MetadataFeature('0x'+'Hello, World!'.encode('utf-8').hex())
 ]
 immutable_features = [
-    {
-        # issuer feature
-        'type': 1,
-        'address': {
-            'type': 0,
-            'pubKeyHash': hexAddress,
-        },
-    },
-    {
-        # MetadataFeature
-        'type': 2,
-        # `hello` hex encoded
-        'data': '0x68656c6c6f',
-    },
+    IssuerFeature(Ed25519Address(hexAddress)),
+    MetadataFeature('0x'+'Hello, World!'.encode('utf-8').hex())
 ]
 
 # Build alias output

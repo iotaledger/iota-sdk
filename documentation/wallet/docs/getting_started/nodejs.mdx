@@ -12,6 +12,8 @@ keywords:
 - security
 ---
 import WarningPasswordStorage from '../_admonitions/_password_storage.md';
+import CodeBlock from '@theme/CodeBlock';
+import CodeSample from '!!raw-loader!../../../../sdk/src/wallet/bindings/nodejs/examples/getting-started.js';
 
 <WarningPasswordStorage/>
 
@@ -36,7 +38,7 @@ management in the examples.
 To install with `npm`, you can run the following command:
 
 ```bash
-npm install @iota/wallet dotenv
+npm install @iota/wallet
 ```
 
 ### yarn
@@ -44,7 +46,7 @@ npm install @iota/wallet dotenv
 To install with `yarn`, you can run the following command:
 
 ```bash
-yarn install @iota/wallet dotenv
+yarn add @iota/wallet
 ```
 
 ## Use the Library
@@ -53,24 +55,9 @@ After you have [installed the library](#install-the-library), you can create
 a [`AccountManager`](./../references/nodejs/classes/AccountManager.md)
 instance and interface with it.
 
-```javascript
-const accountManagerOptions = {
-    storagePath: './alice-database',
-    clientOptions: {
-        nodes: ['https://api.testnet.shimmer.network'],
-        localPow: true,
-    },
-    coinType: CoinType.Shimmer,
-    secretManager: {
-        stronghold: {
-            snapshotPath: `./wallet.stronghold`,
-            password: `${process.env.SH_PASSWORD}`,
-        },
-    },
-};
-
-const manager = new AccountManager(accountManagerOptions);
-```
+<CodeBlock className="language-javascript">
+  {CodeSample}
+</CodeBlock>
 
 ## What's Next?
 

@@ -351,7 +351,6 @@ impl From<Infallible> for Error {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
     use super::*;

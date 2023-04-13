@@ -113,6 +113,7 @@ macro_rules! string_serde_impl {
         }
     };
 }
+#[cfg(feature = "serde")]
 pub(crate) use string_serde_impl;
 
 /// A convenience macro to work around the fact the `[bitflags]` crate does not yet support iterating over the

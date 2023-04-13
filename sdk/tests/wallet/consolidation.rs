@@ -20,13 +20,7 @@ async fn consolidation() -> Result<()> {
     let amount = 1_000_000;
     let tx = account_0
         .send_amount(
-            vec![
-                AddressWithAmount {
-                    address: account_1.addresses().await?[0].address().to_bech32(),
-                    amount,
-                };
-                10
-            ],
+            vec![AddressWithAmount::new(account_1.addresses().await?[0].address().to_bech32(), amount); 10],
             None,
         )
         .await?;
@@ -36,7 +30,7 @@ async fn consolidation() -> Result<()> {
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
-    assert_eq!(balance.base_coin.available, 10 * amount);
+    assert_eq!(balance.base_coin().available(), 10 * amount);
     assert_eq!(account_1.unspent_outputs(None).await?.len(), 10);
 
     let tx = account_1.consolidate_outputs(true, None).await?;
@@ -46,7 +40,7 @@ async fn consolidation() -> Result<()> {
 
     let balance = account_1.sync(None).await.unwrap();
     // Balance still the same
-    assert_eq!(balance.base_coin.available, 10 * amount);
+    assert_eq!(balance.base_coin().available(), 10 * amount);
     // Only one unspent output
     assert_eq!(account_1.unspent_outputs(None).await?.len(), 1);
 

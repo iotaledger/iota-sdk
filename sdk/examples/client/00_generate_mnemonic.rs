@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example generate_mnemonic --release
+//! TODO: Example description
+//!
+//! `cargo run --example generate_mnemonic --release`
 
 use iota_sdk::client::{Client, Result};
 

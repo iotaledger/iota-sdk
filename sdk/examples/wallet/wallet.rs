@@ -63,16 +63,16 @@ async fn main() -> Result<()> {
     println!("Addresses with balance: {}", addresses_with_unspent_outputs.len());
 
     // send transaction
-    let outputs = vec![AddressWithAmount {
-        address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
-        amount: 1_000_000,
-    }];
-    let tx = account.send_amount(outputs, None).await?;
+    let outputs = vec![AddressWithAmount::new(
+        "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
+        1_000_000,
+    )];
+    let transaction = account.send_amount(outputs, None).await?;
+    println!("Transaction: {}", transaction.transaction_id);
     println!(
-        "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
-        tx.transaction_id,
+        "Block sent: {}/api/core/v2/blocks/{}",
         &std::env::var("NODE_URL").unwrap(),
-        tx.block_id.expect("no block created yet")
+        transaction.block_id.expect("no block created yet")
     );
     let now = Instant::now();
     let balance = account.sync(None).await?;

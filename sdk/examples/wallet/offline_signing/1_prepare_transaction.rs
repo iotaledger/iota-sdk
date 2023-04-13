@@ -20,20 +20,20 @@ use iota_sdk::{
     wallet::{account::types::AccountAddress, AddressWithAmount, ClientOptions, Result, Wallet},
 };
 
-const ADDRESS_FILE_NAME: &str = "examples/offline_signing/addresses.json";
-const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/prepared_transaction.json";
+const ADDRESS_FILE_NAME: &str = "examples/wallet/offline_signing/addresses.json";
+const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/wallet/offline_signing/prepared_transaction.json";
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let outputs = vec![AddressWithAmount {
+    let outputs = vec![AddressWithAmount::new(
         // Address to which we want to send the amount.
-        address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
+        "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
         // The amount to send.
-        amount: 1_000_000,
-    }];
+        1_000_000,
+    )];
 
     // Recovers addresses from example `0_address_generation`.
     let addresses = read_addresses_from_file(ADDRESS_FILE_NAME)?;
@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Placeholder(PlaceholderSecretManager))
         .with_client_options(client_options.clone())
         .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_storage_path("examples/offline_signing/online_walletdb")
+        .with_storage_path("examples/wallet/offline_signing/online_walletdb")
         .finish()
         .await?;
 

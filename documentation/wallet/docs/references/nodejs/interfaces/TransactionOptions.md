@@ -24,3 +24,9 @@ ___
 • `Optional` **note**: `string`
 
 Optional note, that is only stored locally
+
+### allowSendMicro
+
+• **allowSendMicro**: `boolean`
+
+Allow sending micro amounts, by automatically adding Storage Deposit Return and Expiration unlock conditions.

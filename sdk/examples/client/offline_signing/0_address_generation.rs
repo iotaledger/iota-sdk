@@ -13,7 +13,7 @@ use std::{
 
 use iota_sdk::client::{constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Client, Result};
 
-const ADDRESS_FILE_NAME: &str = "examples/offline_signing/address.json";
+const ADDRESS_FILE_NAME: &str = "examples/client/offline_signing/address.json";
 
 #[tokio::main]
 async fn main() -> Result<()> {

@@ -111,7 +111,48 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
                            features=None,
                            immutable_features=None):
         """Build an AliasOutput.
+
+        Parameters
+        ----------
+        alias_id : string
+            Hex encoded alias id
+        unlock_conditions : array of UnlockCondition
+            The unlock conditions for this output
+        amount : int
+            Amount of base token
+        native_tokens : array of NativeToken
+            The native token to add to the output
+        state_index : int
+            Index of the state
+        state_metadata : string
+            Hex encoded state metadata
+        foundry_counter : int
+            Counter of foundry outputs created
+        features : array of Feature
+            Features for this outputs
+        immutable_features : array of Feature
+            Immutable features
+
+        Returns
+        -------
+        Output as dict
         """
+
+        unlock_conditions = humps.camelize([unlock_condition.as_dict() for unlock_condition in unlock_conditions])
+        
+        if native_tokens:
+            native_tokens = humps.camelize(
+                [native_token.as_dict() for native_token in native_tokens])
+        
+        if features:
+            features = humps.camelize([feature.as_dict() for feature in features])
+        if immutable_features:
+            immutable_features = humps.camelize(
+                [immutable_feature.as_dict() for immutable_feature in immutable_features])
+
+        if amount:
+            amount = str(amount)
+
         return self.send_message('buildAliasOutput', {
             'aliasId': alias_id,
             'unlockConditions': unlock_conditions,
@@ -130,7 +171,35 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
                            native_tokens=None,
                            features=None):
         """Build a BasicOutput.
+
+        Parameters
+        ----------
+        unlock_conditions : array of UnlockCondition
+            The unlock conditions for this output
+        amount : int
+            Amount of base token
+        native_tokens : array of NativeToken
+            The native token to add to the output
+        features : array of Feature
+            Features for this outputs
+
+        Returns
+        -------
+        Output as dict
         """
+
+        unlock_conditions = humps.camelize([unlock_condition.as_dict() for unlock_condition in unlock_conditions])
+        
+        if native_tokens:
+            native_tokens = humps.camelize(
+                [native_token.as_dict() for native_token in native_tokens])
+
+        if features:
+            features = humps.camelize([feature.as_dict() for feature in features])
+
+        if amount:
+            amount = str(amount)
+
         return self.send_message('buildBasicOutput', {
             'unlockConditions': unlock_conditions,
             'amount': amount,
@@ -147,7 +216,46 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
                              features=None,
                              immutable_features=None):
         """Build a FoundryOutput.
+
+        Parameters
+        ----------
+        serial_number : int
+            The serial number of the foundry
+        token_scheme : TokenScheme
+            The Token scheme. Currently only a simple scheme is supported
+        unlock_conditions : array of UnlockCondition
+            The unlock conditions for this output
+        amount : int
+            Amount of base token
+        native_tokens : array of NativeToken
+            The native token to add to the output
+        features : array of Feature
+            Features for this outputs
+        immutable_features : array of Feature
+            Immutable features
+
+        Returns
+        -------
+        Output as dict
         """
+
+        token_scheme = humps.camelize(token_scheme.as_dict())
+
+        unlock_conditions = humps.camelize([unlock_condition.as_dict() for unlock_condition in unlock_conditions])
+        
+        if native_tokens:
+            native_tokens = humps.camelize(
+                [native_token.as_dict() for native_token in native_tokens])
+        
+        if features:
+            features = humps.camelize([feature.as_dict() for feature in features])
+        if immutable_features:
+            immutable_features = humps.camelize(
+                [immutable_feature.as_dict() for immutable_feature in immutable_features])
+
+        if amount:
+            amount = str(amount)
+
         return self.send_message('buildFoundryOutput', {
             'serialNumber': serial_number,
             'tokenScheme': token_scheme,
@@ -166,7 +274,43 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
                          features=None,
                          immutable_features=None):
         """Build an NftOutput.
+
+        Parameters
+        ----------
+        nft_id : string
+            Hex encoded nft id
+        unlock_conditions : array of UnlockCondition
+            The unlock conditions for this output
+        amount : int
+            Amount of base token
+        native_tokens : array of NativeToken
+            The native tokens to add to the output
+        features : array of Feature
+            Features for this outputs
+        immutable_features : array of Feature
+            Immutable features
+
+        Returns
+        -------
+        Output as dict
         """
+
+        unlock_conditions = humps.camelize([unlock_condition.as_dict() for unlock_condition in unlock_conditions])
+        
+        if native_tokens:
+            native_tokens = humps.camelize(
+                [native_token.as_dict() for native_token in native_tokens])
+
+        if features:
+            features = humps.camelize([feature.as_dict()
+                                      for feature in features])
+        if immutable_features:
+            immutable_features = humps.camelize(
+                [immutable_feature.as_dict() for immutable_feature in immutable_features])
+
+        if amount:
+            amount = str(amount)
+
         return self.send_message('buildNftOutput', {
             'nftId': nft_id,
             'unlockConditions': unlock_conditions,
@@ -383,3 +527,333 @@ class Node():
 class CoinType(Enum):
     IOTA = 4218
     SHIMMER = 4219
+
+class UnlockConditionType(Enum):
+    Address = 0
+    StorageDepositReturn = 1
+    Timelock = 2
+    Expiration = 3
+    StateControllerAddress = 4
+    GovernorAddress = 5
+    ImmutableAliasAddress = 6
+
+class UnlockCondition():
+    def __init__(self, type=None, address=None, amount=None, unix_time=None, return_address=None) -> None:
+        """Initialize an UnlockCondition
+        
+        Parameters
+        ----------
+        type : UnlockConditionType
+            The type of unlock condition
+        address : Address
+            Address for unlock condition
+        amount : int
+            Amount for storage deposit unlock condition
+        unix_time : int
+            Unix timestamp for timelock and expiration unlock condition
+        return_address : Address
+            Return address for expiration and storage deposit unlock condition
+        """
+        self.type = type
+        self.address = address
+        self.amount = amount
+        self.unix_time = unix_time
+        self.return_address = return_address
+
+    def as_dict(self):
+        config = {k: v for k, v in self.__dict__.items() if v != None}
+        
+        if 'type' in config:
+            config['type'] = config['type'].value
+
+        if 'address' in config:
+            config['address'] = config['address'].as_dict()
+
+        if 'return_address' in config:
+            config['return_address'] = config['return_address'].as_dict()
+
+        if 'amount' in config:
+            config['amount'] = str(config['amount'])
+
+        return config
+
+class AddressUnlockCondition(UnlockCondition):
+    def __init__(self, address):
+        """Initialize an AddressUnlockCondition
+        
+        Parameters
+        ----------
+        address : Address
+            Address
+        """
+        super().__init__(type=UnlockConditionType.Address, address=address)
+
+class StorageDepositReturnUnlockCondition(UnlockCondition):
+    def __init__(self, amount, return_address):
+        """Initialize a StorageDepositReturnUnlockCondition
+        
+        Parameters
+        ----------
+        amount : int
+            Amount
+        return_address : Address
+            Return address
+        """
+        super().__init__(type=UnlockConditionType.StorageDepositReturn, amount=amount, return_address=return_address)
+
+class TimelockUnlockCondition(UnlockCondition):
+    def __init__(self, unix_time):
+        """Initialize a TimelockUnlockCondition
+        
+        Parameters
+        ----------
+        unix_time : int
+            Unix timestamp at which to unlock output
+        """
+        super().__init__(type=UnlockConditionType.Timelock, unix_time=unix_time)
+
+class ExpirationUnlockCondition(UnlockCondition):
+    def __init__(self, unix_time, return_address):
+        """Initialize an ExpirationUnlockCondition
+        
+        Parameters
+        ----------
+        unix_time : int
+            Unix timestamp
+        return_address : Address
+            Return address
+        """
+        super().__init__(type=UnlockConditionType.Expiration, unix_time=unix_time, return_address=return_address)
+
+class StateControllerAddressUnlockCondition(UnlockCondition):
+    def __init__(self, address):
+        """Initialize a StateControllerAddressUnlockCondition
+        
+        Parameters
+        ----------
+        address : Address
+            Address for unlock condition
+        """
+        super().__init__(type=UnlockConditionType.StateControllerAddress, address=address)
+
+class GovernorAddressUnlockCondition(UnlockCondition):
+    def __init__(self, address):
+        """Initialize a GovernorAddressUnlockCondition
+        
+        Parameters
+        ----------
+        address : Address
+            Address for unlock condition
+        """
+        super().__init__(type=UnlockConditionType.GovernorAddress, address=address)
+
+class ImmutableAliasAddressUnlockCondition(UnlockCondition):
+    def __init__(self, address):
+        """Initialize an ImmutableAliasAddressUnlockCondition
+        
+        Parameters
+        ----------
+        address : Address
+            Address for unlock condition
+        """
+        super().__init__(type=UnlockConditionType.ImmutableAliasAddress, address=address)
+
+class AddressType(Enum):
+    ED25519 = 0
+    ALIAS = 8
+    NFT = 16
+
+class Address():
+    def __init__(self, type, address_or_id):
+        """Initialize an Address
+        
+        Parameters
+        ----------
+        type : AddressType
+            The type of the Address
+        address_or_id : string
+            The address to use. Can either be an hex encoded ED25519 address or NFT/Alias id
+        """
+        self.type = type
+        self.address_or_id = address_or_id
+
+    def as_dict(self):
+        config = dict(self.__dict__)
+
+        config['type'] = config['type'].value
+        
+        if self.type == AddressType.ED25519:
+            config['pubKeyHash'] = config.pop('address_or_id')
+        elif self.type == AddressType.ALIAS:
+            config['alias_id'] = config.pop('address_or_id')
+        elif self.type == AddressType.NFT:
+            config['nft_id'] = config.pop('address_or_id')
+
+        return config
+
+class Ed25519Address(Address):
+    def __init__(self, address):
+        """Initialize an Ed25519Address
+        
+        Parameters
+        ----------
+        address : string
+            The hex encoded address to use.
+        """
+        super().__init__(AddressType.ED25519, address)
+
+class AliasAddress(Address):
+    def __init__(self, address_or_id):
+        """Initialize an AliasAddress
+        
+        Parameters
+        ----------
+        address_or_id : string
+            The hex encoded address to use.
+        """
+        super().__init__(AddressType.ALIAS, address_or_id)
+
+class NFTAddress(Address):
+    def __init__(self, address_or_id):
+        """Initialize an NFTokenAddress
+        
+        Parameters
+        ----------
+        address_or_id : string
+            The hex encoded address to use.
+        """
+        super().__init__(AddressType.NFT, address_or_id)
+
+class FeatureType(Enum):
+    Sender=0
+    Issuer=1
+    Metadata=2
+    Tag=3
+
+class Feature():
+    def __init__(self, type, sender=None, issuer=None, data=None, tag=None):
+        """Initialise a feature
+
+        Parameters
+        ----------
+        type : FeatureType
+            The type of feature
+        sender : Address
+            Sender address
+        issuer : Address
+            Issuer Address
+        data : string
+            Hex encoded metadata
+        tag : string
+            Hex encoded tag used to index the output
+        """
+        self.type = type
+        self.sender = sender
+        self.issuer = issuer
+        self.data = data
+        self.tag = tag
+
+    def as_dict(self):
+        config = {k: v for k, v in self.__dict__.items() if v != None}
+
+        config['type'] = config['type'].value
+
+        if 'sender' in config:
+            config['address'] = config.pop('sender').as_dict()
+
+        if 'issuer' in config:
+            config['address'] = config.pop('issuer').as_dict()
+
+        return config
+
+class SenderFeature(Feature):
+    def __init__(self, sender):
+        """Initialise a SenderFeature
+
+        Parameters
+        ----------
+        sender : Address
+            Sender address
+        """
+        super().__init__(FeatureType.Sender, sender=sender)
+
+class IssuerFeature(Feature):
+    def __init__(self, issuer):
+        """Initialise an IssuerFeature
+
+        Parameters
+        ----------
+        issuer : Address
+            Issuer address
+        """
+        super().__init__(FeatureType.Issuer, issuer=issuer)
+
+class MetadataFeature(Feature):
+    def __init__(self, data):
+        """Initialise a MetadataFeature
+
+        Parameters
+        ----------
+        data : string
+            Hex encoded metadata
+        """
+        super().__init__(FeatureType.Metadata, data=data)
+
+class TagFeature(Feature):
+    def __init__(self, tag):
+        """Initialise a TagFeature
+
+        Parameters
+        ----------
+        tag : string
+            Hex encoded tag used to index the output
+        """
+        super().__init__(FeatureType.Tag, tag=tag)
+
+class NativeToken():
+    def __init__(self, id, amount):
+        """Initialise NativeToken
+
+        Parameters
+        ----------
+        id : string
+            Id of the token
+        amount : int
+            Native token amount
+        """
+        self.id = id
+        self.amount = amount
+
+    def as_dict(self):
+        config = dict(self.__dict__)
+
+        config['amount'] = str(hex(config['amount']))
+
+        return config
+
+class TokenScheme():
+    def __init__(self, melted_tokens=None, minted_tokens=None, maximum_supply=None):
+        """Initialise TokenScheme
+
+        Parameters
+        ----------
+        melted_tokens : int
+        minted_tokens : int
+        maximum_supply : int
+        """
+        self.type = 0
+        self.melted_tokens = melted_tokens
+        self.minted_tokens = minted_tokens
+        self.maximum_supply = maximum_supply
+
+    def as_dict(self):
+        config = dict(self.__dict__)
+
+        if 'melted_tokens' in config:
+            config['melted_tokens'] = str(hex(config['melted_tokens']))
+        if 'minted_tokens' in config:
+            config['minted_tokens'] = str(hex(config['minted_tokens']))
+        if 'maximum_supply' in config:
+            config['maximum_supply'] = str(hex(config['maximum_supply']))
+
+        return config

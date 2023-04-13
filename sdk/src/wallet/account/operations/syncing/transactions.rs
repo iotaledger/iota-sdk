@@ -49,7 +49,7 @@ impl AccountHandle {
         let mut transactions_to_reattach = Vec::new();
 
         for transaction_id in &account.pending_transactions {
-            log::debug!("[SYNC] sync pending transaction {}", transaction_id);
+            log::debug!("[SYNC] sync pending transaction {transaction_id}");
             let transaction = account
                 .transactions
                 .get(transaction_id)
@@ -70,8 +70,7 @@ impl AccountHandle {
                 // Save to unwrap, we just got the output
                 let confirmed_output_data = account.outputs.get(transaction_output).expect("output exists");
                 log::debug!(
-                    "[SYNC] confirmed transaction {} in block {}",
-                    transaction_id,
+                    "[SYNC] confirmed transaction {transaction_id} in block {}",
                     confirmed_output_data.metadata.block_id
                 );
                 updated_transaction_and_outputs(
@@ -104,8 +103,7 @@ impl AccountHandle {
                             match inclusion_state {
                                 LedgerInclusionStateDto::Included => {
                                     log::debug!(
-                                        "[SYNC] confirmed transaction {} in block {}",
-                                        transaction_id,
+                                        "[SYNC] confirmed transaction {transaction_id} in block {}",
                                         metadata.block_id
                                     );
                                     confirmed_unknown_output = true;
@@ -118,7 +116,6 @@ impl AccountHandle {
                                     );
                                 }
                                 LedgerInclusionStateDto::Conflicting => {
-                                    log::debug!("[SYNC] conflicting transaction {}", transaction_id);
                                     // try to get the included block, because maybe only this attachment is
                                     // conflicting because it got confirmed in another block
                                     if let Ok(included_block) =
@@ -134,6 +131,7 @@ impl AccountHandle {
                                             &mut spent_output_ids,
                                         );
                                     } else {
+                                        log::debug!("[SYNC] conflicting transaction {transaction_id}");
                                         updated_transaction_and_outputs(
                                             transaction,
                                             None,
@@ -262,6 +260,7 @@ fn process_transaction_with_unknown_state(
     if all_inputs_spent {
         transaction.inclusion_state = InclusionState::UnknownPruned;
     } else {
+        log::debug!("[SYNC] conflicting transaction {}", transaction.transaction_id);
         transaction.inclusion_state = InclusionState::Conflicting;
     }
     updated_transactions.push(transaction);

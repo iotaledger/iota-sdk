@@ -1,9 +1,6 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "stronghold")]
-use std::path::PathBuf;
-
 #[cfg(feature = "storage")]
 use iota_sdk::client::node_manager::node::{Node, NodeDto, Url};
 #[cfg(feature = "stronghold")]
@@ -191,7 +188,7 @@ async fn wallet_address_generation() -> Result<()> {
     {
         let mut secret_manager = StrongholdSecretManager::builder()
             .password("some_hopefully_secure_password")
-            .build(PathBuf::from("test-storage/wallet_address_generation/test.stronghold"))?;
+            .build("test-storage/wallet_address_generation/test.stronghold")?;
         secret_manager.store_mnemonic(DEFAULT_MNEMONIC.to_string()).await?;
 
         let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;

@@ -248,12 +248,6 @@ Sends an amount.
 
 * **Parameters:** `options` — The options.
 
-## `public Transaction sendMicroTransaction(SendMicroTransaction options) throws WalletException`
-
-Sends a micro transaction.
-
-* **Parameters:** `options` — The options.
-
 ## `public Transaction sendNativeTokens(SendNativeTokens options) throws WalletException`
 
 Sends Native Tokens.

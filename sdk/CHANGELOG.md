@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `{Alias, Basic, Foundry, Nft}Output::clear_unlock_conditions` method;
 - `{Alias, Basic, Foundry, Nft}Output::clear_features` method;
 - `{Alias, Foundry, Nft}Output::clear_immutable_features` method;
+- `{TransactionOptions, TransactionOptionsDto}::allow_micro_amount` field;
+- `AddressWithAmount::{new, with_return_address, with_expiration}` methods;
+- `{BaseCoinBalance, BaseCoinBalanceDto}::voting_power` field;
 
 ### Changed
 
@@ -36,10 +39,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Builder methods `add_unlock_condition`, `replace_unlock_condition`, `with_unlock_conditions` are now generic;
 - Builder methods `add_feature`, `replace_feature`, `with_features` are now generic;
 - Builder methods `add_immutable_feature`, `replace_immutable_feature`, `with_immutable_features` are now generic;
+- Merge `send_amount` and `send_micro_transaction`;
+- `AddressWithAmount::{address, amount}` fields are no longer public;
+- Fields of `AccountBalance`, `BaseCoinBalance` and `NativeTokensBalance` have been made private and getters have been added;
+
+### Removed
+
+- `AddressWithMicroAmount` and `AddressWithAmountDto`;
 
 ### Fixed
 
 - Fallback to local PoW;
+- Unlock unused inputs;
+- Derive location in Stronghold for parallel usage;
 
 ## 0.1.0 - 2023-04-03
 

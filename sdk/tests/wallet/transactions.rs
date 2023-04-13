@@ -19,10 +19,10 @@ async fn send_amount() -> Result<()> {
     let amount = 1_000_000;
     let tx = account_0
         .send_amount(
-            vec![AddressWithAmount {
-                address: account_1.addresses().await?[0].address().to_bech32(),
+            vec![AddressWithAmount::new(
+                account_1.addresses().await?[0].address().to_bech32(),
                 amount,
-            }],
+            )],
             None,
         )
         .await?;
@@ -32,7 +32,7 @@ async fn send_amount() -> Result<()> {
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
-    assert_eq!(balance.base_coin.available, amount);
+    assert_eq!(balance.base_coin().available(), amount);
 
     tear_down(storage_path)
 }
@@ -52,11 +52,11 @@ async fn send_amount_127_outputs() -> Result<()> {
     let tx = account_0
         .send_amount(
             vec![
-                AddressWithAmount {
-                    address: account_1.addresses().await?[0].address().to_bech32(),
+                AddressWithAmount::new(
+                    account_1.addresses().await?[0].address().to_bech32(),
                     amount,
-                    // Only 127, because we need one remainder
-                };
+                );
+                // Only 127, because we need one remainder
                 127
             ],
             None,
@@ -68,7 +68,7 @@ async fn send_amount_127_outputs() -> Result<()> {
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
-    assert_eq!(balance.base_coin.available, 127 * amount);
+    assert_eq!(balance.base_coin().available(), 127 * amount);
 
     tear_down(storage_path)
 }
@@ -88,13 +88,7 @@ async fn send_amount_custom_input() -> Result<()> {
     let amount = 1_000_000;
     let tx = account_0
         .send_amount(
-            vec![
-                AddressWithAmount {
-                    address: account_1.addresses().await?[0].address().to_bech32(),
-                    amount,
-                };
-                10
-            ],
+            vec![AddressWithAmount::new(account_1.addresses().await?[0].address().to_bech32(), amount); 10],
             None,
         )
         .await?;
@@ -104,16 +98,16 @@ async fn send_amount_custom_input() -> Result<()> {
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
-    assert_eq!(balance.base_coin.available, 10 * amount);
+    assert_eq!(balance.base_coin().available(), 10 * amount);
 
     // Send back with custom provided input
     let custom_input = &account_1.unspent_outputs(None).await?[5];
     let tx = account_1
         .send_amount(
-            vec![AddressWithAmount {
-                address: account_0.addresses().await?[0].address().to_bech32(),
+            vec![AddressWithAmount::new(
+                account_0.addresses().await?[0].address().to_bech32(),
                 amount,
-            }],
+            )],
             Some(TransactionOptions {
                 custom_inputs: Some(vec![custom_input.output_id]),
                 ..Default::default()
@@ -149,7 +143,7 @@ async fn send_nft() -> Result<()> {
     accounts[0]
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
-    let nft_id = *accounts[0].sync(None).await?.nfts.first().unwrap();
+    let nft_id = *accounts[0].sync(None).await?.nfts().first().unwrap();
 
     // Send to account 1
     let transaction = accounts[0]
@@ -167,8 +161,8 @@ async fn send_nft() -> Result<()> {
         .await?;
 
     let balance = accounts[1].sync(None).await?;
-    assert_eq!(balance.nfts.len(), 1);
-    assert_eq!(*balance.nfts.first().unwrap(), nft_id);
+    assert_eq!(balance.nfts().len(), 1);
+    assert_eq!(*balance.nfts().first().unwrap(), nft_id);
 
     tear_down(storage_path)
 }
