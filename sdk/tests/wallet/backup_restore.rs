@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[cfg(all(feature = "stronghold", feature = "storage"))]
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 use iota_sdk::client::{
@@ -30,7 +30,7 @@ async fn backup_and_restore() -> Result<()> {
     std::fs::create_dir_all(storage_path).unwrap_or(());
     let mut stronghold = StrongholdSecretManager::builder()
         .password(stronghold_password)
-        .build(Path::new("test-storage/backup_and_restore/1.stronghold"))?;
+        .build("test-storage/backup_and_restore/1.stronghold")?;
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
 
@@ -53,8 +53,7 @@ async fn backup_and_restore() -> Result<()> {
 
     // restore from backup
 
-    let stronghold =
-        StrongholdSecretManager::builder().build(Path::new("test-storage/backup_and_restore/2.stronghold"))?;
+    let stronghold = StrongholdSecretManager::builder().build("test-storage/backup_and_restore/2.stronghold")?;
 
     let restore_wallet = Wallet::builder()
         .with_storage_path("test-storage/backup_and_restore/2")
@@ -202,9 +201,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
     std::fs::create_dir_all(storage_path).unwrap_or(());
     let mut stronghold = StrongholdSecretManager::builder()
         .password(stronghold_password)
-        .build(Path::new(
-            "test-storage/backup_and_restore_different_coin_type/1.stronghold",
-        ))?;
+        .build("test-storage/backup_and_restore_different_coin_type/1.stronghold")?;
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
 
@@ -228,9 +225,8 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
 
     // restore from backup
 
-    let stronghold = StrongholdSecretManager::builder().build(Path::new(
-        "test-storage/backup_and_restore_different_coin_type/2.stronghold",
-    ))?;
+    let stronghold =
+        StrongholdSecretManager::builder().build("test-storage/backup_and_restore_different_coin_type/2.stronghold")?;
 
     let restore_wallet = Wallet::builder()
         .with_storage_path("test-storage/backup_and_restore_different_coin_type/2")
@@ -287,7 +283,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
     std::fs::create_dir_all(storage_path).unwrap_or(());
     let mut stronghold = StrongholdSecretManager::builder()
         .password(stronghold_password)
-        .build(Path::new("test-storage/backup_and_restore_same_coin_type/1.stronghold"))?;
+        .build("test-storage/backup_and_restore_same_coin_type/1.stronghold")?;
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
 
@@ -311,8 +307,8 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
 
     // restore from backup
 
-    let stronghold = StrongholdSecretManager::builder()
-        .build(Path::new("test-storage/backup_and_restore_same_coin_type/2.stronghold"))?;
+    let stronghold =
+        StrongholdSecretManager::builder().build("test-storage/backup_and_restore_same_coin_type/2.stronghold")?;
 
     let restore_wallet = Wallet::builder()
         .with_storage_path("test-storage/backup_and_restore_same_coin_type/2")
@@ -367,9 +363,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     std::fs::create_dir_all(storage_path).unwrap_or(());
     let mut stronghold = StrongholdSecretManager::builder()
         .password(stronghold_password)
-        .build(Path::new(
-            "test-storage/backup_and_restore_different_coin_type_dont_ignore/1.stronghold",
-        ))?;
+        .build("test-storage/backup_and_restore_different_coin_type_dont_ignore/1.stronghold")?;
 
     stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
 
@@ -393,9 +387,8 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
 
     // restore from backup
 
-    let stronghold = StrongholdSecretManager::builder().build(Path::new(
-        "test-storage/backup_and_restore_different_coin_type_dont_ignore/2.stronghold",
-    ))?;
+    let stronghold = StrongholdSecretManager::builder()
+        .build("test-storage/backup_and_restore_different_coin_type_dont_ignore/2.stronghold")?;
 
     let restore_wallet = Wallet::builder()
         .with_storage_path("test-storage/backup_and_restore_different_coin_type_dont_ignore/2")
