@@ -6,7 +6,7 @@
 //!
 //! `cargo run --example create_wallet --release`
 
-use std::path::PathBuf;
+use std::path::Path;
 
 use iota_sdk::{
     client::{
@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
     // Setup Stronghold secret_manager
     let mut secret_manager = StrongholdSecretManager::builder()
         .password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
-        .build(PathBuf::from("wallet.stronghold"))?;
+        .build(Path::new("wallet.stronghold"))?;
 
     // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
     let mnemonic = std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();

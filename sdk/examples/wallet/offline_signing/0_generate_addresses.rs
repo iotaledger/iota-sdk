@@ -8,7 +8,7 @@
 use std::{
     fs::File,
     io::{BufWriter, Write},
-    path::{Path, PathBuf},
+    path::Path,
 };
 
 use iota_sdk::{
@@ -31,9 +31,7 @@ async fn main() -> Result<()> {
     // Setup Stronghold secret_manager
     let mut secret_manager = StrongholdSecretManager::builder()
         .password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
-        .build(PathBuf::from(
-            "examples/wallet/offline_signing/offline_signing.stronghold",
-        ))?;
+        .build(Path::new("examples/wallet/offline_signing/offline_signing.stronghold"))?;
     // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
     let mnemonic = std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
 
