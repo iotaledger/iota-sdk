@@ -1,26 +1,55 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::collections::HashMap;
+
 use primitive_types::U256;
 
 use crate::{
-    types::block::output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
+    types::block::output::{
+        unlock_condition::UnlockCondition, AliasId, FoundryId, NativeTokensBuilder, NftId, Output, OutputId, Rent,
+    },
     wallet::account::{
         handle::AccountHandle,
         operations::helpers::time::can_output_be_unlocked_forever_from_now_on,
-        types::{AccountBalance, NativeTokensBalance},
+        types::{AccountBalance, BaseCoinBalance, NativeTokensBalance, RequiredStorageDeposit},
         OutputsToClaim,
     },
 };
+
+#[derive(Default)]
+pub struct AccountBalanceBuilder {
+    base_coin: BaseCoinBalance,
+    required_storage_deposit: RequiredStorageDeposit,
+    native_tokens: Vec<NativeTokensBalance>,
+    nfts: Vec<NftId>,
+    aliases: Vec<AliasId>,
+    foundries: Vec<FoundryId>,
+    potentially_locked_outputs: HashMap<OutputId, bool>,
+}
+
+impl AccountBalanceBuilder {
+    fn build(self) -> AccountBalance {
+        AccountBalance {
+            base_coin: self.base_coin,
+            required_storage_deposit: self.required_storage_deposit,
+            native_tokens: self.native_tokens,
+            nfts: self.nfts,
+            aliases: self.aliases,
+            foundries: self.foundries,
+            potentially_locked_outputs: self.potentially_locked_outputs,
+        }
+    }
+}
 
 impl AccountHandle {
     /// Get the AccountBalance
     pub async fn balance(&self) -> crate::wallet::Result<AccountBalance> {
         log::debug!("[BALANCE] get balance");
-        let mut account_balance = AccountBalance::default();
+        let mut balance_builder = AccountBalanceBuilder::default();
         #[cfg(feature = "participation")]
         {
-            account_balance.base_coin.voting_power = self.get_voting_power().await?;
+            balance_builder.base_coin.voting_power = self.get_voting_power().await?;
         }
 
         let unlockable_outputs_with_multiple_unlock_conditions = self
@@ -54,9 +83,9 @@ impl AccountHandle {
             match output {
                 Output::Alias(output) => {
                     // Add amount
-                    account_balance.base_coin.total += output.amount();
+                    balance_builder.base_coin.total += output.amount();
                     // Add storage deposit
-                    account_balance.required_storage_deposit.alias += rent;
+                    balance_builder.required_storage_deposit.alias += rent;
                     if !account.locked_outputs.contains(output_id) {
                         total_rent_amount += rent;
                     }
@@ -65,13 +94,13 @@ impl AccountHandle {
                     total_native_tokens.add_native_tokens(output.native_tokens().clone())?;
 
                     let alias_id = output.alias_id_non_null(output_id);
-                    account_balance.aliases.push(alias_id);
+                    balance_builder.aliases.push(alias_id);
                 }
                 Output::Foundry(output) => {
                     // Add amount
-                    account_balance.base_coin.total += output.amount();
+                    balance_builder.base_coin.total += output.amount();
                     // Add storage deposit
-                    account_balance.required_storage_deposit.foundry += rent;
+                    balance_builder.required_storage_deposit.foundry += rent;
                     if !account.locked_outputs.contains(output_id) {
                         total_rent_amount += rent;
                     }
@@ -79,7 +108,7 @@ impl AccountHandle {
                     // Add native tokens
                     total_native_tokens.add_native_tokens(output.native_tokens().clone())?;
 
-                    account_balance.foundries.push(output.id());
+                    balance_builder.foundries.push(output.id());
                 }
                 _ => {
                     // If there is only an [AddressUnlockCondition], then we can spend the output at any time without
@@ -92,15 +121,15 @@ impl AccountHandle {
                         // add nft_id for nft outputs
                         if let Output::Nft(output) = &output {
                             let nft_id = output.nft_id_non_null(output_id);
-                            account_balance.nfts.push(nft_id);
+                            balance_builder.nfts.push(nft_id);
                         }
 
                         // Add amount
-                        account_balance.base_coin.total += output.amount();
+                        balance_builder.base_coin.total += output.amount();
 
                         // Add storage deposit
                         if output.is_basic() {
-                            account_balance.required_storage_deposit.basic += rent;
+                            balance_builder.required_storage_deposit.basic += rent;
                             if output
                                 .native_tokens()
                                 .map(|native_tokens| !native_tokens.is_empty())
@@ -110,7 +139,7 @@ impl AccountHandle {
                                 total_rent_amount += rent;
                             }
                         } else if output.is_nft() {
-                            account_balance.required_storage_deposit.nft += rent;
+                            balance_builder.required_storage_deposit.nft += rent;
                             if !account.locked_outputs.contains(output_id) {
                                 total_rent_amount += rent;
                             }
@@ -166,15 +195,15 @@ impl AccountHandle {
                                 // add nft_id for nft outputs
                                 if let Output::Nft(output) = &output {
                                     let nft_id = output.nft_id_non_null(output_id);
-                                    account_balance.nfts.push(nft_id);
+                                    balance_builder.nfts.push(nft_id);
                                 }
 
                                 // Add amount
-                                account_balance.base_coin.total += amount;
+                                balance_builder.base_coin.total += amount;
 
                                 // Add storage deposit
                                 if output.is_basic() {
-                                    account_balance.required_storage_deposit.basic += rent;
+                                    balance_builder.required_storage_deposit.basic += rent;
                                     // Amount for basic outputs isn't added to total_rent_amount if there aren't native
                                     // tokens, since we can spend it without burning.
                                     if output
@@ -186,7 +215,7 @@ impl AccountHandle {
                                         total_rent_amount += rent;
                                     }
                                 } else if output.is_nft() {
-                                    account_balance.required_storage_deposit.nft += rent;
+                                    balance_builder.required_storage_deposit.nft += rent;
                                     if !account.locked_outputs.contains(output_id) {
                                         total_rent_amount += rent;
                                     }
@@ -198,7 +227,7 @@ impl AccountHandle {
                                 }
                             } else {
                                 // only add outputs that can't be locked now and at any point in the future
-                                account_balance.potentially_locked_outputs.insert(*output_id, true);
+                                balance_builder.potentially_locked_outputs.insert(*output_id, true);
                             }
                         } else {
                             // Don't add expired outputs that can't ever be unlocked by us
@@ -209,10 +238,10 @@ impl AccountHandle {
                             {
                                 // Not expired, could get unlockable when it's expired, so we insert it
                                 if local_time < expiration.timestamp() {
-                                    account_balance.potentially_locked_outputs.insert(*output_id, false);
+                                    balance_builder.potentially_locked_outputs.insert(*output_id, false);
                                 }
                             } else {
-                                account_balance.potentially_locked_outputs.insert(*output_id, false);
+                                balance_builder.potentially_locked_outputs.insert(*output_id, false);
                             }
                         }
                     }
@@ -239,7 +268,7 @@ impl AccountHandle {
 
         log::debug!(
             "[BALANCE] total_amount: {}, locked_amount: {}, total_rent_amount: {}",
-            account_balance.base_coin.total,
+            balance_builder.base_coin.total,
             locked_amount,
             total_rent_amount,
         );
@@ -262,7 +291,7 @@ impl AccountHandle {
                 .and_then(|foundry| foundry.immutable_features().metadata())
                 .cloned();
 
-            account_balance.native_tokens.push(NativeTokensBalance {
+            balance_builder.native_tokens.push(NativeTokensBalance {
                 token_id: *native_token.token_id(),
                 metadata,
                 total: native_token.amount(),
@@ -272,17 +301,17 @@ impl AccountHandle {
 
         #[cfg(not(feature = "participation"))]
         {
-            account_balance.base_coin.available = account_balance.base_coin.total.saturating_sub(locked_amount);
+            balance_builder.base_coin.available = balance_builder.base_coin.total.saturating_sub(locked_amount);
         }
         #[cfg(feature = "participation")]
         {
-            account_balance.base_coin.available = account_balance
+            balance_builder.base_coin.available = balance_builder
                 .base_coin
                 .total
                 .saturating_sub(locked_amount)
-                .saturating_sub(account_balance.base_coin.voting_power);
+                .saturating_sub(balance_builder.base_coin.voting_power);
         }
 
-        Ok(account_balance)
+        Ok(balance_builder.build())
     }
 }
