@@ -27,7 +27,7 @@ BINARIES=""
 for file in \
   $( \
     RUSTFLAGS="-C instrument-coverage" \
-      cargo +nightly test --tests --package iota-sdk --all-features --no-run --message-format=json -- --include-ignored \
+      cargo +nightly test --package iota-sdk --all-features --no-run --message-format=json -- --include-ignored \
         | jq -r "select(.profile.test == true) | .filenames[]" \
         | grep -v dSYM - \
   ); \
