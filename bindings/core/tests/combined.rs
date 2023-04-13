@@ -28,7 +28,7 @@ async fn generate_addresses() -> Result<()> {
     let options = GetAddressesBuilderOptions {
         coin_type: None,
         account_index: None,
-        range: Some(std::ops::Range { start: 0, end: 10 }),
+        range: Some(0..10),
         internal: None,
         bech32_hrp: Some("atoi".to_string()),
         options: None,
