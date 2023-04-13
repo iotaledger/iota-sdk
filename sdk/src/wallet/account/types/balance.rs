@@ -12,8 +12,8 @@ use crate::types::block::{
     output::{dto::TokenIdDto, feature::MetadataFeature, AliasId, FoundryId, NftId, OutputId, TokenId},
 };
 
-/// The balance of an account, returned from [`crate::account::handle::AccountHandle::sync()`] and
-/// [`crate::account::handle::AccountHandle::balance()`].
+/// The balance of an account, returned from [`crate::wallet::account::handle::AccountHandle::sync()`] and
+/// [`crate::wallet::account::handle::AccountHandle::balance()`].
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, Getters)]
 #[getset(get = "pub")]
 pub struct AccountBalance {
@@ -33,8 +33,8 @@ pub struct AccountBalance {
     /// Foundries
     pub(crate) foundries: Vec<FoundryId>,
     /// Outputs with multiple unlock conditions and if they can currently be spent or not. If there is a
-    /// [`TimelockUnlockCondition`](crate::client::block::output::unlock_condition::TimelockUnlockCondition) or
-    /// [`ExpirationUnlockCondition`](crate::client::block::output::unlock_condition::ExpirationUnlockCondition) this
+    /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) or
+    /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition) this
     /// can change at any time
     #[serde(rename = "potentiallyLockedOutputs")]
     pub(crate) potentially_locked_outputs: HashMap<OutputId, bool>,
@@ -63,8 +63,8 @@ impl std::ops::AddAssign for AccountBalance {
     }
 }
 
-/// Dto for the balance of an account, returned from [`crate::account::handle::AccountHandle::sync()`] and
-/// [`crate::account::handle::AccountHandle::balance()`].
+/// Dto for the balance of an account, returned from [`crate::wallet::account::handle::AccountHandle::sync()`] and
+/// [`crate::wallet::account::handle::AccountHandle::balance()`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct AccountBalanceDto {
     /// Total and available amount of the base coin
@@ -83,8 +83,8 @@ pub struct AccountBalanceDto {
     /// Foundries
     pub foundries: Vec<FoundryId>,
     /// Outputs with multiple unlock conditions and if they can currently be spent or not. If there is a
-    /// [`TimelockUnlockCondition`](crate::client::block::output::unlock_condition::TimelockUnlockCondition) or
-    /// [`ExpirationUnlockCondition`](crate::client::block::output::unlock_condition::ExpirationUnlockCondition) this
+    /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) or
+    /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition) this
     /// can change at any time
     #[serde(rename = "potentiallyLockedOutputs")]
     pub potentially_locked_outputs: HashMap<OutputId, bool>,

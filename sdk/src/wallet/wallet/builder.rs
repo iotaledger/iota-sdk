@@ -75,7 +75,7 @@ impl WalletBuilder {
         self
     }
 
-    /// Set the coin type for the wallet. Registered coin types can be found at https://github.com/satoshilabs/slips/blob/master/slip-0044.md.
+    /// Set the coin type for the wallet. Registered coin types can be found at <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>.
     pub fn with_coin_type(mut self, coin_type: u32) -> Self {
         self.coin_type.replace(coin_type);
         self
