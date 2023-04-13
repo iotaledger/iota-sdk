@@ -26,6 +26,11 @@ pub struct AccountBalanceBuilder {
     aliases: Vec<AliasId>,
     foundries: Vec<FoundryId>,
     potentially_locked_outputs: HashMap<OutputId, bool>,
+
+    locked_amount: u64,
+    locked_native_tokens: NativeTokensBuilder,
+    total_rent_amount: u64,
+    total_native_tokens: NativeTokensBuilder,
 }
 
 impl AccountBalanceBuilder {
@@ -65,12 +70,8 @@ impl AccountHandle {
 
         let account = self.read().await;
 
-        let mut total_rent_amount = 0;
-        let mut total_native_tokens = NativeTokensBuilder::new();
         // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
         log::debug!("[BALANCE] locked outputs: {:#?}", account.locked_outputs);
-        let mut locked_amount = 0;
-        let mut locked_native_tokens = NativeTokensBuilder::new();
 
         let relevant_unspent_outputs = account
             .unspent_outputs
@@ -84,9 +85,11 @@ impl AccountHandle {
             let locked = account.locked_outputs.contains(output_id);
 
             if locked {
-                locked_amount += output.amount();
+                balance_builder.locked_amount += output.amount();
                 if let Some(native_tokens) = output.native_tokens() {
-                    locked_native_tokens.add_native_tokens(native_tokens.clone())?;
+                    balance_builder
+                        .locked_native_tokens
+                        .add_native_tokens(native_tokens.clone())?;
                 }
             }
 
@@ -99,11 +102,13 @@ impl AccountHandle {
                     // Add storage deposit
                     balance_builder.required_storage_deposit.alias += rent;
                     if !locked {
-                        total_rent_amount += rent;
+                        balance_builder.total_rent_amount += rent;
                     }
 
                     // Add native tokens
-                    total_native_tokens.add_native_tokens(output.native_tokens().clone())?;
+                    balance_builder
+                        .total_native_tokens
+                        .add_native_tokens(output.native_tokens().clone())?;
 
                     let alias_id = output.alias_id_non_null(output_id);
                     balance_builder.aliases.push(alias_id);
@@ -114,11 +119,13 @@ impl AccountHandle {
                     // Add storage deposit
                     balance_builder.required_storage_deposit.foundry += rent;
                     if !locked {
-                        total_rent_amount += rent;
+                        balance_builder.total_rent_amount += rent;
                     }
 
                     // Add native tokens
-                    total_native_tokens.add_native_tokens(output.native_tokens().clone())?;
+                    balance_builder
+                        .total_native_tokens
+                        .add_native_tokens(output.native_tokens().clone())?;
 
                     balance_builder.foundries.push(output.id());
                 }
@@ -148,18 +155,20 @@ impl AccountHandle {
                                 .unwrap_or(false)
                                 && !locked
                             {
-                                total_rent_amount += rent;
+                                balance_builder.total_rent_amount += rent;
                             }
                         } else if output.is_nft() {
                             balance_builder.required_storage_deposit.nft += rent;
                             if !locked {
-                                total_rent_amount += rent;
+                                balance_builder.total_rent_amount += rent;
                             }
                         }
 
                         // Add native tokens
                         if let Some(native_tokens) = output.native_tokens() {
-                            total_native_tokens.add_native_tokens(native_tokens.clone())?;
+                            balance_builder
+                                .total_native_tokens
+                                .add_native_tokens(native_tokens.clone())?;
                         }
                     } else {
                         // if we have multiple unlock conditions for basic or nft outputs, then we might can't spend the
@@ -224,18 +233,20 @@ impl AccountHandle {
                                         .unwrap_or(false)
                                         && !locked
                                     {
-                                        total_rent_amount += rent;
+                                        balance_builder.total_rent_amount += rent;
                                     }
                                 } else if output.is_nft() {
                                     balance_builder.required_storage_deposit.nft += rent;
                                     if !locked {
-                                        total_rent_amount += rent;
+                                        balance_builder.total_rent_amount += rent;
                                     }
                                 }
 
                                 // Add native tokens
                                 if let Some(native_tokens) = output.native_tokens() {
-                                    total_native_tokens.add_native_tokens(native_tokens.clone())?;
+                                    balance_builder
+                                        .total_native_tokens
+                                        .add_native_tokens(native_tokens.clone())?;
                                 }
                             } else {
                                 // only add outputs that can't be locked now and at any point in the future
@@ -264,15 +275,16 @@ impl AccountHandle {
         log::debug!(
             "[BALANCE] total_amount: {}, locked_amount: {}, total_rent_amount: {}",
             balance_builder.base_coin.total,
-            locked_amount,
-            total_rent_amount,
+            balance_builder.locked_amount,
+            balance_builder.total_rent_amount,
         );
 
-        locked_amount += total_rent_amount;
+        balance_builder.locked_amount += balance_builder.total_rent_amount;
 
-        for native_token in total_native_tokens.finish_vec()? {
+        // TODO remove clone
+        for native_token in balance_builder.total_native_tokens.clone().finish_vec()? {
             // Check if some amount is currently locked
-            let locked_amount = locked_native_tokens.iter().find_map(|(id, amount)| {
+            let locked_amount = balance_builder.locked_native_tokens.iter().find_map(|(id, amount)| {
                 if id == native_token.token_id() {
                     Some(amount)
                 } else {
@@ -303,7 +315,7 @@ impl AccountHandle {
             balance_builder.base_coin.available = balance_builder
                 .base_coin
                 .total
-                .saturating_sub(locked_amount)
+                .saturating_sub(balance_builder.locked_amount)
                 .saturating_sub(balance_builder.base_coin.voting_power);
         }
 
