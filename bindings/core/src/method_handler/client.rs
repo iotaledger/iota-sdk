@@ -104,7 +104,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 client.get_token_supply().await?,
             )?);
 
-            Ok(Response::BuiltOutput(OutputDto::from(&output)))
+            Ok(Response::Output(OutputDto::from(&output)))
         }
         ClientMethod::BuildBasicOutput {
             amount,
@@ -124,7 +124,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 client.get_token_supply().await?,
             )?);
 
-            Ok(Response::BuiltOutput(OutputDto::from(&output)))
+            Ok(Response::Output(OutputDto::from(&output)))
         }
         ClientMethod::BuildFoundryOutput {
             amount,
@@ -150,7 +150,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 client.get_token_supply().await?,
             )?);
 
-            Ok(Response::BuiltOutput(OutputDto::from(&output)))
+            Ok(Response::Output(OutputDto::from(&output)))
         }
         ClientMethod::BuildNftOutput {
             amount,
@@ -174,7 +174,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 client.get_token_supply().await?,
             )?);
 
-            Ok(Response::BuiltOutput(OutputDto::from(&output)))
+            Ok(Response::Output(OutputDto::from(&output)))
         }
         ClientMethod::GenerateAddresses {
             secret_manager,

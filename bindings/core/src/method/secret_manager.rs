@@ -20,7 +20,7 @@ pub enum SecretManagerMethod {
         options: GetAddressesBuilderOptions,
     },
     /// Get the ledger status
-    /// Expected response: [`LedgerNanoStatus`](crate::message_interface::Response::LedgerNanoStatus)
+    /// Expected response: [`LedgerNanoStatus`](crate::Response::LedgerNanoStatus)
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
     GetLedgerNanoStatus,
