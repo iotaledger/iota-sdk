@@ -44,23 +44,20 @@ jobs:
       - name: Install binutils and rustfilt
         run: cargo install cargo-binutils rustfilt
 
+      - name: Install llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+
+      - name: Install nextest
+        uses: taiki-e/install-action@nextest
+
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
-
-      - name: Build for tests
-        uses: actions-rs/cargo@v1
-        env:
-          RUSTFLAGS: "-C instrument-coverage"
-          LLVM_PROFILE_FILE: "iota-%m.profraw"
-        with:
-          command: test
-          args: --profile ci --tests --package iota-sdk --all-features --no-run -- --include-ignored
 
       - name: Start private tangle
         uses: "./.github/actions/private-tangle/setup"
 
-      - name: Collect coverage
-        run: bash ./coverage.sh
+      - name: Collect coverage data
+        run: cargo llvm-cov nextest --lcov --output-path coverage/coverage.info --tests --package iota-sdk --all-features --run-ignored all
 
       - name: Tear down private tangle
         if: always()
