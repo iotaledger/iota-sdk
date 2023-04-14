@@ -37,14 +37,16 @@ use crate::{
     client::{
         api::{
             input_selection::{is_alias_transition, Error as InputSelectionError},
-            PreparedTransactionData,
+            transaction::validate_transaction_payload_length,
+            verify_semantic, PreparedTransactionData,
         },
         Error,
     },
     types::block::{
         address::Address,
         output::Output,
-        payload::transaction::TransactionEssence,
+        payload::{transaction::TransactionEssence, Payload, TransactionPayload},
+        semantic::ConflictReason,
         signature::{Ed25519Signature, Signature},
         unlock::{AliasUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     },
@@ -378,5 +380,30 @@ impl SecretManager {
         }
 
         Ok(Unlocks::new(blocks)?)
+    }
+
+    /// Sign a transaction
+    pub async fn sign_transaction(
+        &self,
+        prepared_transaction_data: PreparedTransactionData,
+    ) -> crate::client::Result<Payload> {
+        log::debug!("[sign_transaction] {:?}", prepared_transaction_data);
+        let current_time = unix_timestamp_now().as_secs() as u32;
+
+        let unlocks = self
+            .sign_transaction_essence(&prepared_transaction_data, Some(current_time))
+            .await?;
+        let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+
+        validate_transaction_payload_length(&tx_payload)?;
+
+        let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
+
+        if conflict != ConflictReason::None {
+            log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);
+            return Err(Error::TransactionSemantic(conflict));
+        }
+
+        Ok(Payload::from(tx_payload))
     }
 }

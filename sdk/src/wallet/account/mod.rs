@@ -22,6 +22,8 @@ use std::{
 use getset::{Getters, Setters};
 use serde::{de, Deserialize, Deserializer, Serialize};
 
+#[cfg(feature = "participation")]
+pub use self::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes};
 use self::types::{
     address::{AccountAddress, AddressWithUnspentOutputs},
     AccountBalance, OutputData, Transaction,
@@ -36,8 +38,19 @@ pub use self::{
             SyncOptions,
         },
         transaction::{
-            high_level::minting::mint_native_token::MintTokenTransactionDto,
-            prepare_output::{Assets, Features, OutputOptions, ReturnStrategy, StorageDeposit, Unlocks},
+            high_level::{
+                create_alias::{AliasOutputOptions, AliasOutputOptionsDto},
+                minting::{
+                    increase_native_token_supply::{
+                        IncreaseNativeTokenSupplyOptions, IncreaseNativeTokenSupplyOptionsDto,
+                    },
+                    mint_native_token::{MintTokenTransactionDto, NativeTokenOptions, NativeTokenOptionsDto},
+                    mint_nfts::{NftOptions, NftOptionsDto},
+                },
+            },
+            prepare_output::{
+                Assets, Features, OutputOptions, OutputOptionsDto, ReturnStrategy, StorageDeposit, Unlocks,
+            },
             RemainderValueStrategy, TransactionOptions, TransactionOptionsDto,
         },
     },

@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+	"bindings/core",
 	"cli",
 	"sdk",
 	"sdk/src/client/bindings/java/lib/native",
