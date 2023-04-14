@@ -1,10 +1,6 @@
 name: Covector bindings checks (client)
 
-on:
-  push:
-    branches: [develop, production, chore/ci/rework]
-    paths-ignore:
-      - "documentation/**"
+on: workflow_call
 
 jobs:
   status:

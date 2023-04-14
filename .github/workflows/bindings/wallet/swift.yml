@@ -1,37 +1,6 @@
 name: Swift bindings checks (wallet)
-on:
-  push:
-    branches: [develop, production]
-    paths:
-      - ".github/actions/**"
-      - "**.rs" # Include all rust files
-      - "**Cargo.toml" # Include all Cargo.toml files
-      - "**Cargo.lock" # Include all Cargo.lock files
-      - "!**/examples/**" # Exclude all examples
-      - "!**/tests/**" # Exclude all tests
-      - "!**/bindings/**" # Exclude all bindings
-      - "!cli/**" # Exclude CLI
-      - "sdk/src/wallet/bindings/swift/**" # Re-include swift bindings
-      - ".github/workflows/bindings/wallet/swift.yml"
-  pull_request:
-    branches: [develop, production]
-    paths:
-      - ".github/actions/**"
-      - "**.rs" # Include all rust files
-      - "**Cargo.toml" # Include all Cargo.toml files
-      - "**Cargo.lock" # Include all Cargo.lock files
-      - "!**/examples/**" # Exclude all examples
-      - "!**/tests/**" # Exclude all tests
-      - "!**/bindings/**" # Exclude all bindings
-      - "!cli/**" # Exclude CLI
-      - "sdk/src/wallet/bindings/swift/**" # Re-include swift bindings
-      - ".github/workflows/bindings/wallet/swift.yml"
-  schedule:
-    - cron: "0 1 * * *"
-  workflow_dispatch:
 
-env:
-  CARGO_INCREMENTAL: 0
+on: workflow_call
 
 jobs:
   test:

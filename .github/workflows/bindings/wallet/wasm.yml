@@ -1,39 +1,6 @@
 name: Wasm bindings checks (wallet)
-on:
-  push:
-    branches: [develop, production]
-    paths:
-      - ".github/actions/**"
-      - "**.rs" # Include all rust files
-      - "**Cargo.toml" # Include all Cargo.toml files
-      - "**Cargo.lock" # Include all Cargo.lock files
-      - "!**/examples/**" # Exclude all examples
-      - "!**/tests/**" # Exclude all tests
-      - "!**/bindings/**" # Exclude all bindings
-      - "!cli/**" # Exclude CLI
-      - "sdk/src/wallet/bindings/wasm/**" # Re-include wasm wallet bindings
-      - "sdk/src/wallet/bindings/nodejs/**" # Re-include node wallet bindings, b/c lib copied from there
-      - ".github/workflows/bindings/wallet/wasm.yml"
-  pull_request:
-    branches: [develop, production]
-    paths:
-      - ".github/actions/**"
-      - "**.rs" # Include all rust files
-      - "**Cargo.toml" # Include all Cargo.toml files
-      - "**Cargo.lock" # Include all Cargo.lock files
-      - "!**/examples/**" # Exclude all examples
-      - "!**/tests/**" # Exclude all tests
-      - "!**/bindings/**" # Exclude all bindings
-      - "!cli/**" # Exclude CLI
-      - "sdk/src/wallet/bindings/wasm/**" # Re-include wasm wallet bindings
-      - "sdk/src/wallet/bindings/nodejs/**" # Re-include node wallet bindings, b/c lib copied from there
-      - ".github/workflows/bindings/wallet/wasm.yml"
-  schedule:
-    - cron: "0 1 * * *"
-  workflow_dispatch:
 
-env:
-  CARGO_INCREMENTAL: 0
+on: workflow_call
 
 jobs:
   test:
@@ -71,7 +38,8 @@ jobs:
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
-        cache-directories: "sdk/src/wallet/bindings/wasm"
+        with:
+          cache-directories: "sdk/src/wallet/bindings/wasm"
 
       - name: Run Yarn Install
         working-directory: sdk/src/wallet/bindings/wasm/

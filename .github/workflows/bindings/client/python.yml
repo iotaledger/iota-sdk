@@ -1,37 +1,5 @@
 name: Python bindings checks (client)
-on:
-  push:
-    branches: [develop, production]
-    paths:
-      - ".github/actions/**"
-      - "**.rs" # Include all rust files
-      - "**Cargo.toml" # Include all Cargo.toml files
-      - "**Cargo.lock" # Include all Cargo.lock files
-      - "!**/examples/**" # Exclude all examples
-      - "!**/tests/**" # Exclude all tests
-      - "!**/bindings/**" # Exclude all bindings
-      - "!cli/**" # Exclude CLI
-      - "sdk/src/client/bindings/python/**" # Re-include python bindings
-      - ".github/workflows/bindings/client/python.yml"
-  pull_request:
-    branches: [develop, production]
-    paths:
-      - ".github/actions/**"
-      - "**.rs" # Include all rust files
-      - "**Cargo.toml" # Include all Cargo.toml files
-      - "**Cargo.lock" # Include all Cargo.lock files
-      - "!**/examples/**" # Exclude all examples
-      - "!**/tests/**" # Exclude all tests
-      - "!**/bindings/**" # Exclude all bindings
-      - "!cli/**" # Exclude CLI
-      - "sdk/src/client/bindings/python/**" # Re-include python bindings
-      - ".github/workflows/bindings/client/python.yml"
-  schedule:
-    - cron: "0 1 * * *"
-  workflow_dispatch:
-
-env:
-  CARGO_INCREMENTAL: 0
+on: workflow_call
 
 jobs:
   test:
@@ -80,7 +48,7 @@ jobs:
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
         with:
-          workspace: "sdk/src/client/bindings/python -> target"
+          workspaces: "sdk/src/client/bindings/python -> target"
           cache-directories: "sdk/src/client/bindings/python"
 
       - name: Run Tox

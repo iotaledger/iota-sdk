@@ -1,37 +1,6 @@
 name: Nodejs bindings checks (wallet)
-on:
-  push:
-    branches: [develop, production]
-    paths:
-      - ".github/actions/**"
-      - "**.rs" # Include all rust files
-      - "**Cargo.toml" # Include all Cargo.toml files
-      - "**Cargo.lock" # Include all Cargo.lock files
-      - "!**/examples/**" # Exclude all examples
-      - "!**/tests/**" # Exclude all tests
-      - "!**/bindings/**" # Exclude all bindings
-      - "!cli/**" # Exclude CLI
-      - "sdk/src/wallet/bindings/nodejs/**" # Re-include nodejs bindings
-      - ".github/workflows/bindings/wallet/nodejs.yml"
-  pull_request:
-    branches: [develop, production]
-    paths:
-      - ".github/actions/**"
-      - "**.rs" # Include all rust files
-      - "**Cargo.toml" # Include all Cargo.toml files
-      - "**Cargo.lock" # Include all Cargo.lock files
-      - "!**/examples/**" # Exclude all examples
-      - "!**/tests/**" # Exclude all tests
-      - "!**/bindings/**" # Exclude all bindings
-      - "!cli/**" # Exclude CLI
-      - "sdk/src/wallet/bindings/nodejs/**" # Re-include nodejs bindings
-      - ".github/workflows/bindings/wallet/nodejs.yml"
-  schedule:
-    - cron: "0 1 * * *"
-  workflow_dispatch:
 
-env:
-  CARGO_INCREMENTAL: 0
+on: workflow_call
 
 jobs:
   test:
@@ -73,7 +42,8 @@ jobs:
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
-        workspace: "sdk/src/wallet/bindings/nodejs -> target"
+        with:
+          workspaces: "sdk/src/wallet/bindings/nodejs -> target"
 
       - name: Run Yarn Install
         working-directory: sdk/src/wallet/bindings/nodejs/
