@@ -97,7 +97,7 @@ class TestTypes(unittest.TestCase):
             OutputId.from_string(output_id_invalid_hex_char)
 
 
-def hex_utf8():
+def test_hex_utf8():
     utf8_data = "Don't panic!"
     hex_data = '0x446f6e27742070616e696321'
     assert utf8_to_hex(utf8_data) == hex_data
