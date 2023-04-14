@@ -49,8 +49,11 @@ async fn balance_expiration() -> Result<()> {
     let tx = account_0.send(outputs, None).await?;
     let balance_after_tx = account_0.balance().await?;
     // Total doesn't change before syncing after tx got confirmed
-    assert_eq!(balance_before_tx.base_coin.total, balance_after_tx.base_coin.total);
-    assert_eq!(balance_after_tx.base_coin.available, 0);
+    assert_eq!(
+        balance_before_tx.base_coin().total(),
+        balance_after_tx.base_coin().total()
+    );
+    assert_eq!(balance_after_tx.base_coin().available(), 0);
 
     account_0
         .retry_transaction_until_included(&tx.transaction_id, None, None)
@@ -58,30 +61,30 @@ async fn balance_expiration() -> Result<()> {
 
     // Account 1 balance before expiration
     let balance = account_1.sync(None).await?;
-    assert_eq!(balance.potentially_locked_outputs.len(), 1);
-    assert_eq!(balance.base_coin.total, 0);
-    assert_eq!(balance.base_coin.available, 0);
+    assert_eq!(balance.potentially_locked_outputs().len(), 1);
+    assert_eq!(balance.base_coin().total(), 0);
+    assert_eq!(balance.base_coin().available(), 0);
 
     // Account 2 balance before expiration
     let balance = account_2.sync(None).await?;
-    assert_eq!(balance.potentially_locked_outputs.len(), 1);
-    assert_eq!(balance.base_coin.total, 0);
-    assert_eq!(balance.base_coin.available, 0);
+    assert_eq!(balance.potentially_locked_outputs().len(), 1);
+    assert_eq!(balance.base_coin().total(), 0);
+    assert_eq!(balance.base_coin().available(), 0);
 
     // Wait until expired
     tokio::time::sleep(std::time::Duration::from_secs(seconds_until_expired.into())).await;
 
     // Account 1 balance after expiration
     let balance = account_1.sync(None).await?;
-    assert_eq!(balance.potentially_locked_outputs.len(), 0);
-    assert_eq!(balance.base_coin.total, 0);
-    assert_eq!(balance.base_coin.available, 0);
+    assert_eq!(balance.potentially_locked_outputs().len(), 0);
+    assert_eq!(balance.base_coin().total(), 0);
+    assert_eq!(balance.base_coin().available(), 0);
 
     // Account 2 balance after expiration
     let balance = account_2.sync(None).await?;
-    assert_eq!(balance.potentially_locked_outputs.len(), 0);
-    assert_eq!(balance.base_coin.total, 1_000_000);
-    assert_eq!(balance.base_coin.available, 1_000_000);
+    assert_eq!(balance.potentially_locked_outputs().len(), 0);
+    assert_eq!(balance.base_coin().total(), 1_000_000);
+    assert_eq!(balance.base_coin().available(), 1_000_000);
 
     // It's possible to send the expired output
     let outputs = vec![
@@ -111,8 +114,8 @@ async fn balance_voting_power() -> Result<()> {
     let faucet_amount = 100_000_000_000;
 
     let balance = account.balance().await?;
-    assert_eq!(balance.base_coin.total, faucet_amount);
-    assert_eq!(balance.base_coin.available, faucet_amount);
+    assert_eq!(balance.base_coin().total(), faucet_amount);
+    assert_eq!(balance.base_coin().available(), faucet_amount);
 
     let voting_power = 1_000_000;
     // Only use a part as voting power
@@ -121,8 +124,8 @@ async fn balance_voting_power() -> Result<()> {
         .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await?;
-    assert_eq!(balance.base_coin.total, faucet_amount);
-    assert_eq!(balance.base_coin.available, faucet_amount - voting_power);
+    assert_eq!(balance.base_coin().total(), faucet_amount);
+    assert_eq!(balance.base_coin().available(), faucet_amount - voting_power);
     let account_voting_power = account.get_voting_power().await?;
     assert_eq!(account_voting_power, voting_power);
 
@@ -132,8 +135,8 @@ async fn balance_voting_power() -> Result<()> {
         .retry_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await?;
-    assert_eq!(balance.base_coin.total, faucet_amount);
-    assert_eq!(balance.base_coin.available, 0);
+    assert_eq!(balance.base_coin().total(), faucet_amount);
+    assert_eq!(balance.base_coin().available(), 0);
     let account_voting_power = account.get_voting_power().await?;
     assert_eq!(account_voting_power, faucet_amount);
 

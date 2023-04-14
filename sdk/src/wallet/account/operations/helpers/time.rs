@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    types::block::{address::Address, output::AliasTransition},
+    types::block::{
+        address::Address,
+        output::{AliasTransition, Output},
+    },
     wallet::account::types::{AddressWithUnspentOutputs, OutputData},
 };
 
@@ -39,10 +42,10 @@ pub(crate) fn can_output_be_unlocked_forever_from_now_on(
     // We use the addresses with unspent outputs, because other addresses of the account without unspent outputs can't
     // be related to this output
     account_addresses: &[AddressWithUnspentOutputs],
-    output_data: &OutputData,
+    output: &Output,
     current_time: u32,
 ) -> bool {
-    if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
+    if let Some(unlock_conditions) = output.unlock_conditions() {
         if unlock_conditions.is_time_locked(current_time) {
             return false;
         }

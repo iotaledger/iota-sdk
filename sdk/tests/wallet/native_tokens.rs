@@ -36,14 +36,14 @@ async fn mint_and_increase_native_token_supply() -> Result<()> {
         .retry_transaction_until_included(&mint_tx.transaction.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await?;
-    assert_eq!(balance.native_tokens.len(), 1);
+    assert_eq!(balance.native_tokens().len(), 1);
     assert_eq!(
         balance
-            .native_tokens
+            .native_tokens()
             .iter()
-            .find(|t| t.token_id == mint_tx.token_id)
+            .find(|t| t.token_id() == &mint_tx.token_id)
             .unwrap()
-            .available,
+            .available(),
         U256::from(50)
     );
 
@@ -54,14 +54,14 @@ async fn mint_and_increase_native_token_supply() -> Result<()> {
         .retry_transaction_until_included(&mint_tx.transaction.transaction_id, None, None)
         .await?;
     let balance = account.sync(None).await?;
-    assert_eq!(balance.native_tokens.len(), 1);
+    assert_eq!(balance.native_tokens().len(), 1);
     assert_eq!(
         balance
-            .native_tokens
+            .native_tokens()
             .iter()
-            .find(|t| t.token_id == mint_tx.token_id)
+            .find(|t| t.token_id() == &mint_tx.token_id)
             .unwrap()
-            .available,
+            .available(),
         U256::from(100)
     );
 
@@ -107,15 +107,15 @@ async fn native_token_foundry_metadata() -> Result<()> {
             ..Default::default()
         }))
         .await?;
-    assert_eq!(balance.native_tokens.len(), 1);
+    assert_eq!(balance.native_tokens().len(), 1);
     // Metadata should exist and be the same
     assert_eq!(
         balance
-            .native_tokens
+            .native_tokens()
             .iter()
-            .find(|t| t.token_id == mint_tx.token_id)
+            .find(|t| t.token_id() == &mint_tx.token_id)
             .unwrap()
-            .metadata
+            .metadata()
             .as_ref()
             .unwrap()
             .data(),

@@ -3,6 +3,7 @@
 
 use std::collections::HashMap;
 
+use getset::{CopyGetters, Getters};
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
@@ -11,35 +12,59 @@ use crate::types::block::{
     output::{dto::TokenIdDto, feature::MetadataFeature, AliasId, FoundryId, NftId, OutputId, TokenId},
 };
 
-/// The balance of an account, returned from [`crate::account::handle::AccountHandle::sync()`] and
-/// [`crate::account::handle::AccountHandle::balance()`].
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+/// The balance of an account, returned from [`crate::wallet::account::handle::AccountHandle::sync()`] and
+/// [`crate::wallet::account::handle::AccountHandle::balance()`].
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, Getters)]
+#[getset(get = "pub")]
 pub struct AccountBalance {
     /// Total and available amount of the base coin
     #[serde(rename = "baseCoin")]
-    pub base_coin: BaseCoinBalance,
+    pub(crate) base_coin: BaseCoinBalance,
     /// Current required storage deposit amount
     #[serde(rename = "requiredStorageDeposit")]
-    pub required_storage_deposit: RequiredStorageDeposit,
+    pub(crate) required_storage_deposit: RequiredStorageDeposit,
     /// Native tokens
     #[serde(rename = "nativeTokens")]
-    pub native_tokens: Vec<NativeTokensBalance>,
+    pub(crate) native_tokens: Vec<NativeTokensBalance>,
     /// Nfts
-    pub nfts: Vec<NftId>,
+    pub(crate) nfts: Vec<NftId>,
     /// Aliases
-    pub aliases: Vec<AliasId>,
+    pub(crate) aliases: Vec<AliasId>,
     /// Foundries
-    pub foundries: Vec<FoundryId>,
+    pub(crate) foundries: Vec<FoundryId>,
     /// Outputs with multiple unlock conditions and if they can currently be spent or not. If there is a
-    /// [`TimelockUnlockCondition`](crate::client::block::output::unlock_condition::TimelockUnlockCondition) or
-    /// [`ExpirationUnlockCondition`](crate::client::block::output::unlock_condition::ExpirationUnlockCondition) this
+    /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) or
+    /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition) this
     /// can change at any time
     #[serde(rename = "potentiallyLockedOutputs")]
-    pub potentially_locked_outputs: HashMap<OutputId, bool>,
+    pub(crate) potentially_locked_outputs: HashMap<OutputId, bool>,
 }
 
-/// Dto for the balance of an account, returned from [`crate::account::handle::AccountHandle::sync()`] and
-/// [`crate::account::handle::AccountHandle::balance()`].
+impl std::ops::AddAssign for AccountBalance {
+    fn add_assign(&mut self, rhs: Self) {
+        self.base_coin += rhs.base_coin;
+        self.required_storage_deposit += rhs.required_storage_deposit;
+
+        for native_token_balance in rhs.native_tokens.into_iter() {
+            if let Some(total_native_token_balance) = self
+                .native_tokens
+                .iter_mut()
+                .find(|n| n.token_id == native_token_balance.token_id)
+            {
+                *total_native_token_balance += native_token_balance;
+            } else {
+                self.native_tokens.push(native_token_balance);
+            }
+        }
+
+        self.nfts.extend(rhs.nfts.into_iter());
+        self.aliases.extend(rhs.aliases.into_iter());
+        self.foundries.extend(rhs.foundries.into_iter());
+    }
+}
+
+/// Dto for the balance of an account, returned from [`crate::wallet::account::handle::AccountHandle::sync()`] and
+/// [`crate::wallet::account::handle::AccountHandle::balance()`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct AccountBalanceDto {
     /// Total and available amount of the base coin
@@ -58,8 +83,8 @@ pub struct AccountBalanceDto {
     /// Foundries
     pub foundries: Vec<FoundryId>,
     /// Outputs with multiple unlock conditions and if they can currently be spent or not. If there is a
-    /// [`TimelockUnlockCondition`](crate::client::block::output::unlock_condition::TimelockUnlockCondition) or
-    /// [`ExpirationUnlockCondition`](crate::client::block::output::unlock_condition::ExpirationUnlockCondition) this
+    /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) or
+    /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition) this
     /// can change at any time
     #[serde(rename = "potentiallyLockedOutputs")]
     pub potentially_locked_outputs: HashMap<OutputId, bool>,
@@ -84,16 +109,28 @@ impl From<&AccountBalance> for AccountBalanceDto {
 }
 
 /// Base coin fields for [`AccountBalance`]
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters)]
+#[getset(get_copy = "pub")]
 pub struct BaseCoinBalance {
     /// Total amount
-    pub total: u64,
+    pub(crate) total: u64,
     /// Balance that can currently be spent
-    pub available: u64,
+    pub(crate) available: u64,
     /// Voting power
     #[cfg(feature = "participation")]
     #[serde(rename = "votingPower")]
-    pub voting_power: u64,
+    pub(crate) voting_power: u64,
+}
+
+impl std::ops::AddAssign for BaseCoinBalance {
+    fn add_assign(&mut self, rhs: Self) {
+        self.total += rhs.total;
+        self.available += rhs.available;
+        #[cfg(feature = "participation")]
+        {
+            self.voting_power += rhs.voting_power;
+        }
+    }
 }
 
 /// Base coin fields for [`AccountBalance`]
@@ -120,34 +157,13 @@ impl From<&BaseCoinBalance> for BaseCoinBalanceDto {
     }
 }
 
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters)]
+#[getset(get_copy = "pub")]
 pub struct RequiredStorageDeposit {
     pub(crate) alias: u64,
     pub(crate) basic: u64,
     pub(crate) foundry: u64,
     pub(crate) nft: u64,
-}
-
-impl RequiredStorageDeposit {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn alias(&self) -> u64 {
-        self.alias
-    }
-
-    pub fn basic(&self) -> u64 {
-        self.basic
-    }
-
-    pub fn foundry(&self) -> u64 {
-        self.foundry
-    }
-
-    pub fn nft(&self) -> u64 {
-        self.nft
-    }
 }
 
 impl std::ops::AddAssign for RequiredStorageDeposit {
@@ -180,17 +196,21 @@ impl From<&RequiredStorageDeposit> for RequiredStorageDepositDto {
 }
 
 /// Native tokens fields for [`AccountBalance`]
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, Getters, CopyGetters)]
 pub struct NativeTokensBalance {
     /// Token id
+    #[getset(get = "pub")]
     #[serde(rename = "tokenId")]
-    pub token_id: TokenId,
+    pub(crate) token_id: TokenId,
     /// Token foundry immutable metadata
-    pub metadata: Option<MetadataFeature>,
+    #[getset(get = "pub")]
+    pub(crate) metadata: Option<MetadataFeature>,
     /// Total amount
-    pub total: U256,
+    #[getset(get_copy = "pub")]
+    pub(crate) total: U256,
     /// Balance that can currently be spent
-    pub available: U256,
+    #[getset(get_copy = "pub")]
+    pub(crate) available: U256,
 }
 
 impl Default for NativeTokensBalance {
@@ -201,6 +221,16 @@ impl Default for NativeTokensBalance {
             total: U256::from(0u8),
             available: U256::from(0u8),
         }
+    }
+}
+
+impl std::ops::AddAssign for NativeTokensBalance {
+    fn add_assign(&mut self, rhs: Self) {
+        if self.metadata.is_none() {
+            self.metadata = rhs.metadata;
+        }
+        self.total += rhs.total;
+        self.available += rhs.available;
     }
 }
 

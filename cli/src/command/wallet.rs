@@ -1,25 +1,40 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{fs::File, io::prelude::*};
-
 use clap::{Args, Parser, Subcommand};
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, secret::SecretManager, utils::generate_mnemonic},
+    client::{constants::SHIMMER_COIN_TYPE, secret::SecretManager},
     wallet::{ClientOptions, Wallet},
 };
 use log::LevelFilter;
 
-use crate::{error::Error, helper::get_password, println_log_info};
+use crate::{
+    error::Error,
+    helper::{generate_mnemonic, get_password},
+    println_log_info,
+};
+
+const DEFAULT_NODE_URL: &str = "https://api.testnet.shimmer.network";
+const DEFAULT_WALLET_DATABASE_PATH: &str = "./stardust-cli-wallet-db";
+const DEFAULT_STRONGHOLD_SNAPSHOT_PATH: &str = "./stardust-cli-wallet.stronghold";
+const DEFAULT_LOG_LEVEL: &str = "debug";
 
 #[derive(Debug, Clone, Parser)]
 #[command(author, version, about, long_about = None, propagate_version = true)]
 pub struct WalletCli {
+    /// Set the path to the wallet database.
+    #[arg(long, value_name = "PATH", env = "WALLET_DATABASE_PATH", default_value = DEFAULT_WALLET_DATABASE_PATH)]
+    pub wallet_db_path: String,
+    /// Set the path to the stronghold snapshot file.
+    #[arg(long, value_name = "PATH", env = "STRONGHOLD_SNAPSHOT_PATH", default_value = DEFAULT_STRONGHOLD_SNAPSHOT_PATH)]
+    pub stronghold_snapshot_path: String,
+    /// Set the account to enter.
+    pub account: Option<String>,
+    /// Set the log level.
+    #[arg(short, long, default_value = DEFAULT_LOG_LEVEL)]
+    pub log_level: LevelFilter,
     #[command(subcommand)]
     pub command: Option<WalletCommand>,
-    pub account: Option<String>,
-    #[arg(short, long)]
-    pub log_level: Option<LevelFilter>,
 }
 
 #[derive(Debug, Clone, Subcommand)]
@@ -59,9 +74,9 @@ pub struct InitParameters {
     /// Mnemonic, randomly generated if not provided.
     #[arg(short, long)]
     pub mnemonic: Option<String>,
-    /// Node URL, "https://api.testnet.shimmer.network" if not provided.
-    #[arg(short, long)]
-    pub node: Option<String>,
+    /// Set the node to connect to with this wallet.
+    #[arg(short, long, value_name = "URL", env = "NODE_URL", default_value = DEFAULT_NODE_URL)]
+    pub node_url: String,
     /// Coin type, SHIMMER_COIN_TYPE (4219) if not provided.
     #[arg(short, long)]
     pub coin_type: Option<u32>,
@@ -90,14 +105,7 @@ pub async fn init_command(
 ) -> Result<Wallet, Error> {
     let wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
-        .with_client_options(
-            ClientOptions::new().with_node(
-                parameters
-                    .node
-                    .as_deref()
-                    .unwrap_or("https://api.testnet.shimmer.network"),
-            )?,
-        )
+        .with_client_options(ClientOptions::new().with_node(parameters.node_url.as_str())?)
         .with_storage_path(&storage_path)
         .with_coin_type(parameters.coin_type.unwrap_or(SHIMMER_COIN_TYPE))
         .finish()
@@ -105,17 +113,8 @@ pub async fn init_command(
 
     let mnemonic = match parameters.mnemonic {
         Some(mnemonic) => mnemonic,
-        None => generate_mnemonic()?,
+        None => generate_mnemonic().await?,
     };
-
-    let mut file = File::options().create(true).append(true).open("mnemonic.txt")?;
-    // Write mnemonic with new line
-    file.write_all(format!("init_command: {mnemonic}\n").as_bytes())?;
-
-    println_log_info!("IMPORTANT: mnemonic has been written to \"mnemonic.txt\", handle it safely.");
-    println_log_info!(
-        "It is the only way to recover your account if you ever forget your password and/or lose the stronghold file."
-    );
 
     if let SecretManager::Stronghold(secret_manager) = &mut *wallet.get_secret_manager().write().await {
         secret_manager.store_mnemonic(mnemonic).await?;
@@ -128,16 +127,7 @@ pub async fn init_command(
 }
 
 pub async fn mnemonic_command() -> Result<(), Error> {
-    let mnemonic = generate_mnemonic()?;
-
-    let mut file = File::options().create(true).append(true).open("mnemonic.txt")?;
-    // Write mnemonic with new line
-    file.write_all(format!("mnemonic_command: {mnemonic}\n").as_bytes())?;
-
-    println_log_info!("IMPORTANT: mnemonic has been written to \"mnemonic.txt\", handle it safely.");
-    println_log_info!(
-        "It is the only way to recover your account if you ever forget your password and/or lose the stronghold file."
-    );
+    generate_mnemonic().await?;
 
     Ok(())
 }

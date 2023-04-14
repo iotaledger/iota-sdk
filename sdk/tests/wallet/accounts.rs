@@ -9,7 +9,6 @@ use {
         secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
     iota_sdk::wallet::{ClientOptions, Wallet},
-    std::path::PathBuf,
 };
 
 use crate::wallet::common::{make_wallet, setup, tear_down};
@@ -24,7 +23,7 @@ async fn account_ordering() -> Result<()> {
     for _ in 0..100 {
         let _account = wallet.create_account().finish().await?;
     }
-    std::fs::remove_dir_all("test-storage/account_ordering").unwrap_or(());
+    std::fs::remove_dir_all("test-storage/account_ordering").ok();
     #[cfg(debug_assertions)]
     wallet.verify_integrity().await?;
     tear_down(storage_path)
@@ -189,12 +188,10 @@ async fn account_creation_stronghold() -> Result<()> {
     let mnemonic = "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak";
 
     // Create directory before, because stronghold would panic otherwise
-    std::fs::create_dir_all(storage_path).unwrap_or(());
+    std::fs::create_dir_all(storage_path).ok();
     let mut stronghold_secret_manager = StrongholdSecretManager::builder()
         .password("some_hopefully_secure_password")
-        .build(PathBuf::from(
-            "test-storage/account_creation_stronghold/test.stronghold",
-        ))?;
+        .build("test-storage/account_creation_stronghold/test.stronghold")?;
     stronghold_secret_manager.store_mnemonic(mnemonic.to_string()).await?;
     let secret_manager = SecretManager::Stronghold(stronghold_secret_manager);
 

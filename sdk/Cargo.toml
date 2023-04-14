@@ -73,7 +73,6 @@ iota-sdk = { version = "0.1.0", path = ".", default-features = false, features =
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 
-
 [features]
 default = [ "std", "serde" ]
 
@@ -84,6 +83,7 @@ mqtt = [ "regex", "rumqttc", "once_cell" ]
 participation = [ "storage" ]
 pow = [ "std", "num_cpus", "iota-crypto/curl-p" ]
 rand = [ "std", "dep:rand" ]
+rocksdb = [ "dep:rocksdb", "storage" ]
 serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde" ]
 std = [ "packable/std", "prefix-hex/std" ]
 storage = [ "iota-crypto/chacha" ]
@@ -420,6 +420,11 @@ required-features = [ "client", "participation" ]
 ### Wallet
 
 [[example]]
+name = "wallet_getting_started"
+path = "examples/wallet/getting_started.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
 name = "mint_issuer_nft"
 path = "examples/wallet/nft_collection/00_mint_issuer_nft.rs"
 required-features = [ "wallet", "storage", "stronghold" ]
@@ -523,6 +528,11 @@ required-features = [ "wallet", "stronghold" ]
 name = "destroy_foundry"
 path = "examples/wallet/15_destroy_foundry.rs"
 required-features = [ "wallet", "stronghold" ]
+
+[[example]]
+name = "create_alias"
+path = "examples/wallet/create_alias.rs"
+required-features = [ "stronghold" ]
 
 [[example]]
 name = "destroy_alias"

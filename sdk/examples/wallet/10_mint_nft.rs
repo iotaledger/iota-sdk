@@ -26,8 +26,6 @@ async fn main() -> Result<()> {
     // Get the account we generated with `01_create_wallet`
     let account = wallet.get_account("Alice").await?;
 
-    account.sync(None).await?;
-
     // Set the stronghold password
     wallet
         .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
@@ -44,9 +42,9 @@ async fn main() -> Result<()> {
 
     let transaction = account.mint_nfts(nft_options, None).await?;
 
-    println!("Transaction: {}.", transaction.transaction_id,);
+    println!("Transaction: {}", transaction.transaction_id);
     println!(
-        "Block sent: {}/api/core/v2/blocks/{}.",
+        "Block sent: {}/api/core/v2/blocks/{}",
         &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
@@ -65,11 +63,19 @@ async fn main() -> Result<()> {
 
     let transaction = account.send(outputs, None).await?;
 
+    // Wait for transaction to get included
+    account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
+
+    // Ensure the account is synced after minting.
+    account.sync(None).await?;
+
+    println!("Transaction: {}", transaction.transaction_id);
     println!(
-        "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
-        transaction.transaction_id,
+        "Block sent: {}/api/core/v2/blocks/{}",
         &std::env::var("NODE_URL").unwrap(),
-        transaction.block_id.expect("No block created yet")
+        transaction.block_id.expect("no block created yet")
     );
 
     Ok(())

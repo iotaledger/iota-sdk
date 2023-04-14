@@ -24,13 +24,10 @@ use crate::wallet::events::{
 #[cfg(feature = "storage")]
 use crate::wallet::storage::manager::StorageManagerHandle;
 use crate::{
-    client::{secret::SecretManager, Client},
+    client::{secret::SecretManager, verify_mnemonic, Client},
     wallet::{
         account::{
-            builder::AccountBuilder,
-            handle::AccountHandle,
-            operations::{balance::add_balances, syncing::SyncOptions},
-            types::AccountBalance,
+            builder::AccountBuilder, handle::AccountHandle, operations::syncing::SyncOptions, types::AccountBalance,
         },
         ClientOptions,
     },
@@ -126,27 +123,25 @@ impl Wallet {
 
     /// Get the balance of all accounts added together
     pub async fn balance(&self) -> crate::wallet::Result<AccountBalance> {
-        let mut balances = Vec::new();
+        let mut balance = AccountBalance::default();
         let accounts = self.accounts.read().await;
 
         for account in accounts.iter() {
-            balances.push(account.balance().await?);
+            balance += account.balance().await?;
         }
 
-        drop(accounts);
-
-        add_balances(balances)
+        Ok(balance)
     }
 
     /// Sync all accounts
     pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<AccountBalance> {
-        let mut balances = Vec::new();
+        let mut balance = AccountBalance::default();
 
         for account in self.accounts.read().await.iter() {
-            balances.push(account.sync(options.clone()).await?);
+            balance += account.sync(options.clone()).await?;
         }
 
-        add_balances(balances)
+        Ok(balance)
     }
 
     /// Listen to wallet events, empty vec will listen to all events
@@ -175,9 +170,7 @@ impl Wallet {
 
     /// Verify that a &str is a valid mnemonic.
     pub fn verify_mnemonic(&self, mnemonic: &str) -> crate::wallet::Result<()> {
-        // first we check if the mnemonic is valid to give meaningful errors
-        crypto::keys::bip39::wordlist::verify(mnemonic, &crypto::keys::bip39::wordlist::ENGLISH)
-            .map_err(|e| crate::wallet::Error::InvalidMnemonic(format!("{e:?}")))?;
+        verify_mnemonic(mnemonic)?;
         Ok(())
     }
 

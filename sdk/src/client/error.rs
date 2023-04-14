@@ -233,7 +233,7 @@ pub enum Error {
     /// MQTT error.
     #[cfg(feature = "mqtt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "mqtt")))]
-    #[error("MQTT error {0}")]
+    #[error("{0}")]
     Mqtt(#[from] crate::client::node_api::mqtt::Error),
 
     //////////////////////////////////////////////////////////////////////

@@ -30,7 +30,7 @@ async fn consolidation() -> Result<()> {
         .await?;
 
     let balance = account_1.sync(None).await.unwrap();
-    assert_eq!(balance.base_coin.available, 10 * amount);
+    assert_eq!(balance.base_coin().available(), 10 * amount);
     assert_eq!(account_1.unspent_outputs(None).await?.len(), 10);
 
     let tx = account_1.consolidate_outputs(true, None).await?;
@@ -40,7 +40,7 @@ async fn consolidation() -> Result<()> {
 
     let balance = account_1.sync(None).await.unwrap();
     // Balance still the same
-    assert_eq!(balance.base_coin.available, 10 * amount);
+    assert_eq!(balance.base_coin().available(), 10 * amount);
     // Only one unspent output
     assert_eq!(account_1.unspent_outputs(None).await?.len(), 1);
 

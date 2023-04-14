@@ -83,7 +83,7 @@ pub enum AccountCommand {
     Exit,
     /// Request funds from the faucet.
     Faucet {
-        /// URL of the faucet, default to https://faucet.testnet.shimmer.network/api/enqueue.
+        /// URL of the faucet, default to <https://faucet.testnet.shimmer.network/api/enqueue>.
         url: Option<String>,
         /// Address the faucet sends the funds to, defaults to the latest address.
         address: Option<String>,
@@ -109,7 +109,7 @@ pub enum AccountCommand {
         foundry_metadata_file: Option<String>,
     },
     /// Mint an NFT.
-    /// IOTA NFT Standard - TIP27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md.
+    /// IOTA NFT Standard - TIP27: <https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md>.
     MintNft {
         /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         address: Option<String>,
@@ -153,14 +153,16 @@ pub enum AccountCommand {
         /// Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
         /// given the provided amount. If a storage deposit is needed and a return address is not provided, it will
         /// default to the first address of the account.
+        #[arg(long)]
         return_address: Option<String>,
         /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
         /// receiver already. The expiration will only be used if one is necessary given the provided amount. If an
         /// expiration is needed but not provided, it will default to one day.
+        #[arg(long)]
         expiration: Option<humantime::Duration>,
         /// Whether to send micro amounts. This will automatically add Storage Deposit Return and Expiration unlock
-        /// conditions if necessary.
-        #[arg(default_value_t = false)]
+        /// conditions if necessary. This flag is implied by the existence of a return address or expiration.
+        #[arg(long, default_value_t = false)]
         allow_micro_amount: bool,
     },
     /// Send native tokens.
@@ -469,7 +471,7 @@ pub async fn mint_native_token_command(
     foundry_metadata: Option<Vec<u8>>,
 ) -> Result<(), Error> {
     // If no alias output exists, create one first
-    if account_handle.balance().await?.aliases.is_empty() {
+    if account_handle.balance().await?.aliases().is_empty() {
         let transaction = account_handle.create_alias_output(None, None).await?;
         println_log_info!(
             "Alias output minting transaction sent:\n{:?}\n{:?}",
@@ -796,11 +798,40 @@ async fn print_address(account_handle: &AccountHandle, address: &AccountAddress)
     }
 
     let addresses = account_handle.addresses_with_unspent_outputs().await?;
+    let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
 
     if let Ok(index) = addresses.binary_search_by_key(&(address.key_index(), address.internal()), |a| {
         (a.key_index(), a.internal())
     }) {
-        log = format!("{log}\nOutputs: {:#?}", addresses[index].output_ids());
+        let mut address_amount = 0;
+        for output_id in addresses[index].output_ids() {
+            if let Some(output_data) = account_handle.get_output(output_id).await {
+                // Output might be associated with the address, but can't unlocked by it, so we check that here
+                let (required_address, _) =
+                    output_data
+                        .output
+                        .required_and_unlocked_address(current_time, output_id, None)?;
+                if *address.address().as_ref() == required_address {
+                    let unlock_conditions = output_data
+                        .output
+                        .unlock_conditions()
+                        .expect("output must have unlock conditions");
+
+                    if let Some(sdr) = unlock_conditions.storage_deposit_return() {
+                        address_amount += output_data.output.amount() - sdr.amount();
+                    } else {
+                        address_amount += output_data.output.amount();
+                    }
+                }
+            }
+        }
+        log = format!(
+            "{log}\nOutputs: {:#?}\nBase coin amount: {}\n",
+            addresses[index].output_ids(),
+            address_amount
+        );
+    } else {
+        log = format!("{log}\nOutputs: []\nBase coin amount: 0\n");
     }
 
     println_log_info!("{log}");

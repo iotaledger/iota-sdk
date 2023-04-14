@@ -2,6 +2,9 @@ from iota_wallet import IotaWallet
 
 # In this example we will destroy a foundry
 
+# Explorer url
+EXPLORER = "https://explorer.shimmer.network/testnet"
+
 wallet = IotaWallet('./alice-database')
 
 account = wallet.get_account('Alice')
@@ -16,7 +19,7 @@ wallet.set_stronghold_password("some_hopefully_secure_password")
 foundry_id = "0x08429fe5864378ce70699fc2d22bb144cb86a3c4833d136e3b95c5dadfd6ba0cef0500000000"
 
 # Send transaction.
-t = account.destroy_foundry(token_id)
+transaction = account.destroy_foundry(token_id)
 
-# Print transaction.
-print(t)
+print(f'Transaction: {transaction.transaction_id}')
+print(f'Block sent: {EXPLORER}/block/" + {transaction.block_id});

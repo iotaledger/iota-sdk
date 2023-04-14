@@ -61,7 +61,7 @@ pub(crate) async fn create_accounts_with_funds(wallet: &Wallet, amount: usize) -
         for _ in 0..30 {
             tokio::time::sleep(std::time::Duration::from_secs(2)).await;
             let balance = account.sync(None).await?;
-            if balance.base_coin.available > 0 {
+            if balance.base_coin().available() > 0 {
                 new_accounts.push(account);
                 continue 'accounts;
             }
@@ -74,12 +74,12 @@ pub(crate) async fn create_accounts_with_funds(wallet: &Wallet, amount: usize) -
 
 #[allow(dead_code)]
 pub(crate) fn setup(path: &str) -> Result<()> {
-    std::fs::remove_dir_all(path).unwrap_or(());
+    std::fs::remove_dir_all(path).ok();
     Ok(())
 }
 
 #[allow(dead_code)]
 pub(crate) fn tear_down(path: &str) -> Result<()> {
-    std::fs::remove_dir_all(path).unwrap_or(());
+    std::fs::remove_dir_all(path).ok();
     Ok(())
 }

@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `{TransactionOptions, TransactionOptionsDto}::allow_micro_amount` field;
 - `AddressWithAmount::{new, with_return_address, with_expiration}` methods;
 - `{BaseCoinBalance, BaseCoinBalanceDto}::voting_power` field;
+- `verify_mnemonic()`;
+- `SecretManager::sign_transaction()`;
 
 ### Changed
 
@@ -41,6 +43,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Builder methods `add_immutable_feature`, `replace_immutable_feature`, `with_immutable_features` are now generic;
 - Merge `send_amount` and `send_micro_transaction`;
 - `AddressWithAmount::{address, amount}` fields are no longer public;
+- Fields of `AccountBalance`, `BaseCoinBalance` and `NativeTokensBalance` have been made private and getters have been added;
+- Exposed `AccountParticipationOverview, ParticipationEventWithNodes, AliasOutputOptions, AliasOutputOptionsDto, IncreaseNativeTokenSupplyOptions, IncreaseNativeTokenSupplyOptionsDto, NativeTokenOptions, NativeTokenOptionsDto, NftOptions, NftOptionsDto, OutputOptionsDto` from the `account` module;
+- Made `Wallet::get_bech32_hrp()` public;
 - `AddressWrapper` renamed to `Bech32` and moved to `types`;
 
 ### Removed
@@ -51,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fallback to local PoW;
 - Unlock unused inputs;
+- Derive location in Stronghold for parallel usage;
 
 ## 0.1.0 - 2023-04-03
 

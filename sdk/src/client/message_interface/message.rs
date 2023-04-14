@@ -42,7 +42,7 @@ use crate::{
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 pub enum Message {
     /// Build an AliasOutput.
-    /// Expected response: [`BuiltOutput`](crate::message_interface::Response::BuiltOutput)
+    /// Expected response: [`BuiltOutput`](crate::client::message_interface::Response::BuiltOutput)
     #[allow(missing_docs)]
     BuildAliasOutput {
         // If not provided, minimum storage deposit will be used
@@ -64,7 +64,7 @@ pub enum Message {
         immutable_features: Option<Vec<FeatureDto>>,
     },
     /// Build a BasicOutput.
-    /// Expected response: [`BuiltOutput`](crate::message_interface::Response::BuiltOutput)
+    /// Expected response: [`BuiltOutput`](crate::client::message_interface::Response::BuiltOutput)
     #[allow(missing_docs)]
     BuildBasicOutput {
         // If not provided, minimum storage deposit will be used
@@ -76,7 +76,7 @@ pub enum Message {
         features: Option<Vec<FeatureDto>>,
     },
     /// Build a FoundryOutput.
-    /// Expected response: [`BuiltOutput`](crate::message_interface::Response::BuiltOutput)
+    /// Expected response: [`BuiltOutput`](crate::client::message_interface::Response::BuiltOutput)
     #[allow(missing_docs)]
     BuildFoundryOutput {
         // If not provided, minimum storage deposit will be used
@@ -94,7 +94,7 @@ pub enum Message {
         immutable_features: Option<Vec<FeatureDto>>,
     },
     /// Build an NftOutput.
-    /// Expected response: [`BuiltOutput`](crate::message_interface::Response::BuiltOutput)
+    /// Expected response: [`BuiltOutput`](crate::client::message_interface::Response::BuiltOutput)
     #[allow(missing_docs)]
     BuildNftOutput {
         // If not provided, minimum storage deposit will be used
@@ -110,7 +110,7 @@ pub enum Message {
         immutable_features: Option<Vec<FeatureDto>>,
     },
     /// Removes all listeners for the provided topics.
-    /// Expected response: [`Ok`](crate::message_interface::Response::Ok)
+    /// Expected response: [`Ok`](crate::client::message_interface::Response::Ok)
     #[cfg(feature = "mqtt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "mqtt")))]
     ClearListeners {
@@ -155,7 +155,7 @@ pub enum Message {
     #[cfg(not(target_family = "wasm"))]
     UnhealthyNodes,
     /// Get the ledger status
-    /// Expected response: [`LedgerNanoStatus`](crate::message_interface::Response::LedgerNanoStatus)
+    /// Expected response: [`LedgerNanoStatus`](crate::client::message_interface::Response::LedgerNanoStatus)
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
     GetLedgerNanoStatus {
