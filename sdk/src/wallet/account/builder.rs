@@ -16,13 +16,9 @@ use crate::wallet::events::EventEmitter;
 use crate::wallet::storage::manager::StorageManagerHandle;
 use crate::{
     client::secret::{SecretManage, SecretManager},
-    types::block::address::Address,
+    types::block::address::{Address, AddressWrapper},
     wallet::{
-        account::{
-            handle::AccountHandle,
-            types::{address::AddressWrapper, AccountAddress},
-            Account,
-        },
+        account::{handle::AccountHandle, types::AccountAddress, Account},
         ClientOptions, Error,
     },
 };

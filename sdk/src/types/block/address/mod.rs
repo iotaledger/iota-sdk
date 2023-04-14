@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod alias;
+mod bech;
 mod ed25519;
 mod nft;
 
@@ -11,7 +12,7 @@ use bech32::{self, FromBase32, ToBase32, Variant};
 use derive_more::From;
 use packable::PackableExt;
 
-pub use self::{alias::AliasAddress, ed25519::Ed25519Address, nft::NftAddress};
+pub use self::{alias::AliasAddress, bech::AddressWrapper, ed25519::Ed25519Address, nft::NftAddress};
 use crate::types::block::{
     output::{Output, OutputId},
     semantic::{ConflictReason, ValidationContext},

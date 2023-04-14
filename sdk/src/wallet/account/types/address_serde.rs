@@ -3,7 +3,7 @@
 
 use serde::{de::Visitor, Deserializer, Serializer};
 
-use crate::wallet::account::types::address::AddressWrapper;
+use crate::types::block::address::AddressWrapper;
 
 /// custom AddressWrapper serialization to use the bech32 representation
 pub(crate) fn serialize<S: Serializer>(address: &AddressWrapper, s: S) -> std::result::Result<S::Ok, S::Error> {

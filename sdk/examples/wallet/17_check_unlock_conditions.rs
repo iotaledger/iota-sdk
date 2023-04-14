@@ -5,8 +5,8 @@
 // In this example we check if an output has only an address unlock condition and that the address is from the account.
 
 use iota_sdk::{
-    types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
-    wallet::{account::types::AddressWrapper, Result, Wallet},
+    types::block::{address::AddressWrapper, output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition}},
+    wallet::{Result, Wallet},
 };
 
 #[tokio::main]

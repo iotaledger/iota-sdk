@@ -7,10 +7,8 @@ use serde::{Deserialize, Serialize};
 use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
-    wallet::account::{
-        handle::AccountHandle,
-        types::address::{AccountAddress, AddressWrapper},
-    },
+    types::block::address::AddressWrapper,
+    wallet::account::{handle::AccountHandle, types::address::AccountAddress},
 };
 
 /// Options for address generation

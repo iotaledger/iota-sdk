@@ -12,12 +12,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     types::block::{
+        address::AddressWrapper,
         output::{dto::FoundryOutputDto, FoundryId, OutputId},
         payload::transaction::TransactionId,
     },
     wallet::{
         account::{
-            types::{address::AddressWrapper, AccountAddress, AddressWithUnspentOutputs, TransactionDto},
+            types::{AccountAddress, AddressWithUnspentOutputs, TransactionDto},
             Account, OutputDataDto,
         },
         AddressWithAmount,
