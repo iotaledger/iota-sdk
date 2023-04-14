@@ -509,6 +509,7 @@ version = "1.0.0-rc.2"
 dependencies = [
  "clap",
  "dialoguer",
+ "dotenvy",
  "fern-logger",
  "humantime",
  "iota-sdk",
