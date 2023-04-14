@@ -2,7 +2,7 @@ name: Covector bindings checks (client)
 
 on:
   push:
-    branches: [develop, production]
+    branches: [develop, production, chore/ci/rework]
     paths-ignore:
       - "documentation/**"
 
