@@ -1,9 +1,42 @@
 name: Nodejs bindings checks (client)
 
-on: workflow_call
+on:
+  push:
+    branches: [develop, production]
+    paths:
+      - ".github/actions/**"
+      - "**.rs" # Include all rust files
+      - "**Cargo.toml" # Include all Cargo.toml files
+      - "**Cargo.lock" # Include all Cargo.lock files
+      - "!**/examples/**" # Exclude all examples
+      - "!**/tests/**" # Exclude all tests
+      - "!cli/**" # Exclude CLI
+      - "!**/bindings/**" # Exclude all bindings
+      - "sdk/src/client/bindings/nodejs/**"
+      - ".github/workflows/bindings-client-nodejs.yml"
+  pull_request:
+    branches: [develop, production]
+    paths:
+      - ".github/actions/**"
+      - "**.rs" # Include all rust files
+      - "**Cargo.toml" # Include all Cargo.toml files
+      - "**Cargo.lock" # Include all Cargo.lock files
+      - "!**/examples/**" # Exclude all examples
+      - "!**/tests/**" # Exclude all tests
+      - "!cli/**" # Exclude CLI
+      - "!**/bindings/**" # Exclude all bindings
+      - "sdk/src/client/bindings/nodejs/**"
+      - ".github/workflows/bindings-client-nodejs.yml"
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch:
 
 env:
   CARGO_INCREMENTAL: 0
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
