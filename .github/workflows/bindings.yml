@@ -2,32 +2,32 @@ name: Bindings
 
 on:
   push:
-    branches: [develop, production]
-    paths:
-      - ".github/actions/**"
-      - "**.rs" # Include all rust files
-      - "**Cargo.toml" # Include all Cargo.toml files
-      - "**Cargo.lock" # Include all Cargo.lock files
-      - "!**/examples/**" # Exclude all examples
-      - "!**/tests/**" # Exclude all tests
-      - "!cli/**" # Exclude CLI
-      - "sdk/src/*/bindings/**"
-      - ".github/workflows/bindings/**"
-  pull_request:
-    branches: [develop, production]
-    paths:
-      - ".github/actions/**"
-      - "**.rs" # Include all rust files
-      - "**Cargo.toml" # Include all Cargo.toml files
-      - "**Cargo.lock" # Include all Cargo.lock files
-      - "!**/examples/**" # Exclude all examples
-      - "!**/tests/**" # Exclude all tests
-      - "!cli/**" # Exclude CLI
-      - "sdk/src/*/bindings/**"
-      - ".github/workflows/bindings/**"
-  schedule:
-    - cron: "0 1 * * *"
-  workflow_dispatch:
+  #   branches: [develop, production]
+  #   paths:
+  #     - ".github/actions/**"
+  #     - "**.rs" # Include all rust files
+  #     - "**Cargo.toml" # Include all Cargo.toml files
+  #     - "**Cargo.lock" # Include all Cargo.lock files
+  #     - "!**/examples/**" # Exclude all examples
+  #     - "!**/tests/**" # Exclude all tests
+  #     - "!cli/**" # Exclude CLI
+  #     - "sdk/src/*/bindings/**"
+  #     - ".github/workflows/bindings/**"
+  # pull_request:
+  #   branches: [develop, production]
+  #   paths:
+  #     - ".github/actions/**"
+  #     - "**.rs" # Include all rust files
+  #     - "**Cargo.toml" # Include all Cargo.toml files
+  #     - "**Cargo.lock" # Include all Cargo.lock files
+  #     - "!**/examples/**" # Exclude all examples
+  #     - "!**/tests/**" # Exclude all tests
+  #     - "!cli/**" # Exclude CLI
+  #     - "sdk/src/*/bindings/**"
+  #     - ".github/workflows/bindings/**"
+  # schedule:
+  #   - cron: "0 1 * * *"
+  # workflow_dispatch:
 
 env:
   CARGO_INCREMENTAL: 0
