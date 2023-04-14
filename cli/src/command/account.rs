@@ -826,12 +826,12 @@ async fn print_address(account_handle: &AccountHandle, address: &AccountAddress)
             }
         }
         log = format!(
-            "{log}\nOutputs: {:#?}\nBase coin amount: {}",
+            "{log}\nOutputs: {:#?}\nBase coin amount: {}\n",
             addresses[index].output_ids(),
             address_amount
         );
     } else {
-        log = format!("{log}\nOutputs: []\nBase coin amount: 0");
+        log = format!("{log}\nOutputs: []\nBase coin amount: 0\n");
     }
 
     println_log_info!("{log}");
