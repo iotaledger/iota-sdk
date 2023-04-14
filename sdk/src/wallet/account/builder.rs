@@ -16,7 +16,7 @@ use crate::wallet::events::EventEmitter;
 use crate::wallet::storage::manager::StorageManagerHandle;
 use crate::{
     client::secret::{SecretManage, SecretManager},
-    types::block::address::{Address, AddressWrapper},
+    types::block::address::{Address, Bech32},
     wallet::{
         account::{handle::AccountHandle, types::AccountAddress, Account},
         ClientOptions, Error,
@@ -161,7 +161,7 @@ impl AccountBuilder {
                     get_first_public_address(&self.secret_manager, self.coin_type, account_index).await?;
 
                 let first_public_account_address = AccountAddress {
-                    address: AddressWrapper::new(first_public_address, bech32_hrp),
+                    address: Bech32::new(first_public_address, bech32_hrp),
                     key_index: 0,
                     internal: false,
                     used: false,

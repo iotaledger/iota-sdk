@@ -6,7 +6,7 @@ use std::hash::Hash;
 use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 
-use crate::types::block::{address::AddressWrapper, output::OutputId};
+use crate::types::block::{address::Bech32, output::OutputId};
 
 /// An account address.
 #[derive(Debug, Getters, Setters, Clone, Serialize, Deserialize, Eq, PartialEq, Hash)]
@@ -14,7 +14,7 @@ use crate::types::block::{address::AddressWrapper, output::OutputId};
 pub struct AccountAddress {
     /// The address.
     #[serde(with = "crate::wallet::account::types::address_serde")]
-    pub(crate) address: AddressWrapper,
+    pub(crate) address: Bech32,
     /// The address key index.
     #[serde(rename = "keyIndex")]
     #[getset(set = "pub(crate)")]
@@ -33,7 +33,7 @@ pub struct AccountAddress {
 pub struct AddressWithUnspentOutputs {
     /// The address.
     #[serde(with = "crate::wallet::account::types::address_serde")]
-    pub(crate) address: AddressWrapper,
+    pub(crate) address: Bech32,
     /// The address key index.
     #[serde(rename = "keyIndex")]
     #[getset(set = "pub(crate)")]

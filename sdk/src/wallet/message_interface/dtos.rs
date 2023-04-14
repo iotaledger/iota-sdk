@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     types::block::{
-        address::AddressWrapper,
+        address::Bech32,
         output::{dto::FoundryOutputDto, FoundryId, OutputId},
         payload::transaction::TransactionId,
     },
@@ -59,7 +59,7 @@ impl TryFrom<&AddressWithAmountDto> for AddressWithAmount {
 pub struct AddressWithUnspentOutputsDto {
     /// The address.
     #[serde(with = "crate::wallet::account::types::address_serde")]
-    pub address: AddressWrapper,
+    pub address: Bech32,
     /// The address key index.
     #[serde(rename = "keyIndex")]
     pub key_index: u32,

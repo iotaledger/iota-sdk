@@ -9,19 +9,19 @@ use crate::types::block::address::Address;
 
 /// An address and its network type.
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
-pub struct AddressWrapper {
+pub struct Bech32 {
     pub(crate) inner: Address,
     #[serde(rename = "bech32Hrp")]
     pub(crate) bech32_hrp: String,
 }
 
-impl AsRef<Address> for AddressWrapper {
+impl AsRef<Address> for Bech32 {
     fn as_ref(&self) -> &Address {
         &self.inner
     }
 }
 
-impl AddressWrapper {
+impl Bech32 {
     /// Create a new address wrapper.
     pub fn new(address: Address, bech32_hrp: String) -> Self {
         Self {

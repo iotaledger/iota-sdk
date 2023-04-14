@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
-    types::block::address::AddressWrapper,
+    types::block::address::Bech32,
     wallet::account::{handle::AccountHandle, types::address::AccountAddress},
 };
 
@@ -157,7 +157,7 @@ impl AccountHandle {
             .into_iter()
             .enumerate()
             .map(|(index, address)| AccountAddress {
-                address: AddressWrapper::new(address, bech32_hrp.clone()),
+                address: Bech32::new(address, bech32_hrp.clone()),
                 key_index: highest_current_index_plus_one + index as u32,
                 internal: options.internal,
                 used: false,

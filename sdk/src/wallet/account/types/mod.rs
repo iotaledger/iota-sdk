@@ -3,7 +3,7 @@
 
 /// Address types used in the account
 pub(crate) mod address;
-/// Custom de/serialization for [`address::AddressWrapper`]
+/// Custom de/serialization for [`address::Bech32`]
 pub(crate) mod address_serde;
 pub(crate) mod balance;
 #[cfg(feature = "participation")]

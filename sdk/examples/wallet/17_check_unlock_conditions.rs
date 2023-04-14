@@ -5,7 +5,7 @@
 // In this example we check if an output has only an address unlock condition and that the address is from the account.
 
 use iota_sdk::{
-    types::block::{address::AddressWrapper, output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition}},
+    types::block::{address::Bech32, output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition}},
     wallet::{Result, Wallet},
 };
 
@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
     // Get the account we generated with `01_create_wallet`
     let account = wallet.get_account("Alice").await?;
 
-    let account_addresses: Vec<AddressWrapper> = account
+    let account_addresses: Vec<Bech32> = account
         .addresses()
         .await?
         .into_iter()
