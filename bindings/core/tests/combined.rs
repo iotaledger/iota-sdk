@@ -39,7 +39,10 @@ async fn generate_addresses() -> Result<()> {
 
     let response = call_client_method(&client, method).await;
     match response {
-        Response::GeneratedAddresses(addresses) => println!("{:?}", serde_json::to_string(&addresses).unwrap()),
+        Response::GeneratedAddresses(addresses) => assert_eq!(
+            addresses[0],
+            "atoi1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxxja54p"
+        ),
         _ => panic!("Unexpected response type"),
     };
 

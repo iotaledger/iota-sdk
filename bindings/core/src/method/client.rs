@@ -1,7 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::keys::slip10::Chain;
 use derivative::Derivative;
 #[cfg(feature = "mqtt")]
 use iota_sdk::client::mqtt::Topic;
@@ -16,7 +15,6 @@ use iota_sdk::{
         secret::SecretManagerDto,
     },
     types::block::{
-        address::dto::Ed25519AddressDto,
         output::{
             dto::{AliasIdDto, NativeTokenDto, NftIdDto, TokenSchemeDto},
             feature::dto::FeatureDto,
@@ -24,7 +22,6 @@ use iota_sdk::{
             AliasId, FoundryId, NftId, OutputId,
         },
         payload::{dto::PayloadDto, milestone::MilestoneId, transaction::TransactionId},
-        signature::dto::Ed25519SignatureDto,
         BlockDto, BlockId,
     },
 };
@@ -179,49 +176,6 @@ pub enum ClientMethod {
         /// Prepared transaction data
         #[serde(rename = "preparedTransactionData")]
         prepared_transaction_data: PreparedTransactionDataDto,
-    },
-    /// Create a single Signature Unlock.
-    SignatureUnlock {
-        /// Secret manager
-        #[serde(rename = "secretManager")]
-        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        secret_manager: SecretManagerDto,
-        /// Transaction Essence Hash
-        #[serde(rename = "transactionEssenceHash")]
-        transaction_essence_hash: Vec<u8>,
-        /// Chain to sign the essence hash with
-        chain: Chain,
-    },
-    /// Signs a message with an Ed25519 private key.
-    SignEd25519 {
-        /// Secret manager
-        #[serde(rename = "secretManager")]
-        secret_manager: SecretManagerDto,
-        /// The message to sign, hex encoded String
-        message: String,
-        /// Chain to sign the essence hash with
-        chain: Chain,
-    },
-    /// Verifies the Ed25519Signature for a message against an Ed25519Address.
-    VerifyEd25519Signature {
-        /// The Ed25519 Signature
-        signature: Ed25519SignatureDto,
-        /// The signed message, hex encoded String
-        message: String,
-        /// The hex encoded Ed25519 address
-        address: Ed25519AddressDto,
-    },
-    /// Store a mnemonic in the Stronghold vault
-    #[cfg(feature = "stronghold")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-    StoreMnemonic {
-        /// Stronghold secret manager
-        #[serde(rename = "secretManager")]
-        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        secret_manager: SecretManagerDto,
-        /// Mnemonic
-        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        mnemonic: String,
     },
     /// Build a block containing the specified payload and post it to the network.
     PostBlockPayload {

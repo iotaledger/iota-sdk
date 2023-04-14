@@ -5,7 +5,7 @@
 
 mod error;
 mod method;
-pub mod method_handler;
+mod method_handler;
 mod panic;
 mod response;
 
@@ -19,6 +19,8 @@ use iota_sdk::{
 };
 use serde::Deserialize;
 
+#[cfg(feature = "mqtt")]
+pub use self::method_handler::listen_mqtt;
 pub use self::{
     error::{Error, Result},
     method::{AccountMethod, ClientMethod, SecretManagerMethod, UtilsMethod, WalletMethod},

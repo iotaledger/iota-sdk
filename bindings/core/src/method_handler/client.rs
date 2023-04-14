@@ -6,11 +6,9 @@ use iota_sdk::client::secret::ledger_nano::LedgerSecretManager;
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
-        secret::{SecretManage, SecretManager},
         Client,
     },
     types::block::{
-        address::Ed25519Address,
         input::dto::UtxoInputDto,
         output::{
             dto::{OutputBuilderAmountDto, OutputDto, RentStructureDto},
@@ -21,9 +19,7 @@ use iota_sdk::{
             Payload,
         },
         protocol::dto::ProtocolParametersDto,
-        signature::{dto::Ed25519SignatureDto, Ed25519Signature},
-        unlock::Unlock,
-        Block, BlockDto, DtoError,
+        Block, BlockDto,
     },
 };
 #[cfg(feature = "mqtt")]
@@ -286,56 +282,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                     )?)
                     .await?,
             )))
-        }
-        ClientMethod::SignatureUnlock {
-            secret_manager,
-            transaction_essence_hash,
-            chain,
-        } => {
-            let secret_manager: SecretManager = (&secret_manager).try_into()?;
-            let transaction_essence_hash: [u8; 32] = transaction_essence_hash
-                .try_into()
-                .map_err(|_| DtoError::InvalidField("expected 32 bytes for transactionEssenceHash"))?;
-
-            let unlock: Unlock = secret_manager
-                .signature_unlock(&transaction_essence_hash, &chain)
-                .await?;
-
-            Ok(Response::SignatureUnlock((&unlock).into()))
-        }
-        ClientMethod::SignEd25519 {
-            secret_manager,
-            message,
-            chain,
-        } => {
-            let secret_manager: SecretManager = (&secret_manager).try_into()?;
-            let msg: Vec<u8> = prefix_hex::decode(message)?;
-            let signature = secret_manager.sign_ed25519(&msg, &chain).await?;
-            Ok(Response::Ed25519Signature(Ed25519SignatureDto::from(&signature)))
-        }
-        ClientMethod::VerifyEd25519Signature {
-            signature,
-            message,
-            address,
-        } => {
-            let signature = Ed25519Signature::try_from(&signature)?;
-            let msg: Vec<u8> = prefix_hex::decode(message)?;
-            let address = Ed25519Address::try_from(&address)?;
-            Ok(Response::Bool(signature.is_valid(&msg, &address).is_ok()))
-        }
-        #[cfg(feature = "stronghold")]
-        ClientMethod::StoreMnemonic {
-            secret_manager,
-            mnemonic,
-        } => {
-            let mut secret_manager = (&secret_manager).try_into()?;
-            if let SecretManager::Stronghold(secret_manager) = &mut secret_manager {
-                secret_manager.store_mnemonic(mnemonic).await?;
-            } else {
-                return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
-            }
-
-            Ok(Response::Ok)
         }
         ClientMethod::PostBlockPayload { payload_dto } => {
             let block_builder = client.block();

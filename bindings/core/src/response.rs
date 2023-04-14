@@ -96,10 +96,10 @@ pub enum Response {
     /// - [`SignTransaction`](crate::method::ClientMethod::SignTransaction)
     SignedTransaction(PayloadDto),
     /// Response for:
-    /// - [`SignatureUnlock`](crate::method::ClientMethod::SignatureUnlock)
+    /// - [`SignatureUnlock`](crate::method::SecretManagerMethod::SignatureUnlock)
     SignatureUnlock(UnlockDto),
     /// Response for:
-    /// - [`SignEd25519`](crate::method::ClientMethod::SignEd25519)
+    /// - [`SignEd25519`](crate::method::SecretManagerMethod::SignEd25519)
     Ed25519Signature(Ed25519SignatureDto),
     /// Response for:
     /// - [`UnhealthyNodes`](crate::method::ClientMethod::UnhealthyNodes)
@@ -258,7 +258,7 @@ pub enum Response {
     /// Response for
     /// - [`GetLocalPow`](crate::method::ClientMethod::GetLocalPow)
     /// - [`GetFallbackToLocalPow`](crate::method::ClientMethod::GetFallbackToLocalPow)
-    /// - [`VerifyEd25519Signature`](crate::method::ClientMethod::VerifyEd25519Signature)
+    /// - [`VerifyEd25519Signature`](crate::method::UtilsMethod::VerifyEd25519Signature)
     /// - [`GetHealth`](crate::method::ClientMethod::GetHealth)
     /// - [`IsAddressValid`](crate::method::UtilsMethod::IsAddressValid)
     Bool(bool),

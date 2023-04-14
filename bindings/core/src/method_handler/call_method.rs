@@ -23,10 +23,8 @@ pub async fn call_account_method(account: &AccountHandle, method: AccountMethod)
     log::debug!("Account method: {method:?}");
     let result = convert_async_panics(|| async { call_account_method_internal(account, method).await }).await;
 
-    let response = match result {
-        Ok(r) => r,
-        Err(e) => Response::Error(e),
-    };
+    // Safe to unwrap because we converted errors to Response
+    let response = result.map_err(Response::Error).unwrap();
 
     log::debug!("Account response: {response:?}");
     response
@@ -37,10 +35,8 @@ pub async fn call_client_method(client: &Client, method: ClientMethod) -> Respon
     log::debug!("Client method: {method:?}");
     let result = convert_async_panics(|| async { call_client_method_internal(client, method).await }).await;
 
-    let response = match result {
-        Ok(r) => r,
-        Err(e) => Response::Error(e),
-    };
+    // Safe to unwrap because we converted errors to Response
+    let response = result.map_err(Response::Error).unwrap();
 
     log::debug!("Client response: {response:?}");
     response
@@ -51,10 +47,8 @@ pub async fn call_wallet_method(wallet: &Wallet, method: WalletMethod) -> Respon
     log::debug!("Wallet method: {method:?}");
     let result = convert_async_panics(|| async { call_wallet_method_internal(wallet, method).await }).await;
 
-    let response = match result {
-        Ok(r) => r,
-        Err(e) => Response::Error(e),
-    };
+    // Safe to unwrap because we converted errors to Response
+    let response = result.map_err(Response::Error).unwrap();
 
     log::debug!("Wallet response: {response:?}");
     response
@@ -65,10 +59,8 @@ pub async fn call_utils_method(method: UtilsMethod) -> Response {
     log::debug!("Utils method: {method:?}");
     let result = convert_async_panics(|| async { call_utils_method_internal(method).await }).await;
 
-    let response = match result {
-        Ok(r) => r,
-        Err(e) => Response::Error(e),
-    };
+    // Safe to unwrap because we converted errors to Response
+    let response = result.map_err(Response::Error).unwrap();
 
     log::debug!("Utils response: {response:?}");
     response
@@ -80,10 +72,8 @@ pub async fn call_secret_manager_method(secret_manager: &mut SecretManager, meth
     let result =
         convert_async_panics(|| async { call_secret_manager_method_internal(secret_manager, method).await }).await;
 
-    let response = match result {
-        Ok(r) => r,
-        Err(e) => Response::Error(e),
-    };
+    // Safe to unwrap because we converted errors to Response
+    let response = result.map_err(Response::Error).unwrap();
 
     log::debug!("Secret manager response: {response:?}");
     response

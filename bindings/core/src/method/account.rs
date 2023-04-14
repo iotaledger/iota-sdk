@@ -92,13 +92,13 @@ pub enum AccountMethod {
         amount: u32,
         options: Option<AddressGenerationOptions>,
     },
-    /// Get the [`OutputData`](iota_sdk::account::types::OutputData) of an output stored in the account
+    /// Get the [`OutputData`](iota_sdk::wallet::account::types::OutputData) of an output stored in the account
     /// Expected response: [`OutputData`](crate::Response::OutputData)
     GetOutput {
         #[serde(rename = "outputId")]
         output_id: OutputId,
     },
-    /// Get the [`Output`](iota_sdk::iota_sdk::client::block::output::Output) that minted a native token by its TokenId
+    /// Get the [`Output`](iota_sdk::types::block::output::Output) that minted a native token by its TokenId
     /// Expected response: [`Output`](crate::Response::Output)
     GetFoundryOutput {
         #[serde(rename = "tokenId")]
@@ -110,7 +110,7 @@ pub enum AccountMethod {
         #[serde(rename = "outputsToClaim")]
         outputs_to_claim: OutputsToClaim,
     },
-    /// Get the [`Transaction`](iota_sdk::account::types::Transaction) of a transaction stored in the account
+    /// Get the [`Transaction`](iota_sdk::wallet::account::types::Transaction) of a transaction stored in the account
     /// Expected response: [`Transaction`](crate::Response::Transaction)
     GetTransaction {
         #[serde(rename = "transactionId")]
