@@ -40,7 +40,16 @@ jobs:
   paths-filter:
     runs-on: ubuntu-latest
     outputs:
-      filters: ${{ steps.filter.outputs }}
+      client-covector: ${{ steps.filter.outputs.client-covector }}
+      client-java: ${{ steps.filter.outputs.client-java }}
+      client-nodejs: ${{ steps.filter.outputs.client-nodejs }}
+      client-python: ${{ steps.filter.outputs.client-python }}
+      client-wasm: ${{ steps.filter.outputs.client-wasm }}
+      wallet-swift: ${{ steps.filter.outputs.wallet-swift }}
+      wallet-java: ${{ steps.filter.outputs.wallet-java }}
+      wallet-nodejs: ${{ steps.filter.outputs.wallet-nodejs }}
+      wallet-python: ${{ steps.filter.outputs.wallet-python }}
+      wallet-wasm: ${{ steps.filter.outputs.wallet-wasm }}
     steps:
       - uses: actions/checkout@v2
       - uses: dorny/paths-filter@v2
@@ -80,50 +89,50 @@ jobs:
 
   client-covector:
     needs: paths-filter
-    if: needs.paths-filter.outputs.filters.client-covector == 'true'
+    if: needs.paths-filter.outputs.client-covector == 'true'
     uses: ./.github/workflows/bindings/client/covector.yml
 
   client-java:
     needs: paths-filter
-    if: needs.paths-filter.outputs.filters.client-java == 'true'
+    if: needs.paths-filter.outputs.client-java == 'true'
     uses: ./.github/workflows/bindings/client/java.yml
 
   client-nodejs:
     needs: paths-filter
-    if: needs.paths-filter.outputs.filters.client-nodejs == 'true'
+    if: needs.paths-filter.outputs.client-nodejs == 'true'
     uses: ./.github/workflows/bindings/client/nodejs.yml
 
   client-python:
     needs: paths-filter
-    if: needs.paths-filter.outputs.filters.client-python == 'true'
+    if: needs.paths-filter.outputs.client-python == 'true'
     uses: ./.github/workflows/bindings/client/python.yml
 
   client-wasm:
     needs: paths-filter
-    if: needs.paths-filter.outputs.filters.client-wasm == 'true'
+    if: needs.paths-filter.outputs.client-wasm == 'true'
     uses: ./.github/workflows/bindings/client/wasm.yml
 
   wallet-swift:
     needs: paths-filter
-    if: needs.paths-filter.outputs.filters.wallet-swift == 'true'
+    if: needs.paths-filter.outputs.wallet-swift == 'true'
     uses: ./.github/workflows/bindings/wallet/swift.yml
 
   wallet-java:
     needs: paths-filter
-    if: needs.paths-filter.outputs.filters.wallet-java == 'true'
+    if: needs.paths-filter.outputs.wallet-java == 'true'
     uses: ./.github/workflows/bindings/wallet/java.yml
 
   wallet-nodejs:
     needs: paths-filter
-    if: needs.paths-filter.outputs.filters.wallet-nodejs == 'true'
+    if: needs.paths-filter.outputs.wallet-nodejs == 'true'
     uses: ./.github/workflows/bindings/wallet/nodejs.yml
 
   wallet-python:
     needs: paths-filter
-    if: needs.paths-filter.outputs.filters.wallet-python == 'true'
+    if: needs.paths-filter.outputs.wallet-python == 'true'
     uses: ./.github/workflows/bindings/wallet/python.yml
 
   wallet-wasm:
     needs: paths-filter
-    if: needs.paths-filter.outputs.filters.wallet-wasm == 'true'
+    if: needs.paths-filter.outputs.wallet-wasm == 'true'
     uses: ./.github/workflows/bindings/wallet/wasm.yml
