@@ -2,6 +2,9 @@ from iota_wallet import IotaWallet
 
 # In this example we will send native tokens
 
+# Explorer url
+EXPLORER = "https://explorer.shimmer.network/testnet"
+
 wallet = IotaWallet('./alice-database')
 
 account = wallet.get_account('Alice')
@@ -23,4 +26,5 @@ outputs = [{
 
 transaction = account.send_native_tokens(outputs, None)
 
-print(f'Sent transaction: {transaction}')
+print(f'Transaction: {transaction.transaction_id}')
+print(f'Block sent: {EXPLORER}/block/" + {transaction.block_id});

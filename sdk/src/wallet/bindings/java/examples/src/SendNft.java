@@ -30,13 +30,15 @@ public class SendNft {
         NftId nftId = new NftId("0xdbed22679570aecc16da90648836607981e87c1ed3e3a24daf0942aa29a66003");
 
         // Send transaction.
-        Transaction t = a.sendNft(new org.iota.types.account_methods.SendNft().withAddressesAndNftIds(new AddressAndNftId[] {new AddressAndNftId()
+        Transaction transaction = a.sendNft(new org.iota.types.account_methods.SendNft()
+                .withAddressesAndNftIds(new AddressAndNftId[] { new AddressAndNftId()
                 .withAddress(receiverAddress)
                 .withNftId(nftId)
         }));
 
         // Print transaction.
-        System.out.println(t);
+        System.out.println("Transaction: " + transaction.getTransactionId());
+        System.out.println("Block sent: " + Env.EXPLORER + "/block/" + transaction.getBlockId());
 
         // In case you are done and don't need the wallet instance anymore you can destroy the instance to clean up memory.
         // For this, check out the ´DestroyWallet.java´ example.

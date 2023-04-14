@@ -74,12 +74,12 @@ pub(crate) async fn create_accounts_with_funds(wallet: &Wallet, amount: usize) -
 
 #[allow(dead_code)]
 pub(crate) fn setup(path: &str) -> Result<()> {
-    std::fs::remove_dir_all(path).unwrap_or(());
+    std::fs::remove_dir_all(path).ok();
     Ok(())
 }
 
 #[allow(dead_code)]
 pub(crate) fn tear_down(path: &str) -> Result<()> {
-    std::fs::remove_dir_all(path).unwrap_or(());
+    std::fs::remove_dir_all(path).ok();
     Ok(())
 }

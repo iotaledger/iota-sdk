@@ -3,6 +3,9 @@ import time
 
 # In this example we will mint native tokens
 
+# Explorer url
+EXPLORER = "https://explorer.shimmer.network/testnet"
+
 wallet = IotaWallet('./alice-database')
 
 account = wallet.get_account('Alice')
@@ -29,4 +32,5 @@ native_token_options = {
 
 transaction = account.mint_native_token(native_token_options, None)
 
-print(f'Sent transaction: {transaction}')
+print(f'Transaction: {transaction.transaction_id}')
+print(f'Block sent: {EXPLORER}/block/" + {transaction.block_id});

@@ -33,10 +33,10 @@ public class MintNft {
         options.withMetadata("0x5368696d6d65722e20546f6b656e697a652045766572797468696e672e2048656c6c6f2066726f6d20746865204a6176612062696e64696e672e");
 
         // Send transaction.
-        Transaction t = a.mintNfts(new MintNfts().withNftsOptions(new NftOptions[]{options}));
+        Transaction transaction = a.mintNfts(new MintNfts().withNftsOptions(new NftOptions[] { options }));
 
-        // Print the transaction.
-        System.out.println(t);
+        System.out.println("Transaction: " + transaction.getTransactionId());
+        System.out.println("Block sent: " + Env.EXPLORER + "/block/" + transaction.getBlockId());
 
         // In case you are done and don't need the wallet instance anymore you can destroy the instance to clean up memory.
         // For this, check out the ´DestroyWallet.java´ example.

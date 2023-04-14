@@ -798,11 +798,40 @@ async fn print_address(account_handle: &AccountHandle, address: &AccountAddress)
     }
 
     let addresses = account_handle.addresses_with_unspent_outputs().await?;
+    let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
 
     if let Ok(index) = addresses.binary_search_by_key(&(address.key_index(), address.internal()), |a| {
         (a.key_index(), a.internal())
     }) {
-        log = format!("{log}\nOutputs: {:#?}", addresses[index].output_ids());
+        let mut address_amount = 0;
+        for output_id in addresses[index].output_ids() {
+            if let Some(output_data) = account_handle.get_output(output_id).await {
+                // Output might be associated with the address, but can't unlocked by it, so we check that here
+                let (required_address, _) =
+                    output_data
+                        .output
+                        .required_and_unlocked_address(current_time, output_id, None)?;
+                if *address.address().as_ref() == required_address {
+                    let unlock_conditions = output_data
+                        .output
+                        .unlock_conditions()
+                        .expect("output must have unlock conditions");
+
+                    if let Some(sdr) = unlock_conditions.storage_deposit_return() {
+                        address_amount += output_data.output.amount() - sdr.amount();
+                    } else {
+                        address_amount += output_data.output.amount();
+                    }
+                }
+            }
+        }
+        log = format!(
+            "{log}\nOutputs: {:#?}\nBase coin amount: {}\n",
+            addresses[index].output_ids(),
+            address_amount
+        );
+    } else {
+        log = format!("{log}\nOutputs: []\nBase coin amount: 0\n");
     }
 
     println_log_info!("{log}");

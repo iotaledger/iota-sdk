@@ -1,0 +1,38 @@
+[package]
+name = "iota-sdk-bindings-core"
+version = "0.1.0"
+authors = [ "IOTA Stiftung" ]
+edition = "2021"
+homepage = "https://iota.org"
+description = "Bindings core for the IOTA SDK"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+iota-sdk = { path = "../../sdk", default-features = false, features = [ "wallet", "message_interface" ] }
+
+backtrace = { version = "0.3.67", default-features = false }
+derivative = { version = "2.2.0", default-features = false }
+fern-logger = { version = "0.5.0", default-features = false }
+futures =  { version = "0.3.26", default-features = false }
+iota-crypto = { version = "0.15.3", default-features = false }
+log = { version = "0.4.17", default-features = false }
+packable = { version = "0.8.0", default-features = false }
+prefix-hex = { version = "0.7.0", default-features = false }
+primitive-types = { version = "0.12.1", default-features = false }
+serde = { version = "1.0.154", default-features = false }
+serde_json = { version = "1.0.95", default-features = false }
+thiserror = { version = "1.0.40", default-features = false }
+zeroize = { version = "1.6.0", default-features = false }
+
+[dev-dependencies]
+tokio = { version = "1.27.0", default-features = false }
+
+[features]
+events = [ "iota-sdk/events" ]
+ledger_nano = [ "iota-sdk/ledger_nano" ]
+mqtt = [ "iota-sdk/mqtt" ]
+participation = [ "iota-sdk/participation" ]
+rocksdb = [ "iota-sdk/rocksdb" ]
+storage = [ "iota-sdk/storage" ]
+stronghold = [ "iota-sdk/stronghold" ]

@@ -64,7 +64,7 @@ async fn stronghold_secret_manager_dto() -> Result<()> {
     }
 
     // Remove garbage after test, but don't care about the result
-    std::fs::remove_dir_all("snapshot_test_dir").unwrap_or(());
+    std::fs::remove_dir_all("snapshot_test_dir").ok();
     Ok(())
 }
 
@@ -72,7 +72,7 @@ async fn stronghold_secret_manager_dto() -> Result<()> {
 #[tokio::test]
 async fn stronghold_mnemonic_missing() -> Result<()> {
     // Cleanup of a possibly failed run
-    std::fs::remove_dir_all("stronghold_mnemonic_missing").unwrap_or(());
+    std::fs::remove_dir_all("stronghold_mnemonic_missing").ok();
 
     let stronghold_secret_manager = iota_sdk::client::secret::stronghold::StrongholdSecretManager::builder()
         .password("some_hopefully_secure_password")
@@ -92,6 +92,6 @@ async fn stronghold_mnemonic_missing() -> Result<()> {
     }
 
     // Remove garbage after test, but don't care about the result
-    std::fs::remove_dir_all("stronghold_mnemonic_missing").unwrap_or(());
+    std::fs::remove_dir_all("stronghold_mnemonic_missing").ok();
     Ok(())
 }
