@@ -3,10 +3,10 @@
 
 use iota_sdk::{
     client::{
-        api::GetAddressesBuilder,
+        api::{GetAddressesBuilder, PreparedTransactionData},
         secret::{SecretManage, SecretManager},
     },
-    types::block::{signature::dto::Ed25519SignatureDto, unlock::Unlock, DtoError},
+    types::block::{payload::dto::PayloadDto, signature::dto::Ed25519SignatureDto, unlock::Unlock, DtoError},
 };
 
 use crate::{method::SecretManagerMethod, response::Response, Result};
@@ -34,25 +34,16 @@ pub(crate) async fn call_secret_manager_method_internal(
                 Err(iota_sdk::client::Error::SecretManagerMismatch.into())
             }
         }
-        // TODO: support this from secret manager alone without client?
-        // SecretManagerMethod::SignTransaction {
-        //     secret_manager,
-        //     prepared_transaction_data,
-        // } => {
-        //     let mut block_builder = client.block();
-
-        //     let secret_manager = (&secret_manager).try_into()?;
-
-        //     block_builder = block_builder.with_secret_manager(&secret_manager);
-
-        //     Ok(Response::SignedTransaction(PayloadDto::from(
-        //         &block_builder
-        //             .sign_transaction(PreparedTransactionData::try_from_dto_unverified(
-        //                 &prepared_transaction_data,
-        //             )?)
-        //             .await?,
-        //     )))
-        // }
+        SecretManagerMethod::SignTransaction {
+            prepared_transaction_data,
+        } => {
+            let payload = &secret_manager
+                .sign_transaction(PreparedTransactionData::try_from_dto_unverified(
+                    &prepared_transaction_data,
+                )?)
+                .await?;
+            Ok(Response::SignedTransaction(PayloadDto::from(payload)))
+        }
         SecretManagerMethod::SignatureUnlock {
             transaction_essence_hash,
             chain,

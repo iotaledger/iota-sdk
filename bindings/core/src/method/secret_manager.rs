@@ -3,7 +3,7 @@
 
 use crypto::keys::slip10::Chain;
 use derivative::Derivative;
-use iota_sdk::client::api::GetAddressesBuilderOptions;
+use iota_sdk::client::api::{GetAddressesBuilderOptions, PreparedTransactionDataDto};
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "stronghold")]
@@ -38,6 +38,12 @@ pub enum SecretManagerMethod {
         message: String,
         /// Chain to sign the essence hash with
         chain: Chain,
+    },
+    /// Sign a transaction
+    SignTransaction {
+        /// Prepared transaction data
+        #[serde(rename = "preparedTransactionData")]
+        prepared_transaction_data: PreparedTransactionDataDto,
     },
     /// Store a mnemonic in the Stronghold vault
     #[cfg(feature = "stronghold")]
