@@ -1,6 +1,6 @@
 class OutputId():
     def __init__(self, transaction_id, output_index):
-        """Initialise OutputId
+        """Initialize OutputId
 
         Parameters
         ----------
