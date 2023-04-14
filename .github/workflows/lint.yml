@@ -155,8 +155,10 @@ jobs:
         with:
           toolchain: nightly
           override: true
-          components: cargo-audit
           profile: minimal
+
+      - name: Install Cargo-udeps
+        uses: taiki-e/install-action@cargo-audit
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
