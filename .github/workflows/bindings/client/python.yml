@@ -1,9 +1,8 @@
-name: Python bindings checks
+name: Python bindings checks (client)
 on:
   push:
     branches: [develop, production]
     paths:
-      - ".github/workflows/bindings-python.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
@@ -13,10 +12,10 @@ on:
       - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
       - "sdk/src/client/bindings/python/**" # Re-include python bindings
+      - ".github/workflows/bindings/client/python.yml"
   pull_request:
     branches: [develop, production]
     paths:
-      - ".github/workflows/bindings-python.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
@@ -26,13 +25,13 @@ on:
       - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
       - "sdk/src/client/bindings/python/**" # Re-include python bindings
+      - ".github/workflows/bindings/client/python.yml"
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+env:
+  CARGO_INCREMENTAL: 0
 
 jobs:
   test:
@@ -49,14 +48,11 @@ jobs:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Set Up Nightly Rust
-        uses: ./.github/actions/setup-rust
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
-          cache: true
-          cache-root: sdk/src/client/bindings/python
-          cache-job-id: ${{ github.workflow }}-${{ github.job }}-${{ matrix.os }}-${{ matrix.python }}
-          cache-hash: ${{ hashFiles('.github/workflows/bindings-python.yml') }}
+          toolchain: stable
+          override: true
 
       - name: Set Up Python ${{ matrix.python }} and Pip Cache
         uses: actions/setup-python@v4
@@ -80,6 +76,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libudev-dev libusb-1.0-0-dev
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspace: "sdk/src/client/bindings/python -> target"
+          cache-directories: "sdk/src/client/bindings/python"
 
       - name: Run Tox
         working-directory: sdk/src/client/bindings/python

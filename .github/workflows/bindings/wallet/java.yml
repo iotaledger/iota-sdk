@@ -1,9 +1,8 @@
-name: Java bindings checks
+name: Java bindings checks (wallet)
 on:
   push:
     branches: [develop, production]
     paths:
-      - ".github/workflows/bindings-java.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
@@ -12,11 +11,11 @@ on:
       - "!**/tests/**" # Exclude all tests
       - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
-      - "sdk/src/client/bindings/java/**" # Re-include java bindings
+      - "sdk/src/wallet/bindings/java/**" # Re-include java bindings
+      - ".github/workflows/bindings/wallet/java.yml"
   pull_request:
     branches: [develop, production]
     paths:
-      - ".github/workflows/bindings-java.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
@@ -25,19 +24,18 @@ on:
       - "!**/tests/**" # Exclude all tests
       - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
-      - "sdk/src/client/bindings/java/**" # Re-include java bindings
+      - "sdk/src/wallet/bindings/java/**" # Re-include java bindings
+      - ".github/workflows/bindings/wallet/java.yml"
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+env:
+  CARGO_INCREMENTAL: 0
 
 jobs:
   test:
     name: Test
-    if: ${{ ! github.event.schedule }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -49,14 +47,11 @@ jobs:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Set Up Nightly Rust
-        uses: ./.github/actions/setup-rust
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
-          cache: true
-          cache-root: sdk/src/client/bindings/java/lib/native/
-          cache-job-id: ${{ github.workflow }}-${{ github.job }}-${{ matrix.os }}-${{ matrix.java }}
-          cache-hash: ${{ hashFiles('.github/workflows/bindings-java.yml') }}
+          toolchain: stable
+          override: true
 
       # This step is required for bindgen to work on Windows.
       - name: Set Up Clang/LLVM (Windows)
@@ -74,8 +69,11 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
           distribution: "temurin"
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-directories: "sdk/src/wallet/bindings/java/lib/native/"
 
       - name: Start private tangle
         uses: "./.github/actions/private-tangle/setup"
@@ -83,7 +81,7 @@ jobs:
 
       - name: Run Gradle Test (macos, windows)
         if: ${{ !startsWith(matrix.os, 'ubuntu') }}
-        working-directory: sdk/src/client/bindings/java/
+        working-directory: sdk/src/wallet/bindings/java/
         run: |
           chmod +x gradlew
           # Only run test that doesn't require a node because we can't use the private tangle script on macos and windows
@@ -91,7 +89,7 @@ jobs:
 
       - name: Run Gradle Test
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        working-directory: sdk/src/client/bindings/java/
+        working-directory: sdk/src/wallet/bindings/java/
         run: |
           chmod +x gradlew
           ./gradlew test -i

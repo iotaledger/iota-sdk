@@ -1,9 +1,8 @@
-name: Wasm bindings checks
+name: Wasm bindings checks (client)
 on:
   push:
     branches: [develop, production]
     paths:
-      - ".github/workflows/bindings-wasm.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
@@ -14,10 +13,10 @@ on:
       - "!cli/**" # Exclude CLI
       - "sdk/src/client/bindings/wasm/**" # Re-include wasm client bindings
       - "sdk/src/client/bindings/nodejs/**" # Re-include node client bindings, b/c lib copied from there
+      - ".github/workflows/bindings/client/wasm.yml"
   pull_request:
     branches: [develop, production]
     paths:
-      - ".github/workflows/bindings-wasm.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
@@ -28,13 +27,13 @@ on:
       - "!cli/**" # Exclude CLI
       - "sdk/src/client/bindings/wasm/**" # Re-include wasm client bindings
       - "sdk/src/client/bindings/nodejs/**" # Re-include node client bindings, b/c lib copied from there
+      - ".github/workflows/bindings/client/wasm.yml"
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+env:
+  CARGO_INCREMENTAL: 0
 
 jobs:
   test:
@@ -51,15 +50,11 @@ jobs:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Set Up Nightly Rust
-        uses: ./.github/actions/setup-rust
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
-          target: wasm32-unknown-unknown
-          cache: true
-          cache-root: sdk/src/client/bindings/wasm/
-          cache-job-id: ${{ github.workflow }}-${{ github.job }}-${{ matrix.os }}-${{ matrix.node }}
-          cache-hash: ${{ hashFiles('.github/workflows/bindings-wasm.yml') }}
+          toolchain: stable
+          override: true
 
       # Download a pre-compiled wasm-bindgen binary.
       - name: Install wasm-bindgen-cli
@@ -73,6 +68,10 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: yarn
           cache-dependency-path: sdk/src/client/bindings/wasm/yarn.lock
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+        cache-directories: "sdk/src/client/bindings/wasm"
 
       - name: Run Yarn Install
         working-directory: sdk/src/client/bindings/wasm/

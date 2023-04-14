@@ -1,39 +1,39 @@
-name: Examine the Wasm Bindings
+name: Wasm bindings checks (wallet)
 on:
   push:
-    branches:
-      - develop
-      - production
+    branches: [develop, production]
     paths:
-      - ".github/workflows/examine-wasm-bindings.yml"
       - ".github/actions/**"
-      - "sdk/src/wallet/bindings/wasm/**"
-      # Watch the Rust core too
-      - "src/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
+      - "**.rs" # Include all rust files
+      - "**Cargo.toml" # Include all Cargo.toml files
+      - "**Cargo.lock" # Include all Cargo.lock files
+      - "!**/examples/**" # Exclude all examples
+      - "!**/tests/**" # Exclude all tests
+      - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
+      - "sdk/src/wallet/bindings/wasm/**" # Re-include wasm wallet bindings
+      - "sdk/src/wallet/bindings/nodejs/**" # Re-include node wallet bindings, b/c lib copied from there
+      - ".github/workflows/bindings/wallet/wasm.yml"
   pull_request:
-    branches:
-      - develop
-      - production
+    branches: [develop, production]
     paths:
-      - ".github/workflows/examine-wasm-bindings.yml"
       - ".github/actions/**"
-      - "sdk/src/wallet/bindings/wasm/**"
-      - "sdk/src/wallet/bindings/nodejs/**" # Re-include nodejs bindings, b/c lib is copied from there
-      # Watch the Rust core too
-      - "src/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
+      - "**.rs" # Include all rust files
+      - "**Cargo.toml" # Include all Cargo.toml files
+      - "**Cargo.lock" # Include all Cargo.lock files
+      - "!**/examples/**" # Exclude all examples
+      - "!**/tests/**" # Exclude all tests
+      - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
+      - "sdk/src/wallet/bindings/wasm/**" # Re-include wasm wallet bindings
+      - "sdk/src/wallet/bindings/nodejs/**" # Re-include node wallet bindings, b/c lib copied from there
+      - ".github/workflows/bindings/wallet/wasm.yml"
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+env:
+  CARGO_INCREMENTAL: 0
 
 jobs:
   test:
@@ -50,14 +50,11 @@ jobs:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Set Up Nightly Rust
-        uses: ./.github/actions/setup-rust
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
-          target: wasm32-unknown-unknown
-          cache-root: sdk/src/wallet/bindings/wasm/
-          cache-job-id: ${{ github.workflow }}-${{ github.job }}-${{ matrix.os }}-${{ matrix.node }}
-          cache-hash: ${{ hashFiles('.github/workflows/examine-wasm-bindings.yml') }}
+          toolchain: stable
+          override: true
 
       # Download a pre-compiled wasm-bindgen binary.
       - name: Install wasm-bindgen-cli
@@ -71,6 +68,10 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: yarn
           cache-dependency-path: sdk/src/wallet/bindings/wasm/yarn.lock
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+        cache-directories: "sdk/src/wallet/bindings/wasm"
 
       - name: Run Yarn Install
         working-directory: sdk/src/wallet/bindings/wasm/

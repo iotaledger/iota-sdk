@@ -13,10 +13,6 @@ on:
       - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
-
 env:
   CARGO_INCREMENTAL: 0
 
@@ -40,35 +36,16 @@ jobs:
           override: true
           components: llvm-tools-preview
 
-      - name: Get current date
-        run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-
       - name: Install required packages (Ubuntu)
         run: |
           sudo apt-get update
           sudo apt-get install libudev-dev libusb-1.0-0-dev
-      - name: Cache cargo registry
-        uses: actions/cache@v3
-        with:
-          path: ~/.cargo/registry
-          # Add date to the cache to keep it up to date
-          key: ubuntu-latest-nightly-cargo-registry-${{ hashFiles('**/Cargo.lock') }}-${{ env.CURRENT_DATE }}
-          # Restore from outdated cache for speed
-          restore-keys: |
-            ubuntu-latest-nightly-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-            ubuntu-latest-nightly-cargo-registry-
-      - name: Cache cargo index
-        uses: actions/cache@v3
-        with:
-          path: ~/.cargo/git
-          # Add date to the cache to keep it up to date
-          key: ubuntu-latest-nightly-cargo-index-${{ hashFiles('**/Cargo.lock') }}-${{ env.CURRENT_DATE }}
-          # Restore from outdated cache for speed
-          restore-keys: |
-            ubuntu-latest-nightly-cargo-index-${{ hashFiles('**/Cargo.lock') }}
-            ubuntu-latest-nightly-cargo-index-
+
       - name: Install binutils and rustfilt
         run: cargo install cargo-binutils rustfilt
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
 
       - name: Build for tests
         uses: actions-rs/cargo@v1
@@ -77,7 +54,7 @@ jobs:
           LLVM_PROFILE_FILE: "iota-%m.profraw"
         with:
           command: test
-          args: --tests --package iota-sdk --all-features --no-run -- --include-ignored
+          args: --profile ci --tests --package iota-sdk --all-features --no-run -- --include-ignored
 
       - name: Start private tangle
         uses: "./.github/actions/private-tangle/setup"

@@ -22,10 +22,6 @@ on:
       - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
-
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -43,4 +39,4 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: check
-          args: --release --target=wasm32-unknown-unknown --manifest-path sdk/Cargo.toml --no-default-features --features client,tls,events,storage,message_interface,participation,wallet
+          args: --profile ci --target=wasm32-unknown-unknown --manifest-path sdk/Cargo.toml --no-default-features --features client,tls,events,storage,message_interface,participation,wallet

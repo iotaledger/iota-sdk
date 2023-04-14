@@ -1,0 +1,99 @@
+name: Java bindings checks (client)
+on:
+  push:
+    branches: [develop, production]
+    paths:
+      - ".github/actions/**"
+      - "**.rs" # Include all rust files
+      - "**Cargo.toml" # Include all Cargo.toml files
+      - "**Cargo.lock" # Include all Cargo.lock files
+      - "!**/examples/**" # Exclude all examples
+      - "!**/tests/**" # Exclude all tests
+      - "!**/bindings/**" # Exclude all bindings
+      - "!cli/**" # Exclude CLI
+      - "sdk/src/client/bindings/java/**" # Re-include java bindings
+      - ".github/workflows/bindings/client/java.yml"
+  pull_request:
+    branches: [develop, production]
+    paths:
+      - ".github/actions/**"
+      - "**.rs" # Include all rust files
+      - "**Cargo.toml" # Include all Cargo.toml files
+      - "**Cargo.lock" # Include all Cargo.lock files
+      - "!**/examples/**" # Exclude all examples
+      - "!**/tests/**" # Exclude all tests
+      - "!**/bindings/**" # Exclude all bindings
+      - "!cli/**" # Exclude CLI
+      - "sdk/src/client/bindings/java/**" # Re-include java bindings
+      - ".github/workflows/bindings/client/java.yml"
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+
+env:
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+        java: ["11", "17"]
+
+    steps:
+      - name: Checkout the Source Code
+        uses: actions/checkout@v3
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      # This step is required for bindgen to work on Windows.
+      - name: Set Up Clang/LLVM (Windows)
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        uses: ./.github/actions/setup-clang
+
+      - name: Install Required Dependencies (Ubuntu)
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install libudev-dev libusb-1.0-0-dev
+
+      - name: Set Up Java ${{ matrix.java }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: "temurin"
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-directories: "sdk/src/client/bindings/java/lib/native/"
+
+      - name: Start private tangle
+        uses: "./.github/actions/private-tangle/setup"
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+
+      - name: Run Gradle Test (macos, windows)
+        if: ${{ !startsWith(matrix.os, 'ubuntu') }}
+        working-directory: sdk/src/client/bindings/java/
+        run: |
+          chmod +x gradlew
+          # Only run test that doesn't require a node because we can't use the private tangle script on macos and windows
+          ./gradlew test -i --tests "*testAddressDerivation"
+
+      - name: Run Gradle Test
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        working-directory: sdk/src/client/bindings/java/
+        run: |
+          chmod +x gradlew
+          ./gradlew test -i
+
+      - name: Tear down private tangle
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        uses: "./.github/actions/private-tangle/tear-down"

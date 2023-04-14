@@ -24,10 +24,6 @@ on:
       - "**Cargo.lock"
       - "!cli/**" # Exclude CLI
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
-
 env:
   CARGO_INCREMENTAL: 0
 
@@ -93,7 +89,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --tests --all-features -- --ignored
+          args: --profile ci --tests --all-features -- --ignored
 
       - name: Tear down private tangle
         if: always()
