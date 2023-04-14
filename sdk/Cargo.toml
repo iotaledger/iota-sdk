@@ -73,7 +73,6 @@ iota-sdk = { version = "0.1.0", path = ".", default-features = false, features =
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 
-
 [features]
 default = [ "std", "serde" ]
 
