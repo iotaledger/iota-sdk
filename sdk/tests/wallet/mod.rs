@@ -14,6 +14,7 @@ mod common;
 mod consolidation;
 mod error;
 mod message_interface;
+mod migrate_stronghold_snapshot_v2_to_v3;
 mod native_tokens;
 mod output_preparation;
 mod syncing;

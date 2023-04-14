@@ -1,41 +1,53 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::client::{
-    api::GetAddressesBuilder,
-    constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-    secret::{stronghold::StrongholdSecretManager, SecretManager},
-    storage::StorageProvider,
-    stronghold::StrongholdAdapter,
-    Error,
+use std::path::PathBuf;
+
+use iota_sdk::{
+    client::{
+        api::GetAddressesBuilder,
+        constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
+        secret::{stronghold::StrongholdSecretManager, SecretManager},
+        storage::StorageProvider,
+        stronghold::StrongholdAdapter,
+        Error as ClientError,
+    },
+    wallet::{account_manager::AccountManager, ClientOptions, Error as WalletError},
 };
+
+use crate::wallet::common::{setup, tear_down, NODE_LOCAL};
 
 #[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn stronghold_snapshot_v2_v3_migration() {
+    let storage_path = "test-storage/stronghold_snapshot_v2_v3_migration";
+    setup(storage_path).unwrap();
+
     let error = StrongholdSecretManager::builder()
         .password("current_password")
-        .build("./tests/fixtures/v2.stronghold");
+        .build("./tests/wallet/fixtures/v2.stronghold");
 
     assert!(matches!(
         error,
-        Err(Error::StrongholdUnsupportedSnapshotVersion { found, expected }) if found == 2 && expected == 3
+        Err(ClientError::StrongholdUnsupportedSnapshotVersion { found, expected }) if found == 2 && expected == 3
     ));
 
     StrongholdAdapter::migrate_v2_to_v3(
-        "./tests/fixtures/v2.stronghold",
+        "./tests/wallet/fixtures/v2.stronghold",
         "current_password",
-        Some("./tests/fixtures/v3.stronghold"),
+        Some("./tests/wallet/fixtures/v3.stronghold"),
         Some("new_password"),
     )
     .unwrap();
 
-    let stronghold_secret_manager = StrongholdSecretManager::builder()
-        .password("new_password")
-        .build("./tests/fixtures/v3.stronghold")
-        .unwrap();
+    let stronghold_secret_manager = SecretManager::Stronghold(
+        StrongholdSecretManager::builder()
+            .password("new_password")
+            .build("./tests/wallet/fixtures/v3.stronghold")
+            .unwrap(),
+    );
 
-    let addresses = GetAddressesBuilder::new(&SecretManager::Stronghold(stronghold_secret_manager))
+    let addresses = GetAddressesBuilder::new(&stronghold_secret_manager)
         .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .with_account_index(0)
@@ -62,7 +74,36 @@ async fn stronghold_snapshot_v2_v3_migration() {
         ]
     );
 
-    std::fs::remove_file("./tests/fixtures/v3.stronghold").unwrap();
+    let restore_manager = AccountManager::builder()
+        .with_storage_path("test-storage/stronghold_snapshot_v2_v3_migration")
+        .with_secret_manager(stronghold_secret_manager)
+        .with_client_options(ClientOptions::new().with_node(NODE_LOCAL).unwrap())
+        // Build with a different coin type, to check if it gets replaced by the one from the backup
+        .with_coin_type(IOTA_COIN_TYPE)
+        .finish()
+        .await
+        .unwrap();
+
+    // restore with ignore_if_coin_type_mismatch: Some(true) to not overwrite the coin type
+    let error = restore_manager
+        .restore_backup(
+            PathBuf::from("./tests/wallet/fixtures/v3.stronghold"),
+            "wrong_password".to_string(),
+            Some(false),
+        )
+        .await;
+
+    println!("{error:?}");
+
+    match error {
+        Err(WalletError::Client(err)) => {
+            assert!(matches!(*err, ClientError::StrongholdInvalidPassword));
+        }
+        _ => panic!("unexpected error"),
+    }
+
+    std::fs::remove_file("./tests/wallet/fixtures/v3.stronghold").unwrap();
+    tear_down(storage_path).unwrap();
 }
 
 #[cfg(feature = "stronghold")]
@@ -70,24 +111,24 @@ async fn stronghold_snapshot_v2_v3_migration() {
 async fn stronghold_snapshot_with_data_v2_v3_migration() {
     let error = StrongholdSecretManager::builder()
         .password("current_password")
-        .build("./tests/fixtures/v2_backup.stronghold");
+        .build("./tests/wallet/fixtures/v2_backup.stronghold");
 
     assert!(matches!(
         error,
-        Err(Error::StrongholdUnsupportedSnapshotVersion { found, expected }) if found == 2 && expected == 3
+        Err(ClientError::StrongholdUnsupportedSnapshotVersion { found, expected }) if found == 2 && expected == 3
     ));
 
     StrongholdAdapter::migrate_v2_to_v3(
-        "./tests/fixtures/v2_backup.stronghold",
+        "./tests/wallet/fixtures/v2_backup.stronghold",
         "current_password",
-        Some("./tests/fixtures/v3WalletBackup.stronghold"),
+        Some("./tests/wallet/fixtures/v3WalletBackup.stronghold"),
         Some("new_password"),
     )
     .unwrap();
 
     let mut stronghold_secret_manager = StrongholdSecretManager::builder()
         .password("new_password")
-        .build("./tests/fixtures/v3WalletBackup.stronghold")
+        .build("./tests/wallet/fixtures/v3WalletBackup.stronghold")
         .unwrap();
 
     let coin_type_bytes = stronghold_secret_manager
@@ -125,5 +166,5 @@ async fn stronghold_snapshot_with_data_v2_v3_migration() {
         ]
     );
 
-    std::fs::remove_file("./tests/fixtures/v3WalletBackup.stronghold").unwrap();
+    std::fs::remove_file("./tests/wallet/fixtures/v3WalletBackup.stronghold").unwrap();
 }
