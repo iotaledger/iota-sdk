@@ -12,6 +12,8 @@ use bech32::{self, FromBase32, ToBase32, Variant};
 use derive_more::From;
 use packable::PackableExt;
 
+/// Custom de/serialization for [`address::Bech32`]
+pub(crate) mod bech_serde;
 pub use self::{alias::AliasAddress, bech::Bech32, ed25519::Ed25519Address, nft::NftAddress};
 use crate::types::block::{
     output::{Output, OutputId},

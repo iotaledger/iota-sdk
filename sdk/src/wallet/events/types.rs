@@ -113,7 +113,7 @@ pub enum TransactionProgressEvent {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct AddressConsolidationNeeded {
     /// The associated address.
-    #[serde(with = "crate::wallet::account::types::address_serde")]
+    #[serde(with = "crate::types::block::address::bech_serde")]
     pub address: Bech32,
 }
 

@@ -13,7 +13,7 @@ use crate::types::block::{address::Bech32, output::OutputId};
 #[getset(get = "pub")]
 pub struct AccountAddress {
     /// The address.
-    #[serde(with = "crate::wallet::account::types::address_serde")]
+    #[serde(with = "crate::types::block::address::bech_serde")]
     pub(crate) address: Bech32,
     /// The address key index.
     #[serde(rename = "keyIndex")]
@@ -32,7 +32,7 @@ pub struct AccountAddress {
 #[getset(get = "pub")]
 pub struct AddressWithUnspentOutputs {
     /// The address.
-    #[serde(with = "crate::wallet::account::types::address_serde")]
+    #[serde(with = "crate::types::block::address::bech_serde")]
     pub(crate) address: Bech32,
     /// The address key index.
     #[serde(rename = "keyIndex")]

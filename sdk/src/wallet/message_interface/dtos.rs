@@ -58,7 +58,7 @@ impl TryFrom<&AddressWithAmountDto> for AddressWithAmount {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct AddressWithUnspentOutputsDto {
     /// The address.
-    #[serde(with = "crate::wallet::account::types::address_serde")]
+    #[serde(with = "crate::types::block::address::bech_serde")]
     pub address: Bech32,
     /// The address key index.
     #[serde(rename = "keyIndex")]
