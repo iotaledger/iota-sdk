@@ -23,6 +23,7 @@ jobs:
       - name: Install toolchain
         uses: actions-rs/toolchain@v1
         with:
+          target: wasm32-unknown-unknown
           toolchain: stable
           override: true
 
