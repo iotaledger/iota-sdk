@@ -4,6 +4,7 @@
 
 from iota_client import IotaClient, MnemonicSecretManager, OutputId, hex_to_utf8, utf8_to_hex
 import json
+import unittest
 
 # Read the test vector
 tv = dict()
@@ -64,12 +65,36 @@ def test_sign_verify_ed25519():
     assert valid_signature
 
 
-def test_output_id():
-    transaction_id = '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
-    output_index = 42
-    output_id = OutputId(transaction_id, output_index)
-    assert output_id.__repr__(
-    ) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+class TestTypes(unittest.TestCase):
+    def test_output_id(self):
+        transaction_id = '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
+        output_index = 42
+        output_id = OutputId(transaction_id, output_index)
+        assert output_id.__repr__(
+        ) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+
+        new_output_id = OutputId.from_string(
+            '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00')
+        assert new_output_id.__repr__(
+        ) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+        assert new_output_id.transaction_id == transaction_id
+        assert new_output_id.output_index == output_index
+
+        transaction_id_missing_0x_prefix = '52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
+        with self.assertRaises(ValueError):
+            OutputId(transaction_id_missing_0x_prefix, output_index)
+        transaction_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
+        with self.assertRaises(ValueError):
+            OutputId(transaction_id_invalid_hex_char, output_index)
+        invalid_output_index = 129
+        with self.assertRaises(ValueError):
+            OutputId(transaction_id, invalid_output_index)
+        output_id_missing_0x_prefix = '52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+        with self.assertRaises(ValueError):
+            OutputId.from_string(output_id_missing_0x_prefix)
+        output_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+        with self.assertRaises(ValueError):
+            OutputId.from_string(output_id_invalid_hex_char)
 
 
 def hex_utf8():
