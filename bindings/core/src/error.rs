@@ -6,6 +6,9 @@ use serde::{ser::SerializeMap, Serialize, Serializer};
 
 pub use super::{method::AccountMethod, response::Response};
 
+/// Result type of the bindings core crate.
+pub type Result<T> = std::result::Result<T, super::error::Error>;
+
 // TODO: SDK Error instead?
 /// Error type for the bindings core crate.
 #[derive(Debug, thiserror::Error)]
@@ -41,7 +44,7 @@ pub enum Error {
 
 // Serialize type with Display error
 impl Serialize for Error {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
         S: Serializer,
     {

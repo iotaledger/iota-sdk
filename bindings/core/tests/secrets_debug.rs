@@ -6,14 +6,6 @@ use iota_sdk_bindings_core::{ClientMethod, Response, UtilsMethod, WalletOptions}
 
 #[test]
 fn method_interface_secrets_debug() {
-    let client_method = ClientMethod::MnemonicToHexSeed {
-        mnemonic: "mnemonic".to_string(),
-    };
-    assert_eq!(
-        format!("{:?}", client_method),
-        "MnemonicToHexSeed { mnemonic: <omitted> }"
-    );
-
     let client_method = ClientMethod::BuildAndPostBlock {
         secret_manager: None,
         options: None,
@@ -34,6 +26,14 @@ fn method_interface_secrets_debug() {
             "BuildAndPostBlock { secret_manager: Some(<omitted>), options: None }"
         );
     }
+
+    let client_method = UtilsMethod::MnemonicToHexSeed {
+        mnemonic: "mnemonic".to_string(),
+    };
+    assert_eq!(
+        format!("{:?}", client_method),
+        "MnemonicToHexSeed { mnemonic: <omitted> }"
+    );
 
     let wallet_method = UtilsMethod::VerifyMnemonic {
         mnemonic: "mnemonic".to_string(),

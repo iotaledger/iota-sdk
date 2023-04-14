@@ -9,7 +9,7 @@ use iota_sdk::{
     types::block::{signature::dto::Ed25519SignatureDto, unlock::Unlock, DtoError},
 };
 
-use crate::{method::SecretManagerMethod, method_handler::Result, response::Response};
+use crate::{method::SecretManagerMethod, response::Response, Result};
 
 /// Call a secret manager method.
 pub(crate) async fn call_secret_manager_method_internal(

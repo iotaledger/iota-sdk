@@ -7,11 +7,7 @@ use iota_sdk::wallet::{message_interface::dtos::AccountDto, wallet::Wallet};
 #[cfg(feature = "stronghold")]
 use zeroize::Zeroize;
 
-use crate::{
-    method::WalletMethod,
-    method_handler::{account::call_account_method, Result},
-    response::Response,
-};
+use crate::{method::WalletMethod, method_handler::account::call_account_method, response::Response, Result};
 
 /// Call a wallet method.
 pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> Result<Response> {

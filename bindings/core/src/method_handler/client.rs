@@ -6,21 +6,19 @@ use iota_sdk::client::secret::ledger_nano::LedgerSecretManager;
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
-        request_funds_from_faucet,
         secret::{SecretManage, SecretManager},
         Client,
     },
     types::block::{
-        address::{dto::AddressDto, Address, Ed25519Address},
+        address::Ed25519Address,
         input::dto::UtxoInputDto,
         output::{
             dto::{OutputBuilderAmountDto, OutputDto, RentStructureDto},
-            AliasId, AliasOutput, BasicOutput, FoundryId, FoundryOutput, NftId, NftOutput, Output,
+            AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output,
         },
         payload::{
             dto::{MilestonePayloadDto, PayloadDto},
-            transaction::TransactionEssence,
-            Payload, TransactionPayload,
+            Payload,
         },
         protocol::dto::ProtocolParametersDto,
         signature::{dto::Ed25519SignatureDto, Ed25519Signature},
@@ -28,14 +26,13 @@ use iota_sdk::{
         Block, BlockDto, DtoError,
     },
 };
-use zeroize::Zeroize;
 #[cfg(feature = "mqtt")]
 use {
     iota_sdk::client::mqtt::{MqttPayload, Topic},
     iota_sdk::types::block::payload::milestone::option::dto::ReceiptMilestoneOptionDto,
 };
 
-use crate::{method::ClientMethod, method_handler::Result, response::Response};
+use crate::{method::ClientMethod, response::Response, Result};
 
 /// Listen to MQTT events
 #[cfg(feature = "mqtt")]
@@ -497,7 +494,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             let (block_id, block) = client.promote_unchecked(&block_id).await?;
             Ok(Response::Promoted((block_id, BlockDto::from(&block))))
         }
-        ClientMethod::Bech32ToHex { bech32 } => Ok(Response::Bech32ToHex(Client::bech32_to_hex(&bech32)?)),
         ClientMethod::HexToBech32 { hex, bech32_hrp } => Ok(Response::Bech32Address(
             client.hex_to_bech32(&hex, bech32_hrp.as_deref()).await?,
         )),
@@ -512,40 +508,5 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .hex_public_key_to_bech32_address(&hex, bech32_hrp.as_deref())
                 .await?,
         )),
-        ClientMethod::ParseBech32Address { address } => Ok(Response::ParsedBech32Address(AddressDto::from(
-            &Address::try_from_bech32(address)?,
-        ))),
-        ClientMethod::IsAddressValid { address } => Ok(Response::Bool(Address::is_valid_bech32(&address))),
-        ClientMethod::GenerateMnemonic => Ok(Response::GeneratedMnemonic(Client::generate_mnemonic()?)),
-        ClientMethod::MnemonicToHexSeed { mut mnemonic } => {
-            let response = Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(&mnemonic)?);
-
-            mnemonic.zeroize();
-
-            Ok(response)
-        }
-        ClientMethod::BlockId { block } => {
-            let block = Block::try_from_dto_unverified(&block)?;
-            Ok(Response::BlockId(block.id()))
-        }
-        ClientMethod::TransactionId { payload } => {
-            let payload = TransactionPayload::try_from_dto_unverified(&payload)?;
-            Ok(Response::TransactionId(payload.id()))
-        }
-        ClientMethod::ComputeAliasId { output_id } => Ok(Response::AliasId(AliasId::from(&output_id))),
-        ClientMethod::ComputeNftId { output_id } => Ok(Response::NftId(NftId::from(&output_id))),
-        ClientMethod::ComputeFoundryId {
-            alias_address,
-            serial_number,
-            token_scheme_kind,
-        } => Ok(Response::FoundryId(FoundryId::build(
-            &alias_address,
-            serial_number,
-            token_scheme_kind,
-        ))),
-        ClientMethod::Faucet { url, address } => Ok(Response::Faucet(request_funds_from_faucet(&url, &address).await?)),
-        ClientMethod::HashTransactionEssence { essence } => Ok(Response::TransactionEssenceHash(prefix_hex::encode(
-            TransactionEssence::try_from_dto_unverified(&essence)?.hash(),
-        ))),
     }
 }

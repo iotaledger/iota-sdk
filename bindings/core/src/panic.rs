@@ -6,8 +6,7 @@ use std::{any::Any, panic::AssertUnwindSafe};
 use backtrace::Backtrace;
 use futures::{Future, FutureExt};
 
-use super::method_handler::Result;
-use crate::response::Response;
+use crate::{response::Response, Result};
 
 fn panic_to_response_message(panic: Box<dyn Any>) -> Response {
     let msg = panic.downcast_ref::<String>().map_or_else(

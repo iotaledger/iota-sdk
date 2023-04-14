@@ -16,21 +16,14 @@ use iota_sdk::{
         secret::SecretManagerDto,
     },
     types::block::{
-        address::{dto::Ed25519AddressDto, AliasAddress},
+        address::dto::Ed25519AddressDto,
         output::{
             dto::{AliasIdDto, NativeTokenDto, NftIdDto, TokenSchemeDto},
             feature::dto::FeatureDto,
             unlock_condition::dto::UnlockConditionDto,
             AliasId, FoundryId, NftId, OutputId,
         },
-        payload::{
-            dto::PayloadDto,
-            milestone::MilestoneId,
-            transaction::{
-                dto::{TransactionEssenceDto, TransactionPayloadDto},
-                TransactionId,
-            },
-        },
+        payload::{dto::PayloadDto, milestone::MilestoneId, transaction::TransactionId},
         signature::dto::Ed25519SignatureDto,
         BlockDto, BlockId,
     },
@@ -499,11 +492,6 @@ pub enum ClientMethod {
     //////////////////////////////////////////////////////////////////////
     // Utils
     //////////////////////////////////////////////////////////////////////
-    /// Transforms bech32 to hex
-    Bech32ToHex {
-        /// Bech32 encoded address
-        bech32: String,
-    },
     /// Transforms a hex encoded address to a bech32 encoded address
     HexToBech32 {
         /// Hex encoded bech32 address
@@ -537,69 +525,5 @@ pub enum ClientMethod {
         /// Human readable part
         #[serde(rename = "bech32Hrp")]
         bech32_hrp: Option<String>,
-    },
-    /// Returns a valid Address parsed from a String.
-    ParseBech32Address {
-        /// Address
-        address: String,
-    },
-    /// Checks if a String is a valid bech32 encoded address.
-    IsAddressValid {
-        /// Address
-        address: String,
-    },
-    /// Generates a new mnemonic.
-    GenerateMnemonic,
-    /// Returns a hex encoded seed for a mnemonic.
-    MnemonicToHexSeed {
-        /// Mnemonic
-        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        mnemonic: String,
-    },
-    /// Returns a block ID (Blake2b256 hash of block bytes) from a block
-    BlockId {
-        /// Block
-        block: BlockDto,
-    },
-    /// Returns the transaction ID (Blake2b256 hash of the provided transaction payload)
-    TransactionId {
-        /// Transaction Payload
-        payload: TransactionPayloadDto,
-    },
-    /// Computes the alias ID
-    ComputeAliasId {
-        /// Output ID
-        #[serde(rename = "outputId")]
-        output_id: OutputId,
-    },
-    /// Computes the NFT ID
-    ComputeNftId {
-        /// Output ID
-        #[serde(rename = "outputId")]
-        output_id: OutputId,
-    },
-    /// Computes the Foundry ID
-    ComputeFoundryId {
-        /// Alias address
-        #[serde(rename = "aliasAddress")]
-        alias_address: AliasAddress,
-        /// Serial number
-        #[serde(rename = "serialNumber")]
-        serial_number: u32,
-        /// Token scheme kind
-        #[serde(rename = "tokenSchemeKind")]
-        token_scheme_kind: u8,
-    },
-    /// Requests funds for a given address from the faucet.
-    Faucet {
-        /// Faucet URL
-        url: String,
-        /// The address for request funds
-        address: String,
-    },
-    /// Compute the hash of a transaction essence.
-    HashTransactionEssence {
-        /// The transaction essence
-        essence: TransactionEssenceDto,
     },
 }

@@ -6,8 +6,7 @@ use iota_sdk::{
     wallet::account::types::AccountIdentifier,
 };
 use iota_sdk_bindings_core::{
-    call_client_method, call_wallet_method, method_handler::Result, AccountMethod, ClientMethod, Response,
-    WalletMethod, WalletOptions,
+    call_client_method, call_wallet_method, AccountMethod, ClientMethod, Response, Result, WalletMethod, WalletOptions,
 };
 
 #[tokio::test]
@@ -154,10 +153,10 @@ async fn client_from_wallet() -> Result<()> {
     }
 
     // Send ClientMethod via the client from the wallet
-    let response = call_client_method(wallet.get_accounts().await?[0].client(), ClientMethod::GenerateMnemonic).await;
+    let response = call_client_method(wallet.get_accounts().await?[0].client(), ClientMethod::GetLocalPow).await;
 
     match response {
-        Response::GeneratedMnemonic(_) => {}
+        Response::Bool(_) => {}
         _ => panic!("unexpected response {response:?}"),
     }
 

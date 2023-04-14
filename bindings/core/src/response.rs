@@ -194,32 +194,32 @@ pub enum Response {
     /// - [`PromoteUnchecked`](crate::method::ClientMethod::PromoteUnchecked)
     Promoted((BlockId, BlockDto)),
     /// Response for:
-    /// - [`Bech32ToHex`](crate::method::ClientMethod::Bech32ToHex)
+    /// - [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
     Bech32ToHex(String),
     /// Response for:
-    /// - [`ParseBech32Address`](crate::method::ClientMethod::ParseBech32Address)
+    /// - [`ParseBech32Address`](crate::method::UtilsMethod::ParseBech32Address)
     ParsedBech32Address(AddressDto),
     /// Response for:
-    /// - [`MnemonicToHexSeed`](crate::method::ClientMethod::MnemonicToHexSeed)
+    /// - [`MnemonicToHexSeed`](crate::method::UtilsMethod::MnemonicToHexSeed)
     MnemonicHexSeed(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
     /// Response for:
-    /// - [`TransactionId`](crate::method::ClientMethod::TransactionId)
+    /// - [`TransactionId`](crate::method::UtilsMethod::TransactionId)
     TransactionId(TransactionId),
     /// Response for:
-    /// - [`ComputeAliasId`](crate::method::ClientMethod::ComputeAliasId)
+    /// - [`ComputeAliasId`](crate::method::UtilsMethod::ComputeAliasId)
     AliasId(AliasId),
     /// Response for:
-    /// - [`ComputeNftId`](crate::method::ClientMethod::ComputeNftId)
+    /// - [`ComputeNftId`](crate::method::UtilsMethod::ComputeNftId)
     NftId(NftId),
     /// Response for:
-    /// - [`ComputeFoundryId`](crate::method::ClientMethod::ComputeFoundryId)
+    /// - [`ComputeFoundryId`](crate::method::UtilsMethod::ComputeFoundryId)
     FoundryId(FoundryId),
     /// Response for:
-    /// - [`HashTransactionEssence`](crate::method::ClientMethod::HashTransactionEssence)
+    /// - [`HashTransactionEssence`](crate::method::UtilsMethod::HashTransactionEssence)
     TransactionEssenceHash(String),
     /// Response for [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
     NodeInfoWrapper(NodeInfoWrapper),
-    /// Response for [`Bech32ToHex`](crate::method::ClientMethod::Bech32ToHex)
+    /// Response for [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
     HexAddress(String),
 
     // Responses in client and wallet
@@ -239,10 +239,10 @@ pub enum Response {
     /// - [`HexToBech32`](crate::method::ClientMethod::HexToBech32)
     /// - [`NftIdToBech32`](crate::method::ClientMethod::NftIdToBech32)
     Bech32Address(String),
-    /// - [`Faucet`](crate::method::ClientMethod::Faucet)
+    /// - [`Faucet`](crate::method::UtilsMethod::Faucet)
     Faucet(String),
     /// Response for:
-    /// - [`GenerateMnemonic`](crate::method::ClientMethod::GenerateMnemonic)
+    /// - [`GenerateMnemonic`](crate::method::UtilsMethod::GenerateMnemonic)
     GeneratedMnemonic(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
     /// Response for
     /// - [`GetLedgerNanoStatus`](crate::method::ClientMethod::GetLedgerNanoStatus)
@@ -250,7 +250,7 @@ pub enum Response {
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
     LedgerNanoStatus(LedgerNanoStatus),
     /// Response for:
-    /// - [`BlockId`](crate::method::ClientMethod::BlockId)
+    /// - [`BlockId`](crate::method::UtilsMethod::BlockId)
     /// - [`PostBlock`](crate::method::ClientMethod::PostBlock)
     /// - [`PostBlockRaw`](crate::method::ClientMethod::PostBlockRaw)
     /// - [`RetryTransactionUntilIncluded`](crate::method::AccountMethod::RetryTransactionUntilIncluded)
@@ -260,7 +260,7 @@ pub enum Response {
     /// - [`GetFallbackToLocalPow`](crate::method::ClientMethod::GetFallbackToLocalPow)
     /// - [`VerifyEd25519Signature`](crate::method::ClientMethod::VerifyEd25519Signature)
     /// - [`GetHealth`](crate::method::ClientMethod::GetHealth)
-    /// - [`IsAddressValid`](crate::method::ClientMethod::IsAddressValid)
+    /// - [`IsAddressValid`](crate::method::UtilsMethod::IsAddressValid)
     Bool(bool),
     /// Response for
     /// - [`Backup`](crate::method::WalletMethod::Backup),
@@ -328,7 +328,7 @@ pub enum Response {
     GeneratedAddress(Vec<AccountAddress>),
     /// Response for
     /// - [`GetBalance`](crate::method::AccountMethod::GetBalance),
-    /// - [`SyncAccount`](crate::method::AccountMethod::SyncAccount)
+    /// - [`Sync`](crate::method::AccountMethod::Sync)
     Balance(AccountBalanceDto),
     /// Response for
     /// - [`GetIncomingTransactionData`](crate::method::AccountMethod::GetIncomingTransactionData),

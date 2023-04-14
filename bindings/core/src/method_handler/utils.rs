@@ -13,7 +13,7 @@ use iota_sdk::{
 };
 use zeroize::Zeroize;
 
-use crate::{method::UtilsMethod, method_handler::Result, response::Response};
+use crate::{method::UtilsMethod, response::Response, Result};
 
 /// Call a utils method.
 pub(crate) async fn call_utils_method_internal(method: UtilsMethod) -> Result<Response> {

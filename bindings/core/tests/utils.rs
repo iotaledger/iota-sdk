@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk_bindings_core::{call_utils_method, method_handler::Result, Response, UtilsMethod};
+use iota_sdk_bindings_core::{call_utils_method, Response, Result, UtilsMethod};
 
 #[tokio::test]
 async fn utils() -> Result<()> {

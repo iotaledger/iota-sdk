@@ -20,13 +20,13 @@ use iota_sdk::{
 use serde::Deserialize;
 
 pub use self::{
-    error::Error,
+    error::{Error, Result},
     method::{AccountMethod, ClientMethod, SecretManagerMethod, UtilsMethod, WalletMethod},
     method_handler::{call_client_method, call_secret_manager_method, call_utils_method, call_wallet_method},
     response::Response,
 };
 
-pub fn init_logger(config: String) -> Result<(), fern_logger::Error> {
+pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error> {
     let output_config: LoggerOutputConfigBuilder = serde_json::from_str(&config).expect("invalid logger config");
     let config = LoggerConfig::build().with_output(output_config).finish();
     logger_init(config)

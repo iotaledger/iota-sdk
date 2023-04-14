@@ -234,7 +234,7 @@ pub enum AccountMethod {
     /// Sync the account by fetching new information from the nodes. Will also retry pending transactions
     /// if necessary.
     /// Expected response: [`Balance`](crate::Response::Balance)
-    SyncAccount {
+    Sync {
         /// Sync options
         options: Option<SyncOptions>,
     },

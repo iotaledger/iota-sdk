@@ -24,8 +24,7 @@ use iota_sdk::{
 };
 use primitive_types::U256;
 
-use super::Result;
-use crate::{method::AccountMethod, Response};
+use crate::{method::AccountMethod, Response, Result};
 
 pub(crate) async fn call_account_method(account: &AccountHandle, method: AccountMethod) -> Result<Response> {
     let response = match method {
@@ -284,9 +283,7 @@ pub(crate) async fn call_account_method(account: &AccountHandle, method: Account
                 .await?;
             Response::BlockId(block_id)
         }
-        AccountMethod::SyncAccount { options } => {
-            Response::Balance(AccountBalanceDto::from(&account.sync(options).await?))
-        }
+        AccountMethod::Sync { options } => Response::Balance(AccountBalanceDto::from(&account.sync(options).await?)),
         AccountMethod::SendAmount {
             addresses_with_amount,
             options,
