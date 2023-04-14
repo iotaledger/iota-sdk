@@ -2,6 +2,9 @@ name: Nodejs bindings checks (wallet)
 
 on: workflow_call
 
+env:
+  CARGO_INCREMENTAL: 0
+
 jobs:
   test:
     name: Test

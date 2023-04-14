@@ -1,5 +1,9 @@
 name: Python bindings checks (client)
+
 on: workflow_call
+
+env:
+  CARGO_INCREMENTAL: 0
 
 jobs:
   test:
@@ -22,7 +26,7 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Set Up Python ${{ matrix.python }} and Pip Cache
+      - name: Set Up Python ${{ matrix.python-version }} and Pip Cache
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}

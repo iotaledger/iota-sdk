@@ -1,6 +1,9 @@
-name: Wasm bindings checks (client)
+name: Wasm bindings checks (wallet)
 
 on: workflow_call
+
+env:
+  CARGO_INCREMENTAL: 0
 
 jobs:
   test:
@@ -34,24 +37,39 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
-          cache-dependency-path: sdk/src/client/bindings/wasm/yarn.lock
+          cache-dependency-path: sdk/src/wallet/bindings/wasm/yarn.lock
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
         with:
-          cache-directories: "sdk/src/client/bindings/wasm"
+          cache-directories: "sdk/src/wallet/bindings/wasm"
 
       - name: Run Yarn Install
-        working-directory: sdk/src/client/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn install
 
       - name: Run Yarn Build
-        working-directory: sdk/src/client/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn build
 
+      - name: Start private tangle
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        uses: "./.github/actions/private-tangle/setup"
+
       - name: Run Yarn Test
-        working-directory: sdk/src/client/bindings/wasm/
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn test
+
+      - name: Run Yarn Test
+        if: ${{ !startsWith(matrix.os, 'ubuntu') }}
+        working-directory: sdk/src/wallet/bindings/wasm/
+        # Only run test that doesn't require a node because we can't use the private tangle script on macos and windows
+        run: yarn test -t 'Wallet methods'
+
+      - name: Tear down private tangle
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        uses: "./.github/actions/private-tangle/tear-down"
 
   lint:
     name: Lint
@@ -66,15 +84,15 @@ jobs:
         uses: actions/setup-node@v2
         with:
           cache: yarn
-          cache-dependency-path: sdk/src/client/bindings/wasm/yarn.lock
+          cache-dependency-path: sdk/src/wallet/bindings/wasm/yarn.lock
           node-version: 18.x
 
       - name: Install Dependencies
-        working-directory: sdk/src/client/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn install --ignore-scripts
 
       - name: Lint
-        working-directory: sdk/src/client/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn lint
 
   check-format:
@@ -90,13 +108,13 @@ jobs:
         uses: actions/setup-node@v2
         with:
           cache: yarn
-          cache-dependency-path: sdk/src/client/bindings/wasm/yarn.lock
+          cache-dependency-path: sdk/src/wallet/bindings/wasm/yarn.lock
           node-version: 18.x
 
       - name: Install Dependencies
-        working-directory: sdk/src/client/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn install --ignore-scripts
 
       - name: Format
-        working-directory: sdk/src/client/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn format-check

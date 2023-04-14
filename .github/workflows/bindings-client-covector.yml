@@ -2,6 +2,9 @@ name: Covector bindings checks (client)
 
 on: workflow_call
 
+env:
+  CARGO_INCREMENTAL: 0
+
 jobs:
   status:
     name: Status
