@@ -26,7 +26,7 @@ use primitive_types::U256;
 
 use crate::{method::AccountMethod, Response, Result};
 
-pub(crate) async fn call_account_method(account: &AccountHandle, method: AccountMethod) -> Result<Response> {
+pub(crate) async fn call_account_method_internal(account: &AccountHandle, method: AccountMethod) -> Result<Response> {
     let response = match method {
         AccountMethod::BurnNativeToken {
             token_id,

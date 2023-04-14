@@ -3,19 +3,34 @@
 
 use iota_sdk::{
     client::{secret::SecretManager, Client},
-    wallet::wallet::Wallet,
+    wallet::{wallet::Wallet, AccountHandle},
 };
 
 use crate::{
-    method::{ClientMethod, SecretManagerMethod, WalletMethod},
+    method::{AccountMethod, ClientMethod, SecretManagerMethod, WalletMethod},
     method_handler::{
-        client::call_client_method_internal, secret_manager::call_secret_manager_method_internal,
-        utils::call_utils_method_internal, wallet::call_wallet_method_internal,
+        account::call_account_method_internal, client::call_client_method_internal,
+        secret_manager::call_secret_manager_method_internal, utils::call_utils_method_internal,
+        wallet::call_wallet_method_internal,
     },
     panic::convert_async_panics,
     response::Response,
     UtilsMethod,
 };
+
+/// Call an account method.
+pub async fn call_account_method(account: &AccountHandle, method: AccountMethod) -> Response {
+    log::debug!("Account method: {method:?}");
+    let result = convert_async_panics(|| async { call_account_method_internal(account, method).await }).await;
+
+    let response = match result {
+        Ok(r) => r,
+        Err(e) => Response::Error(e),
+    };
+
+    log::debug!("Account response: {response:?}");
+    response
+}
 
 /// Call a client method.
 pub async fn call_client_method(client: &Client, method: ClientMethod) -> Response {

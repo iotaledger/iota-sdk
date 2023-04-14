@@ -7,11 +7,12 @@ use iota_sdk::wallet::{message_interface::dtos::AccountDto, wallet::Wallet};
 #[cfg(feature = "stronghold")]
 use zeroize::Zeroize;
 
-use crate::{method::WalletMethod, method_handler::account::call_account_method, response::Response, Result};
+use super::account::call_account_method_internal;
+use crate::{method::WalletMethod, response::Response, Result};
 
 /// Call a wallet method.
 pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> Result<Response> {
-    match method {
+    let response = match method {
         WalletMethod::CreateAccount { alias, bech32_hrp } => {
             let mut builder = wallet.create_account();
 
@@ -26,15 +27,15 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             match builder.finish().await {
                 Ok(account_handle) => {
                     let account = account_handle.read().await;
-                    Ok(Response::Account(AccountDto::from(&*account)))
+                    Response::Account(AccountDto::from(&*account))
                 }
-                Err(e) => Err(e.into()),
+                Err(e) => return Err(e.into()),
             }
         }
         WalletMethod::GetAccount { account_id } => {
             let account_handle = wallet.get_account(account_id.clone()).await?;
             let account = account_handle.read().await;
-            Ok(Response::Account(AccountDto::from(&*account)))
+            Response::Account(AccountDto::from(&*account))
         }
         WalletMethod::GetAccountIndexes => {
             let accounts = wallet.get_accounts().await?;
@@ -42,7 +43,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             for account in accounts.iter() {
                 account_indexes.push(*account.read().await.index());
             }
-            Ok(Response::AccountIndexes(account_indexes))
+            Response::AccountIndexes(account_indexes)
         }
         WalletMethod::GetAccounts => {
             let account_handles = wallet.get_accounts().await?;
@@ -51,16 +52,16 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 let account = account_handle.read().await;
                 accounts.push(AccountDto::from(&*account));
             }
-            Ok(Response::Accounts(accounts))
+            Response::Accounts(accounts)
         }
         WalletMethod::CallAccountMethod { account_id, method } => {
             let account_handle = wallet.get_account(account_id).await?;
-            call_account_method(&account_handle, method).await
+            call_account_method_internal(&account_handle, method).await?
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::Backup { destination, password } => {
             wallet.backup(destination, password).await?;
-            Ok(Response::Ok)
+            Response::Ok
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::ChangeStrongholdPassword {
@@ -72,17 +73,17 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 .await?;
             current_password.zeroize();
             new_password.zeroize();
-            Ok(Response::Ok)
+            Response::Ok
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::ClearStrongholdPassword => {
             wallet.clear_stronghold_password().await?;
-            Ok(Response::Ok)
+            Response::Ok
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::IsStrongholdPasswordAvailable => {
             let is_available = wallet.is_stronghold_password_available().await?;
-            Ok(Response::Bool(is_available))
+            Response::Bool(is_available)
         }
         WalletMethod::RecoverAccounts {
             account_start_index,
@@ -98,11 +99,11 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 let account = account_handle.read().await;
                 accounts.push(AccountDto::from(&*account));
             }
-            Ok(Response::Accounts(accounts))
+            Response::Accounts(accounts)
         }
         WalletMethod::RemoveLatestAccount => {
             wallet.remove_latest_account().await?;
-            Ok(Response::Ok)
+            Response::Ok
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::RestoreBackup {
@@ -113,16 +114,16 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             wallet
                 .restore_backup(source, password, ignore_if_coin_type_mismatch)
                 .await?;
-            Ok(Response::Ok)
+            Response::Ok
         }
         WalletMethod::SetClientOptions { client_options } => {
             wallet.set_client_options(*client_options).await?;
-            Ok(Response::Ok)
+            Response::Ok
         }
         #[cfg(feature = "ledger_nano")]
         WalletMethod::GetLedgerNanoStatus => {
             let ledger_nano_status = wallet.get_ledger_nano_status().await?;
-            Ok(Response::LedgerNanoStatus(ledger_nano_status))
+            Response::LedgerNanoStatus(ledger_nano_status)
         }
         WalletMethod::GenerateAddress {
             account_index,
@@ -140,13 +141,13 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 None => wallet.get_bech32_hrp().await?,
             };
 
-            Ok(Response::Bech32Address(address.to_bech32(bech32_hrp)))
+            Response::Bech32Address(address.to_bech32(bech32_hrp))
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::SetStrongholdPassword { mut password } => {
             wallet.set_stronghold_password(&password).await?;
             password.zeroize();
-            Ok(Response::Ok)
+            Response::Ok
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::SetStrongholdPasswordClearInterval {
@@ -154,12 +155,12 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         } => {
             let duration = interval_in_milliseconds.map(Duration::from_millis);
             wallet.set_stronghold_password_clear_interval(duration).await?;
-            Ok(Response::Ok)
+            Response::Ok
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::StoreMnemonic { mnemonic } => {
             wallet.store_mnemonic(mnemonic).await?;
-            Ok(Response::Ok)
+            Response::Ok
         }
         WalletMethod::StartBackgroundSync {
             options,
@@ -167,25 +168,26 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         } => {
             let duration = interval_in_milliseconds.map(Duration::from_millis);
             wallet.start_background_syncing(options, duration).await?;
-            Ok(Response::Ok)
+            Response::Ok
         }
         WalletMethod::StopBackgroundSync => {
             wallet.stop_background_syncing().await?;
-            Ok(Response::Ok)
+            Response::Ok
         }
         #[cfg(feature = "events")]
         WalletMethod::EmitTestEvent { event } => {
             wallet.emit_test_event(event.clone()).await?;
-            Ok(Response::Ok)
+            Response::Ok
         }
         #[cfg(feature = "events")]
         WalletMethod::ClearListeners { event_types } => {
             wallet.clear_listeners(event_types).await;
-            Ok(Response::Ok)
+            Response::Ok
         }
         WalletMethod::UpdateNodeAuth { url, auth } => {
             wallet.update_node_auth(url, auth).await?;
-            Ok(Response::Ok)
+            Response::Ok
         }
-    }
+    };
+    Ok(response)
 }
