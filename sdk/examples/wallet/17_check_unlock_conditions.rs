@@ -5,7 +5,10 @@
 // In this example we check if an output has only an address unlock condition and that the address is from the account.
 
 use iota_sdk::{
-    types::block::{address::Bech32, output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition}},
+    types::block::{
+        address::Bech32,
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
+    },
     wallet::{Result, Wallet},
 };
 
