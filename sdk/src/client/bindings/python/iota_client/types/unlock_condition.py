@@ -12,7 +12,7 @@ class UnlockConditionType(Enum):
 
 
 class UnlockCondition():
-    def __init__(self, type=None, address=None, amount=None, unix_time=None, return_address=None) -> None:
+    def __init__(self, type=None, address=None, amount=None, unix_time=None, return_address=None):
         """Initialize an UnlockCondition
 
         Parameters
