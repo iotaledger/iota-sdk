@@ -25,7 +25,7 @@ use crate::{
             types::{LedgerApp, LedgerDeviceType},
             LedgerNanoStatus, PreparedTransactionData,
         },
-        Error, Result,
+        Error,
     },
     types::block::{
         address::{Address, AliasAddress, Ed25519Address, NftAddress},
@@ -47,14 +47,14 @@ pub const HARDENED: u32 = 0x8000_0000;
 pub struct LedgerSecretManager {
     /// Specifies if a real Ledger hardware is used or only a simulator is used.
     pub is_simulator: bool,
-
     /// Mutex to prevent multiple simultaneous requests to a ledger.
     pub mutex: Mutex<()>,
 }
 
 impl TryFrom<u8> for LedgerDeviceType {
     type Error = Error;
-    fn try_from(device: u8) -> Result<Self> {
+
+    fn try_from(device: u8) -> Result<Self, Self::Error> {
         match device {
             0 => Ok(Self::LedgerNanoS),
             1 => Ok(Self::LedgerNanoX),
@@ -66,6 +66,8 @@ impl TryFrom<u8> for LedgerDeviceType {
 
 #[async_trait]
 impl SecretManage for LedgerSecretManager {
+    type Error = Error;
+
     async fn generate_addresses(
         &self,
         // https://github.com/satoshilabs/slips/blob/master/slip-0044.md
@@ -75,7 +77,7 @@ impl SecretManage for LedgerSecretManager {
         address_indexes: Range<u32>,
         internal: bool,
         options: Option<GenerateAddressOptions>,
-    ) -> crate::client::Result<Vec<Address>> {
+    ) -> Result<Vec<Address>, Self::Error> {
         let bip32_account = account_index | HARDENED;
 
         let bip32 = LedgerBIP32Index {
@@ -105,8 +107,8 @@ impl SecretManage for LedgerSecretManager {
         Ok(ed25519_addresses)
     }
 
-    async fn sign_ed25519(&self, _msg: &[u8], _chain: &Chain) -> crate::client::Result<Ed25519Signature> {
-        Err(crate::client::Error::SecretManagerMismatch)
+    async fn sign_ed25519(&self, _msg: &[u8], _chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
+        Err(Error::SecretManagerMismatch)
     }
 }
 
@@ -145,7 +147,7 @@ impl SecretManageExt for LedgerSecretManager {
         &self,
         prepared_transaction: &PreparedTransactionData,
         time: Option<u32>,
-    ) -> crate::client::Result<Unlocks> {
+    ) -> Result<Unlocks, <Self as SecretManage>::Error> {
         let mut input_bip32_indices: Vec<LedgerBIP32Index> = Vec::new();
         let mut coin_type: Option<u32> = None;
         let mut account_index: Option<u32> = None;

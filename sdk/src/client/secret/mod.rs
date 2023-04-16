@@ -56,6 +56,8 @@ use crate::{
 /// The secret manager interface.
 #[async_trait]
 pub trait SecretManage: Send + Sync {
+    type Error;
+
     /// Generates addresses.
     ///
     /// For `coin_type`, see also <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>.
@@ -66,13 +68,13 @@ pub trait SecretManage: Send + Sync {
         address_indexes: Range<u32>,
         internal: bool,
         options: Option<GenerateAddressOptions>,
-    ) -> crate::client::Result<Vec<Address>>;
+    ) -> Result<Vec<Address>, Self::Error>;
 
     /// Signs `msg` using the given [`Chain`].
-    async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> crate::client::Result<Ed25519Signature>;
+    async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error>;
 
     /// Signs `essence_hash` using the given `chain`, returning an [`Unlock`].
-    async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: &Chain) -> crate::client::Result<Unlock> {
+    async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: &Chain) -> Result<Unlock, Self::Error> {
         Ok(Unlock::Signature(SignatureUnlock::new(Signature::Ed25519(
             self.sign_ed25519(essence_hash, chain).await?,
         ))))
