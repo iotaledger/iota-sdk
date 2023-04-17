@@ -7,14 +7,17 @@ use primitive_types::U256;
 
 use crate::{
     types::block::output::{
-        unlock_condition::UnlockCondition, AliasId, FoundryId, FoundryOutput, NativeTokensBuilder, NftId, Output,
-        OutputId, Rent,
+        unlock_condition::UnlockCondition, AliasId, AliasOutput, FoundryId, FoundryOutput, NativeTokensBuilder, NftId,
+        Output, OutputId, Rent,
     },
-    wallet::account::{
-        handle::AccountHandle,
-        operations::helpers::time::can_output_be_unlocked_forever_from_now_on,
-        types::{AccountBalance, BaseCoinBalance, NativeTokenBalance, RequiredStorageDeposit},
-        OutputsToClaim,
+    wallet::{
+        account::{
+            handle::AccountHandle,
+            operations::helpers::time::can_output_be_unlocked_forever_from_now_on,
+            types::{AccountBalance, BaseCoinBalance, NativeTokenBalance, RequiredStorageDeposit},
+            OutputsToClaim,
+        },
+        Result,
     },
 };
 
@@ -35,11 +38,48 @@ pub struct AccountBalanceBuilder {
 }
 
 impl AccountBalanceBuilder {
+    fn add_alias(&mut self, output: &AliasOutput, output_id: &OutputId, rent: u64, locked: bool) -> Result<()> {
+        // Add amount
+        self.base_coin.total += output.amount();
+        // Add storage deposit
+        self.required_storage_deposit.alias += rent;
+        if !locked {
+            self.total_rent_amount += rent;
+        }
+
+        // Add native tokens
+        self.total_native_tokens
+            .add_native_tokens(output.native_tokens().clone())?;
+
+        let alias_id = output.alias_id_non_null(output_id);
+        self.aliases.push(alias_id);
+
+        Ok(())
+    }
+
+    fn add_foundry(&mut self, output: &FoundryOutput, rent: u64, locked: bool) -> Result<()> {
+        // Add amount
+        self.base_coin.total += output.amount();
+        // Add storage deposit
+        self.required_storage_deposit.foundry += rent;
+        if !locked {
+            self.total_rent_amount += rent;
+        }
+
+        // Add native tokens
+        self.total_native_tokens
+            .add_native_tokens(output.native_tokens().clone())?;
+
+        self.foundries.push(output.id());
+
+        Ok(())
+    }
+
     fn build(
         mut self,
         // TODO that way ?
         native_token_foundries: &HashMap<FoundryId, FoundryOutput>,
-    ) -> crate::wallet::Result<AccountBalance> {
+    ) -> Result<AccountBalance> {
         self.locked_amount += self.total_rent_amount;
 
         for native_token in self.total_native_tokens.finish_vec()? {
@@ -85,7 +125,7 @@ impl AccountBalanceBuilder {
 
 impl AccountHandle {
     /// Get the AccountBalance
-    pub async fn balance(&self) -> crate::wallet::Result<AccountBalance> {
+    pub async fn balance(&self) -> Result<AccountBalance> {
         log::debug!("[BALANCE] get balance");
         let mut balance_builder = AccountBalanceBuilder::default();
         #[cfg(feature = "participation")]
@@ -132,39 +172,8 @@ impl AccountHandle {
             // Add alias and foundry outputs here because they can't have a [`StorageDepositReturnUnlockCondition`]
             // or time related unlock conditions
             match output {
-                Output::Alias(output) => {
-                    // Add amount
-                    balance_builder.base_coin.total += output.amount();
-                    // Add storage deposit
-                    balance_builder.required_storage_deposit.alias += rent;
-                    if !locked {
-                        balance_builder.total_rent_amount += rent;
-                    }
-
-                    // Add native tokens
-                    balance_builder
-                        .total_native_tokens
-                        .add_native_tokens(output.native_tokens().clone())?;
-
-                    let alias_id = output.alias_id_non_null(output_id);
-                    balance_builder.aliases.push(alias_id);
-                }
-                Output::Foundry(output) => {
-                    // Add amount
-                    balance_builder.base_coin.total += output.amount();
-                    // Add storage deposit
-                    balance_builder.required_storage_deposit.foundry += rent;
-                    if !locked {
-                        balance_builder.total_rent_amount += rent;
-                    }
-
-                    // Add native tokens
-                    balance_builder
-                        .total_native_tokens
-                        .add_native_tokens(output.native_tokens().clone())?;
-
-                    balance_builder.foundries.push(output.id());
-                }
+                Output::Alias(output) => balance_builder.add_alias(output, output_id, rent, locked)?,
+                Output::Foundry(output) => balance_builder.add_foundry(output, rent, locked)?,
                 _ => {
                     // If there is only an [AddressUnlockCondition], then we can spend the output at any time without
                     // restrictions
