@@ -3,33 +3,8 @@ name: Covector bindings checks (client)
 on:
   push:
     branches: [develop, production]
-    paths:
-      - ".github/actions/**"
-      - "**.rs" # Include all rust files
-      - "**Cargo.toml" # Include all Cargo.toml files
-      - "**Cargo.lock" # Include all Cargo.lock files
-      - "!**/examples/**" # Exclude all examples
-      - "!**/tests/**" # Exclude all tests
-      - "!cli/**" # Exclude CLI
-      - "!**/bindings/**" # Exclude all bindings
-      - "sdk/src/client/bindings/**"
-      - ".github/workflows/bindings-client-covector.yml"
-  pull_request:
-    branches: [develop, production]
-    paths:
-      - ".github/actions/**"
-      - "**.rs" # Include all rust files
-      - "**Cargo.toml" # Include all Cargo.toml files
-      - "**Cargo.lock" # Include all Cargo.lock files
-      - "!**/examples/**" # Exclude all examples
-      - "!**/tests/**" # Exclude all tests
-      - "!cli/**" # Exclude CLI
-      - "!**/bindings/**" # Exclude all bindings
-      - "sdk/src/client/bindings/**"
-      - ".github/workflows/bindings-client-covector.yml"
-  schedule:
-    - cron: "0 1 * * *"
-  workflow_dispatch:
+    paths-ignore:
+      - "documentation/**"
 
 env:
   CARGO_INCREMENTAL: 0
