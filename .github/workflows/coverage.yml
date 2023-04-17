@@ -40,9 +40,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install libudev-dev libusb-1.0-0-dev
 
-      - name: Install binutils and rustfilt
-        run: cargo install cargo-binutils rustfilt
-
       - name: Install llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
 
@@ -53,7 +50,7 @@ jobs:
         uses: "./.github/actions/private-tangle/setup"
 
       - name: Collect coverage data
-        run: |
+        run: >
           cargo llvm-cov nextest 
             --lcov 
             --output-path coverage.info 
