@@ -106,13 +106,13 @@ jobs:
           chmod +x gradlew
           ./gradlew build jarWithoutNativeLibs
 
-      - name: Build JAR for aarch64-apple-darwin target
-        if: matrix.os == 'macos-latest'
+      - name: Build JAR for linux-x86_64 target
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
         shell: bash
         working-directory: sdk/src/wallet/bindings/java/
         run: |
-          rustup target add aarch64-apple-darwin
-          ./gradlew build -PbuildTarget=aarch64-apple-darwin
+          rustup target add linux-x86_64
+          ./gradlew build -PbuildTarget=linux-x86_64
 
       - name: Get filename for tag construction
         shell: bash
@@ -143,8 +143,8 @@ jobs:
         working-directory: sdk/src/wallet/bindings/java/
         run: |
           ./gradlew publishToSonatype
-          if [ "$RUNNER_OS" == "macOS" ];
-          then ./gradlew publishToSonatype -PbuildTarget=aarch64-apple-darwin
+          if [ "$RUNNER_OS" == "Linux" ];
+          then ./gradlew publishToSonatype -PbuildTarget=linux-x86_64
           fi
 
   release-android:
