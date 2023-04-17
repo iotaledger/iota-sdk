@@ -378,9 +378,59 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
             'options': options
         })
 
-    def build_and_post_block(self, secret_manager=None, options=None):
+    def build_and_post_block(self,
+                             secret_manager=None, 
+                             account_index=None,
+                             coin_type=None,
+                             custom_remainder_address=None,
+                             data=None,
+                             initial_address_index=None,
+                             input_range_start=None,
+                             input_range_end=None,
+                             inputs=None,
+                             output=None,
+                             outputs=None,
+                             tag=None):
         """Build and post a block.
+
+        Parameters
+        ----------
+        account_index : int
+        coin_type : 
+        custom_remainder_address : string
+        data : str
+        initial_address_index : int
+        input_range_start : int
+        input_range_end : int
+        inputs : Array of Inputs
+        output : Output
+        outputs : Array of Outputs
+        tag : string
+
+        Returns
+        -------
+        Block as dict
+
         """
+        options = dict(locals())
+
+        del options['self']
+        del options['secret_manager']
+
+        options = {k:v for k,v in options.items() if v != None}
+
+        if 'output' in options:
+            options['output'] = options.pop('output').as_dict()
+        
+        is_start_set = 'input_range_start' in options
+        is_end_set = 'input_range_end' in options
+        if is_start_set or is_end_set:
+            options['range'] = {}
+            if is_start_set:
+                options['range']['start'] = options.pop('start')
+            if is_end_set:
+                options['range']['end'] = options.pop('end')
+
         return self.send_message('buildAndPostBlock', {
             'secretManager': secret_manager,
             'options': options
@@ -855,5 +905,27 @@ class TokenScheme():
             config['minted_tokens'] = str(hex(config['minted_tokens']))
         if 'maximum_supply' in config:
             config['maximum_supply'] = str(hex(config['maximum_supply']))
+
+        return config
+
+class Output():
+    def __init__(self, address, amount):
+        """Initialise an Output
+
+        Parameters
+        ----------
+        address : string
+            Address of the output
+        amount : int
+            Amount of the output
+        """
+        self.address = address
+        self.amount = amount
+
+    def as_dict(self):
+        config = {k: v for k, v in self.__dict__.items() if v != None}
+
+        if 'amount' in config:
+            config['amount'] = str(config['amount'])
 
         return config
