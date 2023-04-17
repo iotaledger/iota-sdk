@@ -13,6 +13,7 @@ on:
       - "!cli/**" # Exclude CLI
       - "!**/bindings/**" # Exclude all bindings
       - "sdk/src/wallet/bindings/wasm/**"
+      - "sdk/src/wallet/bindings/nodejs/**"
       - ".github/workflows/bindings-wallet-wasm.yml"
   pull_request:
     branches: [develop, production]
@@ -26,6 +27,7 @@ on:
       - "!cli/**" # Exclude CLI
       - "!**/bindings/**" # Exclude all bindings
       - "sdk/src/wallet/bindings/wasm/**"
+      - "sdk/src/wallet/bindings/nodejs/**"
       - ".github/workflows/bindings-wallet-wasm.yml"
   schedule:
     - cron: "0 1 * * *"
