@@ -360,6 +360,9 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
 
         options = {k:v for k,v in options.items() if v != None}
 
+        if 'coin_type' in options:
+            options['coin_type'] = int(options.pop('coin_type'))
+
         is_start_set = 'start' in options
         is_end_set = 'end' in options
         if is_start_set or is_end_set:
@@ -378,9 +381,75 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
             'options': options
         })
 
-    def build_and_post_block(self, secret_manager=None, options=None):
+    def build_and_post_block(self,
+                             secret_manager=None, 
+                             account_index=None,
+                             coin_type=None,
+                             custom_remainder_address=None,
+                             data=None,
+                             initial_address_index=None,
+                             input_range_start=None,
+                             input_range_end=None,
+                             inputs=None,
+                             output=None,
+                             outputs=None,
+                             tag=None):
         """Build and post a block.
+
+        Parameters
+        ----------
+        account_index : int
+            Account Index
+        coin_type : int
+            Coin type. The CoinType enum can be used
+        custom_remainder_address : string
+            Address to send the remainder funds to
+        data : str
+            Hex encoded data
+        initial_address_index : int
+            Initial address index
+        input_range_start : int
+            Start of the input range
+        input_range_end : int
+            End of the input range
+        inputs : Array of Inputs
+            Inputs to use
+        output : AddressWithAmount
+            Address and amount to send to
+        outputs : Array of Outputs
+            Outputs to use
+        tag : string
+            Hex encoded tag
+
+        Returns
+        -------
+        Block as dict
+
         """
+        options = dict(locals())
+
+        del options['self']
+        del options['secret_manager']
+
+        options = {k:v for k,v in options.items() if v != None}
+
+        if 'output' in options:
+            options['output'] = options.pop('output').as_dict()
+
+        if 'coin_type' in options:
+            options['coin_type'] = int(options.pop('coin_type'))
+        
+        is_start_set = 'input_range_start' in options
+        is_end_set = 'input_range_end' in options
+        if is_start_set or is_end_set:
+            options['range'] = {}
+            if is_start_set:
+                options['range']['start'] = options.pop('start')
+            if is_end_set:
+                options['range']['end'] = options.pop('end')
+
+        options = humps.camelize(options)
+
         return self.send_message('buildAndPostBlock', {
             'secretManager': secret_manager,
             'options': options
@@ -527,6 +596,9 @@ class Node():
 class CoinType(Enum):
     IOTA = 4218
     SHIMMER = 4219
+
+    def __int__(self):
+        return self.value
 
 class UnlockConditionType(Enum):
     Address = 0
@@ -855,5 +927,27 @@ class TokenScheme():
             config['minted_tokens'] = str(hex(config['minted_tokens']))
         if 'maximum_supply' in config:
             config['maximum_supply'] = str(hex(config['maximum_supply']))
+
+        return config
+
+class AddressWithAmount():
+    def __init__(self, address, amount):
+        """Initialise an AddressWithAmount
+
+        Parameters
+        ----------
+        address : string
+            Address of the output
+        amount : int
+            Amount of the output
+        """
+        self.address = address
+        self.amount = amount
+
+    def as_dict(self):
+        config = {k: v for k, v in self.__dict__.items() if v != None}
+
+        if 'amount' in config:
+            config['amount'] = str(config['amount'])
 
         return config
