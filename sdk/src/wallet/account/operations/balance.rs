@@ -7,7 +7,8 @@ use primitive_types::U256;
 
 use crate::{
     types::block::output::{
-        unlock_condition::UnlockCondition, AliasId, FoundryId, NativeTokensBuilder, NftId, Output, OutputId, Rent,
+        unlock_condition::UnlockCondition, AliasId, FoundryId, FoundryOutput, NativeTokensBuilder, NftId, Output,
+        OutputId, Rent,
     },
     wallet::account::{
         handle::AccountHandle,
@@ -34,8 +35,44 @@ pub struct AccountBalanceBuilder {
 }
 
 impl AccountBalanceBuilder {
-    fn build(self) -> AccountBalance {
-        AccountBalance {
+    fn build(
+        mut self,
+        // TODO that way ?
+        native_token_foundries: &HashMap<FoundryId, FoundryOutput>,
+    ) -> crate::wallet::Result<AccountBalance> {
+        self.locked_amount += self.total_rent_amount;
+
+        // TODO remove clone
+        for native_token in self.total_native_tokens.clone().finish_vec()? {
+            // Check if some amount is currently locked
+            let locked_amount = self.locked_native_tokens.get(native_token.token_id());
+            let metadata = native_token_foundries
+                .get(&FoundryId::from(*native_token.token_id()))
+                .and_then(|foundry| foundry.immutable_features().metadata())
+                .cloned();
+
+            self.native_tokens.push(NativeTokenBalance {
+                token_id: *native_token.token_id(),
+                metadata,
+                total: native_token.amount(),
+                available: native_token.amount() - *locked_amount.unwrap_or(&U256::from(0u8)),
+            })
+        }
+
+        #[cfg(not(feature = "participation"))]
+        {
+            self.base_coin.available = self.base_coin.total.saturating_sub(locked_amount);
+        }
+        #[cfg(feature = "participation")]
+        {
+            self.base_coin.available = self
+                .base_coin
+                .total
+                .saturating_sub(self.locked_amount)
+                .saturating_sub(self.base_coin.voting_power);
+        }
+
+        Ok(AccountBalance {
             base_coin: self.base_coin,
             required_storage_deposit: self.required_storage_deposit,
             native_tokens: self.native_tokens,
@@ -43,7 +80,7 @@ impl AccountBalanceBuilder {
             aliases: self.aliases,
             foundries: self.foundries,
             potentially_locked_outputs: self.potentially_locked_outputs,
-        }
+        })
     }
 }
 
@@ -279,39 +316,6 @@ impl AccountHandle {
             balance_builder.total_rent_amount,
         );
 
-        balance_builder.locked_amount += balance_builder.total_rent_amount;
-
-        // TODO remove clone
-        for native_token in balance_builder.total_native_tokens.clone().finish_vec()? {
-            // Check if some amount is currently locked
-            let locked_amount = balance_builder.locked_native_tokens.get(native_token.token_id());
-            let metadata = account
-                .native_token_foundries
-                .get(&FoundryId::from(*native_token.token_id()))
-                .and_then(|foundry| foundry.immutable_features().metadata())
-                .cloned();
-
-            balance_builder.native_tokens.push(NativeTokenBalance {
-                token_id: *native_token.token_id(),
-                metadata,
-                total: native_token.amount(),
-                available: native_token.amount() - *locked_amount.unwrap_or(&U256::from(0u8)),
-            })
-        }
-
-        #[cfg(not(feature = "participation"))]
-        {
-            balance_builder.base_coin.available = balance_builder.base_coin.total.saturating_sub(locked_amount);
-        }
-        #[cfg(feature = "participation")]
-        {
-            balance_builder.base_coin.available = balance_builder
-                .base_coin
-                .total
-                .saturating_sub(balance_builder.locked_amount)
-                .saturating_sub(balance_builder.base_coin.voting_power);
-        }
-
-        Ok(balance_builder.build())
+        balance_builder.build(&account.native_token_foundries)
     }
 }
