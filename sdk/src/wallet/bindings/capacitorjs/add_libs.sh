@@ -3,7 +3,7 @@
 set -e
 rm -rf tmp && mkdir tmp && cd tmp
 echo Installing Java libraries
-# curl -SL --progress-bar --fail https://github.com/iotaledger/wallet.rs/releases/download/iota-wallet-java-1.0.0-rc.1-new/iota-wallet-1.0.0-rc.1-android.zip > iota-wallet-java.zip
+# curl -SL --progress-bar --fail https://github.com/iotaledger/wallet.rs/releases/download/iota-wallet-java-1.0.0-rc.3-new/iota-wallet-1.0.0-rc.3-android.zip > iota-wallet-java.zip
 curl -SL --progress-bar --fail https://files.iota.org/firefly/bindings/jniLibs-1.0.0-alpha.0.zip > iota-wallet-java.zip
 unzip iota-wallet-java.zip             
 rm -rf ../android/src/main/jniLibs
