@@ -24,21 +24,26 @@ async fn main() -> Result<()> {
         .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
+    println!("Preparing alias output transaction...");
+
     // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs
     let transaction = account.create_alias_output(None, None).await?;
-    println!("Transaction: {}", transaction.transaction_id);
-    println!(
-        "Block sent: {}/api/core/v2/blocks/{}",
-        &std::env::var("NODE_URL").unwrap(),
-        transaction.block_id.expect("no block created yet")
-    );
+    println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for transaction to get included
     account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
+    println!(
+        "Transaction included: {}/api/core/v2/blocks/{}",
+        &std::env::var("NODE_URL").unwrap(),
+        transaction.block_id.expect("no block created yet")
+    );
 
     account.sync(None).await?;
+    println!("Account synced");
+
+    println!("Preparing minting transaction...");
 
     let native_token_options = NativeTokenOptions {
         alias_id: None,
@@ -48,20 +53,21 @@ async fn main() -> Result<()> {
     };
 
     let mint_txn = account.mint_native_token(native_token_options, None).await?;
+    println!("Transaction sent: {}", mint_txn.transaction.transaction_id);
 
     // Wait for transaction to get included
     account
         .retry_transaction_until_included(&mint_txn.transaction.transaction_id, None, None)
         .await?;
-
-    // Ensure the account is synced after minting.
-    account.sync(None).await?;
-
-    println!("Transaction: {}", mint_txn.transaction.transaction_id);
     println!(
-        "Block sent: {}/api/core/v2/blocks/{}",
+        "Transaction included: {}/api/core/v2/blocks/{}",
         &std::env::var("NODE_URL").unwrap(),
         mint_txn.transaction.block_id.expect("no block created yet")
     );
+
+    // Ensure the account is synced after minting.
+    account.sync(None).await?;
+    println!("Account synced");
+
     Ok(())
 }
