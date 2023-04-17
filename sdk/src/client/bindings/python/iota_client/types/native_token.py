@@ -1,6 +1,6 @@
 class NativeToken():
     def __init__(self, id, amount):
-        """Initialise NativeToken
+        """Initialize NativeToken
 
         Parameters
         ----------

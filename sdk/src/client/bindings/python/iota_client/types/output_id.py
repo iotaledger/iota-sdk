@@ -10,6 +10,8 @@ class OutputId():
         if len(transaction_id) != 66:
             raise ValueError(
                 'transaction_id length must be 66 characters with 0x prefix')
+        if not transaction_id.startswith('0x'):
+            raise ValueError('transaction_id must start with 0x')
         # Validate that it has only valid hex characters
         int(transaction_id[2:], 16)
         if output_index not in range(0, 129):
@@ -26,6 +28,8 @@ class OutputId():
         if len(output_id) != 70:
             raise ValueError(
                 'output_id length must be 70 characters with 0x prefix')
+        if not output_id.startswith('0x'):
+            raise ValueError('transaction_id must start with 0x')
         # Validate that it has only valid hex characters
         int(output_id[2:], 16)
         obj.output_id = output_id

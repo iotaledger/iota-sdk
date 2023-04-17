@@ -1,6 +1,6 @@
 class TokenScheme():
     def __init__(self, melted_tokens=None, minted_tokens=None, maximum_supply=None):
-        """Initialise TokenScheme
+        """Initialize TokenScheme
 
         Parameters
         ----------

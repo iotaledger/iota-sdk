@@ -10,7 +10,7 @@ class FeatureType(Enum):
 
 class Feature():
     def __init__(self, type, sender=None, issuer=None, data=None, tag=None):
-        """Initialise a feature
+        """Initialize a feature
 
         Parameters
         ----------
@@ -47,7 +47,7 @@ class Feature():
 
 class SenderFeature(Feature):
     def __init__(self, sender):
-        """Initialise a SenderFeature
+        """Initialize a SenderFeature
 
         Parameters
         ----------
@@ -59,7 +59,7 @@ class SenderFeature(Feature):
 
 class IssuerFeature(Feature):
     def __init__(self, issuer):
-        """Initialise an IssuerFeature
+        """Initialize an IssuerFeature
 
         Parameters
         ----------
@@ -71,7 +71,7 @@ class IssuerFeature(Feature):
 
 class MetadataFeature(Feature):
     def __init__(self, data):
-        """Initialise a MetadataFeature
+        """Initialize a MetadataFeature
 
         Parameters
         ----------
@@ -83,7 +83,7 @@ class MetadataFeature(Feature):
 
 class TagFeature(Feature):
     def __init__(self, tag):
-        """Initialise a TagFeature
+        """Initialize a TagFeature
 
         Parameters
         ----------

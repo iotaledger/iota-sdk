@@ -83,6 +83,9 @@ class TestTypes(unittest.TestCase):
         transaction_id_missing_0x_prefix = '52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
         with self.assertRaises(ValueError):
             OutputId(transaction_id_missing_0x_prefix, output_index)
+        transaction_id__invalid_hex_prefix = '0052fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
+        with self.assertRaises(ValueError):
+            OutputId(transaction_id__invalid_hex_prefix, output_index)
         transaction_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
         with self.assertRaises(ValueError):
             OutputId(transaction_id_invalid_hex_char, output_index)
@@ -95,6 +98,9 @@ class TestTypes(unittest.TestCase):
         output_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
         with self.assertRaises(ValueError):
             OutputId.from_string(output_id_invalid_hex_char)
+        output_id_invalid_hex_prefix = '0052fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+        with self.assertRaises(ValueError):
+            OutputId.from_string(output_id_invalid_hex_prefix)
 
 
 def test_hex_utf8():
