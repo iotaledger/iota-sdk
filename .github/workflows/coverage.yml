@@ -57,7 +57,7 @@ jobs:
         uses: "./.github/actions/private-tangle/setup"
 
       - name: Collect coverage data
-        run: cargo llvm-cov nextest --lcov --output-path coverage/coverage.info --tests --package iota-sdk --all-features --run-ignored all -- --profile ci
+        run: cargo llvm-cov nextest --lcov --output-path coverage/coverage.info --tests --package iota-sdk --all-features --run-ignored all --hide-progress-bar --cargo-profile ci
 
       - name: Tear down private tangle
         if: always()

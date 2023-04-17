@@ -62,7 +62,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: nextest
-          args: run --tests --all-features --no-fail-fast --run-ignored ignored-only -- profile ci
+          args: run --tests --all-features --no-fail-fast --run-ignored ignored-only --hide-progress-bar --cargo-profile ci
 
       - name: Tear down private tangle
         if: always()
