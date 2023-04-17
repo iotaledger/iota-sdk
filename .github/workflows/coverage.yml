@@ -52,15 +52,15 @@ jobs:
       - name: Collect coverage data
         run: >
           cargo llvm-cov nextest 
-            --lcov 
-            --output-path coverage.info 
-            --tests 
-            --package iota-sdk 
-            --all-features 
-            --run-ignored all 
-            --hide-progress-bar 
-            --ignore-filename-regex "/.cargo|rustc|target|tests|/.rustup"
-            --cargo-profile ci
+          --lcov 
+          --output-path coverage.info 
+          --tests 
+          --package iota-sdk 
+          --all-features 
+          --run-ignored all 
+          --hide-progress-bar 
+          --ignore-filename-regex "/.cargo|rustc|target|tests|/.rustup"
+          --cargo-profile ci
 
       - name: Tear down private tangle
         if: always()
