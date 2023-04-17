@@ -9,8 +9,8 @@ use crate::types::block::address::Address;
 /// An address and its network type.
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct Bech32Address {
-    pub(crate) inner: Address,
     pub(crate) hrp: String,
+    pub(crate) inner: Address,
 }
 
 impl AsRef<Address> for Bech32Address {
