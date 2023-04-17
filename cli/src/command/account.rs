@@ -285,7 +285,7 @@ pub async fn burn_nft_command(account_handle: &AccountHandle, nft_id: String) ->
 pub async fn balance_command(account_handle: &AccountHandle) -> Result<(), Error> {
     let balance = account_handle.balance().await?;
     println_log_info!("{balance:#?}");
-    show_claimable_outputs(account_handle, &balance).await?;
+    print_claimable_outputs(account_handle, &balance).await?;
 
     Ok(())
 }
@@ -679,7 +679,7 @@ pub async fn sync_command(account_handle: &AccountHandle) -> Result<(), Error> {
     let balance = account_handle.sync(None).await?;
     println_log_info!("Synced.");
     println_log_info!("{balance:#?}");
-    show_claimable_outputs(account_handle, &balance).await?;
+    print_claimable_outputs(account_handle, &balance).await?;
 
     Ok(())
 }
@@ -844,7 +844,7 @@ async fn print_address(account_handle: &AccountHandle, address: &AccountAddress)
     Ok(())
 }
 
-async fn show_claimable_outputs(account_handle: &AccountHandle, balance: &AccountBalance) -> Result<(), Error> {
+async fn print_claimable_outputs(account_handle: &AccountHandle, balance: &AccountBalance) -> Result<(), Error> {
     println_log_info!("Claimable outputs: {}", balance.potentially_locked_outputs().len());
 
     for output_id in balance
