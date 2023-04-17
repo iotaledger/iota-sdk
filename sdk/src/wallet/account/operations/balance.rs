@@ -42,8 +42,7 @@ impl AccountBalanceBuilder {
     ) -> crate::wallet::Result<AccountBalance> {
         self.locked_amount += self.total_rent_amount;
 
-        // TODO remove clone
-        for native_token in self.total_native_tokens.clone().finish_vec()? {
+        for native_token in self.total_native_tokens.finish_vec()? {
             // Check if some amount is currently locked
             let locked_amount = self.locked_native_tokens.get(native_token.token_id());
             let metadata = native_token_foundries
