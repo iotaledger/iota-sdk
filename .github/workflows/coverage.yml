@@ -53,6 +53,9 @@ jobs:
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
 
+      - name: Create coverage dir
+        run: bash ./.github/scripts/coverage_dir.sh
+
       - name: Start private tangle
         uses: "./.github/actions/private-tangle/setup"
 
