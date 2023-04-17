@@ -109,17 +109,17 @@ impl Address {
 
     /// Tries to create an [`Address`] from a bech32 encoded string.
     pub fn try_from_bech32<T: AsRef<str>>(address: T) -> Result<Self, Error> {
-        Self::try_from_bech32_with_hrp(address).map(|res| res.0)
+        Self::try_from_bech32_with_hrp(address).map(|res| res.1)
     }
 
     /// Tries to create an [`Address`] from a bech32 encoded string, also returns the HRP.
-    pub fn try_from_bech32_with_hrp<T: AsRef<str>>(address: T) -> Result<(Self, String), Error> {
+    pub fn try_from_bech32_with_hrp<T: AsRef<str>>(address: T) -> Result<(String, Self), Error> {
         match ::bech32::decode(address.as_ref()) {
             Ok((hrp, data, _)) => {
                 let bytes = Vec::<u8>::from_base32(&data).map_err(|_| Error::InvalidAddress)?;
                 Self::unpack_verified(bytes.as_slice(), &())
                     .map_err(|_| Error::InvalidAddress)
-                    .map(|address| (address, hrp))
+                    .map(|address| (hrp, address))
             }
             Err(_) => Err(Error::InvalidAddress),
         }

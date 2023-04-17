@@ -70,7 +70,7 @@ impl Client {
 
                 let outputs_chunks = basic_outputs_responses.chunks(INPUT_COUNT_MAX.into());
 
-                let (consolidation_address, bech32_hrp) = Address::try_from_bech32_with_hrp(&consolidation_address)?;
+                let (bech32_hrp, consolidation_address) = Address::try_from_bech32_with_hrp(&consolidation_address)?;
                 self.bech32_hrp_matches(&bech32_hrp).await?;
 
                 for chunk in outputs_chunks {

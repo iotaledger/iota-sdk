@@ -114,11 +114,11 @@ impl AccountHandle {
             expiration,
         } in addresses_with_amount
         {
-            let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
+            let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
             self.client.bech32_hrp_matches(&bech32_hrp).await?;
             let return_address = return_address
                 .map(|address| {
-                    let (address, hrp) = Address::try_from_bech32_with_hrp(address)?;
+                    let (hrp, address) = Address::try_from_bech32_with_hrp(address)?;
                     if bech32_hrp != hrp {
                         Err(crate::client::Error::InvalidBech32Hrp {
                             provided: hrp,

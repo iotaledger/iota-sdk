@@ -619,7 +619,7 @@ pub async fn send_native_token_command(
         let rent_structure = account_handle.client().get_rent_structure().await?;
         let token_supply = account_handle.client().get_token_supply().await?;
 
-        let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
+        let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
         account_handle.client().bech32_hrp_matches(&bech32_hrp).await?;
 
         let outputs = vec![

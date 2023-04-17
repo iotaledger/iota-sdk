@@ -69,7 +69,7 @@ impl AccountHandle {
         let mut outputs = Vec::new();
 
         for address_and_nft_id in addresses_nft_ids {
-            let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address_and_nft_id.address)?;
+            let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address_and_nft_id.address)?;
             self.client.bech32_hrp_matches(&bech32_hrp).await?;
 
             // Find nft output from the inputs
