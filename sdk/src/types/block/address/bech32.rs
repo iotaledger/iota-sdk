@@ -23,7 +23,7 @@ impl AsRef<Address> for Bech32Address {
 }
 
 impl FromStr for Bech32Address {
-    type Err = crate::wallet::Error;
+    type Err = crate::types::block::Error;
 
     fn from_str(address: &str) -> Result<Self, Self::Err> {
         let (address, hrp) = Address::try_from_bech32_with_hrp(address)?;
@@ -44,7 +44,7 @@ impl Bech32Address {
     }
 
     /// Parses a bech32 address string.
-    pub fn try_from_bech32<A: AsRef<str>>(address: A) -> crate::wallet::Result<Self> {
+    pub fn try_from_bech32<A: AsRef<str>>(address: A) -> Result<Self, crate::types::block::Error> {
         let (address, hrp) = Address::try_from_bech32_with_hrp(address)?;
 
         Ok(Self::new(address, hrp))
