@@ -399,17 +399,27 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
         Parameters
         ----------
         account_index : int
+            Account Index
         coin_type : int
             Coin type. The CoinType enum can be used
         custom_remainder_address : string
+            Address to send the remainder funds to
         data : str
+            Hex encoded data
         initial_address_index : int
+            Initial address index
         input_range_start : int
+            Start of the input range
         input_range_end : int
+            End of the input range
         inputs : Array of Inputs
+            Inputs to use
         output : AddressWithAmount
+            Address and amount to send to
         outputs : Array of Outputs
+            Outputs to use
         tag : string
+            Hex encoded tag
 
         Returns
         -------
