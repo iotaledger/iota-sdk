@@ -16,7 +16,7 @@ use crate::wallet::events::EventEmitter;
 use crate::wallet::storage::manager::StorageManagerHandle;
 use crate::{
     client::secret::{SecretManage, SecretManager},
-    types::block::address::{Address, Bech32},
+    types::block::address::{Address, Bech32Address},
     wallet::{
         account::{handle::AccountHandle, types::AccountAddress, Account},
         ClientOptions, Error,
@@ -144,7 +144,7 @@ impl AccountBuilder {
                     // Get bech32_hrp from address
                     if let Some(address) = first_account_addresses.first() {
                         if bech32_hrp.is_none() {
-                            bech32_hrp = Some(address.address.bech32_hrp.clone());
+                            bech32_hrp = Some(address.address.hrp.clone());
                         }
                     }
                 }
@@ -161,7 +161,7 @@ impl AccountBuilder {
                     get_first_public_address(&self.secret_manager, self.coin_type, account_index).await?;
 
                 let first_public_account_address = AccountAddress {
-                    address: Bech32::new(first_public_address, bech32_hrp),
+                    address: Bech32Address::new(first_public_address, bech32_hrp),
                     key_index: 0,
                     internal: false,
                     used: false,

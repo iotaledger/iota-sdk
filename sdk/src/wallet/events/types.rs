@@ -9,7 +9,7 @@ use crate::{
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
-            address::Bech32,
+            address::Bech32Address,
             payload::transaction::{dto::TransactionPayloadDto, TransactionId},
         },
     },
@@ -113,8 +113,8 @@ pub enum TransactionProgressEvent {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct AddressConsolidationNeeded {
     /// The associated address.
-    #[serde(with = "crate::types::block::address::bech_serde")]
-    pub address: Bech32,
+    #[serde(with = "crate::types::block::address::bech32")]
+    pub address: Bech32Address,
 }
 
 /// Address event data.
