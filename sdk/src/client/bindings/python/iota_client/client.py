@@ -407,7 +407,7 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
         input_range_start : int
         input_range_end : int
         inputs : Array of Inputs
-        output : Output
+        output : AddressWithAmount
         outputs : Array of Outputs
         tag : string
 
@@ -920,9 +920,9 @@ class TokenScheme():
 
         return config
 
-class Output():
+class AddressWithAmount():
     def __init__(self, address, amount):
-        """Initialise an Output
+        """Initialise an AddressWithAmount
 
         Parameters
         ----------
