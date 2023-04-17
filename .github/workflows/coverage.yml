@@ -3,15 +3,15 @@ name: Test coverage
 on:
   push:
     branches: [develop, production, chore/ci/rework]
-    # paths:
-    #   - ".github/workflows/coverage.yml"
-    #   - ".github/actions/**"
-    #   - "coverage.sh"
-    #   - "**.rs" # Include all rust files
-    #   - "**Cargo.toml" # Include all Cargo.toml files
-    #   - "**Cargo.lock" # Include all Cargo.lock files
-    #   - "!**/bindings/**" # Exclude all bindings
-    #   - "!cli/**" # Exclude CLI
+    paths:
+      - ".github/workflows/coverage.yml"
+      - ".github/actions/**"
+      - "coverage.sh"
+      - "**.rs" # Include all rust files
+      - "**Cargo.toml" # Include all Cargo.toml files
+      - "**Cargo.lock" # Include all Cargo.lock files
+      - "!**/bindings/**" # Exclude all bindings
+      - "!cli/**" # Exclude CLI
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -53,7 +53,17 @@ jobs:
         uses: "./.github/actions/private-tangle/setup"
 
       - name: Collect coverage data
-        run: cargo llvm-cov nextest --lcov --output-path coverage.info --tests --package iota-sdk --all-features --run-ignored all --hide-progress-bar --cargo-profile ci
+        run: |
+          cargo llvm-cov nextest 
+            --lcov 
+            --output-path coverage.info 
+            --tests 
+            --package iota-sdk 
+            --all-features 
+            --run-ignored all 
+            --hide-progress-bar 
+            --ignore-filename-regex "/.cargo|rustc|target|tests|/.rustup"
+            --cargo-profile ci
 
       - name: Tear down private tangle
         if: always()
