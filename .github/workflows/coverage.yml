@@ -13,9 +13,6 @@ on:
       - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
 
-env:
-  CARGO_INCREMENTAL: 0
-
 jobs:
   collect-coverage:
     runs-on: ubuntu-latest
@@ -60,7 +57,7 @@ jobs:
         uses: "./.github/actions/private-tangle/setup"
 
       - name: Collect coverage data
-        run: cargo llvm-cov nextest --lcov --output-path coverage/coverage.info --tests --package iota-sdk --all-features --run-ignored all
+        run: cargo llvm-cov nextest --lcov --output-path coverage/coverage.info --tests --package iota-sdk --all-features --run-ignored all -- --profile ci
 
       - name: Tear down private tangle
         if: always()

@@ -20,9 +20,6 @@ on:
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/bindings/**" # Exclude all bindings
 
-env:
-  CARGO_INCREMENTAL: 0
-
 jobs:
   crate:
     runs-on: ${{ matrix.os }}
@@ -57,4 +54,4 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: nextest
-          args: run --all-features
+          args: run --all-features --no-fail-fast -- --profile ci

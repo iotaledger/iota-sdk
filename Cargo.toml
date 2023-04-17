@@ -21,6 +21,7 @@ panic = "abort"
 [profile.ci]
 inherits = "dev"
 debug = 0
+incremental = false
 
 [profile.release]
 panic = "abort"
