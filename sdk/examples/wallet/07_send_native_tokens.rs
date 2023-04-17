@@ -57,6 +57,11 @@ async fn main() -> Result<()> {
             transaction.block_id.expect("no block created yet")
         );
 
+        account
+            .retry_transaction_until_included(&transaction.transaction_id, None, None)
+            .await?;
+        account.sync(None).await?;
+
         // Send native tokens together with the required storage deposit
         let rent_structure = account.client().get_rent_structure().await?;
 
@@ -68,6 +73,7 @@ async fn main() -> Result<()> {
         ];
 
         let transaction = account.send(outputs, None).await?;
+        println!("Transaction: {}", transaction.transaction_id);
 
         // Wait for transaction to get included
         account
@@ -80,6 +86,8 @@ async fn main() -> Result<()> {
             &std::env::var("NODE_URL").unwrap(),
             transaction.block_id.expect("no block created yet")
         );
+    } else {
+        println!("Insufficient native token funds");
     }
 
     Ok(())
