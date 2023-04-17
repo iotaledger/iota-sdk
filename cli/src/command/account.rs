@@ -287,21 +287,17 @@ pub async fn balance_command(account_handle: &AccountHandle) -> Result<(), Error
     println_log_info!("{balance:#?}");
     println_log_info!("Claimable outputs: {}", balance.potentially_locked_outputs().len());
 
-    for output_id in
-        balance.potentially_locked_outputs().iter().filter_map(
-            |(output_id, unlockable)| {
-                if *unlockable { Some(output_id) } else { None }
-            },
-        )
+    for output_id in balance
+        .potentially_locked_outputs()
+        .iter()
+        .filter_map(|(output_id, unlockable)| unlockable.then_some(output_id))
     {
         if let Some(output_data) = account_handle.get_output(output_id).await {
             let output = output_data.output;
             let kind = match output {
                 Output::Nft(_) => "Nft",
                 Output::Basic(_) => "Basic",
-                Output::Alias(_) => "Alias",
-                Output::Foundry(_) => "Foundry",
-                Output::Treasury(_) => "Treasury",
+                _ => unreachable!(),
             };
             println_log_info!("- output: {output_id} ({kind})");
 
@@ -317,7 +313,7 @@ pub async fn balance_command(account_handle: &AccountHandle) -> Result<(), Error
                     .map(|deposit_return| deposit_return.amount())
                     .unwrap_or(0);
                 let amount = output.amount() - deposit_return;
-                println_log_info!("  + base token amount: {}", amount);
+                println_log_info!("  + base coin amount: {}", amount);
 
                 if let Some(expiration) = unlock_conditions.expiration() {
                     let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
