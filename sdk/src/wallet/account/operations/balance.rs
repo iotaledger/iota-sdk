@@ -284,14 +284,7 @@ impl AccountHandle {
         // TODO remove clone
         for native_token in balance_builder.total_native_tokens.clone().finish_vec()? {
             // Check if some amount is currently locked
-            let locked_amount = balance_builder.locked_native_tokens.iter().find_map(|(id, amount)| {
-                if id == native_token.token_id() {
-                    Some(amount)
-                } else {
-                    None
-                }
-            });
-
+            let locked_amount = balance_builder.locked_native_tokens.get(native_token.token_id());
             let metadata = account
                 .native_token_foundries
                 .get(&FoundryId::from(*native_token.token_id()))
