@@ -25,7 +25,7 @@ pub struct AccountBalance {
     pub(crate) required_storage_deposit: RequiredStorageDeposit,
     /// Native tokens
     #[serde(rename = "nativeTokens")]
-    pub(crate) native_tokens: Vec<NativeTokensBalance>,
+    pub(crate) native_tokens: Vec<NativeTokenBalance>,
     /// Nfts
     pub(crate) nfts: Vec<NftId>,
     /// Aliases
@@ -75,7 +75,7 @@ pub struct AccountBalanceDto {
     pub required_storage_deposit: RequiredStorageDepositDto,
     /// Native tokens
     #[serde(rename = "nativeTokens")]
-    pub native_tokens: Vec<NativeTokensBalanceDto>,
+    pub native_tokens: Vec<NativeTokenBalanceDto>,
     /// Nfts
     pub nfts: Vec<NftId>,
     /// Aliases
@@ -98,7 +98,7 @@ impl From<&AccountBalance> for AccountBalanceDto {
             native_tokens: value
                 .native_tokens
                 .iter()
-                .map(NativeTokensBalanceDto::from)
+                .map(NativeTokenBalanceDto::from)
                 .collect::<_>(),
             nfts: value.nfts.clone(),
             aliases: value.aliases.clone(),
@@ -195,9 +195,9 @@ impl From<&RequiredStorageDeposit> for RequiredStorageDepositDto {
     }
 }
 
-/// Native tokens fields for [`AccountBalance`]
+/// Native token fields for [`AccountBalance`]
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, Getters, CopyGetters)]
-pub struct NativeTokensBalance {
+pub struct NativeTokenBalance {
     /// Token id
     #[getset(get = "pub")]
     #[serde(rename = "tokenId")]
@@ -213,7 +213,7 @@ pub struct NativeTokensBalance {
     pub(crate) available: U256,
 }
 
-impl Default for NativeTokensBalance {
+impl Default for NativeTokenBalance {
     fn default() -> Self {
         Self {
             token_id: TokenId::null(),
@@ -224,7 +224,7 @@ impl Default for NativeTokensBalance {
     }
 }
 
-impl std::ops::AddAssign for NativeTokensBalance {
+impl std::ops::AddAssign for NativeTokenBalance {
     fn add_assign(&mut self, rhs: Self) {
         if self.metadata.is_none() {
             self.metadata = rhs.metadata;
@@ -236,7 +236,7 @@ impl std::ops::AddAssign for NativeTokensBalance {
 
 /// Base coin fields for [`AccountBalanceDto`]
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub struct NativeTokensBalanceDto {
+pub struct NativeTokenBalanceDto {
     /// Token id
     #[serde(rename = "tokenId")]
     pub token_id: TokenIdDto,
@@ -248,8 +248,8 @@ pub struct NativeTokensBalanceDto {
     pub available: U256Dto,
 }
 
-impl From<&NativeTokensBalance> for NativeTokensBalanceDto {
-    fn from(value: &NativeTokensBalance) -> Self {
+impl From<&NativeTokenBalance> for NativeTokenBalanceDto {
+    fn from(value: &NativeTokenBalance) -> Self {
         Self {
             token_id: TokenIdDto::from(&value.token_id),
             metadata: value.metadata.as_ref().map(|m| prefix_hex::encode(m.data())),

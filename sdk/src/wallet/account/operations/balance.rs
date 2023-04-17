@@ -12,7 +12,7 @@ use crate::{
     wallet::account::{
         handle::AccountHandle,
         operations::helpers::time::can_output_be_unlocked_forever_from_now_on,
-        types::{AccountBalance, BaseCoinBalance, NativeTokensBalance, RequiredStorageDeposit},
+        types::{AccountBalance, BaseCoinBalance, NativeTokenBalance, RequiredStorageDeposit},
         OutputsToClaim,
     },
 };
@@ -21,7 +21,7 @@ use crate::{
 pub struct AccountBalanceBuilder {
     base_coin: BaseCoinBalance,
     required_storage_deposit: RequiredStorageDeposit,
-    native_tokens: Vec<NativeTokensBalance>,
+    native_tokens: Vec<NativeTokenBalance>,
     nfts: Vec<NftId>,
     aliases: Vec<AliasId>,
     foundries: Vec<FoundryId>,
@@ -298,7 +298,7 @@ impl AccountHandle {
                 .and_then(|foundry| foundry.immutable_features().metadata())
                 .cloned();
 
-            balance_builder.native_tokens.push(NativeTokensBalance {
+            balance_builder.native_tokens.push(NativeTokenBalance {
                 token_id: *native_token.token_id(),
                 metadata,
                 total: native_token.amount(),
