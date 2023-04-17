@@ -56,10 +56,9 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
         // no command provided, i.e. `> ./wallet`
         match (storage_path.exists(), snapshot_path.exists()) {
             (true, true) => {
-                let password = get_password("Stronghold password", !snapshot_path.exists())?;
+                let password = get_password("Stronghold password", false)?;
                 let wallet = unlock_wallet(storage_path, snapshot_path, &password).await?;
-                let no_accounts = wallet.get_accounts().await?.is_empty();
-                if no_accounts {
+                if wallet.get_accounts().await?.is_empty() {
                     // ask the user whether a default account should be created
                     if get_decision("Initialize a default account?")? {
                         println_log_info!("Initializing default account.");
