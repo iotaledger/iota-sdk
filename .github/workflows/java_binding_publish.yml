@@ -97,7 +97,7 @@ jobs:
         shell: bash
         id: construct-tag
         run: |
-          echo "tag=iota-wallet-java-${{ steps.prepare-tag.outputs.group1 }}-new" >> $GITHUB_OUTPUT
+          echo "tag=iota-wallet-java-${{ steps.prepare-tag.outputs.group1 }}" >> $GITHUB_OUTPUT
 
       - name: Build JAR for default target and an additional JAR that does not contain the native library
         shell: bash
@@ -227,7 +227,7 @@ jobs:
         shell: bash
         id: construct-tag
         run: |
-          echo "tag=iota-wallet-java-${{ steps.prepare-tag.outputs.group1 }}-new" >> $GITHUB_OUTPUT
+          echo "tag=iota-wallet-java-${{ steps.prepare-tag.outputs.group1 }}" >> $GITHUB_OUTPUT
 
       - name: Build for the Android targets
         shell: bash
