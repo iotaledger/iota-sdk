@@ -360,6 +360,9 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
 
         options = {k:v for k,v in options.items() if v != None}
 
+        if 'coin_type' in options:
+            options['coin_type'] = int(options.pop('coin_type'))
+
         is_start_set = 'start' in options
         is_end_set = 'end' in options
         if is_start_set or is_end_set:
@@ -396,7 +399,8 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
         Parameters
         ----------
         account_index : int
-        coin_type : 
+        coin_type : int
+            Coin type. The CoinType enum can be used
         custom_remainder_address : string
         data : str
         initial_address_index : int
@@ -421,6 +425,9 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
 
         if 'output' in options:
             options['output'] = options.pop('output').as_dict()
+
+        if 'coin_type' in options:
+            options['coin_type'] = int(options.pop('coin_type'))
         
         is_start_set = 'input_range_start' in options
         is_end_set = 'input_range_end' in options
@@ -579,6 +586,9 @@ class Node():
 class CoinType(Enum):
     IOTA = 4218
     SHIMMER = 4219
+
+    def __int__(self):
+        return self.value
 
 class UnlockConditionType(Enum):
     Address = 0
