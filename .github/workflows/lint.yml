@@ -31,13 +31,11 @@ jobs:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Install toolchain
-        uses: actions-rs/toolchain@v1
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
         with:
           toolchain: beta
-          override: true
           components: clippy
-          profile: minimal
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v1
@@ -48,9 +46,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libudev-dev libusb-1.0-0-dev
-
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
 
       # A first run without features to detect feature related issues.
       - name: Run Clippy
@@ -76,15 +71,11 @@ jobs:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Install toolchain
-        uses: actions-rs/toolchain@v1
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
         with:
           toolchain: nightly
-          override: true
-          profile: minimal
-
-      - name: Install Cargo-udeps
-        uses: taiki-e/install-action@cargo-udeps
+          install: cargo-udeps
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v1
@@ -95,9 +86,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libudev-dev libusb-1.0-0-dev
-
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
 
       - name: Run Cargo Udeps
         uses: actions-rs/cargo@v1
@@ -113,22 +101,17 @@ jobs:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Install toolchain
-        uses: actions-rs/toolchain@v1
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
         with:
           toolchain: nightly
-          override: true
           components: rustfmt
-          profile: minimal
 
       - name: Install cargo-license-template
         uses: actions-rs/cargo@v1
         with:
           command: install
           args: --force cargo-license-template
-
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
 
       - name: Run Cargo Fmt
         uses: actions-rs/cargo@v1
@@ -150,21 +133,17 @@ jobs:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Install toolchain
-        uses: actions-rs/toolchain@v1
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
         with:
           toolchain: nightly
-          override: true
-          profile: minimal
+          install: cargo-audit
 
       - name: Install cargo-audit
         uses: actions-rs/cargo@v1
         with:
           command: install
           args: cargo-audit
-
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
 
       - name: Run Cargo Audit
         uses: actions-rs/cargo@v1

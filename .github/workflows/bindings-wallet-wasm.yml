@@ -53,12 +53,11 @@ jobs:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Install toolchain
-        uses: actions-rs/toolchain@v1
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
         with:
           target: wasm32-unknown-unknown
-          toolchain: stable
-          override: true
+          cache-root: sdk/src/wallet/bindings/wasm
 
       # Download a pre-compiled wasm-bindgen binary.
       - name: Install wasm-bindgen-cli
@@ -72,11 +71,6 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: yarn
           cache-dependency-path: sdk/src/wallet/bindings/wasm/yarn.lock
-
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
-        with:
-          cache-directories: "sdk/src/wallet/bindings/wasm"
 
       - name: Run Yarn Install
         working-directory: sdk/src/wallet/bindings/wasm/

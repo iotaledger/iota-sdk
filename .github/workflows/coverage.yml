@@ -25,12 +25,10 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install nightly toolchain with llvm-tools-preview
-        uses: actions-rs/toolchain@v1
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
         with:
-          profile: minimal
           toolchain: nightly
-          override: true
           components: llvm-tools-preview
 
       - name: Install required packages (Ubuntu)
@@ -46,9 +44,6 @@ jobs:
 
       - name: Install nextest
         uses: taiki-e/install-action@nextest
-
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
 
       - name: Create coverage dir
         run: bash ./.github/scripts/coverage_dir.sh

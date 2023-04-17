@@ -49,14 +49,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install libudev-dev libusb-1.0-0-dev
 
-      - name: Start private tangle
-        uses: "./.github/actions/private-tangle/setup"
-
       - name: Install Nextest
         uses: taiki-e/install-action@nextest
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
+
+      - name: Start private tangle
+        uses: "./.github/actions/private-tangle/setup"
 
       - name: Run tests
         uses: actions-rs/cargo@v1

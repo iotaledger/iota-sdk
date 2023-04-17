@@ -52,11 +52,11 @@ jobs:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
         with:
           toolchain: nightly
-          override: true
+          cache-root: sdk/src/client/bindings/java/lib/native/
 
       # This step is required for bindgen to work on Windows.
       - name: Set Up Clang/LLVM (Windows)
@@ -74,11 +74,6 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
           distribution: "temurin"
-
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
-        with:
-          cache-directories: "sdk/src/client/bindings/java/lib/native/"
 
       - name: Start private tangle
         uses: "./.github/actions/private-tangle/setup"
