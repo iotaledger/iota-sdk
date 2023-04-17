@@ -24,6 +24,10 @@ on:
       - "**Cargo.lock"
       - "!cli/**" # Exclude CLI
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   CARGO_INCREMENTAL: 0
 
