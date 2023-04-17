@@ -431,6 +431,8 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
             if is_end_set:
                 options['range']['end'] = options.pop('end')
 
+        options = humps.camelize(options)
+
         return self.send_message('buildAndPostBlock', {
             'secretManager': secret_manager,
             'options': options
