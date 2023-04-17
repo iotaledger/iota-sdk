@@ -19,6 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 0.2.0 - 2023-XX-XX
+
+### Added
+
+### Changed
+
+- `AddressWrapper` renamed to `Bech32Address` and moved to `types`;
+
+### Removed
+
+### Fixed
+
 ## 0.2.0 - 2023-04-17
 
 ### Added
@@ -46,7 +58,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fields of `AccountBalance`, `BaseCoinBalance` and `NativeTokensBalance` have been made private and getters have been added;
 - Exposed `AccountParticipationOverview, ParticipationEventWithNodes, AliasOutputOptions, AliasOutputOptionsDto, IncreaseNativeTokenSupplyOptions, IncreaseNativeTokenSupplyOptionsDto, NativeTokenOptions, NativeTokenOptionsDto, NftOptions, NftOptionsDto, OutputOptionsDto` from the `account` module;
 - Made `Wallet::get_bech32_hrp()` public;
-- `AddressWrapper` renamed to `Bech32Address` and moved to `types`;
 
 ### Removed
 

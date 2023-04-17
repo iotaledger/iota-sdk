@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
 
     // One address gets generated during account creation
     let address = account.addresses().await?[0].address().clone();
-    println!("{}", address.to_bech32());
+    println!("{}", address);
 
     let balance = account.sync(None).await?;
     println!("Balance: {balance:?}");
