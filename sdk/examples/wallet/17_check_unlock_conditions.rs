@@ -7,7 +7,7 @@
 
 use iota_sdk::{
     types::block::{
-        address::Bech32,
+        address::Bech32Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
     },
     wallet::{Result, Wallet},
@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
     // Get the account we generated with `01_create_wallet`
     let account = wallet.get_account("Alice").await?;
 
-    let account_addresses: Vec<Bech32> = account
+    let account_addresses: Vec<Bech32Address> = account
         .addresses()
         .await?
         .into_iter()
