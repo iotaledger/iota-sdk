@@ -1,4 +1,4 @@
-name: Create Java release
+name: Create Java release (wallet)
 
 on: workflow_dispatch
 
@@ -104,15 +104,16 @@ jobs:
         working-directory: sdk/src/wallet/bindings/java/
         run: |
           chmod +x gradlew
-          ./gradlew build jarWithoutNativeLibs
+          ./gradlew build -x test jarWithoutNativeLibs
 
-      - name: Build JAR for linux-x86_64 target
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      # Default macos target is x86_64-apple-darwin
+      - name: Build JAR for aarch64-apple-darwin
+        if: matrix.os == 'macos-latest'
         shell: bash
         working-directory: sdk/src/wallet/bindings/java/
         run: |
-          rustup target add linux-x86_64
-          ./gradlew build -PbuildTarget=linux-x86_64
+          rustup target add aarch64-apple-darwin
+          ./gradlew build -x test -PbuildTarget=aarch64-apple-darwin
 
       - name: Get filename for tag construction
         shell: bash
@@ -143,8 +144,8 @@ jobs:
         working-directory: sdk/src/wallet/bindings/java/
         run: |
           ./gradlew publishToSonatype
-          if [ "$RUNNER_OS" == "Linux" ];
-          then ./gradlew publishToSonatype -PbuildTarget=linux-x86_64
+          if [ "$RUNNER_OS" == "macOS" ];
+          then ./gradlew publishToSonatype -PbuildTarget=aarch64-apple-darwin
           fi
 
   release-android:
@@ -170,7 +171,7 @@ jobs:
       - name: Install required packages
         run: |
           sudo apt-get update
-          sudo apt-get install libudev-dev libusb-1.0-0-dev
+          sudo apt-get install libudev-dev libusb-1.0-0-dev gcc-multilib
 
       - name: Cache cargo registry
         uses: actions/cache@v3
@@ -241,10 +242,10 @@ jobs:
         working-directory: sdk/src/wallet/bindings/java/lib/native/cargo-ndk/jniLibs
         run: |
           echo $ANDROID_NDK_HOME
-          cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so arm64-v8a/libc++_shared.so
-          cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/arm-linux-androideabi/libc++_shared.so armeabi-v7a/libc++_shared.so
-          cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/x86_64-linux-android/libc++_shared.so x86_64/libc++_shared.so
-          cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/i686-linux-android/libc++_shared.so x86/libc++_shared.so
+          cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so arm64-v8a/libc++_shared.so
+          cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/libc++_shared.so armeabi-v7a/libc++_shared.so
+          cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android/libc++_shared.so x86_64/libc++_shared.so
+          cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/libc++_shared.so x86/libc++_shared.so
 
       - name: Archive Release
         uses: thedoctor0/zip-release@0.7.0

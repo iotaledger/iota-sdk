@@ -1,4 +1,4 @@
-name: Java bindings release
+name: Java bindings release (client)
 
 on: workflow_dispatch
 
@@ -79,15 +79,16 @@ jobs:
         working-directory: sdk/src/client/bindings/java/
         run: |
           chmod +x gradlew
-          ./gradlew build jarWithoutNativeLibs
+          ./gradlew build -x test jarWithoutNativeLibs
 
-      - name: Build JAR for linux-x86_64 target
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      # Default macos target is x86_64-apple-darwin
+      - name: Build JAR for aarch64-apple-darwin
+        if: matrix.os == 'macos-latest'
         shell: bash
         working-directory: sdk/src/client/bindings/java/
         run: |
-          rustup target add linux-x86_64
-          ./gradlew build -PbuildTarget=linux-x86_64
+          rustup target add aarch64-apple-darwin
+          ./gradlew build -x test -PbuildTarget=aarch64-apple-darwin
 
       - name: Get filename for tag construction
         shell: bash
@@ -126,6 +127,7 @@ jobs:
         working-directory: sdk/src/client/bindings/java/
         run: |
           ./gradlew publishToSonatype
-          if [ "$RUNNER_OS" == "Linux" ];
-          then ./gradlew publishToSonatype -PbuildTarget=linux-x86_64
+          if [ "$RUNNER_OS" == "macOS" ];
+          then ./gradlew publishToSonatype -PbuildTarget=aarch64-apple-darwin
           fi
+
