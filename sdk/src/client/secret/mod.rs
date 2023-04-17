@@ -138,7 +138,7 @@ impl std::fmt::Debug for SecretManager {
 }
 
 impl FromStr for SecretManager {
-    type Err = crate::client::Error;
+    type Err = Error;
 
     fn from_str(s: &str) -> crate::client::Result<Self> {
         Self::try_from(&serde_json::from_str::<SecretManagerDto>(s)?)
@@ -170,7 +170,8 @@ pub enum SecretManagerDto {
 }
 
 impl TryFrom<&SecretManagerDto> for SecretManager {
-    type Error = crate::client::Error;
+    type Error = Error;
+
     fn try_from(value: &SecretManagerDto) -> crate::client::Result<Self> {
         Ok(match value {
             #[cfg(feature = "stronghold")]
@@ -229,6 +230,8 @@ impl From<&SecretManager> for SecretManagerDto {
 
 #[async_trait]
 impl SecretManage for SecretManager {
+    type Error = Error;
+
     async fn generate_addresses(
         &self,
         coin_type: u32,
