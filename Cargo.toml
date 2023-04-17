@@ -18,6 +18,11 @@ members = [
 [profile.dev]
 panic = "abort"
 
+# Necessary to get coverage to work as for some reason using a custom profile breaks it
+[profile.test]
+debug = 0
+incremental = false
+
 [profile.ci]
 inherits = "dev"
 debug = 0

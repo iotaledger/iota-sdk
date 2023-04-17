@@ -53,4 +53,4 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: nextest
-          args: run --all-features --no-fail-fast --hide-progress-bar --cargo-profile ci
+          args: run --all-features --no-fail-fast --cargo-profile ci --test-threads "num-cpus"

@@ -57,10 +57,8 @@ jobs:
           --tests 
           --package iota-sdk 
           --all-features 
-          --run-ignored all 
-          --hide-progress-bar 
-          --ignore-filename-regex "/.cargo|rustc|target|tests|/.rustup"
-          --cargo-profile ci
+          --run-ignored all
+          --test-threads "num-cpus"
 
       - name: Tear down private tangle
         if: always()
