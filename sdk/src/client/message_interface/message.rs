@@ -205,10 +205,9 @@ pub enum Message {
         mnemonic: String,
     },
     /// Build a block containing the specified payload and post it to the network.
-    #[serde(rename_all = "camelCase")]
     PostBlockPayload {
         /// The payload to send
-        payload_dto: PayloadDto,
+        payload: PayloadDto,
     },
     //////////////////////////////////////////////////////////////////////
     // Node core API

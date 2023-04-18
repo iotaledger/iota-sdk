@@ -163,10 +163,9 @@ pub enum ClientMethod {
         prepared_transaction_data: PreparedTransactionDataDto,
     },
     /// Build a block containing the specified payload and post it to the network.
-    #[serde(rename_all = "camelCase")]
     PostBlockPayload {
         /// The payload to send
-        payload_dto: PayloadDto,
+        payload: PayloadDto,
     },
     //////////////////////////////////////////////////////////////////////
     // Node core API
