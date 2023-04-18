@@ -346,7 +346,7 @@ pub async fn claimable_outputs_command(account_handle: &AccountHandle) -> Result
                 Output::Basic(_) => "Basic",
                 _ => unreachable!(),
             };
-            println_log_info!("- output: {output_id} ({kind})");
+            println_log_info!("{output_id} ({kind})");
 
             if let Some(native_tokens) = output.native_tokens() {
                 native_tokens.iter().for_each(|token| {
