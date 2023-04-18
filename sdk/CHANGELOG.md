@@ -21,15 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.3.0 - 2023-XX-XX
 
-### Added
-
 ### Changed
 
 - `AddressWrapper` renamed to `Bech32Address` and moved to `types`;
-
-### Removed
-
-### Fixed
+- `Address::try_from_bech32_with_hrp` address and HRP return have been reversed;
 
 ## 0.2.0 - 2023-04-17
 
