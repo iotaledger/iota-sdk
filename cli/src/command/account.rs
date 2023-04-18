@@ -350,7 +350,7 @@ pub async fn claimable_outputs_command(account_handle: &AccountHandle) -> Result
 
             if let Some(native_tokens) = output.native_tokens() {
                 native_tokens.iter().for_each(|token| {
-                    println_log_info!("  + native token amount: {} ({})", token.amount(), token.token_id());
+                    println_log_info!("  - native token amount: {} ({})", token.amount(), token.token_id());
                 });
             }
 
@@ -360,12 +360,12 @@ pub async fn claimable_outputs_command(account_handle: &AccountHandle) -> Result
                     .map(|deposit_return| deposit_return.amount())
                     .unwrap_or(0);
                 let amount = output.amount() - deposit_return;
-                println_log_info!("  + base coin amount: {}", amount);
+                println_log_info!("  - base coin amount: {}", amount);
 
                 if let Some(expiration) = unlock_conditions.expiration() {
                     let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
                     let time_left = expiration.timestamp() - current_time;
-                    println_log_info!("  + expires in: {} seconds", time_left);
+                    println_log_info!("  - expires in: {} seconds", time_left);
                 }
             }
         }
