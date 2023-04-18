@@ -47,10 +47,10 @@ pub mod dto {
     use crate::types::block::error::dto::DtoError;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
     pub struct TimelockUnlockConditionDto {
         #[serde(rename = "type")]
         pub kind: u8,
+        #[serde(rename = "unixTime")]
         pub timestamp: u32,
     }
 

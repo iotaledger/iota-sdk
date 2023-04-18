@@ -78,6 +78,7 @@ pub mod dto {
         #[serde(rename = "type")]
         pub kind: u8,
         pub return_address: AddressDto,
+        #[serde(rename = "unixTime")]
         pub timestamp: u32,
     }
 
