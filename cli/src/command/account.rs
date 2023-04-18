@@ -349,8 +349,9 @@ pub async fn claimable_outputs_command(account_handle: &AccountHandle) -> Result
             println_log_info!("{output_id} ({kind})");
 
             if let Some(native_tokens) = output.native_tokens() {
+                println_log_info!("  - native token amount:");
                 native_tokens.iter().for_each(|token| {
-                    println_log_info!("  - native token amount: {} ({})", token.amount(), token.token_id());
+                    println_log_info!("    + {} ({})", token.amount(), token.token_id());
                 });
             }
 
