@@ -17,6 +17,6 @@ At the IOTA Foundation, we consider the security of our systems a top priority. 
 - We will respond to your report within 3 business days with our evaluation of the report, and an expected resolution date.
 - If you have followed the instructions above, we will not take any legal action against you in regard to the report.
 - We will keep you informed during all stages of resolving the problem.
-- To show our appreciation for your effort and cooperation during the report, we will list your name, and a link to a personal website/social network profile on the page below, if that is something you would be interested in.  This way the public can know you've helped keep the IOTA Foundation secure.
+- To show our appreciation for your effort and cooperation during the report, we will list your name, and a link to a personal website/social network profile on the page below, if that is something you would be interested in. This way the public can know you've helped keep the IOTA Foundation secure.
 
 We sincerely appreciate the efforts of security researchers in keeping our community safe.
