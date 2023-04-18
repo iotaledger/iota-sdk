@@ -74,7 +74,7 @@ pub enum WalletCommand {
     Sync,
 }
 
-#[derive(Debug, Default, Clone, Args)]
+#[derive(Debug, Clone, Args)]
 pub struct InitParameters {
     /// Mnemonic, randomly generated if not provided.
     #[arg(short, long)]
@@ -83,8 +83,18 @@ pub struct InitParameters {
     #[arg(short, long, value_name = "URL", env = "NODE_URL", default_value = DEFAULT_NODE_URL)]
     pub node_url: String,
     /// Coin type, SHIMMER_COIN_TYPE (4219) if not provided.
-    #[arg(short, long)]
-    pub coin_type: Option<u32>,
+    #[arg(short, long, default_value_t = SHIMMER_COIN_TYPE)]
+    pub coin_type: u32,
+}
+
+impl Default for InitParameters {
+    fn default() -> Self {
+        Self {
+            mnemonic: None,
+            node_url: DEFAULT_NODE_URL.to_string(),
+            coin_type: SHIMMER_COIN_TYPE,
+        }
+    }
 }
 
 pub async fn backup_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<(), Error> {
@@ -121,7 +131,7 @@ pub async fn init_command(
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(parameters.node_url.as_str())?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
-        .with_coin_type(parameters.coin_type.unwrap_or(SHIMMER_COIN_TYPE))
+        .with_coin_type(parameters.coin_type)
         .finish()
         .await?;
 

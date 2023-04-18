@@ -61,8 +61,8 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                 if wallet.get_accounts().await?.is_empty() {
                     // ask the user whether a default account should be created
                     if get_decision("Initialize a default account?")? {
-                        println_log_info!("Initializing default account.");
                         let account = add_account(&wallet, None).await?;
+                        println_log_info!("Initialized default account.");
                         (Some(wallet), Some(account))
                     } else {
                         (Some(wallet), None)
@@ -76,13 +76,13 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
             }
             (false, false) => {
                 if get_decision("Initialize a new wallet with default values?")? {
-                    println_log_info!("Initializing wallet with default values.");
                     let wallet = init_command(storage_path, snapshot_path, InitParameters::default()).await?;
+                    println_log_info!("Initialized wallet with default values.");
 
                     // ask the user whether a default account should be created
                     if get_decision("Initialize a default account?")? {
-                        println_log_info!("Initializing default account.");
                         let account = add_account(&wallet, None).await?;
+                        println_log_info!("Initialized default account.");
                         (Some(wallet), Some(account))
                     } else {
                         (Some(wallet), None)
