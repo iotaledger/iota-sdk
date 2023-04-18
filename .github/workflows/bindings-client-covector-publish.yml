@@ -1,14 +1,16 @@
-name: Covector
+name: Covector bindings checks (client)
 
 on:
   push:
     branches: [develop, production]
     paths-ignore:
-      - "specs/**"
       - "documentation/**"
 
+env:
+  CARGO_INCREMENTAL: 0
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -95,11 +97,11 @@ jobs:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Set Up Stable Rust
-        uses: ./.github/actions/setup-rust
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          cache: false
+          override: true
 
       - name: Set up Node.js
         uses: actions/setup-node@v2

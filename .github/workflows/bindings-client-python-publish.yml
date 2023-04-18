@@ -1,6 +1,9 @@
-name: Python bindings release
+name: Python bindings release (client)
 
 on: workflow_dispatch
+
+env:
+  CARGO_INCREMENTAL: 0
 
 jobs:
   build-wheels:

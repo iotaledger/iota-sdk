@@ -1,15 +1,21 @@
 name: covector status
 on: [pull_request]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   covector:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout the Source Code
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: covector status
+
+      - name: Covector status
         uses: jbolda/covector/packages/action@covector-v0
         id: covector
         with:

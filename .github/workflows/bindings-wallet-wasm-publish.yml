@@ -1,6 +1,9 @@
-name: Wasm publish to NPM
+name: Wasm publish to NPM (wallet)
 
 on: workflow_dispatch
+
+env:
+  CARGO_INCREMENTAL: 0
 
 jobs:
   publish-wasm:
