@@ -9,18 +9,18 @@ class TokenScheme():
         maximum_supply : int
         """
         self.type = 0
-        self.melted_tokens = melted_tokens
-        self.minted_tokens = minted_tokens
-        self.maximum_supply = maximum_supply
+        self.meltedTokens = melted_tokens
+        self.mintedTokens = minted_tokens
+        self.maximumSupply = maximum_supply
 
     def as_dict(self):
         config = dict(self.__dict__)
 
-        if 'melted_tokens' in config:
-            config['meltedTokens'] = str(hex(config['melted_tokens']))
-        if 'minted_tokens' in config:
-            config['mintedTokens'] = str(hex(config['minted_tokens']))
-        if 'maximum_supply' in config:
-            config['maximumSupply'] = str(hex(config['maximum_supply']))
+        if 'meltedTokens' in config:
+            config['meltedTokens'] = str(hex(config['meltedTokens']))
+        if 'mintedTokens' in config:
+            config['mintedTokens'] = str(hex(config['mintedTokens']))
+        if 'maximumSupply' in config:
+            config['maximumSupply'] = str(hex(config['maximumSupply']))
 
         return config
