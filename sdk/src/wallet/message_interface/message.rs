@@ -164,9 +164,7 @@ pub enum Message {
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
     #[serde(rename_all = "camelCase")]
-    SetStrongholdPasswordClearInterval {
-        interval_in_milliseconds: Option<u64>,
-    },
+    SetStrongholdPasswordClearInterval { interval_in_milliseconds: Option<u64> },
     /// Store a mnemonic into the Stronghold vault.
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
     #[cfg(feature = "stronghold")]
@@ -192,9 +190,7 @@ pub enum Message {
     /// Transforms a bech32 encoded address to hex
     /// Expected response: [`HexAddress`](crate::wallet::message_interface::Response::HexAddress)
     #[serde(rename_all = "camelCase")]
-    Bech32ToHex {
-        bech32_address: String,
-    },
+    Bech32ToHex { bech32_address: String },
     /// Transforms a hex encoded address to a bech32 encoded address
     /// Expected response: [`Bech32Address`](crate::wallet::message_interface::Response::Bech32Address)
     #[serde(rename_all = "camelCase")]
@@ -209,9 +205,7 @@ pub enum Message {
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
     #[serde(rename_all = "camelCase")]
-    ClearListeners {
-        event_types: Vec<WalletEventType>,
-    },
+    ClearListeners { event_types: Vec<WalletEventType> },
     /// Update the authentication for the provided node.
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
     UpdateNodeAuth {
