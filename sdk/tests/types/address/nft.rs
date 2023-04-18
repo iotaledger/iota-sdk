@@ -97,7 +97,7 @@ fn bech32_roundtrip() {
 
     assert_eq!(
         Address::try_from_bech32_with_hrp(bech32).unwrap(),
-        (address, String::from("rms"))
+        (String::from("rms"), address)
     );
 }
 

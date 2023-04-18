@@ -3,8 +3,6 @@
 
 /// Address types used in the account
 pub(crate) mod address;
-/// Custom de/serialization for [`address::AddressWrapper`]
-pub(crate) mod address_serde;
 pub(crate) mod balance;
 #[cfg(feature = "participation")]
 pub mod participation;
@@ -15,7 +13,7 @@ use crypto::keys::slip10::Chain;
 use serde::{Deserialize, Deserializer, Serialize};
 
 pub use self::{
-    address::{AccountAddress, AddressWithUnspentOutputs, AddressWrapper},
+    address::{AccountAddress, AddressWithUnspentOutputs},
     balance::{
         AccountBalance, AccountBalanceDto, BaseCoinBalance, BaseCoinBalanceDto, NativeTokensBalance,
         NativeTokensBalanceDto, RequiredStorageDeposit,

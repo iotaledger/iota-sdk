@@ -499,7 +499,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
 
     let wallet = make_wallet(storage_path, None, None).await?;
     let accounts = &create_accounts_with_funds(&wallet, 1).await?;
-    let address = accounts[0].addresses().await?[0].address().to_bech32();
+    let address = accounts[0].addresses().await?[0].address().to_string();
 
     let nft_options = vec![NftOptions {
         address: Some(address.clone()),

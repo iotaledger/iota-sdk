@@ -42,7 +42,7 @@ impl AccountHandle {
         log::debug!("[OUTPUT] prepare_output {options:?}");
         let token_supply = self.client.get_token_supply().await?;
 
-        let (recipient_address, bech32_hrp) = Address::try_from_bech32_with_hrp(&options.recipient_address)?;
+        let (bech32_hrp, recipient_address) = Address::try_from_bech32_with_hrp(&options.recipient_address)?;
         self.client.bech32_hrp_matches(&bech32_hrp).await?;
 
         if let Some(assets) = &options.assets {

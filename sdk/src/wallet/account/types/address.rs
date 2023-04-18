@@ -6,15 +6,14 @@ use std::hash::Hash;
 use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 
-use crate::types::block::{address::Address, output::OutputId};
+use crate::types::block::{address::Bech32Address, output::OutputId};
 
 /// An account address.
 #[derive(Debug, Getters, Setters, Clone, Serialize, Deserialize, Eq, PartialEq, Hash)]
 #[getset(get = "pub")]
 pub struct AccountAddress {
     /// The address.
-    #[serde(with = "crate::wallet::account::types::address_serde")]
-    pub(crate) address: AddressWrapper,
+    pub(crate) address: Bech32Address,
     /// The address key index.
     #[serde(rename = "keyIndex")]
     #[getset(set = "pub(crate)")]
@@ -32,8 +31,7 @@ pub struct AccountAddress {
 #[getset(get = "pub")]
 pub struct AddressWithUnspentOutputs {
     /// The address.
-    #[serde(with = "crate::wallet::account::types::address_serde")]
-    pub(crate) address: AddressWrapper,
+    pub(crate) address: Bech32Address,
     /// The address key index.
     #[serde(rename = "keyIndex")]
     #[getset(set = "pub(crate)")]
@@ -44,45 +42,4 @@ pub struct AddressWithUnspentOutputs {
     /// Output ids
     #[serde(rename = "outputIds")]
     pub(crate) output_ids: Vec<OutputId>,
-}
-
-/// An address and its network type.
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
-pub struct AddressWrapper {
-    pub(crate) inner: Address,
-    #[serde(rename = "bech32Hrp")]
-    pub(crate) bech32_hrp: String,
-}
-
-impl AsRef<Address> for AddressWrapper {
-    fn as_ref(&self) -> &Address {
-        &self.inner
-    }
-}
-
-impl AddressWrapper {
-    /// Create a new address wrapper.
-    pub fn new(address: Address, bech32_hrp: String) -> Self {
-        Self {
-            inner: address,
-            bech32_hrp,
-        }
-    }
-
-    /// Encodes the address as bech32.
-    pub fn to_bech32(&self) -> String {
-        self.inner.to_bech32(&self.bech32_hrp)
-    }
-
-    /// Get the bech32 human readable part
-    pub fn bech32_hrp(&self) -> &str {
-        &self.bech32_hrp
-    }
-
-    /// Parses a bech32 address string.
-    pub fn try_from_bech32<A: AsRef<str>>(address: A) -> crate::wallet::Result<Self> {
-        let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
-
-        Ok(Self::new(address, bech32_hrp))
-    }
 }
