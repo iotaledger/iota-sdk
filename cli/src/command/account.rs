@@ -285,8 +285,7 @@ pub async fn burn_nft_command(account_handle: &AccountHandle, nft_id: String) ->
 
 // `balance` command
 pub async fn balance_command(account_handle: &AccountHandle) -> Result<(), Error> {
-    let balance = account_handle.balance().await?;
-    println_log_info!("{balance:#?}");
+    println_log_info!("{:#?}", account_handle.balance().await?);
 
     Ok(())
 }
@@ -339,37 +338,36 @@ pub async fn claimable_outputs_command(account_handle: &AccountHandle) -> Result
         .iter()
         .filter_map(|(output_id, unlockable)| unlockable.then_some(output_id))
     {
-        if let Some(output_data) = account_handle.get_output(output_id).await {
-            let output = output_data.output;
-            let kind = match output {
-                Output::Nft(_) => "Nft",
-                Output::Basic(_) => "Basic",
-                _ => unreachable!(),
-            };
-            println_log_info!("{output_id:?} ({kind})");
+        let output_data = account_handle.get_output(output_id).await.unwrap();
+        let output = output_data.output;
+        let kind = match output {
+            Output::Nft(_) => "Nft",
+            Output::Basic(_) => "Basic",
+            _ => unreachable!(),
+        };
+        println_log_info!("{output_id:?} ({kind})");
 
-            if let Some(native_tokens) = output.native_tokens() {
-                if !native_tokens.is_empty() {
-                    println_log_info!("  - native token amount:");
-                    native_tokens.iter().for_each(|token| {
-                        println_log_info!("    + {} {}", token.amount(), token.token_id());
-                    });
-                }
+        if let Some(native_tokens) = output.native_tokens() {
+            if !native_tokens.is_empty() {
+                println_log_info!("  - native token amount:");
+                native_tokens.iter().for_each(|token| {
+                    println_log_info!("    + {} {}", token.amount(), token.token_id());
+                });
             }
+        }
 
-            if let Some(unlock_conditions) = output.unlock_conditions() {
-                let deposit_return = unlock_conditions
-                    .storage_deposit_return()
-                    .map(|deposit_return| deposit_return.amount())
-                    .unwrap_or(0);
-                let amount = output.amount() - deposit_return;
-                println_log_info!("  - base coin amount: {}", amount);
+        if let Some(unlock_conditions) = output.unlock_conditions() {
+            let deposit_return = unlock_conditions
+                .storage_deposit_return()
+                .map(|deposit_return| deposit_return.amount())
+                .unwrap_or(0);
+            let amount = output.amount() - deposit_return;
+            println_log_info!("  - base coin amount: {}", amount);
 
-                if let Some(expiration) = unlock_conditions.expiration() {
-                    let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
-                    let time_left = expiration.timestamp() - current_time;
-                    println_log_info!("  - expires in: {} seconds", time_left);
-                }
+            if let Some(expiration) = unlock_conditions.expiration() {
+                let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
+                let time_left = expiration.timestamp() - current_time;
+                println_log_info!("  - expires in: {} seconds", time_left);
             }
         }
     }
