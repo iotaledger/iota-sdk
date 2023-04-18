@@ -6,7 +6,7 @@ It is advised to do them all at least once in the given order to understand the 
 
 ## Setup
 
-Initialise the wallet with a given node and a randomly generated mnemonic.
+Initialize the wallet with a given node and a randomly generated mnemonic.
 ```sh title=Input
 ./wallet init --node <NODE_API_URL>
 ```
