@@ -66,7 +66,7 @@ jar {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 
-    classifier = getJarClassifier()
+    archiveClassifier = getJarClassifier()
 }
 
 task jarWithoutNativeLibs(type: Jar) {
@@ -82,7 +82,6 @@ task jarWithoutNativeLibs(type: Jar) {
 }
 
 test {
-    dependsOn jar
     doFirst {
         classpath += jar.outputs.files
     }
