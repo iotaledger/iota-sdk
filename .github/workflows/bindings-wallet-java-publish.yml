@@ -2,6 +2,9 @@ name: Create Java release (wallet)
 
 on: workflow_dispatch
 
+env:
+  CARGO_INCREMENTAL: 0
+
 jobs:
   release-desktop:
     name: Create Java release

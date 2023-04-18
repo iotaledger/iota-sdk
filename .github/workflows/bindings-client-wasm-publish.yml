@@ -1,6 +1,9 @@
-name: Wasm bindings release
+name: Wasm bindings release (client)
 
 on: workflow_dispatch
+
+env:
+  CARGO_INCREMENTAL: 0
 
 jobs:
   publish-wasm:

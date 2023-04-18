@@ -2,6 +2,9 @@ name: Java bindings release (client)
 
 on: workflow_dispatch
 
+env:
+  CARGO_INCREMENTAL: 0
+
 jobs:
   release-java:
     name: Create Java release

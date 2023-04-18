@@ -1,39 +1,43 @@
-name: Wasm bindings checks
+name: Wasm bindings checks (wallet)
+
 on:
   push:
     branches: [develop, production]
     paths:
-      - ".github/workflows/bindings-wasm.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/examples/**" # Exclude all examples
       - "!**/tests/**" # Exclude all tests
-      - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
-      - "sdk/src/client/bindings/wasm/**" # Re-include wasm client bindings
-      - "sdk/src/client/bindings/nodejs/**" # Re-include node client bindings, b/c lib copied from there
+      - "!**/bindings/**" # Exclude all bindings
+      - "sdk/src/wallet/bindings/wasm/**"
+      - "sdk/src/wallet/bindings/nodejs/**"
+      - ".github/workflows/bindings-wallet-wasm.yml"
   pull_request:
     branches: [develop, production]
     paths:
-      - ".github/workflows/bindings-wasm.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/examples/**" # Exclude all examples
       - "!**/tests/**" # Exclude all tests
-      - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
-      - "sdk/src/client/bindings/wasm/**" # Re-include wasm client bindings
-      - "sdk/src/client/bindings/nodejs/**" # Re-include node client bindings, b/c lib copied from there
+      - "!**/bindings/**" # Exclude all bindings
+      - "sdk/src/wallet/bindings/wasm/**"
+      - "sdk/src/wallet/bindings/nodejs/**"
+      - ".github/workflows/bindings-wallet-wasm.yml"
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch:
 
+env:
+  CARGO_INCREMENTAL: 0
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -44,22 +48,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        # os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest]
         node: ["18"]
 
     steps:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Set Up Nightly Rust
+      - name: Set up Rust
         uses: ./.github/actions/setup-rust
         with:
-          toolchain: nightly
           target: wasm32-unknown-unknown
-          cache: true
-          cache-root: sdk/src/client/bindings/wasm/
-          cache-job-id: ${{ github.workflow }}-${{ github.job }}-${{ matrix.os }}-${{ matrix.node }}
-          cache-hash: ${{ hashFiles('.github/workflows/bindings-wasm.yml') }}
+          cache-root: sdk/src/wallet/bindings/wasm
 
       # Download a pre-compiled wasm-bindgen binary.
       - name: Install wasm-bindgen-cli
@@ -72,19 +73,34 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: yarn
-          cache-dependency-path: sdk/src/client/bindings/wasm/yarn.lock
+          cache-dependency-path: sdk/src/wallet/bindings/wasm/yarn.lock
 
       - name: Run Yarn Install
-        working-directory: sdk/src/client/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn install
 
       - name: Run Yarn Build
-        working-directory: sdk/src/client/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn build
 
+      - name: Start private tangle
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        uses: "./.github/actions/private-tangle/setup"
+
       - name: Run Yarn Test
-        working-directory: sdk/src/client/bindings/wasm/
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn test
+
+      - name: Run Yarn Test
+        if: ${{ !startsWith(matrix.os, 'ubuntu') }}
+        working-directory: sdk/src/wallet/bindings/wasm/
+        # Only run test that doesn't require a node because we can't use the private tangle script on macos and windows
+        run: yarn test -t 'Wallet methods'
+
+      - name: Tear down private tangle
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        uses: "./.github/actions/private-tangle/tear-down"
 
   lint:
     name: Lint
@@ -99,15 +115,15 @@ jobs:
         uses: actions/setup-node@v2
         with:
           cache: yarn
-          cache-dependency-path: sdk/src/client/bindings/wasm/yarn.lock
+          cache-dependency-path: sdk/src/wallet/bindings/wasm/yarn.lock
           node-version: 18.x
 
       - name: Install Dependencies
-        working-directory: sdk/src/client/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn install --ignore-scripts
 
       - name: Lint
-        working-directory: sdk/src/client/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn lint
 
   check-format:
@@ -123,13 +139,13 @@ jobs:
         uses: actions/setup-node@v2
         with:
           cache: yarn
-          cache-dependency-path: sdk/src/client/bindings/wasm/yarn.lock
+          cache-dependency-path: sdk/src/wallet/bindings/wasm/yarn.lock
           node-version: 18.x
 
       - name: Install Dependencies
-        working-directory: sdk/src/client/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn install --ignore-scripts
 
       - name: Format
-        working-directory: sdk/src/client/bindings/wasm/
+        working-directory: sdk/src/wallet/bindings/wasm/
         run: yarn format-check
