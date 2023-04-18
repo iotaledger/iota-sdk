@@ -78,12 +78,11 @@ pub mod dto {
 
     ///
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct ParametersMilestoneOptionDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "targetMilestoneIndex")]
         pub target_milestone_index: u32,
-        #[serde(rename = "protocolVersion")]
         pub protocol_version: u8,
         #[serde(rename = "params")]
         pub binary_parameters: String,

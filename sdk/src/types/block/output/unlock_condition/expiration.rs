@@ -73,12 +73,11 @@ pub mod dto {
     use crate::types::block::{address::dto::AddressDto, error::dto::DtoError};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct ExpirationUnlockConditionDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "returnAddress")]
         pub return_address: AddressDto,
-        #[serde(rename = "unixTime")]
         pub timestamp: u32,
     }
 

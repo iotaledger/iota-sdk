@@ -283,7 +283,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                     .await?,
             )))
         }
-        ClientMethod::PostBlockPayload { payload_dto } => {
+        ClientMethod::PostBlockPayload { payload: payload_dto } => {
             let block_builder = client.block();
 
             let block = block_builder

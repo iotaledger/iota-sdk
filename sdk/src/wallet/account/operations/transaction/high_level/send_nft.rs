@@ -15,11 +15,11 @@ use crate::{
 
 /// Address and nft for `send_nft()`
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AddressAndNftId {
     /// Bech32 encoded address
     pub address: String,
     /// Nft id
-    #[serde(rename = "nftId")]
     pub nft_id: NftId,
 }
 

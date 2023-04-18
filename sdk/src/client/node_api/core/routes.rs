@@ -36,9 +36,9 @@ use crate::{
 
 /// NodeInfo wrapper which contains the node info and the url from the node (useful when multiple nodes are used)
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NodeInfoWrapper {
     /// The returned node info
-    #[serde(rename = "nodeInfo")]
     pub node_info: InfoResponse,
     /// The url from the node which returned the node info
     pub url: String,

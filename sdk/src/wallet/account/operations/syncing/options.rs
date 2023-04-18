@@ -12,30 +12,31 @@ const DEFAULT_SYNC_NATIVE_TOKEN_FOUNDRIES: bool = false;
 
 /// The synchronization options
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SyncOptions {
     /// Specific Bech32 encoded addresses of the account to sync, if addresses are provided, then `address_start_index`
     /// will be ignored
-    #[serde(rename = "addresses", default)]
+    #[serde(default)]
     pub addresses: Vec<String>,
     /// Address index from which to start syncing addresses. 0 by default, using a higher index will be faster because
     /// addresses with a lower index will be skipped, but could result in a wrong balance for that reason
-    #[serde(rename = "addressStartIndex", default = "default_address_start_index")]
+    #[serde(default = "default_address_start_index")]
     pub address_start_index: u32,
     /// Address index from which to start syncing internal addresses. 0 by default, using a higher index will be faster
     /// because addresses with a lower index will be skipped, but could result in a wrong balance for that reason
-    #[serde(rename = "addressStartIndexInternal", default = "default_address_start_index")]
+    #[serde(default = "default_address_start_index")]
     pub address_start_index_internal: u32,
     /// Usually syncing is skipped if it's called in between 200ms, because there can only be new changes every
     /// milestone and calling it twice "at the same time" will not return new data
     /// When this to true, we will sync anyways, even if it's called 0ms after the las sync finished.
-    #[serde(rename = "forceSyncing", default)]
+    #[serde(default)]
     pub force_syncing: bool,
     /// Try to sync transactions from incoming outputs with their inputs. Some data may not be obtained if it has been
     /// pruned.
-    #[serde(rename = "syncIncomingTransactions", default = "default_sync_incoming_transactions")]
+    #[serde(default = "default_sync_incoming_transactions")]
     pub sync_incoming_transactions: bool,
     /// Checks pending transactions and promotes/reattaches them if necessary.
-    #[serde(rename = "syncPendingTransactions", default = "default_sync_pending_transactions")]
+    #[serde(default = "default_sync_pending_transactions")]
     pub sync_pending_transactions: bool,
     /// Specifies what outputs should be synced for the ed25519 addresses from the account.
     #[serde(default)]
@@ -49,12 +50,11 @@ pub struct SyncOptions {
     /// Specifies if only basic outputs with an AddressUnlockCondition alone should be synced, will overwrite
     /// `account`, `alias` and `nft` options.
     #[serde(
-        rename = "syncOnlyMostBasicOutputs",
         default = "default_sync_only_most_basic_outputs"
     )]
     pub sync_only_most_basic_outputs: bool,
     /// Sync native token foundries, so their metadata can be returned in the balance.
-    #[serde(rename = "syncNativeTokenFoundries", default = "default_sync_native_token_foundries")]
+    #[serde(default = "default_sync_native_token_foundries")]
     pub sync_native_token_foundries: bool,
 }
 

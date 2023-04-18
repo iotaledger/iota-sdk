@@ -30,15 +30,13 @@ use crate::{
 
 /// Options to filter outputs
 #[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq, Hash)]
+#[serde(rename_all = "camelCase")]
 pub struct FilterOptions {
     /// Filter all outputs where the booked milestone index is below the specified timestamp
-    #[serde(rename = "lowerBoundBookedTimestamp")]
     pub lower_bound_booked_timestamp: Option<u32>,
     /// Filter all outputs where the booked milestone index is above the specified timestamp
-    #[serde(rename = "upperBoundBookedTimestamp")]
     pub upper_bound_booked_timestamp: Option<u32>,
     /// Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6).
-    #[serde(rename = "outputTypes")]
     pub output_types: Option<Vec<u8>>,
 }
 
