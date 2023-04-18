@@ -79,7 +79,7 @@ impl AccountHandle {
                                 account_index,
                                 WalletEvent::TransactionProgress(
                                     TransactionProgressEvent::GeneratingRemainderDepositAddress(AddressData {
-                                        address: remainder_address.address.to_bech32(),
+                                        address: remainder_address.address.to_string(),
                                     }),
                                 ),
                             );

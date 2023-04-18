@@ -100,22 +100,23 @@ jobs:
         shell: bash
         id: construct-tag
         run: |
-          echo "tag=iota-wallet-java-${{ steps.prepare-tag.outputs.group1 }}-new" >> $GITHUB_OUTPUT
+          echo "tag=iota-wallet-java-${{ steps.prepare-tag.outputs.group1 }}" >> $GITHUB_OUTPUT
 
       - name: Build JAR for default target and an additional JAR that does not contain the native library
         shell: bash
         working-directory: sdk/src/wallet/bindings/java/
         run: |
           chmod +x gradlew
-          ./gradlew build jarWithoutNativeLibs
+          ./gradlew build -x test jarWithoutNativeLibs
 
-      - name: Build JAR for aarch64-apple-darwin target
+      # Default macos target is x86_64-apple-darwin
+      - name: Build JAR for aarch64-apple-darwin
         if: matrix.os == 'macos-latest'
         shell: bash
         working-directory: sdk/src/wallet/bindings/java/
         run: |
           rustup target add aarch64-apple-darwin
-          ./gradlew build -PbuildTarget=aarch64-apple-darwin
+          ./gradlew build -x test -PbuildTarget=aarch64-apple-darwin
 
       - name: Get filename for tag construction
         shell: bash
@@ -156,12 +157,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest]
+        os: [ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: rocksdb-v18
 
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
@@ -169,30 +168,13 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Install LLVM and Clang (Windows) # required for bindgen to work, see https://github.com/rust-lang/rust-bindgen/issues/1797
-        uses: KyleMayes/install-llvm-action@32c4866ebb71e0949e8833eb49beeebed48532bd
-        if: matrix.os == 'windows-2019'
-        with:
-          version: "11.0"
-          directory: ${{ runner.temp }}/llvm
-
-      - name: Set LIBCLANG_PATH (Windows)
-        run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
-        if: matrix.os == 'windows-2019'
-
       - name: Get current date
         run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-        if: matrix.os == 'macos-latest' || ${{ startsWith(matrix.os, 'ubuntu') }}
 
-      - name: Get current date
-        if: matrix.os == 'windows-2019'
-        run: echo "CURRENT_DATE=$(Get-Date -Format "yyyy-MM-dd")" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-      - name: Install required packages (Ubuntu)
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      - name: Install required packages
         run: |
           sudo apt-get update
-          sudo apt-get install libudev-dev libusb-1.0-0-dev
+          sudo apt-get install libudev-dev libusb-1.0-0-dev gcc-multilib
 
       - name: Cache cargo registry
         uses: actions/cache@v3
@@ -249,7 +231,7 @@ jobs:
         shell: bash
         id: construct-tag
         run: |
-          echo "tag=iota-wallet-java-${{ steps.prepare-tag.outputs.group1 }}-new" >> $GITHUB_OUTPUT
+          echo "tag=iota-wallet-java-${{ steps.prepare-tag.outputs.group1 }}" >> $GITHUB_OUTPUT
 
       - name: Build for the Android targets
         shell: bash
@@ -263,10 +245,10 @@ jobs:
         working-directory: sdk/src/wallet/bindings/java/lib/native/cargo-ndk/jniLibs
         run: |
           echo $ANDROID_NDK_HOME
-          cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so arm64-v8a/libc++_shared.so
-          cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/arm-linux-androideabi/libc++_shared.so armeabi-v7a/libc++_shared.so
-          cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/x86_64-linux-android/libc++_shared.so x86_64/libc++_shared.so
-          cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/i686-linux-android/libc++_shared.so x86/libc++_shared.so
+          cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so arm64-v8a/libc++_shared.so
+          cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/libc++_shared.so armeabi-v7a/libc++_shared.so
+          cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android/libc++_shared.so x86_64/libc++_shared.so
+          cp $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/libc++_shared.so x86/libc++_shared.so
 
       - name: Archive Release
         uses: thedoctor0/zip-release@0.7.0

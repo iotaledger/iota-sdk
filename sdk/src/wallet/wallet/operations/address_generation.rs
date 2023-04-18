@@ -127,7 +127,7 @@ impl Wallet {
                 .first()
                 .expect("missing first public address")
                 .address
-                .bech32_hrp
+                .hrp
                 .clone(),
             None => {
                 self.client_options
