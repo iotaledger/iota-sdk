@@ -2,21 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use core::str::FromStr;
-use std::hash::Hash;
+
+use derive_more::{AsRef, Deref};
 
 use crate::types::block::{address::Address, Error};
 
 /// An address and its network type.
-#[derive(Clone, Eq, PartialEq, Hash)]
+#[derive(Clone, Eq, PartialEq, Hash, AsRef, Deref)]
 pub struct Bech32Address {
     pub(crate) hrp: String,
+    #[as_ref]
+    #[deref]
     pub(crate) inner: Address,
-}
-
-impl AsRef<Address> for Bech32Address {
-    fn as_ref(&self) -> &Address {
-        &self.inner
-    }
 }
 
 impl FromStr for Bech32Address {
@@ -29,30 +26,28 @@ impl FromStr for Bech32Address {
 }
 
 impl Bech32Address {
-    /// Create a new address wrapper.
-    pub fn new(address: Address, hrp: String) -> Result<Self, Error> {
-        Ok(Self { inner: address, hrp })
+    /// Creates a new address wrapper.
+    pub fn new(hrp: String, inner: Address) -> Result<Self, Error> {
+        // TODO validate HRP
+        Ok(Self { hrp, inner })
     }
 
-    /// Get the bech32 human readable part
+    /// Gets the human readable part.
     pub fn hrp(&self) -> &str {
         &self.hrp
     }
 
-    /// Get the address part
+    /// Gets the address part.
     pub fn inner(&self) -> &Address {
         &self.inner
     }
 
     /// Parses a bech32 address string.
-    pub fn try_from_bech32<A: AsRef<str>>(address: A) -> Result<Self, Error> {
-        let (hrp, inner) = Address::try_from_bech32_with_hrp(address)?;
-
-        Ok(Self { hrp, inner })
+    pub fn try_from_str(address: impl AsRef<str>) -> Result<Self, Error> {
+        Self::from_str(address.as_ref())
     }
 }
 
-/// Encodes the address as bech32.
 impl core::fmt::Display for Bech32Address {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}", self.inner.to_bech32(&self.hrp))

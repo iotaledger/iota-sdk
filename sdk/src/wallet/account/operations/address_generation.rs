@@ -158,7 +158,7 @@ impl AccountHandle {
             .into_iter()
             .enumerate()
             .map(|(index, address)| AccountAddress {
-                address: Bech32Address::new(address, bech32_hrp.clone()).unwrap(),
+                address: Bech32Address::new(bech32_hrp.clone(), address).unwrap(),
                 key_index: highest_current_index_plus_one + index as u32,
                 internal: options.internal,
                 used: false,

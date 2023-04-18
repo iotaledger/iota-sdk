@@ -161,7 +161,7 @@ impl AccountBuilder {
                     get_first_public_address(&self.secret_manager, self.coin_type, account_index).await?;
 
                 let first_public_account_address = AccountAddress {
-                    address: Bech32Address::new(first_public_address, bech32_hrp)?,
+                    address: Bech32Address::new(bech32_hrp, first_public_address)?,
                     key_index: 0,
                     internal: false,
                     used: false,
