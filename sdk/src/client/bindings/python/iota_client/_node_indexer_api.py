@@ -9,7 +9,7 @@ class NodeIndexerAPI(BaseAPI):
         """Fetch basic output IDs.
         """
 
-        query_parameters = humps.camelize(query_parameters.as_dict())
+        query_parameters = query_parameters.as_dict()
 
         return self.send_message('basicOutputIds', {
             'queryParameters': query_parameters,
@@ -19,7 +19,7 @@ class NodeIndexerAPI(BaseAPI):
         """Fetch alias output IDs.
         """
 
-        query_parameters = humps.camelize(query_parameters.as_dict())
+        query_parameters = query_parameters.as_dict()
 
         return self.send_message('aliasOutputIds', {
             'queryParameters': query_parameters,
@@ -36,7 +36,7 @@ class NodeIndexerAPI(BaseAPI):
         """Fetch NFT output IDs.
         """
 
-        query_parameters = humps.camelize(query_parameters.as_dict())
+        query_parameters = query_parameters.as_dict()
 
         return self.send_message('nftOutputIds', {
             'queryParameters': query_parameters,
@@ -53,7 +53,7 @@ class NodeIndexerAPI(BaseAPI):
         """Fetch foundry Output IDs.
         """
 
-        query_parameters = humps.camelize(query_parameters.as_dict())
+        query_parameters = query_parameters.as_dict()
 
         return self.send_message('foundryOutputIds', {
             'queryParameters': query_parameters,
@@ -93,4 +93,4 @@ class NodeIndexerAPI(BaseAPI):
         timelocked_before: int = None
 
         def as_dict(self):
-            return [{k: v} for k, v in self.__dict__.items() if v != None]
+            return humps.camelize([{k: v} for k, v in self.__dict__.items() if v != None])

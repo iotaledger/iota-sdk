@@ -142,19 +142,15 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
         Output as dict
         """
 
-        unlock_conditions = humps.camelize(
-            [unlock_condition.as_dict() for unlock_condition in unlock_conditions])
+        unlock_conditions = [unlock_condition.as_dict() for unlock_condition in unlock_conditions]
 
         if native_tokens:
-            native_tokens = humps.camelize(
-                [native_token.as_dict() for native_token in native_tokens])
+            native_tokens = [native_token.as_dict() for native_token in native_tokens]
 
         if features:
-            features = humps.camelize([feature.as_dict()
-                                      for feature in features])
+            features = [feature.as_dict() for feature in features]
         if immutable_features:
-            immutable_features = humps.camelize(
-                [immutable_feature.as_dict() for immutable_feature in immutable_features])
+            immutable_features = [immutable_feature.as_dict() for immutable_feature in immutable_features]
 
         if amount:
             amount = str(amount)
@@ -194,16 +190,13 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
         Output as dict
         """
 
-        unlock_conditions = humps.camelize(
-            [unlock_condition.as_dict() for unlock_condition in unlock_conditions])
+        unlock_conditions = [unlock_condition.as_dict() for unlock_condition in unlock_conditions]
 
         if native_tokens:
-            native_tokens = humps.camelize(
-                [native_token.as_dict() for native_token in native_tokens])
+            native_tokens = [native_token.as_dict() for native_token in native_tokens]
 
         if features:
-            features = humps.camelize([feature.as_dict()
-                                      for feature in features])
+            features = [feature.as_dict() for feature in features]
 
         if amount:
             amount = str(amount)
@@ -249,19 +242,15 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
 
         token_scheme = humps.camelize(token_scheme.as_dict())
 
-        unlock_conditions = humps.camelize(
-            [unlock_condition.as_dict() for unlock_condition in unlock_conditions])
+        unlock_conditions = [unlock_condition.as_dict() for unlock_condition in unlock_conditions]
 
         if native_tokens:
-            native_tokens = humps.camelize(
-                [native_token.as_dict() for native_token in native_tokens])
+            native_tokens = [native_token.as_dict() for native_token in native_tokens]
 
         if features:
-            features = humps.camelize([feature.as_dict()
-                                      for feature in features])
+            features = [feature.as_dict() for feature in features]
         if immutable_features:
-            immutable_features = humps.camelize(
-                [immutable_feature.as_dict() for immutable_feature in immutable_features])
+            immutable_features = [immutable_feature.as_dict() for immutable_feature in immutable_features]
 
         if amount:
             amount = str(amount)
@@ -305,19 +294,15 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
         Output as dict
         """
 
-        unlock_conditions = humps.camelize(
-            [unlock_condition.as_dict() for unlock_condition in unlock_conditions])
+        unlock_conditions = [unlock_condition.as_dict() for unlock_condition in unlock_conditions]
 
         if native_tokens:
-            native_tokens = humps.camelize(
-                [native_token.as_dict() for native_token in native_tokens])
+            native_tokens = [native_token.as_dict() for native_token in native_tokens]
 
         if features:
-            features = humps.camelize([feature.as_dict()
-                                      for feature in features])
+            features = [feature.as_dict() for feature in features]
         if immutable_features:
-            immutable_features = humps.camelize(
-                [immutable_feature.as_dict() for immutable_feature in immutable_features])
+            immutable_features = [immutable_feature.as_dict() for immutable_feature in immutable_features]
 
         if amount:
             amount = str(amount)

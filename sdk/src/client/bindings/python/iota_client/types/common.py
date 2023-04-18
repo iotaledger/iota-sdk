@@ -40,7 +40,7 @@ class Node():
             if 'jwt' in config:
                 config['auth']['jwt'] = config.pop('jwt')
             if 'username' in config or 'password' in config:
-                basic_auth = config['auth']['basic_auth_name_pwd'] = []
+                basic_auth = config['auth']['basicAuthNamePwd'] = []
                 if 'username' in config:
                     basic_auth.append(config.pop('username'))
                 if 'password' in config:

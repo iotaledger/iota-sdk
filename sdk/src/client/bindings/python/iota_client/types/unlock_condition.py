@@ -31,8 +31,8 @@ class UnlockCondition():
         self.type = type
         self.address = address
         self.amount = amount
-        self.unix_time = unix_time
-        self.return_address = return_address
+        self.unixTime = unix_time
+        self.returnAddress = return_address
 
     def as_dict(self):
         config = {k: v for k, v in self.__dict__.items() if v != None}
@@ -43,8 +43,8 @@ class UnlockCondition():
         if 'address' in config:
             config['address'] = config['address'].as_dict()
 
-        if 'return_address' in config:
-            config['return_address'] = config['return_address'].as_dict()
+        if 'returnAddress' in config:
+            config['returnAddress'] = config['returnAddress'].as_dict()
 
         if 'amount' in config:
             config['amount'] = str(config['amount'])

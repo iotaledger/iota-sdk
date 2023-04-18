@@ -27,9 +27,9 @@ class Address():
         if self.type == AddressType.ED25519:
             config['pubKeyHash'] = config.pop('address_or_id')
         elif self.type == AddressType.ALIAS:
-            config['alias_id'] = config.pop('address_or_id')
+            config['aliasId'] = config.pop('address_or_id')
         elif self.type == AddressType.NFT:
-            config['nft_id'] = config.pop('address_or_id')
+            config['nftId'] = config.pop('address_or_id')
 
         return config
 

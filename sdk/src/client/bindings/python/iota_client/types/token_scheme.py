@@ -17,10 +17,10 @@ class TokenScheme():
         config = dict(self.__dict__)
 
         if 'melted_tokens' in config:
-            config['melted_tokens'] = str(hex(config['melted_tokens']))
+            config['meltedTokens'] = str(hex(config['melted_tokens']))
         if 'minted_tokens' in config:
-            config['minted_tokens'] = str(hex(config['minted_tokens']))
+            config['mintedTokens'] = str(hex(config['minted_tokens']))
         if 'maximum_supply' in config:
-            config['maximum_supply'] = str(hex(config['maximum_supply']))
+            config['maximumSupply'] = str(hex(config['maximum_supply']))
 
         return config
