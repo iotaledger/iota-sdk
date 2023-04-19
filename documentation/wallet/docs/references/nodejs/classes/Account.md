@@ -325,7 +325,7 @@ Generate a new unused address.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `options?` | [`AddressGenerationOptions`](../interfaces/AddressGenerationOptions.md) | Options for address generation. |
+| `options?` | [`GenerateAddressOptions`](../interfaces/GenerateAddressOptions.md) | Options for address generation. |
 
 #### Returns
 
@@ -346,7 +346,7 @@ Generate new unused addresses.
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `amount` | `number` | The amount of addresses to generate. |
-| `options?` | [`AddressGenerationOptions`](../interfaces/AddressGenerationOptions.md) | Options for address generation. |
+| `options?` | [`GenerateAddressOptions`](../interfaces/GenerateAddressOptions.md) | Options for address generation. |
 
 #### Returns
 

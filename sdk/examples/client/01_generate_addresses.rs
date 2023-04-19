@@ -5,7 +5,11 @@
 //!
 //! `cargo run --example generate_addresses --release -- [NODE_URL]`
 
-use iota_sdk::client::{api::GetAddressesBuilder, secret::SecretManager, Client, Result};
+use iota_sdk::client::{
+    api::GetAddressesBuilder,
+    secret::{GenerateAddressOptions, SecretManager},
+    Client, Result,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -45,7 +49,10 @@ async fn main() -> Result<()> {
         .get_addresses(&secret_manager)
         .with_account_index(0)
         .with_range(0..4)
-        .with_internal_addresses(true)
+        .with_options(GenerateAddressOptions {
+            internal: true,
+            ..Default::default()
+        })
         .finish()
         .await?;
 

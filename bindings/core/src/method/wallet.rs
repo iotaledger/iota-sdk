@@ -141,8 +141,6 @@ pub enum WalletMethod {
         /// Account index
         #[serde(rename = "accountIndex")]
         account_index: u32,
-        /// Internal address
-        internal: bool,
         /// Account index
         #[serde(rename = "addressIndex")]
         address_index: u32,

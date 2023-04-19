@@ -3,26 +3,17 @@
 
 package org.iota.types.account_methods;
 
-public class AddressGenerationOptions {
+public class GenerateAddressOptions {
     private boolean internal;
-    private GenerateAddressOptions options;
+    private boolean ledgerNanoPrompt;
 
-    public AddressGenerationOptions withInternal(boolean internal) {
+    public GenerateAddressOptions withInternal(boolean internal) {
         this.internal = internal;
         return this;
     }
 
-    public AddressGenerationOptions withOptions(GenerateAddressOptions options) {
-        this.options = options;
+    public GenerateAddressOptions withLedgerNanoPrompt(boolean ledgerNanoPrompt) {
+        this.ledgerNanoPrompt = ledgerNanoPrompt;
         return this;
-    }
-
-    public static class GenerateAddressOptions {
-        private boolean ledgerNanoPrompt;
-
-        public GenerateAddressOptions withLedgerNanoPrompt(boolean ledgerNanoPrompt) {
-            this.ledgerNanoPrompt = ledgerNanoPrompt;
-            return this;
-        }
     }
 }

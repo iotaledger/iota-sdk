@@ -1,8 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use serde::{Deserialize, Serialize};
-
 #[cfg(all(feature = "events", any(feature = "ledger_nano", feature = "ledger_nano")))]
 use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
@@ -10,13 +8,6 @@ use crate::{
     types::block::address::Bech32Address,
     wallet::account::{handle::AccountHandle, types::address::AccountAddress},
 };
-
-/// Options for address generation
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-pub struct AddressGenerationOptions {
-    pub internal: bool,
-    pub options: Option<GenerateAddressOptions>,
-}
 
 impl AccountHandle {
     /// Generate addresses and stores them in the account
@@ -26,7 +17,7 @@ impl AccountHandle {
     /// let internal_addresses = account_handle
     ///     .generate_addresses(
     ///         1,
-    ///         Some(AddressGenerationOptions {
+    ///         Some(GenerateAddressOptions {
     ///             internal: true,
     ///             ..Default::default()
     ///         }),
@@ -36,7 +27,7 @@ impl AccountHandle {
     pub async fn generate_addresses(
         &self,
         amount: u32,
-        options: Option<AddressGenerationOptions>,
+        options: Option<GenerateAddressOptions>,
     ) -> crate::wallet::Result<Vec<AccountAddress>> {
         let options = options.unwrap_or_default();
         log::debug!(
@@ -72,13 +63,14 @@ impl AccountHandle {
                 // If we don't sync, then we want to display the prompt on the ledger with the address. But the user
                 // needs to have it visible on the computer first, so we need to generate it without the
                 // prompt first
-                if options.options.clone().unwrap_or_default().ledger_nano_prompt {
+                if options.ledger_nano_prompt {
                     #[cfg(feature = "events")]
-                    let changed_options = options.options.clone().map(|mut options| {
+                    let changed_options = {
                         // Change options so ledger will not show the prompt the first time
-                        options.ledger_nano_prompt = false;
-                        options
-                    });
+                        let mut changed_options = options.clone();
+                        changed_options.ledger_nano_prompt = false;
+                        changed_options
+                    };
                     let mut addresses = Vec::new();
 
                     for address_index in address_range {
@@ -90,8 +82,7 @@ impl AccountHandle {
                                     account.coin_type,
                                     account.index,
                                     address_index..address_index + 1,
-                                    options.internal,
-                                    changed_options.clone(),
+                                    Some(changed_options),
                                 )
                                 .await?;
                             self.event_emitter.lock().await.emit(
@@ -107,8 +98,7 @@ impl AccountHandle {
                                 account.coin_type,
                                 account.index,
                                 address_index..address_index + 1,
-                                options.internal,
-                                options.options.clone(),
+                                Some(options),
                             )
                             .await?;
                         addresses.push(address[0]);
@@ -116,37 +106,19 @@ impl AccountHandle {
                     addresses
                 } else {
                     ledger_nano
-                        .generate_addresses(
-                            account.coin_type,
-                            account.index,
-                            address_range.clone(),
-                            options.internal,
-                            options.options,
-                        )
+                        .generate_addresses(account.coin_type, account.index, address_range.clone(), Some(options))
                         .await?
                 }
             }
             #[cfg(feature = "stronghold")]
             SecretManager::Stronghold(stronghold) => {
                 stronghold
-                    .generate_addresses(
-                        account.coin_type,
-                        account.index,
-                        address_range,
-                        options.internal,
-                        options.options.clone(),
-                    )
+                    .generate_addresses(account.coin_type, account.index, address_range, Some(options))
                     .await?
             }
             SecretManager::Mnemonic(mnemonic) => {
                 mnemonic
-                    .generate_addresses(
-                        account.coin_type,
-                        account.index,
-                        address_range,
-                        options.internal,
-                        options.options.clone(),
-                    )
+                    .generate_addresses(account.coin_type, account.index, address_range, Some(options))
                     .await?
             }
             SecretManager::Placeholder(_) => vec![],
@@ -176,7 +148,7 @@ impl AccountHandle {
         let result = self
             .generate_addresses(
                 1,
-                Some(AddressGenerationOptions {
+                Some(GenerateAddressOptions {
                     internal: true,
                     ..Default::default()
                 }),

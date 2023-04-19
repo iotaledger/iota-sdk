@@ -127,13 +127,12 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         WalletMethod::GenerateAddress {
             account_index,
-            internal,
             address_index,
             options,
             bech32_hrp,
         } => {
             let address = wallet
-                .generate_address(account_index, internal, address_index, options)
+                .generate_address(account_index, address_index, options)
                 .await?;
 
             let bech32_hrp = match bech32_hrp {

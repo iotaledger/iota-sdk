@@ -45,8 +45,9 @@ pub struct AccountAddress {
 }
 
 /// Options provided to `generate_address()`.
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub struct GenerateAddressOptions {
+    pub internal: bool,
     /// Display the address on ledger devices.
     #[serde(rename = "ledgerNanoPrompt")]
     pub ledger_nano_prompt: bool,

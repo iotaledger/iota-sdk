@@ -26,7 +26,6 @@ impl Wallet {
     pub async fn generate_address(
         &self,
         account_index: u32,
-        internal: bool,
         address_index: u32,
         options: Option<GenerateAddressOptions>,
     ) -> crate::wallet::Result<Address> {
@@ -50,7 +49,6 @@ impl Wallet {
                                 self.coin_type.load(Ordering::Relaxed),
                                 account_index,
                                 address_index..address_index + 1,
-                                internal,
                                 changed_options,
                             )
                             .await?;
@@ -71,7 +69,6 @@ impl Wallet {
                             self.coin_type.load(Ordering::Relaxed),
                             account_index,
                             address_index..address_index + 1,
-                            internal,
                             options,
                         )
                         .await?
@@ -81,7 +78,6 @@ impl Wallet {
                             self.coin_type.load(Ordering::Relaxed),
                             account_index,
                             address_index..address_index + 1,
-                            internal,
                             options,
                         )
                         .await?
@@ -94,7 +90,6 @@ impl Wallet {
                         self.coin_type.load(Ordering::Relaxed),
                         account_index,
                         address_index..address_index + 1,
-                        internal,
                         options,
                     )
                     .await?
@@ -105,7 +100,6 @@ impl Wallet {
                         self.coin_type.load(Ordering::Relaxed),
                         account_index,
                         address_index..address_index + 1,
-                        internal,
                         options,
                     )
                     .await?

@@ -22,9 +22,9 @@ type Account = ReturnType<typeof createAccount>
 
 /** The AccountManager class. */
 export async function createAccountManager(options: AccountManagerOptions) {
-    
+
     let id: AccountId
-    
+
     let messageHandler = await MessageHandler(options);
 
     return {
@@ -168,7 +168,6 @@ export async function createAccountManager(options: AccountManagerOptions) {
          */
         async generateAddress(
             accountIndex: number,
-            internal: boolean,
             addressIndex: number,
             options?: GenerateAddressOptions,
             bech32Hrp?: string,
@@ -177,7 +176,6 @@ export async function createAccountManager(options: AccountManagerOptions) {
                 cmd: 'generateAddress',
                 payload: {
                     accountIndex,
-                    internal,
                     addressIndex,
                     options,
                     bech32Hrp,

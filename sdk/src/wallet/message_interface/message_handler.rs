@@ -248,7 +248,6 @@ impl WalletMessageHandler {
             }
             Message::GenerateAddress {
                 account_index,
-                internal,
                 address_index,
                 options,
                 bech32_hrp,
@@ -256,7 +255,7 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let address = self
                         .wallet
-                        .generate_address(account_index, internal, address_index, options)
+                        .generate_address(account_index, address_index, options)
                         .await?;
 
                     let bech32_hrp = match bech32_hrp {

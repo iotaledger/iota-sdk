@@ -3,10 +3,9 @@
 
 use std::cmp;
 
-use crate::wallet::account::{
-    handle::AccountHandle,
-    operations::{address_generation::AddressGenerationOptions, syncing::SyncOptions},
-    types::AddressWithUnspentOutputs,
+use crate::{
+    client::secret::GenerateAddressOptions,
+    wallet::account::{handle::AccountHandle, operations::syncing::SyncOptions, types::AddressWithUnspentOutputs},
 };
 
 impl AccountHandle {
@@ -47,14 +46,7 @@ impl AccountHandle {
                 log::debug!(
                     "[search_addresses_with_outputs] generate {address_amount_to_generate} public addresses below the start index"
                 );
-                self.generate_addresses(
-                    address_amount_to_generate,
-                    Some(AddressGenerationOptions {
-                        internal: false,
-                        options: None,
-                    }),
-                )
-                .await?;
+                self.generate_addresses(address_amount_to_generate, None).await?;
             }
             // internal addresses
             if sync_options.address_start_index_internal != 0 {
@@ -71,9 +63,9 @@ impl AccountHandle {
                 );
                 self.generate_addresses(
                     address_amount_to_generate,
-                    Some(AddressGenerationOptions {
+                    Some(GenerateAddressOptions {
                         internal: true,
-                        options: None,
+                        ..Default::default()
                     }),
                 )
                 .await?;
@@ -101,21 +93,13 @@ impl AccountHandle {
                 "[search_addresses_with_outputs] address_gap_limit: {address_gap_limit}, address_gap_limit_internal: {address_gap_limit_internal}"
             );
             // generate public and internal addresses
-            let addresses = self
-                .generate_addresses(
-                    address_gap_limit,
-                    Some(AddressGenerationOptions {
-                        internal: false,
-                        options: None,
-                    }),
-                )
-                .await?;
+            let addresses = self.generate_addresses(address_gap_limit, None).await?;
             let internal_addresses = self
                 .generate_addresses(
                     address_gap_limit_internal,
-                    Some(AddressGenerationOptions {
+                    Some(GenerateAddressOptions {
                         internal: true,
-                        options: None,
+                        ..Default::default()
                     }),
                 )
                 .await?;

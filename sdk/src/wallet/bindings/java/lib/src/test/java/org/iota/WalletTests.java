@@ -6,7 +6,7 @@ import org.iota.types.AccountAddress;
 import org.iota.types.AccountHandle;
 import org.iota.types.addresses.Address;
 import org.iota.types.account_methods.GenerateAddresses;
-import org.iota.types.account_methods.AddressGenerationOptions;
+import org.iota.types.account_methods.GenerateAddressOptions;
 import org.iota.types.account_methods.SetAlias;
 import org.iota.types.exceptions.WalletException;
 import org.iota.types.ids.account.AccountAlias;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class WalletTests extends TestSettings {
     @Test
     public void testCreateAccount() throws WalletException {
@@ -27,21 +28,23 @@ public class WalletTests extends TestSettings {
         System.out.println(wallet.createAccount("Alice"));
         try {
             System.out.println(wallet.createAccount("Alice"));
-        } catch (WalletException expectedException) { ; }
+        } catch (WalletException expectedException) {
+            ;
+        }
     }
 
     @Test
     public void testGetAccountByAlias() throws WalletException {
         AccountHandle a = wallet.createAccount("Alice");
         AccountHandle b = wallet.getAccount(new AccountAlias("Alice"));
-        assertEquals(a,b);
+        assertEquals(a, b);
     }
 
     @Test
     public void testGetAccountByIndex() throws WalletException {
         AccountHandle a = wallet.createAccount("Alice");
         AccountHandle b = wallet.getAccount(new AccountIndex(0));
-        assertEquals(a,b);
+        assertEquals(a, b);
     }
 
     @Test
@@ -55,24 +58,26 @@ public class WalletTests extends TestSettings {
 
     @Test
     public void testGenerateAddress() throws WalletException {
-        AddressGenerationOptions.GenerateAddressOptions options = new AddressGenerationOptions.GenerateAddressOptions().withLedgerNanoPrompt(false);
-        AddressGenerationOptions addressOptions = new AddressGenerationOptions().withOptions(options);
+        GenerateAddressOptions options = new GenerateAddressOptions()
+                .withLedgerNanoPrompt(false);
 
-        String address = wallet.generateAddress(0, false, 0, options, "rms");
+        String address = wallet.generateAddress(0, 0, options, "rms");
         assertEquals("rms1qpx0mcrqq7t6up73n4na0zgsuuy4p0767ut0qq67ngctj7pg4tm2ynsuynp", address);
 
-        // generated alice account later has 2 addresses premade, so we check against the third
-        address = wallet.generateAddress(0, false, 2, options, "rms");
+        // generated alice account later has 2 addresses premade, so we check against
+        // the third
+        address = wallet.generateAddress(0, 2, options, "rms");
         assertEquals("rms1qzjq2jwzp8ddh0gawgdskvtd6awlv82c8y0a9s6g7kgszn6ts95u6r4kx2n", address);
 
-        String addressPublic = wallet.generateAddress(0, true, 0, options, "rms");
+        String addressPublic = wallet.generateAddress(0, 0, options.withInternal(true), "rms");
         assertEquals("rms1qqtjgttzh2dp5exzru94pddle5sqf0007q4smdsaycerff2hny5764xrkgk", addressPublic);
 
-        String anotherAddress = wallet.generateAddress(10, true, 10, options, "rms");
+        String anotherAddress = wallet.generateAddress(10, 10, options.withInternal(true), "rms");
         assertEquals("rms1qzu4a5ryj39h07z9atn2fza59wu2n5f295st5ehmjg5u8tyveaew65lw3yg", anotherAddress);
 
         AccountHandle account = wallet.createAccount("Alice");
-        AccountAddress[] addresses = account.generateAddresses(new GenerateAddresses().withAmount(1).withAddressGenerationOptions(addressOptions));
+        AccountAddress[] addresses = account
+                .generateAddresses(new GenerateAddresses().withAmount(1).withGenerateAddressOptions(options));
 
         assertEquals(1, addresses.length);
         String addrHex = wallet.bech32ToHex(addresses[0].getAddress());
@@ -80,7 +85,8 @@ public class WalletTests extends TestSettings {
                 wallet.hexToBech32(addrHex, "rms"));
 
         account = wallet.getAccounts()[0];
-        addresses = account.generateAddresses(new GenerateAddresses().withAmount(1).withAddressGenerationOptions(addressOptions));
+        addresses = account
+                .generateAddresses(new GenerateAddresses().withAmount(1).withGenerateAddressOptions(options));
         addrHex = wallet.bech32ToHex(addresses[0].getAddress());
         assertEquals(address, wallet.hexToBech32(addrHex, "rms"));
     }
