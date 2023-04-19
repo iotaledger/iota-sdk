@@ -338,6 +338,7 @@ pub async fn claimable_outputs_command(account_handle: &AccountHandle) -> Result
         .iter()
         .filter_map(|(output_id, unlockable)| unlockable.then_some(output_id))
     {
+        // Unwrap: for the iterated `OutpuId`s the following call will always return `Some(...)`.
         let output_data = account_handle.get_output(output_id).await.unwrap();
         let output = output_data.output;
         let kind = match output {
