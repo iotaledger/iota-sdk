@@ -100,7 +100,7 @@ impl Client {
         loop {
             let parents = match &parents {
                 Some(parents) => parents.clone(),
-                None => Parents::new(self.get_tips().await?)?,
+                None => Parents::from_vec(self.get_tips().await?)?,
             };
 
             let single_threaded_miner = SingleThreadedMinerBuilder::new()
