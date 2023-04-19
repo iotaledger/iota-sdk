@@ -9,7 +9,7 @@ use crate::{
         restore_command, set_node_command, sync_command, unlock_wallet, InitParameters, WalletCli, WalletCommand,
     },
     error::Error,
-    helper::{get_account_name, get_decision, get_password, pick_account},
+    helper::{get_account_name, get_decision, get_password, pick_account, print_help},
     println_log_error, println_log_info,
 };
 
@@ -60,10 +60,11 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                 let wallet = unlock_wallet(storage_path, snapshot_path, &password).await?;
                 if wallet.get_accounts().await?.is_empty() {
                     // ask the user whether a default account should be created
-                    if get_decision("Create first account?")? {
+                    if get_decision("Create initial account?")? {
                         let alias = get_account_name("New account name", &wallet).await?;
                         let account = add_account(&wallet, Some(alias)).await?;
-                        println_log_info!("Created new account.");
+                        println_log_info!("Created initial account.");
+                        print_help();
                         (Some(wallet), Some(account))
                     } else {
                         (Some(wallet), None)
@@ -81,10 +82,11 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                     println_log_info!("Created new wallet.");
 
                     // ask the user whether a default account should be created
-                    if get_decision("Create first account?")? {
+                    if get_decision("Create initial account?")? {
                         let alias = get_account_name("New account name", &wallet).await?;
                         let account = add_account(&wallet, Some(alias)).await?;
-                        println_log_info!("Created new account.");
+                        println_log_info!("Created initial account.");
+                        print_help();
                         (Some(wallet), Some(account))
                     } else {
                         (Some(wallet), None)
