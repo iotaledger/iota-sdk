@@ -49,7 +49,6 @@ pub fn get_decision(prompt: &str) -> Result<bool, Error> {
 
 pub async fn get_account_name(prompt: &str, wallet: &Wallet) -> Result<String, Error> {
     let mut input = Input::<String>::new().with_prompt(prompt).interact_text()?;
-
     let accounts = wallet.get_account_aliases().await?;
 
     while accounts.iter().any(|alias| alias == &input) {

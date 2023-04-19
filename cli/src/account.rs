@@ -48,7 +48,7 @@ pub async fn account_prompt_internal(
         account.alias().clone()
     };
     let command: String = Input::new()
-        .with_prompt(format!("Account \"{}\"", alias))
+        .with_prompt(console::style(format!("Account \"{}\"", alias)).green().to_string())
         .history_with(history)
         .completion_with(&ACCOUNT_COMPLETION)
         .interact_text()?;
