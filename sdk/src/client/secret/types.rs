@@ -46,7 +46,7 @@ pub struct AccountAddress {
 
 /// Options provided to `generate_address()`.
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", default)]
 pub struct GenerateAddressOptions {
     pub internal: bool,
     /// Display the address on ledger devices.

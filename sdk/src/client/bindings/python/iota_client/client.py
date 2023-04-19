@@ -367,9 +367,11 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
                 options['range']['start'] = options.pop('start')
             if is_end_set:
                 options['range']['end'] = options.pop('end')
+        options['options'] = {}
+        if 'internal' in options:
+            options['options']['internal'] = options.pop('internal')
         if 'ledger_nano_prompt' in options:
-            options['options'] = {
-                'ledger_nano_prompt': options.pop('ledger_nano_prompt')}
+            options['options']['ledger_nano_prompt'] = options.pop('ledger_nano_prompt')
 
         options = humps.camelize(options)
 
