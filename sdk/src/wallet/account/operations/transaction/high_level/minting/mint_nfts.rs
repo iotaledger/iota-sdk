@@ -22,6 +22,7 @@ use crate::{
 
 /// Address and NFT for `send_nft()`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NftOptions {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
     /// first address of the account.
@@ -35,12 +36,12 @@ pub struct NftOptions {
     /// NFT issuer feature.
     pub issuer: Option<String>,
     /// NFT immutable metadata feature.
-    #[serde(rename = "immutableMetadata")]
     pub immutable_metadata: Option<Vec<u8>>,
 }
 
 /// Dto for NftOptions.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NftOptionsDto {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
     /// first address of the account.
@@ -54,7 +55,6 @@ pub struct NftOptionsDto {
     /// NFT issuer feature, bech32 encoded address.
     pub issuer: Option<String>,
     /// Immutable NFT metadata, hex encoded bytes.
-    #[serde(rename = "immutableMetadata")]
     pub immutable_metadata: Option<String>,
 }
 

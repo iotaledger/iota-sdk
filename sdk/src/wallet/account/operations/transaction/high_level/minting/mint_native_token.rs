@@ -23,35 +23,29 @@ use crate::{
 
 /// Address and foundry data for `mint_native_token()`
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NativeTokenOptions {
     /// The alias id which should be used to create the foundry.
-    #[serde(rename = "aliasId")]
     pub alias_id: Option<AliasId>,
     /// Circulating supply
-    #[serde(rename = "circulatingSupply")]
     pub circulating_supply: U256,
     /// Maximum supply
-    #[serde(rename = "maximumSupply")]
     pub maximum_supply: U256,
     /// Foundry metadata
-    #[serde(rename = "foundryMetadata")]
     pub foundry_metadata: Option<Vec<u8>>,
 }
 
 /// Dto for NativeTokenOptions
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NativeTokenOptionsDto {
     /// The alias id which should be used to create the foundry.
-    #[serde(rename = "aliasId")]
     pub alias_id: Option<AliasIdDto>,
     /// Circulating supply
-    #[serde(rename = "circulatingSupply")]
     pub circulating_supply: U256Dto,
     /// Maximum supply
-    #[serde(rename = "maximumSupply")]
     pub maximum_supply: U256Dto,
     /// Foundry metadata, hex encoded bytes
-    #[serde(rename = "foundryMetadata")]
     pub foundry_metadata: Option<String>,
 }
 

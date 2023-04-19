@@ -205,8 +205,7 @@ Store a mnemonic in the Stronghold vault.
 ### submit\_payload
 
 ```python
-def submit_payload(payload_dto)
+def submit_payload(payload)
 ```
 
 Submit a payload in a block.
-

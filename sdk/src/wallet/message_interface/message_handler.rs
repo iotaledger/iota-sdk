@@ -842,13 +842,13 @@ impl WalletMessageHandler {
                 .await
             }
             AccountMethod::SendNativeTokens {
-                addresses_native_tokens,
+                addresses_and_native_tokens,
                 options,
             } => {
                 convert_async_panics(|| async {
                     let transaction = account_handle
                         .send_native_tokens(
-                            addresses_native_tokens.clone(),
+                            addresses_and_native_tokens.clone(),
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
@@ -857,13 +857,13 @@ impl WalletMessageHandler {
                 .await
             }
             AccountMethod::SendNft {
-                addresses_nft_ids,
+                addresses_and_nft_ids,
                 options,
             } => {
                 convert_async_panics(|| async {
                     let transaction = account_handle
                         .send_nft(
-                            addresses_nft_ids.clone(),
+                            addresses_and_nft_ids.clone(),
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;

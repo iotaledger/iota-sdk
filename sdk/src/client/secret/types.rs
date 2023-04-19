@@ -23,22 +23,22 @@ use crate::{
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, ZeroizeOnDrop)]
 #[cfg(feature = "stronghold")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
+#[serde(rename_all = "camelCase")]
 pub struct StrongholdDto {
     /// The Stronghold password
     pub password: Option<String>,
     /// The timeout for auto key clearing, in seconds
     pub timeout: Option<u64>,
     /// The path for the Stronghold file
-    #[serde(rename = "snapshotPath")]
     pub snapshot_path: String,
 }
 /// An account address.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AccountAddress {
     /// The address.
     pub address: Address,
     /// The address key index.
-    #[serde(rename = "keyIndex")]
     pub key_index: u32,
     /// Determines if an address is a public or an internal (change) address.
     pub internal: bool,
@@ -46,10 +46,10 @@ pub struct AccountAddress {
 
 /// Options provided to `generate_address()`.
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GenerateAddressOptions {
     pub internal: bool,
     /// Display the address on ledger devices.
-    #[serde(rename = "ledgerNanoPrompt")]
     pub ledger_nano_prompt: bool,
 }
 
@@ -89,20 +89,19 @@ pub enum LedgerDeviceType {
 
 /// The Ledger device status.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct LedgerNanoStatus {
     /// Ledger is available and ready to be used.
     pub(crate) connected: bool,
     /// Ledger is connected and locked.
     pub(crate) locked: bool,
     /// Ledger blind signing enabled
-    #[serde(rename = "blindSigningEnabled")]
     pub(crate) blind_signing_enabled: bool,
     /// Ledger opened app.
     pub(crate) app: Option<LedgerApp>,
     /// Ledger device
     pub(crate) device: Option<LedgerDeviceType>,
     /// Buffer size on device
-    #[serde(rename = "bufferSize")]
     pub(crate) buffer_size: Option<usize>,
 }
 
@@ -135,11 +134,11 @@ impl LedgerNanoStatus {
 
 /// Data for transaction inputs for signing and ordering of unlock blocks
 #[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct InputSigningData {
     /// The output
     pub output: Output,
     /// The output metadata
-    #[serde(rename = "outputMetadata")]
     pub output_metadata: OutputMetadata,
     /// The chain derived from seed, only for ed25519 addresses
     pub chain: Option<Chain>,
@@ -154,11 +153,11 @@ impl InputSigningData {
 
 /// Dto for data for transaction inputs for signing and ordering of unlock blocks
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct InputSigningDataDto {
     /// The output
     pub output: OutputDto,
     /// The output metadata
-    #[serde(rename = "outputMetadata")]
     pub output_metadata: OutputMetadataDto,
     /// The chain derived from seed, only for ed25519 addresses
     pub chain: Option<Chain>,

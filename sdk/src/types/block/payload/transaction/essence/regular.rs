@@ -353,13 +353,12 @@ pub mod dto {
 
     /// Describes the essence data making up a transaction by defining its inputs and outputs and an optional payload.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct RegularTransactionEssenceDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "networkId")]
         pub network_id: String,
         pub inputs: Vec<InputDto>,
-        #[serde(rename = "inputsCommitment")]
         pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
         #[serde(skip_serializing_if = "Option::is_none")]

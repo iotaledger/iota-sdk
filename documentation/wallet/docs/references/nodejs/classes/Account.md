@@ -808,7 +808,7 @@ ___
 
 ### sendNativeTokens
 
-▸ **sendNativeTokens**(`addressesNativeTokens`, `transactionOptions?`): `Promise`<[`Transaction`](../interfaces/Transaction.md)\>
+▸ **sendNativeTokens**(`addressesAndNativeTokens`, `transactionOptions?`): `Promise`<[`Transaction`](../interfaces/Transaction.md)\>
 
 Send native tokens.
 
@@ -816,7 +816,7 @@ Send native tokens.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `addressesNativeTokens` | [`AddressNativeTokens`](../interfaces/AddressNativeTokens.md)[] | Addresses amounts and native tokens. |
+| `addressesAndNativeTokens` | [`AddressNativeTokens`](../interfaces/AddressNativeTokens.md)[] | Addresses amounts and native tokens. |
 | `transactionOptions?` | [`TransactionOptions`](../interfaces/TransactionOptions.md) | The options to define a `RemainderValueStrategy` or custom inputs. |
 
 #### Returns

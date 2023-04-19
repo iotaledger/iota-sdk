@@ -926,13 +926,13 @@ export class Account {
 
     /**
      * Send native tokens.
-     * @param addressesNativeTokens Addresses amounts and native tokens.
+     * @param addressesAndNativeTokens Addresses amounts and native tokens.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The sent transaction.
      */
     async sendNativeTokens(
-        addressesNativeTokens: AddressNativeTokens[],
+        addressesAndNativeTokens: AddressNativeTokens[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const response = await this.messageHandler.callAccountMethod(
@@ -940,7 +940,7 @@ export class Account {
             {
                 name: 'sendNativeTokens',
                 data: {
-                    addressesNativeTokens,
+                    addressesAndNativeTokens,
                     options: transactionOptions,
                 },
             },
