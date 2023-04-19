@@ -146,7 +146,7 @@ jobs:
         shell: bash
         working-directory: sdk/src/wallet/bindings/java/
         run: |
-          ./gradlew publishToSonatype
+          ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
           if [ "$RUNNER_OS" == "macOS" ];
           then ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository -PbuildTarget=aarch64-apple-darwin
           fi
