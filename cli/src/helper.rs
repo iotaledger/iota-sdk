@@ -5,7 +5,11 @@ use dialoguer::{console::Term, theme::ColorfulTheme, Input, Password, Select};
 use iota_sdk::wallet::{AccountHandle, Wallet};
 use tokio::{fs::OpenOptions, io::AsyncWriteExt};
 
-use crate::{error::Error, println_log_info, command::{account::AccountCli, wallet::WalletCli}};
+use crate::{
+    command::{account::AccountCli, wallet::WalletCli},
+    error::Error,
+    println_log_info,
+};
 
 // TODO: make this configurable via the CLI to allow for more secure locations (e.g. encrypted usb drives etc)
 const MNEMONIC_FILE_NAME: &str = "mnemonic.txt";
