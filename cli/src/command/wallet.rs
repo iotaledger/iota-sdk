@@ -145,7 +145,6 @@ pub async fn init_command(
     } else {
         panic!("cli-wallet only supports Stronghold-backed secret managers at the moment.");
     }
-    println_log_info!("Mnemonic stored successfully");
 
     Ok(wallet)
 }
