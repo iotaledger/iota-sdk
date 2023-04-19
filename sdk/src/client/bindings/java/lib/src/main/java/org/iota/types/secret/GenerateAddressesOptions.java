@@ -48,7 +48,7 @@ public class GenerateAddressesOptions {
         return o;
     }
 
-    static class GenerateAddressOptions {
+    public static class GenerateAddressOptions {
         private boolean internal;
         private boolean ledgerNanoPrompt;
 
