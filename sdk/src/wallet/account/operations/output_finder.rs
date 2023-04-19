@@ -22,7 +22,7 @@ impl AccountHandle {
         log::debug!("[search_addresses_with_outputs]");
         let mut sync_options = match sync_options {
             Some(opt) => opt,
-            None => self.sync_options().await.clone()
+            None => self.default_sync_options().await.clone()
         };
 
         // store the current index, so we can remove new addresses with higher indexes later again, if they don't have

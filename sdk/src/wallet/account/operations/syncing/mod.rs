@@ -30,7 +30,7 @@ impl AccountHandle {
     }
 
     // Get the default sync options we use when none are provided
-    pub async fn sync_options(&self) -> SyncOptions {
+    pub async fn default_sync_options(&self) -> SyncOptions {
         self.fallback_sync_options.lock().await.clone()
     }
 
@@ -39,7 +39,7 @@ impl AccountHandle {
     pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<AccountBalance> {
         let options = match options {
             Some(opt) => opt,
-            None => self.sync_options().await.clone()
+            None => self.default_sync_options().await.clone()
         };
         
         log::debug!("[SYNC] start syncing with {:?}", options);
