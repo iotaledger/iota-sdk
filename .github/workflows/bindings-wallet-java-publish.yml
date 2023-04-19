@@ -148,7 +148,7 @@ jobs:
         run: |
           ./gradlew publishToSonatype
           if [ "$RUNNER_OS" == "macOS" ];
-          then ./gradlew publishToSonatype -PbuildTarget=aarch64-apple-darwin
+          then ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository -PbuildTarget=aarch64-apple-darwin
           fi
 
   release-android:
