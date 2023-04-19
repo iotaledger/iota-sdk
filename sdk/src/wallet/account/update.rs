@@ -25,7 +25,6 @@ use crate::{
 impl AccountHandle {
     /// Set the alias for the account
     pub async fn set_alias(&mut self, alias: &str) -> crate::wallet::Result<()> {
-        self.alias = alias.to_string();
         let mut account = self.write().await;
         account.alias = alias.to_string();
         #[cfg(feature = "storage")]

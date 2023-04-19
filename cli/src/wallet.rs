@@ -69,7 +69,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                         (Some(wallet), None)
                     }
                 } else if let Some(account_handle) = pick_account(&wallet).await? {
-                    let account = account_handle.alias().to_string();
+                    let account = account_handle.alias().await;
                     (Some(wallet), Some(account))
                 } else {
                     (Some(wallet), None)

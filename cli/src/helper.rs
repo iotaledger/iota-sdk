@@ -41,8 +41,9 @@ pub fn get_decision(prompt: &str) -> Result<bool, Error> {
 pub async fn get_account_name(prompt: &str, wallet: &Wallet) -> Result<String, Error> {
     let mut input = Input::<String>::new().with_prompt(prompt).interact_text()?;
 
-    let accounts = wallet.get_accounts().await?;
-    while accounts.iter().any(|account| account.alias() == input) {
+    let accounts = wallet.get_account_aliases().await?;
+
+    while accounts.iter().any(|alias| alias == &input) {
         println_log_info!("Account with alias '{input}' already exists, please choose another name.");
         input = Input::<String>::new()
             .with_prompt("Please choose a new account name")
@@ -60,8 +61,7 @@ pub async fn pick_account(wallet: &Wallet) -> Result<Option<AccountHandle>, Erro
         1 => Ok(Some(accounts.swap_remove(0))),
         _ => {
             // fetch all available account aliases to display to the user
-            let mut aliases = Vec::with_capacity(accounts.len());
-            aliases.extend(accounts.iter().map(|a| a.alias()));
+            let aliases = wallet.get_account_aliases().await?;
             let index = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("Select an account:")
                 .items(&aliases)
