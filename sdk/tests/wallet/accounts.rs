@@ -159,6 +159,7 @@ async fn account_rename_alias() -> Result<()> {
     account.set_alias("Bob").await?;
 
     assert_eq!(account.alias(), "Bob".to_string());
+    assert_eq!(account.read().await.alias(), "Bob");
 
     tear_down(storage_path)
 }
