@@ -25,7 +25,7 @@ use iota_sdk::{
     },
 };
 
-use crate::{error::Error, println_log_info};
+use crate::{error::Error, helper::to_utc_date_time, println_log_info};
 
 #[derive(Debug, Parser)]
 #[command(author, version, about, long_about = None, propagate_version = true)]
@@ -187,7 +187,18 @@ pub enum AccountCommand {
     /// Synchronize the account.
     Sync,
     /// List the account transactions.
-    Transactions,
+    #[clap(alias = "txs")]
+    Transactions {
+        /// List account transactions with all details.
+        #[arg(long, default_value_t = false)]
+        show_details: bool,
+    },
+    /// Show the details of the Transaction
+    #[clap(alias = "tx")]
+    Transaction {
+        /// Transaction ID to be displayed e.g.0x84fe6b1796bddc022c9bc40206f0a692f4536b02aa8c13140264e2e01a3b7e4b.
+        transaction_id: String,
+    },
     /// List the account unspent outputs.
     UnspentOutputs,
     /// Cast votes for an event.
@@ -582,11 +593,9 @@ pub async fn send_command(
     expiration: Option<u32>,
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
-    let outputs = vec![
-        AddressWithAmount::new(address, amount)
-            .with_return_address(return_address)
-            .with_expiration(expiration),
-    ];
+    let outputs = vec![AddressWithAmount::new(address, amount)
+        .with_return_address(return_address)
+        .with_expiration(expiration)];
     let transaction = account_handle
         .send_amount(
             outputs,
@@ -622,15 +631,13 @@ pub async fn send_native_token_command(
         let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
         account_handle.client().bech32_hrp_matches(&bech32_hrp).await?;
 
-        let outputs = vec![
-            BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
-                .add_unlock_condition(AddressUnlockCondition::new(address))
-                .with_native_tokens(vec![NativeToken::new(
-                    TokenId::from_str(&token_id)?,
-                    U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-                )?])
-                .finish_output(token_supply)?,
-        ];
+        let outputs = vec![BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
+            .add_unlock_condition(AddressUnlockCondition::new(address))
+            .with_native_tokens(vec![NativeToken::new(
+                TokenId::from_str(&token_id)?,
+                U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+            )?])
+            .finish_output(token_supply)?];
 
         account_handle.send(outputs, None).await?
     } else {
@@ -680,15 +687,40 @@ pub async fn sync_command(account_handle: &AccountHandle) -> Result<(), Error> {
 }
 
 /// `transactions` command
-pub async fn transactions_command(account_handle: &AccountHandle) -> Result<(), Error> {
-    let transactions = account_handle.transactions().await?;
+pub async fn transactions_command(account_handle: &AccountHandle, show_details: bool) -> Result<(), Error> {
+    let mut transactions = account_handle.transactions().await?;
+    transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
 
     if transactions.is_empty() {
         println_log_info!("No transactions found");
     } else {
-        for tx in transactions {
-            println_log_info!("{}", serde_json::to_string(&TransactionDto::from(&tx))?);
+        for (i, tx) in transactions.into_iter().enumerate() {
+            if show_details {
+                println_log_info!("{}", serde_json::to_string(&TransactionDto::from(&tx))?);
+            } else {
+                let transaction_time = to_utc_date_time(tx.timestamp)?;
+                let formatted_time = transaction_time.format("%Y-%m-%d %H:%M:%S").to_string();
+
+                println_log_info!("{:<5} {:40}\t{:20}", i, tx.transaction_id.to_string(), formatted_time,);
+            }
         }
+    }
+
+    Ok(())
+}
+
+/// `transaction` command
+pub async fn transaction_command(account_handle: &AccountHandle, transaction_id: &str) -> Result<(), Error> {
+    let maybe_transaction = account_handle
+        .transactions()
+        .await?
+        .into_iter()
+        .find(|tx| tx.transaction_id.to_string() == transaction_id);
+
+    if let Some(transaction) = maybe_transaction {
+        println_log_info!("{}", serde_json::to_string(&TransactionDto::from(&transaction))?);
+    } else {
+        println_log_info!("No transaction found");
     }
 
     Ok(())

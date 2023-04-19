@@ -1,6 +1,7 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use chrono::{DateTime, NaiveDateTime, Utc};
 use dialoguer::{console::Term, theme::ColorfulTheme, Password, Select};
 use iota_sdk::wallet::Wallet;
 use tokio::{fs::OpenOptions, io::AsyncWriteExt};
@@ -92,4 +93,15 @@ async fn write_mnemonic_to_file(path: &str, mnemonic: &str) -> Result<(), Error>
     file.write_all(format!("{mnemonic}\n").as_bytes()).await?;
 
     Ok(())
+}
+
+pub fn to_utc_date_time(ts_millis: u128) -> Result<DateTime<Utc>, Error> {
+    let milliseconds = ts_millis % 1000;
+    let secs = (ts_millis - milliseconds) / 1000;
+
+    let naive_time = NaiveDateTime::from_timestamp_opt(secs as i64, (milliseconds * 1000000) as u32).ok_or(
+        Error::Miscellaneous("Failed to convert timestamp to NaiveDateTime".to_string()),
+    )?;
+
+    Ok(DateTime::from_utc(naive_time, Utc))
 }

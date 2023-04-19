@@ -24,3 +24,4 @@ prefix-hex = { version = "0.7.0", default-features = false, features = [ "std" ]
 serde_json = { version = "1.0.95", default-features = false }
 thiserror = { version = "1.0.40", default-features = false }
 tokio = { version = "1.27.0", default-features = false, features = [ "fs" ] }
+chrono = { version = "0.4.24", default-features = false, features=["std"]}

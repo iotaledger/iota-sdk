@@ -14,8 +14,9 @@ use crate::{
         decrease_voting_power_command, destroy_alias_command, destroy_foundry_command, faucet_command,
         increase_native_token_command, increase_voting_power_command, mint_native_token_command, mint_nft_command,
         new_address_command, output_command, outputs_command, participation_overview_command, send_command,
-        send_native_token_command, send_nft_command, stop_participating_command, sync_command, transactions_command,
-        unspent_outputs_command, vote_command, voting_output_command, voting_power_command, AccountCli, AccountCommand,
+        send_native_token_command, send_nft_command, stop_participating_command, sync_command, transaction_command,
+        transactions_command, unspent_outputs_command, vote_command, voting_output_command, voting_power_command,
+        AccountCli, AccountCommand,
     },
     error::Error,
     helper::bytes_from_hex_or_file,
@@ -164,7 +165,12 @@ pub async fn account_prompt_internal(
                 } => send_native_token_command(&account_handle, address, token_id, amount, gift_storage_deposit).await,
                 AccountCommand::SendNft { address, nft_id } => send_nft_command(&account_handle, address, nft_id).await,
                 AccountCommand::Sync => sync_command(&account_handle).await,
-                AccountCommand::Transactions => transactions_command(&account_handle).await,
+                AccountCommand::Transactions { show_details } => {
+                    transactions_command(&account_handle, show_details).await
+                }
+                AccountCommand::Transaction { transaction_id } => {
+                    transaction_command(&account_handle, &transaction_id).await
+                }
                 AccountCommand::UnspentOutputs => unspent_outputs_command(&account_handle).await,
                 AccountCommand::Vote { event_id, answers } => vote_command(&account_handle, event_id, answers).await,
                 AccountCommand::StopParticipating { event_id } => {
