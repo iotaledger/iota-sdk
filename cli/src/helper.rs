@@ -25,14 +25,14 @@ pub fn get_password(prompt: &str, confirmation: bool) -> Result<String, Error> {
 pub fn get_decision(prompt: &str) -> Result<bool, Error> {
     let input = Input::<String>::new()
         .with_prompt(prompt)
-        .default("Yes".into())
+        .default("yes".into())
         .interact_text()?;
 
-    match input.as_str() {
-        "Yes" | "yes" | "y" => Ok(true),
-        "No" | "no" | "n" => Ok(false),
+    match input.to_lowercase().as_str() {
+        "yes" | "y" => Ok(true),
+        "no" | "n" => Ok(false),
         _ => Err(Error::InvalidInput {
-            expected: "Yes|yes|y or No|no|n".to_string(),
+            expected: "yes|y or no|n".to_string(),
             found: input,
         }),
     }
