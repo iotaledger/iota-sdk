@@ -417,22 +417,22 @@ class Account:
             }
         )
 
-    def send_native_tokens(self, addresses_native_tokens, options=None):
+    def send_native_tokens(self, addresses_and_native_tokens, options=None):
         """Send native tokens.
         """
         return self._call_account_method(
             'sendNativeTokens', {
-                'addressesNativeTokens': addresses_native_tokens,
+                'addressesAndNativeTokens': addresses_and_native_tokens,
                 'options': options
             }
         )
 
-    def send_nft(self, addresses_nft_ids, options=None):
+    def send_nft(self, addresses_and_nft_ids, options=None):
         """Send nft.
         """
         return self._call_account_method(
             'sendNft', {
-                'addressesAndNftIds': addresses_nft_ids,
+                'addressesAndNftIds': addresses_and_nft_ids,
                 'options': options
             }
         )

@@ -118,17 +118,15 @@ pub mod dto {
 
     /// Describes a foundry output that is controlled by an alias.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct SimpleTokenSchemeDto {
         #[serde(rename = "type")]
         pub kind: u8,
         // Amount of tokens minted by a foundry.
-        #[serde(rename = "mintedTokens")]
         pub minted_tokens: U256Dto,
         // Amount of tokens melted by a foundry.
-        #[serde(rename = "meltedTokens")]
         pub melted_tokens: U256Dto,
         // Maximum supply of tokens controlled by a foundry.
-        #[serde(rename = "maximumSupply")]
         pub maximum_supply: U256Dto,
     }
 

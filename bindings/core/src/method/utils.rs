@@ -24,37 +24,35 @@ pub enum UtilsMethod {
         bech32: String,
     },
     /// Transforms a hex encoded address to a bech32 encoded address
+    #[serde(rename_all = "camelCase")]
     HexToBech32 {
         /// Hex encoded bech32 address
         hex: String,
         /// Human readable part
-        #[serde(rename = "bech32Hrp")]
         bech32_hrp: String,
     },
     /// Transforms an alias id to a bech32 encoded address
+    #[serde(rename_all = "camelCase")]
     AliasIdToBech32 {
         /// Alias ID
-        #[serde(rename = "aliasId")]
         alias_id: AliasId,
         /// Human readable part
-        #[serde(rename = "bech32Hrp")]
         bech32_hrp: String,
     },
     /// Transforms an nft id to a bech32 encoded address
+    #[serde(rename_all = "camelCase")]
     NftIdToBech32 {
         /// Nft ID
-        #[serde(rename = "nftId")]
         nft_id: NftId,
         /// Human readable part
-        #[serde(rename = "bech32Hrp")]
         bech32_hrp: String,
     },
     /// Transforms a hex encoded public key to a bech32 encoded address
+    #[serde(rename_all = "camelCase")]
     HexPublicKeyToBech32Address {
         /// Hex encoded public key
         hex: String,
         /// Human readable part
-        #[serde(rename = "bech32Hrp")]
         bech32_hrp: String,
     },
     /// Returns a valid Address parsed from a String.
@@ -86,27 +84,25 @@ pub enum UtilsMethod {
         payload: TransactionPayloadDto,
     },
     /// Computes the alias ID
+    #[serde(rename_all = "camelCase")]
     ComputeAliasId {
         /// Output ID
-        #[serde(rename = "outputId")]
         output_id: OutputId,
     },
     /// Computes the NFT ID
+    #[serde(rename_all = "camelCase")]
     ComputeNftId {
         /// Output ID
-        #[serde(rename = "outputId")]
         output_id: OutputId,
     },
     /// Computes the Foundry ID
+    #[serde(rename_all = "camelCase")]
     ComputeFoundryId {
         /// Alias address
-        #[serde(rename = "aliasAddress")]
         alias_address: AliasAddress,
         /// Serial number
-        #[serde(rename = "serialNumber")]
         serial_number: u32,
         /// Token scheme kind
-        #[serde(rename = "tokenSchemeKind")]
         token_scheme_kind: u8,
     },
     /// Requests funds for a given address from the faucet.

@@ -262,9 +262,9 @@ pub mod dto {
 
     /// The block object that nodes gossip around in the network.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct BlockDto {
         ///
-        #[serde(rename = "protocolVersion")]
         pub protocol_version: u8,
         ///
         pub parents: Vec<String>,

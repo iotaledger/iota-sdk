@@ -526,11 +526,11 @@ class IotaClient(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, Utils):
             'mnemonic': mnemonic
         })
 
-    def submit_payload(self, payload_dto):
+    def submit_payload(self, payload):
         """Submit a payload in a block.
         """
         return self.send_message('postBlockPayload', {
-            'payloadDto': payload_dto
+            'payload': payload
         })
 
     def sign_ed25519(self, secret_manager, message, chain):

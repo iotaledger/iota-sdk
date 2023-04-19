@@ -300,24 +300,24 @@ pub(crate) async fn call_account_method_internal(account: &AccountHandle, method
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
         AccountMethod::SendNativeTokens {
-            addresses_native_tokens,
+            addresses_and_native_tokens,
             options,
         } => {
             let transaction = account
                 .send_native_tokens(
-                    addresses_native_tokens.clone(),
+                    addresses_and_native_tokens.clone(),
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
         AccountMethod::SendNft {
-            addresses_nft_ids,
+            addresses_and_nft_ids,
             options,
         } => {
             let transaction = account
                 .send_nft(
-                    addresses_nft_ids.clone(),
+                    addresses_and_nft_ids.clone(),
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
