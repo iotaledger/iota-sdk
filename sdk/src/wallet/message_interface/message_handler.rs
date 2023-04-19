@@ -398,7 +398,7 @@ impl WalletMessageHandler {
     }
 
     async fn call_account_method(&self, account_id: &AccountIdentifier, method: AccountMethod) -> Result<Response> {
-        let account_handle = self.wallet.get_account(account_id.clone()).await?;
+        let mut account_handle = self.wallet.get_account(account_id.clone()).await?;
 
         match method {
             AccountMethod::BuildAliasOutput {

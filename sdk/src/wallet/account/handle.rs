@@ -46,6 +46,7 @@ pub struct FilterOptions {
 #[derive(Debug, Clone)]
 pub struct AccountHandle {
     account: Arc<RwLock<Account>>,
+    pub(crate) alias: String,
     pub(crate) client: Client,
     pub(crate) secret_manager: Arc<RwLock<SecretManager>>,
     // mutex to prevent multiple sync calls at the same or almost the same time, the u128 is a timestamp
@@ -68,6 +69,7 @@ impl AccountHandle {
         #[cfg(feature = "storage")] storage_manager: StorageManagerHandle,
     ) -> Self {
         Self {
+            alias: account.alias().clone(),
             account: Arc::new(RwLock::new(account)),
             client,
             secret_manager,
@@ -79,8 +81,8 @@ impl AccountHandle {
         }
     }
 
-    pub async fn alias(&self) -> String {
-        self.read().await.alias.clone()
+    pub fn alias(&self) -> &str {
+        &self.alias
     }
 
     // Get the Client

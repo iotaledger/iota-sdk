@@ -252,7 +252,7 @@ impl AccountHandle {
         {
             log::debug!(
                 "[search_addresses_with_outputs] storing account {} with new synced data",
-                self.alias().await
+                self.alias()
             );
             self.save(None).await?;
         }

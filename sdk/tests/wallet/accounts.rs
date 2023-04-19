@@ -150,14 +150,15 @@ async fn account_rename_alias() -> Result<()> {
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let mut account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
 
-    assert_eq!(account.alias().await, "Alice".to_string());
+    assert_eq!(account.alias(), "Alice".to_string());
+    assert_eq!(account.read().await.alias(), "Alice");
 
     // rename account
     account.set_alias("Bob").await?;
 
-    assert_eq!(account.alias().await, "Bob".to_string());
+    assert_eq!(account.alias(), "Bob".to_string());
 
     tear_down(storage_path)
 }
