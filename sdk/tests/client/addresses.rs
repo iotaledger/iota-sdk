@@ -17,7 +17,7 @@ use iota_sdk::{
     client::{
         api::GetAddressesBuilder,
         constants::{IOTA_BECH32_HRP, IOTA_COIN_TYPE, IOTA_TESTNET_BECH32_HRP, SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
-        secret::{mnemonic::MnemonicSecretManager, GenerateAddressOptions, SecretManager},
+        secret::{GenerateAddressOptions, SecretManager},
         Client,
     },
     types::block::address::Address,
@@ -26,10 +26,7 @@ use serde::{Deserialize, Serialize};
 
 #[tokio::test]
 async fn addresses() {
-    let secret_manager = SecretManager::Mnemonic(
-        MnemonicSecretManager::try_from_hex_seed("0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2")
-            .unwrap(),
-    );
+    let secret_manager = crate::client::node_api::setup_secret_manager();
 
     let addresses = GetAddressesBuilder::new(&secret_manager)
         .with_coin_type(IOTA_COIN_TYPE)

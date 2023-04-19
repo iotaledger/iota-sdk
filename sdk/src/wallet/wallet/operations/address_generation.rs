@@ -38,7 +38,7 @@ impl Wallet {
                 if options.as_ref().map_or(false, |o| o.ledger_nano_prompt) {
                     #[cfg(feature = "events")]
                     {
-                        let changed_options = options.clone().map(|mut options| {
+                        let changed_options = options.map(|mut options| {
                             // Change options so ledger will not show the prompt the first time
                             options.ledger_nano_prompt = false;
                             options

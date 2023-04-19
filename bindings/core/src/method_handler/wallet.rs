@@ -131,9 +131,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             options,
             bech32_hrp,
         } => {
-            let address = wallet
-                .generate_address(account_index, address_index, options)
-                .await?;
+            let address = wallet.generate_address(account_index, address_index, options).await?;
 
             let bech32_hrp = match bech32_hrp {
                 Some(bech32_hrp) => bech32_hrp,

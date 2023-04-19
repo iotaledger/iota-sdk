@@ -2,9 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[cfg(feature = "participation")]
-use iota_sdk::wallet::account::types::participation::ParticipationEventRegistrationOptions;
 use iota_sdk::{
-    client::{api::{PreparedTransactionDataDto, SignedTransactionDataDto}, secret::GenerateAddressOptions},
+    client::node_manager::node::Node,
+    types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
+    wallet::account::types::participation::ParticipationEventRegistrationOptions,
+};
+use iota_sdk::{
+    client::{
+        api::{PreparedTransactionDataDto, SignedTransactionDataDto},
+        secret::GenerateAddressOptions,
+    },
     types::block::{
         dto::U256Dto,
         output::{
@@ -21,11 +28,6 @@ use iota_sdk::{
         message_interface::dtos::AddressWithAmountDto,
         AddressAndNftId, AddressNativeTokens,
     },
-};
-#[cfg(feature = "participation")]
-use iota_sdk::{
-    client::node_manager::node::Node,
-    types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
 };
 use serde::{Deserialize, Serialize};
 

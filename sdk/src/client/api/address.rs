@@ -131,7 +131,7 @@ impl<'a> GetAddressesBuilder<'a> {
 
         let addresses = self
             .secret_manager
-            .generate_addresses(self.coin_type, self.account_index, self.range, self.options.clone())
+            .generate_addresses(self.coin_type, self.account_index, self.range, self.options)
             .await?
             .into_iter()
             .map(|a| a.to_bech32(&bech32_hrp))
@@ -146,7 +146,7 @@ impl<'a> GetAddressesBuilder<'a> {
                 self.coin_type,
                 self.account_index,
                 self.range,
-                self.options.clone().map(|mut o| {
+                self.options.map(|mut o| {
                     o.internal = false;
                     o
                 }),
@@ -183,7 +183,7 @@ impl<'a> GetAddressesBuilder<'a> {
                 self.coin_type,
                 self.account_index,
                 self.range.clone(),
-                self.options.clone().map(|mut o| {
+                self.options.map(|mut o| {
                     o.internal = false;
                     o
                 }),
@@ -196,7 +196,7 @@ impl<'a> GetAddressesBuilder<'a> {
                 self.coin_type,
                 self.account_index,
                 self.range,
-                self.options.clone().map(|mut o| {
+                self.options.map(|mut o| {
                     o.internal = true;
                     o
                 }),

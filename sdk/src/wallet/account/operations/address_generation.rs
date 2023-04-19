@@ -67,7 +67,7 @@ impl AccountHandle {
                     #[cfg(feature = "events")]
                     let changed_options = {
                         // Change options so ledger will not show the prompt the first time
-                        let mut changed_options = options.clone();
+                        let mut changed_options = options;
                         changed_options.ledger_nano_prompt = false;
                         changed_options
                     };
