@@ -3,7 +3,7 @@ set -e
 rm -rf tmp && mkdir tmp && cd tmp
 
 # retrieve the latest version of org.iota.iota-wallet from Maven Central
-latest_version=$(wget -qO- "https://search.maven.org/solrsearch/select?q=g:%22org.iota%22+AND+a:%22iota-wallet%22&core=gav&rows=1&wt=json" | grep -oP '"v":"\K[^"]+' | head -1)
+latest_version=$(wget -qO- "https://search.maven.org/solrsearch/select?q=g:%22org.iota%22+AND+a:%22iota-wallet%22&core=gav&rows=1&wt=json" | jq ".response.docs[0].v" -r)
 
 echo Installing Java libraries v$latest_version
 curl -SL --progress-bar --fail https://github.com/iotaledger/iota-sdk/releases/download/iota-wallet-java-$latest_version/jniLibs.zip > iota-wallet-java.zip
