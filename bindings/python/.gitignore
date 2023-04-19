@@ -1,5 +1,5 @@
 build
 dist
-iota_wallet.egg-info
+iota_sdk.egg-info
 .tox
-iota_wallet_venv
+iota_sdk_venv

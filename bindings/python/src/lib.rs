@@ -10,16 +10,16 @@ mod wallet;
 
 use std::sync::Mutex;
 
-use client::*;
 use error::Result;
 use iota_sdk_bindings_core::{
-    call_utils_method as rust_call_utils_method, init_logger as init_logger_rust, UtilsMethod,
+    call_utils_method as rust_call_utils_method, init_logger as rust_init_logger, UtilsMethod,
 };
 use once_cell::sync::OnceCell;
 use pyo3::{prelude::*, wrap_pyfunction};
 use secret_manager::*;
 use tokio::runtime::Runtime;
-use wallet::*;
+
+use self::{client::*, wallet::*};
 
 /// Use one runtime.
 pub(crate) fn block_on<C: futures::Future>(cb: C) -> C::Output {
@@ -31,7 +31,7 @@ pub(crate) fn block_on<C: futures::Future>(cb: C) -> C::Output {
 #[pyfunction]
 /// Init the logger of wallet library.
 pub fn init_logger(config: String) -> PyResult<()> {
-    init_logger_rust(config).expect("failed to init logger");
+    rust_init_logger(config).expect("failed to init logger");
     Ok(())
 }
 
