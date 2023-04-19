@@ -23,7 +23,7 @@ use crate::OmittedDebug;
 /// The messages that can be sent to the actor.
 #[derive(Clone, Derivative, Serialize, Deserialize)]
 #[derivative(Debug)]
-#[serde(tag = "cmd", content = "payload", rename_all = "camelCase")]
+#[serde(tag = "name", content = "data", rename_all = "camelCase")]
 #[allow(clippy::large_enum_variant)]
 pub enum WalletMethod {
     /// Creates an account.

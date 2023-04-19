@@ -135,15 +135,6 @@ pub enum ClientMethod {
     /// Returns the unhealthy nodes.
     #[cfg(not(target_family = "wasm"))]
     UnhealthyNodes,
-    /// Get the ledger status
-    /// Expected response: [`LedgerNanoStatus`](crate::Response::LedgerNanoStatus)
-    #[cfg(feature = "ledger_nano")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
-    #[serde(rename_all = "camelCase")]
-    GetLedgerNanoStatus {
-        /// To use a Ledger Speculos simulator, pass `true` to `is_simulator`; `false` otherwise.
-        is_simulator: bool,
-    },
     /// Prepare a transaction for signing
     #[serde(rename_all = "camelCase")]
     PrepareTransaction {
