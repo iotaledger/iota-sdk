@@ -15,7 +15,7 @@ path = "src/main.rs"
 iota-sdk = { path = "../sdk", default-features = false, features = [ "wallet", "tls", "storage", "rocksdb", "stronghold", "participation" ] }
 
 clap = { version = "4.2.0", default-features = false, features = [ "std", "color", "help", "usage", "error-context", "suggestions", "derive", "env" ] }
-console = { version = "0.15.5", default-features = false }
+colored = { version = "2.0.0", default-features = false }
 dialoguer = { version = "0.10.3", default-features = false, features = [ "history", "password", "completion" ] }
 fern-logger = { version = "0.5.0", default-features = false }
 humantime = { version = "2.1.0", default-features = false }

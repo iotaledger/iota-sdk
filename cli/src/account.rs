@@ -43,12 +43,13 @@ pub async fn account_prompt_internal(
     account_handle: AccountHandle,
     history: &mut AccountHistory,
 ) -> Result<bool, Error> {
+    use colored::Colorize;
     let alias = {
         let account = account_handle.read().await;
         account.alias().clone()
     };
     let command: String = Input::new()
-        .with_prompt(console::style(format!("Account \"{}\"", alias)).green().to_string())
+        .with_prompt(format!("Account \"{}\"", alias).green().to_string())
         .history_with(history)
         .completion_with(&ACCOUNT_COMPLETION)
         .interact_text()?;
