@@ -44,7 +44,7 @@ pub fn call_wallet_method(wallet: &Wallet, message: String) -> Result<String> {
     let method = serde_json::from_str::<WalletMethod>(&message)?;
     let response = crate::block_on(async {
         rust_call_wallet_method(
-            &wallet.wallet.read().await.as_ref().expect("wallet got destroyed"),
+            wallet.wallet.read().await.as_ref().expect("wallet got destroyed"),
             method,
         )
         .await
