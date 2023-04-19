@@ -1,9 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example update_alias_output --release
-// In this example we will update the state metadata of an alias output
-// Rename `.env.example` to `.env` first
+//! In this example we will update the state metadata of an alias output.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example update_alias_output --release`
 
 use std::{env, str::FromStr};
 
