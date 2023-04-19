@@ -8,7 +8,7 @@ use tokio::{fs::OpenOptions, io::AsyncWriteExt};
 use crate::{
     command::{account::AccountCli, wallet::WalletCli},
     error::Error,
-    println_log_info,
+    println_log_error, println_log_info,
 };
 
 // TODO: make this configurable via the CLI to allow for more secure locations (e.g. encrypted usb drives etc)
@@ -27,38 +27,34 @@ pub fn get_password(prompt: &str, confirmation: bool) -> Result<String, Error> {
 }
 
 pub fn get_decision(prompt: &str) -> Result<bool, Error> {
-    let mut input = Input::<String>::new()
-        .with_prompt(prompt)
-        .default("yes".into())
-        .interact_text()?;
-
     loop {
+        let input = Input::<String>::new()
+            .with_prompt(prompt)
+            .default("yes".into())
+            .interact_text()?;
+
         match input.to_lowercase().as_str() {
             "yes" | "y" => return Ok(true),
             "no" | "n" => return Ok(false),
             _ => {
-                println_log_info!("Accepted input values are: yes|y|no|n");
-                input = Input::<String>::new()
-                    .with_prompt(prompt)
-                    .default("yes".into())
-                    .interact_text()?;
+                println_log_error!("Accepted input values are: yes|y|no|n");
             }
         }
     }
 }
 
 pub async fn get_account_name(prompt: &str, wallet: &Wallet) -> Result<String, Error> {
-    let mut input = Input::<String>::new().with_prompt(prompt).interact_text()?;
     let accounts = wallet.get_account_aliases().await?;
-
-    while accounts.iter().any(|alias| alias == &input) {
-        println_log_info!("Account with alias '{input}' already exists, please choose another name.");
-        input = Input::<String>::new()
-            .with_prompt("Please choose a new account name")
-            .interact_text()?;
+    loop {
+        let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
+        if input.is_empty() || !input.is_ascii() {
+            println_log_error!("Invalid input, please choose a non-empty name consisting of ASCII characters.");
+        } else if accounts.iter().any(|alias| alias == &input) {
+            println_log_error!("Account with alias '{input}' already exists, please choose another name.");
+        } else {
+            return Ok(input);
+        }
     }
-
-    Ok(input)
 }
 
 pub async fn pick_account(wallet: &Wallet) -> Result<Option<AccountHandle>, Error> {
