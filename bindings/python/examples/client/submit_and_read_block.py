@@ -35,7 +35,7 @@ tag_hex = utf8_to_hex(tag)
 message_hex = utf8_to_hex(message)
 
 print(f'\nYour prepared block content is:')
-print(f'  tag: {tag_hex}')
+print(f'  tag: {tag}')
 print(f'  tag converted to hex: {tag_hex}')
 print(f'  message: {message}')
 print(f'  message converted to hex: {message_hex}')
