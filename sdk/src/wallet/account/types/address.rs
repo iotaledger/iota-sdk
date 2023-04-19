@@ -10,12 +10,12 @@ use crate::types::block::{address::Bech32Address, output::OutputId};
 
 /// An account address.
 #[derive(Debug, Getters, Setters, Clone, Serialize, Deserialize, Eq, PartialEq, Hash)]
+#[serde(rename_all = "camelCase")]
 #[getset(get = "pub")]
 pub struct AccountAddress {
     /// The address.
     pub(crate) address: Bech32Address,
     /// The address key index.
-    #[serde(rename = "keyIndex")]
     #[getset(set = "pub(crate)")]
     pub(crate) key_index: u32,
     /// Determines if an address is a public or an internal (change) address.
@@ -28,18 +28,17 @@ pub struct AccountAddress {
 
 /// An account address with unspent output_ids for unspent outputs.
 #[derive(Debug, Getters, Setters, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "camelCase")]
 #[getset(get = "pub")]
 pub struct AddressWithUnspentOutputs {
     /// The address.
     pub(crate) address: Bech32Address,
     /// The address key index.
-    #[serde(rename = "keyIndex")]
     #[getset(set = "pub(crate)")]
     pub(crate) key_index: u32,
     /// Determines if an address is a public or an internal (change) address.
     #[getset(set = "pub(crate)")]
     pub(crate) internal: bool,
     /// Output ids
-    #[serde(rename = "outputIds")]
     pub(crate) output_ids: Vec<OutputId>,
 }

@@ -295,7 +295,7 @@ export type __SendAmountMethod__ = {
 export type __SendNativeTokensMethod__ = {
     name: 'sendNativeTokens';
     data: {
-        addressesNativeTokens: AddressNativeTokens[];
+        addressesAndNativeTokens: AddressNativeTokens[];
         options?: TransactionOptions;
     };
 };
