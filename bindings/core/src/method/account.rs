@@ -230,14 +230,14 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendNativeTokens {
-        addresses_native_tokens: Vec<AddressNativeTokens>,
+        addresses_and_native_tokens: Vec<AddressNativeTokens>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send nft.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendNft {
-        addresses_nft_ids: Vec<AddressAndNftId>,
+        addresses_and_nft_ids: Vec<AddressAndNftId>,
         options: Option<TransactionOptionsDto>,
     },
     /// Set the alias of the account.

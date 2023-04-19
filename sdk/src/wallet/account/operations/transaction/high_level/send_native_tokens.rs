@@ -69,11 +69,11 @@ impl AccountHandle {
     /// ```
     pub async fn send_native_tokens(
         &self,
-        addresses_native_tokens: Vec<AddressNativeTokens>,
+        addresses_and_native_tokens: Vec<AddressNativeTokens>,
         options: Option<TransactionOptions>,
     ) -> crate::wallet::Result<Transaction> {
         let prepared_transaction = self
-            .prepare_send_native_tokens(addresses_native_tokens, options)
+            .prepare_send_native_tokens(addresses_and_native_tokens, options)
             .await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
@@ -82,7 +82,7 @@ impl AccountHandle {
     /// [AccountHandle.send_native_tokens()](crate::account::handle::AccountHandle.send_native_tokens)
     async fn prepare_send_native_tokens(
         &self,
-        addresses_native_tokens: Vec<AddressNativeTokens>,
+        addresses_and_native_tokens: Vec<AddressNativeTokens>,
         options: Option<TransactionOptions>,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_send_native_tokens");
@@ -95,7 +95,7 @@ impl AccountHandle {
         let local_time = self.client.get_time_checked().await?;
 
         let mut outputs = Vec::new();
-        for address_with_amount in addresses_native_tokens {
+        for address_with_amount in addresses_and_native_tokens {
             let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address_with_amount.address)?;
             self.client.bech32_hrp_matches(&bech32_hrp).await?;
             // get minimum required amount for such an output, so we don't lock more than required
