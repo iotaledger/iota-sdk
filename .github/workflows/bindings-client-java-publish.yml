@@ -129,8 +129,8 @@ jobs:
         shell: bash
         working-directory: sdk/src/client/bindings/java/
         run: |
-          ./gradlew publishToSonatype
+          ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
           if [ "$RUNNER_OS" == "macOS" ];
-          then ./gradlew publishToSonatype -PbuildTarget=aarch64-apple-darwin
+          then ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository -PbuildTarget=aarch64-apple-darwin
           fi
 
