@@ -9,7 +9,7 @@ use crate::{
         restore_command, set_node_command, sync_command, unlock_wallet, InitParameters, WalletCli, WalletCommand,
     },
     error::Error,
-    helper::{get_account_name, get_decision, get_password, pick_account, print_help},
+    helper::{get_account_name, get_decision, get_password, pick_account, print_account_help, print_wallet_help},
     println_log_error, println_log_info,
 };
 
@@ -64,7 +64,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                         let alias = get_account_name("New account name", &wallet).await?;
                         let account = add_account(&wallet, Some(alias)).await?;
                         println_log_info!("Created initial account.");
-                        print_help();
+                        print_account_help();
                         (Some(wallet), Some(account))
                     } else {
                         (Some(wallet), None)
@@ -86,12 +86,13 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                         let alias = get_account_name("New account name", &wallet).await?;
                         let account = add_account(&wallet, Some(alias)).await?;
                         println_log_info!("Created initial account.");
-                        print_help();
+                        print_account_help();
                         (Some(wallet), Some(account))
                     } else {
                         (Some(wallet), None)
                     }
                 } else {
+                    print_wallet_help();
                     (None, None)
                 }
             }

@@ -5,7 +5,7 @@ use dialoguer::{console::Term, theme::ColorfulTheme, Input, Password, Select};
 use iota_sdk::wallet::{AccountHandle, Wallet};
 use tokio::{fs::OpenOptions, io::AsyncWriteExt};
 
-use crate::{error::Error, println_log_info, command::account::AccountCli};
+use crate::{error::Error, println_log_info, command::{account::AccountCli, wallet::WalletCli}};
 
 // TODO: make this configurable via the CLI to allow for more secure locations (e.g. encrypted usb drives etc)
 const MNEMONIC_FILE_NAME: &str = "mnemonic.txt";
@@ -73,7 +73,14 @@ pub async fn pick_account(wallet: &Wallet) -> Result<Option<AccountHandle>, Erro
     }
 }
 
-pub fn print_help() {
+pub fn print_wallet_help() {
+    use clap::Parser;
+    if let Err(err) = WalletCli::try_parse_from(vec!["Wallet:", "help"]) {
+        println!("{err}");
+    }
+}
+
+pub fn print_account_help() {
     use clap::Parser;
     if let Err(err) = AccountCli::try_parse_from(vec!["Account:", "help"]) {
         println!("{err}");
