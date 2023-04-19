@@ -89,7 +89,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                         print_account_help();
                         (Some(wallet), Some(account))
                     } else {
-                        (Some(wallet), None)
+                        (Some(wallet), /*  */ None)
                     }
                 } else {
                     print_wallet_help();

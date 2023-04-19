@@ -27,18 +27,23 @@ pub fn get_password(prompt: &str, confirmation: bool) -> Result<String, Error> {
 }
 
 pub fn get_decision(prompt: &str) -> Result<bool, Error> {
-    let input = Input::<String>::new()
+    let mut input = Input::<String>::new()
         .with_prompt(prompt)
         .default("yes".into())
         .interact_text()?;
 
-    match input.to_lowercase().as_str() {
-        "yes" | "y" => Ok(true),
-        "no" | "n" => Ok(false),
-        _ => Err(Error::InvalidInput {
-            expected: "yes|y or no|n".to_string(),
-            found: input,
-        }),
+    loop {
+        match input.to_lowercase().as_str() {
+            "yes" | "y" => return Ok(true),
+            "no" | "n" => return Ok(false),
+            _ => {
+                println_log_info!("Accepted input values are: yes|y|no|n");
+                input = Input::<String>::new()
+                    .with_prompt(prompt)
+                    .default("yes".into())
+                    .interact_text()?;
+            }
+        }
     }
 }
 
