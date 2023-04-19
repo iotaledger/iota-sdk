@@ -9,7 +9,7 @@ mod state_controller_address;
 mod storage_deposit_return;
 mod timelock;
 
-use alloc::{boxed::Box, vec::Vec};
+use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
 
 use bitflags::bitflags;
 use derive_more::{Deref, From};
@@ -32,7 +32,7 @@ pub use self::{
 use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, Error};
 
 ///
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From)]
+#[derive(Clone, Eq, PartialEq, Hash, From)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -53,6 +53,17 @@ pub enum UnlockCondition {
     GovernorAddress(GovernorAddressUnlockCondition),
     /// An immutable alias address unlock condition.
     ImmutableAliasAddress(ImmutableAliasAddressUnlockCondition),
+}
+
+impl PartialOrd for UnlockCondition {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+        self.kind().partial_cmp(&other.kind())
+    }
+}
+impl Ord for UnlockCondition {
+    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+        self.partial_cmp(other).unwrap()
+    }
 }
 
 impl core::fmt::Debug for UnlockCondition {
@@ -198,7 +209,16 @@ impl TryFrom<Vec<UnlockCondition>> for UnlockConditions {
 
     #[inline(always)]
     fn try_from(unlock_conditions: Vec<UnlockCondition>) -> Result<Self, Self::Error> {
-        Self::new(unlock_conditions)
+        Self::from_vec(unlock_conditions)
+    }
+}
+
+impl TryFrom<BTreeSet<UnlockCondition>> for UnlockConditions {
+    type Error = Error;
+
+    #[inline(always)]
+    fn try_from(unlock_conditions: BTreeSet<UnlockCondition>) -> Result<Self, Self::Error> {
+        Self::from_set(unlock_conditions)
     }
 }
 
@@ -215,8 +235,8 @@ impl UnlockConditions {
     ///
     pub const COUNT_MAX: u8 = 7;
 
-    /// Creates a new [`UnlockConditions`].
-    pub fn new(unlock_conditions: Vec<UnlockCondition>) -> Result<Self, Error> {
+    /// Creates a new [`UnlockConditions`] from a vec.
+    pub fn from_vec(unlock_conditions: Vec<UnlockCondition>) -> Result<Self, Error> {
         let mut unlock_conditions =
             BoxedSlicePrefix::<UnlockCondition, UnlockConditionCount>::try_from(unlock_conditions.into_boxed_slice())
                 .map_err(Error::InvalidUnlockConditionCount)?;
@@ -224,6 +244,16 @@ impl UnlockConditions {
         unlock_conditions.sort_by_key(UnlockCondition::kind);
         // Sort is obviously fine now but uniqueness still needs to be checked.
         verify_unique_sorted::<true>(&unlock_conditions)?;
+
+        Ok(Self(unlock_conditions))
+    }
+
+    /// Creates a new [`UnlockConditions`] from an ordered set.
+    pub fn from_set(unlock_conditions: BTreeSet<UnlockCondition>) -> Result<Self, Error> {
+        let unlock_conditions = BoxedSlicePrefix::<UnlockCondition, UnlockConditionCount>::try_from(
+            unlock_conditions.into_iter().collect::<Box<[_]>>(),
+        )
+        .map_err(Error::InvalidUnlockConditionCount)?;
 
         Ok(Self(unlock_conditions))
     }
