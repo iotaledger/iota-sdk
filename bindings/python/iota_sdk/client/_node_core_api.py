@@ -1,22 +1,19 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk.client._base_api import BaseAPI
-
-
-class NodeCoreAPI(BaseAPI):
+class NodeCoreAPI():
 
     def get_node_health(self, url):
         """ Get node health.
         """
-        return self.call_method('getNodeHealth', {
+        return self._call_method('getNodeHealth', {
             'url': url
         })
 
     def get_node_info(self, url, auth=None):
         """Get node info.
         """
-        return self.call_method('getNodeInfo', {
+        return self._call_method('getNodeInfo', {
             'url': url,
             'auth': auth
         })
@@ -24,136 +21,136 @@ class NodeCoreAPI(BaseAPI):
     def get_info(self):
         """Returns the node information together with the url of the used node.
         """
-        return self.call_method('getInfo')
+        return self._call_method('getInfo')
 
     def get_peers(self):
         """Get peers.
         """
-        return self.call_method('getPeers')
+        return self._call_method('getPeers')
 
     def get_tips(self):
         """Get tips.
         """
-        return self.call_method('getTips')
+        return self._call_method('getTips')
 
     def post_block(self, block):
         """Post block.
         """
-        return self.call_method('postBlockJson', {
+        return self._call_method('postBlockJson', {
             'block': block
         })
 
     def get_block_data(self, block_id):
         """Post block.
         """
-        return self.call_method('getBlock', {
+        return self._call_method('getBlock', {
             'blockId': block_id
         })
 
     def get_block_metadata(self, block_id):
         """Get block metadata with block_id.
         """
-        return self.call_method('getBlockMetadata', {
+        return self._call_method('getBlockMetadata', {
             'blockId': block_id
         })
 
     def get_block_raw(self, block_id):
         """Get block raw.
         """
-        return self.call_method('getBlockRaw', {
+        return self._call_method('getBlockRaw', {
             'blockId': block_id
         })
 
     def post_block_raw(self, block_bytes):
         """Post block raw.
         """
-        return self.call_method('postBlockRaw', {
+        return self._call_method('postBlockRaw', {
             'blockBytes': block_bytes
         })
 
     def get_output(self, output_id):
         """Get output.
         """
-        return self.call_method('getOutput', {
+        return self._call_method('getOutput', {
             'outputId': output_id
         })
 
     def get_output_metadata(self, output_id):
         """Get output metadata.
         """
-        return self.call_method('getOutputMetadata', {
+        return self._call_method('getOutputMetadata', {
             'outputId': output_id
         })
 
     def get_milestone_by_id(self, milestone_id):
         """Get the milestone by the given milestone id.
         """
-        return self.call_method('getMilestoneById', {
+        return self._call_method('getMilestoneById', {
             'milestoneId': milestone_id
         })
 
     def get_milestone_by_id_raw(self, milestone_id):
         """Get the raw milestone by the given milestone id.
         """
-        return self.call_method('getMilestoneByIdRaw', {
+        return self._call_method('getMilestoneByIdRaw', {
             'milestoneId': milestone_id
         })
 
     def get_milestone_by_index(self, index):
         """Get the milestone by the given index.
         """
-        return self.call_method('getMilestoneByIndex', {
+        return self._call_method('getMilestoneByIndex', {
             'index': index
         })
 
     def get_milestone_by_index_raw(self, index):
         """Get the milestone by the given index.
         """
-        return self.call_method('getMilestoneByIndexRaw', {
+        return self._call_method('getMilestoneByIndexRaw', {
             'index': index
         })
 
     def get_utxo_changes_by_id(self, milestone_id):
         """Get the UTXO changes by the given milestone id.
         """
-        return self.call_method('getUtxoChangesById', {
+        return self._call_method('getUtxoChangesById', {
             'milestoneId': milestone_id
         })
 
     def get_utxo_changes_by_index(self, index):
         """Get the UTXO changes by the given milestone index.
         """
-        return self.call_method('getUtxoChangesByIndex', {
+        return self._call_method('getUtxoChangesByIndex', {
             'index': index
         })
 
     def get_receipts(self):
         """Get all receipts.
         """
-        return self.call_method('getReceipts')
+        return self._call_method('getReceipts')
 
     def get_receipts_migrated_at(self, milestone_index):
         """Get the receipts by the given milestone index.
         """
-        return self.call_method('getReceiptsMigratedAt', {
+        return self._call_method('getReceiptsMigratedAt', {
             'milestoneIndex': milestone_index
         })
 
     def get_treasury(self):
         """Get the treasury output.
         """
-        return self.call_method('getTreasury')
+        return self._call_method('getTreasury')
 
     def get_included_block(self, transaction_id):
         """Returns the included block of the transaction.
         """
-        return self.call_method('getIncludedBlock', {
+        return self._call_method('getIncludedBlock', {
             'transactionId': transaction_id
         })
 
     def get_included_block_metadata(self, transaction_id):
         """Returns the metadata of the included block of the transaction.
         """
-        return self.call_method('getIncludedBlockMetadata', {
+        return self._call_method('getIncludedBlockMetadata', {
             'transactionId': transaction_id
         })

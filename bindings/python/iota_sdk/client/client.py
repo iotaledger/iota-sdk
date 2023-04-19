@@ -2,14 +2,20 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import iota_sdk
+from iota_sdk import call_client_method
 from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
 from iota_sdk.client._utils import ClientUtils
 from iota_sdk.types.common import Node
-from json import dumps
+from json import dumps, loads
 import humps
 from datetime import timedelta
+
+class ClientError(Exception):
+    """client error"""
+    pass
+
 
 class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     def __init__(
@@ -103,6 +109,30 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         # Create the message handler
         self.handle = iota_sdk.create_client(client_config)
 
+    def _call_method(self, name, data=None):
+        """Dumps json string and call call_client_method()
+        """
+        message = {
+            'name': name
+        }
+        if data:
+            message['data'] = data
+        message = dumps(message)
+
+        # Send message to the Rust library
+        response = call_client_method(self.handle, message)
+
+        json_response = loads(response)
+
+        if "type" in json_response:
+            if json_response["type"] == "error":
+                raise ClientError(json_response['payload'])
+
+        if "payload" in json_response:
+            return json_response['payload']
+        else:
+            return response
+
     def get_handle(self):
         return self.handle
 
@@ -157,7 +187,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
-        return self.call_method('buildAliasOutput', {
+        return self._call_method('buildAliasOutput', {
             'aliasId': alias_id,
             'unlockConditions': unlock_conditions,
             'amount': amount,
@@ -203,7 +233,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
-        return self.call_method('buildBasicOutput', {
+        return self._call_method('buildBasicOutput', {
             'unlockConditions': unlock_conditions,
             'amount': amount,
             'nativeTokens': native_tokens,
@@ -257,7 +287,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
-        return self.call_method('buildFoundryOutput', {
+        return self._call_method('buildFoundryOutput', {
             'serialNumber': serial_number,
             'tokenScheme': token_scheme,
             'unlockConditions': unlock_conditions,
@@ -309,7 +339,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
-        return self.call_method('buildNftOutput', {
+        return self._call_method('buildNftOutput', {
             'nftId': nft_id,
             'unlockConditions': unlock_conditions,
             'amount': amount,
@@ -375,7 +405,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         options = humps.camelize(options)
 
-        return self.call_method('generateAddresses', {
+        return self._call_method('generateAddresses', {
             'secretManager': secret_manager,
             'options': options
         })
@@ -449,7 +479,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         options = humps.camelize(options)
 
-        return self.call_method('buildAndPostBlock', {
+        return self._call_method('buildAndPostBlock', {
             'secretManager': secret_manager,
             'options': options
         })
@@ -457,52 +487,52 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     def get_node(self):
         """Get a node candidate from the healthy node pool.
         """
-        return self.call_method('getNode')
+        return self._call_method('getNode')
 
     def get_network_info(self):
         """Gets the network related information such as network_id and min_pow_score.
         """
-        return self.call_method('getNetworkInfo')
+        return self._call_method('getNetworkInfo')
 
     def get_network_id(self):
         """Gets the network id of the node we're connecting to.
         """
-        return self.call_method('getNetworkId')
+        return self._call_method('getNetworkId')
 
     def get_bech32_hrp(self):
         """Returns the bech32_hrp.
         """
-        return self.call_method('getBech32Hrp')
+        return self._call_method('getBech32Hrp')
 
     def get_min_pow_score(self):
         """Returns the min pow score.
         """
-        return self.call_method('getMinPowScore')
+        return self._call_method('getMinPowScore')
 
     def get_tips_interval(self):
         """Returns the tips interval.
         """
-        return self.call_method('getTipsInterval')
+        return self._call_method('getTipsInterval')
 
     def get_local_pow(self):
         """Returns if local pow should be used or not.
         """
-        return self.call_method('getLocalPow')
+        return self._call_method('getLocalPow')
 
     def get_fall_back_to_local_pow(self):
         """Get fallback to local proof of work timeout.
         """
-        return self.call_method('getFallbackToLocalPow')
+        return self._call_method('getFallbackToLocalPow')
 
     def unhealthy_nodes(self):
         """Returns the unhealthy nodes.
         """
-        return self.call_method('unhealthyNodes')
+        return self._call_method('unhealthyNodes')
 
     def prepare_transaction(self, secret_manager=None, options=None):
         """Prepare a transaction for signing.
         """
-        return self.call_method('prepareTransaction', {
+        return self._call_method('prepareTransaction', {
             'secretManager': secret_manager,
             'options': options
         })
@@ -510,7 +540,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     def sign_transaction(self, secret_manager, prepared_transaction_data):
         """Sign a transaction.
         """
-        return self.call_method('signTransaction', {
+        return self._call_method('signTransaction', {
             'secretManager': secret_manager,
             'preparedTransactionData': prepared_transaction_data
         })
@@ -518,6 +548,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     def submit_payload(self, payload):
         """Submit a payload in a block.
         """
-        return self.call_method('postBlockPayload', {
+        return self._call_method('postBlockPayload', {
             'payload': payload
         })

@@ -1,12 +1,11 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk.client._base_api import BaseAPI
 from dataclasses import dataclass
 import humps
 
 
-class NodeIndexerAPI(BaseAPI):
+class NodeIndexerAPI():
 
     def basic_output_ids(self, query_parameters):
         """Fetch basic output IDs.
@@ -14,7 +13,7 @@ class NodeIndexerAPI(BaseAPI):
 
         query_parameters = query_parameters.as_dict()
 
-        return self.call_method('basicOutputIds', {
+        return self._call_method('basicOutputIds', {
             'queryParameters': query_parameters,
         })
 
@@ -24,14 +23,14 @@ class NodeIndexerAPI(BaseAPI):
 
         query_parameters = query_parameters.as_dict()
 
-        return self.call_method('aliasOutputIds', {
+        return self._call_method('aliasOutputIds', {
             'queryParameters': query_parameters,
         })
 
     def alias_output_id(self, alias_id):
         """Fetch alias output ID.
         """
-        return self.call_method('aliasOutputId', {
+        return self._call_method('aliasOutputId', {
             'aliasId': alias_id
         })
 
@@ -41,14 +40,14 @@ class NodeIndexerAPI(BaseAPI):
 
         query_parameters = query_parameters.as_dict()
 
-        return self.call_method('nftOutputIds', {
+        return self._call_method('nftOutputIds', {
             'queryParameters': query_parameters,
         })
 
     def nft_output_id(self, nft_id):
         """Fetch NFT output ID.
         """
-        return self.call_method('nftOutputId', {
+        return self._call_method('nftOutputId', {
             'nftId': nft_id
         })
 
@@ -58,14 +57,14 @@ class NodeIndexerAPI(BaseAPI):
 
         query_parameters = query_parameters.as_dict()
 
-        return self.call_method('foundryOutputIds', {
+        return self._call_method('foundryOutputIds', {
             'queryParameters': query_parameters,
         })
 
     def foundry_output_id(self, foundry_id):
         """Fetch foundry Output ID.
         """
-        return self.call_method('foundryOutputId', {
+        return self._call_method('foundryOutputId', {
             'foundryId': foundry_id
         })
 

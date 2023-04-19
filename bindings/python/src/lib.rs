@@ -10,16 +10,14 @@ mod wallet;
 
 use std::sync::Mutex;
 
-use error::Result;
 use iota_sdk_bindings_core::{
     call_utils_method as rust_call_utils_method, init_logger as rust_init_logger, UtilsMethod,
 };
 use once_cell::sync::OnceCell;
 use pyo3::{prelude::*, wrap_pyfunction};
-use secret_manager::*;
 use tokio::runtime::Runtime;
 
-use self::{client::*, wallet::*};
+use self::{client::*, error::Result, secret_manager::*, wallet::*};
 
 /// Use one runtime.
 pub(crate) fn block_on<C: futures::Future>(cb: C) -> C::Output {
