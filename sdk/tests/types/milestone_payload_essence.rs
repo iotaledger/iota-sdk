@@ -34,7 +34,7 @@ fn new_valid() {
             rand_merkle_root(),
             rand_merkle_root(),
             vec![],
-            MilestoneOptions::new(vec![]).unwrap(),
+            MilestoneOptions::from_vec(vec![]).unwrap(),
         )
         .is_ok()
     );
@@ -66,7 +66,7 @@ fn getters() {
         protocol_parameters.token_supply(),
     )
     .unwrap();
-    let options = MilestoneOptions::new(vec![
+    let options = MilestoneOptions::from_vec(vec![
         MilestoneOption::Receipt(receipt.clone()),
         MilestoneOption::Parameters(
             ParametersMilestoneOption::new(
@@ -129,7 +129,7 @@ fn pack_unpack_valid() {
         rand_merkle_root(),
         rand_merkle_root(),
         vec![],
-        MilestoneOptions::new(vec![]).unwrap(),
+        MilestoneOptions::from_vec(vec![]).unwrap(),
     )
     .unwrap();
 

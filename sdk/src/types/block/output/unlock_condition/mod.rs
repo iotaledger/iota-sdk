@@ -250,12 +250,13 @@ impl UnlockConditions {
 
     /// Creates a new [`UnlockConditions`] from an ordered set.
     pub fn from_set(unlock_conditions: BTreeSet<UnlockCondition>) -> Result<Self, Error> {
-        let unlock_conditions = BoxedSlicePrefix::<UnlockCondition, UnlockConditionCount>::try_from(
-            unlock_conditions.into_iter().collect::<Box<[_]>>(),
-        )
-        .map_err(Error::InvalidUnlockConditionCount)?;
-
-        Ok(Self(unlock_conditions))
+        Ok(Self(
+            unlock_conditions
+                .into_iter()
+                .collect::<Box<[_]>>()
+                .try_into()
+                .map_err(Error::InvalidUnlockConditionCount)?,
+        ))
     }
 
     /// Gets a reference to an [`UnlockCondition`] from an unlock condition kind, if any.

@@ -223,7 +223,7 @@ impl<'a> ClientBlockBuilder<'a> {
 
     /// Set 1-8 custom parent block ids
     pub fn with_parents(mut self, parent_ids: Vec<BlockId>) -> Result<Self> {
-        self.parents.replace(Parents::new(parent_ids)?);
+        self.parents.replace(Parents::from_vec(parent_ids)?);
         Ok(self)
     }
 

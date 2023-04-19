@@ -210,10 +210,13 @@ impl Features {
 
     /// Creates a new [`Features`] from an ordered set.
     pub fn from_set(features: BTreeSet<Feature>) -> Result<Self, Error> {
-        let features = BoxedSlicePrefix::<Feature, FeatureCount>::try_from(features.into_iter().collect::<Box<[_]>>())
-            .map_err(Error::InvalidFeatureCount)?;
-
-        Ok(Self(features))
+        Ok(Self(
+            features
+                .into_iter()
+                .collect::<Box<[_]>>()
+                .try_into()
+                .map_err(Error::InvalidFeatureCount)?,
+        ))
     }
 
     /// Gets a reference to a [`Feature`] from a feature kind, if any.

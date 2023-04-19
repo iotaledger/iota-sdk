@@ -288,7 +288,7 @@ pub mod dto {
 
     impl Block {
         fn _try_from_dto(value: &BlockDto) -> Result<BlockBuilder, DtoError> {
-            let parents = Parents::new(
+            let parents = Parents::from_vec(
                 value
                     .parents
                     .iter()

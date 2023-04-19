@@ -202,12 +202,13 @@ impl NativeTokens {
 
     /// Creates a new [`NativeTokens`] from an ordered set.
     pub fn from_set(native_tokens: BTreeSet<NativeToken>) -> Result<Self, Error> {
-        let native_tokens = BoxedSlicePrefix::<NativeToken, NativeTokenCount>::try_from(
-            native_tokens.into_iter().collect::<Box<[_]>>(),
-        )
-        .map_err(Error::InvalidNativeTokenCount)?;
-
-        Ok(Self(native_tokens))
+        Ok(Self(
+            native_tokens
+                .into_iter()
+                .collect::<Box<[_]>>()
+                .try_into()
+                .map_err(Error::InvalidNativeTokenCount)?,
+        ))
     }
 
     /// Creates a new [`NativeTokensBuilder`].
