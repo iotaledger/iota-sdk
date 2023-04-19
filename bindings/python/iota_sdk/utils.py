@@ -153,10 +153,12 @@ class UtilsError(Exception):
 def _call_method(name, data=None):
     """Dumps json string and call call_utils_method()
     """
-    message = dumps({
-        'name': name,
-        'data': data
-    })
+    message = {
+        'name': name
+    }
+    if data:
+        message['data'] = data
+    message = dumps(message)
 
     # Send message to the Rust library
     response = call_utils_method(message)

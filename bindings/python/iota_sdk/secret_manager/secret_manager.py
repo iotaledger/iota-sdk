@@ -64,10 +64,12 @@ class SecretManager():
     def _call_method(self, name, data=None):
         """Dumps json string and call call_secret_manager_method()
         """
-        message = dumps({
-            'name': name,
-            'data': data
-        })
+        message = {
+            'name': name
+        }
+        if data:
+            message['data'] = data
+        message = dumps(message)
 
         # Send message to the Rust library
         response = call_secret_manager_method(self.handle, message)

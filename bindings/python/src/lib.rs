@@ -26,8 +26,8 @@ pub(crate) fn block_on<C: futures::Future>(cb: C) -> C::Output {
     runtime.lock().unwrap().block_on(cb)
 }
 
-#[pyfunction]
 /// Init the logger of wallet library.
+#[pyfunction]
 pub fn init_logger(config: String) -> PyResult<()> {
     rust_init_logger(config).expect("failed to init logger");
     Ok(())

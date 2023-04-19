@@ -15,8 +15,8 @@ pub struct SecretManager {
     pub secret_manager: RustSecretManager,
 }
 
-#[pyfunction]
 /// Create secret_manager for python-side usage.
+#[pyfunction]
 pub fn create_secret_manager(options: String) -> Result<SecretManager> {
     let secret_manager_dto = serde_json::from_str::<SecretManagerDto>(&options)?;
     let secret_manager = RustSecretManager::try_from(&secret_manager_dto)?;

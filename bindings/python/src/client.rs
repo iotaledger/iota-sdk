@@ -15,8 +15,8 @@ pub struct Client {
     pub client: RustClient,
 }
 
-#[pyfunction]
 /// Create client for python-side usage.
+#[pyfunction]
 pub fn create_client(options: Option<String>) -> Result<Client> {
     let client = match options {
         Some(options) => ClientBuilder::new().from_json(&options)?.finish()?,

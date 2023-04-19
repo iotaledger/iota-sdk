@@ -18,8 +18,8 @@ pub struct Wallet {
     pub wallet: Arc<RwLock<Option<RustWallet>>>,
 }
 
-#[pyfunction]
 /// Destroys the wallet instance.
+#[pyfunction]
 pub fn destroy_wallet(wallet: &Wallet) -> PyResult<()> {
     crate::block_on(async {
         *wallet.wallet.write().await = None;
@@ -27,8 +27,8 @@ pub fn destroy_wallet(wallet: &Wallet) -> PyResult<()> {
     Ok(())
 }
 
-#[pyfunction]
 /// Create wallet handler for python-side usage.
+#[pyfunction]
 pub fn create_wallet(options: String) -> Result<Wallet> {
     let wallet_options = serde_json::from_str::<WalletOptions>(&options)?;
     let wallet = crate::block_on(async { wallet_options.build_manager().await })?;
@@ -38,10 +38,10 @@ pub fn create_wallet(options: String) -> Result<Wallet> {
     })
 }
 
+/// Call a wallet method.
 #[pyfunction]
-/// Send message through handler.
-pub fn call_wallet_method(wallet: &Wallet, message: String) -> Result<String> {
-    let method = serde_json::from_str::<WalletMethod>(&message)?;
+pub fn call_wallet_method(wallet: &Wallet, method: String) -> Result<String> {
+    let method = serde_json::from_str::<WalletMethod>(&method)?;
     let response = crate::block_on(async {
         rust_call_wallet_method(
             wallet.wallet.read().await.as_ref().expect("wallet got destroyed"),
@@ -53,8 +53,8 @@ pub fn call_wallet_method(wallet: &Wallet, message: String) -> Result<String> {
     Ok(serde_json::to_string(&response)?)
 }
 
-#[pyfunction]
 /// Listen to wallet events.
+#[pyfunction]
 pub fn listen_wallet(wallet: &Wallet, events: Vec<String>, handler: PyObject) {
     let mut rust_events = Vec::new();
 

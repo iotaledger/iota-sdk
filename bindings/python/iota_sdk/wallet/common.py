@@ -7,7 +7,7 @@ from json import dumps
 
 
 def _call_method_routine(func):
-    """The routine of dump json string and call send_message()
+    """The routine of dump json string and call call_wallet_method()
     """
     def wrapper(*args, **kwargs):
         message = func(*args, **kwargs)
