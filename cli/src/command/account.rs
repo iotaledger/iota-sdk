@@ -83,10 +83,10 @@ pub enum AccountCommand {
     Exit,
     /// Request funds from the faucet.
     Faucet {
-        /// URL of the faucet, default to <https://faucet.testnet.shimmer.network/api/enqueue>.
-        url: Option<String>,
         /// Address the faucet sends the funds to, defaults to the latest address.
         address: Option<String>,
+        /// URL of the faucet, default to <https://faucet.testnet.shimmer.network/api/enqueue>.
+        url: Option<String>,
     },
     /// Mint more of a native token.
     IncreaseNativeTokenSupply {
@@ -418,8 +418,8 @@ pub async fn destroy_foundry_command(account_handle: &AccountHandle, foundry_id:
 // `faucet` command
 pub async fn faucet_command(
     account_handle: &AccountHandle,
-    url: Option<String>,
     address: Option<String>,
+    url: Option<String>,
 ) -> Result<(), Error> {
     let address = if let Some(address) = address {
         address
@@ -429,10 +429,9 @@ pub async fn faucet_command(
             None => return Err(Error::NoAddressForFaucet),
         }
     };
-    let faucet_url = match &url {
-        Some(faucet_url) => faucet_url,
-        None => "https://faucet.testnet.shimmer.network/api/enqueue",
-    };
+    let faucet_url = url
+        .as_deref()
+        .unwrap_or("https://faucet.testnet.shimmer.network/api/enqueue");
 
     println_log_info!("{}", request_funds_from_faucet(faucet_url, &address).await?);
 
