@@ -3,7 +3,7 @@
 
 use std::time::Duration;
 
-use iota_sdk::wallet::{message_interface::dtos::AccountDto, wallet::Wallet};
+use iota_sdk::wallet::{message_interface::dtos::AccountDetailsDto, wallet::Wallet};
 #[cfg(feature = "stronghold")]
 use zeroize::Zeroize;
 
@@ -27,7 +27,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             match builder.finish().await {
                 Ok(account) => {
                     let account = account.read().await;
-                    Response::Account(AccountDto::from(&*account))
+                    Response::Account(AccountDetailsDto::from(&*account))
                 }
                 Err(e) => return Err(e.into()),
             }
@@ -35,7 +35,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         WalletMethod::GetAccount { account_id } => {
             let account = wallet.get_account(account_id.clone()).await?;
             let account = account.read().await;
-            Response::Account(AccountDto::from(&*account))
+            Response::Account(AccountDetailsDto::from(&*account))
         }
         WalletMethod::GetAccountIndexes => {
             let accounts = wallet.get_accounts().await?;
@@ -50,7 +50,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let mut account_dtos = Vec::new();
             for account in accounts {
                 let account = account.read().await;
-                account_dtos.push(AccountDto::from(&*account));
+                account_dtos.push(AccountDetailsDto::from(&*account));
             }
             Response::Accounts(account_dtos)
         }
@@ -97,7 +97,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let mut account_dtos = Vec::new();
             for account in accounts {
                 let account = account.read().await;
-                account_dtos.push(AccountDto::from(&*account));
+                account_dtos.push(AccountDetailsDto::from(&*account));
             }
             Response::Accounts(account_dtos)
         }

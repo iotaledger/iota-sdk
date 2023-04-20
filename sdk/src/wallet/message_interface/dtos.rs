@@ -82,7 +82,7 @@ impl From<&AddressWithUnspentOutputs> for AddressWithUnspentOutputsDto {
 /// Dto for an Account.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AccountDto {
+pub struct AccountDetailsDto {
     /// The account index
     pub index: u32,
     /// The coin type
@@ -112,7 +112,7 @@ pub struct AccountDto {
     pub native_token_foundries: HashMap<FoundryId, FoundryOutputDto>,
 }
 
-impl From<&AccountDetails> for AccountDto {
+impl From<&AccountDetails> for AccountDetailsDto {
     fn from(value: &AccountDetails) -> Self {
         Self {
             index: *value.index(),

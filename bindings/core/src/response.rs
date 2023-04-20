@@ -46,7 +46,7 @@ use iota_sdk::{
             types::{AccountAddress, AccountBalanceDto, TransactionDto},
             MintTokenTransactionDto, OutputDataDto,
         },
-        message_interface::dtos::{AccountDto, AddressWithUnspentOutputsDto},
+        message_interface::dtos::{AccountDetailsDto, AddressWithUnspentOutputsDto},
     },
 };
 use serde::Serialize;
@@ -286,11 +286,11 @@ pub enum Response {
     /// Response for
     /// - [`CreateAccount`](crate::method::WalletMethod::CreateAccount),
     /// - [`GetAccount`](crate::method::WalletMethod::GetAccount)
-    Account(AccountDto),
+    Account(AccountDetailsDto),
     /// Response for [`GetAccountIndexes`](crate::method::WalletMethod::GetAccountIndexes)
     AccountIndexes(Vec<u32>),
     /// Response for [`GetAccounts`](crate::method::WalletMethod::GetAccounts)
-    Accounts(Vec<AccountDto>),
+    Accounts(Vec<AccountDetailsDto>),
     /// Response for [`Addresses`](crate::method::AccountMethod::Addresses)
     Addresses(Vec<AccountAddress>),
     /// Response for

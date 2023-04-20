@@ -42,7 +42,7 @@ use crate::{
             OutputDataDto,
         },
         message_interface::{
-            account_method::AccountMethod, dtos::AccountDto, message::Message, response::Response,
+            account_method::AccountMethod, dtos::AccountDetailsDto, message::Message, response::Response,
             AddressWithUnspentOutputsDto,
         },
         AddressWithAmount, IncreaseNativeTokenSupplyOptions, NativeTokenOptions, NftOptions, Result, Wallet,
@@ -198,7 +198,7 @@ impl WalletMessageHandler {
                     let mut account_dtos = Vec::new();
                     for account in accounts {
                         let account = account.read().await;
-                        account_dtos.push(AccountDto::from(&*account));
+                        account_dtos.push(AccountDetailsDto::from(&*account));
                     }
                     Ok(Response::Accounts(account_dtos))
                 })
@@ -1049,7 +1049,7 @@ impl WalletMessageHandler {
         match builder.finish().await {
             Ok(account) => {
                 let account = account.read().await;
-                Ok(Response::Account(AccountDto::from(&*account)))
+                Ok(Response::Account(AccountDetailsDto::from(&*account)))
             }
             Err(e) => Err(e),
         }
@@ -1058,7 +1058,7 @@ impl WalletMessageHandler {
     async fn get_account(&self, account_id: &AccountIdentifier) -> Result<Response> {
         let account = self.wallet.get_account(account_id.clone()).await?;
         let account = account.read().await;
-        Ok(Response::Account(AccountDto::from(&*account)))
+        Ok(Response::Account(AccountDetailsDto::from(&*account)))
     }
 
     async fn get_accounts(&self) -> Result<Response> {
@@ -1066,7 +1066,7 @@ impl WalletMessageHandler {
         let mut account_dtos = Vec::new();
         for account in accounts {
             let account = account.read().await;
-            account_dtos.push(AccountDto::from(&*account));
+            account_dtos.push(AccountDetailsDto::from(&*account));
         }
         Ok(Response::Accounts(account_dtos))
     }
