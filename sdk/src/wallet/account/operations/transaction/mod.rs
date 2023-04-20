@@ -179,14 +179,14 @@ impl Account {
             inputs,
         };
 
-        let mut account = self.write().await;
+        let mut account_details = self.write().await;
 
-        account.transactions.insert(transaction_id, transaction.clone());
-        account.pending_transactions.insert(transaction_id);
+        account_details.transactions.insert(transaction_id, transaction.clone());
+        account_details.pending_transactions.insert(transaction_id);
         #[cfg(feature = "storage")]
         {
-            log::debug!("[TRANSACTION] storing account {}", account.index());
-            self.save(Some(&account)).await?;
+            log::debug!("[TRANSACTION] storing account {}", account_details.index());
+            self.save(Some(&account_details)).await?;
         }
 
         Ok(transaction)
@@ -194,10 +194,10 @@ impl Account {
 
     // unlock outputs
     async fn unlock_inputs(&self, inputs: &[InputSigningData]) -> crate::wallet::Result<()> {
-        let mut account = self.write().await;
+        let mut account_details = self.write().await;
         for input_signing_data in inputs {
             let output_id = input_signing_data.output_id();
-            account.locked_outputs.remove(output_id);
+            account_details.locked_outputs.remove(output_id);
             log::debug!(
                 "[TRANSACTION] Unlocked output {} because of transaction error",
                 output_id

@@ -55,9 +55,9 @@ impl Account {
     ) -> crate::wallet::Result<MintTokenTransaction> {
         log::debug!("[TRANSACTION] increase_native_token_supply");
 
-        let account = self.read().await;
+        let account_details = self.read().await;
         let token_supply = self.client.get_token_supply().await?;
-        let existing_foundry_output = account.unspent_outputs().values().find(|output_data| {
+        let existing_foundry_output = account_details.unspent_outputs().values().find(|output_data| {
             if let Output::Foundry(output) = &output_data.output {
                 TokenId::new(*output.id()) == token_id
             } else {
@@ -80,7 +80,7 @@ impl Account {
             }
 
             // Get the alias output that controls the foundry output
-            let existing_alias_output = account.unspent_outputs().values().find(|output_data| {
+            let existing_alias_output = account_details.unspent_outputs().values().find(|output_data| {
                 if let Output::Alias(output) = &output_data.output {
                     output.alias_id_non_null(&output_data.output_id) == **foundry_output.alias_address()
                 } else {
@@ -94,7 +94,7 @@ impl Account {
             return Err(Error::MintingFailed("alias output is not available".to_string()));
         };
 
-        drop(account);
+        drop(account_details);
 
         let alias_output = if let Output::Alias(alias_output) = existing_alias_output.output {
             alias_output

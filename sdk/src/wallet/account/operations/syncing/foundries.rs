@@ -50,8 +50,8 @@ impl Account {
             }
         }
 
-        let mut account = self.write().await;
-        account.native_token_foundries = foundries;
+        let mut account_details = self.write().await;
+        account_details.native_token_foundries = foundries;
 
         Ok(())
     }

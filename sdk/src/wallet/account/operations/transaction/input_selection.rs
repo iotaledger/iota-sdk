@@ -34,23 +34,23 @@ impl Account {
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
         // lock so the same inputs can't be selected in multiple transactions
-        let mut account = self.write().await;
+        let mut account_details = self.write().await;
         let protocol_parameters = self.client.get_protocol_parameters().await?;
 
         #[cfg(feature = "events")]
         self.event_emitter.lock().await.emit(
-            account.index,
+            account_details.index,
             WalletEvent::TransactionProgress(TransactionProgressEvent::SelectingInputs),
         );
 
         let current_time = self.client.get_time_checked().await?;
         #[allow(unused_mut)]
-        let mut forbidden_inputs = account.locked_outputs.clone();
+        let mut forbidden_inputs = account_details.locked_outputs.clone();
 
-        let addresses = account
+        let addresses = account_details
             .public_addresses()
             .iter()
-            .chain(account.internal_addresses().iter())
+            .chain(account_details.internal_addresses().iter())
             .map(|address| *address.address.as_ref())
             .collect();
 
@@ -68,8 +68,8 @@ impl Account {
         // Filter inputs to not include inputs that require additional outputs for storage deposit return or could be
         // still locked.
         let available_outputs_signing_data = filter_inputs(
-            &account,
-            account.unspent_outputs.values(),
+            &account_details,
+            account_details.unspent_outputs.values(),
             current_time,
             &outputs,
             burn,
@@ -82,7 +82,7 @@ impl Account {
         if let Some(custom_inputs) = custom_inputs {
             // Check that no input got already locked
             for input in custom_inputs.iter() {
-                if account.locked_outputs.contains(input) {
+                if account_details.locked_outputs.contains(input) {
                     return Err(crate::wallet::Error::CustomInput(format!(
                         "provided custom input {input} is already used in another transaction",
                     )));
@@ -110,14 +110,14 @@ impl Account {
 
             // lock outputs so they don't get used by another transaction
             for output in &selected_transaction_data.inputs {
-                account.locked_outputs.insert(*output.output_id());
+                account_details.locked_outputs.insert(*output.output_id());
             }
 
             return Ok(selected_transaction_data);
         } else if let Some(mandatory_inputs) = mandatory_inputs {
             // Check that no input got already locked
             for input in mandatory_inputs.iter() {
-                if account.locked_outputs.contains(input) {
+                if account_details.locked_outputs.contains(input) {
                     return Err(crate::wallet::Error::CustomInput(format!(
                         "provided custom input {input} is already used in another transaction",
                     )));
@@ -145,12 +145,12 @@ impl Account {
 
             // lock outputs so they don't get used by another transaction
             for output in &selected_transaction_data.inputs {
-                account.locked_outputs.insert(*output.output_id());
+                account_details.locked_outputs.insert(*output.output_id());
             }
 
             // lock outputs so they don't get used by another transaction
             for output in &selected_transaction_data.inputs {
-                account.locked_outputs.insert(*output.output_id());
+                account_details.locked_outputs.insert(*output.output_id());
             }
 
             return Ok(selected_transaction_data);
@@ -192,7 +192,7 @@ impl Account {
         // lock outputs so they don't get used by another transaction
         for output in &selected_transaction_data.inputs {
             log::debug!("[TRANSACTION] locking: {}", output.output_id());
-            account.locked_outputs.insert(*output.output_id());
+            account_details.locked_outputs.insert(*output.output_id());
         }
 
         Ok(selected_transaction_data)

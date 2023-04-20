@@ -195,8 +195,7 @@ impl Account {
 
     /// Get the [`OutputData`] of an output stored in the account
     pub async fn get_output(&self, output_id: &OutputId) -> Option<OutputData> {
-        let account = self.read().await;
-        account.outputs().get(output_id).cloned()
+        self.read().await.outputs().get(output_id).cloned()
     }
 
     /// Get the [`Output`] that minted a native token by the token ID. First try to get it
@@ -224,35 +223,31 @@ impl Account {
 
     /// Get the [`Transaction`] of a transaction stored in the account
     pub async fn get_transaction(&self, transaction_id: &TransactionId) -> Option<Transaction> {
-        let account = self.read().await;
-        account.transactions().get(transaction_id).cloned()
+        self.read().await.transactions().get(transaction_id).cloned()
     }
 
     /// Get the transaction with inputs of an incoming transaction stored in the account
     /// List might not be complete, if the node pruned the data already
     pub async fn get_incoming_transaction_data(&self, transaction_id: &TransactionId) -> Option<Transaction> {
-        let account = self.read().await;
-        account.incoming_transactions().get(transaction_id).cloned()
+        self.read().await.incoming_transactions().get(transaction_id).cloned()
     }
 
     /// Returns all addresses of the account
     pub async fn addresses(&self) -> Result<Vec<AccountAddress>> {
-        let account = self.read().await;
-        let mut all_addresses = account.public_addresses().clone();
-        all_addresses.extend(account.internal_addresses().clone());
+        let account_details = self.read().await;
+        let mut all_addresses = account_details.public_addresses().clone();
+        all_addresses.extend(account_details.internal_addresses().clone());
         Ok(all_addresses.to_vec())
     }
 
     /// Returns all public addresses of the account
     pub(crate) async fn public_addresses(&self) -> Vec<AccountAddress> {
-        let account = self.read().await;
-        account.public_addresses().to_vec()
+        self.read().await.public_addresses().to_vec()
     }
 
     /// Returns only addresses of the account with balance
     pub async fn addresses_with_unspent_outputs(&self) -> Result<Vec<AddressWithUnspentOutputs>> {
-        let account = self.read().await;
-        Ok(account.addresses_with_unspent_outputs().to_vec())
+        Ok(self.read().await.addresses_with_unspent_outputs().to_vec())
     }
 
     /// Returns outputs of the account
@@ -324,10 +319,10 @@ impl Account {
     /// Returns all pending transactions of the account
     pub async fn pending_transactions(&self) -> Result<Vec<Transaction>> {
         let mut transactions = Vec::new();
-        let account = self.read().await;
+        let account_details = self.read().await;
 
-        for transaction_id in &account.pending_transactions {
-            if let Some(transaction) = account.transactions.get(transaction_id) {
+        for transaction_id in &account_details.pending_transactions {
+            if let Some(transaction) = account_details.transactions.get(transaction_id) {
                 transactions.push(transaction.clone());
             }
         }
@@ -347,11 +342,11 @@ impl Account {
                 drop(storage_manager);
             }
             None => {
-                let account = self.read().await;
+                let account_details = self.read().await;
                 let mut storage_manager = self.storage_manager.lock().await;
-                storage_manager.save_account(&account).await?;
+                storage_manager.save_account(&account_details).await?;
                 drop(storage_manager);
-                drop(account);
+                drop(account_details);
             }
         }
         Ok(())

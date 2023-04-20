@@ -80,10 +80,10 @@ impl Account {
         &self,
         alias_id: AliasId,
     ) -> crate::wallet::Result<(OutputId, Output)> {
-        let account = self.read().await;
+        let account_details = self.read().await;
         let token_supply = self.client.get_token_supply().await?;
 
-        let (output_id, output_data) = account
+        let (output_id, output_data) = account_details
             .unspent_outputs()
             .iter()
             .find(|(&output_id, output_data)| match &output_data.output {

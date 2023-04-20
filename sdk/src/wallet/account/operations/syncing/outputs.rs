@@ -37,14 +37,14 @@ impl Account {
         let network_id = self.client.get_network_id().await?;
         let mut outputs = Vec::new();
         let token_supply = self.client.get_token_supply().await?;
-        let account = self.read().await;
+        let account_details = self.read().await;
 
         for output_response in output_responses {
             let output = Output::try_from_dto(&output_response.output, token_supply)?;
             let transaction_id = TransactionId::from_str(&output_response.metadata.transaction_id)?;
             // check if we know the transaction that created this output and if we created it (if we store incoming
             // transactions separated, then this check wouldn't be required)
-            let remainder = account
+            let remainder = account_details
                 .transactions
                 .get(&transaction_id)
                 .map_or(false, |tx| !tx.incoming);
@@ -52,8 +52,8 @@ impl Account {
             // 44 is for BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
             let chain = Chain::from_u32_hardened(vec![
                 44,
-                account.coin_type,
-                account.index,
+                account_details.coin_type,
+                account_details.index,
                 associated_address.internal as u32,
                 associated_address.key_index,
             ]);
@@ -84,10 +84,10 @@ impl Account {
         let mut outputs = Vec::new();
         let mut unknown_outputs = Vec::new();
         let mut unspent_outputs = Vec::new();
-        let mut account = self.write().await;
+        let mut account_details = self.write().await;
 
         for output_id in output_ids {
-            match account.outputs.get_mut(&output_id) {
+            match account_details.outputs.get_mut(&output_id) {
                 // set unspent
                 Some(output_data) => {
                     output_data.is_spent = false;
@@ -103,10 +103,10 @@ impl Account {
         // known output is unspent, so insert it to the unspent outputs again, because if it was an
         // alias/nft/foundry output it could have been removed when syncing without them
         for (output_id, output_data) in unspent_outputs {
-            account.unspent_outputs.insert(output_id, output_data);
+            account_details.unspent_outputs.insert(output_id, output_data);
         }
 
-        drop(account);
+        drop(account_details);
 
         if !unknown_outputs.is_empty() {
             outputs.extend(self.client.get_outputs(unknown_outputs).await?);
@@ -132,13 +132,15 @@ impl Account {
         // Limit parallel requests to 100, to avoid timeouts
         for transaction_ids_chunk in transaction_ids.chunks(100).map(|x: &[TransactionId]| x.to_vec()) {
             let mut tasks = Vec::new();
-            let account = self.read().await;
+            let account_details = self.read().await;
 
             for transaction_id in transaction_ids_chunk {
                 // Don't request known or inaccessible transactions again
-                if account.transactions.contains_key(&transaction_id)
-                    || account.incoming_transactions.contains_key(&transaction_id)
-                    || account.inaccessible_incoming_transactions.contains(&transaction_id)
+                if account_details.transactions.contains_key(&transaction_id)
+                    || account_details.incoming_transactions.contains_key(&transaction_id)
+                    || account_details
+                        .inaccessible_incoming_transactions
+                        .contains(&transaction_id)
                 {
                     continue;
                 }
@@ -171,21 +173,25 @@ impl Account {
                 });
             }
 
-            drop(account);
+            drop(account_details);
 
             let results = futures::future::try_join_all(tasks).await?;
             // Update account with new transactions
-            let mut account = self.write().await;
+            let mut account_details = self.write().await;
             for res in results {
                 match res? {
                     (transaction_id, Some(transaction)) => {
-                        account.incoming_transactions.insert(transaction_id, transaction);
+                        account_details
+                            .incoming_transactions
+                            .insert(transaction_id, transaction);
                     }
                     (transaction_id, None) => {
                         log::debug!("[SYNC] adding {transaction_id} to inaccessible_incoming_transactions");
                         // Save transactions that weren't found by the node to avoid requesting them endlessly.
                         // Will be cleared when new client options are provided.
-                        account.inaccessible_incoming_transactions.insert(transaction_id);
+                        account_details
+                            .inaccessible_incoming_transactions
+                            .insert(transaction_id);
                     }
                 }
             }

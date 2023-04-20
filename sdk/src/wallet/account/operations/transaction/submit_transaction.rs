@@ -15,11 +15,8 @@ impl Account {
         transaction_payload: TransactionPayload,
     ) -> crate::wallet::Result<BlockId> {
         log::debug!("[TRANSACTION] send_payload");
-        let account = self.read().await;
         #[cfg(feature = "events")]
-        let account_index = account.index;
-        // Drop account so it's not locked during PoW
-        drop(account);
+        let account_index = self.read().await.index;
 
         let local_pow = self.client.get_local_pow();
         if local_pow {
