@@ -9,8 +9,6 @@ use std::sync::{
 use std::{collections::HashSet, path::PathBuf, sync::atomic::Ordering};
 
 use serde::{Deserialize, Serialize};
-#[cfg(feature = "events")]
-use tokio::sync::Mutex;
 use tokio::sync::RwLock;
 
 #[cfg(feature = "events")]
@@ -136,7 +134,7 @@ impl WalletBuilder {
         let storage = Memory::default();
 
         #[cfg(feature = "storage")]
-        let mut storage_manager = Arc::new(Mutex::new(
+        let mut storage_manager = Arc::new(tokio::sync::Mutex::new(
             StorageManager::new(
                 None,
                 Box::new(storage) as Box<dyn crate::wallet::storage::adapter::StorageAdapter + Send + Sync>,
@@ -196,7 +194,7 @@ impl WalletBuilder {
             .finish()?;
 
         #[cfg(feature = "events")]
-        let event_emitter = Arc::new(Mutex::new(EventEmitter::new()));
+        let event_emitter = Arc::new(tokio::sync::Mutex::new(EventEmitter::new()));
 
         #[cfg(feature = "storage")]
         let mut accounts = storage_manager.lock().await.get_accounts().await.unwrap_or_default();
