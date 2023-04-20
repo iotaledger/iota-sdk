@@ -83,10 +83,10 @@ pub enum AccountCommand {
     Exit,
     /// Request funds from the faucet.
     Faucet {
-        /// URL of the faucet, default to <https://faucet.testnet.shimmer.network/api/enqueue>.
-        url: Option<String>,
         /// Address the faucet sends the funds to, defaults to the latest address.
         address: Option<String>,
+        /// URL of the faucet, default to <https://faucet.testnet.shimmer.network/api/enqueue>.
+        url: Option<String>,
     },
     /// Mint more of a native token.
     IncreaseNativeTokenSupply {
@@ -418,8 +418,8 @@ pub async fn destroy_foundry_command(account_handle: &Account, foundry_id: Strin
 // `faucet` command
 pub async fn faucet_command(
     account_handle: &Account,
-    url: Option<String>,
     address: Option<String>,
+    url: Option<String>,
 ) -> Result<(), Error> {
     let address = if let Some(address) = address {
         address
@@ -429,10 +429,9 @@ pub async fn faucet_command(
             None => return Err(Error::NoAddressForFaucet),
         }
     };
-    let faucet_url = match &url {
-        Some(faucet_url) => faucet_url,
-        None => "https://faucet.testnet.shimmer.network/api/enqueue",
-    };
+    let faucet_url = url
+        .as_deref()
+        .unwrap_or("https://faucet.testnet.shimmer.network/api/enqueue");
 
     println_log_info!("{}", request_funds_from_faucet(faucet_url, &address).await?);
 
@@ -582,11 +581,9 @@ pub async fn send_command(
     expiration: Option<u32>,
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
-    let outputs = vec![
-        AddressWithAmount::new(address, amount)
-            .with_return_address(return_address)
-            .with_expiration(expiration),
-    ];
+    let outputs = vec![AddressWithAmount::new(address, amount)
+        .with_return_address(return_address)
+        .with_expiration(expiration)];
     let transaction = account_handle
         .send_amount(
             outputs,
@@ -622,15 +619,13 @@ pub async fn send_native_token_command(
         let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
         account_handle.client().bech32_hrp_matches(&bech32_hrp).await?;
 
-        let outputs = vec![
-            BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
-                .add_unlock_condition(AddressUnlockCondition::new(address))
-                .with_native_tokens(vec![NativeToken::new(
-                    TokenId::from_str(&token_id)?,
-                    U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-                )?])
-                .finish_output(token_supply)?,
-        ];
+        let outputs = vec![BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
+            .add_unlock_condition(AddressUnlockCondition::new(address))
+            .with_native_tokens(vec![NativeToken::new(
+                TokenId::from_str(&token_id)?,
+                U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+            )?])
+            .finish_output(token_supply)?];
 
         account_handle.send(outputs, None).await?
     } else {

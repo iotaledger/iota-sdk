@@ -89,7 +89,7 @@ pub async fn account_prompt_internal(account_handle: Account, history: &mut Acco
                 AccountCommand::Exit => {
                     return Ok(true);
                 }
-                AccountCommand::Faucet { url, address } => faucet_command(&account_handle, url, address).await,
+                AccountCommand::Faucet { address, url } => faucet_command(&account_handle, address, url).await,
                 AccountCommand::IncreaseNativeTokenSupply { token_id, amount } => {
                     increase_native_token_command(&account_handle, token_id, amount).await
                 }
