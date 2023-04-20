@@ -610,6 +610,11 @@ path = "examples/wallet/threads.rs"
 required-features = [ "wallet" ]
 
 [[example]]
+name = "update_alias_output"
+path = "examples/wallet/update_alias_output.rs"
+required-features = [ "wallet", "stronghold" ]
+
+[[example]]
 name = "wallet"
 path = "examples/wallet/wallet.rs"
 required-features = [ "wallet" ]
