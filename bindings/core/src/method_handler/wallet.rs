@@ -52,7 +52,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 let account = account.read().await;
                 account_dtos.push(AccountDto::from(&*account));
             }
-            Response::Accounts(accoun_dtos)
+            Response::Accounts(account_dtos)
         }
         WalletMethod::CallAccountMethod { account_id, method } => {
             let account = wallet.get_account(account_id).await?;
