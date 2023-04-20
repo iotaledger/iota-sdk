@@ -49,10 +49,7 @@ async fn main() -> Result<()> {
         .get_addresses(&secret_manager)
         .with_account_index(0)
         .with_range(0..4)
-        .with_options(GenerateAddressOptions {
-            internal: true,
-            ..Default::default()
-        })
+        .with_options(GenerateAddressOptions::internal())
         .finish()
         .await?;
 

@@ -53,6 +53,15 @@ pub struct GenerateAddressOptions {
     pub ledger_nano_prompt: bool,
 }
 
+impl GenerateAddressOptions {
+    pub const fn internal() -> Self {
+        Self {
+            internal: true,
+            ledger_nano_prompt: false,
+        }
+    }
+}
+
 /// The Ledger device status.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct LedgerApp {

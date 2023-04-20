@@ -61,14 +61,8 @@ impl AccountHandle {
                 log::debug!(
                     "[search_addresses_with_outputs] generate {address_amount_to_generate} internal addresses below the start index"
                 );
-                self.generate_addresses(
-                    address_amount_to_generate,
-                    Some(GenerateAddressOptions {
-                        internal: true,
-                        ..Default::default()
-                    }),
-                )
-                .await?;
+                self.generate_addresses(address_amount_to_generate, Some(GenerateAddressOptions::internal()))
+                    .await?;
             }
         }
 
@@ -95,13 +89,7 @@ impl AccountHandle {
             // generate public and internal addresses
             let addresses = self.generate_addresses(address_gap_limit, None).await?;
             let internal_addresses = self
-                .generate_addresses(
-                    address_gap_limit_internal,
-                    Some(GenerateAddressOptions {
-                        internal: true,
-                        ..Default::default()
-                    }),
-                )
+                .generate_addresses(address_gap_limit_internal, Some(GenerateAddressOptions::internal()))
                 .await?;
 
             let address_start_index = addresses

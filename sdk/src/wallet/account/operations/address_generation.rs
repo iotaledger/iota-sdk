@@ -146,13 +146,7 @@ impl AccountHandle {
     /// Generate an internal address and store in the account, internal addresses are used for remainder outputs
     pub(crate) async fn generate_remainder_address(&self) -> crate::wallet::Result<AccountAddress> {
         let result = self
-            .generate_addresses(
-                1,
-                Some(GenerateAddressOptions {
-                    internal: true,
-                    ..Default::default()
-                }),
-            )
+            .generate_addresses(1, Some(GenerateAddressOptions::internal()))
             .await?
             .first()
             .ok_or(crate::wallet::Error::FailedToGetRemainder)?

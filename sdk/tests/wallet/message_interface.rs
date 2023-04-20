@@ -417,10 +417,7 @@ async fn message_interface_address_generation() -> Result<()> {
         .send_message(Message::GenerateAddress {
             account_index: 10,
             address_index: 10,
-            options: Some(GenerateAddressOptions {
-                internal: true,
-                ..Default::default()
-            }),
+            options: Some(GenerateAddressOptions::internal()),
             bech32_hrp: Some("rms".to_string()),
         })
         .await;

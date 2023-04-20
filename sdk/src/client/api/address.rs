@@ -196,10 +196,12 @@ impl<'a> GetAddressesBuilder<'a> {
                 self.coin_type,
                 self.account_index,
                 self.range,
-                self.options.map(|mut o| {
-                    o.internal = true;
-                    o
-                }),
+                self.options
+                    .map(|mut o| {
+                        o.internal = true;
+                        o
+                    })
+                    .or_else(|| Some(GenerateAddressOptions::internal())),
             )
             .await?;
 
