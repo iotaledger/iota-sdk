@@ -6,8 +6,6 @@ use std::{
     sync::Arc,
 };
 
-#[cfg(feature = "events")]
-use tokio::sync::Mutex;
 use tokio::sync::RwLock;
 
 #[cfg(feature = "events")]
@@ -33,9 +31,9 @@ pub struct AccountBuilder {
     secret_manager: Arc<RwLock<SecretManager>>,
     accounts: Arc<RwLock<Vec<Account>>>,
     #[cfg(feature = "events")]
-    event_emitter: Arc<Mutex<EventEmitter>>,
+    event_emitter: Arc<tokio::sync::Mutex<EventEmitter>>,
     #[cfg(feature = "storage")]
-    storage_manager: Arc<Mutex<StorageManager>>,
+    storage_manager: Arc<tokio::sync::Mutex<StorageManager>>,
 }
 
 impl AccountBuilder {
@@ -45,8 +43,8 @@ impl AccountBuilder {
         client_options: Arc<RwLock<ClientOptions>>,
         coin_type: u32,
         secret_manager: Arc<RwLock<SecretManager>>,
-        #[cfg(feature = "events")] event_emitter: Arc<Mutex<EventEmitter>>,
-        #[cfg(feature = "storage")] storage_manager: Arc<Mutex<StorageManager>>,
+        #[cfg(feature = "events")] event_emitter: Arc<tokio::sync::Mutex<EventEmitter>>,
+        #[cfg(feature = "storage")] storage_manager: Arc<tokio::sync::Mutex<StorageManager>>,
     ) -> Self {
         Self {
             addresses: None,
