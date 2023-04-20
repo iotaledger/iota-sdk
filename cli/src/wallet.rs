@@ -9,7 +9,7 @@ use crate::{
         restore_command, set_node_command, sync_command, unlock_wallet, InitParameters, WalletCli, WalletCommand,
     },
     error::Error,
-    helper::{get_account_name, get_decision, get_password, pick_account, print_account_help, print_wallet_help},
+    helper::{get_account_name, get_decision, get_password, pick_account, print_wallet_help},
     println_log_error, println_log_info,
 };
 
