@@ -47,10 +47,10 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         WalletMethod::GetAccounts => {
             let accounts = wallet.get_accounts().await?;
-            let mut accoun_dtos = Vec::new();
+            let mut account_dtos = Vec::new();
             for account in accounts {
                 let account = account.read().await;
-                accoun_dtos.push(AccountDto::from(&*account));
+                account_dtos.push(AccountDto::from(&*account));
             }
             Response::Accounts(accoun_dtos)
         }
