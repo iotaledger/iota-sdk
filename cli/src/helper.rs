@@ -106,19 +106,23 @@ pub async fn generate_mnemonic() -> Result<String, Error> {
     println_log_info!("Mnemonic has been generated.");
     println!("How do you want to proceed with it?");
     let choices = [
-        "I want to write it to the console (and copy it myself)",
-        "I want to write it to a file (which I keep safe)",
+        "I want to write it to the console (and store it myself)",
+        "I want to write it to a file",
         "I want to do both of the above",
     ];
+
     let selected_choice = Select::with_theme(&ColorfulTheme::default())
         .items(&choices)
         .default(0)
-        .interact_on_opt(&Term::stderr())?;
+        .interact_on_opt(&Term::stderr())?
+        .unwrap_or(0);
+    println!("{}", choices[selected_choice]);
 
-    if matches!(selected_choice, Some(0 | 2)) {
+    if [0, 2].contains(&selected_choice) {
+        println!("YOUR MNEMONIC:");
         println!("{}", mnemonic);
     }
-    if matches!(selected_choice, Some(1 | 2)) {
+    if [1, 2].contains(&selected_choice) {
         write_mnemonic_to_file(MNEMONIC_FILE_NAME, &mnemonic).await?;
         println_log_info!("Mnemonic has been written to '{MNEMONIC_FILE_NAME}'.");
     }
