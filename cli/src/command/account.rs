@@ -184,13 +184,13 @@ pub enum AccountCommand {
     },
     /// Synchronize the account.
     Sync,
-    /// List the account transactions.
-    /// Show the details of the Transaction
+    /// Show the details of the transaction
     #[clap(alias = "tx")]
     Transaction {
         /// Transaction ID to be displayed e.g. 0x84fe6b1796bddc022c9bc40206f0a692f4536b02aa8c13140264e2e01a3b7e4b.
         transaction_id: String,
     },
+    /// List the account transactions.
     #[clap(alias = "txs")]
     Transactions {
         /// List account transactions with all details.
