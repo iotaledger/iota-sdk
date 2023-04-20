@@ -58,9 +58,8 @@ describe('AccountManager', () => {
 
         const address = await accountManager.generateAddress(
             0,
-            false,
             0,
-            { ledgerNanoPrompt: false },
+            { internal: false, ledgerNanoPrompt: false },
             "rms"
         );
 
@@ -68,9 +67,8 @@ describe('AccountManager', () => {
 
         const anotherAddress = await accountManager.generateAddress(
             10,
-            true,
             10,
-            { ledgerNanoPrompt: false },
+            { internal: true, ledgerNanoPrompt: false },
             "tst"
         );
 

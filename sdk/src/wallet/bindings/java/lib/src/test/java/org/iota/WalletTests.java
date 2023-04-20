@@ -69,10 +69,12 @@ public class WalletTests extends TestSettings {
         address = wallet.generateAddress(0, 2, options, "rms");
         assertEquals("rms1qzjq2jwzp8ddh0gawgdskvtd6awlv82c8y0a9s6g7kgszn6ts95u6r4kx2n", address);
 
-        String addressPublic = wallet.generateAddress(0, 0, options.withInternal(true), "rms");
+        GenerateAddressOptions internal_options = options.withInternal(true);
+
+        String addressPublic = wallet.generateAddress(0, 0, internal_options, "rms");
         assertEquals("rms1qqtjgttzh2dp5exzru94pddle5sqf0007q4smdsaycerff2hny5764xrkgk", addressPublic);
 
-        String anotherAddress = wallet.generateAddress(10, 10, options.withInternal(true), "rms");
+        String anotherAddress = wallet.generateAddress(10, 10, internal_options, "rms");
         assertEquals("rms1qzu4a5ryj39h07z9atn2fza59wu2n5f295st5ehmjg5u8tyveaew65lw3yg", anotherAddress);
 
         AccountHandle account = wallet.createAccount("Alice");
