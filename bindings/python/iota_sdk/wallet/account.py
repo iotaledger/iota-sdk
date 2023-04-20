@@ -402,6 +402,7 @@ class Account:
     def sync(self, options=None):
         """Sync the account by fetching new information from the nodes.
            Will also retry pending transactions and consolidate outputs if necessary.
+           A custom defaults can be set using set_default_sync_options
         """
         return self._call_account_method(
             'sync', {
@@ -445,6 +446,16 @@ class Account:
         return self._call_account_method(
             'setAlias', {
                 'alias': alias
+            }
+        )
+
+    def set_default_sync_options(self, options):
+        """Set the fallback SyncOptions for account syncing.
+           If storage is enabled, will persist during restarts.
+        """
+        return self._call_account_method(
+            'SetDefaultSyncOptions', {
+                'options': options
             }
         )
 
