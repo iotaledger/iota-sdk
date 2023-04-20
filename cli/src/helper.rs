@@ -1,6 +1,3 @@
-// Copyright 2020-2022 IOTA Stiftung
-// SPDX-License-Identifier: Apache-2.0
-
 use chrono::{DateTime, NaiveDateTime, Utc};
 use dialoguer::{console::Term, theme::ColorfulTheme, Password, Select};
 use iota_sdk::wallet::Wallet;
@@ -95,13 +92,19 @@ async fn write_mnemonic_to_file(path: &str, mnemonic: &str) -> Result<(), Error>
     Ok(())
 }
 
+/// Converts a unix timestamp in milliseconds to a DateTime<Utc>
 pub fn to_utc_date_time(ts_millis: u128) -> Result<DateTime<Utc>, Error> {
-    let milliseconds = ts_millis % 1000;
-    let secs = (ts_millis - milliseconds) / 1000;
+    let millis = ts_millis % 1000;
+    let secs = (ts_millis - millis) / 1000;
 
-    let naive_time = NaiveDateTime::from_timestamp_opt(secs as i64, (milliseconds * 1000000) as u32).ok_or(
-        Error::Miscellaneous("Failed to convert timestamp to NaiveDateTime".to_string()),
-    )?;
+    let secs_int =
+        i64::try_from(secs).map_err(|e| Error::Miscellaneous(format!("Failed to convert timestamp to i64: {e}")))?;
+    let nanos = u32::try_from(millis * 1000000)
+        .map_err(|e| Error::Miscellaneous(format!("Failed to convert timestamp to u32: {e}")))?;
+
+    let naive_time = NaiveDateTime::from_timestamp_opt(secs_int, nanos).ok_or(Error::Miscellaneous(
+        "Failed to convert timestamp to NaiveDateTime".to_string(),
+    ))?;
 
     Ok(DateTime::from_utc(naive_time, Utc))
 }
