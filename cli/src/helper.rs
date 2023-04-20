@@ -104,11 +104,11 @@ pub async fn bytes_from_hex_or_file(hex: Option<String>, file: Option<String>) -
 pub async fn generate_mnemonic() -> Result<String, Error> {
     let mnemonic = iota_sdk::client::generate_mnemonic()?;
     println_log_info!("Mnemonic has been generated.");
-
+    println!("How do you want to proceed with it?");
     let choices = [
-        "Write it to console only",
-        "Write it to file only",
-        "Write it to console and file",
+        "I want to write it to the console (and copy it myself)",
+        "I want to write it to a file (which I keep safe)",
+        "I want to do both of the above",
     ];
     let selected_choice = Select::with_theme(&ColorfulTheme::default())
         .items(&choices)
