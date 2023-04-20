@@ -15,8 +15,7 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{AccountBalanceDto, TransactionDto},
-            AccountHandle, AliasOutputOptions, MintTokenTransactionDto, OutputDataDto, OutputOptions,
-            TransactionOptions,
+            Account, AliasOutputOptions, MintTokenTransactionDto, OutputDataDto, OutputOptions, TransactionOptions,
         },
         message_interface::AddressWithUnspentOutputsDto,
         AddressWithAmount, IncreaseNativeTokenSupplyOptions, NativeTokenOptions, NftOptions,
@@ -26,7 +25,7 @@ use primitive_types::U256;
 
 use crate::{method::AccountMethod, Response, Result};
 
-pub(crate) async fn call_account_method_internal(account: &AccountHandle, method: AccountMethod) -> Result<Response> {
+pub(crate) async fn call_account_method_internal(account: &Account, method: AccountMethod) -> Result<Response> {
     let response = match method {
         AccountMethod::BurnNativeToken {
             token_id,

@@ -6,7 +6,7 @@ use iota_sdk::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         NftId, NftOutputBuilder, OutputId, UnlockCondition,
     },
-    wallet::{account::AccountHandle, NativeTokenOptions, NftOptions, Result, U256},
+    wallet::{Account, NativeTokenOptions, NftOptions, Result, U256},
 };
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
@@ -186,7 +186,7 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     tear_down(storage_path)
 }
 
-async fn destroy_foundry(account: &AccountHandle) -> Result<()> {
+async fn destroy_foundry(account: &Account) -> Result<()> {
     let balance = account.sync(None).await?;
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 
@@ -209,7 +209,7 @@ async fn destroy_foundry(account: &AccountHandle) -> Result<()> {
     Ok(())
 }
 
-async fn destroy_alias(account: &AccountHandle) -> Result<()> {
+async fn destroy_alias(account: &Account) -> Result<()> {
     let balance = account.sync(None).await.unwrap();
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 

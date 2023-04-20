@@ -14,10 +14,10 @@ use crate::{
         api::{transaction::validate_transaction_payload_length, PreparedTransactionData, SignedTransactionData},
         secret::SecretManageExt,
     },
-    wallet::account::{handle::AccountHandle, operations::transaction::TransactionPayload},
+    wallet::account::{operations::transaction::TransactionPayload, Account},
 };
 
-impl AccountHandle {
+impl Account {
     /// Function to sign a transaction essence
     pub async fn sign_transaction_essence(
         &self,

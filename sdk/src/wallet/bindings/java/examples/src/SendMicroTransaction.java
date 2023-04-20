@@ -24,7 +24,7 @@ public class SendMicroTransaction {
 
         // Get account and sync it with the registered node to ensure that its balances
         // are up-to-date.
-        AccountHandle account = wallet.getAccount(Env.ACCOUNT_NAME);
+        Account account = wallet.getAccount(Env.ACCOUNT_NAME);
 
         AddressWithAmount[] outputs = new AddressWithAmount[] {
                 new AddressWithAmount()
