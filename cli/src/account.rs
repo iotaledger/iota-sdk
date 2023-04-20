@@ -165,11 +165,11 @@ pub async fn account_prompt_internal(
                 } => send_native_token_command(&account_handle, address, token_id, amount, gift_storage_deposit).await,
                 AccountCommand::SendNft { address, nft_id } => send_nft_command(&account_handle, address, nft_id).await,
                 AccountCommand::Sync => sync_command(&account_handle).await,
-                AccountCommand::Transactions { show_details } => {
-                    transactions_command(&account_handle, show_details).await
-                }
                 AccountCommand::Transaction { transaction_id } => {
                     transaction_command(&account_handle, &transaction_id).await
+                }
+                AccountCommand::Transactions { show_details } => {
+                    transactions_command(&account_handle, show_details).await
                 }
                 AccountCommand::UnspentOutputs => unspent_outputs_command(&account_handle).await,
                 AccountCommand::Vote { event_id, answers } => vote_command(&account_handle, event_id, answers).await,

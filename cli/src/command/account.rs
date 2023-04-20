@@ -700,12 +700,12 @@ pub async fn transactions_command(account_handle: &AccountHandle, show_details: 
     } else {
         for (i, tx) in transactions.into_iter().enumerate() {
             if show_details {
-                println_log_info!("{}", serde_json::to_string(&TransactionDto::from(&tx))?);
+                println_log_info!("{:#?}", &tx);
             } else {
                 let transaction_time = to_utc_date_time(tx.timestamp)?;
                 let formatted_time = transaction_time.format("%Y-%m-%d %H:%M:%S").to_string();
 
-                println_log_info!("{:<5} {:40}\t{:20}", i, tx.transaction_id.to_string(), formatted_time,);
+                println_log_info!("{:<5} {:40}\t{:20}", i, tx.transaction_id.to_string(), formatted_time);
             }
         }
     }
@@ -722,7 +722,7 @@ pub async fn transaction_command(account_handle: &AccountHandle, transaction_id:
         .find(|tx| tx.transaction_id.to_string() == transaction_id);
 
     if let Some(transaction) = maybe_transaction {
-        println_log_info!("{}", serde_json::to_string(&TransactionDto::from(&transaction))?);
+        println_log_info!("{:#?}", transaction);
     } else {
         println_log_info!("No transaction found");
     }
