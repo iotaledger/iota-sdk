@@ -12,8 +12,8 @@ use crate::types::block::{
     output::{dto::TokenIdDto, feature::MetadataFeature, AliasId, FoundryId, NftId, OutputId, TokenId},
 };
 
-/// The balance of an account, returned from [`crate::wallet::account::handle::AccountHandle::sync()`] and
-/// [`crate::wallet::account::handle::AccountHandle::balance()`].
+/// The balance of an account, returned from [`crate::wallet::account::Account::sync()`] and
+/// [`crate::wallet::account::Account::balance()`].
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, Getters)]
 #[serde(rename_all = "camelCase")]
 #[getset(get = "pub")]
@@ -60,8 +60,8 @@ impl std::ops::AddAssign for AccountBalance {
     }
 }
 
-/// Dto for the balance of an account, returned from [`crate::wallet::account::handle::AccountHandle::sync()`] and
-/// [`crate::wallet::account::handle::AccountHandle::balance()`].
+/// Dto for the balance of an account, returned from [`crate::wallet::account::Account::sync()`] and
+/// [`crate::wallet::account::Account::balance()`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountBalanceDto {

@@ -5,12 +5,12 @@ use crate::{
     client::api::input_selection::Burn,
     types::block::output::{AliasId, AliasOutputBuilder, FoundryId, NativeTokensBuilder, Output, TokenScheme},
     wallet::{
-        account::{handle::AccountHandle, operations::transaction::Transaction, types::OutputData, TransactionOptions},
+        account::{operations::transaction::Transaction, types::OutputData, Account, TransactionOptions},
         Error,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Function to destroy a foundry output with a circulating supply of 0.
     /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
     pub async fn destroy_foundry(

@@ -8,12 +8,10 @@ use std::collections::HashSet;
 
 use crate::{
     types::block::address::Address,
-    wallet::account::{
-        handle::AccountHandle, operations::syncing::SyncOptions, types::address::AddressWithUnspentOutputs,
-    },
+    wallet::account::{operations::syncing::SyncOptions, types::address::AddressWithUnspentOutputs, Account},
 };
 
-impl AccountHandle {
+impl Account {
     /// Get the addresses that should be synced with the current known unspent output ids
     /// Also adds alias and nft addresses from unspent alias or nft outputs that have no Timelock, Expiration or
     /// StorageDepositReturn [`UnlockCondition`]

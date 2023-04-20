@@ -19,7 +19,6 @@ use crate::{
     },
     wallet::{
         account::{
-            handle::FilterOptions,
             operations::{
                 address_generation::AddressGenerationOptions,
                 output_claiming::OutputsToClaim,
@@ -36,6 +35,7 @@ use crate::{
                     TransactionOptionsDto,
                 },
             },
+            FilterOptions,
         },
         message_interface::dtos::AddressWithAmountDto,
         AddressAndNftId, AddressNativeTokens,

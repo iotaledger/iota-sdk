@@ -10,11 +10,11 @@ use crate::{
     },
     wallet::account::{
         operations::participation::ParticipationEventWithNodes,
-        types::participation::ParticipationEventRegistrationOptions, AccountHandle,
+        types::participation::ParticipationEventRegistrationOptions, Account,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Stores participation information for the given events locally and returns them all.
     ///
     /// This will NOT store the node url and auth inside the client options.

@@ -15,12 +15,12 @@ use crate::{
         output::{Output, OUTPUT_COUNT_RANGE},
     },
     wallet::account::{
-        handle::AccountHandle,
         operations::transaction::{RemainderValueStrategy, TransactionOptions},
+        Account,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Get inputs and build the transaction essence
     pub async fn prepare_transaction(
         &self,

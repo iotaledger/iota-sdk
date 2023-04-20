@@ -31,8 +31,8 @@ pub async fn pick_account(wallet: &Wallet) -> Result<Option<u32>, Error> {
         _ => {
             let mut items = Vec::new();
 
-            for account_handle in accounts {
-                items.push(account_handle.read().await.alias().clone());
+            for account in accounts {
+                items.push(account.read().await.alias().clone());
             }
 
             let index = Select::with_theme(&ColorfulTheme::default())

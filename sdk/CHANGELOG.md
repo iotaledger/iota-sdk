@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed `AccountHandle` to `Account`, `Account` to `AccountDetails` and `AccountDto` to `AccountDetailsDto`;
 - `AddressWrapper` renamed to `Bech32Address` and moved to `types`;
 - `Address::try_from_bech32_with_hrp` address and HRP return have been reversed;
 - `PostBlockPayload::payload_dto` renamed to `payload`;

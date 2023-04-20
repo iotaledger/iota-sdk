@@ -29,7 +29,7 @@ use crate::{
             types::{address::AccountAddress, AccountBalanceDto, TransactionDto},
             OutputDataDto,
         },
-        message_interface::dtos::{AccountDto, AddressWithUnspentOutputsDto},
+        message_interface::dtos::{AccountDetailsDto, AddressWithUnspentOutputsDto},
         Error,
     },
 };
@@ -41,11 +41,11 @@ pub enum Response {
     /// Response for
     /// [`CreateAccount`](crate::wallet::message_interface::Message::CreateAccount),
     /// [`GetAccount`](crate::wallet::message_interface::Message::GetAccount)
-    Account(AccountDto),
+    Account(AccountDetailsDto),
     /// Response for [`GetAccountIndexes`](crate::wallet::message_interface::Message::GetAccountIndexes)
     AccountIndexes(Vec<u32>),
     /// Response for [`GetAccounts`](crate::wallet::message_interface::Message::GetAccounts)
-    Accounts(Vec<AccountDto>),
+    Accounts(Vec<AccountDetailsDto>),
     /// Response for [`Addresses`](crate::wallet::message_interface::AccountMethod::Addresses)
     Addresses(Vec<AccountAddress>),
     /// Response for
