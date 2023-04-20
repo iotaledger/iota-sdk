@@ -31,7 +31,7 @@ async fn generate_addresses() {
     let options = GenerateAddressesOptions {
         coin_type: None,
         account_index: None,
-        range: Some(std::ops::Range { start: 0, end: 10 }),
+        range: Some(0..10),
         internal: None,
         bech32_hrp: Some("atoi".to_string()),
         options: None,
@@ -78,7 +78,7 @@ async fn build_and_post_block() {
     let options = GenerateAddressesOptions {
         coin_type: None,
         account_index: None,
-        range: Some(std::ops::Range { start: 0, end: 10 }),
+        range: Some(0..10),
         internal: None,
         bech32_hrp: Some("atoi".to_string()),
         options: None,
@@ -214,7 +214,7 @@ async fn stronghold() {
     }
 
     // Remove garbage after test, but don't care about the result
-    std::fs::remove_file("teststronghold.stronghold").unwrap_or(());
+    std::fs::remove_file("teststronghold.stronghold").ok();
 }
 
 #[tokio::test]

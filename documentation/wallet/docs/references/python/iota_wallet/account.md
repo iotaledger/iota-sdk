@@ -287,7 +287,7 @@ Send amount.
 ### send\_native\_tokens
 
 ```python
-def send_native_tokens(addresses_native_tokens, options=None)
+def send_native_tokens(addresses_and_native_tokens, options=None)
 ```
 
 Send native tokens.
@@ -295,7 +295,7 @@ Send native tokens.
 ### send\_nft
 
 ```python
-def send_nft(addresses_nft_ids, options=None)
+def send_nft(addresses_and_nft_ids, options=None)
 ```
 
 Send nft.

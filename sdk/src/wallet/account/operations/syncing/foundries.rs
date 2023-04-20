@@ -5,10 +5,10 @@ use std::collections::HashSet;
 
 use crate::{
     types::block::output::{FoundryId, Output},
-    wallet::{account::handle::AccountHandle, task},
+    wallet::{task, Account},
 };
 
-impl AccountHandle {
+impl Account {
     pub(crate) async fn request_and_store_foundry_outputs(
         &self,
         foundry_ids: HashSet<FoundryId>,
@@ -50,8 +50,8 @@ impl AccountHandle {
             }
         }
 
-        let mut account = self.write().await;
-        account.native_token_foundries = foundries;
+        let mut account_details = self.write().await;
+        account_details.native_token_foundries = foundries;
 
         Ok(())
     }

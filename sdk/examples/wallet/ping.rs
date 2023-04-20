@@ -81,7 +81,7 @@ async fn main() -> Result<()> {
             "{}",
             request_funds_from_faucet(
                 &std::env::var("FAUCET_URL").unwrap(),
-                &addresses[0].address().to_bech32()
+                &addresses[0].address().to_string()
             )
             .await?
         );

@@ -90,10 +90,10 @@ pub mod dto {
 
     /// Defines an Ed25519 signature.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct Ed25519SignatureDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "publicKey")]
         pub public_key: String,
         pub signature: String,
     }

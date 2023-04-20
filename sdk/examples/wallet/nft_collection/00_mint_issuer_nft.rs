@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
         if let Output::Nft(nft_output) = output {
             // New minted nft id is empty in the output
             if nft_output.nft_id().is_null() {
-                let output_id = OutputId::new(transaction.payload.id(), output_index as u16)?;
+                let output_id = OutputId::new(transaction.transaction_id, output_index as u16)?;
                 let nft_id = NftId::from(&output_id);
                 println!("New minted NFT id: {nft_id}");
             }

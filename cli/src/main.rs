@@ -62,6 +62,8 @@ async fn run(cli: WalletCli) -> Result<(), Error> {
 
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().ok();
+
     let cli = match WalletCli::try_parse() {
         Ok(cli) => cli,
         Err(e) => {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Password, Select};
-use iota_sdk::wallet::{AccountHandle, Wallet};
+use iota_sdk::wallet::{Account, Wallet};
 use tokio::{fs::OpenOptions, io::AsyncWriteExt};
 
 use crate::{
@@ -57,7 +57,7 @@ pub async fn get_account_name(prompt: &str, wallet: &Wallet) -> Result<String, E
     }
 }
 
-pub async fn pick_account(wallet: &Wallet) -> Result<Option<AccountHandle>, Error> {
+pub async fn pick_account(wallet: &Wallet) -> Result<Option<Account>, Error> {
     let mut accounts = wallet.get_accounts().await?;
 
     match accounts.len() {
@@ -66,6 +66,7 @@ pub async fn pick_account(wallet: &Wallet) -> Result<Option<AccountHandle>, Erro
         _ => {
             // fetch all available account aliases to display to the user
             let aliases = wallet.get_account_aliases().await?;
+
             let index = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("Select an account:")
                 .items(&aliases)

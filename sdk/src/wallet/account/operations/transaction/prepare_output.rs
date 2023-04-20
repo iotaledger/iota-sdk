@@ -20,14 +20,10 @@ use crate::{
         },
         DtoError,
     },
-    wallet::account::{
-        handle::{AccountHandle, FilterOptions},
-        operations::transaction::RemainderValueStrategy,
-        TransactionOptions,
-    },
+    wallet::account::{operations::transaction::RemainderValueStrategy, Account, FilterOptions, TransactionOptions},
 };
 
-impl AccountHandle {
+impl Account {
     /// Prepare an output for sending
     /// If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
     /// be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full
@@ -42,7 +38,7 @@ impl AccountHandle {
         log::debug!("[OUTPUT] prepare_output {options:?}");
         let token_supply = self.client.get_token_supply().await?;
 
-        let (recipient_address, bech32_hrp) = Address::try_from_bech32_with_hrp(&options.recipient_address)?;
+        let (bech32_hrp, recipient_address) = Address::try_from_bech32_with_hrp(&options.recipient_address)?;
         self.client.bech32_hrp_matches(&bech32_hrp).await?;
 
         if let Some(assets) = &options.assets {
@@ -404,10 +400,9 @@ pub struct OutputOptions {
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Assets {
-    #[serde(rename = "nativeToken")]
     pub native_tokens: Option<Vec<NativeToken>>,
-    #[serde(rename = "nftId")]
     pub nft_id: Option<NftId>,
 }
 
@@ -420,20 +415,18 @@ pub struct Features {
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Unlocks {
-    #[serde(rename = "expirationUnixTime")]
     pub expiration_unix_time: Option<u32>,
-    #[serde(rename = "timelockUnixTime")]
     pub timelock_unix_time: Option<u32>,
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct StorageDeposit {
-    #[serde(rename = "returnStrategy")]
     pub return_strategy: Option<ReturnStrategy>,
     // If account has 2 Mi, min storage deposit is 1 Mi and one wants to send 1.5 Mi, it wouldn't be possible with a
     // 0.5 Mi remainder. To still send a transaction, the 0.5 can be added to the output automatically, if set to true
-    #[serde(rename = "useExcessIfLow")]
     pub use_excess_if_low: Option<bool>,
 }
 
@@ -447,8 +440,8 @@ pub enum ReturnStrategy {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OutputOptionsDto {
-    #[serde(rename = "recipientAddress")]
     recipient_address: String,
     amount: String,
     #[serde(default)]
@@ -457,7 +450,7 @@ pub struct OutputOptionsDto {
     features: Option<Features>,
     #[serde(default)]
     unlocks: Option<Unlocks>,
-    #[serde(rename = "storageDeposit", default)]
+    #[serde(default)]
     storage_deposit: Option<StorageDeposit>,
 }
 
@@ -481,10 +474,9 @@ impl TryFrom<&OutputOptionsDto> for OutputOptions {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AssetsDto {
-    #[serde(rename = "nativeTokens")]
     native_tokens: Option<Vec<NativeTokenDto>>,
-    #[serde(rename = "nftId")]
     nft_id: Option<String>,
 }
 

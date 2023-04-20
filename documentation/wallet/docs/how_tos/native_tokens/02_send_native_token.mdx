@@ -28,7 +28,7 @@ import ReplaceNativeTokenId from '../../_admonitions/_note_replace_native_token_
 
 After you have [minted](01_mint_native_token.mdx) a
 [native tokens](https://wiki.iota.org/shimmer/introduction/explanations/what_is_stardust/tokenization#native-tokens),
-you can easily send it by calling the `Account.send_native_tokens(addresses_native_tokens, options)` function.
+you can easily send it by calling the `Account.send_native_tokens(addresses_and_native_tokens, options)` function.
 
 As with any output, you can set a
 [storage deposit](https://wiki.iota.org/shimmer/introduction/explanations/what_is_stardust/storage_deposit) and
@@ -45,7 +45,7 @@ The following example will:
 1. Create a wallet.
 2. Get Alice's account which was [created in the first guide](../accounts_and_addresses/01_create_a_wallet_account.mdx).
 3. Define the type of native token and amount to send.
-4. Send the native tokens calling the `Account.send_native_tokens(addresses_native_tokens, options)` function.
+4. Send the native tokens calling the `Account.send_native_tokens(addresses_and_native_tokens, options)` function.
 
 <Tabs groupId="language">
     <TabItem value="rust" label="Rust">
@@ -78,4 +78,3 @@ The following example will:
         <JavaOutput/>
     </TabItem>
 </Tabs>
-

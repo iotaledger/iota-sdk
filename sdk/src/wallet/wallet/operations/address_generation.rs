@@ -118,9 +118,8 @@ impl Wallet {
             .ok_or(crate::wallet::Error::MissingParameter("address"))?)
     }
 
-    // Get the bech32 hrp from the first account address or if not existent, from the client
-    #[allow(dead_code)]
-    pub(crate) async fn get_bech32_hrp(&self) -> crate::wallet::Result<String> {
+    /// Get the bech32 hrp from the first account address or if not existent, from the client
+    pub async fn get_bech32_hrp(&self) -> crate::wallet::Result<String> {
         Ok(match self.get_accounts().await?.first() {
             Some(account) => account
                 .public_addresses()
@@ -128,7 +127,7 @@ impl Wallet {
                 .first()
                 .expect("missing first public address")
                 .address
-                .bech32_hrp
+                .hrp
                 .clone(),
             None => {
                 self.client_options

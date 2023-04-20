@@ -84,6 +84,16 @@ Try to claim a specific output.
 > Account "main": claim 0xd5dff9ee869dfa7796d5132b220cb5c00146c36abba27d3562e2d726decb50850000
 ```
 
+### `claimable-outputs`
+
+Lists all outputs that can currently be claimed by this account and for how long.
+
+#### Examples
+
+```sh
+> Account "main": claimable-outputs
+```
+
 ### `clear`
 
 Clears the terminal.
@@ -201,19 +211,24 @@ Requests funds from a faucet.
 
 | Name      | Optional  | Default                                            | Example                                                         |
 | --------- | --------- | -------------------------------------------------- | --------------------------------------------------------------- |
-| `url`     | ✓         | https://faucet.testnet.shimmer.network/api/enqueue | http://localhost:8091/api/enqueue                               |
 | `address` | ✓         | The latest address of the account                  | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 |
+| `url`     | ✓         | https://faucet.testnet.shimmer.network/api/enqueue | http://localhost:8091/api/enqueue                               |
 
 #### Examples
 
-Request funds from a given faucet to the latest account address.
+Request funds from the default faucet to the latest account address.
 ```sh
-> Account "main": faucet http://localhost:8091/api/enqueue
+> Account "main": faucet
+```
+
+Request funds from the default faucet to a given address.
+```sh
+> Account "main": faucet rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
 ```
 
 Request funds from a given faucet to a given address.
 ```sh
-> Account "main": faucet http://localhost:8091/api/enqueue rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
+> Account "main": faucet rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 http://localhost:8091/api/enqueue
 ```
 
 ### `help`

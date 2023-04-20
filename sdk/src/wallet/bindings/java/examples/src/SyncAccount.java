@@ -20,7 +20,7 @@ public class SyncAccount {
         );
 
         // Get account.
-        AccountHandle a = wallet.getAccount(new AccountAlias(Env.ACCOUNT_NAME));
+        Account a = wallet.getAccount(new AccountAlias(Env.ACCOUNT_NAME));
 
         // Sync the account with the registered node to ensure that its balances are up-to-date.
         AccountBalance balance = a.syncAccount(new org.iota.types.account_methods.SyncAccount().withOptions(new SyncOptions()));

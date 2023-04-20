@@ -22,15 +22,14 @@ use crate::wallet::account::constants::DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRES
 use crate::wallet::{
     account::{
         constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
-        handle::AccountHandle,
         operations::{helpers::time::can_output_be_unlocked_now, output_claiming::get_new_native_token_count},
         types::{OutputData, Transaction},
-        AddressWithUnspentOutputs, TransactionOptions,
+        Account, AddressWithUnspentOutputs, TransactionOptions,
     },
     Result,
 };
 
-impl AccountHandle {
+impl Account {
     fn should_consolidate_output(
         &self,
         output_data: &OutputData,
@@ -74,10 +73,10 @@ impl AccountHandle {
         let current_time = self.client.get_time_checked().await?;
         let token_supply = self.client.get_token_supply().await?;
         let mut outputs_to_consolidate = Vec::new();
-        let account = self.read().await;
-        let account_addresses = &account.addresses_with_unspent_outputs[..];
+        let account_details = self.read().await;
+        let account_addresses = &account_details.addresses_with_unspent_outputs[..];
 
-        for (output_id, output_data) in account.unspent_outputs() {
+        for (output_id, output_data) in account_details.unspent_outputs() {
             #[cfg(feature = "participation")]
             if let Some(ref voting_output) = voting_output {
                 // Remove voting output from inputs, because we want to keep its features and not consolidate it.
@@ -85,7 +84,7 @@ impl AccountHandle {
                     continue;
                 }
             }
-            let is_locked_output = account.locked_outputs.contains(output_id);
+            let is_locked_output = account_details.locked_outputs.contains(output_id);
             let should_consolidate_output =
                 self.should_consolidate_output(output_data, current_time, account_addresses)?;
             if !is_locked_output && should_consolidate_output {
@@ -93,7 +92,7 @@ impl AccountHandle {
             }
         }
 
-        drop(account);
+        drop(account_details);
 
         let output_consolidation_threshold = output_consolidation_threshold.unwrap_or({
             match &*self.secret_manager.read().await {

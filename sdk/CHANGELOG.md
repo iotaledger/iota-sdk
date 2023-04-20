@@ -19,7 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 0.2.0 - 2023-XX-XX
+## 0.3.0 - 2023-XX-XX
+
+### Changed
+
+- Renamed `AccountHandle` to `Account`, `Account` to `AccountDetails` and `AccountDto` to `AccountDetailsDto`;
+- `AddressWrapper` renamed to `Bech32Address` and moved to `types`;
+- `Address::try_from_bech32_with_hrp` address and HRP return have been reversed;
+- `PostBlockPayload::payload_dto` renamed to `payload`;
+- `SendNativeTokens::addresses_native_tokens` renamed to `addresses_and_native_tokens`;
+- `SendNft::addresses_nft_ids` renamed to `addresses_and_nft_ids`;
+
+## 0.2.0 - 2023-04-17
 
 ### Added
 
@@ -30,6 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `{TransactionOptions, TransactionOptionsDto}::allow_micro_amount` field;
 - `AddressWithAmount::{new, with_return_address, with_expiration}` methods;
 - `{BaseCoinBalance, BaseCoinBalanceDto}::voting_power` field;
+- `verify_mnemonic()`;
+- `SecretManager::sign_transaction()`;
 
 ### Changed
 
@@ -42,6 +55,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Merge `send_amount` and `send_micro_transaction`;
 - `AddressWithAmount::{address, amount}` fields are no longer public;
 - Fields of `AccountBalance`, `BaseCoinBalance` and `NativeTokensBalance` have been made private and getters have been added;
+- Exposed `AccountParticipationOverview, ParticipationEventWithNodes, AliasOutputOptions, AliasOutputOptionsDto, IncreaseNativeTokenSupplyOptions, IncreaseNativeTokenSupplyOptionsDto, NativeTokenOptions, NativeTokenOptionsDto, NftOptions, NftOptionsDto, OutputOptionsDto` from the `account` module;
+- Made `Wallet::get_bech32_hrp()` public;
 
 ### Removed
 

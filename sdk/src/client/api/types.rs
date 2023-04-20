@@ -22,11 +22,11 @@ use crate::{
 
 /// Helper struct for offline signing
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PreparedTransactionData {
     /// Transaction essence
     pub essence: TransactionEssence,
     /// Required input information for signing. Inputs need to be ordered by address type
-    #[serde(rename = "inputsData")]
     pub inputs_data: Vec<InputSigningData>,
     /// Optional remainder output information
     pub remainder: Option<RemainderData>,
@@ -34,11 +34,11 @@ pub struct PreparedTransactionData {
 
 /// PreparedTransactionData Dto
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PreparedTransactionDataDto {
     /// Transaction essence
     pub essence: TransactionEssenceDto,
     /// Required address information for signing
-    #[serde(rename = "inputsData")]
     pub inputs_data: Vec<InputSigningDataDto>,
     /// Optional remainder output information
     pub remainder: Option<RemainderDataDto>,
@@ -103,23 +103,21 @@ impl PreparedTransactionData {
 
 /// Helper struct for offline signing
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SignedTransactionData {
     /// Signed transaction payload
-    #[serde(rename = "transactionPayload")]
     pub transaction_payload: TransactionPayload,
     /// Required address information for signing
-    #[serde(rename = "inputsData")]
     pub inputs_data: Vec<InputSigningData>,
 }
 
 /// SignedTransactionData Dto
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SignedTransactionDataDto {
     /// Transaction essence
-    #[serde(rename = "transactionPayload")]
     pub transaction_payload: TransactionPayloadDto,
     /// Required address information for signing
-    #[serde(rename = "inputsData")]
     pub inputs_data: Vec<InputSigningDataDto>,
 }
 

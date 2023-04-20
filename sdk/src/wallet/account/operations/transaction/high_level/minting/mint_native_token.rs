@@ -15,43 +15,36 @@ use crate::{
         DtoError,
     },
     wallet::account::{
-        handle::AccountHandle,
         types::{Transaction, TransactionDto},
-        TransactionOptions,
+        Account, TransactionOptions,
     },
 };
 
 /// Address and foundry data for `mint_native_token()`
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NativeTokenOptions {
     /// The alias id which should be used to create the foundry.
-    #[serde(rename = "aliasId")]
     pub alias_id: Option<AliasId>,
     /// Circulating supply
-    #[serde(rename = "circulatingSupply")]
     pub circulating_supply: U256,
     /// Maximum supply
-    #[serde(rename = "maximumSupply")]
     pub maximum_supply: U256,
     /// Foundry metadata
-    #[serde(rename = "foundryMetadata")]
     pub foundry_metadata: Option<Vec<u8>>,
 }
 
 /// Dto for NativeTokenOptions
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NativeTokenOptionsDto {
     /// The alias id which should be used to create the foundry.
-    #[serde(rename = "aliasId")]
     pub alias_id: Option<AliasIdDto>,
     /// Circulating supply
-    #[serde(rename = "circulatingSupply")]
     pub circulating_supply: U256Dto,
     /// Maximum supply
-    #[serde(rename = "maximumSupply")]
     pub maximum_supply: U256Dto,
     /// Foundry metadata, hex encoded bytes
-    #[serde(rename = "foundryMetadata")]
     pub foundry_metadata: Option<String>,
 }
 
@@ -103,9 +96,9 @@ impl From<&MintTokenTransaction> for MintTokenTransactionDto {
     }
 }
 
-impl AccountHandle {
+impl Account {
     /// Function to create a new foundry output with minted native tokens.
-    /// Calls [AccountHandle.send()](crate::account::handle::AccountHandle.send) internally, the options can define the
+    /// Calls [Account.send()](crate::account::Account.send) internally, the options can define the
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
@@ -116,7 +109,7 @@ impl AccountHandle {
     ///     foundry_metadata: None
     /// };
     ///
-    /// let tx = account_handle.mint_native_token(native_token_options, None,).await?;
+    /// let tx = account.mint_native_token(native_token_options, None,).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
     /// if let Some(block_id) = tx.block_id {
     ///     println!("Block sent: {}", block_id);

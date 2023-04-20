@@ -15,20 +15,21 @@ use crate::{
 
 /// Options for transactions
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct TransactionOptions {
-    #[serde(rename = "remainderValueStrategy", default)]
+    #[serde(default)]
     pub remainder_value_strategy: RemainderValueStrategy,
-    #[serde(rename = "taggedDataPayload", default)]
+    #[serde(default)]
     pub tagged_data_payload: Option<TaggedDataPayload>,
     // If custom inputs are provided only they are used. If also other additional inputs should be used,
     // `mandatory_inputs` should be used instead.
-    #[serde(rename = "customInputs", default)]
+    #[serde(default)]
     pub custom_inputs: Option<Vec<OutputId>>,
-    #[serde(rename = "mandatoryInputs", default)]
+    #[serde(default)]
     pub mandatory_inputs: Option<Vec<OutputId>>,
     pub burn: Option<Burn>,
     pub note: Option<String>,
-    #[serde(rename = "allowMicroAmount", default)]
+    #[serde(default)]
     pub allow_micro_amount: bool,
 }
 
@@ -53,20 +54,21 @@ impl TransactionOptions {
 
 /// Dto for transaction options
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct TransactionOptionsDto {
-    #[serde(rename = "remainderValueStrategy", default)]
+    #[serde(default)]
     pub remainder_value_strategy: RemainderValueStrategy,
-    #[serde(rename = "taggedDataPayload", default)]
+    #[serde(default)]
     pub tagged_data_payload: Option<TaggedDataPayloadDto>,
     // If custom inputs are provided only they are used. If also other additional inputs should be used,
     // `mandatory_inputs` should be used instead.
-    #[serde(rename = "customInputs", default)]
+    #[serde(default)]
     pub custom_inputs: Option<Vec<OutputId>>,
-    #[serde(rename = "mandatoryInputs", default)]
+    #[serde(default)]
     pub mandatory_inputs: Option<Vec<OutputId>>,
     pub burn: Option<BurnDto>,
     pub note: Option<String>,
-    #[serde(rename = "allowMicroAmount", default)]
+    #[serde(default)]
     pub allow_micro_amount: bool,
 }
 

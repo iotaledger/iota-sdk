@@ -61,10 +61,10 @@ pub mod dto {
 
     /// Describes an input which references an unspent treasury output to consume.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct TreasuryInputDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "milestoneId")]
         pub milestone_id: String,
     }
 

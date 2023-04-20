@@ -162,10 +162,10 @@ pub mod dto {
 
     ///
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct ReceiptMilestoneOptionDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "migratedAt")]
         pub migrated_at: u32,
         pub funds: Vec<MigratedFundsEntryDto>,
         pub transaction: PayloadDto,

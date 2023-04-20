@@ -1,6 +1,6 @@
 [package]
 name = "iota-sdk"
-version = "0.1.0"
+version = "0.2.0"
 authors = [ "IOTA Stiftung" ]
 edition = "2021"
 description = "The IOTA SDK provides developers with a seamless experience to develop on IOTA by providing account abstractions and clients to interact with node APIs."
@@ -68,11 +68,10 @@ tokio = { version = "1.27.0", default-features = false, features = [ "macros", "
 wasm-bindgen-futures = { version = "0.4.34", default-features = false }
 
 [dev-dependencies]
-iota-sdk = { version = "0.1.0", path = ".", default-features = false, features = [ "rand" ] }
+iota-sdk = { path = ".", default-features = false, features = [ "rand" ] }
 
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
-
 
 [features]
 default = [ "std", "serde" ]
@@ -84,6 +83,7 @@ mqtt = [ "regex", "rumqttc", "once_cell" ]
 participation = [ "storage" ]
 pow = [ "std", "num_cpus", "iota-crypto/curl-p" ]
 rand = [ "std", "dep:rand" ]
+rocksdb = [ "dep:rocksdb", "storage" ]
 serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde" ]
 std = [ "packable/std", "prefix-hex/std" ]
 storage = [ "iota-crypto/chacha" ]
@@ -608,6 +608,11 @@ required-features = [ "wallet", "storage" ]
 name = "threads"
 path = "examples/wallet/threads.rs"
 required-features = [ "wallet" ]
+
+[[example]]
+name = "update_alias_output"
+path = "examples/wallet/update_alias_output.rs"
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "wallet"

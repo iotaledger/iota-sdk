@@ -4,7 +4,7 @@
 //! In this example we will send a transaction.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example transaction --release`
+//! `cargo run --example wallet_transaction --release`
 
 use iota_sdk::wallet::{AddressWithAmount, Result, Wallet};
 

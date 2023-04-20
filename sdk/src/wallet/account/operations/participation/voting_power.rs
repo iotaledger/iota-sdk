@@ -14,12 +14,12 @@ use crate::{
         },
     },
     wallet::{
-        account::{handle::AccountHandle, types::Transaction, TransactionOptions},
+        account::{types::Transaction, Account, TransactionOptions},
         Result,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Returns an account's total voting power (voting or NOT voting).
     pub async fn get_voting_power(&self) -> Result<u64> {
         Ok(self

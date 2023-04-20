@@ -71,10 +71,10 @@ pub mod dto {
 
     /// Describes an NFT address.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct NftAddressDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "nftId")]
         pub nft_id: String,
     }
 

@@ -27,7 +27,7 @@ async fn backup_and_restore() -> Result<()> {
     let stronghold_password = "some_hopefully_secure_password";
 
     // Create directory if not existing, because stronghold panics otherwise
-    std::fs::create_dir_all(storage_path).unwrap_or(());
+    std::fs::create_dir_all(storage_path).ok();
     let mut stronghold = StrongholdSecretManager::builder()
         .password(stronghold_password)
         .build("test-storage/backup_and_restore/1.stronghold")?;
@@ -132,7 +132,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
     let stronghold_password = "some_hopefully_secure_password";
 
     // Create directory if not existing, because stronghold panics otherwise
-    std::fs::create_dir_all(storage_path).unwrap_or(());
+    std::fs::create_dir_all(storage_path).ok();
     wallet
         .backup(
             PathBuf::from("test-storage/backup_and_restore_mnemonic_secret_manager/backup.stronghold"),
@@ -198,7 +198,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
     let stronghold_password = "some_hopefully_secure_password";
 
     // Create directory if not existing, because stronghold panics otherwise
-    std::fs::create_dir_all(storage_path).unwrap_or(());
+    std::fs::create_dir_all(storage_path).ok();
     let mut stronghold = StrongholdSecretManager::builder()
         .password(stronghold_password)
         .build("test-storage/backup_and_restore_different_coin_type/1.stronghold")?;
@@ -256,7 +256,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
     assert_eq!(new_account.read().await.coin_type(), &IOTA_COIN_TYPE);
     // secret manager is the same
     assert_eq!(
-        new_account.addresses().await?[0].address().to_bech32(),
+        new_account.addresses().await?[0].address().to_string(),
         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
     );
 
@@ -280,7 +280,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
     let stronghold_password = "some_hopefully_secure_password";
 
     // Create directory if not existing, because stronghold panics otherwise
-    std::fs::create_dir_all(storage_path).unwrap_or(());
+    std::fs::create_dir_all(storage_path).ok();
     let mut stronghold = StrongholdSecretManager::builder()
         .password(stronghold_password)
         .build("test-storage/backup_and_restore_same_coin_type/1.stronghold")?;
@@ -360,7 +360,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     let stronghold_password = "some_hopefully_secure_password";
 
     // Create directory if not existing, because stronghold panics otherwise
-    std::fs::create_dir_all(storage_path).unwrap_or(());
+    std::fs::create_dir_all(storage_path).ok();
     let mut stronghold = StrongholdSecretManager::builder()
         .password(stronghold_password)
         .build("test-storage/backup_and_restore_different_coin_type_dont_ignore/1.stronghold")?;
@@ -413,8 +413,8 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     // No accounts restored, because the coin type was different
     let restored_account = restore_wallet.get_account("Alice").await?;
     assert_eq!(
-        account.addresses().await?[0].address().to_bech32(),
-        restored_account.addresses().await?[0].address().to_bech32(),
+        account.addresses().await?[0].address().to_string(),
+        restored_account.addresses().await?[0].address().to_string(),
     );
 
     // Restored coin type is used
@@ -422,7 +422,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     assert_eq!(new_account.read().await.coin_type(), &SHIMMER_COIN_TYPE);
     // secret manager is restored
     assert_eq!(
-        new_account.addresses().await?[0].address().to_bech32(),
+        new_account.addresses().await?[0].address().to_string(),
         "smr1qzvjvjyqxgfx4f0m3xhn2rj24e03dwsmjz082735y3wx88v2gudu2afedhu"
     );
 

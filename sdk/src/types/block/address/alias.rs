@@ -71,10 +71,10 @@ pub mod dto {
 
     /// Describes an alias address.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct AliasAddressDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "aliasId")]
         pub alias_id: String,
     }
 

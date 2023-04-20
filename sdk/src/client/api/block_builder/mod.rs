@@ -162,7 +162,7 @@ impl<'a> ClientBlockBuilder<'a> {
 
     /// Set a transfer to the builder
     pub async fn with_output(mut self, address: &str, amount: u64) -> Result<ClientBlockBuilder<'a>> {
-        let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
+        let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
         self.client.bech32_hrp_matches(&bech32_hrp).await?;
 
         let output = BasicOutputBuilder::new_with_amount(amount)?

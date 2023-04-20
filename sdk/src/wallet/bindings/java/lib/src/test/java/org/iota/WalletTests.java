@@ -3,7 +3,7 @@
 package org.iota;
 
 import org.iota.types.AccountAddress;
-import org.iota.types.AccountHandle;
+import org.iota.types.Account;
 import org.iota.types.addresses.Address;
 import org.iota.types.account_methods.GenerateAddresses;
 import org.iota.types.account_methods.AddressGenerationOptions;
@@ -32,24 +32,24 @@ public class WalletTests extends TestSettings {
 
     @Test
     public void testGetAccountByAlias() throws WalletException {
-        AccountHandle a = wallet.createAccount("Alice");
-        AccountHandle b = wallet.getAccount(new AccountAlias("Alice"));
+        Account a = wallet.createAccount("Alice");
+        Account b = wallet.getAccount(new AccountAlias("Alice"));
         assertEquals(a,b);
     }
 
     @Test
     public void testGetAccountByIndex() throws WalletException {
-        AccountHandle a = wallet.createAccount("Alice");
-        AccountHandle b = wallet.getAccount(new AccountIndex(0));
+        Account a = wallet.createAccount("Alice");
+        Account b = wallet.getAccount(new AccountIndex(0));
         assertEquals(a,b);
     }
 
     @Test
     public void testGetAccounts() throws WalletException {
-        AccountHandle a = wallet.createAccount("Alice");
-        AccountHandle b = wallet.createAccount("Bob");
+        Account a = wallet.createAccount("Alice");
+        Account b = wallet.createAccount("Bob");
         assertTrue(wallet.getAccounts().length == 2);
-        for (AccountHandle x : wallet.getAccounts())
+        for (Account x : wallet.getAccounts())
             System.out.println(x);
     }
 
@@ -71,7 +71,7 @@ public class WalletTests extends TestSettings {
         String anotherAddress = wallet.generateAddress(10, true, 10, options, "rms");
         assertEquals("rms1qzu4a5ryj39h07z9atn2fza59wu2n5f295st5ehmjg5u8tyveaew65lw3yg", anotherAddress);
 
-        AccountHandle account = wallet.createAccount("Alice");
+        Account account = wallet.createAccount("Alice");
         AccountAddress[] addresses = account.generateAddresses(new GenerateAddresses().withAmount(1).withAddressGenerationOptions(addressOptions));
 
         assertEquals(1, addresses.length);
