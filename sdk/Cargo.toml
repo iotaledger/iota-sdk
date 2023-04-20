@@ -88,7 +88,7 @@ serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", 
 std = [ "packable/std", "prefix-hex/std" ]
 storage = [ "iota-crypto/chacha" ]
 stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha" ]
-tls = [ "reqwest/rustls-tls" ]
+tls = [ "reqwest/rustls-tls-native-roots", "rumqttc/use-native-tls" ]
 
 client_without_tls = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10", "iota-crypto/std" ]
 client = [ "client_without_tls", "tls" ]

@@ -87,10 +87,10 @@ async fn set_mqtt_client(client: &Client) -> Result<(), Error> {
             utils::rand::fill(&mut entropy)?;
             let id = format!("iotars{}", prefix_hex::encode(entropy));
             let port = client.broker_options.port;
+            let wss = node.url.scheme() == "https";
             let mut uri = format!(
-                "{}://{}:{}/api/mqtt/v1",
-                if node.url.scheme() == "https" { "wss" } else { "ws" },
-                host,
+                "{}://{host}:{}/api/mqtt/v1",
+                if wss { "wss" } else { "ws" },
                 node.url.port_or_known_default().unwrap_or(port)
             );
 
@@ -99,7 +99,11 @@ async fn set_mqtt_client(client: &Client) -> Result<(), Error> {
             };
             let mut mqtt_options = MqttOptions::new(id, uri, port);
             if client.broker_options.use_ws {
-                mqtt_options.set_transport(Transport::ws());
+                if wss {
+                    mqtt_options.set_transport(Transport::tls_with_config(rumqttc::TlsConfiguration::Native));
+                } else {
+                    mqtt_options.set_transport(Transport::ws());
+                }
             }
             let (_, mut connection) = AsyncClient::new(mqtt_options.clone(), 10);
             connection.set_network_options(
