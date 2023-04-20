@@ -18,7 +18,7 @@ use crate::{
         unspent_outputs_command, vote_command, voting_output_command, voting_power_command, AccountCli, AccountCommand,
     },
     error::Error,
-    helper::bytes_from_hex_or_file,
+    helper::{bytes_from_hex_or_file, print_account_help},
     println_log_error,
 };
 
@@ -54,11 +54,7 @@ pub async fn account_prompt_internal(
         .completion_with(&ACCOUNT_COMPLETION)
         .interact_text()?;
     match command.as_str() {
-        "h" => {
-            if let Err(err) = AccountCli::try_parse_from(vec!["Account:", "help"]) {
-                println!("{err}");
-            }
-        }
+        "h" => print_account_help(),
         "clear" => {
             // Clear console
             let _ = std::process::Command::new("clear").status();
