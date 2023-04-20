@@ -9,13 +9,13 @@ use crate::{
             Block, BlockId,
         },
     },
-    wallet::account::{handle::AccountHandle, types::InclusionState},
+    wallet::account::{types::InclusionState, Account},
 };
 
 const DEFAULT_RETRY_UNTIL_INCLUDED_INTERVAL: u64 = 1;
 const DEFAULT_RETRY_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
 
-impl AccountHandle {
+impl Account {
     /// Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
     /// milestone). This function is re-exported from the client library and default interval is as defined in iota.rs.
     /// Returns the included block at first position and additional reattached blocks
@@ -41,9 +41,7 @@ impl AccountHandle {
     ) -> crate::wallet::Result<BlockId> {
         log::debug!("[retry_transaction_until_included]");
 
-        let account = self.read().await;
-        let transaction = account.transactions.get(transaction_id).cloned();
-        drop(account);
+        let transaction = self.read().await.transactions.get(transaction_id).cloned();
 
         if let Some(transaction) = transaction {
             if transaction.inclusion_state == InclusionState::Confirmed {

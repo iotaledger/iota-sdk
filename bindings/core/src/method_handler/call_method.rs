@@ -3,7 +3,7 @@
 
 use iota_sdk::{
     client::{secret::SecretManager, Client},
-    wallet::{wallet::Wallet, AccountHandle},
+    wallet::{wallet::Wallet, Account},
 };
 
 use crate::{
@@ -19,7 +19,7 @@ use crate::{
 };
 
 /// Call an account method.
-pub async fn call_account_method(account: &AccountHandle, method: AccountMethod) -> Response {
+pub async fn call_account_method(account: &Account, method: AccountMethod) -> Response {
     log::debug!("Account method: {method:?}");
     let result = convert_async_panics(|| async { call_account_method_internal(account, method).await }).await;
 

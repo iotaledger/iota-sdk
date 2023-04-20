@@ -6,15 +6,15 @@ use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
     types::block::address::Bech32Address,
-    wallet::account::{handle::AccountHandle, types::address::AccountAddress},
+    wallet::account::{types::address::AccountAddress, Account},
 };
 
-impl AccountHandle {
+impl Account {
     /// Generate addresses and stores them in the account
     /// ```ignore
-    /// let public_addresses = account_handle.generate_addresses(2, None).await?;
+    /// let public_addresses = account.generate_addresses(2, None).await?;
     /// // internal addresses are used for remainder outputs, if the RemainderValueStrategy for transactions is set to ChangeAddress
-    /// let internal_addresses = account_handle
+    /// let internal_addresses = account
     ///     .generate_addresses(
     ///         1,
     ///         Some(GenerateAddressOptions {
@@ -38,18 +38,18 @@ impl AccountHandle {
             return Ok(vec![]);
         }
 
-        let account = self.read().await;
+        let account_details = self.read().await;
 
         // get the highest index for the public or internal addresses
         let highest_current_index_plus_one = if options.internal {
-            account.internal_addresses.len() as u32
+            account_details.internal_addresses.len() as u32
         } else {
-            account.public_addresses.len() as u32
+            account_details.public_addresses.len() as u32
         };
 
         // get bech32_hrp
         let bech32_hrp = {
-            match account.public_addresses.first() {
+            match account_details.public_addresses.first() {
                 Some(address) => address.address.hrp.to_string(),
                 None => self.client.get_bech32_hrp().await?,
             }
@@ -79,14 +79,14 @@ impl AccountHandle {
                             // Generate without prompt to be able to display it
                             let address = ledger_nano
                                 .generate_addresses(
-                                    account.coin_type,
-                                    account.index,
+                                    account_details.coin_type,
+                                    account_details.index,
                                     address_index..address_index + 1,
                                     Some(changed_options),
                                 )
                                 .await?;
                             self.event_emitter.lock().await.emit(
-                                account.index,
+                                account_details.index,
                                 WalletEvent::LedgerAddressGeneration(AddressData {
                                     address: address[0].to_bech32(bech32_hrp.clone()),
                                 }),
@@ -95,8 +95,8 @@ impl AccountHandle {
                         // Generate with prompt so the user can verify
                         let address = ledger_nano
                             .generate_addresses(
-                                account.coin_type,
-                                account.index,
+                                account_details.coin_type,
+                                account_details.index,
                                 address_index..address_index + 1,
                                 Some(options),
                             )
@@ -106,25 +106,40 @@ impl AccountHandle {
                     addresses
                 } else {
                     ledger_nano
-                        .generate_addresses(account.coin_type, account.index, address_range.clone(), Some(options))
+                        .generate_addresses(
+                            account_details.coin_type,
+                            account_details.index,
+                            address_range.clone(),
+                            Some(options),
+                        )
                         .await?
                 }
             }
             #[cfg(feature = "stronghold")]
             SecretManager::Stronghold(stronghold) => {
                 stronghold
-                    .generate_addresses(account.coin_type, account.index, address_range, Some(options))
+                    .generate_addresses(
+                        account_details.coin_type,
+                        account_details.index,
+                        address_range,
+                        Some(options),
+                    )
                     .await?
             }
             SecretManager::Mnemonic(mnemonic) => {
                 mnemonic
-                    .generate_addresses(account.coin_type, account.index, address_range, Some(options))
+                    .generate_addresses(
+                        account_details.coin_type,
+                        account_details.index,
+                        address_range,
+                        Some(options),
+                    )
                     .await?
             }
             SecretManager::Placeholder(_) => vec![],
         };
 
-        drop(account);
+        drop(account_details);
 
         let generate_addresses: Vec<AccountAddress> = addresses
             .into_iter()

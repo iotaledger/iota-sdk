@@ -19,12 +19,15 @@ use crate::wallet::events::EventEmitter;
 use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
 use crate::wallet::{
-    account::Account,
-    storage::{constants::default_storage_path, manager::ManagerStorage},
+    account::AccountDetails,
+    storage::{
+        constants::default_storage_path,
+        manager::{ManagerStorage, StorageManager},
+    },
 };
 use crate::{
     client::secret::SecretManager,
-    wallet::{AccountHandle, ClientOptions, Wallet},
+    wallet::{Account, ClientOptions, Wallet},
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -133,11 +136,13 @@ impl WalletBuilder {
         let storage = Memory::default();
 
         #[cfg(feature = "storage")]
-        let storage_manager = crate::wallet::storage::manager::new_storage_manager(
-            None,
-            Box::new(storage) as Box<dyn crate::wallet::storage::adapter::StorageAdapter + Send + Sync>,
-        )
-        .await?;
+        let mut storage_manager = Arc::new(Mutex::new(
+            StorageManager::new(
+                None,
+                Box::new(storage) as Box<dyn crate::wallet::storage::adapter::StorageAdapter + Send + Sync>,
+            )
+            .await?,
+        ));
 
         #[cfg(feature = "storage")]
         let read_manager_builder = storage_manager.lock().await.get_wallet_data().await?;
@@ -195,16 +200,17 @@ impl WalletBuilder {
 
         #[cfg(feature = "storage")]
         let mut accounts = storage_manager.lock().await.get_accounts().await.unwrap_or_default();
+
         // It happened that inputs got locked, the transaction failed, but they weren't unlocked again, so we do this
         // here
         #[cfg(feature = "storage")]
         unlock_unused_inputs(&mut accounts)?;
         #[cfg(not(feature = "storage"))]
         let accounts = Vec::new();
-        let mut account_handles: Vec<AccountHandle> = accounts
+        let mut accounts: Vec<Account> = accounts
             .into_iter()
             .map(|a| {
-                AccountHandle::new(
+                Account::new(
                     a,
                     client.clone(),
                     self.secret_manager
@@ -221,13 +227,13 @@ impl WalletBuilder {
         // If the wallet builder is not set, it means the user provided it and we need to update the addresses.
         // In the other case it was loaded from the database and addresses are up to date.
         if new_provided_client_options {
-            for account in account_handles.iter_mut() {
+            for account in accounts.iter_mut() {
                 account.update_account_with_new_client(client.clone()).await?;
             }
         }
 
         Ok(Wallet {
-            accounts: Arc::new(RwLock::new(account_handles)),
+            accounts: Arc::new(RwLock::new(accounts)),
             background_syncing_status: Arc::new(AtomicUsize::new(0)),
             client_options: Arc::new(RwLock::new(
                 self.client_options
@@ -262,7 +268,7 @@ impl WalletBuilder {
 // Check if any of the locked inputs is not used in a transaction and unlock them, so they get available for new
 // transactions
 #[cfg(feature = "storage")]
-fn unlock_unused_inputs(accounts: &mut [Account]) -> crate::wallet::Result<()> {
+fn unlock_unused_inputs(accounts: &mut [AccountDetails]) -> crate::wallet::Result<()> {
     log::debug!("[unlock_unused_inputs]");
     for account in accounts.iter_mut() {
         let mut used_inputs = HashSet::new();

@@ -9,15 +9,14 @@ use crate::{
     },
     wallet::{
         account::{
-            handle::AccountHandle,
             operations::{helpers::time::can_output_be_unlocked_now, transaction::Transaction},
-            TransactionOptions,
+            Account, TransactionOptions,
         },
         Error,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Function to burn an nft output.
     pub async fn burn_nft(
         &self,
@@ -74,11 +73,11 @@ impl AccountHandle {
     // Get the current output id for the nft and build a basic output with the amount, native tokens and
     // governor address from the nft output.
     async fn output_id_and_basic_output_for_nft(&self, nft_id: NftId) -> crate::wallet::Result<(OutputId, Output)> {
-        let account = self.read().await;
+        let account_details = self.read().await;
         let token_supply = self.client.get_token_supply().await?;
         let current_time = self.client.get_time_checked().await?;
 
-        let (output_id, nft_output) = account
+        let (output_id, nft_output) = account_details
             .unspent_outputs()
             .iter()
             .find_map(|(&output_id, output_data)| match &output_data.output {

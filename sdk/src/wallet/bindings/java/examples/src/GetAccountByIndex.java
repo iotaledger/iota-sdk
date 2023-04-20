@@ -21,7 +21,7 @@ public class GetAccountByIndex {
         );
 
         // Get account and sync it with the registered node to ensure that its balances are up-to-date.
-        AccountHandle a = wallet.getAccount(new AccountIndex(0));
+        Account a = wallet.getAccount(new AccountIndex(0));
         a.syncAccount(new SyncAccount().withOptions(new SyncOptions()));
 
         // Print the account.

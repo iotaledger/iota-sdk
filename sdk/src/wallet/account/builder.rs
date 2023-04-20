@@ -13,12 +13,12 @@ use tokio::sync::RwLock;
 #[cfg(feature = "events")]
 use crate::wallet::events::EventEmitter;
 #[cfg(feature = "storage")]
-use crate::wallet::storage::manager::StorageManagerHandle;
+use crate::wallet::storage::manager::StorageManager;
 use crate::{
     client::secret::{SecretManage, SecretManager},
     types::block::address::{Address, Bech32Address},
     wallet::{
-        account::{handle::AccountHandle, types::AccountAddress, Account},
+        account::{types::AccountAddress, Account, AccountDetails},
         ClientOptions, Error,
     },
 };
@@ -31,22 +31,22 @@ pub struct AccountBuilder {
     client_options: Arc<RwLock<ClientOptions>>,
     coin_type: u32,
     secret_manager: Arc<RwLock<SecretManager>>,
-    accounts: Arc<RwLock<Vec<AccountHandle>>>,
+    accounts: Arc<RwLock<Vec<Account>>>,
     #[cfg(feature = "events")]
     event_emitter: Arc<Mutex<EventEmitter>>,
     #[cfg(feature = "storage")]
-    storage_manager: StorageManagerHandle,
+    storage_manager: Arc<Mutex<StorageManager>>,
 }
 
 impl AccountBuilder {
     /// Create an IOTA client builder
     pub fn new(
-        accounts: Arc<RwLock<Vec<AccountHandle>>>,
+        accounts: Arc<RwLock<Vec<Account>>>,
         client_options: Arc<RwLock<ClientOptions>>,
         coin_type: u32,
         secret_manager: Arc<RwLock<SecretManager>>,
         #[cfg(feature = "events")] event_emitter: Arc<Mutex<EventEmitter>>,
-        #[cfg(feature = "storage")] storage_manager: StorageManagerHandle,
+        #[cfg(feature = "storage")] storage_manager: Arc<Mutex<StorageManager>>,
     ) -> Self {
         Self {
             addresses: None,
@@ -85,7 +85,7 @@ impl AccountBuilder {
     /// Build the Account and add it to the accounts from Wallet
     /// Also generates the first address of the account and if it's not the first account, the address for the first
     /// account will also be generated and compared, so no accounts get generated with different seeds
-    pub async fn finish(&mut self) -> crate::wallet::Result<AccountHandle> {
+    pub async fn finish(&mut self) -> crate::wallet::Result<Account> {
         let mut accounts = self.accounts.write().await;
         let account_index = accounts.len() as u32;
         // If no alias is provided, the account index will be set as alias
@@ -98,8 +98,8 @@ impl AccountBuilder {
 
         // Check that the alias isn't already used for another account and that the coin type is the same for new and
         // existing accounts
-        for account_handle in accounts.iter() {
-            let account = account_handle.read().await;
+        for account in accounts.iter() {
+            let account = account.read().await;
             let existing_coin_type = account.coin_type;
             if existing_coin_type != self.coin_type {
                 return Err(Error::InvalidCoinType {
@@ -171,7 +171,7 @@ impl AccountBuilder {
             }
         };
 
-        let account = Account {
+        let account = AccountDetails {
             index: account_index,
             coin_type: self.coin_type,
             alias: account_alias,
@@ -188,7 +188,7 @@ impl AccountBuilder {
             native_token_foundries: HashMap::new(),
         };
 
-        let account_handle = AccountHandle::new(
+        let account = Account::new(
             account,
             client,
             self.secret_manager.clone(),
@@ -198,10 +198,10 @@ impl AccountBuilder {
             self.storage_manager.clone(),
         );
         #[cfg(feature = "storage")]
-        account_handle.save(None).await?;
-        accounts.push(account_handle.clone());
+        account.save(None).await?;
+        accounts.push(account.clone());
 
-        Ok(account_handle)
+        Ok(account)
     }
 }
 
