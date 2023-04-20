@@ -17,10 +17,7 @@ use iota_sdk::{
         },
     },
     wallet::{
-        account::{
-            types::{AccountAddress, TransactionDto},
-            AccountHandle, OutputsToClaim, TransactionOptions,
-        },
+        account::{types::AccountAddress, AccountHandle, OutputsToClaim, TransactionOptions},
         AddressAndNftId, AddressNativeTokens, AddressWithAmount, NativeTokenOptions, NftOptions, U256,
     },
 };
@@ -700,7 +697,7 @@ pub async fn transactions_command(account_handle: &AccountHandle, show_details: 
     } else {
         for (i, tx) in transactions.into_iter().enumerate() {
             if show_details {
-                println_log_info!("{:#?}", &tx);
+                println_log_info!("{:#?}", tx);
             } else {
                 let transaction_time = to_utc_date_time(tx.timestamp)?;
                 let formatted_time = transaction_time.format("%Y-%m-%d %H:%M:%S").to_string();
@@ -721,8 +718,8 @@ pub async fn transaction_command(account_handle: &AccountHandle, transaction_id:
         .into_iter()
         .find(|tx| tx.transaction_id.to_string() == transaction_id);
 
-    if let Some(transaction) = maybe_transaction {
-        println_log_info!("{:#?}", transaction);
+    if let Some(tx) = maybe_transaction {
+        println_log_info!("{:#?}", tx);
     } else {
         println_log_info!("No transaction found");
     }
