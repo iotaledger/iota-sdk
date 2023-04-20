@@ -12,7 +12,7 @@ use iota_sdk::{
             address::Address,
             output::{
                 unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken, NftId,
-                OutputId, TokenId,
+                Output, OutputId, TokenId,
             },
         },
     },
@@ -57,6 +57,8 @@ pub enum AccountCommand {
         /// Output ID to be claimed.
         output_id: Option<String>,
     },
+    /// Print details about claimable outputs - if there are any.
+    ClaimableOutputs,
     /// Consolidate all basic outputs into one address.
     Consolidate,
     /// Create a new alias output.
@@ -83,10 +85,10 @@ pub enum AccountCommand {
     Exit,
     /// Request funds from the faucet.
     Faucet {
-        /// URL of the faucet, default to <https://faucet.testnet.shimmer.network/api/enqueue>.
-        url: Option<String>,
         /// Address the faucet sends the funds to, defaults to the latest address.
         address: Option<String>,
+        /// URL of the faucet, default to <https://faucet.testnet.shimmer.network/api/enqueue>.
+        url: Option<String>,
     },
     /// Mint more of a native token.
     IncreaseNativeTokenSupply {
@@ -328,6 +330,52 @@ pub async fn claim_command(account_handle: &AccountHandle, output_id: Option<Str
     Ok(())
 }
 
+/// `claimable-outputs` command
+pub async fn claimable_outputs_command(account_handle: &AccountHandle) -> Result<(), Error> {
+    let balance = account_handle.balance().await?;
+    for output_id in balance
+        .potentially_locked_outputs()
+        .iter()
+        .filter_map(|(output_id, unlockable)| unlockable.then_some(output_id))
+    {
+        // Unwrap: for the iterated `OutputId`s this call will always return `Some(...)`.
+        let output_data = account_handle.get_output(output_id).await.unwrap();
+        let output = output_data.output;
+        let kind = match output {
+            Output::Nft(_) => "Nft",
+            Output::Basic(_) => "Basic",
+            _ => unreachable!(),
+        };
+        println_log_info!("{output_id:?} ({kind})");
+
+        if let Some(native_tokens) = output.native_tokens() {
+            if !native_tokens.is_empty() {
+                println_log_info!("  - native token amount:");
+                native_tokens.iter().for_each(|token| {
+                    println_log_info!("    + {} {}", token.amount(), token.token_id());
+                });
+            }
+        }
+
+        if let Some(unlock_conditions) = output.unlock_conditions() {
+            let deposit_return = unlock_conditions
+                .storage_deposit_return()
+                .map(|deposit_return| deposit_return.amount())
+                .unwrap_or(0);
+            let amount = output.amount() - deposit_return;
+            println_log_info!("  - base coin amount: {}", amount);
+
+            if let Some(expiration) = unlock_conditions.expiration() {
+                let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
+                let time_left = expiration.timestamp() - current_time;
+                println_log_info!("  - expires in: {} seconds", time_left);
+            }
+        }
+    }
+
+    Ok(())
+}
+
 // `consolidate` command
 pub async fn consolidate_command(account_handle: &AccountHandle) -> Result<(), Error> {
     println_log_info!("Consolidating outputs.");
@@ -418,8 +466,8 @@ pub async fn destroy_foundry_command(account_handle: &AccountHandle, foundry_id:
 // `faucet` command
 pub async fn faucet_command(
     account_handle: &AccountHandle,
-    url: Option<String>,
     address: Option<String>,
+    url: Option<String>,
 ) -> Result<(), Error> {
     let address = if let Some(address) = address {
         address
@@ -429,10 +477,9 @@ pub async fn faucet_command(
             None => return Err(Error::NoAddressForFaucet),
         }
     };
-    let faucet_url = match &url {
-        Some(faucet_url) => faucet_url,
-        None => "https://faucet.testnet.shimmer.network/api/enqueue",
-    };
+    let faucet_url = url
+        .as_deref()
+        .unwrap_or("https://faucet.testnet.shimmer.network/api/enqueue");
 
     println_log_info!("{}", request_funds_from_faucet(faucet_url, &address).await?);
 
@@ -674,7 +721,9 @@ pub async fn send_nft_command(account_handle: &AccountHandle, address: String, n
 
 // `sync` command
 pub async fn sync_command(account_handle: &AccountHandle) -> Result<(), Error> {
-    println_log_info!("Synced: {:#?}", account_handle.sync(None).await?);
+    let balance = account_handle.sync(None).await?;
+    println_log_info!("Synced.");
+    println_log_info!("{balance:#?}");
 
     Ok(())
 }

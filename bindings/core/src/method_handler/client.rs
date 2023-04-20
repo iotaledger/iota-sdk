@@ -1,8 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "ledger_nano")]
-use iota_sdk::client::secret::ledger_nano::LedgerSecretManager;
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
@@ -236,12 +234,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::GetLocalPow => Ok(Response::Bool(client.get_local_pow())),
         ClientMethod::GetFallbackToLocalPow => Ok(Response::Bool(client.get_fallback_to_local_pow())),
-        #[cfg(feature = "ledger_nano")]
-        ClientMethod::GetLedgerNanoStatus { is_simulator } => {
-            let ledger_nano = LedgerSecretManager::new(is_simulator);
-
-            Ok(Response::LedgerNanoStatus(ledger_nano.get_ledger_nano_status().await))
-        }
         ClientMethod::PrepareTransaction {
             secret_manager,
             options,
