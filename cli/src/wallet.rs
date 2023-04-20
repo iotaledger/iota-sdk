@@ -63,8 +63,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                     if get_decision("Create initial account?")? {
                         let alias = get_account_name("New account name", &wallet).await?;
                         let account = add_account(&wallet, Some(alias)).await?;
-                        println_log_info!("Created initial account.");
-                        print_account_help();
+                        println_log_info!("Created initial account. Type `help` to see all available commands.");
                         (Some(wallet), Some(account))
                     } else {
                         (Some(wallet), None)
@@ -85,8 +84,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                     if get_decision("Create initial account?")? {
                         let alias = get_account_name("New account name", &wallet).await?;
                         let account = add_account(&wallet, Some(alias)).await?;
-                        println_log_info!("Created initial account.");
-                        print_account_help();
+                        println_log_info!("Created initial account. Type `help` to see all available commands.");
                         (Some(wallet), Some(account))
                     } else {
                         (Some(wallet), None)
