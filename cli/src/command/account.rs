@@ -14,6 +14,7 @@ use iota_sdk::{
                 unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken, NftId,
                 OutputId, TokenId,
             },
+            payload::transaction::TransactionId,
         },
     },
     wallet::{
@@ -702,7 +703,7 @@ pub async fn transactions_command(account_handle: &AccountHandle, show_details: 
                 let transaction_time = to_utc_date_time(tx.timestamp)?;
                 let formatted_time = transaction_time.format("%Y-%m-%d %H:%M:%S").to_string();
 
-                println_log_info!("{:<5} {:40}\t{:20}", i, tx.transaction_id.to_string(), formatted_time);
+                println_log_info!("{:<5}{}\t{}", i, tx.transaction_id.to_string(), formatted_time);
             }
         }
     }
@@ -711,12 +712,13 @@ pub async fn transactions_command(account_handle: &AccountHandle, show_details: 
 }
 
 /// `transaction` command
-pub async fn transaction_command(account_handle: &AccountHandle, transaction_id: &str) -> Result<(), Error> {
+pub async fn transaction_command(account_handle: &AccountHandle, transaction_id_str: &str) -> Result<(), Error> {
+    let transaction_id = TransactionId::from_str(transaction_id_str)?;
     let maybe_transaction = account_handle
         .transactions()
         .await?
         .into_iter()
-        .find(|tx| tx.transaction_id.to_string() == transaction_id);
+        .find(|tx| tx.transaction_id == transaction_id);
 
     if let Some(tx) = maybe_transaction {
         println_log_info!("{:#?}", tx);
