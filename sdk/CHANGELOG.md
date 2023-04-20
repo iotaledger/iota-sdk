@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.3.0 - 2023-XX-XX
 
+### Added
+- `NativeTokensBuilder::finish_set`;
+- `Features`, `UnlockConditions`, `NativeTokens`, `MilestoneOptions`, and `Parents` added `from_set`;
+
 ### Changed
 
 - Renamed `AccountHandle` to `Account`, `Account` to `AccountDetails` and `AccountDto` to `AccountDetailsDto`;
@@ -29,6 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PostBlockPayload::payload_dto` renamed to `payload`;
 - `SendNativeTokens::addresses_native_tokens` renamed to `addresses_and_native_tokens`;
 - `SendNft::addresses_nft_ids` renamed to `addresses_and_nft_ids`;
+- `Output` builder types, `NativeTokensBuilder`, and `Burn` now use unique, ordered sets for unlock conditions, features, and native tokens. `add_x` and `replace_x` methods thus function appropriately;
+- `Features`, `UnlockConditions`, `NativeTokens`, `MilestoneOptions`, and `Parents` constructor `new` renamed to `from_vec`;
+- Modified `Ord` and `PartialOrd` implementations for `Feature`, `UnlockCondition`, and `NativeToken` to support unique, ordered sets;
 
 ## 0.2.0 - 2023-04-17
 
