@@ -59,24 +59,29 @@ pub struct AccountHandle {
 
 impl AccountHandle {
     /// Create a new AccountHandle with an Account
-    pub(crate) fn new(
+    pub(crate) async fn new(
         account: Account,
         client: Client,
         secret_manager: Arc<RwLock<SecretManager>>,
         #[cfg(feature = "events")] event_emitter: Arc<Mutex<EventEmitter>>,
         #[cfg(feature = "storage")] storage_manager: StorageManagerHandle,
-    ) -> Self {
-        Self {
+    ) -> Result<Self> {
+        #[cfg(feature = "storage")]
+        let fallback_sync_options = storage_manager.lock().await.get_default_sync_options(1).await?.unwrap_or_default();
+        #[cfg(not(feature = "storage"))]
+        let fallback_sync_options = Default::default();
+
+        Ok(Self {
             account: Arc::new(RwLock::new(account)),
             client,
             secret_manager,
-            fallback_sync_options: Default::default(),
+            fallback_sync_options: Arc::new(Mutex::new(fallback_sync_options)),
             last_synced: Default::default(),
             #[cfg(feature = "events")]
             event_emitter,
             #[cfg(feature = "storage")]
             storage_manager,
-        }
+        })
     }
 
     pub async fn alias(&self) -> String {

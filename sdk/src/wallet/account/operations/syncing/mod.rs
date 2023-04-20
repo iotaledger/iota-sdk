@@ -25,8 +25,16 @@ use crate::{
 
 impl AccountHandle {
     /// Set the fallback SyncOptions for account syncing
-    pub async fn set_default_sync_options(&self, options: SyncOptions) {
+    pub async fn set_default_sync_options(&self, options: SyncOptions) -> crate::wallet::Result<()> {
+        
+        #[cfg(feature = "storage")]
+        {
+            let mut storage_manager = self.storage_manager.lock().await;
+            storage_manager.set_default_sync_options(*self.read().await.index(), &options).await?;
+        }
+
         *self.fallback_sync_options.lock().await = options;
+        Ok(())
     }
 
     // Get the default sync options we use when none are provided

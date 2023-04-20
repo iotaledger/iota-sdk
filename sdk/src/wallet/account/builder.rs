@@ -196,7 +196,7 @@ impl AccountBuilder {
             self.event_emitter.clone(),
             #[cfg(feature = "storage")]
             self.storage_manager.clone(),
-        );
+        ).await?;
         #[cfg(feature = "storage")]
         account_handle.save(None).await?;
         accounts.push(account_handle.clone());
