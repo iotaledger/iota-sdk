@@ -2,9 +2,10 @@ from iota_sdk import *
 import json
 
 # Create a Client instance
-client = Client(nodes = ['https://api.testnet.shimmer.network'])
+client = Client(nodes=['https://api.testnet.shimmer.network'])
 
-hex_address = Utils.bech32_to_hex('rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy')
+hex_address = Utils.bech32_to_hex(
+    'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy')
 
 address_unlock_condition = AddressUnlockCondition(
     Ed25519Address(hex_address)

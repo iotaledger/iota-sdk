@@ -1,7 +1,7 @@
 from iota_sdk import Client, NodeIndexerAPI
 
 # Create a Client instance
-client = Client(nodes = ['https://api.testnet.shimmer.network'])
+client = Client(nodes=['https://api.testnet.shimmer.network'])
 
 query_parameters = NodeIndexerAPI.QueryParameter(
     address='rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',

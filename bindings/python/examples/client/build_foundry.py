@@ -2,7 +2,7 @@ from iota_sdk import *
 import json
 
 # Create a Client instance
-client = Client(nodes = ['https://api.testnet.shimmer.network'])
+client = Client(nodes=['https://api.testnet.shimmer.network'])
 
 # Configure foundry output
 # TODO: replace with your own values
