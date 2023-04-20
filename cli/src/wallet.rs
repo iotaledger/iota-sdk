@@ -62,15 +62,15 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                     // ask the user whether a default account should be created
                     if get_decision("Create initial account?")? {
                         let alias = get_account_name("New account name", &wallet).await?;
-                        let account = add_account(&wallet, Some(alias)).await?;
+                        let alias = add_account(&wallet, Some(alias)).await?;
                         println_log_info!("Created initial account. Type `help` to see all available commands.");
-                        (Some(wallet), Some(account))
+                        (Some(wallet), Some(alias))
                     } else {
                         (Some(wallet), None)
                     }
-                } else if let Some(account_handle) = pick_account(&wallet).await? {
-                    let account = account_handle.alias().await;
-                    (Some(wallet), Some(account))
+                } else if let Some(account) = pick_account(&wallet).await? {
+                    let alias = account.alias().await;
+                    (Some(wallet), Some(alias))
                 } else {
                     (Some(wallet), None)
                 }
@@ -83,9 +83,9 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                     // ask the user whether a default account should be created
                     if get_decision("Create initial account?")? {
                         let alias = get_account_name("New account name", &wallet).await?;
-                        let account = add_account(&wallet, Some(alias)).await?;
+                        let alias = add_account(&wallet, Some(alias)).await?;
                         println_log_info!("Created initial account. Type `help` to see all available commands.");
-                        (Some(wallet), Some(account))
+                        (Some(wallet), Some(alias))
                     } else {
                         (Some(wallet), None)
                     }
