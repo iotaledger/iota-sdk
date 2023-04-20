@@ -2,6 +2,9 @@ name: Publish cli wallet
 
 on: workflow_dispatch
 
+env:
+  CARGO_INCREMENTAL: 0
+
 jobs:
   create-release:
     runs-on: ubuntu-latest

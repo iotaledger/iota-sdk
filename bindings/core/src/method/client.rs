@@ -37,69 +37,55 @@ pub enum ClientMethod {
     /// Build an AliasOutput.
     /// Expected response: [`Output`](crate::Response::Output)
     #[allow(missing_docs)]
+    #[serde(rename_all = "camelCase")]
     BuildAliasOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        #[serde(rename = "nativeTokens")]
         native_tokens: Option<Vec<NativeTokenDto>>,
-        #[serde(rename = "aliasId")]
         alias_id: AliasIdDto,
-        #[serde(rename = "stateIndex")]
         state_index: Option<u32>,
-        #[serde(rename = "stateMetadata")]
         state_metadata: Option<String>,
-        #[serde(rename = "foundryCounter")]
         foundry_counter: Option<u32>,
-        #[serde(rename = "unlockConditions")]
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,
-        #[serde(rename = "immutableFeatures")]
         immutable_features: Option<Vec<FeatureDto>>,
     },
     /// Build a BasicOutput.
     /// Expected response: [`Output`](crate::Response::Output)
     #[allow(missing_docs)]
+    #[serde(rename_all = "camelCase")]
     BuildBasicOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        #[serde(rename = "nativeTokens")]
         native_tokens: Option<Vec<NativeTokenDto>>,
-        #[serde(rename = "unlockConditions")]
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,
     },
     /// Build a FoundryOutput.
     /// Expected response: [`Output`](crate::Response::Output)
     #[allow(missing_docs)]
+    #[serde(rename_all = "camelCase")]
     BuildFoundryOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        #[serde(rename = "nativeTokens")]
         native_tokens: Option<Vec<NativeTokenDto>>,
-        #[serde(rename = "serialNumber")]
         serial_number: u32,
-        #[serde(rename = "tokenScheme")]
         token_scheme: TokenSchemeDto,
-        #[serde(rename = "unlockConditions")]
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,
-        #[serde(rename = "immutableFeatures")]
         immutable_features: Option<Vec<FeatureDto>>,
     },
     /// Build an NftOutput.
     /// Expected response: [`Output`](crate::Response::Output)
     #[allow(missing_docs)]
+    #[serde(rename_all = "camelCase")]
     BuildNftOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        #[serde(rename = "nativeTokens")]
         native_tokens: Option<Vec<NativeTokenDto>>,
-        #[serde(rename = "nftId")]
         nft_id: NftIdDto,
-        #[serde(rename = "unlockConditions")]
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,
-        #[serde(rename = "immutableFeatures")]
         immutable_features: Option<Vec<FeatureDto>>,
     },
     /// Removes all listeners for the provided topics.
@@ -111,19 +97,19 @@ pub enum ClientMethod {
         topics: Vec<Topic>,
     },
     /// Generate addresses.
+    #[serde(rename_all = "camelCase")]
     GenerateAddresses {
         /// Create secret manager from json
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        #[serde(rename = "secretManager")]
         secret_manager: SecretManagerDto,
         /// Addresses generation options
         options: GenerateAddressesOptions,
     },
     /// Build and post a block
+    #[serde(rename_all = "camelCase")]
     BuildAndPostBlock {
         /// Secret manager
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        #[serde(rename = "secretManager")]
         secret_manager: Option<SecretManagerDto>,
         /// Options
         options: Option<BuildBlockOptions>,
@@ -153,35 +139,33 @@ pub enum ClientMethod {
     /// Expected response: [`LedgerNanoStatus`](crate::Response::LedgerNanoStatus)
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
+    #[serde(rename_all = "camelCase")]
     GetLedgerNanoStatus {
         /// To use a Ledger Speculos simulator, pass `true` to `is_simulator`; `false` otherwise.
-        #[serde(rename = "isSimulator")]
         is_simulator: bool,
     },
     /// Prepare a transaction for signing
+    #[serde(rename_all = "camelCase")]
     PrepareTransaction {
         /// Secret manager
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        #[serde(rename = "secretManager")]
         secret_manager: Option<SecretManagerDto>,
         /// Options
         options: Option<BuildBlockOptions>,
     },
     /// Sign a transaction
+    #[serde(rename_all = "camelCase")]
     SignTransaction {
         /// Secret manager
-        #[serde(rename = "secretManager")]
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         secret_manager: SecretManagerDto,
         /// Prepared transaction data
-        #[serde(rename = "preparedTransactionData")]
         prepared_transaction_data: PreparedTransactionDataDto,
     },
     /// Build a block containing the specified payload and post it to the network.
     PostBlockPayload {
         /// The payload to send
-        #[serde(rename = "payload")]
-        payload_dto: PayloadDto,
+        payload: PayloadDto,
     },
     //////////////////////////////////////////////////////////////////////
     // Node core API
@@ -210,51 +194,51 @@ pub enum ClientMethod {
         block: BlockDto,
     },
     /// Post block (raw)
+    #[serde(rename_all = "camelCase")]
     PostBlockRaw {
         /// Block
-        #[serde(rename = "blockBytes")]
         block_bytes: Vec<u8>,
     },
     /// Get block
+    #[serde(rename_all = "camelCase")]
     GetBlock {
         /// Block ID
-        #[serde(rename = "blockId")]
         block_id: BlockId,
     },
     /// Get block metadata with block_id
+    #[serde(rename_all = "camelCase")]
     GetBlockMetadata {
         /// Block ID
-        #[serde(rename = "blockId")]
         block_id: BlockId,
     },
     /// Get block raw
+    #[serde(rename_all = "camelCase")]
     GetBlockRaw {
         /// Block ID
-        #[serde(rename = "blockId")]
         block_id: BlockId,
     },
     /// Get output
+    #[serde(rename_all = "camelCase")]
     GetOutput {
         /// Output ID
-        #[serde(rename = "outputId")]
         output_id: OutputId,
     },
     /// Get output metadata
+    #[serde(rename_all = "camelCase")]
     GetOutputMetadata {
         /// Output ID
-        #[serde(rename = "outputId")]
         output_id: OutputId,
     },
     /// Get the milestone by the given milestone id.
+    #[serde(rename_all = "camelCase")]
     GetMilestoneById {
         /// Milestone ID
-        #[serde(rename = "milestoneId")]
         milestone_id: MilestoneId,
     },
     /// Get the raw milestone by the given milestone id.
+    #[serde(rename_all = "camelCase")]
     GetMilestoneByIdRaw {
         /// Milestone ID
-        #[serde(rename = "milestoneId")]
         milestone_id: MilestoneId,
     },
     /// Get the milestone by the given index.
@@ -268,9 +252,9 @@ pub enum ClientMethod {
         index: u32,
     },
     /// Get the UTXO changes by the given milestone id.
+    #[serde(rename_all = "camelCase")]
     GetUtxoChangesById {
         /// Milestone ID
-        #[serde(rename = "milestoneId")]
         milestone_id: MilestoneId,
     },
     /// Get the UTXO changes by the given milestone index.
@@ -281,23 +265,23 @@ pub enum ClientMethod {
     /// Get all receipts.
     GetReceipts,
     /// Get the receipts by the given milestone index.
+    #[serde(rename_all = "camelCase")]
     GetReceiptsMigratedAt {
         /// Milestone index
-        #[serde(rename = "milestoneIndex")]
         milestone_index: u32,
     },
     /// Get the treasury output.
     GetTreasury,
     /// Returns the included block of the transaction.
+    #[serde(rename_all = "camelCase")]
     GetIncludedBlock {
         /// Transaction ID
-        #[serde(rename = "transactionId")]
         transaction_id: TransactionId,
     },
     /// Returns the included block metadata of the transaction.
+    #[serde(rename_all = "camelCase")]
     GetIncludedBlockMetadata {
         /// Transaction ID
-        #[serde(rename = "transactionId")]
         transaction_id: TransactionId,
     },
 
@@ -305,45 +289,45 @@ pub enum ClientMethod {
     // Node indexer API
     //////////////////////////////////////////////////////////////////////
     /// Fetch basic output IDs
+    #[serde(rename_all = "camelCase")]
     BasicOutputIds {
         /// Query parameters for output requests
-        #[serde(rename = "queryParameters")]
         query_parameters: Vec<QueryParameter>,
     },
     /// Fetch alias output IDs
+    #[serde(rename_all = "camelCase")]
     AliasOutputIds {
         /// Query parameters for output requests
-        #[serde(rename = "queryParameters")]
         query_parameters: Vec<QueryParameter>,
     },
     /// Fetch alias output ID
+    #[serde(rename_all = "camelCase")]
     AliasOutputId {
         /// Alias id
-        #[serde(rename = "aliasId")]
         alias_id: AliasId,
     },
     /// Fetch NFT output IDs
+    #[serde(rename_all = "camelCase")]
     NftOutputIds {
         /// Query parameters for output requests
-        #[serde(rename = "queryParameters")]
         query_parameters: Vec<QueryParameter>,
     },
     /// Fetch NFT output ID
+    #[serde(rename_all = "camelCase")]
     NftOutputId {
         /// NFT ID
-        #[serde(rename = "nftId")]
         nft_id: NftId,
     },
     /// Fetch foundry Output IDs
+    #[serde(rename_all = "camelCase")]
     FoundryOutputIds {
         /// Query parameters for output requests
-        #[serde(rename = "queryParameters")]
         query_parameters: Vec<QueryParameter>,
     },
     /// Fetch foundry Output ID
+    #[serde(rename_all = "camelCase")]
     FoundryOutputId {
         /// Foundry ID
-        #[serde(rename = "foundryId")]
         foundry_id: FoundryId,
     },
 
@@ -351,53 +335,51 @@ pub enum ClientMethod {
     // High level API
     //////////////////////////////////////////////////////////////////////
     /// Fetch OutputWithMetadataResponse from provided OutputIds (requests are sent in parallel)
+    #[serde(rename_all = "camelCase")]
     GetOutputs {
         /// Output IDs
-        #[serde(rename = "outputIds")]
         output_ids: Vec<OutputId>,
     },
     /// Try to get OutputWithMetadataResponse from provided OutputIds (requests are sent in parallel and errors are
     /// ignored, can be useful for spent outputs)
+    #[serde(rename_all = "camelCase")]
     TryGetOutputs {
         /// Output IDs
-        #[serde(rename = "outputIds")]
         output_ids: Vec<OutputId>,
     },
     /// Find all blocks by provided block IDs.
+    #[serde(rename_all = "camelCase")]
     FindBlocks {
         /// BlockIDs
-        #[serde(rename = "blockIds")]
         block_ids: Vec<BlockId>,
     },
     /// Retries (promotes or reattaches) a block for provided block id. Block should only be
     /// retried only if they are valid and haven't been confirmed for a while.
+    #[serde(rename_all = "camelCase")]
     Retry {
         /// Block ID
-        #[serde(rename = "blockId")]
         block_id: BlockId,
     },
     /// Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
     /// milestone). Default interval is 5 seconds and max attempts is 40. Returns the included block at first
     /// position and additional reattached blocks
+    #[serde(rename_all = "camelCase")]
     RetryUntilIncluded {
         /// Block ID
-        #[serde(rename = "blockId")]
         block_id: BlockId,
         /// Interval
         interval: Option<u64>,
         /// Maximum attempts
-        #[serde(rename = "maxAttempts")]
         max_attempts: Option<u64>,
     },
     /// Function to consolidate all funds from a range of addresses to the address with the lowest index in that range
     /// Returns the address to which the funds got consolidated, if any were available
+    #[serde(rename_all = "camelCase")]
     ConsolidateFunds {
         /// Secret manager
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        #[serde(rename = "secretManager")]
         secret_manager: SecretManagerDto,
         /// Addresses generation options
-        #[serde(rename = "generateAddressesOptions")]
         generate_addresses_options: GenerateAddressesOptions,
     },
     /// Function to find inputs from addresses for a provided amount (useful for offline signing)
@@ -409,37 +391,37 @@ pub enum ClientMethod {
     },
     /// Find all outputs based on the requests criteria. This method will try to query multiple nodes if
     /// the request amount exceeds individual node limit.
+    #[serde(rename_all = "camelCase")]
     FindOutputs {
         /// Output IDs
-        #[serde(rename = "outputIds")]
         output_ids: Vec<OutputId>,
         /// Addresses
         addresses: Vec<String>,
     },
     /// Reattaches blocks for provided block id. Blocks can be reattached only if they are valid and haven't been
     /// confirmed for a while.
+    #[serde(rename_all = "camelCase")]
     Reattach {
         /// Block ID
-        #[serde(rename = "blockId")]
         block_id: BlockId,
     },
     /// Reattach a block without checking if it should be reattached
+    #[serde(rename_all = "camelCase")]
     ReattachUnchecked {
         /// Block ID
-        #[serde(rename = "blockId")]
         block_id: BlockId,
     },
     /// Promotes a block. The method should validate if a promotion is necessary through get_block. If not, the
     /// method should error out and should not allow unnecessary promotions.
+    #[serde(rename_all = "camelCase")]
     Promote {
         /// Block ID
-        #[serde(rename = "blockId")]
         block_id: BlockId,
     },
     /// Promote a block without checking if it should be promoted
+    #[serde(rename_all = "camelCase")]
     PromoteUnchecked {
         /// Block ID
-        #[serde(rename = "blockId")]
         block_id: BlockId,
     },
 
@@ -447,37 +429,35 @@ pub enum ClientMethod {
     // Utils
     //////////////////////////////////////////////////////////////////////
     /// Transforms a hex encoded address to a bech32 encoded address
+    #[serde(rename_all = "camelCase")]
     HexToBech32 {
         /// Hex encoded bech32 address
         hex: String,
         /// Human readable part
-        #[serde(rename = "bech32Hrp")]
         bech32_hrp: Option<String>,
     },
     /// Transforms an alias id to a bech32 encoded address
+    #[serde(rename_all = "camelCase")]
     AliasIdToBech32 {
         /// Alias ID
-        #[serde(rename = "aliasId")]
         alias_id: AliasId,
         /// Human readable part
-        #[serde(rename = "bech32Hrp")]
         bech32_hrp: Option<String>,
     },
     /// Transforms an nft id to a bech32 encoded address
+    #[serde(rename_all = "camelCase")]
     NftIdToBech32 {
         /// Nft ID
-        #[serde(rename = "nftId")]
         nft_id: NftId,
         /// Human readable part
-        #[serde(rename = "bech32Hrp")]
         bech32_hrp: Option<String>,
     },
     /// Transforms a hex encoded public key to a bech32 encoded address
+    #[serde(rename_all = "camelCase")]
     HexPublicKeyToBech32Address {
         /// Hex encoded public key
         hex: String,
         /// Human readable part
-        #[serde(rename = "bech32Hrp")]
         bech32_hrp: Option<String>,
     },
 }

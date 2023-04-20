@@ -15,11 +15,11 @@ use crate::{
 
 /// Address and nft for `send_nft()`
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AddressAndNftId {
     /// Bech32 encoded address
     pub address: String,
     /// Nft id
-    #[serde(rename = "nftId")]
     pub nft_id: NftId,
 }
 
@@ -47,10 +47,10 @@ impl AccountHandle {
     /// ```
     pub async fn send_nft(
         &self,
-        addresses_nft_ids: Vec<AddressAndNftId>,
+        addresses_and_nft_ids: Vec<AddressAndNftId>,
         options: Option<TransactionOptions>,
     ) -> crate::wallet::Result<Transaction> {
-        let prepared_transaction = self.prepare_send_nft(addresses_nft_ids, options).await?;
+        let prepared_transaction = self.prepare_send_nft(addresses_and_nft_ids, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
 
@@ -58,7 +58,7 @@ impl AccountHandle {
     /// [AccountHandle.send_nft()](crate::account::handle::AccountHandle.send_nft)
     async fn prepare_send_nft(
         &self,
-        addresses_nft_ids: Vec<AddressAndNftId>,
+        addresses_and_nft_ids: Vec<AddressAndNftId>,
         options: Option<TransactionOptions>,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_send_nft");
@@ -68,8 +68,8 @@ impl AccountHandle {
 
         let mut outputs = Vec::new();
 
-        for address_and_nft_id in addresses_nft_ids {
-            let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address_and_nft_id.address)?;
+        for address_and_nft_id in addresses_and_nft_ids {
+            let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address_and_nft_id.address)?;
             self.client.bech32_hrp_matches(&bech32_hrp).await?;
 
             // Find nft output from the inputs

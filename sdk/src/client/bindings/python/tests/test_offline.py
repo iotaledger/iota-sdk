@@ -2,8 +2,9 @@
 # Copyright 2022 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_client import IotaClient, MnemonicSecretManager
+from iota_client import IotaClient, MnemonicSecretManager, OutputId, hex_to_utf8, utf8_to_hex
 import json
+import unittest
 
 # Read the test vector
 tv = dict()
@@ -19,16 +20,17 @@ def test_mnemonic_address_generation():
     for test in mnemonic_address_test_cases:
         secret_manager = MnemonicSecretManager(test['mnemonic'])
 
-        generated_address = client.generate_addresses(secret_manager, 
-            coin_type = test['coin_type'],
-            account_index = test['account_index'],
-            bech32_hrp = test['bech32_hrp'],
-            internal = test['internal'],
-            start = test['address_index'],
-            end = test['address_index']+1
-        )
+        generated_address = client.generate_addresses(secret_manager,
+                                                      coin_type=test['coin_type'],
+                                                      account_index=test['account_index'],
+                                                      bech32_hrp=test['bech32_hrp'],
+                                                      internal=test['internal'],
+                                                      start=test['address_index'],
+                                                      end=test['address_index']+1
+                                                      )
 
         assert test['bech32_address'] == generated_address[0]
+
 
 def test_sign_verify_ed25519():
     secret_manager = MnemonicSecretManager(client.generate_mnemonic())
@@ -61,3 +63,48 @@ def test_sign_verify_ed25519():
         {'type': 0, 'pubKeyHash': pub_key_hash},
     )
     assert valid_signature
+
+
+class TestTypes(unittest.TestCase):
+    def test_output_id(self):
+        transaction_id = '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
+        output_index = 42
+        output_id = OutputId(transaction_id, output_index)
+        assert output_id.__repr__(
+        ) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+
+        new_output_id = OutputId.from_string(
+            '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00')
+        assert new_output_id.__repr__(
+        ) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+        assert new_output_id.transaction_id == transaction_id
+        assert new_output_id.output_index == output_index
+
+        transaction_id_missing_0x_prefix = '52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
+        with self.assertRaises(ValueError):
+            OutputId(transaction_id_missing_0x_prefix, output_index)
+        transaction_id__invalid_hex_prefix = '0052fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
+        with self.assertRaises(ValueError):
+            OutputId(transaction_id__invalid_hex_prefix, output_index)
+        transaction_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
+        with self.assertRaises(ValueError):
+            OutputId(transaction_id_invalid_hex_char, output_index)
+        invalid_output_index = 129
+        with self.assertRaises(ValueError):
+            OutputId(transaction_id, invalid_output_index)
+        output_id_missing_0x_prefix = '52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+        with self.assertRaises(ValueError):
+            OutputId.from_string(output_id_missing_0x_prefix)
+        output_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+        with self.assertRaises(ValueError):
+            OutputId.from_string(output_id_invalid_hex_char)
+        output_id_invalid_hex_prefix = '0052fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+        with self.assertRaises(ValueError):
+            OutputId.from_string(output_id_invalid_hex_prefix)
+
+
+def test_hex_utf8():
+    utf8_data = "Don't panic!"
+    hex_data = '0x446f6e27742070616e696321'
+    assert utf8_to_hex(utf8_data) == hex_data
+    assert hex_to_utf8(hex_data) == utf8_data

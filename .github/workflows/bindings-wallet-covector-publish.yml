@@ -1,9 +1,9 @@
-name: Covector
+name: Create Covector release (wallet)
 
-on:
-  push:
-    branches:
-      - develop
+on: workflow_dispatch
+
+env:
+  CARGO_INCREMENTAL: 0
 
 jobs:
   version-or-publish:

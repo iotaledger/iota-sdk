@@ -60,10 +60,10 @@ pub mod dto {
 
     /// Describes an Ed25519 address.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct Ed25519AddressDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "pubKeyHash")]
         pub pub_key_hash: String,
     }
 

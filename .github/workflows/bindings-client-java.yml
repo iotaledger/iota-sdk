@@ -1,62 +1,63 @@
-name: Java bindings checks
+name: Java bindings checks (client)
+
 on:
   push:
     branches: [develop, production]
     paths:
-      - ".github/workflows/bindings-java.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/examples/**" # Exclude all examples
       - "!**/tests/**" # Exclude all tests
-      - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
-      - "sdk/src/client/bindings/java/**" # Re-include java bindings
+      - "!**/bindings/**" # Exclude all bindings
+      - "sdk/src/client/bindings/java/**"
+      - ".github/workflows/bindings-client-java.yml"
   pull_request:
     branches: [develop, production]
     paths:
-      - ".github/workflows/bindings-java.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/examples/**" # Exclude all examples
       - "!**/tests/**" # Exclude all tests
-      - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
-      - "sdk/src/client/bindings/java/**" # Re-include java bindings
+      - "!**/bindings/**" # Exclude all bindings
+      - "sdk/src/client/bindings/java/**"
+      - ".github/workflows/bindings-client-java.yml"
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch:
 
+env:
+  CARGO_INCREMENTAL: 0
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   test:
     name: Test
-    if: ${{ ! github.event.schedule }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        # os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest]
         java: ["11", "17"]
 
     steps:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Set Up Nightly Rust
+      - name: Set up Rust
         uses: ./.github/actions/setup-rust
         with:
           toolchain: nightly
-          cache: true
           cache-root: sdk/src/client/bindings/java/lib/native/
-          cache-job-id: ${{ github.workflow }}-${{ github.job }}-${{ matrix.os }}-${{ matrix.java }}
-          cache-hash: ${{ hashFiles('.github/workflows/bindings-java.yml') }}
 
       # This step is required for bindgen to work on Windows.
       - name: Set Up Clang/LLVM (Windows)
@@ -74,8 +75,6 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
           distribution: "temurin"
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
 
       - name: Start private tangle
         uses: "./.github/actions/private-tangle/setup"

@@ -19,33 +19,31 @@ use crate::{
 
 /// Alias output options for `create_alias_output()`
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AliasOutputOptions {
     /// Bech32 encoded address which will control the alias. Default will use the first
     /// address of the account
     pub address: Option<String>,
     /// Immutable alias metadata
-    #[serde(rename = "immutableMetadata")]
     pub immutable_metadata: Option<Vec<u8>>,
     /// Alias metadata
     pub metadata: Option<Vec<u8>>,
     /// Alias state metadata
-    #[serde(rename = "stateMetadata")]
     pub state_metadata: Option<Vec<u8>>,
 }
 
 /// Dto for aliasOptions
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AliasOutputOptionsDto {
     /// Bech32 encoded address which will control the alias. Default will use the first
     /// address of the account
     pub address: Option<String>,
     /// Immutable alias metadata, hex encoded bytes
-    #[serde(rename = "immutableMetadata")]
     pub immutable_metadata: Option<String>,
     /// Alias metadata, hex encoded bytes
     pub metadata: Option<String>,
     /// Alias state metadata
-    #[serde(rename = "stateMetadata")]
     pub state_metadata: Option<String>,
 }
 
@@ -115,7 +113,7 @@ impl AccountHandle {
             .and_then(|options| options.address.as_ref())
         {
             Some(bech32_address) => {
-                let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(bech32_address)?;
+                let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(bech32_address)?;
                 self.client.bech32_hrp_matches(&bech32_hrp).await?;
                 address
             }

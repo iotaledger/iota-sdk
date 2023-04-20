@@ -6,8 +6,11 @@
 //! `cargo run --example check_unlock_conditions --release`
 
 use iota_sdk::{
-    types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
-    wallet::{account::types::AddressWrapper, Result, Wallet},
+    types::block::{
+        address::Bech32Address,
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
+    },
+    wallet::{Result, Wallet},
 };
 
 #[tokio::main]
@@ -18,7 +21,7 @@ async fn main() -> Result<()> {
     // Get the account we generated with `01_create_wallet`
     let account = wallet.get_account("Alice").await?;
 
-    let account_addresses: Vec<AddressWrapper> = account
+    let account_addresses: Vec<Bech32Address> = account
         .addresses()
         .await?
         .into_iter()

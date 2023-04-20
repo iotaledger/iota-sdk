@@ -1,9 +1,9 @@
-name: Examine the Rust Core
+name: Linting
 on:
   push:
     branches: [develop, production]
     paths:
-      - ".github/workflows/core.yml"
+      - ".github/workflows/lint.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
@@ -12,79 +12,34 @@ on:
   pull_request:
     branches: [develop, production]
     paths:
-      - ".github/workflows/core.yml"
+      - ".github/workflows/lint.yml"
       - ".github/actions/**"
       - "**.rs" # Include all rust files
       - "**Cargo.toml" # Include all Cargo.toml files
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/bindings/**" # Exclude all bindings
-  schedule:
-    - cron: "0 1 * * *"
-  workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
   CARGO_INCREMENTAL: 0
 
 jobs:
-  test:
-    name: Test
-    if: ${{ ! github.event.schedule }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
-
-    steps:
-      - name: Checkout the Source Code
-        uses: actions/checkout@v3
-
-      - name: Set Up Nightly Rust
-        uses: ./.github/actions/setup-rust
-        with:
-          toolchain: nightly
-          cache: true
-          cache-job-id: ${{ github.workflow }}-${{ github.job }}-${{ matrix.os }}
-          cache-hash: ${{ hashFiles('.github/workflows/core.yml') }}
-
-      - name: Install Protoc
-        uses: arduino/setup-protoc@v1
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install Required Dependencies (Ubuntu)
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        run: |
-          sudo apt-get update
-          sudo apt-get install libudev-dev libusb-1.0-0-dev
-
-      - name: Run Cargo Test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all-features --release
-
   lint:
     name: Lint
-    if: ${{ ! github.event.schedule }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Set Up Beta Clippy
+      - name: Set up Rust
         uses: ./.github/actions/setup-rust
         with:
           toolchain: beta
           components: clippy
-          cache: true
-          cache-job-id: ${{ github.workflow }}-${{ github.job }}
-          cache-hash: ${{ hashFiles('.github/workflows/core.yml') }}
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v1
@@ -96,7 +51,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install libudev-dev libusb-1.0-0-dev
 
-      # A first run without features to detect feature releated issues.
+      # A first run without features to detect feature related issues.
       - name: Run Clippy
         uses: actions-rs/clippy-check@v1
         with:
@@ -114,21 +69,17 @@ jobs:
 
   check-unused-deps:
     name: Check Unused Dependencies
-    if: ${{ ! github.event.schedule }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Install Cargo-udeps with Nightly Rust
+      - name: Set up Rust
         uses: ./.github/actions/setup-rust
         with:
           toolchain: nightly
           install: cargo-udeps
-          cache: true
-          cache-job-id: ${{ github.workflow }}-${{ github.job }}
-          cache-hash: ${{ hashFiles('.github/workflows/core.yml') }}
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v1
@@ -148,19 +99,17 @@ jobs:
 
   check-format:
     name: Check Format
-    if: ${{ ! github.event.schedule }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Set Up Nightly Rustfmt
+      - name: Set up Rust
         uses: ./.github/actions/setup-rust
         with:
           toolchain: nightly
           components: rustfmt
-          cache: false
 
       - name: Install cargo-license-template
         uses: actions-rs/cargo@v1
@@ -188,14 +137,11 @@ jobs:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
 
-      - name: Install Cargo-audit with Nightly Rust
+      - name: Set up Rust
         uses: ./.github/actions/setup-rust
         with:
           toolchain: nightly
           install: cargo-audit
-          cache: true
-          cache-job-id: ${{ github.workflow }}-${{ github.job }}
-          cache-hash: ${{ hashFiles('.github/workflows/core.yml') }}
 
       - name: Run Cargo Audit
         uses: actions-rs/cargo@v1

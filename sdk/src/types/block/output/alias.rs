@@ -743,34 +743,31 @@ pub mod dto {
 
     /// Describes an alias account in the ledger that can be controlled by the state and governance controllers.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct AliasOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         // Amount of IOTA tokens held by the output.
         pub amount: String,
         // Native tokens held by the output.
-        #[serde(rename = "nativeTokens", skip_serializing_if = "Vec::is_empty", default)]
+        #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeTokenDto>,
         // Unique identifier of the alias.
-        #[serde(rename = "aliasId")]
         pub alias_id: AliasIdDto,
         // A counter that must increase by 1 every time the alias is state transitioned.
-        #[serde(rename = "stateIndex")]
         pub state_index: u32,
         // Metadata that can only be changed by the state controller.
-        #[serde(rename = "stateMetadata", skip_serializing_if = "String::is_empty", default)]
+        #[serde(skip_serializing_if = "String::is_empty", default)]
         pub state_metadata: String,
         // A counter that denotes the number of foundries created by this alias account.
-        #[serde(rename = "foundryCounter")]
         pub foundry_counter: u32,
         //
-        #[serde(rename = "unlockConditions")]
         pub unlock_conditions: Vec<UnlockConditionDto>,
         //
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<FeatureDto>,
         //
-        #[serde(rename = "immutableFeatures", skip_serializing_if = "Vec::is_empty", default)]
+        #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub immutable_features: Vec<FeatureDto>,
     }
 

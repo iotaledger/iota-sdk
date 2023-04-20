@@ -28,17 +28,16 @@ use crate::{
     },
 };
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 /// Address, amount and native tokens for `send_native_tokens()`
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct AddressNativeTokens {
     /// Bech32 encoded address
     pub address: String,
     /// Native tokens
-    #[serde(rename = "nativeTokens")]
     pub native_tokens: Vec<(TokenId, U256)>,
     /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
     /// first address of the account
-    #[serde(rename = "returnAddress")]
     pub return_address: Option<String>,
     /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
     /// receiver before. Default is 1 day
@@ -70,11 +69,11 @@ impl AccountHandle {
     /// ```
     pub async fn send_native_tokens(
         &self,
-        addresses_native_tokens: Vec<AddressNativeTokens>,
+        addresses_and_native_tokens: Vec<AddressNativeTokens>,
         options: Option<TransactionOptions>,
     ) -> crate::wallet::Result<Transaction> {
         let prepared_transaction = self
-            .prepare_send_native_tokens(addresses_native_tokens, options)
+            .prepare_send_native_tokens(addresses_and_native_tokens, options)
             .await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
@@ -83,7 +82,7 @@ impl AccountHandle {
     /// [AccountHandle.send_native_tokens()](crate::account::handle::AccountHandle.send_native_tokens)
     async fn prepare_send_native_tokens(
         &self,
-        addresses_native_tokens: Vec<AddressNativeTokens>,
+        addresses_and_native_tokens: Vec<AddressNativeTokens>,
         options: Option<TransactionOptions>,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_send_native_tokens");
@@ -96,8 +95,8 @@ impl AccountHandle {
         let local_time = self.client.get_time_checked().await?;
 
         let mut outputs = Vec::new();
-        for address_with_amount in addresses_native_tokens {
-            let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address_with_amount.address)?;
+        for address_with_amount in addresses_and_native_tokens {
+            let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address_with_amount.address)?;
             self.client.bech32_hrp_matches(&bech32_hrp).await?;
             // get minimum required amount for such an output, so we don't lock more than required
             // We have to check it for every output individually, because different address types and amount of

@@ -532,22 +532,21 @@ pub mod dto {
 
     /// Describes an NFT output, a globally unique token with metadata attached.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct NftOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         // Amount of IOTA tokens held by the output.
         pub amount: String,
         // Native tokens held by the output.
-        #[serde(rename = "nativeTokens", skip_serializing_if = "Vec::is_empty", default)]
+        #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeTokenDto>,
         // Unique identifier of the NFT.
-        #[serde(rename = "nftId")]
         pub nft_id: NftIdDto,
-        #[serde(rename = "unlockConditions")]
         pub unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<FeatureDto>,
-        #[serde(rename = "immutableFeatures", skip_serializing_if = "Vec::is_empty", default)]
+        #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub immutable_features: Vec<FeatureDto>,
     }
 

@@ -51,7 +51,7 @@ async fn main() -> Result<()> {
     let addresses = account.generate_addresses(300, None).await?;
     let mut bech32_addresses = Vec::new();
     for ad in addresses {
-        bech32_addresses.push(ad.address().to_bech32());
+        bech32_addresses.push(ad.address().to_string());
     }
 
     let addresses = account.addresses().await?;

@@ -28,8 +28,8 @@ async fn claim_2_basic_outputs() -> Result<()> {
     let tx = accounts[1]
         .send_amount(
             vec![
-                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_bech32(), micro_amount),
-                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_bech32(), micro_amount),
+                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_string(), micro_amount),
+                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_string(), micro_amount),
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -182,13 +182,13 @@ async fn claim_2_native_tokens() -> Result<()> {
         .send_native_tokens(
             vec![
                 AddressNativeTokens {
-                    address: accounts[0].addresses().await?[0].address().to_bech32(),
+                    address: accounts[0].addresses().await?[0].address().to_string(),
                     native_tokens: vec![(mint_tx_0.token_id, native_token_amount)],
                     expiration: None,
                     return_address: None,
                 },
                 AddressNativeTokens {
-                    address: accounts[0].addresses().await?[0].address().to_bech32(),
+                    address: accounts[0].addresses().await?[0].address().to_string(),
                     native_tokens: vec![(mint_tx_1.token_id, native_token_amount)],
                     expiration: None,
                     return_address: None,

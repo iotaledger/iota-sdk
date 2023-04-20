@@ -84,8 +84,8 @@ pub mod dto {
     use crate::types::block::{address::dto::AddressDto, error::dto::DtoError};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct MigratedFundsEntryDto {
-        #[serde(rename = "tailTransactionHash")]
         pub tail_transaction_hash: String,
         pub address: AddressDto,
         pub deposit: u64,

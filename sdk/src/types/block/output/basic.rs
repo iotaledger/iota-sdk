@@ -370,15 +370,15 @@ pub mod dto {
 
     /// Describes a basic output.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct BasicOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         // Amount of IOTA tokens held by the output.
         pub amount: String,
         // Native tokens held by the output.
-        #[serde(rename = "nativeTokens", skip_serializing_if = "Vec::is_empty", default)]
+        #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeTokenDto>,
-        #[serde(rename = "unlockConditions")]
         pub unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<FeatureDto>,

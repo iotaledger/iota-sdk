@@ -475,12 +475,12 @@ impl ClientMessageHandler {
 
                 Ok(Response::Ok)
             }
-            Message::PostBlockPayload { payload_dto } => {
+            Message::PostBlockPayload { payload } => {
                 let block_builder = self.client.block();
 
                 let block = block_builder
                     .finish_block(Some(Payload::try_from_dto(
-                        &payload_dto,
+                        &payload,
                         &self.client.get_protocol_parameters().await?,
                     )?))
                     .await?;
