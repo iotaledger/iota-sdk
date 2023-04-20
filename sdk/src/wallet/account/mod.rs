@@ -164,7 +164,7 @@ impl Deref for Account {
 }
 
 impl Account {
-    /// Create a new AccountHandle with an Account
+    /// Create a new Account with an AccountDetails
     pub(crate) fn new(
         details: AccountDetails,
         client: Client,

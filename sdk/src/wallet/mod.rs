@@ -3,8 +3,8 @@
 
 //! The IOTA Wallet Library
 
-/// [`AccountHandle`]: crate::wallet::account::Account
-/// The account module. Interaction with an Account happens via an [`AccountHandle`].
+/// [`Account`]: crate::wallet::Account
+/// The account module. Interaction with an Account happens via an [`Account`].
 pub mod account;
 /// The message passing interface for the library. A different way to call the wallet functions, useful for bindings to
 /// other languages.
