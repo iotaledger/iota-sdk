@@ -36,14 +36,14 @@ impl Wallet {
         let mut max_account_index_to_keep = None;
 
         // Search for addresses in current accounts
-        for account_handle in self.accounts.read().await.iter() {
+        for account in self.accounts.read().await.iter() {
             // If the gap limit is 0, there is no need to search for funds
             if address_gap_limit > 0 {
-                account_handle
+                account
                     .search_addresses_with_outputs(address_gap_limit, sync_options.clone())
                     .await?;
             }
-            let account_index = *account_handle.read().await.index();
+            let account_index = *account.read().await.index();
             match max_account_index_to_keep {
                 Some(max_account_index) => {
                     if account_index > max_account_index {
@@ -75,13 +75,13 @@ impl Wallet {
         let mut new_accounts = Vec::new();
         let mut accounts = self.accounts.write().await;
 
-        for account_handle in accounts.iter() {
-            let account_index = *account_handle.read().await.index();
+        for account in accounts.iter() {
+            let account_index = *account.read().await.index();
             let mut keep_account = false;
 
             if let Some(max_account_index_to_keep) = max_account_index_to_keep {
                 if account_index <= max_account_index_to_keep {
-                    new_accounts.push((account_index, account_handle.clone()));
+                    new_accounts.push((account_index, account.clone()));
                     keep_account = true;
                 }
             }

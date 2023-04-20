@@ -43,9 +43,9 @@ impl Account {
     ///    .add_unlock_condition(AddressUnlockCondition::new(
     ///        Address::try_from_bech32("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
     ///    ))
-    ///    .finish_output(account_handle.client.get_token_supply().await?;)?,
+    ///    .finish_output(account.client.get_token_supply().await?;)?,
     /// ];
-    /// let tx = account_handle
+    /// let tx = account
     ///     .send(
     ///         outputs,
     ///         Some(TransactionOptions {

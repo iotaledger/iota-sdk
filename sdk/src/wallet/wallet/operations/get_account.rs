@@ -17,18 +17,20 @@ impl Wallet {
 
         match &account_id {
             AccountIdentifier::Index(index) => {
-                for account_handle in accounts.iter() {
-                    let account = account_handle.read().await;
-                    if account.index() == index {
-                        return Ok(account_handle.clone());
+                for account in accounts.iter() {
+                    let account_details = account.read().await;
+
+                    if account_details.index() == index {
+                        return Ok(account.clone());
                     }
                 }
             }
             AccountIdentifier::Alias(alias) => {
-                for account_handle in accounts.iter() {
-                    let account = account_handle.read().await;
-                    if account.alias() == alias {
-                        return Ok(account_handle.clone());
+                for account in accounts.iter() {
+                    let account_details = account.read().await;
+
+                    if account_details.alias() == alias {
+                        return Ok(account.clone());
                     }
                 }
             }

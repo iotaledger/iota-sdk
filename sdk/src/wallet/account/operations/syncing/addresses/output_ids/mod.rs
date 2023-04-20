@@ -61,10 +61,10 @@ impl Account {
             {
                 tasks.push(
                     async move {
-                        let account_handle = self.clone();
+                        let account = self.clone();
                         let bech32_address = bech32_address.clone();
                         tokio::spawn(async move {
-                            account_handle
+                            account
                                 .get_basic_output_ids_with_any_unlock_condition(&bech32_address)
                                 .await
                         })
@@ -90,9 +90,9 @@ impl Account {
                 tasks.push(
                     async move {
                         let bech32_address_ = bech32_address.clone();
-                        let account_handle = self.clone();
+                        let account = self.clone();
                         tokio::spawn(async move {
-                            account_handle
+                            account
                                 .get_nft_output_ids_with_any_unlock_condition(&bech32_address_)
                                 .await
                         })
@@ -122,9 +122,9 @@ impl Account {
                     async move {
                         let bech32_address = bech32_address.clone();
                         let sync_options = sync_options.clone();
-                        let account_handle = self.clone();
+                        let account = self.clone();
                         tokio::spawn(async move {
-                            account_handle
+                            account
                                 .get_alias_and_foundry_output_ids(&bech32_address, sync_options)
                                 .await
                         })
@@ -181,11 +181,11 @@ impl Account {
             {
                 let mut tasks = Vec::new();
                 for address in addresses_chunk {
-                    let account_handle = self.clone();
+                    let account = self.clone();
                     let sync_options = options.clone();
                     tasks.push(async move {
                         tokio::spawn(async move {
-                            let output_ids = account_handle
+                            let output_ids = account
                                 .get_output_ids_for_address(address.address.inner, &sync_options)
                                 .await?;
                             crate::wallet::Result::Ok((address, output_ids))

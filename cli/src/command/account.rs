@@ -227,14 +227,14 @@ pub enum AccountCommand {
 }
 
 /// `addresses` command
-pub async fn addresses_command(account_handle: &Account) -> Result<(), Error> {
-    let addresses = account_handle.addresses().await?;
+pub async fn addresses_command(account: &Account) -> Result<(), Error> {
+    let addresses = account.addresses().await?;
 
     if addresses.is_empty() {
         println_log_info!("No addresses found");
     } else {
         for address in addresses {
-            print_address(account_handle, &address).await?;
+            print_address(account, &address).await?;
         }
     }
 
@@ -242,14 +242,10 @@ pub async fn addresses_command(account_handle: &Account) -> Result<(), Error> {
 }
 
 // `burn-native-token` command
-pub async fn burn_native_token_command(
-    account_handle: &Account,
-    token_id: String,
-    amount: String,
-) -> Result<(), Error> {
+pub async fn burn_native_token_command(account: &Account, token_id: String, amount: String) -> Result<(), Error> {
     println_log_info!("Burning native token {token_id} {amount}.");
 
-    let transaction = account_handle
+    let transaction = account
         .burn_native_token(
             TokenId::from_str(&token_id)?,
             U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
@@ -267,10 +263,10 @@ pub async fn burn_native_token_command(
 }
 
 // `burn-nft` command
-pub async fn burn_nft_command(account_handle: &Account, nft_id: String) -> Result<(), Error> {
+pub async fn burn_nft_command(account: &Account, nft_id: String) -> Result<(), Error> {
     println_log_info!("Burning nft {nft_id}.");
 
-    let transaction = account_handle.burn_nft(NftId::from_str(&nft_id)?, None).await?;
+    let transaction = account.burn_nft(NftId::from_str(&nft_id)?, None).await?;
 
     println_log_info!(
         "Burning transaction sent:\n{:?}\n{:?}",
@@ -282,20 +278,18 @@ pub async fn burn_nft_command(account_handle: &Account, nft_id: String) -> Resul
 }
 
 // `balance` command
-pub async fn balance_command(account_handle: &Account) -> Result<(), Error> {
-    println_log_info!("{:#?}", account_handle.balance().await?);
+pub async fn balance_command(account: &Account) -> Result<(), Error> {
+    println_log_info!("{:#?}", account.balance().await?);
 
     Ok(())
 }
 
 // `claim` command
-pub async fn claim_command(account_handle: &Account, output_id: Option<String>) -> Result<(), Error> {
+pub async fn claim_command(account: &Account, output_id: Option<String>) -> Result<(), Error> {
     if let Some(output_id) = output_id {
         println_log_info!("Claiming output {output_id}");
 
-        let transaction = account_handle
-            .claim_outputs(vec![OutputId::from_str(&output_id)?])
-            .await?;
+        let transaction = account.claim_outputs(vec![OutputId::from_str(&output_id)?]).await?;
 
         println_log_info!(
             "Claiming transaction sent:\n{:?}\n{:?}",
@@ -305,7 +299,7 @@ pub async fn claim_command(account_handle: &Account, output_id: Option<String>) 
     } else {
         println_log_info!("Claiming outputs.");
 
-        let output_ids = account_handle
+        let output_ids = account
             .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::All)
             .await?;
 
@@ -316,7 +310,7 @@ pub async fn claim_command(account_handle: &Account, output_id: Option<String>) 
         // Doing chunks of only 60, because we might need to create the double amount of outputs, because of potential
         // storage deposit return unlock conditions and also consider the remainder output.
         for output_ids_chunk in output_ids.chunks(60) {
-            let transaction = account_handle.claim_outputs(output_ids_chunk.to_vec()).await?;
+            let transaction = account.claim_outputs(output_ids_chunk.to_vec()).await?;
             println_log_info!(
                 "Claiming transaction sent:\n{:?}\n{:?}",
                 transaction.transaction_id,
@@ -329,10 +323,10 @@ pub async fn claim_command(account_handle: &Account, output_id: Option<String>) 
 }
 
 // `consolidate` command
-pub async fn consolidate_command(account_handle: &Account) -> Result<(), Error> {
+pub async fn consolidate_command(account: &Account) -> Result<(), Error> {
     println_log_info!("Consolidating outputs.");
 
-    let transaction = account_handle.consolidate_outputs(true, None).await?;
+    let transaction = account.consolidate_outputs(true, None).await?;
 
     println_log_info!(
         "Consolidation transaction sent:\n{:?}\n{:?}",
@@ -344,10 +338,10 @@ pub async fn consolidate_command(account_handle: &Account) -> Result<(), Error> 
 }
 
 // `create-alias-output` command
-pub async fn create_alias_outputs_command(account_handle: &Account) -> Result<(), Error> {
+pub async fn create_alias_outputs_command(account: &Account) -> Result<(), Error> {
     println_log_info!("Creating alias output.");
 
-    let transaction = account_handle.create_alias_output(None, None).await?;
+    let transaction = account.create_alias_output(None, None).await?;
 
     println_log_info!(
         "Alias output creation transaction sent:\n{:?}\n{:?}",
@@ -359,12 +353,8 @@ pub async fn create_alias_outputs_command(account_handle: &Account) -> Result<()
 }
 
 // `decrease-native-token-supply` command
-pub async fn decrease_native_token_command(
-    account_handle: &Account,
-    token_id: String,
-    amount: String,
-) -> Result<(), Error> {
-    let transaction = account_handle
+pub async fn decrease_native_token_command(account: &Account, token_id: String, amount: String) -> Result<(), Error> {
+    let transaction = account
         .decrease_native_token_supply(
             TokenId::from_str(&token_id)?,
             U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
@@ -382,12 +372,10 @@ pub async fn decrease_native_token_command(
 }
 
 // `destroy-alias` command
-pub async fn destroy_alias_command(account_handle: &Account, alias_id: String) -> Result<(), Error> {
+pub async fn destroy_alias_command(account: &Account, alias_id: String) -> Result<(), Error> {
     println_log_info!("Destroying alias {alias_id}.");
 
-    let transaction = account_handle
-        .destroy_alias(AliasId::from_str(&alias_id)?, None)
-        .await?;
+    let transaction = account.destroy_alias(AliasId::from_str(&alias_id)?, None).await?;
 
     println_log_info!(
         "Destroying alias transaction sent:\n{:?}\n{:?}",
@@ -399,12 +387,10 @@ pub async fn destroy_alias_command(account_handle: &Account, alias_id: String) -
 }
 
 // `destroy-foundry` command
-pub async fn destroy_foundry_command(account_handle: &Account, foundry_id: String) -> Result<(), Error> {
+pub async fn destroy_foundry_command(account: &Account, foundry_id: String) -> Result<(), Error> {
     println_log_info!("Destroying foundry {foundry_id}.");
 
-    let transaction = account_handle
-        .destroy_foundry(FoundryId::from_str(&foundry_id)?, None)
-        .await?;
+    let transaction = account.destroy_foundry(FoundryId::from_str(&foundry_id)?, None).await?;
 
     println_log_info!(
         "Destroying foundry transaction sent:\n{:?}\n{:?}",
@@ -416,15 +402,11 @@ pub async fn destroy_foundry_command(account_handle: &Account, foundry_id: Strin
 }
 
 // `faucet` command
-pub async fn faucet_command(
-    account_handle: &Account,
-    address: Option<String>,
-    url: Option<String>,
-) -> Result<(), Error> {
+pub async fn faucet_command(account: &Account, address: Option<String>, url: Option<String>) -> Result<(), Error> {
     let address = if let Some(address) = address {
         address
     } else {
-        match account_handle.addresses().await?.last() {
+        match account.addresses().await?.last() {
             Some(address) => address.address().to_string(),
             None => return Err(Error::NoAddressForFaucet),
         }
@@ -439,12 +421,8 @@ pub async fn faucet_command(
 }
 
 // `increase-native-token-supply` command
-pub async fn increase_native_token_command(
-    account_handle: &Account,
-    token_id: String,
-    amount: String,
-) -> Result<(), Error> {
-    let mint_transaction = account_handle
+pub async fn increase_native_token_command(account: &Account, token_id: String, amount: String) -> Result<(), Error> {
+    let mint_transaction = account
         .increase_native_token_supply(
             TokenId::from_str(&token_id)?,
             U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
@@ -464,24 +442,24 @@ pub async fn increase_native_token_command(
 
 // `mint-native-token` command
 pub async fn mint_native_token_command(
-    account_handle: &Account,
+    account: &Account,
     circulating_supply: String,
     maximum_supply: String,
     foundry_metadata: Option<Vec<u8>>,
 ) -> Result<(), Error> {
     // If no alias output exists, create one first
-    if account_handle.balance().await?.aliases().is_empty() {
-        let transaction = account_handle.create_alias_output(None, None).await?;
+    if account.balance().await?.aliases().is_empty() {
+        let transaction = account.create_alias_output(None, None).await?;
         println_log_info!(
             "Alias output minting transaction sent:\n{:?}\n{:?}",
             transaction.transaction_id,
             transaction.block_id
         );
-        account_handle
+        account
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
         // Sync account after the transaction got confirmed, so the alias output is available
-        account_handle.sync(None).await?;
+        account.sync(None).await?;
     }
 
     let native_token_options = NativeTokenOptions {
@@ -491,7 +469,7 @@ pub async fn mint_native_token_command(
         foundry_metadata,
     };
 
-    let mint_transaction = account_handle.mint_native_token(native_token_options, None).await?;
+    let mint_transaction = account.mint_native_token(native_token_options, None).await?;
 
     println_log_info!(
         "Native token minting transaction sent:\n{:?}\n{:?}",
@@ -504,7 +482,7 @@ pub async fn mint_native_token_command(
 
 // `mint-nft` command
 pub async fn mint_nft_command(
-    account_handle: &Account,
+    account: &Account,
     address: Option<String>,
     immutable_metadata: Option<Vec<u8>>,
     metadata: Option<Vec<u8>>,
@@ -525,7 +503,7 @@ pub async fn mint_nft_command(
         immutable_metadata,
         metadata,
     }];
-    let transaction = account_handle.mint_nfts(nft_options, None).await?;
+    let transaction = account.mint_nfts(nft_options, None).await?;
 
     println_log_info!(
         "NFT minting transaction sent:\n{:?}\n{:?}",
@@ -537,17 +515,17 @@ pub async fn mint_nft_command(
 }
 
 // `new-address` command
-pub async fn new_address_command(account_handle: &Account) -> Result<(), Error> {
-    let address = account_handle.generate_addresses(1, None).await?;
+pub async fn new_address_command(account: &Account) -> Result<(), Error> {
+    let address = account.generate_addresses(1, None).await?;
 
-    print_address(account_handle, &address[0]).await?;
+    print_address(account, &address[0]).await?;
 
     Ok(())
 }
 
 /// `output` command
-pub async fn output_command(account_handle: &Account, output_id: String) -> Result<(), Error> {
-    let output = account_handle.get_output(&OutputId::from_str(&output_id)?).await;
+pub async fn output_command(account: &Account, output_id: String) -> Result<(), Error> {
+    let output = account.get_output(&OutputId::from_str(&output_id)?).await;
 
     if let Some(output) = output {
         println_log_info!("{output:#?}");
@@ -559,8 +537,8 @@ pub async fn output_command(account_handle: &Account, output_id: String) -> Resu
 }
 
 /// `outputs` command
-pub async fn outputs_command(account_handle: &Account) -> Result<(), Error> {
-    let outputs = account_handle.outputs(None).await?;
+pub async fn outputs_command(account: &Account) -> Result<(), Error> {
+    let outputs = account.outputs(None).await?;
 
     if outputs.is_empty() {
         println_log_info!("No outputs found");
@@ -574,17 +552,19 @@ pub async fn outputs_command(account_handle: &Account) -> Result<(), Error> {
 
 // `send` command
 pub async fn send_command(
-    account_handle: &Account,
+    account: &Account,
     address: String,
     amount: u64,
     return_address: Option<String>,
     expiration: Option<u32>,
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
-    let outputs = vec![AddressWithAmount::new(address, amount)
-        .with_return_address(return_address)
-        .with_expiration(expiration)];
-    let transaction = account_handle
+    let outputs = vec![
+        AddressWithAmount::new(address, amount)
+            .with_return_address(return_address)
+            .with_expiration(expiration),
+    ];
+    let transaction = account
         .send_amount(
             outputs,
             TransactionOptions {
@@ -605,7 +585,7 @@ pub async fn send_command(
 
 // `send-native-token` command
 pub async fn send_native_token_command(
-    account_handle: &Account,
+    account: &Account,
     address: String,
     token_id: String,
     amount: String,
@@ -613,21 +593,23 @@ pub async fn send_native_token_command(
 ) -> Result<(), Error> {
     let transaction = if gift_storage_deposit.unwrap_or(false) {
         // Send native tokens together with the required storage deposit
-        let rent_structure = account_handle.client().get_rent_structure().await?;
-        let token_supply = account_handle.client().get_token_supply().await?;
+        let rent_structure = account.client().get_rent_structure().await?;
+        let token_supply = account.client().get_token_supply().await?;
 
         let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
-        account_handle.client().bech32_hrp_matches(&bech32_hrp).await?;
+        account.client().bech32_hrp_matches(&bech32_hrp).await?;
 
-        let outputs = vec![BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
-            .add_unlock_condition(AddressUnlockCondition::new(address))
-            .with_native_tokens(vec![NativeToken::new(
-                TokenId::from_str(&token_id)?,
-                U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-            )?])
-            .finish_output(token_supply)?];
+        let outputs = vec![
+            BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
+                .add_unlock_condition(AddressUnlockCondition::new(address))
+                .with_native_tokens(vec![NativeToken::new(
+                    TokenId::from_str(&token_id)?,
+                    U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+                )?])
+                .finish_output(token_supply)?,
+        ];
 
-        account_handle.send(outputs, None).await?
+        account.send(outputs, None).await?
     } else {
         // Send native tokens with storage deposit return and expiration
         let outputs = vec![AddressNativeTokens {
@@ -638,7 +620,7 @@ pub async fn send_native_token_command(
             )],
             ..Default::default()
         }];
-        account_handle.send_native_tokens(outputs, None).await?
+        account.send_native_tokens(outputs, None).await?
     };
 
     println_log_info!(
@@ -651,12 +633,12 @@ pub async fn send_native_token_command(
 }
 
 // `send-nft` command
-pub async fn send_nft_command(account_handle: &Account, address: String, nft_id: String) -> Result<(), Error> {
+pub async fn send_nft_command(account: &Account, address: String, nft_id: String) -> Result<(), Error> {
     let outputs = vec![AddressAndNftId {
         address,
         nft_id: NftId::from_str(&nft_id)?,
     }];
-    let transaction = account_handle.send_nft(outputs, None).await?;
+    let transaction = account.send_nft(outputs, None).await?;
 
     println_log_info!(
         "Nft transaction sent:\n{:?}\n{:?}",
@@ -668,15 +650,15 @@ pub async fn send_nft_command(account_handle: &Account, address: String, nft_id:
 }
 
 // `sync` command
-pub async fn sync_command(account_handle: &Account) -> Result<(), Error> {
-    println_log_info!("Synced: {:#?}", account_handle.sync(None).await?);
+pub async fn sync_command(account: &Account) -> Result<(), Error> {
+    println_log_info!("Synced: {:#?}", account.sync(None).await?);
 
     Ok(())
 }
 
 /// `transactions` command
-pub async fn transactions_command(account_handle: &Account) -> Result<(), Error> {
-    let transactions = account_handle.transactions().await?;
+pub async fn transactions_command(account: &Account) -> Result<(), Error> {
+    let transactions = account.transactions().await?;
 
     if transactions.is_empty() {
         println_log_info!("No transactions found");
@@ -690,8 +672,8 @@ pub async fn transactions_command(account_handle: &Account) -> Result<(), Error>
 }
 
 /// `unspent-outputs` command
-pub async fn unspent_outputs_command(account_handle: &Account) -> Result<(), Error> {
-    let outputs = account_handle.unspent_outputs(None).await?;
+pub async fn unspent_outputs_command(account: &Account) -> Result<(), Error> {
+    let outputs = account.unspent_outputs(None).await?;
 
     if outputs.is_empty() {
         println_log_info!("No outputs found");
@@ -703,12 +685,8 @@ pub async fn unspent_outputs_command(account_handle: &Account) -> Result<(), Err
     Ok(())
 }
 
-pub async fn vote_command(
-    account_handle: &Account,
-    event_id: ParticipationEventId,
-    answers: Vec<u8>,
-) -> Result<(), Error> {
-    let transaction = account_handle.vote(Some(event_id), Some(answers)).await?;
+pub async fn vote_command(account: &Account, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {
+    let transaction = account.vote(Some(event_id), Some(answers)).await?;
 
     println_log_info!(
         "Voting transaction sent:\n{:?}\n{:?}",
@@ -719,8 +697,8 @@ pub async fn vote_command(
     Ok(())
 }
 
-pub async fn stop_participating_command(account_handle: &Account, event_id: ParticipationEventId) -> Result<(), Error> {
-    let transaction = account_handle.stop_participating(event_id).await?;
+pub async fn stop_participating_command(account: &Account, event_id: ParticipationEventId) -> Result<(), Error> {
+    let transaction = account.stop_participating(event_id).await?;
 
     println_log_info!(
         "Stop participating transaction sent:\n{:?}\n{:?}",
@@ -732,26 +710,26 @@ pub async fn stop_participating_command(account_handle: &Account, event_id: Part
 }
 
 pub async fn participation_overview_command(
-    account_handle: &Account,
+    account: &Account,
     event_ids: Option<Vec<ParticipationEventId>>,
 ) -> Result<(), Error> {
-    let participation_overview = account_handle.get_participation_overview(event_ids).await?;
+    let participation_overview = account.get_participation_overview(event_ids).await?;
 
     println_log_info!("Participation overview: {participation_overview:?}");
 
     Ok(())
 }
 
-pub async fn voting_power_command(account_handle: &Account) -> Result<(), Error> {
-    let voting_power = account_handle.get_voting_power().await?;
+pub async fn voting_power_command(account: &Account) -> Result<(), Error> {
+    let voting_power = account.get_voting_power().await?;
 
     println_log_info!("Voting power: {voting_power}");
 
     Ok(())
 }
 
-pub async fn increase_voting_power_command(account_handle: &Account, amount: u64) -> Result<(), Error> {
-    let transaction = account_handle.increase_voting_power(amount).await?;
+pub async fn increase_voting_power_command(account: &Account, amount: u64) -> Result<(), Error> {
+    let transaction = account.increase_voting_power(amount).await?;
 
     println_log_info!(
         "Increase voting power transaction sent:\n{:?}\n{:?}",
@@ -762,8 +740,8 @@ pub async fn increase_voting_power_command(account_handle: &Account, amount: u64
     Ok(())
 }
 
-pub async fn decrease_voting_power_command(account_handle: &Account, amount: u64) -> Result<(), Error> {
-    let transaction = account_handle.decrease_voting_power(amount).await?;
+pub async fn decrease_voting_power_command(account: &Account, amount: u64) -> Result<(), Error> {
+    let transaction = account.decrease_voting_power(amount).await?;
 
     println_log_info!(
         "Decrease voting power transaction sent:\n{:?}\n{:?}",
@@ -774,22 +752,22 @@ pub async fn decrease_voting_power_command(account_handle: &Account, amount: u64
     Ok(())
 }
 
-pub async fn voting_output_command(account_handle: &Account) -> Result<(), Error> {
-    let output = account_handle.get_voting_output().await?;
+pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
+    let output = account.get_voting_output().await?;
 
     println_log_info!("Voting output: {output:?}");
 
     Ok(())
 }
 
-async fn print_address(account_handle: &Account, address: &AccountAddress) -> Result<(), Error> {
+async fn print_address(account: &Account, address: &AccountAddress) -> Result<(), Error> {
     let mut log = format!("Address {}: {}", address.key_index(), address.address());
 
     if *address.internal() {
         log = format!("{log}\nChange address");
     }
 
-    let addresses = account_handle.addresses_with_unspent_outputs().await?;
+    let addresses = account.addresses_with_unspent_outputs().await?;
     let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
 
     if let Ok(index) = addresses.binary_search_by_key(&(address.key_index(), address.internal()), |a| {
@@ -797,7 +775,7 @@ async fn print_address(account_handle: &Account, address: &AccountAddress) -> Re
     }) {
         let mut address_amount = 0;
         for output_id in addresses[index].output_ids() {
-            if let Some(output_data) = account_handle.get_output(output_id).await {
+            if let Some(output_data) = account.get_output(output_id).await {
                 // Output might be associated with the address, but can't unlocked by it, so we check that here
                 let (required_address, _) =
                     output_data

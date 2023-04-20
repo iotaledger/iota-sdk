@@ -109,7 +109,7 @@ impl Account {
     ///     foundry_metadata: None
     /// };
     ///
-    /// let tx = account_handle.mint_native_token(native_token_options, None,).await?;
+    /// let tx = account.mint_native_token(native_token_options, None,).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
     /// if let Some(block_id) = tx.block_id {
     ///     println!("Block sent: {}", block_id);

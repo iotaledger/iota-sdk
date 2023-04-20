@@ -73,7 +73,7 @@ impl Account {
     ///     amount: 1_000_000,
     /// }];
     ///
-    /// let tx = account_handle.send_amount(outputs, None ).await?;
+    /// let tx = account.send_amount(outputs, None ).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
     /// if let Some(block_id) = tx.block_id {
     ///     println!("Block sent: {}", block_id);

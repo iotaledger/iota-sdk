@@ -25,16 +25,16 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             }
 
             match builder.finish().await {
-                Ok(account_handle) => {
-                    let account = account_handle.read().await;
+                Ok(account) => {
+                    let account = account.read().await;
                     Response::Account(AccountDto::from(&*account))
                 }
                 Err(e) => return Err(e.into()),
             }
         }
         WalletMethod::GetAccount { account_id } => {
-            let account_handle = wallet.get_account(account_id.clone()).await?;
-            let account = account_handle.read().await;
+            let account = wallet.get_account(account_id.clone()).await?;
+            let account = account.read().await;
             Response::Account(AccountDto::from(&*account))
         }
         WalletMethod::GetAccountIndexes => {
@@ -46,17 +46,17 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             Response::AccountIndexes(account_indexes)
         }
         WalletMethod::GetAccounts => {
-            let account_handles = wallet.get_accounts().await?;
-            let mut accounts = Vec::new();
-            for account_handle in account_handles {
-                let account = account_handle.read().await;
-                accounts.push(AccountDto::from(&*account));
+            let accounts = wallet.get_accounts().await?;
+            let mut accoun_dtos = Vec::new();
+            for account in accounts {
+                let account = account.read().await;
+                accoun_dtos.push(AccountDto::from(&*account));
             }
-            Response::Accounts(accounts)
+            Response::Accounts(accoun_dtos)
         }
         WalletMethod::CallAccountMethod { account_id, method } => {
-            let account_handle = wallet.get_account(account_id).await?;
-            call_account_method_internal(&account_handle, method).await?
+            let account = wallet.get_account(account_id).await?;
+            call_account_method_internal(&account, method).await?
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::Backup { destination, password } => {
@@ -91,15 +91,15 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             address_gap_limit,
             sync_options,
         } => {
-            let account_handles = wallet
+            let accounts = wallet
                 .recover_accounts(account_start_index, account_gap_limit, address_gap_limit, sync_options)
                 .await?;
-            let mut accounts = Vec::new();
-            for account_handle in account_handles {
-                let account = account_handle.read().await;
-                accounts.push(AccountDto::from(&*account));
+            let mut account_dtos = Vec::new();
+            for account in accounts {
+                let account = account.read().await;
+                account_dtos.push(AccountDto::from(&*account));
             }
-            Response::Accounts(accounts)
+            Response::Accounts(account_dtos)
         }
         WalletMethod::RemoveLatestAccount => {
             wallet.remove_latest_account().await?;

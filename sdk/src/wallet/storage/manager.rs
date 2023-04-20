@@ -71,7 +71,7 @@ impl StorageManager {
 
         let account_indexes = storage.get(ACCOUNTS_INDEXATION_KEY).await?.unwrap_or_default();
 
-        let storage_manager = StorageManager {
+        let storage_manager = Self {
             storage,
             account_indexes,
         };

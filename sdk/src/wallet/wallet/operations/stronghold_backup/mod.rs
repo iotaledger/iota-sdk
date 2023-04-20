@@ -147,9 +147,9 @@ impl Wallet {
             if let Some(read_accounts) = read_accounts {
                 let client = self.client_options.read().await.clone().finish()?;
 
-                let mut restored_account_handles = Vec::new();
+                let mut restored_accounts = Vec::new();
                 for account in read_accounts {
-                    restored_account_handles.push(Account::new(
+                    restored_accounts.push(Account::new(
                         account,
                         client.clone(),
                         self.secret_manager.clone(),
@@ -159,7 +159,7 @@ impl Wallet {
                         self.storage_manager.clone(),
                     ))
                 }
-                *accounts = restored_account_handles;
+                *accounts = restored_accounts;
             }
         }
 

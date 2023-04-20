@@ -98,8 +98,8 @@ impl AccountBuilder {
 
         // Check that the alias isn't already used for another account and that the coin type is the same for new and
         // existing accounts
-        for account_handle in accounts.iter() {
-            let account = account_handle.read().await;
+        for account in accounts.iter() {
+            let account = account.read().await;
             let existing_coin_type = account.coin_type;
             if existing_coin_type != self.coin_type {
                 return Err(Error::InvalidCoinType {
@@ -188,7 +188,7 @@ impl AccountBuilder {
             native_token_foundries: HashMap::new(),
         };
 
-        let account_handle = Account::new(
+        let account = Account::new(
             account,
             client,
             self.secret_manager.clone(),
@@ -198,10 +198,10 @@ impl AccountBuilder {
             self.storage_manager.clone(),
         );
         #[cfg(feature = "storage")]
-        account_handle.save(None).await?;
-        accounts.push(account_handle.clone());
+        account.save(None).await?;
+        accounts.push(account.clone());
 
-        Ok(account_handle)
+        Ok(account)
     }
 }
 

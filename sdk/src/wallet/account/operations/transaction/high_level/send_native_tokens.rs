@@ -60,7 +60,7 @@ impl Account {
     ///     ..Default::default()
     /// }];
     ///
-    /// let tx = account_handle.send_native_tokens(outputs, None).await?;
+    /// let tx = account.send_native_tokens(outputs, None).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
     /// if let Some(block_id) = tx.block_id {
     ///     println!("Block sent: {}", block_id);

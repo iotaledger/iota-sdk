@@ -56,7 +56,7 @@ pub struct Account {
     pub(crate) storage_manager: Arc<Mutex<StorageManager>>,
 }
 
-// impl Deref so we can use `account_handle.read()` instead of `account_handle.account.read()`
+// impl Deref so we can use `account.read()` instead of `account.details.read()`
 impl Deref for Account {
     type Target = RwLock<AccountDetails>;
 

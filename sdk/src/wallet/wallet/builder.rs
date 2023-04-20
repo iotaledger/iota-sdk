@@ -208,7 +208,7 @@ impl WalletBuilder {
         unlock_unused_inputs(&mut accounts)?;
         #[cfg(not(feature = "storage"))]
         let accounts = Vec::new();
-        let mut account_handles: Vec<Account> = accounts
+        let mut accounts: Vec<Account> = accounts
             .into_iter()
             .map(|a| {
                 Account::new(
@@ -228,13 +228,13 @@ impl WalletBuilder {
         // If the wallet builder is not set, it means the user provided it and we need to update the addresses.
         // In the other case it was loaded from the database and addresses are up to date.
         if new_provided_client_options {
-            for account in account_handles.iter_mut() {
+            for account in accounts.iter_mut() {
                 account.update_account_with_new_client(client.clone()).await?;
             }
         }
 
         Ok(Wallet {
-            accounts: Arc::new(RwLock::new(account_handles)),
+            accounts: Arc::new(RwLock::new(accounts)),
             background_syncing_status: Arc::new(AtomicUsize::new(0)),
             client_options: Arc::new(RwLock::new(
                 self.client_options
