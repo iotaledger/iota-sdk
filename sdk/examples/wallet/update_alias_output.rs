@@ -9,7 +9,7 @@
 use std::{env, str::FromStr};
 
 use iota_sdk::{
-    types::block::output::{AliasId, AliasOutputBuilder, Output},
+    types::block::output::{AliasId, AliasOutput, AliasOutputBuilder, Output},
     wallet::{account::FilterOptions, Result, Wallet},
 };
 
@@ -34,10 +34,10 @@ async fn main() -> Result<()> {
     // Replace with an AliasId
     let alias_id = AliasId::from_str("0xc94fc4d280d63c7de09c8cc49ecefba6192e104d200ab7472db9e943e0feef7c")?;
 
-    // Get the alias output by it's alias id
+    // Get the alias output by its alias id
     let alias_output = account
         .unspent_outputs(Some(FilterOptions {
-            output_types: Some(vec![4]),
+            output_types: Some(vec![AliasOutput::KIND]),
             ..Default::default()
         }))
         .await?
@@ -46,7 +46,7 @@ async fn main() -> Result<()> {
             Output::Alias(alias_output) => {
                 let output_alias_id = alias_output.alias_id_non_null(&output_data.output_id);
                 if output_alias_id == alias_id {
-                    Some(output_data.clone())
+                    Some(output_data)
                 } else {
                     None
                 }
@@ -67,10 +67,10 @@ async fn main() -> Result<()> {
 
     // Send the updated output
     let transaction = account.send(vec![updated_alias_output], None).await?;
+    println!("Transaction: {}", transaction.transaction_id);
     println!(
-        "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
-        transaction.transaction_id,
-        &env::var("NODE_URL").unwrap(),
+        "Block sent: {}/api/core/v2/blocks/{}",
+        &std::env::var("NODE_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
 
