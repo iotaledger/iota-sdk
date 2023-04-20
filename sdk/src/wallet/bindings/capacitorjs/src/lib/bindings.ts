@@ -13,6 +13,9 @@ const {
 
 const sendMessageAsync = async (message: string, handler: number): Promise<string> => {
     const { result } = await sendMessage({ message, handler })
+    if (JSON.parse(result)?.type === 'error') {
+        return Promise.reject(result)
+    }
     return result
 }
 

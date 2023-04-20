@@ -10,7 +10,7 @@ use crate::{
     account_history::AccountHistory,
     command::account::{
         addresses_command, balance_command, burn_native_token_command, burn_nft_command, claim_command,
-        consolidate_command, create_alias_outputs_command, decrease_native_token_command,
+        claimable_outputs_command, consolidate_command, create_alias_outputs_command, decrease_native_token_command,
         decrease_voting_power_command, destroy_alias_command, destroy_foundry_command, faucet_command,
         increase_native_token_command, increase_voting_power_command, mint_native_token_command, mint_nft_command,
         new_address_command, output_command, outputs_command, participation_overview_command, send_command,
@@ -77,6 +77,7 @@ pub async fn account_prompt_internal(account: Account, history: &mut AccountHist
                 }
                 AccountCommand::BurnNft { nft_id } => burn_nft_command(&account, nft_id).await,
                 AccountCommand::Claim { output_id } => claim_command(&account, output_id).await,
+                AccountCommand::ClaimableOutputs => claimable_outputs_command(&account).await,
                 AccountCommand::Consolidate => consolidate_command(&account).await,
                 AccountCommand::CreateAliasOutput => create_alias_outputs_command(&account).await,
                 AccountCommand::DecreaseNativeTokenSupply { token_id, amount } => {

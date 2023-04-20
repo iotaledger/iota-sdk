@@ -84,6 +84,16 @@ Try to claim a specific output.
 > Account "main": claim 0xd5dff9ee869dfa7796d5132b220cb5c00146c36abba27d3562e2d726decb50850000
 ```
 
+### `claimable-outputs`
+
+Lists all outputs that can currently be claimed by this account and for how long.
+
+#### Examples
+
+```sh
+> Account "main": claimable-outputs
+```
+
 ### `clear`
 
 Clears the terminal.
