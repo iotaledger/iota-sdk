@@ -4,12 +4,12 @@
 use std::cmp;
 
 use crate::wallet::account::{
-    handle::AccountHandle,
     operations::{address_generation::AddressGenerationOptions, syncing::SyncOptions},
     types::AddressWithUnspentOutputs,
+    Account,
 };
 
-impl AccountHandle {
+impl Account {
     /// Search addresses with unspent outputs
     /// `address_gap_limit`: The number of addresses to search for, after the last address with unspent outputs
     /// Addresses that got crated during this operation and have a higher key_index than the latest one with outputs,

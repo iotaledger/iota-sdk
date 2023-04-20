@@ -15,12 +15,11 @@ use crate::{
         output::{AliasTransition, Output, OutputId},
     },
     wallet::account::{
-        handle::AccountHandle, operations::helpers::time::can_output_be_unlocked_forever_from_now_on, Account,
-        OutputData,
+        operations::helpers::time::can_output_be_unlocked_forever_from_now_on, Account, AccountDetails, OutputData,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Selects inputs for a transaction and locks them in the account, so they don't get used again
     pub(crate) async fn select_inputs(
         &self,
@@ -220,7 +219,7 @@ impl AccountHandle {
 /// | [Address, StorageDepositReturn, expired Expiration] | yes               |
 #[allow(clippy::too_many_arguments)]
 fn filter_inputs(
-    account: &Account,
+    account: &AccountDetails,
     available_outputs: Values<'_, OutputId, OutputData>,
     current_time: u32,
     outputs: &[Output],

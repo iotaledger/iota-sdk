@@ -15,7 +15,7 @@ use crate::{
         DtoError,
     },
     wallet::{
-        account::{handle::AccountHandle, operations::transaction::Transaction, TransactionOptions},
+        account::{operations::transaction::Transaction, Account, TransactionOptions},
         Error,
     },
 };
@@ -84,9 +84,9 @@ impl TryFrom<&NftOptionsDto> for NftOptions {
     }
 }
 
-impl AccountHandle {
+impl Account {
     /// Function to mint nfts.
-    /// Calls [AccountHandle.send()](crate::account::handle::AccountHandle.send) internally, the options can define the
+    /// Calls [Account.send()](crate::account::handle::Account.send) internally, the options can define the
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
@@ -120,7 +120,7 @@ impl AccountHandle {
     }
 
     /// Function to prepare the transaction for
-    /// [AccountHandle.mint_nfts()](crate::account::handle::AccountHandle.mint_nfts)
+    /// [Account.mint_nfts()](crate::account::handle::Account.mint_nfts)
     async fn prepare_mint_nfts(
         &self,
         nfts_options: Vec<NftOptions>,

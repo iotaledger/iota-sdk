@@ -21,13 +21,13 @@ use crate::{
         DtoError,
     },
     wallet::account::{
-        handle::{AccountHandle, FilterOptions},
+        handle::{Account, FilterOptions},
         operations::transaction::RemainderValueStrategy,
         TransactionOptions,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Prepare an output for sending
     /// If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
     /// be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full

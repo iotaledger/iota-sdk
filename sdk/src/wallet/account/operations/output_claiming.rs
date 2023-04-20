@@ -15,7 +15,7 @@ use crate::{
         },
     },
     wallet::account::{
-        handle::AccountHandle, operations::helpers::time::can_output_be_unlocked_now, types::Transaction, OutputData,
+        operations::helpers::time::can_output_be_unlocked_now, types::Transaction, Account, OutputData,
         TransactionOptions,
     },
 };
@@ -30,7 +30,7 @@ pub enum OutputsToClaim {
     All = 4,
 }
 
-impl AccountHandle {
+impl Account {
     /// Get basic and nft outputs that have
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
     /// [`StorageDepositReturnUnlockCondition`] or
@@ -179,7 +179,7 @@ impl AccountHandle {
     }
 
     /// Try to claim basic or nft outputs that have additional unlock conditions to their [AddressUnlockCondition]
-    /// from [`AccountHandle::get_unlockable_outputs_with_additional_unlock_conditions()`].
+    /// from [`Account::get_unlockable_outputs_with_additional_unlock_conditions()`].
     pub async fn claim_outputs(&self, output_ids_to_claim: Vec<OutputId>) -> crate::wallet::Result<Transaction> {
         log::debug!("[OUTPUT_CLAIMING] claim_outputs");
         let basic_outputs = self.get_basic_outputs_for_additional_inputs().await?;

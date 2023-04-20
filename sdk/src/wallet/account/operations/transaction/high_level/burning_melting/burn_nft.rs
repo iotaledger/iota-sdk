@@ -9,15 +9,14 @@ use crate::{
     },
     wallet::{
         account::{
-            handle::AccountHandle,
             operations::{helpers::time::can_output_be_unlocked_now, transaction::Transaction},
-            TransactionOptions,
+            Account, TransactionOptions,
         },
         Error,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Function to burn an nft output.
     pub async fn burn_nft(
         &self,

@@ -14,12 +14,12 @@ use instant::Instant;
 use crate::{
     types::block::{address::Address, output::OutputId},
     wallet::account::{
-        constants::PARALLEL_REQUESTS_AMOUNT, handle::AccountHandle, operations::syncing::SyncOptions,
-        types::address::AddressWithUnspentOutputs,
+        constants::PARALLEL_REQUESTS_AMOUNT, operations::syncing::SyncOptions,
+        types::address::AddressWithUnspentOutputs, Account,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Returns output ids for outputs that are directly (Ed25519 address in AddressUnlockCondition) or indirectly
     /// (alias/nft address in AddressUnlockCondition and the alias/nft output is controlled with the Ed25519 address)
     /// connected to

@@ -15,11 +15,10 @@ use crate::{
     wallet::{
         account::{
             constants::DEFAULT_EXPIRATION_TIME,
-            handle::AccountHandle,
             operations::transaction::{
                 high_level::minimum_storage_deposit::minimum_storage_deposit_basic_native_tokens, Transaction,
             },
-            TransactionOptions,
+            Account, TransactionOptions,
         },
         Error,
     },
@@ -63,9 +62,9 @@ impl AddressWithAmount {
     }
 }
 
-impl AccountHandle {
+impl Account {
     /// Function to create basic outputs with which we then will call
-    /// [AccountHandle.send()](crate::account::handle::AccountHandle.send), the options can define the
+    /// [Account.send()](crate::account::handle::Account.send), the options can define the
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
@@ -90,7 +89,7 @@ impl AccountHandle {
     }
 
     /// Function to prepare the transaction for
-    /// [AccountHandle.send_amount()](crate::account::handle::AccountHandle.send_amount)
+    /// [Account.send_amount()](crate::account::handle::Account.send_amount)
     pub async fn prepare_send_amount(
         &self,
         addresses_with_amount: Vec<AddressWithAmount>,

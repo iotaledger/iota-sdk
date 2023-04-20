@@ -5,10 +5,10 @@ use std::collections::HashSet;
 
 use crate::{
     types::block::output::{FoundryId, Output},
-    wallet::{account::handle::AccountHandle, task},
+    wallet::{task, Account},
 };
 
-impl AccountHandle {
+impl Account {
     pub(crate) async fn request_and_store_foundry_outputs(
         &self,
         foundry_ids: HashSet<FoundryId>,

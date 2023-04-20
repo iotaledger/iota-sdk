@@ -22,15 +22,14 @@ use crate::wallet::account::constants::DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRES
 use crate::wallet::{
     account::{
         constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
-        handle::AccountHandle,
         operations::{helpers::time::can_output_be_unlocked_now, output_claiming::get_new_native_token_count},
         types::{OutputData, Transaction},
-        AddressWithUnspentOutputs, TransactionOptions,
+        Account, AddressWithUnspentOutputs, TransactionOptions,
     },
     Result,
 };
 
-impl AccountHandle {
+impl Account {
     fn should_consolidate_output(
         &self,
         output_data: &OutputData,

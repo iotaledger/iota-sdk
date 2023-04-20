@@ -9,7 +9,7 @@ use tokio::sync::{Mutex, RwLock};
 #[cfg(feature = "events")]
 use crate::wallet::events::EventEmitter;
 #[cfg(feature = "storage")]
-use crate::wallet::storage::manager::StorageManagerHandle;
+use crate::wallet::storage::manager::StorageManager;
 use crate::{
     client::{secret::SecretManager, Client},
     types::block::{
@@ -22,7 +22,7 @@ use crate::{
                 address::{AccountAddress, AddressWithUnspentOutputs},
                 OutputData, Transaction,
             },
-            Account,
+            AccountDetails,
         },
         Result,
     },
@@ -42,8 +42,8 @@ pub struct FilterOptions {
 
 /// A thread guard over an account, so we can lock the account during operations.
 #[derive(Debug, Clone)]
-pub struct AccountHandle {
-    account: Arc<RwLock<Account>>,
+pub struct Account {
+    details: Arc<RwLock<AccountDetails>>,
     pub(crate) client: Client,
     pub(crate) secret_manager: Arc<RwLock<SecretManager>>,
     // mutex to prevent multiple sync calls at the same or almost the same time, the u128 is a timestamp
@@ -53,20 +53,29 @@ pub struct AccountHandle {
     #[cfg(feature = "events")]
     pub(crate) event_emitter: Arc<Mutex<EventEmitter>>,
     #[cfg(feature = "storage")]
-    pub(crate) storage_manager: StorageManagerHandle,
+    pub(crate) storage_manager: Arc<Mutex<StorageManager>>,
 }
 
-impl AccountHandle {
+// impl Deref so we can use `account_handle.read()` instead of `account_handle.account.read()`
+impl Deref for Account {
+    type Target = RwLock<AccountDetails>;
+
+    fn deref(&self) -> &Self::Target {
+        self.details.deref()
+    }
+}
+
+impl Account {
     /// Create a new AccountHandle with an Account
     pub(crate) fn new(
-        account: Account,
+        details: AccountDetails,
         client: Client,
         secret_manager: Arc<RwLock<SecretManager>>,
         #[cfg(feature = "events")] event_emitter: Arc<Mutex<EventEmitter>>,
-        #[cfg(feature = "storage")] storage_manager: StorageManagerHandle,
+        #[cfg(feature = "storage")] storage_manager: Arc<Mutex<StorageManager>>,
     ) -> Self {
         Self {
-            account: Arc::new(RwLock::new(account)),
+            details: Arc::new(RwLock::new(details)),
             client,
             secret_manager,
             last_synced: Default::default(),
@@ -231,7 +240,7 @@ impl AccountHandle {
     /// Save the account to the database, accepts the updated_account as option so we don't need to drop it before
     /// saving
     #[cfg(feature = "storage")]
-    pub(crate) async fn save(&self, updated_account: Option<&Account>) -> Result<()> {
+    pub(crate) async fn save(&self, updated_account: Option<&AccountDetails>) -> Result<()> {
         log::debug!("[save] saving account to database");
         match updated_account {
             Some(account) => {
@@ -248,13 +257,5 @@ impl AccountHandle {
             }
         }
         Ok(())
-    }
-}
-
-// impl Deref so we can use `account_handle.read()` instead of `account_handle.account.read()`
-impl Deref for AccountHandle {
-    type Target = RwLock<Account>;
-    fn deref(&self) -> &Self::Target {
-        self.account.deref()
     }
 }

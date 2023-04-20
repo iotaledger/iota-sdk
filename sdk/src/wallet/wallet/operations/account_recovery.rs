@@ -4,9 +4,9 @@
 use instant::Instant;
 
 use crate::wallet::{
-    account::handle::AccountHandle,
     task,
     wallet::{SyncOptions, Wallet},
+    Account,
 };
 
 impl Wallet {
@@ -23,14 +23,14 @@ impl Wallet {
     ///
     /// Returns:
     ///
-    /// A vector of AccountHandle
+    /// A vector of Account
     pub async fn recover_accounts(
         &self,
         account_start_index: u32,
         account_gap_limit: u32,
         address_gap_limit: u32,
         sync_options: Option<SyncOptions>,
-    ) -> crate::wallet::Result<Vec<AccountHandle>> {
+    ) -> crate::wallet::Result<Vec<Account>> {
         log::debug!("[recover_accounts]");
         let start_time = Instant::now();
         let mut max_account_index_to_keep = None;

@@ -33,7 +33,7 @@ use crate::{
             BlockId,
         },
     },
-    wallet::account::Account,
+    wallet::account::AccountDetails,
 };
 
 /// An output with metadata
@@ -59,7 +59,7 @@ pub struct OutputData {
 impl OutputData {
     pub fn input_signing_data(
         &self,
-        account: &Account,
+        account: &AccountDetails,
         current_time: u32,
         alias_transition: Option<AliasTransition>,
     ) -> crate::wallet::Result<Option<InputSigningData>> {

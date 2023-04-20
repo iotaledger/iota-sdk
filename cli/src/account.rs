@@ -3,7 +3,7 @@
 
 use clap::Parser;
 use dialoguer::Input;
-use iota_sdk::wallet::account::AccountHandle;
+use iota_sdk::wallet::Account;
 
 use crate::{
     account_completion::ACCOUNT_COMPLETION,
@@ -23,7 +23,7 @@ use crate::{
 };
 
 // loop on the account prompt
-pub async fn account_prompt(account_handle: AccountHandle) -> Result<(), Error> {
+pub async fn account_prompt(account_handle: Account) -> Result<(), Error> {
     let mut history = AccountHistory::default();
     loop {
         match account_prompt_internal(account_handle.clone(), &mut history).await {
@@ -39,10 +39,7 @@ pub async fn account_prompt(account_handle: AccountHandle) -> Result<(), Error> 
 }
 
 // loop on the account prompt
-pub async fn account_prompt_internal(
-    account_handle: AccountHandle,
-    history: &mut AccountHistory,
-) -> Result<bool, Error> {
+pub async fn account_prompt_internal(account_handle: Account, history: &mut AccountHistory) -> Result<bool, Error> {
     let alias = {
         let account = account_handle.read().await;
         account.alias().clone()

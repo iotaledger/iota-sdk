@@ -6,14 +6,13 @@ use primitive_types::U256;
 use crate::{
     types::block::output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
     wallet::account::{
-        handle::AccountHandle,
         operations::helpers::time::can_output_be_unlocked_forever_from_now_on,
         types::{AccountBalance, NativeTokensBalance},
-        OutputsToClaim,
+        Account, OutputsToClaim,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Get the AccountBalance
     pub async fn balance(&self) -> crate::wallet::Result<AccountBalance> {
         log::debug!("[BALANCE] get balance");

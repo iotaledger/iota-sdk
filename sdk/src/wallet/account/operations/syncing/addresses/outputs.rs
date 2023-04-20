@@ -4,14 +4,11 @@
 use instant::Instant;
 
 use crate::wallet::{
-    account::{
-        constants::PARALLEL_REQUESTS_AMOUNT, handle::AccountHandle, types::address::AddressWithUnspentOutputs,
-        OutputData,
-    },
+    account::{constants::PARALLEL_REQUESTS_AMOUNT, types::address::AddressWithUnspentOutputs, Account, OutputData},
     task,
 };
 
-impl AccountHandle {
+impl Account {
     /// Get outputs from addresses
     pub(crate) async fn get_outputs_from_address_output_ids(
         &self,

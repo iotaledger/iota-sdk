@@ -19,7 +19,7 @@ use crate::{
     wallet::{
         account::{
             types::{AccountAddress, AddressWithUnspentOutputs, TransactionDto},
-            Account, OutputDataDto,
+            AccountDetails, OutputDataDto,
         },
         AddressWithAmount,
     },
@@ -112,8 +112,8 @@ pub struct AccountDto {
     pub native_token_foundries: HashMap<FoundryId, FoundryOutputDto>,
 }
 
-impl From<&Account> for AccountDto {
-    fn from(value: &Account) -> Self {
+impl From<&AccountDetails> for AccountDto {
+    fn from(value: &AccountDetails) -> Self {
         Self {
             index: *value.index(),
             coin_type: *value.coin_type(),

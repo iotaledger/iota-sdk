@@ -7,7 +7,7 @@ use crate::{
     client::Client,
     types::block::output::{dto::OutputMetadataDto, OutputId},
     wallet::account::{
-        handle::AccountHandle,
+        handle::Account,
         operations::syncing::options::SyncOptions,
         types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, Transaction},
         AccountAddress,
@@ -22,7 +22,7 @@ use crate::{
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Set the alias for the account
     pub async fn set_alias(&self, alias: &str) -> crate::wallet::Result<()> {
         let mut account = self.write().await;

@@ -45,7 +45,7 @@ pub use self::{
             send_native_tokens::AddressNativeTokens,
             send_nft::AddressAndNftId,
         },
-        AccountHandle,
+        Account,
     },
     error::Error,
     wallet::{Wallet, WalletBuilder},

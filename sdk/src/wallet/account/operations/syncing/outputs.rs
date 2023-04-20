@@ -20,15 +20,12 @@ use crate::{
         },
     },
     wallet::{
-        account::{
-            build_transaction_from_payload_and_inputs, handle::AccountHandle, types::OutputData,
-            AddressWithUnspentOutputs,
-        },
+        account::{build_transaction_from_payload_and_inputs, types::OutputData, Account, AddressWithUnspentOutputs},
         task,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Convert OutputWithMetadataResponse to OutputData with the network_id added
     pub(crate) async fn output_response_to_output_data(
         &self,

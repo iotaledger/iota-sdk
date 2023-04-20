@@ -29,12 +29,12 @@ use crate::{
         },
     },
     wallet::account::{
-        handle::AccountHandle,
         types::{InclusionState, Transaction},
+        Account,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Send a transaction, if sending a block fails, the function will return None for the block_id, but the wallet
     /// will retry sending the transaction during syncing.
     /// ```ignore

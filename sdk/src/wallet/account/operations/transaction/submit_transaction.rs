@@ -5,10 +5,10 @@
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     types::block::{payload::Payload, BlockId},
-    wallet::account::{handle::AccountHandle, operations::transaction::TransactionPayload},
+    wallet::account::{operations::transaction::TransactionPayload, Account},
 };
 
-impl AccountHandle {
+impl Account {
     /// Submits a payload in a block
     pub(crate) async fn submit_transaction_payload(
         &self,

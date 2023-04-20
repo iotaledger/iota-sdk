@@ -29,7 +29,7 @@ use self::types::{
     AccountBalance, OutputData, Transaction,
 };
 pub use self::{
-    handle::{AccountHandle, FilterOptions},
+    handle::{Account, FilterOptions},
     operations::{
         address_generation::AddressGenerationOptions,
         output_claiming::OutputsToClaim,
@@ -71,11 +71,11 @@ use crate::{
     wallet::account::types::InclusionState,
 };
 
-/// An Account.
+/// Details of an account.
 #[derive(Clone, Debug, Eq, PartialEq, Getters, Setters, Serialize, Deserialize)]
 #[getset(get = "pub")]
 #[serde(rename_all = "camelCase")]
-pub struct Account {
+pub struct AccountDetails {
     /// The account index
     index: u32,
     /// The coin type
@@ -251,7 +251,7 @@ fn serialize() {
         incoming_transaction,
     );
 
-    let account = Account {
+    let account = AccountDetails {
         index: 0,
         coin_type: 4218,
         alias: "0".to_string(),
@@ -268,5 +268,5 @@ fn serialize() {
         native_token_foundries: HashMap::new(),
     };
 
-    serde_json::from_str::<Account>(&serde_json::to_string(&account).unwrap()).unwrap();
+    serde_json::from_str::<AccountDetails>(&serde_json::to_string(&account).unwrap()).unwrap();
 }

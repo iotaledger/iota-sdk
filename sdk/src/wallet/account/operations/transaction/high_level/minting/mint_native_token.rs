@@ -15,9 +15,8 @@ use crate::{
         DtoError,
     },
     wallet::account::{
-        handle::AccountHandle,
         types::{Transaction, TransactionDto},
-        TransactionOptions,
+        Account, TransactionOptions,
     },
 };
 
@@ -97,9 +96,9 @@ impl From<&MintTokenTransaction> for MintTokenTransactionDto {
     }
 }
 
-impl AccountHandle {
+impl Account {
     /// Function to create a new foundry output with minted native tokens.
-    /// Calls [AccountHandle.send()](crate::account::handle::AccountHandle.send) internally, the options can define the
+    /// Calls [Account.send()](crate::account::handle::Account.send) internally, the options can define the
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore

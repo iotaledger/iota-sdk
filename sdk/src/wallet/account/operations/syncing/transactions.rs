@@ -11,9 +11,8 @@ use crate::{
     },
     utils::unix_timestamp_now,
     wallet::account::{
-        handle::AccountHandle,
         types::{InclusionState, Transaction},
-        Account,
+        Account, AccountDetails,
     },
 };
 
@@ -22,7 +21,7 @@ use crate::{
 // also revalidate that the locked outputs needs to be there, maybe there was a conflict or the transaction got
 // confirmed, then they should get removed
 
-impl AccountHandle {
+impl Account {
     /// Sync transactions and reattach them if unconfirmed. Returns the transaction with updated metadata and spent
     /// output ids that don't need to be locked anymore
     /// Return true if a transaction got confirmed for which we don't have an output already, based on this outputs will
@@ -236,7 +235,7 @@ fn updated_transaction_and_outputs(
 // When a transaction got pruned, the inputs and outputs are also not available, then this could mean that it was
 // confirmed and the created outputs got also already spent and pruned or the inputs got spent in another transaction
 fn process_transaction_with_unknown_state(
-    account: &Account,
+    account: &AccountDetails,
     mut transaction: Transaction,
     updated_transactions: &mut Vec<Transaction>,
     output_ids_to_unlock: &mut Vec<OutputId>,

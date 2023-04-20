@@ -14,7 +14,7 @@ use crate::{
         },
         DtoError,
     },
-    wallet::account::{handle::AccountHandle, types::Transaction, OutputData, TransactionOptions},
+    wallet::account::{types::Transaction, Account, OutputData, TransactionOptions},
 };
 
 /// Alias output options for `create_alias_output()`
@@ -73,7 +73,7 @@ impl TryFrom<&AliasOutputOptionsDto> for AliasOutputOptions {
     }
 }
 
-impl AccountHandle {
+impl Account {
     /// Function to create an alias output.
     /// ```ignore
     /// let alias_options = AliasOutputOptions {

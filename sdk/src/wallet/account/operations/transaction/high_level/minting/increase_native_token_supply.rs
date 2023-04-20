@@ -8,8 +8,8 @@ use crate::{
     types::block::output::{AliasOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme},
     wallet::{
         account::{
-            handle::AccountHandle,
-            operations::transaction::high_level::minting::mint_native_token::MintTokenTransaction, TransactionOptions,
+            operations::transaction::high_level::minting::mint_native_token::MintTokenTransaction, Account,
+            TransactionOptions,
         },
         Error,
     },
@@ -31,7 +31,7 @@ impl TryFrom<&IncreaseNativeTokenSupplyOptionsDto> for IncreaseNativeTokenSupply
     }
 }
 
-impl AccountHandle {
+impl Account {
     /// Function to mint more native tokens when the max supply isn't reached yet. The foundry needs to be controlled by
     /// this account. Address needs to be Bech32 encoded. This will not change the max supply.
     /// ```ignore

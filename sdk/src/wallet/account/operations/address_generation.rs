@@ -8,7 +8,7 @@ use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
     types::block::address::Bech32Address,
-    wallet::account::{handle::AccountHandle, types::address::AccountAddress},
+    wallet::account::{types::address::AccountAddress, Account},
 };
 
 /// Options for address generation
@@ -18,7 +18,7 @@ pub struct AddressGenerationOptions {
     pub options: Option<GenerateAddressOptions>,
 }
 
-impl AccountHandle {
+impl Account {
     /// Generate addresses and stores them in the account
     /// ```ignore
     /// let public_addresses = account_handle.generate_addresses(2, None).await?;
