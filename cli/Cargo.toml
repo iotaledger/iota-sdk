@@ -14,7 +14,7 @@ path = "src/main.rs"
 [dependencies]
 iota-sdk = { path = "../sdk", default-features = false, features = [ "wallet", "tls", "storage", "rocksdb", "stronghold", "participation" ] }
 
-chrono = { version = "0.4.24", default-features = false, features = [ "std" ]}
+chrono = { version = "0.4.24", default-features = false, features = [ "std" ] }
 clap = { version = "4.2.0", default-features = false, features = [ "std", "color", "help", "usage", "error-context", "suggestions", "derive", "env" ] }
 dialoguer = { version = "0.10.3", default-features = false, features = [ "history", "password", "completion" ] }
 dotenvy = { version = "0.15.7", default-features = false }
