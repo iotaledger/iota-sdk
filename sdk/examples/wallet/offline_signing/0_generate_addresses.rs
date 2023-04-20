@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
     let offline_client = ClientOptions::new();
 
     // Setup Stronghold secret_manager
-    let mut secret_manager = StrongholdSecretManager::builder()
+    let secret_manager = StrongholdSecretManager::builder()
         .password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .build("examples/wallet/offline_signing/offline_signing.stronghold")?;
     // Only required the first time, can also be generated with `manager.generate_mnemonic()?`

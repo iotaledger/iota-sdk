@@ -189,7 +189,7 @@ async fn address_generation() {
     #[cfg(feature = "stronghold")]
     for address in &addresses_data {
         let stronghold_filename = format!("{}.stronghold", address.bech32_address);
-        let mut stronghold_secret_manager = StrongholdSecretManager::builder()
+        let stronghold_secret_manager = StrongholdSecretManager::builder()
             .password("some_hopefully_secure_password")
             .build(&stronghold_filename)
             .unwrap();

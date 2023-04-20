@@ -476,7 +476,7 @@ impl StrongholdAdapter {
     ///
     /// [`unload_stronghold_snapshot()`]: Self::unload_stronghold_snapshot()
     #[allow(clippy::significant_drop_tightening)]
-    pub async fn write_stronghold_snapshot(&mut self, snapshot_path: Option<&Path>) -> Result<()> {
+    pub async fn write_stronghold_snapshot(&self, snapshot_path: Option<&Path>) -> Result<()> {
         // The key needs to be supplied first.
         let locked_key_provider = self.key_provider.lock().await;
         let key_provider = if let Some(key_provider) = &*locked_key_provider {

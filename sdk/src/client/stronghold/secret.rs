@@ -210,7 +210,7 @@ impl StrongholdAdapter {
     }
 
     /// Store a mnemonic into the Stronghold vault.
-    pub async fn store_mnemonic(&mut self, mut mnemonic: String) -> Result<()> {
+    pub async fn store_mnemonic(&self, mut mnemonic: String) -> Result<()> {
         // The key needs to be supplied first.
         if self.key_provider.lock().await.is_none() {
             return Err(Error::StrongholdKeyCleared);
@@ -263,7 +263,7 @@ mod tests {
         let mnemonic = String::from(
             "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally",
         );
-        let mut stronghold_adapter = StrongholdAdapter::builder()
+        let stronghold_adapter = StrongholdAdapter::builder()
             .password("drowssap")
             .build(stronghold_path)
             .unwrap();
