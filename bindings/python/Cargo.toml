@@ -1,0 +1,27 @@
+[package]
+name = "iota-sdk-python"
+version = "0.1.0"
+authors = [ "IOTA Stiftung" ]
+edition = "2021"
+description = "Python bindings for the IOTA SDK library"
+documentation = "https://wiki.iota.org/wallet.rs/welcome"
+homepage = "https://www.iota.org/"
+repository = "https://github.com/iotaledger/wallet.rs"
+license = "Apache-2.0"
+keywords = [ "iota", "client", "wallet", "transaction", "python" ]
+categories = [ "cryptography::cryptocurrencies" ]
+publish = false
+
+[lib]
+name = "iota_sdk"
+crate-type = [ "cdylib" ]
+doc = false
+
+[dependencies]
+iota-sdk-bindings-core = { path = "../core", default-features = false, features = [ "events", "rocksdb", "ledger_nano", "storage", "stronghold" ] }
+
+futures = { version = "0.3.26", default-features = false }
+once_cell = { version = "1.17.1", default-features = false }
+pyo3 = { version = "0.18.1", default-features = false, features = [ "macros", "extension-module" ] }
+serde_json = { version = "1.0.94", default-features = false }
+tokio = { version = "1.26.0", default-features = false }
