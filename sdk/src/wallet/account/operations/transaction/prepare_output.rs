@@ -20,11 +20,7 @@ use crate::{
         },
         DtoError,
     },
-    wallet::account::{
-        handle::{Account, FilterOptions},
-        operations::transaction::RemainderValueStrategy,
-        TransactionOptions,
-    },
+    wallet::account::{operations::transaction::RemainderValueStrategy, Account, FilterOptions, TransactionOptions},
 };
 
 impl Account {

@@ -7,10 +7,9 @@ use crate::{
     client::Client,
     types::block::output::{dto::OutputMetadataDto, OutputId},
     wallet::account::{
-        handle::Account,
         operations::syncing::options::SyncOptions,
         types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, Transaction},
-        AccountAddress,
+        Account, AccountAddress,
     },
 };
 #[cfg(feature = "events")]

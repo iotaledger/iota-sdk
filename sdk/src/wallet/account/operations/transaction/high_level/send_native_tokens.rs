@@ -47,7 +47,7 @@ impl Account {
     /// Function to send native tokens in basic outputs with a [StorageDepositReturnUnlockCondition] and
     /// [ExpirationUnlockCondition], so the storage deposit gets back to the sender and also that the sender gets access
     /// to the output again after a defined time (default 1 day),
-    /// Calls [Account.send()](crate::account::handle::Account.send) internally, the options can define the
+    /// Calls [Account.send()](crate::account::Account.send) internally, the options can define the
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
@@ -78,7 +78,7 @@ impl Account {
     }
 
     /// Function to prepare the transaction for
-    /// [Account.send_native_tokens()](crate::account::handle::Account.send_native_tokens)
+    /// [Account.send_native_tokens()](crate::account::Account.send_native_tokens)
     async fn prepare_send_native_tokens(
         &self,
         addresses_and_native_tokens: Vec<AddressNativeTokens>,

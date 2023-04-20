@@ -18,7 +18,7 @@ use crate::{
     client::secret::{SecretManage, SecretManager},
     types::block::address::{Address, Bech32Address},
     wallet::{
-        account::{handle::Account, types::AccountAddress, AccountDetails},
+        account::{types::AccountAddress, Account, AccountDetails},
         ClientOptions, Error,
     },
 };

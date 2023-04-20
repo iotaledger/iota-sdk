@@ -28,7 +28,7 @@ impl Account {
     /// [`StorageDepositReturnUnlockCondition`](crate::types::block::output::unlock_condition::StorageDepositReturnUnlockCondition) and
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition), so the
     /// storage deposit gets back to the sender and also that the sender gets access to the output again after a
-    /// defined time (default 1 day), Calls [Account.send()](crate::wallet::account::handle::Account.send)
+    /// defined time (default 1 day), Calls [Account.send()](crate::wallet::account::Account.send)
     /// internally, the options can define the RemainderValueStrategy. Custom inputs will be replaced with the
     /// required nft inputs. Address needs to be Bech32 encoded
     /// ```ignore
@@ -55,7 +55,7 @@ impl Account {
     }
 
     /// Function to prepare the transaction for
-    /// [Account.send_nft()](crate::account::handle::Account.send_nft)
+    /// [Account.send_nft()](crate::account::Account.send_nft)
     async fn prepare_send_nft(
         &self,
         addresses_and_nft_ids: Vec<AddressAndNftId>,

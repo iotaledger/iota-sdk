@@ -64,7 +64,7 @@ impl AddressWithAmount {
 
 impl Account {
     /// Function to create basic outputs with which we then will call
-    /// [Account.send()](crate::account::handle::Account.send), the options can define the
+    /// [Account.send()](crate::account::Account.send), the options can define the
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
@@ -89,7 +89,7 @@ impl Account {
     }
 
     /// Function to prepare the transaction for
-    /// [Account.send_amount()](crate::account::handle::Account.send_amount)
+    /// [Account.send_amount()](crate::account::Account.send_amount)
     pub async fn prepare_send_amount(
         &self,
         addresses_with_amount: Vec<AddressWithAmount>,

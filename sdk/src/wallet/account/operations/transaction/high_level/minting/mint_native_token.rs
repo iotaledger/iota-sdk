@@ -98,7 +98,7 @@ impl From<&MintTokenTransaction> for MintTokenTransactionDto {
 
 impl Account {
     /// Function to create a new foundry output with minted native tokens.
-    /// Calls [Account.send()](crate::account::handle::Account.send) internally, the options can define the
+    /// Calls [Account.send()](crate::account::Account.send) internally, the options can define the
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore

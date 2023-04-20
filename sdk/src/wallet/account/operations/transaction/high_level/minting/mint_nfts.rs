@@ -86,7 +86,7 @@ impl TryFrom<&NftOptionsDto> for NftOptions {
 
 impl Account {
     /// Function to mint nfts.
-    /// Calls [Account.send()](crate::account::handle::Account.send) internally, the options can define the
+    /// Calls [Account.send()](crate::account::Account.send) internally, the options can define the
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
@@ -120,7 +120,7 @@ impl Account {
     }
 
     /// Function to prepare the transaction for
-    /// [Account.mint_nfts()](crate::account::handle::Account.mint_nfts)
+    /// [Account.mint_nfts()](crate::account::Account.mint_nfts)
     async fn prepare_mint_nfts(
         &self,
         nfts_options: Vec<NftOptions>,
