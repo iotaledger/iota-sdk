@@ -243,6 +243,10 @@ pub enum AccountMethod {
     /// Set the alias of the account.
     /// Expected response: [`Ok`](crate::Response::Ok)
     SetAlias { alias: String },
+    /// Set the fallback SyncOptions for account syncing.
+    /// If storage is enabled, will persist during restarts.
+    /// Expected response: [`Ok`](crate::Response::Ok)
+    SetDefaultSyncOptions { options: SyncOptions },
     /// Send outputs in a transaction.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     SendOutputs {

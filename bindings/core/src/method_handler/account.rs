@@ -327,6 +327,10 @@ pub(crate) async fn call_account_method_internal(account: &AccountHandle, method
             account.set_alias(&alias).await?;
             Response::Ok
         }
+        AccountMethod::SetDefaultSyncOptions { options } => {
+            account.set_default_sync_options(options).await?;
+            Response::Ok
+        }
         AccountMethod::SendOutputs { outputs, options } => {
             let token_supply = account.client().get_token_supply().await?;
             let transaction = account

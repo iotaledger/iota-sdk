@@ -24,7 +24,8 @@ use crate::{
 };
 
 impl AccountHandle {
-    /// Set the fallback SyncOptions for account syncing
+    /// Set the fallback SyncOptions for account syncing.
+    /// If storage is enabled, will persist during restarts.
     pub async fn set_default_sync_options(&self, options: SyncOptions) -> crate::wallet::Result<()> {
         
         #[cfg(feature = "storage")]
