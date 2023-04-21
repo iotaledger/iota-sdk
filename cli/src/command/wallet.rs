@@ -10,7 +10,7 @@ use log::LevelFilter;
 
 use crate::{
     error::Error,
-    helper::{generate_mnemonic, get_password},
+    helper::{enter_or_generate_mnemonic, generate_mnemonic, get_password, import_mnemonic},
     println_log_info,
 };
 
@@ -71,9 +71,9 @@ pub enum WalletCommand {
 
 #[derive(Debug, Default, Clone, Args)]
 pub struct InitParameters {
-    /// Mnemonic, randomly generated if not provided.
+    /// Set the path to a file containing the Mnemonic, randomly generated or interactively received if not provided.
     #[arg(short, long)]
-    pub mnemonic: Option<String>,
+    pub mnemonic_file_path: Option<String>,
     /// Set the node to connect to with this wallet.
     #[arg(short, long, value_name = "URL", env = "NODE_URL", default_value = DEFAULT_NODE_URL)]
     pub node_url: String,
@@ -111,9 +111,9 @@ pub async fn init_command(
         .finish()
         .await?;
 
-    let mnemonic = match parameters.mnemonic {
-        Some(mnemonic) => mnemonic,
-        None => generate_mnemonic().await?,
+    let mnemonic = match parameters.mnemonic_file_path {
+        Some(path) => import_mnemonic(&path).await?,
+        None => enter_or_generate_mnemonic().await?,
     };
 
     if let SecretManager::Stronghold(secret_manager) = &mut *wallet.get_secret_manager().write().await {
@@ -156,7 +156,7 @@ pub async fn restore_command(
     let wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         // Will be overwritten by the backup's value.
-        .with_client_options(ClientOptions::new().with_node("https://api.testnet.shimmer.network")?)
+        .with_client_options(ClientOptions::new().with_node(DEFAULT_NODE_URL)?)
         .with_storage_path(&storage_path)
         // Will be overwritten by the backup's value.
         .with_coin_type(SHIMMER_COIN_TYPE)
