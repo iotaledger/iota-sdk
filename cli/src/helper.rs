@@ -156,10 +156,18 @@ async fn read_mnemonics_from_file(path: &str) -> Result<Vec<String>, Error> {
     let file = OpenOptions::new().read(true).open(path).await?;
     let mut lines = BufReader::new(file).lines();
     let mut mnemonics = Vec::new();
+    let mut line_index = 1;
     while let Some(line) = lines.next_line().await? {
-        if verify_mnemonic(&line).is_ok() {
-            mnemonics.push(line.trim().to_string());
+        // we allow surrounding whitespace in the file
+        let trimmed = line.trim();
+        if verify_mnemonic(trimmed).is_ok() {
+            mnemonics.push(trimmed.to_string());
+        } else {
+            return Err(Error::Miscellaneous(format!(
+                "Invalid mnemonic in file '{path}' at line '{line_index}'."
+            )));
         }
+        line_index += 1;
     }
 
     Ok(mnemonics)
