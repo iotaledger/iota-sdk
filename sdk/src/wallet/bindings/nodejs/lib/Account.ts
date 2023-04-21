@@ -1013,6 +1013,20 @@ export class Account {
     }
 
     /**
+     * Set the fallback SyncOptions for account syncing.
+     * If storage is enabled, will persist during restarts.
+     * @param options The sync options to set.
+     */
+    async setDefaultSyncOptions(options: SyncOptions): Promise<void> {
+        await this.messageHandler.callAccountMethod(this.meta.index, {
+            name: 'setDefaultSyncOptions',
+            data: {
+                options,
+            },
+        });
+    }
+
+    /**
      * Sign a prepared transaction, useful for offline signing.
      * @param preparedTransactionData The prepared transaction data to sign.
      * @returns The signed transaction essence.

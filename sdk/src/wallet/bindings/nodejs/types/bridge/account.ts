@@ -323,6 +323,13 @@ export type __SetAliasMethod__ = {
     };
 };
 
+export type __SetDefaultSyncOptionsMethod__ = {
+    name: 'setDefaultSyncOptions';
+    data: {
+        options: SyncOptions;
+    };
+};
+
 export type __SignTransactionEssenceMethod__ = {
     name: 'signTransactionEssence';
     data: {

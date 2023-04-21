@@ -48,6 +48,7 @@ The Account class.
 - [sendNft](Account.md#sendnft)
 - [sendOutputs](Account.md#sendoutputs)
 - [setAlias](Account.md#setalias)
+- [setDefaultSyncOptions](Account.md#setdefaultsyncoptions)
 - [signTransactionEssence](Account.md#signtransactionessence)
 - [submitAndStoreTransaction](Account.md#submitandstoretransaction)
 - [sync](Account.md#sync)
@@ -880,6 +881,25 @@ Set the alias for the account
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `alias` | `string` | The account alias to set. |
+
+#### Returns
+
+`Promise`<`void`\>
+
+___
+
+### setDefaultSyncOptions
+
+▸ **setDefaultSyncOptions**(`options`): `Promise`<`void`\>
+
+Set the fallback SyncOptions for account syncing.
+If storage is enabled, will persist during restarts.
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `options` | [`SyncOptions`](../interfaces/SyncOptions.md) | The sync options to set. |
 
 #### Returns
 
