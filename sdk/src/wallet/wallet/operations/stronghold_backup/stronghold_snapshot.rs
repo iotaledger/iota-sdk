@@ -5,7 +5,7 @@ use std::sync::atomic::Ordering;
 
 use crate::{
     client::{secret::SecretManagerDto, storage::StorageProvider, stronghold::StrongholdAdapter},
-    wallet::{account::Account, ClientOptions, Wallet},
+    wallet::{account::AccountDetails, ClientOptions, Wallet},
 };
 
 pub(crate) const CLIENT_OPTIONS_KEY: &str = "client_options";
@@ -70,7 +70,7 @@ pub(crate) async fn read_data_from_stronghold_snapshot(
     Option<ClientOptions>,
     Option<u32>,
     Option<SecretManagerDto>,
-    Option<Vec<Account>>,
+    Option<Vec<AccountDetails>>,
 )> {
     // Get version
     let version = stronghold.get(BACKUP_SCHEMA_VERSION_KEY.as_bytes()).await?;
@@ -135,7 +135,7 @@ pub(crate) async fn read_data_from_stronghold_snapshot(
         let restored_accounts = restored_accounts_string
             .into_iter()
             .map(|a| Ok(serde_json::from_str(&a)?))
-            .collect::<crate::wallet::Result<Vec<Account>>>()?;
+            .collect::<crate::wallet::Result<Vec<AccountDetails>>>()?;
 
         Some(restored_accounts)
     } else {

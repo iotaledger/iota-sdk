@@ -11,9 +11,8 @@ use crate::{
     },
     utils::unix_timestamp_now,
     wallet::account::{
-        handle::AccountHandle,
         types::{InclusionState, Transaction},
-        Account,
+        Account, AccountDetails,
     },
 };
 
@@ -22,20 +21,20 @@ use crate::{
 // also revalidate that the locked outputs needs to be there, maybe there was a conflict or the transaction got
 // confirmed, then they should get removed
 
-impl AccountHandle {
+impl Account {
     /// Sync transactions and reattach them if unconfirmed. Returns the transaction with updated metadata and spent
     /// output ids that don't need to be locked anymore
     /// Return true if a transaction got confirmed for which we don't have an output already, based on this outputs will
     /// be synced again
     pub(crate) async fn sync_pending_transactions(&self) -> crate::wallet::Result<bool> {
         log::debug!("[SYNC] sync pending transactions");
-        let account = self.read().await;
+        let account_details = self.read().await;
 
         // only set to true if a transaction got confirmed for which we don't have an output
         // (transaction_output.is_none())
         let mut confirmed_unknown_output = false;
 
-        if account.pending_transactions.is_empty() {
+        if account_details.pending_transactions.is_empty() {
             return Ok(confirmed_unknown_output);
         }
 
@@ -48,9 +47,9 @@ impl AccountHandle {
         let mut output_ids_to_unlock = Vec::new();
         let mut transactions_to_reattach = Vec::new();
 
-        for transaction_id in &account.pending_transactions {
+        for transaction_id in &account_details.pending_transactions {
             log::debug!("[SYNC] sync pending transaction {transaction_id}");
-            let transaction = account
+            let transaction = account_details
                 .transactions
                 .get(transaction_id)
                 // panic during development to easier detect if something is wrong, should be handled different later
@@ -64,11 +63,14 @@ impl AccountHandle {
 
             // check if we have an output (remainder, if not sending to an own address) that got created by this
             // transaction, if that's the case, then the transaction got confirmed
-            let transaction_output = account.outputs.keys().find(|o| o.transaction_id() == transaction_id);
+            let transaction_output = account_details
+                .outputs
+                .keys()
+                .find(|o| o.transaction_id() == transaction_id);
 
             if let Some(transaction_output) = transaction_output {
                 // Save to unwrap, we just got the output
-                let confirmed_output_data = account.outputs.get(transaction_output).expect("output exists");
+                let confirmed_output_data = account_details.outputs.get(transaction_output).expect("output exists");
                 log::debug!(
                     "[SYNC] confirmed transaction {transaction_id} in block {}",
                     confirmed_output_data.metadata.block_id
@@ -88,7 +90,7 @@ impl AccountHandle {
             let mut input_got_spent = false;
             for input in essence.inputs() {
                 if let Input::Utxo(input) = input {
-                    if let Some(input) = account.outputs.get(input.output_id()) {
+                    if let Some(input) = account_details.outputs.get(input.output_id()) {
                         if input.is_spent {
                             input_got_spent = true;
                         }
@@ -151,7 +153,7 @@ impl AccountHandle {
                             // no need to reattach if one input got spent
                             if input_got_spent {
                                 process_transaction_with_unknown_state(
-                                    &account,
+                                    &account_details,
                                     transaction,
                                     &mut updated_transactions,
                                     &mut output_ids_to_unlock,
@@ -170,7 +172,7 @@ impl AccountHandle {
                         // no need to reattach if one input got spent
                         if input_got_spent {
                             process_transaction_with_unknown_state(
-                                &account,
+                                &account_details,
                                 transaction,
                                 &mut updated_transactions,
                                 &mut output_ids_to_unlock,
@@ -196,7 +198,7 @@ impl AccountHandle {
                 }
             }
         }
-        drop(account);
+        drop(account_details);
 
         for mut transaction in transactions_to_reattach {
             log::debug!("[SYNC] reattach transaction");
@@ -236,7 +238,7 @@ fn updated_transaction_and_outputs(
 // When a transaction got pruned, the inputs and outputs are also not available, then this could mean that it was
 // confirmed and the created outputs got also already spent and pruned or the inputs got spent in another transaction
 fn process_transaction_with_unknown_state(
-    account: &Account,
+    account: &AccountDetails,
     mut transaction: Transaction,
     updated_transactions: &mut Vec<Transaction>,
     output_ids_to_unlock: &mut Vec<OutputId>,

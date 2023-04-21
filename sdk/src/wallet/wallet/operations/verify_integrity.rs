@@ -14,10 +14,10 @@ impl Wallet {
 
         // check that no account is missing and they're ordered
         // check that no address is missing and they're ordered
-        for (account_index, account_handle) in accounts.iter().enumerate() {
+        for (account_index, account) in accounts.iter().enumerate() {
             assert_eq!(accounts[account_index].read().await.index(), &(account_index as u32));
 
-            let account = account_handle.read().await;
+            let account = account.read().await;
             let public_addresses = account.public_addresses();
             for (index, public_address) in public_addresses.iter().enumerate() {
                 assert_eq!(public_address.key_index, index as u32);

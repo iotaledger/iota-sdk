@@ -1470,19 +1470,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "iota-client-python"
-version = "1.0.0-rc.3"
-dependencies = [
- "fern-logger",
- "futures",
- "iota-sdk",
- "once_cell",
- "pyo3",
- "serde_json",
- "tokio",
-]
-
-[[package]]
 name = "iota-client-wasm"
 version = "0.1.0"
 dependencies = [
@@ -1615,6 +1602,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "iota-sdk-python"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "iota-sdk-bindings-core",
+ "once_cell",
+ "pyo3",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "iota-wallet-java"
 version = "0.1.0"
 dependencies = [
@@ -1638,18 +1637,6 @@ dependencies = [
  "neon",
  "once_cell",
  "serde",
- "serde_json",
- "tokio",
-]
-
-[[package]]
-name = "iota-wallet-python"
-version = "1.0.0-rc.2"
-dependencies = [
- "futures",
- "iota-sdk",
- "once_cell",
- "pyo3",
  "serde_json",
  "tokio",
 ]

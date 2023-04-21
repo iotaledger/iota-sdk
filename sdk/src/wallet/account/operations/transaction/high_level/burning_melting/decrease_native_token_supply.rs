@@ -7,10 +7,10 @@ use crate::{
     types::block::output::{
         AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
-    wallet::account::{handle::AccountHandle, operations::transaction::Transaction, TransactionOptions},
+    wallet::account::{operations::transaction::Transaction, Account, TransactionOptions},
 };
 
-impl AccountHandle {
+impl Account {
     /// Function to melt native tokens. This happens with the foundry output which minted them, by increasing it's
     /// `melted_tokens` field. This should be preferred over burning, because after burning, the foundry can never be
     /// destroyed anymore.

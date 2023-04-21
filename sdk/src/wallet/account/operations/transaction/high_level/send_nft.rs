@@ -10,7 +10,7 @@ use crate::{
         address::Address,
         output::{unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
     },
-    wallet::account::{handle::AccountHandle, operations::transaction::Transaction, TransactionOptions},
+    wallet::account::{operations::transaction::Transaction, Account, TransactionOptions},
 };
 
 /// Address and nft for `send_nft()`
@@ -23,12 +23,12 @@ pub struct AddressAndNftId {
     pub nft_id: NftId,
 }
 
-impl AccountHandle {
+impl Account {
     /// Function to send native tokens in basic outputs with a
     /// [`StorageDepositReturnUnlockCondition`](crate::types::block::output::unlock_condition::StorageDepositReturnUnlockCondition) and
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition), so the
     /// storage deposit gets back to the sender and also that the sender gets access to the output again after a
-    /// defined time (default 1 day), Calls [AccountHandle.send()](crate::wallet::account::handle::AccountHandle.send)
+    /// defined time (default 1 day), Calls [Account.send()](crate::wallet::account::Account.send)
     /// internally, the options can define the RemainderValueStrategy. Custom inputs will be replaced with the
     /// required nft inputs. Address needs to be Bech32 encoded
     /// ```ignore
@@ -55,7 +55,7 @@ impl AccountHandle {
     }
 
     /// Function to prepare the transaction for
-    /// [AccountHandle.send_nft()](crate::account::handle::AccountHandle.send_nft)
+    /// [Account.send_nft()](crate::account::Account.send_nft)
     async fn prepare_send_nft(
         &self,
         addresses_and_nft_ids: Vec<AddressAndNftId>,

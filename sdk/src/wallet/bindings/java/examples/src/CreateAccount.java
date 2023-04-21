@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import org.iota.Wallet;
-import org.iota.types.AccountHandle;
+import org.iota.types.Account;
 import org.iota.types.ClientConfig;
 import org.iota.types.CoinType;
 import org.iota.types.WalletConfig;
@@ -24,7 +24,7 @@ public class CreateAccount {
         wallet.storeMnemonic(Env.MNEMONIC);
 
         // Create an account.
-        AccountHandle a = wallet.createAccount(Env.ACCOUNT_NAME);
+        Account a = wallet.createAccount(Env.ACCOUNT_NAME);
 
         // Print the account.
         System.out.println(a);
