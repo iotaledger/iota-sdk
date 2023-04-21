@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- Remove `AddressGenerationOptions` in favor of `GenerateAddressOptions`, which now contains the `internal` flag.
+- Remove `AddressGenerationOptions` in favor of `GenerateAddressOptions`, which now contains the `internal` flag;
 
 ## 0.2.0 - 2023-04-17
 
