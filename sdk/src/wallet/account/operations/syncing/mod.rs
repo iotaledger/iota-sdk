@@ -27,11 +27,11 @@ impl AccountHandle {
     /// Set the fallback SyncOptions for account syncing.
     /// If storage is enabled, will persist during restarts.
     pub async fn set_default_sync_options(&self, options: SyncOptions) -> crate::wallet::Result<()> {
-        
         #[cfg(feature = "storage")]
         {
+            let index = *self.read().await.index();
             let mut storage_manager = self.storage_manager.lock().await;
-            storage_manager.set_default_sync_options(*self.read().await.index(), &options).await?;
+            storage_manager.set_default_sync_options(index, &options).await?;
         }
 
         *self.fallback_sync_options.lock().await = options;
@@ -48,9 +48,9 @@ impl AccountHandle {
     pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<AccountBalance> {
         let options = match options {
             Some(opt) => opt,
-            None => self.default_sync_options().await.clone()
+            None => self.default_sync_options().await.clone(),
         };
-        
+
         log::debug!("[SYNC] start syncing with {:?}", options);
         let syc_start_time = instant::Instant::now();
 

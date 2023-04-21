@@ -14,6 +14,36 @@ use iota_sdk::{
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
+#[tokio::test]
+async fn updated_default_sync_options() -> Result<()> {
+    let storage_path = "test-storage/updated_default_sync_options";
+    setup(storage_path)?;
+
+    let default_sync = SyncOptions::default();
+
+    let wallet = make_wallet(storage_path, None, Some("https://api.testnet.shimmer.network")).await?;
+    let account = wallet.create_account().finish().await?;
+
+    assert_eq!(default_sync, account.default_sync_options().await);
+
+    let custom_options = SyncOptions {
+        address_start_index: 10,
+        ..Default::default()
+    };
+    account.set_default_sync_options(custom_options.clone()).await?;
+    assert_eq!(custom_options, account.default_sync_options().await);
+
+    drop(account);
+    drop(wallet);
+
+    let wallet = make_wallet(storage_path, None, Some("https://api.testnet.shimmer.network")).await?;
+    let account = wallet.get_account(0).await?;
+
+    assert_eq!(custom_options, account.default_sync_options().await);
+
+    tear_down(storage_path)
+}
+
 #[ignore]
 #[tokio::test]
 async fn sync_only_most_basic_outputs() -> Result<()> {

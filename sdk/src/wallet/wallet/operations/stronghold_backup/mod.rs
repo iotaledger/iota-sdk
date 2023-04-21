@@ -4,6 +4,7 @@
 mod stronghold_snapshot;
 
 use std::{fs, path::PathBuf, sync::atomic::Ordering};
+
 use futures::{future::try_join_all, FutureExt};
 use zeroize::Zeroize;
 
@@ -147,19 +148,19 @@ impl Wallet {
             if let Some(read_accounts) = read_accounts {
                 let client = self.client_options.read().await.clone().finish()?;
 
-                let restored_account_handles = try_join_all(read_accounts
-                    .into_iter()
-                    .map(|a| {
-                        AccountHandle::new(
-                            a,
-                            client.clone(),
-                            self.secret_manager.clone(),
-                            #[cfg(feature = "events")]
-                            self.event_emitter.clone(),
-                            #[cfg(feature = "storage")]
-                            self.storage_manager.clone(),
-                        ).boxed()
-                    })).await?;
+                let restored_account_handles = try_join_all(read_accounts.into_iter().map(|a| {
+                    AccountHandle::new(
+                        a,
+                        client.clone(),
+                        self.secret_manager.clone(),
+                        #[cfg(feature = "events")]
+                        self.event_emitter.clone(),
+                        #[cfg(feature = "storage")]
+                        self.storage_manager.clone(),
+                    )
+                    .boxed()
+                }))
+                .await?;
                 *accounts = restored_account_handles;
             }
         }

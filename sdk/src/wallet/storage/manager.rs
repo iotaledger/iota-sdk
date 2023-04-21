@@ -185,15 +185,17 @@ impl StorageManager {
             .await
     }
 
-    pub async fn set_default_sync_options(&mut self, account_index: u32, sync_options: &SyncOptions) -> crate::wallet::Result<()> {
-        let key = format!("{ACCOUNT_INDEXATION_KEY}{}-{ACCOUNT_SYNC_OPTIONS}", account_index);
-        self.storage
-            .set(&key, sync_options.clone())
-            .await
+    pub async fn set_default_sync_options(
+        &mut self,
+        account_index: u32,
+        sync_options: &SyncOptions,
+    ) -> crate::wallet::Result<()> {
+        let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}-{ACCOUNT_SYNC_OPTIONS}");
+        self.storage.set(&key, sync_options.clone()).await
     }
 
     pub async fn get_default_sync_options(&self, account_index: u32) -> crate::wallet::Result<Option<SyncOptions>> {
-        let key = format!("{ACCOUNT_INDEXATION_KEY}{}-{ACCOUNT_SYNC_OPTIONS}", account_index);
+        let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}-{ACCOUNT_SYNC_OPTIONS}");
         self.storage.get(&key).await
     }
 }

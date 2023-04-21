@@ -7,6 +7,7 @@ use std::sync::{
 };
 #[cfg(feature = "storage")]
 use std::{collections::HashSet, path::PathBuf, sync::atomic::Ordering};
+
 use futures::{future::try_join_all, FutureExt};
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "events")]
@@ -201,21 +202,21 @@ impl WalletBuilder {
         unlock_unused_inputs(&mut accounts)?;
         #[cfg(not(feature = "storage"))]
         let accounts = Vec::new();
-        let mut account_handles: Vec<AccountHandle> = try_join_all(accounts
-            .into_iter()
-            .map(|a| {
-                AccountHandle::new(
-                    a,
-                    client.clone(),
-                    self.secret_manager
-                        .clone()
-                        .expect("secret_manager needs to be provided"),
-                    #[cfg(feature = "events")]
-                    event_emitter.clone(),
-                    #[cfg(feature = "storage")]
-                    storage_manager.clone(),
-                ).boxed()
-            })).await?;
+        let mut account_handles: Vec<AccountHandle> = try_join_all(accounts.into_iter().map(|a| {
+            AccountHandle::new(
+                a,
+                client.clone(),
+                self.secret_manager
+                    .clone()
+                    .expect("secret_manager needs to be provided"),
+                #[cfg(feature = "events")]
+                event_emitter.clone(),
+                #[cfg(feature = "storage")]
+                storage_manager.clone(),
+            )
+            .boxed()
+        }))
+        .await?;
 
         // If the wallet builder is not set, it means the user provided it and we need to update the addresses.
         // In the other case it was loaded from the database and addresses are up to date.

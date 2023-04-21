@@ -67,7 +67,12 @@ impl AccountHandle {
         #[cfg(feature = "storage")] storage_manager: StorageManagerHandle,
     ) -> Result<Self> {
         #[cfg(feature = "storage")]
-        let fallback_sync_options = storage_manager.lock().await.get_default_sync_options(1).await?.unwrap_or_default();
+        let fallback_sync_options = storage_manager
+            .lock()
+            .await
+            .get_default_sync_options(*account.index())
+            .await?
+            .unwrap_or_default();
         #[cfg(not(feature = "storage"))]
         let fallback_sync_options = Default::default();
 
