@@ -3,7 +3,7 @@
 
 use chrono::{DateTime, NaiveDateTime, Utc};
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Password, Select};
-use iota_sdk::wallet::Wallet;
+use iota_sdk::{client::verify_mnemonic, wallet::Wallet};
 use tokio::{
     fs::OpenOptions,
     io::{AsyncBufReadExt, AsyncWriteExt, BufReader},
@@ -113,10 +113,8 @@ pub fn enter_mnemonic() -> Result<String, Error> {
         let input = Input::<String>::new()
             .with_prompt("Enter your mnemonic")
             .interact_text()?;
-        if !valid_mnemonic_input(&input) {
-            println_log_error!(
-                "Invalid mnemonic. Please enter a 24-word mnemonic consisting of ASCII characters only."
-            );
+        if verify_mnemonic(&input).is_err() {
+            println_log_error!("Invalid mnemonic. Please enter a bip-39 conform mnemonic.");
         } else {
             return Ok(input);
         }
@@ -159,17 +157,12 @@ async fn read_mnemonics_from_file(path: &str) -> Result<Vec<String>, Error> {
     let mut lines = BufReader::new(file).lines();
     let mut mnemonics = Vec::new();
     while let Some(line) = lines.next_line().await? {
-        if valid_mnemonic_input(&line) {
+        if verify_mnemonic(&line).is_ok() {
             mnemonics.push(line.trim().to_string());
         }
     }
 
     Ok(mnemonics)
-}
-
-fn valid_mnemonic_input(input: &str) -> bool {
-    let words = input.trim().split(' ').collect::<Vec<_>>();
-    input.is_ascii() && words.len() == 24
 }
 
 /// Converts a unix timestamp in milliseconds to a DateTime<Utc>
