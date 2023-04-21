@@ -253,13 +253,13 @@ impl InputSelection {
 
             let new_output = match output {
                 Output::Alias(output) => AliasOutputBuilder::from(&*output)
-                    .with_amount(new_amount)?
+                    .with_amount(new_amount)
                     .finish_output(self.protocol_parameters.token_supply())?,
                 Output::Nft(output) => NftOutputBuilder::from(&*output)
-                    .with_amount(new_amount)?
+                    .with_amount(new_amount)
                     .finish_output(self.protocol_parameters.token_supply())?,
                 Output::Foundry(output) => FoundryOutputBuilder::from(&*output)
-                    .with_amount(new_amount)?
+                    .with_amount(new_amount)
                     .finish_output(self.protocol_parameters.token_supply())?,
                 _ => panic!("only alias, nft and foundry can be automatically created"),
             };

@@ -115,7 +115,7 @@ impl Account {
                 });
 
             outputs.push(
-                BasicOutputBuilder::new_with_amount(storage_deposit_amount)?
+                BasicOutputBuilder::new_with_amount(storage_deposit_amount)
                     .with_native_tokens(
                         address_with_amount
                             .native_tokens

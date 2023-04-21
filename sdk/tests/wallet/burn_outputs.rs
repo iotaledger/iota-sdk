@@ -68,7 +68,7 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
 
     let amount = 1_000_000;
     let outputs = vec![
-        NftOutputBuilder::new_with_amount(amount, NftId::null())?
+        NftOutputBuilder::new_with_amount(amount, NftId::null())
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(
                     *account_0.addresses().await?[0].address().as_ref(),
