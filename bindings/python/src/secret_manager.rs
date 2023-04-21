@@ -24,10 +24,10 @@ pub fn create_secret_manager(options: String) -> Result<SecretManager> {
 }
 
 #[pyfunction]
-pub fn call_secret_manager_method(secret_manager: &mut SecretManager, method: String) -> Result<String> {
+pub fn call_secret_manager_method(secret_manager: &SecretManager, method: String) -> Result<String> {
     let method = serde_json::from_str::<SecretManagerMethod>(&method)?;
     let response =
-        crate::block_on(async { rust_call_secret_manager_method(&mut secret_manager.secret_manager, method).await });
+        crate::block_on(async { rust_call_secret_manager_method(&secret_manager.secret_manager, method).await });
 
     Ok(serde_json::to_string(&response)?)
 }

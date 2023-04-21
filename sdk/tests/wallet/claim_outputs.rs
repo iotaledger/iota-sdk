@@ -83,7 +83,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     let rent_structure = account_0.client().get_rent_structure().await?;
     let expiration_time = account_0.client().get_time_checked().await? + 86400; // 1 Day from now
 
-    let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
+    let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
         .add_unlock_condition(AddressUnlockCondition::new(
             *account_1.addresses().await?[0].address().as_ref(),
         ))
@@ -292,7 +292,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
     let tx = account_0
         .send(
             vec![
-                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())?
+                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())
                     .add_unlock_condition(AddressUnlockCondition::new(
                         *account_1.addresses().await?[0].address().as_ref(),
                     ))
@@ -302,7 +302,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
                     )?)
                     .add_native_token(NativeToken::new(mint_tx_0.token_id, native_token_amount)?)
                     .finish_output(token_supply)?,
-                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())?
+                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())
                     .add_unlock_condition(AddressUnlockCondition::new(
                         *account_1.addresses().await?[0].address().as_ref(),
                     ))
@@ -367,7 +367,7 @@ async fn claim_2_nft_outputs() -> Result<()> {
     let token_supply = accounts[1].client().get_token_supply().await?;
     let outputs = vec![
         // address of the owner of the NFT
-        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
+        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(
                     *accounts[0].addresses().await?[0].address().as_ref(),
@@ -378,7 +378,7 @@ async fn claim_2_nft_outputs() -> Result<()> {
                 )?),
             ])
             .finish_output(token_supply)?,
-        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
+        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(
                     *accounts[0].addresses().await?[0].address().as_ref(),
@@ -432,7 +432,7 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
     let token_supply = account_0.client().get_token_supply().await?;
     let outputs = vec![
         // address of the owner of the NFT
-        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
+        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(
                     *account_1.addresses().await?[0].address().as_ref(),
@@ -443,7 +443,7 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
                 )?),
             ])
             .finish_output(token_supply)?,
-        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
+        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(
                     *account_1.addresses().await?[0].address().as_ref(),

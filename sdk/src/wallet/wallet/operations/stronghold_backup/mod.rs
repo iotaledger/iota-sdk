@@ -13,7 +13,7 @@ use self::stronghold_snapshot::{read_data_from_stronghold_snapshot, store_data_t
 use crate::wallet::WalletBuilder;
 use crate::{
     client::secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerDto},
-    wallet::{AccountHandle, Wallet},
+    wallet::{Account, Wallet},
 };
 
 impl Wallet {
@@ -60,7 +60,7 @@ impl Wallet {
     /// mnemonic was stored, it will be gone.
     /// if ignore_if_coin_type_mismatch.is_some(), client options will not be restored
     /// if ignore_if_coin_type_mismatch == Some(true), client options coin type and accounts will not be restored if the
-    /// cointype doesn't match
+    /// coin type doesn't match
     pub async fn restore_backup(
         &self,
         backup_path: PathBuf,
@@ -148,8 +148,8 @@ impl Wallet {
             if let Some(read_accounts) = read_accounts {
                 let client = self.client_options.read().await.clone().finish()?;
 
-                let restored_account_handles = try_join_all(read_accounts.into_iter().map(|a| {
-                    AccountHandle::new(
+                let restored_account = try_join_all(read_accounts.into_iter().map(|a| {
+                    Account::new(
                         a,
                         client.clone(),
                         self.secret_manager.clone(),
@@ -161,7 +161,7 @@ impl Wallet {
                     .boxed()
                 }))
                 .await?;
-                *accounts = restored_account_handles;
+                *accounts = restored_account;
             }
         }
 

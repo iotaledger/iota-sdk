@@ -4,12 +4,12 @@
 use std::cmp;
 
 use crate::wallet::account::{
-    handle::AccountHandle,
     operations::{address_generation::AddressGenerationOptions, syncing::SyncOptions},
     types::AddressWithUnspentOutputs,
+    Account,
 };
 
-impl AccountHandle {
+impl Account {
     /// Search addresses with unspent outputs
     /// `address_gap_limit`: The number of addresses to search for, after the last address with unspent outputs
     /// Addresses that got crated during this operation and have a higher key_index than the latest one with outputs,
@@ -28,14 +28,14 @@ impl AccountHandle {
         // store the current index, so we can remove new addresses with higher indexes later again, if they don't have
         // outputs
         let (highest_public_address_index, highest_internal_address_index) = {
-            let account = self.read().await;
+            let account_details = self.read().await;
             (
-                account
+                account_details
                     .public_addresses
                     .last()
                     .map(|a| a.key_index)
                     .expect("account needs to have a public address"),
-                account.internal_addresses.last().map(|a| a.key_index),
+                account_details.internal_addresses.last().map(|a| a.key_index),
             )
         };
 
@@ -88,14 +88,14 @@ impl AccountHandle {
             // Also needs to be in the loop so it gets updated every round for internal use without modifying the values
             // outside
             let (highest_public_address_index, highest_internal_address_index) = {
-                let account = self.read().await;
+                let account_details = self.read().await;
                 (
-                    account
+                    account_details
                         .public_addresses
                         .last()
                         .map(|a| a.key_index)
                         .expect("account needs to have a public address"),
-                    account.internal_addresses.last().map(|a| a.key_index),
+                    account_details.internal_addresses.last().map(|a| a.key_index),
                 )
             };
             log::debug!(
@@ -154,23 +154,23 @@ impl AccountHandle {
             // Update address_gap_limit to only generate the amount of addresses we need to have `address_gap_limit`
             // amount of empty addresses after the latest one with outputs
 
-            let account = self.read().await;
+            let account_details = self.read().await;
 
-            let highest_address_index = account
+            let highest_address_index = account_details
                 .public_addresses
                 .iter()
                 .max_by_key(|a| *a.key_index())
                 .map(|a| *a.key_index())
                 .expect("account needs to have at least one public address");
 
-            let highest_address_index_internal = account
+            let highest_address_index_internal = account_details
                 .internal_addresses
                 .iter()
                 .max_by_key(|a| *a.key_index())
                 .map(|a| *a.key_index())
                 .unwrap_or(0);
 
-            drop(account);
+            drop(account_details);
 
             let addresses_with_unspent_outputs = self.addresses_with_unspent_outputs().await?;
 
@@ -256,12 +256,12 @@ impl AccountHandle {
         old_highest_public_address_index: u32,
         old_highest_internal_address_index: Option<u32>,
     ) {
-        let mut account = self.write().await;
+        let mut account_details = self.write().await;
 
         let (internal_addresses_with_unspent_outputs, public_addresses_with_spent_outputs): (
             Vec<&AddressWithUnspentOutputs>,
             Vec<&AddressWithUnspentOutputs>,
-        ) = account
+        ) = account_details
             .addresses_with_unspent_outputs()
             .iter()
             .partition(|address| address.internal);
@@ -281,14 +281,14 @@ impl AccountHandle {
         // The new highest index should be either the old one before we searched for funds or if we found addresses with
         // funds the highest index from an address with outputs
         let new_latest_public_index = cmp::max(highest_public_index_with_outputs, old_highest_public_address_index);
-        account.public_addresses = account
+        account_details.public_addresses = account_details
             .public_addresses
             .clone()
             .into_iter()
             .filter(|a| a.key_index <= new_latest_public_index)
             .collect();
 
-        account.internal_addresses =
+        account_details.internal_addresses =
             if old_highest_internal_address_index.is_none() && highest_internal_index_with_outputs.is_none() {
                 // For internal addresses we don't leave an empty address, that's only required for the public address
                 Vec::new()
@@ -297,7 +297,7 @@ impl AccountHandle {
                     highest_internal_index_with_outputs.unwrap_or(0),
                     old_highest_internal_address_index.unwrap_or(0),
                 );
-                account
+                account_details
                     .internal_addresses
                     .clone()
                     .into_iter()

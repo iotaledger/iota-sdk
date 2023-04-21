@@ -44,7 +44,6 @@ pub fn rand_treasury_output(token_supply: u64) -> TreasuryOutput {
 pub fn rand_basic_output(token_supply: u64) -> BasicOutput {
     // TODO: Add `NativeTokens`
     BasicOutput::build_with_amount(rand_number_range(Output::AMOUNT_MIN..token_supply))
-        .unwrap()
         .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_address_unlock_condition())
         .finish(token_supply)
@@ -62,7 +61,6 @@ pub fn rand_alias_output(token_supply: u64) -> AliasOutput {
     let alias_id = rand_alias_id();
 
     AliasOutput::build_with_amount(rand_number_range(Output::AMOUNT_MIN..token_supply), alias_id)
-        .unwrap()
         .with_features(rand_allowed_features(AliasOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(&alias_id))
         .add_unlock_condition(rand_governor_address_unlock_condition_different_from(&alias_id))
@@ -86,7 +84,6 @@ pub fn rand_foundry_output(token_supply: u64) -> FoundryOutput {
         rand_number(),
         rand_token_scheme(),
     )
-    .unwrap()
     .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES))
     .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(rand_alias_address()))
     .finish(token_supply)
@@ -99,7 +96,6 @@ pub fn rand_nft_output(token_supply: u64) -> NftOutput {
     let nft_id = NftId::from(rand_bytes_array());
 
     NftOutput::build_with_amount(rand_number_range(Output::AMOUNT_MIN..token_supply), nft_id)
-        .unwrap()
         .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_address_unlock_condition_different_from(&nft_id))
         .finish(token_supply)

@@ -20,14 +20,10 @@ use crate::{
         },
         DtoError,
     },
-    wallet::account::{
-        handle::{AccountHandle, FilterOptions},
-        operations::transaction::RemainderValueStrategy,
-        TransactionOptions,
-    },
+    wallet::account::{operations::transaction::RemainderValueStrategy, Account, FilterOptions, TransactionOptions},
 };
 
-impl AccountHandle {
+impl Account {
     /// Prepare an output for sending
     /// If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
     /// be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full
@@ -54,7 +50,7 @@ impl AccountHandle {
 
         // We start building with minimum storage deposit, so we know the minimum required amount and can later replace
         // it, if needed
-        let mut first_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())?
+        let mut first_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())
             .add_unlock_condition(AddressUnlockCondition::new(recipient_address));
 
         if let Some(assets) = options.assets {
@@ -107,7 +103,7 @@ impl AccountHandle {
         match options.amount.cmp(&first_output.amount()) {
             Ordering::Greater | Ordering::Equal => {
                 // if it's larger than the minimum storage deposit, just replace it
-                second_output_builder = second_output_builder.with_amount(options.amount)?;
+                second_output_builder = second_output_builder.with_amount(options.amount);
             }
             Ordering::Less => {
                 let storage_deposit = options.storage_deposit.unwrap_or_default();
@@ -142,7 +138,7 @@ impl AccountHandle {
 
                         if balance_minus_output < minimum_required_storage_deposit {
                             second_output_builder =
-                                second_output_builder.with_amount(first_output.amount() + balance_minus_output)?;
+                                second_output_builder.with_amount(first_output.amount() + balance_minus_output);
                         }
                     }
                 }
@@ -168,7 +164,7 @@ impl AccountHandle {
                 // increase the output amount by the additional required amount for the SDR
                 final_output_amount += minimum_storage_deposit - (required_storage_deposit - options.amount);
             }
-            third_output_builder = third_output_builder.with_amount(final_output_amount)?;
+            third_output_builder = third_output_builder.with_amount(final_output_amount);
 
             // add newly added amount also to the storage deposit return unlock condition, if that was added
             if let Some(sdr) = second_output.unlock_conditions().storage_deposit_return() {
@@ -215,7 +211,7 @@ impl AccountHandle {
                 unreachable!("We checked before if it's an nft output")
             }
         } else if nft_id.is_null() {
-            NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone(), nft_id)?
+            NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone(), nft_id)
         } else {
             return Err(crate::wallet::Error::NftNotFoundInUnspentOutputs);
         };
@@ -281,7 +277,7 @@ impl AccountHandle {
         match options.amount.cmp(&first_output.amount()) {
             Ordering::Greater | Ordering::Equal => {
                 // if it's larger than the minimum storage deposit, just replace it
-                second_output_builder = second_output_builder.with_amount(options.amount)?;
+                second_output_builder = second_output_builder.with_amount(options.amount);
             }
             Ordering::Less => {
                 let storage_deposit = options.storage_deposit.unwrap_or_default();
@@ -316,7 +312,7 @@ impl AccountHandle {
 
                         if balance_minus_output < minimum_required_storage_deposit {
                             second_output_builder =
-                                second_output_builder.with_amount(first_output.amount() + balance_minus_output)?;
+                                second_output_builder.with_amount(first_output.amount() + balance_minus_output);
                         }
                     }
                 }
@@ -342,7 +338,7 @@ impl AccountHandle {
                 // increase the output amount by the additional required amount for the SDR
                 final_output_amount += minimum_storage_deposit - (required_storage_deposit - options.amount);
             }
-            third_output_builder = third_output_builder.with_amount(final_output_amount)?;
+            third_output_builder = third_output_builder.with_amount(final_output_amount);
 
             // add newly added amount also to the storage deposit return unlock condition, if that was added
             if let Some(sdr) = second_output.unlock_conditions().storage_deposit_return() {

@@ -19,10 +19,10 @@ use crate::{
             Payload,
         },
     },
-    wallet::account::{handle::AccountHandle, operations::transaction::TransactionOptions},
+    wallet::account::{operations::transaction::TransactionOptions, Account},
 };
 
-impl AccountHandle {
+impl Account {
     /// Function to build the transaction essence from the selected in and outputs
     pub(crate) async fn build_transaction_essence(
         &self,

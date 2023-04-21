@@ -18,11 +18,10 @@ use crate::{
     wallet::{
         account::{
             constants::DEFAULT_EXPIRATION_TIME,
-            handle::AccountHandle,
             operations::transaction::{
                 high_level::minimum_storage_deposit::minimum_storage_deposit_basic_native_tokens, Transaction,
             },
-            TransactionOptions,
+            Account, TransactionOptions,
         },
         Error, Result,
     },
@@ -44,11 +43,11 @@ pub struct AddressNativeTokens {
     pub expiration: Option<u32>,
 }
 
-impl AccountHandle {
+impl Account {
     /// Function to send native tokens in basic outputs with a [StorageDepositReturnUnlockCondition] and
     /// [ExpirationUnlockCondition], so the storage deposit gets back to the sender and also that the sender gets access
     /// to the output again after a defined time (default 1 day),
-    /// Calls [AccountHandle.send()](crate::account::handle::AccountHandle.send) internally, the options can define the
+    /// Calls [Account.send()](crate::account::Account.send) internally, the options can define the
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
@@ -61,7 +60,7 @@ impl AccountHandle {
     ///     ..Default::default()
     /// }];
     ///
-    /// let tx = account_handle.send_native_tokens(outputs, None).await?;
+    /// let tx = account.send_native_tokens(outputs, None).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
     /// if let Some(block_id) = tx.block_id {
     ///     println!("Block sent: {}", block_id);
@@ -79,7 +78,7 @@ impl AccountHandle {
     }
 
     /// Function to prepare the transaction for
-    /// [AccountHandle.send_native_tokens()](crate::account::handle::AccountHandle.send_native_tokens)
+    /// [Account.send_native_tokens()](crate::account::Account.send_native_tokens)
     async fn prepare_send_native_tokens(
         &self,
         addresses_and_native_tokens: Vec<AddressNativeTokens>,
@@ -116,7 +115,7 @@ impl AccountHandle {
                 });
 
             outputs.push(
-                BasicOutputBuilder::new_with_amount(storage_deposit_amount)?
+                BasicOutputBuilder::new_with_amount(storage_deposit_amount)
                     .with_native_tokens(
                         address_with_amount
                             .native_tokens

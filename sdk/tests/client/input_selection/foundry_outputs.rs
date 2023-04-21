@@ -300,7 +300,6 @@ fn destroy_foundry_with_alias_state_transition() {
     ]);
     let alias_output = AliasOutputBuilder::from(inputs[0].output.as_alias())
         .with_amount(103_100)
-        .unwrap()
         .with_state_index(inputs[0].output.as_alias().state_index() + 1)
         .finish_output(TOKEN_SUPPLY)
         .unwrap();

@@ -23,11 +23,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed `AccountHandle` to `Account`, `Account` to `AccountDetails` and `AccountDto` to `AccountDetailsDto`;
 - `AddressWrapper` renamed to `Bech32Address` and moved to `types`;
 - `Address::try_from_bech32_with_hrp` address and HRP return have been reversed;
 - `PostBlockPayload::payload_dto` renamed to `payload`;
 - `SendNativeTokens::addresses_native_tokens` renamed to `addresses_and_native_tokens`;
 - `SendNft::addresses_nft_ids` renamed to `addresses_and_nft_ids`;
+- `{AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NftOutputBuilder}::{new_with_amount, new_with_minimum_storage_deposit, new, with_amount}` don't return a `Result` anymore;
+- `{AliasOutput, BasicOutput, FoundryOutput, NftOutput}::{build_with_amount, build_with_minimum_storage_deposit}` don't return a `Result` anymore;
 
 ## 0.2.0 - 2023-04-17
 

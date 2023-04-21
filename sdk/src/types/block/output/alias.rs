@@ -74,18 +74,18 @@ pub struct AliasOutputBuilder {
 
 impl AliasOutputBuilder {
     /// Creates an [`AliasOutputBuilder`] with a provided amount.
-    pub fn new_with_amount(amount: u64, alias_id: AliasId) -> Result<Self, Error> {
+    pub fn new_with_amount(amount: u64, alias_id: AliasId) -> Self {
         Self::new(OutputBuilderAmount::Amount(amount), alias_id)
     }
 
     /// Creates an [`AliasOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, alias_id: AliasId) -> Result<Self, Error> {
+    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, alias_id: AliasId) -> Self {
         Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), alias_id)
     }
 
-    fn new(amount: OutputBuilderAmount, alias_id: AliasId) -> Result<Self, Error> {
-        Ok(Self {
+    fn new(amount: OutputBuilderAmount, alias_id: AliasId) -> Self {
+        Self {
             amount,
             native_tokens: Vec::new(),
             alias_id,
@@ -95,14 +95,14 @@ impl AliasOutputBuilder {
             unlock_conditions: Vec::new(),
             features: Vec::new(),
             immutable_features: Vec::new(),
-        })
+        }
     }
 
     /// Sets the amount to the provided value.
     #[inline(always)]
-    pub fn with_amount(mut self, amount: u64) -> Result<Self, Error> {
+    pub fn with_amount(mut self, amount: u64) -> Self {
         self.amount = OutputBuilderAmount::Amount(amount);
-        Ok(self)
+        self
     }
 
     /// Sets the amount to the minimum storage deposit.
@@ -380,7 +380,7 @@ impl AliasOutput {
     /// Creates a new [`AliasOutput`] with a provided amount.
     #[inline(always)]
     pub fn new_with_amount(amount: u64, alias_id: AliasId, token_supply: u64) -> Result<Self, Error> {
-        AliasOutputBuilder::new_with_amount(amount, alias_id)?.finish(token_supply)
+        AliasOutputBuilder::new_with_amount(amount, alias_id).finish(token_supply)
     }
 
     /// Creates a new [`AliasOutput`] with a provided rent structure.
@@ -391,22 +391,19 @@ impl AliasOutput {
         rent_structure: RentStructure,
         token_supply: u64,
     ) -> Result<Self, Error> {
-        AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id)?.finish(token_supply)
+        AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id).finish(token_supply)
     }
 
     /// Creates a new [`AliasOutputBuilder`] with a provided amount.
     #[inline(always)]
-    pub fn build_with_amount(amount: u64, alias_id: AliasId) -> Result<AliasOutputBuilder, Error> {
+    pub fn build_with_amount(amount: u64, alias_id: AliasId) -> AliasOutputBuilder {
         AliasOutputBuilder::new_with_amount(amount, alias_id)
     }
 
     /// Creates a new [`AliasOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
-    pub fn build_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
-        alias_id: AliasId,
-    ) -> Result<AliasOutputBuilder, Error> {
+    pub fn build_with_minimum_storage_deposit(rent_structure: RentStructure, alias_id: AliasId) -> AliasOutputBuilder {
         AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id)
     }
 
@@ -796,7 +793,7 @@ pub mod dto {
                     .parse::<u64>()
                     .map_err(|_| DtoError::InvalidField("amount"))?,
                 (&value.alias_id).try_into()?,
-            )?;
+            );
 
             builder = builder.with_state_index(value.state_index);
 
@@ -862,9 +859,9 @@ pub mod dto {
                 OutputBuilderAmountDto::Amount(amount) => AliasOutputBuilder::new_with_amount(
                     amount.parse().map_err(|_| DtoError::InvalidField("amount"))?,
                     alias_id,
-                )?,
+                ),
                 OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
-                    AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id)?
+                    AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id)
                 }
             };
 

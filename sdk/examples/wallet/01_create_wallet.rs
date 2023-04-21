@@ -20,7 +20,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Setup Stronghold secret_manager
-    let mut secret_manager = StrongholdSecretManager::builder()
+    let secret_manager = StrongholdSecretManager::builder()
         .password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .build("wallet.stronghold")?;
 

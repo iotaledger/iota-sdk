@@ -139,8 +139,8 @@ pub async fn new_command(wallet: &Wallet, alias: Option<String>) -> Result<Strin
         builder = builder.with_alias(alias);
     }
 
-    let account_handle = builder.finish().await?;
-    let alias = account_handle.read().await.alias().to_string();
+    let account = builder.finish().await?;
+    let alias = account.read().await.alias().to_string();
 
     println_log_info!("Created account \"{alias}\"");
 

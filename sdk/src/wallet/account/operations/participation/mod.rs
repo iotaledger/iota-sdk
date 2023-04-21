@@ -26,7 +26,7 @@ use crate::{
         block::output::{unlock_condition::UnlockCondition, Output, OutputId},
     },
     wallet::{
-        account::{handle::AccountHandle, OutputData},
+        account::{Account, OutputData},
         task, Result,
     },
 };
@@ -49,7 +49,7 @@ pub struct ParticipationEventWithNodes {
     pub nodes: Vec<Node>,
 }
 
-impl AccountHandle {
+impl Account {
     /// Calculates the voting overview of an account. If event_ids are provided, only return outputs and tracked
     /// participations for them.
     pub async fn get_participation_overview(

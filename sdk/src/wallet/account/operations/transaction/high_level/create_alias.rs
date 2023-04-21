@@ -14,7 +14,7 @@ use crate::{
         },
         DtoError,
     },
-    wallet::account::{handle::AccountHandle, types::Transaction, OutputData, TransactionOptions},
+    wallet::account::{types::Transaction, Account, OutputData, TransactionOptions},
 };
 
 /// Alias output options for `create_alias_output()`
@@ -73,7 +73,7 @@ impl TryFrom<&AliasOutputOptionsDto> for AliasOutputOptions {
     }
 }
 
-impl AccountHandle {
+impl Account {
     /// Function to create an alias output.
     /// ```ignore
     /// let alias_options = AliasOutputOptions {
@@ -128,7 +128,7 @@ impl AccountHandle {
         };
 
         let mut alias_output_builder =
-            AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())?
+            AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())
                 .with_state_index(0)
                 .with_foundry_counter(0)
                 .add_unlock_condition(StateControllerAddressUnlockCondition::new(controller_address))

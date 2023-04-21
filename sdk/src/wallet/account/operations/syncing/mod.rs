@@ -17,13 +17,12 @@ use crate::{
     },
     wallet::account::{
         constants::MIN_SYNC_INTERVAL,
-        handle::AccountHandle,
         types::{AddressWithUnspentOutputs, OutputData},
-        AccountBalance,
+        Account, AccountBalance,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Set the fallback SyncOptions for account syncing.
     /// If storage is enabled, will persist during restarts.
     pub async fn set_default_sync_options(&self, options: SyncOptions) -> crate::wallet::Result<()> {

@@ -28,7 +28,7 @@ async fn backup_and_restore() -> Result<()> {
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).ok();
-    let mut stronghold = StrongholdSecretManager::builder()
+    let stronghold = StrongholdSecretManager::builder()
         .password(stronghold_password)
         .build("test-storage/backup_and_restore/1.stronghold")?;
 
@@ -199,7 +199,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).ok();
-    let mut stronghold = StrongholdSecretManager::builder()
+    let stronghold = StrongholdSecretManager::builder()
         .password(stronghold_password)
         .build("test-storage/backup_and_restore_different_coin_type/1.stronghold")?;
 
@@ -281,7 +281,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).ok();
-    let mut stronghold = StrongholdSecretManager::builder()
+    let stronghold = StrongholdSecretManager::builder()
         .password(stronghold_password)
         .build("test-storage/backup_and_restore_same_coin_type/1.stronghold")?;
 
@@ -361,7 +361,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).ok();
-    let mut stronghold = StrongholdSecretManager::builder()
+    let stronghold = StrongholdSecretManager::builder()
         .password(stronghold_password)
         .build("test-storage/backup_and_restore_different_coin_type_dont_ignore/1.stronghold")?;
 

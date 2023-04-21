@@ -13,25 +13,23 @@ use crate::{method::SecretManagerMethod, response::Response, Result};
 
 /// Call a secret manager method.
 pub(crate) async fn call_secret_manager_method_internal(
-    secret_manager: &mut SecretManager,
+    secret_manager: &SecretManager,
     method: SecretManagerMethod,
 ) -> Result<Response> {
-    match method {
+    let response = match method {
         SecretManagerMethod::GenerateAddresses { options } => {
             let addresses = GetAddressesBuilder::new(secret_manager)
                 .set_options(options)?
                 .finish()
                 .await?;
-            Ok(Response::GeneratedAddresses(addresses))
+            Response::GeneratedAddresses(addresses)
         }
         #[cfg(feature = "ledger_nano")]
         SecretManagerMethod::GetLedgerNanoStatus => {
             if let SecretManager::LedgerNano(secret_manager) = secret_manager {
-                Ok(Response::LedgerNanoStatus(
-                    secret_manager.get_ledger_nano_status().await,
-                ))
+                Response::LedgerNanoStatus(secret_manager.get_ledger_nano_status().await)
             } else {
-                Err(iota_sdk::client::Error::SecretManagerMismatch.into())
+                return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
             }
         }
         SecretManagerMethod::SignTransaction {
@@ -42,7 +40,7 @@ pub(crate) async fn call_secret_manager_method_internal(
                     &prepared_transaction_data,
                 )?)
                 .await?;
-            Ok(Response::SignedTransaction(PayloadDto::from(payload)))
+            Response::SignedTransaction(PayloadDto::from(payload))
         }
         SecretManagerMethod::SignatureUnlock {
             transaction_essence_hash,
@@ -56,21 +54,22 @@ pub(crate) async fn call_secret_manager_method_internal(
                 .signature_unlock(&transaction_essence_hash, &chain)
                 .await?;
 
-            Ok(Response::SignatureUnlock((&unlock).into()))
+            Response::SignatureUnlock((&unlock).into())
         }
         SecretManagerMethod::SignEd25519 { message, chain } => {
             let msg: Vec<u8> = prefix_hex::decode(message)?;
             let signature = secret_manager.sign_ed25519(&msg, &chain).await?;
-            Ok(Response::Ed25519Signature(Ed25519SignatureDto::from(&signature)))
+            Response::Ed25519Signature(Ed25519SignatureDto::from(&signature))
         }
         #[cfg(feature = "stronghold")]
         SecretManagerMethod::StoreMnemonic { mnemonic } => {
             if let SecretManager::Stronghold(secret_manager) = secret_manager {
                 secret_manager.store_mnemonic(mnemonic).await?;
-                Ok(Response::Ok)
+                Response::Ok
             } else {
-                Err(iota_sdk::client::Error::SecretManagerMismatch.into())
+                return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
             }
         }
-    }
+    };
+    Ok(response)
 }
