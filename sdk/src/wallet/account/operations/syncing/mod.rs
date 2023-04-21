@@ -47,7 +47,7 @@ impl Account {
     pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<AccountBalance> {
         let options = match options {
             Some(opt) => opt,
-            None => self.default_sync_options().await.clone(),
+            None => self.default_sync_options().await,
         };
 
         log::debug!("[SYNC] start syncing with {:?}", options);
