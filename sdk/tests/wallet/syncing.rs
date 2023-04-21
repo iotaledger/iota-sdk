@@ -21,7 +21,7 @@ async fn updated_default_sync_options() -> Result<()> {
 
     let default_sync = SyncOptions::default();
 
-    let wallet = make_wallet(storage_path, None, Some("https://api.testnet.shimmer.network")).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
     let account = wallet.create_account().finish().await?;
 
     assert_eq!(default_sync, account.default_sync_options().await);
@@ -36,7 +36,7 @@ async fn updated_default_sync_options() -> Result<()> {
     drop(account);
     drop(wallet);
 
-    let wallet = make_wallet(storage_path, None, Some("https://api.testnet.shimmer.network")).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
     let account = wallet.get_account(0).await?;
 
     assert_eq!(custom_options, account.default_sync_options().await);
