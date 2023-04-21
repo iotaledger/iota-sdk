@@ -33,7 +33,7 @@ impl RegularTransactionEssenceBuilder {
             inputs: Vec::new(),
             inputs_commitment,
             outputs: Vec::new(),
-            payload: OptionalPayload::none(),
+            payload: OptionalPayload::default(),
         }
     }
 

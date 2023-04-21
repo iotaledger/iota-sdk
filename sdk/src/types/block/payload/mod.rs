@@ -143,15 +143,11 @@ impl Packable for Payload {
 
 /// Representation of an optional [`Payload`].
 /// Essentially an `Option<Payload>` with a different [`Packable`] implementation, to conform to specs.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OptionalPayload(Option<Payload>);
 
 impl OptionalPayload {
-    pub(crate) fn none() -> Self {
-        Self(None)
-    }
-
     fn pack_ref<P: Packer>(payload: &Payload, packer: &mut P) -> Result<(), P::Error> {
         (payload.packed_len() as u32).pack(packer)?;
         payload.pack(packer)

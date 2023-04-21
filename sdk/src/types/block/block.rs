@@ -38,7 +38,7 @@ impl BlockBuilder {
         Self {
             protocol_version: None,
             parents,
-            payload: OptionalPayload::none(),
+            payload: OptionalPayload::default(),
             nonce: None,
         }
     }
