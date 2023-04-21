@@ -11,8 +11,7 @@ use tokio::{
 
 use crate::{error::Error, println_log_error, println_log_info};
 
-// TODO: make this configurable via the CLI to allow for more secure locations (e.g. encrypted usb drives etc)
-const MNEMONIC_FILE_NAME: &str = "mnemonic.txt";
+const DEFAULT_MNEMONIC_FILE_PATH: &str = "./mnemonic.txt";
 
 pub fn get_password(prompt: &str, confirmation: bool) -> Result<String, Error> {
     let mut password = Password::new();
@@ -61,24 +60,16 @@ pub async fn bytes_from_hex_or_file(hex: Option<String>, file: Option<String>) -
 }
 
 pub async fn enter_or_generate_mnemonic() -> Result<String, Error> {
-    let choices = [
-        "I want to generate a new mnemonic",
-        "I want to enter a mnemonic",
-        "I want to import a mnemonic from a file",
-    ];
+    let choices = ["Generate a new mnemonic", "Enter a mnemonic"];
     let selected_choice = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Select how to import a mnemonic")
+        .with_prompt("Select how to provide a mnemonic")
         .items(&choices)
         .default(0)
-        .interact_on(&Term::stderr())
-        // TODO: signal Abort
-        .unwrap_or(0);
-    println_log_info!("{}", choices[selected_choice]);
+        .interact_on(&Term::stderr())?;
 
     let mnemnonic = match selected_choice {
         0 => generate_mnemonic().await?,
         1 => enter_mnemonic()?,
-        2 => import_mnemonic(MNEMONIC_FILE_NAME).await?,
         _ => unreachable!(),
     };
 
@@ -95,16 +86,17 @@ pub async fn generate_mnemonic() -> Result<String, Error> {
         "Write to console and file",
     ];
     let selected_choice = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select how to proceed with it")
         .items(&choices)
         .default(0)
-        .interact_on_opt(&Term::stderr())?;
+        .interact_on(&Term::stderr())?;
 
-    if matches!(selected_choice, Some(0 | 2)) {
+    if [0, 2].contains(&selected_choice) {
         println!("{}", mnemonic);
     }
-    if matches!(selected_choice, Some(1 | 2)) {
-        write_mnemonic_to_file(MNEMONIC_FILE_NAME, &mnemonic).await?;
-        println_log_info!("Mnemonic has been written to '{MNEMONIC_FILE_NAME}'.");
+    if [1, 2].contains(&selected_choice) {
+        write_mnemonic_to_file(DEFAULT_MNEMONIC_FILE_PATH, &mnemonic).await?;
+        println_log_info!("Mnemonic has been written to '{DEFAULT_MNEMONIC_FILE_PATH}'.");
     }
 
     println_log_info!("IMPORTANT:");
@@ -134,25 +126,24 @@ pub fn enter_mnemonic() -> Result<String, Error> {
 pub async fn import_mnemonic(path: &str) -> Result<String, Error> {
     let mut mnemonics = read_mnemonics_from_file(path).await?;
     if mnemonics.is_empty() {
-        println_log_info!("No valid mnemonics found in '{path}'.");
-        // TODO: what error should we return?
+        println_log_error!("No valid mnemonics found in '{path}'.");
         Err(Error::Miscellaneous("No valid mnemonics found".to_string()))
     } else if mnemonics.len() == 1 {
         Ok(mnemonics.swap_remove(0))
     } else {
         println!("Found {} mnemonics.", mnemonics.len());
         let n = mnemonics.len() - 1;
-        let selected = loop {
+        let selected_index = loop {
             let input = Input::<usize>::new()
-                .with_prompt(format!("Select a mnemonic in the range [0..{n}]"))
+                .with_prompt(format!("Pick a mnemonic by its index in the range [0..{n}]"))
                 .interact_text()?;
             if (0..=n).contains(&input) {
                 break input;
             } else {
-                println!("Invalid choice. Please select a valid mnemonic from the range [0..{n}].");
+                println!("Invalid choice. Please pick a valid mnemonic by its index in the range [0..{n}].");
             }
         };
-        Ok(mnemonics.swap_remove(selected))
+        Ok(mnemonics.swap_remove(selected_index))
     }
 }
 
