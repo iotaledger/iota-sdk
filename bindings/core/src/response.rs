@@ -245,7 +245,7 @@ pub enum Response {
     /// - [`GenerateMnemonic`](crate::method::UtilsMethod::GenerateMnemonic)
     GeneratedMnemonic(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
     /// Response for
-    /// - [`GetLedgerNanoStatus`](crate::method::ClientMethod::GetLedgerNanoStatus)
+    /// - [`GetLedgerNanoStatus`](crate::method::SecretManagerMethod::GetLedgerNanoStatus)
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
     LedgerNanoStatus(LedgerNanoStatus),

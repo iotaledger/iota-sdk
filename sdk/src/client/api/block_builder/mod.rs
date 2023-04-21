@@ -165,7 +165,7 @@ impl<'a> ClientBlockBuilder<'a> {
         let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
         self.client.bech32_hrp_matches(&bech32_hrp).await?;
 
-        let output = BasicOutputBuilder::new_with_amount(amount)?
+        let output = BasicOutputBuilder::new_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish_output(self.client.get_token_supply().await?)?;
         self.outputs.push(output);
@@ -190,7 +190,7 @@ impl<'a> ClientBlockBuilder<'a> {
 
     /// Set a transfer to the builder, address needs to be hex encoded
     pub async fn with_output_hex(mut self, address: &str, amount: u64) -> Result<ClientBlockBuilder<'a>> {
-        let output = BasicOutputBuilder::new_with_amount(amount)?
+        let output = BasicOutputBuilder::new_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address.parse::<Ed25519Address>()?.into()))
             .finish_output(self.client.get_token_supply().await?)?;
         self.outputs.push(output);

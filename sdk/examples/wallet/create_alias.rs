@@ -1,9 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example create_alias --release
-// In this example we will create an alias output
-// Rename `.env.example` to `.env` first
+//! In this example we will create an alias output.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example create_alias --release`
 
 use std::env;
 

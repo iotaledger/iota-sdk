@@ -107,11 +107,9 @@ fn build_basic_output(
     timelock: Option<u32>,
     expiration: Option<(&str, u32)>,
 ) -> Output {
-    let mut builder = BasicOutputBuilder::new_with_amount(amount)
-        .unwrap()
-        .add_unlock_condition(AddressUnlockCondition::new(
-            Address::try_from_bech32(bech32_address).unwrap(),
-        ));
+    let mut builder = BasicOutputBuilder::new_with_amount(amount).add_unlock_condition(AddressUnlockCondition::new(
+        Address::try_from_bech32(bech32_address).unwrap(),
+    ));
 
     if let Some(native_tokens) = native_tokens {
         builder = builder.with_native_tokens(
@@ -156,11 +154,9 @@ fn build_nft_output(
     sdruc: Option<(&str, u64)>,
     expiration: Option<(&str, u32)>,
 ) -> Output {
-    let mut builder = NftOutputBuilder::new_with_amount(amount, nft_id)
-        .unwrap()
-        .add_unlock_condition(AddressUnlockCondition::new(
-            Address::try_from_bech32(bech32_address).unwrap(),
-        ));
+    let mut builder = NftOutputBuilder::new_with_amount(amount, nft_id).add_unlock_condition(
+        AddressUnlockCondition::new(Address::try_from_bech32(bech32_address).unwrap()),
+    );
 
     if let Some(native_tokens) = native_tokens {
         builder = builder.with_native_tokens(
@@ -209,7 +205,6 @@ fn build_alias_output(
     let governor_address = Address::try_from_bech32(governor_address).unwrap();
 
     let mut builder = AliasOutputBuilder::new_with_amount(amount, alias_id)
-        .unwrap()
         .with_state_index(state_index)
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(state_address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(governor_address));
@@ -241,7 +236,6 @@ fn build_foundry_output(
     native_tokens: Option<Vec<(&str, u64)>>,
 ) -> Output {
     let mut builder = FoundryOutputBuilder::new_with_amount(amount, serial_number, TokenScheme::Simple(token_scheme))
-        .unwrap()
         .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::new(alias_id)));
 
     if let Some(native_tokens) = native_tokens {

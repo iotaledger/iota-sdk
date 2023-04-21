@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
 
     let basic_output_builder =
-        BasicOutputBuilder::new_with_amount(1_000_000)?.add_unlock_condition(AddressUnlockCondition::new(address));
+        BasicOutputBuilder::new_with_amount(1_000_000).add_unlock_condition(AddressUnlockCondition::new(address));
 
     let outputs = vec![
         // most simple output

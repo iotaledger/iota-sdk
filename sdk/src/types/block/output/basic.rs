@@ -32,31 +32,31 @@ pub struct BasicOutputBuilder {
 impl BasicOutputBuilder {
     /// Creates a [`BasicOutputBuilder`] with a provided amount.
     #[inline(always)]
-    pub fn new_with_amount(amount: u64) -> Result<Self, Error> {
+    pub fn new_with_amount(amount: u64) -> Self {
         Self::new(OutputBuilderAmount::Amount(amount))
     }
 
     /// Creates an [`BasicOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
-    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure) -> Result<Self, Error> {
+    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure) -> Self {
         Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure))
     }
 
-    fn new(amount: OutputBuilderAmount) -> Result<Self, Error> {
-        Ok(Self {
+    fn new(amount: OutputBuilderAmount) -> Self {
+        Self {
             amount,
             native_tokens: BTreeSet::new(),
             unlock_conditions: BTreeSet::new(),
             features: BTreeSet::new(),
-        })
+        }
     }
 
     /// Sets the amount to the provided value.
     #[inline(always)]
-    pub fn with_amount(mut self, amount: u64) -> Result<Self, Error> {
+    pub fn with_amount(mut self, amount: u64) -> Self {
         self.amount = OutputBuilderAmount::Amount(amount);
-        Ok(self)
+        self
     }
 
     /// Sets the amount to the minimum storage deposit.
@@ -224,26 +224,26 @@ impl BasicOutput {
     /// Creates a new [`BasicOutput`] with a provided amount.
     #[inline(always)]
     pub fn new_with_amount(amount: u64, token_supply: u64) -> Result<Self, Error> {
-        BasicOutputBuilder::new_with_amount(amount)?.finish(token_supply)
+        BasicOutputBuilder::new_with_amount(amount).finish(token_supply)
     }
 
     /// Creates a new [`BasicOutput`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
     pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, token_supply: u64) -> Result<Self, Error> {
-        BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?.finish(token_supply)
+        BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure).finish(token_supply)
     }
 
     /// Creates a new [`BasicOutputBuilder`] with a provided amount.
     #[inline(always)]
-    pub fn build_with_amount(amount: u64) -> Result<BasicOutputBuilder, Error> {
+    pub fn build_with_amount(amount: u64) -> BasicOutputBuilder {
         BasicOutputBuilder::new_with_amount(amount)
     }
 
     /// Creates a new [`BasicOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
-    pub fn build_with_minimum_storage_deposit(rent_structure: RentStructure) -> Result<BasicOutputBuilder, Error> {
+    pub fn build_with_minimum_storage_deposit(rent_structure: RentStructure) -> BasicOutputBuilder {
         BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
     }
 
@@ -386,7 +386,7 @@ pub mod dto {
         fn _try_from_dto(value: &BasicOutputDto) -> Result<BasicOutputBuilder, DtoError> {
             let mut builder = BasicOutputBuilder::new_with_amount(
                 value.amount.parse().map_err(|_| DtoError::InvalidField("amount"))?,
-            )?;
+            );
 
             for t in &value.native_tokens {
                 builder = builder.add_native_token(t.try_into()?);
@@ -428,10 +428,10 @@ pub mod dto {
         ) -> Result<Self, DtoError> {
             let mut builder = match amount {
                 OutputBuilderAmountDto::Amount(amount) => {
-                    BasicOutputBuilder::new_with_amount(amount.parse().map_err(|_| DtoError::InvalidField("amount"))?)?
+                    BasicOutputBuilder::new_with_amount(amount.parse().map_err(|_| DtoError::InvalidField("amount"))?)
                 }
                 OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
-                    BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
+                    BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                 }
             };
 

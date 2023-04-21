@@ -159,7 +159,7 @@ impl Account {
         }
 
         let consolidation_output = vec![
-            BasicOutputBuilder::new_with_amount(total_amount)?
+            BasicOutputBuilder::new_with_amount(total_amount)
                 .add_unlock_condition(AddressUnlockCondition::new(outputs_to_consolidate[0].address))
                 .with_native_tokens(total_native_tokens.finish()?)
                 .finish_output(token_supply)?,

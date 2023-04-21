@@ -128,7 +128,7 @@ impl Account {
         };
 
         let mut alias_output_builder =
-            AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())?
+            AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())
                 .with_state_index(0)
                 .with_foundry_counter(0)
                 .add_unlock_condition(StateControllerAddressUnlockCondition::new(controller_address))

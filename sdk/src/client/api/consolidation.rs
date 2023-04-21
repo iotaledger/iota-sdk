@@ -92,7 +92,7 @@ impl Client {
                         total_amount += output.amount();
                     }
 
-                    let consolidation_output = BasicOutputBuilder::new_with_amount(total_amount)?
+                    let consolidation_output = BasicOutputBuilder::new_with_amount(total_amount)
                         .add_unlock_condition(AddressUnlockCondition::new(consolidation_address))
                         .with_native_tokens(total_native_tokens.finish()?)
                         .finish_output(token_supply)?;

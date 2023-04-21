@@ -186,7 +186,7 @@ async fn wallet_address_generation() -> Result<()> {
 
     #[cfg(feature = "stronghold")]
     {
-        let mut secret_manager = StrongholdSecretManager::builder()
+        let secret_manager = StrongholdSecretManager::builder()
             .password("some_hopefully_secure_password")
             .build("test-storage/wallet_address_generation/test.stronghold")?;
         secret_manager.store_mnemonic(DEFAULT_MNEMONIC.to_string()).await?;

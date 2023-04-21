@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Output` builder types, `NativeTokensBuilder`, and `Burn` now use unique, ordered sets for unlock conditions, features, and native tokens. `add_x` and `replace_x` methods thus function appropriately;
 - `Features`, `UnlockConditions`, `NativeTokens`, `MilestoneOptions`, and `Parents` constructor `new` renamed to `from_vec`;
 - Modified `Ord` and `PartialOrd` implementations for `Feature`, `UnlockCondition`, and `NativeToken` to support unique, ordered sets;
+- `{AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NftOutputBuilder}::{new_with_amount, new_with_minimum_storage_deposit, new, with_amount}` don't return a `Result` anymore;
+- `{AliasOutput, BasicOutput, FoundryOutput, NftOutput}::{build_with_amount, build_with_minimum_storage_deposit}` don't return a `Result` anymore;
 
 ## 0.2.0 - 2023-04-17
 
