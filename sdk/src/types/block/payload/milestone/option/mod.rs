@@ -46,6 +46,17 @@ impl MilestoneOption {
     }
 }
 
+impl PartialOrd for MilestoneOption {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+        self.kind().partial_cmp(&other.kind())
+    }
+}
+impl Ord for MilestoneOption {
+    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+
 pub(crate) type MilestoneOptionCount = BoundedU8<0, { MilestoneOptions::COUNT_MAX }>;
 
 ///

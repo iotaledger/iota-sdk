@@ -8,7 +8,7 @@ use core::ops::RangeInclusive;
 
 use derive_more::Deref;
 use iterator_sorted::is_unique_sorted;
-use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable, PackableExt};
+use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
 use crate::types::block::{BlockId, Error};
 
@@ -33,7 +33,7 @@ impl Parents {
 
     /// Creates new [`Parents`] from a vec.
     pub fn from_vec(mut inner: Vec<BlockId>) -> Result<Self, Error> {
-        inner.sort_unstable_by_key(|a| a.pack_to_vec());
+        inner.sort_unstable();
         inner.dedup();
 
         Ok(Self(
