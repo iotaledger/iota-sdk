@@ -76,7 +76,7 @@ fn build_valid_with_payload() {
             .finish(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let payload = Payload::from(rand_tagged_data_payload());
+    let payload = rand_tagged_data_payload();
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs(vec![input1, input2])

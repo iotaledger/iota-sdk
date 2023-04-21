@@ -110,7 +110,7 @@ fn pack_unpack_valid() {
 fn getters() {
     let protocol_parameters = protocol_parameters();
     let parents = rand_parents();
-    let payload: Payload = rand_tagged_data_payload().into();
+    let payload = Payload::from(rand_tagged_data_payload());
     let nonce: u64 = rand_number();
 
     let block = BlockBuilder::new(parents.clone())

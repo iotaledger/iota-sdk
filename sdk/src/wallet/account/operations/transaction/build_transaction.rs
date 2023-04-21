@@ -14,10 +14,7 @@ use crate::{
     types::block::{
         input::{Input, UtxoInput},
         output::{InputsCommitment, Output},
-        payload::{
-            transaction::{RegularTransactionEssence, TransactionEssence},
-            Payload,
-        },
+        payload::transaction::{RegularTransactionEssence, TransactionEssence},
     },
     wallet::account::{operations::transaction::TransactionOptions, Account},
 };
@@ -58,8 +55,7 @@ impl Account {
         // Optional add a tagged payload
         if let Some(options) = options {
             if let Some(tagged_data_payload) = &options.tagged_data_payload {
-                essence_builder =
-                    essence_builder.with_payload(Payload::TaggedData(Box::new(tagged_data_payload.clone())));
+                essence_builder = essence_builder.with_payload(tagged_data_payload.clone());
             }
         }
 
