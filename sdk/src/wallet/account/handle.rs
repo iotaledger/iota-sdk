@@ -44,7 +44,7 @@ pub struct FilterOptions {
 #[derive(Debug, Clone)]
 pub struct AccountHandle {
     account: Arc<RwLock<Account>>,
-    pub(crate) fallback_sync_options: Arc<Mutex<SyncOptions>>,
+    pub(crate) default_sync_options: Arc<Mutex<SyncOptions>>,
     pub(crate) client: Client,
     pub(crate) secret_manager: Arc<RwLock<SecretManager>>,
     // mutex to prevent multiple sync calls at the same or almost the same time, the u128 is a timestamp
@@ -67,23 +67,23 @@ impl AccountHandle {
         #[cfg(feature = "storage")] storage_manager: StorageManagerHandle,
     ) -> Result<Self> {
         #[cfg(feature = "storage")]
-        let fallback_sync_options = storage_manager
+        let default_sync_options = storage_manager
             .lock()
             .await
             .get_default_sync_options(*account.index())
             .await?
             .unwrap_or_default();
         #[cfg(not(feature = "storage"))]
-        let fallback_sync_options = Default::default();
+        let default_sync_options = Default::default();
 
         Ok(Self {
             account: Arc::new(RwLock::new(account)),
             client,
             secret_manager,
 <<<<<<< HEAD
-            fallback_sync_options: Arc::new(Mutex::new(fallback_sync_options)),
+            default_sync_options: Arc::new(Mutex::new(default_sync_options)),
 =======
-            fallback_sync_options: Default::default(),
+            default_sync_options: Default::default(),
 >>>>>>> syncoptions to main crate
             last_synced: Default::default(),
             #[cfg(feature = "events")]

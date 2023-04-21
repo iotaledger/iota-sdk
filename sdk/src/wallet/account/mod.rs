@@ -148,7 +148,7 @@ pub struct Account {
     // if the last synced time was < `MIN_SYNC_INTERVAL` second ago, we don't sync, but only calculate the balance
     // again, because sending transactions can change that
     pub(crate) last_synced: Arc<Mutex<u128>>,
-    pub(crate) fallback_sync_options: Arc<Mutex<SyncOptions>>,
+    pub(crate) default_sync_options: Arc<Mutex<SyncOptions>>,
     #[cfg(feature = "events")]
     pub(crate) event_emitter: Arc<Mutex<EventEmitter>>,
     #[cfg(feature = "storage")]
@@ -174,21 +174,21 @@ impl Account {
         #[cfg(feature = "storage")] storage_manager: Arc<Mutex<StorageManager>>,
     ) -> Result<Self> {
         #[cfg(feature = "storage")]
-        let fallback_sync_options = storage_manager
+        let default_sync_options = storage_manager
             .lock()
             .await
             .get_default_sync_options(*details.index())
             .await?
             .unwrap_or_default();
         #[cfg(not(feature = "storage"))]
-        let fallback_sync_options = Default::default();
+        let default_sync_options = Default::default();
 
         Ok(Self {
             details: Arc::new(RwLock::new(details)),
             client,
             secret_manager,
             last_synced: Default::default(),
-            fallback_sync_options: Arc::new(Mutex::new(fallback_sync_options)),
+            default_sync_options: Arc::new(Mutex::new(default_sync_options)),
             #[cfg(feature = "events")]
             event_emitter,
             #[cfg(feature = "storage")]

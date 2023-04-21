@@ -33,13 +33,13 @@ impl Account {
             storage_manager.set_default_sync_options(index, &options).await?;
         }
 
-        *self.fallback_sync_options.lock().await = options;
+        *self.default_sync_options.lock().await = options;
         Ok(())
     }
 
     // Get the default sync options we use when none are provided
     pub async fn default_sync_options(&self) -> SyncOptions {
-        self.fallback_sync_options.lock().await.clone()
+        self.default_sync_options.lock().await.clone()
     }
 
     /// Sync the account by fetching new information from the nodes. Will also retry pending transactions
