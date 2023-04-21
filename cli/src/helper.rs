@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use chrono::{DateTime, NaiveDateTime, Utc};
+use clap::Parser;
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Password, Select};
 use iota_sdk::wallet::{Account, Wallet};
 use tokio::{fs::OpenOptions, io::AsyncWriteExt};
@@ -80,14 +81,12 @@ pub async fn pick_account(wallet: &Wallet) -> Result<Option<Account>, Error> {
 }
 
 pub fn print_wallet_help() {
-    use clap::Parser;
     if let Err(err) = WalletCli::try_parse_from(vec!["Wallet:", "help"]) {
         println!("{err}");
     }
 }
 
 pub fn print_account_help() {
-    use clap::Parser;
     if let Err(err) = AccountCli::try_parse_from(vec!["Account:", "help"]) {
         println!("{err}");
     }
