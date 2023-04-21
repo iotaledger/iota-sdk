@@ -22,6 +22,7 @@ iota-sdk = { path = "../../../..", default-features = false, features = [ "walle
 console_error_panic_hook = { version = "0.1.7", default-features = false }
 js-sys = { version = "0.3.61", default-features = false, features = [] }
 log = { version = "0.4.17", default-features = false }
+native-tls = { version = "0.2.11", default-features = false, features = ["vendored"] }
 serde_json = { version = "1.0.94", default-features = false }
 tokio = { version = "1.26.0", default-features = false, features = [ "sync" ] }
 wasm-bindgen = { version = "0.2.84", default-features = false, features = [ "spans", "std", "serde-serialize" ] }
