@@ -38,32 +38,32 @@ pub struct NftOutputBuilder {
 
 impl NftOutputBuilder {
     /// Creates an [`NftOutputBuilder`] with a provided amount.
-    pub fn new_with_amount(amount: u64, nft_id: NftId) -> Result<Self, Error> {
+    pub fn new_with_amount(amount: u64, nft_id: NftId) -> Self {
         Self::new(OutputBuilderAmount::Amount(amount), nft_id)
     }
 
     /// Creates an [`NftOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, nft_id: NftId) -> Result<Self, Error> {
+    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, nft_id: NftId) -> Self {
         Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), nft_id)
     }
 
-    fn new(amount: OutputBuilderAmount, nft_id: NftId) -> Result<Self, Error> {
-        Ok(Self {
+    fn new(amount: OutputBuilderAmount, nft_id: NftId) -> Self {
+        Self {
             amount,
             native_tokens: Vec::new(),
             nft_id,
             unlock_conditions: Vec::new(),
             features: Vec::new(),
             immutable_features: Vec::new(),
-        })
+        }
     }
 
     /// Sets the amount to the provided value.
     #[inline(always)]
-    pub fn with_amount(mut self, amount: u64) -> Result<Self, Error> {
+    pub fn with_amount(mut self, amount: u64) -> Self {
         self.amount = OutputBuilderAmount::Amount(amount);
-        Ok(self)
+        self
     }
 
     /// Sets the amount to the minimum storage deposit.
@@ -295,7 +295,7 @@ impl NftOutput {
     /// Creates a new [`NftOutput`] with a provided amount.
     #[inline(always)]
     pub fn new_with_amount(amount: u64, nft_id: NftId, token_supply: u64) -> Result<Self, Error> {
-        NftOutputBuilder::new_with_amount(amount, nft_id)?.finish(token_supply)
+        NftOutputBuilder::new_with_amount(amount, nft_id).finish(token_supply)
     }
 
     /// Creates a new [`NftOutput`] with a provided rent structure.
@@ -306,22 +306,19 @@ impl NftOutput {
         rent_structure: RentStructure,
         token_supply: u64,
     ) -> Result<Self, Error> {
-        NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, nft_id)?.finish(token_supply)
+        NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, nft_id).finish(token_supply)
     }
 
     /// Creates a new [`NftOutputBuilder`] with a provided amount.
     #[inline(always)]
-    pub fn build_with_amount(amount: u64, nft_id: NftId) -> Result<NftOutputBuilder, Error> {
+    pub fn build_with_amount(amount: u64, nft_id: NftId) -> NftOutputBuilder {
         NftOutputBuilder::new_with_amount(amount, nft_id)
     }
 
     /// Creates a new [`NftOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
-    pub fn build_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
-        nft_id: NftId,
-    ) -> Result<NftOutputBuilder, Error> {
+    pub fn build_with_minimum_storage_deposit(rent_structure: RentStructure, nft_id: NftId) -> NftOutputBuilder {
         NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, nft_id)
     }
 
@@ -572,7 +569,7 @@ pub mod dto {
                     .parse::<u64>()
                     .map_err(|_| DtoError::InvalidField("amount"))?,
                 (&value.nft_id).try_into()?,
-            )?;
+            );
 
             for t in &value.native_tokens {
                 builder = builder.add_native_token(t.try_into()?);
@@ -624,9 +621,9 @@ pub mod dto {
                 OutputBuilderAmountDto::Amount(amount) => NftOutputBuilder::new_with_amount(
                     amount.parse().map_err(|_| DtoError::InvalidField("amount"))?,
                     nft_id,
-                )?,
+                ),
                 OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
-                    NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, nft_id)?
+                    NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, nft_id)
                 }
             };
 

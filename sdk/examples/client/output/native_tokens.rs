@@ -57,13 +57,13 @@ async fn main() -> Result<()> {
     let outputs = vec![
         // Without StorageDepositReturnUnlockCondition, the receiver will get the amount of the output and the native
         // tokens
-        BasicOutputBuilder::new_with_amount(1_000_000)?
+        BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
             .add_native_token(NativeToken::new(TokenId::new(token_id), U256::from(10))?)
             .finish_output(token_supply)?,
         // With StorageDepositReturnUnlockCondition, the receiver can consume the output to get the native tokens, but
         // he needs to send the amount back
-        BasicOutputBuilder::new_with_amount(1_000_000)?
+        BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
             .add_native_token(NativeToken::new(TokenId::new(token_id), U256::from(10))?)
             // Return the full amount.

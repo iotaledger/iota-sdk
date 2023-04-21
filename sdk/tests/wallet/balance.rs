@@ -27,7 +27,7 @@ async fn balance_expiration() -> Result<()> {
     let seconds_until_expired = 20;
     let token_supply = account_0.client().get_token_supply().await?;
     let outputs = vec![
-        BasicOutputBuilder::new_with_amount(1_000_000)?
+        BasicOutputBuilder::new_with_amount(1_000_000)
             // Send to account 1 with expiration to account 2, both have no amount yet
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(
@@ -88,7 +88,7 @@ async fn balance_expiration() -> Result<()> {
 
     // It's possible to send the expired output
     let outputs = vec![
-        BasicOutputBuilder::new_with_amount(1_000_000)?
+        BasicOutputBuilder::new_with_amount(1_000_000)
             // Send to account 1 with expiration to account 2, both have no amount yet
             .with_unlock_conditions(vec![AddressUnlockCondition::new(
                 *account_1.addresses().await?[0].address().as_ref(),

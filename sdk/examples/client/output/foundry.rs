@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
     // create new alias output
     //////////////////////////////////
 
-    let alias_output_builder = AliasOutputBuilder::new_with_amount(2_000_000, AliasId::null())?
+    let alias_output_builder = AliasOutputBuilder::new_with_amount(2_000_000, AliasId::null())
         .add_feature(SenderFeature::new(address))
         .add_feature(MetadataFeature::new(vec![1, 2, 3])?)
         .add_immutable_feature(IssuerFeature::new(address))
@@ -97,12 +97,12 @@ async fn main() -> Result<()> {
     let outputs = vec![
         alias_output_builder
             .clone()
-            .with_amount(1_000_000)?
+            .with_amount(1_000_000)
             .with_alias_id(alias_id)
             .with_state_index(1)
             .with_foundry_counter(1)
             .finish_output(token_supply)?,
-        FoundryOutputBuilder::new_with_amount(1_000_000, 1, token_scheme)?
+        FoundryOutputBuilder::new_with_amount(1_000_000, 1, token_scheme)
             .add_native_token(NativeToken::new(token_id, U256::from(70u8))?)
             .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)))
             .finish_output(token_supply)?,
@@ -133,7 +133,7 @@ async fn main() -> Result<()> {
             U256::from(20u8),
             U256::from(100u8),
         )?),
-    )?
+    )
     .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
 
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
@@ -141,7 +141,7 @@ async fn main() -> Result<()> {
     let outputs = vec![
         alias_output_builder
             .clone()
-            .with_amount(1_000_000)?
+            .with_amount(1_000_000)
             .with_alias_id(alias_id)
             .with_state_index(2)
             .with_foundry_counter(1)
@@ -171,14 +171,14 @@ async fn main() -> Result<()> {
     //////////////////////////////////
 
     let basic_output_builder =
-        BasicOutputBuilder::new_with_amount(57_700)?.add_unlock_condition(AddressUnlockCondition::new(address));
+        BasicOutputBuilder::new_with_amount(57_700).add_unlock_condition(AddressUnlockCondition::new(address));
 
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
     let foundry_output_id = get_foundry_output_id(block.payload().unwrap())?;
     let outputs = vec![
         alias_output_builder
             .clone()
-            .with_amount(57_700)?
+            .with_amount(57_700)
             .with_alias_id(alias_id)
             .with_state_index(3)
             .with_foundry_counter(1)

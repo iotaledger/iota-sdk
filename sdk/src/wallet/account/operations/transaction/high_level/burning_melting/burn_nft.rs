@@ -97,7 +97,7 @@ impl Account {
             .locked_address(nft_output.address(), current_time);
 
         let basic_output = Output::Basic(
-            BasicOutputBuilder::new_with_amount(nft_output.amount())?
+            BasicOutputBuilder::new_with_amount(nft_output.amount())
                 .add_unlock_condition(AddressUnlockCondition::new(*unlock_address))
                 .with_native_tokens(nft_output.native_tokens().clone())
                 .finish(token_supply)?,

@@ -54,7 +54,7 @@ async fn main() -> Result<()> {
     let token_supply = account.client().get_token_supply().await?;
     let outputs = vec![
         // address of the owner of the NFT
-        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
+        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .add_unlock_condition(AddressUnlockCondition::new(*sender_address.as_ref()))
             .add_feature(SenderFeature::new(*sender_address.as_ref()))
             .add_immutable_feature(IssuerFeature::new(*sender_address.as_ref()))
