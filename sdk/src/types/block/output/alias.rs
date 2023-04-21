@@ -135,8 +135,8 @@ impl AliasOutputBuilder {
 
     ///
     #[inline(always)]
-    pub fn with_state_index(mut self, state_index: u32) -> Self {
-        self.state_index.replace(state_index);
+    pub fn with_state_index(mut self, state_index: impl Into<Option<u32>>) -> Self {
+        self.state_index = state_index.into();
         self
     }
 
@@ -149,8 +149,8 @@ impl AliasOutputBuilder {
 
     ///
     #[inline(always)]
-    pub fn with_foundry_counter(mut self, foundry_counter: u32) -> Self {
-        self.foundry_counter.replace(foundry_counter);
+    pub fn with_foundry_counter(mut self, foundry_counter: impl Into<Option<u32>>) -> Self {
+        self.foundry_counter = foundry_counter.into();
         self
     }
 

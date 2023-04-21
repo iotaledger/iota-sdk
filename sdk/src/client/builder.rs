@@ -289,8 +289,8 @@ impl ClientBuilder {
     }
 
     /// Sets the amount of workers that should be used for PoW, default is num_cpus::get().
-    pub fn with_pow_worker_count(mut self, worker_count: usize) -> Self {
-        self.pow_worker_count.replace(worker_count);
+    pub fn with_pow_worker_count(mut self, worker_count: impl Into<Option<usize>>) -> Self {
+        self.pow_worker_count = worker_count.into();
         self
     }
 
