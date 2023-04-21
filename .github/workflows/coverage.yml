@@ -2,7 +2,7 @@ name: Test coverage
 
 on:
   push:
-    branches: [develop, production]
+    branches: [develop, production, chore/test/coverage]
     paths:
       - ".github/workflows/coverage.yml"
       - ".github/actions/**"
@@ -12,6 +12,7 @@ on:
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
