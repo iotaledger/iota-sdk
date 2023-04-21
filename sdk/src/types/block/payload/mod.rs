@@ -143,7 +143,7 @@ impl Packable for Payload {
 
 /// Representation of an optional [`Payload`].
 /// Essentially an `Option<Payload>` with a different [`Packable`] implementation, to conform to specs.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OptionalPayload(Option<Payload>);
 
@@ -151,6 +151,18 @@ impl OptionalPayload {
     fn pack_ref<P: Packer>(payload: &Payload, packer: &mut P) -> Result<(), P::Error> {
         (payload.packed_len() as u32).pack(packer)?;
         payload.pack(packer)
+    }
+}
+
+impl<T: Into<Payload>> From<Option<T>> for OptionalPayload {
+    fn from(payload: Option<T>) -> Self {
+        Self(payload.map(|p| p.into()))
+    }
+}
+
+impl<T: Into<Payload>> From<T> for OptionalPayload {
+    fn from(payload: T) -> Self {
+        Self(Some(payload.into()))
     }
 }
 
@@ -203,20 +215,6 @@ impl Packable for OptionalPayload {
         } else {
             Ok(Self(None))
         }
-    }
-}
-
-// FIXME: does this break any invariant about the Payload length?
-impl From<Option<Payload>> for OptionalPayload {
-    fn from(option: Option<Payload>) -> Self {
-        Self(option)
-    }
-}
-
-#[allow(clippy::from_over_into)]
-impl Into<Option<Payload>> for OptionalPayload {
-    fn into(self) -> Option<Payload> {
-        self.0
     }
 }
 

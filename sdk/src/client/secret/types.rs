@@ -45,11 +45,21 @@ pub struct AccountAddress {
 }
 
 /// Options provided to `generate_address()`.
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
 pub struct GenerateAddressOptions {
+    pub internal: bool,
     /// Display the address on ledger devices.
     pub ledger_nano_prompt: bool,
+}
+
+impl GenerateAddressOptions {
+    pub const fn internal() -> Self {
+        Self {
+            internal: true,
+            ledger_nano_prompt: false,
+        }
+    }
 }
 
 /// The Ledger device status.

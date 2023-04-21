@@ -11,10 +11,10 @@ import type {
     AddressWithAmount,
     AddressNativeTokens,
     AddressNftId,
-    AddressGenerationOptions,
     AddressWithUnspentOutputs,
     AliasOutputOptions,
     FilterOptions,
+    GenerateAddressOptions,
     IncreaseNativeTokenSupplyOptions,
     MintTokenTransaction,
     NativeTokenOptions,
@@ -342,7 +342,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          * @returns The address.
          */
         async generateAddress(
-            options?: AddressGenerationOptions,
+            options?: GenerateAddressOptions,
         ): Promise<Address> {
             const addresses = await this.generateAddresses(1, options);
             return addresses[0];
@@ -356,7 +356,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async generateAddresses(
             amount: number,
-            options?: AddressGenerationOptions,
+            options?: GenerateAddressOptions,
         ): Promise<Address[]> {
             const response = await messageHandler.callAccountMethod(
                 accountMeta.index,

@@ -2,9 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[cfg(feature = "participation")]
-use iota_sdk::wallet::account::types::participation::ParticipationEventRegistrationOptions;
 use iota_sdk::{
-    client::api::{PreparedTransactionDataDto, SignedTransactionDataDto},
+    client::node_manager::node::Node,
+    types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
+    wallet::account::types::participation::ParticipationEventRegistrationOptions,
+};
+use iota_sdk::{
+    client::{
+        api::{PreparedTransactionDataDto, SignedTransactionDataDto},
+        secret::GenerateAddressOptions,
+    },
     types::block::{
         dto::U256Dto,
         output::{
@@ -15,17 +22,12 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            AddressGenerationOptions, AliasOutputOptionsDto, FilterOptions, IncreaseNativeTokenSupplyOptionsDto,
-            NativeTokenOptionsDto, NftOptionsDto, OutputOptionsDto, OutputsToClaim, SyncOptions, TransactionOptionsDto,
+            AliasOutputOptionsDto, FilterOptions, IncreaseNativeTokenSupplyOptionsDto, NativeTokenOptionsDto,
+            NftOptionsDto, OutputOptionsDto, OutputsToClaim, SyncOptions, TransactionOptionsDto,
         },
         message_interface::dtos::AddressWithAmountDto,
         AddressAndNftId, AddressNativeTokens,
     },
-};
-#[cfg(feature = "participation")]
-use iota_sdk::{
-    client::node_manager::node::Node,
-    types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
 };
 use serde::{Deserialize, Serialize};
 
@@ -89,7 +91,7 @@ pub enum AccountMethod {
     /// Expected response: [`GeneratedAddress`](crate::Response::GeneratedAddress)
     GenerateAddresses {
         amount: u32,
-        options: Option<AddressGenerationOptions>,
+        options: Option<GenerateAddressOptions>,
     },
     /// Get the [`OutputData`](iota_sdk::wallet::account::types::OutputData) of an output stored in the account
     /// Expected response: [`OutputData`](crate::Response::OutputData)

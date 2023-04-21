@@ -38,20 +38,20 @@ impl RentStructureBuilder {
     }
 
     /// Sets the byte cost for the storage deposit.
-    pub fn byte_cost(mut self, byte_cost: u32) -> Self {
-        self.v_byte_cost.replace(byte_cost);
+    pub fn byte_cost(mut self, byte_cost: impl Into<Option<u32>>) -> Self {
+        self.v_byte_cost = byte_cost.into();
         self
     }
 
     /// Sets the virtual byte weight for the key fields.
-    pub fn byte_factor_key(mut self, weight: u8) -> Self {
-        self.v_byte_factor_key.replace(weight);
+    pub fn byte_factor_key(mut self, weight: impl Into<Option<u8>>) -> Self {
+        self.v_byte_factor_key = weight.into();
         self
     }
 
     /// Sets the virtual byte weight for the data fields.
-    pub fn byte_factor_data(mut self, weight: u8) -> Self {
-        self.v_byte_factor_data.replace(weight);
+    pub fn byte_factor_data(mut self, weight: impl Into<Option<u8>>) -> Self {
+        self.v_byte_factor_data = weight.into();
         self
     }
 

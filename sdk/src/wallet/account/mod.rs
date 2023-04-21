@@ -31,7 +31,6 @@ use self::types::{
 };
 pub use self::{
     operations::{
-        address_generation::AddressGenerationOptions,
         output_claiming::OutputsToClaim,
         syncing::{
             options::{AccountSyncOptions, AliasSyncOptions, NftSyncOptions},

@@ -12,6 +12,7 @@ mod claim_outputs;
 mod common;
 mod consolidation;
 mod error;
+#[cfg(feature = "message_interface")]
 mod message_interface;
 mod native_tokens;
 mod output_preparation;
