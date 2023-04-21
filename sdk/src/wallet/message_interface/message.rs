@@ -132,8 +132,6 @@ pub enum Message {
     GenerateAddress {
         /// Account index
         account_index: u32,
-        /// Internal address
-        internal: bool,
         /// Account index
         address_index: u32,
         /// Options
@@ -275,13 +273,12 @@ impl Debug for Message {
             Self::GetLedgerNanoStatus => write!(f, "GetLedgerNanoStatus"),
             Self::GenerateAddress {
                 account_index,
-                internal,
                 address_index,
                 options,
                 bech32_hrp,
             } => write!(
                 f,
-                "GenerateAddress{{ account_index: {account_index:?}, internal: {internal:?}, address_index: {address_index:?}, options: {options:?}, bech32_hrp: {bech32_hrp:?} }}"
+                "GenerateAddress{{ account_index: {account_index:?}, address_index: {address_index:?}, options: {options:?}, bech32_hrp: {bech32_hrp:?} }}"
             ),
             Self::GetNodeInfo { url, auth: _ } => write!(f, "GetNodeInfo{{ url: {url:?} }}"),
             #[cfg(feature = "stronghold")]

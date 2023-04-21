@@ -22,7 +22,7 @@ pub struct RegularTransactionEssenceBuilder {
     inputs: Vec<Input>,
     inputs_commitment: InputsCommitment,
     outputs: Vec<Output>,
-    payload: Option<Payload>,
+    payload: OptionalPayload,
 }
 
 impl RegularTransactionEssenceBuilder {
@@ -33,7 +33,7 @@ impl RegularTransactionEssenceBuilder {
             inputs: Vec::new(),
             inputs_commitment,
             outputs: Vec::new(),
-            payload: None,
+            payload: OptionalPayload::default(),
         }
     }
 
@@ -62,8 +62,8 @@ impl RegularTransactionEssenceBuilder {
     }
 
     /// Add a payload to a [`RegularTransactionEssenceBuilder`].
-    pub fn with_payload(mut self, payload: Payload) -> Self {
-        self.payload = Some(payload);
+    pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
+        self.payload = payload.into();
         self
     }
 
@@ -92,16 +92,14 @@ impl RegularTransactionEssenceBuilder {
 
         verify_outputs::<true>(&outputs, protocol_parameters)?;
 
-        let payload = OptionalPayload::from(self.payload);
-
-        verify_payload::<true>(&payload)?;
+        verify_payload::<true>(&self.payload)?;
 
         Ok(RegularTransactionEssence {
             network_id: self.network_id,
             inputs,
             inputs_commitment: self.inputs_commitment,
             outputs,
-            payload,
+            payload: self.payload,
         })
     }
 
@@ -123,16 +121,14 @@ impl RegularTransactionEssenceBuilder {
 
         verify_outputs_unverified::<true>(&outputs)?;
 
-        let payload = OptionalPayload::from(self.payload);
-
-        verify_payload::<true>(&payload)?;
+        verify_payload::<true>(&self.payload)?;
 
         Ok(RegularTransactionEssence {
             network_id: self.network_id,
             inputs,
             inputs_commitment: self.inputs_commitment,
             outputs,
-            payload,
+            payload: self.payload,
         })
     }
 }

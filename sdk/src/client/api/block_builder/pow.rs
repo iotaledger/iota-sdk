@@ -24,13 +24,8 @@ impl Client {
                 Some(parents) => parents,
                 None => Parents::from_vec(self.get_tips().await?)?,
             };
-            let mut block_builder = BlockBuilder::new(parents);
 
-            if let Some(p) = payload {
-                block_builder = block_builder.with_payload(p);
-            }
-
-            Ok(block_builder.finish()?)
+            Ok(BlockBuilder::new(parents).with_payload(payload).finish()?)
         }
     }
 
@@ -128,13 +123,9 @@ fn do_pow(
     payload: Option<Payload>,
     parents: Parents,
 ) -> Result<Block> {
-    let mut block = BlockBuilder::new(parents);
-
-    if let Some(p) = payload {
-        block = block.with_payload(p);
-    }
-
-    Ok(block.finish_nonce(|bytes| miner.nonce(bytes, min_pow_score))?)
+    Ok(BlockBuilder::new(parents)
+        .with_payload(payload)
+        .finish_nonce(|bytes| miner.nonce(bytes, min_pow_score))?)
 }
 
 // PoW timeout, if we reach this we will restart the PoW with new tips, so the final block will never be lazy.

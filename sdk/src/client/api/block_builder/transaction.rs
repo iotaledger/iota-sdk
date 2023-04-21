@@ -71,7 +71,7 @@ impl<'a> ClientBlockBuilder<'a> {
         // Add tagged data payload if tag set
         if let Some(index) = self.tag.clone() {
             let tagged_data_payload = TaggedDataPayload::new(index.to_vec(), self.data.clone().unwrap_or_default())?;
-            essence = essence.with_payload(Payload::from(tagged_data_payload));
+            essence = essence.with_payload(tagged_data_payload);
         }
 
         let regular_essence = essence.finish(&self.client.get_protocol_parameters().await?)?;

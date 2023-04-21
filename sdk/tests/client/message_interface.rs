@@ -32,7 +32,6 @@ async fn generate_addresses() {
         coin_type: None,
         account_index: None,
         range: Some(0..10),
-        internal: None,
         bech32_hrp: Some("atoi".to_string()),
         options: None,
     };
@@ -79,7 +78,6 @@ async fn build_and_post_block() {
         coin_type: None,
         account_index: None,
         range: Some(0..10),
-        internal: None,
         bech32_hrp: Some("atoi".to_string()),
         options: None,
     };
@@ -192,8 +190,7 @@ async fn stronghold() {
     let options = GenerateAddressesOptions {
         coin_type: None,
         account_index: None,
-        range: Some(std::ops::Range { start: 0, end: 1 }),
-        internal: None,
+        range: Some(0..1),
         bech32_hrp: Some("rms".to_string()),
         options: None,
     };

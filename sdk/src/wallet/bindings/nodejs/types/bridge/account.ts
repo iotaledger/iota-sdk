@@ -4,7 +4,7 @@ import type {
     AddressWithAmount,
     AddressNativeTokens,
     AddressNftId,
-    AddressGenerationOptions,
+    GenerateAddressOptions,
 } from '../address';
 import type {
     BuildAliasOutputData,
@@ -126,7 +126,7 @@ export type __GenerateAddressesMethod__ = {
     name: 'generateAddresses';
     data: {
         amount: number;
-        options?: AddressGenerationOptions;
+        options?: GenerateAddressOptions;
     };
 };
 

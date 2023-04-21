@@ -42,11 +42,7 @@ fn pow_provider() {
 fn invalid_length() {
     let res = BlockBuilder::new(Parents::from_vec(rand_block_ids(2)).unwrap())
         .with_nonce(42)
-        .with_payload(
-            TaggedDataPayload::new(vec![42], vec![0u8; Block::LENGTH_MAX - Block::LENGTH_MIN - 9])
-                .unwrap()
-                .into(),
-        )
+        .with_payload(TaggedDataPayload::new(vec![42], vec![0u8; Block::LENGTH_MAX - Block::LENGTH_MIN - 9]).unwrap())
         .finish();
 
     assert!(matches!(res, Err(Error::InvalidBlockLength(len)) if len == Block::LENGTH_MAX + 33));
@@ -56,7 +52,7 @@ fn invalid_length() {
 fn invalid_payload_kind() {
     let protocol_parameters = protocol_parameters();
     let res = BlockBuilder::new(rand_parents())
-        .with_payload(rand_treasury_transaction_payload(protocol_parameters.token_supply()).into())
+        .with_payload(rand_treasury_transaction_payload(protocol_parameters.token_supply()))
         .finish();
 
     assert!(matches!(res, Err(Error::InvalidPayloadKind(4))))
@@ -114,7 +110,7 @@ fn pack_unpack_valid() {
 fn getters() {
     let protocol_parameters = protocol_parameters();
     let parents = rand_parents();
-    let payload: Payload = rand_tagged_data_payload().into();
+    let payload = Payload::from(rand_tagged_data_payload());
     let nonce: u64 = rand_number();
 
     let block = BlockBuilder::new(parents.clone())

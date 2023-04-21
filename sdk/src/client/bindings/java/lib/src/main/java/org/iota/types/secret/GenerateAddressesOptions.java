@@ -9,7 +9,6 @@ public class GenerateAddressesOptions {
     private Integer coinType;
     private Integer accountIndex;
     private Range range;
-    private Boolean internal;
     private String bech32Hrp;
     private GenerateAddressOptions options;
 
@@ -28,11 +27,6 @@ public class GenerateAddressesOptions {
         return this;
     }
 
-    public GenerateAddressesOptions withInternal(Boolean internal) {
-        this.internal = internal;
-        return this;
-    }
-
     public GenerateAddressesOptions withBech32Hrp(String bech32Hrp) {
         this.bech32Hrp = bech32Hrp;
         return this;
@@ -48,15 +42,20 @@ public class GenerateAddressesOptions {
         o.addProperty("coinType", coinType);
         o.addProperty("accountIndex", accountIndex);
         o.add("range", range != null ? range.getAsJson() : null);
-        o.addProperty("internal", internal);
         o.addProperty("bech32Hrp", bech32Hrp);
         o.add("options", options != null ? options.getAsJson() : null);
 
         return o;
     }
 
-    static class GenerateAddressOptions {
+    public static class GenerateAddressOptions {
+        private boolean internal;
         private boolean ledgerNanoPrompt;
+
+        public GenerateAddressOptions withInternal(boolean internal) {
+            this.internal = internal;
+            return this;
+        }
 
         public GenerateAddressOptions withLedgerNanoPrompt(boolean ledgerNanoPrompt) {
             this.ledgerNanoPrompt = ledgerNanoPrompt;
@@ -65,6 +64,7 @@ public class GenerateAddressesOptions {
 
         public JsonObject getAsJson() {
             JsonObject o = new JsonObject();
+            o.addProperty("internal", internal);
             o.addProperty("ledgerNanoPrompt", ledgerNanoPrompt);
 
             return o;

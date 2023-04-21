@@ -25,7 +25,7 @@ use crate::types::block::{
 pub struct BlockBuilder {
     protocol_version: Option<u8>,
     parents: Parents,
-    payload: Option<Payload>,
+    payload: OptionalPayload,
     nonce: Option<u64>,
 }
 
@@ -38,29 +38,29 @@ impl BlockBuilder {
         Self {
             protocol_version: None,
             parents,
-            payload: None,
+            payload: OptionalPayload::default(),
             nonce: None,
         }
     }
 
     /// Adds a protocol version to a [`BlockBuilder`].
     #[inline(always)]
-    pub fn with_protocol_version(mut self, protocol_version: u8) -> Self {
-        self.protocol_version = Some(protocol_version);
+    pub fn with_protocol_version(mut self, protocol_version: impl Into<Option<u8>>) -> Self {
+        self.protocol_version = protocol_version.into();
         self
     }
 
     /// Adds a payload to a [`BlockBuilder`].
     #[inline(always)]
-    pub fn with_payload(mut self, payload: Payload) -> Self {
-        self.payload = Some(payload);
+    pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
+        self.payload = payload.into();
         self
     }
 
     /// Adds a nonce to a [`BlockBuilder`].
     #[inline(always)]
-    pub fn with_nonce(mut self, nonce: u64) -> Self {
-        self.nonce = Some(nonce);
+    pub fn with_nonce(mut self, nonce: impl Into<Option<u64>>) -> Self {
+        self.nonce = nonce.into();
         self
     }
 
@@ -70,7 +70,7 @@ impl BlockBuilder {
         let block = Block {
             protocol_version: self.protocol_version.unwrap_or(PROTOCOL_VERSION),
             parents: self.parents,
-            payload: self.payload.into(),
+            payload: self.payload,
             nonce: self.nonce.unwrap_or(Self::DEFAULT_NONCE),
         };
 

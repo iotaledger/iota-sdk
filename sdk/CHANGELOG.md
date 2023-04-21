@@ -39,6 +39,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Modified `Ord` and `PartialOrd` implementations for `Feature`, `UnlockCondition`, `NativeToken`, and `MilestoneOption` to support unique, ordered sets;
 - `{AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NftOutputBuilder}::{new_with_amount, new_with_minimum_storage_deposit, new, with_amount}` don't return a `Result` anymore;
 - `{AliasOutput, BasicOutput, FoundryOutput, NftOutput}::{build_with_amount, build_with_minimum_storage_deposit}` don't return a `Result` anymore;
+- Lots of builder setters are now taking an `impl Into<Option<T>>` instead of a `T` parameter;
+
+### Removed
+
+- Remove `AddressGenerationOptions` in favor of `GenerateAddressOptions`, which now contains the `internal` flag;
 
 ## 0.2.0 - 2023-04-17
 

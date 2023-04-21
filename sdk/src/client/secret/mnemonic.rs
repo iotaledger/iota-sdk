@@ -32,9 +32,9 @@ impl SecretManage for MnemonicSecretManager {
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        internal: bool,
-        _: Option<GenerateAddressOptions>,
+        options: Option<GenerateAddressOptions>,
     ) -> crate::client::Result<Vec<Address>> {
+        let internal = options.map(|o| o.internal).unwrap_or_default();
         let mut addresses = Vec::new();
 
         for address_index in address_indexes {
@@ -101,7 +101,7 @@ mod tests {
         let secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic).unwrap();
 
         let addresses = secret_manager
-            .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, false, None)
+            .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
             .await
             .unwrap();
 
@@ -119,7 +119,7 @@ mod tests {
         let secret_manager = MnemonicSecretManager::try_from_hex_seed(seed).unwrap();
 
         let addresses = secret_manager
-            .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, false, None)
+            .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
             .await
             .unwrap();
 
