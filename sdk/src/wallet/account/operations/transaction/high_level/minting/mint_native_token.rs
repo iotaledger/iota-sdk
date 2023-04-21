@@ -155,7 +155,7 @@ impl Account {
                             U256::from(0u8),
                             native_token_options.maximum_supply,
                         )?),
-                    )?
+                    )
                     .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
 
                     if let Some(foundry_metadata) = native_token_options.foundry_metadata {

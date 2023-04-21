@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
         .map(|a| a.address().clone())
         .collect();
 
-    let output = BasicOutputBuilder::new_with_amount(1_000_000)?
+    let output = BasicOutputBuilder::new_with_amount(1_000_000)
         .add_unlock_condition(AddressUnlockCondition::new(*account_addresses[0].as_ref()))
         .finish_output(account.client().get_token_supply().await?)?;
 

@@ -52,7 +52,7 @@ async fn main() -> Result<()> {
 
     let outputs = vec![
         // with storage deposit return
-        BasicOutputBuilder::new_with_amount(255_100)?
+        BasicOutputBuilder::new_with_amount(255_100)
             .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
             // If the receiver does not consume this output, we Unlock after a day to avoid
             // locking our funds forever.

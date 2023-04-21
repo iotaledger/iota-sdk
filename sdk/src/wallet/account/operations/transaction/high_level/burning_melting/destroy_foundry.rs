@@ -59,7 +59,7 @@ impl Account {
                 // tokens
                 let alias_output = AliasOutputBuilder::from(&alias_output)
                     .with_alias_id(alias_id)
-                    .with_amount(amount)?
+                    .with_amount(amount)
                     .with_native_tokens(native_tokens_builder.finish()?)
                     .with_state_index(alias_output.state_index() + 1)
                     .finish(token_supply)?;
