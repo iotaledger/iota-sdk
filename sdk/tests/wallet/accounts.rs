@@ -189,7 +189,7 @@ async fn account_creation_stronghold() -> Result<()> {
 
     // Create directory before, because stronghold would panic otherwise
     std::fs::create_dir_all(storage_path).ok();
-    let mut stronghold_secret_manager = StrongholdSecretManager::builder()
+    let stronghold_secret_manager = StrongholdSecretManager::builder()
         .password("some_hopefully_secure_password")
         .build("test-storage/account_creation_stronghold/test.stronghold")?;
     stronghold_secret_manager.store_mnemonic(mnemonic.to_string()).await?;
