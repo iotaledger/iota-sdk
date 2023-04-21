@@ -59,15 +59,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                 let password = get_password("Stronghold password", false)?;
                 let wallet = unlock_wallet(storage_path, snapshot_path, &password).await?;
                 if wallet.get_accounts().await?.is_empty() {
-                    // ask the user whether a default account should be created
-                    if get_decision("Create initial account?")? {
-                        let alias = get_account_name("New account name", &wallet).await?;
-                        let alias = add_account(&wallet, Some(alias)).await?;
-                        println_log_info!("Created initial account. Type `help` to see all available commands.");
-                        (Some(wallet), Some(alias))
-                    } else {
-                        (Some(wallet), None)
-                    }
+                    create_initial_account(wallet).await?
                 } else if let Some(account) = pick_account(&wallet).await? {
                     let alias = account.alias().await;
                     (Some(wallet), Some(alias))
@@ -79,16 +71,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                 if get_decision("Create a new wallet with default parameters?")? {
                     let wallet = init_command(storage_path, snapshot_path, InitParameters::default()).await?;
                     println_log_info!("Created new wallet.");
-
-                    // ask the user whether a default account should be created
-                    if get_decision("Create initial account?")? {
-                        let alias = get_account_name("New account name", &wallet).await?;
-                        let alias = add_account(&wallet, Some(alias)).await?;
-                        println_log_info!("Created initial account. Type `help` to see all available commands.");
-                        (Some(wallet), Some(alias))
-                    } else {
-                        (Some(wallet), None)
-                    }
+                    create_initial_account(wallet).await?
                 } else {
                     print_wallet_help();
                     (None, None)
@@ -105,4 +88,16 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
         }
     };
     Ok((wallet, account))
+}
+
+async fn create_initial_account(wallet: Wallet) -> Result<(Option<Wallet>, Option<String>), Error> {
+    // Ask the user whether an initial account should be created.
+    if get_decision("Create initial account?")? {
+        let alias = get_account_name("New account name", &wallet).await?;
+        let alias = add_account(&wallet, Some(alias)).await?;
+        println_log_info!("Created initial account. Type `help` to see all available commands.");
+        Ok((Some(wallet), Some(alias)))
+    } else {
+        Ok((Some(wallet), None))
+    }
 }
