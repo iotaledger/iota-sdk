@@ -212,6 +212,6 @@ pub(crate) async fn get_first_public_address(
     Ok(secret_manager
         .read()
         .await
-        .generate_addresses(coin_type, account_index, 0..1, false, None)
+        .generate_addresses(coin_type, account_index, 0..1, None)
         .await?[0])
 }

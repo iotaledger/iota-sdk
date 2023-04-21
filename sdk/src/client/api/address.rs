@@ -23,7 +23,6 @@ pub struct GetAddressesBuilder<'a> {
     coin_type: u32,
     account_index: u32,
     range: Range<u32>,
-    internal: bool,
     bech32_hrp: Option<String>,
     options: Option<GenerateAddressOptions>,
 }
@@ -38,8 +37,6 @@ pub struct GetAddressesBuilderOptions {
     pub account_index: Option<u32>,
     /// Range
     pub range: Option<Range<u32>>,
-    /// Internal addresses
-    pub internal: Option<bool>,
     /// Bech32 human readable part
     pub bech32_hrp: Option<String>,
     /// Options
@@ -55,7 +52,6 @@ impl<'a> GetAddressesBuilder<'a> {
             coin_type: SHIMMER_COIN_TYPE,
             account_index: 0,
             range: 0..super::ADDRESS_GAP_RANGE,
-            internal: false,
             bech32_hrp: None,
             options: None,
         }
@@ -82,12 +78,6 @@ impl<'a> GetAddressesBuilder<'a> {
     /// Set range to the builder
     pub fn with_range(mut self, range: Range<u32>) -> Self {
         self.range = range;
-        self
-    }
-
-    /// Set if internal or public addresses should be generated
-    pub fn with_internal_addresses(mut self, internal: bool) -> Self {
-        self.internal = internal;
         self
     }
 
@@ -118,10 +108,6 @@ impl<'a> GetAddressesBuilder<'a> {
             self = self.with_range(range);
         };
 
-        if let Some(internal) = options.internal {
-            self = self.with_internal_addresses(internal);
-        };
-
         if let Some(bech32_hrp) = options.bech32_hrp {
             self = self.with_bech32_hrp(bech32_hrp);
         };
@@ -145,13 +131,7 @@ impl<'a> GetAddressesBuilder<'a> {
 
         let addresses = self
             .secret_manager
-            .generate_addresses(
-                self.coin_type,
-                self.account_index,
-                self.range,
-                self.internal,
-                self.options.clone(),
-            )
+            .generate_addresses(self.coin_type, self.account_index, self.range, self.options)
             .await?
             .into_iter()
             .map(|a| a.to_bech32(&bech32_hrp))
@@ -166,8 +146,10 @@ impl<'a> GetAddressesBuilder<'a> {
                 self.coin_type,
                 self.account_index,
                 self.range,
-                false,
-                self.options.clone(),
+                self.options.map(|mut o| {
+                    o.internal = false;
+                    o
+                }),
             )
             .await
     }
@@ -201,8 +183,10 @@ impl<'a> GetAddressesBuilder<'a> {
                 self.coin_type,
                 self.account_index,
                 self.range.clone(),
-                false,
-                self.options.clone(),
+                self.options.map(|mut o| {
+                    o.internal = false;
+                    o
+                }),
             )
             .await?;
 
@@ -212,8 +196,12 @@ impl<'a> GetAddressesBuilder<'a> {
                 self.coin_type,
                 self.account_index,
                 self.range,
-                true,
-                self.options.clone(),
+                self.options
+                    .map(|mut o| {
+                        o.internal = true;
+                        o
+                    })
+                    .or_else(|| Some(GenerateAddressOptions::internal())),
             )
             .await?;
 

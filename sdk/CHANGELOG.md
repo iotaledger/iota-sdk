@@ -33,6 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `{AliasOutput, BasicOutput, FoundryOutput, NftOutput}::{build_with_amount, build_with_minimum_storage_deposit}` don't return a `Result` anymore;
 - Lots of builder setters are now taking an `impl Into<Option<T>>` instead of a `T` parameter;
 
+### Removed
+
+- Remove `AddressGenerationOptions` in favor of `GenerateAddressOptions`, which now contains the `internal` flag;
+
 ## 0.2.0 - 2023-04-17
 
 ### Added

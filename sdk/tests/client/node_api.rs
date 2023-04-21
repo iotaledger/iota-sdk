@@ -34,7 +34,7 @@ async fn setup_tagged_data_block() -> BlockId {
         .id()
 }
 
-fn setup_secret_manager() -> SecretManager {
+pub fn setup_secret_manager() -> SecretManager {
     SecretManager::try_from_hex_seed(DEFAULT_DEVELOPMENT_SEED).unwrap()
 }
 

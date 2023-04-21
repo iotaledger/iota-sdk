@@ -133,8 +133,6 @@ pub enum WalletMethod {
     GenerateAddress {
         /// Account index
         account_index: u32,
-        /// Internal address
-        internal: bool,
         /// Account index
         address_index: u32,
         /// Options
