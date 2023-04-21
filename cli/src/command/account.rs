@@ -14,18 +14,16 @@ use iota_sdk::{
                 unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken, NftId,
                 Output, OutputId, TokenId,
             },
+            payload::transaction::TransactionId,
         },
     },
     wallet::{
-        account::{
-            types::{AccountAddress, TransactionDto},
-            Account, OutputsToClaim, TransactionOptions,
-        },
+        account::{types::AccountAddress, Account, OutputsToClaim, TransactionOptions},
         AddressAndNftId, AddressNativeTokens, AddressWithAmount, NativeTokenOptions, NftOptions, U256,
     },
 };
 
-use crate::{error::Error, println_log_info};
+use crate::{error::Error, helper::to_utc_date_time, println_log_info};
 
 #[derive(Debug, Parser)]
 #[command(author, version, about, long_about = None, propagate_version = true)]
@@ -188,8 +186,19 @@ pub enum AccountCommand {
     },
     /// Synchronize the account.
     Sync,
+    /// Show the details of the transaction.
+    #[clap(alias = "tx")]
+    Transaction {
+        /// Transaction ID to be displayed e.g. 0x84fe6b1796bddc022c9bc40206f0a692f4536b02aa8c13140264e2e01a3b7e4b.
+        transaction_id: String,
+    },
     /// List the account transactions.
-    Transactions,
+    #[clap(alias = "txs")]
+    Transactions {
+        /// List account transactions with all details.
+        #[arg(long, default_value_t = false)]
+        show_details: bool,
+    },
     /// List the account unspent outputs.
     UnspentOutputs,
     /// Cast votes for an event.
@@ -706,15 +715,41 @@ pub async fn sync_command(account: &Account) -> Result<(), Error> {
     Ok(())
 }
 
+/// `transaction` command
+pub async fn transaction_command(account: &Account, transaction_id_str: &str) -> Result<(), Error> {
+    let transaction_id = TransactionId::from_str(transaction_id_str)?;
+    let maybe_transaction = account
+        .transactions()
+        .await?
+        .into_iter()
+        .find(|tx| tx.transaction_id == transaction_id);
+
+    if let Some(tx) = maybe_transaction {
+        println_log_info!("{:#?}", tx);
+    } else {
+        println_log_info!("No transaction found");
+    }
+
+    Ok(())
+}
+
 /// `transactions` command
-pub async fn transactions_command(account: &Account) -> Result<(), Error> {
-    let transactions = account.transactions().await?;
+pub async fn transactions_command(account: &Account, show_details: bool) -> Result<(), Error> {
+    let mut transactions = account.transactions().await?;
+    transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
 
     if transactions.is_empty() {
         println_log_info!("No transactions found");
     } else {
-        for tx in transactions {
-            println_log_info!("{}", serde_json::to_string(&TransactionDto::from(&tx))?);
+        for (i, tx) in transactions.into_iter().rev().enumerate() {
+            if show_details {
+                println_log_info!("{:#?}", tx);
+            } else {
+                let transaction_time = to_utc_date_time(tx.timestamp)?;
+                let formatted_time = transaction_time.format("%Y-%m-%d %H:%M:%S").to_string();
+
+                println_log_info!("{:<5}{}\t{}", i, tx.transaction_id, formatted_time);
+            }
         }
     }
 
