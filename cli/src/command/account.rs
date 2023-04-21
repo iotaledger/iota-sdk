@@ -687,29 +687,6 @@ pub async fn sync_command(account_handle: &AccountHandle) -> Result<(), Error> {
     Ok(())
 }
 
-/// `transactions` command
-pub async fn transactions_command(account_handle: &AccountHandle, show_details: bool) -> Result<(), Error> {
-    let mut transactions = account_handle.transactions().await?;
-    transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
-
-    if transactions.is_empty() {
-        println_log_info!("No transactions found");
-    } else {
-        for (i, tx) in transactions.into_iter().enumerate() {
-            if show_details {
-                println_log_info!("{:#?}", tx);
-            } else {
-                let transaction_time = to_utc_date_time(tx.timestamp)?;
-                let formatted_time = transaction_time.format("%Y-%m-%d %H:%M:%S").to_string();
-
-                println_log_info!("{:<5}{}\t{}", i, tx.transaction_id.to_string(), formatted_time);
-            }
-        }
-    }
-
-    Ok(())
-}
-
 /// `transaction` command
 pub async fn transaction_command(account_handle: &AccountHandle, transaction_id_str: &str) -> Result<(), Error> {
     let transaction_id = TransactionId::from_str(transaction_id_str)?;
@@ -723,6 +700,29 @@ pub async fn transaction_command(account_handle: &AccountHandle, transaction_id_
         println_log_info!("{:#?}", tx);
     } else {
         println_log_info!("No transaction found");
+    }
+
+    Ok(())
+}
+
+/// `transactions` command
+pub async fn transactions_command(account_handle: &AccountHandle, show_details: bool) -> Result<(), Error> {
+    let mut transactions = account_handle.transactions().await?;
+    transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+
+    if transactions.is_empty() {
+        println_log_info!("No transactions found");
+    } else {
+        for (i, tx) in transactions.into_iter().rev().enumerate() {
+            if show_details {
+                println_log_info!("{:#?}", tx);
+            } else {
+                let transaction_time = to_utc_date_time(tx.timestamp)?;
+                let formatted_time = transaction_time.format("%Y-%m-%d %H:%M:%S").to_string();
+
+                println_log_info!("{:<5}{}\t{}", i, tx.transaction_id, formatted_time);
+            }
+        }
     }
 
     Ok(())

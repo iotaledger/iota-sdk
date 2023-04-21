@@ -205,9 +205,9 @@ Requests funds from a faucet.
 
 #### Parameters
 
-| Name      | Optional  | Default                                            | Example                                                         |
-| --------- | --------- | -------------------------------------------------- | --------------------------------------------------------------- |
-| `address` | ✓         | The latest address of the account                  | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 |
+| Name      | Optional  | Default                                              | Example                                                           |
+| --------- | --------- | -----------------------------------------------------| ------------------------------------------------------------------|
+| `address` | ✓         | The latest address of the account                    | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3   |
 | `url`     | ✓         | <https://faucet.testnet.shimmer.network/api/enqueue> | <http://localhost:8091/api/enqueue>                               |
 
 #### Examples
@@ -515,7 +515,7 @@ Shows the details of given Transaction ID
 
 | Name             | Optional  | Default | Example                                                                |
 | -----------------| --------- | ------- | ---------------------------------------------------------------------- |
-| `transaction_id` | ✘         | N/A     | 0x84fe6b1796bddc022c9bc40206f0a692f4536b02aa8c13140264e2e01a3b7e4b |
+| `transaction_id` | ✘         | N/A     | 0x84fe6b1796bddc022c9bc40206f0a692f4536b02aa8c13140264e2e01a3b7e4b     |
 
 #### Example
 
