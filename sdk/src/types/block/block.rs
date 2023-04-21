@@ -25,7 +25,7 @@ use crate::types::block::{
 pub struct BlockBuilder {
     protocol_version: Option<u8>,
     parents: Parents,
-    payload: Option<Payload>,
+    payload: OptionalPayload,
     nonce: Option<u64>,
 }
 
@@ -38,7 +38,7 @@ impl BlockBuilder {
         Self {
             protocol_version: None,
             parents,
-            payload: None,
+            payload: OptionalPayload::none(),
             nonce: None,
         }
     }
@@ -52,8 +52,8 @@ impl BlockBuilder {
 
     /// Adds a payload to a [`BlockBuilder`].
     #[inline(always)]
-    pub fn with_payload<T: Into<Payload>>(mut self, payload: impl Into<Option<T>>) -> Self {
-        self.payload = payload.into().map(|p| p.into());
+    pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
+        self.payload = payload.into();
         self
     }
 
@@ -70,7 +70,7 @@ impl BlockBuilder {
         let block = Block {
             protocol_version: self.protocol_version.unwrap_or(PROTOCOL_VERSION),
             parents: self.parents,
-            payload: self.payload.into(),
+            payload: self.payload,
             nonce: self.nonce.unwrap_or(Self::DEFAULT_NONCE),
         };
 

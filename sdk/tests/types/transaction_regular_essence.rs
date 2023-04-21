@@ -76,12 +76,11 @@ fn build_valid_with_payload() {
             .finish(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let payload = rand_tagged_data_payload();
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs(vec![input1, input2])
         .add_output(output)
-        .with_payload(payload)
+        .with_payload(rand_tagged_data_payload())
         .finish(&protocol_parameters);
 
     assert!(essence.is_ok());
@@ -126,12 +125,11 @@ fn build_invalid_payload_kind() {
             .finish(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let payload = rand_treasury_transaction_payload(protocol_parameters.token_supply());
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs(vec![input1, input2])
         .add_output(output)
-        .with_payload(payload)
+        .with_payload(rand_treasury_transaction_payload(protocol_parameters.token_supply()))
         .finish(&protocol_parameters);
 
     assert!(matches!(essence, Err(Error::InvalidPayloadKind(4))));

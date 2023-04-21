@@ -54,9 +54,7 @@ impl Account {
 
         // Optional add a tagged payload
         if let Some(options) = options {
-            if let Some(tagged_data_payload) = &options.tagged_data_payload {
-                essence_builder = essence_builder.with_payload(tagged_data_payload.clone());
-            }
+            essence_builder = essence_builder.with_payload(options.tagged_data_payload);
         }
 
         let essence = essence_builder.finish(&protocol_parameters)?;
