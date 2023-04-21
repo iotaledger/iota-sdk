@@ -6,7 +6,7 @@ use iota_sdk_bindings_core::{call_secret_manager_method, Response, Result, Secre
 
 #[tokio::test]
 async fn generate_addresses() -> Result<()> {
-    let mut secret_manager = SecretManager::try_from_mnemonic(
+    let secret_manager = SecretManager::try_from_mnemonic(
         "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river",
     )?;
 
@@ -14,7 +14,7 @@ async fn generate_addresses() -> Result<()> {
         options: GetAddressesBuilderOptions::default(),
     };
 
-    let response = call_secret_manager_method(&mut secret_manager, method).await;
+    let response = call_secret_manager_method(&secret_manager, method).await;
     match response {
         Response::GeneratedAddresses(addresses) => assert_eq!(
             addresses[0],
