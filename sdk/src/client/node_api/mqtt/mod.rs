@@ -100,7 +100,7 @@ async fn set_mqtt_client(client: &Client) -> Result<(), Error> {
             let mut mqtt_options = MqttOptions::new(id, uri, port);
             if client.broker_options.use_ws {
                 if wss {
-                    mqtt_options.set_transport(Transport::tls_with_config(rumqttc::TlsConfiguration::Native));
+                    mqtt_options.set_transport(Transport::tls_with_default_config());
                 } else {
                     mqtt_options.set_transport(Transport::ws());
                 }
