@@ -135,7 +135,7 @@ fn build_invalid_payload_kind() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs(vec![input1, input2])
         .add_output(output)
-        .with_payload(payload.into())
+        .with_payload(payload)
         .finish(&protocol_parameters);
 
     assert!(matches!(essence, Err(Error::InvalidPayloadKind(4))));

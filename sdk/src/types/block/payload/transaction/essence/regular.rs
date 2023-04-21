@@ -62,8 +62,8 @@ impl RegularTransactionEssenceBuilder {
     }
 
     /// Add a payload to a [`RegularTransactionEssenceBuilder`].
-    pub fn with_payload(mut self, payload: Payload) -> Self {
-        self.payload = Some(payload);
+    pub fn with_payload<T: Into<Payload>>(mut self, payload: impl Into<Option<T>>) -> Self {
+        self.payload = payload.into().map(|p| p.into());
         self
     }
 

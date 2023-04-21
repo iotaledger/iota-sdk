@@ -62,8 +62,8 @@ impl<'a> GetAddressesBuilder<'a> {
     }
 
     /// Provide a client to get the bech32_hrp from the node
-    pub fn with_client(mut self, client: &'a Client) -> Self {
-        self.client.replace(client);
+    pub fn with_client(mut self, client: impl Into<Option<&'a Client>>) -> Self {
+        self.client = client.into();
         self
     }
 
@@ -92,14 +92,14 @@ impl<'a> GetAddressesBuilder<'a> {
     }
 
     /// Set bech32 human readable part (hrp)
-    pub fn with_bech32_hrp<T: Into<String>>(mut self, bech32_hrp: T) -> Self {
-        self.bech32_hrp.replace(bech32_hrp.into());
+    pub fn with_bech32_hrp<T: Into<String>>(mut self, bech32_hrp: impl Into<Option<T>>) -> Self {
+        self.bech32_hrp = bech32_hrp.into().map(|b| b.into());
         self
     }
 
     /// Set the metadata for the address generation (used for ledger to display addresses or not)
-    pub fn with_options(mut self, options: GenerateAddressOptions) -> Self {
-        self.options = Some(options);
+    pub fn with_options(mut self, options: impl Into<Option<GenerateAddressOptions>>) -> Self {
+        self.options = options.into();
         self
     }
 

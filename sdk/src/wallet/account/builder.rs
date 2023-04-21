@@ -63,20 +63,20 @@ impl AccountBuilder {
 
     /// Set the addresses, should only be used for accounts with an offline counterpart account from which the addresses
     /// were exported
-    pub fn with_addresses(mut self, addresses: Vec<AccountAddress>) -> Self {
-        self.addresses.replace(addresses);
+    pub fn with_addresses(mut self, addresses: impl Into<Option<Vec<AccountAddress>>>) -> Self {
+        self.addresses = addresses.into();
         self
     }
 
     /// Set the alias
-    pub fn with_alias(mut self, alias: String) -> Self {
-        self.alias.replace(alias);
+    pub fn with_alias(mut self, alias: impl Into<Option<String>>) -> Self {
+        self.alias = alias.into();
         self
     }
 
     /// Set the bech32 HRP
-    pub fn with_bech32_hrp(mut self, bech32_hrp: String) -> Self {
-        self.bech32_hrp.replace(bech32_hrp);
+    pub fn with_bech32_hrp(mut self, bech32_hrp: impl Into<Option<String>>) -> Self {
+        self.bech32_hrp = bech32_hrp.into();
         self
     }
 

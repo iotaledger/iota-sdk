@@ -174,8 +174,8 @@ impl ClientBuilder {
         Default::default()
     }
 
-    #[allow(unused_assignments)]
     /// Set the fields from a client JSON config
+    #[allow(unused_assignments)]
     pub fn from_json(mut self, client_config: &str) -> Result<Self> {
         self = serde_json::from_str(client_config)?;
         // validate URLs
