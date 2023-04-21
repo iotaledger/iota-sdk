@@ -130,15 +130,15 @@ pub async fn import_mnemonic(path: &str) -> Result<String, Error> {
         Ok(mnemonics.swap_remove(0))
     } else {
         println!("Found {} mnemonics.", mnemonics.len());
-        let n = mnemonics.len() - 1;
+        let n = mnemonics.len();
         let selected_index = loop {
             let input = Input::<usize>::new()
-                .with_prompt(format!("Pick a mnemonic by its index in the range [0..{n}]"))
+                .with_prompt(format!("Pick a mnemonic by its line index in the file ([1..{n}])"))
                 .interact_text()?;
-            if (0..=n).contains(&input) {
+            if (1..=n).contains(&input) {
                 break input;
             } else {
-                println!("Invalid choice. Please pick a valid mnemonic by its index in the range [0..{n}].");
+                println!("Invalid choice. Please pick a valid mnemonic by its index in the range [1..{n}].");
             }
         };
         Ok(mnemonics.swap_remove(selected_index))
