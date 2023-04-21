@@ -130,7 +130,7 @@ impl Account {
                 .unwrap_or(default_return_address.address.inner);
 
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
-            let output = BasicOutputBuilder::new_with_amount(amount)?
+            let output = BasicOutputBuilder::new_with_amount(amount)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
                 .finish_output(token_supply)?;
             let rent_cost = output.rent_cost(&rent_structure);
@@ -162,7 +162,7 @@ impl Account {
                     // Add address_and_amount.amount+storage_deposit_amount, so receiver can get
                     // address_and_amount.amount
                     BasicOutputBuilder::from(output.as_basic())
-                        .with_amount(amount + storage_deposit_amount)?
+                        .with_amount(amount + storage_deposit_amount)
                         .add_unlock_condition(
                             // We send the storage_deposit_amount back to the sender, so only the additional amount is
                             // sent

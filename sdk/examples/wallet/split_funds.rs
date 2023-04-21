@@ -73,7 +73,6 @@ async fn main() -> Result<()> {
             .into_iter()
             .map(|a| {
                 BasicOutputBuilder::new_with_amount(1_000_000)
-                    .unwrap()
                     .add_unlock_condition(AddressUnlockCondition::new(*a.address().as_ref()))
                     .finish_output(token_supply)
                     .unwrap()

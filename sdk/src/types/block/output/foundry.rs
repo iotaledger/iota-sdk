@@ -40,7 +40,7 @@ pub struct FoundryOutputBuilder {
 
 impl FoundryOutputBuilder {
     /// Creates a [`FoundryOutputBuilder`] with a provided amount.
-    pub fn new_with_amount(amount: u64, serial_number: u32, token_scheme: TokenScheme) -> Result<Self, Error> {
+    pub fn new_with_amount(amount: u64, serial_number: u32, token_scheme: TokenScheme) -> Self {
         Self::new(OutputBuilderAmount::Amount(amount), serial_number, token_scheme)
     }
 
@@ -50,7 +50,7 @@ impl FoundryOutputBuilder {
         rent_structure: RentStructure,
         serial_number: u32,
         token_scheme: TokenScheme,
-    ) -> Result<Self, Error> {
+    ) -> Self {
         Self::new(
             OutputBuilderAmount::MinimumStorageDeposit(rent_structure),
             serial_number,
@@ -58,8 +58,8 @@ impl FoundryOutputBuilder {
         )
     }
 
-    fn new(amount: OutputBuilderAmount, serial_number: u32, token_scheme: TokenScheme) -> Result<Self, Error> {
-        Ok(Self {
+    fn new(amount: OutputBuilderAmount, serial_number: u32, token_scheme: TokenScheme) -> Self {
+        Self {
             amount,
             native_tokens: Vec::new(),
             serial_number,
@@ -67,14 +67,14 @@ impl FoundryOutputBuilder {
             unlock_conditions: Vec::new(),
             features: Vec::new(),
             immutable_features: Vec::new(),
-        })
+        }
     }
 
     /// Sets the amount to the provided value.
     #[inline(always)]
-    pub fn with_amount(mut self, amount: u64) -> Result<Self, Error> {
+    pub fn with_amount(mut self, amount: u64) -> Self {
         self.amount = OutputBuilderAmount::Amount(amount);
-        Ok(self)
+        self
     }
 
     /// Sets the amount to the minimum storage deposit.
@@ -316,7 +316,7 @@ impl FoundryOutput {
         token_scheme: TokenScheme,
         token_supply: u64,
     ) -> Result<Self, Error> {
-        FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme)?.finish(token_supply)
+        FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme).finish(token_supply)
     }
 
     /// Creates a new [`FoundryOutput`] with a provided rent structure.
@@ -328,17 +328,13 @@ impl FoundryOutput {
         rent_structure: RentStructure,
         token_supply: u64,
     ) -> Result<Self, Error> {
-        FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, serial_number, token_scheme)?
+        FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, serial_number, token_scheme)
             .finish(token_supply)
     }
 
     /// Creates a new [`FoundryOutputBuilder`] with a provided amount.
     #[inline(always)]
-    pub fn build_with_amount(
-        amount: u64,
-        serial_number: u32,
-        token_scheme: TokenScheme,
-    ) -> Result<FoundryOutputBuilder, Error> {
+    pub fn build_with_amount(amount: u64, serial_number: u32, token_scheme: TokenScheme) -> FoundryOutputBuilder {
         FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme)
     }
 
@@ -349,7 +345,7 @@ impl FoundryOutput {
         rent_structure: RentStructure,
         serial_number: u32,
         token_scheme: TokenScheme,
-    ) -> Result<FoundryOutputBuilder, Error> {
+    ) -> FoundryOutputBuilder {
         FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, serial_number, token_scheme)
     }
 
@@ -691,7 +687,7 @@ pub mod dto {
                     .map_err(|_| DtoError::InvalidField("amount"))?,
                 value.serial_number,
                 (&value.token_scheme).try_into()?,
-            )?;
+            );
 
             for t in &value.native_tokens {
                 builder = builder.add_native_token(t.try_into()?);
@@ -746,9 +742,9 @@ pub mod dto {
                     amount.parse().map_err(|_| DtoError::InvalidField("amount"))?,
                     serial_number,
                     token_scheme,
-                )?,
+                ),
                 OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
-                    FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, serial_number, token_scheme)?
+                    FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, serial_number, token_scheme)
                 }
             };
 

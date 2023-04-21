@@ -22,7 +22,7 @@ async fn send_basic_output() -> Result<()> {
 
     let second_address = client.get_addresses(&secret_manager).with_range(1..2).get_raw().await?[0];
 
-    let output = BasicOutputBuilder::new_with_amount(1_000_000)?
+    let output = BasicOutputBuilder::new_with_amount(1_000_000)
         .add_unlock_condition(AddressUnlockCondition::new(second_address))
         .finish_output(token_supply)?;
 

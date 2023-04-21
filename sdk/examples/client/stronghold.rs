@@ -14,7 +14,7 @@ use iota_sdk::client::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let mut stronghold_secret_manager = StrongholdSecretManager::builder()
+    let stronghold_secret_manager = StrongholdSecretManager::builder()
         .password("some_hopefully_secure_password")
         .build("test.stronghold")?;
 

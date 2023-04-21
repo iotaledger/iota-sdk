@@ -109,8 +109,8 @@ impl<'a> ClientBlockBuilder<'a> {
     }
 
     /// Sets explicit burning of aliases, nfts, foundries and native tokens.
-    pub fn with_burn(mut self, burn: Burn) -> Self {
-        self.burn.replace(burn);
+    pub fn with_burn(mut self, burn: impl Into<Option<Burn>>) -> Self {
+        self.burn = burn.into();
         self
     }
 
@@ -165,7 +165,7 @@ impl<'a> ClientBlockBuilder<'a> {
         let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
         self.client.bech32_hrp_matches(&bech32_hrp).await?;
 
-        let output = BasicOutputBuilder::new_with_amount(amount)?
+        let output = BasicOutputBuilder::new_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish_output(self.client.get_token_supply().await?)?;
         self.outputs.push(output);
@@ -190,7 +190,7 @@ impl<'a> ClientBlockBuilder<'a> {
 
     /// Set a transfer to the builder, address needs to be hex encoded
     pub async fn with_output_hex(mut self, address: &str, amount: u64) -> Result<ClientBlockBuilder<'a>> {
-        let output = BasicOutputBuilder::new_with_amount(amount)?
+        let output = BasicOutputBuilder::new_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address.parse::<Ed25519Address>()?.into()))
             .finish_output(self.client.get_token_supply().await?)?;
         self.outputs.push(output);
@@ -210,20 +210,20 @@ impl<'a> ClientBlockBuilder<'a> {
     }
 
     /// Set tagged_data to the builder
-    pub fn with_tag(mut self, tag: Vec<u8>) -> Self {
-        self.tag.replace(tag);
+    pub fn with_tag(mut self, tag: impl Into<Option<Vec<u8>>>) -> Self {
+        self.tag = tag.into();
         self
     }
 
     /// Set data to the builder
-    pub fn with_data(mut self, data: Vec<u8>) -> Self {
-        self.data.replace(data);
+    pub fn with_data(mut self, data: impl Into<Option<Vec<u8>>>) -> Self {
+        self.data = data.into();
         self
     }
 
     /// Set 1-8 custom parent block ids
-    pub fn with_parents(mut self, parent_ids: Vec<BlockId>) -> Result<Self> {
-        self.parents.replace(Parents::new(parent_ids)?);
+    pub fn with_parents(mut self, parent_ids: impl Into<Option<Vec<BlockId>>>) -> Result<Self> {
+        self.parents = parent_ids.into().map(Parents::new).transpose()?;
         Ok(self)
     }
 
@@ -292,11 +292,11 @@ impl<'a> ClientBlockBuilder<'a> {
         }
 
         if let Some(tag) = options.tag {
-            self = self.with_tag(prefix_hex::decode(tag)?);
+            self = self.with_tag(prefix_hex::decode::<Vec<_>>(tag)?);
         }
 
         if let Some(data) = options.data {
-            self = self.with_data(prefix_hex::decode(data)?);
+            self = self.with_data(prefix_hex::decode::<Vec<_>>(data)?);
         }
 
         if let Some(parents) = options.parents {

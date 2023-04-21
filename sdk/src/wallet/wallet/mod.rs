@@ -9,8 +9,6 @@ use std::sync::{
     Arc,
 };
 
-#[cfg(feature = "events")]
-use tokio::sync::Mutex;
 use tokio::sync::RwLock;
 
 #[cfg(feature = "storage")]
@@ -43,11 +41,11 @@ pub struct Wallet {
     pub(crate) coin_type: Arc<AtomicU32>,
     pub(crate) secret_manager: Arc<RwLock<SecretManager>>,
     #[cfg(feature = "events")]
-    pub(crate) event_emitter: Arc<Mutex<EventEmitter>>,
+    pub(crate) event_emitter: Arc<tokio::sync::Mutex<EventEmitter>>,
     #[cfg(feature = "storage")]
     pub(crate) storage_options: StorageOptions,
     #[cfg(feature = "storage")]
-    pub(crate) storage_manager: Arc<Mutex<StorageManager>>,
+    pub(crate) storage_manager: Arc<tokio::sync::Mutex<StorageManager>>,
 }
 
 impl Wallet {

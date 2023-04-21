@@ -36,8 +36,8 @@ impl SingleThreadedMinerBuilder {
 
     /// Aborts and returns a "cancelled" error after the interval elapses, if set.
     /// New parents (tips) should be fetched and proof-of-work re-run afterwards.
-    pub fn with_timeout_in_seconds(mut self, timeout_in_seconds: u64) -> Self {
-        self.timeout_in_seconds = Some(timeout_in_seconds);
+    pub fn with_timeout_in_seconds(mut self, timeout_in_seconds: impl Into<Option<u64>>) -> Self {
+        self.timeout_in_seconds = timeout_in_seconds.into();
         self
     }
 

@@ -98,7 +98,7 @@ impl Account {
         };
 
         let basic_output = Output::Basic(
-            BasicOutputBuilder::new_with_amount(alias_output.amount())?
+            BasicOutputBuilder::new_with_amount(alias_output.amount())
                 .add_unlock_condition(AddressUnlockCondition::new(*alias_output.governor_address()))
                 .with_native_tokens(alias_output.native_tokens().clone())
                 .finish(token_supply)?,
