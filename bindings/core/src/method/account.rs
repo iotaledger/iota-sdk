@@ -213,7 +213,7 @@ pub enum AccountMethod {
         max_attempts: Option<u64>,
     },
     /// Sync the account by fetching new information from the nodes. Will also retry pending transactions
-    /// if necessary.
+    /// if necessary. A custom default can be set using SetDefaultSyncOptions.
     /// Expected response: [`Balance`](crate::Response::Balance)
     Sync {
         /// Sync options

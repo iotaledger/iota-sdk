@@ -1069,6 +1069,8 @@ export class Account {
     /**
      * Sync the account by fetching new information from the nodes.
      * Will also retry pending transactions if necessary.
+     * A custom default can be set using setDefaultSyncOptions
+     * 
      * @param options Optional synchronization options.
      * @returns The account balance.
      */

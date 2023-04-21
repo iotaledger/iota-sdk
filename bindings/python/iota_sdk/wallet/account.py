@@ -402,7 +402,7 @@ class Account:
     def sync(self, options=None):
         """Sync the account by fetching new information from the nodes.
            Will also retry pending transactions and consolidate outputs if necessary.
-           A custom defaults can be set using set_default_sync_options
+           A custom default can be set using set_default_sync_options
         """
         return self._call_account_method(
             'sync', {

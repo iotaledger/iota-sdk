@@ -43,7 +43,7 @@ impl Account {
     }
 
     /// Sync the account by fetching new information from the nodes. Will also retry pending transactions
-    /// if necessary.
+    /// if necessary. A custom default can be set using set_default_sync_options.
     pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<AccountBalance> {
         let options = match options {
             Some(opt) => opt,
