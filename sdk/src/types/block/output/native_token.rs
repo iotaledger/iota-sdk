@@ -1,10 +1,13 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{boxed::Box, vec::Vec};
+use alloc::{
+    boxed::Box,
+    collections::{BTreeMap, BTreeSet},
+    vec::Vec,
+};
 
 use derive_more::{Deref, DerefMut, From};
-use hashbrown::HashMap;
 use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 use primitive_types::U256;
@@ -12,7 +15,7 @@ use primitive_types::U256;
 use crate::types::block::{output::TokenId, Error};
 
 ///
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
 pub struct NativeToken {
@@ -45,6 +48,17 @@ impl NativeToken {
     }
 }
 
+impl PartialOrd for NativeToken {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+        self.token_id.partial_cmp(&other.token_id)
+    }
+}
+impl Ord for NativeToken {
+    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+
 #[inline]
 fn verify_amount<const VERIFY: bool>(amount: &U256, _: &()) -> Result<(), Error> {
     if VERIFY && amount.is_zero() {
@@ -57,7 +71,7 @@ fn verify_amount<const VERIFY: bool>(amount: &U256, _: &()) -> Result<(), Error>
 /// A builder for [`NativeTokens`].
 #[derive(Clone, Default, Debug, Deref, DerefMut, From)]
 #[must_use]
-pub struct NativeTokensBuilder(HashMap<TokenId, U256>);
+pub struct NativeTokensBuilder(BTreeMap<TokenId, U256>);
 
 impl NativeTokensBuilder {
     /// Creates a new [`NativeTokensBuilder`].
@@ -100,12 +114,20 @@ impl NativeTokensBuilder {
             self.0
                 .into_iter()
                 .map(|(token_id, amount)| NativeToken::new(token_id, amount))
-                .collect::<Result<Vec<_>, _>>()?,
+                .collect::<Result<BTreeSet<_>, _>>()?,
         )
     }
 
     /// Finishes the [`NativeTokensBuilder`] into a [`Vec<NativeToken>`].
     pub fn finish_vec(self) -> Result<Vec<NativeToken>, Error> {
+        self.0
+            .into_iter()
+            .map(|(token_id, amount)| NativeToken::new(token_id, amount))
+            .collect::<Result<_, _>>()
+    }
+
+    /// Finishes the [`NativeTokensBuilder`] into a [`BTreeSet<NativeToken>`].
+    pub fn finish_set(self) -> Result<BTreeSet<NativeToken>, Error> {
         self.0
             .into_iter()
             .map(|(token_id, amount)| NativeToken::new(token_id, amount))
@@ -139,7 +161,16 @@ impl TryFrom<Vec<NativeToken>> for NativeTokens {
 
     #[inline(always)]
     fn try_from(native_tokens: Vec<NativeToken>) -> Result<Self, Self::Error> {
-        Self::new(native_tokens)
+        Self::from_vec(native_tokens)
+    }
+}
+
+impl TryFrom<BTreeSet<NativeToken>> for NativeTokens {
+    type Error = Error;
+
+    #[inline(always)]
+    fn try_from(native_tokens: BTreeSet<NativeToken>) -> Result<Self, Self::Error> {
+        Self::from_set(native_tokens)
     }
 }
 
@@ -156,8 +187,8 @@ impl NativeTokens {
     /// Maximum number of different native tokens that can be referenced in one transaction.
     pub const COUNT_MAX: u8 = 64;
 
-    /// Creates a new [`NativeTokens`].
-    pub fn new(native_tokens: Vec<NativeToken>) -> Result<Self, Error> {
+    /// Creates a new [`NativeTokens`] from a vec.
+    pub fn from_vec(native_tokens: Vec<NativeToken>) -> Result<Self, Error> {
         let mut native_tokens =
             BoxedSlicePrefix::<NativeToken, NativeTokenCount>::try_from(native_tokens.into_boxed_slice())
                 .map_err(Error::InvalidNativeTokenCount)?;
@@ -167,6 +198,17 @@ impl NativeTokens {
         verify_unique_sorted::<true>(&native_tokens, &())?;
 
         Ok(Self(native_tokens))
+    }
+
+    /// Creates a new [`NativeTokens`] from an ordered set.
+    pub fn from_set(native_tokens: BTreeSet<NativeToken>) -> Result<Self, Error> {
+        Ok(Self(
+            native_tokens
+                .into_iter()
+                .collect::<Box<[_]>>()
+                .try_into()
+                .map_err(Error::InvalidNativeTokenCount)?,
+        ))
     }
 
     /// Creates a new [`NativeTokensBuilder`].

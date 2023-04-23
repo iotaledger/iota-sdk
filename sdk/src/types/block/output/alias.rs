@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::vec::Vec;
+use alloc::{collections::BTreeSet, vec::Vec};
 
 use packable::{
     bounded::BoundedU16,
@@ -62,14 +62,14 @@ impl core::fmt::Display for AliasTransition {
 #[must_use]
 pub struct AliasOutputBuilder {
     amount: OutputBuilderAmount,
-    native_tokens: Vec<NativeToken>,
+    native_tokens: BTreeSet<NativeToken>,
     alias_id: AliasId,
     state_index: Option<u32>,
     state_metadata: Vec<u8>,
     foundry_counter: Option<u32>,
-    unlock_conditions: Vec<UnlockCondition>,
-    features: Vec<Feature>,
-    immutable_features: Vec<Feature>,
+    unlock_conditions: BTreeSet<UnlockCondition>,
+    features: BTreeSet<Feature>,
+    immutable_features: BTreeSet<Feature>,
 }
 
 impl AliasOutputBuilder {
@@ -87,14 +87,14 @@ impl AliasOutputBuilder {
     fn new(amount: OutputBuilderAmount, alias_id: AliasId) -> Self {
         Self {
             amount,
-            native_tokens: Vec::new(),
+            native_tokens: BTreeSet::new(),
             alias_id,
             state_index: None,
             state_metadata: Vec::new(),
             foundry_counter: None,
-            unlock_conditions: Vec::new(),
-            features: Vec::new(),
-            immutable_features: Vec::new(),
+            unlock_conditions: BTreeSet::new(),
+            features: BTreeSet::new(),
+            immutable_features: BTreeSet::new(),
         }
     }
 
@@ -115,7 +115,7 @@ impl AliasOutputBuilder {
     ///
     #[inline(always)]
     pub fn add_native_token(mut self, native_token: NativeToken) -> Self {
-        self.native_tokens.push(native_token);
+        self.native_tokens.insert(native_token);
         self
     }
 
@@ -154,10 +154,10 @@ impl AliasOutputBuilder {
         self
     }
 
-    /// Adds an [`UnlockCondition`] to the builder.
+    /// Adds an [`UnlockCondition`] to the builder, if one does not already exist of that type.
     #[inline(always)]
     pub fn add_unlock_condition(mut self, unlock_condition: impl Into<UnlockCondition>) -> Self {
-        self.unlock_conditions.push(unlock_condition.into());
+        self.unlock_conditions.insert(unlock_condition.into());
         self
     }
 
@@ -173,16 +173,7 @@ impl AliasOutputBuilder {
 
     /// Replaces an [`UnlockCondition`] of the builder with a new one, or adds it.
     pub fn replace_unlock_condition(mut self, unlock_condition: impl Into<UnlockCondition>) -> Self {
-        let unlock_condition = unlock_condition.into();
-
-        match self
-            .unlock_conditions
-            .iter_mut()
-            .find(|u| u.kind() == unlock_condition.kind())
-        {
-            Some(u) => *u = unlock_condition,
-            None => self.unlock_conditions.push(unlock_condition),
-        }
+        self.unlock_conditions.replace(unlock_condition.into());
         self
     }
 
@@ -193,10 +184,10 @@ impl AliasOutputBuilder {
         self
     }
 
-    /// Adds a [`Feature`] to the builder.
+    /// Adds a [`Feature`] to the builder, if one does not already exist of that type.
     #[inline(always)]
     pub fn add_feature(mut self, feature: impl Into<Feature>) -> Self {
-        self.features.push(feature.into());
+        self.features.insert(feature.into());
         self
     }
 
@@ -209,12 +200,7 @@ impl AliasOutputBuilder {
 
     /// Replaces a [`Feature`] of the builder with a new one, or adds it.
     pub fn replace_feature(mut self, feature: impl Into<Feature>) -> Self {
-        let feature = feature.into();
-
-        match self.features.iter_mut().find(|f| f.kind() == feature.kind()) {
-            Some(f) => *f = feature,
-            None => self.features.push(feature),
-        }
+        self.features.replace(feature.into());
         self
     }
 
@@ -225,10 +211,10 @@ impl AliasOutputBuilder {
         self
     }
 
-    /// Adds an immutable [`Feature`] to the builder.
+    /// Adds an immutable [`Feature`] to the builder, if one does not already exist of that type.
     #[inline(always)]
     pub fn add_immutable_feature(mut self, immutable_feature: impl Into<Feature>) -> Self {
-        self.immutable_features.push(immutable_feature.into());
+        self.immutable_features.insert(immutable_feature.into());
         self
     }
 
@@ -241,16 +227,7 @@ impl AliasOutputBuilder {
 
     /// Replaces an immutable [`Feature`] of the builder with a new one, or adds it.
     pub fn replace_immutable_feature(mut self, immutable_feature: impl Into<Feature>) -> Self {
-        let immutable_feature = immutable_feature.into();
-
-        match self
-            .immutable_features
-            .iter_mut()
-            .find(|f| f.kind() == immutable_feature.kind())
-        {
-            Some(f) => *f = immutable_feature,
-            None => self.immutable_features.push(immutable_feature),
-        }
+        self.immutable_features.replace(immutable_feature.into());
         self
     }
 
@@ -274,21 +251,21 @@ impl AliasOutputBuilder {
 
         verify_index_counter(&self.alias_id, state_index, foundry_counter)?;
 
-        let unlock_conditions = UnlockConditions::new(self.unlock_conditions)?;
+        let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions(&unlock_conditions, &self.alias_id)?;
 
-        let features = Features::new(self.features)?;
+        let features = Features::from_set(self.features)?;
 
         verify_allowed_features(&features, AliasOutput::ALLOWED_FEATURES)?;
 
-        let immutable_features = Features::new(self.immutable_features)?;
+        let immutable_features = Features::from_set(self.immutable_features)?;
 
         verify_allowed_features(&immutable_features, AliasOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
         let mut output = AliasOutput {
             amount: 1,
-            native_tokens: NativeTokens::new(self.native_tokens)?,
+            native_tokens: NativeTokens::from_set(self.native_tokens)?,
             alias_id: self.alias_id,
             state_index,
             state_metadata,
@@ -327,14 +304,14 @@ impl From<&AliasOutput> for AliasOutputBuilder {
     fn from(output: &AliasOutput) -> Self {
         Self {
             amount: OutputBuilderAmount::Amount(output.amount),
-            native_tokens: output.native_tokens.to_vec(),
+            native_tokens: output.native_tokens.iter().copied().collect(),
             alias_id: output.alias_id,
             state_index: Some(output.state_index),
             state_metadata: output.state_metadata.to_vec(),
             foundry_counter: Some(output.foundry_counter),
-            unlock_conditions: output.unlock_conditions.to_vec(),
-            features: output.features.to_vec(),
-            immutable_features: output.immutable_features.to_vec(),
+            unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
+            features: output.features.iter().cloned().collect(),
+            immutable_features: output.immutable_features.iter().cloned().collect(),
         }
     }
 }

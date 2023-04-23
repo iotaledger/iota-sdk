@@ -4,7 +4,7 @@
 mod parameters;
 mod receipt;
 
-use alloc::{boxed::Box, vec::Vec};
+use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
 
 use derive_more::{Deref, From};
 use iterator_sorted::is_unique_sorted;
@@ -46,6 +46,17 @@ impl MilestoneOption {
     }
 }
 
+impl PartialOrd for MilestoneOption {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+        self.kind().partial_cmp(&other.kind())
+    }
+}
+impl Ord for MilestoneOption {
+    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+
 pub(crate) type MilestoneOptionCount = BoundedU8<0, { MilestoneOptions::COUNT_MAX }>;
 
 ///
@@ -62,7 +73,16 @@ impl TryFrom<Vec<MilestoneOption>> for MilestoneOptions {
 
     #[inline(always)]
     fn try_from(milestone_options: Vec<MilestoneOption>) -> Result<Self, Self::Error> {
-        Self::new(milestone_options)
+        Self::from_vec(milestone_options)
+    }
+}
+
+impl TryFrom<BTreeSet<MilestoneOption>> for MilestoneOptions {
+    type Error = Error;
+
+    #[inline(always)]
+    fn try_from(milestone_options: BTreeSet<MilestoneOption>) -> Result<Self, Self::Error> {
+        Self::from_set(milestone_options)
     }
 }
 
@@ -79,8 +99,8 @@ impl MilestoneOptions {
     ///
     pub const COUNT_MAX: u8 = 2;
 
-    /// Creates a new [`MilestoneOptions`].
-    pub fn new(milestone_options: Vec<MilestoneOption>) -> Result<Self, Error> {
+    /// Creates a new [`MilestoneOptions`] from a vec.
+    pub fn from_vec(milestone_options: Vec<MilestoneOption>) -> Result<Self, Error> {
         let mut milestone_options =
             BoxedSlicePrefix::<MilestoneOption, MilestoneOptionCount>::try_from(milestone_options.into_boxed_slice())
                 .map_err(Error::InvalidMilestoneOptionCount)?;
@@ -90,6 +110,17 @@ impl MilestoneOptions {
         verify_unique_sorted::<true>(&milestone_options)?;
 
         Ok(Self(milestone_options))
+    }
+
+    /// Creates a new [`MilestoneOptions`] from an ordered set.
+    pub fn from_set(milestone_options: BTreeSet<MilestoneOption>) -> Result<Self, Error> {
+        Ok(Self(
+            milestone_options
+                .into_iter()
+                .collect::<Box<[_]>>()
+                .try_into()
+                .map_err(Error::InvalidMilestoneOptionCount)?,
+        ))
     }
 
     /// Gets a reference to a [`MilestoneOption`] from a milestone option kind, if any.
