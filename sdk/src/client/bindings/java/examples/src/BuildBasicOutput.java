@@ -91,7 +91,7 @@ public class BuildBasicOutput {
             .withAmount(amount)
             .withUnlockConditions(new UnlockCondition[]{addressUnlockCondition})
             // "Hello, World!" hex encoded
-            .withFeatures(new Feature[]{new Feature("{ type: 3, data: \"0x48656c6c6f2c20576f726c6421\" }")});
+            .withFeatures(new Feature[]{new Feature("{ type: 3, tag: \"0x48656c6c6f2c20576f726c6421\" }")});
 
         Output tagOutput = client.buildBasicOutput(tagParams);
 
