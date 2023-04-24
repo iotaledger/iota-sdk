@@ -623,10 +623,13 @@ pub mod dto {
 mod tests {
     use packable::PackableExt;
 
-    use super::{dto::NftOutputDto, *};
+    use super::*;
     use crate::types::block::{
         address::AliasAddress,
-        output::{dto::OutputBuilderAmountDto, FoundryId, SimpleTokenScheme, TokenId},
+        output::{
+            dto::{OutputBuilderAmountDto, OutputDto},
+            FoundryId, SimpleTokenScheme, TokenId,
+        },
         protocol::protocol_parameters,
         rand::{
             address::rand_alias_address,
@@ -698,11 +701,11 @@ mod tests {
     fn to_from_dto() {
         let protocol_parameters = protocol_parameters();
         let output = rand_nft_output(protocol_parameters.token_supply());
-        let dto = NftOutputDto::from(&output);
-        let output_unver = NftOutput::try_from_dto_unverified(&dto).unwrap();
-        assert_eq!(output, output_unver);
-        let output_ver = NftOutput::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
-        assert_eq!(output, output_ver);
+        let dto = OutputDto::Nft((&output).into());
+        let output_unver = Output::try_from_dto_unverified(&dto).unwrap();
+        assert_eq!(&output, output_unver.as_nft());
+        let output_ver = Output::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
+        assert_eq!(&output, output_ver.as_nft());
 
         let output_split = NftOutput::try_from_dtos(
             OutputBuilderAmountDto::Amount(output.amount().to_string()),

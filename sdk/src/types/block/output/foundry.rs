@@ -737,12 +737,13 @@ pub mod dto {
 mod tests {
     use packable::PackableExt;
 
-    use super::{dto::FoundryOutputDto, *};
+    use super::*;
     use crate::types::block::{
         address::AliasAddress,
         output::{
-            dto::OutputBuilderAmountDto, unlock_condition::ImmutableAliasAddressUnlockCondition, FoundryId,
-            SimpleTokenScheme, TokenId,
+            dto::{OutputBuilderAmountDto, OutputDto},
+            unlock_condition::ImmutableAliasAddressUnlockCondition,
+            FoundryId, SimpleTokenScheme, TokenId,
         },
         protocol::protocol_parameters,
         rand::{
@@ -811,11 +812,11 @@ mod tests {
     fn to_from_dto() {
         let protocol_parameters = protocol_parameters();
         let output = rand_foundry_output(protocol_parameters.token_supply());
-        let dto = FoundryOutputDto::from(&output);
-        let output_unver = FoundryOutput::try_from_dto_unverified(&dto).unwrap();
-        assert_eq!(output, output_unver);
-        let output_ver = FoundryOutput::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
-        assert_eq!(output, output_ver);
+        let dto = OutputDto::Foundry((&output).into());
+        let output_unver = Output::try_from_dto_unverified(&dto).unwrap();
+        assert_eq!(&output, output_unver.as_foundry());
+        let output_ver = Output::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
+        assert_eq!(&output, output_ver.as_foundry());
 
         let output_split = FoundryOutput::try_from_dtos(
             OutputBuilderAmountDto::Amount(output.amount().to_string()),

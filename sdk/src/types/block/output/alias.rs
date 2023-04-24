@@ -873,10 +873,13 @@ pub mod dto {
 mod tests {
     use packable::PackableExt;
 
-    use super::{dto::AliasOutputDto, *};
+    use super::*;
     use crate::types::block::{
         address::AliasAddress,
-        output::{dto::OutputBuilderAmountDto, FoundryId, SimpleTokenScheme, TokenId},
+        output::{
+            dto::{OutputBuilderAmountDto, OutputDto},
+            FoundryId, SimpleTokenScheme, TokenId,
+        },
         protocol::protocol_parameters,
         rand::output::{
             feature::{rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
@@ -969,11 +972,11 @@ mod tests {
     fn to_from_dto() {
         let protocol_parameters = protocol_parameters();
         let output = rand_alias_output(protocol_parameters.token_supply());
-        let dto = AliasOutputDto::from(&output);
-        let output_unver = AliasOutput::try_from_dto_unverified(&dto).unwrap();
-        assert_eq!(output, output_unver);
-        let output_ver = AliasOutput::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
-        assert_eq!(output, output_ver);
+        let dto = OutputDto::Alias((&output).into());
+        let output_unver = Output::try_from_dto_unverified(&dto).unwrap();
+        assert_eq!(&output, output_unver.as_alias());
+        let output_ver = Output::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
+        assert_eq!(&output, output_ver.as_alias());
 
         let output_split = AliasOutput::try_from_dtos(
             OutputBuilderAmountDto::Amount(output.amount().to_string()),
