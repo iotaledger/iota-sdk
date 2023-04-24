@@ -73,6 +73,9 @@ pub enum Error {
     /// Unpack error
     #[error("{0}")]
     Unpack(#[from] packable::error::UnpackError<crate::types::block::Error, UnexpectedEOF>),
+    /// No available inputs provided
+    #[error("No available inputs provided")]
+    NoAvailableInputsProvided,
 }
 
 impl From<crate::types::block::Error> for Error {
@@ -240,6 +243,10 @@ impl SecretManageExt for LedgerSecretManager {
                 bip32_change: bip32_indices[3] | HARDENED,
                 bip32_index: bip32_indices[4] | HARDENED,
             });
+        }
+
+        if coin_type.is_none() || account_index.is_none() {
+            return Err(Error::NoAvailableInputsProvided)?;
         }
 
         let coin_type = coin_type.unwrap() & !HARDENED;
