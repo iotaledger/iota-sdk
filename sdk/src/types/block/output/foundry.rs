@@ -285,30 +285,6 @@ impl FoundryOutput {
     /// The set of allowed immutable [`Feature`]s for a [`FoundryOutput`].
     pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::METADATA;
 
-    /// Creates a new [`FoundryOutput`] with a provided amount.
-    #[inline(always)]
-    pub fn new_with_amount(
-        amount: u64,
-        serial_number: u32,
-        token_scheme: TokenScheme,
-        token_supply: u64,
-    ) -> Result<Self, Error> {
-        FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme).finish(token_supply)
-    }
-
-    /// Creates a new [`FoundryOutput`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    #[inline(always)]
-    pub fn new_with_minimum_storage_deposit(
-        serial_number: u32,
-        token_scheme: TokenScheme,
-        rent_structure: RentStructure,
-        token_supply: u64,
-    ) -> Result<Self, Error> {
-        FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, serial_number, token_scheme)
-            .finish(token_supply)
-    }
-
     /// Creates a new [`FoundryOutputBuilder`] with a provided amount.
     #[inline(always)]
     pub fn build_with_amount(amount: u64, serial_number: u32, token_scheme: TokenScheme) -> FoundryOutputBuilder {

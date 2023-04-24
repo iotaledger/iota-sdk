@@ -354,23 +354,6 @@ impl AliasOutput {
     /// The set of allowed immutable [`Feature`]s for an [`AliasOutput`].
     pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::ISSUER.union(FeatureFlags::METADATA);
 
-    /// Creates a new [`AliasOutput`] with a provided amount.
-    #[inline(always)]
-    pub fn new_with_amount(amount: u64, alias_id: AliasId, token_supply: u64) -> Result<Self, Error> {
-        AliasOutputBuilder::new_with_amount(amount, alias_id).finish(token_supply)
-    }
-
-    /// Creates a new [`AliasOutput`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    #[inline(always)]
-    pub fn new_with_minimum_storage_deposit(
-        alias_id: AliasId,
-        rent_structure: RentStructure,
-        token_supply: u64,
-    ) -> Result<Self, Error> {
-        AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id).finish(token_supply)
-    }
-
     /// Creates a new [`AliasOutputBuilder`] with a provided amount.
     #[inline(always)]
     pub fn build_with_amount(amount: u64, alias_id: AliasId) -> AliasOutputBuilder {
