@@ -221,19 +221,6 @@ impl BasicOutput {
         .union(FeatureFlags::METADATA)
         .union(FeatureFlags::TAG);
 
-    /// Creates a new [`BasicOutput`] with a provided amount.
-    #[inline(always)]
-    pub fn new_with_amount(amount: u64, token_supply: u64) -> Result<Self, Error> {
-        BasicOutputBuilder::new_with_amount(amount).finish(token_supply)
-    }
-
-    /// Creates a new [`BasicOutput`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    #[inline(always)]
-    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, token_supply: u64) -> Result<Self, Error> {
-        BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure).finish(token_supply)
-    }
-
     /// Creates a new [`BasicOutputBuilder`] with a provided amount.
     #[inline(always)]
     pub fn build_with_amount(amount: u64) -> BasicOutputBuilder {

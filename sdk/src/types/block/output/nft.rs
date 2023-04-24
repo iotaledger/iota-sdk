@@ -269,23 +269,6 @@ impl NftOutput {
     /// The set of allowed immutable [`Feature`]s for an [`NftOutput`].
     pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::ISSUER.union(FeatureFlags::METADATA);
 
-    /// Creates a new [`NftOutput`] with a provided amount.
-    #[inline(always)]
-    pub fn new_with_amount(amount: u64, nft_id: NftId, token_supply: u64) -> Result<Self, Error> {
-        NftOutputBuilder::new_with_amount(amount, nft_id).finish(token_supply)
-    }
-
-    /// Creates a new [`NftOutput`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    #[inline(always)]
-    pub fn new_with_minimum_storage_deposit(
-        nft_id: NftId,
-        rent_structure: RentStructure,
-        token_supply: u64,
-    ) -> Result<Self, Error> {
-        NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, nft_id).finish(token_supply)
-    }
-
     /// Creates a new [`NftOutputBuilder`] with a provided amount.
     #[inline(always)]
     pub fn build_with_amount(amount: u64, nft_id: NftId) -> NftOutputBuilder {
