@@ -179,19 +179,16 @@ pub mod dto {
 
     /// The payload type to define a milestone.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct MilestonePayloadDto {
         #[serde(rename = "type")]
         pub kind: u32,
         pub index: u32,
         pub timestamp: u32,
-        #[serde(rename = "protocolVersion")]
         pub protocol_version: u8,
-        #[serde(rename = "previousMilestoneId")]
         pub previous_milestone_id: String,
         pub parents: Vec<String>,
-        #[serde(rename = "inclusionMerkleRoot")]
         pub inclusion_merkle_root: String,
-        #[serde(rename = "appliedMerkleRoot")]
         pub applied_merkle_root: String,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub options: Vec<MilestoneOptionDto>,
@@ -261,7 +258,7 @@ pub mod dto {
                     timestamp,
                     protocol_parameters.protocol_version(),
                     previous_milestone_id,
-                    Parents::new(parent_ids)?,
+                    Parents::from_vec(parent_ids)?,
                     inclusion_merkle_root,
                     applied_merkle_root,
                     metadata,
@@ -316,7 +313,7 @@ pub mod dto {
                     timestamp,
                     protocol_version,
                     previous_milestone_id,
-                    Parents::new(parent_ids)?,
+                    Parents::from_vec(parent_ids)?,
                     inclusion_merkle_root,
                     applied_merkle_root,
                     metadata,

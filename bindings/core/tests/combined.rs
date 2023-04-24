@@ -28,7 +28,6 @@ async fn generate_addresses() -> Result<()> {
         coin_type: None,
         account_index: None,
         range: Some(0..10),
-        internal: None,
         bech32_hrp: Some("atoi".to_string()),
         options: None,
     };

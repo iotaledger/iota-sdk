@@ -13,6 +13,7 @@ use std::fmt::{Formatter, Result as FmtResult};
 
 use derivative::Derivative;
 use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
+pub use iota_sdk;
 use iota_sdk::{
     client::secret::{SecretManager, SecretManagerDto},
     wallet::{wallet::Wallet, ClientOptions},
@@ -24,9 +25,7 @@ pub use self::method_handler::listen_mqtt;
 pub use self::{
     error::{Error, Result},
     method::{AccountMethod, ClientMethod, SecretManagerMethod, UtilsMethod, WalletMethod},
-    method_handler::{
-        call_account_method, call_client_method, call_secret_manager_method, call_utils_method, call_wallet_method,
-    },
+    method_handler::{call_client_method, call_secret_manager_method, call_utils_method, call_wallet_method},
     response::Response,
 };
 

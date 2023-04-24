@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::collections::BTreeMap;
 use std::collections::{HashMap, HashSet};
 
 use primitive_types::U256;
@@ -24,8 +25,7 @@ pub struct Burn {
     /// Foundries to burn.
     pub(crate) foundries: HashSet<FoundryId>,
     /// Amounts of native tokens to burn.
-    /// `hashbrown::HashMap` to allow seamless operations with `NativeTokens`.
-    pub(crate) native_tokens: hashbrown::HashMap<TokenId, U256>,
+    pub(crate) native_tokens: BTreeMap<TokenId, U256>,
 }
 
 impl Burn {
@@ -101,7 +101,7 @@ impl Burn {
     }
 
     /// Returns the native tokens to [`Burn`].
-    pub fn native_tokens(&self) -> &hashbrown::HashMap<TokenId, U256> {
+    pub fn native_tokens(&self) -> &BTreeMap<TokenId, U256> {
         &self.native_tokens
     }
 }
@@ -120,9 +120,8 @@ pub struct BurnDto {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) foundries: Option<HashSet<FoundryId>>,
     /// Amounts of native tokens to burn.
-    /// `hashbrown::HashMap` to allow seamless operations with `NativeTokens`.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) native_tokens: Option<HashMap<TokenId, U256Dto>>,
+    pub(crate) native_tokens: Option<BTreeMap<TokenId, U256Dto>>,
 }
 
 impl From<&Burn> for BurnDto {
@@ -131,7 +130,7 @@ impl From<&Burn> for BurnDto {
             aliases: (!value.aliases.is_empty()).then_some(value.aliases.clone()),
             nfts: (!value.nfts.is_empty()).then_some(value.nfts.clone()),
             foundries: (!value.foundries.is_empty()).then_some(value.foundries.clone()),
-            native_tokens: (!value.native_tokens.is_empty()).then_some(HashMap::from_iter(
+            native_tokens: (!value.native_tokens.is_empty()).then_some(BTreeMap::from_iter(
                 value
                     .native_tokens
                     .iter()
@@ -156,7 +155,7 @@ impl TryFrom<&BurnDto> for Burn {
                     native_tokens
                         .iter()
                         .map(|(token_id, amount)| U256::try_from(amount).map(|amount| (*token_id, amount)))
-                        .collect::<Result<hashbrown::HashMap<_, _>, _>>()
+                        .collect::<Result<BTreeMap<_, _>, _>>()
                 })
                 .transpose()
                 .map_err(|_| DtoError::InvalidField("native_tokens"))?

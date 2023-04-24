@@ -60,12 +60,11 @@ pub mod dto {
 
     /// Describes an input which references an unspent transaction output to consume.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct UtxoInputDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "transactionId")]
         pub transaction_id: String,
-        #[serde(rename = "transactionOutputIndex")]
         pub transaction_output_index: u16,
     }
 

@@ -75,7 +75,7 @@ async fn output_preparation() -> Result<()> {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
-                    native_tokens: Some(vec![native_token.clone()]),
+                    native_tokens: Some(vec![native_token]),
                     nft_id: None,
                 }),
                 features: None,
@@ -260,7 +260,7 @@ async fn output_preparation() -> Result<()> {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
-                    native_tokens: Some(vec![native_token.clone()]),
+                    native_tokens: Some(vec![native_token]),
                     nft_id: None,
                 }),
                 features: Some(Features {
@@ -499,7 +499,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
 
     let wallet = make_wallet(storage_path, None, None).await?;
     let accounts = &create_accounts_with_funds(&wallet, 1).await?;
-    let address = accounts[0].addresses().await?[0].address().to_bech32();
+    let address = accounts[0].addresses().await?[0].address().to_string();
 
     let nft_options = vec![NftOptions {
         address: Some(address.clone()),

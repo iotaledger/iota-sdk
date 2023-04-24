@@ -17,7 +17,7 @@ use iota_sdk::{
     client::{
         api::GetAddressesBuilder,
         constants::{IOTA_BECH32_HRP, IOTA_COIN_TYPE, IOTA_TESTNET_BECH32_HRP, SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        secret::{GenerateAddressOptions, SecretManager},
         Client,
     },
     types::block::address::Address,
@@ -26,10 +26,7 @@ use serde::{Deserialize, Serialize};
 
 #[tokio::test]
 async fn addresses() {
-    let secret_manager = SecretManager::Mnemonic(
-        MnemonicSecretManager::try_from_hex_seed("0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2")
-            .unwrap(),
-    );
+    let secret_manager = crate::client::node_api::setup_secret_manager();
 
     let addresses = GetAddressesBuilder::new(&secret_manager)
         .with_coin_type(IOTA_COIN_TYPE)
@@ -173,7 +170,10 @@ async fn address_generation() {
             .with_coin_type(address.coin_type)
             .with_account_index(address.account_index)
             .with_range(address.address_index..address.address_index + 1)
-            .with_internal_addresses(address.internal)
+            .with_options(GenerateAddressOptions {
+                internal: address.internal,
+                ..Default::default()
+            })
             .finish()
             .await
             .unwrap();
@@ -189,7 +189,7 @@ async fn address_generation() {
     #[cfg(feature = "stronghold")]
     for address in &addresses_data {
         let stronghold_filename = format!("{}.stronghold", address.bech32_address);
-        let mut stronghold_secret_manager = StrongholdSecretManager::builder()
+        let stronghold_secret_manager = StrongholdSecretManager::builder()
             .password("some_hopefully_secure_password")
             .build(&stronghold_filename)
             .unwrap();
@@ -204,7 +204,10 @@ async fn address_generation() {
             .with_coin_type(address.coin_type)
             .with_account_index(address.account_index)
             .with_range(address.address_index..address.address_index + 1)
-            .with_internal_addresses(address.internal)
+            .with_options(GenerateAddressOptions {
+                internal: address.internal,
+                ..Default::default()
+            })
             .finish()
             .await
             .unwrap();
@@ -229,9 +232,11 @@ async fn address_generation() {
                     start: address.address_index,
                     end: address.address_index + 1,
                 }),
-                internal: Some(address.internal),
                 bech32_hrp: Some(address.bech32_hrp.to_string()),
-                options: None,
+                options: Some(GenerateAddressOptions {
+                    internal: address.internal,
+                    ..Default::default()
+                }),
             };
             let message = Message::GenerateAddresses {
                 secret_manager: SecretManagerDto::Mnemonic(address.mnemonic.clone()),
@@ -276,9 +281,11 @@ async fn address_generation() {
                     start: address.address_index,
                     end: address.address_index + 1,
                 }),
-                internal: Some(address.internal),
                 bech32_hrp: Some(address.bech32_hrp.to_string()),
-                options: None,
+                options: Some(GenerateAddressOptions {
+                    internal: address.internal,
+                    ..Default::default()
+                }),
             };
             let message = Message::GenerateAddresses {
                 secret_manager: SecretManagerDto::Stronghold(secret_manager_dto),

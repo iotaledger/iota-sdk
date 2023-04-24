@@ -66,7 +66,6 @@ pub trait SecretManage: Send + Sync {
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        internal: bool,
         options: Option<GenerateAddressOptions>,
     ) -> Result<Vec<Address>, Self::Error>;
 
@@ -237,30 +236,29 @@ impl SecretManage for SecretManager {
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        internal: bool,
         options: Option<GenerateAddressOptions>,
     ) -> crate::client::Result<Vec<Address>> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => {
                 secret_manager
-                    .generate_addresses(coin_type, account_index, address_indexes, internal, options)
+                    .generate_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => {
                 secret_manager
-                    .generate_addresses(coin_type, account_index, address_indexes, internal, options)
+                    .generate_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
             Self::Mnemonic(secret_manager) => {
                 secret_manager
-                    .generate_addresses(coin_type, account_index, address_indexes, internal, options)
+                    .generate_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
             Self::Placeholder(secret_manager) => {
                 secret_manager
-                    .generate_addresses(coin_type, account_index, address_indexes, internal, options)
+                    .generate_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
         }

@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
 
     let outputs = vec![
         // address of the owner of the NFT
-        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
+        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .add_unlock_condition(AddressUnlockCondition::new(address))
             // address of the minter of the NFT
             // .add_feature(IssuerFeature::new(address))
@@ -95,7 +95,7 @@ async fn main() -> Result<()> {
         .with_input(nft_output_id.into())?
         .with_input(output_ids_response.items[0].into())?
         .with_outputs(vec![
-            NftOutputBuilder::new_with_amount(1_000_000 + output.amount(), nft_id)?
+            NftOutputBuilder::new_with_amount(1_000_000 + output.amount(), nft_id)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
                 .finish_output(token_supply)?,
         ])?
@@ -117,7 +117,7 @@ async fn main() -> Result<()> {
     let output_response = client.get_output(&nft_output_id).await?;
     let output = Output::try_from_dto(&output_response.output, token_supply)?;
     let outputs = vec![
-        BasicOutputBuilder::new_with_amount(output.amount())?
+        BasicOutputBuilder::new_with_amount(output.amount())
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish_output(token_supply)?,
     ];

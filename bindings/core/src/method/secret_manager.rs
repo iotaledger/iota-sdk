@@ -25,9 +25,9 @@ pub enum SecretManagerMethod {
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
     GetLedgerNanoStatus,
     /// Create a single Signature Unlock.
+    #[serde(rename_all = "camelCase")]
     SignatureUnlock {
         /// Transaction Essence Hash
-        #[serde(rename = "transactionEssenceHash")]
         transaction_essence_hash: Vec<u8>,
         /// Chain to sign the essence hash with
         chain: Chain,
@@ -40,9 +40,9 @@ pub enum SecretManagerMethod {
         chain: Chain,
     },
     /// Sign a transaction
+    #[serde(rename_all = "camelCase")]
     SignTransaction {
         /// Prepared transaction data
-        #[serde(rename = "preparedTransactionData")]
         prepared_transaction_data: PreparedTransactionDataDto,
     },
     /// Store a mnemonic in the Stronghold vault

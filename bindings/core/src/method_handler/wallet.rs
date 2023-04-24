@@ -3,7 +3,7 @@
 
 use std::time::Duration;
 
-use iota_sdk::wallet::{message_interface::dtos::AccountDto, wallet::Wallet};
+use iota_sdk::wallet::{message_interface::dtos::AccountDetailsDto, wallet::Wallet};
 #[cfg(feature = "stronghold")]
 use zeroize::Zeroize;
 
@@ -25,17 +25,17 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             }
 
             match builder.finish().await {
-                Ok(account_handle) => {
-                    let account = account_handle.read().await;
-                    Response::Account(AccountDto::from(&*account))
+                Ok(account) => {
+                    let account = account.read().await;
+                    Response::Account(AccountDetailsDto::from(&*account))
                 }
                 Err(e) => return Err(e.into()),
             }
         }
         WalletMethod::GetAccount { account_id } => {
-            let account_handle = wallet.get_account(account_id.clone()).await?;
-            let account = account_handle.read().await;
-            Response::Account(AccountDto::from(&*account))
+            let account = wallet.get_account(account_id.clone()).await?;
+            let account = account.read().await;
+            Response::Account(AccountDetailsDto::from(&*account))
         }
         WalletMethod::GetAccountIndexes => {
             let accounts = wallet.get_accounts().await?;
@@ -46,17 +46,17 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             Response::AccountIndexes(account_indexes)
         }
         WalletMethod::GetAccounts => {
-            let account_handles = wallet.get_accounts().await?;
-            let mut accounts = Vec::new();
-            for account_handle in account_handles {
-                let account = account_handle.read().await;
-                accounts.push(AccountDto::from(&*account));
+            let accounts = wallet.get_accounts().await?;
+            let mut account_dtos = Vec::new();
+            for account in accounts {
+                let account = account.read().await;
+                account_dtos.push(AccountDetailsDto::from(&*account));
             }
-            Response::Accounts(accounts)
+            Response::Accounts(account_dtos)
         }
         WalletMethod::CallAccountMethod { account_id, method } => {
-            let account_handle = wallet.get_account(account_id).await?;
-            call_account_method_internal(&account_handle, method).await?
+            let account = wallet.get_account(account_id).await?;
+            call_account_method_internal(&account, method).await?
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::Backup { destination, password } => {
@@ -91,15 +91,15 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             address_gap_limit,
             sync_options,
         } => {
-            let account_handles = wallet
+            let accounts = wallet
                 .recover_accounts(account_start_index, account_gap_limit, address_gap_limit, sync_options)
                 .await?;
-            let mut accounts = Vec::new();
-            for account_handle in account_handles {
-                let account = account_handle.read().await;
-                accounts.push(AccountDto::from(&*account));
+            let mut account_dtos = Vec::new();
+            for account in accounts {
+                let account = account.read().await;
+                account_dtos.push(AccountDetailsDto::from(&*account));
             }
-            Response::Accounts(accounts)
+            Response::Accounts(account_dtos)
         }
         WalletMethod::RemoveLatestAccount => {
             wallet.remove_latest_account().await?;
@@ -127,14 +127,11 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         WalletMethod::GenerateAddress {
             account_index,
-            internal,
             address_index,
             options,
             bech32_hrp,
         } => {
-            let address = wallet
-                .generate_address(account_index, internal, address_index, options)
-                .await?;
+            let address = wallet.generate_address(account_index, address_index, options).await?;
 
             let bech32_hrp = match bech32_hrp {
                 Some(bech32_hrp) => bech32_hrp,

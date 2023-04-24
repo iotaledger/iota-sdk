@@ -325,7 +325,7 @@ Generate a new unused address.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `options?` | [`AddressGenerationOptions`](../interfaces/AddressGenerationOptions.md) | Options for address generation. |
+| `options?` | [`GenerateAddressOptions`](../interfaces/GenerateAddressOptions.md) | Options for address generation. |
 
 #### Returns
 
@@ -346,7 +346,7 @@ Generate new unused addresses.
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `amount` | `number` | The amount of addresses to generate. |
-| `options?` | [`AddressGenerationOptions`](../interfaces/AddressGenerationOptions.md) | Options for address generation. |
+| `options?` | [`GenerateAddressOptions`](../interfaces/GenerateAddressOptions.md) | Options for address generation. |
 
 #### Returns
 
@@ -808,7 +808,7 @@ ___
 
 ### sendNativeTokens
 
-▸ **sendNativeTokens**(`addressesNativeTokens`, `transactionOptions?`): `Promise`<[`Transaction`](../interfaces/Transaction.md)\>
+▸ **sendNativeTokens**(`addressesAndNativeTokens`, `transactionOptions?`): `Promise`<[`Transaction`](../interfaces/Transaction.md)\>
 
 Send native tokens.
 
@@ -816,7 +816,7 @@ Send native tokens.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `addressesNativeTokens` | [`AddressNativeTokens`](../interfaces/AddressNativeTokens.md)[] | Addresses amounts and native tokens. |
+| `addressesAndNativeTokens` | [`AddressNativeTokens`](../interfaces/AddressNativeTokens.md)[] | Addresses amounts and native tokens. |
 | `transactionOptions?` | [`TransactionOptions`](../interfaces/TransactionOptions.md) | The options to define a `RemainderValueStrategy` or custom inputs. |
 
 #### Returns

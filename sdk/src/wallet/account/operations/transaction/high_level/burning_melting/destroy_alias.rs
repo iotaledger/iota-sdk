@@ -9,15 +9,14 @@ use crate::{
     },
     wallet::{
         account::{
-            handle::AccountHandle,
             operations::{helpers::time::can_output_be_unlocked_now, transaction::Transaction},
-            TransactionOptions,
+            Account, TransactionOptions,
         },
         Error,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Function to destroy an alias output.
     pub async fn destroy_alias(
         &self,
@@ -81,10 +80,10 @@ impl AccountHandle {
         &self,
         alias_id: AliasId,
     ) -> crate::wallet::Result<(OutputId, Output)> {
-        let account = self.read().await;
+        let account_details = self.read().await;
         let token_supply = self.client.get_token_supply().await?;
 
-        let (output_id, output_data) = account
+        let (output_id, output_data) = account_details
             .unspent_outputs()
             .iter()
             .find(|(&output_id, output_data)| match &output_data.output {
@@ -99,7 +98,7 @@ impl AccountHandle {
         };
 
         let basic_output = Output::Basic(
-            BasicOutputBuilder::new_with_amount(alias_output.amount())?
+            BasicOutputBuilder::new_with_amount(alias_output.amount())
                 .add_unlock_condition(AddressUnlockCondition::new(*alias_output.governor_address()))
                 .with_native_tokens(alias_output.native_tokens().clone())
                 .finish(token_supply)?,

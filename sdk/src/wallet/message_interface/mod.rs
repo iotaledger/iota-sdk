@@ -23,14 +23,12 @@ use crate::{
 };
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct ManagerOptions {
-    #[serde(rename = "storagePath")]
     pub storage_path: Option<String>,
-    #[serde(rename = "clientOptions")]
     pub client_options: Option<ClientOptions>,
-    #[serde(rename = "coinType")]
     pub coin_type: Option<u32>,
-    #[serde(rename = "secretManager", serialize_with = "secret_manager_serialize")]
+    #[serde(serialize_with = "secret_manager_serialize")]
     pub secret_manager: Option<SecretManagerDto>,
 }
 

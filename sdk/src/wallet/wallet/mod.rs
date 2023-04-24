@@ -9,8 +9,6 @@ use std::sync::{
     Arc,
 };
 
-#[cfg(feature = "events")]
-use tokio::sync::Mutex;
 use tokio::sync::RwLock;
 
 #[cfg(feature = "storage")]
@@ -22,13 +20,11 @@ use crate::wallet::events::{
     EventEmitter,
 };
 #[cfg(feature = "storage")]
-use crate::wallet::storage::manager::StorageManagerHandle;
+use crate::wallet::storage::manager::StorageManager;
 use crate::{
     client::{secret::SecretManager, verify_mnemonic, Client},
     wallet::{
-        account::{
-            builder::AccountBuilder, handle::AccountHandle, operations::syncing::SyncOptions, types::AccountBalance,
-        },
+        account::{builder::AccountBuilder, operations::syncing::SyncOptions, types::AccountBalance, Account},
         ClientOptions,
     },
 };
@@ -38,18 +34,18 @@ use crate::{
 #[derive(Debug)]
 pub struct Wallet {
     // should we use a hashmap instead of a vec like in wallet.rs?
-    pub(crate) accounts: Arc<RwLock<Vec<AccountHandle>>>,
+    pub(crate) accounts: Arc<RwLock<Vec<Account>>>,
     // 0 = not running, 1 = running, 2 = stopping
     pub(crate) background_syncing_status: Arc<AtomicUsize>,
     pub(crate) client_options: Arc<RwLock<ClientOptions>>,
     pub(crate) coin_type: Arc<AtomicU32>,
     pub(crate) secret_manager: Arc<RwLock<SecretManager>>,
     #[cfg(feature = "events")]
-    pub(crate) event_emitter: Arc<Mutex<EventEmitter>>,
+    pub(crate) event_emitter: Arc<tokio::sync::Mutex<EventEmitter>>,
     #[cfg(feature = "storage")]
     pub(crate) storage_options: StorageOptions,
     #[cfg(feature = "storage")]
-    pub(crate) storage_manager: StorageManagerHandle,
+    pub(crate) storage_manager: Arc<tokio::sync::Mutex<StorageManager>>,
 }
 
 impl Wallet {
@@ -74,7 +70,7 @@ impl Wallet {
     }
 
     /// Get all accounts
-    pub async fn get_accounts(&self) -> crate::wallet::Result<Vec<AccountHandle>> {
+    pub async fn get_accounts(&self) -> crate::wallet::Result<Vec<Account>> {
         Ok(self.accounts.read().await.clone())
     }
 

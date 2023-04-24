@@ -17,13 +17,12 @@ use crate::{
     },
     wallet::account::{
         constants::MIN_SYNC_INTERVAL,
-        handle::AccountHandle,
         types::{AddressWithUnspentOutputs, OutputData},
-        AccountBalance,
+        Account, AccountBalance,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Sync the account by fetching new information from the nodes. Will also retry pending transactions
     /// if necessary.
     pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<AccountBalance> {

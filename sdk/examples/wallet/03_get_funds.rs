@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
     println!("Starting available funds: {funds_before}");
 
     let faucet_response =
-        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &address[0].address().to_bech32()).await?;
+        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &address[0].address().to_string()).await?;
 
     println!("Response from faucet: {faucet_response}");
 

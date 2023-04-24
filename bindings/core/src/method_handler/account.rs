@@ -15,8 +15,7 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{AccountBalanceDto, TransactionDto},
-            AccountHandle, AliasOutputOptions, MintTokenTransactionDto, OutputDataDto, OutputOptions,
-            TransactionOptions,
+            Account, AliasOutputOptions, MintTokenTransactionDto, OutputDataDto, OutputOptions, TransactionOptions,
         },
         message_interface::AddressWithUnspentOutputsDto,
         AddressWithAmount, IncreaseNativeTokenSupplyOptions, NativeTokenOptions, NftOptions,
@@ -26,7 +25,7 @@ use primitive_types::U256;
 
 use crate::{method::AccountMethod, Response, Result};
 
-pub(crate) async fn call_account_method_internal(account: &AccountHandle, method: AccountMethod) -> Result<Response> {
+pub(crate) async fn call_account_method_internal(account: &Account, method: AccountMethod) -> Result<Response> {
     let response = match method {
         AccountMethod::BurnNativeToken {
             token_id,
@@ -300,24 +299,24 @@ pub(crate) async fn call_account_method_internal(account: &AccountHandle, method
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
         AccountMethod::SendNativeTokens {
-            addresses_native_tokens,
+            addresses_and_native_tokens,
             options,
         } => {
             let transaction = account
                 .send_native_tokens(
-                    addresses_native_tokens.clone(),
+                    addresses_and_native_tokens.clone(),
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
         AccountMethod::SendNft {
-            addresses_nft_ids,
+            addresses_and_nft_ids,
             options,
         } => {
             let transaction = account
                 .send_nft(
-                    addresses_nft_ids.clone(),
+                    addresses_and_nft_ids.clone(),
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;

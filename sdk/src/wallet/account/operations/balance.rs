@@ -6,14 +6,13 @@ use primitive_types::U256;
 use crate::{
     types::block::output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
     wallet::account::{
-        handle::AccountHandle,
         operations::helpers::time::can_output_be_unlocked_forever_from_now_on,
         types::{AccountBalance, NativeTokensBalance},
-        OutputsToClaim,
+        Account, OutputsToClaim,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Get the AccountBalance
     pub async fn balance(&self) -> crate::wallet::Result<AccountBalance> {
         log::debug!("[BALANCE] get balance");
@@ -37,9 +36,9 @@ impl AccountHandle {
         let mut total_rent_amount = 0;
         let mut total_native_tokens = NativeTokensBuilder::new();
 
-        let account = self.read().await;
+        let account_details = self.read().await;
 
-        let relevant_unspent_outputs = account
+        let relevant_unspent_outputs = account_details
             .unspent_outputs
             .values()
             // Check if output is from the network we're currently connected to
@@ -57,7 +56,7 @@ impl AccountHandle {
                     account_balance.base_coin.total += output.amount();
                     // Add storage deposit
                     account_balance.required_storage_deposit.alias += rent;
-                    if !account.locked_outputs.contains(output_id) {
+                    if !account_details.locked_outputs.contains(output_id) {
                         total_rent_amount += rent;
                     }
 
@@ -72,7 +71,7 @@ impl AccountHandle {
                     account_balance.base_coin.total += output.amount();
                     // Add storage deposit
                     account_balance.required_storage_deposit.foundry += rent;
-                    if !account.locked_outputs.contains(output_id) {
+                    if !account_details.locked_outputs.contains(output_id) {
                         total_rent_amount += rent;
                     }
 
@@ -105,13 +104,13 @@ impl AccountHandle {
                                 .native_tokens()
                                 .map(|native_tokens| !native_tokens.is_empty())
                                 .unwrap_or(false)
-                                && !account.locked_outputs.contains(output_id)
+                                && !account_details.locked_outputs.contains(output_id)
                             {
                                 total_rent_amount += rent;
                             }
                         } else if output.is_nft() {
                             account_balance.required_storage_deposit.nft += rent;
-                            if !account.locked_outputs.contains(output_id) {
+                            if !account_details.locked_outputs.contains(output_id) {
                                 total_rent_amount += rent;
                             }
                         }
@@ -136,7 +135,7 @@ impl AccountHandle {
                             let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_forever_from_now_on(
                                 // We use the addresses with unspent outputs, because other addresses of the
                                 // account without unspent outputs can't be related to this output
-                                &account.addresses_with_unspent_outputs,
+                                &account_details.addresses_with_unspent_outputs,
                                 output,
                                 local_time,
                             );
@@ -181,13 +180,13 @@ impl AccountHandle {
                                         .native_tokens()
                                         .map(|native_tokens| !native_tokens.is_empty())
                                         .unwrap_or(false)
-                                        && !account.locked_outputs.contains(output_id)
+                                        && !account_details.locked_outputs.contains(output_id)
                                     {
                                         total_rent_amount += rent;
                                     }
                                 } else if output.is_nft() {
                                     account_balance.required_storage_deposit.nft += rent;
-                                    if !account.locked_outputs.contains(output_id) {
+                                    if !account_details.locked_outputs.contains(output_id) {
                                         total_rent_amount += rent;
                                     }
                                 }
@@ -221,12 +220,12 @@ impl AccountHandle {
         }
 
         // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
-        log::debug!("[BALANCE] locked outputs: {:#?}", account.locked_outputs);
+        log::debug!("[BALANCE] locked outputs: {:#?}", account_details.locked_outputs);
         let mut locked_amount = 0;
         let mut locked_native_tokens = NativeTokensBuilder::new();
 
-        for locked_output in &account.locked_outputs {
-            if let Some(output_data) = account.unspent_outputs.get(locked_output) {
+        for locked_output in &account_details.locked_outputs {
+            if let Some(output_data) = account_details.unspent_outputs.get(locked_output) {
                 // Only check outputs that are in this network
                 if output_data.network_id == network_id {
                     locked_amount += output_data.output.amount();
@@ -246,7 +245,7 @@ impl AccountHandle {
 
         locked_amount += total_rent_amount;
 
-        for native_token in total_native_tokens.finish_vec()? {
+        for native_token in total_native_tokens.finish_set()? {
             // Check if some amount is currently locked
             let locked_amount = locked_native_tokens.iter().find_map(|(id, amount)| {
                 if id == native_token.token_id() {
@@ -256,7 +255,7 @@ impl AccountHandle {
                 }
             });
 
-            let metadata = account
+            let metadata = account_details
                 .native_token_foundries
                 .get(&FoundryId::from(*native_token.token_id()))
                 .and_then(|foundry| foundry.immutable_features().metadata())

@@ -11,10 +11,10 @@ import type {
     AddressWithAmount,
     AddressNativeTokens,
     AddressNftId,
-    AddressGenerationOptions,
     AddressWithUnspentOutputs,
     AliasOutputOptions,
     FilterOptions,
+    GenerateAddressOptions,
     IncreaseNativeTokenSupplyOptions,
     MintTokenTransaction,
     NativeTokenOptions,
@@ -350,7 +350,7 @@ export class Account {
      * @returns The address.
      */
     async generateAddress(
-        options?: AddressGenerationOptions,
+        options?: GenerateAddressOptions,
     ): Promise<Address> {
         const addresses = await this.generateAddresses(1, options);
         return addresses[0];
@@ -364,7 +364,7 @@ export class Account {
      */
     async generateAddresses(
         amount: number,
-        options?: AddressGenerationOptions,
+        options?: GenerateAddressOptions,
     ): Promise<Address[]> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
@@ -926,13 +926,13 @@ export class Account {
 
     /**
      * Send native tokens.
-     * @param addressesNativeTokens Addresses amounts and native tokens.
+     * @param addressesAndNativeTokens Addresses amounts and native tokens.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The sent transaction.
      */
     async sendNativeTokens(
-        addressesNativeTokens: AddressNativeTokens[],
+        addressesAndNativeTokens: AddressNativeTokens[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const response = await this.messageHandler.callAccountMethod(
@@ -940,7 +940,7 @@ export class Account {
             {
                 name: 'sendNativeTokens',
                 data: {
-                    addressesNativeTokens,
+                    addressesAndNativeTokens,
                     options: transactionOptions,
                 },
             },

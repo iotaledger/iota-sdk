@@ -13,12 +13,12 @@ use crate::{
         },
     },
     wallet::{
-        account::{types::Transaction, AccountHandle, TransactionOptions},
+        account::{types::Transaction, Account, TransactionOptions},
         Result,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Casts a given number of votes for a given (voting) event.
     ///
     /// If voting for other events, continues voting for them.

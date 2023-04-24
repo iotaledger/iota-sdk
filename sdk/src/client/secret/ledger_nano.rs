@@ -75,14 +75,14 @@ impl SecretManage for LedgerSecretManager {
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        internal: bool,
         options: Option<GenerateAddressOptions>,
     ) -> Result<Vec<Address>, Self::Error> {
+        let options = options.unwrap_or_default();
         let bip32_account = account_index | HARDENED;
 
         let bip32 = LedgerBIP32Index {
             bip32_index: address_indexes.start | HARDENED,
-            bip32_change: u32::from(internal) | HARDENED,
+            bip32_change: u32::from(options.internal) | HARDENED,
         };
 
         // lock the mutex to prevent multiple simultaneous requests to a ledger
@@ -91,7 +91,7 @@ impl SecretManage for LedgerSecretManager {
         // get ledger
         let ledger = get_ledger(coin_type, bip32_account, self.is_simulator)?;
 
-        let addresses = if options.unwrap_or_default().ledger_nano_prompt {
+        let addresses = if options.ledger_nano_prompt {
             // and generate a single address that is shown to the user
             ledger.get_addresses(true, bip32, address_indexes.len())?
         } else {

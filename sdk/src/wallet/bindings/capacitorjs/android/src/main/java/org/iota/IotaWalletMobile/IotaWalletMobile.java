@@ -135,8 +135,12 @@ public class IotaWalletMobile extends Plugin {
             }
             call.resolve(ret);
         } catch (Exception ex) {
-            call.reject(ex.getMessage() + Arrays.toString(ex.getStackTrace()));
-            Log.d("sendMessage Error", ex.getMessage() + Arrays.toString(ex.getStackTrace()));
+            JSObject ret = new JSObject();
+            JsonObject clientResponse = new JsonObject();
+            clientResponse.addProperty("type", "error");
+            clientResponse.addProperty("payload", ex.getMessage());
+            ret.put("result", clientResponse.toString());
+            call.resolve(ret);
         }
     }
 

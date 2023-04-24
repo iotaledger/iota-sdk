@@ -31,39 +31,36 @@ use crate::{
 
 /// Struct containing network and PoW related information
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct NetworkInfo {
     // TODO do we really want a default?
     /// Protocol parameters.
-    #[serde(rename = "protocolParameters", default = "ProtocolParameters::default")]
+    #[serde(default = "ProtocolParameters::default")]
     pub protocol_parameters: ProtocolParameters,
     /// Local proof of work.
-    #[serde(rename = "localPow", default = "default_local_pow")]
+    #[serde(default = "default_local_pow")]
     pub local_pow: bool,
     /// Fallback to local proof of work if the node doesn't support remote PoW.
-    #[serde(rename = "fallbackToLocalPow", default = "default_fallback_to_local_pow")]
+    #[serde(default = "default_fallback_to_local_pow")]
     pub fallback_to_local_pow: bool,
     /// Tips request interval during PoW in seconds.
-    #[serde(rename = "tipsInterval", default = "default_tips_interval")]
+    #[serde(default = "default_tips_interval")]
     pub tips_interval: u64,
     /// The latest cached milestone timestamp.
-    #[serde(rename = "latestMilestoneTimestamp")]
     pub latest_milestone_timestamp: Option<u32>,
 }
 
 /// Dto for the NetworkInfo
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct NetworkInfoDto {
     /// Protocol parameters.
-    #[serde(rename = "protocolParameters")]
     protocol_parameters: ProtocolParametersDto,
     /// Local proof of work.
-    #[serde(rename = "localPow")]
     local_pow: bool,
     /// Fallback to local proof of work if the node doesn't support remote PoW.
-    #[serde(rename = "fallbackToLocalPow")]
     fallback_to_local_pow: bool,
     /// Tips request interval during PoW in seconds.
-    #[serde(rename = "tipsInterval")]
     tips_interval: u64,
 }
 
@@ -111,27 +108,28 @@ fn default_tips_interval() -> u64 {
 
 /// Builder to construct client instance with sensible default values
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 #[must_use]
 pub struct ClientBuilder {
     /// Node manager builder
-    #[serde(flatten, rename = "nodeManagerBuilder")]
+    #[serde(flatten)]
     pub node_manager_builder: crate::client::node_manager::builder::NodeManagerBuilder,
     /// Options for the MQTT broker
     #[cfg(feature = "mqtt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "mqtt")))]
-    #[serde(flatten, rename = "brokerOptions")]
+    #[serde(flatten)]
     pub broker_options: BrokerOptions,
     /// Data related to the used network
-    #[serde(flatten, rename = "networkInfo", default)]
+    #[serde(flatten, default)]
     pub network_info: NetworkInfo,
     /// Timeout for API requests
-    #[serde(rename = "apiTimeout", default = "default_api_timeout")]
+    #[serde(default = "default_api_timeout")]
     pub api_timeout: Duration,
     /// Timeout when sending a block that requires remote proof of work
-    #[serde(rename = "remotePowTimeout", default = "default_remote_pow_timeout")]
+    #[serde(default = "default_remote_pow_timeout")]
     pub remote_pow_timeout: Duration,
     /// The amount of threads to be used for proof of work
-    #[serde(rename = "powWorkerCount", default)]
+    #[serde(default)]
     pub pow_worker_count: Option<usize>,
 }
 
@@ -176,8 +174,8 @@ impl ClientBuilder {
         Default::default()
     }
 
-    #[allow(unused_assignments)]
     /// Set the fields from a client JSON config
+    #[allow(unused_assignments)]
     pub fn from_json(mut self, client_config: &str) -> Result<Self> {
         self = serde_json::from_str(client_config)?;
         // validate URLs
@@ -291,8 +289,8 @@ impl ClientBuilder {
     }
 
     /// Sets the amount of workers that should be used for PoW, default is num_cpus::get().
-    pub fn with_pow_worker_count(mut self, worker_count: usize) -> Self {
-        self.pow_worker_count.replace(worker_count);
+    pub fn with_pow_worker_count(mut self, worker_count: impl Into<Option<usize>>) -> Self {
+        self.pow_worker_count = worker_count.into();
         self
     }
 

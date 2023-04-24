@@ -17,9 +17,7 @@ use crate::{
             NftOutputBuilder, Output, OutputId, TokenId, OUTPUT_COUNT_MAX,
         },
     },
-    wallet::account::{
-        handle::AccountHandle, operations::transaction::Transaction, types::OutputData, TransactionOptions,
-    },
+    wallet::account::{operations::transaction::Transaction, types::OutputData, Account, TransactionOptions},
 };
 
 const NATIVE_TOKEN_OVERFLOW: &str = "NativeTokensOverflow";
@@ -46,7 +44,7 @@ struct StrippedOutputAggregate {
     outputs: Vec<Output>,
 }
 
-impl AccountHandle {
+impl Account {
     /// Function to burn native tokens. This doesn't require the foundry output which minted them, but will not increase
     /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
     /// recommended to use `decrease_native_token_supply()`, if the foundry output is available.
@@ -330,7 +328,7 @@ fn strip_native_token_if_found(
                     .checked_add(native_token.amount())
                     .ok_or_else(|| crate::wallet::Error::BurningOrMeltingFailed(NATIVE_TOKEN_OVERFLOW.to_string()))?;
             } else {
-                not_to_be_stripped_native_tokens.add_native_token(native_token.clone())?;
+                not_to_be_stripped_native_tokens.add_native_token(*native_token)?;
             }
         }
 

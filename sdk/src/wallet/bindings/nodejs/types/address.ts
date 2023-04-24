@@ -46,13 +46,8 @@ export interface AddressNftId {
     nftId: string;
 }
 
-/** Options for address generation, options is used only with a Ledger Nano SecretManager */
-export interface AddressGenerationOptions {
-    internal: boolean;
-    options: GenerateAddressOptions;
-}
-
 /** Options for address generation, useful with a Ledger Nano SecretManager */
 export interface GenerateAddressOptions {
+    internal: boolean;
     ledgerNanoPrompt: boolean;
 }

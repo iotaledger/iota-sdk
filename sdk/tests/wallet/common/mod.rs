@@ -12,7 +12,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
         Client,
     },
-    wallet::{account::AccountHandle, ClientOptions, Result, Wallet},
+    wallet::{Account, ClientOptions, Result, Wallet},
 };
 
 pub use self::constants::*;
@@ -51,11 +51,11 @@ pub(crate) async fn make_wallet(storage_path: &str, mnemonic: Option<&str>, node
 /// Create `amount` new accounts, request funds from the faucet and sync the accounts afterwards until the faucet output
 /// is available. Returns the new accounts.
 #[allow(dead_code)]
-pub(crate) async fn create_accounts_with_funds(wallet: &Wallet, amount: usize) -> Result<Vec<AccountHandle>> {
+pub(crate) async fn create_accounts_with_funds(wallet: &Wallet, amount: usize) -> Result<Vec<Account>> {
     let mut new_accounts = Vec::new();
     'accounts: for _ in 0..amount {
         let account = wallet.create_account().finish().await?;
-        request_funds_from_faucet(FAUCET_URL, &account.addresses().await?[0].address().to_bech32()).await?;
+        request_funds_from_faucet(FAUCET_URL, &account.addresses().await?[0].address().to_string()).await?;
 
         // Continue only after funds are received
         for _ in 0..30 {

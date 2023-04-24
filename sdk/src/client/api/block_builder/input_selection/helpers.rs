@@ -41,7 +41,7 @@ pub fn minimum_storage_deposit_basic_output(
     native_tokens: &Option<NativeTokens>,
     token_supply: u64,
 ) -> Result<u64> {
-    let mut basic_output_builder = BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN)?;
+    let mut basic_output_builder = BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN);
     if let Some(native_tokens) = native_tokens {
         basic_output_builder = basic_output_builder.with_native_tokens(native_tokens.clone());
     }

@@ -15,13 +15,14 @@ use crate::{
         DtoError,
     },
     wallet::{
-        account::{handle::AccountHandle, operations::transaction::Transaction, TransactionOptions},
+        account::{operations::transaction::Transaction, Account, TransactionOptions},
         Error,
     },
 };
 
 /// Address and NFT for `send_nft()`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NftOptions {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
     /// first address of the account.
@@ -35,12 +36,12 @@ pub struct NftOptions {
     /// NFT issuer feature.
     pub issuer: Option<String>,
     /// NFT immutable metadata feature.
-    #[serde(rename = "immutableMetadata")]
     pub immutable_metadata: Option<Vec<u8>>,
 }
 
 /// Dto for NftOptions.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NftOptionsDto {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
     /// first address of the account.
@@ -54,7 +55,6 @@ pub struct NftOptionsDto {
     /// NFT issuer feature, bech32 encoded address.
     pub issuer: Option<String>,
     /// Immutable NFT metadata, hex encoded bytes.
-    #[serde(rename = "immutableMetadata")]
     pub immutable_metadata: Option<String>,
 }
 
@@ -84,9 +84,9 @@ impl TryFrom<&NftOptionsDto> for NftOptions {
     }
 }
 
-impl AccountHandle {
+impl Account {
     /// Function to mint nfts.
-    /// Calls [AccountHandle.send()](crate::account::handle::AccountHandle.send) internally, the options can define the
+    /// Calls [Account.send()](crate::account::Account.send) internally, the options can define the
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
@@ -120,7 +120,7 @@ impl AccountHandle {
     }
 
     /// Function to prepare the transaction for
-    /// [AccountHandle.mint_nfts()](crate::account::handle::AccountHandle.mint_nfts)
+    /// [Account.mint_nfts()](crate::account::Account.mint_nfts)
     async fn prepare_mint_nfts(
         &self,
         nfts_options: Vec<NftOptions>,
@@ -135,7 +135,7 @@ impl AccountHandle {
         for nft_options in nfts_options {
             let address = match nft_options.address {
                 Some(address) => {
-                    let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
+                    let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
                     self.client.bech32_hrp_matches(&bech32_hrp).await?;
                     address
                 }
@@ -151,7 +151,7 @@ impl AccountHandle {
 
             // NftId needs to be set to 0 for the creation
             let mut nft_builder =
-                NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone(), NftId::null())?
+                NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone(), NftId::null())
                     // Address which will own the nft
                     .add_unlock_condition(AddressUnlockCondition::new(address));
 

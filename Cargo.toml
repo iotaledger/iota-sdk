@@ -2,24 +2,30 @@
 resolver = "2"
 members = [
 	"bindings/core",
+	"bindings/python",
 	"cli",
 	"sdk",
 	"sdk/src/client/bindings/java/lib/native",
 	"sdk/src/client/bindings/nodejs",
-	"sdk/src/client/bindings/python",
 	"sdk/src/client/bindings/wasm",
 	"sdk/src/wallet/bindings/java/lib/native",
 	"sdk/src/wallet/bindings/nodejs",
-	"sdk/src/wallet/bindings/python",
 	"sdk/src/wallet/bindings/swift",
 	"sdk/src/wallet/bindings/wasm"
 ]
 
 [profile.dev]
 panic = "abort"
-# Disabling debug info speeds up builds a bunch,
-# and we don't rely on it for debugging that much.
+
+# Necessary to get coverage to work as for some reason using a custom profile breaks it
+[profile.test]
 debug = 0
+incremental = false
+
+[profile.ci]
+inherits = "dev"
+debug = 0
+incremental = false
 
 [profile.release]
 panic = "abort"

@@ -34,7 +34,7 @@ fn new_valid() {
                 rand_merkle_root(),
                 rand_merkle_root(),
                 vec![],
-                MilestoneOptions::new(vec![]).unwrap(),
+                MilestoneOptions::from_vec(vec![]).unwrap(),
             )
             .unwrap(),
             vec![Signature::from(Ed25519Signature::new([0; 32], [0; 64]))]
@@ -56,7 +56,7 @@ fn new_invalid_no_signature() {
                 rand_merkle_root(),
                 rand_merkle_root(),
                 vec![],
-                MilestoneOptions::new(vec![]).unwrap(),
+                MilestoneOptions::from_vec(vec![]).unwrap(),
             )
             .unwrap(),
             vec![]
@@ -78,7 +78,7 @@ fn new_invalid_too_many_signatures() {
                 rand_merkle_root(),
                 rand_merkle_root(),
                 vec![],
-                MilestoneOptions::new(vec![]).unwrap(),
+                MilestoneOptions::from_vec(vec![]).unwrap(),
             )
             .unwrap(),
             vec![Signature::from(Ed25519Signature::new([0; 32], [0; 64])); 300]
@@ -97,11 +97,11 @@ fn packed_len() {
             0,
             protocol_parameters().protocol_version(),
             rand_milestone_id(),
-            Parents::new(rand_block_ids(4)).unwrap(),
+            Parents::from_vec(rand_block_ids(4)).unwrap(),
             rand_merkle_root(),
             rand_merkle_root(),
             vec![0x2a, 0x2a, 0x2a, 0x2a, 0x2a],
-            MilestoneOptions::new(vec![]).unwrap(),
+            MilestoneOptions::from_vec(vec![]).unwrap(),
         )
         .unwrap(),
         vec![
@@ -128,7 +128,7 @@ fn pack_unpack_valid() {
             rand_merkle_root(),
             rand_merkle_root(),
             vec![],
-            MilestoneOptions::new(vec![]).unwrap(),
+            MilestoneOptions::from_vec(vec![]).unwrap(),
         )
         .unwrap(),
         vec![Signature::from(Ed25519Signature::new([0; 32], [0; 64]))],
@@ -155,7 +155,7 @@ fn getters() {
         rand_merkle_root(),
         rand_merkle_root(),
         vec![],
-        MilestoneOptions::new(vec![]).unwrap(),
+        MilestoneOptions::from_vec(vec![]).unwrap(),
     )
     .unwrap();
     let signatures = vec![Signature::from(Ed25519Signature::new([0; 32], [0; 64]))];
