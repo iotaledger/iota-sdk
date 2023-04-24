@@ -4,6 +4,8 @@
 //! node API modules
 
 pub mod core;
+
+pub mod error;
 pub mod indexer;
 #[cfg(feature = "mqtt")]
 #[cfg_attr(docsrs, doc(cfg(feature = "mqtt")))]

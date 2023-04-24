@@ -163,12 +163,12 @@ impl Client {
         {
             Ok(res) => res,
             Err(e) => {
-                if let Error::Node(e) = e {
+                if let Error::Node(crate::client::node_api::error::Error::BadResponse(res)) = e {
                     let fallback_to_local_pow = self.get_fallback_to_local_pow();
                     // hornet and bee return different error blocks
-                    if (e == *"no available nodes with remote Pow"
-                        || e.contains("proof of work is not enabled")
-                        || e.contains("`Pow` not enabled"))
+                    if (res == *"no available nodes with remote Pow"
+                        || res.contains("proof of work is not enabled")
+                        || res.contains("`Pow` not enabled"))
                         && fallback_to_local_pow
                     {
                         // Without this we get:within `impl Future<Output = [async output]>`, the trait `Send` is not
@@ -207,7 +207,7 @@ impl Client {
                             .post_request_json(path, timeout, serde_json::to_value(block_dto)?, true)
                             .await?
                     } else {
-                        return Err(Error::Node(e));
+                        return Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow));
                     }
                 } else {
                     return Err(e);
@@ -237,12 +237,12 @@ impl Client {
         {
             Ok(res) => res,
             Err(e) => {
-                if let Error::Node(e) = e {
+                if let Error::Node(crate::client::node_api::error::Error::BadResponse(res)) = e {
                     let fallback_to_local_pow = self.get_fallback_to_local_pow();
                     // hornet and bee return different error blocks
-                    if (e == *"no available nodes with remote Pow"
-                        || e.contains("proof of work is not enabled")
-                        || e.contains("`Pow` not enabled"))
+                    if (res == *"no available nodes with remote Pow"
+                        || res.contains("proof of work is not enabled")
+                        || res.contains("`Pow` not enabled"))
                         && fallback_to_local_pow
                     {
                         // Without this we get:within `impl Future<Output = [async output]>`, the trait `Send` is not
@@ -279,7 +279,7 @@ impl Client {
                             .post_request_bytes(path, timeout, &block_with_local_pow.pack_to_vec(), true)
                             .await?
                     } else {
-                        return Err(Error::Node(e));
+                        return Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow));
                     }
                 } else {
                     return Err(e);

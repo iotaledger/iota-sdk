@@ -10,7 +10,7 @@ use serde::de::DeserializeOwned;
 use serde_json::Value;
 
 use crate::client::{
-    error::{Error, Result},
+    node_api::error::{Error, Result},
     node_manager::node::Node,
 };
 pub(crate) struct Response(reqwest::Response);

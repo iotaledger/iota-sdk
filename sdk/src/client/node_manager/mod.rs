@@ -141,7 +141,9 @@ impl NodeManager {
 
         if nodes_with_modified_url.is_empty() {
             if use_pow_nodes {
-                return Err(Error::Node("no available nodes with remote Pow".into()));
+                return Err(crate::client::Error::Node(
+                    crate::client::node_api::error::Error::UnavailablePow,
+                ));
             }
             return Err(crate::client::Error::HealthyNodePoolEmpty);
         }
@@ -214,11 +216,11 @@ impl NodeManager {
                                 result_counter += 1;
                             },
                         ),
-                        Err(Error::ResponseError { code: 404, url, .. }) => {
+                        Err(crate::client::node_api::error::Error::ResponseError { code: 404, url, .. }) => {
                             error.replace(crate::client::Error::NotFound(url));
                         }
                         Err(err) => {
-                            error.replace(err);
+                            error.replace(err.into());
                         }
                     }
                 }
@@ -257,25 +259,23 @@ impl NodeManager {
                                         }
                                     }
                                     Err(e) => {
-                                        error.replace(e);
+                                        error.replace(e.into());
                                     }
                                 }
                             }
 
                             _ => {
-                                error.replace(crate::client::Error::Node(
-                                    res.into_text()
-                                        .await
-                                        .unwrap_or_else(|_| "couldn't convert node response into text".to_string()),
-                                ));
+                                error.replace(Error::Node(crate::client::node_api::error::Error::BadResponse(
+                                    res.into_text().await?,
+                                )));
                             }
                         }
                     }
-                    Err(Error::ResponseError { code: 404, url, .. }) => {
+                    Err(crate::client::node_api::error::Error::ResponseError { code: 404, url, .. }) => {
                         error.replace(crate::client::Error::NotFound(url));
                     }
                     Err(err) => {
-                        error.replace(err);
+                        error.replace(err.into());
                     }
                 }
             }
@@ -284,7 +284,7 @@ impl NodeManager {
         let res = result
             .into_iter()
             .max_by_key(|v| v.1)
-            .ok_or_else(|| error.unwrap_or_else(|| Error::Node("couldn't get a result from any node".into())))?;
+            .ok_or_else(|| error.unwrap_or(Error::Node(crate::client::node_api::error::Error::NoResult)))?;
 
         // Return if quorum is false or check if quorum was reached
         if !self.quorum
@@ -323,21 +323,22 @@ impl NodeManager {
                         match status {
                             200 => return Ok(res_text),
                             _ => error.replace(crate::client::Error::Node(
-                                String::from_utf8(res_text)
-                                    .map_err(|_| Error::Node("non UTF8 node response".into()))?,
+                                crate::client::node_api::error::Error::BadResponse(
+                                    String::from_utf8(res_text).unwrap_or("non UTF8 node response".into()),
+                                ),
                             )),
                         };
                     }
                 }
-                Err(Error::ResponseError { code: 404, url, .. }) => {
+                Err(crate::client::node_api::error::Error::ResponseError { code: 404, url, .. }) => {
                     error.replace(crate::client::Error::NotFound(url));
                 }
                 Err(err) => {
-                    error.replace(err);
+                    error.replace(err.into());
                 }
             }
         }
-        Err(error.unwrap_or_else(|| Error::Node("couldn't get a result from any node".into())))
+        Err(error.unwrap_or(Error::Node(crate::client::node_api::error::Error::NoResult)))
     }
 
     pub(crate) async fn post_request_bytes<T: serde::de::DeserializeOwned>(
@@ -357,21 +358,19 @@ impl NodeManager {
                     match res.status() {
                         200 | 201 => match res.into_json::<T>().await {
                             Ok(res) => return Ok(res),
-                            Err(e) => error.replace(e),
+                            Err(e) => error.replace(Error::Node(e)),
                         },
-                        _ => error.replace(crate::client::Error::Node(
-                            res.into_text()
-                                .await
-                                .unwrap_or_else(|_| "couldn't convert node response into text".to_string()),
-                        )),
+                        _ => error.replace(Error::Node(crate::client::node_api::error::Error::BadResponse(
+                            res.into_text().await?,
+                        ))),
                     };
                 }
                 Err(e) => {
-                    error.replace(crate::client::Error::Node(e.to_string()));
+                    error.replace(e.into());
                 }
             }
         }
-        Err(error.unwrap_or_else(|| Error::Node("couldn't get a result from any node".into())))
+        Err(error.unwrap_or(Error::Node(crate::client::node_api::error::Error::NoResult)))
     }
 
     pub(crate) async fn post_request_json<T: serde::de::DeserializeOwned>(
@@ -391,20 +390,18 @@ impl NodeManager {
                     match res.status() {
                         200 | 201 => match res.into_json::<T>().await {
                             Ok(res) => return Ok(res),
-                            Err(e) => error.replace(e),
+                            Err(e) => error.replace(Error::Node(e)),
                         },
-                        _ => error.replace(crate::client::Error::Node(
-                            res.into_text()
-                                .await
-                                .unwrap_or_else(|_| "couldn't convert node response into text".to_string()),
-                        )),
+                        _ => error.replace(Error::Node(crate::client::node_api::error::Error::BadResponse(
+                            res.into_text().await?,
+                        ))),
                     };
                 }
                 Err(e) => {
-                    error.replace(crate::client::Error::Node(e.to_string()));
+                    error.replace(e.into());
                 }
             }
         }
-        Err(error.unwrap_or_else(|| Error::Node("couldn't get a result from any node".into())))
+        Err(error.unwrap_or(Error::Node(crate::client::node_api::error::Error::NoResult)))
     }
 }

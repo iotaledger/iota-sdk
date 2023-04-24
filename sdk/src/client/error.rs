@@ -87,7 +87,7 @@ pub enum Error {
     MissingParameter(&'static str),
     /// Error on API request
     #[error("node error: {0}")]
-    Node(String),
+    Node(#[from] crate::client::node_api::error::Error),
     /// The block doesn't need to be promoted or reattached
     #[error("block ID `{0}` doesn't need to be promoted or reattached")]
     NoNeedPromoteOrReattach(String),
@@ -125,19 +125,6 @@ pub enum Error {
         /// The minimum quorum threshold.
         minimum_threshold: usize,
     },
-    /// Error from RestAPI calls with unexpected status code response
-    #[error("response error with status code {code}: {text}, URL: {url}")]
-    ResponseError {
-        /// The status code.
-        code: u16,
-        /// The text from the response.
-        text: String,
-        /// The url of the API.
-        url: String,
-    },
-    /// reqwest error
-    #[error("{0}")]
-    Reqwest(#[from] reqwest::Error),
     /// Specifically used for `TryInfo` implementations for `SecretManager`.
     #[error("cannot unwrap a SecretManager: type mismatch!")]
     SecretManagerMismatch,
@@ -215,6 +202,12 @@ pub enum Error {
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
     #[error("{0}")]
     Stronghold(#[from] crate::client::stronghold::Error),
+}
+
+impl From<reqwest::Error> for Error {
+    fn from(error: reqwest::Error) -> Self {
+        Error::Node(error.into())
+    }
 }
 
 // Serialize type with Display error

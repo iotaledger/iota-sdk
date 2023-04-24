@@ -12,7 +12,7 @@ use crate::{
             },
             QueryParameters,
         },
-        Client, Result,
+        Client, Error, Result,
     },
     types::{
         api::plugins::indexer::OutputIdsResponse,
@@ -59,7 +59,7 @@ impl Client {
             .get_output_ids(&route, QueryParameters::empty(), true, false)
             .await?
             .first()
-            .ok_or_else(|| crate::client::Error::Node("no output id for alias".to_string()))?))
+            .ok_or_else(|| Error::Node(crate::client::node_api::error::Error::NoOutput("alias")))?))
     }
 
     /// Get foundry outputs filtered by the given parameters.
@@ -84,7 +84,7 @@ impl Client {
             .get_output_ids(&route, QueryParameters::empty(), true, false)
             .await?
             .first()
-            .ok_or_else(|| crate::client::Error::Node("no output id for foundry".to_string()))?))
+            .ok_or_else(|| Error::Node(crate::client::node_api::error::Error::NoOutput("foundry")))?))
     }
 
     /// Get NFT outputs filtered by the given parameters.
@@ -110,6 +110,6 @@ impl Client {
             .get_output_ids(&route, QueryParameters::empty(), true, false)
             .await?
             .first()
-            .ok_or_else(|| crate::client::Error::Node("no output id for nft".to_string()))?))
+            .ok_or_else(|| Error::Node(crate::client::node_api::error::Error::NoOutput("nft")))?))
     }
 }
