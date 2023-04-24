@@ -85,5 +85,18 @@ public class BuildBasicOutput {
         System.out.println(
             new GsonBuilder().setPrettyPrinting().create().toJson(JsonParser.parseString(timelockOutput.toString()))
         );
+
+        // Output with tag feature
+        BasicOutputBuilderParams tagParams = new BasicOutputBuilderParams()
+            .withAmount(amount)
+            .withUnlockConditions(new UnlockCondition[]{addressUnlockCondition})
+            // "Hello, World!" hex encoded
+            .withFeatures(new Feature[]{new Feature("{ type: 3, data: \"0x48656c6c6f2c20576f726c6421\" }")});
+
+        Output tagOutput = client.buildBasicOutput(tagParams);
+
+        System.out.println(
+            new GsonBuilder().setPrettyPrinting().create().toJson(JsonParser.parseString(tagOutput.toString()))
+        );
     }
 }
