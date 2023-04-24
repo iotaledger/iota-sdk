@@ -105,7 +105,6 @@ async function run() {
 
         console.log(JSON.stringify(basicOutputWithTimelock, null, 2));
 
-
         // Output with tag feature
         const basicOutputWithTag = await client.buildBasicOutput({
             amount: '1000000',
