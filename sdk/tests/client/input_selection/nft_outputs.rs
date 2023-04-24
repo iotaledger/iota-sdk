@@ -6,17 +6,26 @@ use std::str::FromStr;
 use iota_sdk::{
     client::api::input_selection::{Burn, Error, InputSelection, Requirement},
     types::block::{
-        address::Address,
-        output::{NftId, Output},
+        address::{Address, AliasAddress},
+        output::{
+            dto::NftOutputDto, AliasId, FoundryId, NativeToken, NftId, NftOutput, Output, Rent, SimpleTokenScheme,
+            TokenId,
+        },
         protocol::protocol_parameters,
+        rand::output::{
+            feature::{rand_issuer_feature, rand_sender_feature},
+            rand_nft_output,
+            unlock_condition::rand_address_unlock_condition,
+        },
     },
 };
+use packable::PackableExt;
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Basic, Nft},
-    BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_NFT_1, NFT_ID_0,
-    NFT_ID_1, NFT_ID_2,
+    ALIAS_ID_2, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_NFT_1,
+    NFT_ID_0, NFT_ID_1, NFT_ID_2,
 };
 
 #[test]
@@ -1174,4 +1183,65 @@ fn transitioned_zero_nft_id_no_longer_is_zero() {
             );
         }
     });
+}
+
+#[test]
+fn nft_builder_replace() {
+    let protocol_parameters = protocol_parameters();
+    let alias_id = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id), 0, SimpleTokenScheme::KIND);
+    let address_1 = rand_address_unlock_condition();
+    let address_2 = rand_address_unlock_condition();
+    let sender_1 = rand_sender_feature();
+    let sender_2 = rand_sender_feature();
+    let issuer_1 = rand_issuer_feature();
+    let issuer_2 = rand_issuer_feature();
+
+    let mut builder =
+        NftOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), NftId::null())
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_unlock_condition(address_1)
+            .add_feature(sender_1)
+            .replace_feature(sender_2)
+            .replace_immutable_feature(issuer_1)
+            .add_immutable_feature(issuer_2);
+
+    let output = builder.clone().finish_unverified().unwrap();
+    assert_eq!(
+        output.amount(),
+        Output::Nft(output.clone()).rent_cost(protocol_parameters.rent_structure())
+    );
+    assert_eq!(output.unlock_conditions().address(), Some(&address_1));
+    assert_eq!(output.features().sender(), Some(&sender_2));
+    assert_eq!(output.immutable_features().issuer(), Some(&issuer_1));
+
+    builder = builder
+        .clear_unlock_conditions()
+        .clear_features()
+        .clear_immutable_features()
+        .replace_unlock_condition(address_2);
+    let output = builder.clone().finish_unverified().unwrap();
+    assert_eq!(output.unlock_conditions().address(), Some(&address_2));
+    assert!(output.features().is_empty());
+    assert!(output.immutable_features().is_empty());
+}
+
+#[test]
+fn nft_output_pack_unpack() {
+    let protocol_parameters = protocol_parameters();
+    let output = rand_nft_output(protocol_parameters.token_supply());
+    let bytes = output.pack_to_vec();
+    let output_unpacked = NftOutput::unpack_verified(bytes, &protocol_parameters).unwrap();
+    assert_eq!(output, output_unpacked);
+}
+
+#[test]
+fn nft_output_to_from_dto() {
+    let protocol_parameters = protocol_parameters();
+    let output = rand_nft_output(protocol_parameters.token_supply());
+    let dto = NftOutputDto::from(&output);
+    let output_unver = NftOutput::try_from_dto_unverified(&dto).unwrap();
+    assert_eq!(output, output_unver);
+    let output_ver = NftOutput::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
+    assert_eq!(output, output_ver);
 }

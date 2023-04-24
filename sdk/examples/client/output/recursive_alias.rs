@@ -48,13 +48,12 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     // create three new alias outputs
     //////////////////////////////////
-    let alias_output_builder =
-        AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone(), AliasId::null())
-            .add_feature(SenderFeature::new(address))
-            .with_state_metadata(vec![1, 2, 3])
-            .add_immutable_feature(IssuerFeature::new(address))
-            .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
-            .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
+    let alias_output_builder = AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())
+        .add_feature(SenderFeature::new(address))
+        .with_state_metadata(vec![1, 2, 3])
+        .add_immutable_feature(IssuerFeature::new(address))
+        .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
+        .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
 
     let outputs = vec![alias_output_builder.clone().finish_output(token_supply)?; 3];
 

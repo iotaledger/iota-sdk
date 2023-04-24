@@ -357,7 +357,7 @@ impl AliasOutput {
     /// Creates a new [`AliasOutput`] with a provided amount.
     #[inline(always)]
     pub fn new_with_amount(amount: u64, alias_id: AliasId, token_supply: u64) -> Result<Self, Error> {
-        AliasOutputBuilder::new_with_amount(amount, alias_id).finish(token_supply)
+        Self::build_with_amount(amount, alias_id).finish(token_supply)
     }
 
     /// Creates a new [`AliasOutput`] with a provided rent structure.
@@ -368,7 +368,7 @@ impl AliasOutput {
         rent_structure: RentStructure,
         token_supply: u64,
     ) -> Result<Self, Error> {
-        AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id).finish(token_supply)
+        Self::build_with_minimum_storage_deposit(rent_structure, alias_id).finish(token_supply)
     }
 
     /// Creates a new [`AliasOutputBuilder`] with a provided amount.
