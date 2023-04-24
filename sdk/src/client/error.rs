@@ -201,36 +201,13 @@ pub enum Error {
     #[error("{0}")]
     Participation(#[from] crate::types::api::plugins::participation::error::Error),
 
-    //////////////////////////////////////////////////////////////////////
-    // Ledger Nano
-    //////////////////////////////////////////////////////////////////////
-    /// Denied by User
+    /// Ledger error
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
-    #[error("denied by user")]
-    LedgerDeniedByUser,
-    /// Dongle Locked
-    #[cfg(feature = "ledger_nano")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
-    #[error("ledger locked")]
-    LedgerDongleLocked,
-    /// Ledger Device not found
-    #[cfg(feature = "ledger_nano")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
-    #[error("ledger device not found")]
-    LedgerDeviceNotFound,
-    /// Ledger Essence Too Large
-    #[cfg(feature = "ledger_nano")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
-    #[error("ledger essence too large")]
-    LedgerEssenceTooLarge,
-    /// Ledger transport error
-    #[cfg(feature = "ledger_nano")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
-    #[error("ledger transport error")]
-    LedgerMiscError,
+    #[error("{0}")]
+    Ledger(#[from] crate::client::secret::ledger_nano::Error),
 
-    /// MQTT error.
+    /// MQTT error
     #[cfg(feature = "mqtt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "mqtt")))]
     #[error("{0}")]
@@ -239,29 +216,8 @@ pub enum Error {
     /// Stronghold error
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-    #[error("stronghold error: {0}")]
+    #[error("{0}")]
     Stronghold(#[from] crate::client::stronghold::Error),
-}
-
-// map most errors to a single error but there are some errors that
-// need special care.
-// LedgerDongleLocked: Ask the user to unlock the dongle
-// LedgerDeniedByUser: The user denied a signing
-// LedgerDeviceNotFound: No usable Ledger device was found
-// LedgerMiscError: Everything else.
-// LedgerEssenceTooLarge: Essence with bip32 input indices need more space then the internal buffer is big
-#[cfg(feature = "ledger_nano")]
-impl From<iota_ledger_nano::api::errors::APIError> for Error {
-    fn from(error: iota_ledger_nano::api::errors::APIError) -> Self {
-        log::info!("ledger error: {}", error);
-        match error {
-            iota_ledger_nano::api::errors::APIError::ConditionsOfUseNotSatisfied => Self::LedgerDeniedByUser,
-            iota_ledger_nano::api::errors::APIError::EssenceTooLarge => Self::LedgerEssenceTooLarge,
-            iota_ledger_nano::api::errors::APIError::SecurityStatusNotSatisfied => Self::LedgerDongleLocked,
-            iota_ledger_nano::api::errors::APIError::TransportError => Self::LedgerDeviceNotFound,
-            _ => Self::LedgerMiscError,
-        }
-    }
 }
 
 // Serialize type with Display error

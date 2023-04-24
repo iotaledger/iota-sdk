@@ -86,7 +86,7 @@ pub trait SecretManage: Send + Sync {
 /// internal use that are based on the methods in [`SecretManager`]. Secret managers don't implement this on their
 /// sides.
 #[async_trait]
-pub trait SecretManageExt {
+pub trait SecretManageExt: SecretManage {
     /// Signs transaction essence.
     ///
     /// Secret managers usually don't implement this, as the default implementation has taken care of the placement of
@@ -96,7 +96,7 @@ pub trait SecretManageExt {
         &self,
         prepared_transaction_data: &PreparedTransactionData,
         time: Option<u32>,
-    ) -> crate::client::Result<Unlocks>;
+    ) -> Result<Unlocks, <Self as SecretManage>::Error>;
 }
 
 /// Supported secret managers
@@ -244,11 +244,9 @@ impl SecretManage for SecretManager {
                 .generate_addresses(coin_type, account_index, address_indexes, options)
                 .await?),
             #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => {
-                secret_manager
-                    .generate_addresses(coin_type, account_index, address_indexes, options)
-                    .await
-            }
+            Self::LedgerNano(secret_manager) => Ok(secret_manager
+                .generate_addresses(coin_type, account_index, address_indexes, options)
+                .await?),
             Self::Mnemonic(secret_manager) => {
                 secret_manager
                     .generate_addresses(coin_type, account_index, address_indexes, options)
@@ -267,7 +265,7 @@ impl SecretManage for SecretManager {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager.sign_ed25519(msg, chain).await?),
             #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
+            Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_ed25519(msg, chain).await?),
             Self::Mnemonic(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
             Self::Placeholder(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
         }
@@ -288,11 +286,9 @@ impl SecretManageExt for SecretManager {
                     .await
             }
             #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => {
-                secret_manager
-                    .sign_transaction_essence(prepared_transaction_data, time)
-                    .await
-            }
+            Self::LedgerNano(secret_manager) => Ok(secret_manager
+                .sign_transaction_essence(prepared_transaction_data, time)
+                .await?),
             Self::Mnemonic(_) => {
                 self.default_sign_transaction_essence(prepared_transaction_data, time)
                     .await

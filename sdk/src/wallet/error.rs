@@ -159,6 +159,12 @@ impl From<crate::client::stronghold::Error> for Error {
     }
 }
 
+impl From<crate::client::secret::ledger_nano::Error> for Error {
+    fn from(error: crate::client::secret::ledger_nano::Error) -> Self {
+        Self::Client(Box::new(crate::client::Error::Ledger(error)))
+    }
+}
+
 #[cfg(feature = "rocksdb")]
 impl From<rocksdb::Error> for Error {
     fn from(error: rocksdb::Error) -> Self {

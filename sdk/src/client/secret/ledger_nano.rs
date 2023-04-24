@@ -13,19 +13,15 @@ use iota_ledger_nano::{
     get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index, Packable as LedgerNanoPackable,
     TransportTypes,
 };
-use packable::{unpacker::SliceUnpacker, Packable, PackableExt};
+use packable::{error::UnexpectedEOF, unpacker::SliceUnpacker, Packable, PackableExt};
 use tokio::sync::Mutex;
 
 use super::{GenerateAddressOptions, SecretManage, SecretManageExt};
 use crate::{
-    client::{
-        api::input_selection::Error as InputSelectionError,
-        secret::{
-            is_alias_transition,
-            types::{LedgerApp, LedgerDeviceType},
-            LedgerNanoStatus, PreparedTransactionData,
-        },
-        Error,
+    client::secret::{
+        is_alias_transition,
+        types::{LedgerApp, LedgerDeviceType},
+        LedgerNanoStatus, PreparedTransactionData,
     },
     types::block::{
         address::{Address, AliasAddress, Ed25519Address, NftAddress},
@@ -41,6 +37,70 @@ use crate::{
 ///
 /// See also: <https://wiki.trezor.io/Hardened_and_non-hardened_derivation>.
 pub const HARDENED: u32 = 0x8000_0000;
+
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    /// Denied by User
+    #[error("denied by user")]
+    DeniedByUser,
+    /// Dongle Locked
+    #[error("ledger locked")]
+    DongleLocked,
+    /// Ledger Device not found
+    #[error("ledger device not found")]
+    DeviceNotFound,
+    /// Ledger Essence Too Large
+    #[error("ledger essence too large")]
+    EssenceTooLarge,
+    /// Ledger transport error
+    #[error("ledger transport error")]
+    MiscError,
+    /// Unsupported operation
+    #[error("unsupported operation")]
+    UnsupportedOperation,
+    /// Block error
+    #[error("{0}")]
+    Block(Box<crate::types::block::Error>),
+    /// Missing input with ed25519 address
+    #[error("missing input with ed25519 address")]
+    MissingInputWithEd25519Address,
+    /// Missing bip32 chain
+    #[error("missing bip32 chain")]
+    MissingBip32Chain,
+    /// Bip32 chain mismatch
+    #[error("Bip32 chain mismatch")]
+    Bip32ChainMismatch,
+    /// Unpack error
+    #[error("{0}")]
+    Unpack(#[from] packable::error::UnpackError<crate::types::block::Error, UnexpectedEOF>),
+}
+
+impl From<crate::types::block::Error> for Error {
+    fn from(error: crate::types::block::Error) -> Self {
+        Self::Block(Box::new(error))
+    }
+}
+
+// map most errors to a single error but there are some errors that
+// need special care.
+// LedgerDongleLocked: Ask the user to unlock the dongle
+// LedgerDeniedByUser: The user denied a signing
+// LedgerDeviceNotFound: No usable Ledger device was found
+// LedgerMiscError: Everything else.
+// LedgerEssenceTooLarge: Essence with bip32 input indices need more space then the internal buffer is big
+#[cfg(feature = "ledger_nano")]
+impl From<iota_ledger_nano::api::errors::APIError> for Error {
+    fn from(error: iota_ledger_nano::api::errors::APIError) -> Self {
+        log::info!("ledger error: {}", error);
+        match error {
+            iota_ledger_nano::api::errors::APIError::ConditionsOfUseNotSatisfied => Self::DeniedByUser,
+            iota_ledger_nano::api::errors::APIError::EssenceTooLarge => Self::EssenceTooLarge,
+            iota_ledger_nano::api::errors::APIError::SecurityStatusNotSatisfied => Self::DongleLocked,
+            iota_ledger_nano::api::errors::APIError::TransportError => Self::DeviceNotFound,
+            _ => Self::MiscError,
+        }
+    }
+}
 
 /// Secret manager that uses a Ledger hardware wallet.
 #[derive(Default)]
@@ -59,7 +119,7 @@ impl TryFrom<u8> for LedgerDeviceType {
             0 => Ok(Self::LedgerNanoS),
             1 => Ok(Self::LedgerNanoX),
             2 => Ok(Self::LedgerNanoSPlus),
-            _ => Err(Error::LedgerMiscError),
+            _ => Err(Error::MiscError),
         }
     }
 }
@@ -108,7 +168,7 @@ impl SecretManage for LedgerSecretManager {
     }
 
     async fn sign_ed25519(&self, _msg: &[u8], _chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
-        Err(Error::SecretManagerMismatch)
+        Err(Error::UnsupportedOperation)
     }
 }
 
@@ -164,13 +224,14 @@ impl SecretManageExt for LedgerSecretManager {
                         .map(|seg| u32::from_be_bytes(seg.bs()))
                         .collect()
                 }
-                None => return Err(InputSelectionError::NoAvailableInputsProvided)?,
+                None => return Err(Error::MissingBip32Chain)?,
             };
+
             // coin_type and account_index should be the same in each output
             if (coin_type.is_some() && coin_type != Some(bip32_indices[1]))
                 || (account_index.is_some() && account_index != Some(bip32_indices[2]))
             {
-                return Err(crate::client::Error::InvalidBIP32ChainData);
+                return Err(Error::Bip32ChainMismatch);
             }
 
             coin_type = Some(bip32_indices[1]);
@@ -181,11 +242,6 @@ impl SecretManageExt for LedgerSecretManager {
             });
         }
 
-        if coin_type.is_none() || account_index.is_none() {
-            return Err(InputSelectionError::NoAvailableInputsProvided)?;
-        }
-
-        // unwrap values
         let coin_type = coin_type.unwrap() & !HARDENED;
         let bip32_account = account_index.unwrap() | HARDENED;
 
@@ -220,7 +276,7 @@ impl SecretManageExt for LedgerSecretManager {
                                     .map(|seg| u32::from_be_bytes(seg.bs()))
                                     .collect()
                             }
-                            None => return Err(crate::client::Error::InvalidBIP32ChainData),
+                            None => return Err(Error::MissingBip32Chain),
                         };
                         (
                             Some(&a.address),
@@ -253,7 +309,7 @@ impl SecretManageExt for LedgerSecretManager {
                                 }
                             } else {
                                 log::debug!("[LEDGER] unsupported output");
-                                return Err(crate::client::Error::LedgerMiscError);
+                                return Err(Error::MiscError);
                             }
 
                             remainder_index += 1;
@@ -262,7 +318,7 @@ impl SecretManageExt for LedgerSecretManager {
                         // was index found?
                         if remainder_index as usize == essence.outputs().len() {
                             log::debug!("[LEDGER] remainder_index not found");
-                            return Err(crate::client::Error::LedgerMiscError);
+                            return Err(Error::MiscError);
                         }
                     }
                 }
@@ -392,7 +448,7 @@ fn merge_unlocks(
     prepared_transaction_data: &PreparedTransactionData,
     mut unlocks: impl Iterator<Item = Unlock>,
     time: Option<u32>,
-) -> crate::client::Result<Vec<Unlock>> {
+) -> Result<Vec<Unlock>, Error> {
     // The hashed_essence gets signed
     let hashed_essence = prepared_transaction_data.essence.hash();
 
@@ -426,18 +482,16 @@ fn merge_unlocks(
                 // address already at this point, because the reference index needs to be lower
                 // than the current block index
                 if !input_address.is_ed25519() {
-                    return Err(InputSelectionError::MissingInputWithEd25519Address)?;
+                    return Err(Error::MissingInputWithEd25519Address)?;
                 }
 
-                let unlock = unlocks
-                    .next()
-                    .ok_or(InputSelectionError::MissingInputWithEd25519Address)?;
+                let unlock = unlocks.next().ok_or(Error::MissingInputWithEd25519Address)?;
 
                 if let Unlock::Signature(signature_unlock) = &unlock {
                     let Signature::Ed25519(ed25519_signature) = signature_unlock.signature();
                     let ed25519_address = match input_address {
                         Address::Ed25519(ed25519_address) => ed25519_address,
-                        _ => return Err(InputSelectionError::MissingInputWithEd25519Address)?,
+                        _ => return Err(Error::MissingInputWithEd25519Address)?,
                     };
                     ed25519_signature.is_valid(&hashed_essence, &ed25519_address)?;
                 }

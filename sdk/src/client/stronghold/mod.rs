@@ -58,7 +58,6 @@ use std::{
 };
 
 use derive_builder::Builder;
-
 use iota_stronghold::{KeyProvider, SnapshotPath, Stronghold};
 use log::{debug, error, warn};
 use tokio::{sync::Mutex, task::JoinHandle};
