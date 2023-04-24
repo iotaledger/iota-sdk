@@ -12,7 +12,7 @@ use crate::{
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
             AliasId, AliasOutputBuilder, Output,
         },
-        DtoError,
+        Error,
     },
     wallet::account::{types::Transaction, Account, OutputData, TransactionOptions},
 };
@@ -55,17 +55,17 @@ impl TryFrom<&AliasOutputOptionsDto> for AliasOutputOptions {
             address: value.address.clone(),
             immutable_metadata: match &value.immutable_metadata {
                 Some(metadata) => {
-                    Some(prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("immutable_metadata"))?)
+                    Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("immutable_metadata"))?)
                 }
                 None => None,
             },
             metadata: match &value.metadata {
-                Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("metadata"))?),
+                Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("metadata"))?),
                 None => None,
             },
             state_metadata: match &value.state_metadata {
                 Some(metadata) => {
-                    Some(prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("state_metadata"))?)
+                    Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("state_metadata"))?)
                 }
                 None => None,
             },

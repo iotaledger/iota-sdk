@@ -20,9 +20,6 @@ pub enum Error {
     /// Wallet error
     #[error("{0}")]
     Wallet(#[from] iota_sdk::wallet::Error),
-    /// Block dtos error
-    #[error("{0}")]
-    BlockDto(#[from] iota_sdk::types::block::DtoError),
     /// Error from block crate.
     #[error("{0}")]
     Block(Box<iota_sdk::types::block::Error>),

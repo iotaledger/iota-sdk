@@ -8,7 +8,7 @@ use crate::{
     types::block::{
         output::OutputId,
         payload::{dto::TaggedDataPayloadDto, tagged_data::TaggedDataPayload},
-        DtoError,
+        Error,
     },
     wallet::account::types::address::AccountAddress,
 };
@@ -35,7 +35,7 @@ pub struct TransactionOptions {
 
 impl TransactionOptions {
     /// Conversion from TransactionOptionsDto to TransactionOptions.
-    pub fn try_from_dto(value: &TransactionOptionsDto) -> Result<Self, DtoError> {
+    pub fn try_from_dto(value: &TransactionOptionsDto) -> Result<Self, Error> {
         Ok(Self {
             remainder_value_strategy: value.remainder_value_strategy.clone(),
             tagged_data_payload: value

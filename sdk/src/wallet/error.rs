@@ -28,9 +28,6 @@ pub enum Error {
     /// Error from block crate.
     #[error("{0}")]
     Block(Box<crate::types::block::Error>),
-    /// Block dtos error
-    #[error("{0}")]
-    BlockDto(#[from] crate::types::block::DtoError),
     /// Burning or melting failed
     #[error("burning or melting failed: {0}")]
     BurningOrMeltingFailed(String),

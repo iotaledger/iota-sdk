@@ -206,7 +206,7 @@ pub mod dto {
 
     use super::*;
     pub use super::{alias::dto::AliasAddressDto, ed25519::dto::Ed25519AddressDto, nft::dto::NftAddressDto};
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// Describes all the different address types.
     #[derive(Clone, Debug, Eq, PartialEq, From)]
@@ -230,7 +230,7 @@ pub mod dto {
     }
 
     impl TryFrom<&AddressDto> for Address {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &AddressDto) -> Result<Self, Self::Error> {
             match value {

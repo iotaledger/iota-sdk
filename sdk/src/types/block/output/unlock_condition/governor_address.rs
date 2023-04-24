@@ -34,7 +34,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, error::dto::DtoError};
+    use crate::types::block::{address::dto::AddressDto, Error};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct GovernorAddressUnlockConditionDto {
@@ -53,12 +53,14 @@ pub mod dto {
     }
 
     impl TryFrom<&GovernorAddressUnlockConditionDto> for GovernorAddressUnlockCondition {
-        type Error = DtoError;
+        type Error = Error;
 
-        fn try_from(value: &GovernorAddressUnlockConditionDto) -> Result<Self, DtoError> {
-            Ok(Self::new((&value.address).try_into().map_err(|_e| {
-                DtoError::InvalidField("governorAddressUnlockCondition")
-            })?))
+        fn try_from(value: &GovernorAddressUnlockConditionDto) -> Result<Self, Error> {
+            Ok(Self::new(
+                (&value.address)
+                    .try_into()
+                    .map_err(|_e| Error::InvalidField("governorAddressUnlockCondition"))?,
+            ))
         }
     }
 }

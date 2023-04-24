@@ -227,7 +227,7 @@ pub mod dto {
         milestone::dto::MilestonePayloadDto, tagged_data::dto::TaggedDataPayloadDto,
         transaction::dto::TransactionPayloadDto, treasury_transaction::dto::TreasuryTransactionPayloadDto,
     };
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// Describes all the different payload types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -277,7 +277,7 @@ pub mod dto {
     }
 
     impl Payload {
-        pub fn try_from_dto(value: &PayloadDto, protocol_parameters: &ProtocolParameters) -> Result<Self, DtoError> {
+        pub fn try_from_dto(value: &PayloadDto, protocol_parameters: &ProtocolParameters) -> Result<Self, Error> {
             Ok(match value {
                 PayloadDto::Transaction(p) => {
                     Self::from(TransactionPayload::try_from_dto(p.as_ref(), protocol_parameters)?)
@@ -293,7 +293,7 @@ pub mod dto {
             })
         }
 
-        pub fn try_from_dto_unverified(value: &PayloadDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &PayloadDto) -> Result<Self, Error> {
             Ok(match value {
                 PayloadDto::Transaction(p) => Self::from(TransactionPayload::try_from_dto_unverified(p.as_ref())?),
                 PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from_dto_unverified(p.as_ref())?),
