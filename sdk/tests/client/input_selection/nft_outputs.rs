@@ -1220,7 +1220,7 @@ fn nft_builder_replace() {
         .clear_features()
         .clear_immutable_features()
         .replace_unlock_condition(address_2);
-    let output = builder.clone().finish_unverified().unwrap();
+    let output = builder.finish_unverified().unwrap();
     assert_eq!(output.unlock_conditions().address(), Some(&address_2));
     assert!(output.features().is_empty());
     assert!(output.immutable_features().is_empty());

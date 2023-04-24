@@ -256,7 +256,7 @@ fn foundry_builder_replace() {
         .clear_features()
         .clear_immutable_features()
         .replace_unlock_condition(alias_2);
-    let output = builder.clone().finish_unverified().unwrap();
+    let output = builder.finish_unverified().unwrap();
     assert_eq!(output.unlock_conditions().immutable_alias_address(), Some(&alias_2));
     assert!(output.features().is_empty());
     assert!(output.immutable_features().is_empty());

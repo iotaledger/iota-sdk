@@ -381,7 +381,7 @@ fn alias_builder_replace() {
         .clear_immutable_features()
         .replace_unlock_condition(gov_address_2)
         .replace_unlock_condition(state_address_2);
-    let output = builder.clone().finish_unverified().unwrap();
+    let output = builder.finish_unverified().unwrap();
     assert_eq!(output.unlock_conditions().governor_address(), Some(&gov_address_2));
     assert_eq!(
         output.unlock_conditions().state_controller_address(),
