@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use crate::types::block::{
     dto::U256Dto,
     output::{AliasId, FoundryId, NftId, TokenId},
-    DtoError,
+    Error,
 };
 
 /// A type to specify what needs to be burned during input selection.
@@ -141,7 +141,7 @@ impl From<&Burn> for BurnDto {
 }
 
 impl TryFrom<&BurnDto> for Burn {
-    type Error = DtoError;
+    type Error = Error;
 
     fn try_from(value: &BurnDto) -> Result<Self, Self::Error> {
         Ok(Self {
@@ -158,7 +158,7 @@ impl TryFrom<&BurnDto> for Burn {
                         .collect::<Result<BTreeMap<_, _>, _>>()
                 })
                 .transpose()
-                .map_err(|_| DtoError::InvalidField("native_tokens"))?
+                .map_err(|_| Error::InvalidField("native_tokens"))?
                 .unwrap_or_default(),
         })
     }

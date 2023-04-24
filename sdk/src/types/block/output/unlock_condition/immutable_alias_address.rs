@@ -53,7 +53,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, error::dto::DtoError};
+    use crate::types::block::{address::dto::AddressDto, Error};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct ImmutableAliasAddressUnlockConditionDto {
@@ -72,18 +72,18 @@ pub mod dto {
     }
 
     impl TryFrom<&ImmutableAliasAddressUnlockConditionDto> for ImmutableAliasAddressUnlockCondition {
-        type Error = DtoError;
+        type Error = Error;
 
-        fn try_from(value: &ImmutableAliasAddressUnlockConditionDto) -> Result<Self, DtoError> {
+        fn try_from(value: &ImmutableAliasAddressUnlockConditionDto) -> Result<Self, Error> {
             let address: Address = (&value.address)
                 .try_into()
-                .map_err(|_e| DtoError::InvalidField("immutableAliasAddressUnlockCondition"))?;
+                .map_err(|_e| Error::InvalidField("immutableAliasAddressUnlockCondition"))?;
 
             // An ImmutableAliasAddressUnlockCondition must have an AliasAddress.
             if let Address::Alias(alias_address) = &address {
                 Ok(Self::new(*alias_address))
             } else {
-                Err(DtoError::InvalidField("immutableAliasAddressUnlockCondition"))
+                Err(Error::InvalidField("immutableAliasAddressUnlockCondition"))
             }
         }
     }

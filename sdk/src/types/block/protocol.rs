@@ -144,7 +144,7 @@ pub fn protocol_parameters() -> ProtocolParameters {
 pub mod dto {
 
     use super::*;
-    use crate::types::block::{error::dto::DtoError, output::dto::RentStructureDto};
+    use crate::types::block::{output::dto::RentStructureDto, Error};
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     #[cfg_attr(
@@ -164,10 +164,10 @@ pub mod dto {
     }
 
     impl TryFrom<ProtocolParametersDto> for ProtocolParameters {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: ProtocolParametersDto) -> Result<Self, Self::Error> {
-            Ok(Self::new(
+            Self::new(
                 value.protocol_version,
                 value.network_name,
                 value.bech32_hrp,
@@ -177,8 +177,8 @@ pub mod dto {
                 value
                     .token_supply
                     .parse()
-                    .map_err(|_| DtoError::InvalidField("token_supply"))?,
-            )?)
+                    .map_err(|_| Error::InvalidField("token_supply"))?,
+            )
         }
     }
 }
