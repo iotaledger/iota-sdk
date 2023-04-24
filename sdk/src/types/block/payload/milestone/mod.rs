@@ -270,7 +270,7 @@ pub mod dto {
                 signatures.push(v.try_into().map_err(|_| Error::InvalidField("signatures"))?)
             }
 
-            Ok(Self::new(essence, signatures)?)
+            Self::new(essence, signatures)
         }
 
         pub fn try_from_dto_unverified(value: &MilestonePayloadDto) -> Result<Self, Error> {
@@ -325,7 +325,7 @@ pub mod dto {
                 signatures.push(v.try_into().map_err(|_| Error::InvalidField("signatures"))?)
             }
 
-            Ok(Self::new(essence, signatures)?)
+            Self::new(essence, signatures)
         }
     }
 }

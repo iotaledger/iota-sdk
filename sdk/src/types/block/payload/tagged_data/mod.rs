@@ -105,7 +105,7 @@ pub mod dto {
         type Error = Error;
 
         fn try_from(value: &TaggedDataPayloadDto) -> Result<Self, Self::Error> {
-            Ok(Self::new(
+            Self::new(
                 if !value.tag.is_empty() {
                     prefix_hex::decode(&value.tag).map_err(|_| Error::InvalidField("tag"))?
                 } else {
@@ -116,7 +116,7 @@ pub mod dto {
                 } else {
                     Vec::new()
                 },
-            )?)
+            )
         }
     }
 }

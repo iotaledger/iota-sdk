@@ -98,14 +98,14 @@ pub mod dto {
 
     impl TreasuryTransactionPayload {
         fn _try_from_dto(value: &TreasuryTransactionPayloadDto, output: TreasuryOutput) -> Result<Self, Error> {
-            Ok(Self::new(
+            Self::new(
                 if let InputDto::Treasury(ref input) = value.input {
                     input.try_into()?
                 } else {
                     return Err(Error::InvalidField("input"));
                 },
                 output,
-            )?)
+            )
         }
 
         pub fn try_from_dto(value: &TreasuryTransactionPayloadDto, token_supply: u64) -> Result<Self, Error> {

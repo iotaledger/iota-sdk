@@ -801,7 +801,7 @@ pub mod dto {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto(u, token_supply)?);
             }
 
-            Ok(builder.finish(token_supply)?)
+            builder.finish(token_supply)
         }
 
         pub fn try_from_dto_unverified(value: &AliasOutputDto) -> Result<Self, Error> {
@@ -811,7 +811,7 @@ pub mod dto {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_unverified(u)?);
             }
 
-            Ok(builder.finish_unverified()?)
+            builder.finish_unverified()
         }
 
         #[allow(clippy::too_many_arguments)]
@@ -881,7 +881,7 @@ pub mod dto {
                 builder = builder.with_immutable_features(immutable_features);
             }
 
-            Ok(builder.finish(token_supply)?)
+            builder.finish(token_supply)
         }
     }
 }

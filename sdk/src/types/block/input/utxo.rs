@@ -82,13 +82,13 @@ pub mod dto {
         type Error = Error;
 
         fn try_from(value: &UtxoInputDto) -> Result<Self, Self::Error> {
-            Ok(Self::new(
+            Self::new(
                 value
                     .transaction_id
                     .parse::<TransactionId>()
                     .map_err(|_| Error::InvalidField("transactionId"))?,
                 value.transaction_output_index,
-            )?)
+            )
         }
     }
 }

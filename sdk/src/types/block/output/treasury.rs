@@ -74,10 +74,10 @@ pub mod dto {
 
     impl TreasuryOutput {
         pub fn try_from_dto(value: &TreasuryOutputDto, token_supply: u64) -> Result<Self, Error> {
-            Ok(Self::new(
+            Self::new(
                 value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
                 token_supply,
-            )?)
+            )
         }
 
         pub fn try_from_dto_unverified(value: &TreasuryOutputDto) -> Result<Self, Error> {

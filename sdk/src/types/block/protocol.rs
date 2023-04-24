@@ -167,7 +167,7 @@ pub mod dto {
         type Error = Error;
 
         fn try_from(value: ProtocolParametersDto) -> Result<Self, Self::Error> {
-            Ok(Self::new(
+            Self::new(
                 value.protocol_version,
                 value.network_name,
                 value.bech32_hrp,
@@ -178,7 +178,7 @@ pub mod dto {
                     .token_supply
                     .parse()
                     .map_err(|_| Error::InvalidField("token_supply"))?,
-            )?)
+            )
         }
     }
 }

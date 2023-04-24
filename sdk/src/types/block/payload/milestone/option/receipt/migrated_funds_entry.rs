@@ -106,12 +106,12 @@ pub mod dto {
             let tail_transaction_hash = prefix_hex::decode(&value.tail_transaction_hash)
                 .map_err(|_| Error::InvalidField("tailTransactionHash"))?;
 
-            Ok(Self::new(
+            Self::new(
                 TailTransactionHash::new(tail_transaction_hash)?,
                 (&value.address).try_into()?,
                 value.deposit,
                 token_supply,
-            )?)
+            )
         }
 
         pub fn try_from_dto_unverified(value: &MigratedFundsEntryDto) -> Result<Self, Error> {

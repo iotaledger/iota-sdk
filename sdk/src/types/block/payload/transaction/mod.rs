@@ -137,7 +137,7 @@ pub mod dto {
                 unlocks.push(b.try_into()?);
             }
 
-            Ok(Self::new(transaction_essence, Unlocks::new(unlocks)?)?)
+            Self::new(transaction_essence, Unlocks::new(unlocks)?)
         }
 
         pub fn try_from_dto(

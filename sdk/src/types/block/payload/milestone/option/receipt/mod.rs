@@ -189,7 +189,7 @@ pub mod dto {
 
     impl ReceiptMilestoneOption {
         pub fn try_from_dto(value: &ReceiptMilestoneOptionDto, token_supply: u64) -> Result<Self, Error> {
-            Ok(Self::new(
+            Self::new(
                 MilestoneIndex(value.migrated_at),
                 value.last,
                 value
@@ -203,7 +203,7 @@ pub mod dto {
                     return Err(Error::InvalidField("transaction"));
                 },
                 token_supply,
-            )?)
+            )
         }
 
         pub fn try_from_dto_unverified(value: &ReceiptMilestoneOptionDto) -> Result<Self, Error> {

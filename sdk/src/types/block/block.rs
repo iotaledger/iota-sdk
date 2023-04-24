@@ -310,7 +310,7 @@ pub mod dto {
                 builder = builder.with_payload(Payload::try_from_dto(p, protocol_parameters)?);
             }
 
-            Ok(builder.finish()?)
+            builder.finish()
         }
 
         pub fn try_from_dto_unverified(value: &BlockDto) -> Result<Self, Error> {
@@ -320,7 +320,7 @@ pub mod dto {
                 builder = builder.with_payload(Payload::try_from_dto_unverified(p)?);
             }
 
-            Ok(builder.finish()?)
+            builder.finish()
         }
     }
 }
