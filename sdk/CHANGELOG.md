@@ -91,4 +91,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.1.0 - 2023-04-03
 
-First release of the `iota-sdk` crate.
+First release of the `iota-sdk` crate which is a combination and successor of [iota.rs](https://github.com/iotaledger/iota.rs) and [wallet.rs](https://github.com/iotaledger/wallet.rs).
+
+This is a strict implementation of the `stardust` related [TIPs](https://github.com/iotaledger/tips) which are not compatible with the `chrysalis` features set.
+
+All the changes compared to the previous version are mostly derived from the following TIPs:
+
+- [Multi-Asset Ledger and ISC Support](https://github.com/iotaledger/tips/blob/main/tips/TIP-0018/tip-0018.md)
+- [Dust Protection Based on Byte Costs (Storage Deposit)](https://github.com/iotaledger/tips/blob/main/tips/TIP-0019/tip-0019.md)
+- [Transaction Payload with TIP-18 Output Types](https://github.com/iotaledger/tips/blob/main/tips/TIP-0020/tip-0020.md)
+- [Tangle Block](https://github.com/iotaledger/tips/blob/main/tips/TIP-0024/tip-0024.md)
+- [Core REST API](https://github.com/iotaledger/tips/blob/main/tips/TIP-0025/tip-0025.md)
+- [UTXO Indexer API](https://github.com/iotaledger/tips/blob/main/tips/TIP-0026/tip-0026.md)
+- [Event API](https://github.com/iotaledger/tips/blob/main/tips/TIP-0028/tip-0028.md)
+- [Milestone Payload](https://github.com/iotaledger/tips/blob/main/tips/TIP-0029/tip-0029.md)
+- [Bech32 Address Format](https://github.com/iotaledger/tips/blob/main/tips/TIP-0031/tip-0031.md)
+- [Shimmer Protocol Parameters](https://github.com/iotaledger/tips/blob/main/tips/TIP-0032/tip-0032.md)
+
+Past changelogs: [types](https://github.com/iotaledger/iota.rs/blob/develop/types/CHANGELOG.md), [pow](https://github.com/iotaledger/iota.rs/blob/develop/pow/CHANGELOG.md), [client](https://github.com/iotaledger/iota.rs/blob/develop/client/CHANGELOG.md) and [wallet](https://github.com/iotaledger/wallet.rs/blob/develop/wallet/CHANGELOG.md).
