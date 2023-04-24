@@ -65,3 +65,9 @@ impl From<iota_sdk::types::block::Error> for Error {
         Self::Block(Box::new(error))
     }
 }
+
+impl From<iota_sdk::client::stronghold::Error> for Error {
+    fn from(error: iota_sdk::client::stronghold::Error) -> Self {
+        Self::Client(iota_sdk::client::Error::Stronghold(error))
+    }
+}
