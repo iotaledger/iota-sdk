@@ -11,6 +11,8 @@ use iota_sdk::{
         address::Address,
         output::{
             feature::MetadataFeature,
+            feature::TagFeature,
+            feature::SenderFeature,
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                 TimelockUnlockCondition,
@@ -62,6 +64,14 @@ async fn main() -> Result<()> {
         // with timelock
         basic_output_builder
             .add_unlock_condition(TimelockUnlockCondition::new(1)?)
+            .finish_output(token_supply)?,
+        // with tag feature
+        basic_output_builder
+            .add_feature(TagFeature::new("Hello, World!".as_bytes().to_owned())?)
+            .finish_output(token_supply)?,
+        // with sender feature
+        basic_output_builder
+            .add_feature(SenderFeature::new(address))
             .finish_output(token_supply)?,
     ];
 
