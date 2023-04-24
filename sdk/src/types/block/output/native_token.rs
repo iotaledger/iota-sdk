@@ -250,7 +250,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{dto::U256Dto, error::dto::DtoError, output::token_id::dto::TokenIdDto};
+    use crate::types::block::{dto::U256Dto, output::token_id::dto::TokenIdDto, Error};
 
     /// Describes a native token.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -272,14 +272,14 @@ pub mod dto {
     }
 
     impl TryFrom<&NativeTokenDto> for NativeToken {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &NativeTokenDto) -> Result<Self, Self::Error> {
             Self::new(
                 (&value.token_id).try_into()?,
-                U256::try_from(&value.amount).map_err(|_| DtoError::InvalidField("amount"))?,
+                U256::try_from(&value.amount).map_err(|_| Error::InvalidField("amount"))?,
             )
-            .map_err(|_| DtoError::InvalidField("nativeTokens"))
+            .map_err(|_| Error::InvalidField("nativeTokens"))
         }
     }
 }

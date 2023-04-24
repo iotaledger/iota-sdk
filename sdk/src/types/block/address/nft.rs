@@ -67,7 +67,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// Describes an NFT address.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -88,13 +88,10 @@ pub mod dto {
     }
 
     impl TryFrom<&NftAddressDto> for NftAddress {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &NftAddressDto) -> Result<Self, Self::Error> {
-            value
-                .nft_id
-                .parse::<Self>()
-                .map_err(|_| DtoError::InvalidField("nftId"))
+            value.nft_id.parse::<Self>().map_err(|_| Error::InvalidField("nftId"))
         }
     }
 }

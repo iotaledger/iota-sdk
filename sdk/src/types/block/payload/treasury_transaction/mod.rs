@@ -72,9 +72,9 @@ pub mod dto {
 
     use super::*;
     use crate::types::block::{
-        error::dto::DtoError,
         input::dto::{InputDto, TreasuryInputDto},
         output::dto::{OutputDto, TreasuryOutputDto},
+        Error,
     };
 
     /// The payload type to define a treasury transaction.
@@ -97,35 +97,35 @@ pub mod dto {
     }
 
     impl TreasuryTransactionPayload {
-        fn _try_from_dto(value: &TreasuryTransactionPayloadDto, output: TreasuryOutput) -> Result<Self, DtoError> {
+        fn _try_from_dto(value: &TreasuryTransactionPayloadDto, output: TreasuryOutput) -> Result<Self, Error> {
             Ok(Self::new(
                 if let InputDto::Treasury(ref input) = value.input {
                     input.try_into()?
                 } else {
-                    return Err(DtoError::InvalidField("input"));
+                    return Err(Error::InvalidField("input"));
                 },
                 output,
             )?)
         }
 
-        pub fn try_from_dto(value: &TreasuryTransactionPayloadDto, token_supply: u64) -> Result<Self, DtoError> {
+        pub fn try_from_dto(value: &TreasuryTransactionPayloadDto, token_supply: u64) -> Result<Self, Error> {
             Self::_try_from_dto(
                 value,
                 if let OutputDto::Treasury(ref output) = value.output {
                     TreasuryOutput::try_from_dto(output, token_supply)?
                 } else {
-                    return Err(DtoError::InvalidField("output"));
+                    return Err(Error::InvalidField("output"));
                 },
             )
         }
 
-        pub fn try_from_dto_unverified(value: &TreasuryTransactionPayloadDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &TreasuryTransactionPayloadDto) -> Result<Self, Error> {
             Self::_try_from_dto(
                 value,
                 if let OutputDto::Treasury(ref output) = value.output {
                     TreasuryOutput::try_from_dto_unverified(output)?
                 } else {
-                    return Err(DtoError::InvalidField("output"));
+                    return Err(Error::InvalidField("output"));
                 },
             )
         }

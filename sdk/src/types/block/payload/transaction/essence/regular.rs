@@ -343,9 +343,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{
-        error::dto::DtoError, input::dto::InputDto, output::dto::OutputDto, payload::dto::PayloadDto,
-    };
+    use crate::types::block::{input::dto::InputDto, output::dto::OutputDto, payload::dto::PayloadDto, Error};
 
     /// Describes the essence data making up a transaction by defining its inputs and outputs and an optional payload.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -382,16 +380,16 @@ pub mod dto {
         fn _try_from_dto(
             value: &RegularTransactionEssenceDto,
             outputs: Vec<Output>,
-        ) -> Result<RegularTransactionEssenceBuilder, DtoError> {
+        ) -> Result<RegularTransactionEssenceBuilder, Error> {
             let network_id = value
                 .network_id
                 .parse::<u64>()
-                .map_err(|_| DtoError::InvalidField("network_id"))?;
+                .map_err(|_| Error::InvalidField("network_id"))?;
             let inputs = value
                 .inputs
                 .iter()
                 .map(TryInto::try_into)
-                .collect::<Result<Vec<Input>, DtoError>>()?;
+                .collect::<Result<Vec<Input>, Error>>()?;
 
             let mut builder = Self::builder(network_id, InputsCommitment::from_str(&value.inputs_commitment)?)
                 .with_inputs(inputs)
@@ -401,7 +399,7 @@ pub mod dto {
                 if let PayloadDto::TaggedData(i) = p {
                     builder.with_payload(Payload::TaggedData(Box::new((i.as_ref()).try_into()?)))
                 } else {
-                    return Err(DtoError::InvalidField("payload"));
+                    return Err(Error::InvalidField("payload"));
                 }
             } else {
                 builder
@@ -413,24 +411,24 @@ pub mod dto {
         pub fn try_from_dto(
             value: &RegularTransactionEssenceDto,
             protocol_parameters: &ProtocolParameters,
-        ) -> Result<Self, DtoError> {
+        ) -> Result<Self, Error> {
             let outputs = value
                 .outputs
                 .iter()
                 .map(|o| Output::try_from_dto(o, protocol_parameters.token_supply()))
-                .collect::<Result<Vec<Output>, DtoError>>()?;
+                .collect::<Result<Vec<Output>, Error>>()?;
 
             let builder = Self::_try_from_dto(value, outputs)?;
 
             builder.finish(protocol_parameters).map_err(Into::into)
         }
 
-        pub fn try_from_dto_unverified(value: &RegularTransactionEssenceDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &RegularTransactionEssenceDto) -> Result<Self, Error> {
             let outputs = value
                 .outputs
                 .iter()
                 .map(Output::try_from_dto_unverified)
-                .collect::<Result<Vec<Output>, DtoError>>()?;
+                .collect::<Result<Vec<Output>, Error>>()?;
 
             let builder = Self::_try_from_dto(value, outputs)?;
 

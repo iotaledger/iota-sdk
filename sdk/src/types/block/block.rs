@@ -258,7 +258,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{error::dto::DtoError, payload::dto::PayloadDto, protocol::ProtocolParameters};
+    use crate::types::block::{payload::dto::PayloadDto, protocol::ProtocolParameters, Error};
 
     /// The block object that nodes gossip around in the network.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -287,28 +287,23 @@ pub mod dto {
     }
 
     impl Block {
-        fn _try_from_dto(value: &BlockDto) -> Result<BlockBuilder, DtoError> {
+        fn _try_from_dto(value: &BlockDto) -> Result<BlockBuilder, Error> {
             let parents = Parents::from_vec(
                 value
                     .parents
                     .iter()
-                    .map(|m| m.parse::<BlockId>().map_err(|_| DtoError::InvalidField("parents")))
-                    .collect::<Result<Vec<BlockId>, DtoError>>()?,
+                    .map(|m| m.parse::<BlockId>().map_err(|_| Error::InvalidField("parents")))
+                    .collect::<Result<Vec<BlockId>, Error>>()?,
             )?;
 
             let builder = BlockBuilder::new(parents)
                 .with_protocol_version(value.protocol_version)
-                .with_nonce(
-                    value
-                        .nonce
-                        .parse::<u64>()
-                        .map_err(|_| DtoError::InvalidField("nonce"))?,
-                );
+                .with_nonce(value.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?);
 
             Ok(builder)
         }
 
-        pub fn try_from_dto(value: &BlockDto, protocol_parameters: &ProtocolParameters) -> Result<Self, DtoError> {
+        pub fn try_from_dto(value: &BlockDto, protocol_parameters: &ProtocolParameters) -> Result<Self, Error> {
             let mut builder = Self::_try_from_dto(value)?;
 
             if let Some(p) = value.payload.as_ref() {
@@ -318,7 +313,7 @@ pub mod dto {
             Ok(builder.finish()?)
         }
 
-        pub fn try_from_dto_unverified(value: &BlockDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &BlockDto) -> Result<Self, Error> {
             let mut builder = Self::_try_from_dto(value)?;
 
             if let Some(p) = value.payload.as_ref() {

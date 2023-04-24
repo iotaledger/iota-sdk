@@ -612,11 +612,11 @@ pub mod dto {
 
     use super::*;
     use crate::types::block::{
-        error::dto::DtoError,
         output::{
             dto::OutputBuilderAmountDto, feature::dto::FeatureDto, native_token::dto::NativeTokenDto,
             token_scheme::dto::TokenSchemeDto, unlock_condition::dto::UnlockConditionDto,
         },
+        Error,
     };
 
     /// Describes a foundry output that is controlled by an alias.
@@ -656,12 +656,9 @@ pub mod dto {
     }
 
     impl FoundryOutput {
-        fn _try_from_dto(value: &FoundryOutputDto) -> Result<FoundryOutputBuilder, DtoError> {
+        fn _try_from_dto(value: &FoundryOutputDto) -> Result<FoundryOutputBuilder, Error> {
             let mut builder = FoundryOutputBuilder::new_with_amount(
-                value
-                    .amount
-                    .parse::<u64>()
-                    .map_err(|_| DtoError::InvalidField("amount"))?,
+                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
                 value.serial_number,
                 (&value.token_scheme).try_into()?,
             );
@@ -681,7 +678,7 @@ pub mod dto {
             Ok(builder)
         }
 
-        pub fn try_from_dto(value: &FoundryOutputDto, token_supply: u64) -> Result<Self, DtoError> {
+        pub fn try_from_dto(value: &FoundryOutputDto, token_supply: u64) -> Result<Self, Error> {
             let mut builder = Self::_try_from_dto(value)?;
 
             for u in &value.unlock_conditions {
@@ -691,7 +688,7 @@ pub mod dto {
             Ok(builder.finish(token_supply)?)
         }
 
-        pub fn try_from_dto_unverified(value: &FoundryOutputDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &FoundryOutputDto) -> Result<Self, Error> {
             let mut builder = Self::_try_from_dto(value)?;
 
             for u in &value.unlock_conditions {
@@ -711,12 +708,12 @@ pub mod dto {
             features: Option<Vec<FeatureDto>>,
             immutable_features: Option<Vec<FeatureDto>>,
             token_supply: u64,
-        ) -> Result<Self, DtoError> {
+        ) -> Result<Self, Error> {
             let token_scheme = TokenScheme::try_from(token_scheme)?;
 
             let mut builder = match amount {
                 OutputBuilderAmountDto::Amount(amount) => FoundryOutputBuilder::new_with_amount(
-                    amount.parse().map_err(|_| DtoError::InvalidField("amount"))?,
+                    amount.parse().map_err(|_| Error::InvalidField("amount"))?,
                     serial_number,
                     token_scheme,
                 ),
@@ -729,21 +726,21 @@ pub mod dto {
                 let native_tokens = native_tokens
                     .iter()
                     .map(NativeToken::try_from)
-                    .collect::<Result<Vec<NativeToken>, DtoError>>()?;
+                    .collect::<Result<Vec<NativeToken>, Error>>()?;
                 builder = builder.with_native_tokens(native_tokens);
             }
 
             let unlock_conditions = unlock_conditions
                 .iter()
                 .map(|u| UnlockCondition::try_from_dto(u, token_supply))
-                .collect::<Result<Vec<UnlockCondition>, DtoError>>()?;
+                .collect::<Result<Vec<UnlockCondition>, Error>>()?;
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(features) = features {
                 let features = features
                     .iter()
                     .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, DtoError>>()?;
+                    .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_features(features);
             }
 
@@ -751,7 +748,7 @@ pub mod dto {
                 let immutable_features = immutable_features
                     .iter()
                     .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, DtoError>>()?;
+                    .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_immutable_features(immutable_features);
             }
 
