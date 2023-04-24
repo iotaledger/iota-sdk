@@ -87,24 +87,28 @@ async fn set_mqtt_client(client: &Client) -> Result<(), Error> {
             utils::rand::fill(&mut entropy)?;
             let id = format!("iotasdk{}", prefix_hex::encode(entropy));
             let port = client.broker_options.port;
-            let wss = node.url.scheme() == "https";
-            let mut uri = format!(
-                "{}://{host}:{}/api/mqtt/v1",
-                if wss { "wss" } else { "ws" },
-                node.url.port_or_known_default().unwrap_or(port)
-            );
-
-            if !client.broker_options.use_ws {
-                uri = host.to_string();
-            };
-            let mut mqtt_options = MqttOptions::new(id, uri, port);
-            if client.broker_options.use_ws {
-                if wss {
-                    mqtt_options.set_transport(Transport::tls_with_default_config());
+            let secure = node.url.scheme() == "https";
+            let mqtt_options = if client.broker_options.use_ws {
+                let uri = format!(
+                    "{}://{host}:{}/api/mqtt/v1",
+                    if secure { "wss" } else { "ws" },
+                    node.url.port_or_known_default().unwrap_or(port)
+                );
+                let mut mqtt_options = MqttOptions::new(id, uri, port);
+                if secure {
+                    mqtt_options.set_transport(Transport::wss_with_default_config());
                 } else {
                     mqtt_options.set_transport(Transport::ws());
                 }
-            }
+                mqtt_options
+            } else {
+                let uri = host.to_string();
+                let mut mqtt_options = MqttOptions::new(id, uri, port);
+                if secure {
+                    mqtt_options.set_transport(Transport::tls_with_default_config());
+                }
+                mqtt_options
+            };
             let (_, mut connection) = AsyncClient::new(mqtt_options.clone(), 10);
             connection.set_network_options(
                 *NetworkOptions::new().set_connection_timeout(client.broker_options.timeout.as_secs()),
