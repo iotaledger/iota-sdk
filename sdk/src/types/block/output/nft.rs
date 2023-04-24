@@ -625,7 +625,6 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        address::AliasAddress,
         output::{
             dto::{OutputBuilderAmountDto, OutputDto},
             FoundryId, SimpleTokenScheme, TokenId,
@@ -634,7 +633,7 @@ mod tests {
         rand::{
             address::rand_alias_address,
             output::{
-                feature::{rand_issuer_feature, rand_sender_feature},
+                feature::{rand_allowed_features, rand_issuer_feature, rand_sender_feature},
                 rand_nft_output,
                 unlock_condition::rand_address_unlock_condition,
             },
@@ -644,8 +643,7 @@ mod tests {
     #[test]
     fn builder() {
         let protocol_parameters = protocol_parameters();
-        let alias_id = rand_alias_address();
-        let foundry_id = FoundryId::build(&AliasAddress::from(alias_id), 0, SimpleTokenScheme::KIND);
+        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
         let address_1 = rand_address_unlock_condition();
         let address_2 = rand_address_unlock_condition();
         let sender_1 = rand_sender_feature();
@@ -684,7 +682,7 @@ mod tests {
 
         assert_eq!(
             output.amount(),
-            Output::Nft(output.clone()).rent_cost(protocol_parameters.rent_structure())
+            Output::Nft(output).rent_cost(protocol_parameters.rent_structure())
         );
     }
 
@@ -707,6 +705,8 @@ mod tests {
         let output_ver = Output::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
         assert_eq!(&output, output_ver.as_nft());
 
+        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
+
         let output_split = NftOutput::try_from_dtos(
             OutputBuilderAmountDto::Amount(output.amount().to_string()),
             Some(output.native_tokens().iter().map(Into::into).collect()),
@@ -718,5 +718,37 @@ mod tests {
         )
         .unwrap();
         assert_eq!(output, output_split);
+
+        let test_split_dto = |builder: NftOutputBuilder| {
+            let output_split = NftOutput::try_from_dtos(
+                (&builder.amount).into(),
+                Some(builder.native_tokens.iter().map(Into::into).collect()),
+                &(&builder.nft_id).into(),
+                builder.unlock_conditions.iter().map(Into::into).collect(),
+                Some(builder.features.iter().map(Into::into).collect()),
+                Some(builder.immutable_features.iter().map(Into::into).collect()),
+                protocol_parameters.token_supply(),
+            )
+            .unwrap();
+            assert_eq!(
+                builder.finish(protocol_parameters.token_supply()).unwrap(),
+                output_split
+            );
+        };
+
+        let builder = NftOutput::build_with_amount(100, NftId::null())
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_unlock_condition(rand_address_unlock_condition())
+            .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))
+            .with_immutable_features(rand_allowed_features(NftOutput::ALLOWED_IMMUTABLE_FEATURES));
+        test_split_dto(builder);
+
+        let builder =
+            NftOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), NftId::null())
+                .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+                .add_unlock_condition(rand_address_unlock_condition())
+                .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))
+                .with_immutable_features(rand_allowed_features(NftOutput::ALLOWED_IMMUTABLE_FEATURES));
+        test_split_dto(builder);
     }
 }

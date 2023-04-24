@@ -881,12 +881,15 @@ mod tests {
             FoundryId, SimpleTokenScheme, TokenId,
         },
         protocol::protocol_parameters,
-        rand::output::{
-            feature::{rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
-            rand_alias_id, rand_alias_output,
-            unlock_condition::{
-                rand_governor_address_unlock_condition_different_from,
-                rand_state_controller_address_unlock_condition_different_from,
+        rand::{
+            address::rand_alias_address,
+            output::{
+                feature::{rand_allowed_features, rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
+                rand_alias_id, rand_alias_output,
+                unlock_condition::{
+                    rand_governor_address_unlock_condition_different_from,
+                    rand_state_controller_address_unlock_condition_different_from,
+                },
             },
         },
     };
@@ -905,7 +908,7 @@ mod tests {
         let issuer_1 = rand_issuer_feature();
         let issuer_2 = rand_issuer_feature();
 
-        let mut builder = AliasOutput::build_with_amount(0, rand_alias_id())
+        let mut builder = AliasOutput::build_with_amount(0, alias_id)
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
             .add_unlock_condition(gov_address_1)
             .add_unlock_condition(state_address_1)
@@ -992,5 +995,46 @@ mod tests {
         )
         .unwrap();
         assert_eq!(output, output_split);
+
+        let alias_id = rand_alias_id();
+        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
+        let gov_address = rand_governor_address_unlock_condition_different_from(&alias_id);
+        let state_address = rand_state_controller_address_unlock_condition_different_from(&alias_id);
+
+        let test_split_dto = |builder: AliasOutputBuilder| {
+            let output_split = AliasOutput::try_from_dtos(
+                (&builder.amount).into(),
+                Some(builder.native_tokens.iter().map(Into::into).collect()),
+                &(&builder.alias_id).into(),
+                builder.state_index,
+                builder.state_metadata.to_owned().into(),
+                builder.foundry_counter,
+                builder.unlock_conditions.iter().map(Into::into).collect(),
+                Some(builder.features.iter().map(Into::into).collect()),
+                Some(builder.immutable_features.iter().map(Into::into).collect()),
+                protocol_parameters.token_supply(),
+            )
+            .unwrap();
+            assert_eq!(
+                builder.finish(protocol_parameters.token_supply()).unwrap(),
+                output_split
+            );
+        };
+
+        let builder = AliasOutput::build_with_amount(100, alias_id)
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_unlock_condition(gov_address)
+            .add_unlock_condition(state_address)
+            .with_features(rand_allowed_features(AliasOutput::ALLOWED_FEATURES))
+            .with_immutable_features(rand_allowed_features(AliasOutput::ALLOWED_IMMUTABLE_FEATURES));
+        test_split_dto(builder);
+
+        let builder = AliasOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id)
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_unlock_condition(gov_address)
+            .add_unlock_condition(state_address)
+            .with_features(rand_allowed_features(AliasOutput::ALLOWED_FEATURES))
+            .with_immutable_features(rand_allowed_features(AliasOutput::ALLOWED_IMMUTABLE_FEATURES));
+        test_split_dto(builder);
     }
 }

@@ -739,24 +739,24 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        address::AliasAddress,
         output::{
-            dto::{OutputBuilderAmountDto, OutputDto},
-            unlock_condition::ImmutableAliasAddressUnlockCondition,
-            FoundryId, SimpleTokenScheme, TokenId,
+            dto::OutputDto, unlock_condition::ImmutableAliasAddressUnlockCondition, FoundryId, SimpleTokenScheme,
+            TokenId,
         },
         protocol::protocol_parameters,
         rand::{
             address::rand_alias_address,
-            output::{feature::rand_metadata_feature, rand_foundry_output, rand_token_scheme},
+            output::{
+                feature::{rand_allowed_features, rand_metadata_feature},
+                rand_foundry_output, rand_token_scheme,
+            },
         },
     };
 
     #[test]
     fn builder() {
         let protocol_parameters = protocol_parameters();
-        let alias_id = rand_alias_address();
-        let foundry_id = FoundryId::build(&AliasAddress::from(alias_id), 0, SimpleTokenScheme::KIND);
+        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
         let alias_1 = ImmutableAliasAddressUnlockCondition::new(rand_alias_address());
         let alias_2 = ImmutableAliasAddressUnlockCondition::new(rand_alias_address());
         let metadata_1 = rand_metadata_feature();
@@ -795,7 +795,7 @@ mod tests {
 
         assert_eq!(
             output.amount(),
-            Output::Foundry(output.clone()).rent_cost(protocol_parameters.rent_structure())
+            Output::Foundry(output).rent_cost(protocol_parameters.rent_structure())
         );
     }
 
@@ -818,17 +818,42 @@ mod tests {
         let output_ver = Output::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
         assert_eq!(&output, output_ver.as_foundry());
 
-        let output_split = FoundryOutput::try_from_dtos(
-            OutputBuilderAmountDto::Amount(output.amount().to_string()),
-            Some(output.native_tokens().iter().map(Into::into).collect()),
-            output.serial_number(),
-            &output.token_scheme().into(),
-            output.unlock_conditions().iter().map(Into::into).collect(),
-            Some(output.features().iter().map(Into::into).collect()),
-            Some(output.immutable_features().iter().map(Into::into).collect()),
-            protocol_parameters.token_supply(),
+        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
+
+        let test_split_dto = |builder: FoundryOutputBuilder| {
+            let output_split = FoundryOutput::try_from_dtos(
+                (&builder.amount).into(),
+                Some(builder.native_tokens.iter().map(Into::into).collect()),
+                builder.serial_number,
+                &(&builder.token_scheme).into(),
+                builder.unlock_conditions.iter().map(Into::into).collect(),
+                Some(builder.features.iter().map(Into::into).collect()),
+                Some(builder.immutable_features.iter().map(Into::into).collect()),
+                protocol_parameters.token_supply(),
+            )
+            .unwrap();
+            assert_eq!(
+                builder.finish(protocol_parameters.token_supply()).unwrap(),
+                output_split
+            );
+        };
+
+        let builder = FoundryOutput::build_with_amount(100, 123, rand_token_scheme())
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(rand_alias_address()))
+            .add_immutable_feature(rand_metadata_feature())
+            .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
+        test_split_dto(builder);
+
+        let builder = FoundryOutput::build_with_minimum_storage_deposit(
+            *protocol_parameters.rent_structure(),
+            123,
+            rand_token_scheme(),
         )
-        .unwrap();
-        assert_eq!(output, output_split);
+        .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+        .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(rand_alias_address()))
+        .add_immutable_feature(rand_metadata_feature())
+        .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
+        test_split_dto(builder);
     }
 }
