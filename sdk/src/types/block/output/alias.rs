@@ -885,3 +885,126 @@ pub mod dto {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use packable::PackableExt;
+
+    use super::{dto::AliasOutputDto, *};
+    use crate::types::block::{
+        address::AliasAddress,
+        output::{dto::OutputBuilderAmountDto, FoundryId, SimpleTokenScheme, TokenId},
+        protocol::protocol_parameters,
+        rand::output::{
+            feature::{rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
+            rand_alias_id, rand_alias_output,
+            unlock_condition::{
+                rand_governor_address_unlock_condition_different_from,
+                rand_state_controller_address_unlock_condition_different_from,
+            },
+        },
+    };
+
+    #[test]
+    fn builder() {
+        let protocol_parameters = protocol_parameters();
+        let alias_id = rand_alias_id();
+        let foundry_id = FoundryId::build(&AliasAddress::from(alias_id), 0, SimpleTokenScheme::KIND);
+        let gov_address_1 = rand_governor_address_unlock_condition_different_from(&alias_id);
+        let gov_address_2 = rand_governor_address_unlock_condition_different_from(&alias_id);
+        let state_address_1 = rand_state_controller_address_unlock_condition_different_from(&alias_id);
+        let state_address_2 = rand_state_controller_address_unlock_condition_different_from(&alias_id);
+        let sender_1 = rand_sender_feature();
+        let sender_2 = rand_sender_feature();
+        let issuer_1 = rand_issuer_feature();
+        let issuer_2 = rand_issuer_feature();
+
+        let mut builder = AliasOutput::build_with_amount(0, rand_alias_id())
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_unlock_condition(gov_address_1)
+            .add_unlock_condition(state_address_1)
+            .add_feature(sender_1)
+            .replace_feature(sender_2)
+            .replace_immutable_feature(issuer_1)
+            .add_immutable_feature(issuer_2);
+
+        let output = builder.clone().finish_unverified().unwrap();
+        assert_eq!(output.unlock_conditions().governor_address(), Some(&gov_address_1));
+        assert_eq!(
+            output.unlock_conditions().state_controller_address(),
+            Some(&state_address_1)
+        );
+        assert_eq!(output.features().sender(), Some(&sender_2));
+        assert_eq!(output.immutable_features().issuer(), Some(&issuer_1));
+
+        builder = builder
+            .clear_unlock_conditions()
+            .clear_features()
+            .clear_immutable_features()
+            .replace_unlock_condition(gov_address_2)
+            .replace_unlock_condition(state_address_2);
+        let output = builder.clone().finish_unverified().unwrap();
+        assert_eq!(output.unlock_conditions().governor_address(), Some(&gov_address_2));
+        assert_eq!(
+            output.unlock_conditions().state_controller_address(),
+            Some(&state_address_2)
+        );
+        assert!(output.features().is_empty());
+        assert!(output.immutable_features().is_empty());
+
+        let metadata = rand_metadata_feature();
+
+        let output = builder
+            .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+            .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(&alias_id))
+            .add_unlock_condition(rand_governor_address_unlock_condition_different_from(&alias_id))
+            .with_features([Feature::from(metadata.clone()), sender_1.into()])
+            .with_immutable_features([Feature::from(metadata.clone()), issuer_1.into()])
+            .finish(protocol_parameters.token_supply())
+            .unwrap();
+
+        assert_eq!(
+            output.amount(),
+            Output::Alias(output.clone()).rent_cost(protocol_parameters.rent_structure())
+        );
+        assert_eq!(output.features().metadata(), Some(&metadata));
+        assert_eq!(output.features().sender(), Some(&sender_1));
+        assert_eq!(output.immutable_features().metadata(), Some(&metadata));
+        assert_eq!(output.immutable_features().issuer(), Some(&issuer_1));
+    }
+
+    #[test]
+    fn pack_unpack() {
+        let protocol_parameters = protocol_parameters();
+        let output = rand_alias_output(protocol_parameters.token_supply());
+        let bytes = output.pack_to_vec();
+        let output_unpacked = AliasOutput::unpack_verified(bytes, &protocol_parameters).unwrap();
+        assert_eq!(output, output_unpacked);
+    }
+
+    #[test]
+    fn to_from_dto() {
+        let protocol_parameters = protocol_parameters();
+        let output = rand_alias_output(protocol_parameters.token_supply());
+        let dto = AliasOutputDto::from(&output);
+        let output_unver = AliasOutput::try_from_dto_unverified(&dto).unwrap();
+        assert_eq!(output, output_unver);
+        let output_ver = AliasOutput::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
+        assert_eq!(output, output_ver);
+
+        let output_split = AliasOutput::try_from_dtos(
+            OutputBuilderAmountDto::Amount(output.amount().to_string()),
+            Some(output.native_tokens().iter().map(Into::into).collect()),
+            &output.alias_id().into(),
+            output.state_index().into(),
+            output.state_metadata().to_owned().into(),
+            output.foundry_counter().into(),
+            output.unlock_conditions().iter().map(Into::into).collect(),
+            Some(output.features().iter().map(Into::into).collect()),
+            Some(output.immutable_features().iter().map(Into::into).collect()),
+            protocol_parameters.token_supply(),
+        )
+        .unwrap();
+        assert_eq!(output, output_split);
+    }
+}

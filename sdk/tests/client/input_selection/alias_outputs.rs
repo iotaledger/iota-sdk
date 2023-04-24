@@ -6,23 +6,11 @@ use std::{collections::HashSet, str::FromStr};
 use iota_sdk::{
     client::api::input_selection::{Burn, Error, InputSelection, Requirement},
     types::block::{
-        address::{Address, AliasAddress},
-        output::{
-            dto::AliasOutputDto, AliasId, AliasOutput, AliasOutputBuilder, AliasTransition, FoundryId, NativeToken,
-            Output, Rent, SimpleTokenScheme, TokenId,
-        },
+        address::Address,
+        output::{AliasId, AliasOutputBuilder, AliasTransition, Output},
         protocol::protocol_parameters,
-        rand::output::{
-            feature::{rand_issuer_feature, rand_sender_feature},
-            rand_alias_id, rand_alias_output,
-            unlock_condition::{
-                rand_governor_address_unlock_condition_different_from,
-                rand_state_controller_address_unlock_condition_different_from,
-            },
-        },
     },
 };
-use packable::PackableExt;
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
@@ -336,79 +324,6 @@ fn burn_alias() {
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert!(unsorted_eq(&selected.outputs, &outputs));
-}
-
-#[test]
-fn alias_builder_replace() {
-    let protocol_parameters = protocol_parameters();
-    let alias_id = AliasId::from_str(ALIAS_ID_2).unwrap();
-    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id), 0, SimpleTokenScheme::KIND);
-    let gov_address_1 = rand_governor_address_unlock_condition_different_from(&alias_id);
-    let gov_address_2 = rand_governor_address_unlock_condition_different_from(&alias_id);
-    let state_address_1 = rand_state_controller_address_unlock_condition_different_from(&alias_id);
-    let state_address_2 = rand_state_controller_address_unlock_condition_different_from(&alias_id);
-    let sender_1 = rand_sender_feature();
-    let sender_2 = rand_sender_feature();
-    let issuer_1 = rand_issuer_feature();
-    let issuer_2 = rand_issuer_feature();
-
-    let mut builder =
-        AliasOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), rand_alias_id())
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
-            .add_unlock_condition(gov_address_1)
-            .add_unlock_condition(state_address_1)
-            .add_feature(sender_1)
-            .replace_feature(sender_2)
-            .replace_immutable_feature(issuer_1)
-            .add_immutable_feature(issuer_2);
-
-    let output = builder.clone().finish_unverified().unwrap();
-    assert_eq!(
-        output.amount(),
-        Output::Alias(output.clone()).rent_cost(protocol_parameters.rent_structure())
-    );
-    assert_eq!(output.unlock_conditions().governor_address(), Some(&gov_address_1));
-    assert_eq!(
-        output.unlock_conditions().state_controller_address(),
-        Some(&state_address_1)
-    );
-    assert_eq!(output.features().sender(), Some(&sender_2));
-    assert_eq!(output.immutable_features().issuer(), Some(&issuer_1));
-
-    builder = builder
-        .clear_unlock_conditions()
-        .clear_features()
-        .clear_immutable_features()
-        .replace_unlock_condition(gov_address_2)
-        .replace_unlock_condition(state_address_2);
-    let output = builder.finish_unverified().unwrap();
-    assert_eq!(output.unlock_conditions().governor_address(), Some(&gov_address_2));
-    assert_eq!(
-        output.unlock_conditions().state_controller_address(),
-        Some(&state_address_2)
-    );
-    assert!(output.features().is_empty());
-    assert!(output.immutable_features().is_empty());
-}
-
-#[test]
-fn alias_output_pack_unpack() {
-    let protocol_parameters = protocol_parameters();
-    let output = rand_alias_output(protocol_parameters.token_supply());
-    let bytes = output.pack_to_vec();
-    let output_unpacked = AliasOutput::unpack_verified(bytes, &protocol_parameters).unwrap();
-    assert_eq!(output, output_unpacked);
-}
-
-#[test]
-fn alias_output_to_from_dto() {
-    let protocol_parameters = protocol_parameters();
-    let output = rand_alias_output(protocol_parameters.token_supply());
-    let dto = AliasOutputDto::from(&output);
-    let output_unver = AliasOutput::try_from_dto_unverified(&dto).unwrap();
-    assert_eq!(output, output_unver);
-    let output_ver = AliasOutput::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
-    assert_eq!(output, output_ver);
 }
 
 #[test]

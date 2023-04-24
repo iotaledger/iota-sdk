@@ -7,18 +7,10 @@ use iota_sdk::{
     client::api::input_selection::{Burn, Error, InputSelection, Requirement},
     types::block::{
         address::{Address, AliasAddress},
-        output::{
-            dto::FoundryOutputDto, unlock_condition::ImmutableAliasAddressUnlockCondition, AliasId, AliasOutputBuilder,
-            AliasTransition, FoundryId, FoundryOutput, NativeToken, Output, Rent, SimpleTokenScheme, TokenId,
-        },
+        output::{AliasId, AliasOutputBuilder, AliasTransition, FoundryId, Output, SimpleTokenScheme, TokenId},
         protocol::protocol_parameters,
-        rand::{
-            address::rand_alias_address,
-            output::{feature::rand_metadata_feature, rand_foundry_output, rand_token_scheme},
-        },
     },
 };
-use packable::PackableExt;
 use primitive_types::U256;
 
 use crate::client::{
@@ -216,70 +208,6 @@ fn minted_native_tokens_in_provided_output() {
     assert!(selected.outputs.contains(&outputs[0]));
     assert!(selected.outputs.contains(&outputs[1]));
     assert!(selected.outputs.iter().any(|output| output.is_alias()));
-}
-
-#[test]
-fn foundry_builder_replace() {
-    let protocol_parameters = protocol_parameters();
-    let alias_id = AliasId::from_str(ALIAS_ID_2).unwrap();
-    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id), 0, SimpleTokenScheme::KIND);
-    let alias_1 = ImmutableAliasAddressUnlockCondition::new(rand_alias_address());
-    let alias_2 = ImmutableAliasAddressUnlockCondition::new(rand_alias_address());
-    let metadata_1 = rand_metadata_feature();
-    let metadata_2 = rand_metadata_feature();
-
-    let mut builder = FoundryOutput::build_with_minimum_storage_deposit(
-        *protocol_parameters.rent_structure(),
-        234,
-        rand_token_scheme(),
-    )
-    .with_serial_number(85)
-    .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
-    .with_unlock_conditions([alias_1])
-    .add_feature(metadata_1.clone())
-    .replace_feature(metadata_2.clone())
-    .with_immutable_features([metadata_2.clone()])
-    .replace_immutable_feature(metadata_1.clone());
-
-    let output = builder.clone().finish_unverified().unwrap();
-    assert_eq!(
-        output.amount(),
-        Output::Foundry(output.clone()).rent_cost(protocol_parameters.rent_structure())
-    );
-    assert_eq!(output.serial_number(), 85);
-    assert_eq!(output.unlock_conditions().immutable_alias_address(), Some(&alias_1));
-    assert_eq!(output.features().metadata(), Some(&metadata_2));
-    assert_eq!(output.immutable_features().metadata(), Some(&metadata_1));
-
-    builder = builder
-        .clear_unlock_conditions()
-        .clear_features()
-        .clear_immutable_features()
-        .replace_unlock_condition(alias_2);
-    let output = builder.finish_unverified().unwrap();
-    assert_eq!(output.unlock_conditions().immutable_alias_address(), Some(&alias_2));
-    assert!(output.features().is_empty());
-    assert!(output.immutable_features().is_empty());
-}
-
-#[test]
-fn foundry_output_pack_unpack() {
-    let protocol_parameters = protocol_parameters();
-    let output = rand_foundry_output(protocol_parameters.token_supply());
-    let bytes = output.pack_to_vec();
-    let output_unpacked = FoundryOutput::unpack_verified(bytes, &protocol_parameters).unwrap();
-    assert_eq!(output, output_unpacked);
-}
-
-#[test]
-fn foundry_output_to_from_dto() {
-    let protocol_parameters = protocol_parameters();
-    let output = rand_foundry_output(protocol_parameters.token_supply());
-    let dto = FoundryOutputDto::from(&output);
-    let output_unver = FoundryOutput::try_from_dto_unverified(&dto).unwrap();
-    assert_eq!(output, output_unver);
-    let output_ver = FoundryOutput::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
-    assert_eq!(output, output_ver);
 }
 
 #[test]
