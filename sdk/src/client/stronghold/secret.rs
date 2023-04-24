@@ -21,7 +21,7 @@ use crate::{
     client::{
         constants::HD_WALLET_TYPE,
         secret::{GenerateAddressOptions, SecretManage},
-        Error,
+        stronghold::Error,
     },
     types::block::{
         address::{Address, Ed25519Address},
@@ -46,7 +46,7 @@ impl SecretManage for StrongholdAdapter {
         // Thus, we put an extra guard here to prevent this methods from being invoked when our cached key has
         // been cleared.
         if !self.is_key_available().await {
-            return Err(Error::StrongholdKeyCleared);
+            return Err(Error::KeyCleared);
         }
 
         // Stronghold arguments.
@@ -104,7 +104,7 @@ impl SecretManage for StrongholdAdapter {
         // Thus, we put an extra guard here to prevent this methods from being invoked when our cached key has
         // been cleared.
         if !self.is_key_available().await {
-            return Err(Error::StrongholdKeyCleared);
+            return Err(Error::KeyCleared);
         }
 
         // Stronghold arguments.
@@ -170,7 +170,7 @@ impl StrongholdAdapter {
                     // Custom error for missing vault error: https://github.com/iotaledger/stronghold.rs/blob/7f0a2e0637394595e953f9071fa74b1d160f51ec/client/src/types/error.rs#L170
                     if e.to_string().contains("does not exist") {
                         // Actually the seed, derived from the mnemonic, is not stored.
-                        return Err(Error::StrongholdMnemonicMissing);
+                        return Err(Error::MnemonicMissing);
                     } else {
                         return Err(err.into());
                     }
@@ -215,7 +215,7 @@ impl StrongholdAdapter {
     pub async fn store_mnemonic(&self, mut mnemonic: String) -> Result<(), Error> {
         // The key needs to be supplied first.
         if self.key_provider.lock().await.is_none() {
-            return Err(Error::StrongholdKeyCleared);
+            return Err(Error::KeyCleared);
         };
 
         // Stronghold arguments.
@@ -227,7 +227,7 @@ impl StrongholdAdapter {
 
         // Check if the mnemonic is valid.
         crypto::keys::bip39::wordlist::verify(&trimmed_mnemonic, &crypto::keys::bip39::wordlist::ENGLISH)
-            .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
+            .map_err(|e| Error::InvalidMnemonic(format!("{e:?}")))?;
 
         // We need to check if there has been a mnemonic stored in Stronghold or not to prevent overwriting it.
         if self
@@ -237,7 +237,7 @@ impl StrongholdAdapter {
             .get_client(PRIVATE_DATA_CLIENT_PATH)?
             .record_exists(&output)?
         {
-            return Err(crate::client::Error::StrongholdMnemonicAlreadyStored);
+            return Err(Error::MnemonicAlreadyStored);
         }
 
         // Execute the BIP-39 recovery procedure to put it into the vault (in memory).

@@ -240,11 +240,9 @@ impl SecretManage for SecretManager {
     ) -> crate::client::Result<Vec<Address>> {
         match self {
             #[cfg(feature = "stronghold")]
-            Self::Stronghold(secret_manager) => {
-                secret_manager
-                    .generate_addresses(coin_type, account_index, address_indexes, options)
-                    .await
-            }
+            Self::Stronghold(secret_manager) => Ok(secret_manager
+                .generate_addresses(coin_type, account_index, address_indexes, options)
+                .await?),
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => {
                 secret_manager
@@ -267,7 +265,7 @@ impl SecretManage for SecretManager {
     async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> crate::client::Result<Ed25519Signature> {
         match self {
             #[cfg(feature = "stronghold")]
-            Self::Stronghold(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
+            Self::Stronghold(secret_manager) => Ok(secret_manager.sign_ed25519(msg, chain).await?),
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
             Self::Mnemonic(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,

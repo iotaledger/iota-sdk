@@ -47,6 +47,7 @@
 //! [`write_stronghold_snapshot()`]: self::StrongholdAdapter::write_stronghold_snapshot()
 
 mod common;
+mod error;
 mod secret;
 mod storage;
 
@@ -57,13 +58,15 @@ use std::{
 };
 
 use derive_builder::Builder;
+
 use iota_stronghold::{KeyProvider, SnapshotPath, Stronghold};
 use log::{debug, error, warn};
 use tokio::{sync::Mutex, task::JoinHandle};
 use zeroize::Zeroizing;
 
 use self::common::PRIVATE_DATA_CLIENT_PATH;
-use crate::client::{storage::StorageProvider, Error, Result};
+pub use self::error::Error;
+use crate::client::storage::StorageProvider;
 
 /// A wrapper on [Stronghold].
 ///
@@ -111,7 +114,7 @@ fn check_or_create_snapshot(
     stronghold: &Stronghold,
     key_provider: &KeyProvider,
     snapshot_path: &SnapshotPath,
-) -> Result<()> {
+) -> Result<(), Error> {
     let result = stronghold.load_client_from_snapshot(PRIVATE_DATA_CLIENT_PATH, key_provider, snapshot_path);
 
     match result {
@@ -125,7 +128,7 @@ fn check_or_create_snapshot(
         Err(iota_stronghold::ClientError::Inner(ref err_msg)) => {
             // Matching the error string is not ideal but stronghold doesn't wrap the error types at the moment.
             if err_msg.to_string().contains("XCHACHA20-POLY1305") {
-                return Err(Error::StrongholdInvalidPassword);
+                return Err(Error::InvalidPassword);
             }
         }
         _ => {}
@@ -158,7 +161,7 @@ impl StrongholdAdapterBuilder {
     ///
     /// [`password()`]: Self::password()
     /// [`timeout()`]: Self::timeout()
-    pub fn build<P: AsRef<Path>>(mut self, snapshot_path: P) -> Result<StrongholdAdapter> {
+    pub fn build<P: AsRef<Path>>(mut self, snapshot_path: P) -> Result<StrongholdAdapter, Error> {
         // In any case, Stronghold - as a necessary component - needs to be present at this point.
         let stronghold = self.stronghold.unwrap_or_default();
 
@@ -224,14 +227,14 @@ impl StrongholdAdapter {
     /// `password` after `timeout` (if set).
     /// It will also try to load a snapshot to check if the provided password is correct, if not it's cleared and an
     /// error will be returned.
-    pub async fn set_password(&mut self, password: &str) -> Result<()> {
+    pub async fn set_password(&mut self, password: &str) -> Result<(), Error> {
         let mut key_provider_guard = self.key_provider.lock().await;
 
         let key_provider = self::common::key_provider_from_password(password);
 
         if let Some(old_key_provider) = &*key_provider_guard {
             if old_key_provider.try_unlock()? != key_provider.try_unlock()? {
-                return Err(crate::client::Error::StrongholdInvalidPassword);
+                return Err(Error::InvalidPassword);
             }
         }
 
@@ -274,7 +277,7 @@ impl StrongholdAdapter {
     /// data, provide a list of keys in `keys_to_re_encrypt`, as we have no way to list and iterate over every
     /// key-value in the Stronghold store - we'll attempt on the ones provided instead. Set it to `None` to skip
     /// re-encryption.
-    pub async fn change_password(&mut self, new_password: &str) -> Result<()> {
+    pub async fn change_password(&mut self, new_password: &str) -> Result<(), Error> {
         // Stop the key clearing task to prevent the key from being abruptly cleared (largely).
         if let Some(timeout_task) = self.timeout_task.lock().await.take() {
             timeout_task.abort();
@@ -451,13 +454,13 @@ impl StrongholdAdapter {
 
     /// Load Stronghold from a snapshot at `snapshot_path`, if it hasn't been loaded yet.
     #[allow(clippy::significant_drop_tightening)]
-    pub async fn read_stronghold_snapshot(&mut self) -> Result<()> {
+    pub async fn read_stronghold_snapshot(&mut self) -> Result<(), Error> {
         // The key needs to be supplied first.
         let locked_key_provider = self.key_provider.lock().await;
         let key_provider = if let Some(key_provider) = &*locked_key_provider {
             key_provider
         } else {
-            return Err(Error::StrongholdKeyCleared);
+            return Err(Error::KeyCleared);
         };
 
         self.stronghold.lock().await.load_client_from_snapshot(
@@ -476,13 +479,13 @@ impl StrongholdAdapter {
     ///
     /// [`unload_stronghold_snapshot()`]: Self::unload_stronghold_snapshot()
     #[allow(clippy::significant_drop_tightening)]
-    pub async fn write_stronghold_snapshot(&self, snapshot_path: Option<&Path>) -> Result<()> {
+    pub async fn write_stronghold_snapshot(&self, snapshot_path: Option<&Path>) -> Result<(), Error> {
         // The key needs to be supplied first.
         let locked_key_provider = self.key_provider.lock().await;
         let key_provider = if let Some(key_provider) = &*locked_key_provider {
             key_provider
         } else {
-            return Err(Error::StrongholdKeyCleared);
+            return Err(Error::KeyCleared);
         };
 
         self.stronghold.lock().await.commit_with_keyprovider(
@@ -503,7 +506,7 @@ impl StrongholdAdapter {
     /// the cached key is cleared from the memory. In other words, if a `timeout` is set and a `snapshot_path` is not
     /// set for a [`StrongholdAdapter`], then after `timeout` Stronghold will be purged. See the [module-level
     /// documentation](self) for more details.
-    pub async fn unload_stronghold_snapshot(&mut self) -> Result<()> {
+    pub async fn unload_stronghold_snapshot(&mut self) -> Result<(), Error> {
         // Flush Stronghold.
         self.write_stronghold_snapshot(None).await?;
 

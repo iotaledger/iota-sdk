@@ -153,6 +153,12 @@ impl From<crate::client::api::input_selection::Error> for Error {
     }
 }
 
+impl From<crate::client::stronghold::Error> for Error {
+    fn from(error: crate::client::stronghold::Error) -> Self {
+        Self::Client(Box::new(crate::client::Error::Stronghold(error)))
+    }
+}
+
 #[cfg(feature = "rocksdb")]
 impl From<rocksdb::Error> for Error {
     fn from(error: rocksdb::Error) -> Self {

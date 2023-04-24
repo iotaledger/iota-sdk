@@ -236,44 +236,11 @@ pub enum Error {
     #[error("{0}")]
     Mqtt(#[from] crate::client::node_api::mqtt::Error),
 
-    //////////////////////////////////////////////////////////////////////
-    // Stronghold
-    //////////////////////////////////////////////////////////////////////
-    /// Stronghold client error
+    /// Stronghold error
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-    #[error("stronghold client error: {0}")]
-    StrongholdClient(#[from] iota_stronghold::ClientError),
-    /// Invalid stronghold password.
-    #[cfg(feature = "stronghold")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-    #[error("invalid stronghold password")]
-    StrongholdInvalidPassword,
-    /// No password has been supplied to a Stronghold vault, or it has been cleared
-    #[cfg(feature = "stronghold")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-    #[error("no password has been supplied, or the key has been cleared from the memory")]
-    StrongholdKeyCleared,
-    /// Stronghold memory error
-    #[cfg(feature = "stronghold")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-    #[error("stronghold memory error: {0}")]
-    StrongholdMemory(#[from] iota_stronghold::MemoryError),
-    /// A mnemonic has been already stored into a Stronghold vault
-    #[cfg(feature = "stronghold")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-    #[error("a mnemonic has already been stored in the Stronghold vault")]
-    StrongholdMnemonicAlreadyStored,
-    /// No mnemonic has been stored into the Stronghold vault
-    #[cfg(feature = "stronghold")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-    #[error("no mnemonic has been stored into the Stronghold vault")]
-    StrongholdMnemonicMissing,
-    /// Procedure execution error from Stronghold
-    #[cfg(feature = "stronghold")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-    #[error("Stronghold reported a procedure error: {0}")]
-    StrongholdProcedure(#[from] iota_stronghold::procedures::ProcedureError),
+    #[error("stronghold error: {0}")]
+    Stronghold(#[from] crate::client::stronghold::Error),
 }
 
 // map most errors to a single error but there are some errors that
