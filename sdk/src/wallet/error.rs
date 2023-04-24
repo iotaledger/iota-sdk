@@ -150,12 +150,14 @@ impl From<crate::client::api::input_selection::Error> for Error {
     }
 }
 
+#[cfg(feature = "stronghold")]
 impl From<crate::client::stronghold::Error> for Error {
     fn from(error: crate::client::stronghold::Error) -> Self {
         Self::Client(Box::new(crate::client::Error::Stronghold(error)))
     }
 }
 
+#[cfg(feature = "ledger_nano")]
 impl From<crate::client::secret::ledger_nano::Error> for Error {
     fn from(error: crate::client::secret::ledger_nano::Error) -> Self {
         Self::Client(Box::new(crate::client::Error::Ledger(error)))
