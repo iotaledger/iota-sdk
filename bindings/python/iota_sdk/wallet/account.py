@@ -454,7 +454,7 @@ class Account:
            If storage is enabled, will persist during restarts.
         """
         return self._call_account_method(
-            'SetDefaultSyncOptions', {
+            'setDefaultSyncOptions', {
                 'options': options
             }
         )
