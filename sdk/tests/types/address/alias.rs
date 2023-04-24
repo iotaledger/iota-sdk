@@ -9,7 +9,7 @@ use iota_sdk::types::block::{
         Address, AliasAddress,
     },
     output::AliasId,
-    DtoError,
+    Error,
 };
 use packable::PackableExt;
 
@@ -137,7 +137,7 @@ fn dto_invalid_alias_id() {
 
     assert!(matches!(
         AliasAddress::try_from(&dto),
-        Err(DtoError::InvalidField("aliasId"))
+        Err(Error::InvalidField("aliasId"))
     ));
 }
 

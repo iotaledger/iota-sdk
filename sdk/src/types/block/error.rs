@@ -123,6 +123,7 @@ pub enum Error {
     UnlockConditionsNotUniqueSorted,
     UnsupportedOutputKind(u8),
     DuplicateOutputChain(ChainId),
+    InvalidField(&'static str),
 }
 
 #[cfg(feature = "std")]
@@ -335,6 +336,7 @@ impl fmt::Display for Error {
             Self::UnlockConditionsNotUniqueSorted => write!(f, "unlock conditions are not unique and/or sorted"),
             Self::UnsupportedOutputKind(k) => write!(f, "unsupported output kind: {k}"),
             Self::DuplicateOutputChain(chain_id) => write!(f, "duplicate output chain {chain_id}"),
+            Self::InvalidField(field) => write!(f, "invalid field: {field}"),
         }
     }
 }
@@ -349,33 +351,4 @@ impl From<Infallible> for Error {
     fn from(error: Infallible) -> Self {
         match error {}
     }
-}
-
-#[allow(missing_docs)]
-pub mod dto {
-    use super::*;
-
-    #[derive(Debug)]
-    pub enum DtoError {
-        InvalidField(&'static str),
-        Block(Error),
-    }
-
-    impl fmt::Display for DtoError {
-        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            match self {
-                Self::InvalidField(field) => write!(f, "{field}"),
-                Self::Block(error) => write!(f, "{error}"),
-            }
-        }
-    }
-
-    impl From<Error> for DtoError {
-        fn from(error: Error) -> Self {
-            Self::Block(error)
-        }
-    }
-
-    #[cfg(feature = "std")]
-    impl std::error::Error for DtoError {}
 }

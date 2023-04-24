@@ -12,11 +12,11 @@ use crate::{
             unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
         },
-        DtoError,
+        Error as BlockError,
     },
     wallet::{
         account::{operations::transaction::Transaction, Account, TransactionOptions},
-        Error,
+        Error as WalletError,
     },
 };
 
@@ -66,17 +66,17 @@ impl TryFrom<&NftOptionsDto> for NftOptions {
             address: value.address.clone(),
             sender: value.sender.clone(),
             metadata: match &value.metadata {
-                Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("metadata"))?),
+                Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("metadata"))?),
                 None => None,
             },
             tag: match &value.tag {
-                Some(tag) => Some(prefix_hex::decode(tag).map_err(|_| DtoError::InvalidField("tag"))?),
+                Some(tag) => Some(prefix_hex::decode(tag).map_err(|_| BlockError::InvalidField("tag"))?),
                 None => None,
             },
             issuer: value.issuer.clone(),
             immutable_metadata: match &value.immutable_metadata {
                 Some(metadata) => {
-                    Some(prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("immutable_metadata"))?)
+                    Some(prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("immutable_metadata"))?)
                 }
                 None => None,
             },
@@ -143,7 +143,7 @@ impl Account {
                 None => {
                     account_addresses
                         .first()
-                        .ok_or(Error::FailedToGetRemainder)?
+                        .ok_or(WalletError::FailedToGetRemainder)?
                         .address
                         .inner
                 }

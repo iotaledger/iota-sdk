@@ -321,7 +321,7 @@ impl Client {
             *tip = *block_id;
         }
 
-        let promote_block = self.finish_block_builder(Some(Parents::new(tips)?), None).await?;
+        let promote_block = self.finish_block_builder(Some(Parents::from_vec(tips)?), None).await?;
 
         let block_id = self.post_block_raw(&promote_block).await?;
         // Get block if we use remote Pow, because the node will change parents and nonce.

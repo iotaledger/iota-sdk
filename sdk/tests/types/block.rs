@@ -40,7 +40,7 @@ fn pow_provider() {
 
 #[test]
 fn invalid_length() {
-    let res = BlockBuilder::new(Parents::new(rand_block_ids(2)).unwrap())
+    let res = BlockBuilder::new(Parents::from_vec(rand_block_ids(2)).unwrap())
         .with_nonce(42)
         .with_payload(TaggedDataPayload::new(vec![42], vec![0u8; Block::LENGTH_MAX - Block::LENGTH_MIN - 9]).unwrap())
         .finish();

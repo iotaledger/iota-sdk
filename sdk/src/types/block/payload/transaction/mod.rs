@@ -105,7 +105,7 @@ pub mod dto {
 
     pub use super::essence::dto::{RegularTransactionEssenceDto, TransactionEssenceDto};
     use super::*;
-    use crate::types::block::{error::dto::DtoError, unlock::dto::UnlockDto};
+    use crate::types::block::{unlock::dto::UnlockDto, Error};
 
     /// The payload type to define a value transaction.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -130,27 +130,27 @@ pub mod dto {
         fn _try_from_dto(
             value: &TransactionPayloadDto,
             transaction_essence: TransactionEssence,
-        ) -> Result<Self, DtoError> {
+        ) -> Result<Self, Error> {
             let mut unlocks = Vec::new();
 
             for b in &value.unlocks {
                 unlocks.push(b.try_into()?);
             }
 
-            Ok(Self::new(transaction_essence, Unlocks::new(unlocks)?)?)
+            Self::new(transaction_essence, Unlocks::new(unlocks)?)
         }
 
         pub fn try_from_dto(
             value: &TransactionPayloadDto,
             protocol_parameters: &ProtocolParameters,
-        ) -> Result<Self, DtoError> {
+        ) -> Result<Self, Error> {
             Self::_try_from_dto(
                 value,
                 TransactionEssence::try_from_dto(&value.essence, protocol_parameters)?,
             )
         }
 
-        pub fn try_from_dto_unverified(value: &TransactionPayloadDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &TransactionPayloadDto) -> Result<Self, Error> {
             Self::_try_from_dto(value, TransactionEssence::try_from_dto_unverified(&value.essence)?)
         }
     }

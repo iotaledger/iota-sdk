@@ -29,9 +29,6 @@ pub enum Error {
     /// Blake2b256 Error
     #[error("{0}")]
     Blake2b256(&'static str),
-    /// Block dtos error
-    #[error("{0}")]
-    BlockDto(#[from] crate::types::block::DtoError),
     /// Block types error
     #[error("{0}")]
     Block(#[from] crate::types::block::Error),

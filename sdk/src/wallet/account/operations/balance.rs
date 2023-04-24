@@ -245,7 +245,7 @@ impl Account {
 
         locked_amount += total_rent_amount;
 
-        for native_token in total_native_tokens.finish_vec()? {
+        for native_token in total_native_tokens.finish_set()? {
             // Check if some amount is currently locked
             let locked_amount = locked_native_tokens.iter().find_map(|(id, amount)| {
                 if id == native_token.token_id() {

@@ -8,5 +8,5 @@ use crate::types::block::{
 
 /// Generates random parents.
 pub fn rand_parents() -> Parents {
-    Parents::new(rand_block_ids(rand_number_range(Parents::COUNT_RANGE).into())).unwrap()
+    Parents::from_vec(rand_block_ids(rand_number_range(Parents::COUNT_RANGE).into())).unwrap()
 }

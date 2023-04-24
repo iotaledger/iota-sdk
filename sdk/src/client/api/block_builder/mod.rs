@@ -223,7 +223,7 @@ impl<'a> ClientBlockBuilder<'a> {
 
     /// Set 1-8 custom parent block ids
     pub fn with_parents(mut self, parent_ids: impl Into<Option<Vec<BlockId>>>) -> Result<Self> {
-        self.parents = parent_ids.into().map(Parents::new).transpose()?;
+        self.parents = parent_ids.into().map(Parents::from_vec).transpose()?;
         Ok(self)
     }
 
