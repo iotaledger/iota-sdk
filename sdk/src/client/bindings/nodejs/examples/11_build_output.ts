@@ -116,7 +116,7 @@ async function run() {
                 {
                     type: 3,
                     // "Hello, World!" hex encoded
-                    data: '0x48656c6c6f2c20576f726c6421',
+                    tag: '0x48656c6c6f2c20576f726c6421',
                 },
             ]
         });
