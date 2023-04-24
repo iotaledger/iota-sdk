@@ -108,16 +108,14 @@ async function run() {
         // Output with tag feature
         const basicOutputWithTag = await client.buildBasicOutput({
             amount: '1000000',
-            unlockConditions: [
-                addressUnlockCondition,
-            ],
+            unlockConditions: [addressUnlockCondition],
             features: [
                 {
                     type: 3,
                     // "Hello, World!" hex encoded
                     tag: '0x48656c6c6f2c20576f726c6421',
                 },
-            ]
+            ],
         });
 
         console.log(JSON.stringify(basicOutputWithTag, null, 2));
@@ -125,15 +123,13 @@ async function run() {
         // Output with sender feature
         const basicOutputWithSender = await client.buildBasicOutput({
             amount: '1000000',
-            unlockConditions: [
-                addressUnlockCondition,
-            ],
+            unlockConditions: [addressUnlockCondition],
             features: [
                 {
                     type: 0,
                     sender: hexAddress,
                 },
-            ]
+            ],
         });
 
         console.log(JSON.stringify(basicOutputWithSender, null, 2));

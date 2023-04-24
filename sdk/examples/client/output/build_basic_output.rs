@@ -10,9 +10,7 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{
-            feature::MetadataFeature,
-            feature::TagFeature,
-            feature::SenderFeature,
+            feature::{MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                 TimelockUnlockCondition,
