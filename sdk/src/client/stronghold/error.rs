@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// Error type of the stronghold module.
+/// Stronghold errors.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     /// Crypto.rs error

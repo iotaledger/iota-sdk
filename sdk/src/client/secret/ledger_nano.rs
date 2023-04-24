@@ -38,6 +38,7 @@ use crate::{
 /// See also: <https://wiki.trezor.io/Hardened_and_non-hardened_derivation>.
 pub const HARDENED: u32 = 0x8000_0000;
 
+/// Ledger nano errors.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     /// Denied by User
