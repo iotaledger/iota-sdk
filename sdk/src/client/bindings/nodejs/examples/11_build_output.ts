@@ -121,6 +121,22 @@ async function run() {
         });
 
         console.log(JSON.stringify(basicOutputWithTag, null, 2));
+
+        // Output with sender feature
+        const basicOutputWithSender = await client.buildBasicOutput({
+            amount: '1000000',
+            unlockConditions: [
+                addressUnlockCondition,
+            ],
+            features: [
+                {
+                    type: 0,
+                    sender: hexAddress,
+                },
+            ]
+        });
+
+        console.log(JSON.stringify(basicOutputWithSender, null, 2));
     } catch (error) {
         console.error('Error: ', error);
     }

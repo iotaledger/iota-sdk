@@ -98,5 +98,17 @@ public class BuildBasicOutput {
         System.out.println(
             new GsonBuilder().setPrettyPrinting().create().toJson(JsonParser.parseString(tagOutput.toString()))
         );
+
+        // Output with sender feature
+        BasicOutputBuilderParams senderParams = new BasicOutputBuilderParams()
+            .withAmount(amount)
+            .withUnlockConditions(new UnlockCondition[]{addressUnlockCondition})
+            .withFeatures(new Feature[]{new Feature("{ type: 0, sender: \"" + hexAddress + "\" }")});
+
+        Output senderOutput = client.buildBasicOutput(senderParams);
+
+        System.out.println(
+            new GsonBuilder().setPrettyPrinting().create().toJson(JsonParser.parseString(senderOutput.toString()))
+        );
     }
 }

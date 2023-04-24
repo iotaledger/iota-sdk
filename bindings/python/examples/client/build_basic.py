@@ -79,3 +79,15 @@ basic_output = client.build_basic_output(
     amount=1000000,
 )
 print(json.dumps(basic_output, indent=4))
+
+# Output with sender feature
+basic_output = client.build_basic_output(
+    unlock_conditions=[
+        address_unlock_condition
+    ],
+    features=[
+        SenderFeature(Ed25519Address(hex_address))
+    ],
+    amount=1000000,
+)
+print(json.dumps(basic_output, indent=4))
