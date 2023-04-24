@@ -141,7 +141,7 @@ pub async fn import_mnemonic(path: &str) -> Result<String, Error> {
                 println!("Invalid choice. Please pick a valid mnemonic by its index in the range [1..{n}].");
             }
         };
-        Ok(mnemonics.swap_remove(selected_index))
+        Ok(mnemonics.swap_remove(selected_index - 1))
     }
 }
 
