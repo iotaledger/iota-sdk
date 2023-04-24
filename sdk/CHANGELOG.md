@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `NativeTokensBuilder::finish_set`;
 - `Features`, `UnlockConditions`, `NativeTokens`, `MilestoneOptions`, and `Parents` added `from_set`;
 - `types::block::Error::InvalidField` variant;
+- `StorageProvider` and `SecretManage` have an `Error` associated type;
+- `SecretManageExt` is a super trait of `SecretManage`;
 
 ### Changed
 
@@ -41,6 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `{AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NftOutputBuilder}::{new_with_amount, new_with_minimum_storage_deposit, new, with_amount}` don't return a `Result` anymore;
 - `{AliasOutput, BasicOutput, FoundryOutput, NftOutput}::{build_with_amount, build_with_minimum_storage_deposit}` don't return a `Result` anymore;
 - Lots of builder setters are now taking an `impl Into<Option<T>>` instead of a `T` parameter;
+- All `ledger_nano` related errors have been moved from the client error to a newly created `client::secret::ledger_nano::Error`;
+- All `stronghold` related errors have been moved from the client error to a newly created `client::stronghold::Error`;
 
 ### Removed
 
