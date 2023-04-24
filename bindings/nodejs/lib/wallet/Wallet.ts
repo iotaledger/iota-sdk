@@ -1,9 +1,8 @@
-// Copyright 2021 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 import { WalletMethodHandler } from './WalletMethodHandler';
 import { Account } from './Account';
-import { getClient } from './bindings';
 
 import type {
     AccountId,
@@ -17,7 +16,6 @@ import type {
 import {
     IAuth,
     IClientOptions,
-    INodeInfoWrapper,
     LedgerNanoStatus,
 } from '../../types/client';
 import { Client } from '../client';

@@ -4,3 +4,4 @@
 export * from './bindings';
 export * from './SecretManager';
 export * from './SecretManagerMethodHandler';
+export * from '../../types/secretManager';
