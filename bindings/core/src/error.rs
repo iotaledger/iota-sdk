@@ -24,6 +24,9 @@ pub enum Error {
     /// Prefix hex errors.
     #[error("{0}")]
     PrefixHex(#[from] prefix_hex::Error),
+    /// SerdeJson errors.
+    #[error("{0}")]
+    SerdeJson(#[from] serde_json::error::Error),
     /// Unpack errors.
     #[error("{0}")]
     Unpack(#[from] packable::error::UnpackError<iota_sdk::types::block::Error, UnexpectedEOF>),
