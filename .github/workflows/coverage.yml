@@ -2,7 +2,7 @@ name: Test coverage
 
 on:
   push:
-    branches: [develop, production]
+    branches: [develop, production, chore/tests/increase-coverage-1]
     paths:
       - ".github/workflows/coverage.yml"
       - ".github/actions/**"
