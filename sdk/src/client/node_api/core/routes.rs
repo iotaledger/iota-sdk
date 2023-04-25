@@ -162,57 +162,48 @@ impl Client {
             .await
         {
             Ok(res) => res,
-            Err(e) => {
-                if let Error::Node(crate::client::node_api::error::Error::BadResponse(res)) = e {
-                    let fallback_to_local_pow = self.get_fallback_to_local_pow();
-                    // hornet and bee return different error blocks
-                    if (res == *"no available nodes with remote Pow"
-                        || res.contains("proof of work is not enabled")
-                        || res.contains("`Pow` not enabled"))
-                        && fallback_to_local_pow
-                    {
-                        // Without this we get:within `impl Future<Output = [async output]>`, the trait `Send` is not
-                        // implemented for `std::sync::RwLockWriteGuard<'_, NetworkInfo>`
-                        {
-                            let mut client_network_info = self
-                                .network_info
-                                .write()
-                                .map_err(|_| crate::client::Error::PoisonError)?;
-                            // switch to local PoW
-                            client_network_info.local_pow = true;
-                        }
-                        let block_res = self.finish_block_builder(None, block.payload().cloned()).await;
-                        let block_with_local_pow = match block_res {
-                            Ok(block) => {
-                                // reset local PoW state
-                                let mut client_network_info = self
-                                    .network_info
-                                    .write()
-                                    .map_err(|_| crate::client::Error::PoisonError)?;
-                                client_network_info.local_pow = false;
-                                block
-                            }
-                            Err(e) => {
-                                // reset local PoW state
-                                self.network_info
-                                    .write()
-                                    .map_err(|_| crate::client::Error::PoisonError)?
-                                    .local_pow = false;
-                                return Err(e);
-                            }
-                        };
-                        let block_dto = BlockDto::from(&block_with_local_pow);
-
-                        self.node_manager
-                            .post_request_json(path, timeout, serde_json::to_value(block_dto)?, true)
-                            .await?
-                    } else {
-                        return Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow));
-                    }
-                } else {
-                    return Err(e);
+            Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow)) => {
+                if !self.get_fallback_to_local_pow() {
+                    return Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow));
                 }
+
+                // Without this we get:within `impl Future<Output = [async output]>`, the trait `Send` is not
+                // implemented for `std::sync::RwLockWriteGuard<'_, NetworkInfo>`
+                {
+                    let mut client_network_info = self
+                        .network_info
+                        .write()
+                        .map_err(|_| crate::client::Error::PoisonError)?;
+                    // switch to local PoW
+                    client_network_info.local_pow = true;
+                }
+                let block_res = self.finish_block_builder(None, block.payload().cloned()).await;
+                let block_with_local_pow = match block_res {
+                    Ok(block) => {
+                        // reset local PoW state
+                        let mut client_network_info = self
+                            .network_info
+                            .write()
+                            .map_err(|_| crate::client::Error::PoisonError)?;
+                        client_network_info.local_pow = false;
+                        block
+                    }
+                    Err(e) => {
+                        // reset local PoW state
+                        self.network_info
+                            .write()
+                            .map_err(|_| crate::client::Error::PoisonError)?
+                            .local_pow = false;
+                        return Err(e);
+                    }
+                };
+                let block_dto = BlockDto::from(&block_with_local_pow);
+
+                self.node_manager
+                    .post_request_json(path, timeout, serde_json::to_value(block_dto)?, true)
+                    .await?
             }
+            Err(e) => return Err(e),
         };
 
         Ok(BlockId::from_str(&resp.block_id)?)
@@ -236,55 +227,45 @@ impl Client {
             .await
         {
             Ok(res) => res,
-            Err(e) => {
-                if let Error::Node(crate::client::node_api::error::Error::BadResponse(res)) = e {
-                    let fallback_to_local_pow = self.get_fallback_to_local_pow();
-                    // hornet and bee return different error blocks
-                    if (res == *"no available nodes with remote Pow"
-                        || res.contains("proof of work is not enabled")
-                        || res.contains("`Pow` not enabled"))
-                        && fallback_to_local_pow
-                    {
-                        // Without this we get:within `impl Future<Output = [async output]>`, the trait `Send` is not
-                        // implemented for `std::sync::RwLockWriteGuard<'_, NetworkInfo>`
-                        {
-                            let mut client_network_info = self
-                                .network_info
-                                .write()
-                                .map_err(|_| crate::client::Error::PoisonError)?;
-                            // switch to local PoW
-                            client_network_info.local_pow = true;
-                        }
-                        let block_res = self.finish_block_builder(None, block.payload().cloned()).await;
-                        let block_with_local_pow = match block_res {
-                            Ok(block) => {
-                                // reset local PoW state
-                                let mut client_network_info = self
-                                    .network_info
-                                    .write()
-                                    .map_err(|_| crate::client::Error::PoisonError)?;
-                                client_network_info.local_pow = false;
-                                block
-                            }
-                            Err(e) => {
-                                // reset local PoW state
-                                self.network_info
-                                    .write()
-                                    .map_err(|_| crate::client::Error::PoisonError)?
-                                    .local_pow = false;
-                                return Err(e);
-                            }
-                        };
-                        self.node_manager
-                            .post_request_bytes(path, timeout, &block_with_local_pow.pack_to_vec(), true)
-                            .await?
-                    } else {
-                        return Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow));
-                    }
-                } else {
-                    return Err(e);
+            Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow)) => {
+                if !self.get_fallback_to_local_pow() {
+                    return Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow));
                 }
+                // Without this we get:within `impl Future<Output = [async output]>`, the trait `Send` is not
+                // implemented for `std::sync::RwLockWriteGuard<'_, NetworkInfo>`
+                {
+                    let mut client_network_info = self
+                        .network_info
+                        .write()
+                        .map_err(|_| crate::client::Error::PoisonError)?;
+                    // switch to local PoW
+                    client_network_info.local_pow = true;
+                }
+                let block_res = self.finish_block_builder(None, block.payload().cloned()).await;
+                let block_with_local_pow = match block_res {
+                    Ok(block) => {
+                        // reset local PoW state
+                        let mut client_network_info = self
+                            .network_info
+                            .write()
+                            .map_err(|_| crate::client::Error::PoisonError)?;
+                        client_network_info.local_pow = false;
+                        block
+                    }
+                    Err(e) => {
+                        // reset local PoW state
+                        self.network_info
+                            .write()
+                            .map_err(|_| crate::client::Error::PoisonError)?
+                            .local_pow = false;
+                        return Err(e);
+                    }
+                };
+                self.node_manager
+                    .post_request_bytes(path, timeout, &block_with_local_pow.pack_to_vec(), true)
+                    .await?
             }
+            Err(e) => return Err(e),
         };
 
         Ok(BlockId::from_str(&resp.block_id)?)

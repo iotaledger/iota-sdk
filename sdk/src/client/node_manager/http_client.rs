@@ -52,11 +52,21 @@ impl HttpClient {
         if status.is_success() {
             Ok(Response(response))
         } else {
-            Err(Error::ResponseError {
-                code: status.as_u16(),
-                text: response.text().await?,
-                url: url.to_string(),
-            })
+            let text = response.text().await?;
+            // hornet and bee return different error blocks
+            if text == *"no available nodes with remote Pow"
+                || text.contains("proof of work is not enabled")
+                || text.contains("proof of work is not available on this node")
+                || text.contains("`Pow` not enabled")
+            {
+                Err(Error::UnavailablePow)
+            } else {
+                Err(Error::ResponseError {
+                    code: status.as_u16(),
+                    text,
+                    url: url.to_string(),
+                })
+            }
         }
     }
 

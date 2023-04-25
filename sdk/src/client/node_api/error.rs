@@ -10,13 +10,13 @@ pub enum Error {
     /// Node returned a result that is not 200
     #[error("{0}")]
     BadResponse(String),
-    ///
+    /// None of our nodes gave a reply
     #[error("couldn't get a result from any node")]
     NoResult,
-    ///
+    /// Requested output id not found for this type
     #[error("No output for {0}")]
     NoOutput(&'static str),
-    ///
+    /// None of our nodes have remote Pow enabled
     #[error("No node available for remote Pow")]
     UnavailablePow,
     /// reqwest error

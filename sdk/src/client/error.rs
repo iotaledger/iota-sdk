@@ -103,9 +103,6 @@ pub enum Error {
     /// Rw lock failed.
     #[error("rw lock failed")]
     PoisonError,
-    /// PoW error
-    #[error("{0}")]
-    Pow(String),
     /// Prefix hex string convert error
     #[error("{0}")]
     PrefixHex(#[from] prefix_hex::Error),
@@ -204,6 +201,7 @@ pub enum Error {
     Stronghold(#[from] crate::client::stronghold::Error),
 }
 
+// Used in faucet funds request util
 impl From<reqwest::Error> for Error {
     fn from(error: reqwest::Error) -> Self {
         Error::Node(error.into())

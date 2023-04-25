@@ -355,18 +355,13 @@ impl NodeManager {
         for node in nodes {
             match self.http_client.post_bytes(node, timeout, body).await {
                 Ok(res) => {
-                    match res.status() {
-                        200 | 201 => match res.into_json::<T>().await {
-                            Ok(res) => return Ok(res),
-                            Err(e) => error.replace(Error::Node(e)),
-                        },
-                        _ => error.replace(Error::Node(crate::client::node_api::error::Error::BadResponse(
-                            res.into_text().await?,
-                        ))),
+                    match res.into_json::<T>().await {
+                        Ok(res) => return Ok(res),
+                        Err(e) => error.replace(e.into()),
                     };
                 }
                 Err(e) => {
-                    error.replace(e.into());
+                    error.replace(Error::Node(e));
                 }
             }
         }
@@ -387,18 +382,13 @@ impl NodeManager {
         for node in nodes {
             match self.http_client.post_json(node, timeout, json.clone()).await {
                 Ok(res) => {
-                    match res.status() {
-                        200 | 201 => match res.into_json::<T>().await {
-                            Ok(res) => return Ok(res),
-                            Err(e) => error.replace(Error::Node(e)),
-                        },
-                        _ => error.replace(Error::Node(crate::client::node_api::error::Error::BadResponse(
-                            res.into_text().await?,
-                        ))),
+                    match res.into_json::<T>().await {
+                        Ok(res) => return Ok(res),
+                        Err(e) => error.replace(e.into()),
                     };
                 }
                 Err(e) => {
-                    error.replace(e.into());
+                    error.replace(Error::Node(e));
                 }
             }
         }
