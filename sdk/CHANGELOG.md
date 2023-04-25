@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `types::block::Error::InvalidField` variant;
 - `StorageProvider` and `SecretManage` have an `Error` associated type;
 - `SecretManageExt` is a super trait of `SecretManage`;
+- `OutputsToClaim::Amount` to allow claiming only outputs that will add an amount to the account;
 
 ### Changed
 
