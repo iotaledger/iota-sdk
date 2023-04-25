@@ -81,6 +81,8 @@ async fn main() {
         return;
     }
 
+    log::info!("Starting wallet ({})", std::env!("CARGO_PKG_VERSION").to_string());
+
     if let Err(e) = run(cli).await {
         println_log_error!("{e}");
     }
