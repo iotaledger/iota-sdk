@@ -247,7 +247,7 @@ impl Account {
 
         for native_token in total_native_tokens.finish_set()? {
             // Check if some amount is currently locked
-            let locked_amount = locked_native_tokens.iter().find_map(|(id, amount)| {
+            let locked_native_token_amount = locked_native_tokens.iter().find_map(|(id, amount)| {
                 if id == native_token.token_id() {
                     Some(amount)
                 } else {
@@ -265,7 +265,9 @@ impl Account {
                 token_id: *native_token.token_id(),
                 metadata,
                 total: native_token.amount(),
-                available: native_token.amount() - *locked_amount.unwrap_or(&U256::from(0u8)),
+                available: native_token
+                    .amount()
+                    .saturating_sub(*locked_native_token_amount.unwrap_or(&U256::from(0u8))),
             })
         }
 
