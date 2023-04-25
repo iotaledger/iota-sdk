@@ -40,7 +40,7 @@ impl<'a> ClientBlockBuilder<'a> {
 
         for output in &self.outputs {
             // Check if the outputs have enough amount to cover the storage deposit
-            output.verify_storage_deposit(protocol_parameters.rent_structure().clone(), token_supply)?;
+            output.verify_storage_deposit(*protocol_parameters.rent_structure(), token_supply)?;
         }
 
         // Input selection

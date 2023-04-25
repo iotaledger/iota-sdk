@@ -147,7 +147,7 @@ impl Account {
                 new_alias_output_builder.finish_output(token_supply)?,
                 {
                     let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_storage_deposit(
-                        rent_structure.clone(),
+                        rent_structure,
                         alias_output.foundry_counter() + 1,
                         TokenScheme::Simple(SimpleTokenScheme::new(
                             native_token_options.circulating_supply,

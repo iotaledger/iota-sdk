@@ -35,7 +35,7 @@ impl Account {
 
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {
-            output.verify_storage_deposit(rent_structure.clone(), token_supply)?;
+            output.verify_storage_deposit(rent_structure, token_supply)?;
         }
 
         // validate amounts
