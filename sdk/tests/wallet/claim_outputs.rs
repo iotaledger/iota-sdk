@@ -292,7 +292,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
     let tx = account_0
         .send(
             vec![
-                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())
+                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                     .add_unlock_condition(AddressUnlockCondition::new(
                         *account_1.addresses().await?[0].address().as_ref(),
                     ))
@@ -302,7 +302,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
                     )?)
                     .add_native_token(NativeToken::new(mint_tx_0.token_id, native_token_amount)?)
                     .finish_output(token_supply)?,
-                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())
+                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                     .add_unlock_condition(AddressUnlockCondition::new(
                         *account_1.addresses().await?[0].address().as_ref(),
                     ))

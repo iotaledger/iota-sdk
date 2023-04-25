@@ -1,6 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::pin::Pin;
+
+use futures::Future;
 use iota_sdk::{
     client::{secret::SecretManager, Client},
     wallet::wallet::Wallet,
@@ -16,6 +19,37 @@ use crate::{
     response::Response,
     UtilsMethod,
 };
+
+pub trait CallMethod {
+    type Method;
+
+    // This uses a manual async_trait-like impl because it's not worth it to import the lib for one trait
+    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + Send + 'a>>;
+}
+
+impl CallMethod for Client {
+    type Method = ClientMethod;
+
+    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + Send + 'a>> {
+        Box::pin(call_client_method(self, method))
+    }
+}
+
+impl CallMethod for Wallet {
+    type Method = WalletMethod;
+
+    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + Send + 'a>> {
+        Box::pin(call_wallet_method(self, method))
+    }
+}
+
+impl CallMethod for SecretManager {
+    type Method = SecretManagerMethod;
+
+    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + Send + 'a>> {
+        Box::pin(call_secret_manager_method(self, method))
+    }
+}
 
 /// Call a client method.
 pub async fn call_client_method(client: &Client, method: ClientMethod) -> Response {
