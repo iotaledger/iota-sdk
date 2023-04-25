@@ -60,6 +60,7 @@ jobs:
           --all-features 
           --run-ignored all
           --test-threads "num-cpus"
+          --retries 2
 
       - name: Tear down private tangle
         if: always()
