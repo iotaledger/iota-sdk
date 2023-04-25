@@ -2,8 +2,8 @@
 resolver = "2"
 members = [
 	"bindings/core",
-	"bindings/python",
 	"bindings/nodejs",
+	"bindings/python",
 	"cli",
 	"sdk",
 	"sdk/src/client/bindings/java/lib/native",

@@ -10,14 +10,14 @@ use iota_sdk_bindings_core::{
 };
 use neon::prelude::*;
 
-pub struct SecretManager {
+pub struct SecretManagerMethodHandler {
     channel: Channel,
     secret_manager: RustSecretManager,
 }
 
-impl Finalize for SecretManager {}
+impl Finalize for SecretManagerMethodHandler {}
 
-impl SecretManager {
+impl SecretManagerMethodHandler {
     fn new(channel: Channel, options: String) -> Arc<Self> {
         let secret_manager_dto =
             serde_json::from_str::<SecretManagerDto>(&options).expect("error initializing secret manager");
@@ -55,12 +55,12 @@ impl SecretManager {
     }
 }
 
-pub fn create_secret_manager(mut cx: FunctionContext) -> JsResult<JsBox<Arc<SecretManager>>> {
+pub fn create_secret_manager(mut cx: FunctionContext) -> JsResult<JsBox<Arc<SecretManagerMethodHandler>>> {
     let options = cx.argument::<JsString>(0)?;
     let options = options.value(&mut cx);
     let channel = cx.channel();
 
-    let method_handler = SecretManager::new(channel, options);
+    let method_handler = SecretManagerMethodHandler::new(channel, options);
 
     Ok(cx.boxed(method_handler))
 }
@@ -68,7 +68,7 @@ pub fn create_secret_manager(mut cx: FunctionContext) -> JsResult<JsBox<Arc<Secr
 pub fn call_secret_manager_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let method = cx.argument::<JsString>(0)?;
     let method = method.value(&mut cx);
-    let method_handler = Arc::clone(&&cx.argument::<JsBox<Arc<SecretManager>>>(1)?);
+    let method_handler = Arc::clone(&&cx.argument::<JsBox<Arc<SecretManagerMethodHandler>>>(1)?);
     let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
 
     crate::RUNTIME.spawn(async move {

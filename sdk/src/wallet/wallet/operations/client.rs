@@ -47,7 +47,6 @@ impl Wallet {
     pub async fn get_client(&self) -> crate::wallet::Result<Client> {
         let accounts = self.accounts.read().await;
 
-        // Try to get the Client from the first account and only build the Client if we have no account
         let client = match &accounts.first() {
             Some(account) => account.client.clone(),
             None => self.client_options.read().await.clone().finish()?,
