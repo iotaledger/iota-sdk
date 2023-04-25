@@ -41,7 +41,6 @@ fn transaction() {
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
-            .unwrap()
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
@@ -88,7 +87,7 @@ fn milestone() {
             rand_merkle_root(),
             rand_merkle_root(),
             vec![],
-            MilestoneOptions::new(vec![]).unwrap(),
+            MilestoneOptions::from_vec(vec![]).unwrap(),
         )
         .unwrap(),
         vec![Signature::from(Ed25519Signature::new([0; 32], [0; 64]))],

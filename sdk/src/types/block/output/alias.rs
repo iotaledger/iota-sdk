@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::vec::Vec;
+use alloc::{collections::BTreeSet, vec::Vec};
 
 use packable::{
     bounded::BoundedU16,
@@ -62,47 +62,47 @@ impl core::fmt::Display for AliasTransition {
 #[must_use]
 pub struct AliasOutputBuilder {
     amount: OutputBuilderAmount,
-    native_tokens: Vec<NativeToken>,
+    native_tokens: BTreeSet<NativeToken>,
     alias_id: AliasId,
     state_index: Option<u32>,
     state_metadata: Vec<u8>,
     foundry_counter: Option<u32>,
-    unlock_conditions: Vec<UnlockCondition>,
-    features: Vec<Feature>,
-    immutable_features: Vec<Feature>,
+    unlock_conditions: BTreeSet<UnlockCondition>,
+    features: BTreeSet<Feature>,
+    immutable_features: BTreeSet<Feature>,
 }
 
 impl AliasOutputBuilder {
     /// Creates an [`AliasOutputBuilder`] with a provided amount.
-    pub fn new_with_amount(amount: u64, alias_id: AliasId) -> Result<Self, Error> {
+    pub fn new_with_amount(amount: u64, alias_id: AliasId) -> Self {
         Self::new(OutputBuilderAmount::Amount(amount), alias_id)
     }
 
     /// Creates an [`AliasOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, alias_id: AliasId) -> Result<Self, Error> {
+    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, alias_id: AliasId) -> Self {
         Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), alias_id)
     }
 
-    fn new(amount: OutputBuilderAmount, alias_id: AliasId) -> Result<Self, Error> {
-        Ok(Self {
+    fn new(amount: OutputBuilderAmount, alias_id: AliasId) -> Self {
+        Self {
             amount,
-            native_tokens: Vec::new(),
+            native_tokens: BTreeSet::new(),
             alias_id,
             state_index: None,
             state_metadata: Vec::new(),
             foundry_counter: None,
-            unlock_conditions: Vec::new(),
-            features: Vec::new(),
-            immutable_features: Vec::new(),
-        })
+            unlock_conditions: BTreeSet::new(),
+            features: BTreeSet::new(),
+            immutable_features: BTreeSet::new(),
+        }
     }
 
     /// Sets the amount to the provided value.
     #[inline(always)]
-    pub fn with_amount(mut self, amount: u64) -> Result<Self, Error> {
+    pub fn with_amount(mut self, amount: u64) -> Self {
         self.amount = OutputBuilderAmount::Amount(amount);
-        Ok(self)
+        self
     }
 
     /// Sets the amount to the minimum storage deposit.
@@ -115,7 +115,7 @@ impl AliasOutputBuilder {
     ///
     #[inline(always)]
     pub fn add_native_token(mut self, native_token: NativeToken) -> Self {
-        self.native_tokens.push(native_token);
+        self.native_tokens.insert(native_token);
         self
     }
 
@@ -135,8 +135,8 @@ impl AliasOutputBuilder {
 
     ///
     #[inline(always)]
-    pub fn with_state_index(mut self, state_index: u32) -> Self {
-        self.state_index.replace(state_index);
+    pub fn with_state_index(mut self, state_index: impl Into<Option<u32>>) -> Self {
+        self.state_index = state_index.into();
         self
     }
 
@@ -149,15 +149,15 @@ impl AliasOutputBuilder {
 
     ///
     #[inline(always)]
-    pub fn with_foundry_counter(mut self, foundry_counter: u32) -> Self {
-        self.foundry_counter.replace(foundry_counter);
+    pub fn with_foundry_counter(mut self, foundry_counter: impl Into<Option<u32>>) -> Self {
+        self.foundry_counter = foundry_counter.into();
         self
     }
 
-    /// Adds an [`UnlockCondition`] to the builder.
+    /// Adds an [`UnlockCondition`] to the builder, if one does not already exist of that type.
     #[inline(always)]
     pub fn add_unlock_condition(mut self, unlock_condition: impl Into<UnlockCondition>) -> Self {
-        self.unlock_conditions.push(unlock_condition.into());
+        self.unlock_conditions.insert(unlock_condition.into());
         self
     }
 
@@ -173,16 +173,7 @@ impl AliasOutputBuilder {
 
     /// Replaces an [`UnlockCondition`] of the builder with a new one, or adds it.
     pub fn replace_unlock_condition(mut self, unlock_condition: impl Into<UnlockCondition>) -> Self {
-        let unlock_condition = unlock_condition.into();
-
-        match self
-            .unlock_conditions
-            .iter_mut()
-            .find(|u| u.kind() == unlock_condition.kind())
-        {
-            Some(u) => *u = unlock_condition,
-            None => self.unlock_conditions.push(unlock_condition),
-        }
+        self.unlock_conditions.replace(unlock_condition.into());
         self
     }
 
@@ -193,10 +184,10 @@ impl AliasOutputBuilder {
         self
     }
 
-    /// Adds a [`Feature`] to the builder.
+    /// Adds a [`Feature`] to the builder, if one does not already exist of that type.
     #[inline(always)]
     pub fn add_feature(mut self, feature: impl Into<Feature>) -> Self {
-        self.features.push(feature.into());
+        self.features.insert(feature.into());
         self
     }
 
@@ -209,12 +200,7 @@ impl AliasOutputBuilder {
 
     /// Replaces a [`Feature`] of the builder with a new one, or adds it.
     pub fn replace_feature(mut self, feature: impl Into<Feature>) -> Self {
-        let feature = feature.into();
-
-        match self.features.iter_mut().find(|f| f.kind() == feature.kind()) {
-            Some(f) => *f = feature,
-            None => self.features.push(feature),
-        }
+        self.features.replace(feature.into());
         self
     }
 
@@ -225,10 +211,10 @@ impl AliasOutputBuilder {
         self
     }
 
-    /// Adds an immutable [`Feature`] to the builder.
+    /// Adds an immutable [`Feature`] to the builder, if one does not already exist of that type.
     #[inline(always)]
     pub fn add_immutable_feature(mut self, immutable_feature: impl Into<Feature>) -> Self {
-        self.immutable_features.push(immutable_feature.into());
+        self.immutable_features.insert(immutable_feature.into());
         self
     }
 
@@ -241,16 +227,7 @@ impl AliasOutputBuilder {
 
     /// Replaces an immutable [`Feature`] of the builder with a new one, or adds it.
     pub fn replace_immutable_feature(mut self, immutable_feature: impl Into<Feature>) -> Self {
-        let immutable_feature = immutable_feature.into();
-
-        match self
-            .immutable_features
-            .iter_mut()
-            .find(|f| f.kind() == immutable_feature.kind())
-        {
-            Some(f) => *f = immutable_feature,
-            None => self.immutable_features.push(immutable_feature),
-        }
+        self.immutable_features.replace(immutable_feature.into());
         self
     }
 
@@ -274,21 +251,21 @@ impl AliasOutputBuilder {
 
         verify_index_counter(&self.alias_id, state_index, foundry_counter)?;
 
-        let unlock_conditions = UnlockConditions::new(self.unlock_conditions)?;
+        let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions(&unlock_conditions, &self.alias_id)?;
 
-        let features = Features::new(self.features)?;
+        let features = Features::from_set(self.features)?;
 
         verify_allowed_features(&features, AliasOutput::ALLOWED_FEATURES)?;
 
-        let immutable_features = Features::new(self.immutable_features)?;
+        let immutable_features = Features::from_set(self.immutable_features)?;
 
         verify_allowed_features(&immutable_features, AliasOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
         let mut output = AliasOutput {
             amount: 1,
-            native_tokens: NativeTokens::new(self.native_tokens)?,
+            native_tokens: NativeTokens::from_set(self.native_tokens)?,
             alias_id: self.alias_id,
             state_index,
             state_metadata,
@@ -327,14 +304,14 @@ impl From<&AliasOutput> for AliasOutputBuilder {
     fn from(output: &AliasOutput) -> Self {
         Self {
             amount: OutputBuilderAmount::Amount(output.amount),
-            native_tokens: output.native_tokens.to_vec(),
+            native_tokens: output.native_tokens.iter().copied().collect(),
             alias_id: output.alias_id,
             state_index: Some(output.state_index),
             state_metadata: output.state_metadata.to_vec(),
             foundry_counter: Some(output.foundry_counter),
-            unlock_conditions: output.unlock_conditions.to_vec(),
-            features: output.features.to_vec(),
-            immutable_features: output.immutable_features.to_vec(),
+            unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
+            features: output.features.iter().cloned().collect(),
+            immutable_features: output.immutable_features.iter().cloned().collect(),
         }
     }
 }
@@ -377,36 +354,16 @@ impl AliasOutput {
     /// The set of allowed immutable [`Feature`]s for an [`AliasOutput`].
     pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::ISSUER.union(FeatureFlags::METADATA);
 
-    /// Creates a new [`AliasOutput`] with a provided amount.
-    #[inline(always)]
-    pub fn new_with_amount(amount: u64, alias_id: AliasId, token_supply: u64) -> Result<Self, Error> {
-        AliasOutputBuilder::new_with_amount(amount, alias_id)?.finish(token_supply)
-    }
-
-    /// Creates a new [`AliasOutput`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    #[inline(always)]
-    pub fn new_with_minimum_storage_deposit(
-        alias_id: AliasId,
-        rent_structure: RentStructure,
-        token_supply: u64,
-    ) -> Result<Self, Error> {
-        AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id)?.finish(token_supply)
-    }
-
     /// Creates a new [`AliasOutputBuilder`] with a provided amount.
     #[inline(always)]
-    pub fn build_with_amount(amount: u64, alias_id: AliasId) -> Result<AliasOutputBuilder, Error> {
+    pub fn build_with_amount(amount: u64, alias_id: AliasId) -> AliasOutputBuilder {
         AliasOutputBuilder::new_with_amount(amount, alias_id)
     }
 
     /// Creates a new [`AliasOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
-    pub fn build_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
-        alias_id: AliasId,
-    ) -> Result<AliasOutputBuilder, Error> {
+    pub fn build_with_minimum_storage_deposit(rent_structure: RentStructure, alias_id: AliasId) -> AliasOutputBuilder {
         AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id)
     }
 
@@ -734,11 +691,11 @@ pub mod dto {
 
     use super::*;
     use crate::types::block::{
-        error::dto::DtoError,
         output::{
             alias_id::dto::AliasIdDto, dto::OutputBuilderAmountDto, feature::dto::FeatureDto,
             native_token::dto::NativeTokenDto, unlock_condition::dto::UnlockConditionDto,
         },
+        Error,
     };
 
     /// Describes an alias account in the ledger that can be controlled by the state and governance controllers.
@@ -789,20 +746,17 @@ pub mod dto {
     }
 
     impl AliasOutput {
-        fn _try_from_dto(value: &AliasOutputDto) -> Result<AliasOutputBuilder, DtoError> {
+        fn _try_from_dto(value: &AliasOutputDto) -> Result<AliasOutputBuilder, Error> {
             let mut builder = AliasOutputBuilder::new_with_amount(
-                value
-                    .amount
-                    .parse::<u64>()
-                    .map_err(|_| DtoError::InvalidField("amount"))?,
+                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
                 (&value.alias_id).try_into()?,
-            )?;
+            );
 
             builder = builder.with_state_index(value.state_index);
 
             if !value.state_metadata.is_empty() {
                 builder = builder.with_state_metadata(
-                    prefix_hex::decode(&value.state_metadata).map_err(|_| DtoError::InvalidField("state_metadata"))?,
+                    prefix_hex::decode(&value.state_metadata).map_err(|_| Error::InvalidField("state_metadata"))?,
                 );
             }
 
@@ -823,24 +777,24 @@ pub mod dto {
             Ok(builder)
         }
 
-        pub fn try_from_dto(value: &AliasOutputDto, token_supply: u64) -> Result<Self, DtoError> {
+        pub fn try_from_dto(value: &AliasOutputDto, token_supply: u64) -> Result<Self, Error> {
             let mut builder = Self::_try_from_dto(value)?;
 
             for u in &value.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto(u, token_supply)?);
             }
 
-            Ok(builder.finish(token_supply)?)
+            builder.finish(token_supply)
         }
 
-        pub fn try_from_dto_unverified(value: &AliasOutputDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &AliasOutputDto) -> Result<Self, Error> {
             let mut builder = Self::_try_from_dto(value)?;
 
             for u in &value.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_unverified(u)?);
             }
 
-            Ok(builder.finish_unverified()?)
+            builder.finish_unverified()
         }
 
         #[allow(clippy::too_many_arguments)]
@@ -855,16 +809,16 @@ pub mod dto {
             features: Option<Vec<FeatureDto>>,
             immutable_features: Option<Vec<FeatureDto>>,
             token_supply: u64,
-        ) -> Result<Self, DtoError> {
+        ) -> Result<Self, Error> {
             let alias_id = AliasId::try_from(alias_id)?;
 
             let mut builder = match amount {
                 OutputBuilderAmountDto::Amount(amount) => AliasOutputBuilder::new_with_amount(
-                    amount.parse().map_err(|_| DtoError::InvalidField("amount"))?,
+                    amount.parse().map_err(|_| Error::InvalidField("amount"))?,
                     alias_id,
-                )?,
+                ),
                 OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
-                    AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id)?
+                    AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id)
                 }
             };
 
@@ -872,7 +826,7 @@ pub mod dto {
                 let native_tokens = native_tokens
                     .iter()
                     .map(NativeToken::try_from)
-                    .collect::<Result<Vec<NativeToken>, DtoError>>()?;
+                    .collect::<Result<Vec<NativeToken>, Error>>()?;
                 builder = builder.with_native_tokens(native_tokens);
             }
 
@@ -891,14 +845,14 @@ pub mod dto {
             let unlock_conditions = unlock_conditions
                 .iter()
                 .map(|u| UnlockCondition::try_from_dto(u, token_supply))
-                .collect::<Result<Vec<UnlockCondition>, DtoError>>()?;
+                .collect::<Result<Vec<UnlockCondition>, Error>>()?;
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(features) = features {
                 let features = features
                     .iter()
                     .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, DtoError>>()?;
+                    .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_features(features);
             }
 
@@ -906,11 +860,11 @@ pub mod dto {
                 let immutable_features = immutable_features
                     .iter()
                     .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, DtoError>>()?;
+                    .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_immutable_features(immutable_features);
             }
 
-            Ok(builder.finish(token_supply)?)
+            builder.finish(token_supply)
         }
     }
 }

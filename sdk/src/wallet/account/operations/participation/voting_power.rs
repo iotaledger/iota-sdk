@@ -63,7 +63,7 @@ impl Account {
                 )
             }
             None => (
-                BasicOutputBuilder::new_with_amount(amount)?
+                BasicOutputBuilder::new_with_amount(amount)
                     .add_unlock_condition(AddressUnlockCondition::new(
                         self.public_addresses()
                             .await
@@ -135,7 +135,7 @@ impl Account {
         amount: u64,
         token_supply: u64,
     ) -> Result<(Output, TaggedDataPayload)> {
-        let mut output_builder = BasicOutputBuilder::from(output).with_amount(amount)?;
+        let mut output_builder = BasicOutputBuilder::from(output).with_amount(amount);
         let mut participation_bytes = output.features().metadata().map(|m| m.data()).unwrap_or(&[]);
 
         let participation_bytes = if let Ok(mut participations) = Participations::from_bytes(&mut participation_bytes) {

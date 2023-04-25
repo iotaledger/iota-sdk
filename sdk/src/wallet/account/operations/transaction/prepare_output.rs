@@ -18,7 +18,7 @@ use crate::{
             },
             BasicOutputBuilder, NativeToken, NftId, NftOutput, NftOutputBuilder, Output, Rent,
         },
-        DtoError,
+        Error,
     },
     wallet::account::{operations::transaction::RemainderValueStrategy, Account, FilterOptions, TransactionOptions},
 };
@@ -50,7 +50,7 @@ impl Account {
 
         // We start building with minimum storage deposit, so we know the minimum required amount and can later replace
         // it, if needed
-        let mut first_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())?
+        let mut first_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())
             .add_unlock_condition(AddressUnlockCondition::new(recipient_address));
 
         if let Some(assets) = options.assets {
@@ -66,13 +66,13 @@ impl Account {
 
             if let Some(tag) = features.tag {
                 first_output_builder = first_output_builder.add_feature(TagFeature::new(
-                    prefix_hex::decode(tag).map_err(|_| DtoError::InvalidField("tag"))?,
+                    prefix_hex::decode(tag).map_err(|_| Error::InvalidField("tag"))?,
                 )?);
             }
 
             if let Some(metadata) = features.metadata {
                 first_output_builder = first_output_builder.add_feature(MetadataFeature::new(
-                    prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("metadata"))?,
+                    prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("metadata"))?,
                 )?);
             }
 
@@ -103,7 +103,7 @@ impl Account {
         match options.amount.cmp(&first_output.amount()) {
             Ordering::Greater | Ordering::Equal => {
                 // if it's larger than the minimum storage deposit, just replace it
-                second_output_builder = second_output_builder.with_amount(options.amount)?;
+                second_output_builder = second_output_builder.with_amount(options.amount);
             }
             Ordering::Less => {
                 let storage_deposit = options.storage_deposit.unwrap_or_default();
@@ -138,7 +138,7 @@ impl Account {
 
                         if balance_minus_output < minimum_required_storage_deposit {
                             second_output_builder =
-                                second_output_builder.with_amount(first_output.amount() + balance_minus_output)?;
+                                second_output_builder.with_amount(first_output.amount() + balance_minus_output);
                         }
                     }
                 }
@@ -164,7 +164,7 @@ impl Account {
                 // increase the output amount by the additional required amount for the SDR
                 final_output_amount += minimum_storage_deposit - (required_storage_deposit - options.amount);
             }
-            third_output_builder = third_output_builder.with_amount(final_output_amount)?;
+            third_output_builder = third_output_builder.with_amount(final_output_amount);
 
             // add newly added amount also to the storage deposit return unlock condition, if that was added
             if let Some(sdr) = second_output.unlock_conditions().storage_deposit_return() {
@@ -211,7 +211,7 @@ impl Account {
                 unreachable!("We checked before if it's an nft output")
             }
         } else if nft_id.is_null() {
-            NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone(), nft_id)?
+            NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone(), nft_id)
         } else {
             return Err(crate::wallet::Error::NftNotFoundInUnspentOutputs);
         };
@@ -233,13 +233,13 @@ impl Account {
         if let Some(features) = options.features {
             if let Some(tag) = features.tag {
                 first_output_builder = first_output_builder.add_feature(TagFeature::new(
-                    prefix_hex::decode(tag).map_err(|_| DtoError::InvalidField("tag"))?,
+                    prefix_hex::decode(tag).map_err(|_| Error::InvalidField("tag"))?,
                 )?);
             }
 
             if let Some(metadata) = features.metadata {
                 first_output_builder = first_output_builder.add_feature(MetadataFeature::new(
-                    prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("metadata"))?,
+                    prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("metadata"))?,
                 )?);
             }
 
@@ -277,7 +277,7 @@ impl Account {
         match options.amount.cmp(&first_output.amount()) {
             Ordering::Greater | Ordering::Equal => {
                 // if it's larger than the minimum storage deposit, just replace it
-                second_output_builder = second_output_builder.with_amount(options.amount)?;
+                second_output_builder = second_output_builder.with_amount(options.amount);
             }
             Ordering::Less => {
                 let storage_deposit = options.storage_deposit.unwrap_or_default();
@@ -312,7 +312,7 @@ impl Account {
 
                         if balance_minus_output < minimum_required_storage_deposit {
                             second_output_builder =
-                                second_output_builder.with_amount(first_output.amount() + balance_minus_output)?;
+                                second_output_builder.with_amount(first_output.amount() + balance_minus_output);
                         }
                     }
                 }
@@ -338,7 +338,7 @@ impl Account {
                 // increase the output amount by the additional required amount for the SDR
                 final_output_amount += minimum_storage_deposit - (required_storage_deposit - options.amount);
             }
-            third_output_builder = third_output_builder.with_amount(final_output_amount)?;
+            third_output_builder = third_output_builder.with_amount(final_output_amount);
 
             // add newly added amount also to the storage deposit return unlock condition, if that was added
             if let Some(sdr) = second_output.unlock_conditions().storage_deposit_return() {

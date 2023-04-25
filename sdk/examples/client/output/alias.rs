@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     // create new alias output
     //////////////////////////////////
-    let alias_output_builder = AliasOutputBuilder::new_with_amount(1_000_000, AliasId::null())?
+    let alias_output_builder = AliasOutputBuilder::new_with_amount(1_000_000, AliasId::null())
         .add_feature(SenderFeature::new(address))
         .add_feature(MetadataFeature::new(vec![1, 2, 3])?)
         .add_immutable_feature(IssuerFeature::new(address))

@@ -1,7 +1,7 @@
 // Copyright 2021-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::vec::Vec;
+use alloc::{collections::BTreeSet, vec::Vec};
 
 use packable::{
     error::{UnpackError, UnpackErrorExt},
@@ -29,41 +29,41 @@ use crate::types::block::{
 #[must_use]
 pub struct NftOutputBuilder {
     amount: OutputBuilderAmount,
-    native_tokens: Vec<NativeToken>,
+    native_tokens: BTreeSet<NativeToken>,
     nft_id: NftId,
-    unlock_conditions: Vec<UnlockCondition>,
-    features: Vec<Feature>,
-    immutable_features: Vec<Feature>,
+    unlock_conditions: BTreeSet<UnlockCondition>,
+    features: BTreeSet<Feature>,
+    immutable_features: BTreeSet<Feature>,
 }
 
 impl NftOutputBuilder {
     /// Creates an [`NftOutputBuilder`] with a provided amount.
-    pub fn new_with_amount(amount: u64, nft_id: NftId) -> Result<Self, Error> {
+    pub fn new_with_amount(amount: u64, nft_id: NftId) -> Self {
         Self::new(OutputBuilderAmount::Amount(amount), nft_id)
     }
 
     /// Creates an [`NftOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, nft_id: NftId) -> Result<Self, Error> {
+    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, nft_id: NftId) -> Self {
         Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), nft_id)
     }
 
-    fn new(amount: OutputBuilderAmount, nft_id: NftId) -> Result<Self, Error> {
-        Ok(Self {
+    fn new(amount: OutputBuilderAmount, nft_id: NftId) -> Self {
+        Self {
             amount,
-            native_tokens: Vec::new(),
+            native_tokens: BTreeSet::new(),
             nft_id,
-            unlock_conditions: Vec::new(),
-            features: Vec::new(),
-            immutable_features: Vec::new(),
-        })
+            unlock_conditions: BTreeSet::new(),
+            features: BTreeSet::new(),
+            immutable_features: BTreeSet::new(),
+        }
     }
 
     /// Sets the amount to the provided value.
     #[inline(always)]
-    pub fn with_amount(mut self, amount: u64) -> Result<Self, Error> {
+    pub fn with_amount(mut self, amount: u64) -> Self {
         self.amount = OutputBuilderAmount::Amount(amount);
-        Ok(self)
+        self
     }
 
     /// Sets the amount to the minimum storage deposit.
@@ -76,7 +76,7 @@ impl NftOutputBuilder {
     ///
     #[inline(always)]
     pub fn add_native_token(mut self, native_token: NativeToken) -> Self {
-        self.native_tokens.push(native_token);
+        self.native_tokens.insert(native_token);
         self
     }
 
@@ -94,10 +94,10 @@ impl NftOutputBuilder {
         self
     }
 
-    /// Adds an [`UnlockCondition`] to the builder.
+    /// Adds an [`UnlockCondition`] to the builder, if one does not already exist of that type.
     #[inline(always)]
     pub fn add_unlock_condition(mut self, unlock_condition: impl Into<UnlockCondition>) -> Self {
-        self.unlock_conditions.push(unlock_condition.into());
+        self.unlock_conditions.insert(unlock_condition.into());
         self
     }
 
@@ -113,16 +113,7 @@ impl NftOutputBuilder {
 
     /// Replaces an [`UnlockCondition`] of the builder with a new one, or adds it.
     pub fn replace_unlock_condition(mut self, unlock_condition: impl Into<UnlockCondition>) -> Self {
-        let unlock_condition = unlock_condition.into();
-
-        match self
-            .unlock_conditions
-            .iter_mut()
-            .find(|u| u.kind() == unlock_condition.kind())
-        {
-            Some(u) => *u = unlock_condition,
-            None => self.unlock_conditions.push(unlock_condition),
-        }
+        self.unlock_conditions.replace(unlock_condition.into());
         self
     }
 
@@ -133,10 +124,10 @@ impl NftOutputBuilder {
         self
     }
 
-    /// Adds a [`Feature`] to the builder.
+    /// Adds a [`Feature`] to the builder, if one does not already exist of that type.
     #[inline(always)]
     pub fn add_feature(mut self, feature: impl Into<Feature>) -> Self {
-        self.features.push(feature.into());
+        self.features.insert(feature.into());
         self
     }
 
@@ -149,12 +140,7 @@ impl NftOutputBuilder {
 
     /// Replaces a [`Feature`] of the builder with a new one, or adds it.
     pub fn replace_feature(mut self, feature: impl Into<Feature>) -> Self {
-        let feature = feature.into();
-
-        match self.features.iter_mut().find(|f| f.kind() == feature.kind()) {
-            Some(f) => *f = feature,
-            None => self.features.push(feature),
-        }
+        self.features.replace(feature.into());
         self
     }
 
@@ -165,10 +151,10 @@ impl NftOutputBuilder {
         self
     }
 
-    /// Adds an immutable [`Feature`] to the builder.
+    /// Adds an immutable [`Feature`] to the builder, if one does not already exist of that type.
     #[inline(always)]
     pub fn add_immutable_feature(mut self, immutable_feature: impl Into<Feature>) -> Self {
-        self.immutable_features.push(immutable_feature.into());
+        self.immutable_features.insert(immutable_feature.into());
         self
     }
 
@@ -181,16 +167,7 @@ impl NftOutputBuilder {
 
     /// Replaces an immutable [`Feature`] of the builder with a new one, or adds it.
     pub fn replace_immutable_feature(mut self, immutable_feature: impl Into<Feature>) -> Self {
-        let immutable_feature = immutable_feature.into();
-
-        match self
-            .immutable_features
-            .iter_mut()
-            .find(|f| f.kind() == immutable_feature.kind())
-        {
-            Some(f) => *f = immutable_feature,
-            None => self.immutable_features.push(immutable_feature),
-        }
+        self.immutable_features.replace(immutable_feature.into());
         self
     }
 
@@ -203,21 +180,21 @@ impl NftOutputBuilder {
 
     ///
     pub fn finish_unverified(self) -> Result<NftOutput, Error> {
-        let unlock_conditions = UnlockConditions::new(self.unlock_conditions)?;
+        let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions(&unlock_conditions, &self.nft_id)?;
 
-        let features = Features::new(self.features)?;
+        let features = Features::from_set(self.features)?;
 
         verify_allowed_features(&features, NftOutput::ALLOWED_FEATURES)?;
 
-        let immutable_features = Features::new(self.immutable_features)?;
+        let immutable_features = Features::from_set(self.immutable_features)?;
 
         verify_allowed_features(&immutable_features, NftOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
         let mut output = NftOutput {
             amount: 1u64,
-            native_tokens: NativeTokens::new(self.native_tokens)?,
+            native_tokens: NativeTokens::from_set(self.native_tokens)?,
             nft_id: self.nft_id,
             unlock_conditions,
             features,
@@ -253,11 +230,11 @@ impl From<&NftOutput> for NftOutputBuilder {
     fn from(output: &NftOutput) -> Self {
         Self {
             amount: OutputBuilderAmount::Amount(output.amount),
-            native_tokens: output.native_tokens.to_vec(),
+            native_tokens: output.native_tokens.iter().copied().collect(),
             nft_id: output.nft_id,
-            unlock_conditions: output.unlock_conditions.to_vec(),
-            features: output.features.to_vec(),
-            immutable_features: output.immutable_features.to_vec(),
+            unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
+            features: output.features.iter().cloned().collect(),
+            immutable_features: output.immutable_features.iter().cloned().collect(),
         }
     }
 }
@@ -292,36 +269,16 @@ impl NftOutput {
     /// The set of allowed immutable [`Feature`]s for an [`NftOutput`].
     pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::ISSUER.union(FeatureFlags::METADATA);
 
-    /// Creates a new [`NftOutput`] with a provided amount.
-    #[inline(always)]
-    pub fn new_with_amount(amount: u64, nft_id: NftId, token_supply: u64) -> Result<Self, Error> {
-        NftOutputBuilder::new_with_amount(amount, nft_id)?.finish(token_supply)
-    }
-
-    /// Creates a new [`NftOutput`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    #[inline(always)]
-    pub fn new_with_minimum_storage_deposit(
-        nft_id: NftId,
-        rent_structure: RentStructure,
-        token_supply: u64,
-    ) -> Result<Self, Error> {
-        NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, nft_id)?.finish(token_supply)
-    }
-
     /// Creates a new [`NftOutputBuilder`] with a provided amount.
     #[inline(always)]
-    pub fn build_with_amount(amount: u64, nft_id: NftId) -> Result<NftOutputBuilder, Error> {
+    pub fn build_with_amount(amount: u64, nft_id: NftId) -> NftOutputBuilder {
         NftOutputBuilder::new_with_amount(amount, nft_id)
     }
 
     /// Creates a new [`NftOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
-    pub fn build_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
-        nft_id: NftId,
-    ) -> Result<NftOutputBuilder, Error> {
+    pub fn build_with_minimum_storage_deposit(rent_structure: RentStructure, nft_id: NftId) -> NftOutputBuilder {
         NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, nft_id)
     }
 
@@ -523,11 +480,11 @@ pub mod dto {
 
     use super::*;
     use crate::types::block::{
-        error::dto::DtoError,
         output::{
             dto::OutputBuilderAmountDto, feature::dto::FeatureDto, native_token::dto::NativeTokenDto,
             nft_id::dto::NftIdDto, unlock_condition::dto::UnlockConditionDto,
         },
+        Error,
     };
 
     /// Describes an NFT output, a globally unique token with metadata attached.
@@ -565,14 +522,11 @@ pub mod dto {
     }
 
     impl NftOutput {
-        fn _try_from_dto(value: &NftOutputDto) -> Result<NftOutputBuilder, DtoError> {
+        fn _try_from_dto(value: &NftOutputDto) -> Result<NftOutputBuilder, Error> {
             let mut builder = NftOutputBuilder::new_with_amount(
-                value
-                    .amount
-                    .parse::<u64>()
-                    .map_err(|_| DtoError::InvalidField("amount"))?,
+                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
                 (&value.nft_id).try_into()?,
-            )?;
+            );
 
             for t in &value.native_tokens {
                 builder = builder.add_native_token(t.try_into()?);
@@ -589,24 +543,24 @@ pub mod dto {
             Ok(builder)
         }
 
-        pub fn try_from_dto(value: &NftOutputDto, token_supply: u64) -> Result<Self, DtoError> {
+        pub fn try_from_dto(value: &NftOutputDto, token_supply: u64) -> Result<Self, Error> {
             let mut builder = Self::_try_from_dto(value)?;
 
             for u in &value.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto(u, token_supply)?);
             }
 
-            Ok(builder.finish(token_supply)?)
+            builder.finish(token_supply)
         }
 
-        pub fn try_from_dto_unverified(value: &NftOutputDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &NftOutputDto) -> Result<Self, Error> {
             let mut builder = Self::_try_from_dto(value)?;
 
             for u in &value.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_unverified(u)?);
             }
 
-            Ok(builder.finish_unverified()?)
+            builder.finish_unverified()
         }
 
         pub fn try_from_dtos(
@@ -617,16 +571,16 @@ pub mod dto {
             features: Option<Vec<FeatureDto>>,
             immutable_features: Option<Vec<FeatureDto>>,
             token_supply: u64,
-        ) -> Result<Self, DtoError> {
+        ) -> Result<Self, Error> {
             let nft_id = NftId::try_from(nft_id)?;
 
             let mut builder = match amount {
                 OutputBuilderAmountDto::Amount(amount) => NftOutputBuilder::new_with_amount(
-                    amount.parse().map_err(|_| DtoError::InvalidField("amount"))?,
+                    amount.parse().map_err(|_| Error::InvalidField("amount"))?,
                     nft_id,
-                )?,
+                ),
                 OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
-                    NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, nft_id)?
+                    NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, nft_id)
                 }
             };
 
@@ -634,21 +588,21 @@ pub mod dto {
                 let native_tokens = native_tokens
                     .iter()
                     .map(NativeToken::try_from)
-                    .collect::<Result<Vec<NativeToken>, DtoError>>()?;
+                    .collect::<Result<Vec<NativeToken>, Error>>()?;
                 builder = builder.with_native_tokens(native_tokens);
             }
 
             let unlock_conditions = unlock_conditions
                 .iter()
                 .map(|u| UnlockCondition::try_from_dto(u, token_supply))
-                .collect::<Result<Vec<UnlockCondition>, DtoError>>()?;
+                .collect::<Result<Vec<UnlockCondition>, Error>>()?;
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(features) = features {
                 let features = features
                     .iter()
                     .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, DtoError>>()?;
+                    .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_features(features);
             }
 
@@ -656,11 +610,11 @@ pub mod dto {
                 let immutable_features = immutable_features
                     .iter()
                     .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, DtoError>>()?;
+                    .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_immutable_features(immutable_features);
             }
 
-            Ok(builder.finish(token_supply)?)
+            builder.finish(token_supply)
         }
     }
 }

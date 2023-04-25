@@ -87,7 +87,7 @@ async fn stronghold_mnemonic_missing() -> Result<()> {
         .unwrap_err();
 
     match error {
-        iota_sdk::client::Error::StrongholdMnemonicMissing => {}
+        iota_sdk::client::Error::Stronghold(iota_sdk::client::stronghold::Error::MnemonicMissing) => {}
         _ => panic!("expected StrongholdMnemonicMissing error"),
     }
 

@@ -1,8 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use serde::{Deserialize, Serialize};
-
 #[cfg(all(feature = "events", any(feature = "ledger_nano", feature = "ledger_nano")))]
 use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
@@ -10,13 +8,6 @@ use crate::{
     types::block::address::Bech32Address,
     wallet::account::{types::address::AccountAddress, Account},
 };
-
-/// Options for address generation
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-pub struct AddressGenerationOptions {
-    pub internal: bool,
-    pub options: Option<GenerateAddressOptions>,
-}
 
 impl Account {
     /// Generate addresses and stores them in the account
@@ -26,7 +17,7 @@ impl Account {
     /// let internal_addresses = account
     ///     .generate_addresses(
     ///         1,
-    ///         Some(AddressGenerationOptions {
+    ///         Some(GenerateAddressOptions {
     ///             internal: true,
     ///             ..Default::default()
     ///         }),
@@ -36,7 +27,7 @@ impl Account {
     pub async fn generate_addresses(
         &self,
         amount: u32,
-        options: Option<AddressGenerationOptions>,
+        options: Option<GenerateAddressOptions>,
     ) -> crate::wallet::Result<Vec<AccountAddress>> {
         let options = options.unwrap_or_default();
         log::debug!(
@@ -72,13 +63,14 @@ impl Account {
                 // If we don't sync, then we want to display the prompt on the ledger with the address. But the user
                 // needs to have it visible on the computer first, so we need to generate it without the
                 // prompt first
-                if options.options.clone().unwrap_or_default().ledger_nano_prompt {
+                if options.ledger_nano_prompt {
                     #[cfg(feature = "events")]
-                    let changed_options = options.options.clone().map(|mut options| {
+                    let changed_options = {
                         // Change options so ledger will not show the prompt the first time
-                        options.ledger_nano_prompt = false;
-                        options
-                    });
+                        let mut changed_options = options;
+                        changed_options.ledger_nano_prompt = false;
+                        changed_options
+                    };
                     let mut addresses = Vec::new();
 
                     for address_index in address_range {
@@ -90,8 +82,7 @@ impl Account {
                                     account_details.coin_type,
                                     account_details.index,
                                     address_index..address_index + 1,
-                                    options.internal,
-                                    changed_options.clone(),
+                                    Some(changed_options),
                                 )
                                 .await?;
                             self.event_emitter.lock().await.emit(
@@ -107,8 +98,7 @@ impl Account {
                                 account_details.coin_type,
                                 account_details.index,
                                 address_index..address_index + 1,
-                                options.internal,
-                                options.options.clone(),
+                                Some(options),
                             )
                             .await?;
                         addresses.push(address[0]);
@@ -120,8 +110,7 @@ impl Account {
                             account_details.coin_type,
                             account_details.index,
                             address_range.clone(),
-                            options.internal,
-                            options.options,
+                            Some(options),
                         )
                         .await?
                 }
@@ -133,8 +122,7 @@ impl Account {
                         account_details.coin_type,
                         account_details.index,
                         address_range,
-                        options.internal,
-                        options.options.clone(),
+                        Some(options),
                     )
                     .await?
             }
@@ -144,8 +132,7 @@ impl Account {
                         account_details.coin_type,
                         account_details.index,
                         address_range,
-                        options.internal,
-                        options.options.clone(),
+                        Some(options),
                     )
                     .await?
             }
@@ -174,13 +161,7 @@ impl Account {
     /// Generate an internal address and store in the account, internal addresses are used for remainder outputs
     pub(crate) async fn generate_remainder_address(&self) -> crate::wallet::Result<AccountAddress> {
         let result = self
-            .generate_addresses(
-                1,
-                Some(AddressGenerationOptions {
-                    internal: true,
-                    ..Default::default()
-                }),
-            )
+            .generate_addresses(1, Some(GenerateAddressOptions::internal()))
             .await?
             .first()
             .ok_or(crate::wallet::Error::FailedToGetRemainder)?

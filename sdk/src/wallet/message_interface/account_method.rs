@@ -5,8 +5,16 @@ use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "participation")]
 use crate::wallet::account::types::participation::ParticipationEventRegistrationOptions;
+#[cfg(feature = "participation")]
 use crate::{
-    client::api::{PreparedTransactionDataDto, SignedTransactionDataDto},
+    client::node_manager::node::Node,
+    types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
+};
+use crate::{
+    client::{
+        api::{PreparedTransactionDataDto, SignedTransactionDataDto},
+        secret::GenerateAddressOptions,
+    },
     types::block::{
         dto::U256Dto,
         output::{
@@ -20,7 +28,6 @@ use crate::{
     wallet::{
         account::{
             operations::{
-                address_generation::AddressGenerationOptions,
                 output_claiming::OutputsToClaim,
                 syncing::SyncOptions,
                 transaction::{
@@ -40,11 +47,6 @@ use crate::{
         message_interface::dtos::AddressWithAmountDto,
         AddressAndNftId, AddressNativeTokens,
     },
-};
-#[cfg(feature = "participation")]
-use crate::{
-    client::node_manager::node::Node,
-    types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
 };
 
 /// Each public account method.
@@ -161,7 +163,7 @@ pub enum AccountMethod {
     /// Expected response: [`GeneratedAddress`](crate::wallet::message_interface::Response::GeneratedAddress)
     GenerateAddresses {
         amount: u32,
-        options: Option<AddressGenerationOptions>,
+        options: Option<GenerateAddressOptions>,
     },
     /// Get the [`OutputData`](crate::wallet::account::types::OutputData) of an output stored in the account
     /// Expected response: [`OutputData`](crate::wallet::message_interface::Response::OutputData)

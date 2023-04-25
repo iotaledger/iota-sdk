@@ -8,10 +8,10 @@ use primitive_types::U256;
 
 use crate::types::block::{
     address::Address,
-    error::Error,
     output::{ChainId, FoundryId, InputsCommitment, NativeTokens, Output, OutputId, TokenId},
     payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionId},
     unlock::Unlocks,
+    Error,
 };
 
 /// Errors related to ledger types.

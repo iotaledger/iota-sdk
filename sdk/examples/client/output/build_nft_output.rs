@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
     .to_vec();
 
     // NftId needs to be null the first time
-    let nft_output = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())?
+    let nft_output = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .add_feature(SenderFeature::new(address))
         .add_feature(MetadataFeature::new("mutable metadata".as_bytes().to_vec())?)

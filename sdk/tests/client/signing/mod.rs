@@ -48,7 +48,7 @@ async fn all_combined() -> Result<()> {
     let protocol_parameters = protocol_parameters();
 
     let ed25519_bech32_addresses = secret_manager
-        .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..3, false, None)
+        .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..3, None)
         .await?;
     let ed25519_bech32_address_0 = &ed25519_bech32_addresses[0].to_bech32(SHIMMER_TESTNET_BECH32_HRP);
     let ed25519_bech32_address_1 = &ed25519_bech32_addresses[1].to_bech32(SHIMMER_TESTNET_BECH32_HRP);

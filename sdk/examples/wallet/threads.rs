@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
                 tokio::spawn(async move {
                     // send transaction
                     let outputs = vec![
-                        BasicOutputBuilder::new_with_amount(1_000_000)?
+                        BasicOutputBuilder::new_with_amount(1_000_000)
                             .add_unlock_condition(AddressUnlockCondition::new(address_))
                             .finish_output(account_.client().get_token_supply().await?)?;
                         // amount of outputs in the transaction (one additional output might be added for the remaining amount)

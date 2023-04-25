@@ -4,8 +4,14 @@
 use chrono::{DateTime, NaiveDateTime, Utc};
 use clap::Parser;
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Password, Select};
-use iota_sdk::wallet::{Account, Wallet};
-use tokio::{fs::OpenOptions, io::AsyncWriteExt};
+use iota_sdk::{
+    client::verify_mnemonic,
+    wallet::{Account, Wallet},
+};
+use tokio::{
+    fs::OpenOptions,
+    io::{AsyncBufReadExt, AsyncWriteExt, BufReader},
+};
 
 use crate::{
     command::{account::AccountCli, wallet::WalletCli},
@@ -13,8 +19,7 @@ use crate::{
     println_log_error, println_log_info,
 };
 
-// TODO: make this configurable via the CLI to allow for more secure locations (e.g. encrypted usb drives etc)
-const MNEMONIC_FILE_NAME: &str = "mnemonic.txt";
+const DEFAULT_MNEMONIC_FILE_PATH: &str = "./mnemonic.txt";
 
 pub fn get_password(prompt: &str, confirmation: bool) -> Result<String, Error> {
     let mut password = Password::new();
@@ -102,6 +107,23 @@ pub async fn bytes_from_hex_or_file(hex: Option<String>, file: Option<String>) -
     })
 }
 
+pub async fn enter_or_generate_mnemonic() -> Result<String, Error> {
+    let choices = ["Generate a new mnemonic", "Enter a mnemonic"];
+    let selected_choice = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select how to provide a mnemonic")
+        .items(&choices)
+        .default(0)
+        .interact_on(&Term::stderr())?;
+
+    let mnemnonic = match selected_choice {
+        0 => generate_mnemonic().await?,
+        1 => enter_mnemonic()?,
+        _ => unreachable!(),
+    };
+
+    Ok(mnemnonic)
+}
+
 pub async fn generate_mnemonic() -> Result<String, Error> {
     let mnemonic = iota_sdk::client::generate_mnemonic()?;
     println_log_info!("Mnemonic has been generated.");
@@ -122,8 +144,8 @@ pub async fn generate_mnemonic() -> Result<String, Error> {
         println!("{}", mnemonic);
     }
     if [1, 2].contains(&selected_choice) {
-        write_mnemonic_to_file(MNEMONIC_FILE_NAME, &mnemonic).await?;
-        println_log_info!("Mnemonic has been written to '{MNEMONIC_FILE_NAME}'.");
+        write_mnemonic_to_file(DEFAULT_MNEMONIC_FILE_PATH, &mnemonic).await?;
+        println_log_info!("Mnemonic has been written to '{DEFAULT_MNEMONIC_FILE_PATH}'.");
     }
 
     println_log_info!("IMPORTANT:");
@@ -135,11 +157,69 @@ pub async fn generate_mnemonic() -> Result<String, Error> {
     Ok(mnemonic)
 }
 
+pub fn enter_mnemonic() -> Result<String, Error> {
+    loop {
+        let input = Input::<String>::new()
+            .with_prompt("Enter your mnemonic")
+            .interact_text()?;
+        if verify_mnemonic(&input).is_err() {
+            println_log_error!("Invalid mnemonic. Please enter a bip-39 conform mnemonic.");
+        } else {
+            return Ok(input);
+        }
+    }
+}
+
+pub async fn import_mnemonic(path: &str) -> Result<String, Error> {
+    let mut mnemonics = read_mnemonics_from_file(path).await?;
+    if mnemonics.is_empty() {
+        println_log_error!("No valid mnemonics found in '{path}'.");
+        Err(Error::Miscellaneous("No valid mnemonics found".to_string()))
+    } else if mnemonics.len() == 1 {
+        Ok(mnemonics.swap_remove(0))
+    } else {
+        println!("Found {} mnemonics.", mnemonics.len());
+        let n = mnemonics.len();
+        let selected_index = loop {
+            let input = Input::<usize>::new()
+                .with_prompt(format!("Pick a mnemonic by its line index in the file ([1..{n}])"))
+                .interact_text()?;
+            if (1..=n).contains(&input) {
+                break input;
+            } else {
+                println!("Invalid choice. Please pick a valid mnemonic by its index in the range [1..{n}].");
+            }
+        };
+        Ok(mnemonics.swap_remove(selected_index - 1))
+    }
+}
+
 async fn write_mnemonic_to_file(path: &str, mnemonic: &str) -> Result<(), Error> {
     let mut file = OpenOptions::new().create(true).append(true).open(path).await?;
     file.write_all(format!("{mnemonic}\n").as_bytes()).await?;
 
     Ok(())
+}
+
+async fn read_mnemonics_from_file(path: &str) -> Result<Vec<String>, Error> {
+    let file = OpenOptions::new().read(true).open(path).await?;
+    let mut lines = BufReader::new(file).lines();
+    let mut mnemonics = Vec::new();
+    let mut line_index = 1;
+    while let Some(line) = lines.next_line().await? {
+        // we allow surrounding whitespace in the file
+        let trimmed = line.trim();
+        if verify_mnemonic(trimmed).is_ok() {
+            mnemonics.push(trimmed.to_string());
+        } else {
+            return Err(Error::Miscellaneous(format!(
+                "Invalid mnemonic in file '{path}' at line '{line_index}'."
+            )));
+        }
+        line_index += 1;
+    }
+
+    Ok(mnemonics)
 }
 
 /// Converts a unix timestamp in milliseconds to a DateTime<Utc>

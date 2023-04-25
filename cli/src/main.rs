@@ -31,6 +31,10 @@ macro_rules! println_log_error {
 }
 
 fn logger_init(cli: &WalletCli) -> Result<(), Error> {
+    std::panic::set_hook(Box::new(move |panic_info| {
+        println_log_error!("{panic_info}");
+    }));
+
     let archive = LoggerOutputConfigBuilder::default()
         .name("archive.log")
         .level_filter(cli.log_level)

@@ -31,7 +31,6 @@ use self::types::{
 };
 pub use self::{
     operations::{
-        address_generation::AddressGenerationOptions,
         output_claiming::OutputsToClaim,
         syncing::{
             options::{AccountSyncOptions, AliasSyncOptions, NftSyncOptions},
@@ -442,7 +441,6 @@ fn serialize() {
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
-            .unwrap()
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
             .unwrap(),

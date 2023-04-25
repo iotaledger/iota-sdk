@@ -9,7 +9,7 @@ use packable::{
 };
 use primitive_types::U256;
 
-use crate::types::block::error::Error;
+use crate::types::block::Error;
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -114,7 +114,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{dto::U256Dto, error::dto::DtoError};
+    use crate::types::block::{dto::U256Dto, Error};
 
     /// Describes a foundry output that is controlled by an alias.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -142,15 +142,14 @@ pub mod dto {
     }
 
     impl TryFrom<&SimpleTokenSchemeDto> for SimpleTokenScheme {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &SimpleTokenSchemeDto) -> Result<Self, Self::Error> {
             Self::new(
-                U256::try_from(&value.minted_tokens).map_err(|_| DtoError::InvalidField("mintedTokens"))?,
-                U256::try_from(&value.melted_tokens).map_err(|_| DtoError::InvalidField("meltedTokens"))?,
-                U256::try_from(&value.maximum_supply).map_err(|_| DtoError::InvalidField("maximumSupply"))?,
+                U256::try_from(&value.minted_tokens).map_err(|_| Error::InvalidField("mintedTokens"))?,
+                U256::try_from(&value.melted_tokens).map_err(|_| Error::InvalidField("meltedTokens"))?,
+                U256::try_from(&value.maximum_supply).map_err(|_| Error::InvalidField("maximumSupply"))?,
             )
-            .map_err(DtoError::Block)
         }
     }
 }

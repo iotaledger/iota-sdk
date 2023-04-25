@@ -56,6 +56,8 @@ use crate::{
 /// The secret manager interface.
 #[async_trait]
 pub trait SecretManage: Send + Sync {
+    type Error;
+
     /// Generates addresses.
     ///
     /// For `coin_type`, see also <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>.
@@ -64,15 +66,14 @@ pub trait SecretManage: Send + Sync {
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        internal: bool,
         options: Option<GenerateAddressOptions>,
-    ) -> crate::client::Result<Vec<Address>>;
+    ) -> Result<Vec<Address>, Self::Error>;
 
     /// Signs `msg` using the given [`Chain`].
-    async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> crate::client::Result<Ed25519Signature>;
+    async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error>;
 
     /// Signs `essence_hash` using the given `chain`, returning an [`Unlock`].
-    async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: &Chain) -> crate::client::Result<Unlock> {
+    async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: &Chain) -> Result<Unlock, Self::Error> {
         Ok(Unlock::Signature(SignatureUnlock::new(Signature::Ed25519(
             self.sign_ed25519(essence_hash, chain).await?,
         ))))
@@ -85,7 +86,7 @@ pub trait SecretManage: Send + Sync {
 /// internal use that are based on the methods in [`SecretManager`]. Secret managers don't implement this on their
 /// sides.
 #[async_trait]
-pub trait SecretManageExt {
+pub trait SecretManageExt: SecretManage {
     /// Signs transaction essence.
     ///
     /// Secret managers usually don't implement this, as the default implementation has taken care of the placement of
@@ -95,7 +96,7 @@ pub trait SecretManageExt {
         &self,
         prepared_transaction_data: &PreparedTransactionData,
         time: Option<u32>,
-    ) -> crate::client::Result<Unlocks>;
+    ) -> Result<Unlocks, <Self as SecretManage>::Error>;
 }
 
 /// Supported secret managers
@@ -136,7 +137,7 @@ impl std::fmt::Debug for SecretManager {
 }
 
 impl FromStr for SecretManager {
-    type Err = crate::client::Error;
+    type Err = Error;
 
     fn from_str(s: &str) -> crate::client::Result<Self> {
         Self::try_from(&serde_json::from_str::<SecretManagerDto>(s)?)
@@ -168,7 +169,8 @@ pub enum SecretManagerDto {
 }
 
 impl TryFrom<&SecretManagerDto> for SecretManager {
-    type Error = crate::client::Error;
+    type Error = Error;
+
     fn try_from(value: &SecretManagerDto) -> crate::client::Result<Self> {
         Ok(match value {
             #[cfg(feature = "stronghold")]
@@ -227,35 +229,32 @@ impl From<&SecretManager> for SecretManagerDto {
 
 #[async_trait]
 impl SecretManage for SecretManager {
+    type Error = Error;
+
     async fn generate_addresses(
         &self,
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        internal: bool,
         options: Option<GenerateAddressOptions>,
     ) -> crate::client::Result<Vec<Address>> {
         match self {
             #[cfg(feature = "stronghold")]
-            Self::Stronghold(secret_manager) => {
-                secret_manager
-                    .generate_addresses(coin_type, account_index, address_indexes, internal, options)
-                    .await
-            }
+            Self::Stronghold(secret_manager) => Ok(secret_manager
+                .generate_addresses(coin_type, account_index, address_indexes, options)
+                .await?),
             #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => {
-                secret_manager
-                    .generate_addresses(coin_type, account_index, address_indexes, internal, options)
-                    .await
-            }
+            Self::LedgerNano(secret_manager) => Ok(secret_manager
+                .generate_addresses(coin_type, account_index, address_indexes, options)
+                .await?),
             Self::Mnemonic(secret_manager) => {
                 secret_manager
-                    .generate_addresses(coin_type, account_index, address_indexes, internal, options)
+                    .generate_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
             Self::Placeholder(secret_manager) => {
                 secret_manager
-                    .generate_addresses(coin_type, account_index, address_indexes, internal, options)
+                    .generate_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
         }
@@ -264,9 +263,9 @@ impl SecretManage for SecretManager {
     async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> crate::client::Result<Ed25519Signature> {
         match self {
             #[cfg(feature = "stronghold")]
-            Self::Stronghold(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
+            Self::Stronghold(secret_manager) => Ok(secret_manager.sign_ed25519(msg, chain).await?),
             #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
+            Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_ed25519(msg, chain).await?),
             Self::Mnemonic(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
             Self::Placeholder(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
         }
@@ -287,11 +286,9 @@ impl SecretManageExt for SecretManager {
                     .await
             }
             #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => {
-                secret_manager
-                    .sign_transaction_essence(prepared_transaction_data, time)
-                    .await
-            }
+            Self::LedgerNano(secret_manager) => Ok(secret_manager
+                .sign_transaction_essence(prepared_transaction_data, time)
+                .await?),
             Self::Mnemonic(_) => {
                 self.default_sign_transaction_essence(prepared_transaction_data, time)
                     .await

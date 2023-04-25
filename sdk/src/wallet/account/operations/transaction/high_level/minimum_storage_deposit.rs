@@ -29,7 +29,7 @@ pub(crate) fn minimum_storage_deposit_basic_native_tokens(
 ) -> Result<u64> {
     // Safety: This can never fail because the amount will always be within the valid range. Also, the actual value is
     // not important, we are only interested in the storage requirements of the type.
-    let mut basic_output_builder = BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN)?
+    let mut basic_output_builder = BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN)
         .add_unlock_condition(AddressUnlockCondition::new(*address))
         .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
             *return_address,

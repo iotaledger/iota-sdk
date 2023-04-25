@@ -71,27 +71,27 @@ impl WalletBuilder {
     }
 
     /// Set the client options for the core nodes.
-    pub fn with_client_options(mut self, client_options: ClientOptions) -> Self {
-        self.client_options.replace(client_options);
+    pub fn with_client_options(mut self, client_options: impl Into<Option<ClientOptions>>) -> Self {
+        self.client_options = client_options.into();
         self
     }
 
     /// Set the coin type for the wallet. Registered coin types can be found at <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>.
-    pub fn with_coin_type(mut self, coin_type: u32) -> Self {
-        self.coin_type.replace(coin_type);
+    pub fn with_coin_type(mut self, coin_type: impl Into<Option<u32>>) -> Self {
+        self.coin_type = coin_type.into();
         self
     }
 
     /// Set the secret_manager to be used.
-    pub fn with_secret_manager(mut self, secret_manager: SecretManager) -> Self {
-        self.secret_manager.replace(Arc::new(RwLock::new(secret_manager)));
+    pub fn with_secret_manager(mut self, secret_manager: impl Into<Option<SecretManager>>) -> Self {
+        self.secret_manager = secret_manager.into().map(|sm| Arc::new(RwLock::new(sm)));
         self
     }
 
     /// Set the secret_manager to be used wrapped in an Arc<RwLock<>> so it can be cloned and mutated also outside of
     /// the Wallet.
-    pub fn with_secret_manager_arc(mut self, secret_manager: Arc<RwLock<SecretManager>>) -> Self {
-        self.secret_manager.replace(secret_manager);
+    pub fn with_secret_manager_arc(mut self, secret_manager: impl Into<Option<Arc<RwLock<SecretManager>>>>) -> Self {
+        self.secret_manager = secret_manager.into();
         self
     }
 

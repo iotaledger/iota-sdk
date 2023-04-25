@@ -26,7 +26,6 @@ impl Wallet {
     pub async fn generate_address(
         &self,
         account_index: u32,
-        internal: bool,
         address_index: u32,
         options: Option<GenerateAddressOptions>,
     ) -> crate::wallet::Result<Address> {
@@ -39,7 +38,7 @@ impl Wallet {
                 if options.as_ref().map_or(false, |o| o.ledger_nano_prompt) {
                     #[cfg(feature = "events")]
                     {
-                        let changed_options = options.clone().map(|mut options| {
+                        let changed_options = options.map(|mut options| {
                             // Change options so ledger will not show the prompt the first time
                             options.ledger_nano_prompt = false;
                             options
@@ -50,7 +49,6 @@ impl Wallet {
                                 self.coin_type.load(Ordering::Relaxed),
                                 account_index,
                                 address_index..address_index + 1,
-                                internal,
                                 changed_options,
                             )
                             .await?;
@@ -71,7 +69,6 @@ impl Wallet {
                             self.coin_type.load(Ordering::Relaxed),
                             account_index,
                             address_index..address_index + 1,
-                            internal,
                             options,
                         )
                         .await?
@@ -81,7 +78,6 @@ impl Wallet {
                             self.coin_type.load(Ordering::Relaxed),
                             account_index,
                             address_index..address_index + 1,
-                            internal,
                             options,
                         )
                         .await?
@@ -94,7 +90,6 @@ impl Wallet {
                         self.coin_type.load(Ordering::Relaxed),
                         account_index,
                         address_index..address_index + 1,
-                        internal,
                         options,
                     )
                     .await?
@@ -105,7 +100,6 @@ impl Wallet {
                         self.coin_type.load(Ordering::Relaxed),
                         account_index,
                         address_index..address_index + 1,
-                        internal,
                         options,
                     )
                     .await?
