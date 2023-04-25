@@ -44,7 +44,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct TimelockUnlockConditionDto {
@@ -64,10 +64,10 @@ pub mod dto {
     }
 
     impl TryFrom<&TimelockUnlockConditionDto> for TimelockUnlockCondition {
-        type Error = DtoError;
+        type Error = Error;
 
-        fn try_from(value: &TimelockUnlockConditionDto) -> Result<Self, DtoError> {
-            Self::new(value.timestamp).map_err(|_| DtoError::InvalidField("timelockUnlockCondition"))
+        fn try_from(value: &TimelockUnlockConditionDto) -> Result<Self, Error> {
+            Self::new(value.timestamp).map_err(|_| Error::InvalidField("timelockUnlockCondition"))
         }
     }
 }

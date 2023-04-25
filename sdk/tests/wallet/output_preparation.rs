@@ -75,7 +75,7 @@ async fn output_preparation() -> Result<()> {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
-                    native_tokens: Some(vec![native_token.clone()]),
+                    native_tokens: Some(vec![native_token]),
                     nft_id: None,
                 }),
                 features: None,
@@ -260,7 +260,7 @@ async fn output_preparation() -> Result<()> {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
-                    native_tokens: Some(vec![native_token.clone()]),
+                    native_tokens: Some(vec![native_token]),
                     nft_id: None,
                 }),
                 features: Some(Features {

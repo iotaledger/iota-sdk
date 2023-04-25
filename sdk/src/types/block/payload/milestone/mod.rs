@@ -173,8 +173,7 @@ pub mod dto {
     use self::option::dto::MilestoneOptionDto;
     use super::*;
     use crate::types::block::{
-        error::dto::DtoError, parent::Parents, payload::milestone::MilestoneIndex, signature::dto::SignatureDto,
-        BlockId,
+        parent::Parents, payload::milestone::MilestoneIndex, signature::dto::SignatureDto, BlockId, Error,
     };
 
     /// The payload type to define a milestone.
@@ -220,26 +219,26 @@ pub mod dto {
         pub fn try_from_dto(
             value: &MilestonePayloadDto,
             protocol_parameters: &ProtocolParameters,
-        ) -> Result<Self, DtoError> {
+        ) -> Result<Self, Error> {
             let essence = {
                 let index = value.index;
                 let timestamp = value.timestamp;
                 let previous_milestone_id = MilestoneId::from_str(&value.previous_milestone_id)
-                    .map_err(|_| DtoError::InvalidField("previousMilestoneId"))?;
+                    .map_err(|_| Error::InvalidField("previousMilestoneId"))?;
                 let mut parent_ids = Vec::new();
 
                 for block_id in &value.parents {
                     parent_ids.push(
                         block_id
                             .parse::<BlockId>()
-                            .map_err(|_| DtoError::InvalidField("parents"))?,
+                            .map_err(|_| Error::InvalidField("parents"))?,
                     );
                 }
 
                 let inclusion_merkle_root = MerkleRoot::from_str(&value.inclusion_merkle_root)
-                    .map_err(|_| DtoError::InvalidField("inclusionMerkleRoot"))?;
+                    .map_err(|_| Error::InvalidField("inclusionMerkleRoot"))?;
                 let applied_merkle_root = MerkleRoot::from_str(&value.applied_merkle_root)
-                    .map_err(|_| DtoError::InvalidField("appliedMerkleRoot"))?;
+                    .map_err(|_| Error::InvalidField("appliedMerkleRoot"))?;
                 let options = MilestoneOptions::try_from(
                     value
                         .options
@@ -248,7 +247,7 @@ pub mod dto {
                         .collect::<Result<Vec<_>, _>>()?,
                 )?;
                 let metadata = if !value.metadata.is_empty() {
-                    prefix_hex::decode(&value.metadata).map_err(|_| DtoError::InvalidField("metadata"))?
+                    prefix_hex::decode(&value.metadata).map_err(|_| Error::InvalidField("metadata"))?
                 } else {
                     Vec::new()
                 };
@@ -258,7 +257,7 @@ pub mod dto {
                     timestamp,
                     protocol_parameters.protocol_version(),
                     previous_milestone_id,
-                    Parents::new(parent_ids)?,
+                    Parents::from_vec(parent_ids)?,
                     inclusion_merkle_root,
                     applied_merkle_root,
                     metadata,
@@ -268,33 +267,33 @@ pub mod dto {
 
             let mut signatures = Vec::new();
             for v in &value.signatures {
-                signatures.push(v.try_into().map_err(|_| DtoError::InvalidField("signatures"))?)
+                signatures.push(v.try_into().map_err(|_| Error::InvalidField("signatures"))?)
             }
 
-            Ok(Self::new(essence, signatures)?)
+            Self::new(essence, signatures)
         }
 
-        pub fn try_from_dto_unverified(value: &MilestonePayloadDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &MilestonePayloadDto) -> Result<Self, Error> {
             let essence = {
                 let index = value.index;
                 let timestamp = value.timestamp;
                 let protocol_version = value.protocol_version;
                 let previous_milestone_id = MilestoneId::from_str(&value.previous_milestone_id)
-                    .map_err(|_| DtoError::InvalidField("previousMilestoneId"))?;
+                    .map_err(|_| Error::InvalidField("previousMilestoneId"))?;
                 let mut parent_ids = Vec::new();
 
                 for block_id in &value.parents {
                     parent_ids.push(
                         block_id
                             .parse::<BlockId>()
-                            .map_err(|_| DtoError::InvalidField("parents"))?,
+                            .map_err(|_| Error::InvalidField("parents"))?,
                     );
                 }
 
                 let inclusion_merkle_root = MerkleRoot::from_str(&value.inclusion_merkle_root)
-                    .map_err(|_| DtoError::InvalidField("inclusionMerkleRoot"))?;
+                    .map_err(|_| Error::InvalidField("inclusionMerkleRoot"))?;
                 let applied_merkle_root = MerkleRoot::from_str(&value.applied_merkle_root)
-                    .map_err(|_| DtoError::InvalidField("appliedMerkleRoot"))?;
+                    .map_err(|_| Error::InvalidField("appliedMerkleRoot"))?;
                 let options = MilestoneOptions::try_from(
                     value
                         .options
@@ -303,7 +302,7 @@ pub mod dto {
                         .collect::<Result<Vec<_>, _>>()?,
                 )?;
                 let metadata = if !value.metadata.is_empty() {
-                    prefix_hex::decode(&value.metadata).map_err(|_| DtoError::InvalidField("metadata"))?
+                    prefix_hex::decode(&value.metadata).map_err(|_| Error::InvalidField("metadata"))?
                 } else {
                     Vec::new()
                 };
@@ -313,7 +312,7 @@ pub mod dto {
                     timestamp,
                     protocol_version,
                     previous_milestone_id,
-                    Parents::new(parent_ids)?,
+                    Parents::from_vec(parent_ids)?,
                     inclusion_merkle_root,
                     applied_merkle_root,
                     metadata,
@@ -323,10 +322,10 @@ pub mod dto {
 
             let mut signatures = Vec::new();
             for v in &value.signatures {
-                signatures.push(v.try_into().map_err(|_| DtoError::InvalidField("signatures"))?)
+                signatures.push(v.try_into().map_err(|_| Error::InvalidField("signatures"))?)
             }
 
-            Ok(Self::new(essence, signatures)?)
+            Self::new(essence, signatures)
         }
     }
 }

@@ -13,6 +13,7 @@ import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import org.iota.Wallet;
 import org.iota.api.WalletCommand;
@@ -135,10 +136,13 @@ public class IotaWalletMobile extends Plugin {
             }
             call.resolve(ret);
         } catch (Exception ex) {
+            String message = Objects.requireNonNull(ex.getMessage());
+            JsonElement element = JsonParser.parseString(message);
+            JsonObject jsonObject = element.getAsJsonObject();
             JSObject ret = new JSObject();
             JsonObject clientResponse = new JsonObject();
             clientResponse.addProperty("type", "error");
-            clientResponse.addProperty("payload", ex.getMessage());
+            clientResponse.add("payload", jsonObject);
             ret.put("result", clientResponse.toString());
             call.resolve(ret);
         }

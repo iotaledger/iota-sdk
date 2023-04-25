@@ -70,7 +70,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, error::dto::DtoError};
+    use crate::types::block::{address::dto::AddressDto, Error};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -93,16 +93,16 @@ pub mod dto {
     }
 
     impl TryFrom<&ExpirationUnlockConditionDto> for ExpirationUnlockCondition {
-        type Error = DtoError;
+        type Error = Error;
 
-        fn try_from(value: &ExpirationUnlockConditionDto) -> Result<Self, DtoError> {
+        fn try_from(value: &ExpirationUnlockConditionDto) -> Result<Self, Error> {
             Self::new(
                 (&value.return_address)
                     .try_into()
-                    .map_err(|_e| DtoError::InvalidField("expirationUnlockCondition"))?,
+                    .map_err(|_e| Error::InvalidField("expirationUnlockCondition"))?,
                 value.timestamp,
             )
-            .map_err(|_| DtoError::InvalidField("expirationUnlockCondition"))
+            .map_err(|_| Error::InvalidField("expirationUnlockCondition"))
         }
     }
 }

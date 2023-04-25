@@ -28,9 +28,6 @@ pub enum Error {
     /// Error from block crate.
     #[error("{0}")]
     Block(Box<crate::types::block::Error>),
-    /// Block dtos error
-    #[error("{0}")]
-    BlockDto(#[from] crate::types::block::DtoError),
     /// Burning or melting failed
     #[error("burning or melting failed: {0}")]
     BurningOrMeltingFailed(String),
@@ -150,6 +147,20 @@ impl From<crate::client::Error> for Error {
 impl From<crate::client::api::input_selection::Error> for Error {
     fn from(error: crate::client::api::input_selection::Error) -> Self {
         Self::Client(Box::new(crate::client::Error::InputSelection(error)))
+    }
+}
+
+#[cfg(feature = "stronghold")]
+impl From<crate::client::stronghold::Error> for Error {
+    fn from(error: crate::client::stronghold::Error) -> Self {
+        Self::Client(Box::new(crate::client::Error::Stronghold(error)))
+    }
+}
+
+#[cfg(feature = "ledger_nano")]
+impl From<crate::client::secret::ledger_nano::Error> for Error {
+    fn from(error: crate::client::secret::ledger_nano::Error) -> Self {
+        Self::Client(Box::new(crate::client::Error::Ledger(error)))
     }
 }
 

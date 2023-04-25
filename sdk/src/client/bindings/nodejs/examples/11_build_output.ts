@@ -104,6 +104,35 @@ async function run() {
         });
 
         console.log(JSON.stringify(basicOutputWithTimelock, null, 2));
+
+        // Output with tag feature
+        const basicOutputWithTag = await client.buildBasicOutput({
+            amount: '1000000',
+            unlockConditions: [addressUnlockCondition],
+            features: [
+                {
+                    type: 3,
+                    // "Hello, World!" hex encoded
+                    tag: '0x48656c6c6f2c20576f726c6421',
+                },
+            ],
+        });
+
+        console.log(JSON.stringify(basicOutputWithTag, null, 2));
+
+        // Output with sender feature
+        const basicOutputWithSender = await client.buildBasicOutput({
+            amount: '1000000',
+            unlockConditions: [addressUnlockCondition],
+            features: [
+                {
+                    type: 0,
+                    sender: hexAddress,
+                },
+            ],
+        });
+
+        console.log(JSON.stringify(basicOutputWithSender, null, 2));
     } catch (error) {
         console.error('Error: ', error);
     }

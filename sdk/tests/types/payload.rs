@@ -87,7 +87,7 @@ fn milestone() {
             rand_merkle_root(),
             rand_merkle_root(),
             vec![],
-            MilestoneOptions::new(vec![]).unwrap(),
+            MilestoneOptions::from_vec(vec![]).unwrap(),
         )
         .unwrap(),
         vec![Signature::from(Ed25519Signature::new([0; 32], [0; 64]))],
