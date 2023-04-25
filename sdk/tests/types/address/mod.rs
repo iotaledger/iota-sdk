@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod alias;
+mod bech32;
 mod ed25519;
 mod nft;
 
