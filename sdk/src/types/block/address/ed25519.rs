@@ -56,14 +56,14 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// Describes an Ed25519 address.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct Ed25519AddressDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "pubKeyHash")]
         pub pub_key_hash: String,
     }
 
@@ -77,13 +77,13 @@ pub mod dto {
     }
 
     impl TryFrom<&Ed25519AddressDto> for Ed25519Address {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &Ed25519AddressDto) -> Result<Self, Self::Error> {
             value
                 .pub_key_hash
                 .parse::<Self>()
-                .map_err(|_| DtoError::InvalidField("pubKeyHash"))
+                .map_err(|_| Error::InvalidField("pubKeyHash"))
         }
     }
 }

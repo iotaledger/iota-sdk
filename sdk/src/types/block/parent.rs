@@ -3,12 +3,12 @@
 
 //! The parents module defines the core data type for storing the blocks directly approved by a block.
 
-use alloc::vec::Vec;
+use alloc::{collections::BTreeSet, vec::Vec};
 use core::ops::RangeInclusive;
 
 use derive_more::Deref;
 use iterator_sorted::is_unique_sorted;
-use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable, PackableExt};
+use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
 use crate::types::block::{BlockId, Error};
 
@@ -31,13 +31,24 @@ impl Parents {
     /// The range representing the valid number of parents.
     pub const COUNT_RANGE: RangeInclusive<u8> = 1..=8;
 
-    /// Creates new [`Parents`].
-    pub fn new(mut inner: Vec<BlockId>) -> Result<Self, Error> {
-        inner.sort_unstable_by_key(|a| a.pack_to_vec());
+    /// Creates new [`Parents`] from a vec.
+    pub fn from_vec(mut inner: Vec<BlockId>) -> Result<Self, Error> {
+        inner.sort_unstable();
         inner.dedup();
 
         Ok(Self(
             inner.into_boxed_slice().try_into().map_err(Error::InvalidParentCount)?,
+        ))
+    }
+
+    /// Creates new [`Parents`] from an ordered set.
+    pub fn from_set(inner: BTreeSet<BlockId>) -> Result<Self, Error> {
+        Ok(Self(
+            inner
+                .into_iter()
+                .collect::<Box<[_]>>()
+                .try_into()
+                .map_err(Error::InvalidParentCount)?,
         ))
     }
 

@@ -36,7 +36,7 @@ async fn nft_reference_unlocks() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
-        .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..1, false, None)
+        .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..1, None)
         .await?[0]
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 

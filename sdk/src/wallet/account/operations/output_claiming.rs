@@ -15,7 +15,7 @@ use crate::{
         },
     },
     wallet::account::{
-        handle::AccountHandle, operations::helpers::time::can_output_be_unlocked_now, types::Transaction, OutputData,
+        operations::helpers::time::can_output_be_unlocked_now, types::Transaction, Account, OutputData,
         TransactionOptions,
     },
 };
@@ -30,7 +30,7 @@ pub enum OutputsToClaim {
     All = 4,
 }
 
-impl AccountHandle {
+impl Account {
     /// Get basic and nft outputs that have
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
     /// [`StorageDepositReturnUnlockCondition`] or
@@ -42,16 +42,16 @@ impl AccountHandle {
         outputs_to_claim: OutputsToClaim,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[OUTPUT_CLAIMING] get_unlockable_outputs_with_additional_unlock_conditions");
-        let account = self.read().await;
+        let account_details = self.read().await;
 
         let local_time = self.client.get_time_checked().await?;
 
         // Get outputs for the claim
         let mut output_ids_to_claim: HashSet<OutputId> = HashSet::new();
-        for (output_id, output_data) in &account.unspent_outputs {
+        for (output_id, output_data) in &account_details.unspent_outputs {
             // Don't use outputs that are locked for other transactions
-            if !account.locked_outputs.contains(output_id) {
-                if let Some(output) = account.outputs.get(output_id) {
+            if !account_details.locked_outputs.contains(output_id) {
+                if let Some(output) = account_details.outputs.get(output_id) {
                     match &output.output {
                         Output::Basic(basic_output) => {
                             // If there is a single [UnlockCondition], then it's an
@@ -61,7 +61,7 @@ impl AccountHandle {
                                 && can_output_be_unlocked_now(
                                     // We use the addresses with unspent outputs, because other addresses of the
                                     // account without unspent outputs can't be related to this output
-                                    &account.addresses_with_unspent_outputs,
+                                    &account_details.addresses_with_unspent_outputs,
                                     // outputs controlled by an alias or nft are currently not considered
                                     &[],
                                     output,
@@ -99,7 +99,7 @@ impl AccountHandle {
                                 && can_output_be_unlocked_now(
                                     // We use the addresses with unspent outputs, because other addresses of the
                                     // account without unspent outputs can't be related to this output
-                                    &account.addresses_with_unspent_outputs,
+                                    &account_details.addresses_with_unspent_outputs,
                                     // outputs controlled by an alias or nft are currently not considered
                                     &[],
                                     output,
@@ -149,11 +149,11 @@ impl AccountHandle {
         log::debug!("[OUTPUT_CLAIMING] get_basic_outputs_for_additional_inputs");
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
-        let account = self.read().await;
+        let account_details = self.read().await;
 
         // Get basic outputs only with AddressUnlockCondition and no other unlock condition
         let mut basic_outputs: Vec<OutputData> = Vec::new();
-        for (output_id, output_data) in &account.unspent_outputs {
+        for (output_id, output_data) in &account_details.unspent_outputs {
             #[cfg(feature = "participation")]
             if let Some(ref voting_output) = voting_output {
                 // Remove voting output from inputs, because we don't want to spent it to claim something else.
@@ -162,8 +162,8 @@ impl AccountHandle {
                 }
             }
             // Don't use outputs that are locked for other transactions
-            if !account.locked_outputs.contains(output_id) {
-                if let Some(output) = account.outputs.get(output_id) {
+            if !account_details.locked_outputs.contains(output_id) {
+                if let Some(output) = account_details.outputs.get(output_id) {
                     if let Output::Basic(basic_output) = &output.output {
                         if basic_output.unlock_conditions().len() == 1 {
                             // Store outputs with [`AddressUnlockCondition`] alone, because they could be used as
@@ -179,7 +179,7 @@ impl AccountHandle {
     }
 
     /// Try to claim basic or nft outputs that have additional unlock conditions to their [AddressUnlockCondition]
-    /// from [`AccountHandle::get_unlockable_outputs_with_additional_unlock_conditions()`].
+    /// from [`Account::get_unlockable_outputs_with_additional_unlock_conditions()`].
     pub async fn claim_outputs(&self, output_ids_to_claim: Vec<OutputId>) -> crate::wallet::Result<Transaction> {
         log::debug!("[OUTPUT_CLAIMING] claim_outputs");
         let basic_outputs = self.get_basic_outputs_for_additional_inputs().await?;
@@ -198,12 +198,12 @@ impl AccountHandle {
         let rent_structure = self.client.get_rent_structure().await?;
         let token_supply = self.client.get_token_supply().await?;
 
-        let account = self.read().await;
+        let account_details = self.read().await;
 
         let mut outputs_to_claim = Vec::new();
         for output_id in output_ids_to_claim {
-            if let Some(output_data) = account.unspent_outputs.get(&output_id) {
-                if !account.locked_outputs.contains(&output_id) {
+            if let Some(output_data) = account_details.unspent_outputs.get(&output_id) {
+                if !account_details.locked_outputs.contains(&output_id) {
                     outputs_to_claim.push(output_data.clone());
                 }
             }
@@ -215,12 +215,12 @@ impl AccountHandle {
             ));
         }
 
-        let first_account_address = account
+        let first_account_address = account_details
             .public_addresses
             .first()
             .ok_or(crate::wallet::Error::FailedToGetRemainder)?
             .clone();
-        drop(account);
+        drop(account_details);
 
         let mut additional_inputs_used = HashSet::new();
 
@@ -347,7 +347,7 @@ impl AccountHandle {
 
         for (return_address, return_amount) in required_address_returns {
             outputs_to_send.push(
-                BasicOutputBuilder::new_with_amount(return_amount)?
+                BasicOutputBuilder::new_with_amount(return_amount)
                     .add_unlock_condition(AddressUnlockCondition::new(return_address))
                     .finish_output(token_supply)?,
             );
@@ -356,7 +356,7 @@ impl AccountHandle {
         // Create output with claimed values
         if available_amount - required_amount_for_nfts > 0 {
             outputs_to_send.push(
-                BasicOutputBuilder::new_with_amount(available_amount - required_amount_for_nfts)?
+                BasicOutputBuilder::new_with_amount(available_amount - required_amount_for_nfts)
                     .add_unlock_condition(AddressUnlockCondition::new(first_account_address.address.inner))
                     .with_native_tokens(new_native_tokens.finish()?)
                     .finish_output(token_supply)?,

@@ -194,8 +194,8 @@ impl InputSelection {
     }
 
     /// Sets the required inputs of an [`InputSelection`].
-    pub fn required_inputs(mut self, inputs: HashSet<OutputId>) -> Self {
-        self.required_inputs.replace(inputs);
+    pub fn required_inputs(mut self, inputs: impl Into<Option<HashSet<OutputId>>>) -> Self {
+        self.required_inputs = inputs.into();
         self
     }
 
@@ -206,14 +206,14 @@ impl InputSelection {
     }
 
     /// Sets the burn of an [`InputSelection`].
-    pub fn burn(mut self, burn: Burn) -> Self {
-        self.burn.replace(burn);
+    pub fn burn(mut self, burn: impl Into<Option<Burn>>) -> Self {
+        self.burn = burn.into();
         self
     }
 
     /// Sets the remainder address of an [`InputSelection`].
-    pub fn remainder_address(mut self, address: Address) -> Self {
-        self.remainder_address.replace(address);
+    pub fn remainder_address(mut self, address: impl Into<Option<Address>>) -> Self {
+        self.remainder_address = address.into();
         self
     }
 

@@ -15,11 +15,10 @@ use crate::{
     wallet::{
         account::{
             constants::DEFAULT_EXPIRATION_TIME,
-            handle::AccountHandle,
             operations::transaction::{
                 high_level::minimum_storage_deposit::minimum_storage_deposit_basic_native_tokens, Transaction,
             },
-            TransactionOptions,
+            Account, TransactionOptions,
         },
         Error,
     },
@@ -63,9 +62,9 @@ impl AddressWithAmount {
     }
 }
 
-impl AccountHandle {
+impl Account {
     /// Function to create basic outputs with which we then will call
-    /// [AccountHandle.send()](crate::account::handle::AccountHandle.send), the options can define the
+    /// [Account.send()](crate::account::Account.send), the options can define the
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
@@ -74,7 +73,7 @@ impl AccountHandle {
     ///     amount: 1_000_000,
     /// }];
     ///
-    /// let tx = account_handle.send_amount(outputs, None ).await?;
+    /// let tx = account.send_amount(outputs, None ).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
     /// if let Some(block_id) = tx.block_id {
     ///     println!("Block sent: {}", block_id);
@@ -90,7 +89,7 @@ impl AccountHandle {
     }
 
     /// Function to prepare the transaction for
-    /// [AccountHandle.send_amount()](crate::account::handle::AccountHandle.send_amount)
+    /// [Account.send_amount()](crate::account::Account.send_amount)
     pub async fn prepare_send_amount(
         &self,
         addresses_with_amount: Vec<AddressWithAmount>,
@@ -114,11 +113,11 @@ impl AccountHandle {
             expiration,
         } in addresses_with_amount
         {
-            let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
+            let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
             self.client.bech32_hrp_matches(&bech32_hrp).await?;
             let return_address = return_address
                 .map(|address| {
-                    let (address, hrp) = Address::try_from_bech32_with_hrp(address)?;
+                    let (hrp, address) = Address::try_from_bech32_with_hrp(address)?;
                     if bech32_hrp != hrp {
                         Err(crate::client::Error::InvalidBech32Hrp {
                             provided: hrp,
@@ -131,7 +130,7 @@ impl AccountHandle {
                 .unwrap_or(default_return_address.address.inner);
 
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
-            let output = BasicOutputBuilder::new_with_amount(amount)?
+            let output = BasicOutputBuilder::new_with_amount(amount)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
                 .finish_output(token_supply)?;
             let rent_cost = output.rent_cost(&rent_structure);
@@ -163,7 +162,7 @@ impl AccountHandle {
                     // Add address_and_amount.amount+storage_deposit_amount, so receiver can get
                     // address_and_amount.amount
                     BasicOutputBuilder::from(output.as_basic())
-                        .with_amount(amount + storage_deposit_amount)?
+                        .with_amount(amount + storage_deposit_amount)
                         .add_unlock_condition(
                             // We send the storage_deposit_amount back to the sender, so only the additional amount is
                             // sent

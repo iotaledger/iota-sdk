@@ -81,7 +81,7 @@ async fn main() -> Result<()> {
             "{}",
             request_funds_from_faucet(
                 &std::env::var("FAUCET_URL").unwrap(),
-                &addresses[0].address().to_bech32()
+                &addresses[0].address().to_string()
             )
             .await?
         );
@@ -98,7 +98,7 @@ async fn main() -> Result<()> {
                     // send transaction
                     let outputs = vec![
                         // send one or two Mi for more different transactions
-                        BasicOutputBuilder::new_with_amount(n * 1_000_000)?
+                        BasicOutputBuilder::new_with_amount(n * 1_000_000)
                             .add_unlock_condition(AddressUnlockCondition::new(
                                 *ping_addresses_[address_index % amount_addresses].address().as_ref(),
                             ))

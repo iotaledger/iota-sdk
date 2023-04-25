@@ -39,7 +39,6 @@
 - [AddressWithUnspentOutputs](interfaces/AddressWithUnspentOutputs.md)
 - [AddressNativeTokens](interfaces/AddressNativeTokens.md)
 - [AddressNftId](interfaces/AddressNftId.md)
-- [AddressGenerationOptions](interfaces/AddressGenerationOptions.md)
 - [GenerateAddressOptions](interfaces/GenerateAddressOptions.md)
 - [BuildAliasOutputData](interfaces/BuildAliasOutputData.md)
 - [BuildBasicOutputData](interfaces/BuildBasicOutputData.md)

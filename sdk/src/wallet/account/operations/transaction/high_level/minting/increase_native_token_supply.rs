@@ -8,8 +8,8 @@ use crate::{
     types::block::output::{AliasOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme},
     wallet::{
         account::{
-            handle::AccountHandle,
-            operations::transaction::high_level::minting::mint_native_token::MintTokenTransaction, TransactionOptions,
+            operations::transaction::high_level::minting::mint_native_token::MintTokenTransaction, Account,
+            TransactionOptions,
         },
         Error,
     },
@@ -31,11 +31,11 @@ impl TryFrom<&IncreaseNativeTokenSupplyOptionsDto> for IncreaseNativeTokenSupply
     }
 }
 
-impl AccountHandle {
+impl Account {
     /// Function to mint more native tokens when the max supply isn't reached yet. The foundry needs to be controlled by
     /// this account. Address needs to be Bech32 encoded. This will not change the max supply.
     /// ```ignore
-    /// let tx = account_handle.increase_native_token_supply(
+    /// let tx = account.increase_native_token_supply(
     ///             TokenId::from_str("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?,
     ///             U256::from(100),
     ///             native_token_options,
@@ -55,9 +55,9 @@ impl AccountHandle {
     ) -> crate::wallet::Result<MintTokenTransaction> {
         log::debug!("[TRANSACTION] increase_native_token_supply");
 
-        let account = self.read().await;
+        let account_details = self.read().await;
         let token_supply = self.client.get_token_supply().await?;
-        let existing_foundry_output = account.unspent_outputs().values().find(|output_data| {
+        let existing_foundry_output = account_details.unspent_outputs().values().find(|output_data| {
             if let Output::Foundry(output) = &output_data.output {
                 TokenId::new(*output.id()) == token_id
             } else {
@@ -80,7 +80,7 @@ impl AccountHandle {
             }
 
             // Get the alias output that controls the foundry output
-            let existing_alias_output = account.unspent_outputs().values().find(|output_data| {
+            let existing_alias_output = account_details.unspent_outputs().values().find(|output_data| {
                 if let Output::Alias(output) = &output_data.output {
                     output.alias_id_non_null(&output_data.output_id) == **foundry_output.alias_address()
                 } else {
@@ -94,7 +94,7 @@ impl AccountHandle {
             return Err(Error::MintingFailed("alias output is not available".to_string()));
         };
 
-        drop(account);
+        drop(account_details);
 
         let alias_output = if let Output::Alias(alias_output) = existing_alias_output.output {
             alias_output

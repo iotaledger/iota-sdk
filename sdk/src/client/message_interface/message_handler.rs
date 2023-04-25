@@ -37,7 +37,7 @@ use crate::{
         protocol::dto::ProtocolParametersDto,
         signature::{dto::Ed25519SignatureDto, Ed25519Signature},
         unlock::Unlock,
-        Block, BlockDto, DtoError,
+        Block, BlockDto, Error,
     },
 };
 
@@ -433,7 +433,7 @@ impl ClientMessageHandler {
                 let secret_manager: SecretManager = (&secret_manager).try_into()?;
                 let transaction_essence_hash: [u8; 32] = transaction_essence_hash
                     .try_into()
-                    .map_err(|_| DtoError::InvalidField("expected 32 bytes for transactionEssenceHash"))?;
+                    .map_err(|_| Error::InvalidField("expected 32 bytes for transactionEssenceHash"))?;
 
                 let unlock: Unlock = secret_manager
                     .signature_unlock(&transaction_essence_hash, &chain)
@@ -475,12 +475,12 @@ impl ClientMessageHandler {
 
                 Ok(Response::Ok)
             }
-            Message::PostBlockPayload { payload_dto } => {
+            Message::PostBlockPayload { payload } => {
                 let block_builder = self.client.block();
 
                 let block = block_builder
                     .finish_block(Some(Payload::try_from_dto(
-                        &payload_dto,
+                        &payload,
                         &self.client.get_protocol_parameters().await?,
                     )?))
                     .await?;

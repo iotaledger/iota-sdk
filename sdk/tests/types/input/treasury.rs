@@ -9,7 +9,7 @@ use iota_sdk::types::block::{
         Input, TreasuryInput,
     },
     payload::milestone::MilestoneId,
-    DtoError,
+    Error,
 };
 use packable::PackableExt;
 
@@ -118,7 +118,7 @@ fn dto_invalid() {
 
     assert!(matches!(
         TreasuryInput::try_from(&dto),
-        Err(DtoError::InvalidField("milestoneId"))
+        Err(Error::InvalidField("milestoneId"))
     ));
 }
 

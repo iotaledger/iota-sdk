@@ -31,6 +31,10 @@ macro_rules! println_log_error {
 }
 
 fn logger_init(cli: &WalletCli) -> Result<(), Error> {
+    std::panic::set_hook(Box::new(move |panic_info| {
+        println_log_error!("{panic_info}");
+    }));
+
     let archive = LoggerOutputConfigBuilder::default()
         .name("archive.log")
         .level_filter(cli.log_level)
@@ -62,6 +66,8 @@ async fn run(cli: WalletCli) -> Result<(), Error> {
 
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().ok();
+
     let cli = match WalletCli::try_parse() {
         Ok(cli) => cli,
         Err(e) => {

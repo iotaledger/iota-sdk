@@ -86,14 +86,14 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// Defines an Ed25519 signature.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct Ed25519SignatureDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "publicKey")]
         pub public_key: String,
         pub signature: String,
     }
@@ -109,12 +109,12 @@ pub mod dto {
     }
 
     impl TryFrom<&Ed25519SignatureDto> for Ed25519Signature {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &Ed25519SignatureDto) -> Result<Self, Self::Error> {
             Ok(Self::new(
-                prefix_hex::decode(&value.public_key).map_err(|_| DtoError::InvalidField("publicKey"))?,
-                prefix_hex::decode(&value.signature).map_err(|_| DtoError::InvalidField("signature"))?,
+                prefix_hex::decode(&value.public_key).map_err(|_| Error::InvalidField("publicKey"))?,
+                prefix_hex::decode(&value.signature).map_err(|_| Error::InvalidField("signature"))?,
             ))
         }
     }

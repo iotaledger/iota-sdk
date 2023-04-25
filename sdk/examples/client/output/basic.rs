@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
     );
 
     let basic_output_builder =
-        BasicOutputBuilder::new_with_amount(1_000_000)?.add_unlock_condition(AddressUnlockCondition::new(address));
+        BasicOutputBuilder::new_with_amount(1_000_000).add_unlock_condition(AddressUnlockCondition::new(address));
 
     let outputs = vec![
         // most simple output
@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
         // with storage deposit return
         basic_output_builder
             .clone()
-            .with_amount(234_100)?
+            .with_amount(234_100)
             .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                 address,
                 234_000,

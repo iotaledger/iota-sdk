@@ -9,12 +9,14 @@ use async_trait::async_trait;
 use crypto::ciphers::chacha;
 
 use super::{common::PRIVATE_DATA_CLIENT_PATH, StrongholdAdapter};
-use crate::client::{storage::StorageProvider, Error, Result};
+use crate::client::{storage::StorageProvider, stronghold::Error};
 
 #[async_trait]
 impl StorageProvider for StrongholdAdapter {
+    type Error = Error;
+
     #[allow(clippy::significant_drop_tightening)]
-    async fn get(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>> {
+    async fn get(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
         let data = match self
             .stronghold
             .lock()
@@ -31,7 +33,7 @@ impl StorageProvider for StrongholdAdapter {
         let key_provider = if let Some(key_provider) = &*locked_key_provider {
             key_provider
         } else {
-            return Err(Error::StrongholdKeyCleared);
+            return Err(Error::KeyCleared);
         };
         let buffer = key_provider.try_unlock()?;
         let buffer_ref = buffer.borrow();
@@ -39,13 +41,13 @@ impl StorageProvider for StrongholdAdapter {
         Ok(Some(chacha::aead_decrypt(buffer_ref.deref(), &data)?))
     }
 
-    async fn insert(&mut self, k: &[u8], v: &[u8]) -> Result<Option<Vec<u8>>> {
+    async fn insert(&mut self, k: &[u8], v: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
         let encrypted_value = {
             let locked_key_provider = self.key_provider.lock().await;
             let key_provider = if let Some(key_provider) = &*locked_key_provider {
                 key_provider
             } else {
-                return Err(Error::StrongholdKeyCleared);
+                return Err(Error::KeyCleared);
             };
             let buffer = key_provider.try_unlock()?;
             let buffer_ref = buffer.borrow();
@@ -62,7 +64,7 @@ impl StorageProvider for StrongholdAdapter {
             .insert(k.to_vec(), encrypted_value, None)?)
     }
 
-    async fn delete(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>> {
+    async fn delete(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
         Ok(self
             .stronghold
             .lock()

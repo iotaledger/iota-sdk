@@ -9,7 +9,7 @@ mod state_controller_address;
 mod storage_deposit_return;
 mod timelock;
 
-use alloc::{boxed::Box, vec::Vec};
+use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
 
 use bitflags::bitflags;
 use derive_more::{Deref, From};
@@ -32,7 +32,7 @@ pub use self::{
 use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, Error};
 
 ///
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From)]
+#[derive(Clone, Eq, PartialEq, Hash, From)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -53,6 +53,17 @@ pub enum UnlockCondition {
     GovernorAddress(GovernorAddressUnlockCondition),
     /// An immutable alias address unlock condition.
     ImmutableAliasAddress(ImmutableAliasAddressUnlockCondition),
+}
+
+impl PartialOrd for UnlockCondition {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+        self.kind().partial_cmp(&other.kind())
+    }
+}
+impl Ord for UnlockCondition {
+    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+        self.partial_cmp(other).unwrap()
+    }
 }
 
 impl core::fmt::Debug for UnlockCondition {
@@ -198,7 +209,16 @@ impl TryFrom<Vec<UnlockCondition>> for UnlockConditions {
 
     #[inline(always)]
     fn try_from(unlock_conditions: Vec<UnlockCondition>) -> Result<Self, Self::Error> {
-        Self::new(unlock_conditions)
+        Self::from_vec(unlock_conditions)
+    }
+}
+
+impl TryFrom<BTreeSet<UnlockCondition>> for UnlockConditions {
+    type Error = Error;
+
+    #[inline(always)]
+    fn try_from(unlock_conditions: BTreeSet<UnlockCondition>) -> Result<Self, Self::Error> {
+        Self::from_set(unlock_conditions)
     }
 }
 
@@ -215,8 +235,8 @@ impl UnlockConditions {
     ///
     pub const COUNT_MAX: u8 = 7;
 
-    /// Creates a new [`UnlockConditions`].
-    pub fn new(unlock_conditions: Vec<UnlockCondition>) -> Result<Self, Error> {
+    /// Creates a new [`UnlockConditions`] from a vec.
+    pub fn from_vec(unlock_conditions: Vec<UnlockCondition>) -> Result<Self, Error> {
         let mut unlock_conditions =
             BoxedSlicePrefix::<UnlockCondition, UnlockConditionCount>::try_from(unlock_conditions.into_boxed_slice())
                 .map_err(Error::InvalidUnlockConditionCount)?;
@@ -226,6 +246,17 @@ impl UnlockConditions {
         verify_unique_sorted::<true>(&unlock_conditions)?;
 
         Ok(Self(unlock_conditions))
+    }
+
+    /// Creates a new [`UnlockConditions`] from an ordered set.
+    pub fn from_set(unlock_conditions: BTreeSet<UnlockCondition>) -> Result<Self, Error> {
+        Ok(Self(
+            unlock_conditions
+                .into_iter()
+                .collect::<Box<[_]>>()
+                .try_into()
+                .map_err(Error::InvalidUnlockConditionCount)?,
+        ))
     }
 
     /// Gets a reference to an [`UnlockCondition`] from an unlock condition kind, if any.
@@ -407,7 +438,7 @@ pub mod dto {
         storage_deposit_return::dto::StorageDepositReturnUnlockConditionDto, timelock::dto::TimelockUnlockConditionDto,
     };
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum UnlockConditionDto {
@@ -555,7 +586,7 @@ pub mod dto {
     }
 
     impl UnlockCondition {
-        pub fn try_from_dto(value: &UnlockConditionDto, token_supply: u64) -> Result<Self, DtoError> {
+        pub fn try_from_dto(value: &UnlockConditionDto, token_supply: u64) -> Result<Self, Error> {
             Ok(match value {
                 UnlockConditionDto::Address(v) => Self::Address(AddressUnlockCondition::try_from(v)?),
                 UnlockConditionDto::StorageDepositReturn(v) => {
@@ -575,7 +606,7 @@ pub mod dto {
             })
         }
 
-        pub fn try_from_dto_unverified(value: &UnlockConditionDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &UnlockConditionDto) -> Result<Self, Error> {
             Ok(match value {
                 UnlockConditionDto::Address(v) => Self::Address(AddressUnlockCondition::try_from(v)?),
                 UnlockConditionDto::StorageDepositReturn(v) => {

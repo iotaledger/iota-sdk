@@ -156,16 +156,16 @@ pub mod dto {
     pub use super::migrated_funds_entry::dto::MigratedFundsEntryDto;
     use super::*;
     use crate::types::block::{
-        error::dto::DtoError,
         payload::dto::{PayloadDto, TreasuryTransactionPayloadDto},
+        Error,
     };
 
     ///
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct ReceiptMilestoneOptionDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "migratedAt")]
         pub migrated_at: u32,
         pub funds: Vec<MigratedFundsEntryDto>,
         pub transaction: PayloadDto,
@@ -188,8 +188,8 @@ pub mod dto {
     }
 
     impl ReceiptMilestoneOption {
-        pub fn try_from_dto(value: &ReceiptMilestoneOptionDto, token_supply: u64) -> Result<Self, DtoError> {
-            Ok(Self::new(
+        pub fn try_from_dto(value: &ReceiptMilestoneOptionDto, token_supply: u64) -> Result<Self, Error> {
+            Self::new(
                 MilestoneIndex(value.migrated_at),
                 value.last,
                 value
@@ -200,13 +200,13 @@ pub mod dto {
                 if let PayloadDto::TreasuryTransaction(ref transaction) = value.transaction {
                     TreasuryTransactionPayload::try_from_dto(transaction.as_ref(), token_supply)?
                 } else {
-                    return Err(DtoError::InvalidField("transaction"));
+                    return Err(Error::InvalidField("transaction"));
                 },
                 token_supply,
-            )?)
+            )
         }
 
-        pub fn try_from_dto_unverified(value: &ReceiptMilestoneOptionDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &ReceiptMilestoneOptionDto) -> Result<Self, Error> {
             let funds = value
                 .funds
                 .iter()
@@ -221,7 +221,7 @@ pub mod dto {
                 transaction: if let PayloadDto::TreasuryTransaction(ref transaction) = value.transaction {
                     TreasuryTransactionPayload::try_from_dto_unverified(transaction.as_ref())?.into()
                 } else {
-                    return Err(DtoError::InvalidField("transaction"));
+                    return Err(Error::InvalidField("transaction"));
                 },
             })
         }

@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
 
     // One address gets generated during account creation
     let address = account.addresses().await?[0].address().clone();
-    println!("{}", address.to_bech32());
+    println!("{}", address);
 
     let balance = account.sync(None).await?;
     println!("Balance: {balance:?}");
@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
                 tokio::spawn(async move {
                     // send transaction
                     let outputs = vec![
-                        BasicOutputBuilder::new_with_amount(1_000_000)?
+                        BasicOutputBuilder::new_with_amount(1_000_000)
                             .add_unlock_condition(AddressUnlockCondition::new(address_))
                             .finish_output(account_.client().get_token_supply().await?)?;
                         // amount of outputs in the transaction (one additional output might be added for the remaining amount)

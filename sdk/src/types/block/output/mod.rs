@@ -458,7 +458,6 @@ fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, tok
     // PANIC: This can never fail because the amount will always be within the valid range. Also, the actual value is
     // not important, we are only interested in the storage requirements of the type.
     BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-        .unwrap()
         .add_unlock_condition(AddressUnlockCondition::new(*address))
         .finish(token_supply)
         .unwrap()
@@ -487,7 +486,7 @@ pub mod dto {
         token_scheme::dto::{SimpleTokenSchemeDto, TokenSchemeDto},
         treasury::dto::TreasuryOutputDto,
     };
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     #[derive(Clone, Debug, From)]
     #[cfg_attr(feature = "serde", derive(serde::Deserialize))]
@@ -519,7 +518,7 @@ pub mod dto {
     }
 
     impl Output {
-        pub fn try_from_dto(value: &OutputDto, token_supply: u64) -> Result<Self, DtoError> {
+        pub fn try_from_dto(value: &OutputDto, token_supply: u64) -> Result<Self, Error> {
             Ok(match value {
                 OutputDto::Treasury(o) => Self::Treasury(TreasuryOutput::try_from_dto(o, token_supply)?),
                 OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from_dto(o, token_supply)?),
@@ -529,7 +528,7 @@ pub mod dto {
             })
         }
 
-        pub fn try_from_dto_unverified(value: &OutputDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &OutputDto) -> Result<Self, Error> {
             Ok(match value {
                 OutputDto::Treasury(o) => Self::Treasury(TreasuryOutput::try_from_dto_unverified(o)?),
                 OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from_dto_unverified(o)?),

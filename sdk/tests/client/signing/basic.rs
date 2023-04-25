@@ -29,7 +29,7 @@ async fn single_ed25519_unlock() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
-        .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..1, false, None)
+        .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..1, None)
         .await?[0]
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
@@ -117,7 +117,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
-        .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..1, false, None)
+        .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..1, None)
         .await?[0]
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
@@ -251,11 +251,11 @@ async fn two_signature_unlocks() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
-        .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..1, false, None)
+        .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..1, None)
         .await?[0]
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
     let bech32_address_1 = &secret_manager
-        .generate_addresses(SHIMMER_COIN_TYPE, 0, 1..2, false, None)
+        .generate_addresses(SHIMMER_COIN_TYPE, 0, 1..2, None)
         .await?[0]
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 

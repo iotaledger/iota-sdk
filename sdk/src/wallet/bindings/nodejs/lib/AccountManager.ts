@@ -164,7 +164,6 @@ export class AccountManager {
      */
     async generateAddress(
         accountIndex: number,
-        internal: boolean,
         addressIndex: number,
         options?: GenerateAddressOptions,
         bech32Hrp?: string,
@@ -173,7 +172,6 @@ export class AccountManager {
             cmd: 'generateAddress',
             payload: {
                 accountIndex,
-                internal,
                 addressIndex,
                 options,
                 bech32Hrp,

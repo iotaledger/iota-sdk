@@ -8,33 +8,34 @@ use crate::{
     types::block::{
         output::OutputId,
         payload::{dto::TaggedDataPayloadDto, tagged_data::TaggedDataPayload},
-        DtoError,
+        Error,
     },
     wallet::account::types::address::AccountAddress,
 };
 
 /// Options for transactions
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct TransactionOptions {
-    #[serde(rename = "remainderValueStrategy", default)]
+    #[serde(default)]
     pub remainder_value_strategy: RemainderValueStrategy,
-    #[serde(rename = "taggedDataPayload", default)]
+    #[serde(default)]
     pub tagged_data_payload: Option<TaggedDataPayload>,
     // If custom inputs are provided only they are used. If also other additional inputs should be used,
     // `mandatory_inputs` should be used instead.
-    #[serde(rename = "customInputs", default)]
+    #[serde(default)]
     pub custom_inputs: Option<Vec<OutputId>>,
-    #[serde(rename = "mandatoryInputs", default)]
+    #[serde(default)]
     pub mandatory_inputs: Option<Vec<OutputId>>,
     pub burn: Option<Burn>,
     pub note: Option<String>,
-    #[serde(rename = "allowMicroAmount", default)]
+    #[serde(default)]
     pub allow_micro_amount: bool,
 }
 
 impl TransactionOptions {
     /// Conversion from TransactionOptionsDto to TransactionOptions.
-    pub fn try_from_dto(value: &TransactionOptionsDto) -> Result<Self, DtoError> {
+    pub fn try_from_dto(value: &TransactionOptionsDto) -> Result<Self, Error> {
         Ok(Self {
             remainder_value_strategy: value.remainder_value_strategy.clone(),
             tagged_data_payload: value
@@ -53,20 +54,21 @@ impl TransactionOptions {
 
 /// Dto for transaction options
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct TransactionOptionsDto {
-    #[serde(rename = "remainderValueStrategy", default)]
+    #[serde(default)]
     pub remainder_value_strategy: RemainderValueStrategy,
-    #[serde(rename = "taggedDataPayload", default)]
+    #[serde(default)]
     pub tagged_data_payload: Option<TaggedDataPayloadDto>,
     // If custom inputs are provided only they are used. If also other additional inputs should be used,
     // `mandatory_inputs` should be used instead.
-    #[serde(rename = "customInputs", default)]
+    #[serde(default)]
     pub custom_inputs: Option<Vec<OutputId>>,
-    #[serde(rename = "mandatoryInputs", default)]
+    #[serde(default)]
     pub mandatory_inputs: Option<Vec<OutputId>>,
     pub burn: Option<BurnDto>,
     pub note: Option<String>,
-    #[serde(rename = "allowMicroAmount", default)]
+    #[serde(default)]
     pub allow_micro_amount: bool,
 }
 

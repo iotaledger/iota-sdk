@@ -48,7 +48,6 @@ fn build_valid() {
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
-            .unwrap()
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
@@ -73,17 +72,15 @@ fn build_valid_with_payload() {
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
-            .unwrap()
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let payload = Payload::from(rand_tagged_data_payload());
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs(vec![input1, input2])
         .add_output(output)
-        .with_payload(payload)
+        .with_payload(rand_tagged_data_payload())
         .finish(&protocol_parameters);
 
     assert!(essence.is_ok());
@@ -100,7 +97,6 @@ fn build_valid_add_inputs_outputs() {
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
-            .unwrap()
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
@@ -125,17 +121,15 @@ fn build_invalid_payload_kind() {
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
-            .unwrap()
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let payload = rand_treasury_transaction_payload(protocol_parameters.token_supply());
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs(vec![input1, input2])
         .add_output(output)
-        .with_payload(payload.into())
+        .with_payload(rand_treasury_transaction_payload(protocol_parameters.token_supply()))
         .finish(&protocol_parameters);
 
     assert!(matches!(essence, Err(Error::InvalidPayloadKind(4))));
@@ -149,7 +143,6 @@ fn build_invalid_input_count_low() {
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
-            .unwrap()
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
@@ -175,7 +168,6 @@ fn build_invalid_input_count_high() {
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
-            .unwrap()
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
@@ -218,7 +210,6 @@ fn build_invalid_output_count_high() {
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
-            .unwrap()
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
@@ -245,7 +236,6 @@ fn build_invalid_duplicate_utxo() {
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
-            .unwrap()
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
@@ -268,7 +258,6 @@ fn build_invalid_input_kind() {
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
-            .unwrap()
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
@@ -309,7 +298,6 @@ fn build_invalid_accumulated_output() {
     let amount1 = protocol_parameters.token_supply() - 1_000_000;
     let output1 = Output::Basic(
         BasicOutput::build_with_amount(amount1)
-            .unwrap()
             .add_unlock_condition(AddressUnlockCondition::new(address1))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
@@ -320,7 +308,6 @@ fn build_invalid_accumulated_output() {
     let amount2 = 2_000_000;
     let output2 = Output::Basic(
         BasicOutput::build_with_amount(amount2)
-            .unwrap()
             .add_unlock_condition(AddressUnlockCondition::new(address2))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
@@ -345,7 +332,6 @@ fn getters() {
     let amount = 1_000_000;
     let outputs = vec![Output::Basic(
         BasicOutput::build_with_amount(amount)
-            .unwrap()
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
             .unwrap(),
@@ -373,13 +359,11 @@ fn duplicate_output_nft() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let basic = BasicOutput::build_with_amount(amount)
-        .unwrap()
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     let nft_id = NftId::from(bytes);
     let nft = NftOutput::build_with_amount(1_000_000, nft_id)
-        .unwrap()
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
@@ -405,13 +389,11 @@ fn duplicate_output_nft_null() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let basic = BasicOutput::build_with_amount(amount)
-        .unwrap()
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     let nft_id = NftId::null();
     let nft = NftOutput::build_with_amount(1_000_000, nft_id)
-        .unwrap()
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
@@ -434,13 +416,11 @@ fn duplicate_output_alias() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let basic = BasicOutput::build_with_amount(amount)
-        .unwrap()
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     let alias_id = AliasId::from(bytes);
     let alias = AliasOutput::build_with_amount(1_000_000, alias_id)
-        .unwrap()
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())
@@ -467,7 +447,6 @@ fn duplicate_output_foundry() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let basic = BasicOutput::build_with_amount(amount)
-        .unwrap()
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
@@ -477,7 +456,6 @@ fn duplicate_output_foundry() {
     let foundry_id = FoundryId::build(&AliasAddress::from(alias_id), 1, token_scheme.kind());
     let token_id = TokenId::from(foundry_id);
     let foundry = FoundryOutput::build_with_amount(1_000_000, 1, token_scheme)
-        .unwrap()
         .add_native_token(NativeToken::new(token_id, U256::from(70u8)).unwrap())
         .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)))
         .finish_output(protocol_parameters.token_supply())
