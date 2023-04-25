@@ -225,6 +225,9 @@ impl Account {
         let mut locked_native_tokens = NativeTokensBuilder::new();
 
         for locked_output in &account_details.locked_outputs {
+            if account_balance.potentially_locked_outputs.contains_key(locked_output){
+                continue;
+            }
             if let Some(output_data) = account_details.unspent_outputs.get(locked_output) {
                 // Only check outputs that are in this network
                 if output_data.network_id == network_id {
