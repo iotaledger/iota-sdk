@@ -12,6 +12,7 @@ on:
       - "**Cargo.lock" # Include all Cargo.lock files
       - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -59,6 +60,7 @@ jobs:
           --all-features 
           --run-ignored all
           --test-threads "num-cpus"
+          --retries 2
 
       - name: Tear down private tangle
         if: always()

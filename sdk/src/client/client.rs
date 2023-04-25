@@ -184,12 +184,7 @@ impl Client {
 
     /// Gets the rent structure of the node we're connecting to.
     pub async fn get_rent_structure(&self) -> Result<RentStructure> {
-        Ok(self
-            .get_network_info()
-            .await?
-            .protocol_parameters
-            .rent_structure()
-            .clone())
+        Ok(*self.get_network_info().await?.protocol_parameters.rent_structure())
     }
 
     /// Gets the token supply of the node we're connecting to.

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::client::{api::GetAddressesBuilderOptions, secret::SecretManager};
-use iota_sdk_bindings_core::{call_secret_manager_method, Response, Result, SecretManagerMethod};
+use iota_sdk_bindings_core::{CallMethod, Response, Result, SecretManagerMethod};
 
 #[tokio::test]
 async fn generate_addresses() -> Result<()> {
@@ -14,7 +14,7 @@ async fn generate_addresses() -> Result<()> {
         options: GetAddressesBuilderOptions::default(),
     };
 
-    let response = call_secret_manager_method(&secret_manager, method).await;
+    let response = secret_manager.call_method(method).await;
     match response {
         Response::GeneratedAddresses(addresses) => assert_eq!(
             addresses[0],
