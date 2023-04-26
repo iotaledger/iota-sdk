@@ -40,7 +40,7 @@ Prebuild requires that the binary is in `build/Release` as though it was built w
 After you linked the library, you can create a `Client` instance and interface with it.
 
 ```javascript
-const { Client, initLogger } = require('@iota/client');
+const { Client, initLogger } = require('@iota/sdk');
 
 async function run() {
     initLogger();
