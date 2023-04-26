@@ -181,14 +181,25 @@ pub fn get_client(mut cx: FunctionContext) -> JsResult<JsPromise> {
     let channel = cx.channel();
 
     let (deferred, promise) = cx.promise();
+    let (sender, receiver) = std::sync::mpsc::channel();
     crate::RUNTIME.spawn(async move {
         if let Some(message_handler) = &*message_handler.read().await {
-            let client = message_handler.wallet.get_client().await.unwrap();
+            let client = match message_handler.wallet.get_client().await {
+                Ok(client) => client,
+                Err(err) => return sender.send(Some(err)),
+            };
+
             let client_message_handler = ClientMethodHandler::new_with_client(channel.clone(), client);
             deferred.settle_with(&channel, move |mut cx| Ok(cx.boxed(client_message_handler)));
+            sender.send(None)
         } else {
             panic!("Wallet got destroyed")
         }
     });
+
+    if let Some(err) = receiver.recv().expect("channel hung up") {
+        cx.throw_error(err.to_string())?;
+    }
+
     Ok(promise)
 }

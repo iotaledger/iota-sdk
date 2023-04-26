@@ -5,14 +5,14 @@ use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
     call_secret_manager_method as rust_call_secret_manager_method,
-    iota_sdk::client::secret::{SecretManager as RustSecretManager, SecretManagerDto},
+    iota_sdk::client::secret::{SecretManager, SecretManagerDto},
     Response, SecretManagerMethod,
 };
 use neon::prelude::*;
 
 pub struct SecretManagerMethodHandler {
     channel: Channel,
-    secret_manager: RustSecretManager,
+    secret_manager: SecretManager,
 }
 
 impl Finalize for SecretManagerMethodHandler {}
@@ -21,8 +21,7 @@ impl SecretManagerMethodHandler {
     fn new(channel: Channel, options: String) -> Arc<Self> {
         let secret_manager_dto =
             serde_json::from_str::<SecretManagerDto>(&options).expect("error initializing secret manager");
-        let secret_manager =
-            RustSecretManager::try_from(&secret_manager_dto).expect("error initializing secret manager");
+        let secret_manager = SecretManager::try_from(&secret_manager_dto).expect("error initializing secret manager");
 
         Arc::new(Self {
             channel,
