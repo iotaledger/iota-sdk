@@ -2,7 +2,7 @@ name: Build and Run Tests
 
 on:
   push:
-    branches: [develop, production]
+    branches: [develop, production, chore/tests/increase-coverage-1]
     paths:
       - ".github/workflows/core.yml"
       - ".github/actions/**"
