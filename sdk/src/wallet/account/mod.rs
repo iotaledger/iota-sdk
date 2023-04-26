@@ -249,11 +249,14 @@ impl Account {
         Ok(self.read().await.addresses_with_unspent_outputs().to_vec())
     }
 
-    /// Returns outputs of the account
-    pub async fn outputs(&self, filter: Option<FilterOptions>) -> Result<Vec<OutputData>> {
-        let mut outputs = Vec::new();
+    fn filter_outputs<'a>(
+        &self,
+        outputs: impl Iterator<Item = &'a OutputData>,
+        filter: Option<FilterOptions>,
+    ) -> Result<Vec<OutputData>> {
+        let mut filtered_outputs = Vec::new();
 
-        for output in self.read().await.outputs.values() {
+        for output in outputs {
             if let Some(filter_options) = &filter {
                 if let Some(lower_bound_booked_timestamp) = filter_options.lower_bound_booked_timestamp {
                     if output.metadata.milestone_timestamp_booked < lower_bound_booked_timestamp {
@@ -271,38 +274,20 @@ impl Account {
                     }
                 }
             }
-            outputs.push(output.clone());
+            filtered_outputs.push(output.clone());
         }
 
-        Ok(outputs)
+        Ok(filtered_outputs)
+    }
+
+    /// Returns outputs of the account
+    pub async fn outputs(&self, filter: Option<FilterOptions>) -> Result<Vec<OutputData>> {
+        self.filter_outputs(self.read().await.outputs.values(), filter)
     }
 
     /// Returns unspent outputs of the account
     pub async fn unspent_outputs(&self, filter: Option<FilterOptions>) -> Result<Vec<OutputData>> {
-        let mut outputs = Vec::new();
-
-        for output in self.read().await.unspent_outputs.values() {
-            if let Some(filter_options) = &filter {
-                if let Some(lower_bound_booked_timestamp) = filter_options.lower_bound_booked_timestamp {
-                    if output.metadata.milestone_timestamp_booked < lower_bound_booked_timestamp {
-                        continue;
-                    }
-                }
-                if let Some(upper_bound_booked_timestamp) = filter_options.upper_bound_booked_timestamp {
-                    if output.metadata.milestone_timestamp_booked > upper_bound_booked_timestamp {
-                        continue;
-                    }
-                }
-                if let Some(output_types) = &filter_options.output_types {
-                    if !output_types.contains(&output.output.kind()) {
-                        continue;
-                    }
-                }
-            }
-            outputs.push(output.clone());
-        }
-
-        Ok(outputs)
+        self.filter_outputs(self.read().await.unspent_outputs.values(), filter)
     }
 
     /// Returns all incoming transactions of the account
