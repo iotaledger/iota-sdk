@@ -10,7 +10,7 @@ use iota_sdk::{
     },
     types::block::{
         output::{dto::OutputDto, AliasId, NftId, Output, Rent, TokenId},
-        DtoError,
+        Error,
     },
     wallet::{
         account::{
@@ -35,7 +35,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let transaction = account
                 .burn_native_token(
                     TokenId::try_from(&token_id)?,
-                    U256::try_from(&burn_amount).map_err(|_| DtoError::InvalidField("burn_amount"))?,
+                    U256::try_from(&burn_amount).map_err(|_| Error::InvalidField("burn_amount"))?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -170,7 +170,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let transaction = account
                 .decrease_native_token_supply(
                     TokenId::try_from(&token_id)?,
-                    U256::try_from(&melt_amount).map_err(|_| DtoError::InvalidField("melt_amount"))?,
+                    U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -189,7 +189,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let transaction = account
                 .increase_native_token_supply(
                     TokenId::try_from(&token_id)?,
-                    U256::try_from(&mint_amount).map_err(|_| DtoError::InvalidField("mint_amount"))?,
+                    U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
                     increase_native_token_supply_options,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )

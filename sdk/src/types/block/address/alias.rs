@@ -67,7 +67,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// Describes an alias address.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -88,13 +88,13 @@ pub mod dto {
     }
 
     impl TryFrom<&AliasAddressDto> for AliasAddress {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &AliasAddressDto) -> Result<Self, Self::Error> {
             value
                 .alias_id
                 .parse::<Self>()
-                .map_err(|_| DtoError::InvalidField("aliasId"))
+                .map_err(|_| Error::InvalidField("aliasId"))
         }
     }
 }

@@ -44,7 +44,7 @@ pub fn rand_milestone_payload(protocol_version: u8) -> MilestonePayload {
         rand_merkle_root(),
         rand_merkle_root(),
         rand_bytes(32),
-        MilestoneOptions::new(vec![]).unwrap(),
+        MilestoneOptions::from_vec(vec![]).unwrap(),
     )
     .unwrap();
     let signatures = vec![Signature::from(Ed25519Signature::new(

@@ -75,7 +75,7 @@ async fn output_preparation() -> Result<()> {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
-                    native_tokens: Some(vec![native_token.clone()]),
+                    native_tokens: Some(vec![native_token]),
                     nft_id: None,
                 }),
                 features: None,
@@ -260,7 +260,7 @@ async fn output_preparation() -> Result<()> {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
-                    native_tokens: Some(vec![native_token.clone()]),
+                    native_tokens: Some(vec![native_token]),
                     nft_id: None,
                 }),
                 features: Some(Features {
@@ -411,7 +411,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure.clone(), token_supply)?;
+    output.verify_storage_deposit(rent_structure, token_supply)?;
     assert_eq!(output.amount(), 50601);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -432,7 +432,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure.clone(), token_supply)?;
+    output.verify_storage_deposit(rent_structure, token_supply)?;
     assert_eq!(output.amount(), 85199);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -457,7 +457,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure.clone(), token_supply)?;
+    output.verify_storage_deposit(rent_structure, token_supply)?;
     assert_eq!(output.amount(), 85199);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);

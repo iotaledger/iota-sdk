@@ -486,13 +486,22 @@ pub mod dto {
         token_scheme::dto::{SimpleTokenSchemeDto, TokenSchemeDto},
         treasury::dto::TreasuryOutputDto,
     };
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     #[derive(Clone, Debug, From)]
     #[cfg_attr(feature = "serde", derive(serde::Deserialize))]
     pub enum OutputBuilderAmountDto {
         Amount(String),
         MinimumStorageDeposit(RentStructure),
+    }
+
+    impl From<&OutputBuilderAmount> for OutputBuilderAmountDto {
+        fn from(value: &OutputBuilderAmount) -> Self {
+            match value {
+                OutputBuilderAmount::Amount(a) => Self::Amount(a.to_string()),
+                OutputBuilderAmount::MinimumStorageDeposit(r) => Self::MinimumStorageDeposit(*r),
+            }
+        }
     }
 
     /// Describes all the different output types.
@@ -518,7 +527,7 @@ pub mod dto {
     }
 
     impl Output {
-        pub fn try_from_dto(value: &OutputDto, token_supply: u64) -> Result<Self, DtoError> {
+        pub fn try_from_dto(value: &OutputDto, token_supply: u64) -> Result<Self, Error> {
             Ok(match value {
                 OutputDto::Treasury(o) => Self::Treasury(TreasuryOutput::try_from_dto(o, token_supply)?),
                 OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from_dto(o, token_supply)?),
@@ -528,7 +537,7 @@ pub mod dto {
             })
         }
 
-        pub fn try_from_dto_unverified(value: &OutputDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &OutputDto) -> Result<Self, Error> {
             Ok(match value {
                 OutputDto::Treasury(o) => Self::Treasury(TreasuryOutput::try_from_dto_unverified(o)?),
                 OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from_dto_unverified(o)?),

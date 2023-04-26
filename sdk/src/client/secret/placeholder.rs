@@ -10,7 +10,7 @@ use crypto::keys::slip10::Chain;
 
 use super::{GenerateAddressOptions, SecretManage, SecretManageExt};
 use crate::{
-    client::secret::PreparedTransactionData,
+    client::{secret::PreparedTransactionData, Error},
     types::block::{address::Address, signature::Ed25519Signature, unlock::Unlocks},
 };
 
@@ -20,18 +20,20 @@ pub struct PlaceholderSecretManager;
 
 #[async_trait]
 impl SecretManage for PlaceholderSecretManager {
+    type Error = Error;
+
     async fn generate_addresses(
         &self,
         _coin_type: u32,
         _account_index: u32,
         _address_indexes: Range<u32>,
         _options: Option<GenerateAddressOptions>,
-    ) -> crate::client::Result<Vec<Address>> {
-        Err(crate::client::Error::PlaceholderSecretManager)
+    ) -> Result<Vec<Address>, Self::Error> {
+        Err(Error::PlaceholderSecretManager)
     }
 
-    async fn sign_ed25519(&self, _msg: &[u8], _chain: &Chain) -> crate::client::Result<Ed25519Signature> {
-        Err(crate::client::Error::PlaceholderSecretManager)
+    async fn sign_ed25519(&self, _msg: &[u8], _chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
+        Err(Error::PlaceholderSecretManager)
     }
 }
 
@@ -41,7 +43,7 @@ impl SecretManageExt for PlaceholderSecretManager {
         &self,
         _prepared_transaction_data: &PreparedTransactionData,
         _time: Option<u32>,
-    ) -> crate::client::Result<Unlocks> {
-        Err(crate::client::Error::PlaceholderSecretManager)
+    ) -> Result<Unlocks, <Self as SecretManage>::Error> {
+        Err(Error::PlaceholderSecretManager)
     }
 }

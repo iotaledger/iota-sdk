@@ -10,14 +10,14 @@ use log::LevelFilter;
 
 use crate::{
     error::Error,
-    helper::{generate_mnemonic, get_password},
+    helper::{enter_or_generate_mnemonic, generate_mnemonic, get_password, import_mnemonic},
     println_log_info,
 };
 
-const DEFAULT_NODE_URL: &str = "https://api.testnet.shimmer.network";
-const DEFAULT_WALLET_DATABASE_PATH: &str = "./stardust-cli-wallet-db";
-const DEFAULT_STRONGHOLD_SNAPSHOT_PATH: &str = "./stardust-cli-wallet.stronghold";
 const DEFAULT_LOG_LEVEL: &str = "debug";
+const DEFAULT_NODE_URL: &str = "https://api.testnet.shimmer.network";
+const DEFAULT_STRONGHOLD_SNAPSHOT_PATH: &str = "./stardust-cli-wallet.stronghold";
+const DEFAULT_WALLET_DATABASE_PATH: &str = "./stardust-cli-wallet-db";
 
 #[derive(Debug, Clone, Parser)]
 #[command(author, version, about, long_about = None, propagate_version = true)]
@@ -69,17 +69,28 @@ pub enum WalletCommand {
     Sync,
 }
 
-#[derive(Debug, Default, Clone, Args)]
+#[derive(Debug, Clone, Args)]
 pub struct InitParameters {
-    /// Mnemonic, randomly generated if not provided.
-    #[arg(short, long)]
-    pub mnemonic: Option<String>,
+    /// Set the path to a file containing mnemonics. If empty, a mnemonic has to be entered or will be randomly
+    /// generated.
+    #[arg(short, long, value_name = "PATH")]
+    pub mnemonic_file_path: Option<String>,
     /// Set the node to connect to with this wallet.
     #[arg(short, long, value_name = "URL", env = "NODE_URL", default_value = DEFAULT_NODE_URL)]
     pub node_url: String,
     /// Coin type, SHIMMER_COIN_TYPE (4219) if not provided.
-    #[arg(short, long)]
-    pub coin_type: Option<u32>,
+    #[arg(short, long, default_value_t = SHIMMER_COIN_TYPE)]
+    pub coin_type: u32,
+}
+
+impl Default for InitParameters {
+    fn default() -> Self {
+        Self {
+            mnemonic_file_path: None,
+            node_url: DEFAULT_NODE_URL.to_string(),
+            coin_type: SHIMMER_COIN_TYPE,
+        }
+    }
 }
 
 pub async fn backup_command(wallet: &Wallet, path: String, password: &str) -> Result<(), Error> {
@@ -107,13 +118,13 @@ pub async fn init_command(
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(parameters.node_url.as_str())?)
         .with_storage_path(&storage_path)
-        .with_coin_type(parameters.coin_type.unwrap_or(SHIMMER_COIN_TYPE))
+        .with_coin_type(parameters.coin_type)
         .finish()
         .await?;
 
-    let mnemonic = match parameters.mnemonic {
-        Some(mnemonic) => mnemonic,
-        None => generate_mnemonic().await?,
+    let mnemonic = match parameters.mnemonic_file_path {
+        Some(path) => import_mnemonic(&path).await?,
+        None => enter_or_generate_mnemonic().await?,
     };
 
     if let SecretManager::Stronghold(secret_manager) = &mut *wallet.get_secret_manager().write().await {
@@ -121,7 +132,6 @@ pub async fn init_command(
     } else {
         panic!("cli-wallet only supports Stronghold-backed secret managers at the moment.");
     }
-    println_log_info!("Mnemonic stored successfully");
 
     Ok(wallet)
 }
@@ -156,7 +166,7 @@ pub async fn restore_command(
     let wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         // Will be overwritten by the backup's value.
-        .with_client_options(ClientOptions::new().with_node("https://api.testnet.shimmer.network")?)
+        .with_client_options(ClientOptions::new().with_node(DEFAULT_NODE_URL)?)
         .with_storage_path(&storage_path)
         // Will be overwritten by the backup's value.
         .with_coin_type(SHIMMER_COIN_TYPE)

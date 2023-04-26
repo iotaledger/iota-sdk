@@ -22,7 +22,7 @@ impl Client {
             // Finish block without doing PoW.
             let parents = match parents {
                 Some(parents) => parents,
-                None => Parents::new(self.get_tips().await?)?,
+                None => Parents::from_vec(self.get_tips().await?)?,
             };
 
             Ok(BlockBuilder::new(parents).with_payload(payload).finish()?)
@@ -54,7 +54,7 @@ impl Client {
             let payload_ = payload.clone();
             let parents = match &parents {
                 Some(parents) => parents.clone(),
-                None => Parents::new(self.get_tips().await?)?,
+                None => Parents::from_vec(self.get_tips().await?)?,
             };
             let time_thread = std::thread::spawn(move || Ok(pow_timeout(tips_interval, cancel)));
             let pow_thread = std::thread::spawn(move || {
@@ -95,7 +95,7 @@ impl Client {
         loop {
             let parents = match &parents {
                 Some(parents) => parents.clone(),
-                None => Parents::new(self.get_tips().await?)?,
+                None => Parents::from_vec(self.get_tips().await?)?,
             };
 
             let single_threaded_miner = SingleThreadedMinerBuilder::new()

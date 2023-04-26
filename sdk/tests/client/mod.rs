@@ -15,7 +15,11 @@ mod secret_manager;
 mod signing;
 mod transactions;
 
-use std::{collections::HashMap, hash::Hash, str::FromStr};
+use std::{
+    collections::{BTreeSet, HashMap},
+    hash::Hash,
+    str::FromStr,
+};
 
 use crypto::keys::slip10::Chain;
 use iota_sdk::{
@@ -385,13 +389,13 @@ fn is_remainder_or_return(
         }
 
         if let Some(native_tokens) = native_tokens {
-            let native_tokens = NativeTokens::new(
+            let native_tokens = NativeTokens::from_set(
                 native_tokens
                     .into_iter()
                     .map(|(token_id, amount)| {
                         NativeToken::new(TokenId::from_str(token_id).unwrap(), U256::from(amount)).unwrap()
                     })
-                    .collect::<Vec<_>>(),
+                    .collect::<BTreeSet<_>>(),
             )
             .unwrap();
 

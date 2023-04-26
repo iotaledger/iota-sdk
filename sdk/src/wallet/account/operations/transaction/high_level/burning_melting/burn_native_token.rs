@@ -328,7 +328,7 @@ fn strip_native_token_if_found(
                     .checked_add(native_token.amount())
                     .ok_or_else(|| crate::wallet::Error::BurningOrMeltingFailed(NATIVE_TOKEN_OVERFLOW.to_string()))?;
             } else {
-                not_to_be_stripped_native_tokens.add_native_token(native_token.clone())?;
+                not_to_be_stripped_native_tokens.add_native_token(*native_token)?;
             }
         }
 

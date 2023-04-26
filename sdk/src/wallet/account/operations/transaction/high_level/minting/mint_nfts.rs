@@ -12,11 +12,11 @@ use crate::{
             unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
         },
-        DtoError,
+        Error as BlockError,
     },
     wallet::{
         account::{operations::transaction::Transaction, Account, TransactionOptions},
-        Error,
+        Error as WalletError,
     },
 };
 
@@ -66,17 +66,17 @@ impl TryFrom<&NftOptionsDto> for NftOptions {
             address: value.address.clone(),
             sender: value.sender.clone(),
             metadata: match &value.metadata {
-                Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("metadata"))?),
+                Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("metadata"))?),
                 None => None,
             },
             tag: match &value.tag {
-                Some(tag) => Some(prefix_hex::decode(tag).map_err(|_| DtoError::InvalidField("tag"))?),
+                Some(tag) => Some(prefix_hex::decode(tag).map_err(|_| BlockError::InvalidField("tag"))?),
                 None => None,
             },
             issuer: value.issuer.clone(),
             immutable_metadata: match &value.immutable_metadata {
                 Some(metadata) => {
-                    Some(prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("immutable_metadata"))?)
+                    Some(prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("immutable_metadata"))?)
                 }
                 None => None,
             },
@@ -143,17 +143,16 @@ impl Account {
                 None => {
                     account_addresses
                         .first()
-                        .ok_or(Error::FailedToGetRemainder)?
+                        .ok_or(WalletError::FailedToGetRemainder)?
                         .address
                         .inner
                 }
             };
 
             // NftId needs to be set to 0 for the creation
-            let mut nft_builder =
-                NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone(), NftId::null())
-                    // Address which will own the nft
-                    .add_unlock_condition(AddressUnlockCondition::new(address));
+            let mut nft_builder = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())
+                // Address which will own the nft
+                .add_unlock_condition(AddressUnlockCondition::new(address));
 
             if let Some(sender) = nft_options.sender {
                 nft_builder = nft_builder.add_feature(SenderFeature::new(Address::try_from_bech32(sender)?));

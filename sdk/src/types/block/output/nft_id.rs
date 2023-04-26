@@ -38,7 +38,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct NftIdDto(pub String);
@@ -50,10 +50,10 @@ pub mod dto {
     }
 
     impl TryFrom<&NftIdDto> for NftId {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &NftIdDto) -> Result<Self, Self::Error> {
-            value.0.parse::<Self>().map_err(|_| DtoError::InvalidField("NFT id"))
+            value.0.parse::<Self>().map_err(|_| Error::InvalidField("NFT id"))
         }
     }
 }

@@ -7,42 +7,43 @@ use serde::{ser::SerializeMap, Serialize, Serializer};
 pub use super::{method::AccountMethod, response::Response};
 
 /// Result type of the bindings core crate.
-pub type Result<T> = std::result::Result<T, super::error::Error>;
+pub type Result<T> = std::result::Result<T, Error>;
 
-// TODO: SDK Error instead?
 /// Error type for the bindings core crate.
 #[derive(Debug, thiserror::Error)]
-#[allow(clippy::large_enum_variant)]
 pub enum Error {
-    /// Client error
+    /// Block errors.
+    #[error("{0}")]
+    Block(#[from] iota_sdk::types::block::Error),
+    /// Client errors.
     #[error("{0}")]
     Client(#[from] iota_sdk::client::Error),
-    /// Wallet error
+    /// Wallet errors.
     #[error("{0}")]
     Wallet(#[from] iota_sdk::wallet::Error),
-    /// Block dtos error
-    #[error("{0}")]
-    BlockDto(#[from] iota_sdk::types::block::DtoError),
-    /// Error from block crate.
-    #[error("{0}")]
-    Block(Box<iota_sdk::types::block::Error>),
-    /// JSON error
-    #[error("{0}")]
-    Json(#[from] serde_json::Error),
-    /// Prefix hex string convert error
+    /// Prefix hex errors.
     #[error("{0}")]
     PrefixHex(#[from] prefix_hex::Error),
-    /// MQTT error.
-    #[cfg(feature = "mqtt")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "mqtt")))]
-    #[error("{0}")]
-    Mqtt(#[from] iota_sdk::client::node_api::mqtt::Error),
-    /// Unpack error
+    /// Unpack errors.
     #[error("{0}")]
     Unpack(#[from] packable::error::UnpackError<iota_sdk::types::block::Error, UnexpectedEOF>),
 }
 
-// Serialize type with Display error
+#[cfg(feature = "stronghold")]
+impl From<iota_sdk::client::stronghold::Error> for Error {
+    fn from(error: iota_sdk::client::stronghold::Error) -> Self {
+        Self::Client(iota_sdk::client::Error::Stronghold(error))
+    }
+}
+
+#[cfg(feature = "mqtt")]
+impl From<iota_sdk::client::node_api::mqtt::Error> for Error {
+    fn from(error: iota_sdk::client::node_api::mqtt::Error) -> Self {
+        Self::Client(iota_sdk::client::Error::Mqtt(error))
+    }
+}
+
+// Serialize type with Display error.
 impl Serialize for Error {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
@@ -60,11 +61,5 @@ impl Serialize for Error {
         seq.serialize_entry("type", &kind)?;
         seq.serialize_entry("error", &self.to_string())?;
         seq.end()
-    }
-}
-
-impl From<iota_sdk::types::block::Error> for Error {
-    fn from(error: iota_sdk::types::block::Error) -> Self {
-        Self::Block(Box::new(error))
     }
 }
