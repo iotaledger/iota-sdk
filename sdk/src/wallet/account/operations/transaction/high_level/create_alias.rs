@@ -153,7 +153,7 @@ impl AccountHandle {
         self.prepare_transaction(outputs, options).await
     }
 
-    /// Get an existing alias output
+    /// Get an unspent alias output
     pub async fn get_alias_output(&self, alias_id: Option<AliasId>) -> Option<(AliasId, OutputData)> {
         log::debug!("[get_alias_output]");
         self.read()
