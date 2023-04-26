@@ -172,10 +172,10 @@ impl std::ops::AddAssign for RequiredStorageDeposit {
 /// DTO for [`RequiredStorageDeposit`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct RequiredStorageDepositDto {
-    pub(crate) alias: String,
-    pub(crate) basic: String,
-    pub(crate) foundry: String,
-    pub(crate) nft: String,
+    pub alias: String,
+    pub basic: String,
+    pub foundry: String,
+    pub nft: String,
 }
 
 impl From<&RequiredStorageDeposit> for RequiredStorageDepositDto {
@@ -249,6 +249,61 @@ impl From<&NativeTokensBalance> for NativeTokensBalanceDto {
             metadata: value.metadata.as_ref().map(|m| prefix_hex::encode(m.data())),
             total: U256Dto::from(&value.total),
             available: U256Dto::from(&value.available),
+        }
+    }
+}
+
+#[cfg(feature = "rand")]
+impl AccountBalance {
+    pub fn rand() -> Self {
+        use rand::Rng;
+
+        use crate::types::block::rand::bytes::rand_bytes_array;
+
+        let token_supply = crate::types::block::protocol::protocol_parameters().token_supply();
+        let total = rand::thread_rng().gen_range(128..token_supply / 1000000);
+
+        let native_tokens = std::iter::repeat_with(|| {
+            let token_id = TokenId::from(rand_bytes_array());
+            let total = rand::thread_rng().gen_range(1..10000u32);
+            NativeTokensBalance {
+                token_id,
+                total: U256::from(total),
+                available: U256::from(rand::thread_rng().gen_range(1..total)),
+                ..Default::default()
+            }
+        })
+        .take(rand::thread_rng().gen_range(0..10))
+        .collect::<Vec<_>>();
+
+        let aliases = std::iter::repeat_with(|| AliasId::from(rand_bytes_array()))
+            .take(rand::thread_rng().gen_range(0..10))
+            .collect::<Vec<_>>();
+        let nfts = std::iter::repeat_with(|| NftId::from(rand_bytes_array()))
+            .take(rand::thread_rng().gen_range(0..10))
+            .collect::<Vec<_>>();
+        let foundries = std::iter::repeat_with(|| FoundryId::from(rand_bytes_array()))
+            .take(rand::thread_rng().gen_range(0..10))
+            .collect::<Vec<_>>();
+
+        Self {
+            base_coin: BaseCoinBalance {
+                total,
+                available: total / 2,
+                #[cfg(feature = "participation")]
+                voting_power: total / 4,
+            },
+            required_storage_deposit: RequiredStorageDeposit {
+                alias: total / 16,
+                basic: total / 8,
+                foundry: total / 4,
+                nft: total / 2,
+            },
+            native_tokens,
+            aliases,
+            foundries,
+            nfts,
+            ..Default::default()
         }
     }
 }

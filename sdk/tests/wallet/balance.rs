@@ -7,10 +7,114 @@ use iota_sdk::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         BasicOutputBuilder, UnlockCondition,
     },
-    wallet::Result,
+    wallet::{
+        account::types::{AccountBalance, AccountBalanceDto},
+        Result,
+    },
 };
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
+
+#[test]
+fn balance_to_dto() {
+    let balance = AccountBalance::rand();
+    let balance_dto = AccountBalanceDto::from(&balance);
+
+    assert_eq!(balance.base_coin().total().to_string(), balance_dto.base_coin.total);
+    assert_eq!(
+        balance.base_coin().available().to_string(),
+        balance_dto.base_coin.available
+    );
+    #[cfg(feature = "participation")]
+    assert_eq!(
+        balance.base_coin().voting_power().to_string(),
+        balance_dto.base_coin.voting_power
+    );
+
+    assert_eq!(
+        balance.required_storage_deposit().alias().to_string(),
+        balance_dto.required_storage_deposit.alias
+    );
+    assert_eq!(
+        balance.required_storage_deposit().basic().to_string(),
+        balance_dto.required_storage_deposit.basic
+    );
+    assert_eq!(
+        balance.required_storage_deposit().foundry().to_string(),
+        balance_dto.required_storage_deposit.foundry
+    );
+    assert_eq!(
+        balance.required_storage_deposit().nft().to_string(),
+        balance_dto.required_storage_deposit.nft
+    );
+
+    assert_eq!(balance.native_tokens().len(), balance_dto.native_tokens.len());
+    assert_eq!(balance.nfts().len(), balance_dto.nfts.len());
+    assert_eq!(balance.aliases().len(), balance_dto.aliases.len());
+    assert_eq!(balance.foundries().len(), balance_dto.foundries.len());
+    assert_eq!(
+        balance.potentially_locked_outputs().len(),
+        balance_dto.potentially_locked_outputs.len()
+    );
+}
+
+#[test]
+fn balance_add_assign() {
+    let mut balance_1 = AccountBalance::rand();
+    let total_1 = balance_1.base_coin().total();
+    let available_1 = balance_1.base_coin().available();
+    #[cfg(feature = "participation")]
+    let voting_power_1 = balance_1.base_coin().voting_power();
+
+    let sdr_alias_1 = balance_1.required_storage_deposit().alias();
+    let sdr_basic_1 = balance_1.required_storage_deposit().basic();
+    let sdr_foundry_1 = balance_1.required_storage_deposit().foundry();
+    let sdr_nft_1 = balance_1.required_storage_deposit().nft();
+
+    let num_native_tokens_1 = balance_1.native_tokens().len();
+    let num_aliases_1 = balance_1.aliases().len();
+    let num_foundries_1 = balance_1.foundries().len();
+    let num_nfts_1 = balance_1.nfts().len();
+
+    let balance_2 = AccountBalance::rand();
+    let total_2 = balance_2.base_coin().total();
+    let available_2 = balance_2.base_coin().available();
+    #[cfg(feature = "participation")]
+    let voting_power_2 = balance_2.base_coin().voting_power();
+
+    let sdr_alias_2 = balance_2.required_storage_deposit().alias();
+    let sdr_basic_2 = balance_2.required_storage_deposit().basic();
+    let sdr_foundry_2 = balance_2.required_storage_deposit().foundry();
+    let sdr_nft_2 = balance_2.required_storage_deposit().nft();
+
+    let num_native_tokens_2 = balance_2.native_tokens().len();
+    let num_aliases_2 = balance_2.aliases().len();
+    let num_foundries_2 = balance_2.foundries().len();
+    let num_nfts_2 = balance_2.nfts().len();
+
+    balance_1 += balance_2;
+
+    assert_eq!(balance_1.base_coin().total(), total_1 + total_2);
+    assert_eq!(balance_1.base_coin().available(), available_1 + available_2);
+    #[cfg(feature = "participation")]
+    assert_eq!(balance_1.base_coin().voting_power(), voting_power_1 + voting_power_2);
+
+    assert_eq!(balance_1.required_storage_deposit().alias(), sdr_alias_1 + sdr_alias_2);
+    assert_eq!(balance_1.required_storage_deposit().basic(), sdr_basic_1 + sdr_basic_2);
+    assert_eq!(
+        balance_1.required_storage_deposit().foundry(),
+        sdr_foundry_1 + sdr_foundry_2
+    );
+    assert_eq!(balance_1.required_storage_deposit().nft(), sdr_nft_1 + sdr_nft_2);
+
+    assert_eq!(
+        balance_1.native_tokens().len(),
+        num_native_tokens_1 + num_native_tokens_2
+    );
+    assert_eq!(balance_1.aliases().len(), num_aliases_1 + num_aliases_2);
+    assert_eq!(balance_1.foundries().len(), num_foundries_1 + num_foundries_2);
+    assert_eq!(balance_1.nfts().len(), num_nfts_1 + num_nfts_2);
+}
 
 #[ignore]
 #[tokio::test]
