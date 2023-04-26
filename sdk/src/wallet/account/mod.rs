@@ -147,6 +147,7 @@ pub struct Account {
     // if the last synced time was < `MIN_SYNC_INTERVAL` second ago, we don't sync, but only calculate the balance
     // again, because sending transactions can change that
     pub(crate) last_synced: Arc<Mutex<u128>>,
+    pub(crate) default_sync_options: Arc<Mutex<SyncOptions>>,
     #[cfg(feature = "events")]
     pub(crate) event_emitter: Arc<Mutex<EventEmitter>>,
     #[cfg(feature = "storage")]
@@ -164,23 +165,34 @@ impl Deref for Account {
 
 impl Account {
     /// Create a new Account with an AccountDetails
-    pub(crate) fn new(
+    pub(crate) async fn new(
         details: AccountDetails,
         client: Client,
         secret_manager: Arc<RwLock<SecretManager>>,
         #[cfg(feature = "events")] event_emitter: Arc<Mutex<EventEmitter>>,
         #[cfg(feature = "storage")] storage_manager: Arc<Mutex<StorageManager>>,
-    ) -> Self {
-        Self {
+    ) -> Result<Self> {
+        #[cfg(feature = "storage")]
+        let default_sync_options = storage_manager
+            .lock()
+            .await
+            .get_default_sync_options(*details.index())
+            .await?
+            .unwrap_or_default();
+        #[cfg(not(feature = "storage"))]
+        let default_sync_options = Default::default();
+
+        Ok(Self {
             details: Arc::new(RwLock::new(details)),
             client,
             secret_manager,
             last_synced: Default::default(),
+            default_sync_options: Arc::new(Mutex::new(default_sync_options)),
             #[cfg(feature = "events")]
             event_emitter,
             #[cfg(feature = "storage")]
             storage_manager,
-        }
+        })
     }
 
     pub async fn alias(&self) -> String {
