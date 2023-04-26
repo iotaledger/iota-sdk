@@ -4,14 +4,14 @@
 use std::sync::Arc;
 
 use serde::{Deserialize, Serialize};
-use tokio::sync::{Mutex, RwLock};
+use tokio::sync::RwLock;
 
 use crate::{
     client::secret::{SecretManager, SecretManagerDto},
     wallet::{
-        account::Account,
-        account_manager::builder::AccountManagerBuilder,
+        account::AccountDetails,
         storage::{constants::*, Storage, StorageAdapter},
+        WalletBuilder,
     },
 };
 
@@ -39,40 +39,6 @@ impl Default for ManagerStorage {
     }
 }
 
-pub(crate) type StorageManagerHandle = Arc<Mutex<StorageManager>>;
-
-/// Sets the storage adapter.
-pub(crate) async fn new_storage_manager(
-    encryption_key: Option<[u8; 32]>,
-    storage: Box<dyn StorageAdapter + Send + Sync + 'static>,
-) -> crate::wallet::Result<StorageManagerHandle> {
-    let mut storage = Storage {
-        inner: storage,
-        encryption_key,
-    };
-    // Get the db version or set it
-    if let Some(db_schema_version) = storage.get::<u8>(DATABASE_SCHEMA_VERSION_KEY).await? {
-        if db_schema_version != DATABASE_SCHEMA_VERSION {
-            return Err(crate::wallet::Error::Storage(format!(
-                "unsupported database schema version {db_schema_version}"
-            )));
-        }
-    } else {
-        storage
-            .set(DATABASE_SCHEMA_VERSION_KEY, DATABASE_SCHEMA_VERSION)
-            .await?;
-    };
-
-    let account_indexes = storage.get(ACCOUNTS_INDEXATION_KEY).await?.unwrap_or_default();
-
-    let storage_manager = StorageManager {
-        storage,
-        account_indexes,
-    };
-
-    Ok(Arc::new(Mutex::new(storage_manager)))
-}
-
 /// Storage manager
 #[derive(Debug)]
 pub struct StorageManager {
@@ -82,6 +48,37 @@ pub struct StorageManager {
 }
 
 impl StorageManager {
+    pub(crate) async fn new(
+        encryption_key: Option<[u8; 32]>,
+        storage: Box<dyn StorageAdapter + Send + Sync + 'static>,
+    ) -> crate::wallet::Result<Self> {
+        let mut storage = Storage {
+            inner: storage,
+            encryption_key,
+        };
+        // Get the db version or set it
+        if let Some(db_schema_version) = storage.get::<u8>(DATABASE_SCHEMA_VERSION_KEY).await? {
+            if db_schema_version != DATABASE_SCHEMA_VERSION {
+                return Err(crate::wallet::Error::Storage(format!(
+                    "unsupported database schema version {db_schema_version}"
+                )));
+            }
+        } else {
+            storage
+                .set(DATABASE_SCHEMA_VERSION_KEY, DATABASE_SCHEMA_VERSION)
+                .await?;
+        };
+
+        let account_indexes = storage.get(ACCOUNTS_INDEXATION_KEY).await?.unwrap_or_default();
+
+        let storage_manager = Self {
+            storage,
+            account_indexes,
+        };
+
+        Ok(storage_manager)
+    }
+
     pub fn id(&self) -> &'static str {
         self.storage.id()
     }
@@ -95,16 +92,11 @@ impl StorageManager {
         self.storage.get(key).await
     }
 
-    pub async fn save_account_manager_data(
-        &mut self,
-        account_manager_builder: &AccountManagerBuilder,
-    ) -> crate::wallet::Result<()> {
-        log::debug!("save_account_manager_data");
-        self.storage
-            .set(ACCOUNT_MANAGER_INDEXATION_KEY, account_manager_builder)
-            .await?;
+    pub async fn save_wallet_data(&mut self, wallet_builder: &WalletBuilder) -> crate::wallet::Result<()> {
+        log::debug!("save_wallet_data");
+        self.storage.set(WALLET_INDEXATION_KEY, wallet_builder).await?;
 
-        if let Some(secret_manager) = &account_manager_builder.secret_manager {
+        if let Some(secret_manager) = &wallet_builder.secret_manager {
             let secret_manager = secret_manager.read().await;
             let secret_manager_dto = SecretManagerDto::from(&*secret_manager);
             // Only store secret_managers that aren't SecretManagerDto::Mnemonic, because there the Seed can't be
@@ -119,14 +111,10 @@ impl StorageManager {
         Ok(())
     }
 
-    pub async fn get_account_manager_data(&self) -> crate::wallet::Result<Option<AccountManagerBuilder>> {
-        log::debug!("get_account_manager_data");
-        if let Some(mut builder) = self
-            .storage
-            .get::<AccountManagerBuilder>(ACCOUNT_MANAGER_INDEXATION_KEY)
-            .await?
-        {
-            log::debug!("get_account_manager_data {builder:?}");
+    pub async fn get_wallet_data(&self) -> crate::wallet::Result<Option<WalletBuilder>> {
+        log::debug!("get_wallet_data");
+        if let Some(mut builder) = self.storage.get::<WalletBuilder>(WALLET_INDEXATION_KEY).await? {
+            log::debug!("get_wallet_data {builder:?}");
 
             if let Some(secret_manager_dto) = self.storage.get::<SecretManagerDto>(SECRET_MANAGER_KEY).await? {
                 log::debug!("get_secret_manager {secret_manager_dto:?}");
@@ -147,7 +135,7 @@ impl StorageManager {
         }
     }
 
-    pub async fn get_accounts(&mut self) -> crate::wallet::Result<Vec<Account>> {
+    pub async fn get_accounts(&mut self) -> crate::wallet::Result<Vec<AccountDetails>> {
         if let Some(account_indexes) = self.storage.get(ACCOUNTS_INDEXATION_KEY).await? {
             if self.account_indexes.is_empty() {
                 self.account_indexes = account_indexes;
@@ -170,7 +158,7 @@ impl StorageManager {
         Ok(accounts)
     }
 
-    pub async fn save_account(&mut self, account: &Account) -> crate::wallet::Result<()> {
+    pub async fn save_account(&mut self, account: &AccountDetails) -> crate::wallet::Result<()> {
         // Only add account index if not already present
         if !self.account_indexes.contains(account.index()) {
             self.account_indexes.push(*account.index());

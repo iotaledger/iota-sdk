@@ -52,10 +52,10 @@ pub enum Payload {
 impl core::fmt::Debug for Payload {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Transaction(payload) => write!(f, "{payload:?}"),
-            Self::Milestone(payload) => write!(f, "{payload:?}"),
-            Self::TreasuryTransaction(payload) => write!(f, "{payload:?}"),
-            Self::TaggedData(payload) => write!(f, "{payload:?}"),
+            Self::Transaction(payload) => payload.fmt(f),
+            Self::Milestone(payload) => payload.fmt(f),
+            Self::TreasuryTransaction(payload) => payload.fmt(f),
+            Self::TaggedData(payload) => payload.fmt(f),
         }
     }
 }
@@ -143,7 +143,7 @@ impl Packable for Payload {
 
 /// Representation of an optional [`Payload`].
 /// Essentially an `Option<Payload>` with a different [`Packable`] implementation, to conform to specs.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OptionalPayload(Option<Payload>);
 
@@ -151,6 +151,18 @@ impl OptionalPayload {
     fn pack_ref<P: Packer>(payload: &Payload, packer: &mut P) -> Result<(), P::Error> {
         (payload.packed_len() as u32).pack(packer)?;
         payload.pack(packer)
+    }
+}
+
+impl<T: Into<Payload>> From<Option<T>> for OptionalPayload {
+    fn from(payload: Option<T>) -> Self {
+        Self(payload.map(|p| p.into()))
+    }
+}
+
+impl<T: Into<Payload>> From<T> for OptionalPayload {
+    fn from(payload: T) -> Self {
+        Self(Some(payload.into()))
     }
 }
 
@@ -206,21 +218,6 @@ impl Packable for OptionalPayload {
     }
 }
 
-// FIXME: does this break any invariant about the Payload length?
-impl From<Option<Payload>> for OptionalPayload {
-    fn from(option: Option<Payload>) -> Self {
-        Self(option)
-    }
-}
-
-#[allow(clippy::from_over_into)]
-impl Into<Option<Payload>> for OptionalPayload {
-    fn into(self) -> Option<Payload> {
-        self.0
-    }
-}
-
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
     use serde::{Deserialize, Serialize};
@@ -230,7 +227,7 @@ pub mod dto {
         milestone::dto::MilestonePayloadDto, tagged_data::dto::TaggedDataPayloadDto,
         transaction::dto::TransactionPayloadDto, treasury_transaction::dto::TreasuryTransactionPayloadDto,
     };
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// Describes all the different payload types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -280,7 +277,7 @@ pub mod dto {
     }
 
     impl Payload {
-        pub fn try_from_dto(value: &PayloadDto, protocol_parameters: &ProtocolParameters) -> Result<Self, DtoError> {
+        pub fn try_from_dto(value: &PayloadDto, protocol_parameters: &ProtocolParameters) -> Result<Self, Error> {
             Ok(match value {
                 PayloadDto::Transaction(p) => {
                     Self::from(TransactionPayload::try_from_dto(p.as_ref(), protocol_parameters)?)
@@ -296,7 +293,7 @@ pub mod dto {
             })
         }
 
-        pub fn try_from_dto_unverified(value: &PayloadDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &PayloadDto) -> Result<Self, Error> {
             Ok(match value {
                 PayloadDto::Transaction(p) => Self::from(TransactionPayload::try_from_dto_unverified(p.as_ref())?),
                 PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from_dto_unverified(p.as_ref())?),

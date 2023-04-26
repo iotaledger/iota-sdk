@@ -21,14 +21,15 @@ public class CreateAliasOutput {
         );
 
         // Get account and sync it with the registered node to ensure that its balances are up-to-date.
-        AccountHandle a = wallet.getAccount(new AccountAlias(Env.ACCOUNT_NAME));
+        Account a = wallet.getAccount(new AccountAlias(Env.ACCOUNT_NAME));
         a.syncAccount(new SyncAccount().withOptions(new SyncOptions()));
 
         // Send transaction.
-        Transaction t = a.createAliasOutput(new org.iota.types.account_methods.CreateAliasOutput());
+        Transaction transaction = a.createAliasOutput(new org.iota.types.account_methods.CreateAliasOutput());
 
         // Print transaction.
-        System.out.println(t);
+        System.out.println("Transaction: " + transaction.getTransactionId());
+        System.out.println("Block sent: " + Env.EXPLORER + "/block/" + transaction.getBlockId());
 
         // In case you are done and don't need the wallet instance anymore you can destroy the instance to clean up memory.
         // For this, check out the ´DestroyWallet.java´ example.

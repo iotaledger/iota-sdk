@@ -23,7 +23,7 @@ public class RequestFundsFromFaucet {
         );
 
         // Get account and sync it with the registered node to ensure that its balances are up-to-date.
-        AccountHandle a = wallet.getAccount(new AccountAlias(Env.ACCOUNT_NAME));
+        Account a = wallet.getAccount(new AccountAlias(Env.ACCOUNT_NAME));
         AccountBalance balance = a.syncAccount(new SyncAccount().withOptions(new SyncOptions()));
 
         // Print the account balance before asking the faucet for funds.

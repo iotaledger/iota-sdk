@@ -3,9 +3,8 @@
 
 #![cfg(feature = "message_interface")]
 
-use std::{env, str::FromStr};
+use std::str::FromStr;
 
-use dotenv::dotenv;
 use iota_sdk::{
     client::{
         api::GetAddressesBuilderOptions as GenerateAddressesOptions,
@@ -32,8 +31,7 @@ async fn generate_addresses() {
     let options = GenerateAddressesOptions {
         coin_type: None,
         account_index: None,
-        range: Some(std::ops::Range { start: 0, end: 10 }),
-        internal: None,
+        range: Some(0..10),
         bech32_hrp: Some("atoi".to_string()),
         options: None,
     };
@@ -52,8 +50,8 @@ async fn generate_addresses() {
 #[tokio::test]
 #[should_panic]
 async fn build_and_post_block() {
-    // This test uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This test uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     // Create a client message handler with node health ignored
     let client_config = r#"{
@@ -74,13 +72,12 @@ async fn build_and_post_block() {
     // Generate addresses
     let secret_manager = format!(
         "{{\"mnemonic\":\"{}\"}}",
-        &env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap()
+        &std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap()
     );
     let options = GenerateAddressesOptions {
         coin_type: None,
         account_index: None,
-        range: Some(std::ops::Range { start: 0, end: 10 }),
-        internal: None,
+        range: Some(0..10),
         bech32_hrp: Some("atoi".to_string()),
         options: None,
     };
@@ -193,8 +190,7 @@ async fn stronghold() {
     let options = GenerateAddressesOptions {
         coin_type: None,
         account_index: None,
-        range: Some(std::ops::Range { start: 0, end: 1 }),
-        internal: None,
+        range: Some(0..1),
         bech32_hrp: Some("rms".to_string()),
         options: None,
     };
@@ -215,7 +211,7 @@ async fn stronghold() {
     }
 
     // Remove garbage after test, but don't care about the result
-    std::fs::remove_file("teststronghold.stronghold").unwrap_or(());
+    std::fs::remove_file("teststronghold.stronghold").ok();
 }
 
 #[tokio::test]

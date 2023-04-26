@@ -37,7 +37,6 @@ import type {
     __RequestFundsFromFaucetMethod__,
     __RetryTransactionUntilIncludedMethod__,
     __SendAmountMethod__,
-    __SendMicroTransactionMethod__,
     __SendNativeTokensMethod__,
     __SendNftMethod__,
     __SendOutputsMethod__,
@@ -47,7 +46,6 @@ import type {
     __SyncAccountMethod__,
     __GetIncomingTransactionDataMethod__,
     __VoteMethod__,
-    __GetVotingPowerMethod__,
     __GetParticipationOverviewMethod__,
     __GetParticipationEventMethod__,
     __GetParticipationEventsMethod__,
@@ -130,7 +128,6 @@ export type __AccountMethod__ =
     | __RequestFundsFromFaucetMethod__
     | __RetryTransactionUntilIncludedMethod__
     | __SendAmountMethod__
-    | __SendMicroTransactionMethod__
     | __SendNativeTokensMethod__
     | __SendNftMethod__
     | __SendOutputsMethod__
@@ -140,7 +137,6 @@ export type __AccountMethod__ =
     | __SyncAccountMethod__
     | __VoteMethod__
     | __StopParticipatingMethod__
-    | __GetVotingPowerMethod__
     | __GetParticipationOverviewMethod__
     | __IncreaseVotingPowerMethod__
     | __DecreaseVotingPowerMethod__;

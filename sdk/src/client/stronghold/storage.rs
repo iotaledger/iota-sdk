@@ -15,12 +15,14 @@ use super::{
     common::{PRIVATE_DATA_CLIENT_PATH, SECRET_VAULT_PATH, USERDATA_STORE_KEY_RECORD_PATH},
     StrongholdAdapter,
 };
-use crate::client::{storage::StorageProvider, Result};
+use crate::client::{storage::StorageProvider, stronghold::Error};
 
 #[async_trait]
 impl StorageProvider for StrongholdAdapter {
+    type Error = Error;
+
     #[allow(clippy::significant_drop_tightening)]
-    async fn get(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>> {
+    async fn get(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
         let stronghold_client = self.stronghold.lock().await.get_client(PRIVATE_DATA_CLIENT_PATH)?;
 
         let mut data = match stronghold_client.store().get(k)? {
@@ -42,7 +44,7 @@ impl StorageProvider for StrongholdAdapter {
         Ok(Some(decrypted_value))
     }
 
-    async fn insert(&mut self, k: &[u8], v: &[u8]) -> Result<Option<Vec<u8>>> {
+    async fn insert(&mut self, k: &[u8], v: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
         let store_key_location = Location::generic(SECRET_VAULT_PATH, USERDATA_STORE_KEY_RECORD_PATH);
 
         let stronghold_client = self.stronghold.lock().await.get_client(PRIVATE_DATA_CLIENT_PATH)?;
@@ -66,7 +68,7 @@ impl StorageProvider for StrongholdAdapter {
         Ok(decrypted_previous_data)
     }
 
-    async fn delete(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>> {
+    async fn delete(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
         Ok(self
             .stronghold
             .lock()
@@ -77,7 +79,7 @@ impl StorageProvider for StrongholdAdapter {
     }
 }
 
-pub(crate) fn insert(stronghold_client: &Client, k: &[u8], v: &[u8]) -> Result<Option<Vec<u8>>> {
+pub(crate) fn insert(stronghold_client: &Client, k: &[u8], v: &[u8]) -> Result<Option<Vec<u8>>, Error> {
     let store_key_location = Location::generic(SECRET_VAULT_PATH, USERDATA_STORE_KEY_RECORD_PATH);
 
     // Generate and store encryption key if not existent yet.
@@ -135,6 +137,7 @@ mod tests {
         assert!(matches!(stronghold.get(b"test-1").await, Ok(Some(_))));
         assert!(matches!(stronghold.get(b"test-2").await, Ok(Some(_))));
 
+        assert!(matches!(stronghold.insert(b"test-0", b"0-tset").await, Ok(Some(_))));
         let previous_value = stronghold.insert(b"test-0", b"0-tset").await.unwrap();
         assert_eq!(Some(b"test-0".to_vec()), previous_value);
         assert!(matches!(stronghold.insert(b"test-1", b"1-tset").await, Ok(Some(_))));

@@ -60,20 +60,21 @@ impl core::fmt::Debug for AliasAddress {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::string::{String, ToString};
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// Describes an alias address.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct AliasAddressDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "aliasId")]
         pub alias_id: String,
     }
 
@@ -87,13 +88,13 @@ pub mod dto {
     }
 
     impl TryFrom<&AliasAddressDto> for AliasAddress {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &AliasAddressDto) -> Result<Self, Self::Error> {
             value
                 .alias_id
                 .parse::<Self>()
-                .map_err(|_| DtoError::InvalidField("aliasId"))
+                .map_err(|_| Error::InvalidField("aliasId"))
         }
     }
 }

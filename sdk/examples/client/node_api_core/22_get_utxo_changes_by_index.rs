@@ -1,9 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET /api/core/v2/milestones/by-index/{index}/utxo-changes`.
-//! Gets all UTXO changes of a given milestone by milestone index.
-//! Run: `cargo run --example node_api_core_get_utxo_changes_by_index --release -- [NODE URL]`.
+//! Gets all UTXO changes of a given milestone by milestone index by calling
+//! `GET /api/core/v2/milestones/by-index/{index}/utxo-changes`.
+//!
+//! `cargo run --example node_api_core_get_utxo_changes_by_index --release -- [NODE URL]`
 
 use iota_sdk::client::{Client, Result};
 
@@ -11,8 +12,8 @@ use iota_sdk::client::{Client, Result};
 async fn main() -> Result<()> {
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses dotenv, which is not safe for use in production.
-        dotenv::dotenv().ok();
+        // This example uses secrets in environment variables for simplicity which should not be done in production.
+        dotenvy::dotenv().ok();
         std::env::var("NODE_URL").unwrap()
     });
 

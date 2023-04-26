@@ -5,22 +5,18 @@ use crate::{
     client::api::input_selection::Burn,
     types::block::{
         address::{Address, NftAddress},
-        output::{
-            unlock_condition::{AddressUnlockCondition, UnlockCondition},
-            BasicOutputBuilder, NftId, Output, OutputId,
-        },
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NftId, Output, OutputId},
     },
     wallet::{
         account::{
-            handle::AccountHandle,
             operations::{helpers::time::can_output_be_unlocked_now, transaction::Transaction},
-            TransactionOptions,
+            Account, TransactionOptions,
         },
         Error,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Function to burn an nft output.
     pub async fn burn_nft(
         &self,
@@ -77,11 +73,11 @@ impl AccountHandle {
     // Get the current output id for the nft and build a basic output with the amount, native tokens and
     // governor address from the nft output.
     async fn output_id_and_basic_output_for_nft(&self, nft_id: NftId) -> crate::wallet::Result<(OutputId, Output)> {
-        let account = self.read().await;
+        let account_details = self.read().await;
         let token_supply = self.client.get_token_supply().await?;
         let current_time = self.client.get_time_checked().await?;
 
-        let (output_id, nft_output) = account
+        let (output_id, nft_output) = account_details
             .unspent_outputs()
             .iter()
             .find_map(|(&output_id, output_data)| match &output_data.output {
@@ -101,8 +97,8 @@ impl AccountHandle {
             .locked_address(nft_output.address(), current_time);
 
         let basic_output = Output::Basic(
-            BasicOutputBuilder::new_with_amount(nft_output.amount())?
-                .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(*unlock_address)))
+            BasicOutputBuilder::new_with_amount(nft_output.amount())
+                .add_unlock_condition(AddressUnlockCondition::new(*unlock_address))
                 .with_native_tokens(nft_output.native_tokens().clone())
                 .finish(token_supply)?,
         );

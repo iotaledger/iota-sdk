@@ -1,6 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::vec::Vec;
 use core::ops::Deref;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
@@ -24,7 +25,7 @@ use crate::types::block::{
 pub struct BlockBuilder {
     protocol_version: Option<u8>,
     parents: Parents,
-    payload: Option<Payload>,
+    payload: OptionalPayload,
     nonce: Option<u64>,
 }
 
@@ -37,29 +38,29 @@ impl BlockBuilder {
         Self {
             protocol_version: None,
             parents,
-            payload: None,
+            payload: OptionalPayload::default(),
             nonce: None,
         }
     }
 
     /// Adds a protocol version to a [`BlockBuilder`].
     #[inline(always)]
-    pub fn with_protocol_version(mut self, protocol_version: u8) -> Self {
-        self.protocol_version = Some(protocol_version);
+    pub fn with_protocol_version(mut self, protocol_version: impl Into<Option<u8>>) -> Self {
+        self.protocol_version = protocol_version.into();
         self
     }
 
     /// Adds a payload to a [`BlockBuilder`].
     #[inline(always)]
-    pub fn with_payload(mut self, payload: Payload) -> Self {
-        self.payload = Some(payload);
+    pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
+        self.payload = payload.into();
         self
     }
 
     /// Adds a nonce to a [`BlockBuilder`].
     #[inline(always)]
-    pub fn with_nonce(mut self, nonce: u64) -> Self {
-        self.nonce = Some(nonce);
+    pub fn with_nonce(mut self, nonce: impl Into<Option<u64>>) -> Self {
+        self.nonce = nonce.into();
         self
     }
 
@@ -69,7 +70,7 @@ impl BlockBuilder {
         let block = Block {
             protocol_version: self.protocol_version.unwrap_or(PROTOCOL_VERSION),
             parents: self.parents,
-            payload: self.payload.into(),
+            payload: self.payload,
             nonce: self.nonce.unwrap_or(Self::DEFAULT_NONCE),
         };
 
@@ -250,19 +251,20 @@ fn verify_payload(payload: Option<&Payload>) -> Result<(), Error> {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::string::{String, ToString};
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{error::dto::DtoError, payload::dto::PayloadDto, protocol::ProtocolParameters};
+    use crate::types::block::{payload::dto::PayloadDto, protocol::ProtocolParameters, Error};
 
     /// The block object that nodes gossip around in the network.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct BlockDto {
         ///
-        #[serde(rename = "protocolVersion")]
         pub protocol_version: u8,
         ///
         pub parents: Vec<String>,
@@ -285,45 +287,40 @@ pub mod dto {
     }
 
     impl Block {
-        fn _try_from_dto(value: &BlockDto) -> Result<BlockBuilder, DtoError> {
-            let parents = Parents::new(
+        fn _try_from_dto(value: &BlockDto) -> Result<BlockBuilder, Error> {
+            let parents = Parents::from_vec(
                 value
                     .parents
                     .iter()
-                    .map(|m| m.parse::<BlockId>().map_err(|_| DtoError::InvalidField("parents")))
-                    .collect::<Result<Vec<BlockId>, DtoError>>()?,
+                    .map(|m| m.parse::<BlockId>().map_err(|_| Error::InvalidField("parents")))
+                    .collect::<Result<Vec<BlockId>, Error>>()?,
             )?;
 
             let builder = BlockBuilder::new(parents)
                 .with_protocol_version(value.protocol_version)
-                .with_nonce(
-                    value
-                        .nonce
-                        .parse::<u64>()
-                        .map_err(|_| DtoError::InvalidField("nonce"))?,
-                );
+                .with_nonce(value.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?);
 
             Ok(builder)
         }
 
-        pub fn try_from_dto(value: &BlockDto, protocol_parameters: &ProtocolParameters) -> Result<Self, DtoError> {
+        pub fn try_from_dto(value: &BlockDto, protocol_parameters: &ProtocolParameters) -> Result<Self, Error> {
             let mut builder = Self::_try_from_dto(value)?;
 
             if let Some(p) = value.payload.as_ref() {
                 builder = builder.with_payload(Payload::try_from_dto(p, protocol_parameters)?);
             }
 
-            Ok(builder.finish()?)
+            builder.finish()
         }
 
-        pub fn try_from_dto_unverified(value: &BlockDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &BlockDto) -> Result<Self, Error> {
             let mut builder = Self::_try_from_dto(value)?;
 
             if let Some(p) = value.payload.as_ref() {
                 builder = builder.with_payload(Payload::try_from_dto_unverified(p)?);
             }
 
-            Ok(builder.finish()?)
+            builder.finish()
         }
     }
 }

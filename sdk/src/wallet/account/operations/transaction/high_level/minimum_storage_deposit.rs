@@ -8,7 +8,7 @@ use crate::{
         address::Address,
         output::{
             unlock_condition::{
-                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition, UnlockCondition,
+                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
             },
             BasicOutputBuilder, NativeToken, Output, Rent, RentStructure, TokenId,
         },
@@ -27,19 +27,20 @@ pub(crate) fn minimum_storage_deposit_basic_native_tokens(
     native_tokens: Option<Vec<(TokenId, U256)>>,
     token_supply: u64,
 ) -> Result<u64> {
-    let address_condition = UnlockCondition::Address(AddressUnlockCondition::new(*address));
     // Safety: This can never fail because the amount will always be within the valid range. Also, the actual value is
     // not important, we are only interested in the storage requirements of the type.
-    let mut basic_output_builder = BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN)?
-        .add_unlock_condition(address_condition)
-        .add_unlock_condition(UnlockCondition::StorageDepositReturn(
-            StorageDepositReturnUnlockCondition::new(*return_address, Output::AMOUNT_MIN, token_supply)?,
-        ))
-        .add_unlock_condition(UnlockCondition::Expiration(ExpirationUnlockCondition::new(
+    let mut basic_output_builder = BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN)
+        .add_unlock_condition(AddressUnlockCondition::new(*address))
+        .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
+            *return_address,
+            Output::AMOUNT_MIN,
+            token_supply,
+        )?)
+        .add_unlock_condition(ExpirationUnlockCondition::new(
             *return_address,
             // 0 would be invalid
             1,
-        )?));
+        )?);
     if let Some(native_tokens) = native_tokens {
         basic_output_builder = basic_output_builder.with_native_tokens(
             native_tokens

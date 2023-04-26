@@ -41,8 +41,8 @@ pub enum Input {
 impl core::fmt::Debug for Input {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Utxo(input) => write!(f, "{input:?}"),
-            Self::Treasury(input) => write!(f, "{input:?}"),
+            Self::Utxo(input) => input.fmt(f),
+            Self::Treasury(input) => input.fmt(f),
         }
     }
 }
@@ -87,14 +87,13 @@ impl Input {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
     pub use super::{treasury::dto::TreasuryInputDto, utxo::dto::UtxoInputDto};
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// Describes all the different input types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
@@ -114,7 +113,7 @@ pub mod dto {
     }
 
     impl TryFrom<&InputDto> for Input {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &InputDto) -> Result<Self, Self::Error> {
             match value {

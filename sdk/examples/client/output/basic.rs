@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example basic --release
+//! In this example we will send basic outputs with different feature blocks.
+//!
+//! `cargo run --example basic --release`
 
 use iota_sdk::{
     client::{secret::SecretManager, utils::request_funds_from_faucet, Client, Result},
@@ -9,20 +11,18 @@ use iota_sdk::{
         feature::MetadataFeature,
         unlock_condition::{
             AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-            TimelockUnlockCondition, UnlockCondition,
+            TimelockUnlockCondition,
         },
-        BasicOutputBuilder, Feature,
+        BasicOutputBuilder,
     },
 };
 
-/// In this example we will send basic outputs with different feature blocks
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production!
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     // Configure your own mnemonic in the ".env" file. Since the output amount cannot be zero, the seed must contain
     // non-zero balance.
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
@@ -41,8 +41,8 @@ async fn main() -> Result<()> {
         request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?
     );
 
-    let basic_output_builder = BasicOutputBuilder::new_with_amount(1_000_000)?
-        .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address)));
+    let basic_output_builder =
+        BasicOutputBuilder::new_with_amount(1_000_000).add_unlock_condition(AddressUnlockCondition::new(address));
 
     let outputs = vec![
         // most simple output
@@ -50,25 +50,27 @@ async fn main() -> Result<()> {
         // with metadata feature block
         basic_output_builder
             .clone()
-            .add_feature(Feature::Metadata(MetadataFeature::new(vec![13, 37])?))
+            .add_feature(MetadataFeature::new(vec![13, 37])?)
             .finish_output(token_supply)?,
         // with storage deposit return
         basic_output_builder
             .clone()
-            .with_amount(234_100)?
-            .add_unlock_condition(UnlockCondition::StorageDepositReturn(
-                StorageDepositReturnUnlockCondition::new(address, 234_000, token_supply)?,
-            ))
+            .with_amount(234_100)
+            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                address,
+                234_000,
+                token_supply,
+            )?)
             .finish_output(token_supply)?,
         // with expiration
         basic_output_builder
             .clone()
-            .add_unlock_condition(UnlockCondition::Expiration(ExpirationUnlockCondition::new(address, 1)?))
+            .add_unlock_condition(ExpirationUnlockCondition::new(address, 1)?)
             .finish_output(token_supply)?,
         // with timelock
         basic_output_builder
             .clone()
-            .add_unlock_condition(UnlockCondition::Timelock(TimelockUnlockCondition::new(1)?))
+            .add_unlock_condition(TimelockUnlockCondition::new(1)?)
             .finish_output(token_supply)?,
     ];
 

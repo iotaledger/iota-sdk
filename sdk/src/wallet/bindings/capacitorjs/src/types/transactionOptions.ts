@@ -1,4 +1,5 @@
 import type { ITaggedDataPayload, HexEncodedAmount } from '@iota/types';
+import type { Burn } from './burn';
 
 /** Options for the transaction creation */
 export interface TransactionOptions {
@@ -6,8 +7,11 @@ export interface TransactionOptions {
     taggedDataPayload?: ITaggedDataPayload;
     /** Custom inputs that should be used for the transaction */
     customInputs?: string[];
+    mandatoryInputs?: string[];
+    burn?: Burn;
     /** Optional note, that is only stored locally */
     note?: string;
+    allowMicroAmount: boolean;
 }
 
 /** The RemainderValueStrategy */
@@ -35,7 +39,7 @@ export type CustomAddress = {
 };
 
 /** Native token options for minting more native tokens */
-export interface IncreaseNativeTokenSupplyOptions {}
+export interface IncreaseNativeTokenSupplyOptions { }
 
 /** Native token options for minting */
 export interface NativeTokenOptions {

@@ -8,18 +8,18 @@ use crate::{
             output::{
                 feature::{MetadataFeature, TagFeature},
                 unlock_condition::AddressUnlockCondition,
-                BasicOutput, BasicOutputBuilder, Feature, Output, UnlockCondition,
+                BasicOutput, BasicOutputBuilder, Output,
             },
             payload::TaggedDataPayload,
         },
     },
     wallet::{
-        account::{handle::AccountHandle, types::Transaction, TransactionOptions},
+        account::{types::Transaction, Account, TransactionOptions},
         Result,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Returns an account's total voting power (voting or NOT voting).
     pub async fn get_voting_power(&self) -> Result<u64> {
         Ok(self
@@ -63,16 +63,16 @@ impl AccountHandle {
                 )
             }
             None => (
-                BasicOutputBuilder::new_with_amount(amount)?
-                    .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
+                BasicOutputBuilder::new_with_amount(amount)
+                    .add_unlock_condition(AddressUnlockCondition::new(
                         self.public_addresses()
                             .await
                             .first()
                             .expect("account needs to have a public address")
                             .address
                             .inner,
-                    )))
-                    .add_feature(Feature::Tag(TagFeature::new(PARTICIPATION_TAG.as_bytes().to_vec())?))
+                    ))
+                    .add_feature(TagFeature::new(PARTICIPATION_TAG.as_bytes().to_vec())?)
                     .finish_output(token_supply)?,
                 None,
             ),
@@ -103,7 +103,7 @@ impl AccountHandle {
         let (new_output, tagged_data_payload) = if amount == output.amount() {
             (
                 BasicOutputBuilder::from(output)
-                    .with_features([])
+                    .clear_features()
                     .finish_output(token_supply)?,
                 None,
             )
@@ -135,7 +135,7 @@ impl AccountHandle {
         amount: u64,
         token_supply: u64,
     ) -> Result<(Output, TaggedDataPayload)> {
-        let mut output_builder = BasicOutputBuilder::from(output).with_amount(amount)?;
+        let mut output_builder = BasicOutputBuilder::from(output).with_amount(amount);
         let mut participation_bytes = output.features().metadata().map(|m| m.data()).unwrap_or(&[]);
 
         let participation_bytes = if let Ok(mut participations) = Participations::from_bytes(&mut participation_bytes) {
@@ -144,8 +144,7 @@ impl AccountHandle {
 
             let participation_bytes = participations.to_bytes()?;
 
-            output_builder =
-                output_builder.replace_feature(Feature::Metadata(MetadataFeature::new(participation_bytes.clone())?));
+            output_builder = output_builder.replace_feature(MetadataFeature::new(participation_bytes.clone())?);
 
             participation_bytes
         } else {

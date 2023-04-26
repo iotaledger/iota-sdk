@@ -8,7 +8,7 @@ use iota_sdk::types::block::{
         dto::{AddressDto, Ed25519AddressDto},
         Address, Ed25519Address,
     },
-    DtoError,
+    Error,
 };
 use packable::PackableExt;
 
@@ -87,7 +87,7 @@ fn bech32_roundtrip() {
 
     assert_eq!(
         Address::try_from_bech32_with_hrp(bech32).unwrap(),
-        (address, String::from("rms"))
+        (String::from("rms"), address)
     );
 }
 
@@ -127,7 +127,7 @@ fn dto_invalid_pub_key_hash() {
 
     assert!(matches!(
         Ed25519Address::try_from(&dto),
-        Err(DtoError::InvalidField("pubKeyHash"))
+        Err(Error::InvalidField("pubKeyHash"))
     ));
 }
 

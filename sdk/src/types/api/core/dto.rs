@@ -1,6 +1,8 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::{string::String, vec::Vec};
+
 use crate::types::block::payload::milestone::option::dto::ReceiptMilestoneOptionDto;
 
 /// Describes a peer.

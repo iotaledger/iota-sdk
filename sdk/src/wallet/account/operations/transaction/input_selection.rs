@@ -15,12 +15,11 @@ use crate::{
         output::{AliasTransition, Output, OutputId},
     },
     wallet::account::{
-        handle::AccountHandle, operations::helpers::time::can_output_be_unlocked_forever_from_now_on, Account,
-        OutputData,
+        operations::helpers::time::can_output_be_unlocked_forever_from_now_on, Account, AccountDetails, OutputData,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Selects inputs for a transaction and locks them in the account, so they don't get used again
     pub(crate) async fn select_inputs(
         &self,
@@ -35,23 +34,23 @@ impl AccountHandle {
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
         // lock so the same inputs can't be selected in multiple transactions
-        let mut account = self.write().await;
+        let mut account_details = self.write().await;
         let protocol_parameters = self.client.get_protocol_parameters().await?;
 
         #[cfg(feature = "events")]
         self.event_emitter.lock().await.emit(
-            account.index,
+            account_details.index,
             WalletEvent::TransactionProgress(TransactionProgressEvent::SelectingInputs),
         );
 
         let current_time = self.client.get_time_checked().await?;
         #[allow(unused_mut)]
-        let mut forbidden_inputs = account.locked_outputs.clone();
+        let mut forbidden_inputs = account_details.locked_outputs.clone();
 
-        let addresses = account
+        let addresses = account_details
             .public_addresses()
             .iter()
-            .chain(account.internal_addresses().iter())
+            .chain(account_details.internal_addresses().iter())
             .map(|address| *address.address.as_ref())
             .collect();
 
@@ -69,8 +68,8 @@ impl AccountHandle {
         // Filter inputs to not include inputs that require additional outputs for storage deposit return or could be
         // still locked.
         let available_outputs_signing_data = filter_inputs(
-            &account,
-            account.unspent_outputs.values(),
+            &account_details,
+            account_details.unspent_outputs.values(),
             current_time,
             &outputs,
             burn,
@@ -83,7 +82,7 @@ impl AccountHandle {
         if let Some(custom_inputs) = custom_inputs {
             // Check that no input got already locked
             for input in custom_inputs.iter() {
-                if account.locked_outputs.contains(input) {
+                if account_details.locked_outputs.contains(input) {
                     return Err(crate::wallet::Error::CustomInput(format!(
                         "provided custom input {input} is already used in another transaction",
                     )));
@@ -111,14 +110,14 @@ impl AccountHandle {
 
             // lock outputs so they don't get used by another transaction
             for output in &selected_transaction_data.inputs {
-                account.locked_outputs.insert(*output.output_id());
+                account_details.locked_outputs.insert(*output.output_id());
             }
 
             return Ok(selected_transaction_data);
         } else if let Some(mandatory_inputs) = mandatory_inputs {
             // Check that no input got already locked
             for input in mandatory_inputs.iter() {
-                if account.locked_outputs.contains(input) {
+                if account_details.locked_outputs.contains(input) {
                     return Err(crate::wallet::Error::CustomInput(format!(
                         "provided custom input {input} is already used in another transaction",
                     )));
@@ -146,12 +145,12 @@ impl AccountHandle {
 
             // lock outputs so they don't get used by another transaction
             for output in &selected_transaction_data.inputs {
-                account.locked_outputs.insert(*output.output_id());
+                account_details.locked_outputs.insert(*output.output_id());
             }
 
             // lock outputs so they don't get used by another transaction
             for output in &selected_transaction_data.inputs {
-                account.locked_outputs.insert(*output.output_id());
+                account_details.locked_outputs.insert(*output.output_id());
             }
 
             return Ok(selected_transaction_data);
@@ -193,7 +192,7 @@ impl AccountHandle {
         // lock outputs so they don't get used by another transaction
         for output in &selected_transaction_data.inputs {
             log::debug!("[TRANSACTION] locking: {}", output.output_id());
-            account.locked_outputs.insert(*output.output_id());
+            account_details.locked_outputs.insert(*output.output_id());
         }
 
         Ok(selected_transaction_data)
@@ -220,7 +219,7 @@ impl AccountHandle {
 /// | [Address, StorageDepositReturn, expired Expiration] | yes               |
 #[allow(clippy::too_many_arguments)]
 fn filter_inputs(
-    account: &Account,
+    account: &AccountDetails,
     available_outputs: Values<'_, OutputId, OutputData>,
     current_time: u32,
     outputs: &[Output],
@@ -242,7 +241,7 @@ fn filter_inputs(
                 // We use the addresses with unspent outputs, because other addresses of the
                 // account without unspent outputs can't be related to this output
                 &account.addresses_with_unspent_outputs,
-                output_data,
+                &output_data.output,
                 current_time,
             );
 

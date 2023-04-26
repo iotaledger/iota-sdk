@@ -30,7 +30,7 @@ pub enum Signature {
 impl core::fmt::Debug for Signature {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Ed25519(signature) => write!(f, "{signature:?}"),
+            Self::Ed25519(signature) => signature.fmt(f),
         }
     }
 }
@@ -44,14 +44,13 @@ impl Signature {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
     pub use super::ed25519::dto::Ed25519SignatureDto;
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// Describes all the different signature types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
@@ -69,7 +68,7 @@ pub mod dto {
     }
 
     impl TryFrom<&SignatureDto> for Signature {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &SignatureDto) -> Result<Self, Self::Error> {
             match value {

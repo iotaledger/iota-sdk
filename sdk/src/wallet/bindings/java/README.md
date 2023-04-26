@@ -8,8 +8,8 @@ minimum Java version >= 8
 
 ## Use in your Android project (Android Studio)
 
-1. Download the `iota-wallet-1.0.0-rc.1.jar` file from the [GitHub release](https://github.com/iotaledger/wallet.rs/releases/tag/iota-wallet-java-1.0.0-rc.1-new) and add it as a library to your project.
-2. Download the `iota-wallet-1.0.0-rc.1-android.zip` file from the [GitHub release](https://github.com/iotaledger/wallet.rs/releases/tag/iota-wallet-java-1.0.0-rc.1-new), unzip it and add the `jniLibs` folder with its contents to your Android Studio project as shown below:
+1. Download the `iota-wallet-1.0.0-rc.3.jar` file from the [GitHub release](https://github.com/iotaledger/wallet.rs/releases/tag/iota-wallet-java-1.0.0-rc.3) and add it as a library to your project.
+2. Download the `iota-wallet-1.0.0-rc.3-android.zip` file from the [GitHub release](https://github.com/iotaledger/wallet.rs/releases/tag/iota-wallet-java-1.0.0-rc.3), unzip it and add the `jniLibs` folder with its contents to your Android Studio project as shown below:
 
 ```
 project/
@@ -38,22 +38,22 @@ Depending on your operating system, add one of the following dependencies to you
 
 #### linux-x86_64
 ```
-implementation 'org.iota:iota-wallet:1.0.0-rc.1:linux-x86_64'
+implementation 'org.iota:iota-wallet:1.0.0-rc.3:linux-x86_64'
 ```
 
 #### windows-x86_64
 ```
-implementation 'org.iota:iota-wallet:1.0.0-rc.1:windows-x86_64'
+implementation 'org.iota:iota-wallet:1.0.0-rc.3:windows-x86_64'
 ```
 
 #### aarch64-apple-darwin
 ```
-implementation 'org.iota:iota-wallet:1.0.0-rc.1:aarch64-apple-darwin'
+implementation 'org.iota:iota-wallet:1.0.0-rc.3:aarch64-apple-darwin'
 ```
 
 #### osx-x86_64
 ```
-implementation 'org.iota:iota-wallet:1.0.0-rc.1:osx-x86_64'
+implementation 'org.iota:iota-wallet:1.0.0-rc.3:osx-x86_64'
 ```
 
 ## Use the Library
@@ -62,42 +62,58 @@ In order to use the library, you need to create a `Wallet` instance.
 **Note**: Android applications must necessarily configure a suitable storage path for the wallet to avoid problems with file system permissions. Specify a suitable storage path as illustrated below:
 
 ```java
-// Copyright 2022 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 import org.iota.Wallet;
+import org.iota.types.AccountAddress;
 import org.iota.types.AccountHandle;
 import org.iota.types.ClientConfig;
 import org.iota.types.CoinType;
 import org.iota.types.WalletConfig;
+import org.iota.types.exceptions.InitializeWalletException;
 import org.iota.types.exceptions.WalletException;
 import org.iota.types.secret.StrongholdSecretManager;
 
-public class CreateAccount {
-    
-    private static final String DEFAULT_DEVELOPMENT_MNEMONIC = "hidden enroll proud copper decide negative orient asset speed work dolphin atom unhappy game cannon scheme glow kid ring core name still twist actor";
+public class GettingStarted {
+    // A name to associate with the created account.
+    private static final String ACCOUNT_ALIAS = "Alice";
+
+    // The node to connect to.
+    private static final String NODE_URL = "https://api.testnet.shimmer.network";
+
+    // Set a suitable storage path for the wallet to avoid problems with file system permissions.
+    // INFO: Android applications must necessarily configure this: make sure you replace the ´com.example.myapplication´ with your own app naming.
+    private static final String STORAGE_PATH = "/data/data/com.example.myapplication/";
+
+    // A password to encrypt the stored data.
+    // WARNING: Never hardcode passwords in production code.
+    private static final String STRONGHOLD_PASSWORD = "a-secure-password";
+
+    // The path to store the account snapshot.
+    private static final String STRONGHOLD_SNAPSHOT_PATH = "vault.stronghold";
 
     public static void main(String[] args) throws WalletException, InitializeWalletException {
-        // Set a suitable storage path for the wallet to avoid problems with file system permissions.
-        // Android applications must necessarily configure this: make sure you replace the ´com.example.myapplication´ with your own app naming.
-        String storagePath = "/data/data/com.example.myapplication/";
-
         // Set up and store the wallet.
         Wallet wallet = new Wallet(new WalletConfig()
-                .withClientOptions(new ClientConfig().withNodes("https://api.testnet.shimmer.network"))
-                .withSecretManager(new StrongholdSecretManager("PASSWORD_FOR_ENCRYPTION", null, storagePath + "stronghold/vault.stronghold"))
-                .withCoinType(CoinType.Shimmer)
-                .withStoragePath(storagePath)
+            .withClientOptions(new ClientConfig().withNodes(NODE_URL))
+            .withSecretManager(new StrongholdSecretManager(
+                STRONGHOLD_PASSWORD, null, STORAGE_PATH + STRONGHOLD_SNAPSHOT_PATH))
+            .withCoinType(CoinType.Shimmer)
+            .withStoragePath(STORAGE_PATH)
         );
-        
-        // Store the mnemonic in the Stronghold vault.
-        wallet.storeMnemonic(DEFAULT_DEVELOPMENT_MNEMONIC);
 
+        // Generate a mnemonic and store it in the Stronghold vault.
+        // INFO: It is best practice to back up the mnemonic somewhere secure.
+        String mnemonic = wallet.generateMnemonic();
+        wallet.storeMnemonic(mnemonic);
+    
         // Create an account.
-        AccountHandle a = wallet.createAccount("Alice");
+        AccountHandle account = wallet.createAccount(ACCOUNT_ALIAS);
 
-        // Print the account.
-        System.out.println(a);
+        // Get the first address and print it.
+        AccountAddress address = account.getAddresses()[0];
+        System.out.println("Address:\n" + address.getAddress() + "\n");
     }
 }
 ```

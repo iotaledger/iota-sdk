@@ -19,18 +19,16 @@ pub use self::{
 };
 use crate::{
     client::secret::{SecretManager, SecretManagerDto},
-    wallet::{account_manager::AccountManager, ClientOptions},
+    wallet::{ClientOptions, Wallet},
 };
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct ManagerOptions {
-    #[serde(rename = "storagePath")]
     pub storage_path: Option<String>,
-    #[serde(rename = "clientOptions")]
     pub client_options: Option<ClientOptions>,
-    #[serde(rename = "coinType")]
     pub coin_type: Option<u32>,
-    #[serde(rename = "secretManager", serialize_with = "secret_manager_serialize")]
+    #[serde(serialize_with = "secret_manager_serialize")]
     pub secret_manager: Option<SecretManagerDto>,
 }
 
@@ -70,8 +68,8 @@ pub async fn create_message_handler(options: Option<ManagerOptions>) -> crate::w
         "create_message_handler with options: {}",
         serde_json::to_string(&options)?,
     );
-    let manager = if let Some(options) = options {
-        let mut builder = AccountManager::builder();
+    let wallet = if let Some(options) = options {
+        let mut builder = Wallet::builder();
 
         #[cfg(feature = "storage")]
         if let Some(storage_path) = options.storage_path {
@@ -92,8 +90,8 @@ pub async fn create_message_handler(options: Option<ManagerOptions>) -> crate::w
 
         builder.finish().await?
     } else {
-        AccountManager::builder().finish().await?
+        Wallet::builder().finish().await?
     };
 
-    Ok(WalletMessageHandler::with_manager(manager))
+    Ok(WalletMessageHandler::with_manager(wallet))
 }

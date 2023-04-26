@@ -1,36 +1,30 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example threads --release
+//! In this example we will spam transactions from multiple threads simultaneously to our own address.
+//!
+//! `cargo run --example threads --release`
 
-// In this example we will spam transactions from multiple threads simultaneously to our own address
-
-use std::env;
-
-use dotenv::dotenv;
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::output::{
-        unlock_condition::{AddressUnlockCondition, UnlockCondition},
-        BasicOutputBuilder,
-    },
-    wallet::{account_manager::AccountManager, ClientOptions, Result},
+    types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
-    let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(&env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let manager = AccountManager::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -39,11 +33,11 @@ async fn main() -> Result<()> {
 
     // Get account or create a new one
     let account_alias = "thread_account";
-    let account = match manager.get_account(account_alias.to_string()).await {
+    let account = match wallet.get_account(account_alias.to_string()).await {
         Ok(account) => account,
         _ => {
             // first we'll create an example account and store it
-            manager
+            wallet
                 .create_account()
                 .with_alias(account_alias.to_string())
                 .finish()
@@ -53,12 +47,12 @@ async fn main() -> Result<()> {
 
     // One address gets generated during account creation
     let address = account.addresses().await?[0].address().clone();
-    println!("{}", address.to_bech32());
+    println!("{}", address);
 
     let balance = account.sync(None).await?;
     println!("Balance: {balance:?}");
 
-    if balance.base_coin.available == 0 {
+    if balance.base_coin().available() == 0 {
         panic!("Account has no available balance");
     }
 
@@ -72,8 +66,8 @@ async fn main() -> Result<()> {
                 tokio::spawn(async move {
                     // send transaction
                     let outputs = vec![
-                        BasicOutputBuilder::new_with_amount(1_000_000)?
-                            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(address_)))
+                        BasicOutputBuilder::new_with_amount(1_000_000)
+                            .add_unlock_condition(AddressUnlockCondition::new(address_))
                             .finish_output(account_.client().get_token_supply().await?)?;
                         // amount of outputs in the transaction (one additional output might be added for the remaining amount)
                         1
@@ -83,7 +77,7 @@ async fn main() -> Result<()> {
                         println!(
                             "Block from thread {} sent: {}/api/core/v2/blocks/{}",
                             n,
-                            &env::var("NODE_URL").unwrap(),
+                            &std::env::var("NODE_URL").unwrap(),
                             block_id
                         );
                     }

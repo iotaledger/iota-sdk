@@ -15,7 +15,11 @@ mod secret_manager;
 mod signing;
 mod transactions;
 
-use std::{collections::HashMap, hash::Hash, str::FromStr};
+use std::{
+    collections::{BTreeSet, HashMap},
+    hash::Hash,
+    str::FromStr,
+};
 
 use crypto::keys::slip10::Chain;
 use iota_sdk::{
@@ -23,7 +27,7 @@ use iota_sdk::{
     types::block::{
         address::{Address, AliasAddress},
         output::{
-            feature::{Feature, IssuerFeature, SenderFeature},
+            feature::{IssuerFeature, SenderFeature},
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
                 ImmutableAliasAddressUnlockCondition, StateControllerAddressUnlockCondition,
@@ -103,11 +107,9 @@ fn build_basic_output(
     timelock: Option<u32>,
     expiration: Option<(&str, u32)>,
 ) -> Output {
-    let mut builder = BasicOutputBuilder::new_with_amount(amount)
-        .unwrap()
-        .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-            Address::try_from_bech32(bech32_address).unwrap(),
-        )));
+    let mut builder = BasicOutputBuilder::new_with_amount(amount).add_unlock_condition(AddressUnlockCondition::new(
+        Address::try_from_bech32(bech32_address).unwrap(),
+    ));
 
     if let Some(native_tokens) = native_tokens {
         builder = builder.with_native_tokens(
@@ -118,28 +120,24 @@ fn build_basic_output(
     }
 
     if let Some(bech32_sender) = bech32_sender {
-        builder = builder.add_feature(Feature::Sender(SenderFeature::new(
-            Address::try_from_bech32(bech32_sender).unwrap(),
-        )));
+        builder = builder.add_feature(SenderFeature::new(Address::try_from_bech32(bech32_sender).unwrap()));
     }
 
     if let Some((address, amount)) = sdruc {
-        builder = builder.add_unlock_condition(UnlockCondition::StorageDepositReturn(
+        builder = builder.add_unlock_condition(
             StorageDepositReturnUnlockCondition::new(Address::try_from_bech32(address).unwrap(), amount, TOKEN_SUPPLY)
                 .unwrap(),
-        ));
+        );
     }
 
     if let Some(timelock) = timelock {
-        builder = builder.add_unlock_condition(UnlockCondition::Timelock(
-            TimelockUnlockCondition::new(timelock).unwrap(),
-        ));
+        builder = builder.add_unlock_condition(TimelockUnlockCondition::new(timelock).unwrap());
     }
 
     if let Some((address, timestamp)) = expiration {
-        builder = builder.add_unlock_condition(UnlockCondition::Expiration(
+        builder = builder.add_unlock_condition(
             ExpirationUnlockCondition::new(Address::try_from_bech32(address).unwrap(), timestamp).unwrap(),
-        ));
+        );
     }
 
     builder.finish_output(TOKEN_SUPPLY).unwrap()
@@ -156,11 +154,9 @@ fn build_nft_output(
     sdruc: Option<(&str, u64)>,
     expiration: Option<(&str, u32)>,
 ) -> Output {
-    let mut builder = NftOutputBuilder::new_with_amount(amount, nft_id)
-        .unwrap()
-        .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
-            Address::try_from_bech32(bech32_address).unwrap(),
-        )));
+    let mut builder = NftOutputBuilder::new_with_amount(amount, nft_id).add_unlock_condition(
+        AddressUnlockCondition::new(Address::try_from_bech32(bech32_address).unwrap()),
+    );
 
     if let Some(native_tokens) = native_tokens {
         builder = builder.with_native_tokens(
@@ -171,28 +167,24 @@ fn build_nft_output(
     }
 
     if let Some(bech32_sender) = bech32_sender {
-        builder = builder.add_feature(Feature::Sender(SenderFeature::new(
-            Address::try_from_bech32(bech32_sender).unwrap(),
-        )));
+        builder = builder.add_feature(SenderFeature::new(Address::try_from_bech32(bech32_sender).unwrap()));
     }
 
     if let Some(bech32_issuer) = bech32_issuer {
-        builder = builder.add_immutable_feature(Feature::Issuer(IssuerFeature::new(
-            Address::try_from_bech32(bech32_issuer).unwrap(),
-        )));
+        builder = builder.add_immutable_feature(IssuerFeature::new(Address::try_from_bech32(bech32_issuer).unwrap()));
     }
 
     if let Some((address, amount)) = sdruc {
-        builder = builder.add_unlock_condition(UnlockCondition::StorageDepositReturn(
+        builder = builder.add_unlock_condition(
             StorageDepositReturnUnlockCondition::new(Address::try_from_bech32(address).unwrap(), amount, TOKEN_SUPPLY)
                 .unwrap(),
-        ));
+        );
     }
 
     if let Some((address, timestamp)) = expiration {
-        builder = builder.add_unlock_condition(UnlockCondition::Expiration(
+        builder = builder.add_unlock_condition(
             ExpirationUnlockCondition::new(Address::try_from_bech32(address).unwrap(), timestamp).unwrap(),
-        ));
+        );
     }
 
     builder.finish_output(TOKEN_SUPPLY).unwrap()
@@ -213,14 +205,9 @@ fn build_alias_output(
     let governor_address = Address::try_from_bech32(governor_address).unwrap();
 
     let mut builder = AliasOutputBuilder::new_with_amount(amount, alias_id)
-        .unwrap()
         .with_state_index(state_index)
-        .add_unlock_condition(UnlockCondition::StateControllerAddress(
-            StateControllerAddressUnlockCondition::new(state_address),
-        ))
-        .add_unlock_condition(UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(
-            governor_address,
-        )));
+        .add_unlock_condition(StateControllerAddressUnlockCondition::new(state_address))
+        .add_unlock_condition(GovernorAddressUnlockCondition::new(governor_address));
 
     if let Some(native_tokens) = native_tokens {
         builder = builder.with_native_tokens(
@@ -231,15 +218,11 @@ fn build_alias_output(
     }
 
     if let Some(bech32_sender) = bech32_sender {
-        builder = builder.add_feature(Feature::Sender(SenderFeature::new(
-            Address::try_from_bech32(bech32_sender).unwrap(),
-        )));
+        builder = builder.add_feature(SenderFeature::new(Address::try_from_bech32(bech32_sender).unwrap()));
     }
 
     if let Some(bech32_issuer) = bech32_issuer {
-        builder = builder.add_immutable_feature(Feature::Issuer(IssuerFeature::new(
-            Address::try_from_bech32(bech32_issuer).unwrap(),
-        )));
+        builder = builder.add_immutable_feature(IssuerFeature::new(Address::try_from_bech32(bech32_issuer).unwrap()));
     }
 
     builder.finish_output(TOKEN_SUPPLY).unwrap()
@@ -253,10 +236,7 @@ fn build_foundry_output(
     native_tokens: Option<Vec<(&str, u64)>>,
 ) -> Output {
     let mut builder = FoundryOutputBuilder::new_with_amount(amount, serial_number, TokenScheme::Simple(token_scheme))
-        .unwrap()
-        .add_unlock_condition(UnlockCondition::ImmutableAliasAddress(
-            ImmutableAliasAddressUnlockCondition::new(AliasAddress::new(alias_id)),
-        ));
+        .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::new(alias_id)));
 
     if let Some(native_tokens) = native_tokens {
         builder = builder.with_native_tokens(
@@ -409,13 +389,13 @@ fn is_remainder_or_return(
         }
 
         if let Some(native_tokens) = native_tokens {
-            let native_tokens = NativeTokens::new(
+            let native_tokens = NativeTokens::from_set(
                 native_tokens
                     .into_iter()
                     .map(|(token_id, amount)| {
                         NativeToken::new(TokenId::from_str(token_id).unwrap(), U256::from(amount)).unwrap()
                     })
-                    .collect::<Vec<_>>(),
+                    .collect::<BTreeSet<_>>(),
             )
             .unwrap();
 

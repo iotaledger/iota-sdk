@@ -38,20 +38,20 @@ impl RentStructureBuilder {
     }
 
     /// Sets the byte cost for the storage deposit.
-    pub fn byte_cost(mut self, byte_cost: u32) -> Self {
-        self.v_byte_cost.replace(byte_cost);
+    pub fn byte_cost(mut self, byte_cost: impl Into<Option<u32>>) -> Self {
+        self.v_byte_cost = byte_cost.into();
         self
     }
 
     /// Sets the virtual byte weight for the key fields.
-    pub fn byte_factor_key(mut self, weight: u8) -> Self {
-        self.v_byte_factor_key.replace(weight);
+    pub fn byte_factor_key(mut self, weight: impl Into<Option<u8>>) -> Self {
+        self.v_byte_factor_key = weight.into();
         self
     }
 
     /// Sets the virtual byte weight for the data fields.
-    pub fn byte_factor_data(mut self, weight: u8) -> Self {
-        self.v_byte_factor_data.replace(weight);
+    pub fn byte_factor_data(mut self, weight: impl Into<Option<u8>>) -> Self {
+        self.v_byte_factor_data = weight.into();
         self
     }
 
@@ -71,7 +71,7 @@ impl RentStructureBuilder {
 }
 
 /// Specifies the current parameters for the byte cost computation.
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RentStructure {
     /// Cost in tokens per virtual byte.
@@ -184,7 +184,6 @@ fn v_byte_offset(v_byte_factor_key: u8, v_byte_factor_data: u8) -> u32 {
         + size_of::<ConfirmationUnixTimestamp>() as u32 * v_byte_factor_data as u32
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
 

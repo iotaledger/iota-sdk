@@ -9,7 +9,7 @@ use packable::{
 };
 use primitive_types::U256;
 
-use crate::types::block::error::Error;
+use crate::types::block::Error;
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -109,27 +109,24 @@ fn verify_supply(minted_tokens: &U256, melted_tokens: &U256, maximum_supply: &U2
     Ok(())
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{dto::U256Dto, error::dto::DtoError};
+    use crate::types::block::{dto::U256Dto, Error};
 
     /// Describes a foundry output that is controlled by an alias.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct SimpleTokenSchemeDto {
         #[serde(rename = "type")]
         pub kind: u8,
         // Amount of tokens minted by a foundry.
-        #[serde(rename = "mintedTokens")]
         pub minted_tokens: U256Dto,
         // Amount of tokens melted by a foundry.
-        #[serde(rename = "meltedTokens")]
         pub melted_tokens: U256Dto,
         // Maximum supply of tokens controlled by a foundry.
-        #[serde(rename = "maximumSupply")]
         pub maximum_supply: U256Dto,
     }
 
@@ -145,15 +142,14 @@ pub mod dto {
     }
 
     impl TryFrom<&SimpleTokenSchemeDto> for SimpleTokenScheme {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &SimpleTokenSchemeDto) -> Result<Self, Self::Error> {
             Self::new(
-                U256::try_from(&value.minted_tokens).map_err(|_| DtoError::InvalidField("mintedTokens"))?,
-                U256::try_from(&value.melted_tokens).map_err(|_| DtoError::InvalidField("meltedTokens"))?,
-                U256::try_from(&value.maximum_supply).map_err(|_| DtoError::InvalidField("maximumSupply"))?,
+                U256::try_from(&value.minted_tokens).map_err(|_| Error::InvalidField("mintedTokens"))?,
+                U256::try_from(&value.melted_tokens).map_err(|_| Error::InvalidField("meltedTokens"))?,
+                U256::try_from(&value.maximum_supply).map_err(|_| Error::InvalidField("maximumSupply"))?,
             )
-            .map_err(DtoError::Block)
         }
     }
 }

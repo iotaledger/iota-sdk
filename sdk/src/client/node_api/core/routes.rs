@@ -36,9 +36,9 @@ use crate::{
 
 /// NodeInfo wrapper which contains the node info and the url from the node (useful when multiple nodes are used)
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NodeInfoWrapper {
     /// The returned node info
-    #[serde(rename = "nodeInfo")]
     pub node_info: InfoResponse,
     /// The url from the node which returned the node info
     pub url: String,
@@ -166,7 +166,7 @@ impl Client {
                 if let Error::Node(e) = e {
                     let fallback_to_local_pow = self.get_fallback_to_local_pow();
                     // hornet and bee return different error blocks
-                    if (e == *"No available nodes with remote Pow"
+                    if (e == *"no available nodes with remote Pow"
                         || e.contains("proof of work is not enabled")
                         || e.contains("`Pow` not enabled"))
                         && fallback_to_local_pow
@@ -240,7 +240,7 @@ impl Client {
                 if let Error::Node(e) = e {
                     let fallback_to_local_pow = self.get_fallback_to_local_pow();
                     // hornet and bee return different error blocks
-                    if (e == *"No available nodes with remote Pow"
+                    if (e == *"no available nodes with remote Pow"
                         || e.contains("proof of work is not enabled")
                         || e.contains("`Pow` not enabled"))
                         && fallback_to_local_pow

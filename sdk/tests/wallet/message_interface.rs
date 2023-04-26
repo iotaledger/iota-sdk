@@ -1,35 +1,26 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "message_interface")]
 use std::sync::{atomic::Ordering, Arc};
 
-#[cfg(all(feature = "message_interface", feature = "events"))]
+#[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::WalletEvent;
-#[cfg(feature = "message_interface")]
-use iota_sdk::wallet::{
-    message_interface::{create_message_handler, AccountMethod, ManagerOptions, Message, Response},
-    Result,
-};
-#[cfg(feature = "message_interface")]
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, ClientBuilder},
+    client::{constants::SHIMMER_COIN_TYPE, secret::GenerateAddressOptions, ClientBuilder},
     types::block::{
         address::Address,
-        output::{
-            dto::OutputDto,
-            unlock_condition::{AddressUnlockCondition, UnlockCondition},
-            BasicOutputBuilder,
-        },
+        output::{dto::OutputDto, unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
+    },
+    wallet::{
+        message_interface::{create_message_handler, AccountMethod, ManagerOptions, Message, Response},
+        Result,
     },
 };
 
 use crate::wallet::common::{setup, tear_down, FAUCET_URL};
 
-#[cfg(feature = "message_interface")]
 const TOKEN_SUPPLY: u64 = 1_813_620_509_061_365;
 
-#[cfg(feature = "message_interface")]
 #[tokio::test]
 async fn message_interface_validate_mnemonic() -> Result<()> {
     let storage_path = "test-storage/message_interface_validate_mnemonic";
@@ -67,7 +58,6 @@ async fn message_interface_validate_mnemonic() -> Result<()> {
     tear_down(storage_path)
 }
 
-#[cfg(feature = "message_interface")]
 #[tokio::test]
 async fn message_interface_create_account() -> Result<()> {
     let storage_path = "test-storage/message_interface_create_account";
@@ -125,7 +115,7 @@ async fn message_interface_create_account() -> Result<()> {
 }
 
 #[ignore]
-#[cfg(all(feature = "message_interface", feature = "events"))]
+#[cfg(feature = "events")]
 #[tokio::test]
 async fn message_interface_events() -> Result<()> {
     let storage_path = "test-storage/message_interface_events";
@@ -177,7 +167,7 @@ async fn message_interface_events() -> Result<()> {
                 account_id: "alias".into(),
                 method: AccountMethod::RequestFundsFromFaucet {
                     url: FAUCET_URL.to_string(),
-                    address: account.public_addresses[0].address().to_bech32(),
+                    address: account.public_addresses[0].address().to_string(),
                 },
             };
 
@@ -199,10 +189,9 @@ async fn message_interface_events() -> Result<()> {
     // send transaction
     let outputs = vec![OutputDto::from(
         &BasicOutputBuilder::new_with_amount(1_000_000)
-            .unwrap()
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(
+            .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu").unwrap(),
-            )))
+            ))
             .finish_output(TOKEN_SUPPLY)
             .unwrap(),
     )];
@@ -221,7 +210,7 @@ async fn message_interface_events() -> Result<()> {
     tear_down(storage_path)
 }
 
-#[cfg(all(feature = "message_interface", feature = "events"))]
+#[cfg(feature = "events")]
 #[tokio::test]
 async fn message_interface_emit_event() -> Result<()> {
     let storage_path = "test-storage/message_interface_emit_event";
@@ -278,7 +267,7 @@ async fn message_interface_emit_event() -> Result<()> {
     tear_down(storage_path)
 }
 
-#[cfg(all(feature = "message_interface", feature = "stronghold"))]
+#[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn message_interface_stronghold() -> Result<()> {
     let storage_path = "test-storage/message_interface_stronghold";
@@ -335,7 +324,6 @@ async fn message_interface_stronghold() -> Result<()> {
     tear_down(storage_path)
 }
 
-#[cfg(feature = "message_interface")]
 #[tokio::test]
 async fn address_conversion_methods() -> Result<()> {
     let storage_path = "test-storage/address_conversion_methods";
@@ -387,7 +375,6 @@ async fn address_conversion_methods() -> Result<()> {
     tear_down(storage_path)
 }
 
-#[cfg(feature = "message_interface")]
 #[tokio::test]
 async fn message_interface_address_generation() -> Result<()> {
     let storage_path = "test-storage/message_interface_address_generation";
@@ -409,7 +396,6 @@ async fn message_interface_address_generation() -> Result<()> {
     let response = wallet_handle
         .send_message(Message::GenerateAddress {
             account_index: 0,
-            internal: false,
             address_index: 0,
             options: None,
             bech32_hrp: Some("rms".to_string()),
@@ -429,9 +415,8 @@ async fn message_interface_address_generation() -> Result<()> {
     let response = wallet_handle
         .send_message(Message::GenerateAddress {
             account_index: 10,
-            internal: true,
             address_index: 10,
-            options: None,
+            options: Some(GenerateAddressOptions::internal()),
             bech32_hrp: Some("rms".to_string()),
         })
         .await;

@@ -1,6 +1,6 @@
 # Account Interface
 
-The Account Interface is evaluated, after the Account Manager Interface, repeatedly through a prompt within the `wallet`
+The Account Interface is evaluated, after the Wallet Interface, repeatedly through a prompt within the `wallet`
 binary.
 
 It is responsible for the creation and management of account addresses and their outputs, tokens, native tokens, NFTs...
@@ -41,6 +41,7 @@ Burns a native token.
 #### Example
 
 Burn the provided amount of a native token.
+
 ```sh
 > Account "main": burn-native-token 0x08860e1f3593ba86c597cf86f61d8b04d8a714c02c7c5da7132d45be9c2ce6445c0300000000 100
 ```
@@ -58,6 +59,7 @@ Burns an NFT.
 #### Example
 
 Burn a provided NFT.
+
 ```sh
 > Account "main": burn-nft 0x397ae8552dcf0dc604a44c9d86a5005d09f95d67e2965ea3b1c1271f9a9ae44c
 ```
@@ -75,13 +77,25 @@ Tries to claim outputs with storage deposit return, expiration or timelock unloc
 #### Examples
 
 Try to claim all outputs with storage deposit return, expiration or timelock unlock conditions.
+
 ```sh
 > Account "main": claim
 ```
 
 Try to claim a specific output.
+
 ```sh
 > Account "main": claim 0xd5dff9ee869dfa7796d5132b220cb5c00146c36abba27d3562e2d726decb50850000
+```
+
+### `claimable-outputs`
+
+Lists all outputs that can currently be claimed by this account and for how long.
+
+#### Examples
+
+```sh
+> Account "main": claimable-outputs
 ```
 
 ### `clear`
@@ -130,6 +144,7 @@ Melts a native token.
 #### Example
 
 Melt the provided amount of a native token.
+
 ```sh
 > Account "main": decrease-native-token-supply 0x08860e1f3593ba86c597cf86f61d8b04d8a714c02c7c5da7132d45be9c2ce6445c0300000000 100
 ```
@@ -147,6 +162,7 @@ Decreases the voting power of the account.
 #### Example
 
 Decrease the voting power of the account by 100000.
+
 ```sh
 > Account "main": decrease-voting-power 100000
 ```
@@ -199,21 +215,29 @@ Requests funds from a faucet.
 
 #### Parameters
 
-| Name      | Optional  | Default                                            | Example                                                         |
-| --------- | --------- | -------------------------------------------------- | --------------------------------------------------------------- |
-| `url`     | ✓         | https://faucet.testnet.shimmer.network/api/enqueue | http://localhost:8091/api/enqueue                               |
-| `address` | ✓         | The latest address of the account                  | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 |
+| Name      | Optional  | Default                                              | Example                                                           |
+| --------- | --------- | -----------------------------------------------------| ------------------------------------------------------------------|
+| `address` | ✓         | The latest address of the account                    | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3   |
+| `url`     | ✓         | <https://faucet.testnet.shimmer.network/api/enqueue> | <http://localhost:8091/api/enqueue>                               |
 
 #### Examples
 
-Request funds from a given faucet to the latest account address.
+Request funds from the default faucet to the latest account address.
+
 ```sh
-> Account "main": faucet http://localhost:8091/api/enqueue
+> Account "main": faucet
+```
+
+Request funds from the default faucet to a given address.
+
+```sh
+> Account "main": faucet rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
 ```
 
 Request funds from a given faucet to a given address.
+
 ```sh
-> Account "main": faucet http://localhost:8091/api/enqueue rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
+> Account "main": faucet rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 http://localhost:8091/api/enqueue
 ```
 
 ### `help`
@@ -240,6 +264,7 @@ Mints more of a native token.
 #### Example
 
 Mint 10 additional native tokens.
+
 ```sh
 > Account "main": increase-native-token-supply 0x08860e1f3593ba86c597cf86f61d8b04d8a714c02c7c5da7132d45be9c2ce6445c0300000000 10
 ```
@@ -257,6 +282,7 @@ Increases the voting power of the account.
 #### Example
 
 Increase the voting power of the account by 100000.
+
 ```sh
 > Account "main": increase-voting-power 100000
 ```
@@ -277,16 +303,19 @@ Mints a native token.
 #### Examples
 
 Mint a native token with a maximum supply.
+
 ```sh
 > Account "main": mint-native-token 1000 1000
 ```
 
 Mint a native token with a maximum supply and hexadecimal foundry metadata.
+
 ```sh
 > Account "main": mint-native-token 1000 1000 --foundry-metadata-hex 0xabcdef
 ```
 
 Mint a native token with a maximum supply and foundry metadata from a file.
+
 ```sh
 > Account "main": mint-native-token 1000 1000 --foundry-metadata-file metadata.json
 ```
@@ -313,21 +342,25 @@ Mints an NFT.
 #### Examples
 
 Mint an NFT to the latest address of the account.
+
 ```sh
 > Account "main": mint-nft
 ```
 
 Mint an NFT to a given address.
+
 ```sh
 > Account "main": mint-nft rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
 ```
 
 Mint an NFT to a given address with hexadecimal immutable metadata and metadata from a file.
+
 ```sh
 > Account "main": mint-nft rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 --immutable-metadata-hex 0xabcdef --metadata-file metadata.json
 ```
 
 Mint an NFT to a given address with hexadecimal tag and sender feature.
+
 ```sh
 > Account "main": mint-nft --tag 0xabcdef --sender rms1qq5k0ut6nl2vpyehdvg5k4ygyntd4r44t9lw2ksex280x60lc2fmcgdsmku
 ```
@@ -381,11 +414,13 @@ Calculates the participation overview of the account.
 #### Example
 
 Get the participation overview for all events.
+
 ```sh
 > Account "main": participation-overview
 ```
 
 Get the participation overview only for a specific event.
+
 ```sh
 > Account "main": participation-overview -e 0x8d6ffcd8d6c9f049b5732adb8900bb6f6a28e282b15a2297405a28181eebd515
 ```
@@ -396,32 +431,18 @@ Sends an amount to an address.
 
 #### Parameters
 
-| Name      | Optional  | Default | Example                                                         |
-| --------- | --------- | ------- | --------------------------------------------------------------- |
-| `address` | ✘         | N/A     | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 |
-| `amount`  | ✘         | N/A     | 1000000                                                         |
+| Name                 | Optional  | Default | Example                                                         |
+| -------------------- | --------- | ------- | --------------------------------------------------------------- |
+| `address`            | ✘         | N/A     | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 |
+| `amount`             | ✘         | N/A     | 1000000                                                         |
+| `return_address`     | ✓         | 1st     | rms1qrvddncqclzrxrkxhuy4cjr9aqth5nu0h5kuzhr4phj5u67mmq29z0r9v2g |
+| `expiration`         | ✓         | 1d      | 72h                                                             |
+| `allow_micro_amount` | ✓         | false   | N/A                                                             |
 
 #### Example
 
 ```sh
 > Account "main": send rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 1000000
-```
-
-### `send-micro`
-
-Sends a micro amount to an address with StorageDepositReturn and Expiration Unlock Conditions.
-
-#### Parameters
-
-| Name      | Optional  | Default | Example                                                         |
-| --------- | --------- | ------- | --------------------------------------------------------------- |
-| `address` | ✘         | N/A     | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 |
-| `amount`  | ✘         | N/A     | 1                                                               |
-
-#### Example
-
-```sh
-> Account "main": send-micro rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 1
 ```
 
 ### `send-native-token`
@@ -496,9 +517,31 @@ Synchronises the account.
 > Account "main": sync
 ```
 
+### `transaction`
+
+Shows the details of given Transaction ID
+
+#### Parameters
+
+| Name             | Optional  | Default | Example                                                                |
+| -----------------| --------- | ------- | ---------------------------------------------------------------------- |
+| `transaction_id` | ✘         | N/A     | 0x84fe6b1796bddc022c9bc40206f0a692f4536b02aa8c13140264e2e01a3b7e4b     |
+
+#### Example
+
+```sh
+> Account "main": transaction 0x84fe6b1796bddc022c9bc40206f0a692f4536b02aa8c13140264e2e01a3b7e4b
+```
+
 ### `transactions`
 
 Lists all account transactions.
+
+#### Parameters
+
+| Name               | Optional  | Default | Example                                                                         |
+| -------------------| --------- | ------- | ------------------------------------------------------------------------------- |
+| `show_details`     | ✓         | false   | true                                                                            |
 
 #### Example
 

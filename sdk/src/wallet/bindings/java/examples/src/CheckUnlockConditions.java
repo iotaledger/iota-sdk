@@ -27,7 +27,7 @@ public class CheckUnlockConditions {
         );
 
         // Get account.
-        AccountHandle a = wallet.getAccount(new AccountAlias(Env.ACCOUNT_NAME));
+        Account a = wallet.getAccount(new AccountAlias(Env.ACCOUNT_NAME));
 
         // Convert addresses to hex.
         ArrayList<String> hexEncodedAccountAddresses = new ArrayList<String>();

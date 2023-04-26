@@ -1,12 +1,12 @@
 {
   "name": "@iota/client",
-  "version": "3.0.0-rc.11",
+  "version": "3.0.0-rc.12",
   "description": "Node.js binding to the client library",
   "main": "out/lib/index.js",
   "types": "out/lib/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/iotaledger/iota.rs"
+    "url": "https://github.com/iotaledger/iota-sdk"
   },
   "author": "IOTA Foundation <contact@iota.org>",
   "license": "Apache-2.0",
@@ -21,7 +21,7 @@
     "lint": "eslint --ignore-path .eslintignore --ext .js,.ts .",
     "format": "prettier --ignore-path .eslintignore -w {,*/**/}*.{ts,js,json}",
     "format-check": "prettier --ignore-path .eslintignore -c {,*/**/}*.{ts,js,json}",
-    "install": "prebuild-install --runtime napi --tag-prefix nodejs-binding-v && tsc || npm run rebuild",
+    "install": "prebuild-install --runtime napi --tag-prefix='client-nodejs-binding-v' && tsc || npm run rebuild",
     "build": "npm run build:neon && tsc",
     "build:neon": "cargo-cp-artifact -ac iota-client-nodejs ./index.node -- cargo build --release --message-format=json-render-diagnostics",
     "rebuild": "npm run build:neon && tsc && node scripts/neon-build.js --strip && node scripts/strip.js",

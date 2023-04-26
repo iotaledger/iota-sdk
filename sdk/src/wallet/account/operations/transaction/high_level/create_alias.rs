@@ -8,46 +8,42 @@ use crate::{
     types::block::{
         address::Address,
         output::{
-            feature::{Feature, MetadataFeature},
-            unlock_condition::{
-                GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition, UnlockCondition,
-            },
+            feature::MetadataFeature,
+            unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
             AliasId, AliasOutputBuilder, Output,
         },
-        DtoError,
+        Error,
     },
-    wallet::account::{handle::AccountHandle, types::Transaction, OutputData, TransactionOptions},
+    wallet::account::{types::Transaction, Account, OutputData, TransactionOptions},
 };
 
 /// Alias output options for `create_alias_output()`
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AliasOutputOptions {
     /// Bech32 encoded address which will control the alias. Default will use the first
     /// address of the account
     pub address: Option<String>,
     /// Immutable alias metadata
-    #[serde(rename = "immutableMetadata")]
     pub immutable_metadata: Option<Vec<u8>>,
     /// Alias metadata
     pub metadata: Option<Vec<u8>>,
     /// Alias state metadata
-    #[serde(rename = "stateMetadata")]
     pub state_metadata: Option<Vec<u8>>,
 }
 
 /// Dto for aliasOptions
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AliasOutputOptionsDto {
     /// Bech32 encoded address which will control the alias. Default will use the first
     /// address of the account
     pub address: Option<String>,
     /// Immutable alias metadata, hex encoded bytes
-    #[serde(rename = "immutableMetadata")]
     pub immutable_metadata: Option<String>,
     /// Alias metadata, hex encoded bytes
     pub metadata: Option<String>,
     /// Alias state metadata
-    #[serde(rename = "stateMetadata")]
     pub state_metadata: Option<String>,
 }
 
@@ -59,17 +55,17 @@ impl TryFrom<&AliasOutputOptionsDto> for AliasOutputOptions {
             address: value.address.clone(),
             immutable_metadata: match &value.immutable_metadata {
                 Some(metadata) => {
-                    Some(prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("immutable_metadata"))?)
+                    Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("immutable_metadata"))?)
                 }
                 None => None,
             },
             metadata: match &value.metadata {
-                Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("metadata"))?),
+                Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("metadata"))?),
                 None => None,
             },
             state_metadata: match &value.state_metadata {
                 Some(metadata) => {
-                    Some(prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("state_metadata"))?)
+                    Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("state_metadata"))?)
                 }
                 None => None,
             },
@@ -77,7 +73,7 @@ impl TryFrom<&AliasOutputOptionsDto> for AliasOutputOptions {
     }
 }
 
-impl AccountHandle {
+impl Account {
     /// Function to create an alias output.
     /// ```ignore
     /// let alias_options = AliasOutputOptions {
@@ -117,7 +113,7 @@ impl AccountHandle {
             .and_then(|options| options.address.as_ref())
         {
             Some(bech32_address) => {
-                let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(bech32_address)?;
+                let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(bech32_address)?;
                 self.client.bech32_hrp_matches(&bech32_hrp).await?;
                 address
             }
@@ -132,23 +128,18 @@ impl AccountHandle {
         };
 
         let mut alias_output_builder =
-            AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())?
+            AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())
                 .with_state_index(0)
                 .with_foundry_counter(0)
-                .add_unlock_condition(UnlockCondition::StateControllerAddress(
-                    StateControllerAddressUnlockCondition::new(controller_address),
-                ))
-                .add_unlock_condition(UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(
-                    controller_address,
-                )));
+                .add_unlock_condition(StateControllerAddressUnlockCondition::new(controller_address))
+                .add_unlock_condition(GovernorAddressUnlockCondition::new(controller_address));
         if let Some(options) = alias_output_options {
             if let Some(immutable_metadata) = options.immutable_metadata {
-                alias_output_builder = alias_output_builder
-                    .add_immutable_feature(Feature::Metadata(MetadataFeature::new(immutable_metadata)?));
+                alias_output_builder =
+                    alias_output_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
             }
             if let Some(metadata) = options.metadata {
-                alias_output_builder =
-                    alias_output_builder.add_feature(Feature::Metadata(MetadataFeature::new(metadata)?));
+                alias_output_builder = alias_output_builder.add_feature(MetadataFeature::new(metadata)?);
             }
             if let Some(state_metadata) = options.state_metadata {
                 alias_output_builder = alias_output_builder.with_state_metadata(state_metadata);

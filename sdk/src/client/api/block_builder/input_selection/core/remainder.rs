@@ -15,10 +15,7 @@ use crate::{
     client::api::RemainderData,
     types::block::{
         address::{Address, Ed25519Address},
-        output::{
-            unlock_condition::{AddressUnlockCondition, UnlockCondition},
-            BasicOutputBuilder, NativeTokensBuilder, Output,
-        },
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder, Output},
     },
 };
 
@@ -64,9 +61,9 @@ impl InputSelection {
         let native_tokens_remainder = native_tokens_diff.is_some();
 
         let mut remainder_builder =
-            BasicOutputBuilder::new_with_minimum_storage_deposit(self.protocol_parameters.rent_structure().clone())?
-                .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(Address::from(
-                    Ed25519Address::from([0; 32]),
+            BasicOutputBuilder::new_with_minimum_storage_deposit(*self.protocol_parameters.rent_structure())
+                .add_unlock_condition(AddressUnlockCondition::new(Address::from(Ed25519Address::from(
+                    [0; 32],
                 ))));
 
         if let Some(native_tokens) = native_tokens_diff {
@@ -93,8 +90,8 @@ impl InputSelection {
 
             if amount > output_sdr_amount {
                 let diff = amount - output_sdr_amount;
-                let srd_output = BasicOutputBuilder::new_with_amount(diff)?
-                    .with_unlock_conditions([UnlockCondition::Address(AddressUnlockCondition::new(address))])
+                let srd_output = BasicOutputBuilder::new_with_amount(diff)
+                    .with_unlock_conditions([AddressUnlockCondition::new(address)])
                     .finish_output(self.protocol_parameters.token_supply())?;
 
                 // TODO verify_storage_deposit ?
@@ -130,10 +127,9 @@ impl InputSelection {
 
         // TODO checked ops ?
         let diff = inputs_sum - outputs_sum;
-        let mut remainder_builder = BasicOutputBuilder::new_with_amount(diff)?;
+        let mut remainder_builder = BasicOutputBuilder::new_with_amount(diff);
 
-        remainder_builder = remainder_builder
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(remainder_address)));
+        remainder_builder = remainder_builder.add_unlock_condition(AddressUnlockCondition::new(remainder_address));
 
         if let Some(native_tokens) = native_tokens_diff {
             log::debug!("Adding {native_tokens:?} to remainder output for {remainder_address:?}");
@@ -145,7 +141,7 @@ impl InputSelection {
         log::debug!("Created remainder output of {diff} for {remainder_address:?}");
 
         remainder.verify_storage_deposit(
-            self.protocol_parameters.rent_structure().clone(),
+            *self.protocol_parameters.rent_structure(),
             self.protocol_parameters.token_supply(),
         )?;
 

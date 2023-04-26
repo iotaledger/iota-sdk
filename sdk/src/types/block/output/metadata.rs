@@ -117,15 +117,15 @@ impl OutputMetadata {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
-    use std::str::FromStr;
+    use alloc::string::{String, ToString};
+    use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// DTO for an [`OutputMetadata`].
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -154,7 +154,7 @@ pub mod dto {
     }
 
     impl TryFrom<&OutputMetadataDto> for OutputMetadata {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(response: &OutputMetadataDto) -> Result<Self, Self::Error> {
             Ok(Self {

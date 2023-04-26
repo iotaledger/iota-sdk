@@ -20,7 +20,7 @@ pub enum TokenScheme {
 impl core::fmt::Debug for TokenScheme {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Simple(scheme) => write!(f, "{scheme:?}"),
+            Self::Simple(scheme) => scheme.fmt(f),
         }
     }
 }
@@ -34,7 +34,6 @@ impl TokenScheme {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
     use derive_more::From;
@@ -42,7 +41,7 @@ pub mod dto {
 
     pub use super::simple::dto::SimpleTokenSchemeDto;
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
     #[serde(untagged)]
@@ -60,7 +59,7 @@ pub mod dto {
     }
 
     impl TryFrom<&TokenSchemeDto> for TokenScheme {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &TokenSchemeDto) -> Result<Self, Self::Error> {
             Ok(match value {

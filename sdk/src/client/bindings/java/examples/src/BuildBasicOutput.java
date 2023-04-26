@@ -1,10 +1,10 @@
 import org.iota.Client;
 import org.iota.types.ClientConfig;
-import org.iota.types.expections.ClientException;
+import org.iota.types.exceptions.ClientException;
 import org.iota.types.Output;
 import org.iota.types.UnlockCondition;
 import org.iota.types.Feature;
-import org.iota.types.expections.InitializeClientException;
+import org.iota.types.exceptions.InitializeClientException;
 import org.iota.types.output_builder.BasicOutputBuilderParams;
 import org.iota.types.secret.GenerateAddressesOptions;
 import org.iota.types.secret.MnemonicSecretManager;
@@ -84,6 +84,31 @@ public class BuildBasicOutput {
 
         System.out.println(
             new GsonBuilder().setPrettyPrinting().create().toJson(JsonParser.parseString(timelockOutput.toString()))
+        );
+
+        // Output with tag feature
+        BasicOutputBuilderParams tagParams = new BasicOutputBuilderParams()
+            .withAmount(amount)
+            .withUnlockConditions(new UnlockCondition[]{addressUnlockCondition})
+            // "Hello, World!" hex encoded
+            .withFeatures(new Feature[]{new Feature("{ type: 3, tag: \"0x48656c6c6f2c20576f726c6421\" }")});
+
+        Output tagOutput = client.buildBasicOutput(tagParams);
+
+        System.out.println(
+            new GsonBuilder().setPrettyPrinting().create().toJson(JsonParser.parseString(tagOutput.toString()))
+        );
+
+        // Output with sender feature
+        BasicOutputBuilderParams senderParams = new BasicOutputBuilderParams()
+            .withAmount(amount)
+            .withUnlockConditions(new UnlockCondition[]{addressUnlockCondition})
+            .withFeatures(new Feature[]{new Feature("{ type: 0, sender: \"" + hexAddress + "\" }")});
+
+        Output senderOutput = client.buildBasicOutput(senderParams);
+
+        System.out.println(
+            new GsonBuilder().setPrettyPrinting().create().toJson(JsonParser.parseString(senderOutput.toString()))
         );
     }
 }

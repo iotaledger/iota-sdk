@@ -27,12 +27,11 @@ use crate::{
 
 /// Node manager builder
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct NodeManagerBuilder {
     /// Node which will be tried first for all requests
-    #[serde(rename = "primaryNode")]
     pub primary_node: Option<NodeDto>,
     /// Node which will be tried first when using remote PoW, even before the primary_node
-    #[serde(rename = "primaryPowNode")]
     pub primary_pow_node: Option<NodeDto>,
     /// Nodes
     #[serde(default)]
@@ -40,24 +39,24 @@ pub struct NodeManagerBuilder {
     /// Permanodes
     pub permanodes: Option<HashSet<NodeDto>>,
     /// If the node health should be ignored
-    #[serde(rename = "ignoreNodeHealth", default)]
+    #[serde(default)]
     pub ignore_node_health: bool,
-    /// Interval in which nodes will be checked for their sync status and the [NetworkInfo](crate::NetworkInfo)
+    /// Interval in which nodes will be checked for their sync status and the [NetworkInfo](crate::client::NetworkInfo)
     /// gets updated
-    #[serde(rename = "nodeSyncInterval", default = "default_node_sync_interval")]
+    #[serde(default = "default_node_sync_interval")]
     pub node_sync_interval: Duration,
     /// If node quorum is enabled. Will compare the responses from multiple nodes and only returns the response if
     /// `quorum_threshold`% of the nodes return the same one
     #[serde(default)]
     pub quorum: bool,
     /// Minimum amount of nodes required for request when quorum is enabled
-    #[serde(rename = "minQuorumSize", default = "default_min_quorum_size")]
+    #[serde(default = "default_min_quorum_size")]
     pub min_quorum_size: usize,
     /// % of nodes that have to return the same response so it gets accepted
-    #[serde(rename = "quorumThreshold", default = "default_quorum_threshold")]
+    #[serde(default = "default_quorum_threshold")]
     pub quorum_threshold: usize,
     /// The User-Agent header for requests
-    #[serde(rename = "userAgent", default = "default_user_agent")]
+    #[serde(default = "default_user_agent")]
     pub user_agent: String,
 }
 

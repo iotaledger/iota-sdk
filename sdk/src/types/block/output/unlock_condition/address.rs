@@ -6,7 +6,7 @@ use derive_more::From;
 use crate::types::block::address::Address;
 
 /// Defines the Address that owns this output, that is, it can unlock it with the proper Unlock in a transaction.
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AddressUnlockCondition(Address);
 
@@ -27,13 +27,12 @@ impl AddressUnlockCondition {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, error::dto::DtoError};
+    use crate::types::block::{address::dto::AddressDto, Error};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct AddressUnlockConditionDto {
@@ -52,13 +51,13 @@ pub mod dto {
     }
 
     impl TryFrom<&AddressUnlockConditionDto> for AddressUnlockCondition {
-        type Error = DtoError;
+        type Error = Error;
 
-        fn try_from(value: &AddressUnlockConditionDto) -> Result<Self, DtoError> {
+        fn try_from(value: &AddressUnlockConditionDto) -> Result<Self, Error> {
             Ok(Self::new(
                 (&value.address)
                     .try_into()
-                    .map_err(|_e| DtoError::InvalidField("addressUnlockCondition"))?,
+                    .map_err(|_e| Error::InvalidField("addressUnlockCondition"))?,
             ))
         }
     }

@@ -57,10 +57,10 @@ pub enum Unlock {
 impl core::fmt::Debug for Unlock {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Signature(unlock) => write!(f, "{unlock:?}"),
-            Self::Reference(unlock) => write!(f, "{unlock:?}"),
-            Self::Alias(unlock) => write!(f, "{unlock:?}"),
-            Self::Nft(unlock) => write!(f, "{unlock:?}"),
+            Self::Signature(unlock) => unlock.fmt(f),
+            Self::Reference(unlock) => unlock.fmt(f),
+            Self::Alias(unlock) => unlock.fmt(f),
+            Self::Nft(unlock) => unlock.fmt(f),
         }
     }
 }
@@ -145,9 +145,10 @@ fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _: &()) -> Result<(), 
     Ok(())
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::format;
+
     use serde::{Deserialize, Serialize, Serializer};
     use serde_json::Value;
 
@@ -157,11 +158,11 @@ pub mod dto {
         signature::dto::SignatureUnlockDto,
     };
     use crate::types::block::{
-        error::dto::DtoError,
         signature::{
             dto::{Ed25519SignatureDto, SignatureDto},
             Ed25519Signature, Signature,
         },
+        Error,
     };
 
     /// Describes all the different unlock types.
@@ -203,16 +204,16 @@ pub mod dto {
     }
 
     impl TryFrom<&UnlockDto> for Unlock {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &UnlockDto) -> Result<Self, Self::Error> {
             match value {
                 UnlockDto::Signature(s) => match &s.signature {
                     SignatureDto::Ed25519(ed) => {
                         let public_key =
-                            prefix_hex::decode(&ed.public_key).map_err(|_| DtoError::InvalidField("publicKey"))?;
+                            prefix_hex::decode(&ed.public_key).map_err(|_| Error::InvalidField("publicKey"))?;
                         let signature =
-                            prefix_hex::decode(&ed.signature).map_err(|_| DtoError::InvalidField("signature"))?;
+                            prefix_hex::decode(&ed.signature).map_err(|_| Error::InvalidField("signature"))?;
                         Ok(Self::Signature(SignatureUnlock::from(Signature::Ed25519(
                             Ed25519Signature::new(public_key, signature),
                         ))))

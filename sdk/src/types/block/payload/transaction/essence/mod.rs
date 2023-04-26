@@ -40,14 +40,13 @@ impl TransactionEssence {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
     pub use super::regular::dto::RegularTransactionEssenceDto;
     use super::*;
-    use crate::types::block::{error::dto::DtoError, protocol::ProtocolParameters};
+    use crate::types::block::{protocol::ProtocolParameters, Error};
 
     /// Describes all the different essence types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
@@ -68,7 +67,7 @@ pub mod dto {
         pub fn try_from_dto(
             value: &TransactionEssenceDto,
             protocol_parameters: &ProtocolParameters,
-        ) -> Result<Self, DtoError> {
+        ) -> Result<Self, Error> {
             match value {
                 TransactionEssenceDto::Regular(r) => Ok(Self::Regular(RegularTransactionEssence::try_from_dto(
                     r,
@@ -77,7 +76,7 @@ pub mod dto {
             }
         }
 
-        pub fn try_from_dto_unverified(value: &TransactionEssenceDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &TransactionEssenceDto) -> Result<Self, Error> {
             match value {
                 TransactionEssenceDto::Regular(r) => {
                     Ok(Self::Regular(RegularTransactionEssence::try_from_dto_unverified(r)?))

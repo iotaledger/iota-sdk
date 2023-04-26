@@ -1,6 +1,6 @@
 # IOTA Client Library - Node.js binding
 
-Node.js binding to the iota.rs client library.
+Node.js binding to the iota-sdk client library.
 
 ## Installation
 

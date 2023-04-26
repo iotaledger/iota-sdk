@@ -71,13 +71,14 @@ impl core::fmt::Debug for TaggedDataPayload {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::string::String;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// The payload type to define a tagged data payload.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -101,21 +102,21 @@ pub mod dto {
     }
 
     impl TryFrom<&TaggedDataPayloadDto> for TaggedDataPayload {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &TaggedDataPayloadDto) -> Result<Self, Self::Error> {
-            Ok(Self::new(
+            Self::new(
                 if !value.tag.is_empty() {
-                    prefix_hex::decode(&value.tag).map_err(|_| DtoError::InvalidField("tag"))?
+                    prefix_hex::decode(&value.tag).map_err(|_| Error::InvalidField("tag"))?
                 } else {
                     Vec::new()
                 },
                 if !value.data.is_empty() {
-                    prefix_hex::decode(&value.data).map_err(|_| DtoError::InvalidField("data"))?
+                    prefix_hex::decode(&value.data).map_err(|_| Error::InvalidField("data"))?
                 } else {
                     Vec::new()
                 },
-            )?)
+            )
         }
     }
 }

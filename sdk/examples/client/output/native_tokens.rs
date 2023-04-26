@@ -1,31 +1,29 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example native_tokens --release
+//! In this example we will send basic outputs with native tokens in two ways:
+//! 1. receiver gets the full output amount + native tokens
+//! 2. receiver needs to claim the output to get the native tokens, but has to send the amount back
+//!
+//! `cargo run --example native_tokens --release`
 
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use iota_sdk::{
     client::{secret::SecretManager, utils::request_funds_from_faucet, Client, Result},
     types::block::output::{
-        unlock_condition::{
-            AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition, UnlockCondition,
-        },
+        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
         BasicOutputBuilder, NativeToken, TokenId,
     },
 };
 use primitive_types::U256;
 
-/// In this example we will send basic outputs with native tokens in two ways:
-/// 1. receiver gets the full output amount + native tokens
-/// 2. receiver needs to claim the output to get the native tokens, but has to send the amount back
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production!
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     // Configure your own mnemonic in the ".env" file. Since the output amount cannot be zero, the seed must contain
     // non-zero balance.
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
@@ -59,25 +57,24 @@ async fn main() -> Result<()> {
     let outputs = vec![
         // Without StorageDepositReturnUnlockCondition, the receiver will get the amount of the output and the native
         // tokens
-        BasicOutputBuilder::new_with_amount(1_000_000)?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(receiver_address)))
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
             .add_native_token(NativeToken::new(TokenId::new(token_id), U256::from(10))?)
             .finish_output(token_supply)?,
         // With StorageDepositReturnUnlockCondition, the receiver can consume the output to get the native tokens, but
         // he needs to send the amount back
-        BasicOutputBuilder::new_with_amount(1_000_000)?
-            .add_unlock_condition(UnlockCondition::Address(AddressUnlockCondition::new(receiver_address)))
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
             .add_native_token(NativeToken::new(TokenId::new(token_id), U256::from(10))?)
             // Return the full amount.
-            .add_unlock_condition(UnlockCondition::StorageDepositReturn(
-                StorageDepositReturnUnlockCondition::new(sender_address, 1_000_000, token_supply)?,
-            ))
+            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                sender_address,
+                1_000_000,
+                token_supply,
+            )?)
             // If the receiver does not consume this output, we unlock after a day to avoid
             // locking our funds forever.
-            .add_unlock_condition(UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                sender_address,
-                tomorrow,
-            )?))
+            .add_unlock_condition(ExpirationUnlockCondition::new(sender_address, tomorrow)?)
             .finish_output(token_supply)?,
     ];
 
