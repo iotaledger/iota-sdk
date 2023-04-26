@@ -48,38 +48,50 @@ async fn main() -> Result<()> {
             ..Default::default()
         }];
 
-        let transaction = account.send_native_tokens(outputs, None).await?;
+        println!("Preparing native token transaction...");
 
-        println!("Transaction: {}", transaction.transaction_id);
+        let transaction = account.send_native_tokens(outputs, None).await?;
+        println!("Transaction sent: {}", transaction.transaction_id);
+
+        // Wait for transaction to get included
+        account
+            .retry_transaction_until_included(&transaction.transaction_id, None, None)
+            .await?;
         println!(
-            "Block sent: {}/api/core/v2/blocks/{}",
+            "Transaction included: {}/api/core/v2/blocks/{}",
             &std::env::var("NODE_URL").unwrap(),
             transaction.block_id.expect("no block created yet")
         );
+
+        account.sync(None).await?;
+        println!("Account synced");
+
+        println!("Preparing basic output transaction...");
 
         // Send native tokens together with the required storage deposit
         let rent_structure = account.client().get_rent_structure().await?;
 
         let outputs = vec![
-            BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)?
+            BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                 .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(bech32_address)?))
                 .with_native_tokens(vec![NativeToken::new(*token_id, U256::from(10))?])
                 .finish_output(account.client().get_token_supply().await?)?,
         ];
 
         let transaction = account.send(outputs, None).await?;
+        println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included
         account
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
-
-        println!("Transaction: {}", transaction.transaction_id);
         println!(
-            "Block sent: {}/api/core/v2/blocks/{}",
+            "Transaction included: {}/api/core/v2/blocks/{}",
             &std::env::var("NODE_URL").unwrap(),
             transaction.block_id.expect("no block created yet")
         );
+    } else {
+        println!("Insufficient native token funds");
     }
 
     Ok(())

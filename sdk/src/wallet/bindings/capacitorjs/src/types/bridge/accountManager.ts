@@ -74,7 +74,6 @@ export type __GenerateAddressMessage__ = {
     cmd: 'generateAddress';
     payload: {
         accountIndex: number;
-        internal: boolean;
         addressIndex: number;
         options?: GenerateAddressOptions;
         bech32Hrp?: string;

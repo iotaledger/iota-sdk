@@ -11,10 +11,10 @@ import type {
     AddressWithAmount,
     AddressNativeTokens,
     AddressNftId,
-    AddressGenerationOptions,
     AddressWithUnspentOutputs,
     AliasOutputOptions,
     FilterOptions,
+    GenerateAddressOptions,
     IncreaseNativeTokenSupplyOptions,
     MintTokenTransaction,
     NativeTokenOptions,
@@ -342,7 +342,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          * @returns The address.
          */
         async generateAddress(
-            options?: AddressGenerationOptions,
+            options?: GenerateAddressOptions,
         ): Promise<Address> {
             const addresses = await this.generateAddresses(1, options);
             return addresses[0];
@@ -356,7 +356,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          */
         async generateAddresses(
             amount: number,
-            options?: AddressGenerationOptions,
+            options?: GenerateAddressOptions,
         ): Promise<Address[]> {
             const response = await messageHandler.callAccountMethod(
                 accountMeta.index,
@@ -918,13 +918,13 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
 
         /**
          * Send native tokens.
-         * @param addressesNativeTokens Addresses amounts and native tokens.
+         * @param addressesAndNativeTokens Addresses amounts and native tokens.
          * @param transactionOptions The options to define a `RemainderValueStrategy`
          * or custom inputs.
          * @returns The sent transaction.
          */
         async sendNativeTokens(
-            addressesNativeTokens: AddressNativeTokens[],
+            addressesAndNativeTokens: AddressNativeTokens[],
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const response = await messageHandler.callAccountMethod(
@@ -932,7 +932,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
                 {
                     name: 'sendNativeTokens',
                     data: {
-                        addressesNativeTokens,
+                        addressesAndNativeTokens,
                         options: transactionOptions,
                     },
                 },

@@ -15,12 +15,12 @@ use crate::{
         output::{Output, OUTPUT_COUNT_RANGE},
     },
     wallet::account::{
-        handle::AccountHandle,
         operations::transaction::{RemainderValueStrategy, TransactionOptions},
+        Account,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Get inputs and build the transaction essence
     pub async fn prepare_transaction(
         &self,
@@ -35,7 +35,7 @@ impl AccountHandle {
 
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {
-            output.verify_storage_deposit(rent_structure.clone(), token_supply)?;
+            output.verify_storage_deposit(rent_structure, token_supply)?;
         }
 
         // validate amounts
@@ -79,7 +79,7 @@ impl AccountHandle {
                                 account_index,
                                 WalletEvent::TransactionProgress(
                                     TransactionProgressEvent::GeneratingRemainderDepositAddress(AddressData {
-                                        address: remainder_address.address.to_bech32(),
+                                        address: remainder_address.address.to_string(),
                                     }),
                                 ),
                             );

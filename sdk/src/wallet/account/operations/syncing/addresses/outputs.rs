@@ -4,14 +4,11 @@
 use instant::Instant;
 
 use crate::wallet::{
-    account::{
-        constants::PARALLEL_REQUESTS_AMOUNT, handle::AccountHandle, types::address::AddressWithUnspentOutputs,
-        OutputData,
-    },
+    account::{constants::PARALLEL_REQUESTS_AMOUNT, types::address::AddressWithUnspentOutputs, Account, OutputData},
     task,
 };
 
-impl AccountHandle {
+impl Account {
     /// Get outputs from addresses
     pub(crate) async fn get_outputs_from_address_output_ids(
         &self,
@@ -30,12 +27,12 @@ impl AccountHandle {
         {
             let mut tasks = Vec::new();
             for address in addresses_chunk {
-                let account_handle = self.clone();
+                let account = self.clone();
                 tasks.push(async move {
                     task::spawn(async move {
-                        let output_responses = account_handle.get_outputs(address.output_ids.clone()).await?;
+                        let output_responses = account.get_outputs(address.output_ids.clone()).await?;
 
-                        let outputs = account_handle
+                        let outputs = account
                             .output_response_to_output_data(output_responses, &address)
                             .await?;
                         crate::wallet::Result::Ok((address, outputs))

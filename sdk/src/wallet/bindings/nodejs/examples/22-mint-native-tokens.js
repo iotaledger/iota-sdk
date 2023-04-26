@@ -31,7 +31,9 @@ async function run() {
         let { transaction } = await account.mintNativeToken(
             nativeTokenOptions,
         );
-        console.log('Transaction ID: ', transaction.transactionId);
+        console.log(
+            `Check your block on ${process.env.EXPLORER_URL}/block/${response.blockId}`,
+        );
     } catch (error) {
         console.log('Error: ', error);
     }

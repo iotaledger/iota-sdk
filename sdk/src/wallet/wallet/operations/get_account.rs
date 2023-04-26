@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::wallet::{
-    account::{handle::AccountHandle, types::AccountIdentifier},
+    account::{types::AccountIdentifier, Account},
     Wallet,
 };
 
@@ -11,24 +11,26 @@ impl Wallet {
     pub async fn get_account<I: Into<AccountIdentifier> + Send>(
         &self,
         identifier: I,
-    ) -> crate::wallet::Result<AccountHandle> {
+    ) -> crate::wallet::Result<Account> {
         let account_id = identifier.into();
         let accounts = self.accounts.read().await;
 
         match &account_id {
             AccountIdentifier::Index(index) => {
-                for account_handle in accounts.iter() {
-                    let account = account_handle.read().await;
-                    if account.index() == index {
-                        return Ok(account_handle.clone());
+                for account in accounts.iter() {
+                    let account_details = account.read().await;
+
+                    if account_details.index() == index {
+                        return Ok(account.clone());
                     }
                 }
             }
             AccountIdentifier::Alias(alias) => {
-                for account_handle in accounts.iter() {
-                    let account = account_handle.read().await;
-                    if account.alias() == alias {
-                        return Ok(account_handle.clone());
+                for account in accounts.iter() {
+                    let account_details = account.read().await;
+
+                    if account_details.alias() == alias {
+                        return Ok(account.clone());
                     }
                 }
             }

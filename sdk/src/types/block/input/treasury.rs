@@ -57,14 +57,14 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// Describes an input which references an unspent treasury output to consume.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct TreasuryInputDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "milestoneId")]
         pub milestone_id: String,
     }
 
@@ -78,14 +78,14 @@ pub mod dto {
     }
 
     impl TryFrom<&TreasuryInputDto> for TreasuryInput {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &TreasuryInputDto) -> Result<Self, Self::Error> {
             Ok(Self::new(
                 value
                     .milestone_id
                     .parse::<MilestoneId>()
-                    .map_err(|_| DtoError::InvalidField("milestoneId"))?,
+                    .map_err(|_| Error::InvalidField("milestoneId"))?,
             ))
         }
     }

@@ -56,17 +56,18 @@ pub enum MqttEvent {
 /// The MQTT broker options.
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 #[must_use]
 pub struct BrokerOptions {
-    #[serde(default = "default_broker_automatic_disconnect", rename = "automaticDisconnect")]
+    #[serde(default = "default_broker_automatic_disconnect")]
     pub(crate) automatic_disconnect: bool,
     #[serde(default = "default_broker_timeout")]
     pub(crate) timeout: Duration,
-    #[serde(default = "default_broker_use_ws", rename = "useWs")]
+    #[serde(default = "default_broker_use_ws")]
     pub(crate) use_ws: bool,
     #[serde(default = "default_broker_port")]
     pub(crate) port: u16,
-    #[serde(default = "default_max_reconnection_attempts", rename = "maxReconnectionAttempts")]
+    #[serde(default = "default_max_reconnection_attempts")]
     pub(crate) max_reconnection_attempts: usize,
 }
 

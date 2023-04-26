@@ -1,16 +1,20 @@
 #!/bin/bash
-# 🛑 temporarily using host https://files.iota.org/firefly/bindings until CI will be done.
 set -e
 rm -rf tmp && mkdir tmp && cd tmp
-echo Installing Java libraries
-# curl -SL --progress-bar --fail https://github.com/iotaledger/wallet.rs/releases/download/iota-wallet-java-1.0.0-rc.1-new/iota-wallet-1.0.0-rc.1-android.zip > iota-wallet-java.zip
-curl -SL --progress-bar --fail https://files.iota.org/firefly/bindings/jniLibs-1.0.0-alpha.0.zip > iota-wallet-java.zip
+
+# retrieve the latest version of org.iota.iota-wallet from Maven Central
+latest_version=$(wget -qO- "https://search.maven.org/solrsearch/select?q=g:%22org.iota%22+AND+a:%22iota-wallet%22&core=gav&rows=1&wt=json" | jq ".response.docs[0].v" -r)
+
+echo Installing Java libraries v$latest_version
+curl -SL --progress-bar --fail https://github.com/iotaledger/iota-sdk/releases/download/iota-wallet-java-$latest_version/jniLibs.zip > iota-wallet-java.zip
 unzip iota-wallet-java.zip             
 rm -rf ../android/src/main/jniLibs
 cp -rv jniLibs ../android/src/main
-curl -SL --progress-bar --fail https://files.iota.org/firefly/bindings/iota-wallet-1.0.0-alpha.0.jar > iota-wallet.jar
+curl -SL --progress-bar --fail https://github.com/iotaledger/iota-sdk/releases/download/iota-wallet-java-$latest_version/iota-wallet-$latest_version.jar > iota-wallet.jar
 rm -rf ../android/libs && mkdir -p ../android/libs             
 cp -rv iota-wallet.jar ../android/libs
+
+# 🛑 temporarily using host https://files.iota.org/firefly/bindings until Swift mobile CI will be done.
 echo Installing Swift libraries
 curl -SL --progress-bar --fail https://files.iota.org/firefly/bindings/WalletFramework-1.0.0-alpha.0.zip > iota-wallet-swift.zip
 unzip iota-wallet-swift.zip             

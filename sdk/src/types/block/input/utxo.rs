@@ -56,16 +56,15 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// Describes an input which references an unspent transaction output to consume.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct UtxoInputDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "transactionId")]
         pub transaction_id: String,
-        #[serde(rename = "transactionOutputIndex")]
         pub transaction_output_index: u16,
     }
 
@@ -80,16 +79,16 @@ pub mod dto {
     }
 
     impl TryFrom<&UtxoInputDto> for UtxoInput {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &UtxoInputDto) -> Result<Self, Self::Error> {
-            Ok(Self::new(
+            Self::new(
                 value
                     .transaction_id
                     .parse::<TransactionId>()
-                    .map_err(|_| DtoError::InvalidField("transactionId"))?,
+                    .map_err(|_| Error::InvalidField("transactionId"))?,
                 value.transaction_output_index,
-            )?)
+            )
         }
     }
 }

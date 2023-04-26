@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
 
     println!("Addresses:");
     for address in account.addresses().await? {
-        println!(" - {prepended}{}", address.address().to_bech32());
+        println!(" - {prepended}{}", address.address());
     }
 
     Ok(())

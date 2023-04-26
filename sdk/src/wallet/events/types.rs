@@ -8,14 +8,17 @@ use crate::{
     client::api::PreparedTransactionDataDto,
     types::{
         api::core::response::OutputWithMetadataResponse,
-        block::payload::transaction::{dto::TransactionPayloadDto, TransactionId},
+        block::{
+            address::Bech32Address,
+            payload::transaction::{dto::TransactionPayloadDto, TransactionId},
+        },
     },
-    wallet::account::types::{address::AddressWrapper, InclusionState, OutputDataDto},
+    wallet::account::types::{InclusionState, OutputDataDto},
 };
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Event {
     /// Associated account index.
-    #[serde(rename = "accountIndex")]
     pub account_index: u32,
     /// The event
     pub event: WalletEvent,
@@ -156,6 +159,7 @@ impl TryFrom<&str> for WalletEventType {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NewOutputEvent {
     /// The new output.
     pub output: OutputDataDto,
@@ -163,7 +167,7 @@ pub struct NewOutputEvent {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub transaction: Option<TransactionPayloadDto>,
     /// The inputs for the transaction that created the output. Might be pruned and not available.
-    #[serde(rename = "transactionInputs", skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub transaction_inputs: Option<Vec<OutputWithMetadataResponse>>,
 }
 
@@ -174,10 +178,9 @@ pub struct SpentOutputEvent {
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TransactionInclusionEvent {
-    #[serde(rename = "transactionId")]
     pub transaction_id: TransactionId,
-    #[serde(rename = "inclusionState")]
     pub inclusion_state: InclusionState,
 }
 
@@ -202,8 +205,7 @@ pub enum TransactionProgressEvent {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct AddressConsolidationNeeded {
     /// The associated address.
-    #[serde(with = "crate::wallet::account::types::address_serde")]
-    pub address: AddressWrapper,
+    pub address: Bech32Address,
 }
 
 /// Address event data.

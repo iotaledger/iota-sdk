@@ -10,7 +10,7 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{
-            feature::MetadataFeature,
+            feature::{MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                 TimelockUnlockCondition,
@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
 
     let basic_output_builder =
-        BasicOutputBuilder::new_with_amount(1_000_000)?.add_unlock_condition(AddressUnlockCondition::new(address));
+        BasicOutputBuilder::new_with_amount(1_000_000).add_unlock_condition(AddressUnlockCondition::new(address));
 
     let outputs = vec![
         // most simple output
@@ -61,7 +61,17 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
         // with timelock
         basic_output_builder
+            .clone()
             .add_unlock_condition(TimelockUnlockCondition::new(1)?)
+            .finish_output(token_supply)?,
+        // with tag feature
+        basic_output_builder
+            .clone()
+            .add_feature(TagFeature::new("Hello, World!".as_bytes().to_owned())?)
+            .finish_output(token_supply)?,
+        // with sender feature
+        basic_output_builder
+            .add_feature(SenderFeature::new(address))
             .finish_output(token_supply)?,
     ];
 

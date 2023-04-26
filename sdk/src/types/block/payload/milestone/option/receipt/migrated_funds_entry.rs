@@ -81,11 +81,11 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, error::dto::DtoError};
+    use crate::types::block::{address::dto::AddressDto, Error};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct MigratedFundsEntryDto {
-        #[serde(rename = "tailTransactionHash")]
         pub tail_transaction_hash: String,
         pub address: AddressDto,
         pub deposit: u64,
@@ -102,21 +102,21 @@ pub mod dto {
     }
 
     impl MigratedFundsEntry {
-        pub fn try_from_dto(value: &MigratedFundsEntryDto, token_supply: u64) -> Result<Self, DtoError> {
+        pub fn try_from_dto(value: &MigratedFundsEntryDto, token_supply: u64) -> Result<Self, Error> {
             let tail_transaction_hash = prefix_hex::decode(&value.tail_transaction_hash)
-                .map_err(|_| DtoError::InvalidField("tailTransactionHash"))?;
+                .map_err(|_| Error::InvalidField("tailTransactionHash"))?;
 
-            Ok(Self::new(
+            Self::new(
                 TailTransactionHash::new(tail_transaction_hash)?,
                 (&value.address).try_into()?,
                 value.deposit,
                 token_supply,
-            )?)
+            )
         }
 
-        pub fn try_from_dto_unverified(value: &MigratedFundsEntryDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &MigratedFundsEntryDto) -> Result<Self, Error> {
             let tail_transaction_hash = prefix_hex::decode(&value.tail_transaction_hash)
-                .map_err(|_| DtoError::InvalidField("tailTransactionHash"))?;
+                .map_err(|_| Error::InvalidField("tailTransactionHash"))?;
 
             Ok(Self {
                 tail_transaction_hash: TailTransactionHash::new(tail_transaction_hash)?,

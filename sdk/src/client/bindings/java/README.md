@@ -8,8 +8,8 @@ minimum Java version >= 8
 
 ## Use in your Android project (Android Studio)
 
-1. Download the `iota-client-1.0.0-rc.1.jar` file from the [GitHub release](https://github.com/iotaledger/iota.rs/releases/tag/iota-client-java-1.0.0-rc.1) and add it as a library to your project.
-2. Download the `iota-client-1.0.0-rc.1-android.zip` file from the [GitHub release](https://github.com/iotaledger/iota.rs/releases/tag/iota-client-java-1.0.0-rc.1), unzip it and add the `jniLibs` folder with its contents to your Android Studio project as shown below:
+1. Download the `iota-client-1.0.0-rc.3.jar` file from the [GitHub release](https://github.com/iotaledger/iota.rs/releases/tag/iota-client-java-1.0.0-rc.3) and add it as a library to your project.
+2. Download the `iota-client-1.0.0-rc.3-android.zip` file from the [GitHub release](https://github.com/iotaledger/iota.rs/releases/tag/iota-client-java-1.0.0-rc.3), unzip it and add the `jniLibs` folder with its contents to your Android Studio project as shown below:
 
 ```
 project/
@@ -38,22 +38,22 @@ Depending on your operating system, add one of the following dependencies to you
 
 #### linux-x86_64
 ```
-implementation 'org.iota:iota-client:1.0.0-rc.1:linux-x86_64'
+implementation 'org.iota:iota-client:1.0.0-rc.3:linux-x86_64'
 ```
 
 #### windows-x86_64
 ```
-implementation 'org.iota:iota-client:1.0.0-rc.1:windows-x86_64'
+implementation 'org.iota:iota-client:1.0.0-rc.3:windows-x86_64'
 ```
 
 #### aarch64-apple-darwin
 ```
-implementation 'org.iota:iota-client:1.0.0-rc.1:aarch64-apple-darwin'
+implementation 'org.iota:iota-client:1.0.0-rc.3:aarch64-apple-darwin'
 ```
 
 #### osx-x86_64
 ```
-implementation 'org.iota:iota-client:1.0.0-rc.1:osx-x86_64'
+implementation 'org.iota:iota-client:1.0.0-rc.3:osx-x86_64'
 ```
 
 ## Use the Library

@@ -9,7 +9,7 @@ use iota_sdk::types::block::{
         Input, UtxoInput,
     },
     output::OutputId,
-    DtoError, Error,
+    Error,
 };
 use packable::{bounded::InvalidBoundedU16, PackableExt};
 
@@ -119,7 +119,7 @@ fn dto_invalid() {
 
     assert!(matches!(
         UtxoInput::try_from(&dto),
-        Err(DtoError::InvalidField("transactionId"))
+        Err(Error::InvalidField("transactionId"))
     ));
 
     let dto = UtxoInputDto {
@@ -130,7 +130,7 @@ fn dto_invalid() {
 
     assert!(matches!(
         UtxoInput::try_from(&dto),
-        Err(DtoError::Block(Error::InvalidInputOutputIndex(InvalidBoundedU16(1000))))
+        Err(Error::InvalidInputOutputIndex(InvalidBoundedU16(1000)))
     ));
 }
 

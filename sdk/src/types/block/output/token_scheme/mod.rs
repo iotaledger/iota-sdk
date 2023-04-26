@@ -41,7 +41,7 @@ pub mod dto {
 
     pub use super::simple::dto::SimpleTokenSchemeDto;
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
     #[serde(untagged)]
@@ -59,7 +59,7 @@ pub mod dto {
     }
 
     impl TryFrom<&TokenSchemeDto> for TokenScheme {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &TokenSchemeDto) -> Result<Self, Self::Error> {
             Ok(match value {

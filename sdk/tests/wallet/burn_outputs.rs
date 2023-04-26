@@ -6,7 +6,7 @@ use iota_sdk::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         NftId, NftOutputBuilder, OutputId, UnlockCondition,
     },
-    wallet::{account::AccountHandle, NativeTokenOptions, NftOptions, Result, U256},
+    wallet::{Account, NativeTokenOptions, NftOptions, Result, U256},
 };
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
@@ -21,7 +21,7 @@ async fn mint_and_burn_nft() -> Result<()> {
     let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
     let nft_options = vec![NftOptions {
-        address: Some(account.addresses().await?[0].address().to_bech32()),
+        address: Some(account.addresses().await?[0].address().to_string()),
         sender: None,
         metadata: Some(b"some nft metadata".to_vec()),
         tag: None,
@@ -68,7 +68,7 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
 
     let amount = 1_000_000;
     let outputs = vec![
-        NftOutputBuilder::new_with_amount(amount, NftId::null())?
+        NftOutputBuilder::new_with_amount(amount, NftId::null())
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(
                     *account_0.addresses().await?[0].address().as_ref(),
@@ -186,7 +186,7 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     tear_down(storage_path)
 }
 
-async fn destroy_foundry(account: &AccountHandle) -> Result<()> {
+async fn destroy_foundry(account: &Account) -> Result<()> {
     let balance = account.sync(None).await?;
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 
@@ -209,7 +209,7 @@ async fn destroy_foundry(account: &AccountHandle) -> Result<()> {
     Ok(())
 }
 
-async fn destroy_alias(account: &AccountHandle) -> Result<()> {
+async fn destroy_alias(account: &Account) -> Result<()> {
     let balance = account.sync(None).await.unwrap();
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 

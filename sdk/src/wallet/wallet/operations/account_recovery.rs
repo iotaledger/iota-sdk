@@ -4,9 +4,9 @@
 use instant::Instant;
 
 use crate::wallet::{
-    account::handle::AccountHandle,
     task,
     wallet::{SyncOptions, Wallet},
+    Account,
 };
 
 impl Wallet {
@@ -23,27 +23,27 @@ impl Wallet {
     ///
     /// Returns:
     ///
-    /// A vector of AccountHandle
+    /// A vector of Account
     pub async fn recover_accounts(
         &self,
         account_start_index: u32,
         account_gap_limit: u32,
         address_gap_limit: u32,
         sync_options: Option<SyncOptions>,
-    ) -> crate::wallet::Result<Vec<AccountHandle>> {
+    ) -> crate::wallet::Result<Vec<Account>> {
         log::debug!("[recover_accounts]");
         let start_time = Instant::now();
         let mut max_account_index_to_keep = None;
 
         // Search for addresses in current accounts
-        for account_handle in self.accounts.read().await.iter() {
+        for account in self.accounts.read().await.iter() {
             // If the gap limit is 0, there is no need to search for funds
             if address_gap_limit > 0 {
-                account_handle
+                account
                     .search_addresses_with_outputs(address_gap_limit, sync_options.clone())
                     .await?;
             }
-            let account_index = *account_handle.read().await.index();
+            let account_index = *account.read().await.index();
             match max_account_index_to_keep {
                 Some(max_account_index) => {
                     if account_index > max_account_index {
@@ -75,13 +75,13 @@ impl Wallet {
         let mut new_accounts = Vec::new();
         let mut accounts = self.accounts.write().await;
 
-        for account_handle in accounts.iter() {
-            let account_index = *account_handle.read().await.index();
+        for account in accounts.iter() {
+            let account_index = *account.read().await.index();
             let mut keep_account = false;
 
             if let Some(max_account_index_to_keep) = max_account_index_to_keep {
                 if account_index <= max_account_index_to_keep {
-                    new_accounts.push((account_index, account_handle.clone()));
+                    new_accounts.push((account_index, account.clone()));
                     keep_account = true;
                 }
             }

@@ -85,7 +85,7 @@ async fn set_mqtt_client(client: &Client) -> Result<(), Error> {
             let host = node.url.host_str().expect("can't get host from URL");
             let mut entropy = [0u8; 8];
             utils::rand::fill(&mut entropy)?;
-            let id = format!("iotars{}", prefix_hex::encode(entropy));
+            let id = format!("iotasdk{}", prefix_hex::encode(entropy));
             let port = client.broker_options.port;
             let mut uri = format!(
                 "{}://{}:{}/api/mqtt/v1",

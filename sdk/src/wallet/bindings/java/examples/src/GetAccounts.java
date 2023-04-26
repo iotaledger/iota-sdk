@@ -20,7 +20,7 @@ public class GetAccounts {
         );
 
         // Print the accounts.
-        for (AccountHandle a : wallet.getAccounts()) {
+        for (Account a : wallet.getAccounts()) {
             // Sync the account with the registered node to ensure that its balances are up-to-date.
             a.syncAccount(new SyncAccount().withOptions(new SyncOptions()));
             System.out.println(a);

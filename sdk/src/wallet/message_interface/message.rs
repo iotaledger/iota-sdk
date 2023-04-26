@@ -25,19 +25,17 @@ use crate::{
 pub enum Message {
     /// Creates an account.
     /// Expected response: [`Account`](crate::wallet::message_interface::Response::Account)
+    #[serde(rename_all = "camelCase")]
     CreateAccount {
         /// The account alias.
         alias: Option<String>,
         /// The bech32 HRP.
-        #[serde(rename = "bech32Hrp")]
         bech32_hrp: Option<String>,
     },
     /// Read account.
     /// Expected response: [`Account`](crate::wallet::message_interface::Response::Account)
-    GetAccount {
-        #[serde(rename = "accountId")]
-        account_id: AccountIdentifier,
-    },
+    #[serde(rename_all = "camelCase")]
+    GetAccount { account_id: AccountIdentifier },
     /// Return the account indexes.
     /// Expected response: [`AccountIndexes`](crate::wallet::message_interface::Response::AccountIndexes)
     GetAccountIndexes,
@@ -46,9 +44,9 @@ pub enum Message {
     GetAccounts,
     /// Consume an account method.
     /// Returns [`Response`](crate::wallet::message_interface::Response)
+    #[serde(rename_all = "camelCase")]
     CallAccountMethod {
         /// The account identifier.
-        #[serde(rename = "accountId")]
         account_id: AccountIdentifier,
         /// The account method to call.
         method: AccountMethod,
@@ -67,10 +65,9 @@ pub enum Message {
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
+    #[serde(rename_all = "camelCase")]
     ChangeStrongholdPassword {
-        #[serde(rename = "currentPassword")]
         current_password: String,
-        #[serde(rename = "newPassword")]
         new_password: String,
     },
     /// Clears the Stronghold password from memory.
@@ -86,18 +83,15 @@ pub enum Message {
     IsStrongholdPasswordAvailable,
     /// Find accounts with unspent outputs
     /// Expected response: [`Accounts`](crate::wallet::message_interface::Response::Accounts)
+    #[serde(rename_all = "camelCase")]
     RecoverAccounts {
-        #[serde(rename = "accountStartIndex")]
         /// The index of the first account to search for.
         account_start_index: u32,
-        #[serde(rename = "accountGapLimit")]
         /// The number of accounts to search for, after the last account with unspent outputs.
         account_gap_limit: u32,
-        #[serde(rename = "addressGapLimit")]
         /// The number of addresses to search for, after the last address with unspent outputs, in
         /// each account.
         address_gap_limit: u32,
-        #[serde(rename = "syncOptions")]
         /// Optional parameter to specify the sync options. The `address_start_index` and `force_syncing`
         /// fields will be overwritten to skip existing addresses.
         sync_options: Option<SyncOptions>,
@@ -111,12 +105,12 @@ pub enum Message {
     /// the cointype doesn't match Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
+    #[serde(rename_all = "camelCase")]
     RestoreBackup {
         /// The path to the backed up Stronghold.
         source: PathBuf,
         /// Stronghold file password.
         password: String,
-        #[serde(rename = "ignoreIfCoinTypeMismatch")]
         ignore_if_coin_type_mismatch: Option<bool>,
     },
     /// Removes the latest account (account with the largest account index).
@@ -130,25 +124,19 @@ pub enum Message {
     VerifyMnemonic { mnemonic: String },
     /// Updates the client options for all accounts.
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
-    SetClientOptions {
-        #[serde(rename = "clientOptions")]
-        client_options: Box<ClientOptions>,
-    },
+    #[serde(rename_all = "camelCase")]
+    SetClientOptions { client_options: Box<ClientOptions> },
     /// Generate an address without storing it
     /// Expected response: [`Bech32Address`](crate::wallet::message_interface::Response::Bech32Address)
+    #[serde(rename_all = "camelCase")]
     GenerateAddress {
         /// Account index
-        #[serde(rename = "accountIndex")]
         account_index: u32,
-        /// Internal address
-        internal: bool,
         /// Account index
-        #[serde(rename = "addressIndex")]
         address_index: u32,
         /// Options
         options: Option<GenerateAddressOptions>,
         /// Bech32 HRP
-        #[serde(rename = "bech32Hrp")]
         bech32_hrp: Option<String>,
     },
     /// Get the ledger nano status
@@ -173,10 +161,8 @@ pub enum Message {
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-    SetStrongholdPasswordClearInterval {
-        #[serde(rename = "intervalInMilliseconds")]
-        interval_in_milliseconds: Option<u64>,
-    },
+    #[serde(rename_all = "camelCase")]
+    SetStrongholdPasswordClearInterval { interval_in_milliseconds: Option<u64> },
     /// Store a mnemonic into the Stronghold vault.
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
     #[cfg(feature = "stronghold")]
@@ -184,11 +170,11 @@ pub enum Message {
     StoreMnemonic { mnemonic: String },
     /// Start background syncing.
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
+    #[serde(rename_all = "camelCase")]
     StartBackgroundSync {
         /// Sync options
         options: Option<SyncOptions>,
         /// Interval in milliseconds
-        #[serde(rename = "intervalInMilliseconds")]
         interval_in_milliseconds: Option<u64>,
     },
     /// Stop background syncing.
@@ -201,27 +187,23 @@ pub enum Message {
     EmitTestEvent { event: WalletEvent },
     /// Transforms a bech32 encoded address to hex
     /// Expected response: [`HexAddress`](crate::wallet::message_interface::Response::HexAddress)
-    Bech32ToHex {
-        #[serde(rename = "bech32Address")]
-        bech32_address: String,
-    },
+    #[serde(rename_all = "camelCase")]
+    Bech32ToHex { bech32_address: String },
     /// Transforms a hex encoded address to a bech32 encoded address
     /// Expected response: [`Bech32Address`](crate::wallet::message_interface::Response::Bech32Address)
+    #[serde(rename_all = "camelCase")]
     HexToBech32 {
         /// Hex encoded bech32 address
         hex: String,
         /// Human readable part
-        #[serde(rename = "bech32Hrp")]
         bech32_hrp: Option<String>,
     },
     // Remove all listeners of this type. Empty vec clears all listeners
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
-    ClearListeners {
-        #[serde(rename = "eventTypes")]
-        event_types: Vec<WalletEventType>,
-    },
+    #[serde(rename_all = "camelCase")]
+    ClearListeners { event_types: Vec<WalletEventType> },
     /// Update the authentication for the provided node.
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
     UpdateNodeAuth {
@@ -291,13 +273,12 @@ impl Debug for Message {
             Self::GetLedgerNanoStatus => write!(f, "GetLedgerNanoStatus"),
             Self::GenerateAddress {
                 account_index,
-                internal,
                 address_index,
                 options,
                 bech32_hrp,
             } => write!(
                 f,
-                "GenerateAddress{{ account_index: {account_index:?}, internal: {internal:?}, address_index: {address_index:?}, options: {options:?}, bech32_hrp: {bech32_hrp:?} }}"
+                "GenerateAddress{{ account_index: {account_index:?}, address_index: {address_index:?}, options: {options:?}, bech32_hrp: {bech32_hrp:?} }}"
             ),
             Self::GetNodeInfo { url, auth: _ } => write!(f, "GetNodeInfo{{ url: {url:?} }}"),
             #[cfg(feature = "stronghold")]
