@@ -17,8 +17,8 @@ impl Client {
     /// Without local PoW, it will finish the block with a 0 nonce.
     pub async fn finish_block_builder(
         &self,
-        parents: impl Into<Option<Parents>>,
-        payload: impl Into<Option<Payload>>,
+        parents: impl Into<Option<Parents>> + Send,
+        payload: impl Into<Option<Payload>> + Send,
     ) -> Result<Block> {
         if self.get_local_pow() {
             self.finish_pow(parents, payload).await
@@ -36,8 +36,8 @@ impl Client {
     /// Calls the appropriate PoW function depending whether the compilation is for wasm or not.
     pub async fn finish_pow(
         &self,
-        parents: impl Into<Option<Parents>>,
-        payload: impl Into<Option<Payload>>,
+        parents: impl Into<Option<Parents>> + Send,
+        payload: impl Into<Option<Payload>> + Send,
     ) -> Result<Block> {
         #[cfg(not(target_family = "wasm"))]
         let block = self.finish_multi_threaded_pow(parents, payload).await?;
@@ -53,8 +53,8 @@ impl Client {
     #[cfg(not(target_family = "wasm"))]
     async fn finish_multi_threaded_pow(
         &self,
-        parents: impl Into<Option<Parents>>,
-        payload: impl Into<Option<Payload>>,
+        parents: impl Into<Option<Parents>> + Send,
+        payload: impl Into<Option<Payload>> + Send,
     ) -> Result<Block> {
         let pow_worker_count = self.pow_worker_count;
         let min_pow_score = self.get_min_pow_score().await?;

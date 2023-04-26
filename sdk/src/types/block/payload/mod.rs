@@ -233,43 +233,45 @@ pub mod dto {
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(untagged)]
     pub enum PayloadDto {
-        Transaction(TransactionPayloadDto),
-        Milestone(MilestonePayloadDto),
-        TreasuryTransaction(TreasuryTransactionPayloadDto),
-        TaggedData(TaggedDataPayloadDto),
+        Transaction(Box<TransactionPayloadDto>),
+        Milestone(Box<MilestonePayloadDto>),
+        TreasuryTransaction(Box<TreasuryTransactionPayloadDto>),
+        TaggedData(Box<TaggedDataPayloadDto>),
     }
 
     impl From<TransactionPayloadDto> for PayloadDto {
         fn from(payload: TransactionPayloadDto) -> Self {
-            Self::Transaction(payload)
+            Self::Transaction(Box::new(payload))
         }
     }
 
     impl From<MilestonePayloadDto> for PayloadDto {
         fn from(payload: MilestonePayloadDto) -> Self {
-            Self::Milestone(payload)
+            Self::Milestone(Box::new(payload))
         }
     }
 
     impl From<TreasuryTransactionPayloadDto> for PayloadDto {
         fn from(payload: TreasuryTransactionPayloadDto) -> Self {
-            Self::TreasuryTransaction(payload)
+            Self::TreasuryTransaction(Box::new(payload))
         }
     }
 
     impl From<TaggedDataPayloadDto> for PayloadDto {
         fn from(payload: TaggedDataPayloadDto) -> Self {
-            Self::TaggedData(payload)
+            Self::TaggedData(Box::new(payload))
         }
     }
 
     impl From<&Payload> for PayloadDto {
         fn from(value: &Payload) -> Self {
             match value {
-                Payload::Transaction(p) => Self::Transaction(TransactionPayloadDto::from(p)),
-                Payload::Milestone(p) => Self::Milestone(MilestonePayloadDto::from(p)),
-                Payload::TreasuryTransaction(p) => Self::TreasuryTransaction(TreasuryTransactionPayloadDto::from(p)),
-                Payload::TaggedData(p) => Self::TaggedData(TaggedDataPayloadDto::from(p)),
+                Payload::Transaction(p) => Self::Transaction(Box::new(TransactionPayloadDto::from(p))),
+                Payload::Milestone(p) => Self::Milestone(Box::new(MilestonePayloadDto::from(p))),
+                Payload::TreasuryTransaction(p) => {
+                    Self::TreasuryTransaction(Box::new(TreasuryTransactionPayloadDto::from(p)))
+                }
+                Payload::TaggedData(p) => Self::TaggedData(Box::new(TaggedDataPayloadDto::from(p))),
             }
         }
     }
@@ -277,24 +279,28 @@ pub mod dto {
     impl Payload {
         pub fn try_from_dto(value: &PayloadDto, protocol_parameters: &ProtocolParameters) -> Result<Self, Error> {
             Ok(match value {
-                PayloadDto::Transaction(p) => Self::from(TransactionPayload::try_from_dto(p, protocol_parameters)?),
-                PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from_dto(p, protocol_parameters)?),
+                PayloadDto::Transaction(p) => {
+                    Self::from(TransactionPayload::try_from_dto(p.as_ref(), protocol_parameters)?)
+                }
+                PayloadDto::Milestone(p) => {
+                    Self::from(MilestonePayload::try_from_dto(p.as_ref(), protocol_parameters)?)
+                }
                 PayloadDto::TreasuryTransaction(p) => Self::from(TreasuryTransactionPayload::try_from_dto(
-                    p,
+                    p.as_ref(),
                     protocol_parameters.token_supply(),
                 )?),
-                PayloadDto::TaggedData(p) => Self::from(TaggedDataPayload::try_from(p)?),
+                PayloadDto::TaggedData(p) => Self::from(TaggedDataPayload::try_from(p.as_ref())?),
             })
         }
 
         pub fn try_from_dto_unverified(value: &PayloadDto) -> Result<Self, Error> {
             Ok(match value {
-                PayloadDto::Transaction(p) => Self::from(TransactionPayload::try_from_dto_unverified(p)?),
-                PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from_dto_unverified(p)?),
+                PayloadDto::Transaction(p) => Self::from(TransactionPayload::try_from_dto_unverified(p.as_ref())?),
+                PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from_dto_unverified(p.as_ref())?),
                 PayloadDto::TreasuryTransaction(p) => {
-                    Self::from(TreasuryTransactionPayload::try_from_dto_unverified(p)?)
+                    Self::from(TreasuryTransactionPayload::try_from_dto_unverified(p.as_ref())?)
                 }
-                PayloadDto::TaggedData(p) => Self::from(TaggedDataPayload::try_from(p)?),
+                PayloadDto::TaggedData(p) => Self::from(TaggedDataPayload::try_from(p.as_ref())?),
             })
         }
     }

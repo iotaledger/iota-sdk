@@ -180,9 +180,9 @@ pub mod dto {
                 migrated_at: *value.migrated_at(),
                 last: value.last(),
                 funds: value.funds().iter().map(Into::into).collect::<_>(),
-                transaction: PayloadDto::TreasuryTransaction(
-                    TreasuryTransactionPayloadDto::from(value.transaction()).into(),
-                ),
+                transaction: PayloadDto::TreasuryTransaction(Box::new(TreasuryTransactionPayloadDto::from(
+                    value.transaction(),
+                ))),
             }
         }
     }
