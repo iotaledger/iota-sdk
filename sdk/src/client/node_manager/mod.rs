@@ -257,7 +257,7 @@ impl NodeManager {
                                 error.replace(e.into());
                             }
                         }
-                    },
+                    }
                     Err(err) => {
                         error.replace(err.into());
                     }
