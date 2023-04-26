@@ -22,6 +22,8 @@ pub(crate) const SECRET_MANAGER_KEY: &str = "secret_manager";
 pub(crate) const ACCOUNTS_INDEXATION_KEY: &str = "iota-wallet-accounts";
 pub(crate) const ACCOUNT_INDEXATION_KEY: &str = "iota-wallet-account-";
 
+pub(crate) const ACCOUNT_SYNC_OPTIONS: &str = "sync-options";
+
 pub(crate) const DATABASE_SCHEMA_VERSION: u8 = 1;
 pub(crate) const DATABASE_SCHEMA_VERSION_KEY: &str = "database-schema-version";
 
