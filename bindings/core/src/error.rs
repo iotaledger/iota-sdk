@@ -29,12 +29,14 @@ pub enum Error {
     Unpack(#[from] packable::error::UnpackError<iota_sdk::types::block::Error, UnexpectedEOF>),
 }
 
+#[cfg(feature = "stronghold")]
 impl From<iota_sdk::client::stronghold::Error> for Error {
     fn from(error: iota_sdk::client::stronghold::Error) -> Self {
         Self::Client(iota_sdk::client::Error::Stronghold(error))
     }
 }
 
+#[cfg(feature = "mqtt")]
 impl From<iota_sdk::client::node_api::mqtt::Error> for Error {
     fn from(error: iota_sdk::client::node_api::mqtt::Error) -> Self {
         Self::Client(iota_sdk::client::Error::Mqtt(error))
