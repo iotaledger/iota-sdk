@@ -37,7 +37,7 @@ impl Account {
         Ok(())
     }
 
-    // Get the default sync options we use when none are provided
+    // Get the default sync options we use when none are provided.
     pub async fn default_sync_options(&self) -> SyncOptions {
         self.default_sync_options.lock().await.clone()
     }

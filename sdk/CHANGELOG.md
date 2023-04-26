@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.3.0 - 2023-XX-XX
 
+### Added
+
+- `Account::{set_default_sync_options, default_sync_options}` methods;
+
 ### Changed
 
 - Renamed `AccountHandle` to `Account`, `Account` to `AccountDetails` and `AccountDto` to `AccountDetailsDto`;
@@ -50,7 +54,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `{BaseCoinBalance, BaseCoinBalanceDto}::voting_power` field;
 - `verify_mnemonic()`;
 - `SecretManager::sign_transaction()`;
-- `Account::{set_default_sync_options, default_sync_options}` methods;
 
 ### Changed
 
@@ -65,7 +68,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fields of `AccountBalance`, `BaseCoinBalance` and `NativeTokensBalance` have been made private and getters have been added;
 - Exposed `AccountParticipationOverview, ParticipationEventWithNodes, AliasOutputOptions, AliasOutputOptionsDto, IncreaseNativeTokenSupplyOptions, IncreaseNativeTokenSupplyOptionsDto, NativeTokenOptions, NativeTokenOptionsDto, NftOptions, NftOptionsDto, OutputOptionsDto` from the `account` module;
 - Made `Wallet::get_bech32_hrp()` public;
-- Made `Account::new()` `async` and return `Result<Self>`;
 
 ### Removed
 
