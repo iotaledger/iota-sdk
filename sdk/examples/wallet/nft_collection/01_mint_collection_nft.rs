@@ -58,14 +58,11 @@ async fn main() -> Result<()> {
     for nfts in nft_options.chunks(50) {
         let transaction = account.mint_nfts(nfts.to_vec(), None).await?;
 
-        println!("Transaction: {}", transaction.transaction_id);
-        if let Some(block_id) = transaction.block_id {
-            println!(
-                "Block sent: {}/api/core/v2/blocks/{}",
-                &std::env::var("NODE_URL").unwrap(),
-                block_id
-            );
-        }
+        println!(
+            "Transaction sent: {}/block/{}",
+            &std::env::var("EXPLORER_URL").unwrap(),
+            transaction.block_id.expect("no block created yet")
+        );
         // Try to get the transaction confirmed
         account
             .retry_transaction_until_included(&transaction.transaction_id, None, None)

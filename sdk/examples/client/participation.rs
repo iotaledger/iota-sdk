@@ -125,7 +125,10 @@ async fn participate(client: &Client, event_id: ParticipationEventId, node_url: 
 
     println!("{block:#?}");
 
-    println!("Transaction sent: {node_url}/api/core/v2/blocks/{}", block.id());
-    println!("Block metadata: {node_url}/api/core/v2/blocks/{}/metadata", block.id());
+    println!(
+        "Transaction sent: {}/block/{}",
+        &std::env::var("EXPLORER_URL").unwrap(),
+        block.id()
+    );
     Ok(())
 }

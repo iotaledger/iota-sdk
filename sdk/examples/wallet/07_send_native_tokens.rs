@@ -58,8 +58,8 @@ async fn main() -> Result<()> {
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
         println!(
-            "Transaction included: {}/api/core/v2/blocks/{}",
-            &std::env::var("NODE_URL").unwrap(),
+            "Transaction included: {}/block/{}",
+            &std::env::var("EXPLORER_URL").unwrap(),
             transaction.block_id.expect("no block created yet")
         );
 
@@ -86,8 +86,8 @@ async fn main() -> Result<()> {
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
         println!(
-            "Transaction included: {}/api/core/v2/blocks/{}",
-            &std::env::var("NODE_URL").unwrap(),
+            "Transaction included: {}/block/{}",
+            &std::env::var("EXPLORER_URL").unwrap(),
             transaction.block_id.expect("no block created yet")
         );
     } else {

@@ -31,9 +31,8 @@ async fn main() -> Result<()> {
     // Create an alias output
     let transaction = account.create_alias_output(None, None).await?;
     println!(
-        "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
-        transaction.transaction_id,
-        &env::var("NODE_URL").unwrap(),
+        "Block sent: {}/block/{}",
+        &env::var("EXPLORER_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
 

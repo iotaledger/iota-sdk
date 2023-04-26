@@ -106,9 +106,9 @@ async fn main() -> Result<()> {
                     ];
                     let tx = pong_account_.send(outputs, None).await?;
                     println!(
-                        "Block from thread {} sent: {}/api/core/v2/blocks/{}",
+                        "Block from thread {} sent: {}/block/{}",
                         n,
-                        &std::env::var("NODE_URL").unwrap(),
+                        &std::env::var("EXPLORER_URL").unwrap(),
                         tx.block_id.expect("no block created yet")
                     );
                     iota_sdk::wallet::Result::Ok(n)

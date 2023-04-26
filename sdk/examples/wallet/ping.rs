@@ -105,10 +105,11 @@ async fn main() -> Result<()> {
                             .finish_output(ping_account_.client().get_token_supply().await?)?,
                     ];
                     let tx = ping_account_.send(outputs, None).await?;
+
                     println!(
-                        "Block from thread {} sent: {}/api/core/v2/blocks/{}",
+                        "Block from thread {} sent: {}/block/{}",
                         n,
-                        &std::env::var("NODE_URL").unwrap(),
+                        &std::env::var("EXPLORER_URL").unwrap(),
                         tx.block_id.expect("no block created yet")
                     );
                     iota_sdk::wallet::Result::Ok(n)

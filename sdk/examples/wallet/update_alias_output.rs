@@ -69,8 +69,8 @@ async fn main() -> Result<()> {
     let transaction = account.send(vec![updated_alias_output], None).await?;
     println!("Transaction: {}", transaction.transaction_id);
     println!(
-        "Block sent: {}/api/core/v2/blocks/{}",
-        &std::env::var("NODE_URL").unwrap(),
+        "Block sent: {}/block/{}",
+        &std::env::var("EXPLORER_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
 

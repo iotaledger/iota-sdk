@@ -24,7 +24,11 @@ async fn main() -> Result<()> {
     // Post the block.
     let block_id = client.post_block(&block).await?;
 
-    println!("Posted: {block_id:?}");
+    println!(
+        "Posted block: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
+    );
 
     Ok(())
 }

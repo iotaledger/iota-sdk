@@ -104,9 +104,8 @@ async fn main() -> Result<()> {
 
     let transaction = account.increase_voting_power(1000001).await?;
     println!(
-        "Increase voting power transaction: {} Block sent: {}/api/core/v2/blocks/{}",
-        transaction.transaction_id,
-        &std::env::var("NODE_URL").unwrap(),
+        "Increase voting power transaction: {}/block/{}",
+        &std::env::var("EXPLORER_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
 
@@ -123,10 +122,11 @@ async fn main() -> Result<()> {
     //// ////////////////////////////
 
     // let transaction = account.decrease_voting_power(1).await?;
+    // println!("Transaction sent: {}", transaction.transaction_id);
     // println!(
-    //     "Decrease voting power Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
+    //     "Decrease voting power {}/block/{}",
     //     transaction.transaction_id,
-    //     &std::env::var("NODE_URL").unwrap(),
+    //     &std::env::var("EXPLORER_URL").unwrap(),
     //     transaction.block_id.expect("no block created yet")
     // );
 
@@ -140,10 +140,11 @@ async fn main() -> Result<()> {
     //// ////////////////////////////
 
     let transaction = account.vote(Some(event_id), Some(vec![0])).await?;
+
+    println!("Transaction sent: {}", transaction.transaction_id);
     println!(
-        "Vote transaction: {} Block sent: {}/api/core/v2/blocks/{}",
-        transaction.transaction_id,
-        &std::env::var("NODE_URL").unwrap(),
+        "Vote transaction: {}/block/{}",
+        &std::env::var("EXPLORER_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
     account
@@ -163,10 +164,10 @@ async fn main() -> Result<()> {
     //// ////////////////////////////
 
     let transaction = account.stop_participating(event_id).await?;
+    println!("Transaction sent: {}", transaction.transaction_id);
     println!(
-        "Stop participating transaction: {} Block sent: {}/api/core/v2/blocks/{}",
-        transaction.transaction_id,
-        &std::env::var("NODE_URL").unwrap(),
+        "Stop participating transaction: {}/block/{}",
+        &std::env::var("EXPLORER_URL").unwrap(),
         transaction.block_id.expect("no block created yet")
     );
     account
@@ -183,16 +184,16 @@ async fn main() -> Result<()> {
 
     // // Decrease full amount, there should be no voting output afterwards
     // let transaction = account.decrease_voting_power(voting_output.output.amount()).await?;
-    // println!(
-    //     "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
-    //     transaction.transaction_id,
-    //     &std::env::var("NODE_URL").unwrap(),
-    //     transaction.block_id.expect("no block created yet")
-    // );
+    // println!("Transaction sent: {}", transaction.transaction_id);
 
     // account
     //     .retry_transaction_until_included(&transaction.transaction_id, None, None)
     //     .await?;
+    // println!(
+    //     "Transaction included: {}/block/{}",
+    //     &std::env::var("EXPLORER_URL").unwrap(),
+    //     transaction.block_id.expect("no block created yet")
+    // );
     // account.sync(None).await?;
 
     // assert!(account.get_voting_output().await.is_err());

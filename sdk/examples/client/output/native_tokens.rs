@@ -26,6 +26,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance.
@@ -85,8 +86,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!("Transaction sent: {node_url}/api/core/v2/blocks/{}", block.id());
-    println!("Block metadata: {node_url}/api/core/v2/blocks/{}/metadata", block.id());
+    println!("Transaction sent: {explorer_url}/block/{}", block.id());
 
     Ok(())
 }

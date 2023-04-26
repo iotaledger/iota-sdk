@@ -26,6 +26,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance.
@@ -65,7 +66,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Transaction with new alias outputs sent: {node_url}/api/core/v2/blocks/{}",
+        "Transaction with new alias outputs sent: {explorer_url}/block/{}",
         block_1.id()
     );
     let _ = client.retry_until_included(&block_1.id(), None, None).await?;
@@ -110,7 +111,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Transaction with alias id set and ownership assigned to the first alias sent: {node_url}/api/core/v2/blocks/{}",
+        "Transaction with alias id set and ownership assigned to the first alias sent: {explorer_url}/block/{}",
         block_2.id()
     );
     let _ = client.retry_until_included(&block_2.id(), None, None).await?;
@@ -136,7 +137,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Transaction with state metadata of the third alias updated sent: {node_url}/api/core/v2/blocks/{}",
+        "Transaction with state metadata of the third alias updated sent: {explorer_url}/block/{}",
         block_3.id()
     );
     let _ = client.retry_until_included(&block_3.id(), None, None).await?;
@@ -161,7 +162,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Another transaction with state metadata of the third alias updated sent: {node_url}/api/core/v2/blocks/{}",
+        "Another transaction with state metadata of the third alias updated sent: {explorer_url}/block/{}",
         block_3.id()
     );
     let _ = client.retry_until_included(&block_3.id(), None, None).await?;

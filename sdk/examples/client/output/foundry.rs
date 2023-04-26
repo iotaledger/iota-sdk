@@ -34,6 +34,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance.
@@ -72,7 +73,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Transaction with new alias output sent: {node_url}/api/core/v2/blocks/{}",
+        "Transaction with new alias output sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -116,7 +117,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Transaction with foundry output sent: {node_url}/api/core/v2/blocks/{}",
+        "Transaction with foundry output sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -161,7 +162,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Transaction with native tokens burnt sent: {node_url}/api/core/v2/blocks/{}",
+        "Transaction with native tokens burnt sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -207,7 +208,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Transaction with native tokens sent: {node_url}/api/core/v2/blocks/{}",
+        "Transaction with native tokens sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -232,7 +233,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Second transaction with native tokens sent: {node_url}/api/core/v2/blocks/{}",
+        "Second transaction with native tokens sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -257,7 +258,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Third transaction with native tokens burned sent: {node_url}/api/core/v2/blocks/{}",
+        "Third transaction with native tokens burned sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
