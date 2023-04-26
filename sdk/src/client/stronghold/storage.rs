@@ -137,7 +137,6 @@ mod tests {
         assert!(matches!(stronghold.get(b"test-1").await, Ok(Some(_))));
         assert!(matches!(stronghold.get(b"test-2").await, Ok(Some(_))));
 
-        assert!(matches!(stronghold.insert(b"test-0", b"0-tset").await, Ok(Some(_))));
         let previous_value = stronghold.insert(b"test-0", b"0-tset").await.unwrap();
         assert_eq!(Some(b"test-0".to_vec()), previous_value);
         assert!(matches!(stronghold.insert(b"test-1", b"1-tset").await, Ok(Some(_))));
