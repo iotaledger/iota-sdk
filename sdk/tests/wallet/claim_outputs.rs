@@ -70,8 +70,8 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn claim_2_basic_outputs() -> Result<()> {
-    let storage_path = "test-storage/claim_2_basic_outputs";
+async fn claim_1_of_2_basic_outputs() -> Result<()> {
+    let storage_path = "test-storage/claim_1_of_2_basic_outputs";
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
@@ -83,7 +83,7 @@ async fn claim_2_basic_outputs() -> Result<()> {
         .send_amount(
             vec![
                 AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_string(), amount),
-                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_string(), amount),
+                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_string(), 0),
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -113,10 +113,10 @@ async fn claim_2_basic_outputs() -> Result<()> {
         .await?;
 
     let balance = accounts[0].sync(None).await.unwrap();
-    assert_eq!(balance.potentially_locked_outputs().len(), 0);
+    assert_eq!(balance.potentially_locked_outputs().len(), 1);
     assert_eq!(
         balance.base_coin().available(),
-        base_coin_amount_before_claiming + 2 * amount
+        base_coin_amount_before_claiming + amount
     );
 
     tear_down(storage_path)
