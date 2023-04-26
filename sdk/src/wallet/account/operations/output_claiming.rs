@@ -23,12 +23,12 @@ use crate::{
 /// Enum to specify which outputs should be claimed
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum OutputsToClaim {
-    None = 0,
-    MicroTransactions = 1,
-    NativeTokens = 2,
-    Nfts = 3,
-    Amount = 4,
-    All = 5,
+    None,
+    MicroTransactions,
+    NativeTokens,
+    Nfts,
+    Amount,
+    All,
 }
 
 impl Account {

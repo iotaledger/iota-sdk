@@ -13,6 +13,7 @@ public class GetOutputsWithAdditionalUnlockConditions implements AccountMethod {
         MicroTransactions,
         NativeTokens,
         Nfts,
+        Amount,
         All,
     }
 

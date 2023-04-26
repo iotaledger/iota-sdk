@@ -10,6 +10,7 @@ export enum OutputsToClaim {
     MicroTransactions = 'MicroTransactions',
     NativeTokens = 'NativeTokens',
     Nfts = 'Nfts',
+    Amount = 'Amount',
     All = 'All',
 }
 
