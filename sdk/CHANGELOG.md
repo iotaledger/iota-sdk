@@ -45,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Lots of builder setters are now taking an `impl Into<Option<T>>` instead of a `T` parameter;
 - All `ledger_nano` related errors have been moved from the client error to a newly created `client::secret::ledger_nano::Error`;
 - All `stronghold` related errors have been moved from the client error to a newly created `client::stronghold::Error`;
+- `Payload` variants are no longer boxed;
 
 ### Removed
 

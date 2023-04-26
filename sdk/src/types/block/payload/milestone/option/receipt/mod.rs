@@ -198,7 +198,7 @@ pub mod dto {
                     .map(|f| MigratedFundsEntry::try_from_dto(f, token_supply))
                     .collect::<Result<_, _>>()?,
                 if let PayloadDto::TreasuryTransaction(ref transaction) = value.transaction {
-                    TreasuryTransactionPayload::try_from_dto(transaction.as_ref(), token_supply)?
+                    TreasuryTransactionPayload::try_from_dto(transaction, token_supply)?
                 } else {
                     return Err(Error::InvalidField("transaction"));
                 },
@@ -219,7 +219,7 @@ pub mod dto {
                 funds: VecPrefix::<MigratedFundsEntry, ReceiptFundsCount>::try_from(funds)
                     .map_err(Error::InvalidReceiptFundsCount)?,
                 transaction: if let PayloadDto::TreasuryTransaction(ref transaction) = value.transaction {
-                    TreasuryTransactionPayload::try_from_dto_unverified(transaction.as_ref())?.into()
+                    TreasuryTransactionPayload::try_from_dto_unverified(transaction)?.into()
                 } else {
                     return Err(Error::InvalidField("transaction"));
                 },

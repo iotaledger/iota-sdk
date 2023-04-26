@@ -47,9 +47,7 @@ async fn main() -> Result<()> {
     // Sends the offline signed transaction online.
     let block = online_client
         .block()
-        .finish_block(Some(Payload::Transaction(Box::new(
-            signed_transaction_payload.transaction_payload,
-        ))))
+        .finish_block(Payload::Transaction(signed_transaction_payload.transaction_payload))
         .await?;
 
     println!(

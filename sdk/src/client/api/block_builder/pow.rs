@@ -15,22 +15,30 @@ use crate::{
 impl Client {
     /// Finishes the block with local PoW if needed.
     /// Without local PoW, it will finish the block with a 0 nonce.
-    pub async fn finish_block_builder(&self, parents: Option<Parents>, payload: Option<Payload>) -> Result<Block> {
+    pub async fn finish_block_builder(
+        &self,
+        parents: impl Into<Option<Parents>>,
+        payload: impl Into<Option<Payload>>,
+    ) -> Result<Block> {
         if self.get_local_pow() {
             self.finish_pow(parents, payload).await
         } else {
             // Finish block without doing PoW.
-            let parents = match parents {
+            let parents = match parents.into() {
                 Some(parents) => parents,
                 None => Parents::from_vec(self.get_tips().await?)?,
             };
 
-            Ok(BlockBuilder::new(parents).with_payload(payload).finish()?)
+            Ok(BlockBuilder::new(parents).with_payload(payload.into()).finish()?)
         }
     }
 
     /// Calls the appropriate PoW function depending whether the compilation is for wasm or not.
-    pub async fn finish_pow(&self, parents: Option<Parents>, payload: Option<Payload>) -> Result<Block> {
+    pub async fn finish_pow(
+        &self,
+        parents: impl Into<Option<Parents>>,
+        payload: impl Into<Option<Payload>>,
+    ) -> Result<Block> {
         #[cfg(not(target_family = "wasm"))]
         let block = self.finish_multi_threaded_pow(parents, payload).await?;
         #[cfg(target_family = "wasm")]
@@ -43,10 +51,16 @@ impl Client {
     ///
     /// Always fetches new tips after each tips interval elapses if no parents are provided.
     #[cfg(not(target_family = "wasm"))]
-    async fn finish_multi_threaded_pow(&self, parents: Option<Parents>, payload: Option<Payload>) -> Result<Block> {
+    async fn finish_multi_threaded_pow(
+        &self,
+        parents: impl Into<Option<Parents>>,
+        payload: impl Into<Option<Payload>>,
+    ) -> Result<Block> {
         let pow_worker_count = self.pow_worker_count;
         let min_pow_score = self.get_min_pow_score().await?;
         let tips_interval = self.get_tips_interval();
+        let parents = parents.into();
+        let payload = payload.into();
 
         loop {
             let cancel = MinerCancel::new();
@@ -88,9 +102,15 @@ impl Client {
     ///
     /// Fetches new tips after each tips interval elapses if no parents are provided.
     #[cfg(target_family = "wasm")]
-    async fn finish_single_threaded_pow(&self, parents: Option<Parents>, payload: Option<Payload>) -> Result<Block> {
+    async fn finish_single_threaded_pow(
+        &self,
+        parents: impl Into<Option<Parents>>,
+        payload: impl Into<Option<Payload>>,
+    ) -> Result<Block> {
         let min_pow_score: u32 = self.get_min_pow_score().await?;
         let tips_interval: u64 = self.get_tips_interval();
+        let parents = parents.into();
+        let payload = payload.into();
 
         loop {
             let parents = match &parents {
@@ -120,11 +140,11 @@ fn do_pow(
     #[cfg(not(target_family = "wasm"))] miner: Miner,
     #[cfg(target_family = "wasm")] miner: SingleThreadedMiner,
     min_pow_score: u32,
-    payload: Option<Payload>,
+    payload: impl Into<Option<Payload>>,
     parents: Parents,
 ) -> Result<Block> {
     Ok(BlockBuilder::new(parents)
-        .with_payload(payload)
+        .with_payload(payload.into())
         .finish_nonce(|bytes| miner.nonce(bytes, min_pow_score))?)
 }
 

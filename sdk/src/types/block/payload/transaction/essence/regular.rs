@@ -188,7 +188,7 @@ impl RegularTransactionEssence {
 
     /// Returns the optional payload of a [`RegularTransactionEssence`].
     pub fn payload(&self) -> Option<&Payload> {
-        self.payload.as_ref()
+        self.payload.as_ref().map(Box::as_ref)
     }
 }
 
@@ -316,7 +316,7 @@ fn verify_outputs_unverified<const VERIFY: bool>(outputs: &[Output]) -> Result<(
 
 fn verify_payload<const VERIFY: bool>(payload: &OptionalPayload) -> Result<(), Error> {
     if VERIFY {
-        match &payload.0 {
+        match payload.0.as_deref() {
             Some(Payload::TaggedData(_)) | None => Ok(()),
             Some(payload) => Err(Error::InvalidPayloadKind(payload.kind())),
         }
@@ -356,7 +356,7 @@ pub mod dto {
         pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
         #[serde(skip_serializing_if = "Option::is_none")]
-        pub payload: Option<PayloadDto>,
+        pub payload: Option<Box<PayloadDto>>,
     }
 
     impl From<&RegularTransactionEssence> for RegularTransactionEssenceDto {
@@ -368,7 +368,7 @@ pub mod dto {
                 inputs_commitment: value.inputs_commitment().to_string(),
                 outputs: value.outputs().iter().map(Into::into).collect::<Vec<_>>(),
                 payload: match value.payload() {
-                    Some(Payload::TaggedData(i)) => Some(PayloadDto::TaggedData(Box::new(i.as_ref().into()))),
+                    Some(Payload::TaggedData(i)) => Some(Box::new(PayloadDto::TaggedData(i.into()))),
                     Some(_) => unimplemented!(),
                     None => None,
                 },
@@ -396,8 +396,8 @@ pub mod dto {
                 .with_outputs(outputs);
 
             builder = if let Some(p) = &value.payload {
-                if let PayloadDto::TaggedData(i) = p {
-                    builder.with_payload(Payload::TaggedData(Box::new((i.as_ref()).try_into()?)))
+                if let PayloadDto::TaggedData(i) = p.as_ref() {
+                    builder.with_payload(Payload::TaggedData(i.try_into()?))
                 } else {
                     return Err(Error::InvalidField("payload"));
                 }

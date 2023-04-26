@@ -354,7 +354,7 @@ impl<'a> ClientBlockBuilder<'a> {
     }
 
     /// Builds the final block and posts it to the node
-    pub async fn finish_block(self, payload: Option<Payload>) -> Result<Block> {
+    pub async fn finish_block(self, payload: impl Into<Option<Payload>>) -> Result<Block> {
         // Do not replace parents with the latest tips if they are set explicitly,
         // necessary for block promotion.
         let final_block = self.client.finish_block_builder(self.parents, payload).await?;

@@ -65,7 +65,7 @@ impl Account {
                 None => self
                     .client
                     .block()
-                    .finish_block(Some(Payload::Transaction(Box::new(transaction.payload.clone()))))
+                    .finish_block(Some(Payload::Transaction(transaction.payload.clone())))
                     .await?
                     .id(),
             };
@@ -106,7 +106,7 @@ impl Account {
                             let reattached_block = self
                                 .client
                                 .block()
-                                .finish_block(Some(Payload::Transaction(Box::new(transaction.payload.clone()))))
+                                .finish_block(Some(Payload::Transaction(transaction.payload.clone())))
                                 .await?;
                             block_ids.push(reattached_block.id());
                         }

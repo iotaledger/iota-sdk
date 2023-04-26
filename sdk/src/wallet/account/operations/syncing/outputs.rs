@@ -156,7 +156,7 @@ impl Account {
 
                                     let transaction = build_transaction_from_payload_and_inputs(
                                         transaction_id,
-                                        *transaction_payload.clone(),
+                                        transaction_payload.clone(),
                                         inputs,
                                     )?;
 

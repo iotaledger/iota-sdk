@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::vec::Vec;
-use core::ops::Deref;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{
@@ -65,7 +64,7 @@ impl BlockBuilder {
     }
 
     fn _finish(self) -> Result<(Block, Vec<u8>), Error> {
-        verify_payload(self.payload.as_ref())?;
+        verify_payload(self.payload.as_deref())?;
 
         let block = Block {
             protocol_version: self.protocol_version.unwrap_or(PROTOCOL_VERSION),
@@ -140,7 +139,7 @@ impl Block {
     /// Returns the optional payload of a [`Block`].
     #[inline(always)]
     pub fn payload(&self) -> Option<&Payload> {
-        self.payload.as_ref()
+        self.payload.as_deref()
     }
 
     /// Returns the nonce of a [`Block`].
@@ -211,7 +210,7 @@ impl Packable for Block {
         let payload = OptionalPayload::unpack::<_, VERIFY>(unpacker, visitor)?;
 
         if VERIFY {
-            verify_payload(payload.deref().as_ref()).map_err(UnpackError::Packable)?;
+            verify_payload(payload.as_deref()).map_err(UnpackError::Packable)?;
         }
 
         let nonce = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
