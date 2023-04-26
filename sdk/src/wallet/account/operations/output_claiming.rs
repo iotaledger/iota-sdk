@@ -23,7 +23,6 @@ use crate::{
 /// Enum to specify which outputs should be claimed
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum OutputsToClaim {
-    None,
     MicroTransactions,
     NativeTokens,
     Nfts,
@@ -102,7 +101,11 @@ impl Account {
                             OutputsToClaim::All => {
                                 output_ids_to_claim.insert(output_data.output_id);
                             }
-                            _ => {}
+                            OutputsToClaim::Nfts => {
+                                if output_data.output.is_nft() {
+                                    output_ids_to_claim.insert(output_data.output_id);
+                                }
+                            }
                         }
                     }
                 }

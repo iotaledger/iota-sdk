@@ -6,7 +6,6 @@ import type {
 
 /** Output to claim */
 export enum OutputsToClaim {
-    None = 'None',
     MicroTransactions = 'MicroTransactions',
     NativeTokens = 'NativeTokens',
     Nfts = 'Nfts',

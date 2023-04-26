@@ -83,7 +83,7 @@ async fn claim_2_basic_outputs() -> Result<()> {
         .send_amount(
             vec![
                 AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_string(), amount),
-                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_string(), 0),
+                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_string(), amount),
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -116,7 +116,7 @@ async fn claim_2_basic_outputs() -> Result<()> {
     assert_eq!(balance.potentially_locked_outputs().len(), 0);
     assert_eq!(
         balance.base_coin().available(),
-        base_coin_amount_before_claiming + amount
+        base_coin_amount_before_claiming + 2 * amount
     );
 
     tear_down(storage_path)
