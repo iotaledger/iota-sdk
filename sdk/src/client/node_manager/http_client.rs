@@ -55,11 +55,13 @@ impl HttpClient {
             let text = response.text().await?;
             // hornet and bee return different error blocks
             if text == *"no available nodes with remote Pow"
-                || text.contains("proof of work is not enabled")
                 || text.contains("proof of work is not available on this node")
+                || text.contains("proof of work is not enabled")
                 || text.contains("`Pow` not enabled")
             {
                 Err(Error::UnavailablePow)
+            } else if status.as_u16() == 404 {
+                Err(Error::NotFound(url.to_string()))
             } else {
                 Err(Error::ResponseError {
                     code: status.as_u16(),

@@ -59,7 +59,7 @@ impl Client {
             .get_output_ids(&route, QueryParameters::empty(), true, false)
             .await?
             .first()
-            .ok_or_else(|| Error::Node(crate::client::node_api::error::Error::NoOutput("alias")))?))
+            .ok_or_else(|| Error::NoOutput("alias"))?))
     }
 
     /// Get foundry outputs filtered by the given parameters.
@@ -84,7 +84,7 @@ impl Client {
             .get_output_ids(&route, QueryParameters::empty(), true, false)
             .await?
             .first()
-            .ok_or_else(|| Error::Node(crate::client::node_api::error::Error::NoOutput("foundry")))?))
+            .ok_or_else(|| Error::NoOutput("foundry"))?))
     }
 
     /// Get NFT outputs filtered by the given parameters.
@@ -110,6 +110,6 @@ impl Client {
             .get_output_ids(&route, QueryParameters::empty(), true, false)
             .await?
             .first()
-            .ok_or_else(|| Error::Node(crate::client::node_api::error::Error::NoOutput("nft")))?))
+            .ok_or_else(|| Error::NoOutput("nft"))?))
     }
 }

@@ -216,9 +216,6 @@ impl NodeManager {
                                 result_counter += 1;
                             },
                         ),
-                        Err(crate::client::node_api::error::Error::ResponseError { code: 404, url, .. }) => {
-                            error.replace(crate::client::Error::NotFound(url));
-                        }
                         Err(err) => {
                             error.replace(err.into());
                         }
@@ -230,50 +227,37 @@ impl NodeManager {
             for node in nodes {
                 match self.http_client.get(node.clone(), timeout).await {
                     Ok(res) => {
-                        match res.status() {
-                            200 => {
-                                // Handle node_info extra because we also want to return the url
-                                if path == "api/core/v2/info" {
-                                    let node_info: InfoResponse = res.into_json().await?;
-                                    let wrapper = crate::client::node_api::core::routes::NodeInfoWrapper {
-                                        node_info,
-                                        url: format!("{}://{}", node.url.scheme(), node.url.host_str().unwrap_or("")),
-                                    };
-                                    let serde_res = serde_json::to_string(&wrapper)?;
-                                    return Ok(serde_json::from_str(&serde_res)?);
-                                }
+                        // Handle node_info extra because we also want to return the url
+                        if path == "api/core/v2/info" {
+                            let node_info: InfoResponse = res.into_json().await?;
+                            let wrapper = crate::client::node_api::core::routes::NodeInfoWrapper {
+                                node_info,
+                                url: format!("{}://{}", node.url.scheme(), node.url.host_str().unwrap_or("")),
+                            };
+                            let serde_res = serde_json::to_string(&wrapper)?;
+                            return Ok(serde_json::from_str(&serde_res)?);
+                        }
 
-                                match res.into_json::<T>().await {
-                                    Ok(result_data) => {
-                                        let counters = result.entry(serde_json::to_string(&result_data)?).or_insert(0);
-                                        *counters += 1;
-                                        result_counter += 1;
-                                        // Without quorum it's enough if we got one response
-                                        if !self.quorum
-                                            || result_counter >= self.min_quorum_size
-                                            || !need_quorum
-                                            // with query we ignore quorum because the nodes can store a different amount of history
-                                            || query.is_some()
-                                        {
-                                            break;
-                                        }
-                                    }
-                                    Err(e) => {
-                                        error.replace(e.into());
-                                    }
+                        match res.into_json::<T>().await {
+                            Ok(result_data) => {
+                                let counters = result.entry(serde_json::to_string(&result_data)?).or_insert(0);
+                                *counters += 1;
+                                result_counter += 1;
+                                // Without quorum it's enough if we got one response
+                                if !self.quorum
+                                    || result_counter >= self.min_quorum_size
+                                    || !need_quorum
+                                    // with query we ignore quorum because the nodes can store a different amount of history
+                                    || query.is_some()
+                                {
+                                    break;
                                 }
                             }
-
-                            _ => {
-                                error.replace(Error::Node(crate::client::node_api::error::Error::BadResponse(
-                                    res.into_text().await?,
-                                )));
+                            Err(e) => {
+                                error.replace(e.into());
                             }
                         }
-                    }
-                    Err(crate::client::node_api::error::Error::ResponseError { code: 404, url, .. }) => {
-                        error.replace(crate::client::Error::NotFound(url));
-                    }
+                    },
                     Err(err) => {
                         error.replace(err.into());
                     }
@@ -284,7 +268,7 @@ impl NodeManager {
         let res = result
             .into_iter()
             .max_by_key(|v| v.1)
-            .ok_or_else(|| error.unwrap_or(Error::Node(crate::client::node_api::error::Error::NoResult)))?;
+            .ok_or_else(|| error.unwrap_or(Error::NotFound(path.to_string())))?;
 
         // Return if quorum is false or check if quorum was reached
         if !self.quorum
@@ -317,28 +301,17 @@ impl NodeManager {
         for node in nodes {
             match self.http_client.get_bytes(node, timeout).await {
                 Ok(res) => {
-                    let status = res.status();
-                    if let Ok(res_text) = res.into_bytes().await {
-                        // Without quorum it's enough if we got one response
-                        match status {
-                            200 => return Ok(res_text),
-                            _ => error.replace(crate::client::Error::Node(
-                                crate::client::node_api::error::Error::BadResponse(
-                                    String::from_utf8(res_text).unwrap_or("non UTF8 node response".into()),
-                                ),
-                            )),
-                        };
-                    }
-                }
-                Err(crate::client::node_api::error::Error::ResponseError { code: 404, url, .. }) => {
-                    error.replace(crate::client::Error::NotFound(url));
+                    match res.into_bytes().await {
+                        Ok(res_text) => return Ok(res_text),
+                        Err(e) => error.replace(e.into()),
+                    };
                 }
                 Err(err) => {
                     error.replace(err.into());
                 }
             }
         }
-        Err(error.unwrap_or(Error::Node(crate::client::node_api::error::Error::NoResult)))
+        Err(error.unwrap_or(Error::NotFound(path.to_string())))
     }
 
     pub(crate) async fn post_request_bytes<T: serde::de::DeserializeOwned>(
@@ -365,7 +338,7 @@ impl NodeManager {
                 }
             }
         }
-        Err(error.unwrap_or(Error::Node(crate::client::node_api::error::Error::NoResult)))
+        Err(error.unwrap_or(Error::NotFound(path.to_string())))
     }
 
     pub(crate) async fn post_request_json<T: serde::de::DeserializeOwned>(
@@ -392,6 +365,6 @@ impl NodeManager {
                 }
             }
         }
-        Err(error.unwrap_or(Error::Node(crate::client::node_api::error::Error::NoResult)))
+        Err(error.unwrap_or(Error::NotFound(path.to_string())))
     }
 }
