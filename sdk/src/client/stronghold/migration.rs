@@ -7,11 +7,8 @@ use crypto::ciphers::chacha::{self};
 use iota_stronghold::{Client, SnapshotPath, Stronghold};
 use zeroize::Zeroize;
 
-use super::{common::PRIVATE_DATA_CLIENT_PATH, StrongholdAdapter};
-use crate::client::{
-    stronghold::{check_or_create_snapshot, storage::insert as v3_insert},
-    Result,
-};
+use super::{common::PRIVATE_DATA_CLIENT_PATH, Error, StrongholdAdapter};
+use crate::client::stronghold::{check_or_create_snapshot, storage::insert as v3_insert};
 
 impl StrongholdAdapter {
     /// Migrates a snapshot from version 2 to version 3.
@@ -20,7 +17,7 @@ impl StrongholdAdapter {
         current_password: &str,
         new_path: Option<P>,
         new_password: Option<&str>,
-    ) -> Result<()> {
+    ) -> Result<(), Error> {
         log::debug!("migrate_v2_to_v3");
         use engine::snapshot::migration::{migrate, Version};
 
@@ -61,7 +58,11 @@ impl StrongholdAdapter {
     }
 
     /// Re-encrypt data in the Stronghold store.
-    fn reencrypt_data_v2_to_v3<P: AsRef<Path>>(path: P, v2_password_hash: &[u8; 32], new_password: &str) -> Result<()> {
+    fn reencrypt_data_v2_to_v3<P: AsRef<Path>>(
+        path: P,
+        v2_password_hash: &[u8; 32],
+        new_password: &str,
+    ) -> Result<(), Error> {
         log::debug!("reencrypt_data_v2_to_v3");
 
         let stronghold = Stronghold::default();
@@ -89,7 +90,7 @@ impl StrongholdAdapter {
     }
 }
 
-fn v2_get(stronghold_client: &Client, k: &[u8], encryption_key: &[u8; 32]) -> Result<Option<Vec<u8>>> {
+fn v2_get(stronghold_client: &Client, k: &[u8], encryption_key: &[u8; 32]) -> Result<Option<Vec<u8>>, Error> {
     let data = match stronghold_client.store().get(k)? {
         Some(data) => data,
         None => return Ok(None),

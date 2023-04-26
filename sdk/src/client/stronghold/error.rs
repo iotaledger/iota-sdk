@@ -32,4 +32,15 @@ pub enum Error {
     /// Invalid mnemonic error
     #[error("invalid mnemonic {0}")]
     InvalidMnemonic(String),
+    /// Unsupported snapshot version
+    #[error("Unsupported snapshot version, migration required")]
+    UnsupportedSnapshotVersion {
+        /// Found version
+        found: u16,
+        /// Expected version
+        expected: u16,
+    },
+    /// Migration error
+    #[error("Stronghold migration error: {0}")]
+    Migration(#[from] engine::snapshot::migration::Error),
 }

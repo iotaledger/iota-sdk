@@ -9,10 +9,10 @@ use iota_sdk::{
         constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
         secret::{stronghold::StrongholdSecretManager, SecretManager},
         storage::StorageProvider,
-        stronghold::StrongholdAdapter,
+        stronghold::{Error as StrongholdError, StrongholdAdapter},
         Error as ClientError,
     },
-    wallet::{account_manager::AccountManager, ClientOptions, Error as WalletError},
+    wallet::{ClientOptions, Error as WalletError, Wallet},
 };
 
 use crate::wallet::common::{setup, tear_down, NODE_LOCAL};
@@ -29,7 +29,7 @@ async fn stronghold_snapshot_v2_v3_migration() {
 
     assert!(matches!(
         error,
-        Err(ClientError::StrongholdUnsupportedSnapshotVersion { found, expected }) if found == 2 && expected == 3
+        Err(StrongholdError::UnsupportedSnapshotVersion { found, expected }) if found == 2 && expected == 3
     ));
 
     StrongholdAdapter::migrate_v2_to_v3(
@@ -74,7 +74,7 @@ async fn stronghold_snapshot_v2_v3_migration() {
         ]
     );
 
-    let restore_manager = AccountManager::builder()
+    let restore_manager = Wallet::builder()
         .with_storage_path("test-storage/stronghold_snapshot_v2_v3_migration")
         .with_secret_manager(stronghold_secret_manager)
         .with_client_options(ClientOptions::new().with_node(NODE_LOCAL).unwrap())
@@ -97,7 +97,10 @@ async fn stronghold_snapshot_v2_v3_migration() {
 
     match error {
         Err(WalletError::Client(err)) => {
-            assert!(matches!(*err, ClientError::StrongholdInvalidPassword));
+            assert!(matches!(
+                *err,
+                ClientError::Stronghold(StrongholdError::InvalidPassword)
+            ));
         }
         _ => panic!("unexpected error"),
     }
@@ -115,7 +118,7 @@ async fn stronghold_snapshot_with_data_v2_v3_migration() {
 
     assert!(matches!(
         error,
-        Err(ClientError::StrongholdUnsupportedSnapshotVersion { found, expected }) if found == 2 && expected == 3
+        Err(StrongholdError::UnsupportedSnapshotVersion { found, expected }) if found == 2 && expected == 3
     ));
 
     StrongholdAdapter::migrate_v2_to_v3(

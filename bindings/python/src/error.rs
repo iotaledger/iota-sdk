@@ -8,8 +8,8 @@ use pyo3::{exceptions, prelude::*};
 /// The `Result` structure to wrap the error type for python binding.
 pub(crate) type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Debug)]
 /// The Error type.
+#[derive(Debug)]
 pub struct Error {
     /// The error exposed to python.
     pub error: PyErr,

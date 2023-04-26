@@ -5,11 +5,12 @@ use iota_sdk::{
     client::secret::{stronghold::StrongholdSecretManager, SecretManager},
     wallet::Wallet,
 };
+use zeroize::Zeroize;
 
 use crate::{
     command::wallet::{
-        backup_command, change_password_command, init_command, mnemonic_command, new_command, restore_command,
-        set_node_command, sync_command, InitParameters, WalletCli, WalletCommand,
+        backup_command, change_password_command, init_command, migrate_command, mnemonic_command, new_command,
+        restore_command, set_node_command, sync_command, InitParameters, WalletCli, WalletCommand,
     },
     error::Error,
     helper::get_password,
@@ -17,6 +18,11 @@ use crate::{
 };
 
 pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String>), Error> {
+    if let Some(WalletCommand::MigrateStronghold { path }) = cli.command {
+        migrate_command(path).await?;
+        return Ok((None, None));
+    }
+
     if let Some(WalletCommand::Mnemonic) = cli.command {
         mnemonic_command().await?;
         return Ok((None, None));
@@ -25,7 +31,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
     let storage_path = cli.wallet_db_path;
     let snapshot_path = std::path::Path::new(&cli.stronghold_snapshot_path);
     let snapshot_exists = snapshot_path.exists();
-    let password = if let Some(WalletCommand::Restore { .. }) = &cli.command {
+    let mut password = if let Some(WalletCommand::Restore { .. }) = &cli.command {
         get_password("Stronghold password", false)?
     } else {
         get_password("Stronghold password", !snapshot_path.exists())?
@@ -41,7 +47,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
             (init_command(secret_manager, storage_path, init_parameters).await?, None)
         } else if let WalletCommand::Restore { backup_path } = command {
             (
-                restore_command(secret_manager, storage_path, backup_path, password).await?,
+                restore_command(secret_manager, storage_path, backup_path, &password).await?,
                 None,
             )
         } else {
@@ -62,7 +68,10 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                 WalletCommand::SetNode { url } => set_node_command(&wallet, url).await?,
                 WalletCommand::Sync => sync_command(&wallet).await?,
                 // PANIC: this will never happen because these variants have already been checked.
-                WalletCommand::Init(_) | WalletCommand::Mnemonic | WalletCommand::Restore { .. } => unreachable!(),
+                WalletCommand::Init(_)
+                | WalletCommand::MigrateStronghold { .. }
+                | WalletCommand::Mnemonic
+                | WalletCommand::Restore { .. } => unreachable!(),
             };
 
             (wallet, account)
@@ -83,6 +92,8 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
             None,
         )
     };
+
+    password.zeroize();
 
     Ok((Some(wallet), account))
 }
