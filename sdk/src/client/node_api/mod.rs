@@ -4,7 +4,6 @@
 //! node API modules
 
 pub mod core;
-
 pub mod error;
 pub mod indexer;
 #[cfg(feature = "mqtt")]

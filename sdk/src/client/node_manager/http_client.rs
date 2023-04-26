@@ -53,7 +53,7 @@ impl HttpClient {
             Ok(Response(response))
         } else {
             let text = response.text().await?;
-            // hornet and bee return different error blocks
+            // Different urls, nodes and versions give different replies
             if text == *"no available nodes with remote Pow"
                 || text.contains("proof of work is not available on this node")
                 || text.contains("proof of work is not enabled")
