@@ -204,7 +204,7 @@ pub enum Error {
 // Used in faucet funds request util
 impl From<reqwest::Error> for Error {
     fn from(error: reqwest::Error) -> Self {
-        Error::Node(error.into())
+        Self::Node(error.into())
     }
 }
 

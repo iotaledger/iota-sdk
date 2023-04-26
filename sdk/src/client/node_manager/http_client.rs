@@ -24,6 +24,7 @@ impl Response {
         self.0.json().await.map_err(Into::into)
     }
 
+    #[cfg(not(target_family = "wasm"))]
     pub(crate) async fn into_text(self) -> Result<String> {
         self.0.text().await.map_err(Into::into)
     }
