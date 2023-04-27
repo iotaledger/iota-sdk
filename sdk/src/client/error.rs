@@ -201,13 +201,6 @@ pub enum Error {
     Stronghold(#[from] crate::client::stronghold::Error),
 }
 
-// Used in faucet funds request util
-impl From<reqwest::Error> for Error {
-    fn from(error: reqwest::Error) -> Self {
-        Self::Node(error.into())
-    }
-}
-
 // Serialize type with Display error
 impl Serialize for Error {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
