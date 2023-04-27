@@ -42,6 +42,11 @@ impl Serialize for WalletEvent {
         S: Serializer,
     {
         #[derive(Serialize)]
+        struct TransactionProgressEvent_<'a> {
+            event: &'a TransactionProgressEvent,
+        }
+
+        #[derive(Serialize)]
         #[serde(untagged)]
         enum WalletEvent_<'a> {
             T0,
@@ -50,13 +55,13 @@ impl Serialize for WalletEvent {
             T2(&'a NewOutputEvent),
             T3(&'a SpentOutputEvent),
             T4(&'a TransactionInclusionEvent),
-            T5(&'a TransactionProgressEvent),
+            T5(TransactionProgressEvent_<'a>),
         }
         #[derive(Serialize)]
         struct TypedWalletEvent_<'a> {
             #[serde(rename = "type")]
             kind: u8,
-            // #[serde(flatten)]
+            #[serde(flatten)]
             event: WalletEvent_<'a>,
         }
         let event = match self {
@@ -83,7 +88,7 @@ impl Serialize for WalletEvent {
             },
             Self::TransactionProgress(e) => TypedWalletEvent_ {
                 kind: 5,
-                event: WalletEvent_::T5(e),
+                event: WalletEvent_::T5(TransactionProgressEvent_ { event: e }),
             },
         };
         event.serialize(serializer)
@@ -92,6 +97,11 @@ impl Serialize for WalletEvent {
 
 impl<'de> Deserialize<'de> for WalletEvent {
     fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        struct TransactionProgressEvent_ {
+            event: TransactionProgressEvent,
+        }
+
         let value = serde_json::Value::deserialize(d)?;
         Ok(
             match value
@@ -119,9 +129,13 @@ impl<'de> Deserialize<'de> for WalletEvent {
                         serde::de::Error::custom(format!("cannot deserialize TransactionInclusion: {e}"))
                     })?)
                 }
-                5 => Self::TransactionProgress(TransactionProgressEvent::deserialize(value).map_err(|e| {
-                    serde::de::Error::custom(format!("cannot deserialize TransactionProgressEvent: {e}"))
-                })?),
+                5 => Self::TransactionProgress(
+                    TransactionProgressEvent_::deserialize(value)
+                        .map_err(|e| {
+                            serde::de::Error::custom(format!("cannot deserialize TransactionProgressEvent: {e}"))
+                        })?
+                        .event,
+                ),
                 _ => return Err(serde::de::Error::custom("invalid event type")),
             },
         )
