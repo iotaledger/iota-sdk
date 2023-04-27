@@ -24,7 +24,6 @@ use crate::OmittedDebug;
 #[derive(Clone, Derivative, Serialize, Deserialize)]
 #[derivative(Debug)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
-#[allow(clippy::large_enum_variant)]
 pub enum WalletMethod {
     /// Creates an account.
     /// Expected response: [`Account`](crate::Response::Account)
