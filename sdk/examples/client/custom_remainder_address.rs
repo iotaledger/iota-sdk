@@ -17,6 +17,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance
     let client = Client::builder()
@@ -36,6 +37,12 @@ async fn main() -> Result<()> {
     println!("sender address: {sender_address}");
     println!("receiver address: {receiver_address}");
     println!("remainder address: {remainder_address}");
+
+    println!(
+        "automatically funding sender address with faucet: {}",
+        request_funds_from_faucet(faucet_url, sender_address).await?
+    );
+    tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
     let output_ids_response = client
         .basic_output_ids(vec![QueryParameter::Address(sender_address.clone())])
