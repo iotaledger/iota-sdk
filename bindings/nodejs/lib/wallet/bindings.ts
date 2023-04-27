@@ -25,11 +25,11 @@ const listenTo = (
 };
 
 const callWalletMethodAsync = (
-    message: string,
+    method: string,
     handler: WalletMethodHandler,
 ): Promise<string> =>
     new Promise((resolve, reject) => {
-        callWalletMethod(message, handler, (error: Error, result: string) => {
+        callWalletMethod(method, handler, (error: Error, result: string) => {
             if (error) {
                 reject(error);
             } else {

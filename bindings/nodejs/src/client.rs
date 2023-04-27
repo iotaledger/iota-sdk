@@ -34,18 +34,17 @@ impl ClientMethodHandler {
         Arc::new(Self { channel, client })
     }
 
-    async fn call_method(&self, serialized_message: String) -> (String, bool) {
-        match serde_json::from_str::<ClientMethod>(&serialized_message) {
-            Ok(message) => {
-                let res = rust_call_client_method(&self.client, message).await;
+    async fn call_method(&self, serialized_method: String) -> (String, bool) {
+        match serde_json::from_str::<ClientMethod>(&serialized_method) {
+            Ok(method) => {
+                let res = rust_call_client_method(&self.client, method).await;
                 let mut is_err = matches!(res, Response::Error(_) | Response::Panic(_));
 
                 let msg = match serde_json::to_string(&res) {
                     Ok(msg) => msg,
                     Err(e) => {
                         is_err = true;
-                        serde_json::to_string(&Response::Error(e.into()))
-                            .expect("the response is generated manually, so unwrap is safe.")
+                        serde_json::to_string(&Response::Error(e.into())).expect("json to string error")
                     }
                 };
 
@@ -53,7 +52,7 @@ impl ClientMethodHandler {
             }
             Err(e) => {
                 log::debug!("{:?}", e);
-                (format!("Couldn't parse to message with error - {e:?}"), true)
+                (format!("Couldn't parse to method with error - {e:?}"), true)
             }
         }
     }
@@ -63,20 +62,20 @@ pub fn create_client(mut cx: FunctionContext) -> JsResult<JsBox<Arc<ClientMethod
     let options = cx.argument::<JsString>(0)?;
     let options = options.value(&mut cx);
     let channel = cx.channel();
-    let message_handler = ClientMethodHandler::new(channel, options);
+    let method_handler = ClientMethodHandler::new(channel, options);
 
-    Ok(cx.boxed(message_handler))
+    Ok(cx.boxed(method_handler))
 }
 
 pub fn call_client_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let message = cx.argument::<JsString>(0)?;
-    let message = message.value(&mut cx);
-    let message_handler = Arc::clone(&&cx.argument::<JsBox<Arc<ClientMethodHandler>>>(1)?);
+    let method = cx.argument::<JsString>(0)?;
+    let method = method.value(&mut cx);
+    let method_handler = Arc::clone(&&cx.argument::<JsBox<Arc<ClientMethodHandler>>>(1)?);
     let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
 
     crate::RUNTIME.spawn(async move {
-        let (response, is_error) = message_handler.call_method(message).await;
-        message_handler.channel.send(move |mut cx| {
+        let (response, is_error) = method_handler.call_method(method).await;
+        method_handler.channel.send(move |mut cx| {
             let cb = callback.into_inner(&mut cx);
             let this = cx.undefined();
 
@@ -109,13 +108,13 @@ pub fn listen_mqtt(mut cx: FunctionContext) -> JsResult<JsPromise> {
     }
 
     let callback = Arc::new(cx.argument::<JsFunction>(1)?.root(&mut cx));
-    let message_handler = Arc::clone(&&cx.argument::<JsBox<Arc<ClientMethodHandler>>>(2)?);
+    let method_handler = Arc::clone(&&cx.argument::<JsBox<Arc<ClientMethodHandler>>>(2)?);
     let (deferred, promise) = cx.promise();
 
     crate::RUNTIME.spawn(async move {
-        let channel0 = message_handler.channel.clone();
-        let channel1 = message_handler.channel.clone();
-        rust_listen_mqtt(&message_handler.client, topics, move |event_data| {
+        let channel0 = method_handler.channel.clone();
+        let channel1 = method_handler.channel.clone();
+        rust_listen_mqtt(&method_handler.client, topics, move |event_data| {
             call_event_callback(&channel0, event_data, callback.clone())
         })
         .await;

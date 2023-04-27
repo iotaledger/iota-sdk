@@ -17,19 +17,19 @@ import type {
 } from '../../types/wallet';
 import { Client } from '../client';
 
-// The WalletMethodHandler class interacts with messages with the rust bindings.
+// The WalletMethodHandler class interacts with methods with the rust bindings.
 export class WalletMethodHandler {
     methodHandler: any;
 
     constructor(options?: WalletOptions) {
-        const messageOptions = {
+        const walletOptions = {
             storagePath: options?.storagePath,
             clientOptions: options?.clientOptions,
             coinType: options?.coinType,
             secretManager: options?.secretManager,
         };
 
-        this.methodHandler = createWallet(JSON.stringify(messageOptions));
+        this.methodHandler = createWallet(JSON.stringify(walletOptions));
     }
 
     async callMethod(method: __Method__): Promise<string> {

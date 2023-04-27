@@ -39,8 +39,7 @@ impl SecretManagerMethodHandler {
                     Ok(msg) => msg,
                     Err(e) => {
                         is_err = true;
-                        serde_json::to_string(&Response::Error(e.into()))
-                            .expect("the response is generated manually, so unwrap is safe.")
+                        serde_json::to_string(&Response::Error(e.into())).expect("json to string error")
                     }
                 };
 

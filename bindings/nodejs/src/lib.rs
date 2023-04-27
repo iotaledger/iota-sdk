@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// Increased limit required specifically for the call_message method
+// Increased limit required specifically for call_method
 #![recursion_limit = "256"]
 #![allow(clippy::needless_borrow)]
 
@@ -29,10 +29,7 @@ pub fn call_utils_method(mut cx: FunctionContext) -> JsResult<JsString> {
     let method = match serde_json::from_str::<UtilsMethod>(&method) {
         Ok(method) => method,
         Err(err) => {
-            return Ok(cx.string(
-                serde_json::to_string(&Response::Error(err.into()))
-                    .expect("the response is generated manually, so unwrap is safe."),
-            ));
+            return Ok(cx.string(serde_json::to_string(&Response::Error(err.into())).expect("json to string error")));
         }
     };
     let response = crate::RUNTIME.block_on(async move { rust_call_utils_method(method).await });

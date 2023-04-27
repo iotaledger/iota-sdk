@@ -50,8 +50,7 @@ impl WalletMethodHandler {
                     Ok(msg) => msg,
                     Err(e) => {
                         is_err = true;
-                        serde_json::to_string(&Response::Error(e.into()))
-                            .expect("the response is generated manually, so unwrap is safe.")
+                        serde_json::to_string(&Response::Error(e.into())).expect("json to string error")
                     }
                 };
 
@@ -60,8 +59,7 @@ impl WalletMethodHandler {
             Err(e) => {
                 log::debug!("{:?}", e);
                 (
-                    serde_json::to_string(&Response::Error(e.into()))
-                        .expect("the response is generated manually, so unwrap is safe."),
+                    serde_json::to_string(&Response::Error(e.into())).expect("json to string error"),
                     true,
                 )
             }
@@ -91,25 +89,22 @@ pub fn create_wallet(mut cx: FunctionContext) -> JsResult<JsBox<WalletMethodHand
     let options = cx.argument::<JsString>(0)?;
     let options = options.value(&mut cx);
     let channel = cx.channel();
-    let message_handler = WalletMethodHandler::new(channel, options).or_else(|e| {
-        cx.throw_error(
-            serde_json::to_string(&Response::Error(e)).expect("the response is generated manually, so unwrap is safe."),
-        )
-    })?;
+    let method_handler = WalletMethodHandler::new(channel, options)
+        .or_else(|e| cx.throw_error(serde_json::to_string(&Response::Error(e)).expect("json to string error")))?;
 
-    Ok(cx.boxed(WalletMethodHandlerWrapper(Arc::new(RwLock::new(Some(message_handler))))))
+    Ok(cx.boxed(WalletMethodHandlerWrapper(Arc::new(RwLock::new(Some(method_handler))))))
 }
 
 pub fn call_wallet_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let message = cx.argument::<JsString>(0)?;
-    let message = message.value(&mut cx);
-    let message_handler = Arc::clone(&&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(1)?.0);
+    let method = cx.argument::<JsString>(0)?;
+    let method = method.value(&mut cx);
+    let method_handler = Arc::clone(&&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(1)?.0);
     let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
 
     crate::RUNTIME.spawn(async move {
-        if let Some(message_handler) = &*message_handler.read().await {
-            let (response, is_error) = message_handler.call_method(message).await;
-            message_handler.channel.send(move |mut cx| {
+        if let Some(method_handler) = &*method_handler.read().await {
+            let (response, is_error) = method_handler.call_method(method).await;
+            method_handler.channel.send(move |mut cx| {
                 let cb = callback.into_inner(&mut cx);
                 let this = cx.undefined();
 
@@ -146,12 +141,12 @@ pub fn listen_wallet(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     }
 
     let callback = Arc::new(cx.argument::<JsFunction>(1)?.root(&mut cx));
-    let message_handler = Arc::clone(&&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(2)?.0);
+    let method_handler = Arc::clone(&&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(2)?.0);
 
     crate::RUNTIME.spawn(async move {
-        if let Some(message_handler) = &*message_handler.read().await {
-            let channel = message_handler.channel.clone();
-            message_handler
+        if let Some(method_handler) = &*method_handler.read().await {
+            let channel = method_handler.channel.clone();
+            method_handler
                 .wallet
                 .listen(event_types, move |event_data| {
                     call_event_callback(&channel, event_data.clone(), callback.clone())
@@ -166,31 +161,31 @@ pub fn listen_wallet(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 }
 
 pub fn destroy_wallet(mut cx: FunctionContext) -> JsResult<JsPromise> {
-    let message_handler = Arc::clone(&&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(0)?.0);
+    let method_handler = Arc::clone(&&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(0)?.0);
     let channel = cx.channel();
     let (deferred, promise) = cx.promise();
     crate::RUNTIME.spawn(async move {
-        *message_handler.write().await = None;
+        *method_handler.write().await = None;
         deferred.settle_with(&channel, move |mut cx| Ok(cx.undefined()));
     });
     Ok(promise)
 }
 
 pub fn get_client(mut cx: FunctionContext) -> JsResult<JsPromise> {
-    let message_handler = Arc::clone(&&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(0)?.0);
+    let method_handler = Arc::clone(&&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(0)?.0);
     let channel = cx.channel();
 
     let (deferred, promise) = cx.promise();
     let (sender, receiver) = std::sync::mpsc::channel();
     crate::RUNTIME.spawn(async move {
-        if let Some(message_handler) = &*message_handler.read().await {
-            let client = match message_handler.wallet.get_client().await {
+        if let Some(method_handler) = &*method_handler.read().await {
+            let client = match method_handler.wallet.get_client().await {
                 Ok(client) => client,
                 Err(err) => return sender.send(Some(err)),
             };
 
-            let client_message_handler = ClientMethodHandler::new_with_client(channel.clone(), client);
-            deferred.settle_with(&channel, move |mut cx| Ok(cx.boxed(client_message_handler)));
+            let client_method_handler = ClientMethodHandler::new_with_client(channel.clone(), client);
+            deferred.settle_with(&channel, move |mut cx| Ok(cx.boxed(client_method_handler)));
             sender.send(None)
         } else {
             panic!("Wallet got destroyed")
