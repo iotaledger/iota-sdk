@@ -86,6 +86,11 @@ impl Account {
                                     output_ids_to_claim.insert(output_data.output_id);
                                 }
                             }
+                            OutputsToClaim::Nfts => {
+                                if output_data.output.is_nft() {
+                                    output_ids_to_claim.insert(output_data.output_id);
+                                }
+                            }
                             OutputsToClaim::Amount => {
                                 let mut claimable_amount = output_data.output.amount();
                                 if !unlock_conditions.is_expired(local_time) {
@@ -100,11 +105,6 @@ impl Account {
                             }
                             OutputsToClaim::All => {
                                 output_ids_to_claim.insert(output_data.output_id);
-                            }
-                            OutputsToClaim::Nfts => {
-                                if output_data.output.is_nft() {
-                                    output_ids_to_claim.insert(output_data.output_id);
-                                }
                             }
                         }
                     }
