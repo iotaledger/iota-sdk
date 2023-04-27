@@ -9,9 +9,7 @@ pub mod routes;
 use crate::client::constants::MAX_PARALLEL_API_REQUESTS;
 use crate::{
     client::{Client, Result},
-    types::{
-        block::output::{dto::OutputMetadataDto, OutputId, OutputWithMetadata},
-    },
+    types::block::output::{dto::OutputMetadataDto, OutputId, OutputWithMetadata},
 };
 
 impl Client {
