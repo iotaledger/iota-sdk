@@ -11,7 +11,7 @@ use iota_sdk::{
         block::{
             input::dto::UtxoInputDto,
             output::{
-                dto::{OutputBuilderAmountDto, OutputDto, OutputMetadataDto, RentStructureDto},
+                dto::{OutputBuilderAmountDto, OutputDto, RentStructureDto},
                 AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output,
             },
             payload::{

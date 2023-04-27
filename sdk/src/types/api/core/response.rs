@@ -213,8 +213,8 @@ pub struct OutputWithMetadataResponse {
 impl From<&OutputWithMetadata> for OutputWithMetadataResponse {
     fn from(value: &OutputWithMetadata) -> Self {
         Self {
-            metadata: OutputMetadataDto::from(&value.metadata),
-            output: OutputDto::from(&value.output),
+            metadata: OutputMetadataDto::from(value.metadata()),
+            output: OutputDto::from(value.output()),
         }
     }
 }

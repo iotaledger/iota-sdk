@@ -41,10 +41,10 @@ impl<'a> ClientBlockBuilder<'a> {
             for input in inputs {
                 let output_with_meta = self.client.get_output(input.output_id()).await?;
 
-                if !output_with_meta.metadata.is_spent() {
+                if !output_with_meta.metadata().is_spent() {
                     let alias_transition =
-                        is_alias_transition_internal(&output_with_meta.output, *input.output_id(), &self.outputs);
-                    let (unlock_address, _) = output_with_meta.output.required_and_unlocked_address(
+                        is_alias_transition_internal(output_with_meta.output(), *input.output_id(), &self.outputs);
+                    let (unlock_address, _) = output_with_meta.output().required_and_unlocked_address(
                         current_time,
                         input.output_id(),
                         alias_transition.map(|g| g.0),
@@ -74,8 +74,8 @@ impl<'a> ClientBlockBuilder<'a> {
                     };
 
                     inputs_data.push(InputSigningData {
-                        output: output_with_meta.output,
-                        output_metadata: output_with_meta.metadata,
+                        output: output_with_meta.output().to_owned(),
+                        output_metadata: output_with_meta.metadata().to_owned(),
                         chain: address_index_internal.map(|(address_index, internal)| {
                             Chain::from_u32_hardened(vec![
                                 HD_WALLET_TYPE,

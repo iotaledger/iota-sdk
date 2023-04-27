@@ -158,7 +158,7 @@ impl<'a> ClientBlockBuilder<'a> {
             let mut address_index = gap_index;
 
             for (index, (str_address, internal)) in public_and_internal_addresses.iter().enumerate() {
-                let outputs_with_meta = self.basic_address_outputs(str_address.to_string()).await?;
+                let address_outputs = self.basic_address_outputs(str_address.to_string()).await?;
 
                 // If there are more than 20 (ADDRESS_GAP_RANGE) consecutive empty addresses, then we stop
                 // looking up the addresses belonging to the seed. Note that we don't
@@ -166,24 +166,27 @@ impl<'a> ClientBlockBuilder<'a> {
                 // unnecessary. We just need to check the address range,
                 // (index * ADDRESS_GAP_RANGE, index * ADDRESS_GAP_RANGE + ADDRESS_GAP_RANGE), where index is
                 // natural number, and to see if the outputs are all empty.
-                if outputs_with_meta.is_empty() {
+                if address_outputs.is_empty() {
                     // Accumulate the empty_address_count for each run of output address searching
                     empty_address_count += 1;
                 } else {
                     // Reset counter if there is an output
                     empty_address_count = 0;
 
-                    for output_with_meta in outputs_with_meta {
+                    for output_with_meta in address_outputs {
                         let address = Address::try_from_bech32(str_address)?;
 
                         // We can ignore the unlocked_alias_or_nft_address, since we only requested basic outputs
-                        let (required_unlock_address, _unlocked_alias_or_nft_address) = output_with_meta
-                            .output
-                            .required_and_unlocked_address(current_time, output_with_meta.metadata.output_id(), None)?;
+                        let (required_unlock_address, _unlocked_alias_or_nft_address) =
+                            output_with_meta.output().required_and_unlocked_address(
+                                current_time,
+                                output_with_meta.metadata().output_id(),
+                                None,
+                            )?;
                         if required_unlock_address == address {
                             available_inputs.push(InputSigningData {
-                                output: output_with_meta.output.clone(),
-                                output_metadata: output_with_meta.metadata.clone(),
+                                output: output_with_meta.output().clone(),
+                                output_metadata: output_with_meta.metadata().clone(),
                                 chain: Some(Chain::from_u32_hardened(vec![
                                     HD_WALLET_TYPE,
                                     self.coin_type,

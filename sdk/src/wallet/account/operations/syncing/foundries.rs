@@ -41,8 +41,8 @@ impl Account {
         // Update account with new foundries.
         for result in results {
             if let Some(foundry_output_with_metadata) = result? {
-                if let Output::Foundry(foundry) = foundry_output_with_metadata.output {
-                    foundries.insert(foundry.id(), foundry);
+                if let Output::Foundry(foundry) = foundry_output_with_metadata.output() {
+                    foundries.insert(foundry.id(), foundry.to_owned());
                 }
             }
         }

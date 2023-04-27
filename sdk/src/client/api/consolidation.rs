@@ -77,12 +77,12 @@ impl Client {
 
                     for output_with_meta in chunk {
                         block_builder = block_builder
-                            .with_input(UtxoInput::from(output_with_meta.metadata.output_id().to_owned()))?;
+                            .with_input(UtxoInput::from(output_with_meta.metadata().output_id().to_owned()))?;
 
-                        if let Some(native_tokens) = output_with_meta.output.native_tokens() {
+                        if let Some(native_tokens) = output_with_meta.output().native_tokens() {
                             total_native_tokens.add_native_tokens(native_tokens.clone())?;
                         }
-                        total_amount += output_with_meta.output.amount();
+                        total_amount += output_with_meta.output().amount();
                     }
 
                     let consolidation_output = BasicOutputBuilder::new_with_amount(total_amount)

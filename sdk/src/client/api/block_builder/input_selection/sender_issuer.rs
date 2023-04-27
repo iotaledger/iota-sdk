@@ -60,14 +60,17 @@ impl<'a> ClientBlockBuilder<'a> {
                     let mut found_output = false;
                     for output_with_meta in address_outputs {
                         // We can ignore the unlocked_alias_or_nft_address, since we only requested basic outputs
-                        let (required_unlock_address, _unlocked_alias_or_nft_address) = output_with_meta
-                            .output
-                            .required_and_unlocked_address(current_time, output_with_meta.metadata.output_id(), None)?;
+                        let (required_unlock_address, _unlocked_alias_or_nft_address) =
+                            output_with_meta.output().required_and_unlocked_address(
+                                current_time,
+                                output_with_meta.metadata().output_id(),
+                                None,
+                            )?;
 
                         if required_unlock_address == sender_or_issuer_address {
                             required_inputs.push(InputSigningData {
-                                output: output_with_meta.output,
-                                output_metadata: output_with_meta.metadata,
+                                output: output_with_meta.output().to_owned(),
+                                output_metadata: output_with_meta.metadata().to_owned(),
                                 chain: Some(Chain::from_u32_hardened(vec![
                                     HD_WALLET_TYPE,
                                     self.coin_type,
@@ -98,8 +101,8 @@ impl<'a> ClientBlockBuilder<'a> {
                         }
                     }) {
                         let output_id = self.client.alias_output_id(*alias_id).await?;
-                        let output_response = self.client.get_output(&output_id).await?;
-                        if let Output::Alias(alias_output) = &output_response.output {
+                        let output_with_meta = self.client.get_output(&output_id).await?;
+                        if let Output::Alias(alias_output) = output_with_meta.output() {
                             // State transition if we add them to inputs
                             let unlock_address = alias_output.state_controller_address();
                             let address_index_internal = match self.secret_manager {
@@ -125,8 +128,8 @@ impl<'a> ClientBlockBuilder<'a> {
                             };
 
                             required_inputs.push(InputSigningData {
-                                output: output_response.output,
-                                output_metadata: output_response.metadata,
+                                output: output_with_meta.output().to_owned(),
+                                output_metadata: output_with_meta.metadata().to_owned(),
                                 chain: address_index_internal.map(|(address_index, internal)| {
                                     Chain::from_u32_hardened(vec![
                                         HD_WALLET_TYPE,
@@ -153,8 +156,8 @@ impl<'a> ClientBlockBuilder<'a> {
                         }
                     }) {
                         let output_id = self.client.nft_output_id(*nft_id).await?;
-                        let output_response = self.client.get_output(&output_id).await?;
-                        if let Output::Nft(nft_output) = &output_response.output {
+                        let output_with_meta = self.client.get_output(&output_id).await?;
+                        if let Output::Nft(nft_output) = output_with_meta.output() {
                             let unlock_address = nft_output
                                 .unlock_conditions()
                                 .locked_address(nft_output.address(), current_time);
@@ -182,8 +185,8 @@ impl<'a> ClientBlockBuilder<'a> {
                             };
 
                             required_inputs.push(InputSigningData {
-                                output: output_response.output,
-                                output_metadata: output_response.metadata,
+                                output: output_with_meta.output().to_owned(),
+                                output_metadata: output_with_meta.metadata().to_owned(),
                                 chain: address_index_internal.map(|(address_index, internal)| {
                                     Chain::from_u32_hardened(vec![
                                         HD_WALLET_TYPE,

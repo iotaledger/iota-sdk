@@ -214,7 +214,7 @@ impl Account {
         let foundry_output_id = self.client.foundry_output_id(foundry_id).await?;
         let output_response = self.client.get_output(&foundry_output_id).await?;
 
-        Ok(output_response.output)
+        Ok(output_response.output().to_owned())
     }
 
     /// Get the [`Transaction`] of a transaction stored in the account

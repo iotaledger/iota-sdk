@@ -207,10 +207,10 @@ impl Client {
         for output_with_meta in available_outputs {
             basic_outputs.push((
                 UtxoInput::new(
-                    output_with_meta.metadata.transaction_id().to_owned(),
-                    output_with_meta.metadata.output_index(),
+                    output_with_meta.metadata().transaction_id().to_owned(),
+                    output_with_meta.metadata().output_index(),
                 )?,
-                output_with_meta.output.amount(),
+                output_with_meta.output().amount(),
             ));
         }
         basic_outputs.sort_by(|l, r| r.1.cmp(&l.1));

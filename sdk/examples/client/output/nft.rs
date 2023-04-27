@@ -94,7 +94,7 @@ async fn main() -> Result<()> {
         .with_input(nft_output_id.into())?
         .with_input(output_ids_response.items[0].into())?
         .with_outputs(vec![
-            NftOutputBuilder::new_with_amount(1_000_000 + output_with_meta.output.amount(), nft_id)
+            NftOutputBuilder::new_with_amount(1_000_000 + output_with_meta.output().amount(), nft_id)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
                 .finish_output(token_supply)?,
         ])?
@@ -115,7 +115,7 @@ async fn main() -> Result<()> {
     let nft_output_id = get_nft_output_id(block.payload().unwrap())?;
     let output_with_meta = client.get_output(&nft_output_id).await?;
     let outputs = vec![
-        BasicOutputBuilder::new_with_amount(output_with_meta.output.amount())
+        BasicOutputBuilder::new_with_amount(output_with_meta.output().amount())
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish_output(token_supply)?,
     ];

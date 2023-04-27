@@ -87,8 +87,8 @@ pub(crate) enum OutputBuilderAmount {
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OutputWithMetadata {
-    pub output: Output,
-    pub metadata: OutputMetadata,
+    output: Output,
+    metadata: OutputMetadata,
 }
 
 impl AsRef<Self> for OutputWithMetadata {
@@ -98,6 +98,11 @@ impl AsRef<Self> for OutputWithMetadata {
 }
 
 impl OutputWithMetadata {
+    /// Creates a new [`OutputWithMetadata`].
+    pub fn new(output: Output, metadata: OutputMetadata) -> Self {
+        Self { output, metadata }
+    }
+
     /// Returns the [`Output`].
     pub fn output(&self) -> &Output {
         &self.output

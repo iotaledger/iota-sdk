@@ -28,7 +28,7 @@ use crate::{
             address::{dto::AddressDto, Address, Ed25519Address},
             input::dto::UtxoInputDto,
             output::{
-                dto::{OutputBuilderAmountDto, OutputDto, OutputMetadataDto, RentStructureDto},
+                dto::{OutputBuilderAmountDto, OutputDto, RentStructureDto},
                 AliasId, AliasOutput, BasicOutput, FoundryId, FoundryOutput, NftId, NftOutput, Output,
             },
             payload::{
@@ -525,15 +525,8 @@ impl ClientMessageHandler {
             )),
             Message::GetBlockRaw { block_id } => Ok(Response::BlockRaw(self.client.get_block_raw(&block_id).await?)),
             Message::GetOutput { output_id } => {
-                let output = self.client.get_output(&output_id).await?;
-                let output_dto = OutputDto::from(&output.output);
-                let metadata_dto = OutputMetadataDto::from(&output.metadata);
-
-                // ? should we return via mqtt the DTO or non-dto version?
-                Ok(Response::Output(OutputWithMetadataResponse {
-                    metadata: metadata_dto,
-                    output: output_dto,
-                }))
+                let output_with_meta = self.client.get_output(&output_id).await?;
+                Ok(Response::Output(OutputWithMetadataResponse::from(&output_with_meta)))
             }
             Message::GetOutputMetadata { output_id } => Ok(Response::OutputMetadata(
                 self.client.get_output_metadata(&output_id).await?,
@@ -587,25 +580,13 @@ impl ClientMessageHandler {
             Message::GetOutputs { output_ids } => {
                 let outputs_with_meta = self.client.get_outputs(output_ids).await?;
                 Ok(Response::Outputs(
-                    outputs_with_meta
-                        .iter()
-                        .map(|o| OutputWithMetadataResponse {
-                            output: OutputDto::from(&o.output),
-                            metadata: OutputMetadataDto::from(&o.metadata),
-                        })
-                        .collect(),
+                    outputs_with_meta.iter().map(OutputWithMetadataResponse::from).collect(),
                 ))
             }
             Message::TryGetOutputs { output_ids } => {
                 let outputs_with_meta = self.client.try_get_outputs(output_ids).await?;
                 Ok(Response::Outputs(
-                    outputs_with_meta
-                        .iter()
-                        .map(|o| OutputWithMetadataResponse {
-                            output: OutputDto::from(&o.output),
-                            metadata: OutputMetadataDto::from(&o.metadata),
-                        })
-                        .collect(),
+                    outputs_with_meta.iter().map(OutputWithMetadataResponse::from).collect(),
                 ))
             }
             Message::FindBlocks { block_ids } => Ok(Response::Blocks(
@@ -655,15 +636,10 @@ impl ClientMessageHandler {
                     .collect(),
             )),
             Message::FindOutputs { output_ids, addresses } => {
-                let found_outputs = self.client.find_outputs(&output_ids, &addresses).await?;
-                let found_response_outputs = found_outputs
-                    .iter()
-                    .map(|o| OutputWithMetadataResponse {
-                        output: OutputDto::from(&o.output),
-                        metadata: OutputMetadataDto::from(&o.metadata),
-                    })
-                    .collect();
-                Ok(Response::Outputs(found_response_outputs))
+                let outputs_with_meta = self.client.find_outputs(&output_ids, &addresses).await?;
+                Ok(Response::Outputs(
+                    outputs_with_meta.iter().map(OutputWithMetadataResponse::from).collect(),
+                ))
             }
             Message::Reattach { block_id } => {
                 let (block_id, block) = self.client.reattach(&block_id).await?;
