@@ -225,7 +225,7 @@ impl Account {
         let mut locked_native_tokens = NativeTokensBuilder::new();
 
         for locked_output in &account_details.locked_outputs {
-            if account_balance.potentially_locked_outputs.contains_key(locked_output){
+            if account_balance.potentially_locked_outputs.contains_key(locked_output) {
                 continue;
             }
             if let Some(output_data) = account_details.unspent_outputs.get(locked_output) {
@@ -268,9 +268,7 @@ impl Account {
                 token_id: *native_token.token_id(),
                 metadata,
                 total: native_token.amount(),
-                available: native_token
-                    .amount()
-                    .saturating_sub(*locked_native_token_amount.unwrap_or(&U256::from(0u8))),
+                available: native_token.amount() - *locked_native_token_amount.unwrap_or(&U256::from(0u8)),
             })
         }
 
