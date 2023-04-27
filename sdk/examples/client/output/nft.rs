@@ -101,7 +101,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Block with input(basic output) to NFT output sent: {explorer_url}/block/{}",
+        "Block with input (basic output) to NFT output sent: {explorer_url}/block/{}",
         block.id()
     );
 

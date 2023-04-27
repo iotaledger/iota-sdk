@@ -28,12 +28,12 @@ async fn main() -> Result<()> {
         .basic_output_ids(vec![QueryParameter::Cursor(String::new())])
         .await?;
 
-    println!("Address output IDs {output_ids_response:#?}");
+    println!("Basic output IDs from first cursor {output_ids_response:#?}");
 
     // Get the outputs by their IDs.
     let outputs_responses = client.get_outputs(output_ids_response.items).await?;
 
-    println!("Basic outputs: {outputs_responses:#?}");
+    println!("{outputs_responses:#?}");
 
     Ok(())
 }

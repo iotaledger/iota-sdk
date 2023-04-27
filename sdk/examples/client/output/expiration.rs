@@ -68,7 +68,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!("Block with expiration output sent: {explorer_url}/block/{}", block.id());
+    println!("Block with ExpirationUnlockCondition sent: {explorer_url}/block/{}", block.id());
     let _ = client.retry_until_included(&block.id(), None, None).await?;
     Ok(())
 }
