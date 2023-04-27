@@ -922,9 +922,9 @@ export class Client {
      * Try to get OutputResponse from provided OutputIds (requests are sent
      * in parallel and errors are ignored, can be useful for spent outputs)
      */
-    async tryGetOutputs(outputIds: string[]): Promise<IOutputResponse[]> {
+    async getOutputsIgnoreErrors(outputIds: string[]): Promise<IOutputResponse[]> {
         const response = await this.messageHandler.sendMessage({
-            name: 'tryGetOutputs',
+            name: 'getOutputsIgnoreErrors',
             data: {
                 outputIds,
             },

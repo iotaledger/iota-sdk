@@ -381,9 +381,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .collect();
             Response::Outputs(outputs_response)
         }
-        ClientMethod::TryGetOutputs { output_ids } => {
+        ClientMethod::GetOutputsIgnoreErrors { output_ids } => {
             let outputs_response = client
-                .try_get_outputs(output_ids)
+                .get_outputs_ignore_errors(output_ids)
                 .await?
                 .iter()
                 .map(OutputWithMetadataResponse::from)

@@ -53,7 +53,7 @@ import type {
     __NftOutputIdMessage__,
     __FoundryOutputIdsMessage__,
     __FoundryOutputIdMessage__,
-    __TryGetOutputsMessage__,
+    __GetOutputsIgnoreErrorsMessage__,
     __FindBlocksMessage__,
     __RetryMessage__,
     __RetryUntilIncludedMessage__,
@@ -140,7 +140,7 @@ export type __ClientMessages__ =
     | __NftOutputIdMessage__
     | __FoundryOutputIdsMessage__
     | __FoundryOutputIdMessage__
-    | __TryGetOutputsMessage__
+    | __GetOutputsIgnoreErrorsMessage__
     | __FindBlocksMessage__
     | __RetryMessage__
     | __RetryUntilIncludedMessage__

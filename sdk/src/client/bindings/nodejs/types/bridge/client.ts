@@ -416,8 +416,8 @@ export interface __FoundryOutputIdMessage__ {
     };
 }
 
-export interface __TryGetOutputsMessage__ {
-    name: 'tryGetOutputs';
+export interface _GetOutputsIgnoreErrorsMessage__ {
+    name: 'getOutputsIgnoreErrors';
     data: {
         outputIds: string[];
     };

@@ -220,5 +220,5 @@ pub(crate) async fn get_inputs_for_transaction_payload(
         }
     }
 
-    client.try_get_outputs(output_ids).await.map_err(|e| e.into())
+    client.get_outputs_ignore_errors(output_ids).await.map_err(|e| e.into())
 }

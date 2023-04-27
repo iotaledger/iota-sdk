@@ -583,8 +583,8 @@ impl ClientMessageHandler {
                     outputs_with_meta.iter().map(OutputWithMetadataResponse::from).collect(),
                 ))
             }
-            Message::TryGetOutputs { output_ids } => {
-                let outputs_with_meta = self.client.try_get_outputs(output_ids).await?;
+            Message::GetOutputsIgnoreErrors { output_ids } => {
+                let outputs_with_meta = self.client.get_outputs_ignore_errors(output_ids).await?;
                 Ok(Response::Outputs(
                     outputs_with_meta.iter().map(OutputWithMetadataResponse::from).collect(),
                 ))
