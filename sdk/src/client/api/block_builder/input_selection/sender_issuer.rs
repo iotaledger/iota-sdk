@@ -22,7 +22,7 @@ use crate::{
     },
     types::block::{
         address::Address,
-        output::{dto::OutputDto, feature::Features, AliasOutput, NftOutput, Output, OutputMetadata},
+        output::{feature::Features, Output},
     },
 };
 
@@ -36,7 +36,6 @@ impl<'a> ClientBlockBuilder<'a> {
         let mut required_inputs = Vec::new();
         let bech32_hrp = self.client.get_bech32_hrp().await?;
         let current_time = self.client.get_time_checked().await?;
-        let token_supply = self.client.get_token_supply().await?;
 
         let required_sender_or_issuer_addresses =
             get_required_addresses_for_sender_and_issuer(&[], &self.outputs, current_time)?;
@@ -59,21 +58,16 @@ impl<'a> ClientBlockBuilder<'a> {
                         .await?;
 
                     let mut found_output = false;
-                    for output_response in address_outputs {
-                        let output = Output::try_from_dto(&output_response.output, token_supply)?;
-
+                    for output_with_meta in address_outputs {
                         // We can ignore the unlocked_alias_or_nft_address, since we only requested basic outputs
-                        let (required_unlock_address, _unlocked_alias_or_nft_address) = output
-                            .required_and_unlocked_address(
-                                current_time,
-                                &output_response.metadata.output_id()?,
-                                None,
-                            )?;
+                        let (required_unlock_address, _unlocked_alias_or_nft_address) = output_with_meta
+                            .output
+                            .required_and_unlocked_address(current_time, output_with_meta.metadata.output_id(), None)?;
 
                         if required_unlock_address == sender_or_issuer_address {
                             required_inputs.push(InputSigningData {
-                                output,
-                                output_metadata: OutputMetadata::try_from(&output_response.metadata)?,
+                                output: output_with_meta.output,
+                                output_metadata: output_with_meta.metadata,
                                 chain: Some(Chain::from_u32_hardened(vec![
                                     HD_WALLET_TYPE,
                                     self.coin_type,
@@ -105,8 +99,7 @@ impl<'a> ClientBlockBuilder<'a> {
                     }) {
                         let output_id = self.client.alias_output_id(*alias_id).await?;
                         let output_response = self.client.get_output(&output_id).await?;
-                        if let OutputDto::Alias(alias_output_dto) = &output_response.output {
-                            let alias_output = AliasOutput::try_from_dto(alias_output_dto, token_supply)?;
+                        if let Output::Alias(alias_output) = &output_response.output {
                             // State transition if we add them to inputs
                             let unlock_address = alias_output.state_controller_address();
                             let address_index_internal = match self.secret_manager {
@@ -132,8 +125,8 @@ impl<'a> ClientBlockBuilder<'a> {
                             };
 
                             required_inputs.push(InputSigningData {
-                                output: Output::try_from_dto(&output_response.output, token_supply)?,
-                                output_metadata: OutputMetadata::try_from(&output_response.metadata)?,
+                                output: output_response.output,
+                                output_metadata: output_response.metadata,
                                 chain: address_index_internal.map(|(address_index, internal)| {
                                     Chain::from_u32_hardened(vec![
                                         HD_WALLET_TYPE,
@@ -161,9 +154,7 @@ impl<'a> ClientBlockBuilder<'a> {
                     }) {
                         let output_id = self.client.nft_output_id(*nft_id).await?;
                         let output_response = self.client.get_output(&output_id).await?;
-                        if let OutputDto::Nft(nft_output) = &output_response.output {
-                            let nft_output = NftOutput::try_from_dto(nft_output, token_supply)?;
-
+                        if let Output::Nft(nft_output) = &output_response.output {
                             let unlock_address = nft_output
                                 .unlock_conditions()
                                 .locked_address(nft_output.address(), current_time);
@@ -191,8 +182,8 @@ impl<'a> ClientBlockBuilder<'a> {
                             };
 
                             required_inputs.push(InputSigningData {
-                                output: Output::try_from_dto(&output_response.output, token_supply)?,
-                                output_metadata: OutputMetadata::try_from(&output_response.metadata)?,
+                                output: output_response.output,
+                                output_metadata: output_response.metadata,
                                 chain: address_index_internal.map(|(address_index, internal)| {
                                     Chain::from_u32_hardened(vec![
                                         HD_WALLET_TYPE,

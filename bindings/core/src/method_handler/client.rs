@@ -6,18 +6,21 @@ use iota_sdk::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
         Client,
     },
-    types::block::{
-        input::dto::UtxoInputDto,
-        output::{
-            dto::{OutputBuilderAmountDto, OutputDto, RentStructureDto},
-            AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output,
+    types::{
+        api::core::response::OutputWithMetadataResponse,
+        block::{
+            input::dto::UtxoInputDto,
+            output::{
+                dto::{OutputBuilderAmountDto, OutputDto, OutputMetadataDto, RentStructureDto},
+                AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output,
+            },
+            payload::{
+                dto::{MilestonePayloadDto, PayloadDto},
+                Payload,
+            },
+            protocol::dto::ProtocolParametersDto,
+            Block, BlockDto,
         },
-        payload::{
-            dto::{MilestonePayloadDto, PayloadDto},
-            Payload,
-        },
-        protocol::dto::ProtocolParametersDto,
-        Block, BlockDto,
     },
 };
 #[cfg(feature = "mqtt")]
@@ -316,9 +319,12 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::BlockMetadata(client.get_block_metadata(&block_id).await?)
         }
         ClientMethod::GetBlockRaw { block_id } => Response::BlockRaw(client.get_block_raw(&block_id).await?),
-        ClientMethod::GetOutput { output_id } => {
-            Response::OutputWithMetadataResponse(client.get_output(&output_id).await?)
-        }
+        ClientMethod::GetOutput { output_id } => Response::OutputWithMetadataResponse(
+            client
+                .get_output(&output_id)
+                .await
+                .map(|o| OutputWithMetadataResponse::from(&o))?,
+        ),
         ClientMethod::GetOutputMetadata { output_id } => {
             Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
         }
@@ -366,8 +372,24 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::OutputIdsResponse(client.foundry_output_ids(query_parameters).await?)
         }
         ClientMethod::FoundryOutputId { foundry_id } => Response::OutputId(client.foundry_output_id(foundry_id).await?),
-        ClientMethod::GetOutputs { output_ids } => Response::Outputs(client.get_outputs(output_ids).await?),
-        ClientMethod::TryGetOutputs { output_ids } => Response::Outputs(client.try_get_outputs(output_ids).await?),
+        ClientMethod::GetOutputs { output_ids } => {
+            let outputs_response = client
+                .get_outputs(output_ids)
+                .await?
+                .iter()
+                .map(OutputWithMetadataResponse::from)
+                .collect();
+            Response::Outputs(outputs_response)
+        }
+        ClientMethod::TryGetOutputs { output_ids } => {
+            let outputs_response = client
+                .try_get_outputs(output_ids)
+                .await?
+                .iter()
+                .map(OutputWithMetadataResponse::from)
+                .collect();
+            Response::Outputs(outputs_response)
+        }
         ClientMethod::FindBlocks { block_ids } => Response::Blocks(
             client
                 .find_blocks(&block_ids)
@@ -412,7 +434,13 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .collect(),
         ),
         ClientMethod::FindOutputs { output_ids, addresses } => {
-            Response::Outputs(client.find_outputs(&output_ids, &addresses).await?)
+            let outputs_response = client
+                .find_outputs(&output_ids, &addresses)
+                .await?
+                .iter()
+                .map(OutputWithMetadataResponse::from)
+                .collect();
+            Response::Outputs(outputs_response)
         }
         ClientMethod::Reattach { block_id } => {
             let (block_id, block) = client.reattach(&block_id).await?;

@@ -6,7 +6,10 @@ use alloc::{boxed::Box, string::String, vec::Vec};
 use crate::types::{
     api::core::dto::{LedgerInclusionStateDto, PeerDto, ReceiptDto},
     block::{
-        output::dto::{OutputDto, OutputMetadataDto},
+        output::{
+            dto::{OutputDto, OutputMetadataDto},
+            OutputWithMetadata,
+        },
         payload::dto::MilestonePayloadDto,
         protocol::dto::ProtocolParametersDto,
         BlockDto,
@@ -205,6 +208,15 @@ pub struct BlockMetadataResponse {
 pub struct OutputWithMetadataResponse {
     pub metadata: OutputMetadataDto,
     pub output: OutputDto,
+}
+
+impl From<&OutputWithMetadata> for OutputWithMetadataResponse {
+    fn from(value: &OutputWithMetadata) -> Self {
+        Self {
+            metadata: OutputMetadataDto::from(&value.metadata),
+            output: OutputDto::from(&value.output),
+        }
+    }
 }
 
 /// Response of GET /api/core/v2/outputs/{output_id}.

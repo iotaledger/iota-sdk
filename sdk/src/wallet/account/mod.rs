@@ -214,10 +214,7 @@ impl Account {
         let foundry_output_id = self.client.foundry_output_id(foundry_id).await?;
         let output_response = self.client.get_output(&foundry_output_id).await?;
 
-        Ok(Output::try_from_dto(
-            &output_response.output,
-            self.client.get_token_supply().await?,
-        )?)
+        Ok(output_response.output)
     }
 
     /// Get the [`Transaction`] of a transaction stored in the account

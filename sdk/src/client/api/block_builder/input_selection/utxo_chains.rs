@@ -3,8 +3,6 @@
 
 //! input selection for utxo chains
 
-use std::str::FromStr;
-
 use crypto::keys::slip10::Chain;
 
 use crate::{
@@ -14,40 +12,34 @@ use crate::{
         secret::types::InputSigningData,
         Client, Result,
     },
-    types::{
-        api::core::response::OutputWithMetadataResponse,
-        block::{
-            address::Address,
-            output::{dto::OutputDto, AliasOutput, FoundryOutput, NftOutput, Output, OutputId, OutputMetadata},
-            payload::transaction::TransactionId,
-        },
+    types::block::{
+        address::Address,
+        output::{Output, OutputWithMetadata},
     },
 };
 
 /// Get recursively owned alias and nft outputs and add them to the utxo_chains
 pub(crate) async fn get_alias_and_nft_outputs_recursively(
     client: &Client,
-    utxo_chains: &mut Vec<(Address, OutputWithMetadataResponse)>,
+    utxo_chains: &mut Vec<(Address, OutputWithMetadata)>,
 ) -> Result<()> {
     log::debug!("[get_alias_and_nft_outputs_recursively]");
     let current_time = client.get_time_checked().await?;
-    let token_supply = client.get_token_supply().await?;
 
     let mut processed_alias_nft_addresses = std::collections::HashSet::new();
 
     // Add addresses for alias and nft outputs we already have
-    for (_unlock_address, output_response) in utxo_chains.iter() {
-        let output_id = OutputId::new(
-            TransactionId::from_str(&output_response.metadata.transaction_id)?,
-            output_response.metadata.output_index,
-        )?;
-
-        match Output::try_from_dto(&output_response.output, token_supply)? {
+    for (_unlock_address, output_with_meta) in utxo_chains.iter() {
+        match &output_with_meta.output {
             Output::Alias(alias_output) => {
-                processed_alias_nft_addresses.insert(Address::Alias(alias_output.alias_address(&output_id)));
+                processed_alias_nft_addresses.insert(Address::Alias(
+                    alias_output.alias_address(output_with_meta.metadata.output_id()),
+                ));
             }
             Output::Nft(nft_output) => {
-                processed_alias_nft_addresses.insert(Address::Nft(nft_output.nft_address(&output_id)));
+                processed_alias_nft_addresses.insert(Address::Nft(
+                    nft_output.nft_address(output_with_meta.metadata.output_id()),
+                ));
             }
             _ => {}
         }
@@ -56,7 +48,7 @@ pub(crate) async fn get_alias_and_nft_outputs_recursively(
     let mut processed_utxo_chains = Vec::new();
 
     // Make the outputs response optional, because we don't know it yet for new required outputs
-    let mut utxo_chain_optional_response: Vec<(Address, Option<OutputWithMetadataResponse>)> =
+    let mut utxo_chain_optional_response: Vec<(Address, Option<OutputWithMetadata>)> =
         utxo_chains.iter_mut().map(|(a, o)| (*a, Some(o.clone()))).collect();
 
     // Get alias or nft addresses when needed or just add the input again
@@ -66,9 +58,8 @@ pub(crate) async fn get_alias_and_nft_outputs_recursively(
             match unlock_address {
                 Address::Alias(address) => {
                     let input_id = client.alias_output_id(*address.alias_id()).await?;
-                    let input_response = client.get_output(&input_id).await?;
-                    if let OutputDto::Alias(alias_input_dto) = &input_response.output {
-                        let alias_input = AliasOutput::try_from_dto(alias_input_dto, token_supply)?;
+                    let input = client.get_output(&input_id).await?;
+                    if let Output::Alias(alias_input) = &input.output {
                         // State transition if we add them to inputs
                         let alias_unlock_address = alias_input.state_controller_address();
                         // Add address to unprocessed_alias_nft_addresses so we get the required output there
@@ -76,14 +67,13 @@ pub(crate) async fn get_alias_and_nft_outputs_recursively(
                         if alias_unlock_address.is_alias() || alias_unlock_address.is_nft() {
                             utxo_chain_optional_response.push((*alias_unlock_address, None));
                         }
-                        processed_utxo_chains.push((*alias_unlock_address, input_response));
+                        processed_utxo_chains.push((*alias_unlock_address, input));
                     }
                 }
                 Address::Nft(address) => {
                     let input_id = client.nft_output_id(*address.nft_id()).await?;
-                    let input_response = client.get_output(&input_id).await?;
-                    if let OutputDto::Nft(nft_input) = &input_response.output {
-                        let nft_input = NftOutput::try_from_dto(nft_input, token_supply)?;
+                    let input = client.get_output(&input_id).await?;
+                    if let Output::Nft(nft_input) = &input.output {
                         let unlock_address = nft_input
                             .unlock_conditions()
                             .locked_address(nft_input.address(), current_time);
@@ -91,7 +81,7 @@ pub(crate) async fn get_alias_and_nft_outputs_recursively(
                         if unlock_address.is_alias() || unlock_address.is_nft() {
                             utxo_chain_optional_response.push((*unlock_address, None));
                         }
-                        processed_utxo_chains.push((*unlock_address, input_response));
+                        processed_utxo_chains.push((*unlock_address, input));
                     }
                 }
                 _ => {}
@@ -119,9 +109,8 @@ impl<'a> ClientBlockBuilder<'a> {
         let client = self.client;
         let bech32_hrp = client.get_bech32_hrp().await?;
         let current_time = self.client.get_time_checked().await?;
-        let token_supply = client.get_token_supply().await?;
 
-        let mut utxo_chains: Vec<(Address, OutputWithMetadataResponse)> = Vec::new();
+        let mut utxo_chains: Vec<(Address, OutputWithMetadata)> = Vec::new();
         for output in outputs {
             match output {
                 Output::Alias(alias_output) => {
@@ -132,9 +121,7 @@ impl<'a> ClientBlockBuilder<'a> {
                         // as the previous index
                         let output_id = client.alias_output_id(*alias_output.alias_id()).await?;
                         let input_response = client.get_output(&output_id).await?;
-                        if let OutputDto::Alias(alias_input_dto) = &input_response.output {
-                            let alias_input = AliasOutput::try_from_dto(alias_input_dto, token_supply)?;
-
+                        if let Output::Alias(alias_input) = &input_response.output {
                             // A governance transition is identified by an unchanged State Index in next
                             // state.
                             if alias_output.state_index() == alias_input.state_index() {
@@ -150,9 +137,7 @@ impl<'a> ClientBlockBuilder<'a> {
                     if !nft_output.nft_id().is_null() {
                         let output_id = client.nft_output_id(*nft_output.nft_id()).await?;
                         let input_response = client.get_output(&output_id).await?;
-                        if let OutputDto::Nft(nft_input_dto) = &input_response.output {
-                            let nft_input = NftOutput::try_from_dto(nft_input_dto, token_supply)?;
-
+                        if let Output::Nft(nft_input) = &input_response.output {
                             let unlock_address = nft_input
                                 .unlock_conditions()
                                 .locked_address(nft_output.address(), current_time);
@@ -164,10 +149,9 @@ impl<'a> ClientBlockBuilder<'a> {
                 Output::Foundry(foundry_output) => {
                     // if it's the first foundry output, then we can't have it as input
                     if let Ok(output_id) = client.foundry_output_id(foundry_output.id()).await {
-                        let input_response = client.get_output(&output_id).await?;
-                        if let OutputDto::Foundry(foundry_output_dto) = &input_response.output {
-                            let foundry_input = FoundryOutput::try_from_dto(foundry_output_dto, token_supply)?;
-                            utxo_chains.push((Address::Alias(*foundry_input.alias_address()), input_response));
+                        let input = client.get_output(&output_id).await?;
+                        if let Output::Foundry(foundry_input_output) = &input.output {
+                            utxo_chains.push((Address::Alias(*foundry_input_output.alias_address()), input));
                         }
                     }
                 }
@@ -203,8 +187,8 @@ impl<'a> ClientBlockBuilder<'a> {
             };
 
             utxo_chain_inputs.push(InputSigningData {
-                output: Output::try_from_dto(&output_response.output, token_supply)?,
-                output_metadata: OutputMetadata::try_from(&output_response.metadata)?,
+                output: output_response.output,
+                output_metadata: output_response.metadata,
                 chain: address_index_internal.map(|(address_index, internal)| {
                     Chain::from_u32_hardened(vec![
                         HD_WALLET_TYPE,

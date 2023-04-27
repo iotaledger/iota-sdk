@@ -1,8 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::str::FromStr;
-
 use crate::{
     client::{
         api::GetAddressesBuilderOptions, node_api::indexer::query_parameters::QueryParameter, secret::SecretManager,
@@ -11,8 +9,7 @@ use crate::{
     types::block::{
         address::Address,
         input::{UtxoInput, INPUT_COUNT_MAX},
-        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder, Output, OutputId},
-        payload::transaction::TransactionId,
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder},
     },
 };
 
@@ -78,18 +75,14 @@ impl Client {
                     let mut total_amount = 0;
                     let mut total_native_tokens = NativeTokensBuilder::new();
 
-                    for output_response in chunk {
-                        block_builder = block_builder.with_input(UtxoInput::from(OutputId::new(
-                            TransactionId::from_str(&output_response.metadata.transaction_id)?,
-                            output_response.metadata.output_index,
-                        )?))?;
+                    for output_with_meta in chunk {
+                        block_builder = block_builder
+                            .with_input(UtxoInput::from(output_with_meta.metadata.output_id().to_owned()))?;
 
-                        let output = Output::try_from_dto(&output_response.output, token_supply)?;
-
-                        if let Some(native_tokens) = output.native_tokens() {
+                        if let Some(native_tokens) = output_with_meta.output.native_tokens() {
                             total_native_tokens.add_native_tokens(native_tokens.clone())?;
                         }
-                        total_amount += output.amount();
+                        total_amount += output_with_meta.output.amount();
                     }
 
                     let consolidation_output = BasicOutputBuilder::new_with_amount(total_amount)

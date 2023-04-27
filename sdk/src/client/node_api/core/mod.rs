@@ -10,14 +10,13 @@ use crate::client::constants::MAX_PARALLEL_API_REQUESTS;
 use crate::{
     client::{Client, Result},
     types::{
-        api::core::response::OutputWithMetadataResponse,
-        block::output::{dto::OutputMetadataDto, OutputId},
+        block::output::{dto::OutputMetadataDto, OutputId, OutputWithMetadata},
     },
 };
 
 impl Client {
     /// Request outputs by their output ID in parallel
-    pub async fn get_outputs(&self, output_ids: Vec<OutputId>) -> Result<Vec<OutputWithMetadataResponse>> {
+    pub async fn get_outputs(&self, output_ids: Vec<OutputId>) -> Result<Vec<OutputWithMetadata>> {
         let mut outputs = Vec::new();
 
         #[cfg(target_family = "wasm")]
@@ -49,7 +48,7 @@ impl Client {
 
     /// Request outputs by their output ID in parallel, ignoring failed requests
     /// Useful to get data about spent outputs, that might not be pruned yet
-    pub async fn try_get_outputs(&self, output_ids: Vec<OutputId>) -> Result<Vec<OutputWithMetadataResponse>> {
+    pub async fn try_get_outputs(&self, output_ids: Vec<OutputId>) -> Result<Vec<OutputWithMetadata>> {
         let mut outputs = Vec::new();
 
         #[cfg(target_family = "wasm")]

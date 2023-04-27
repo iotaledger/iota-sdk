@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{collections::HashSet, str::FromStr};
+use std::collections::HashSet;
 
 use crate::{
     client::{
@@ -15,10 +15,10 @@ use crate::{
         Client,
     },
     types::{
-        api::core::{dto::LedgerInclusionStateDto, response::OutputWithMetadataResponse},
+        api::core::dto::LedgerInclusionStateDto,
         block::{
             input::{Input, UtxoInput, INPUT_COUNT_MAX},
-            output::{Output, OutputId},
+            output::{OutputId, OutputWithMetadata},
             parent::Parents,
             payload::{
                 transaction::{TransactionEssence, TransactionId},
@@ -32,10 +32,7 @@ use crate::{
 
 impl Client {
     /// Get the inputs of a transaction for the given transaction id.
-    pub async fn inputs_from_transaction_id(
-        &self,
-        transaction_id: &TransactionId,
-    ) -> Result<Vec<OutputWithMetadataResponse>> {
+    pub async fn inputs_from_transaction_id(&self, transaction_id: &TransactionId) -> Result<Vec<OutputWithMetadata>> {
         let block = self.get_included_block(transaction_id).await?;
 
         let inputs = match block.payload() {
@@ -206,16 +203,14 @@ impl Client {
         }
 
         let mut basic_outputs = Vec::new();
-        let token_supply = self.get_token_supply().await?;
 
-        for output_resp in available_outputs {
-            let amount = Output::try_from_dto(&output_resp.output, token_supply)?.amount();
+        for output_with_meta in available_outputs {
             basic_outputs.push((
                 UtxoInput::new(
-                    TransactionId::from_str(&output_resp.metadata.transaction_id)?,
-                    output_resp.metadata.output_index,
+                    output_with_meta.metadata.transaction_id().to_owned(),
+                    output_with_meta.metadata.output_index(),
                 )?,
-                amount,
+                output_with_meta.output.amount(),
             ));
         }
         basic_outputs.sort_by(|l, r| r.1.cmp(&l.1));
@@ -248,11 +243,7 @@ impl Client {
 
     /// Find all outputs based on the requests criteria. This method will try to query multiple nodes if
     /// the request amount exceeds individual node limit.
-    pub async fn find_outputs(
-        &self,
-        output_ids: &[OutputId],
-        addresses: &[String],
-    ) -> Result<Vec<OutputWithMetadataResponse>> {
+    pub async fn find_outputs(&self, output_ids: &[OutputId], addresses: &[String]) -> Result<Vec<OutputWithMetadata>> {
         let mut output_responses = self.get_outputs(output_ids.to_vec()).await?;
 
         // Use `get_address()` API to get the address outputs first,
