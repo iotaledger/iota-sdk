@@ -12,7 +12,7 @@ fn assert_serde_eq(event_0: WalletEvent) {
 }
 
 #[test]
-fn serde() {
+fn wallet_events_serde() {
     let event = WalletEvent::ConsolidationRequired;
 
     assert_serde_eq(event);

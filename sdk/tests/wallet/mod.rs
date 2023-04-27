@@ -14,6 +14,7 @@ mod consolidation;
 mod error;
 #[cfg(feature = "events")]
 mod events;
+#[cfg(feature = "message_interface")]
 mod message_interface;
 mod native_tokens;
 mod output_preparation;
