@@ -81,6 +81,12 @@ async fn main() {
         return;
     }
 
+    log::info!(
+        "Starting {} v{}",
+        std::env!("CARGO_PKG_NAME"),
+        std::env!("CARGO_PKG_VERSION")
+    );
+
     if let Err(e) = run(cli).await {
         println_log_error!("{e}");
     }

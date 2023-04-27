@@ -147,6 +147,7 @@ pub struct Account {
     // if the last synced time was < `MIN_SYNC_INTERVAL` second ago, we don't sync, but only calculate the balance
     // again, because sending transactions can change that
     pub(crate) last_synced: Arc<Mutex<u128>>,
+    pub(crate) default_sync_options: Arc<Mutex<SyncOptions>>,
     #[cfg(feature = "events")]
     pub(crate) event_emitter: Arc<Mutex<EventEmitter>>,
     #[cfg(feature = "storage")]
@@ -164,23 +165,34 @@ impl Deref for Account {
 
 impl Account {
     /// Create a new Account with an AccountDetails
-    pub(crate) fn new(
+    pub(crate) async fn new(
         details: AccountDetails,
         client: Client,
         secret_manager: Arc<RwLock<SecretManager>>,
         #[cfg(feature = "events")] event_emitter: Arc<Mutex<EventEmitter>>,
         #[cfg(feature = "storage")] storage_manager: Arc<Mutex<StorageManager>>,
-    ) -> Self {
-        Self {
+    ) -> Result<Self> {
+        #[cfg(feature = "storage")]
+        let default_sync_options = storage_manager
+            .lock()
+            .await
+            .get_default_sync_options(*details.index())
+            .await?
+            .unwrap_or_default();
+        #[cfg(not(feature = "storage"))]
+        let default_sync_options = Default::default();
+
+        Ok(Self {
             details: Arc::new(RwLock::new(details)),
             client,
             secret_manager,
             last_synced: Default::default(),
+            default_sync_options: Arc::new(Mutex::new(default_sync_options)),
             #[cfg(feature = "events")]
             event_emitter,
             #[cfg(feature = "storage")]
             storage_manager,
-        }
+        })
     }
 
     pub async fn alias(&self) -> String {
@@ -246,11 +258,14 @@ impl Account {
         Ok(self.read().await.addresses_with_unspent_outputs().to_vec())
     }
 
-    /// Returns outputs of the account
-    pub async fn outputs(&self, filter: Option<FilterOptions>) -> Result<Vec<OutputData>> {
-        let mut outputs = Vec::new();
+    fn filter_outputs<'a>(
+        &self,
+        outputs: impl Iterator<Item = &'a OutputData>,
+        filter: Option<FilterOptions>,
+    ) -> Result<Vec<OutputData>> {
+        let mut filtered_outputs = Vec::new();
 
-        for output in self.read().await.outputs.values() {
+        for output in outputs {
             if let Some(filter_options) = &filter {
                 if let Some(lower_bound_booked_timestamp) = filter_options.lower_bound_booked_timestamp {
                     if output.metadata.milestone_timestamp_booked < lower_bound_booked_timestamp {
@@ -268,38 +283,20 @@ impl Account {
                     }
                 }
             }
-            outputs.push(output.clone());
+            filtered_outputs.push(output.clone());
         }
 
-        Ok(outputs)
+        Ok(filtered_outputs)
+    }
+
+    /// Returns outputs of the account
+    pub async fn outputs(&self, filter: Option<FilterOptions>) -> Result<Vec<OutputData>> {
+        self.filter_outputs(self.read().await.outputs.values(), filter)
     }
 
     /// Returns unspent outputs of the account
     pub async fn unspent_outputs(&self, filter: Option<FilterOptions>) -> Result<Vec<OutputData>> {
-        let mut outputs = Vec::new();
-
-        for output in self.read().await.unspent_outputs.values() {
-            if let Some(filter_options) = &filter {
-                if let Some(lower_bound_booked_timestamp) = filter_options.lower_bound_booked_timestamp {
-                    if output.metadata.milestone_timestamp_booked < lower_bound_booked_timestamp {
-                        continue;
-                    }
-                }
-                if let Some(upper_bound_booked_timestamp) = filter_options.upper_bound_booked_timestamp {
-                    if output.metadata.milestone_timestamp_booked > upper_bound_booked_timestamp {
-                        continue;
-                    }
-                }
-                if let Some(output_types) = &filter_options.output_types {
-                    if !output_types.contains(&output.output.kind()) {
-                        continue;
-                    }
-                }
-            }
-            outputs.push(output.clone());
-        }
-
-        Ok(outputs)
+        self.filter_outputs(self.read().await.unspent_outputs.values(), filter)
     }
 
     /// Returns all incoming transactions of the account
