@@ -42,12 +42,15 @@ async fn main() -> Result<()> {
     }];
 
     let transaction = account.mint_nfts(nft_options, None).await?;
+    println!("Transaction sent: {}", &transaction.transaction_id);
 
-    println!("Transaction: {}", transaction.transaction_id);
+    let block_id = account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
     println!(
-        "Block sent: {}/block/{}",
+        "Block with NFTs mint included: {}/block/{}",
         &std::env::var("EXPLORER_URL").unwrap(),
-        transaction.block_id.expect("no block created yet")
+        block_id
     );
 
     let TransactionEssence::Regular(essence) = transaction.payload.essence();

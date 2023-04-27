@@ -28,16 +28,16 @@ async fn main() -> Result<()> {
 
     // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs
     let transaction = account.create_alias_output(None, None).await?;
-    println!("Transaction sent: {}", transaction.transaction_id);
+    println!("Transaction sent: {}", &transaction.transaction_id);
 
     // Wait for transaction to get included
-    account
+    let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Transaction included: {}/block/{}",
+        "Block included: {}/block/{}",
         &std::env::var("EXPLORER_URL").unwrap(),
-        transaction.block_id.expect("no block created yet")
+        block_id
     );
 
     account.sync(None).await?;
@@ -56,13 +56,14 @@ async fn main() -> Result<()> {
     println!("Transaction sent: {}", mint_txn.transaction.transaction_id);
 
     // Wait for transaction to get included
-    account
+    let block_id = account
         .retry_transaction_until_included(&mint_txn.transaction.transaction_id, None, None)
         .await?;
+
     println!(
-        "Transaction included: {}/block/{}",
+        "Block included: {}/block/{}",
         &std::env::var("EXPLORER_URL").unwrap(),
-        mint_txn.transaction.block_id.expect("no block created yet")
+        block_id
     );
 
     // Ensure the account is synced after minting.

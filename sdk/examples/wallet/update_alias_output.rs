@@ -67,11 +67,15 @@ async fn main() -> Result<()> {
 
     // Send the updated output
     let transaction = account.send(vec![updated_alias_output], None).await?;
-    println!("Transaction: {}", transaction.transaction_id);
+    println!("Transaction sent: {}", &transaction.transaction_id);
+
+    let block_id = account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
     println!(
-        "Block sent: {}/block/{}",
+        "Block included: {}/block/{}",
         &std::env::var("EXPLORER_URL").unwrap(),
-        transaction.block_id.expect("no block created yet")
+        block_id
     );
 
     Ok(())

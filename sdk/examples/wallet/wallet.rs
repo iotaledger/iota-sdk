@@ -68,12 +68,17 @@ async fn main() -> Result<()> {
         1_000_000,
     )];
     let transaction = account.send_amount(outputs, None).await?;
-    println!("Transaction: {}", transaction.transaction_id);
+    println!("Transaction sent: {}", &transaction.transaction_id);
+
+    let block_id = account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
     println!(
-        "Block sent: {}/block/{}",
+        "Block included: {}/block/{}",
         &std::env::var("EXPLORER_URL").unwrap(),
-        transaction.block_id.expect("no block created yet")
+        block_id
     );
+
     let now = Instant::now();
     let balance = account.sync(None).await?;
     println!("Syncing took: {:.2?}", now.elapsed());

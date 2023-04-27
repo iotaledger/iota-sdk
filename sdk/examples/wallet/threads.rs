@@ -74,10 +74,10 @@ async fn main() -> Result<()> {
                     ];
                     let transaction = account_.send(outputs, None).await?;
                     println!(
-                        "Block from thread {} sent: {}/block/{}",
+                        "Block from thread {} sent: {}/transaction/{}",
                         n,
                         &std::env::var("EXPLORER_URL").unwrap(),
-                        transaction.block_id.expect("no block created yet")
+                        transaction.transaction_id
                     );
                     iota_sdk::wallet::Result::Ok(n)
                 })

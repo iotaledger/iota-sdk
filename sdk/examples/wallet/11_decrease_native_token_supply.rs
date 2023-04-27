@@ -43,10 +43,17 @@ async fn main() -> Result<()> {
     let transaction = account
         .decrease_native_token_supply(token_id, melt_amount, None)
         .await?;
+    println!("Transaction sent: {}", &transaction.transaction_id);
 
-    account
+    let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
+
+    println!(
+        "Block included: {}/block/{}",
+        &std::env::var("EXPLORER_URL").unwrap(),
+        block_id
+    );
 
     let balance = account.sync(None).await?;
 

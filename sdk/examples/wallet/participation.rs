@@ -103,15 +103,17 @@ async fn main() -> Result<()> {
     //// ////////////////////////////
 
     let transaction = account.increase_voting_power(1000001).await?;
-    println!(
-        "Increase voting power transaction: {}/block/{}",
-        &std::env::var("EXPLORER_URL").unwrap(),
-        transaction.block_id.expect("no block created yet")
-    );
+    println!("Transaction sent: {}", &transaction.transaction_id);
 
-    account
+    let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
+    println!(
+        "Increase voting power block included: {}/block/{}",
+        &std::env::var("EXPLORER_URL").unwrap(),
+        block_id
+    );
+
     account.sync(None).await?;
 
     let voting_output = account.get_voting_output().await?.unwrap();
@@ -122,17 +124,18 @@ async fn main() -> Result<()> {
     //// ////////////////////////////
 
     // let transaction = account.decrease_voting_power(1).await?;
-    // println!("Transaction sent: {}", transaction.transaction_id);
+    // println!("Transaction sent: {}", &transaction.transaction_id);
+
+    // let block_id = account
+    //     .retry_transaction_until_included(&transaction.transaction_id, None, None)
+    //     .await?;
     // println!(
     //     "Decrease voting power {}/block/{}",
     //     transaction.transaction_id,
     //     &std::env::var("EXPLORER_URL").unwrap(),
-    //     transaction.block_id.expect("no block created yet")
+    //     block_id
     // );
 
-    // account
-    //     .retry_transaction_until_included(&transaction.transaction_id, None, None)
-    //     .await?;
     // account.sync(None).await?;
 
     ////////////////////////////////
@@ -140,16 +143,16 @@ async fn main() -> Result<()> {
     //// ////////////////////////////
 
     let transaction = account.vote(Some(event_id), Some(vec![0])).await?;
+    println!("Transaction sent: {}", &transaction.transaction_id);
 
-    println!("Transaction sent: {}", transaction.transaction_id);
-    println!(
-        "Vote transaction: {}/block/{}",
-        &std::env::var("EXPLORER_URL").unwrap(),
-        transaction.block_id.expect("no block created yet")
-    );
-    account
+    let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
+    println!(
+        "Vote block included: {}/block/{}",
+        &std::env::var("EXPLORER_URL").unwrap(),
+        block_id
+    );
     account.sync(None).await?;
 
     ////////////////////////////////
@@ -164,15 +167,16 @@ async fn main() -> Result<()> {
     //// ////////////////////////////
 
     let transaction = account.stop_participating(event_id).await?;
-    println!("Transaction sent: {}", transaction.transaction_id);
-    println!(
-        "Stop participating transaction: {}/block/{}",
-        &std::env::var("EXPLORER_URL").unwrap(),
-        transaction.block_id.expect("no block created yet")
-    );
-    account
+    println!("Transaction sent: {}", &transaction.transaction_id);
+
+    let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
+    println!(
+        "Stop participating block included: {}/block/{}",
+        &std::env::var("EXPLORER_URL").unwrap(),
+        block_id
+    );
     account.sync(None).await?;
 
     ////////////////////////////////
@@ -184,15 +188,15 @@ async fn main() -> Result<()> {
 
     // // Decrease full amount, there should be no voting output afterwards
     // let transaction = account.decrease_voting_power(voting_output.output.amount()).await?;
-    // println!("Transaction sent: {}", transaction.transaction_id);
+    // println!("Transaction sent: {}", &transaction.transaction_id);
 
-    // account
+    // let block_id = account
     //     .retry_transaction_until_included(&transaction.transaction_id, None, None)
     //     .await?;
     // println!(
     //     "Transaction included: {}/block/{}",
     //     &std::env::var("EXPLORER_URL").unwrap(),
-    //     transaction.block_id.expect("no block created yet")
+    //     block_id
     // );
     // account.sync(None).await?;
 

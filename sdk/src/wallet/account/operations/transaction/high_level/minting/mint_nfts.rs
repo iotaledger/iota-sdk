@@ -105,9 +105,9 @@ impl Account {
     ///
     /// let transaction = account.mint_nfts(nft_options, None).await?;
     /// println!(
-    ///     "Transaction: {} Block sent: http://localhost:14265/api/core/v2/blocks/{}",
+    ///     "Transaction send: {}/transaction/{}",
+    ///     &std::env::var("EXPLORER_URL").unwrap(),
     ///     transaction.transaction_id,
-    ///     transaction.block_id.expect("no block created yet")
     /// );
     /// ```
     pub async fn mint_nfts(

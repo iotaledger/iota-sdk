@@ -40,9 +40,9 @@ impl Account {
     /// let transaction = account.send_nft(outputs, None).await?;
     ///
     /// println!(
-    /// "Transaction: {} Block sent: http://localhost:14265/api/core/v2/blocks/{}",
-    /// transaction.transaction_id,
-    /// transaction.block_id.expect("no block created yet")
+    ///     "Transaction send: {}/transaction/{}",
+    ///     &std::env::var("EXPLORER_URL").unwrap(),
+    ///     transaction.transaction_id
     /// );
     /// ```
     pub async fn send_nft(

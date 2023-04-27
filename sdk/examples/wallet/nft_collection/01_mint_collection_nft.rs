@@ -59,9 +59,9 @@ async fn main() -> Result<()> {
         let transaction = account.mint_nfts(nfts.to_vec(), None).await?;
 
         println!(
-            "Transaction sent: {}/block/{}",
+            "Block with chunk of NFTs mint sent: {}/transaction/{}",
             &std::env::var("EXPLORER_URL").unwrap(),
-            transaction.block_id.expect("no block created yet")
+            transaction.transaction_id
         );
         // Try to get the transaction confirmed
         account

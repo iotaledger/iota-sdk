@@ -80,9 +80,9 @@ async fn main() -> Result<()> {
             .collect();
         match account.send(outputs, None).await {
             Ok(transaction) => println!(
-                "Transaction send: {}/block/{}",
+                "Transaction send: {}/transaction/{}",
                 &std::env::var("EXPLORER_URL").unwrap(),
-                transaction.block_id.expect("no block created yet")
+                transaction.transaction_id
             ),
             Err(e) => println!("{e}"),
         }
