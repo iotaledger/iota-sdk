@@ -40,7 +40,7 @@ impl Account {
     /// let transaction = account.send_nft(outputs, None).await?;
     ///
     /// println!(
-    ///     "Transaction send: {}/transaction/{}",
+    ///     "Transaction sent: {}/transaction/{}",
     ///     &std::env::var("EXPLORER_URL").unwrap(),
     ///     transaction.transaction_id
     /// );

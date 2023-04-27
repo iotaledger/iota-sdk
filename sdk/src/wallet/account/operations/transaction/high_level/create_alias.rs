@@ -85,7 +85,7 @@ impl Account {
     ///
     /// let transaction = account.create_alias_output(alias_options, None).await?;
     /// println!(
-    ///     "Transaction send: {}/transaction/{}",
+    ///     "Transaction sent: {}/transaction/{}",
     ///     &std::env::var("EXPLORER_URL").unwrap(),
     ///     transaction.transaction_id
     /// );
