@@ -125,7 +125,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// DTO for an [`OutputMetadata`].
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -154,7 +154,7 @@ pub mod dto {
     }
 
     impl TryFrom<&OutputMetadataDto> for OutputMetadata {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(response: &OutputMetadataDto) -> Result<Self, Self::Error> {
             Ok(Self {

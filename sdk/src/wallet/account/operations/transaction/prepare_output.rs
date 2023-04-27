@@ -18,7 +18,7 @@ use crate::{
             },
             BasicOutputBuilder, NativeToken, NftId, NftOutput, NftOutputBuilder, Output, Rent,
         },
-        DtoError,
+        Error,
     },
     wallet::account::{operations::transaction::RemainderValueStrategy, Account, FilterOptions, TransactionOptions},
 };
@@ -50,7 +50,7 @@ impl Account {
 
         // We start building with minimum storage deposit, so we know the minimum required amount and can later replace
         // it, if needed
-        let mut first_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone())
+        let mut first_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
             .add_unlock_condition(AddressUnlockCondition::new(recipient_address));
 
         if let Some(assets) = options.assets {
@@ -66,13 +66,13 @@ impl Account {
 
             if let Some(tag) = features.tag {
                 first_output_builder = first_output_builder.add_feature(TagFeature::new(
-                    prefix_hex::decode(tag).map_err(|_| DtoError::InvalidField("tag"))?,
+                    prefix_hex::decode(tag).map_err(|_| Error::InvalidField("tag"))?,
                 )?);
             }
 
             if let Some(metadata) = features.metadata {
                 first_output_builder = first_output_builder.add_feature(MetadataFeature::new(
-                    prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("metadata"))?,
+                    prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("metadata"))?,
                 )?);
             }
 
@@ -211,7 +211,7 @@ impl Account {
                 unreachable!("We checked before if it's an nft output")
             }
         } else if nft_id.is_null() {
-            NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone(), nft_id)
+            NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, nft_id)
         } else {
             return Err(crate::wallet::Error::NftNotFoundInUnspentOutputs);
         };
@@ -233,13 +233,13 @@ impl Account {
         if let Some(features) = options.features {
             if let Some(tag) = features.tag {
                 first_output_builder = first_output_builder.add_feature(TagFeature::new(
-                    prefix_hex::decode(tag).map_err(|_| DtoError::InvalidField("tag"))?,
+                    prefix_hex::decode(tag).map_err(|_| Error::InvalidField("tag"))?,
                 )?);
             }
 
             if let Some(metadata) = features.metadata {
                 first_output_builder = first_output_builder.add_feature(MetadataFeature::new(
-                    prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("metadata"))?,
+                    prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("metadata"))?,
                 )?);
             }
 
@@ -268,7 +268,7 @@ impl Account {
         }
 
         let first_output = first_output_builder
-            .with_minimum_storage_deposit(rent_structure.clone())
+            .with_minimum_storage_deposit(rent_structure)
             .finish(token_supply)?;
 
         let mut second_output_builder = NftOutputBuilder::from(&first_output);

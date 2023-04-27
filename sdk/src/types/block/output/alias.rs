@@ -354,23 +354,6 @@ impl AliasOutput {
     /// The set of allowed immutable [`Feature`]s for an [`AliasOutput`].
     pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::ISSUER.union(FeatureFlags::METADATA);
 
-    /// Creates a new [`AliasOutput`] with a provided amount.
-    #[inline(always)]
-    pub fn new_with_amount(amount: u64, alias_id: AliasId, token_supply: u64) -> Result<Self, Error> {
-        AliasOutputBuilder::new_with_amount(amount, alias_id).finish(token_supply)
-    }
-
-    /// Creates a new [`AliasOutput`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    #[inline(always)]
-    pub fn new_with_minimum_storage_deposit(
-        alias_id: AliasId,
-        rent_structure: RentStructure,
-        token_supply: u64,
-    ) -> Result<Self, Error> {
-        AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id).finish(token_supply)
-    }
-
     /// Creates a new [`AliasOutputBuilder`] with a provided amount.
     #[inline(always)]
     pub fn build_with_amount(amount: u64, alias_id: AliasId) -> AliasOutputBuilder {
@@ -708,11 +691,11 @@ pub mod dto {
 
     use super::*;
     use crate::types::block::{
-        error::dto::DtoError,
         output::{
             alias_id::dto::AliasIdDto, dto::OutputBuilderAmountDto, feature::dto::FeatureDto,
             native_token::dto::NativeTokenDto, unlock_condition::dto::UnlockConditionDto,
         },
+        Error,
     };
 
     /// Describes an alias account in the ledger that can be controlled by the state and governance controllers.
@@ -763,12 +746,9 @@ pub mod dto {
     }
 
     impl AliasOutput {
-        fn _try_from_dto(value: &AliasOutputDto) -> Result<AliasOutputBuilder, DtoError> {
+        fn _try_from_dto(value: &AliasOutputDto) -> Result<AliasOutputBuilder, Error> {
             let mut builder = AliasOutputBuilder::new_with_amount(
-                value
-                    .amount
-                    .parse::<u64>()
-                    .map_err(|_| DtoError::InvalidField("amount"))?,
+                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
                 (&value.alias_id).try_into()?,
             );
 
@@ -776,7 +756,7 @@ pub mod dto {
 
             if !value.state_metadata.is_empty() {
                 builder = builder.with_state_metadata(
-                    prefix_hex::decode(&value.state_metadata).map_err(|_| DtoError::InvalidField("state_metadata"))?,
+                    prefix_hex::decode(&value.state_metadata).map_err(|_| Error::InvalidField("state_metadata"))?,
                 );
             }
 
@@ -797,24 +777,24 @@ pub mod dto {
             Ok(builder)
         }
 
-        pub fn try_from_dto(value: &AliasOutputDto, token_supply: u64) -> Result<Self, DtoError> {
+        pub fn try_from_dto(value: &AliasOutputDto, token_supply: u64) -> Result<Self, Error> {
             let mut builder = Self::_try_from_dto(value)?;
 
             for u in &value.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto(u, token_supply)?);
             }
 
-            Ok(builder.finish(token_supply)?)
+            builder.finish(token_supply)
         }
 
-        pub fn try_from_dto_unverified(value: &AliasOutputDto) -> Result<Self, DtoError> {
+        pub fn try_from_dto_unverified(value: &AliasOutputDto) -> Result<Self, Error> {
             let mut builder = Self::_try_from_dto(value)?;
 
             for u in &value.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_unverified(u)?);
             }
 
-            Ok(builder.finish_unverified()?)
+            builder.finish_unverified()
         }
 
         #[allow(clippy::too_many_arguments)]
@@ -829,12 +809,12 @@ pub mod dto {
             features: Option<Vec<FeatureDto>>,
             immutable_features: Option<Vec<FeatureDto>>,
             token_supply: u64,
-        ) -> Result<Self, DtoError> {
+        ) -> Result<Self, Error> {
             let alias_id = AliasId::try_from(alias_id)?;
 
             let mut builder = match amount {
                 OutputBuilderAmountDto::Amount(amount) => AliasOutputBuilder::new_with_amount(
-                    amount.parse().map_err(|_| DtoError::InvalidField("amount"))?,
+                    amount.parse().map_err(|_| Error::InvalidField("amount"))?,
                     alias_id,
                 ),
                 OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
@@ -846,7 +826,7 @@ pub mod dto {
                 let native_tokens = native_tokens
                     .iter()
                     .map(NativeToken::try_from)
-                    .collect::<Result<Vec<NativeToken>, DtoError>>()?;
+                    .collect::<Result<Vec<NativeToken>, Error>>()?;
                 builder = builder.with_native_tokens(native_tokens);
             }
 
@@ -865,14 +845,14 @@ pub mod dto {
             let unlock_conditions = unlock_conditions
                 .iter()
                 .map(|u| UnlockCondition::try_from_dto(u, token_supply))
-                .collect::<Result<Vec<UnlockCondition>, DtoError>>()?;
+                .collect::<Result<Vec<UnlockCondition>, Error>>()?;
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(features) = features {
                 let features = features
                     .iter()
                     .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, DtoError>>()?;
+                    .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_features(features);
             }
 
@@ -880,11 +860,181 @@ pub mod dto {
                 let immutable_features = immutable_features
                     .iter()
                     .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, DtoError>>()?;
+                    .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_immutable_features(immutable_features);
             }
 
-            Ok(builder.finish(token_supply)?)
+            builder.finish(token_supply)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use packable::PackableExt;
+
+    use super::*;
+    use crate::types::block::{
+        address::AliasAddress,
+        output::{
+            dto::{OutputBuilderAmountDto, OutputDto},
+            FoundryId, SimpleTokenScheme, TokenId,
+        },
+        protocol::protocol_parameters,
+        rand::{
+            address::rand_alias_address,
+            output::{
+                feature::{rand_allowed_features, rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
+                rand_alias_id, rand_alias_output,
+                unlock_condition::{
+                    rand_governor_address_unlock_condition_different_from,
+                    rand_state_controller_address_unlock_condition_different_from,
+                },
+            },
+        },
+    };
+
+    #[test]
+    fn builder() {
+        let protocol_parameters = protocol_parameters();
+        let alias_id = rand_alias_id();
+        let foundry_id = FoundryId::build(&AliasAddress::from(alias_id), 0, SimpleTokenScheme::KIND);
+        let gov_address_1 = rand_governor_address_unlock_condition_different_from(&alias_id);
+        let gov_address_2 = rand_governor_address_unlock_condition_different_from(&alias_id);
+        let state_address_1 = rand_state_controller_address_unlock_condition_different_from(&alias_id);
+        let state_address_2 = rand_state_controller_address_unlock_condition_different_from(&alias_id);
+        let sender_1 = rand_sender_feature();
+        let sender_2 = rand_sender_feature();
+        let issuer_1 = rand_issuer_feature();
+        let issuer_2 = rand_issuer_feature();
+
+        let mut builder = AliasOutput::build_with_amount(0, alias_id)
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_unlock_condition(gov_address_1)
+            .add_unlock_condition(state_address_1)
+            .add_feature(sender_1)
+            .replace_feature(sender_2)
+            .replace_immutable_feature(issuer_1)
+            .add_immutable_feature(issuer_2);
+
+        let output = builder.clone().finish_unverified().unwrap();
+        assert_eq!(output.unlock_conditions().governor_address(), Some(&gov_address_1));
+        assert_eq!(
+            output.unlock_conditions().state_controller_address(),
+            Some(&state_address_1)
+        );
+        assert_eq!(output.features().sender(), Some(&sender_2));
+        assert_eq!(output.immutable_features().issuer(), Some(&issuer_1));
+
+        builder = builder
+            .clear_unlock_conditions()
+            .clear_features()
+            .clear_immutable_features()
+            .replace_unlock_condition(gov_address_2)
+            .replace_unlock_condition(state_address_2);
+        let output = builder.clone().finish_unverified().unwrap();
+        assert_eq!(output.unlock_conditions().governor_address(), Some(&gov_address_2));
+        assert_eq!(
+            output.unlock_conditions().state_controller_address(),
+            Some(&state_address_2)
+        );
+        assert!(output.features().is_empty());
+        assert!(output.immutable_features().is_empty());
+
+        let metadata = rand_metadata_feature();
+
+        let output = builder
+            .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+            .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(&alias_id))
+            .add_unlock_condition(rand_governor_address_unlock_condition_different_from(&alias_id))
+            .with_features([Feature::from(metadata.clone()), sender_1.into()])
+            .with_immutable_features([Feature::from(metadata.clone()), issuer_1.into()])
+            .finish(protocol_parameters.token_supply())
+            .unwrap();
+
+        assert_eq!(
+            output.amount(),
+            Output::Alias(output.clone()).rent_cost(protocol_parameters.rent_structure())
+        );
+        assert_eq!(output.features().metadata(), Some(&metadata));
+        assert_eq!(output.features().sender(), Some(&sender_1));
+        assert_eq!(output.immutable_features().metadata(), Some(&metadata));
+        assert_eq!(output.immutable_features().issuer(), Some(&issuer_1));
+    }
+
+    #[test]
+    fn pack_unpack() {
+        let protocol_parameters = protocol_parameters();
+        let output = rand_alias_output(protocol_parameters.token_supply());
+        let bytes = output.pack_to_vec();
+        let output_unpacked = AliasOutput::unpack_verified(bytes, &protocol_parameters).unwrap();
+        assert_eq!(output, output_unpacked);
+    }
+
+    #[test]
+    fn to_from_dto() {
+        let protocol_parameters = protocol_parameters();
+        let output = rand_alias_output(protocol_parameters.token_supply());
+        let dto = OutputDto::Alias((&output).into());
+        let output_unver = Output::try_from_dto_unverified(&dto).unwrap();
+        assert_eq!(&output, output_unver.as_alias());
+        let output_ver = Output::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
+        assert_eq!(&output, output_ver.as_alias());
+
+        let output_split = AliasOutput::try_from_dtos(
+            OutputBuilderAmountDto::Amount(output.amount().to_string()),
+            Some(output.native_tokens().iter().map(Into::into).collect()),
+            &output.alias_id().into(),
+            output.state_index().into(),
+            output.state_metadata().to_owned().into(),
+            output.foundry_counter().into(),
+            output.unlock_conditions().iter().map(Into::into).collect(),
+            Some(output.features().iter().map(Into::into).collect()),
+            Some(output.immutable_features().iter().map(Into::into).collect()),
+            protocol_parameters.token_supply(),
+        )
+        .unwrap();
+        assert_eq!(output, output_split);
+
+        let alias_id = rand_alias_id();
+        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
+        let gov_address = rand_governor_address_unlock_condition_different_from(&alias_id);
+        let state_address = rand_state_controller_address_unlock_condition_different_from(&alias_id);
+
+        let test_split_dto = |builder: AliasOutputBuilder| {
+            let output_split = AliasOutput::try_from_dtos(
+                (&builder.amount).into(),
+                Some(builder.native_tokens.iter().map(Into::into).collect()),
+                &(&builder.alias_id).into(),
+                builder.state_index,
+                builder.state_metadata.to_owned().into(),
+                builder.foundry_counter,
+                builder.unlock_conditions.iter().map(Into::into).collect(),
+                Some(builder.features.iter().map(Into::into).collect()),
+                Some(builder.immutable_features.iter().map(Into::into).collect()),
+                protocol_parameters.token_supply(),
+            )
+            .unwrap();
+            assert_eq!(
+                builder.finish(protocol_parameters.token_supply()).unwrap(),
+                output_split
+            );
+        };
+
+        let builder = AliasOutput::build_with_amount(100, alias_id)
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_unlock_condition(gov_address)
+            .add_unlock_condition(state_address)
+            .with_features(rand_allowed_features(AliasOutput::ALLOWED_FEATURES))
+            .with_immutable_features(rand_allowed_features(AliasOutput::ALLOWED_IMMUTABLE_FEATURES));
+        test_split_dto(builder);
+
+        let builder = AliasOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id)
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_unlock_condition(gov_address)
+            .add_unlock_condition(state_address)
+            .with_features(rand_allowed_features(AliasOutput::ALLOWED_FEATURES))
+            .with_immutable_features(rand_allowed_features(AliasOutput::ALLOWED_IMMUTABLE_FEATURES));
+        test_split_dto(builder);
     }
 }

@@ -21,7 +21,6 @@ use crate::{
 /// The messages that can be sent to the actor.
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(tag = "cmd", content = "payload", rename_all = "camelCase")]
-#[allow(clippy::large_enum_variant)]
 pub enum Message {
     /// Creates an account.
     /// Expected response: [`Account`](crate::wallet::message_interface::Response::Account)

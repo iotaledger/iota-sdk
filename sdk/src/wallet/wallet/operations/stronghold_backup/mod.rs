@@ -5,6 +5,7 @@ mod stronghold_snapshot;
 
 use std::{fs, path::PathBuf, sync::atomic::Ordering};
 
+use futures::{future::try_join_all, FutureExt};
 use zeroize::Zeroize;
 
 use self::stronghold_snapshot::{read_data_from_stronghold_snapshot, store_data_to_stronghold};
@@ -147,19 +148,20 @@ impl Wallet {
             if let Some(read_accounts) = read_accounts {
                 let client = self.client_options.read().await.clone().finish()?;
 
-                let mut restored_accounts = Vec::new();
-                for account in read_accounts {
-                    restored_accounts.push(Account::new(
-                        account,
+                let restored_account = try_join_all(read_accounts.into_iter().map(|a| {
+                    Account::new(
+                        a,
                         client.clone(),
                         self.secret_manager.clone(),
                         #[cfg(feature = "events")]
                         self.event_emitter.clone(),
                         #[cfg(feature = "storage")]
                         self.storage_manager.clone(),
-                    ))
-                }
-                *accounts = restored_accounts;
+                    )
+                    .boxed()
+                }))
+                .await?;
+                *accounts = restored_account;
             }
         }
 

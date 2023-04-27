@@ -12,7 +12,7 @@ use crate::{
             dto::AliasIdDto, feature::MetadataFeature, unlock_condition::ImmutableAliasAddressUnlockCondition, AliasId,
             AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
         },
-        DtoError,
+        Error,
     },
     wallet::account::{
         types::{Transaction, TransactionDto},
@@ -58,12 +58,11 @@ impl TryFrom<&NativeTokenOptionsDto> for NativeTokenOptions {
                 None => None,
             },
             circulating_supply: U256::try_from(&value.circulating_supply)
-                .map_err(|_| DtoError::InvalidField("circulating_supply"))?,
-            maximum_supply: U256::try_from(&value.maximum_supply)
-                .map_err(|_| DtoError::InvalidField("maximum_supply"))?,
+                .map_err(|_| Error::InvalidField("circulating_supply"))?,
+            maximum_supply: U256::try_from(&value.maximum_supply).map_err(|_| Error::InvalidField("maximum_supply"))?,
             foundry_metadata: match &value.foundry_metadata {
                 Some(metadata) => {
-                    Some(prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("foundry_metadata"))?)
+                    Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("foundry_metadata"))?)
                 }
                 None => None,
             },
@@ -148,7 +147,7 @@ impl Account {
                 new_alias_output_builder.finish_output(token_supply)?,
                 {
                     let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_storage_deposit(
-                        rent_structure.clone(),
+                        rent_structure,
                         alias_output.foundry_counter() + 1,
                         TokenScheme::Simple(SimpleTokenScheme::new(
                             native_token_options.circulating_supply,

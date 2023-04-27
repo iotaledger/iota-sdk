@@ -44,7 +44,7 @@ pub(crate) use r#macro::{create_bitflags, impl_id};
 pub use self::{
     block::{dto::BlockDto, Block, BlockBuilder},
     block_id::BlockId,
-    error::{dto::DtoError, Error},
+    error::Error,
 };
 
 pub(crate) const PROTOCOL_VERSION: u8 = 2;

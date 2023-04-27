@@ -32,3 +32,9 @@ impl From<ClientError> for Error {
         Error::Client(Box::new(error))
     }
 }
+
+impl From<iota_sdk::client::stronghold::Error> for Error {
+    fn from(error: iota_sdk::client::stronghold::Error) -> Self {
+        Self::Client(Box::new(iota_sdk::client::Error::Stronghold(error)))
+    }
+}
