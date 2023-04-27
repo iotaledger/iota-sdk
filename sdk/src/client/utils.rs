@@ -95,9 +95,14 @@ pub async fn request_funds_from_faucet(url: &str, bech32_address: &str) -> Resul
     map.insert("address", bech32_address);
 
     let client = reqwest::Client::new();
-    let faucet_response = client.post(url).json(&map).send().await
+    let faucet_response = client
+        .post(url)
+        .json(&map)
+        .send()
+        .await
         .map_err(|err| Error::Node(err.into()))?
-        .text().await
+        .text()
+        .await
         .map_err(|err| Error::Node(err.into()))?;
     Ok(faucet_response)
 }
