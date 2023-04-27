@@ -2,11 +2,11 @@
 resolver = "2"
 members = [
 	"bindings/core",
+	"bindings/nodejs",
 	"bindings/python",
 	"cli",
 	"sdk",
 	"sdk/src/client/bindings/java/lib/native",
-	"sdk/src/client/bindings/nodejs",
 	"sdk/src/client/bindings/wasm",
 	"sdk/src/wallet/bindings/java/lib/native",
 	"sdk/src/wallet/bindings/nodejs",
