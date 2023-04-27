@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
     let block_id = client.post_block_raw(&block).await?;
 
     println!(
-        "Posted block: {}/block/{}",
+        "Posted raw block: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );

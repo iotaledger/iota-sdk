@@ -46,7 +46,7 @@ async fn main() -> Result<()> {
     println!("{block:#?}");
 
     println!(
-        "Transaction sent: {}/block/{}",
+        "Block with custom outputs sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );

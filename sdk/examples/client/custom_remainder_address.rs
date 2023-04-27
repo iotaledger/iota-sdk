@@ -37,12 +37,6 @@ async fn main() -> Result<()> {
     println!("receiver address: {receiver_address}");
     println!("remainder address: {remainder_address}");
 
-    println!(
-        "automatically funding sender address with faucet: {}",
-        request_funds_from_faucet("http://localhost:8091/api/enqueue", sender_address).await?
-    );
-    tokio::time::sleep(std::time::Duration::from_secs(15)).await;
-
     let output_ids_response = client
         .basic_output_ids(vec![QueryParameter::Address(sender_address.clone())])
         .await?;
@@ -63,7 +57,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Transaction sent: {}/block/{}",
+        "Block with custom remainder sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );

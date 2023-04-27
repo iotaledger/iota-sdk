@@ -73,7 +73,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Transaction with new alias output sent: {explorer_url}/block/{}",
+        "Block with new alias output sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -117,7 +117,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Transaction with foundry output sent: {explorer_url}/block/{}",
+        "Block with foundry output sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -162,7 +162,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Transaction with native tokens burnt sent: {explorer_url}/block/{}",
+        "Block with native tokens burnt sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -208,7 +208,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Transaction with native tokens sent: {explorer_url}/block/{}",
+        "Block with native tokens sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -233,7 +233,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Second transaction with native tokens sent: {explorer_url}/block/{}",
+        "Second block with native tokens sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -258,7 +258,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Third transaction with native tokens burned sent: {explorer_url}/block/{}",
+        "Third block with native tokens burned sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;

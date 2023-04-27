@@ -47,7 +47,11 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!("Transaction sent with block-id: {}", block.id());
+    println!(
+        "Block using ledger nano sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block.id()
+    );
 
     Ok(())
 }

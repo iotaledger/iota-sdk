@@ -86,7 +86,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!("Transaction sent: {explorer_url}/block/{}", block.id());
+    println!("Block withnative tokens sent: {explorer_url}/block/{}", block.id());
 
     Ok(())
 }

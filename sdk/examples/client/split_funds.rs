@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
     let block = block_builder.finish().await?;
 
     println!(
-        "Transaction sent: {}/block/{}",
+        "Block with split funds sent: {}/block/{}",
         &std::env::var("EXPLORER_URL").unwrap(),
         transaction.id()
     );

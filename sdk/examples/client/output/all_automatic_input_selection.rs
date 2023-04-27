@@ -81,7 +81,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Transaction with new nft and alias output sent: {explorer_url}/block/{}",
+        "Block with new nft and alias output sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -130,7 +130,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Transaction with alias id, foundry output with minted native tokens, and nfts sent: {explorer_url}/block/{}",
+        "Block with alias id, foundry output with minted native tokens, and nfts sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -191,7 +191,7 @@ async fn main() -> Result<()> {
         .with_outputs(outputs)?
         .finish()
         .await?;
-    println!("Transaction with all outputs sent: {explorer_url}/block/{}", block.id());
+    println!("Block with all outputs sent: {explorer_url}/block/{}", block.id());
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
     Ok(())
