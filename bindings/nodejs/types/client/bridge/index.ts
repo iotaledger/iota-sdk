@@ -43,7 +43,7 @@ import type {
     __NftOutputIdMethod__,
     __FoundryOutputIdsMethod__,
     __FoundryOutputIdMethod__,
-    __TryGetOutputsMethod__,
+    __GetOutputsIgnoreErrorsMethod__,
     __FindBlocksMethod__,
     __RetryMethod__,
     __RetryUntilIncludedMethod__,
@@ -115,7 +115,7 @@ export type __ClientMethods__ =
     | __NftOutputIdMethod__
     | __FoundryOutputIdsMethod__
     | __FoundryOutputIdMethod__
-    | __TryGetOutputsMethod__
+    | __GetOutputsIgnoreErrorsMethod__
     | __FindBlocksMethod__
     | __RetryMethod__
     | __RetryUntilIncludedMethod__
