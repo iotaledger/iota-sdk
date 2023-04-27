@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `SecretManageExt` is a super trait of `SecretManage`;
 - `OutputsToClaim::Amount` to allow claiming only outputs that will add an amount to the account;
 - `Account::{set_default_sync_options, default_sync_options}` methods;
+- `Wallet::get_client()`;
 
 ### Changed
 
