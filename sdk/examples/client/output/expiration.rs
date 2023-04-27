@@ -69,7 +69,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Block with ExpirationUnlockCondition sent: {explorer_url}/block/{}",
+        "Block with ExpirationUnlockCondition transaction sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
