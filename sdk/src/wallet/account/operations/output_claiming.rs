@@ -48,7 +48,11 @@ impl Account {
 
         // Get outputs for the claim
         let mut output_ids_to_claim: HashSet<OutputId> = HashSet::new();
-        for (output_id, output_data) in &account_details.unspent_outputs {
+        for (output_id, output_data) in account_details
+            .unspent_outputs
+            .iter()
+            .filter(|(_, o)| o.output.is_basic() || o.output.is_nft())
+        {
             // Don't use outputs that are locked for other transactions
             if !account_details.locked_outputs.contains(output_id) && account_details.outputs.contains_key(output_id) {
                 if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
