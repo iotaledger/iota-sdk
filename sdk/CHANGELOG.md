@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `types::block::Error::InvalidField` variant;
 - `StorageProvider` and `SecretManage` have an `Error` associated type;
 - `SecretManageExt` is a super trait of `SecretManage`;
+- `Wallet::get_account_aliases` method;
 
 ### Changed
 
