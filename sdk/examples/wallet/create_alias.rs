@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Block included: {}/block/{}",
-        &env::var("EXPLORER_URL").unwrap(),
+        env::var("EXPLORER_URL").unwrap(),
         block_id
     );
 
