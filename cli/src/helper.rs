@@ -55,9 +55,9 @@ pub async fn get_account_alias(prompt: &str, wallet: &Wallet) -> Result<String, 
     loop {
         let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
         if input.is_empty() || !input.is_ascii() {
-            println_log_error!("Invalid input, please choose a non-empty name consisting of ASCII characters.");
+            println_log_error!("Invalid input, please choose a non-empty alias consisting of ASCII characters.");
         } else if account_aliases.iter().any(|alias| alias == &input) {
-            println_log_error!("Account with alias '{input}' already exists, please choose another name.");
+            println_log_error!("Account '{input}' already exists, please choose another alias.");
         } else {
             return Ok(input);
         }
