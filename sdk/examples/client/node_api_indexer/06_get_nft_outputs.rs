@@ -38,12 +38,12 @@ async fn main() -> Result<()> {
         ])
         .await?;
 
-    println!("Address output IDs {output_ids_response:#?}");
+    println!("NFT output IDs {output_ids_response:#?}");
 
     // Get the outputs by their IDs.
     let outputs_responses = client.get_outputs(output_ids_response.items).await?;
 
-    println!("NFT outputs: {outputs_responses:#?}");
+    println!("{outputs_responses:#?}");
 
     Ok(())
 }

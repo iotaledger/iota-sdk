@@ -33,12 +33,12 @@ async fn main() -> Result<()> {
         .foundry_output_ids(vec![QueryParameter::AliasAddress(alias_address)])
         .await?;
 
-    println!("Address output IDs {output_ids_response:#?}");
+    println!("Foundry output IDs: {output_ids_response:#?}");
 
     // Get the outputs by their IDs.
     let outputs_responses = client.get_outputs(output_ids_response.items).await?;
 
-    println!("Foundry outputs: {outputs_responses:#?}");
+    println!("{outputs_responses:#?}");
 
     Ok(())
 }

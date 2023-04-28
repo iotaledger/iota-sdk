@@ -49,6 +49,9 @@ async fn main() -> Result<()> {
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
     let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
 
+    let faucet_url = std::env::var("FAUCET_URL").unwrap();
+    request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?;
+
     let bech32_address = address.to_bech32(client.get_bech32_hrp().await?);
 
     let address_participation = client.address_staking_status(&bech32_address).await?;
@@ -82,13 +85,12 @@ async fn main() -> Result<()> {
     participate(
         &client,
         events.event_ids.first().expect("No event available").to_owned(),
-        node_url,
     )
     .await?;
     Ok(())
 }
 
-async fn participate(client: &Client, event_id: ParticipationEventId, node_url: String) -> Result<()> {
+async fn participate(client: &Client, event_id: ParticipationEventId) -> Result<()> {
     let secret_manager =
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
@@ -96,9 +98,6 @@ async fn participate(client: &Client, event_id: ParticipationEventId, node_url: 
     let rent_structure = client.get_rent_structure().await?;
 
     let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
-
-    let faucet_url = std::env::var("FAUCET_URL").unwrap();
-    request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?;
 
     let outputs = vec![
         BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
@@ -125,7 +124,10 @@ async fn participate(client: &Client, event_id: ParticipationEventId, node_url: 
 
     println!("{block:#?}");
 
-    println!("Transaction sent: {node_url}/api/core/v2/blocks/{}", block.id());
-    println!("Block metadata: {node_url}/api/core/v2/blocks/{}/metadata", block.id());
+    println!(
+        "Block with participation data sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block.id()
+    );
     Ok(())
 }

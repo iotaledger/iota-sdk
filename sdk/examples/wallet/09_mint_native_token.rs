@@ -31,13 +31,13 @@ async fn main() -> Result<()> {
     println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for transaction to get included
-    account
+    let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Transaction included: {}/api/core/v2/blocks/{}",
-        &std::env::var("NODE_URL").unwrap(),
-        transaction.block_id.expect("no block created yet")
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
     );
 
     account.sync(None).await?;
@@ -56,13 +56,14 @@ async fn main() -> Result<()> {
     println!("Transaction sent: {}", mint_txn.transaction.transaction_id);
 
     // Wait for transaction to get included
-    account
+    let block_id = account
         .retry_transaction_until_included(&mint_txn.transaction.transaction_id, None, None)
         .await?;
+
     println!(
-        "Transaction included: {}/api/core/v2/blocks/{}",
-        &std::env::var("NODE_URL").unwrap(),
-        mint_txn.transaction.block_id.expect("no block created yet")
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
     );
 
     // Ensure the account is synced after minting.
