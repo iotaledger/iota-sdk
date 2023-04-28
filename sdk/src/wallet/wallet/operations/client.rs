@@ -8,7 +8,7 @@ use crate::wallet::WalletBuilder;
 use crate::{
     client::{
         node_manager::node::{Node, NodeAuth, NodeDto},
-        NodeInfoWrapper, Url,
+        Client, NodeInfoWrapper, Url,
     },
     wallet::{ClientOptions, Wallet},
 };
@@ -43,6 +43,18 @@ impl Wallet {
         Ok(())
     }
 
+    /// Try to get the Client from the first account and only build a new one if we have no account
+    pub async fn get_client(&self) -> crate::wallet::Result<Client> {
+        let accounts = self.accounts.read().await;
+
+        let client = match &accounts.first() {
+            Some(account) => account.client.clone(),
+            None => self.client_options.read().await.clone().finish()?,
+        };
+
+        Ok(client)
+    }
+
     /// Get the used client options.
     pub async fn get_client_options(&self) -> ClientOptions {
         self.client_options.read().await.clone()
@@ -50,13 +62,7 @@ impl Wallet {
 
     /// Get the node info.
     pub async fn get_node_info(&self) -> crate::wallet::Result<NodeInfoWrapper> {
-        let accounts = self.accounts.read().await;
-
-        // Try to get the Client from the first account and only build the Client if we have no account
-        let node_info_wrapper = match &accounts.first() {
-            Some(account) => account.client.get_info().await?,
-            None => self.client_options.read().await.clone().finish()?.get_info().await?,
-        };
+        let node_info_wrapper = self.get_client().await?.get_info().await?;
 
         Ok(node_info_wrapper)
     }

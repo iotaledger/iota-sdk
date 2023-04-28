@@ -215,7 +215,7 @@ pub enum AccountMethod {
         max_attempts: Option<u64>,
     },
     /// Sync the account by fetching new information from the nodes. Will also retry pending transactions
-    /// if necessary.
+    /// if necessary. A custom default can be set using SetDefaultSyncOptions.
     /// Expected response: [`Balance`](crate::Response::Balance)
     Sync {
         /// Sync options
@@ -245,6 +245,10 @@ pub enum AccountMethod {
     /// Set the alias of the account.
     /// Expected response: [`Ok`](crate::Response::Ok)
     SetAlias { alias: String },
+    /// Set the fallback SyncOptions for account syncing.
+    /// If storage is enabled, will persist during restarts.
+    /// Expected response: [`Ok`](crate::Response::Ok)
+    SetDefaultSyncOptions { options: SyncOptions },
     /// Send outputs in a transaction.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     SendOutputs {

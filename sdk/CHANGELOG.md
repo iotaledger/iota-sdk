@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `types::block::Error::InvalidField` variant;
 - `StorageProvider` and `SecretManage` have an `Error` associated type;
 - `SecretManageExt` is a super trait of `SecretManage`;
+- `OutputsToClaim::Amount` to allow claiming only outputs that will add an amount to the account;
+- `Account::{set_default_sync_options, default_sync_options}` methods;
+- `Wallet::get_client` method;
 - `Wallet::get_account_aliases` method;
 
 ### Changed
@@ -52,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `AddressGenerationOptions` in favor of `GenerateAddressOptions`, which now contains the `internal` flag;
 - `types::block::DtoError`, `client::Error::BlockDto` and `wallet::Error::BlockDto`;
 - `BasicOutput`, `AliasOutput`, `FoundryOutput`, `NftOutput` - `new_with_amount` and `new_with_minimum_storage_deposit` functions;
+- `OutputsToClaim::None` variant;
 
 ## 0.2.0 - 2023-04-17
 

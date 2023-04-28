@@ -495,6 +495,15 @@ pub mod dto {
         MinimumStorageDeposit(RentStructure),
     }
 
+    impl From<&OutputBuilderAmount> for OutputBuilderAmountDto {
+        fn from(value: &OutputBuilderAmount) -> Self {
+            match value {
+                OutputBuilderAmount::Amount(a) => Self::Amount(a.to_string()),
+                OutputBuilderAmount::MinimumStorageDeposit(r) => Self::MinimumStorageDeposit(*r),
+            }
+        }
+    }
+
     /// Describes all the different output types.
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum OutputDto {

@@ -13,8 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Test Build
+      - name: Test CLI Build
         run: |
-          cd documentation
+          cd documentation/cli
+          yarn install --immutable
+          yarn build
+      - name: Test SDK Build
+        run: |
+          cd documentation/sdk
           yarn install --immutable
           yarn build
