@@ -2,14 +2,22 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use chrono::{DateTime, NaiveDateTime, Utc};
+use clap::Parser;
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Password, Select};
-use iota_sdk::{client::verify_mnemonic, wallet::Wallet};
+use iota_sdk::{
+    client::verify_mnemonic,
+    wallet::{Account, Wallet},
+};
 use tokio::{
     fs::OpenOptions,
     io::{AsyncBufReadExt, AsyncWriteExt, BufReader},
 };
 
-use crate::{error::Error, println_log_error, println_log_info};
+use crate::{
+    command::{account::AccountCli, wallet::WalletCli},
+    error::Error,
+    println_log_error, println_log_info,
+};
 
 const DEFAULT_MNEMONIC_FILE_PATH: &str = "./mnemonic.txt";
 
@@ -25,27 +33,67 @@ pub fn get_password(prompt: &str, confirmation: bool) -> Result<String, Error> {
     Ok(password.interact()?)
 }
 
-pub async fn pick_account(wallet: &Wallet) -> Result<Option<u32>, Error> {
-    let accounts = wallet.get_accounts().await?;
+pub fn get_decision(prompt: &str) -> Result<bool, Error> {
+    loop {
+        let input = Input::<String>::new()
+            .with_prompt(prompt)
+            .default("yes".into())
+            .interact_text()?;
+
+        match input.to_lowercase().as_str() {
+            "yes" | "y" => return Ok(true),
+            "no" | "n" => return Ok(false),
+            _ => {
+                println_log_error!("Accepted input values are: yes|y|no|n");
+            }
+        }
+    }
+}
+
+pub async fn get_account_alias(prompt: &str, wallet: &Wallet) -> Result<String, Error> {
+    let account_aliases = wallet.get_account_aliases().await?;
+    loop {
+        let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
+        if input.is_empty() || !input.is_ascii() {
+            println_log_error!("Invalid input, please choose a non-empty alias consisting of ASCII characters.");
+        } else if account_aliases.iter().any(|alias| alias == &input) {
+            println_log_error!("Account '{input}' already exists, please choose another alias.");
+        } else {
+            return Ok(input);
+        }
+    }
+}
+
+pub async fn pick_account(wallet: &Wallet) -> Result<Option<Account>, Error> {
+    let mut accounts = wallet.get_accounts().await?;
 
     match accounts.len() {
         0 => Ok(None),
-        1 => Ok(Some(0)),
+        1 => Ok(Some(accounts.swap_remove(0))),
         _ => {
-            let mut items = Vec::new();
-
-            for account in accounts {
-                items.push(account.read().await.alias().clone());
-            }
+            // fetch all available account aliases to display to the user
+            let aliases = wallet.get_account_aliases().await?;
 
             let index = Select::with_theme(&ColorfulTheme::default())
                 .with_prompt("Select an account:")
-                .items(&items)
+                .items(&aliases)
                 .default(0)
                 .interact_on(&Term::stderr())?;
 
-            Ok(Some(index as u32))
+            Ok(Some(accounts.swap_remove(index)))
         }
+    }
+}
+
+pub fn print_wallet_help() {
+    if let Err(err) = WalletCli::try_parse_from(vec!["Wallet:", "help"]) {
+        println!("{err}");
+    }
+}
+
+pub fn print_account_help() {
+    if let Err(err) = AccountCli::try_parse_from(vec!["Account:", "help"]) {
+        println!("{err}");
     }
 }
 
@@ -79,12 +127,12 @@ pub async fn enter_or_generate_mnemonic() -> Result<String, Error> {
 pub async fn generate_mnemonic() -> Result<String, Error> {
     let mnemonic = iota_sdk::client::generate_mnemonic()?;
     println_log_info!("Mnemonic has been generated.");
-
     let choices = [
-        "Write to console only",
-        "Write to file only",
-        "Write to console and file",
+        "Write it to the console only",
+        "Write it to a file only",
+        "Write it to the console and a file",
     ];
+
     let selected_choice = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Select how to proceed with it")
         .items(&choices)
@@ -92,6 +140,7 @@ pub async fn generate_mnemonic() -> Result<String, Error> {
         .interact_on(&Term::stderr())?;
 
     if [0, 2].contains(&selected_choice) {
+        println!("YOUR MNEMONIC:");
         println!("{}", mnemonic);
     }
     if [1, 2].contains(&selected_choice) {
