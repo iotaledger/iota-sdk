@@ -74,7 +74,7 @@ async fn main() -> Result<()> {
                     ];
                     let transaction = account_.send(outputs, None).await?;
                     println!(
-                        "Block from thread {} sent: {}/transaction/{}",
+                        "Transaction from thread {} sent: {}/transaction/{}",
                         n,
                         &std::env::var("EXPLORER_URL").unwrap(),
                         transaction.transaction_id

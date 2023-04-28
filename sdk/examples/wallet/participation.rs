@@ -103,7 +103,7 @@ async fn main() -> Result<()> {
     //// ////////////////////////////
 
     let transaction = account.increase_voting_power(1000001).await?;
-    println!("Transaction sent: {}", &transaction.transaction_id);
+    println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
@@ -124,7 +124,7 @@ async fn main() -> Result<()> {
     //// ////////////////////////////
 
     // let transaction = account.decrease_voting_power(1).await?;
-    // println!("Transaction sent: {}", &transaction.transaction_id);
+    // println!("Transaction sent: {}", transaction.transaction_id);
 
     // let block_id = account
     //     .retry_transaction_until_included(&transaction.transaction_id, None, None)
@@ -143,7 +143,7 @@ async fn main() -> Result<()> {
     //// ////////////////////////////
 
     let transaction = account.vote(Some(event_id), Some(vec![0])).await?;
-    println!("Transaction sent: {}", &transaction.transaction_id);
+    println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
@@ -167,7 +167,7 @@ async fn main() -> Result<()> {
     //// ////////////////////////////
 
     let transaction = account.stop_participating(event_id).await?;
-    println!("Transaction sent: {}", &transaction.transaction_id);
+    println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
@@ -188,7 +188,7 @@ async fn main() -> Result<()> {
 
     // // Decrease full amount, there should be no voting output afterwards
     // let transaction = account.decrease_voting_power(voting_output.output.amount()).await?;
-    // println!("Transaction sent: {}", &transaction.transaction_id);
+    // println!("Transaction sent: {}", transaction.transaction_id);
 
     // let block_id = account
     //     .retry_transaction_until_included(&transaction.transaction_id, None, None)

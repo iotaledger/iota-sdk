@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
     }];
 
     let transaction = account.mint_nfts(nft_options, None).await?;
-    println!("Transaction sent: {}", &transaction.transaction_id);
+    println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for transaction to get included
     let block_id = account
@@ -67,7 +67,7 @@ async fn main() -> Result<()> {
     ];
 
     let transaction = account.send(outputs, None).await?;
-    println!("Transaction sent: {}", &transaction.transaction_id);
+    println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for transaction to get included
     let block_id = account

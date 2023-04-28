@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
             .await?;
 
         let transaction = account.destroy_alias(*alias_id, None).await?;
-        println!("Transaction sent: {}", &transaction.transaction_id);
+        println!("Transaction sent: {}", transaction.transaction_id);
 
         let block_id = account
             .retry_transaction_until_included(&transaction.transaction_id, None, None)

@@ -59,7 +59,7 @@ async fn main() -> Result<()> {
         let transaction = account.mint_nfts(nfts.to_vec(), None).await?;
 
         println!(
-            "Block with chunk of NFTs mint sent: {}/transaction/{}",
+            "Transaction with chunk of NFTs mint sent: {}/transaction/{}",
             &std::env::var("EXPLORER_URL").unwrap(),
             transaction.transaction_id
         );

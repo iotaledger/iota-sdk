@@ -68,7 +68,7 @@ async fn main() -> Result<()> {
         1_000_000,
     )];
     let transaction = account.send_amount(outputs, None).await?;
-    println!("Transaction sent: {}", &transaction.transaction_id);
+    println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)

@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
 
     // Sends offline signed transaction online.
     let transaction = account.submit_and_store_transaction(signed_transaction_data).await?;
-    println!("Transaction sent: {}", &transaction.transaction_id);
+    println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)

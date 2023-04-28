@@ -34,7 +34,7 @@ async fn main() -> Result<()> {
         }];
 
         let transaction = account.send_nft(outputs, None).await?;
-        println!("Transaction sent: {}", &transaction.transaction_id);
+        println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included
         let block_id = account
