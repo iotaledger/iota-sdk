@@ -41,7 +41,7 @@ async function run() {
         ]);
 
         console.log(
-            `Check your block on ${process.env.EXPLORER_URL}/block/${response.blockId}`,
+            `Block sent: ${process.env.EXPLORER_URL}/block/${response.blockId}`,
         );
     } catch (error) {
         console.error('Error: ', error);

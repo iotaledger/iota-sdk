@@ -21,7 +21,7 @@ async function run() {
         console.log('Account addresses:', accountAddresses);
 
         const faucetResponse = Utils.requestFundsFromFaucet(
-            'https://faucet.testnet.shimmer.network/api/enqueue',
+            process.env.FAUCET_URL,
             accountAddresses[0].address,
         );
         console.log(faucetResponse);
