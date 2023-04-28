@@ -225,6 +225,7 @@ impl Account {
         let mut locked_native_tokens = NativeTokensBuilder::new();
 
         for locked_output in &account_details.locked_outputs {
+            // Skip potentially_locked_outputs, as their amounts aren't added to the balance
             if account_balance.potentially_locked_outputs.contains_key(locked_output) {
                 continue;
             }
