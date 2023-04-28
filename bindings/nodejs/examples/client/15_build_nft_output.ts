@@ -1,7 +1,18 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Client, initLogger, utf8ToHex, Utils } from '@iota/sdk';
+import {
+    Client,
+    initLogger,
+    utf8ToHex,
+    Utils,
+    AddressUnlockCondition,
+    TagFeature,
+    MetadataFeature,
+    SenderFeature,
+    Ed25519Address,
+    IssuerFeature,
+} from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -36,48 +47,18 @@ async function run() {
             // NftId needs to be null the first time
             nftId: '0x0000000000000000000000000000000000000000000000000000000000000000',
             unlockConditions: [
-                {
-                    type: 0,
-                    address: {
-                        type: 0,
-                        pubKeyHash: hexAddress,
-                    },
-                },
+                new AddressUnlockCondition(new Ed25519Address(hexAddress)),
             ],
             immutableFeatures: [
-                {
-                    // issuer feature
-                    type: 1,
-                    address: {
-                        type: 0,
-                        pubKeyHash: hexAddress,
-                    },
-                },
-                {
-                    // metadata feature
-                    type: 2,
-                    data: utf8ToHex(JSON.stringify(tip27ImmutableMetadata)),
-                },
+                new IssuerFeature(new Ed25519Address(hexAddress)),
+                new MetadataFeature(
+                    utf8ToHex(JSON.stringify(tip27ImmutableMetadata)),
+                ),
             ],
             features: [
-                {
-                    // sender feature
-                    type: 0,
-                    address: {
-                        type: 0,
-                        pubKeyHash: hexAddress,
-                    },
-                },
-                {
-                    // metadata feature
-                    type: 2,
-                    data: utf8ToHex('mutable metadata'),
-                },
-                {
-                    // tag feature
-                    type: 3,
-                    tag: utf8ToHex('my tag'),
-                },
+                new SenderFeature(new Ed25519Address(hexAddress)),
+                new MetadataFeature(utf8ToHex('mutable metadata')),
+                new TagFeature(utf8ToHex('my tag')),
             ],
         });
 

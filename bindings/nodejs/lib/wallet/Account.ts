@@ -349,7 +349,9 @@ export class Account {
      * @param options Options for address generation.
      * @returns The address.
      */
-    async generateAddress(options?: GenerateAddressOptions): Promise<AccountAddress> {
+    async generateAddress(
+        options?: GenerateAddressOptions,
+    ): Promise<AccountAddress> {
         const addresses = await this.generateAddresses(1, options);
         return addresses[0];
     }

@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { FeatureTypes } from '@iota/types';
 import { Address } from './address';
 
 enum FeatureType {

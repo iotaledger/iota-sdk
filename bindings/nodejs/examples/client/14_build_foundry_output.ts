@@ -1,7 +1,12 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Client, initLogger } from '@iota/sdk';
+import {
+    Client,
+    initLogger,
+    ImmutableAliasAddressUnlockCondition,
+    AliasAddress,
+} from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -35,17 +40,11 @@ async function run() {
                 meltedTokens: '0x0',
                 maximumSupply: '0xa',
             },
-            amount: '1000000',
+            amount: 1000000,
             unlockConditions: [
-                {
-                    // ImmutableAliasAddressUnlockCondition
-                    type: 6,
-                    address: {
-                        // AliasAddress
-                        type: 8,
-                        aliasId,
-                    },
-                },
+                new ImmutableAliasAddressUnlockCondition(
+                    new AliasAddress(aliasId),
+                ),
             ],
         });
 

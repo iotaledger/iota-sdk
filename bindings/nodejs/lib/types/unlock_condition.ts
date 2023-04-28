@@ -41,7 +41,7 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition {
     private _amount: number;
     private _returnAddress: Address;
 
-    constructor(amount: number, returnAddress: Address) {
+    constructor(returnAddress: Address, amount: number) {
         super(UnlockConditionType.StorageDepositReturn);
         this._amount = amount;
         this._returnAddress = returnAddress;
@@ -73,7 +73,7 @@ class ExpirationUnlockCondition extends UnlockCondition {
     private _returnAddress: Address;
     private _unixTime: number;
 
-    constructor(unixTime: number, returnAddress: Address) {
+    constructor(returnAddress: Address, unixTime: number) {
         super(UnlockConditionType.Expiration);
         this._returnAddress = returnAddress;
         this._unixTime = unixTime;
@@ -124,4 +124,13 @@ class ImmutableAliasAddressUnlockCondition extends UnlockCondition {
     }
 }
 
-export { UnlockCondition, AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition };
+export {
+    UnlockCondition,
+    AddressUnlockCondition,
+    StorageDepositReturnUnlockCondition,
+    TimelockUnlockCondition,
+    ExpirationUnlockCondition,
+    StateControllerAddressUnlockCondition,
+    GovernorAddressUnlockCondition,
+    ImmutableAliasAddressUnlockCondition,
+};
