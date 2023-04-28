@@ -109,7 +109,7 @@ pub async fn backup_command(storage_path: &Path, snapshot_path: &Path, backup_pa
 }
 
 pub async fn change_password_command(storage_path: &Path, snapshot_path: &Path) -> Result<Wallet, Error> {
-    let password = get_password("Stronghold password", !std::path::Path::new(snapshot_path).exists())?;
+    let password = get_password("Stronghold password", !snapshot_path.exists())?;
     let wallet = unlock_wallet(storage_path, snapshot_path, &password).await?;
     let new_password = get_password("Stronghold new password", true)?;
     wallet.change_stronghold_password(&password, &new_password).await?;
@@ -169,20 +169,6 @@ pub async fn new_command(
     Ok((wallet, alias))
 }
 
-pub async fn add_account(wallet: &Wallet, alias: Option<String>) -> Result<String, Error> {
-    let mut builder = wallet.create_account();
-    if let Some(alias) = alias {
-        builder = builder.with_alias(alias);
-    }
-
-    let account = builder.finish().await?;
-    let alias = account.read().await.alias().to_string();
-
-    println_log_info!("Created account \"{alias}\"");
-
-    Ok(alias)
-}
-
 pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<Wallet, Error> {
     let password = get_password("Stronghold password", false)?;
     let secret_manager = SecretManager::Stronghold(
@@ -236,4 +222,13 @@ pub async fn unlock_wallet(storage_path: &Path, snapshot_path: &Path, password: 
         .await?;
 
     Ok(wallet)
+}
+
+pub async fn add_account(wallet: &Wallet, alias: Option<String>) -> Result<String, Error> {
+    let account = wallet.create_account().with_alias(alias).finish().await?;
+    let alias = account.read().await.alias().to_string();
+
+    println_log_info!("Created account \"{alias}\"");
+
+    Ok(alias)
 }
