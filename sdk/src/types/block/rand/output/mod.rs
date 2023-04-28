@@ -8,9 +8,9 @@ pub mod metadata;
 /// Module providing random unlock condition generation utilities.
 pub mod unlock_condition;
 
-pub use metadata::rand_output_metadata;
 use primitive_types::U256;
 
+pub use self::metadata::rand_output_metadata;
 use crate::types::block::{
     output::{
         unlock_condition::ImmutableAliasAddressUnlockCondition, AliasId, AliasOutput, BasicOutput, FoundryOutput,
