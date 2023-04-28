@@ -9,7 +9,7 @@ use crate::{
         restore_command, set_node_command, sync_command, unlock_wallet, InitParameters, WalletCli, WalletCommand,
     },
     error::Error,
-    helper::{get_account_name, get_decision, get_password, pick_account, print_wallet_help},
+    helper::{get_account_alias, get_decision, get_password, pick_account, print_wallet_help},
     println_log_error, println_log_info,
 };
 
@@ -93,7 +93,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
 async fn create_initial_account(wallet: Wallet) -> Result<(Option<Wallet>, Option<String>), Error> {
     // Ask the user whether an initial account should be created.
     if get_decision("Create initial account?")? {
-        let alias = get_account_name("New account name", &wallet).await?;
+        let alias = get_account_alias("New account alias", &wallet).await?;
         let alias = add_account(&wallet, Some(alias)).await?;
         println_log_info!("Created initial account. Type `help` to see all available commands.");
         Ok((Some(wallet), Some(alias)))

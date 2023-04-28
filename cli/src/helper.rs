@@ -50,13 +50,13 @@ pub fn get_decision(prompt: &str) -> Result<bool, Error> {
     }
 }
 
-pub async fn get_account_name(prompt: &str, wallet: &Wallet) -> Result<String, Error> {
-    let accounts = wallet.get_account_aliases().await?;
+pub async fn get_account_alias(prompt: &str, wallet: &Wallet) -> Result<String, Error> {
+    let account_aliases = wallet.get_account_aliases().await?;
     loop {
         let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
         if input.is_empty() || !input.is_ascii() {
             println_log_error!("Invalid input, please choose a non-empty name consisting of ASCII characters.");
-        } else if accounts.iter().any(|alias| alias == &input) {
+        } else if account_aliases.iter().any(|alias| alias == &input) {
             println_log_error!("Account with alias '{input}' already exists, please choose another name.");
         } else {
             return Ok(input);
