@@ -26,7 +26,7 @@ impl Account {
     pub(crate) async fn get_alias_and_foundry_output_ids(
         &self,
         bech32_address: &str,
-        sync_options: SyncOptions,
+        sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[SYNC] get_alias_and_foundry_output_ids");
         let client = self.client();
