@@ -81,7 +81,7 @@ async fn main() -> Result<()> {
         match account.send(outputs, None).await {
             Ok(transaction) => println!(
                 "Transaction sent: {}/transaction/{}",
-                &std::env::var("EXPLORER_URL").unwrap(),
+                std::env::var("EXPLORER_URL").unwrap(),
                 transaction.transaction_id
             ),
             Err(e) => println!("{e}"),

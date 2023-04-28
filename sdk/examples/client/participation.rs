@@ -126,7 +126,7 @@ async fn participate(client: &Client, event_id: ParticipationEventId) -> Result<
 
     println!(
         "Block with participation data sent: {}/block/{}",
-        &std::env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
     Ok(())

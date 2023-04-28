@@ -76,7 +76,7 @@ async fn main() -> Result<()> {
                     println!(
                         "Transaction from thread {} sent: {}/transaction/{}",
                         n,
-                        &std::env::var("EXPLORER_URL").unwrap(),
+                        std::env::var("EXPLORER_URL").unwrap(),
                         transaction.transaction_id
                     );
                     iota_sdk::wallet::Result::Ok(n)

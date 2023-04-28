@@ -108,7 +108,7 @@ async fn main() -> Result<()> {
                     println!(
                         "Block from thread {} sent: {}/block/{}",
                         n,
-                        &std::env::var("EXPLORER_URL").unwrap(),
+                        std::env::var("EXPLORER_URL").unwrap(),
                         tx.block_id.expect("no block created yet")
                     );
                     iota_sdk::wallet::Result::Ok(n)

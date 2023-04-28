@@ -41,7 +41,7 @@ impl Account {
     ///
     /// println!(
     ///     "Transaction sent: {}/transaction/{}",
-    ///     &std::env::var("EXPLORER_URL").unwrap(),
+    ///     std::env::var("EXPLORER_URL").unwrap(),
     ///     transaction.transaction_id
     /// );
     /// ```

@@ -60,7 +60,7 @@ async fn main() -> Result<()> {
 
         println!(
             "Transaction with chunk of NFTs mint sent: {}/transaction/{}",
-            &std::env::var("EXPLORER_URL").unwrap(),
+            std::env::var("EXPLORER_URL").unwrap(),
             transaction.transaction_id
         );
         // Try to get the transaction confirmed

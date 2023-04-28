@@ -110,7 +110,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Increase voting power block included: {}/block/{}",
-        &std::env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
 
@@ -132,7 +132,7 @@ async fn main() -> Result<()> {
     // println!(
     //     "Decrease voting power {}/block/{}",
     //     transaction.transaction_id,
-    //     &std::env::var("EXPLORER_URL").unwrap(),
+    //     std::env::var("EXPLORER_URL").unwrap(),
     //     block_id
     // );
 
@@ -150,7 +150,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Vote block included: {}/block/{}",
-        &std::env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
     account.sync(None).await?;
@@ -174,7 +174,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Stop participating block included: {}/block/{}",
-        &std::env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
     account.sync(None).await?;
@@ -195,7 +195,7 @@ async fn main() -> Result<()> {
     //     .await?;
     // println!(
     //     "Transaction included: {}/block/{}",
-    //     &std::env::var("EXPLORER_URL").unwrap(),
+    //     std::env::var("EXPLORER_URL").unwrap(),
     //     block_id
     // );
     // account.sync(None).await?;

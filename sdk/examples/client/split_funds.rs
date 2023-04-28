@@ -46,7 +46,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Block with split funds sent: {}/block/{}",
-        &std::env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
     Ok(())

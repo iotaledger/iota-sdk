@@ -106,7 +106,7 @@ impl Account {
     /// let transaction = account.mint_nfts(nft_options, None).await?;
     /// println!(
     ///     "Transaction sent: {}/transaction/{}",
-    ///     &std::env::var("EXPLORER_URL").unwrap(),
+    ///     std::env::var("EXPLORER_URL").unwrap(),
     ///     transaction.transaction_id,
     /// );
     /// ```

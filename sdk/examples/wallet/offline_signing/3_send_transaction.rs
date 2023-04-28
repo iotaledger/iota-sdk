@@ -40,7 +40,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Block included: {}/block/{}",
-        &std::env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
 
