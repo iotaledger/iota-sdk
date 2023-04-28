@@ -3,9 +3,12 @@
 
 /// Module providing random feature generation utilities.
 pub mod feature;
+/// Module providing random output metadata generation utilities.
+pub mod metadata;
 /// Module providing random unlock condition generation utilities.
 pub mod unlock_condition;
 
+pub use metadata::rand_output_metadata;
 use primitive_types::U256;
 
 use crate::types::block::{
