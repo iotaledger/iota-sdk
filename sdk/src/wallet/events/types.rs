@@ -15,6 +15,7 @@ use crate::{
     },
     wallet::account::types::{InclusionState, OutputDataDto},
 };
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Event {
