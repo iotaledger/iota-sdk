@@ -1,4 +1,4 @@
----
+ ---
 description: 'The IOTA SDK is designed to simplify how you connect and interact
 with nodes in the Tangle.'
 keywords:
