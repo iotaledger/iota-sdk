@@ -20,27 +20,3 @@ different [account approaches](https://wiki.iota.org/shimmer/develop/how-tos/see
 to split addresses/keys into independent spaces. The
 multi-account approach assigns an account for each user, while the single account approach creates a single account and
 generates multiple addresses linked to user IDs.
-
-## Code Examples
-
-### Create Mnemonic
-You can use this example to generate a mnemonic for a seed.
-
-### List Addresses
-List all the addresses related to an account.
-
-### Create an Account
-
-
-### Create an Address
-
-
-### List Accounts
-
-### List Outputs
-
-### Check Unlock Conditions
-
-
-### List Transactions:
-
