@@ -19,7 +19,7 @@ fn main(mut cx: ModuleContext) -> NeonResult<()> {
     cx.export_function("messageHandlerNew", message_handler::message_handler_new)?;
     cx.export_function("destroy", message_handler::destroy)?;
 
-    cx.export_function("listenRust", message_handler::listen)?;
+    cx.export_function("listen", message_handler::listen)?;
     cx.export_function("initLogger", message_handler::init_logger)?;
     Ok(())
 }
