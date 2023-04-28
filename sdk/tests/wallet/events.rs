@@ -19,6 +19,7 @@ use iota_sdk::{
 
 fn assert_serde_eq(event_0: WalletEvent) {
     let json = serde_json::to_string(&event_0).unwrap();
+    println!("{}", json);
     let event_1 = serde_json::from_str(&json).unwrap();
 
     assert_eq!(event_0, event_1);

@@ -43,7 +43,7 @@ impl Serialize for WalletEvent {
     {
         #[derive(Serialize)]
         struct TransactionProgressEvent_<'a> {
-            event: &'a TransactionProgressEvent,
+            progress: &'a TransactionProgressEvent,
         }
 
         #[derive(Serialize)]
@@ -88,7 +88,7 @@ impl Serialize for WalletEvent {
             },
             Self::TransactionProgress(e) => TypedWalletEvent_ {
                 kind: 5,
-                event: WalletEvent_::T5(TransactionProgressEvent_ { event: e }),
+                event: WalletEvent_::T5(TransactionProgressEvent_ { progress: e }),
             },
         };
         event.serialize(serializer)
@@ -99,7 +99,7 @@ impl<'de> Deserialize<'de> for WalletEvent {
     fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         #[derive(Deserialize)]
         struct TransactionProgressEvent_ {
-            event: TransactionProgressEvent,
+            progress: TransactionProgressEvent,
         }
 
         let value = serde_json::Value::deserialize(d)?;
@@ -134,7 +134,7 @@ impl<'de> Deserialize<'de> for WalletEvent {
                         .map_err(|e| {
                             serde::de::Error::custom(format!("cannot deserialize TransactionProgressEvent: {e}"))
                         })?
-                        .event,
+                        .progress,
                 ),
                 _ => return Err(serde::de::Error::custom("invalid event type")),
             },
