@@ -3,7 +3,7 @@
 
 use iota_sdk::types::block::{
     address::{Address, AliasAddress, Ed25519Address},
-    input::{Input, TreasuryInput, UtxoInput},
+    input::{Input, UtxoInput},
     output::{
         unlock_condition::{
             AddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition,
@@ -13,13 +13,11 @@ use iota_sdk::types::block::{
         SimpleTokenScheme, TokenId, TokenScheme, TreasuryOutput,
     },
     payload::{
-        milestone::MilestoneId,
         transaction::{RegularTransactionEssence, TransactionId},
         Payload,
     },
     protocol::protocol_parameters,
     rand::{
-        bytes::rand_bytes_array,
         output::rand_inputs_commitment,
         payload::{rand_milestone_payload, rand_tagged_data_payload},
     },
@@ -249,27 +247,27 @@ fn build_invalid_duplicate_utxo() {
     assert!(matches!(essence, Err(Error::DuplicateUtxo(_))));
 }
 
-#[test]
-fn build_invalid_input_kind() {
-    let protocol_parameters = protocol_parameters();
-    let input = Input::Treasury(TreasuryInput::new(MilestoneId::new(rand_bytes_array())));
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
-    let amount = 1_000_000;
-    let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish(protocol_parameters.token_supply())
-            .unwrap(),
-    );
+// #[test]
+// fn build_invalid_input_kind() {
+//     let protocol_parameters = protocol_parameters();
+//     let input = Input::Treasury(TreasuryInput::new(MilestoneId::new(rand_bytes_array())));
+//     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
+//     let address = Address::from(Ed25519Address::new(bytes));
+//     let amount = 1_000_000;
+//     let output = Output::Basic(
+//         BasicOutput::build_with_amount(amount)
+//             .add_unlock_condition(AddressUnlockCondition::new(address))
+//             .finish(protocol_parameters.token_supply())
+//             .unwrap(),
+//     );
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-        .add_input(input)
-        .add_output(output)
-        .finish(&protocol_parameters);
+//     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+//         .add_input(input)
+//         .add_output(output)
+//         .finish(&protocol_parameters);
 
-    assert!(matches!(essence, Err(Error::InvalidInputKind(1))));
-}
+//     assert!(matches!(essence, Err(Error::InvalidInputKind(1))));
+// }
 
 #[test]
 fn build_invalid_output_kind() {

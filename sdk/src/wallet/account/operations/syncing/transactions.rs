@@ -89,11 +89,10 @@ impl Account {
             let TransactionEssence::Regular(essence) = transaction.payload.essence();
             let mut input_got_spent = false;
             for input in essence.inputs() {
-                if let Input::Utxo(input) = input {
-                    if let Some(input) = account_details.outputs.get(input.output_id()) {
-                        if input.is_spent {
-                            input_got_spent = true;
-                        }
+                let Input::Utxo(input) = input;
+                if let Some(input) = account_details.outputs.get(input.output_id()) {
+                    if input.is_spent {
+                        input_got_spent = true;
                     }
                 }
             }
@@ -228,9 +227,8 @@ fn updated_transaction_and_outputs(
     // get spent inputs
     let TransactionEssence::Regular(essence) = transaction.payload.essence();
     for input in essence.inputs() {
-        if let Input::Utxo(input) = input {
-            spent_output_ids.push(*input.output_id());
-        }
+        let Input::Utxo(input) = input;
+        spent_output_ids.push(*input.output_id());
     }
     updated_transactions.push(transaction);
 }
@@ -246,16 +244,15 @@ fn process_transaction_with_unknown_state(
     let mut all_inputs_spent = true;
     let TransactionEssence::Regular(essence) = transaction.payload.essence();
     for input in essence.inputs() {
-        if let Input::Utxo(input) = input {
-            if let Some(output_data) = account.outputs.get(input.output_id()) {
-                if !output_data.metadata.is_spent {
-                    // unspent output needs to be made available again
-                    output_ids_to_unlock.push(*input.output_id());
-                    all_inputs_spent = false;
-                }
-            } else {
+        let Input::Utxo(input) = input;
+        if let Some(output_data) = account.outputs.get(input.output_id()) {
+            if !output_data.metadata.is_spent {
+                // unspent output needs to be made available again
+                output_ids_to_unlock.push(*input.output_id());
                 all_inputs_spent = false;
             }
+        } else {
+            all_inputs_spent = false;
         }
     }
     // If only a part of the inputs got spent, then it couldn't happen with this transaction, so it's conflicting

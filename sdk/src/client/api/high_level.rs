@@ -51,9 +51,6 @@ impl Client {
             .iter()
             .map(|i| match i {
                 Input::Utxo(input) => *input.output_id(),
-                Input::Treasury(_) => {
-                    unreachable!()
-                }
             })
             .collect();
 

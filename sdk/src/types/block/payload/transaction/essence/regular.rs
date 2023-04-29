@@ -212,13 +212,9 @@ fn verify_inputs<const VERIFY: bool>(inputs: &[Input]) -> Result<(), Error> {
         let mut seen_utxos = HashSet::new();
 
         for input in inputs.iter() {
-            match input {
-                Input::Utxo(utxo) => {
-                    if !seen_utxos.insert(utxo) {
-                        return Err(Error::DuplicateUtxo(*utxo));
-                    }
-                }
-                _ => return Err(Error::InvalidInputKind(input.kind())),
+            let Input::Utxo(utxo) = input;
+            if !seen_utxos.insert(utxo) {
+                return Err(Error::DuplicateUtxo(*utxo));
             }
         }
     }

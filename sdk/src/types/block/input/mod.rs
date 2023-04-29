@@ -1,14 +1,13 @@
 // Copyright 2020-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod treasury;
 mod utxo;
 
 use core::ops::RangeInclusive;
 
 use derive_more::From;
 
-pub use self::{treasury::TreasuryInput, utxo::UtxoInput};
+pub use self::utxo::UtxoInput;
 use crate::types::block::Error;
 
 /// The maximum number of inputs of a transaction.
@@ -33,16 +32,12 @@ pub enum Input {
     /// A UTXO input.
     #[packable(tag = UtxoInput::KIND)]
     Utxo(UtxoInput),
-    /// A treasury input.
-    #[packable(tag = TreasuryInput::KIND)]
-    Treasury(TreasuryInput),
 }
 
 impl core::fmt::Debug for Input {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::Utxo(input) => input.fmt(f),
-            Self::Treasury(input) => input.fmt(f),
         }
     }
 }
@@ -52,7 +47,6 @@ impl Input {
     pub fn kind(&self) -> u8 {
         match self {
             Self::Utxo(_) => UtxoInput::KIND,
-            Self::Treasury(_) => TreasuryInput::KIND,
         }
     }
 
@@ -64,26 +58,8 @@ impl Input {
     /// Gets the input as an actual [`UtxoInput`].
     /// PANIC: do not call on a non-utxo input.
     pub fn as_utxo(&self) -> &UtxoInput {
-        if let Self::Utxo(input) = self {
-            input
-        } else {
-            panic!("as_utxo called on a non-utxo input");
-        }
-    }
-
-    /// Checks whether the input is a [`TreasuryInput`].
-    pub fn is_treasury(&self) -> bool {
-        matches!(self, Self::Treasury(_))
-    }
-
-    /// Gets the input as an actual [`TreasuryInput`].
-    /// PANIC: do not call on a non-treasury input.
-    pub fn as_treasury(&self) -> &TreasuryInput {
-        if let Self::Treasury(input) = self {
-            input
-        } else {
-            panic!("as_treasury called on a non-treasury input");
-        }
+        let Self::Utxo(input) = self;
+        input
     }
 }
 
@@ -91,8 +67,8 @@ impl Input {
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
+    pub use super::utxo::dto::UtxoInputDto;
     use super::*;
-    pub use super::{treasury::dto::TreasuryInputDto, utxo::dto::UtxoInputDto};
     use crate::types::block::Error;
 
     /// Describes all the different input types.
@@ -100,14 +76,12 @@ pub mod dto {
     #[serde(untagged)]
     pub enum InputDto {
         Utxo(UtxoInputDto),
-        Treasury(TreasuryInputDto),
     }
 
     impl From<&Input> for InputDto {
         fn from(value: &Input) -> Self {
             match value {
                 Input::Utxo(u) => Self::Utxo(u.into()),
-                Input::Treasury(t) => Self::Treasury(t.into()),
             }
         }
     }
@@ -118,7 +92,6 @@ pub mod dto {
         fn try_from(value: &InputDto) -> Result<Self, Self::Error> {
             match value {
                 InputDto::Utxo(u) => Ok(Self::Utxo(u.try_into()?)),
-                InputDto::Treasury(t) => Ok(Self::Treasury(t.try_into()?)),
             }
         }
     }

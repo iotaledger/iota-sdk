@@ -210,9 +210,8 @@ pub(crate) async fn get_inputs_for_transaction_payload(
     let mut output_ids = Vec::new();
 
     for input in essence.inputs() {
-        if let Input::Utxo(input) = input {
-            output_ids.push(*input.output_id());
-        }
+        let Input::Utxo(input) = input;
+        output_ids.push(*input.output_id());
     }
 
     client.try_get_outputs(output_ids).await.map_err(|e| e.into())
