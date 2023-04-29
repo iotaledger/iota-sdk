@@ -25,5 +25,4 @@ mod transaction_id;
 mod transaction_payload;
 mod transaction_regular_essence;
 mod treasury_output;
-mod treasury_transaction_payload;
 mod unlocks;

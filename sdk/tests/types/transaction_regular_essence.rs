@@ -21,7 +21,7 @@ use iota_sdk::types::block::{
     rand::{
         bytes::rand_bytes_array,
         output::rand_inputs_commitment,
-        payload::{rand_tagged_data_payload, rand_treasury_transaction_payload},
+        payload::{rand_milestone_payload, rand_tagged_data_payload},
     },
     Error,
 };
@@ -129,7 +129,7 @@ fn build_invalid_payload_kind() {
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs(vec![input1, input2])
         .add_output(output)
-        .with_payload(rand_treasury_transaction_payload(protocol_parameters.token_supply()))
+        .with_payload(rand_milestone_payload(42))
         .finish(&protocol_parameters);
 
     assert!(matches!(essence, Err(Error::InvalidPayloadKind(4))));
