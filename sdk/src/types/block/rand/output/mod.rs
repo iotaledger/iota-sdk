@@ -11,8 +11,7 @@ use primitive_types::U256;
 use crate::types::block::{
     output::{
         unlock_condition::ImmutableAliasAddressUnlockCondition, AliasId, AliasOutput, BasicOutput, FoundryOutput,
-        InputsCommitment, NftId, NftOutput, Output, OutputId, SimpleTokenScheme, TokenScheme, TreasuryOutput,
-        OUTPUT_INDEX_RANGE,
+        InputsCommitment, NftId, NftOutput, Output, OutputId, SimpleTokenScheme, TokenScheme, OUTPUT_INDEX_RANGE,
     },
     rand::{
         address::rand_alias_address,
@@ -33,11 +32,6 @@ use crate::types::block::{
 /// Generates a random [`OutputId`].
 pub fn rand_output_id() -> OutputId {
     OutputId::new(rand_transaction_id(), rand_number_range(OUTPUT_INDEX_RANGE)).unwrap()
-}
-
-/// Generates a random treasury output.
-pub fn rand_treasury_output(token_supply: u64) -> TreasuryOutput {
-    TreasuryOutput::new(rand_number_range(0..token_supply), token_supply).unwrap()
 }
 
 /// Generates a random [`BasicOutput`](BasicOutput).
@@ -110,7 +104,6 @@ pub fn rand_inputs_commitment() -> InputsCommitment {
 /// Generates a random [`Output`].
 pub fn rand_output(token_supply: u64) -> Output {
     match rand_number::<u64>() % 5 {
-        0 => rand_treasury_output(token_supply).into(),
         1 => rand_basic_output(token_supply).into(),
         2 => rand_alias_output(token_supply).into(),
         3 => rand_foundry_output(token_supply).into(),

@@ -10,7 +10,7 @@ use iota_sdk::types::block::{
             StateControllerAddressUnlockCondition,
         },
         AliasId, AliasOutput, BasicOutput, ChainId, FoundryId, FoundryOutput, NativeToken, NftId, NftOutput, Output,
-        SimpleTokenScheme, TokenId, TokenScheme, TreasuryOutput,
+        SimpleTokenScheme, TokenId, TokenScheme,
     },
     payload::{
         transaction::{RegularTransactionEssence, TransactionId},
@@ -269,21 +269,21 @@ fn build_invalid_duplicate_utxo() {
 //     assert!(matches!(essence, Err(Error::InvalidInputKind(1))));
 // }
 
-#[test]
-fn build_invalid_output_kind() {
-    let protocol_parameters = protocol_parameters();
-    let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let amount = 1_000_000;
-    let output = Output::Treasury(TreasuryOutput::new(amount, protocol_parameters.token_supply()).unwrap());
+// #[test]
+// fn build_invalid_output_kind() {
+//     let protocol_parameters = protocol_parameters();
+//     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
+//     let input = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
+//     let amount = 1_000_000;
+//     let output = Output::Treasury(TreasuryOutput::new(amount, protocol_parameters.token_supply()).unwrap());
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-        .add_input(input)
-        .add_output(output)
-        .finish(&protocol_parameters);
+//     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+//         .add_input(input)
+//         .add_output(output)
+//         .finish(&protocol_parameters);
 
-    assert!(matches!(essence, Err(Error::InvalidOutputKind(2))));
-}
+//     assert!(matches!(essence, Err(Error::InvalidOutputKind(2))));
+// }
 
 #[test]
 fn build_invalid_accumulated_output() {

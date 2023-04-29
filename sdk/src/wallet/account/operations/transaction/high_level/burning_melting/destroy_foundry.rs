@@ -94,7 +94,7 @@ impl Account {
                     }
                 }
                 // Not interested in these outputs here
-                Output::Treasury(_) | Output::Basic(_) | Output::Nft(_) => {}
+                Output::Basic(_) | Output::Nft(_) => {}
             }
 
             if existing_alias_output_data.is_some() && existing_foundry_output.is_some() {

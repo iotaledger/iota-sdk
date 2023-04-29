@@ -238,7 +238,6 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
                 Output::Alias(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
                 Output::Foundry(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
                 Output::Nft(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
-                _ => return Err(Error::InvalidOutputKind(output.kind())),
             };
 
             amount_sum = amount_sum
@@ -284,7 +283,6 @@ fn verify_outputs_unverified<const VERIFY: bool>(outputs: &[Output]) -> Result<(
                 Output::Alias(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
                 Output::Foundry(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
                 Output::Nft(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
-                _ => return Err(Error::InvalidOutputKind(output.kind())),
             };
 
             amount_sum = amount_sum

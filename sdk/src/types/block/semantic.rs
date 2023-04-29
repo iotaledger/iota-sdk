@@ -221,7 +221,6 @@ pub fn semantic_validation(
                 output.native_tokens(),
                 output.unlock_conditions(),
             ),
-            _ => return Err(Error::UnsupportedOutputKind(consumed_output.kind())),
         };
 
         if let Err(conflict) = conflict {
@@ -276,7 +275,6 @@ pub fn semantic_validation(
             Output::Alias(output) => (output.amount(), output.native_tokens(), output.features()),
             Output::Foundry(output) => (output.amount(), output.native_tokens(), output.features()),
             Output::Nft(output) => (output.amount(), output.native_tokens(), output.features()),
-            _ => return Err(Error::UnsupportedOutputKind(created_output.kind())),
         };
 
         if let Some(sender) = features.sender() {

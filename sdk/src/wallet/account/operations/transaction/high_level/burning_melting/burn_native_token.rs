@@ -114,7 +114,6 @@ impl Account {
                         foundry_selection.push(StrippedOutput::new(*output_id, amount, output));
                     }
                 }
-                Output::Treasury(_) => continue,
             }
         }
 
@@ -410,11 +409,6 @@ fn create_output_and_replace_native_tokens(
             .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
             .with_native_tokens(native_tokens)
             .finish_output(token_supply)?,
-        Output::Treasury(_) => {
-            return Err(crate::wallet::Error::InvalidOutputKind(
-                "treasury output cannot hold native tokens".to_string(),
-            ));
-        }
     };
 
     Ok(output)
@@ -438,11 +432,6 @@ fn add_native_token_to_output(
         Output::Nft(nft_output) => NftOutputBuilder::from(nft_output)
             .add_native_token(native_token)
             .finish_output(token_supply)?,
-        Output::Treasury(_) => {
-            return Err(crate::wallet::Error::InvalidOutputKind(
-                "treasury output cannot hold native tokens".to_string(),
-            ));
-        }
     };
 
     Ok(output)
