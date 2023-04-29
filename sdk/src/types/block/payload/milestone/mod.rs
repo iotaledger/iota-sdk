@@ -16,7 +16,7 @@ use core::{fmt::Debug, ops::RangeInclusive};
 
 use crypto::{signatures::ed25519, Error as CryptoError};
 use iterator_sorted::is_unique_sorted;
-pub(crate) use option::{MilestoneOptionCount, ReceiptFundsCount};
+pub(crate) use option::MilestoneOptionCount;
 use packable::{bounded::BoundedU8, prefix::VecPrefix, Packable};
 
 pub use self::{
@@ -24,7 +24,7 @@ pub use self::{
     index::MilestoneIndex,
     merkle::MerkleRoot,
     milestone_id::MilestoneId,
-    option::{MilestoneOption, MilestoneOptions, ParametersMilestoneOption, ReceiptMilestoneOption},
+    option::{MilestoneOption, MilestoneOptions, ParametersMilestoneOption},
 };
 pub(crate) use self::{essence::MilestoneMetadataLength, option::BinaryParametersLength};
 use crate::types::block::{protocol::ProtocolParameters, signature::Signature, Error};
@@ -243,7 +243,7 @@ pub mod dto {
                     value
                         .options
                         .iter()
-                        .map(|o| MilestoneOption::try_from_dto(o, protocol_parameters.token_supply()))
+                        .map(MilestoneOption::try_from_dto)
                         .collect::<Result<Vec<_>, _>>()?,
                 )?;
                 let metadata = if !value.metadata.is_empty() {

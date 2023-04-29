@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[cfg(feature = "mqtt")]
+use iota_sdk::client::mqtt::{MqttPayload, Topic};
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
@@ -19,11 +21,6 @@ use iota_sdk::{
         protocol::dto::ProtocolParametersDto,
         Block, BlockDto,
     },
-};
-#[cfg(feature = "mqtt")]
-use {
-    iota_sdk::client::mqtt::{MqttPayload, Topic},
-    iota_sdk::types::block::payload::milestone::option::dto::ReceiptMilestoneOptionDto,
 };
 
 use crate::{method::ClientMethod, response::Response, Result};
@@ -50,8 +47,6 @@ where
                 }
                 MqttPayload::MilestonePayload(ms) => serde_json::to_string(&MilestonePayloadDto::from(ms))
                     .expect("failed to serialize MqttPayload::MilestonePayload"),
-                MqttPayload::Receipt(receipt) => serde_json::to_string(&ReceiptMilestoneOptionDto::from(receipt))
-                    .expect("failed to serialize MqttPayload::Receipt"),
             };
             let response = MqttResponse {
                 topic: topic_event.topic.clone(),
@@ -339,10 +334,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::GetUtxoChangesByIndex { index } => {
             Response::MilestoneUtxoChanges(client.get_utxo_changes_by_index(index).await?)
-        }
-        ClientMethod::GetReceipts => Response::Receipts(client.get_receipts().await?),
-        ClientMethod::GetReceiptsMigratedAt { milestone_index } => {
-            Response::Receipts(client.get_receipts_migrated_at(milestone_index).await?)
         }
         ClientMethod::GetTreasury => Response::Treasury(client.get_treasury().await?),
         ClientMethod::GetIncludedBlock { transaction_id } => {

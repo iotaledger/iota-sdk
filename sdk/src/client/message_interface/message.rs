@@ -304,14 +304,6 @@ pub enum Message {
         /// Milestone Index
         index: u32,
     },
-    /// Get all receipts.
-    GetReceipts,
-    /// Get the receipts by the given milestone index.
-    #[serde(rename_all = "camelCase")]
-    GetReceiptsMigratedAt {
-        /// Milestone index
-        milestone_index: u32,
-    },
     /// Get the treasury output.
     GetTreasury,
     /// Returns the included block of the transaction.

@@ -4,7 +4,7 @@
 use alloc::{boxed::Box, string::String, vec::Vec};
 
 use crate::types::{
-    api::core::dto::{LedgerInclusionStateDto, PeerDto, ReceiptDto},
+    api::core::dto::{LedgerInclusionStateDto, PeerDto},
     block::{
         output::dto::{OutputDto, OutputMetadataDto},
         payload::dto::MilestonePayloadDto,
@@ -219,19 +219,6 @@ pub struct OutputWithMetadataResponse {
 pub enum OutputResponse {
     Json(Box<OutputWithMetadataResponse>),
     Raw(Vec<u8>),
-}
-
-/// Response of:
-/// * GET /api/core/v2/receipts/{milestone_index}, returns all stored receipts for the given milestone index.
-/// * GET /api/core/v2/receipts, returns all stored receipts, independent of a milestone index.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct ReceiptsResponse {
-    pub receipts: Vec<ReceiptDto>,
 }
 
 /// Response of GET /api/core/v2/treasury.

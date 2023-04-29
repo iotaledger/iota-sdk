@@ -51,7 +51,6 @@ async fn main() -> Result<()> {
                     MqttPayload::Json(val) => println!("{}", serde_json::to_string(&val).unwrap()),
                     MqttPayload::Block(block) => println!("{block:?}"),
                     MqttPayload::MilestonePayload(ms) => println!("{ms:?}"),
-                    MqttPayload::Receipt(receipt) => println!("{receipt:?}"),
                 }
                 tx.lock().unwrap().send(()).unwrap();
             },

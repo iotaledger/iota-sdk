@@ -10,10 +10,7 @@ use serde::{de::Error as _, Deserialize, Deserializer};
 use serde_json::Value;
 
 use super::Error;
-use crate::types::block::{
-    payload::{milestone::ReceiptMilestoneOption, MilestonePayload},
-    Block,
-};
+use crate::types::block::{payload::MilestonePayload, Block};
 
 type TopicHandler = Box<dyn Fn(&TopicEvent) + Send + Sync>;
 
@@ -39,8 +36,6 @@ pub enum MqttPayload {
     Block(Block),
     /// In case it contains a `Milestone` object.
     MilestonePayload(MilestonePayload),
-    /// In case it contains a `Receipt` object.
-    Receipt(ReceiptMilestoneOption),
 }
 
 /// Mqtt events.

@@ -19,7 +19,7 @@ use packable::{
 };
 
 pub(crate) use self::{
-    milestone::{MilestoneMetadataLength, MilestoneOptionCount, ReceiptFundsCount, SignatureCount},
+    milestone::{MilestoneMetadataLength, MilestoneOptionCount, SignatureCount},
     tagged_data::{TagLength, TaggedDataLength},
     transaction::{InputCount, OutputCount},
 };
