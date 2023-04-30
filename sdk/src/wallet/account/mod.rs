@@ -269,7 +269,7 @@ impl Account {
         outputs: impl Iterator<Item = &'a OutputData>,
         filter: Option<FilterOptions>,
     ) -> Result<Vec<OutputData>> {
-        if let Some(filter) = &filter {
+        if let Some(filter) = filter {
             let mut filtered_outputs = Vec::new();
 
             for output in outputs {
@@ -281,6 +281,33 @@ impl Account {
                 if let Some(upper_bound_booked_timestamp) = filter.upper_bound_booked_timestamp {
                     if output.metadata.milestone_timestamp_booked > upper_bound_booked_timestamp {
                         continue;
+                    }
+                }
+                if let Some(alias_ids) = &filter.alias_ids {
+                    if output.output.is_alias() {
+                        let alias_id = output.output.as_alias().alias_id_non_null(&output.output_id);
+                        if alias_ids.contains(&alias_id) {
+                            filtered_outputs.push(output.clone());
+                            continue;
+                        }
+                    }
+                }
+                if let Some(foundry_ids) = &filter.foundry_ids {
+                    if output.output.is_foundry() {
+                        let foundry_id = output.output.as_foundry().id();
+                        if foundry_ids.contains(&foundry_id) {
+                            filtered_outputs.push(output.clone());
+                            continue;
+                        }
+                    }
+                }
+                if let Some(nft_ids) = &filter.nft_ids {
+                    if output.output.is_nft() {
+                        let nft_id = output.output.as_nft().nft_id_non_null(&output.output_id);
+                        if nft_ids.contains(&nft_id) {
+                            filtered_outputs.push(output.clone());
+                            continue;
+                        }
                     }
                 }
                 if let Some(output_types) = &filter.output_types {
