@@ -269,30 +269,33 @@ impl Account {
         outputs: impl Iterator<Item = &'a OutputData>,
         filter: Option<FilterOptions>,
     ) -> Result<Vec<OutputData>> {
-        let mut filtered_outputs = Vec::new();
+        if let Some(filter) = &filter {
+            let mut filtered_outputs = Vec::new();
 
-        for output in outputs {
-            if let Some(filter_options) = &filter {
-                if let Some(lower_bound_booked_timestamp) = filter_options.lower_bound_booked_timestamp {
+            for output in outputs {
+                if let Some(lower_bound_booked_timestamp) = filter.lower_bound_booked_timestamp {
                     if output.metadata.milestone_timestamp_booked < lower_bound_booked_timestamp {
                         continue;
                     }
                 }
-                if let Some(upper_bound_booked_timestamp) = filter_options.upper_bound_booked_timestamp {
+                if let Some(upper_bound_booked_timestamp) = filter.upper_bound_booked_timestamp {
                     if output.metadata.milestone_timestamp_booked > upper_bound_booked_timestamp {
                         continue;
                     }
                 }
-                if let Some(output_types) = &filter_options.output_types {
+                if let Some(output_types) = &filter.output_types {
                     if !output_types.contains(&output.output.kind()) {
                         continue;
                     }
                 }
-            }
-            filtered_outputs.push(output.clone());
-        }
 
-        Ok(filtered_outputs)
+                filtered_outputs.push(output.clone());
+            }
+
+            Ok(filtered_outputs)
+        } else {
+            Ok(outputs.cloned().collect())
+        }
     }
 
     /// Returns outputs of the account
