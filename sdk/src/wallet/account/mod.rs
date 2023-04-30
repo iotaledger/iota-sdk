@@ -13,7 +13,7 @@ pub mod types;
 pub(crate) mod update;
 
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{BTreeSet, HashMap, HashSet},
     ops::Deref,
     str::FromStr,
     sync::Arc,
@@ -64,7 +64,7 @@ use crate::{
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
-            output::{FoundryId, FoundryOutput, Output, OutputId, TokenId},
+            output::{AliasId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
             payload::{
                 transaction::{TransactionEssence, TransactionId},
                 TransactionPayload,
@@ -85,6 +85,9 @@ pub struct FilterOptions {
     pub upper_bound_booked_timestamp: Option<u32>,
     /// Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6).
     pub output_types: Option<Vec<u8>>,
+    pub alias_ids: Option<BTreeSet<AliasId>>,
+    pub foundry_ids: Option<BTreeSet<FoundryId>>,
+    pub nft_ids: Option<BTreeSet<NftId>>,
 }
 
 /// Details of an account.
