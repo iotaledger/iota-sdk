@@ -267,8 +267,10 @@ impl Account {
     fn filter_outputs<'a>(
         &self,
         outputs: impl Iterator<Item = &'a OutputData>,
-        filter: Option<FilterOptions>,
+        filter: impl Into<Option<FilterOptions>>,
     ) -> Result<Vec<OutputData>> {
+        let filter = filter.into();
+
         if let Some(filter) = filter {
             let mut filtered_outputs = Vec::new();
 
@@ -326,13 +328,40 @@ impl Account {
     }
 
     /// Returns outputs of the account
-    pub async fn outputs(&self, filter: Option<FilterOptions>) -> Result<Vec<OutputData>> {
+    pub async fn outputs(&self, filter: impl Into<Option<FilterOptions>>) -> Result<Vec<OutputData>> {
         self.filter_outputs(self.read().await.outputs.values(), filter)
     }
 
     /// Returns unspent outputs of the account
-    pub async fn unspent_outputs(&self, filter: Option<FilterOptions>) -> Result<Vec<OutputData>> {
+    pub async fn unspent_outputs(&self, filter: impl Into<Option<FilterOptions>>) -> Result<Vec<OutputData>> {
         self.filter_outputs(self.read().await.unspent_outputs.values(), filter)
+    }
+
+    pub async fn alias_output(&self, alias_id: &AliasId) -> Result<Option<OutputData>> {
+        self.unspent_outputs(FilterOptions {
+            alias_ids: Some([*alias_id].into()),
+            ..Default::default()
+        })
+        .await
+        .map(|res| res.get(0).cloned())
+    }
+
+    pub async fn foundry_output(&self, foundry_id: &FoundryId) -> Result<Option<OutputData>> {
+        self.unspent_outputs(FilterOptions {
+            foundry_ids: Some([*foundry_id].into()),
+            ..Default::default()
+        })
+        .await
+        .map(|res| res.get(0).cloned())
+    }
+
+    pub async fn nft_output(&self, nft_id: &NftId) -> Result<Option<OutputData>> {
+        self.unspent_outputs(FilterOptions {
+            nft_ids: Some([*nft_id].into()),
+            ..Default::default()
+        })
+        .await
+        .map(|res| res.get(0).cloned())
     }
 
     /// Returns all incoming transactions of the account
