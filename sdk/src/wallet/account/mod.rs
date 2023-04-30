@@ -288,8 +288,7 @@ impl Account {
                 if let Some(alias_ids) = &filter.alias_ids {
                     if output.output.is_alias() {
                         let alias_id = output.output.as_alias().alias_id_non_null(&output.output_id);
-                        if alias_ids.contains(&alias_id) {
-                            filtered_outputs.push(output.clone());
+                        if !alias_ids.contains(&alias_id) {
                             continue;
                         }
                     }
@@ -297,8 +296,7 @@ impl Account {
                 if let Some(foundry_ids) = &filter.foundry_ids {
                     if output.output.is_foundry() {
                         let foundry_id = output.output.as_foundry().id();
-                        if foundry_ids.contains(&foundry_id) {
-                            filtered_outputs.push(output.clone());
+                        if !foundry_ids.contains(&foundry_id) {
                             continue;
                         }
                     }
@@ -306,8 +304,7 @@ impl Account {
                 if let Some(nft_ids) = &filter.nft_ids {
                     if output.output.is_nft() {
                         let nft_id = output.output.as_nft().nft_id_non_null(&output.output_id);
-                        if nft_ids.contains(&nft_id) {
-                            filtered_outputs.push(output.clone());
+                        if !nft_ids.contains(&nft_id) {
                             continue;
                         }
                     }
