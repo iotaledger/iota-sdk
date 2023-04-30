@@ -271,12 +271,12 @@ impl Account {
         for output in outputs {
             if let Some(filter_options) = &filter {
                 if let Some(lower_bound_booked_timestamp) = filter_options.lower_bound_booked_timestamp {
-                    if output.metadata.milestone_timestamp_booked < lower_bound_booked_timestamp {
+                    if output.metadata.milestone_timestamp_booked() < lower_bound_booked_timestamp {
                         continue;
                     }
                 }
                 if let Some(upper_bound_booked_timestamp) = filter_options.upper_bound_booked_timestamp {
-                    if output.metadata.milestone_timestamp_booked > upper_bound_booked_timestamp {
+                    if output.metadata.milestone_timestamp_booked() > upper_bound_booked_timestamp {
                         continue;
                     }
                 }
