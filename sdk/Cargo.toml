@@ -36,17 +36,17 @@ serde_json = { version = "1.0.95", default-features = false, features = [ "alloc
 
 # Optional dependencies
 async-trait = { version = "0.1.68", default-features = false, optional = true }
-backtrace = { version = "0.3.67", default-features = false, features = [ "std" ], optional = true }
-derive_builder = { version = "0.12.0", default-features = false, features = [ "std" ], optional = true }
+backtrace = { version = "0.3.67", default-features = false, optional = true }
+derive_builder = { version = "0.12.0", default-features = false, optional = true }
 fern-logger = { version = "0.5.0", default-features = false, optional = true }
 futures = { version = "0.3.28", default-features = false, features = [ "thread-pool" ], optional = true }
 iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
-iota_stronghold = { version = "1.0.5", default-features = false, features = [ "std" ], optional = true }
+iota_stronghold = { version = "1.0.5", default-features = false, optional = true }
 log = { version = "0.4.17", default-features = false, optional = true }
 num_cpus = { version = "1.15.0", default-features = false, optional = true }
-once_cell = { version = "1.17.1", default-features = false, features = [ "std" ], optional = true }
-rand = { version = "0.8.5", default-features = false, features = [ "min_const_gen", "std_rng" ], optional = true }
-regex = { version = "1.7.3", default-features = false, features = [ "std", "unicode-perl" ], optional = true }
+once_cell = { version = "1.17.1", default-features = false, optional = true }
+rand = { version = "0.8.5", default-features = false, features = [ "min_const_gen" ], optional = true }
+regex = { version = "1.8.1", default-features = false, features = [ "unicode-perl" ], optional = true }
 reqwest = { version = "0.11.16", default-features = false, features = [ "json" ], optional = true }
 rocksdb = { version = "0.20.1", default-features = false, features = [ "lz4" ], optional = true }
 rumqttc = { version = "0.20.0", default-features = false, features = [ "websocket" ], optional = true }
@@ -79,20 +79,20 @@ default = [ "std", "serde" ]
 events = [  ]
 ledger_nano = [ "iota-ledger-nano" ]
 message_interface = [ "backtrace", "fern-logger" ]
-mqtt = [ "regex", "rumqttc", "once_cell" ]
+mqtt = [ "std", "regex", "rumqttc", "once_cell" ]
 participation = [ "storage" ]
 pow = [ "std", "num_cpus", "iota-crypto/curl-p" ]
-rand = [ "std", "dep:rand" ]
+rand = [ "dep:rand" ]
 rocksdb = [ "dep:rocksdb", "storage" ]
 serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde" ]
-std = [ "packable/std", "prefix-hex/std" ]
+std = [ "packable/std", "prefix-hex/std", "rand?/std_rng", "regex?/std", "backtrace?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std" ]
 storage = [ "iota-crypto/chacha" ]
 stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha" ]
 tls = [ "reqwest/rustls-tls" ]
 
-client_without_tls = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10", "iota-crypto/std" ]
+client_without_tls = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10" ]
 client = [ "client_without_tls", "tls" ]
-wallet = [ "client" ]
+wallet = [ "client_without_tls" ]
 
 # Block examples
 
