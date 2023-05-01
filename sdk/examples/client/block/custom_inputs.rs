@@ -11,7 +11,7 @@ use iota_sdk::{
         node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet, secret::SecretManager, Client,
         Result,
     },
-    types::block::input::UtxoInput,
+    types::block::{input::UtxoInput, address::Bech32Address},
 };
 
 #[tokio::main]
@@ -38,7 +38,7 @@ async fn main() -> Result<()> {
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
     let output_ids_response = client
-        .basic_output_ids(vec![QueryParameter::Address(addresses[0].clone())])
+        .basic_output_ids(vec![QueryParameter::Address(addresses[0].to_string())])
         .await?;
     println!("{output_ids_response:?}");
 
@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
         .with_input(UtxoInput::from(output_ids_response.items[0]))?
         //.with_input_range(20..25)
         .with_output(
-            "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r",
+            &Bech32Address::try_from_str("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r")?,
             1_000_000,
         )
         .await?

@@ -176,7 +176,10 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .get_addresses(&secret_manager)
                 .set_options(options)?
                 .finish()
-                .await?;
+                .await?
+                .into_iter()
+                .map(|a| a.to_string())
+                .collect();
             Response::GeneratedAddresses(addresses)
         }
         ClientMethod::BuildAndPostBlock {
@@ -400,7 +403,8 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::ConsolidatedFunds(
                 client
                     .consolidate_funds(&secret_manager, generate_addresses_options)
-                    .await?,
+                    .await?
+                    .to_string(),
             )
         }
         ClientMethod::FindInputs { addresses, amount } => Response::Inputs(

@@ -46,18 +46,20 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
     let addresses = client
         .get_addresses(&secret_manager)
         .with_range(0..2)
-        .get_raw()
+        .finish()
         .await
         .unwrap();
-    let address = addresses[0].to_bech32(client.get_bech32_hrp().await.unwrap());
-    println!("{}", request_funds_from_faucet(FAUCET_URL, &address,).await.unwrap());
+    println!(
+        "{}",
+        request_funds_from_faucet(FAUCET_URL, &addresses[0]).await.unwrap()
+    );
 
     // Continue only after funds are received
     for _ in 0..30 {
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let output_ids_response = client
             .basic_output_ids(vec![
-                QueryParameter::Address(address.to_string()),
+                QueryParameter::Address(addresses[0].to_string()),
                 QueryParameter::HasExpiration(false),
                 QueryParameter::HasTimelock(false),
                 QueryParameter::HasStorageDepositReturn(false),
@@ -182,17 +184,15 @@ async fn test_get_address_outputs() {
     let client = setup_client_with_node_health_ignored();
     let secret_manager = setup_secret_manager();
 
-    let address = client
+    let address = &client
         .get_addresses(&secret_manager)
         .with_range(0..1)
-        .get_raw()
+        .finish()
         .await
         .unwrap()[0];
 
     let output_ids_response = client
-        .basic_output_ids(vec![QueryParameter::Address(
-            address.to_bech32(&client.get_bech32_hrp().await.unwrap()),
-        )])
+        .basic_output_ids(vec![QueryParameter::Address(address.to_string())])
         .await
         .unwrap();
 

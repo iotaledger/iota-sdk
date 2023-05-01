@@ -69,7 +69,7 @@ impl Account {
                             .await
                             .first()
                             .expect("account needs to have a public address")
-                            .address
+                            .bech32_address
                             .inner,
                     ))
                     .add_feature(TagFeature::new(PARTICIPATION_TAG.as_bytes().to_vec())?)

@@ -27,9 +27,9 @@ impl FromStr for Bech32Address {
 
 impl Bech32Address {
     /// Creates a new address wrapper.
-    pub fn new(hrp: String, inner: Address) -> Result<Self, Error> {
+    pub fn new(hrp: impl Into<String>, inner: impl Into<Address>) -> Result<Self, Error> {
         // TODO validate HRP
-        Ok(Self { hrp, inner })
+        Ok(Self { hrp: hrp.into(), inner: inner.into() })
     }
 
     /// Gets the human readable part.
@@ -57,6 +57,12 @@ impl core::fmt::Display for Bech32Address {
 impl core::fmt::Debug for Bech32Address {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "Bech32Address({self})")
+    }
+}
+
+impl<T: std::borrow::Borrow<Bech32Address>> From<T> for Address {
+    fn from(value: T) -> Self {
+        value.borrow().inner
     }
 }
 

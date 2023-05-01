@@ -15,7 +15,7 @@ use crate::{
                 ParticipationEventType,
             },
         },
-        block::output::OutputId,
+        block::{address::Bech32Address, output::OutputId},
     },
 };
 
@@ -72,7 +72,7 @@ impl Client {
     }
 
     /// RouteAddressBech32Status is the route to get the staking rewards for the given bech32 address.
-    pub async fn address_staking_status(&self, bech32_address: &str) -> Result<AddressStakingStatus> {
+    pub async fn address_staking_status(&self, bech32_address: &Bech32Address) -> Result<AddressStakingStatus> {
         let route = format!("api/participation/v1/addresses/{bech32_address}");
 
         self.node_manager
@@ -81,7 +81,10 @@ impl Client {
     }
 
     /// RouteAddressBech32Outputs is the route to get the outputs for the given bech32 address.
-    pub async fn address_participation_output_ids(&self, bech32_address: &str) -> Result<AddressOutputsResponse> {
+    pub async fn address_participation_output_ids(
+        &self,
+        bech32_address: &Bech32Address,
+    ) -> Result<AddressOutputsResponse> {
         let route = format!("api/participation/v1/addresses/{bech32_address}/outputs");
 
         self.node_manager

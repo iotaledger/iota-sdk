@@ -10,20 +10,20 @@ use futures::FutureExt;
 #[cfg(not(target_family = "wasm"))]
 use crate::types::api::plugins::indexer::OutputIdsResponse;
 use crate::{
-    client::node_api::indexer::query_parameters::QueryParameter, types::block::output::OutputId, wallet::Account,
+    client::node_api::indexer::query_parameters::QueryParameter, types::block::{output::OutputId, address::Bech32Address}, wallet::Account,
 };
 
 impl Account {
     /// Returns output ids of basic outputs that have only the address unlock condition
     pub(crate) async fn get_basic_output_ids_with_address_unlock_condition_only(
         &self,
-        bech32_address: String,
+        bech32_address: &Bech32Address,
     ) -> crate::client::Result<Vec<OutputId>> {
         // Only request basic outputs with `AddressUnlockCondition` only
         Ok(self
             .client
             .basic_output_ids(vec![
-                QueryParameter::Address(bech32_address),
+                QueryParameter::Address(bech32_address.to_string()),
                 QueryParameter::HasExpiration(false),
                 QueryParameter::HasTimelock(false),
                 QueryParameter::HasStorageDepositReturn(false),
@@ -36,7 +36,7 @@ impl Account {
     /// `ExpirationUnlockCondition` or `StorageDepositReturnUnlockCondition`
     pub(crate) async fn get_basic_output_ids_with_any_unlock_condition(
         &self,
-        bech32_address: &str,
+        bech32_address: &Bech32Address,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         // aliases and foundries
         #[cfg(target_family = "wasm")]

@@ -23,7 +23,7 @@ use crate::{
         Client, Result,
     },
     types::block::{
-        address::{dto::AddressDto, Address, Ed25519Address},
+        address::{dto::AddressDto, Address, Bech32Address, Ed25519Address},
         input::dto::UtxoInputDto,
         output::{
             dto::{OutputBuilderAmountDto, OutputDto, RentStructureDto},
@@ -320,7 +320,10 @@ impl ClientMessageHandler {
                     .get_addresses(&secret_manager)
                     .set_options(options)?
                     .finish()
-                    .await?;
+                    .await?
+                    .into_iter()
+                    .map(|a| a.to_string())
+                    .collect();
                 Ok(Response::GeneratedAddresses(addresses))
             }
             Message::BuildAndPostBlock {
@@ -610,7 +613,8 @@ impl ClientMessageHandler {
                 Ok(Response::ConsolidatedFunds(
                     self.client
                         .consolidate_funds(&secret_manager, generate_addresses_options)
-                        .await?,
+                        .await?
+                        .to_string(),
                 ))
             }
             Message::FindInputs { addresses, amount } => Ok(Response::Inputs(
@@ -686,7 +690,9 @@ impl ClientMessageHandler {
                 serial_number,
                 token_scheme_kind,
             ))),
-            Message::Faucet { url, address } => Ok(Response::Faucet(request_funds_from_faucet(&url, &address).await?)),
+            Message::Faucet { url, address } => Ok(Response::Faucet(
+                request_funds_from_faucet(&url, &Bech32Address::try_from_str(address)?).await?,
+            )),
             Message::HashTransactionEssence { essence } => Ok(Response::TransactionEssenceHash(prefix_hex::encode(
                 TransactionEssence::try_from_dto_unverified(&essence)?.hash(),
             ))),

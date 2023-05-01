@@ -19,7 +19,7 @@ async fn mnemonic_secret_manager_dto() -> Result<()> {
         .unwrap();
 
     assert_eq!(
-        addresses[0],
+        addresses[0].to_string(),
         "rms1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6v3ea5a".to_string()
     );
 
@@ -52,7 +52,7 @@ async fn stronghold_secret_manager_dto() -> Result<()> {
         .unwrap();
 
     assert_eq!(
-        addresses[0],
+        addresses[0].to_string(),
         "rms1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6v3ea5a".to_string()
     );
 

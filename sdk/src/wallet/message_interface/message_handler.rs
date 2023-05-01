@@ -25,6 +25,7 @@ use crate::{
         request_funds_from_faucet, utils, Client, NodeInfoWrapper,
     },
     types::block::{
+        address::Bech32Address,
         output::{
             dto::{OutputBuilderAmountDto, OutputDto},
             AliasId, AliasOutput, BasicOutput, FoundryOutput, NftId, NftOutput, Output, Rent, TokenId,
@@ -1033,7 +1034,9 @@ impl WalletMessageHandler {
             }
             AccountMethod::RequestFundsFromFaucet { url, address } => {
                 convert_async_panics(|| async {
-                    Ok(Response::Faucet(request_funds_from_faucet(&url, &address).await?))
+                    Ok(Response::Faucet(
+                        request_funds_from_faucet(&url, &Bech32Address::try_from_str(address)?).await?,
+                    ))
                 })
                 .await
             }

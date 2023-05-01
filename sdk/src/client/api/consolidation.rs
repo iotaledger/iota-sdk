@@ -9,7 +9,7 @@ use crate::{
         Client, Result,
     },
     types::block::{
-        address::Address,
+        address::{Bech32Address},
         input::{UtxoInput, INPUT_COUNT_MAX},
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder, Output, OutputId},
         payload::transaction::TransactionId,
@@ -23,7 +23,7 @@ impl Client {
         &self,
         secret_manager: &SecretManager,
         address_builder_options: GetAddressesBuilderOptions,
-    ) -> Result<String> {
+    ) -> Result<Bech32Address> {
         let token_supply = self.get_token_supply().await?;
         let mut last_transfer_index = address_builder_options.range.as_ref().unwrap_or(&(0..1)).start;
         // use the start index as offset
@@ -70,8 +70,7 @@ impl Client {
 
                 let outputs_chunks = basic_outputs_responses.chunks(INPUT_COUNT_MAX.into());
 
-                let (bech32_hrp, consolidation_address) = Address::try_from_bech32_with_hrp(&consolidation_address)?;
-                self.bech32_hrp_matches(&bech32_hrp).await?;
+                self.bech32_hrp_matches(consolidation_address.hrp()).await?;
 
                 for chunk in outputs_chunks {
                     let mut block_builder = self.block().with_secret_manager(secret_manager);
@@ -93,7 +92,7 @@ impl Client {
                     }
 
                     let consolidation_output = BasicOutputBuilder::new_with_amount(total_amount)
-                        .add_unlock_condition(AddressUnlockCondition::new(consolidation_address))
+                        .add_unlock_condition(AddressUnlockCondition::new(consolidation_address.inner().clone()))
                         .with_native_tokens(total_native_tokens.finish()?)
                         .finish_output(token_supply)?;
 

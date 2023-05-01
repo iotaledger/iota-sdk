@@ -11,7 +11,7 @@ use crate::{
     types::{
         api::plugins::indexer::OutputIdsResponse,
         block::{
-            address::{Address, AliasAddress},
+            address::{Address, AliasAddress, Bech32Address},
             output::{Output, OutputId},
         },
     },
@@ -25,7 +25,7 @@ impl Account {
     /// Returns output ids of alias outputs
     pub(crate) async fn get_alias_and_foundry_output_ids(
         &self,
-        bech32_address: &str,
+        bech32_address: &Bech32Address,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[SYNC] get_alias_and_foundry_output_ids");

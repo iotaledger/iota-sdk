@@ -318,7 +318,7 @@ pub mod dto {
         tag::dto::TagFeatureDto,
     };
     use super::*;
-    use crate::types::block::Error;
+    use crate::types::block::{Error, address::Address};
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum FeatureDto {
@@ -428,8 +428,8 @@ pub mod dto {
 
         fn try_from(value: &FeatureDto) -> Result<Self, Self::Error> {
             Ok(match value {
-                FeatureDto::Sender(v) => Self::Sender(SenderFeature::new((&v.address).try_into()?)),
-                FeatureDto::Issuer(v) => Self::Issuer(IssuerFeature::new((&v.address).try_into()?)),
+                FeatureDto::Sender(v) => Self::Sender(SenderFeature::new(Address::try_from(&v.address)?)),
+                FeatureDto::Issuer(v) => Self::Issuer(IssuerFeature::new(Address::try_from(&v.address)?)),
                 FeatureDto::Metadata(v) => Self::Metadata(MetadataFeature::new(
                     prefix_hex::decode(&v.data).map_err(|_e| Error::InvalidField("MetadataFeature"))?,
                 )?),

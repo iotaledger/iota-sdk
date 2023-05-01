@@ -35,10 +35,10 @@ async fn main() -> Result<()> {
     let secret_manager =
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
+    let address = &client.get_addresses(&secret_manager).with_range(0..1).finish().await?[0];
     println!(
         "{}",
-        request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?
+        request_funds_from_faucet(&faucet_url, address).await?
     );
     // Wait some time for the faucet transaction
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;

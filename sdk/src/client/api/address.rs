@@ -1,6 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::borrow::Cow;
 use std::ops::Range;
 
 use serde::Deserialize;
@@ -12,7 +13,7 @@ use crate::{
         secret::{GenerateAddressOptions, SecretManage, SecretManager},
         Client, Result,
     },
-    types::block::address::Address,
+    types::block::address::{Address, Bech32Address},
 };
 
 /// Builder of get_addresses API
@@ -120,12 +121,12 @@ impl<'a> GetAddressesBuilder<'a> {
     }
 
     /// Consume the builder and get a vector of public addresses bech32 encoded
-    pub async fn finish(self) -> Result<Vec<String>> {
-        let bech32_hrp = match self.bech32_hrp.clone() {
-            Some(bech32_hrp) => bech32_hrp,
+    pub async fn finish(self) -> Result<Vec<Bech32Address>> {
+        let bech32_hrp: Cow<'_, str> = match &self.bech32_hrp {
+            Some(bech32_hrp) => bech32_hrp.as_str().into(),
             None => match self.client {
-                Some(client) => client.get_bech32_hrp().await?,
-                None => SHIMMER_TESTNET_BECH32_HRP.to_string(),
+                Some(client) => client.get_bech32_hrp().await?.into(),
+                None => SHIMMER_TESTNET_BECH32_HRP.into(),
             },
         };
 
@@ -134,8 +135,8 @@ impl<'a> GetAddressesBuilder<'a> {
             .generate_addresses(self.coin_type, self.account_index, self.range, self.options)
             .await?
             .into_iter()
-            .map(|a| a.to_bech32(&bech32_hrp))
-            .collect();
+            .map(|a| Ok(Bech32Address::new(bech32_hrp.as_ref(), a)?))
+            .collect::<Result<_>>()?;
 
         Ok(addresses)
     }
@@ -156,27 +157,35 @@ impl<'a> GetAddressesBuilder<'a> {
 
     /// Consume the builder and get the vector of public and internal addresses bech32 encoded
     pub async fn get_all(self) -> Result<Bech32Addresses> {
-        let bech32_hrp = match self.bech32_hrp.clone() {
-            Some(bech32_hrp) => bech32_hrp,
+        let bech32_hrp: Cow<'_, str> = match &self.bech32_hrp {
+            Some(bech32_hrp) => bech32_hrp.as_str().into(),
             None => match self.client {
-                Some(client) => client.get_bech32_hrp().await?,
-                None => SHIMMER_TESTNET_BECH32_HRP.to_string(),
+                Some(client) => client.get_bech32_hrp().await?.into(),
+                None => SHIMMER_TESTNET_BECH32_HRP.into(),
             },
         };
-        let addresses = self.get_all_raw().await?;
+        let addresses = self.get_all_internal().await?;
 
         Ok(Bech32Addresses {
-            public: addresses.public.into_iter().map(|a| a.to_bech32(&bech32_hrp)).collect(),
+            public: addresses
+                .public
+                .into_iter()
+                .map(|a| Ok(Bech32Address::new(bech32_hrp.as_ref(), a)?))
+                .collect::<Result<_>>()?,
             internal: addresses
                 .internal
                 .into_iter()
-                .map(|a| a.to_bech32(&bech32_hrp))
-                .collect(),
+                .map(|a| Ok(Bech32Address::new(bech32_hrp.as_ref(), a)?))
+                .collect::<Result<_>>()?,
         })
     }
 
     /// Consume the builder and get the vector of public and internal addresses
     pub async fn get_all_raw(self) -> Result<RawAddresses> {
+        self.get_all_internal().await
+    }
+
+    async fn get_all_internal(&self) -> Result<RawAddresses> {
         let public_addresses = self
             .secret_manager
             .generate_addresses(
@@ -195,7 +204,7 @@ impl<'a> GetAddressesBuilder<'a> {
             .generate_addresses(
                 self.coin_type,
                 self.account_index,
-                self.range,
+                self.range.clone(),
                 self.options
                     .map(|mut o| {
                         o.internal = true;

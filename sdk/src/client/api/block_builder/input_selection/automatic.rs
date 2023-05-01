@@ -143,15 +143,15 @@ impl<'a> ClientBlockBuilder<'a> {
                 addresses
                     .public
                     .iter()
-                    .map(|bech32_address| Ok(Address::try_from_bech32(bech32_address)?))
-                    .collect::<Result<Vec<Address>>>()?,
+                    .map(|bech32_address| *bech32_address.inner())
+                    .collect::<Vec<Address>>(),
             );
             available_input_addresses.extend(
                 addresses
                     .internal
                     .iter()
-                    .map(|bech32_address| Ok(Address::try_from_bech32(bech32_address)?))
-                    .collect::<Result<Vec<Address>>>()?,
+                    .map(|bech32_address| *bech32_address.inner())
+                    .collect::<Vec<Address>>(),
             );
 
             // Have public and internal addresses with the index ascending ordered.
@@ -165,8 +165,8 @@ impl<'a> ClientBlockBuilder<'a> {
             // For each address, get the address outputs.
             let mut address_index = gap_index;
 
-            for (index, (str_address, internal)) in public_and_internal_addresses.iter().enumerate() {
-                let address_outputs = self.basic_address_outputs(str_address.to_string()).await?;
+            for (index, (bech32_address, internal)) in public_and_internal_addresses.iter().enumerate() {
+                let address_outputs = self.basic_address_outputs(bech32_address.to_string()).await?;
 
                 // If there are more than 20 (ADDRESS_GAP_RANGE) consecutive empty addresses, then we stop
                 // looking up the addresses belonging to the seed. Note that we don't
@@ -183,7 +183,6 @@ impl<'a> ClientBlockBuilder<'a> {
 
                     for output_response in address_outputs {
                         let output = Output::try_from_dto(&output_response.output, token_supply)?;
-                        let address = Address::try_from_bech32(str_address)?;
 
                         // We can ignore the unlocked_alias_or_nft_address, since we only requested basic outputs
                         let (required_unlock_address, _unlocked_alias_or_nft_address) = output
@@ -192,7 +191,7 @@ impl<'a> ClientBlockBuilder<'a> {
                                 &output_response.metadata.output_id()?,
                                 None,
                             )?;
-                        if required_unlock_address == address {
+                        if &required_unlock_address == bech32_address.inner() {
                             available_inputs.push(InputSigningData {
                                 output,
                                 output_metadata: OutputMetadata::try_from(&output_response.metadata)?,

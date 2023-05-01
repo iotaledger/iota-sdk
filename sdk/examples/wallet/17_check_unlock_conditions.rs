@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
         .addresses()
         .await?
         .into_iter()
-        .map(|a| a.address().clone())
+        .map(|a| a.bech32_address().clone())
         .collect();
 
     let output = BasicOutputBuilder::new_with_amount(1_000_000)

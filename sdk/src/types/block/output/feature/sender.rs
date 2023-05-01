@@ -16,8 +16,8 @@ impl SenderFeature {
 
     /// Creates a new [`SenderFeature`].
     #[inline(always)]
-    pub fn new(address: Address) -> Self {
-        Self(address)
+    pub fn new(address: impl Into<Address>) -> Self {
+        Self(address.into())
     }
 
     /// Returns the sender [`Address`].

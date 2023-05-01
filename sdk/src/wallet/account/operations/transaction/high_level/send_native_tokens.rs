@@ -103,7 +103,7 @@ impl Account {
             let storage_deposit_amount = minimum_storage_deposit_basic_native_tokens(
                 &rent_structure,
                 &address,
-                &return_address.address.inner,
+                &return_address.bech32_address.inner,
                 Some(address_with_amount.native_tokens.clone()),
                 token_supply,
             )?;
@@ -131,13 +131,13 @@ impl Account {
                         // We send the full storage_deposit_amount back to the sender, so only the native tokens are
                         // sent
                         StorageDepositReturnUnlockCondition::new(
-                            return_address.address.inner,
+                            return_address.bech32_address.inner,
                             storage_deposit_amount,
                             token_supply,
                         )?,
                     )
                     .add_unlock_condition(ExpirationUnlockCondition::new(
-                        return_address.address.inner,
+                        return_address.bech32_address.inner,
                         expiration_time,
                     )?)
                     .finish_output(token_supply)?,

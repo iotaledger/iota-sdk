@@ -25,11 +25,11 @@ impl ExpirationUnlockCondition {
 
     /// Creates a new [`ExpirationUnlockCondition`].
     #[inline(always)]
-    pub fn new(return_address: Address, timestamp: u32) -> Result<Self, Error> {
+    pub fn new(return_address: impl Into<Address>, timestamp: u32) -> Result<Self, Error> {
         verify_timestamp::<true>(&timestamp, &())?;
 
         Ok(Self {
-            return_address,
+            return_address: return_address.into(),
             timestamp,
         })
     }
@@ -97,8 +97,7 @@ pub mod dto {
 
         fn try_from(value: &ExpirationUnlockConditionDto) -> Result<Self, Error> {
             Self::new(
-                (&value.return_address)
-                    .try_into()
+                Address::try_from(&value.return_address)
                     .map_err(|_e| Error::InvalidField("expirationUnlockCondition"))?,
                 value.timestamp,
             )

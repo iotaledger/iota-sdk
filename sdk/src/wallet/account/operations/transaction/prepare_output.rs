@@ -367,9 +367,9 @@ impl Account {
                     }
                     RemainderValueStrategy::ChangeAddress => {
                         let remainder_address = self.generate_remainder_address().await?;
-                        Some(remainder_address.address().inner)
+                        Some(remainder_address.bech32_address().inner)
                     }
-                    RemainderValueStrategy::CustomAddress(address) => Some(address.address().inner),
+                    RemainderValueStrategy::CustomAddress(address) => Some(address.bech32_address().inner),
                 }
             }
             None => None,
@@ -381,7 +381,7 @@ impl Account {
                     .await?
                     .first()
                     .ok_or(crate::wallet::Error::FailedToGetRemainder)?
-                    .address()
+                    .bech32_address()
                     .inner
             }
         };

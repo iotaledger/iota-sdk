@@ -25,7 +25,7 @@ use crypto::keys::slip10::Chain;
 use iota_sdk::{
     client::secret::types::InputSigningData,
     types::block::{
-        address::{Address, AliasAddress},
+        address::{Address, AliasAddress, Bech32Address},
         output::{
             feature::{IssuerFeature, SenderFeature},
             unlock_condition::{
@@ -100,16 +100,15 @@ enum Build<'a> {
 
 fn build_basic_output(
     amount: u64,
-    bech32_address: &str,
+    bech32_address: &Bech32Address,
     native_tokens: Option<Vec<(&str, u64)>>,
     bech32_sender: Option<&str>,
     sdruc: Option<(&str, u64)>,
     timelock: Option<u32>,
     expiration: Option<(&str, u32)>,
 ) -> Output {
-    let mut builder = BasicOutputBuilder::new_with_amount(amount).add_unlock_condition(AddressUnlockCondition::new(
-        Address::try_from_bech32(bech32_address).unwrap(),
-    ));
+    let mut builder =
+        BasicOutputBuilder::new_with_amount(amount).add_unlock_condition(AddressUnlockCondition::new(bech32_address));
 
     if let Some(native_tokens) = native_tokens {
         builder = builder.with_native_tokens(
@@ -147,16 +146,15 @@ fn build_basic_output(
 fn build_nft_output(
     amount: u64,
     nft_id: NftId,
-    bech32_address: &str,
+    bech32_address: &Bech32Address,
     native_tokens: Option<Vec<(&str, u64)>>,
     bech32_sender: Option<&str>,
     bech32_issuer: Option<&str>,
     sdruc: Option<(&str, u64)>,
     expiration: Option<(&str, u32)>,
 ) -> Output {
-    let mut builder = NftOutputBuilder::new_with_amount(amount, nft_id).add_unlock_condition(
-        AddressUnlockCondition::new(Address::try_from_bech32(bech32_address).unwrap()),
-    );
+    let mut builder = NftOutputBuilder::new_with_amount(amount, nft_id)
+        .add_unlock_condition(AddressUnlockCondition::new(bech32_address));
 
     if let Some(native_tokens) = native_tokens {
         builder = builder.with_native_tokens(
@@ -254,7 +252,7 @@ fn build_output_inner(build: Build) -> (Output, Option<Chain>) {
         Build::Basic(amount, bech32_address, native_tokens, bech32_sender, sdruc, timelock, expiration, chain) => (
             build_basic_output(
                 amount,
-                bech32_address,
+                &Bech32Address::try_from_str(bech32_address).unwrap(),
                 native_tokens,
                 bech32_sender,
                 sdruc,
@@ -277,7 +275,7 @@ fn build_output_inner(build: Build) -> (Output, Option<Chain>) {
             build_nft_output(
                 amount,
                 nft_id,
-                bech32_address,
+                &Bech32Address::try_from_str(bech32_address).unwrap(),
                 native_tokens,
                 bech32_sender,
                 bech32_issuer,

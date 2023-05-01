@@ -71,7 +71,7 @@ pub struct AddressWithUnspentOutputsDto {
 impl From<&AddressWithUnspentOutputs> for AddressWithUnspentOutputsDto {
     fn from(value: &AddressWithUnspentOutputs) -> Self {
         Self {
-            address: value.address.clone(),
+            address: value.bech32_address.clone(),
             key_index: value.key_index,
             internal: value.internal,
             output_ids: value.output_ids.clone(),

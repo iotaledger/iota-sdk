@@ -9,7 +9,7 @@ use iota_sdk::{
     types::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
-            address::Address,
+            address::{Address, Bech32Address},
             output::{
                 unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken, NftId,
                 Output, OutputId, TokenId,
@@ -461,10 +461,10 @@ pub async fn destroy_foundry_command(account: &Account, foundry_id: String) -> R
 // `faucet` command
 pub async fn faucet_command(account: &Account, address: Option<String>, url: Option<String>) -> Result<(), Error> {
     let address = if let Some(address) = address {
-        address
+        Bech32Address::try_from_str(address)?
     } else {
         match account.addresses().await?.last() {
-            Some(address) => address.address().to_string(),
+            Some(address) => address.bech32_address().clone(),
             None => return Err(Error::NoAddressForFaucet),
         }
     };
@@ -846,7 +846,7 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
 }
 
 async fn print_address(account: &Account, address: &AccountAddress) -> Result<(), Error> {
-    let mut log = format!("Address {}: {}", address.key_index(), address.address());
+    let mut log = format!("Address {}: {}", address.key_index(), address.bech32_address());
 
     if *address.internal() {
         log = format!("{log}\nChange address");
@@ -866,7 +866,7 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
                     output_data
                         .output
                         .required_and_unlocked_address(current_time, output_id, None)?;
-                if *address.address().as_ref() == required_address {
+                if *address.bech32_address().as_ref() == required_address {
                     let unlock_conditions = output_data
                         .output
                         .unlock_conditions()

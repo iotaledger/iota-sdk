@@ -28,8 +28,14 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
     let tx = accounts[1]
         .send_amount(
             vec![
-                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_string(), micro_amount),
-                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_string(), micro_amount),
+                AddressWithAmount::new(
+                    accounts[0].addresses().await?[0].bech32_address().to_string(),
+                    micro_amount,
+                ),
+                AddressWithAmount::new(
+                    accounts[0].addresses().await?[0].bech32_address().to_string(),
+                    micro_amount,
+                ),
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -82,8 +88,8 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
     let tx = accounts[1]
         .send_amount(
             vec![
-                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_string(), amount),
-                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_string(), 0),
+                AddressWithAmount::new(accounts[0].addresses().await?[0].bech32_address().to_string(), amount),
+                AddressWithAmount::new(accounts[0].addresses().await?[0].bech32_address().to_string(), 0),
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -139,10 +145,10 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
 
     let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
         .add_unlock_condition(AddressUnlockCondition::new(
-            *account_1.addresses().await?[0].address().as_ref(),
+            *account_1.addresses().await?[0].bech32_address().as_ref(),
         ))
         .add_unlock_condition(ExpirationUnlockCondition::new(
-            *account_0.addresses().await?[0].address().as_ref(),
+            *account_0.addresses().await?[0].bech32_address().as_ref(),
             expiration_time,
         )?)
         .finish_output(token_supply)?;
@@ -236,13 +242,13 @@ async fn claim_2_native_tokens() -> Result<()> {
         .send_native_tokens(
             vec![
                 AddressNativeTokens {
-                    address: accounts[0].addresses().await?[0].address().to_string(),
+                    address: accounts[0].addresses().await?[0].bech32_address().to_string(),
                     native_tokens: vec![(mint_tx_0.token_id, native_token_amount)],
                     expiration: None,
                     return_address: None,
                 },
                 AddressNativeTokens {
-                    address: accounts[0].addresses().await?[0].address().to_string(),
+                    address: accounts[0].addresses().await?[0].bech32_address().to_string(),
                     native_tokens: vec![(mint_tx_1.token_id, native_token_amount)],
                     expiration: None,
                     return_address: None,
@@ -348,20 +354,20 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
             vec![
                 BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                     .add_unlock_condition(AddressUnlockCondition::new(
-                        *account_1.addresses().await?[0].address().as_ref(),
+                        *account_1.addresses().await?[0].bech32_address().as_ref(),
                     ))
                     .add_unlock_condition(ExpirationUnlockCondition::new(
-                        *account_0.addresses().await?[0].address().as_ref(),
+                        *account_0.addresses().await?[0].bech32_address().as_ref(),
                         account_0.client().get_time_checked().await? + 5000,
                     )?)
                     .add_native_token(NativeToken::new(mint_tx_0.token_id, native_token_amount)?)
                     .finish_output(token_supply)?,
                 BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                     .add_unlock_condition(AddressUnlockCondition::new(
-                        *account_1.addresses().await?[0].address().as_ref(),
+                        *account_1.addresses().await?[0].bech32_address().as_ref(),
                     ))
                     .add_unlock_condition(ExpirationUnlockCondition::new(
-                        *account_0.addresses().await?[0].address().as_ref(),
+                        *account_0.addresses().await?[0].bech32_address().as_ref(),
                         account_0.client().get_time_checked().await? + 5000,
                     )?)
                     .add_native_token(NativeToken::new(mint_tx_1.token_id, native_token_amount)?)
@@ -424,10 +430,10 @@ async fn claim_2_nft_outputs() -> Result<()> {
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(
-                    *accounts[0].addresses().await?[0].address().as_ref(),
+                    *accounts[0].addresses().await?[0].bech32_address().as_ref(),
                 )),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    *accounts[1].addresses().await?[0].address().as_ref(),
+                    *accounts[1].addresses().await?[0].bech32_address().as_ref(),
                     accounts[1].client().get_time_checked().await? + 5000,
                 )?),
             ])
@@ -435,10 +441,10 @@ async fn claim_2_nft_outputs() -> Result<()> {
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(
-                    *accounts[0].addresses().await?[0].address().as_ref(),
+                    *accounts[0].addresses().await?[0].bech32_address().as_ref(),
                 )),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    *accounts[1].addresses().await?[0].address().as_ref(),
+                    *accounts[1].addresses().await?[0].bech32_address().as_ref(),
                     accounts[1].client().get_time_checked().await? + 5000,
                 )?),
             ])
@@ -489,10 +495,10 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(
-                    *account_1.addresses().await?[0].address().as_ref(),
+                    *account_1.addresses().await?[0].bech32_address().as_ref(),
                 )),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    *account_0.addresses().await?[0].address().as_ref(),
+                    *account_0.addresses().await?[0].bech32_address().as_ref(),
                     account_0.client().get_time_checked().await? + 5000,
                 )?),
             ])
@@ -500,10 +506,10 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(
-                    *account_1.addresses().await?[0].address().as_ref(),
+                    *account_1.addresses().await?[0].bech32_address().as_ref(),
                 )),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    *account_0.addresses().await?[0].address().as_ref(),
+                    *account_0.addresses().await?[0].bech32_address().as_ref(),
                     account_0.client().get_time_checked().await? + 5000,
                 )?),
             ])

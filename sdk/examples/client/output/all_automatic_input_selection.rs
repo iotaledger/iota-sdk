@@ -43,11 +43,8 @@ async fn main() -> Result<()> {
 
     let token_supply = client.get_token_supply().await?;
 
-    let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
-    println!(
-        "{}",
-        request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?
-    );
+    let address = &client.get_addresses(&secret_manager).with_range(0..1).finish().await?[0];
+    println!("{}", request_funds_from_faucet(&faucet_url, address).await?);
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
     //////////////////////////////////

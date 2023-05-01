@@ -5,9 +5,11 @@
 
 mod constants;
 
-use iota_sdk::client::{
-    constants::SHIMMER_COIN_TYPE, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
-    secret::SecretManager, Client, Result,
+use iota_sdk::{
+    client::{
+        constants::SHIMMER_COIN_TYPE, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
+        secret::SecretManager, Client, Result,
+    },
 };
 
 pub use self::constants::{FAUCET_URL, NODE_LOCAL};
@@ -39,7 +41,7 @@ pub async fn create_client_and_secret_manager_with_funds(mnemonic: Option<&str>)
         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
         let output_ids_response = client
             .basic_output_ids(vec![
-                QueryParameter::Address(address.clone()),
+                QueryParameter::Address(address.to_string()),
                 QueryParameter::HasExpiration(false),
                 QueryParameter::HasTimelock(false),
                 QueryParameter::HasStorageDepositReturn(false),

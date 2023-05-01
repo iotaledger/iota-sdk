@@ -20,8 +20,8 @@ impl ImmutableAliasAddressUnlockCondition {
 
     /// Creates a new [`ImmutableAliasAddressUnlockCondition`].
     #[inline(always)]
-    pub fn new(address: AliasAddress) -> Self {
-        Self(Address::Alias(address))
+    pub fn new(address: impl Into<AliasAddress>) -> Self {
+        Self(Address::Alias(address.into()))
     }
 
     /// Returns the address of an [`ImmutableAliasAddressUnlockCondition`].

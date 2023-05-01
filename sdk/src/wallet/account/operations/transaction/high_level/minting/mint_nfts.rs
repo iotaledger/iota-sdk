@@ -144,7 +144,7 @@ impl Account {
                     account_addresses
                         .first()
                         .ok_or(WalletError::FailedToGetRemainder)?
-                        .address
+                        .bech32_address
                         .inner
                 }
             };

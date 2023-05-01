@@ -167,7 +167,7 @@ async fn message_interface_events() -> Result<()> {
                 account_id: "alias".into(),
                 method: AccountMethod::RequestFundsFromFaucet {
                     url: FAUCET_URL.to_string(),
-                    address: account.public_addresses[0].address().to_string(),
+                    address: account.public_addresses[0].bech32_address().to_string(),
                 },
             };
 

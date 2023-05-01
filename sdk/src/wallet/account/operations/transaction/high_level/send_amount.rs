@@ -127,7 +127,7 @@ impl Account {
                     Ok::<_, Error>(address)
                 })
                 .transpose()?
-                .unwrap_or(default_return_address.address.inner);
+                .unwrap_or(default_return_address.bech32_address.inner);
 
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
             let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)

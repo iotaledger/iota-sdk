@@ -499,7 +499,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
 
     let wallet = make_wallet(storage_path, None, None).await?;
     let accounts = &create_accounts_with_funds(&wallet, 1).await?;
-    let address = accounts[0].addresses().await?[0].address().to_string();
+    let address = accounts[0].addresses().await?[0].bech32_address().to_string();
 
     let nft_options = vec![NftOptions {
         address: Some(address.clone()),
@@ -542,7 +542,10 @@ async fn prepare_nft_output_features_update() -> Result<()> {
         .clone();
 
     assert_eq!(nft.amount(), 1_000_000);
-    assert_eq!(nft.address(), accounts[0].addresses().await?[0].address().as_ref());
+    assert_eq!(
+        nft.address(),
+        accounts[0].addresses().await?[0].bech32_address().as_ref()
+    );
     assert!(nft.features().sender().is_none());
     assert!(nft.features().tag().is_none());
     assert_eq!(nft.features().metadata().unwrap().data(), &[42]);
@@ -552,7 +555,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     );
     assert_eq!(
         nft.immutable_features().issuer().unwrap().address(),
-        accounts[0].addresses().await?[0].address().as_ref()
+        accounts[0].addresses().await?[0].bech32_address().as_ref()
     );
 
     tear_down(storage_path)

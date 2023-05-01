@@ -120,7 +120,7 @@ impl Wallet {
                 .await
                 .first()
                 .expect("missing first public address")
-                .address
+                .bech32_address
                 .hrp
                 .clone(),
             None => {

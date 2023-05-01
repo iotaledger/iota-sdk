@@ -38,11 +38,11 @@ async fn addresses() {
         .unwrap();
 
     assert_eq!(
-        *addresses.public[0],
+        *addresses.public[0].to_string(),
         "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r".to_string()
     );
     assert_eq!(
-        *addresses.internal[0],
+        *addresses.internal[0].to_string(),
         "atoi1qprxpfvaz2peggq6f8k9cj8zfsxuw69e4nszjyv5kuf8yt70t2847shpjak".to_string()
     );
 }
@@ -79,11 +79,11 @@ async fn mnemonic_address_generation_iota() {
         .unwrap();
 
     assert_eq!(
-        addresses[0],
+        addresses[0].to_string(),
         "iota1qpg2xkj66wwgn8p2ggnp7p582gj8g6p79us5hve2tsudzpsr2ap4skprwjg".to_string()
     );
     assert_eq!(
-        addresses[1],
+        addresses[1].to_string(),
         "iota1qpswqe4v8z2cdtgc7sfj0hfneqh37lhmjgnth36mfndwcxkjrakcvpmm727".to_string()
     );
 
@@ -98,7 +98,7 @@ async fn mnemonic_address_generation_iota() {
         .unwrap();
 
     assert_eq!(
-        addresses[0],
+        addresses[0].to_string(),
         "iota1qr43g007shcd7zx3xe7s4lu2c9fr33w7tfjppyy0swlhrxx247szqhuaeaa".to_string()
     );
 }
@@ -119,11 +119,11 @@ async fn mnemonic_address_generation_shimmer() {
         .unwrap();
 
     assert_eq!(
-        addresses[0],
+        addresses[0].to_string(),
         "smr1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6ckj80y".to_string()
     );
     assert_eq!(
-        addresses[1],
+        addresses[1].to_string(),
         "smr1qznujl7m240za4pf6p0p8rdtqdca6tq7z44heqec8e57xsf429tvz0wt4w3".to_string()
     );
 
@@ -138,7 +138,7 @@ async fn mnemonic_address_generation_shimmer() {
         .unwrap();
 
     assert_eq!(
-        addresses[0],
+        addresses[0].to_string(),
         "smr1qrexl2g0m74v57y4kl6kfwqz7zrlrkvjt8m30av0cxgxlu92kyzc5npslm8".to_string()
     );
 }
@@ -178,8 +178,8 @@ async fn address_generation() {
             .await
             .unwrap();
 
-        assert_eq!(addresses[0], address.bech32_address);
-        if let Address::Ed25519(ed25519_address) = Address::try_from_bech32(&addresses[0]).unwrap() {
+        assert_eq!(addresses[0].to_string(), address.bech32_address);
+        if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
             assert_eq!(ed25519_address.to_string(), address.ed25519_address);
         } else {
             panic!("Invalid address type")
@@ -212,8 +212,8 @@ async fn address_generation() {
             .await
             .unwrap();
 
-        assert_eq!(addresses[0], address.bech32_address);
-        if let Address::Ed25519(ed25519_address) = Address::try_from_bech32(&addresses[0]).unwrap() {
+        assert_eq!(addresses[0].to_string(), address.bech32_address);
+        if let Address::Ed25519(ed25519_address) = &addresses[0].inner() {
             assert_eq!(ed25519_address.to_string(), address.ed25519_address);
         } else {
             panic!("Invalid address type")

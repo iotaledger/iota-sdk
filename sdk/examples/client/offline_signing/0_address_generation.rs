@@ -11,7 +11,7 @@ use std::{
     path::Path,
 };
 
-use iota_sdk::client::{constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Client, Result};
+use iota_sdk::{client::{constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Client, Result}, types::block::address::Bech32Address};
 
 const ADDRESS_FILE_NAME: &str = "examples/client/offline_signing/address.json";
 
@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
     write_address_to_file(ADDRESS_FILE_NAME, &address)
 }
 
-fn write_address_to_file<P: AsRef<Path>>(path: P, address: &[String]) -> Result<()> {
+fn write_address_to_file<P: AsRef<Path>>(path: P, address: &[Bech32Address]) -> Result<()> {
     let json = serde_json::to_string_pretty(&address)?;
     let mut file = BufWriter::new(File::create(path).unwrap());
 

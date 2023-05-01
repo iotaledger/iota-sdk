@@ -197,6 +197,12 @@ impl Address {
     }
 }
 
+impl From<&Address> for Address {
+    fn from(value: &Address) -> Self {
+        *value
+    }
+}
+
 #[allow(missing_docs)]
 pub mod dto {
     use alloc::format;

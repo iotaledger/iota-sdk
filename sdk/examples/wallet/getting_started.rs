@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
 
     // Get the first address and print it.
     let address = &account.addresses().await?[0];
-    println!("Address:\n{}\n", address.address());
+    println!("Address:\n{}\n", address.bech32_address());
 
     Ok(())
 }

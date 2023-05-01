@@ -21,7 +21,10 @@ pub(crate) async fn call_secret_manager_method_internal(
             let addresses = GetAddressesBuilder::new(secret_manager)
                 .set_options(options)?
                 .finish()
-                .await?;
+                .await?
+                .into_iter()
+                .map(|a| a.to_string())
+                .collect();
             Response::GeneratedAddresses(addresses)
         }
         #[cfg(feature = "ledger_nano")]

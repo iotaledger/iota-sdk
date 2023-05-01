@@ -63,7 +63,7 @@ impl Account {
                 metadata: output_response.metadata.clone(),
                 output,
                 is_spent: output_response.metadata.is_spent,
-                address: associated_address.address.inner,
+                address: associated_address.bech32_address.inner,
                 network_id,
                 remainder,
                 chain: Some(chain),

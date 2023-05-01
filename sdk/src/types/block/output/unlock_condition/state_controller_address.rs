@@ -18,8 +18,8 @@ impl StateControllerAddressUnlockCondition {
 
     /// Creates a new [`StateControllerAddressUnlockCondition`].
     #[inline(always)]
-    pub fn new(address: Address) -> Self {
-        Self(address)
+    pub fn new(address: impl Into<Address>) -> Self {
+        Self(address.into())
     }
 
     /// Returns the address of a [`StateControllerAddressUnlockCondition`].
@@ -56,7 +56,7 @@ pub mod dto {
         type Error = Error;
 
         fn try_from(value: &StateControllerAddressUnlockConditionDto) -> Result<Self, Error> {
-            Ok(Self::new((&value.address).try_into().map_err(|_e| {
+            Ok(Self::new(Address::try_from(&value.address).map_err(|_e| {
                 Error::InvalidField("stateControllerAddressUnlockCondition")
             })?))
         }

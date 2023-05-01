@@ -24,10 +24,10 @@ impl StorageDepositReturnUnlockCondition {
 
     /// Creates a new [`StorageDepositReturnUnlockCondition`].
     #[inline(always)]
-    pub fn new(return_address: Address, amount: u64, token_supply: u64) -> Result<Self, Error> {
+    pub fn new(return_address: impl Into<Address>, amount: u64, token_supply: u64) -> Result<Self, Error> {
         verify_amount::<true>(&amount, &token_supply)?;
 
-        Ok(Self { return_address, amount })
+        Ok(Self { return_address: return_address.into(), amount })
     }
 
     /// Returns the return address.

@@ -122,7 +122,7 @@ impl Account {
                     .await
                     .first()
                     .expect("first address is generated during account creation")
-                    .address
+                    .bech32_address
                     .inner
             }
         };

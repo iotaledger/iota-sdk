@@ -16,7 +16,7 @@ use super::Client;
 use crate::{
     client::{Error, Result},
     types::block::{
-        address::{Address, Ed25519Address},
+        address::{Address, Bech32Address, Ed25519Address},
         output::{AliasId, NftId},
         payload::TaggedDataPayload,
     },
@@ -90,9 +90,9 @@ pub fn verify_mnemonic(mnemonic: &str) -> Result<()> {
 }
 
 /// Requests funds from a faucet
-pub async fn request_funds_from_faucet(url: &str, bech32_address: &str) -> Result<String> {
+pub async fn request_funds_from_faucet(url: &str, bech32_address: &Bech32Address) -> Result<String> {
     let mut map = HashMap::new();
-    map.insert("address", bech32_address);
+    map.insert("address", bech32_address.to_string());
 
     let client = reqwest::Client::new();
     let faucet_response = client.post(url).json(&map).send().await?.text().await?;

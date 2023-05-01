@@ -73,7 +73,7 @@ impl OutputData {
             if let Some(address) = account
                 .addresses_with_unspent_outputs
                 .iter()
-                .find(|a| a.address.inner == unlock_address)
+                .find(|a| a.bech32_address.inner == unlock_address)
             {
                 Some(Chain::from_u32_hardened(vec![
                     44,

@@ -12,7 +12,10 @@ use futures::FutureExt;
 use instant::Instant;
 
 use crate::{
-    types::block::{address::Address, output::OutputId},
+    types::block::{
+        address::{Address, Bech32Address},
+        output::OutputId,
+    },
     wallet::account::{
         constants::PARALLEL_REQUESTS_AMOUNT, operations::syncing::SyncOptions,
         types::address::AddressWithUnspentOutputs, Account,
@@ -28,12 +31,11 @@ impl Account {
         address: Address,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
-        let bech32_hrp = self.client.get_bech32_hrp().await?;
-        let bech32_address = &address.to_bech32(bech32_hrp);
+        let bech32_address = Bech32Address::new(self.client.get_bech32_hrp().await?, address)?;
 
         if sync_options.sync_only_most_basic_outputs {
             let output_ids = self
-                .get_basic_output_ids_with_address_unlock_condition_only(bech32_address.to_string())
+                .get_basic_output_ids_with_address_unlock_condition_only(&bech32_address)
                 .await?;
             return Ok(output_ids);
         }
@@ -59,10 +61,10 @@ impl Account {
 
             #[cfg(not(target_family = "wasm"))]
             {
+                let bech32_address = bech32_address.clone();
                 tasks.push(
                     async move {
                         let account = self.clone();
-                        let bech32_address = bech32_address.clone();
                         tokio::spawn(async move {
                             account
                                 .get_basic_output_ids_with_any_unlock_condition(&bech32_address)
@@ -87,13 +89,13 @@ impl Account {
 
             #[cfg(not(target_family = "wasm"))]
             {
+                let bech32_address = bech32_address.clone();
                 tasks.push(
                     async move {
-                        let bech32_address_ = bech32_address.clone();
                         let account = self.clone();
                         tokio::spawn(async move {
                             account
-                                .get_nft_output_ids_with_any_unlock_condition(&bech32_address_)
+                                .get_nft_output_ids_with_any_unlock_condition(&bech32_address)
                                 .await
                         })
                         .await
@@ -118,9 +120,9 @@ impl Account {
 
             #[cfg(not(target_family = "wasm"))]
             {
+                let bech32_address = bech32_address.clone();
                 tasks.push(
                     async move {
-                        let bech32_address = bech32_address.clone();
                         let sync_options = sync_options.clone();
                         let account = self.clone();
                         tokio::spawn(async move {
@@ -186,7 +188,7 @@ impl Account {
                     tasks.push(async move {
                         tokio::spawn(async move {
                             let output_ids = account
-                                .get_output_ids_for_address(address.address.inner, &sync_options)
+                                .get_output_ids_for_address(address.bech32_address.inner, &sync_options)
                                 .await?;
                             crate::wallet::Result::Ok((address, output_ids))
                         })

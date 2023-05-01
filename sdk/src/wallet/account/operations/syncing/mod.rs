@@ -187,7 +187,7 @@ impl Account {
                     // Update address with unspent outputs
                     let address_with_unspent_outputs = addresses_with_unspent_outputs
                         .iter_mut()
-                        .find(|a| a.address.inner == ed25519_address)
+                        .find(|a| a.bech32_address.inner == ed25519_address)
                         .ok_or_else(|| {
                             crate::wallet::Error::AddressNotFoundInAccount(
                                 ed25519_address.to_bech32(bech32_hrp.clone()),

@@ -11,10 +11,10 @@ use std::{
     path::Path,
 };
 
-use iota_sdk::client::{
+use iota_sdk::{client::{
     api::{PreparedTransactionData, PreparedTransactionDataDto},
     Client, Result,
-};
+}, types::block::address::Bech32Address};
 
 const ADDRESS_FILE_NAME: &str = "examples/client/offline_signing/address.json";
 const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/client/offline_signing/prepared_transaction.json";
@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
         transaction_builder = transaction_builder.with_input(input)?;
     }
     let prepared_transaction = transaction_builder
-        .with_output(address, amount)
+        .with_output(&Bech32Address::try_from_str(address)?, amount)
         .await?
         .prepare_transaction()
         .await?;

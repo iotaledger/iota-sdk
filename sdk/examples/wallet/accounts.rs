@@ -72,11 +72,7 @@ async fn main() -> Result<()> {
 
     println!(
         "{}",
-        request_funds_from_faucet(
-            &std::env::var("FAUCET_URL").unwrap(),
-            &addresses[0].address().to_string()
-        )
-        .await?
+        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &addresses[0].bech32_address()).await?
     );
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
