@@ -10,7 +10,9 @@ use futures::FutureExt;
 #[cfg(not(target_family = "wasm"))]
 use crate::types::api::plugins::indexer::OutputIdsResponse;
 use crate::{
-    client::node_api::indexer::query_parameters::QueryParameter, types::block::{output::OutputId, address::Bech32Address}, wallet::Account,
+    client::node_api::indexer::query_parameters::QueryParameter,
+    types::block::{address::Bech32Address, output::OutputId},
+    wallet::Account,
 };
 
 impl Account {

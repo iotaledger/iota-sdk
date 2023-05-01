@@ -11,10 +11,13 @@ use std::{
     path::Path,
 };
 
-use iota_sdk::{client::{
-    api::{PreparedTransactionData, PreparedTransactionDataDto},
-    Client, Result,
-}, types::block::address::Bech32Address};
+use iota_sdk::{
+    client::{
+        api::{PreparedTransactionData, PreparedTransactionDataDto},
+        Client, Result,
+    },
+    types::block::address::Bech32Address,
+};
 
 const ADDRESS_FILE_NAME: &str = "examples/client/offline_signing/address.json";
 const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/client/offline_signing/prepared_transaction.json";

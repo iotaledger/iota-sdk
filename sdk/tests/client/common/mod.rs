@@ -5,11 +5,9 @@
 
 mod constants;
 
-use iota_sdk::{
-    client::{
-        constants::SHIMMER_COIN_TYPE, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
-        secret::SecretManager, Client, Result,
-    },
+use iota_sdk::client::{
+    constants::SHIMMER_COIN_TYPE, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
+    secret::SecretManager, Client, Result,
 };
 
 pub use self::constants::{FAUCET_URL, NODE_LOCAL};

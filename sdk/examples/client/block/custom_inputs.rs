@@ -11,7 +11,7 @@ use iota_sdk::{
         node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet, secret::SecretManager, Client,
         Result,
     },
-    types::block::{input::UtxoInput, address::Bech32Address},
+    types::block::{address::Bech32Address, input::UtxoInput},
 };
 
 #[tokio::main]

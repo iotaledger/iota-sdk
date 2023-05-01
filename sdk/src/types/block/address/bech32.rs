@@ -29,7 +29,10 @@ impl Bech32Address {
     /// Creates a new address wrapper.
     pub fn new(hrp: impl Into<String>, inner: impl Into<Address>) -> Result<Self, Error> {
         // TODO validate HRP
-        Ok(Self { hrp: hrp.into(), inner: inner.into() })
+        Ok(Self {
+            hrp: hrp.into(),
+            inner: inner.into(),
+        })
     }
 
     /// Gets the human readable part.

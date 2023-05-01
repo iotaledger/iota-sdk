@@ -55,8 +55,7 @@ pub mod dto {
 
         fn try_from(value: &AddressUnlockConditionDto) -> Result<Self, Error> {
             Ok(Self::new(
-                Address::try_from(&value.address)
-                    .map_err(|_e| Error::InvalidField("addressUnlockCondition"))?,
+                Address::try_from(&value.address).map_err(|_e| Error::InvalidField("addressUnlockCondition"))?,
             ))
         }
     }

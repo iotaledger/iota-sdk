@@ -318,7 +318,7 @@ pub mod dto {
         tag::dto::TagFeatureDto,
     };
     use super::*;
-    use crate::types::block::{Error, address::Address};
+    use crate::types::block::{address::Address, Error};
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum FeatureDto {

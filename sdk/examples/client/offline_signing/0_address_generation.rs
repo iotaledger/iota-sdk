@@ -11,7 +11,10 @@ use std::{
     path::Path,
 };
 
-use iota_sdk::{client::{constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Client, Result}, types::block::address::Bech32Address};
+use iota_sdk::{
+    client::{constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Client, Result},
+    types::block::address::Bech32Address,
+};
 
 const ADDRESS_FILE_NAME: &str = "examples/client/offline_signing/address.json";
 

@@ -12,7 +12,7 @@ use iota_sdk::{
     },
     types::{
         api::plugins::participation::types::{Participation, ParticipationEventId, Participations, PARTICIPATION_TAG},
-        block::{output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder}},
+        block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
     },
 };
 
@@ -51,7 +51,6 @@ async fn main() -> Result<()> {
 
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
     request_funds_from_faucet(&faucet_url, bech32_address).await?;
-
 
     let address_participation = client.address_staking_status(bech32_address).await?;
     println!("{address_participation:#?}");

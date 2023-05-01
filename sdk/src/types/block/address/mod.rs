@@ -197,8 +197,8 @@ impl Address {
     }
 }
 
-impl From<&Address> for Address {
-    fn from(value: &Address) -> Self {
+impl From<&Self> for Address {
+    fn from(value: &Self) -> Self {
         *value
     }
 }
