@@ -85,8 +85,11 @@ pub struct FilterOptions {
     pub upper_bound_booked_timestamp: Option<u32>,
     /// Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6).
     pub output_types: Option<Vec<u8>>,
+    /// Return all alias outputs matching these IDs.
     pub alias_ids: Option<HashSet<AliasId>>,
+    /// Return all foundry outputs matching these IDs.
     pub foundry_ids: Option<HashSet<FoundryId>>,
+    /// Return all nft outputs matching these IDs.
     pub nft_ids: Option<HashSet<NftId>>,
 }
 
