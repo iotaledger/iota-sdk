@@ -216,14 +216,4 @@ export class Utils {
             data: { mnemonic },
         });
     }
-
-    /**
-     * Request funds from a faucet for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.
-     */
-    static requestFundsFromFaucet(url: string, address: string): string {
-        return callUtilsMethodJson({
-            name: 'faucet',
-            data: { url, address },
-        });
-    }
 }

@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    client::{hex_public_key_to_bech32_address, hex_to_bech32, request_funds_from_faucet, verify_mnemonic, Client},
+    client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
     types::block::{
-        address::{dto::AddressDto, Address, Bech32Address, Ed25519Address},
+        address::{dto::AddressDto, Address, Ed25519Address},
         output::{AliasId, FoundryId, NftId},
         payload::{transaction::TransactionEssence, TransactionPayload},
         signature::Ed25519Signature,
@@ -16,7 +16,7 @@ use zeroize::Zeroize;
 use crate::{method::UtilsMethod, response::Response, Result};
 
 /// Call a utils method.
-pub(crate) async fn call_utils_method_internal(method: UtilsMethod) -> Result<Response> {
+pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response> {
     let response = match method {
         UtilsMethod::Bech32ToHex { bech32 } => Response::Bech32ToHex(Client::bech32_to_hex(&bech32)?),
         UtilsMethod::HexToBech32 { hex, bech32_hrp } => Response::Bech32Address(hex_to_bech32(&hex, &bech32_hrp)?),
@@ -50,9 +50,6 @@ pub(crate) async fn call_utils_method_internal(method: UtilsMethod) -> Result<Re
             serial_number,
             token_scheme_kind,
         } => Response::FoundryId(FoundryId::build(&alias_address, serial_number, token_scheme_kind)),
-        UtilsMethod::Faucet { url, address } => {
-            Response::Faucet(request_funds_from_faucet(&url, &Bech32Address::try_from_str(address)?).await?)
-        }
         UtilsMethod::HashTransactionEssence { essence } => Response::TransactionEssenceHash(prefix_hex::encode(
             TransactionEssence::try_from_dto_unverified(&essence)?.hash(),
         )),

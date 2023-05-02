@@ -3,8 +3,8 @@ from iota_sdk import Client
 # Create a Client instance
 client = Client(nodes=['https://api.testnet.shimmer.network'])
 
-# Create and post a block without payload
-block_id = client.build_and_post_block()[0]
+# Fetch a block ID from the node
+block_id = client.get_tips()[0]
 print(f'{block_id}')
 
 # Get block raw
