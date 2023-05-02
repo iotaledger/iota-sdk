@@ -59,12 +59,7 @@ export interface IRemainder {
     address: AddressTypes;
 }
 
-export interface ISegment {
-    hardened: boolean;
-    bs: number[];
-}
-
 /**
  * BIP 32 chain.
  */
-export type IBip32Chain = ISegment[];
+export type IBip32Chain = number[];

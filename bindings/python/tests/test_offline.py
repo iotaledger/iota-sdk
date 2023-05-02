@@ -33,28 +33,26 @@ def test_mnemonic_address_generation():
 
 
 def test_sign_verify_ed25519():
-    secret_manager = MnemonicSecretManager(Utils.generate_mnemonic())
+    secret_manager = MnemonicSecretManager(
+        "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")
     message = utf8_to_hex('IOTA')
 
     secret_manager = SecretManager(secret_manager)
     signature = secret_manager.sign_ed25519(
         message,
-        # [44, 4218, 0, 0, 0] IOTA coin type, first account, first public address
-        [
-            {'hardened': True, 'bs': [128, 0, 0, 44]},
-            {'hardened': True, 'bs': [128, 0, 16, 123]},
-            {'hardened': True, 'bs': [128, 0, 0, 0]},
-            {'hardened': True, 'bs': [128, 0, 0, 0]},
-            {'hardened': True, 'bs': [128, 0, 0, 0]},
-        ],
+        # HD-Wallet type, IOTA coin type, first account, first public address
+        [44, 4218, 0, 0, 0],
     )
+    assert signature['signature'] == '0x72bf2bc8fbc5dc56d657d7de8afa5208be1db025851e81031c754b371c7a29ce9f352d12df8207f9163316f81f59eb7725e5c0e4f3228e71ffe3764a9de6b10e'
 
     bech32_address = client.hex_public_key_to_bech32_address(
         signature['publicKey'],
-        'rms',
+        'iota',
     )
+    assert bech32_address == 'iota1qpg2xkj66wwgn8p2ggnp7p582gj8g6p79us5hve2tsudzpsr2ap4skprwjg'
 
     pub_key_hash = Utils.bech32_to_hex(bech32_address)
+    assert pub_key_hash == '0x50a35a5ad39c899c2a42261f0687522474683e2f214bb32a5c38d10603574358'
 
     valid_signature = Utils.verify_ed25519_signature(
         signature,

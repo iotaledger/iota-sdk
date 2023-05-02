@@ -22,7 +22,7 @@ export interface __SignTransactionMethod__ {
 export interface __SignatureUnlockMethod__ {
     name: 'signatureUnlock';
     data: {
-        transactionEssenceHash: Array<number>;
+        transactionEssenceHash: HexEncodedString;
         chain: IBip32Chain;
     };
 }

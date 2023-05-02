@@ -50,11 +50,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Wallet::emit_test_event` no longer returns a `Result`;
 - `AccountBuilder::new` now takes a wallet;
 
+### Changed
+
+- `InputSigningDataDto::chain` is now `Vec<u32>` instead of `Chain`;
+
 ### Removed
 
 - `FilterOptions`'s `Hash` derivation;
 - `client_without_tls` feature in favor of separate `client` and `tls` features;
 - `IncreaseNativeTokenSupplyOptions`;
+- `HARDENED` const;
 
 ## 0.3.0 - 2023-05-02
 

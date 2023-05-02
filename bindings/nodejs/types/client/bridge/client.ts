@@ -1,4 +1,4 @@
-import type { IBlock, PayloadTypes } from '@iota/types';
+import type { HexEncodedString, IBlock, PayloadTypes } from '@iota/types';
 import type { SecretManagerType } from '../../secretManager/secretManager';
 import type { IGenerateAddressesOptions } from '../generateAddressesOptions';
 import type { IBuildBlockOptions } from '../buildBlockOptions';
@@ -125,7 +125,7 @@ export interface __SignatureUnlockMethod__ {
     name: 'signatureUnlock';
     data: {
         secretManager: SecretManagerType;
-        transactionEssenceHash: Array<number>;
+        transactionEssenceHash: HexEncodedString;
         chain: IBip32Chain;
     };
 }
