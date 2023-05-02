@@ -21,6 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.4.0 - 2023-MM-DD
 
+### Added
+
+- `OutputMetadata::set_spent` method;
+
+### Changed
+
+- `OutputData::metadata` changed from `OutputMetadataDto` to `OutputMetadata`;
+
 ## 0.3.0 - 2023-05-02
 
 ### Added
@@ -34,7 +42,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::{set_default_sync_options, default_sync_options}` methods;
 - `Wallet::get_client` method;
 - `Wallet::get_account_aliases` method;
-- `OutputMetadata::set_spent` method;
 
 ### Changed
 
@@ -52,7 +59,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Lots of builder setters are now taking an `impl Into<Option<T>>` instead of a `T` parameter;
 - All `ledger_nano` related errors have been moved from the client error to a newly created `client::secret::ledger_nano::Error`;
 - All `stronghold` related errors have been moved from the client error to a newly created `client::stronghold::Error`;
-- `OutputData::metadata` changed from `OutputMetadataDto` to `OutputMetadata`;
 
 ### Removed
 
