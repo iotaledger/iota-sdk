@@ -1,6 +1,5 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-
 import type { BlockId } from '../../types/client/';
 import type {
     AddressTypes,
@@ -11,7 +10,7 @@ import type {
     IEd25519Address,
 } from '@iota/types';
 
-import { callUtilsMethodJson } from './bindings';
+import { callUtilsMethod } from '../bindings';
 
 /** Utils class for utils. */
 export class Utils {
@@ -19,7 +18,7 @@ export class Utils {
      * Generates a new mnemonic.
      */
     static generateMnemonic(): string {
-        return callUtilsMethodJson({
+        return callUtilsMethod({
             name: 'generateMnemonic',
         });
     }
@@ -28,7 +27,7 @@ export class Utils {
      * Returns a hex encoded seed for a mnemonic.
      */
     static mnemonicToHexSeed(mnemonic: string): string {
-        return callUtilsMethodJson({
+        return callUtilsMethod({
             name: 'mnemonicToHexSeed',
             data: {
                 mnemonic,
@@ -40,7 +39,7 @@ export class Utils {
      * Computes the alias id for the given alias output id.
      */
     static computeAliasId(outputId: string): string {
-        return callUtilsMethodJson({
+        return callUtilsMethod({
             name: 'computeAliasId',
             data: {
                 outputId,
@@ -52,7 +51,7 @@ export class Utils {
      * Computes the NFT id for the given NFT output id.
      */
     static computeNftId(outputId: string): string {
-        return callUtilsMethodJson({
+        return callUtilsMethod({
             name: 'computeNftId',
             data: {
                 outputId,
@@ -68,7 +67,7 @@ export class Utils {
         serialNumber: number,
         tokenSchemeKind: number,
     ): string {
-        return callUtilsMethodJson({
+        return callUtilsMethod({
             name: 'computeFoundryId',
             data: {
                 aliasAddress,
@@ -82,7 +81,7 @@ export class Utils {
      * Returns a valid Address parsed from a String.
      */
     static parseBech32Address(address: string): AddressTypes {
-        return callUtilsMethodJson({
+        return callUtilsMethod({
             name: 'parseBech32Address',
             data: {
                 address,
@@ -94,7 +93,7 @@ export class Utils {
      * Returns a block ID (Blake2b256 hash of the block bytes)
      */
     static blockId(block: IBlock): BlockId {
-        return callUtilsMethodJson({
+        return callUtilsMethod({
             name: 'blockId',
             data: {
                 block,
@@ -106,7 +105,7 @@ export class Utils {
      * Transforms bech32 to hex.
      */
     static bech32ToHex(bech32: string): string {
-        return callUtilsMethodJson({
+        return callUtilsMethod({
             name: 'bech32ToHex',
             data: {
                 bech32,
@@ -118,7 +117,7 @@ export class Utils {
      * Transforms a hex encoded address to a bech32 encoded address.
      */
     static hexToBech32(hex: string, bech32Hrp: string): string {
-        return callUtilsMethodJson({
+        return callUtilsMethod({
             name: 'hexToBech32',
             data: {
                 hex,
@@ -131,7 +130,7 @@ export class Utils {
      * Transforms an alias id to a bech32 encoded address.
      */
     static aliasIdToBech32(aliasId: string, bech32Hrp: string): string {
-        return callUtilsMethodJson({
+        return callUtilsMethod({
             name: 'aliasIdToBech32',
             data: {
                 aliasId,
@@ -144,7 +143,7 @@ export class Utils {
      * Transforms an nft id to a bech32 encoded address.
      */
     static nftIdToBech32(nftId: string, bech32Hrp: string): string {
-        return callUtilsMethodJson({
+        return callUtilsMethod({
             name: 'nftIdToBech32',
             data: {
                 nftId,
@@ -157,7 +156,7 @@ export class Utils {
      * Transforms a hex encoded public key to a bech32 encoded address.
      */
     static hexPublicKeyToBech32Address(hex: string, bech32Hrp: string): string {
-        return callUtilsMethodJson({
+        return callUtilsMethod({
             name: 'hexPublicKeyToBech32Address',
             data: {
                 hex,
@@ -170,7 +169,7 @@ export class Utils {
      * Checks if a String is a valid bech32 encoded address.
      */
     static isAddressValid(address: string): boolean {
-        return callUtilsMethodJson({
+        return callUtilsMethod({
             name: 'isAddressValid',
             data: {
                 address,
@@ -182,7 +181,7 @@ export class Utils {
      * Compute the hash of a transaction essence.
      */
     static hashTransactionEssence(essence: ITransactionEssence): string {
-        return callUtilsMethodJson({
+        return callUtilsMethod({
             name: 'hashTransactionEssence',
             data: {
                 essence,
@@ -198,7 +197,7 @@ export class Utils {
         message: HexEncodedString,
         address: IEd25519Address,
     ): boolean {
-        return callUtilsMethodJson({
+        return callUtilsMethod({
             name: 'verifyEd25519Signature',
             data: {
                 signature,
@@ -211,7 +210,7 @@ export class Utils {
      * Verify if a mnemonic is a valid BIP39 mnemonic.
      */
     static verifyMnemonic(mnemonic: string): void {
-        return callUtilsMethodJson({
+        return callUtilsMethod({
             name: 'verifyMnemonic',
             data: { mnemonic },
         });

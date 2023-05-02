@@ -1,8 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[cfg(not(target_family = "wasm"))]
 use std::pin::Pin;
 
+#[cfg(not(target_family = "wasm"))]
 use futures::Future;
 use iota_sdk::{
     client::{secret::SecretManager, Client},
@@ -20,6 +22,7 @@ use crate::{
     UtilsMethod,
 };
 
+#[cfg(not(target_family = "wasm"))]
 pub trait CallMethod {
     type Method;
 
@@ -27,6 +30,7 @@ pub trait CallMethod {
     fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + Send + 'a>>;
 }
 
+#[cfg(not(target_family = "wasm"))]
 impl CallMethod for Client {
     type Method = ClientMethod;
 
@@ -35,6 +39,7 @@ impl CallMethod for Client {
     }
 }
 
+#[cfg(not(target_family = "wasm"))]
 impl CallMethod for Wallet {
     type Method = WalletMethod;
 
@@ -43,6 +48,7 @@ impl CallMethod for Wallet {
     }
 }
 
+#[cfg(not(target_family = "wasm"))]
 impl CallMethod for SecretManager {
     type Method = SecretManagerMethod;
 
