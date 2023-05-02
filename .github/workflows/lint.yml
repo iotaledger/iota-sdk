@@ -164,6 +164,8 @@ jobs:
 
       - name: Set up Rust
         uses: ./.github/actions/setup-rust
+        with:
+          target: riscv64gc-unknown-none-elf
 
       - name: Check
         uses: actions-rs/cargo@v1
