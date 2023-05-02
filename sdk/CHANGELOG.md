@@ -21,6 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.4.0 - 2023-MM-DD
 
+### Added
+
+- `FilterOptions::{alias_ids, foundry_ids, nft_ids}` fields;
+- `Account::{alias_output, foundry_output, nft_output}` methods;
+
 ## 0.3.0 - 2023-05-02
 
 ### Added
