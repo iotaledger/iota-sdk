@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example foundry --release
+//! In this example we will create a foundry output.
+//!
+//! `cargo run --example foundry --release`
 
 use iota_sdk::{
     client::{
@@ -24,16 +26,15 @@ use iota_sdk::{
 };
 use primitive_types::U256;
 
-/// In this example we will create a foundry output
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production!
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     // Configure your own mnemonic in the ".env" file. Since the output amount cannot be zero, the seed must contain
     // non-zero balance.
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance.
@@ -55,7 +56,7 @@ async fn main() -> Result<()> {
     // create new alias output
     //////////////////////////////////
 
-    let alias_output_builder = AliasOutputBuilder::new_with_amount(2_000_000, AliasId::null())?
+    let alias_output_builder = AliasOutputBuilder::new_with_amount(2_000_000, AliasId::null())
         .add_feature(SenderFeature::new(address))
         .add_feature(MetadataFeature::new(vec![1, 2, 3])?)
         .add_immutable_feature(IssuerFeature::new(address))
@@ -71,10 +72,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!(
-        "Transaction with new alias output sent: {node_url}/api/core/v2/blocks/{}",
-        block.id()
-    );
+    println!("Block with new alias output sent: {explorer_url}/block/{}", block.id());
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
     //////////////////////////////////////////////////
@@ -97,12 +95,12 @@ async fn main() -> Result<()> {
     let outputs = vec![
         alias_output_builder
             .clone()
-            .with_amount(1_000_000)?
+            .with_amount(1_000_000)
             .with_alias_id(alias_id)
             .with_state_index(1)
             .with_foundry_counter(1)
             .finish_output(token_supply)?,
-        FoundryOutputBuilder::new_with_amount(1_000_000, 1, token_scheme)?
+        FoundryOutputBuilder::new_with_amount(1_000_000, 1, token_scheme)
             .add_native_token(NativeToken::new(token_id, U256::from(70u8))?)
             .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)))
             .finish_output(token_supply)?,
@@ -115,10 +113,7 @@ async fn main() -> Result<()> {
         .with_outputs(outputs)?
         .finish()
         .await?;
-    println!(
-        "Transaction with foundry output sent: {node_url}/api/core/v2/blocks/{}",
-        block.id()
-    );
+    println!("Block with foundry output sent: {explorer_url}/block/{}", block.id());
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
     //////////////////////////////////
@@ -133,7 +128,7 @@ async fn main() -> Result<()> {
             U256::from(20u8),
             U256::from(100u8),
         )?),
-    )?
+    )
     .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
 
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
@@ -141,7 +136,7 @@ async fn main() -> Result<()> {
     let outputs = vec![
         alias_output_builder
             .clone()
-            .with_amount(1_000_000)?
+            .with_amount(1_000_000)
             .with_alias_id(alias_id)
             .with_state_index(2)
             .with_foundry_counter(1)
@@ -161,7 +156,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Transaction with native tokens burnt sent: {node_url}/api/core/v2/blocks/{}",
+        "Block with native tokens burnt sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -171,14 +166,14 @@ async fn main() -> Result<()> {
     //////////////////////////////////
 
     let basic_output_builder =
-        BasicOutputBuilder::new_with_amount(57_700)?.add_unlock_condition(AddressUnlockCondition::new(address));
+        BasicOutputBuilder::new_with_amount(57_700).add_unlock_condition(AddressUnlockCondition::new(address));
 
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
     let foundry_output_id = get_foundry_output_id(block.payload().unwrap())?;
     let outputs = vec![
         alias_output_builder
             .clone()
-            .with_amount(57_700)?
+            .with_amount(57_700)
             .with_alias_id(alias_id)
             .with_state_index(3)
             .with_foundry_counter(1)
@@ -206,10 +201,7 @@ async fn main() -> Result<()> {
         .with_outputs(outputs)?
         .finish()
         .await?;
-    println!(
-        "Transaction with native tokens sent: {node_url}/api/core/v2/blocks/{}",
-        block.id()
-    );
+    println!("Block with native tokens sent: {explorer_url}/block/{}", block.id());
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
     //////////////////////////////////
@@ -232,7 +224,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Second transaction with native tokens sent: {node_url}/api/core/v2/blocks/{}",
+        "Second block with native tokens sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -257,7 +249,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Third transaction with native tokens burned sent: {node_url}/api/core/v2/blocks/{}",
+        "Third block with native tokens burned sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;

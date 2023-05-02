@@ -15,26 +15,27 @@ use crate::{
         output::{Output, OUTPUT_COUNT_RANGE},
     },
     wallet::account::{
-        handle::AccountHandle,
         operations::transaction::{RemainderValueStrategy, TransactionOptions},
+        Account,
     },
 };
 
-impl AccountHandle {
+impl Account {
     /// Get inputs and build the transaction essence
     pub async fn prepare_transaction(
         &self,
         outputs: Vec<Output>,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_transaction");
+        let options = options.into();
         let prepare_transaction_start_time = Instant::now();
         let rent_structure = self.client.get_rent_structure().await?;
         let token_supply = self.client.get_token_supply().await?;
 
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {
-            output.verify_storage_deposit(rent_structure.clone(), token_supply)?;
+            output.verify_storage_deposit(rent_structure, token_supply)?;
         }
 
         // validate amounts
@@ -78,7 +79,7 @@ impl AccountHandle {
                                 account_index,
                                 WalletEvent::TransactionProgress(
                                     TransactionProgressEvent::GeneratingRemainderDepositAddress(AddressData {
-                                        address: remainder_address.address.to_bech32(),
+                                        address: remainder_address.address.to_string(),
                                     }),
                                 ),
                             );
@@ -114,7 +115,7 @@ impl AccountHandle {
             Ok(res) => res,
             Err(err) => {
                 // unlock outputs so they are available for a new transaction
-                self.unlock_inputs(selected_transaction_data.inputs).await?;
+                self.unlock_inputs(&selected_transaction_data.inputs).await?;
                 return Err(err);
             }
         };

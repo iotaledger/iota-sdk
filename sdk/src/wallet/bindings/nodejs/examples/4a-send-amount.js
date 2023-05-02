@@ -8,7 +8,6 @@ async function run() {
     try {
         const manager = await getUnlockedManager();
         const account = await manager.getAccount('Alice');
-        console.log('Account:', account);
 
         await account.sync();
 
@@ -24,10 +23,8 @@ async function run() {
             },
         ]);
 
-        console.log(response);
-
         console.log(
-            `Check your block on ${process.env.NODE_URL}/api/core/v2/blocks/${response.blockId}`,
+            `Check your block on ${process.env.EXPLORER_URL}/block/${response.blockId}`,
         );
     } catch (error) {
         console.log('Error: ', error);

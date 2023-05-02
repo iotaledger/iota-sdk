@@ -1,7 +1,13 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example microtransaction --release
+//! In this example we will do a micro transaction using unlock conditions to an output.
+//!
+//! Due to the required storage deposit, it is not possible to send a small amount of tokens.
+//! However, it is possible to send a large amount and ask a slightly smaller amount in return to
+//! effectively transfer a small amount.
+//!
+//! `cargo run --example microtransaction --release`
 
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -13,20 +19,15 @@ use iota_sdk::{
     },
 };
 
-/// In this example we will do a micro transaction using unlock conditions to an output.
-///
-/// Due to the required storage deposit, it is not possible to send a small amount of tokens.
-/// However, it is possible to send a large amount and ask a slightly smaller amount in return to
-/// effectively transfer a small amount.
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production!
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     // Configure your own mnemonic in the ".env" file. Since the output amount cannot be zero, the seed must contain
     // non-zero balance.
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance.
@@ -52,7 +53,7 @@ async fn main() -> Result<()> {
         .unwrap();
     let outputs = vec![
         // with storage deposit return
-        BasicOutputBuilder::new_with_amount(255_100)?
+        BasicOutputBuilder::new_with_amount(255_100)
             .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
             // Return 100 less than the original amount.
             .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
@@ -73,8 +74,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!("Transaction sent: {node_url}/api/core/v2/blocks/{}", block.id());
-    println!("Block metadata: {node_url}/api/core/v2/blocks/{}/metadata", block.id());
+    println!("Block with micro amount sent: {explorer_url}/block/{}", block.id());
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
     Ok(())

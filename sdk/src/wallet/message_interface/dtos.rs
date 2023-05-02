@@ -12,82 +12,59 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     types::block::{
+        address::Bech32Address,
         output::{dto::FoundryOutputDto, FoundryId, OutputId},
         payload::transaction::TransactionId,
     },
     wallet::{
         account::{
-            types::{address::AddressWrapper, AccountAddress, AddressWithUnspentOutputs, TransactionDto},
-            Account, OutputDataDto,
+            types::{AccountAddress, AddressWithUnspentOutputs, TransactionDto},
+            AccountDetails, OutputDataDto,
         },
-        AddressWithAmount, AddressWithMicroAmount,
+        AddressWithAmount,
     },
 };
 
 /// Dto for address with amount for `send_amount()`
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AddressWithAmountDto {
     /// Bech32 encoded address
     pub address: String,
     /// Amount
     pub amount: String,
-}
-
-impl TryFrom<&AddressWithAmountDto> for AddressWithAmount {
-    type Error = crate::wallet::Error;
-
-    fn try_from(value: &AddressWithAmountDto) -> crate::wallet::Result<Self> {
-        Ok(Self {
-            address: value.address.clone(),
-            amount: u64::from_str(&value.amount)
-                .map_err(|_| crate::client::Error::InvalidAmount(value.amount.clone()))?,
-        })
-    }
-}
-
-/// Dto for address with amount for `send_micro_transaction()`
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub struct AddressWithMicroAmountDto {
-    /// Bech32 encoded address
-    pub address: String,
-    /// Amount below the minimum storage deposit
-    pub amount: String,
     /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
     /// first address of the account
-    #[serde(rename = "returnAddress")]
     pub return_address: Option<String>,
     /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
     /// receiver before. Default is 1 day
     pub expiration: Option<u32>,
 }
 
-impl TryFrom<&AddressWithMicroAmountDto> for AddressWithMicroAmount {
+impl TryFrom<&AddressWithAmountDto> for AddressWithAmount {
     type Error = crate::wallet::Error;
 
-    fn try_from(value: &AddressWithMicroAmountDto) -> crate::wallet::Result<Self> {
-        Ok(Self {
-            address: value.address.clone(),
-            amount: u64::from_str(&value.amount)
-                .map_err(|_| crate::client::Error::InvalidAmount(value.amount.clone()))?,
-            return_address: value.return_address.clone(),
-            expiration: value.expiration,
-        })
+    fn try_from(value: &AddressWithAmountDto) -> crate::wallet::Result<Self> {
+        Ok(Self::new(
+            value.address.clone(),
+            u64::from_str(&value.amount).map_err(|_| crate::client::Error::InvalidAmount(value.amount.clone()))?,
+        )
+        .with_return_address(value.return_address.clone())
+        .with_expiration(value.expiration))
     }
 }
 
 /// Dto for an account address with output_ids of unspent outputs.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AddressWithUnspentOutputsDto {
     /// The address.
-    #[serde(with = "crate::wallet::account::types::address_serde")]
-    pub address: AddressWrapper,
+    pub address: Bech32Address,
     /// The address key index.
-    #[serde(rename = "keyIndex")]
     pub key_index: u32,
     /// Determines if an address is a public or an internal (change) address.
     pub internal: bool,
     /// Output ids
-    #[serde(rename = "outputIds")]
     pub output_ids: Vec<OutputId>,
 }
 
@@ -103,47 +80,40 @@ impl From<&AddressWithUnspentOutputs> for AddressWithUnspentOutputsDto {
 }
 
 /// Dto for an Account.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct AccountDto {
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountDetailsDto {
     /// The account index
     pub index: u32,
     /// The coin type
-    #[serde(rename = "coinType")]
     pub coin_type: u32,
     /// The account alias.
     pub alias: String,
     /// Public addresses
-    #[serde(rename = "publicAddresses")]
     pub public_addresses: Vec<AccountAddress>,
     /// Internal addresses
-    #[serde(rename = "internalAddresses")]
     pub internal_addresses: Vec<AccountAddress>,
     /// Addresses with unspent outputs
-    #[serde(rename = "addressesWithUnspentOutputs")]
     pub addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputsDto>,
     /// Outputs
     pub outputs: HashMap<OutputId, OutputDataDto>,
     /// Unspent outputs that are currently used as input for transactions
-    #[serde(rename = "lockedOutputs")]
     pub locked_outputs: HashSet<OutputId>,
     /// Unspent outputs
-    #[serde(rename = "unspentOutputs")]
     pub unspent_outputs: HashMap<OutputId, OutputDataDto>,
     /// Sent transactions
     pub transactions: HashMap<TransactionId, TransactionDto>,
     /// Pending transactions
-    #[serde(rename = "pendingTransactions")]
     pub pending_transactions: HashSet<TransactionId>,
     /// Incoming transactions
-    #[serde(rename = "incomingTransactions")]
     pub incoming_transactions: HashMap<TransactionId, TransactionDto>,
     /// Foundries for native tokens in outputs
-    #[serde(rename = "nativeTokenFoundries", default)]
+    #[serde(default)]
     pub native_token_foundries: HashMap<FoundryId, FoundryOutputDto>,
 }
 
-impl From<&Account> for AccountDto {
-    fn from(value: &Account) -> Self {
+impl From<&AccountDetails> for AccountDetailsDto {
+    fn from(value: &AccountDetails) -> Self {
         Self {
             index: *value.index(),
             coin_type: *value.coin_type(),

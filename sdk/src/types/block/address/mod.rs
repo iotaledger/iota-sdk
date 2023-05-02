@@ -2,16 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod alias;
+mod bech32;
 mod ed25519;
 mod nft;
 
 use alloc::{string::String, vec::Vec};
 
-use bech32::{self, FromBase32, ToBase32, Variant};
+use ::bech32::{FromBase32, ToBase32, Variant};
 use derive_more::From;
 use packable::PackableExt;
 
-pub use self::{alias::AliasAddress, ed25519::Ed25519Address, nft::NftAddress};
+pub use self::{alias::AliasAddress, bech32::Bech32Address, ed25519::Ed25519Address, nft::NftAddress};
 use crate::types::block::{
     output::{Output, OutputId},
     semantic::{ConflictReason, ValidationContext},
@@ -108,17 +109,17 @@ impl Address {
 
     /// Tries to create an [`Address`] from a bech32 encoded string.
     pub fn try_from_bech32<T: AsRef<str>>(address: T) -> Result<Self, Error> {
-        Self::try_from_bech32_with_hrp(address).map(|res| res.0)
+        Self::try_from_bech32_with_hrp(address).map(|res| res.1)
     }
 
     /// Tries to create an [`Address`] from a bech32 encoded string, also returns the HRP.
-    pub fn try_from_bech32_with_hrp<T: AsRef<str>>(address: T) -> Result<(Self, String), Error> {
-        match bech32::decode(address.as_ref()) {
+    pub fn try_from_bech32_with_hrp<T: AsRef<str>>(address: T) -> Result<(String, Self), Error> {
+        match ::bech32::decode(address.as_ref()) {
             Ok((hrp, data, _)) => {
                 let bytes = Vec::<u8>::from_base32(&data).map_err(|_| Error::InvalidAddress)?;
                 Self::unpack_verified(bytes.as_slice(), &())
                     .map_err(|_| Error::InvalidAddress)
-                    .map(|address| (address, hrp))
+                    .map(|address| (hrp, address))
             }
             Err(_) => Err(Error::InvalidAddress),
         }
@@ -127,7 +128,7 @@ impl Address {
     /// Encodes this address to a bech32 string with the given Human Readable Part as prefix.
     pub fn to_bech32<T: AsRef<str>>(&self, hrp: T) -> String {
         // PANIC: encoding can't fail as `self` has already been validated and built.
-        bech32::encode(hrp.as_ref(), self.pack_to_vec().to_base32(), Variant::Bech32).unwrap()
+        ::bech32::encode(hrp.as_ref(), self.pack_to_vec().to_base32(), Variant::Bech32).unwrap()
     }
 
     /// Checks if an string is a valid bech32 encoded address.
@@ -196,15 +197,16 @@ impl Address {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::format;
+
     use serde::{Deserialize, Serialize, Serializer};
     use serde_json::Value;
 
     use super::*;
     pub use super::{alias::dto::AliasAddressDto, ed25519::dto::Ed25519AddressDto, nft::dto::NftAddressDto};
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// Describes all the different address types.
     #[derive(Clone, Debug, Eq, PartialEq, From)]
@@ -228,7 +230,7 @@ pub mod dto {
     }
 
     impl TryFrom<&AddressDto> for Address {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &AddressDto) -> Result<Self, Self::Error> {
             match value {

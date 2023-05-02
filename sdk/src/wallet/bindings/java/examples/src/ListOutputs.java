@@ -22,7 +22,7 @@ public class ListOutputs {
         );
 
         // Get account and sync it with the registered node to ensure that its balances are up-to-date.
-        AccountHandle a = wallet.getAccount(new AccountAlias(Env.ACCOUNT_NAME));
+        Account a = wallet.getAccount(new AccountAlias(Env.ACCOUNT_NAME));
         a.syncAccount(new SyncAccount().withOptions(new SyncOptions()));
 
         // Get outputs.

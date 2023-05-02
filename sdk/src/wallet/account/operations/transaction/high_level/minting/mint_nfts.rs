@@ -12,16 +12,17 @@ use crate::{
             unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
         },
-        DtoError,
+        Error as BlockError,
     },
     wallet::{
-        account::{handle::AccountHandle, operations::transaction::Transaction, TransactionOptions},
-        Error,
+        account::{operations::transaction::Transaction, Account, TransactionOptions},
+        Error as WalletError,
     },
 };
 
 /// Address and NFT for `send_nft()`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NftOptions {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
     /// first address of the account.
@@ -35,12 +36,12 @@ pub struct NftOptions {
     /// NFT issuer feature.
     pub issuer: Option<String>,
     /// NFT immutable metadata feature.
-    #[serde(rename = "immutableMetadata")]
     pub immutable_metadata: Option<Vec<u8>>,
 }
 
 /// Dto for NftOptions.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NftOptionsDto {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
     /// first address of the account.
@@ -54,7 +55,6 @@ pub struct NftOptionsDto {
     /// NFT issuer feature, bech32 encoded address.
     pub issuer: Option<String>,
     /// Immutable NFT metadata, hex encoded bytes.
-    #[serde(rename = "immutableMetadata")]
     pub immutable_metadata: Option<String>,
 }
 
@@ -66,17 +66,17 @@ impl TryFrom<&NftOptionsDto> for NftOptions {
             address: value.address.clone(),
             sender: value.sender.clone(),
             metadata: match &value.metadata {
-                Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("metadata"))?),
+                Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("metadata"))?),
                 None => None,
             },
             tag: match &value.tag {
-                Some(tag) => Some(prefix_hex::decode(tag).map_err(|_| DtoError::InvalidField("tag"))?),
+                Some(tag) => Some(prefix_hex::decode(tag).map_err(|_| BlockError::InvalidField("tag"))?),
                 None => None,
             },
             issuer: value.issuer.clone(),
             immutable_metadata: match &value.immutable_metadata {
                 Some(metadata) => {
-                    Some(prefix_hex::decode(metadata).map_err(|_| DtoError::InvalidField("immutable_metadata"))?)
+                    Some(prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("immutable_metadata"))?)
                 }
                 None => None,
             },
@@ -84,9 +84,9 @@ impl TryFrom<&NftOptionsDto> for NftOptions {
     }
 }
 
-impl AccountHandle {
+impl Account {
     /// Function to mint nfts.
-    /// Calls [AccountHandle.send()](crate::account::handle::AccountHandle.send) internally, the options can define the
+    /// Calls [Account.send()](crate::account::Account.send) internally, the options can define the
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
@@ -105,9 +105,9 @@ impl AccountHandle {
     ///
     /// let transaction = account.mint_nfts(nft_options, None).await?;
     /// println!(
-    ///     "Transaction: {} Block sent: http://localhost:14265/api/core/v2/blocks/{}",
+    ///     "Transaction sent: {}/transaction/{}",
+    ///     std::env::var("EXPLORER_URL").unwrap(),
     ///     transaction.transaction_id,
-    ///     transaction.block_id.expect("no block created yet")
     /// );
     /// ```
     pub async fn mint_nfts(
@@ -120,7 +120,7 @@ impl AccountHandle {
     }
 
     /// Function to prepare the transaction for
-    /// [AccountHandle.mint_nfts()](crate::account::handle::AccountHandle.mint_nfts)
+    /// [Account.mint_nfts()](crate::account::Account.mint_nfts)
     async fn prepare_mint_nfts(
         &self,
         nfts_options: Vec<NftOptions>,
@@ -135,7 +135,7 @@ impl AccountHandle {
         for nft_options in nfts_options {
             let address = match nft_options.address {
                 Some(address) => {
-                    let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address)?;
+                    let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
                     self.client.bech32_hrp_matches(&bech32_hrp).await?;
                     address
                 }
@@ -143,17 +143,16 @@ impl AccountHandle {
                 None => {
                     account_addresses
                         .first()
-                        .ok_or(Error::FailedToGetRemainder)?
+                        .ok_or(WalletError::FailedToGetRemainder)?
                         .address
                         .inner
                 }
             };
 
             // NftId needs to be set to 0 for the creation
-            let mut nft_builder =
-                NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone(), NftId::null())?
-                    // Address which will own the nft
-                    .add_unlock_condition(AddressUnlockCondition::new(address));
+            let mut nft_builder = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())
+                // Address which will own the nft
+                .add_unlock_condition(AddressUnlockCondition::new(address));
 
             if let Some(sender) = nft_options.sender {
                 nft_builder = nft_builder.add_feature(SenderFeature::new(Address::try_from_bech32(sender)?));

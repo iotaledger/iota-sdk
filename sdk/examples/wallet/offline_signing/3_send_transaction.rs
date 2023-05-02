@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we send the signed transaction in a block.
+//!
 //! `cargo run --example 3_send_transaction --release`.
 
 use std::{fs::File, io::prelude::*, path::Path};
@@ -11,31 +12,36 @@ use iota_sdk::{
         api::{SignedTransactionData, SignedTransactionDataDto},
         Client,
     },
-    wallet::{account_manager::AccountManager, Result},
+    wallet::{Result, Wallet},
 };
 
-const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/offline_signing/signed_transaction.json";
+const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/wallet/offline_signing/signed_transaction.json";
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Create the account manager with the secret_manager and client options
-    let manager = AccountManager::builder()
-        .with_storage_path("examples/offline_signing/online_walletdb")
+    // Create the wallet with the secret_manager and client options
+    let wallet = Wallet::builder()
+        .with_storage_path("examples/wallet/offline_signing/online_walletdb")
         .finish()
         .await?;
 
     // Create a new account
-    let account = manager.get_account("Alice").await?;
+    let account = wallet.get_account("Alice").await?;
 
     let signed_transaction_data =
         read_signed_transaction_from_file(account.client(), SIGNED_TRANSACTION_FILE_NAME).await?;
 
     // Sends offline signed transaction online.
-    let result = account.submit_and_store_transaction(signed_transaction_data).await?;
+    let transaction = account.submit_and_store_transaction(signed_transaction_data).await?;
+    println!("Transaction sent: {}", transaction.transaction_id);
 
+    let block_id = account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
     println!(
-        "Transaction sent: https://explorer.iota.org/devnet/block/{}",
-        result.transaction_id
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
     );
 
     Ok(())

@@ -10,25 +10,25 @@ use crate::{
         address::Address,
         output::{unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
     },
-    wallet::account::{handle::AccountHandle, operations::transaction::Transaction, TransactionOptions},
+    wallet::account::{operations::transaction::Transaction, Account, TransactionOptions},
 };
 
 /// Address and nft for `send_nft()`
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AddressAndNftId {
     /// Bech32 encoded address
     pub address: String,
     /// Nft id
-    #[serde(rename = "nftId")]
     pub nft_id: NftId,
 }
 
-impl AccountHandle {
+impl Account {
     /// Function to send native tokens in basic outputs with a
-    /// [`StorageDepositReturnUnlockCondition`](crate::client::block::output::unlock_condition::StorageDepositReturnUnlockCondition) and
-    /// [`ExpirationUnlockCondition`](crate::client::block::output::unlock_condition::ExpirationUnlockCondition), so the
+    /// [`StorageDepositReturnUnlockCondition`](crate::types::block::output::unlock_condition::StorageDepositReturnUnlockCondition) and
+    /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition), so the
     /// storage deposit gets back to the sender and also that the sender gets access to the output again after a
-    /// defined time (default 1 day), Calls [AccountHandle.send()](crate::account::handle::AccountHandle.send)
+    /// defined time (default 1 day), Calls [Account.send()](crate::wallet::account::Account.send)
     /// internally, the options can define the RemainderValueStrategy. Custom inputs will be replaced with the
     /// required nft inputs. Address needs to be Bech32 encoded
     /// ```ignore
@@ -40,25 +40,25 @@ impl AccountHandle {
     /// let transaction = account.send_nft(outputs, None).await?;
     ///
     /// println!(
-    /// "Transaction: {} Block sent: http://localhost:14265/api/core/v2/blocks/{}",
-    /// transaction.transaction_id,
-    /// transaction.block_id.expect("no block created yet")
+    ///     "Transaction sent: {}/transaction/{}",
+    ///     std::env::var("EXPLORER_URL").unwrap(),
+    ///     transaction.transaction_id
     /// );
     /// ```
     pub async fn send_nft(
         &self,
-        addresses_nft_ids: Vec<AddressAndNftId>,
+        addresses_and_nft_ids: Vec<AddressAndNftId>,
         options: Option<TransactionOptions>,
     ) -> crate::wallet::Result<Transaction> {
-        let prepared_transaction = self.prepare_send_nft(addresses_nft_ids, options).await?;
+        let prepared_transaction = self.prepare_send_nft(addresses_and_nft_ids, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
 
     /// Function to prepare the transaction for
-    /// [AccountHandle.send_nft()](crate::account::handle::AccountHandle.send_nft)
+    /// [Account.send_nft()](crate::account::Account.send_nft)
     async fn prepare_send_nft(
         &self,
-        addresses_nft_ids: Vec<AddressAndNftId>,
+        addresses_and_nft_ids: Vec<AddressAndNftId>,
         options: Option<TransactionOptions>,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_send_nft");
@@ -68,8 +68,8 @@ impl AccountHandle {
 
         let mut outputs = Vec::new();
 
-        for address_and_nft_id in addresses_nft_ids {
-            let (address, bech32_hrp) = Address::try_from_bech32_with_hrp(address_and_nft_id.address)?;
+        for address_and_nft_id in addresses_and_nft_ids {
+            let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address_and_nft_id.address)?;
             self.client.bech32_hrp_matches(&bech32_hrp).await?;
 
             // Find nft output from the inputs

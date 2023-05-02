@@ -3,8 +3,6 @@
 
 /// Address types used in the account
 pub(crate) mod address;
-/// Custom de/serialization for [`address::AddressWrapper`]
-pub(crate) mod address_serde;
 pub(crate) mod balance;
 #[cfg(feature = "participation")]
 pub mod participation;
@@ -15,7 +13,7 @@ use crypto::keys::slip10::Chain;
 use serde::{Deserialize, Deserializer, Serialize};
 
 pub use self::{
-    address::{AccountAddress, AddressWithUnspentOutputs, AddressWrapper},
+    address::{AccountAddress, AddressWithUnspentOutputs},
     balance::{
         AccountBalance, AccountBalanceDto, BaseCoinBalance, BaseCoinBalanceDto, NativeTokensBalance,
         NativeTokensBalanceDto, RequiredStorageDeposit,
@@ -35,25 +33,23 @@ use crate::{
             BlockId,
         },
     },
-    wallet::account::Account,
+    wallet::account::AccountDetails,
 };
 
 /// An output with metadata
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OutputData {
     /// The output id
-    #[serde(rename = "outputId")]
     pub output_id: OutputId,
     pub metadata: OutputMetadataDto,
     /// The actual Output
     pub output: Output,
     /// If an output is spent
-    #[serde(rename = "isSpent")]
     pub is_spent: bool,
     /// Associated account address.
     pub address: Address,
     /// Network ID
-    #[serde(rename = "networkId")]
     pub network_id: u64,
     pub remainder: bool,
     // bip32 path
@@ -63,7 +59,7 @@ pub struct OutputData {
 impl OutputData {
     pub fn input_signing_data(
         &self,
-        account: &Account,
+        account: &AccountDetails,
         current_time: u32,
         alias_transition: Option<AliasTransition>,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
@@ -104,21 +100,19 @@ impl OutputData {
 
 /// Dto for an output with metadata
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OutputDataDto {
     /// The output id
-    #[serde(rename = "outputId")]
     pub output_id: OutputId,
     /// The metadata of the output
     pub metadata: OutputMetadataDto,
     /// The actual Output
     pub output: OutputDto,
     /// If an output is spent
-    #[serde(rename = "isSpent")]
     pub is_spent: bool,
     /// Associated account address.
     pub address: AddressDto,
     /// Network ID
-    #[serde(rename = "networkId")]
     pub network_id: String,
     /// Remainder
     pub remainder: bool,
@@ -143,18 +137,15 @@ impl From<&OutputData> for OutputDataDto {
 
 /// A transaction with metadata
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Transaction {
     pub payload: TransactionPayload,
-    #[serde(rename = "blockId")]
     pub block_id: Option<BlockId>,
-    #[serde(rename = "inclusionState")]
     pub inclusion_state: InclusionState,
     // Transaction creation time
     pub timestamp: u128,
-    #[serde(rename = "transactionId")]
     pub transaction_id: TransactionId,
     // network id to ignore outputs when set_client_options is used to switch to another network
-    #[serde(rename = "networkId")]
     pub network_id: u64,
     // set if the transaction was created by the wallet or if it was sent by someone else and is incoming
     pub incoming: bool,
@@ -168,21 +159,18 @@ pub struct Transaction {
 
 /// Dto for a transaction with metadata
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TransactionDto {
     /// The transaction payload
     pub payload: TransactionPayloadDto,
     /// BlockId when it got sent to the Tangle
-    #[serde(rename = "blockId")]
     pub block_id: Option<BlockId>,
     /// Inclusion state of the transaction
-    #[serde(rename = "inclusionState")]
     pub inclusion_state: InclusionState,
     /// Timestamp
     pub timestamp: String,
-    #[serde(rename = "transactionId")]
     pub transaction_id: TransactionId,
     /// Network id to ignore outputs when set_client_options is used to switch to another network
-    #[serde(rename = "networkId")]
     pub network_id: String,
     /// If the transaction was created by the wallet or if it was sent by someone else and is incoming
     pub incoming: bool,

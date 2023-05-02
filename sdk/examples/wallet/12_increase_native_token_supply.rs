@@ -1,35 +1,35 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example increase_native_token_supply --release
-// In this example we will melt an existing native token with its foundry
-// Rename `.env.example` to `.env` first
+//! In this example we will melt an existing native token with its foundry.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example increase_native_token_supply --release`
 
-use std::{env, str::FromStr};
+use std::str::FromStr;
 
-use dotenv::dotenv;
 use iota_sdk::{
     types::block::output::TokenId,
-    wallet::{account_manager::AccountManager, Result, U256},
+    wallet::{Result, Wallet, U256},
 };
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
-    // Create the account manager
-    let manager = AccountManager::builder().finish().await?;
+    // Create the wallet
+    let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = manager.get_account("Alice").await?;
-
-    let balance = account.balance().await?;
+    let account = wallet.get_account("Alice").await?;
+    // May want to ensure the account is synced before sending a transaction.
+    let balance = account.sync(None).await?;
     println!("Balance before melting:\n{balance:?}",);
 
     // Set the stronghold password
-    manager
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+    wallet
+        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Replace with a TokenId that is available in the account, the foundry output which minted it, also needs to be
@@ -38,13 +38,20 @@ async fn main() -> Result<()> {
 
     // Mint some more native tokens
     let mint_amount = U256::from(10);
-    let mint_transaction = account
+    let transaction = account
         .increase_native_token_supply(token_id, mint_amount, None, None)
         .await?;
+    println!("Transaction sent: {}", transaction.transaction.transaction_id);
 
-    account
-        .retry_transaction_until_included(&mint_transaction.transaction.transaction_id, None, None)
+    let block_id = account
+        .retry_transaction_until_included(&transaction.transaction.transaction_id, None, None)
         .await?;
+
+    println!(
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
+    );
 
     let balance = account.sync(None).await?;
 

@@ -6,7 +6,7 @@ mod metadata;
 mod sender;
 mod tag;
 
-use alloc::{boxed::Box, vec::Vec};
+use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
 
 use bitflags::bitflags;
 use derive_more::{Deref, From};
@@ -18,7 +18,7 @@ pub(crate) use self::{metadata::MetadataFeatureLength, tag::TagFeatureLength};
 use crate::types::block::{create_bitflags, Error};
 
 ///
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Packable)]
+#[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -39,6 +39,17 @@ pub enum Feature {
     /// A tag feature.
     #[packable(tag = TagFeature::KIND)]
     Tag(TagFeature),
+}
+
+impl PartialOrd for Feature {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+        self.kind().partial_cmp(&other.kind())
+    }
+}
+impl Ord for Feature {
+    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+        self.partial_cmp(other).unwrap()
+    }
 }
 
 impl core::fmt::Debug for Feature {
@@ -159,7 +170,16 @@ impl TryFrom<Vec<Feature>> for Features {
 
     #[inline(always)]
     fn try_from(features: Vec<Feature>) -> Result<Self, Self::Error> {
-        Self::new(features)
+        Self::from_vec(features)
+    }
+}
+
+impl TryFrom<BTreeSet<Feature>> for Features {
+    type Error = Error;
+
+    #[inline(always)]
+    fn try_from(features: BTreeSet<Feature>) -> Result<Self, Self::Error> {
+        Self::from_set(features)
     }
 }
 
@@ -176,8 +196,8 @@ impl Features {
     ///
     pub const COUNT_MAX: u8 = 4;
 
-    /// Creates a new [`Features`].
-    pub fn new(features: Vec<Feature>) -> Result<Self, Error> {
+    /// Creates a new [`Features`] from a vec.
+    pub fn from_vec(features: Vec<Feature>) -> Result<Self, Error> {
         let mut features = BoxedSlicePrefix::<Feature, FeatureCount>::try_from(features.into_boxed_slice())
             .map_err(Error::InvalidFeatureCount)?;
 
@@ -186,6 +206,17 @@ impl Features {
         verify_unique_sorted::<true>(&features, &())?;
 
         Ok(Self(features))
+    }
+
+    /// Creates a new [`Features`] from an ordered set.
+    pub fn from_set(features: BTreeSet<Feature>) -> Result<Self, Error> {
+        Ok(Self(
+            features
+                .into_iter()
+                .collect::<Box<[_]>>()
+                .try_into()
+                .map_err(Error::InvalidFeatureCount)?,
+        ))
     }
 
     /// Gets a reference to a [`Feature`] from a feature kind, if any.
@@ -275,9 +306,10 @@ mod test {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::{format, string::ToString};
+
     use serde::{Deserialize, Serialize, Serializer};
     use serde_json::Value;
 
@@ -286,7 +318,7 @@ pub mod dto {
         tag::dto::TagFeatureDto,
     };
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum FeatureDto {
@@ -392,17 +424,17 @@ pub mod dto {
     }
 
     impl TryFrom<&FeatureDto> for Feature {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &FeatureDto) -> Result<Self, Self::Error> {
             Ok(match value {
                 FeatureDto::Sender(v) => Self::Sender(SenderFeature::new((&v.address).try_into()?)),
                 FeatureDto::Issuer(v) => Self::Issuer(IssuerFeature::new((&v.address).try_into()?)),
                 FeatureDto::Metadata(v) => Self::Metadata(MetadataFeature::new(
-                    prefix_hex::decode(&v.data).map_err(|_e| DtoError::InvalidField("MetadataFeature"))?,
+                    prefix_hex::decode(&v.data).map_err(|_e| Error::InvalidField("MetadataFeature"))?,
                 )?),
                 FeatureDto::Tag(v) => Self::Tag(TagFeature::new(
-                    prefix_hex::decode(&v.tag).map_err(|_e| DtoError::InvalidField("TagFeature"))?,
+                    prefix_hex::decode(&v.tag).map_err(|_e| Error::InvalidField("TagFeature"))?,
                 )?),
             })
         }

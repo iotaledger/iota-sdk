@@ -4,7 +4,7 @@
 use dialoguer::Completion;
 
 pub(crate) struct AccountCompletion<'a> {
-    options: [&'a str; 33],
+    options: [&'a str; 36],
 }
 
 pub(crate) const ACCOUNT_COMPLETION: AccountCompletion = AccountCompletion {
@@ -14,6 +14,7 @@ pub(crate) const ACCOUNT_COMPLETION: AccountCompletion = AccountCompletion {
         "burn-native-token",
         "burn-nft",
         "claim",
+        "claimable-outputs",
         "consolidate",
         "create-alias-output",
         "decrease-native-token-supply",
@@ -28,11 +29,13 @@ pub(crate) const ACCOUNT_COMPLETION: AccountCompletion = AccountCompletion {
         "output",
         "outputs",
         "send",
-        "send-micro",
         "send-native-token",
         "send-nft",
         "sync",
+        "transaction",
         "transactions",
+        "tx",
+        "txs",
         "unspent-outputs",
         "vote",
         "stop-participating",

@@ -19,8 +19,9 @@ use super::{
 };
 use crate::{
     client::{
+        constants::HD_WALLET_TYPE,
         secret::{GenerateAddressOptions, SecretManage},
-        Error, Result,
+        stronghold::Error,
     },
     types::block::{
         address::{Address, Ed25519Address},
@@ -30,32 +31,43 @@ use crate::{
 
 #[async_trait]
 impl SecretManage for StrongholdAdapter {
+    type Error = Error;
+
     async fn generate_addresses(
         &self,
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        internal: bool,
-        _options: Option<GenerateAddressOptions>,
-    ) -> Result<Vec<Address>> {
+        options: Option<GenerateAddressOptions>,
+    ) -> Result<Vec<Address>, Self::Error> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
         // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
         // Thus, we put an extra guard here to prevent this methods from being invoked when our cached key has
         // been cleared.
         if !self.is_key_available().await {
-            return Err(Error::StrongholdKeyCleared);
+            return Err(Error::KeyCleared);
         }
 
         // Stronghold arguments.
         let seed_location = Slip10DeriveInput::Seed(Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH));
-        let derive_location = Location::generic(SECRET_VAULT_PATH, DERIVE_OUTPUT_RECORD_PATH);
 
         // Addresses to return.
         let mut addresses = Vec::new();
+        let internal = options.map(|o| o.internal).unwrap_or_default();
 
         for address_index in address_indexes {
-            let chain = Chain::from_u32_hardened(vec![44u32, coin_type, account_index, internal as u32, address_index]);
+            let bip_path = vec![HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index];
+            let chain = Chain::from_u32_hardened(bip_path);
+
+            let derive_location = Location::generic(
+                SECRET_VAULT_PATH,
+                [
+                    DERIVE_OUTPUT_RECORD_PATH,
+                    &chain.segments().iter().flat_map(|seg| seg.bs()).collect::<Vec<u8>>(),
+                ]
+                .concat(),
+            );
 
             // Derive a SLIP-10 private key in the vault.
             self.slip10_derive(chain, seed_location.clone(), derive_location.clone())
@@ -63,6 +75,14 @@ impl SecretManage for StrongholdAdapter {
 
             // Get the Ed25519 public key from the derived SLIP-10 private key in the vault.
             let public_key = self.ed25519_public_key(derive_location.clone()).await?;
+
+            // Cleanup location afterwards
+            self.stronghold
+                .lock()
+                .await
+                .get_client(PRIVATE_DATA_CLIENT_PATH)?
+                .vault(SECRET_VAULT_PATH)
+                .delete_secret(derive_location.record_path())?;
 
             // Hash the public key to get the address.
             let hash = Blake2b256::digest(public_key);
@@ -77,39 +97,43 @@ impl SecretManage for StrongholdAdapter {
         Ok(addresses)
     }
 
-    async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature> {
+    async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
         // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
         // Thus, we put an extra guard here to prevent this methods from being invoked when our cached key has
         // been cleared.
         if !self.is_key_available().await {
-            return Err(Error::StrongholdKeyCleared);
+            return Err(Error::KeyCleared);
         }
 
         // Stronghold arguments.
         let seed_location = Slip10DeriveInput::Seed(Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH));
-        let derive_location = Location::generic(SECRET_VAULT_PATH, DERIVE_OUTPUT_RECORD_PATH);
 
-        // Stronghold asks for an older version of [Chain], so we have to perform a conversion here.
-        let chain = {
-            let raw: Vec<u32> = chain
-                .segments()
-                .iter()
-                // XXX: "ser32(i)". RTFSC: [crypto::keys::slip10::Segment::from_u32()]
-                .map(|seg| u32::from_be_bytes(seg.bs()))
-                .collect();
-
-            Chain::from_u32_hardened(raw)
-        };
+        let derive_location = Location::generic(
+            SECRET_VAULT_PATH,
+            [
+                DERIVE_OUTPUT_RECORD_PATH,
+                &chain.segments().iter().flat_map(|seg| seg.bs()).collect::<Vec<u8>>(),
+            ]
+            .concat(),
+        );
 
         // Derive a SLIP-10 private key in the vault.
-        self.slip10_derive(chain, seed_location, derive_location.clone())
+        self.slip10_derive(chain.clone(), seed_location, derive_location.clone())
             .await?;
 
         // Get the Ed25519 public key from the derived SLIP-10 private key in the vault.
         let public_key = self.ed25519_public_key(derive_location.clone()).await?;
-        let signature = self.ed25519_sign(derive_location, msg).await?;
+        let signature = self.ed25519_sign(derive_location.clone(), msg).await?;
+
+        // Cleanup location afterwards
+        self.stronghold
+            .lock()
+            .await
+            .get_client(PRIVATE_DATA_CLIENT_PATH)?
+            .vault(SECRET_VAULT_PATH)
+            .delete_secret(derive_location.record_path())?;
 
         Ok(Ed25519Signature::new(public_key, signature))
     }
@@ -118,7 +142,7 @@ impl SecretManage for StrongholdAdapter {
 /// Private methods for the secret manager implementation.
 impl StrongholdAdapter {
     /// Execute [Procedure::BIP39Recover] in Stronghold to put a mnemonic into the Stronghold vault.
-    async fn bip39_recover(&self, mnemonic: String, passphrase: Option<String>, output: Location) -> Result<()> {
+    async fn bip39_recover(&self, mnemonic: String, passphrase: Option<String>, output: Location) -> Result<(), Error> {
         self.stronghold
             .lock()
             .await
@@ -133,7 +157,7 @@ impl StrongholdAdapter {
     }
 
     /// Execute [Procedure::SLIP10Derive] in Stronghold to derive a SLIP-10 private key in the Stronghold vault.
-    async fn slip10_derive(&self, chain: Chain, input: Slip10DeriveInput, output: Location) -> Result<()> {
+    async fn slip10_derive(&self, chain: Chain, input: Slip10DeriveInput, output: Location) -> Result<(), Error> {
         if let Err(err) = self
             .stronghold
             .lock()
@@ -146,7 +170,7 @@ impl StrongholdAdapter {
                     // Custom error for missing vault error: https://github.com/iotaledger/stronghold.rs/blob/7f0a2e0637394595e953f9071fa74b1d160f51ec/client/src/types/error.rs#L170
                     if e.to_string().contains("does not exist") {
                         // Actually the seed, derived from the mnemonic, is not stored.
-                        return Err(Error::StrongholdMnemonicMissing);
+                        return Err(Error::MnemonicMissing);
                     } else {
                         return Err(err.into());
                     }
@@ -162,7 +186,7 @@ impl StrongholdAdapter {
 
     /// Execute [Procedure::Ed25519PublicKey] in Stronghold to get an Ed25519 public key from the SLIP-10 private key
     /// located in `private_key`.
-    async fn ed25519_public_key(&self, private_key: Location) -> Result<[u8; 32]> {
+    async fn ed25519_public_key(&self, private_key: Location) -> Result<[u8; 32], Error> {
         Ok(self
             .stronghold
             .lock()
@@ -175,7 +199,7 @@ impl StrongholdAdapter {
     }
 
     /// Execute [Procedure::Ed25519Sign] in Stronghold to sign `msg` with `private_key` stored in the Stronghold vault.
-    async fn ed25519_sign(&self, private_key: Location, msg: &[u8]) -> Result<[u8; 64]> {
+    async fn ed25519_sign(&self, private_key: Location, msg: &[u8]) -> Result<[u8; 64], Error> {
         Ok(self
             .stronghold
             .lock()
@@ -188,10 +212,10 @@ impl StrongholdAdapter {
     }
 
     /// Store a mnemonic into the Stronghold vault.
-    pub async fn store_mnemonic(&mut self, mut mnemonic: String) -> Result<()> {
+    pub async fn store_mnemonic(&self, mut mnemonic: String) -> Result<(), Error> {
         // The key needs to be supplied first.
         if self.key_provider.lock().await.is_none() {
-            return Err(Error::StrongholdKeyCleared);
+            return Err(Error::KeyCleared);
         };
 
         // Stronghold arguments.
@@ -203,7 +227,7 @@ impl StrongholdAdapter {
 
         // Check if the mnemonic is valid.
         crypto::keys::bip39::wordlist::verify(&trimmed_mnemonic, &crypto::keys::bip39::wordlist::ENGLISH)
-            .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
+            .map_err(|e| Error::InvalidMnemonic(format!("{e:?}")))?;
 
         // We need to check if there has been a mnemonic stored in Stronghold or not to prevent overwriting it.
         if self
@@ -213,7 +237,7 @@ impl StrongholdAdapter {
             .get_client(PRIVATE_DATA_CLIENT_PATH)?
             .record_exists(&output)?
         {
-            return Err(crate::client::Error::StrongholdMnemonicAlreadyStored);
+            return Err(Error::MnemonicAlreadyStored);
         }
 
         // Execute the BIP-39 recovery procedure to put it into the vault (in memory).
@@ -237,11 +261,11 @@ mod tests {
     async fn test_address_generation() {
         let stronghold_path = "test_address_generation.stronghold";
         // Remove potential old stronghold file
-        std::fs::remove_file(stronghold_path).unwrap_or(());
+        std::fs::remove_file(stronghold_path).ok();
         let mnemonic = String::from(
             "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally",
         );
-        let mut stronghold_adapter = StrongholdAdapter::builder()
+        let stronghold_adapter = StrongholdAdapter::builder()
             .password("drowssap")
             .build(stronghold_path)
             .unwrap();
@@ -252,7 +276,7 @@ mod tests {
         assert!(Path::new(stronghold_path).exists());
 
         let addresses = stronghold_adapter
-            .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, false, None)
+            .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
             .await
             .unwrap();
 
@@ -262,14 +286,14 @@ mod tests {
         );
 
         // Remove garbage after test, but don't care about the result
-        std::fs::remove_file(stronghold_path).unwrap_or(());
+        std::fs::remove_file(stronghold_path).ok();
     }
 
     #[tokio::test]
     async fn test_key_cleared() {
         let stronghold_path = "test_key_cleared.stronghold";
         // Remove potential old stronghold file
-        std::fs::remove_file(stronghold_path).unwrap_or(());
+        std::fs::remove_file(stronghold_path).ok();
         let mnemonic = String::from(
             "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally",
         );
@@ -288,7 +312,7 @@ mod tests {
         // Address generation returns an error when the key is cleared.
         assert!(
             stronghold_adapter
-                .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, false, None,)
+                .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, None,)
                 .await
                 .is_err()
         );
@@ -297,7 +321,7 @@ mod tests {
 
         // After setting the correct password it works again.
         let addresses = stronghold_adapter
-            .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, false, None)
+            .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
             .await
             .unwrap();
 
@@ -307,6 +331,6 @@ mod tests {
         );
 
         // Remove garbage after test, but don't care about the result
-        std::fs::remove_file(stronghold_path).unwrap_or(());
+        std::fs::remove_file(stronghold_path).ok();
     }
 }

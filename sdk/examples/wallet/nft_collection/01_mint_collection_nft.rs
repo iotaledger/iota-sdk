@@ -1,41 +1,41 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example mint_collection_nft --release
-// In this example we will mint the 150 nfts with issuer feature.
-// Rename `.env.example` to `.env` and run 01_create_wallet.rs before
+//! In this example we will mint the 150 nfts with issuer feature.
+//! Rename `.env.example` to `.env` and run 01_create_wallet.rs before.
+//!
+//! `cargo run --example mint_collection_nft --release`
 
-use std::{env, str::FromStr};
+use std::str::FromStr;
 
-use dotenv::dotenv;
 use iota_sdk::{
     types::block::{
         address::{Address, NftAddress},
         output::NftId,
     },
-    wallet::{account_manager::AccountManager, NftOptions, Result},
+    wallet::{NftOptions, Result, Wallet},
 };
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     let nft_collection_size = 15;
     // Set this to the NFT id from the mint_issuer_nft example
     let issuer_nft_id = NftId::from_str("0x13c490ac052e575cffd40e170c2d46c6029b8b68cdf0e899b34cde93d2a7b28a")?;
 
-    // Create the account manager
-    let manager = AccountManager::builder().finish().await?;
+    // Create the wallet
+    let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = manager.get_account("Alice").await?;
+    let account = wallet.get_account("Alice").await?;
 
     account.sync(None).await?;
 
     // Set the stronghold password
-    manager
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+    wallet
+        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     let bech32_hrp = account.client().get_bech32_hrp().await?;
@@ -58,14 +58,11 @@ async fn main() -> Result<()> {
     for nfts in nft_options.chunks(50) {
         let transaction = account.mint_nfts(nfts.to_vec(), None).await?;
 
-        println!("Transaction: {}", transaction.transaction_id);
-        if let Some(block_id) = transaction.block_id {
-            println!(
-                "Block sent: {}/api/core/v2/blocks/{}",
-                &env::var("NODE_URL").unwrap(),
-                block_id
-            );
-        }
+        println!(
+            "Transaction with chunk of NFTs mint sent: {}/transaction/{}",
+            std::env::var("EXPLORER_URL").unwrap(),
+            transaction.transaction_id
+        );
         // Try to get the transaction confirmed
         account
             .retry_transaction_until_included(&transaction.transaction_id, None, None)

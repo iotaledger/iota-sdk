@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example all_automatic_input_selection --release
+//! In this example we will create all output types in a single transaction.
+//!
+//! `cargo run --example all_automatic_input_selection --release`
 
 use iota_sdk::{
     client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
@@ -22,16 +24,15 @@ use iota_sdk::{
 };
 use primitive_types::U256;
 
-/// In this example we will create all output types in a single transaction
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production!
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     // Configure your own mnemonic in the ".env" file. Since the output amount cannot be zero, the seed must contain
     // non-zero balance.
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance.
@@ -52,7 +53,7 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     // create new alias and nft output
     //////////////////////////////////
-    let alias_output_builder = AliasOutputBuilder::new_with_amount(2_000_000, AliasId::null())?
+    let alias_output_builder = AliasOutputBuilder::new_with_amount(2_000_000, AliasId::null())
         .add_feature(SenderFeature::new(address))
         .add_feature(MetadataFeature::new(vec![1, 2, 3])?)
         .add_immutable_feature(IssuerFeature::new(address))
@@ -60,7 +61,7 @@ async fn main() -> Result<()> {
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
 
     // address of the owner of the NFT
-    let nft_output_builder = NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
+    let nft_output_builder = NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
         .add_unlock_condition(AddressUnlockCondition::new(address));
 
     let outputs = vec![
@@ -80,7 +81,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Transaction with new nft and alias output sent: {node_url}/api/core/v2/blocks/{}",
+        "Block with new nft and alias output sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -100,13 +101,13 @@ async fn main() -> Result<()> {
     );
     let token_id = TokenId::from(foundry_id);
 
-    let foundry_output_builder = FoundryOutputBuilder::new_with_amount(1_000_000, 1, token_scheme)?
+    let foundry_output_builder = FoundryOutputBuilder::new_with_amount(1_000_000, 1, token_scheme)
         .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
 
     let outputs = vec![
         alias_output_builder
             .clone()
-            .with_amount(1_000_000)?
+            .with_amount(1_000_000)
             .with_alias_id(alias_id)
             .with_state_index(1)
             .with_foundry_counter(1)
@@ -129,7 +130,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Transaction with alias id, foundry output with minted native tokens, and nfts sent: {node_url}/api/core/v2/blocks/{}",
+        "Block with alias id, foundry output with minted native tokens, and nfts sent: {explorer_url}/block/{}",
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -139,11 +140,11 @@ async fn main() -> Result<()> {
     //////////////////////////////////
 
     let basic_output_builder =
-        BasicOutputBuilder::new_with_amount(1_000_000)?.add_unlock_condition(AddressUnlockCondition::new(address));
+        BasicOutputBuilder::new_with_amount(1_000_000).add_unlock_condition(AddressUnlockCondition::new(address));
 
     let outputs = vec![
         alias_output_builder
-            .with_amount(1_000_000)?
+            .with_amount(1_000_000)
             .with_alias_id(alias_id)
             .with_state_index(2)
             .with_foundry_counter(1)
@@ -165,7 +166,7 @@ async fn main() -> Result<()> {
         // with storage deposit return
         basic_output_builder
             .clone()
-            .with_amount(234_100)?
+            .with_amount(234_100)
             .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                 address,
                 234_000,
@@ -190,10 +191,7 @@ async fn main() -> Result<()> {
         .with_outputs(outputs)?
         .finish()
         .await?;
-    println!(
-        "Transaction with all outputs sent: {node_url}/api/core/v2/blocks/{}",
-        block.id()
-    );
+    println!("Block with all outputs sent: {explorer_url}/block/{}", block.id());
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
     Ok(())

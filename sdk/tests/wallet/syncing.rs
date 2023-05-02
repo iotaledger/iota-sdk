@@ -12,7 +12,37 @@ use iota_sdk::{
     wallet::{account::SyncOptions, Result},
 };
 
-use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
+use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
+
+#[tokio::test]
+async fn updated_default_sync_options() -> Result<()> {
+    let storage_path = "test-storage/updated_default_sync_options";
+    setup(storage_path)?;
+
+    let default_sync = SyncOptions::default();
+
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account = wallet.create_account().finish().await?;
+
+    assert_eq!(default_sync, account.default_sync_options().await);
+
+    let custom_options = SyncOptions {
+        address_start_index: 10,
+        ..Default::default()
+    };
+    account.set_default_sync_options(custom_options.clone()).await?;
+    assert_eq!(custom_options, account.default_sync_options().await);
+
+    drop(account);
+    drop(wallet);
+
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account = wallet.get_account(0).await?;
+
+    assert_eq!(custom_options, account.default_sync_options().await);
+
+    tear_down(storage_path)
+}
 
 #[ignore]
 #[tokio::test]
@@ -20,20 +50,20 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
     let storage_path = "test-storage/sync_only_most_basic_outputs";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&manager, 1).await?[0];
-    let account_1 = manager.create_account().finish().await?;
+    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_1 = wallet.create_account().finish().await?;
 
     let account_1_address = *account_1.addresses().await?[0].address().as_ref();
 
     let token_supply = account_0.client().get_token_supply().await?;
     // Only one basic output without further unlock conditions
     let outputs = vec![
-        BasicOutputBuilder::new_with_amount(1_000_000)?
+        BasicOutputBuilder::new_with_amount(1_000_000)
             .with_unlock_conditions(vec![AddressUnlockCondition::new(account_1_address)])
             .finish_output(token_supply)?,
-        BasicOutputBuilder::new_with_amount(1_000_000)?
+        BasicOutputBuilder::new_with_amount(1_000_000)
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(account_1_address)),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
@@ -43,7 +73,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
                 )?),
             ])
             .finish_output(token_supply)?,
-        BasicOutputBuilder::new_with_amount(1_000_000)?
+        BasicOutputBuilder::new_with_amount(1_000_000)
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(account_1_address)),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
@@ -53,7 +83,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
                 )?),
             ])
             .finish_output(token_supply)?,
-        BasicOutputBuilder::new_with_amount(1_000_000)?
+        BasicOutputBuilder::new_with_amount(1_000_000)
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(account_1_address)),
                 UnlockCondition::StorageDepositReturn(StorageDepositReturnUnlockCondition::new(
@@ -63,10 +93,10 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
                 )?),
             ])
             .finish_output(token_supply)?,
-        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
+        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions(vec![AddressUnlockCondition::new(account_1_address)])
             .finish_output(token_supply)?,
-        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
+        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(account_1_address)),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
@@ -75,7 +105,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
                 )?),
             ])
             .finish_output(token_supply)?,
-        AliasOutputBuilder::new_with_amount(1_000_000, AliasId::null())?
+        AliasOutputBuilder::new_with_amount(1_000_000, AliasId::null())
             .with_unlock_conditions(vec![
                 UnlockCondition::StateControllerAddress(StateControllerAddressUnlockCondition::new(account_1_address)),
                 UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(account_1_address)),
@@ -95,9 +125,9 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
             ..Default::default()
         }))
         .await?;
-    assert_eq!(balance.potentially_locked_outputs.len(), 0);
-    assert_eq!(balance.nfts.len(), 0);
-    assert_eq!(balance.aliases.len(), 0);
+    assert_eq!(balance.potentially_locked_outputs().len(), 0);
+    assert_eq!(balance.nfts().len(), 0);
+    assert_eq!(balance.aliases().len(), 0);
     let unspent_outputs = account_1.unspent_outputs(None).await?;
     assert_eq!(unspent_outputs.len(), 1);
     unspent_outputs.into_iter().for_each(|output_data| {

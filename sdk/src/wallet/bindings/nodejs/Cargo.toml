@@ -15,6 +15,7 @@ publish = false
 
 [lib]
 crate-type = [ "cdylib" ]
+doc = false
 
 [dependencies]
 iota-sdk = { path = "../../../..", default-features = false, features = [ "wallet", "events", "ledger_nano", "storage", "stronghold", "tls", "message_interface", "participation", "rocksdb" ] }

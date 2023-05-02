@@ -9,7 +9,7 @@ use iota_sdk::types::block::{
         Address, NftAddress,
     },
     output::NftId,
-    DtoError,
+    Error,
 };
 use packable::PackableExt;
 
@@ -97,7 +97,7 @@ fn bech32_roundtrip() {
 
     assert_eq!(
         Address::try_from_bech32_with_hrp(bech32).unwrap(),
-        (address, String::from("rms"))
+        (String::from("rms"), address)
     );
 }
 
@@ -135,10 +135,7 @@ fn dto_invalid_nft_id() {
         nft_id: NFT_ID_INVALID.to_string(),
     };
 
-    assert!(matches!(
-        NftAddress::try_from(&dto),
-        Err(DtoError::InvalidField("nftId"))
-    ));
+    assert!(matches!(NftAddress::try_from(&dto), Err(Error::InvalidField("nftId"))));
 }
 
 #[test]

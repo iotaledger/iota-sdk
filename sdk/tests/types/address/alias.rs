@@ -9,7 +9,7 @@ use iota_sdk::types::block::{
         Address, AliasAddress,
     },
     output::AliasId,
-    DtoError,
+    Error,
 };
 use packable::PackableExt;
 
@@ -97,7 +97,7 @@ fn bech32_roundtrip() {
 
     assert_eq!(
         Address::try_from_bech32_with_hrp(bech32).unwrap(),
-        (address, String::from("rms"))
+        (String::from("rms"), address)
     );
 }
 
@@ -137,7 +137,7 @@ fn dto_invalid_alias_id() {
 
     assert!(matches!(
         AliasAddress::try_from(&dto),
-        Err(DtoError::InvalidField("aliasId"))
+        Err(Error::InvalidField("aliasId"))
     ));
 }
 

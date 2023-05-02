@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example nft --release
+//! In this example we will create an NFT output.
+//!
+//! `cargo run --example nft --release`
 
 use iota_sdk::{
     client::{
@@ -17,16 +19,15 @@ use iota_sdk::{
     },
 };
 
-/// In this example we will create an NFT output
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production!
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     // Configure your own mnemonic in the ".env" file. Since the output amount cannot be zero, the seed must contain
     // non-zero balance.
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance.
@@ -47,7 +48,7 @@ async fn main() -> Result<()> {
 
     let outputs = vec![
         // address of the owner of the NFT
-        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
+        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .add_unlock_condition(AddressUnlockCondition::new(address))
             // address of the minter of the NFT
             // .add_feature(IssuerFeature::new(address))
@@ -61,10 +62,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!(
-        "Transaction with new NFT output sent: {node_url}/api/core/v2/blocks/{}",
-        block.id()
-    );
+    println!("Block with new NFT output sent: {explorer_url}/block/{}", block.id());
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
     //////////////////////////////////
@@ -95,7 +93,7 @@ async fn main() -> Result<()> {
         .with_input(nft_output_id.into())?
         .with_input(output_ids_response.items[0].into())?
         .with_outputs(vec![
-            NftOutputBuilder::new_with_amount(1_000_000 + output.amount(), nft_id)?
+            NftOutputBuilder::new_with_amount(1_000_000 + output.amount(), nft_id)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
                 .finish_output(token_supply)?,
         ])?
@@ -103,7 +101,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Transaction with input(basic output) to NFT output sent: {node_url}/api/core/v2/blocks/{}",
+        "Block with input (basic output) to NFT output sent: {explorer_url}/block/{}",
         block.id()
     );
 
@@ -117,7 +115,7 @@ async fn main() -> Result<()> {
     let output_response = client.get_output(&nft_output_id).await?;
     let output = Output::try_from_dto(&output_response.output, token_supply)?;
     let outputs = vec![
-        BasicOutputBuilder::new_with_amount(output.amount())?
+        BasicOutputBuilder::new_with_amount(output.amount())
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish_output(token_supply)?,
     ];
@@ -129,7 +127,7 @@ async fn main() -> Result<()> {
         .with_outputs(outputs)?
         .finish()
         .await?;
-    println!("Burn transaction sent: {node_url}/api/core/v2/blocks/{}", block.id());
+    println!("Block with burn transaction sent: {explorer_url}/block/{}", block.id());
     let _ = client.retry_until_included(&block.id(), None, None).await?;
     Ok(())
 }

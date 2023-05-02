@@ -1,38 +1,34 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example mint_nft --release
-// In this example we will mint a native token
-// Rename `.env.example` to `.env` first
+//! In this example we will mint a native token.
+//! Rename `.env.example` to `.env` first.
+//!
+//! `cargo run --example mint_nft --release`
 
-use std::env;
-
-use dotenv::dotenv;
 use iota_sdk::{
     types::block::output::{
         feature::{IssuerFeature, SenderFeature},
         unlock_condition::AddressUnlockCondition,
         NftId, NftOutputBuilder,
     },
-    wallet::{account_manager::AccountManager, NftOptions, Result},
+    wallet::{NftOptions, Result, Wallet},
 };
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
-    // Create the account manager
-    let manager = AccountManager::builder().finish().await?;
+    // Create the wallet
+    let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = manager.get_account("Alice").await?;
-
-    account.sync(None).await?;
+    let account = wallet.get_account("Alice").await?;
 
     // Set the stronghold password
-    manager
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+    wallet
+        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     let nft_options = vec![NftOptions {
@@ -45,12 +41,17 @@ async fn main() -> Result<()> {
     }];
 
     let transaction = account.mint_nfts(nft_options, None).await?;
+    println!("Transaction sent: {}", transaction.transaction_id);
 
-    println!("Transaction: {}.", transaction.transaction_id,);
+    // Wait for transaction to get included
+    let block_id = account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
+
     println!(
-        "Block sent: {}/api/core/v2/blocks/{}.",
-        &env::var("NODE_URL").unwrap(),
-        transaction.block_id.expect("no block created yet")
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
     );
 
     // Build nft output manually
@@ -58,7 +59,7 @@ async fn main() -> Result<()> {
     let token_supply = account.client().get_token_supply().await?;
     let outputs = vec![
         // address of the owner of the NFT
-        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())?
+        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .add_unlock_condition(AddressUnlockCondition::new(*sender_address.as_ref()))
             .add_feature(SenderFeature::new(*sender_address.as_ref()))
             .add_immutable_feature(IssuerFeature::new(*sender_address.as_ref()))
@@ -66,13 +67,21 @@ async fn main() -> Result<()> {
     ];
 
     let transaction = account.send(outputs, None).await?;
+    println!("Transaction sent: {}", transaction.transaction_id);
+
+    // Wait for transaction to get included
+    let block_id = account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
 
     println!(
-        "Transaction: {} Block sent: {}/api/core/v2/blocks/{}",
-        transaction.transaction_id,
-        &env::var("NODE_URL").unwrap(),
-        transaction.block_id.expect("No block created yet")
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
     );
+
+    // Ensure the account is synced after minting.
+    account.sync(None).await?;
 
     Ok(())
 }

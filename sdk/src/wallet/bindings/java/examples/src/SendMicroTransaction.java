@@ -11,8 +11,10 @@ import org.iota.types.secret.StrongholdSecretManager;
 
 public class SendMicroTransaction {
     public static void main(String[] args) throws WalletException, InterruptedException, InitializeWalletException {
-        // This example assumes that a wallet has already been created using the ´SetupWallet.java´ example.
-        // If you haven't run the ´SetupWallet.java´ example yet, you must run it first to be able to load the wallet as shown below:
+        // This example assumes that a wallet has already been created using the
+        // ´SetupWallet.java´ example.
+        // If you haven't run the ´SetupWallet.java´ example yet, you must run it first
+        // to be able to load the wallet as shown below:
         Wallet wallet = new Wallet(new WalletConfig()
                 .withClientOptions(new ClientConfig().withNodes(Env.NODE))
                 .withSecretManager(new StrongholdSecretManager(Env.STRONGHOLD_PASSWORD, null, Env.STRONGHOLD_VAULT_PATH))
@@ -20,27 +22,27 @@ public class SendMicroTransaction {
                 .withStoragePath(Env.STORAGE_PATH)
         );
 
-        // Get account and sync it with the registered node to ensure that its balances are up-to-date.
-        AccountHandle a = wallet.getAccount(new AccountAlias(Env.ACCOUNT_NAME));
-        a.syncAccount(new SyncAccount().withOptions(new SyncOptions()));
+        // Get account and sync it with the registered node to ensure that its balances
+        // are up-to-date.
+        Account account = wallet.getAccount(Env.ACCOUNT_NAME);
 
-        // Fund the account for this example.
-        ExampleUtils.fundAccount(a);
-
-        // TODO: replace with your own values.
-        String receiverAddress = a.getPublicAddresses()[0].getAddress();
-        String amount = "1";
+        AddressWithAmount[] outputs = new AddressWithAmount[] {
+                new AddressWithAmount()
+                        .withAddress("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")
+                                        .withAmount("1")
+        };
 
         // Configure outputs
-        Transaction t = a.sendMicroTransaction(new org.iota.types.account_methods.SendMicroTransaction().withAddressesWithMicroAmount(new AddressWithMicroAmount[]{new AddressWithMicroAmount()
-                .withAddress(receiverAddress)
-                .withAmount(amount)
-        }));
+        Transaction transaction = account.sendAmount(
+                new org.iota.types.account_methods.SendAmount().withAddressesWithAmount(outputs)
+                        .withOptions(new TransactionOptions().withAllowMicroAmount(true)));
 
         // Print transaction
-        System.out.println(t);
+        System.out.println("Transaction: " + transaction.getTransactionId());
+        System.out.println("Block sent: " + Env.EXPLORER + "/block/" + transaction.getBlockId());
 
-        // In case you are done and don't need the wallet instance anymore you can destroy the instance to clean up memory.
+        // In case you are done and don't need the wallet instance anymore you can
+        // destroy the instance to clean up memory.
         // For this, check out the ´DestroyWallet.java´ example.
     }
 

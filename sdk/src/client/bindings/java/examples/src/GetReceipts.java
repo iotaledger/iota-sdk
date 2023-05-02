@@ -1,8 +1,8 @@
 import org.iota.Client;
 import org.iota.types.ClientConfig;
-import org.iota.types.expections.ClientException;
+import org.iota.types.exceptions.ClientException;
 import org.iota.types.Receipt;
-import org.iota.types.expections.InitializeClientException;
+import org.iota.types.exceptions.InitializeClientException;
 
 public class GetReceipts {
     public static void main(String[] args) throws ClientException, InitializeClientException {

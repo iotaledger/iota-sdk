@@ -1,14 +1,20 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example generate_addresses --release -- [NODE URL]
+//! TODO: Example description
+//!
+//! `cargo run --example generate_addresses --release -- [NODE_URL]`
 
-use iota_sdk::client::{api::GetAddressesBuilder, secret::SecretManager, Client, Result};
+use iota_sdk::client::{
+    api::GetAddressesBuilder,
+    secret::{GenerateAddressOptions, SecretManager},
+    Client, Result,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv::dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args()
@@ -26,7 +32,8 @@ async fn main() -> Result<()> {
     // Generate addresses with default account index and range
     let addresses = client.get_addresses(&secret_manager).finish().await?;
 
-    println!("List of generated public addresses:\n{addresses:#?}\n");
+    println!("List of generated public addresses:");
+    println!("{addresses:#?}\n");
 
     // Generate addresses with custom account index and range
     let addresses = client
@@ -36,18 +43,20 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!("List of generated public addresses:\n{addresses:#?}\n");
+    println!("List of generated public addresses:\n");
+    println!("{addresses:#?}\n");
 
     // Generate internal addresses with custom account index and range
     let addresses = client
         .get_addresses(&secret_manager)
         .with_account_index(0)
         .with_range(0..4)
-        .with_internal_addresses(true)
+        .with_options(GenerateAddressOptions::internal())
         .finish()
         .await?;
 
-    println!("List of generated internal addresses:\n{addresses:#?}\n");
+    println!("List of generated internal addresses:\n");
+    println!("{addresses:#?}\n");
 
     // Generating addresses with `client.get_addresses(&secret_manager)`, will by default get the bech32_hrp (Bech32
     // human readable part) from the node info, generating it "offline" requires setting it with
@@ -59,7 +68,8 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!("List of offline generated public addresses:\n{addresses:#?}\n");
+    println!("List of offline generated public addresses:\n");
+    println!("{addresses:#?}\n");
 
     Ok(())
 }

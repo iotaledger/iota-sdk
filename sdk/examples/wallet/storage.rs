@@ -1,30 +1,31 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example storage --release
+//! TODO: Example description
+//!
+//! `cargo run --example storage --release`
 
-use std::{env, time::Instant};
+use std::time::Instant;
 
-use dotenv::dotenv;
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    wallet::{account_manager::AccountManager, ClientOptions, Result},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(&env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let client_options = ClientOptions::new().with_node(&env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
-    let manager = AccountManager::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
@@ -34,11 +35,11 @@ async fn main() -> Result<()> {
 
     // Get account or create a new one
     let account_alias = "logger";
-    let account = match manager.get_account(account_alias.to_string()).await {
+    let account = match wallet.get_account(account_alias.to_string()).await {
         Ok(account) => account,
         _ => {
             // first we'll create an example account and store it
-            manager
+            wallet
                 .create_account()
                 .with_alias(account_alias.to_string())
                 .finish()
@@ -49,7 +50,7 @@ async fn main() -> Result<()> {
     let addresses = account.generate_addresses(3, None).await?;
     let mut bech32_addresses = Vec::new();
     for address in addresses {
-        bech32_addresses.push(address.address().to_bech32());
+        bech32_addresses.push(address.address().to_string());
     }
     println!("Generated new addresses: {bech32_addresses:#?}");
 
@@ -60,6 +61,6 @@ async fn main() -> Result<()> {
     println!("Balance: {balance:?}");
 
     #[cfg(debug_assertions)]
-    manager.verify_integrity().await?;
+    wallet.verify_integrity().await?;
     Ok(())
 }

@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 // TODO missing_docs, unreachable_pub
 #![deny(clippy::nursery, rust_2018_idioms, warnings)]
@@ -8,7 +9,8 @@
     clippy::redundant_pub_crate,
     clippy::module_name_repetitions,
     clippy::missing_const_for_fn,
-    clippy::significant_drop_in_scrutinee
+    clippy::significant_drop_in_scrutinee,
+    clippy::significant_drop_tightening
 )]
 
 #[cfg(feature = "client")]

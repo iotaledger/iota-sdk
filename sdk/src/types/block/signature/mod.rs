@@ -44,14 +44,13 @@ impl Signature {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
     pub use super::ed25519::dto::Ed25519SignatureDto;
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     /// Describes all the different signature types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
@@ -69,7 +68,7 @@ pub mod dto {
     }
 
     impl TryFrom<&SignatureDto> for Signature {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &SignatureDto) -> Result<Self, Self::Error> {
             match value {

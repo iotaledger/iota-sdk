@@ -9,11 +9,11 @@ import org.iota.types.TransactionOptions;
 /// Send native tokens.
 public class SendNativeTokens implements AccountMethod {
 
-    private AddressNativeTokens[] addressesNativeTokens;
+    private AddressNativeTokens[] addressesAndNativeTokens;
     private TransactionOptions options;
 
-    public SendNativeTokens withAddressesNativeTokens(AddressNativeTokens[] addressesNativeTokens) {
-        this.addressesNativeTokens = addressesNativeTokens;
+    public SendNativeTokens withAddressesAndNativeTokens(AddressNativeTokens[] addressesAndNativeTokens) {
+        this.addressesAndNativeTokens = addressesAndNativeTokens;
         return this;
     }
 

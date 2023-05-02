@@ -7,3 +7,4 @@ examples/build/
 examples/bin/
 examples/walletdb
 examples/example-wallet
+examples/wallet-data

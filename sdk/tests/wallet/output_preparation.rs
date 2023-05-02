@@ -14,15 +14,15 @@ use iota_sdk::{
     },
 };
 
-use crate::wallet::common::{create_accounts_with_funds, make_manager, setup, tear_down};
+use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
 #[tokio::test]
 async fn output_preparation() -> Result<()> {
     let storage_path = "test-storage/output_preparation";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
-    let account = manager.create_account().finish().await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account = wallet.create_account().finish().await?;
 
     let recipient_address_bech32 = String::from("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu");
     // Roundtrip to get the correct bech32 HRP
@@ -75,7 +75,7 @@ async fn output_preparation() -> Result<()> {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
-                    native_tokens: Some(vec![native_token.clone()]),
+                    native_tokens: Some(vec![native_token]),
                     nft_id: None,
                 }),
                 features: None,
@@ -260,7 +260,7 @@ async fn output_preparation() -> Result<()> {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
-                    native_tokens: Some(vec![native_token.clone()]),
+                    native_tokens: Some(vec![native_token]),
                     nft_id: None,
                 }),
                 features: Some(Features {
@@ -386,8 +386,8 @@ async fn output_preparation_sdr() -> Result<()> {
     let storage_path = "test-storage/output_preparation_sdr";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
-    let account = manager.create_account().finish().await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account = wallet.create_account().finish().await?;
 
     let rent_structure = account.client().get_rent_structure().await?;
     let token_supply = account.client().get_token_supply().await?;
@@ -411,7 +411,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure.clone(), token_supply)?;
+    output.verify_storage_deposit(rent_structure, token_supply)?;
     assert_eq!(output.amount(), 50601);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -432,7 +432,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure.clone(), token_supply)?;
+    output.verify_storage_deposit(rent_structure, token_supply)?;
     assert_eq!(output.amount(), 85199);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -457,7 +457,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure.clone(), token_supply)?;
+    output.verify_storage_deposit(rent_structure, token_supply)?;
     assert_eq!(output.amount(), 85199);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -497,9 +497,9 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     let storage_path = "test-storage/output_preparation";
     setup(storage_path)?;
 
-    let manager = make_manager(storage_path, None, None).await?;
-    let accounts = &create_accounts_with_funds(&manager, 1).await?;
-    let address = accounts[0].addresses().await?[0].address().to_bech32();
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let accounts = &create_accounts_with_funds(&wallet, 1).await?;
+    let address = accounts[0].addresses().await?[0].address().to_string();
 
     let nft_options = vec![NftOptions {
         address: Some(address.clone()),
@@ -515,7 +515,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
-    let nft_id = *accounts[0].sync(None).await?.nfts.first().unwrap();
+    let nft_id = *accounts[0].sync(None).await?.nfts().first().unwrap();
 
     let nft = accounts[0]
         .prepare_output(

@@ -3,7 +3,8 @@
 
 //! In this example we will send 1_000_000 tokens to atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r.
 //! This address belongs to the first seed in .env.example.
-//! Run: `cargo run --example custom_inputs --release`.
+//!
+//! `cargo run --example custom_inputs --release`
 
 use iota_sdk::{
     client::{
@@ -15,8 +16,8 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production.
-    dotenv::dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
@@ -57,7 +58,7 @@ async fn main() -> Result<()> {
     println!("{block:#?}");
 
     println!(
-        "Transaction sent: {}/block/{}",
+        "Block with custom inputs sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );

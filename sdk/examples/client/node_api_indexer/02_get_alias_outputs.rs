@@ -1,8 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Calls `GET api/indexer/v1/outputs/alias`.
-//! RUn: `cargo run --example node_api_indexer_get_alias_outputs --release -- [NODE URL] [ADDRESS]`.
+//! TODO: <insert example description> by calling
+//! `GET api/indexer/v1/outputs/alias`.
+//!
+//! `cargo run --example node_api_indexer_get_alias_outputs --release -- [NODE URL] [ADDRESS]`
 
 use iota_sdk::client::{node_api::indexer::query_parameters::QueryParameter, Client, Result};
 
@@ -10,8 +12,8 @@ use iota_sdk::client::{node_api::indexer::query_parameters::QueryParameter, Clie
 async fn main() -> Result<()> {
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses dotenv, which is not safe for use in production.
-        dotenv::dotenv().ok();
+        // This example uses secrets in environment variables for simplicity which should not be done in production.
+        dotenvy::dotenv().ok();
         std::env::var("NODE_URL").unwrap()
     });
 
@@ -34,12 +36,12 @@ async fn main() -> Result<()> {
         ])
         .await?;
 
-    println!("Address output IDs {output_ids_response:#?}");
+    println!("Alias output IDs: {output_ids_response:#?}");
 
     // Get the outputs by their IDs.
     let outputs_responses = client.get_outputs(output_ids_response.items).await?;
 
-    println!("Alias outputs: {outputs_responses:#?}");
+    println!("{outputs_responses:#?}");
 
     Ok(())
 }

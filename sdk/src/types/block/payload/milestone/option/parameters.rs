@@ -67,22 +67,22 @@ impl ParametersMilestoneOption {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::string::String;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     ///
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     pub struct ParametersMilestoneOptionDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        #[serde(rename = "targetMilestoneIndex")]
         pub target_milestone_index: u32,
-        #[serde(rename = "protocolVersion")]
         pub protocol_version: u8,
         #[serde(rename = "params")]
         pub binary_parameters: String,
@@ -100,14 +100,14 @@ pub mod dto {
     }
 
     impl TryFrom<&ParametersMilestoneOptionDto> for ParametersMilestoneOption {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &ParametersMilestoneOptionDto) -> Result<Self, Self::Error> {
-            Ok(Self::new(
+            Self::new(
                 value.target_milestone_index.into(),
                 value.protocol_version,
-                prefix_hex::decode(&value.binary_parameters).map_err(|_| DtoError::InvalidField("params"))?,
-            )?)
+                prefix_hex::decode(&value.binary_parameters).map_err(|_| Error::InvalidField("params"))?,
+            )
         }
     }
 }

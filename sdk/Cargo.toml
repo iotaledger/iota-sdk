@@ -1,6 +1,6 @@
 [package]
 name = "iota-sdk"
-version = "0.1.0"
+version = "0.3.0"
 authors = [ "IOTA Stiftung" ]
 edition = "2021"
 description = "The IOTA SDK provides developers with a seamless experience to develop on IOTA by providing account abstractions and clients to interact with node APIs."
@@ -17,78 +17,82 @@ all-features = true
 rustdoc-args = [ "--cfg", "docsrs" ]
 
 [dependencies]
-bytemuck = { version = "1.13.1", default-features = false }
+# Mandatory dependencies
 bech32 = { version = "0.9.1", default-features = false }
-bitflags = { version = "2.0.2", default-features = false }
+bitflags = { version = "2.1.0", default-features = false }
+bytemuck = { version = "1.13.1", default-features = false }
 derive_more = { version = "0.99.17", default-features = false, features = [ "from", "as_ref", "deref", "deref_mut" ] }
-packable = { version = "0.8.0", default-features = false, features = [ "serde", "primitive-types", "std" ] }
-prefix-hex = { version = "0.7.0", default-features = false, features = [ "std", "primitive-types" ] }
-primitive-types = { version = "0.12.1", default-features = false, features = [ "serde" ] }
-iterator-sorted = { version = "0.1.0", default-features = false }
-hashbrown = { version = "0.13.2", default-features = false, features = [ "ahash", "inline-more", "serde" ] }
 getset = { version = "0.1.2", default-features = false }
-hex = { version = "0.4.3", default-features = false, features = [ "alloc" ] }
-iota-crypto = { version = "0.15.3", default-features = false, features = [ "std", "chacha", "digest", "curl-p", "blake2b", "ed25519", "random", "slip10", "bip39", "bip39-en", "ternary_encoding" ] }
-rand = { version = "0.8.5", default-features = false, features = [ "min_const_gen", "std_rng" ] }
-serde = { version = "1.0.159", default-features = false, features = [ "derive" ] }
-serde-big-array = { version = "0.5.1", default-features = false }
-serde_json = { version = "1.0.95", default-features = false, features = [ "alloc", "std" ] }
-serde_repr = { version = "0.1.12", default-features = false }
-async-trait = { version = "0.1.68", default-features = false, optional = true }
-regex = { version = "1.7.3", default-features = false, features = [ "std", "unicode-perl" ], optional = true }
-rumqttc = { version = "0.20.0", default-features = false, features = [ "websocket" ], optional = true }
-once_cell = { version = "1.17.1", default-features = false, features = [ "std" ], optional = true }
-iota_stronghold = { version = "1.0.5", default-features = false, features = [ "std" ], optional = true }
-iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
-backtrace = { version = "0.3.67", default-features = false, features = [ "std" ], optional = true }
-fern-logger = { version = "0.5.0", default-features = false, optional = true }
-log = { version = "0.4.17", default-features = false, optional = true }
-derive_builder = { version = "0.12.0", default-features = false, features = [ "std" ], optional = true}
-rocksdb = { version = "0.20.1", default-features = false, features = [ "lz4" ], optional = true }
+hashbrown = { version = "0.13.2", default-features = false, features = [ "ahash", "inline-more" ] }
+hex = { version = "0.4.3", default-features = false }
 instant = { version = "0.1.12", default-features = false }
-tokio = { version = "1.27.0", default-features = false, features = [ "macros", "rt", "time", "sync" ] }
-thiserror = { version = "1.0.40", default-features = false }
-num_cpus = { version = "1.15.0", default-features = false }
-url = { version = "2.3.1", default-features = false, features = [ "serde" ] }
-futures = { version = "0.3.28", default-features = false, features = [ "thread-pool" ] }
-reqwest = { version = "0.11.16", default-features = false, features = [ "json" ] }
-zeroize = { version = "1.6.0", default-features = false, features = [ "zeroize_derive" ] }
+iota-crypto = { version = "0.15.3", default-features = false, features = [ "blake2b", "ed25519", "ternary_encoding" ] }
+iterator-sorted = { version = "0.1.0", default-features = false }
+packable = { version = "0.8.0", default-features = false, features = [ "primitive-types" ] }
+prefix-hex = { version = "0.7.0", default-features = false, features = [ "primitive-types" ] }
+primitive-types = { version = "0.12.1", default-features = false }
+serde = { version = "1.0.160", default-features = false, features = [ "derive" ] }
+serde_json = { version = "1.0.95", default-features = false, features = [ "alloc" ] }
+
+# Optional dependencies
+async-trait = { version = "0.1.68", default-features = false, optional = true }
+backtrace = { version = "0.3.67", default-features = false, features = [ "std" ], optional = true }
+derive_builder = { version = "0.12.0", default-features = false, features = [ "std" ], optional = true }
+fern-logger = { version = "0.5.0", default-features = false, optional = true }
+futures = { version = "0.3.28", default-features = false, features = [ "thread-pool" ], optional = true }
+iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
+iota_stronghold = { version = "1.0.5", default-features = false, features = [ "std" ], optional = true }
+log = { version = "0.4.17", default-features = false, optional = true }
+num_cpus = { version = "1.15.0", default-features = false, optional = true }
+once_cell = { version = "1.17.1", default-features = false, features = [ "std" ], optional = true }
+rand = { version = "0.8.5", default-features = false, features = [ "min_const_gen", "std_rng" ], optional = true }
+regex = { version = "1.7.3", default-features = false, features = [ "std", "unicode-perl" ], optional = true }
+reqwest = { version = "0.11.16", default-features = false, features = [ "json" ], optional = true }
+rocksdb = { version = "0.20.1", default-features = false, features = [ "lz4" ], optional = true }
+rumqttc = { version = "0.20.0", default-features = false, features = [ "websocket" ], optional = true }
+serde-big-array = { version = "0.5.1", default-features = false, optional = true }
+serde_repr = { version = "0.1.12", default-features = false, optional = true }
+thiserror = { version = "1.0.40", default-features = false, optional = true }
+url = { version = "2.3.1", default-features = false, features = [ "serde" ], optional = true }
+zeroize = { version = "1.6.0", default-features = false, features = [ "zeroize_derive" ], optional = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
-tokio = { version = "1.27.0", default-features = false, features = [ "macros", "rt-multi-thread", "time", "sync" ] }
+tokio = { version = "1.27.0", default-features = false, features = [ "macros", "rt-multi-thread", "time", "sync" ], optional = true }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
-gloo-timers = { version = "0.2.6", default-features = false, features = [ "futures" ] }
 gloo-storage = { version = "0.2.2", default-features = false, optional = true }
+gloo-timers = { version = "0.2.6", default-features = false, features = [ "futures" ] }
 instant = { version = "0.1.12", default-features = false, features = [ "wasm-bindgen" ] }
 lazy_static = { version = "1.4.0", default-features = false }
+tokio = { version = "1.27.0", default-features = false, features = [ "macros", "rt", "time", "sync" ], optional = true }
 wasm-bindgen-futures = { version = "0.4.34", default-features = false }
 
 [dev-dependencies]
-iota-sdk = { version = "0.1.0", path = ".", default-features = false, features = [ "rand" ] }
-dotenv = { version = "0.15.0", default-features = false }
+iota-sdk = { path = ".", default-features = false, features = [ "rand" ] }
+
+dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 
 [features]
-client = [ "serde", "block", "dto", "api", "pow", "std", "async-trait", "log", "derive_builder" ]
-pow = [ ]
-wallet = [ "client", "log" ]
-storage = [ "async-trait" ]
-mqtt = [ "regex", "rumqttc", "once_cell" ]
-stronghold = [ "iota_stronghold" ]
-events = [ ]
+default = [ "std", "serde" ]
+
+events = [  ]
 ledger_nano = [ "iota-ledger-nano" ]
-participation = [ "storage" ]
 message_interface = [ "backtrace", "fern-logger" ]
+mqtt = [ "regex", "rumqttc", "once_cell" ]
+participation = [ "storage" ]
+pow = [ "std", "num_cpus", "iota-crypto/curl-p" ]
+rand = [ "std", "dep:rand" ]
+rocksdb = [ "dep:rocksdb", "storage" ]
+serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde" ]
+std = [ "packable/std", "prefix-hex/std" ]
+storage = [ "iota-crypto/chacha" ]
+stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha" ]
 tls = [ "reqwest/rustls-tls" ]
 
-default = [ "api", "block", "std", "serde", "tls" ]
-api = [ "block", "dto" ]
-block = [  ]
-dto = [ "serde" ]
-rand = [ "std" ]
-serde = [  ]
-std = [  ]
+client_without_tls = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10", "iota-crypto/std" ]
+client = [ "client_without_tls", "tls" ]
+wallet = [ "client" ]
 
 # Block examples
 
@@ -309,6 +313,11 @@ path = "examples/client/07_mqtt.rs"
 required-features = [ "client", "mqtt" ]
 
 [[example]]
+name = "get_block"
+path = "examples/client/get_block.rs"
+required-features = [ "client" ]
+
+[[example]]
 name = "ledger_nano"
 path = "examples/client/ledger_nano.rs"
 required-features = [ "client", "ledger_nano" ]
@@ -416,6 +425,11 @@ required-features = [ "client", "participation" ]
 ### Wallet
 
 [[example]]
+name = "wallet_getting_started"
+path = "examples/wallet/getting_started.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
 name = "mint_issuer_nft"
 path = "examples/wallet/nft_collection/00_mint_issuer_nft.rs"
 required-features = [ "wallet", "storage", "stronghold" ]
@@ -521,6 +535,11 @@ path = "examples/wallet/15_destroy_foundry.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
+name = "create_alias"
+path = "examples/wallet/create_alias.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
 name = "destroy_alias"
 path = "examples/wallet/16_destroy_alias.rs"
 required-features = [ "wallet", "stronghold" ]
@@ -594,6 +613,11 @@ required-features = [ "wallet", "storage" ]
 name = "threads"
 path = "examples/wallet/threads.rs"
 required-features = [ "wallet" ]
+
+[[example]]
+name = "update_alias_output"
+path = "examples/wallet/update_alias_output.rs"
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "wallet"

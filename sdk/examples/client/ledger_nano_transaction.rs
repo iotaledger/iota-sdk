@@ -1,8 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example ledger_nano_transaction --features=ledger_nano --release
 //! In this example we will create a transaction with a ledger nano hardware wallet.
+//!
+//! `cargo run --example ledger_nano_transaction --features=ledger_nano --release`
 
 use iota_sdk::client::{
     secret::{ledger_nano::LedgerSecretManager, SecretManager},
@@ -11,7 +12,8 @@ use iota_sdk::client::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    dotenv::dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
 
@@ -45,7 +47,11 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!("Transaction sent with block-id: {}", block.id());
+    println!(
+        "Block using ledger nano sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block.id()
+    );
 
     Ok(())
 }

@@ -17,9 +17,10 @@ import org.iota.types.events.wallet.WalletEvent;
 import org.iota.types.events.wallet.WalletEventType;
 import org.iota.types.exceptions.InitializeWalletException;
 import org.iota.types.exceptions.WalletException;
+import org.iota.types.ids.account.AccountAlias;
 import org.iota.types.ids.account.AccountIdentifier;
 import org.iota.types.ids.account.AccountIndex;
-import org.iota.types.account_methods.AddressGenerationOptions;
+import org.iota.types.account_methods.GenerateAddressOptions;
 
 public class Wallet extends NativeApi {
 
@@ -39,17 +40,17 @@ public class Wallet extends NativeApi {
     // Account manager APIs
 
     /**
-     * Create an account with the given alias and return an AccountHandle for it.
+     * Create an account with the given alias and return an Account for it.
      *
      * @param alias The name of the account.
-     * @return An AccountHandle object.
+     * @return An Account object.
      */
-    public AccountHandle createAccount(String alias) throws WalletException {
+    public Account createAccount(String alias) throws WalletException {
         JsonObject o = new JsonObject();
         o.addProperty("alias", alias);
 
-        Account a = CustomGson.get().fromJson(callBaseApi(new WalletCommand("createAccount", o)), Account.class);
-        AccountHandle handle = new AccountHandle(this, new AccountIndex(a.getIndex()));
+        AccountDetails a = CustomGson.get().fromJson(callBaseApi(new WalletCommand("createAccount", o)), AccountDetails.class);
+        Account handle = new Account(this, new AccountIndex(a.getIndex()));
 
         return handle;
     }
@@ -57,17 +58,27 @@ public class Wallet extends NativeApi {
     /**
      * Return a given account from the wallet.
      *
-     * @param accountIdentifier The account identifier.
-     * @return An AccountHandle object.
+     * @param accountIdentifier The account identifier by alias.
+     * @return An Account object.
      */
-    public AccountHandle getAccount(AccountIdentifier accountIdentifier) throws WalletException {
+    public Account getAccount(String accountIdentifier) throws WalletException {
+        return this.getAccount(new AccountAlias(accountIdentifier));
+    }
+
+    /**
+     * Return a given account from the wallet.
+     *
+     * @param accountIdentifier The account identifier.
+     * @return An Account object.
+     */
+    public Account getAccount(AccountIdentifier accountIdentifier) throws WalletException {
         JsonObject o = new JsonObject();
         o.add("accountId", CustomGson.get().toJsonTree(accountIdentifier));
 
-        Account a = CustomGson.get().fromJson(
+        AccountDetails a = CustomGson.get().fromJson(
                 callBaseApi(new WalletCommand("getAccount", o)),
-                Account.class);
-        AccountHandle handle = new AccountHandle(this, new AccountIndex(a.getIndex()));
+                AccountDetails.class);
+        Account handle = new Account(this, new AccountIndex(a.getIndex()));
 
         return handle;
     }
@@ -75,17 +86,17 @@ public class Wallet extends NativeApi {
     /**
      * Returns all the accounts from the wallet.
      *
-     * @return An array of AccountHandles.
+     * @return An array of Accounts.
      */
-    public AccountHandle[] getAccounts() throws WalletException {
+    public Account[] getAccounts() throws WalletException {
         JsonArray responsePayload = (JsonArray) callBaseApi(new WalletCommand("getAccounts"));
 
-        AccountHandle[] accountHandles = new AccountHandle[responsePayload.size()];
+        Account[] accounts = new Account[responsePayload.size()];
         for (int i = 0; i < responsePayload.size(); i++)
-            accountHandles[i] = new AccountHandle(this, new AccountIndex(
-                    CustomGson.get().fromJson(responsePayload.get(i).getAsJsonObject(), Account.class).getIndex()));
+            accounts[i] = new Account(this, new AccountIndex(
+                    CustomGson.get().fromJson(responsePayload.get(i).getAsJsonObject(), AccountDetails.class).getIndex()));
 
-        return accountHandles;
+        return accounts;
     }
 
     /**
@@ -308,14 +319,14 @@ public class Wallet extends NativeApi {
      * @param options The options.
      * @return The generated address.
      */
-    public String generateAddress(int accountIndex, boolean internal, int addressIndex, AddressGenerationOptions.GenerateAddressOptions options, String bechHrp) throws WalletException {
+    public String generateAddress(int accountIndex, int addressIndex,
+            GenerateAddressOptions options, String bechHrp) throws WalletException {
         JsonObject o = new JsonObject();
         o.addProperty("accountIndex", accountIndex);
-        o.addProperty("internal", internal);
         o.addProperty("addressIndex", addressIndex);
         o.add("options", CustomGson.get().toJsonTree(options));
         o.addProperty("bech32Hrp", bechHrp);
-        
+
         return callBaseApi(new WalletCommand("generateAddress", o)).getAsString();
     }
 
@@ -335,7 +346,7 @@ public class Wallet extends NativeApi {
     /**
      * Converts a hex address to a bech32 address.
      *
-     * @param hex The hex address to convert.
+     * @param hex       The hex address to convert.
      * @param bech32Hrp The bech32 human-readable part.
      * @return The bech32 address.
      */

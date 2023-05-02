@@ -64,18 +64,18 @@ pub struct MinerBuilder {
 impl MinerBuilder {
     /// Creates a new [`MinerBuilder`].
     pub fn new() -> Self {
-        Self { ..Default::default() }
+        Self::default()
     }
 
     /// Sets the desired number of workers for the [`Miner`].
-    pub fn with_num_workers(mut self, num_workers: usize) -> Self {
-        self.num_workers.replace(num_workers);
+    pub fn with_num_workers(mut self, num_workers: impl Into<Option<usize>>) -> Self {
+        self.num_workers = num_workers.into();
         self
     }
 
     /// Sets a `MinerCancel to abort the [`Miner`].
-    pub fn with_cancel(mut self, cancel: MinerCancel) -> Self {
-        self.cancel.replace(cancel);
+    pub fn with_cancel(mut self, cancel: impl Into<Option<MinerCancel>>) -> Self {
+        self.cancel = cancel.into();
         self
     }
 

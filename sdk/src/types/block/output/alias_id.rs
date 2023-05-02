@@ -1,6 +1,8 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::string::String;
+
 use crate::types::block::{
     address::{Address, AliasAddress},
     output::OutputId,
@@ -29,13 +31,14 @@ impl AliasId {
     }
 }
 
-#[cfg(feature = "dto")]
 #[allow(missing_docs)]
 pub mod dto {
+    use alloc::string::ToString;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::error::dto::DtoError;
+    use crate::types::block::Error;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct AliasIdDto(pub String);
@@ -47,10 +50,10 @@ pub mod dto {
     }
 
     impl TryFrom<&AliasIdDto> for AliasId {
-        type Error = DtoError;
+        type Error = Error;
 
         fn try_from(value: &AliasIdDto) -> Result<Self, Self::Error> {
-            value.0.parse::<Self>().map_err(|_| DtoError::InvalidField("alias id"))
+            value.0.parse::<Self>().map_err(|_| Error::InvalidField("alias id"))
         }
     }
 }

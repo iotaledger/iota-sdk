@@ -17,17 +17,39 @@ use crate::{
     },
     wallet::account::{
         constants::MIN_SYNC_INTERVAL,
-        handle::AccountHandle,
         types::{AddressWithUnspentOutputs, OutputData},
-        AccountBalance,
+        Account, AccountBalance,
     },
 };
 
-impl AccountHandle {
+impl Account {
+    /// Set the fallback SyncOptions for account syncing.
+    /// If storage is enabled, will persist during restarts.
+    pub async fn set_default_sync_options(&self, options: SyncOptions) -> crate::wallet::Result<()> {
+        #[cfg(feature = "storage")]
+        {
+            let index = *self.read().await.index();
+            let mut storage_manager = self.storage_manager.lock().await;
+            storage_manager.set_default_sync_options(index, &options).await?;
+        }
+
+        *self.default_sync_options.lock().await = options;
+        Ok(())
+    }
+
+    // Get the default sync options we use when none are provided.
+    pub async fn default_sync_options(&self) -> SyncOptions {
+        self.default_sync_options.lock().await.clone()
+    }
+
     /// Sync the account by fetching new information from the nodes. Will also retry pending transactions
-    /// if necessary.
+    /// if necessary. A custom default can be set using set_default_sync_options.
     pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<AccountBalance> {
-        let options = options.unwrap_or_default();
+        let options = match options {
+            Some(opt) => opt,
+            None => self.default_sync_options().await,
+        };
+
         log::debug!("[SYNC] start syncing with {:?}", options);
         let syc_start_time = instant::Instant::now();
 

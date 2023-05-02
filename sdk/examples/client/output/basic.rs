@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example basic --release
+//! In this example we will send basic outputs with different feature blocks.
+//!
+//! `cargo run --example basic --release`
 
 use iota_sdk::{
     client::{secret::SecretManager, utils::request_funds_from_faucet, Client, Result},
@@ -15,16 +17,15 @@ use iota_sdk::{
     },
 };
 
-/// In this example we will send basic outputs with different feature blocks
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production!
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     // Configure your own mnemonic in the ".env" file. Since the output amount cannot be zero, the seed must contain
     // non-zero balance.
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance.
@@ -42,7 +43,7 @@ async fn main() -> Result<()> {
     );
 
     let basic_output_builder =
-        BasicOutputBuilder::new_with_amount(1_000_000)?.add_unlock_condition(AddressUnlockCondition::new(address));
+        BasicOutputBuilder::new_with_amount(1_000_000).add_unlock_condition(AddressUnlockCondition::new(address));
 
     let outputs = vec![
         // most simple output
@@ -55,7 +56,7 @@ async fn main() -> Result<()> {
         // with storage deposit return
         basic_output_builder
             .clone()
-            .with_amount(234_100)?
+            .with_amount(234_100)
             .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                 address,
                 234_000,
@@ -81,8 +82,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!("Transaction sent: {node_url}/api/core/v2/blocks/{}", block.id());
-    println!("Block metadata: {node_url}/api/core/v2/blocks/{}/metadata", block.id());
+    println!("Basic outputs block sent: {explorer_url}/block/{}", block.id());
     let _ = client.retry_until_included(&block.id(), None, None).await?;
     Ok(())
 }

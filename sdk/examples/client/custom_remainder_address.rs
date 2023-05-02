@@ -1,9 +1,10 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example custom_remainder_address --release
 //! In this example we will send 9_000_000 tokens to a given receiver and 1_000_000 tokens to a custom remainder
 //! address. The used addresses belong to the first seed in .env.example.
+//! 
+//! `cargo run --example custom_remainder_address --release`
 
 use iota_sdk::client::{
     node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet, secret::SecretManager, Client,
@@ -12,10 +13,11 @@ use iota_sdk::client::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production
-    dotenv::dotenv().ok();
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance
     let client = Client::builder()
@@ -38,7 +40,7 @@ async fn main() -> Result<()> {
 
     println!(
         "automatically funding sender address with faucet: {}",
-        request_funds_from_faucet("http://localhost:8091/api/enqueue", sender_address).await?
+        request_funds_from_faucet(faucet_url, sender_address).await?
     );
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
@@ -62,7 +64,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Transaction sent: {}/block/{}",
+        "Block with custom remainder sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );

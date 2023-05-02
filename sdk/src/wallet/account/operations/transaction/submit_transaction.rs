@@ -5,21 +5,18 @@
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     types::block::{payload::Payload, BlockId},
-    wallet::account::{handle::AccountHandle, operations::transaction::TransactionPayload},
+    wallet::account::{operations::transaction::TransactionPayload, Account},
 };
 
-impl AccountHandle {
+impl Account {
     /// Submits a payload in a block
     pub(crate) async fn submit_transaction_payload(
         &self,
         transaction_payload: TransactionPayload,
     ) -> crate::wallet::Result<BlockId> {
         log::debug!("[TRANSACTION] send_payload");
-        let account = self.read().await;
         #[cfg(feature = "events")]
-        let account_index = account.index;
-        // Drop account so it's not locked during PoW
-        drop(account);
+        let account_index = self.read().await.index;
 
         let local_pow = self.client.get_local_pow();
         if local_pow {

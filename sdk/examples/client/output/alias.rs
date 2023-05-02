@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example alias --release
+//! In this example we will create an alias output.
+//!
+//! `cargo run --example alias --release`
 
 use iota_sdk::{
     client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
@@ -15,14 +17,12 @@ use iota_sdk::{
     },
 };
 
-/// In this example we will create an alias output
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses dotenv, which is not safe for use in production!
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
     // Configure your own mnemonic in the ".env" file. Since the output amount cannot be zero, the seed must contain
     // non-zero balance.
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     // create new alias output
     //////////////////////////////////
-    let alias_output_builder = AliasOutputBuilder::new_with_amount(1_000_000, AliasId::null())?
+    let alias_output_builder = AliasOutputBuilder::new_with_amount(1_000_000, AliasId::null())
         .add_feature(SenderFeature::new(address))
         .add_feature(MetadataFeature::new(vec![1, 2, 3])?)
         .add_immutable_feature(IssuerFeature::new(address))
@@ -59,7 +59,8 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Transaction with new alias output sent: {node_url}/api/core/v2/blocks/{}",
+        "Transaction with new alias output sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -83,8 +84,10 @@ async fn main() -> Result<()> {
         .with_outputs(outputs)?
         .finish()
         .await?;
+
     println!(
-        "Transaction with alias id set sent: {node_url}/api/core/v2/blocks/{}",
+        "Block with alias id set sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;

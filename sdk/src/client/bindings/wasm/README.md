@@ -1,10 +1,10 @@
 # IOTA Client Library - WebAssembly bindings
 
-WebAssembly (Wasm) bindings for TypeScript/JavaScript to the `iota.rs` client library.
+WebAssembly (Wasm) bindings for TypeScript/JavaScript to the `iota-sdk` client library.
 
 ## Which bindings to choose?
 
-The `iota.rs` client library also offers dedicated [Node.js bindings](../nodejs). The differences with this package are outlined below.
+The `iota-sdk` client library also offers dedicated [Node.js bindings](../nodejs). The differences with this package are outlined below.
 
 |               |   Wasm bindings   |   Node.js bindings    |
 |:--------------|:-----------------:|:---------------------:|
