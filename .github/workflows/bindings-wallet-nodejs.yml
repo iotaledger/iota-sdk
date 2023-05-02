@@ -45,13 +45,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # os: [windows-latest, macos-latest, ubuntu-latest]
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, macos-13, ubuntu-latest]
         node: ["18"]
 
     steps:
       - name: Checkout the Source Code
         uses: actions/checkout@v3
+
+      - name: Select Xcode (macOS)
+        uses: maxim-lobanov/setup-xcode@v1
+        if: matrix.os == 'macos-latest'
+        with:
+          xcode-version: '14.3'
+
+      - name: Set deployment target (macOS)
+        run: echo "MACOSX_DEPLOYMENT_TARGET=10.13" >> $GITHUB_ENV
+        if: matrix.os == 'macos-latest'
 
       - name: Set up Rust
         uses: ./.github/actions/setup-rust
