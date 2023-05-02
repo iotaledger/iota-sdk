@@ -8,7 +8,7 @@ export interface BasicOutputBuilderOptions {
     /**
      * If not provided, minimum storage deposit will be used
      */
-    amount?: number;
+    amount?: string;
     /**
      * The native tokens to be held by the output.
      */

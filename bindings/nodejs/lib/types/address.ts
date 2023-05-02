@@ -1,69 +1,71 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import * as ADDRESS_TYPES from '@iota/types';
-
 import type { HexEncodedString } from '@iota/types';
 
 enum AddressType {
-    Ed25519 = ADDRESS_TYPES.ED25519_ADDRESS_TYPE,
-    Alias = ADDRESS_TYPES.ALIAS_ADDRESS_TYPE,
-    Nft = ADDRESS_TYPES.NFT_ADDRESS_TYPE,
+    Ed25519 = 0,
+    Alias = 8,
+    Nft = 16,
 }
 
 abstract class Address {
-    private _type: AddressType;
-    protected _hexEncodedString: HexEncodedString;
+    private type: AddressType;
 
-    constructor(type: AddressType, hexEncodedString: HexEncodedString) {
-        this._type = type;
-        this._hexEncodedString = hexEncodedString;
+    constructor(type: AddressType) {
+        this.type = type;
     }
     /**
      * The type of address.
      */
-    get type(): AddressType {
-        return this._type;
+    getType(): AddressType {
+        return this.type;
     }
 }
 /**
  * Ed25519Address address.
  */
 class Ed25519Address extends Address {
+    private pubKeyHash: HexEncodedString;
     constructor(address: HexEncodedString) {
-        super(AddressType.Ed25519, address);
+        super(AddressType.Ed25519);
+        this.pubKeyHash = address;
     }
     /**
      * The public key hash.
      */
-    get pubKeyHash(): HexEncodedString {
-        return this._hexEncodedString;
+    getPubKeyHash(): HexEncodedString {
+        return this.pubKeyHash;
     }
 }
 
 class AliasAddress extends Address {
+    private aliasId: HexEncodedString;
     constructor(address: HexEncodedString) {
-        super(AddressType.Alias, address);
+        super(AddressType.Alias);
+        this.aliasId = address;
     }
     /**
      * The alias id.
      */
-    get aliasId(): HexEncodedString {
-        return this._hexEncodedString;
+    getAliasId(): HexEncodedString {
+        return this.aliasId;
     }
 }
 /**
  * NFT address.
  */
 class NftAddress extends Address {
+    private nftId: HexEncodedString;
     constructor(address: HexEncodedString) {
-        super(AddressType.Nft, address);
+        super(AddressType.Nft);
+        this.nftId = address;
     }
     /**
      * The NFT Id.
      */
-    get nftId(): HexEncodedString {
-        return this._hexEncodedString;
+    getNftId(): HexEncodedString {
+        return this.nftId;
     }
 }
 

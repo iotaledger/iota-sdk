@@ -30,7 +30,7 @@ describe.skip('Output builder methods', () => {
 
         // most simple basic output
         const basicOutput = await client.buildBasicOutput({
-            amount: 1000000,
+            amount: '1000000',
             unlockConditions: [
                 new AddressUnlockCondition(
                     new Ed25519Address(hexAddress),

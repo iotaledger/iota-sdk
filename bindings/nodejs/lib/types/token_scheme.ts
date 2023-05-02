@@ -1,48 +1,55 @@
-import { HexEncodedAmount, SIMPLE_TOKEN_SCHEME_TYPE } from '@iota/types';
+import { HexEncodedAmount } from '@iota/types';
 
 enum TokenSchemeType {
-    Simple = SIMPLE_TOKEN_SCHEME_TYPE,
+    Simple = 0,
 }
 
 /**
  * Simple token scheme.
  */
 class SimpleTokenScheme {
-    private _mintedTokens: HexEncodedAmount;
+    private mintedTokens: HexEncodedAmount;
 
-    private _meltedTokens: HexEncodedAmount;
+    private meltedTokens: HexEncodedAmount;
 
-    private _maximumSupply: HexEncodedAmount;
+    private maximumSupply: HexEncodedAmount;
+
+    private type: TokenSchemeType;
 
     constructor(
         mintedTokens: HexEncodedAmount,
         meltedTokens: HexEncodedAmount,
         maximumSupply: HexEncodedAmount,
     ) {
-        this._mintedTokens = mintedTokens;
-        this._meltedTokens = meltedTokens;
-        this._maximumSupply = maximumSupply;
+        this.mintedTokens = mintedTokens;
+        this.meltedTokens = meltedTokens;
+        this.maximumSupply = maximumSupply;
+        this.type = TokenSchemeType.Simple;
+    }
+
+    getType(): TokenSchemeType {
+        return this.type;
     }
 
     /**
      * Amount of tokens minted by this foundry.
      */
     getMintedTokens(): HexEncodedAmount {
-        return this._mintedTokens;
+        return this.mintedTokens;
     }
 
     /**
      * Amount of tokens melted by this foundry.
      */
     getMeltedTokens(): HexEncodedAmount {
-        return this._meltedTokens;
+        return this.meltedTokens;
     }
 
     /**
      * Maximum supply of tokens controlled by this foundry.
      */
     getMaximumSupply(): HexEncodedAmount {
-        return this._maximumSupply;
+        return this.maximumSupply;
     }
 }
 

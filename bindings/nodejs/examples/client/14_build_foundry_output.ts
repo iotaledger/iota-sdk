@@ -36,7 +36,7 @@ async function run() {
             serialNumber: 0,
             // 10 hex encoded
             tokenScheme: new SimpleTokenScheme('0xa', '0x0', '0xa'),
-            amount: 1000000,
+            amount: '1000000',
             unlockConditions: [
                 new ImmutableAliasAddressUnlockCondition(
                     new AliasAddress(aliasId),
