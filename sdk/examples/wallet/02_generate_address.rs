@@ -8,6 +8,8 @@
 
 use iota_sdk::wallet::{Result, Wallet};
 
+const ACCOUNT: &str = "Alice";
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
@@ -17,7 +19,7 @@ async fn main() -> Result<()> {
     let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = wallet.get_account("Alice").await?;
+    let account = wallet.get_account(ACCOUNT).await?;
 
     // Set the stronghold password
     wallet

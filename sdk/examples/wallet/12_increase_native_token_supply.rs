@@ -13,6 +13,10 @@ use iota_sdk::{
     wallet::{Result, Wallet, U256},
 };
 
+const ACCOUNT: &str = "Alice";
+const TOKEN_ID: &str = "0x08847bd287c912fadedb6bf38900bda9f2d377b75b2a0bece8738699f56ebca4130100000000";
+const MINT_AMOUNT: u64 = 10;
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
@@ -22,7 +26,7 @@ async fn main() -> Result<()> {
     let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = wallet.get_account("Alice").await?;
+    let account = wallet.get_account(ACCOUNT).await?;
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
     println!("Balance before melting:\n{balance:?}",);
@@ -34,10 +38,10 @@ async fn main() -> Result<()> {
 
     // Replace with a TokenId that is available in the account, the foundry output which minted it, also needs to be
     // available.
-    let token_id = TokenId::from_str("0x08847bd287c912fadedb6bf38900bda9f2d377b75b2a0bece8738699f56ebca4130100000000")?;
+    let token_id = TokenId::from_str(TOKEN_ID)?;
 
     // Mint some more native tokens
-    let mint_amount = U256::from(10);
+    let mint_amount = U256::from(MINT_AMOUNT);
     let transaction = account
         .increase_native_token_supply(token_id, mint_amount, None, None)
         .await?;

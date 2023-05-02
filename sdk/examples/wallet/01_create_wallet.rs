@@ -14,6 +14,8 @@ use iota_sdk::{
     wallet::{ClientOptions, Result, Wallet},
 };
 
+const ACCOUNT: &str = "Alice";
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
@@ -41,7 +43,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Create a new account
-    let _account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let _account = wallet.create_account().with_alias(ACCOUNT.to_string()).finish().await?;
 
     println!("Generated a new account");
 

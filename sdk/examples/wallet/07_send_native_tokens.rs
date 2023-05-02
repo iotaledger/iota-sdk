@@ -15,6 +15,10 @@ use iota_sdk::{
 };
 use primitive_types::U256;
 
+const ACCOUNT: &str = "Alice";
+const SEND_NATIVE_TOKEN_AMOUNT: u64 = 10;
+const SEND_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
@@ -24,7 +28,7 @@ async fn main() -> Result<()> {
     let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = wallet.get_account("Alice").await?;
+    let account = wallet.get_account(ACCOUNT).await?;
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
 
@@ -32,7 +36,7 @@ async fn main() -> Result<()> {
     if let Some(token_id) = balance
         .native_tokens()
         .iter()
-        .find(|t| t.available() >= U256::from(10))
+        .find(|t| t.available() >= U256::from(SEND_NATIVE_TOKEN_AMOUNT))
         .map(|t| t.token_id())
     {
         // Set the stronghold password
@@ -40,11 +44,11 @@ async fn main() -> Result<()> {
             .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        let bech32_address = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string();
+        let bech32_address = SEND_ADDRESS.to_string();
 
         let outputs = vec![AddressNativeTokens {
             address: bech32_address.clone(),
-            native_tokens: vec![(*token_id, U256::from(10))],
+            native_tokens: vec![(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))],
             ..Default::default()
         }];
 
@@ -74,7 +78,7 @@ async fn main() -> Result<()> {
         let outputs = vec![
             BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                 .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(bech32_address)?))
-                .with_native_tokens(vec![NativeToken::new(*token_id, U256::from(10))?])
+                .with_native_tokens(vec![NativeToken::new(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))?])
                 .finish_output(account.client().get_token_supply().await?)?,
         ];
 

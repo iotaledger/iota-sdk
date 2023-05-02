@@ -13,13 +13,16 @@ use iota_sdk::{
     wallet::{Result, Wallet},
 };
 
+const ACCOUNT: &str = "Alice";
+const AMOUNT: u64 = 1_000_000;
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // Create the wallet
     let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = wallet.get_account("Alice").await?;
+    let account = wallet.get_account(ACCOUNT).await?;
 
     let account_addresses: Vec<Bech32Address> = account
         .addresses()
@@ -28,7 +31,7 @@ async fn main() -> Result<()> {
         .map(|a| a.address().clone())
         .collect();
 
-    let output = BasicOutputBuilder::new_with_amount(1_000_000)
+    let output = BasicOutputBuilder::new_with_amount(AMOUNT)
         .add_unlock_condition(AddressUnlockCondition::new(*account_addresses[0].as_ref()))
         .finish_output(account.client().get_token_supply().await?)?;
 

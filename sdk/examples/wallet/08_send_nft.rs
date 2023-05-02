@@ -8,6 +8,9 @@
 
 use iota_sdk::wallet::{AddressAndNftId, Result, Wallet};
 
+const ACCOUNT: &str = "Alice";
+const SEND_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
@@ -17,7 +20,7 @@ async fn main() -> Result<()> {
     let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = wallet.get_account("Alice").await?;
+    let account = wallet.get_account(ACCOUNT).await?;
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
 
@@ -29,7 +32,7 @@ async fn main() -> Result<()> {
             .await?;
 
         let outputs = vec![AddressAndNftId {
-            address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
+            address: SEND_ADDRESS.to_string(),
             nft_id: *nft_id,
         }];
 

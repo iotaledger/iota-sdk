@@ -8,6 +8,10 @@
 
 use iota_sdk::wallet::{NativeTokenOptions, Result, Wallet, U256};
 
+const ACCOUNT: &str = "Alice";
+const CIRCULATING_SUPPLY: u64 = 100;
+const MAXIMUM_SUPPLY: u64 = 100;
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
@@ -17,7 +21,7 @@ async fn main() -> Result<()> {
     let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = wallet.get_account("Alice").await?;
+    let account = wallet.get_account(ACCOUNT).await?;
 
     // Set the stronghold password
     wallet
@@ -47,8 +51,8 @@ async fn main() -> Result<()> {
 
     let native_token_options = NativeTokenOptions {
         alias_id: None,
-        circulating_supply: U256::from(100),
-        maximum_supply: U256::from(100),
+        circulating_supply: U256::from(CIRCULATING_SUPPLY),
+        maximum_supply: U256::from(MAXIMUM_SUPPLY),
         foundry_metadata: None,
     };
 

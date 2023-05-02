@@ -10,6 +10,10 @@
 
 use iota_sdk::wallet::{Result, Wallet, U256};
 
+const ACCOUNT: &str = "Alice";
+const MIN_AVAILABLE_AMOUNT: u64 = 11;
+const BURN_AMOUNT: u64 = 1;
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
@@ -19,7 +23,7 @@ async fn main() -> Result<()> {
     let wallet = Wallet::builder().finish().await?;
 
     // Get the account we generated with `01_create_wallet`
-    let account = wallet.get_account("Alice").await?;
+    let account = wallet.get_account(ACCOUNT).await?;
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
 
@@ -27,7 +31,7 @@ async fn main() -> Result<()> {
     if let Some(token_id) = balance
         .native_tokens()
         .iter()
-        .find(|t| t.available() >= U256::from(11))
+        .find(|t| t.available() >= U256::from(MIN_AVAILABLE_AMOUNT))
         .map(|t| t.token_id())
     {
         println!("Balance before burning:\n{balance:?}",);
@@ -38,7 +42,7 @@ async fn main() -> Result<()> {
             .await?;
 
         // Burn a native token
-        let burn_amount = U256::from(1);
+        let burn_amount = U256::from(BURN_AMOUNT);
         let transaction = account.burn_native_token(*token_id, burn_amount, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
