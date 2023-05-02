@@ -59,7 +59,7 @@ jobs:
           xcode-version: '14.3'
 
       - name: Set deployment target (macOS)
-        run: echo "MACOSX_DEPLOYMENT_TARGET=10.13" >> $GITHUB_ENV
+        run: echo "MACOSX_DEPLOYMENT_TARGET=10.12" >> $GITHUB_ENV
         if: matrix.os == 'macos-latest'
 
       - name: Set up Rust
