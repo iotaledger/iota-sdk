@@ -1,5 +1,4 @@
-import type { ISimpleTokenScheme } from '@iota/types';
-import { Feature } from '../../../lib';
+import { Feature, SimpleTokenScheme } from '../../../lib';
 import type { BasicOutputBuilderOptions } from './basicOutputOptions';
 
 /**
@@ -10,6 +9,6 @@ export interface FoundryOutputBuilderOptions extends BasicOutputBuilderOptions {
      * The serial number of the foundry with respect to the controlling alias.
      */
     serialNumber: number;
-    tokenScheme: ISimpleTokenScheme;
+    tokenScheme: SimpleTokenScheme;
     immutableFeatures?: Feature[];
 }

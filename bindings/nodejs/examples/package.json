@@ -4,7 +4,8 @@
     "main": "dist/index.js",
     "private": true,
     "scripts": {
-        "build": "tsc"
+        "build": "tsc",
+        "prebuild": "npm install"
     },
     "dependencies": {
         "@iota/sdk": "../",

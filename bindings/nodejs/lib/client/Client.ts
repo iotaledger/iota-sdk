@@ -42,6 +42,7 @@ import type {
 } from '@iota/types';
 import type { INodeInfoWrapper } from '../../types/client/nodeInfo';
 import { SecretManagerType } from '../../types/secretManager/secretManager';
+import { AliasOutput, BasicOutput, FoundryOutput, NftOutput } from '../types';
 
 /** The Client to interact with nodes. */
 export class Client {
@@ -909,7 +910,7 @@ export class Client {
      */
     async buildBasicOutput(
         options: BasicOutputBuilderOptions,
-    ): Promise<IBasicOutput> {
+    ): Promise<BasicOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildBasicOutput',
             data: options,
@@ -923,7 +924,7 @@ export class Client {
      */
     async buildAliasOutput(
         options: AliasOutputBuilderOptions,
-    ): Promise<IAliasOutput> {
+    ): Promise<AliasOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildAliasOutput',
             data: options,
@@ -936,8 +937,8 @@ export class Client {
      * Build a Foundry Output.
      */
     async buildFoundryOutput(
-        options: FoundryOutputBuilderOptions,
-    ): Promise<IFoundryOutput> {
+        options: IFoundryOutputBuilderOptions,
+    ): Promise<FoundryOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildFoundryOutput',
             data: options,
@@ -949,9 +950,7 @@ export class Client {
     /**
      * Build an Nft Output.
      */
-    async buildNftOutput(
-        options: NftOutputBuilderOptions,
-    ): Promise<INftOutput> {
+    async buildNftOutput(options: NftOutputBuilderOptions): Promise<NftOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildNftOutput',
             data: options,

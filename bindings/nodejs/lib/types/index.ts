@@ -5,3 +5,4 @@ export * from './address';
 export * from './feature';
 export * from './unlock_condition';
 export * from './output';
+export * from './token_scheme';

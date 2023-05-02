@@ -1,7 +1,6 @@
-import { HexEncodedString } from "@iota/types";
-import { Feature } from "../../../lib";
-import { BasicOutputBuilderOptions } from "./basicOutputOptions";
-
+import { HexEncodedString } from '@iota/types';
+import { Feature } from '../../../lib';
+import { BasicOutputBuilderOptions } from './basicOutputOptions';
 
 /**
  * Options for building an Alias Output

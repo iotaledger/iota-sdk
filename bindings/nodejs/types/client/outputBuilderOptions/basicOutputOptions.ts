@@ -1,5 +1,5 @@
-import { UnlockCondition, Feature } from "../../../lib";
-import { NativeToken } from "../../../lib/types/native_token";
+import { INativeToken } from '@iota/types';
+import { UnlockCondition, Feature } from '../../../lib';
 
 /**
  * Options for building a Basic Output
@@ -12,7 +12,7 @@ export interface BasicOutputBuilderOptions {
     /**
      * The native tokens to be held by the output.
      */
-    nativeTokens?: NativeToken[];
+    nativeTokens?: INativeToken[];
     /**
      * The unlock conditions for the output.
      */
