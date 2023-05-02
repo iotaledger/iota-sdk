@@ -275,6 +275,37 @@ impl Account {
             let mut filtered_outputs = Vec::new();
 
             for output in outputs {
+                match &output.output {
+                    Output::Alias(alias) => {
+                        if let Some(alias_ids) = &filter.alias_ids {
+                            let alias_id = alias.alias_id_non_null(&output.output_id);
+                            if alias_ids.contains(&alias_id) {
+                                filtered_outputs.push(output.clone());
+                                continue;
+                            }
+                        }
+                    }
+                    Output::Foundry(foundry) => {
+                        if let Some(foundry_ids) = &filter.foundry_ids {
+                            let foundry_id = foundry.id();
+                            if foundry_ids.contains(&foundry_id) {
+                                filtered_outputs.push(output.clone());
+                                continue;
+                            }
+                        }
+                    }
+                    Output::Nft(nft) => {
+                        if let Some(nft_ids) = &filter.nft_ids {
+                            let nft_id = nft.nft_id_non_null(&output.output_id);
+                            if nft_ids.contains(&nft_id) {
+                                filtered_outputs.push(output.clone());
+                                continue;
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+
                 if let Some(lower_bound_booked_timestamp) = filter.lower_bound_booked_timestamp {
                     if output.metadata.milestone_timestamp_booked < lower_bound_booked_timestamp {
                         continue;
@@ -285,30 +316,7 @@ impl Account {
                         continue;
                     }
                 }
-                if let Some(alias_ids) = &filter.alias_ids {
-                    if output.output.is_alias() {
-                        let alias_id = output.output.as_alias().alias_id_non_null(&output.output_id);
-                        if !alias_ids.contains(&alias_id) {
-                            continue;
-                        }
-                    }
-                }
-                if let Some(foundry_ids) = &filter.foundry_ids {
-                    if output.output.is_foundry() {
-                        let foundry_id = output.output.as_foundry().id();
-                        if !foundry_ids.contains(&foundry_id) {
-                            continue;
-                        }
-                    }
-                }
-                if let Some(nft_ids) = &filter.nft_ids {
-                    if output.output.is_nft() {
-                        let nft_id = output.output.as_nft().nft_id_non_null(&output.output_id);
-                        if !nft_ids.contains(&nft_id) {
-                            continue;
-                        }
-                    }
-                }
+
                 if let Some(output_types) = &filter.output_types {
                     if !output_types.contains(&output.output.kind()) {
                         continue;
