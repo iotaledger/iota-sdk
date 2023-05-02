@@ -4,7 +4,7 @@
 /// Type alias of `Result` in Node errors
 pub type Result<T> = std::result::Result<T, Error>;
 
-/// Stronghold errors.
+/// Node errors.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     /// The requested data was not found. (404)
