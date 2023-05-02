@@ -500,3 +500,25 @@ fn serialize() {
 
     serde_json::from_str::<AccountDetails>(&serde_json::to_string(&account).unwrap()).unwrap();
 }
+
+#[cfg(test)]
+impl AccountDetails {
+    pub(crate) fn get_test_account_details() -> Self {
+        Self {
+            index: 0,
+            coin_type: 4218,
+            alias: "Alice".to_string(),
+            public_addresses: Vec::new(),
+            internal_addresses: Vec::new(),
+            addresses_with_unspent_outputs: Vec::new(),
+            outputs: HashMap::new(),
+            locked_outputs: HashSet::new(),
+            unspent_outputs: HashMap::new(),
+            transactions: HashMap::new(),
+            pending_transactions: HashSet::new(),
+            incoming_transactions: HashMap::new(),
+            inaccessible_incoming_transactions: HashSet::new(),
+            native_token_foundries: HashMap::new(),
+        }
+    }
+}

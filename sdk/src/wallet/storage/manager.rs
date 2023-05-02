@@ -182,3 +182,64 @@ impl StorageManager {
             .await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::wallet::storage::adapter::memory::{Memory, STORAGE_ID};
+
+    #[tokio::test]
+    async fn id() {
+        let storage_manager = StorageManager::new(None, Box::<Memory>::default()).await.unwrap();
+        assert_eq!(storage_manager.id(), STORAGE_ID);
+        assert!(!storage_manager.is_encrypted());
+    }
+
+    #[tokio::test]
+    async fn get() {
+        #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+        struct Record {
+            a: String,
+            b: u32,
+            c: i64,
+        }
+
+        let rec = Record {
+            a: "test".to_string(),
+            b: 42,
+            c: -420,
+        };
+        let mut storage = Box::<Memory>::default();
+        storage.set("key", serde_json::to_string(&rec).unwrap()).await.unwrap();
+
+        let storage_manager = StorageManager::new(None, storage).await.unwrap();
+        assert_eq!(Some(rec), storage_manager.get::<Record>("key").await.unwrap());
+    }
+
+    #[tokio::test]
+    async fn save_remove_account() {
+        let mut storage_manager = StorageManager::new(None, Box::<Memory>::default()).await.unwrap();
+        assert!(storage_manager.get_accounts().await.unwrap().is_empty());
+
+        let account_details = AccountDetails::get_test_account_details();
+
+        storage_manager.save_account(&account_details).await.unwrap();
+        let accounts = storage_manager.get_accounts().await.unwrap();
+        assert_eq!(accounts.len(), 1);
+        assert_eq!(accounts[0].alias(), "Alice");
+
+        storage_manager.remove_account(0).await.unwrap();
+        assert!(storage_manager.get_accounts().await.unwrap().is_empty());
+    }
+
+    #[tokio::test]
+    async fn save_get_wallet_data() {
+        let mut storage_manager = StorageManager::new(None, Box::<Memory>::default()).await.unwrap();
+        assert!(storage_manager.get_wallet_data().await.unwrap().is_none());
+
+        let wallet_builder = WalletBuilder::new();
+        storage_manager.save_wallet_data(&wallet_builder).await.unwrap();
+
+        assert!(storage_manager.get_wallet_data().await.unwrap().is_some());
+    }
+}
