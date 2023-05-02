@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `FilterOptions::{alias_ids, foundry_ids, nft_ids}` fields;
 - `Account::{unspent_alias_output, unspent_foundry_output, unspent_nft_output}` methods;
 
+### Removed
+
+- `FilterOptions`'s `Hash` derivation;
+
 ## 0.3.0 - 2023-05-02
 
 ### Added

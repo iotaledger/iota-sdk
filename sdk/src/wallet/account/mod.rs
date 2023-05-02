@@ -13,7 +13,7 @@ pub mod types;
 pub(crate) mod update;
 
 use std::{
-    collections::{BTreeSet, HashMap, HashSet},
+    collections::{HashMap, HashSet},
     ops::Deref,
     str::FromStr,
     sync::Arc,
@@ -76,7 +76,7 @@ use crate::{
 };
 
 /// Options to filter outputs
-#[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq, Hash)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct FilterOptions {
     /// Filter all outputs where the booked milestone index is below the specified timestamp
@@ -85,9 +85,9 @@ pub struct FilterOptions {
     pub upper_bound_booked_timestamp: Option<u32>,
     /// Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6).
     pub output_types: Option<Vec<u8>>,
-    pub alias_ids: Option<BTreeSet<AliasId>>,
-    pub foundry_ids: Option<BTreeSet<FoundryId>>,
-    pub nft_ids: Option<BTreeSet<NftId>>,
+    pub alias_ids: Option<HashSet<AliasId>>,
+    pub foundry_ids: Option<HashSet<FoundryId>>,
+    pub nft_ids: Option<HashSet<NftId>>,
 }
 
 /// Details of an account.
