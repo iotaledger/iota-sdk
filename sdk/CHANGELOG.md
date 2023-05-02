@@ -56,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `types::block::DtoError`, `client::Error::BlockDto` and `wallet::Error::BlockDto`;
 - `BasicOutput`, `AliasOutput`, `FoundryOutput`, `NftOutput` - `new_with_amount` and `new_with_minimum_storage_deposit` functions;
 - `OutputsToClaim::None` variant;
+- `client_without_tls` feature in favor of separate `client` and `tls` features;
 
 ## 0.2.0 - 2023-04-17
 
