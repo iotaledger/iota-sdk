@@ -6,7 +6,7 @@ package org.iota.types;
 public class AccountAddress extends AbstractObject {
 
     /// The address.
-    private String bech32Address;
+    private String address;
     /// The address key index.
     private int keyIndex;
     /// Determines if an address is a public or an internal (change) address.
@@ -16,8 +16,8 @@ public class AccountAddress extends AbstractObject {
     // an address was used or not just by looking at it
     private boolean used;
 
-    public AccountAddress withBech32Address(String bech32Address) {
-        this.bech32Address = bech32Address;
+    public AccountAddress withAddress(String address) {
+        this.address = address;
         return this;
     }
 
@@ -36,8 +36,8 @@ public class AccountAddress extends AbstractObject {
         return this;
     }
 
-    public String getBech32Address() {
-        return bech32Address;
+    public String getAddress() {
+        return address;
     }
 
     public int getKeyIndex() {
