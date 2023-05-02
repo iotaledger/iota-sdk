@@ -169,4 +169,4 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: check
-          args: --no-default-features -F serde,events,ledger_nano,message_interface,participation,rocksdb,serde,storage,stronghold,tls,rand
+          args: --no-default-features -F serde
