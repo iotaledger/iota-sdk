@@ -457,6 +457,6 @@ pub enum ClientMethod {
         /// Faucet URL
         url: String,
         /// The address for request funds
-        address: String,
+        address: Bech32Address,
     },
 }

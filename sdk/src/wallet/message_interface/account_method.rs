@@ -16,6 +16,7 @@ use crate::{
         secret::GenerateAddressOptions,
     },
     types::block::{
+        address::Bech32Address,
         dto::U256Dto,
         output::{
             dto::{AliasIdDto, NativeTokenDto, NftIdDto, OutputDto, TokenIdDto, TokenSchemeDto},
@@ -422,5 +423,5 @@ pub enum AccountMethod {
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     GetParticipationEvents,
     /// Expected response: [`Faucet`](crate::wallet::message_interface::Response::Faucet)
-    RequestFundsFromFaucet { url: String, address: String },
+    RequestFundsFromFaucet { url: String, address: Bech32Address },
 }
