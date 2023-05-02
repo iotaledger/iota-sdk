@@ -334,6 +334,7 @@ impl Account {
         self.filter_outputs(self.read().await.unspent_outputs.values(), filter)
     }
 
+    /// Gets the unspent alias output matching the given ID.
     pub async fn alias_output(&self, alias_id: &AliasId) -> Result<Option<OutputData>> {
         self.unspent_outputs(FilterOptions {
             alias_ids: Some([*alias_id].into()),
@@ -343,6 +344,7 @@ impl Account {
         .map(|res| res.get(0).cloned())
     }
 
+    /// Gets the unspent foundry output matching the given ID.
     pub async fn foundry_output(&self, foundry_id: &FoundryId) -> Result<Option<OutputData>> {
         self.unspent_outputs(FilterOptions {
             foundry_ids: Some([*foundry_id].into()),
@@ -352,6 +354,7 @@ impl Account {
         .map(|res| res.get(0).cloned())
     }
 
+    /// Gets the unspent nft output matching the given ID.
     pub async fn nft_output(&self, nft_id: &NftId) -> Result<Option<OutputData>> {
         self.unspent_outputs(FilterOptions {
             nft_ids: Some([*nft_id].into()),
