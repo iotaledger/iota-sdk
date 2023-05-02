@@ -16,6 +16,10 @@ use iota_sdk::{
     wallet::{ClientOptions, Result, Wallet},
 };
 
+const ACCOUNT_1: &str = "alice";
+const ACCOUNT_2: &str = "bob";
+const NUM_ADDRESSES_TO_GENERATE: u32 = 5;
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
@@ -34,7 +38,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get account or create a new one
-    let account_alias = "first_account";
+    let account_alias = ACCOUNT_1;
 
     // create first account
     let _first_account = match wallet.get_account(account_alias).await {
@@ -50,7 +54,7 @@ async fn main() -> Result<()> {
     };
 
     // create second account
-    let account_alias = "second_account";
+    let account_alias = ACCOUNT_2;
     let account = match wallet.get_account(account_alias).await {
         Ok(account) => account,
         _ => {
@@ -68,7 +72,7 @@ async fn main() -> Result<()> {
         println!("Accounts: {a:#?}");
     }
 
-    let addresses = account.generate_addresses(5, None).await?;
+    let addresses = account.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
 
     println!(
         "{}",

@@ -14,6 +14,9 @@ use iota_sdk::{
 };
 use tokio::time::{sleep, Duration};
 
+const ACCOUNT: &str = "logger";
+const NUM_ADDRESSES_TO_GENERATE: u32 = 1;
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
@@ -32,7 +35,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get account or create a new one
-    let account_alias = "logger";
+    let account_alias = ACCOUNT;
     let account = match wallet.get_account(account_alias).await {
         Ok(account) => account,
         _ => {
@@ -45,7 +48,7 @@ async fn main() -> Result<()> {
         }
     };
 
-    account.generate_addresses(1, None).await?;
+    account.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
 
     wallet.start_background_syncing(None, None).await?;
     sleep(Duration::from_secs(10)).await;

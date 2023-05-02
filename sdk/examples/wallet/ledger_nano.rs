@@ -17,15 +17,22 @@ use iota_sdk::{
     wallet::{AddressWithAmount, ClientOptions, Result, Wallet},
 };
 
+// the account alias used in this example
+const ACCOUNT_ALIAS: &str = "ledger";
+// the number of addresses to generate
+const NUM_ADDRESSES_TO_GENERATE: u32 = 1;
+// the address to send to
+const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
+// the amount to send
+const SEND_AMOUNT: u64 = 1_000_000;
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
-
     let secret_manager = LedgerSecretManager::new(true);
-
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::LedgerNano(secret_manager))
         .with_storage_path("ledger_nano_walletdb")
@@ -37,20 +44,18 @@ async fn main() -> Result<()> {
     println!("{:?}", wallet.get_ledger_nano_status().await?);
 
     // Get account or create a new one
-    let account_alias = "ledger";
-    let account = match wallet.get_account(account_alias).await {
-        Ok(account) => account,
-        _ => {
-            // first we'll create an example account and store it
-            wallet
-                .create_account()
-                .with_alias(account_alias.to_string())
-                .finish()
-                .await?
-        }
+    let account = if let Ok(account) = wallet.get_account(ACCOUNT_ALIAS).await {
+        account
+    } else {
+        // first we'll create an example account and store it
+        wallet
+            .create_account()
+            .with_alias(ACCOUNT_ALIAS.to_string())
+            .finish()
+            .await?
     };
 
-    let address = account.generate_addresses(1, None).await?;
+    let address = account.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
 
     println!("{address:?}");
 
@@ -60,10 +65,7 @@ async fn main() -> Result<()> {
     println!("Balance: {balance:?}");
 
     // send transaction
-    let outputs = vec![AddressWithAmount::new(
-        "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
-        1_000_000,
-    )];
+    let outputs = vec![AddressWithAmount::new(RECV_ADDRESS.to_string(), SEND_AMOUNT)];
     let transaction = account.send_amount(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 

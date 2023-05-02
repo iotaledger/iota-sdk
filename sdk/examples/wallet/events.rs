@@ -17,6 +17,11 @@ use iota_sdk::{
     wallet::{ClientOptions, Result, Wallet},
 };
 
+const ACCOUNT: &str = "event_account";
+const ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
+const AMOUNT: u64 = 1_000_000;
+const NUM_ADDRESSES_TO_GENERATE: u32 = 5;
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
@@ -41,7 +46,7 @@ async fn main() -> Result<()> {
         .await;
 
     // Get account or create a new one
-    let account_alias = "event_account";
+    let account_alias = ACCOUNT;
     let account = match wallet.get_account(account_alias.to_string()).await {
         Ok(account) => account,
         _ => {
@@ -54,17 +59,15 @@ async fn main() -> Result<()> {
         }
     };
 
-    let _address = account.generate_addresses(5, None).await?;
+    let _address = account.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
 
     let balance = account.sync(None).await?;
     println!("Balance: {balance:?}");
 
     // send transaction
     let outputs = vec![
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(
-                "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
-            )?))
+        BasicOutputBuilder::new_with_amount(AMOUNT)
+            .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(ADDRESS)?))
             .finish_output(account.client().get_token_supply().await?)?,
     ];
 

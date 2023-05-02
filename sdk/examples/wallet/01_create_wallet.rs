@@ -2,9 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will create a new wallet.
-//! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example create_wallet --release`
+//! Make sure there's no `example.stronghold` file and no `example.walletdb` folder yet!
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --all-features --example create_wallet
+//! ```
 
 use iota_sdk::{
     client::{
@@ -14,7 +18,12 @@ use iota_sdk::{
     wallet::{ClientOptions, Result, Wallet},
 };
 
-const ACCOUNT: &str = "Alice";
+// The account alias created in this example
+const ACCOUNT_ALIAS: &str = "Alice";
+// The Stronghold snapshot file created in this example
+const STRONGHOLD_SNAPSHOT_PATH: &str = "./example.stronghold";
+// The wallet database folder created in this example
+const WALLET_DB_PATH: &str = "./example.walletdb";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -24,10 +33,10 @@ async fn main() -> Result<()> {
     // Setup Stronghold secret_manager
     let secret_manager = StrongholdSecretManager::builder()
         .password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
-        .build("wallet.stronghold")?;
+        .build(STRONGHOLD_SNAPSHOT_PATH)?;
 
     // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
-    let mnemonic = std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC").unwrap();
+    let mnemonic = std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
 
     // The mnemonic only needs to be stored the first time
     secret_manager.store_mnemonic(mnemonic).await?;
@@ -39,13 +48,18 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_storage_path(WALLET_DB_PATH)
         .finish()
         .await?;
 
     // Create a new account
-    let _account = wallet.create_account().with_alias(ACCOUNT.to_string()).finish().await?;
+    let account = wallet
+        .create_account()
+        .with_alias(ACCOUNT_ALIAS.to_string())
+        .finish()
+        .await?;
 
-    println!("Generated a new account");
+    println!("Generated new account: '{}'", account.alias().await);
 
     Ok(())
 }

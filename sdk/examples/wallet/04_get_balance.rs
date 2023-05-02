@@ -2,21 +2,30 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we sync the account and get the balance.
-//! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example get_balance --release`
+//! Make sure that `example.stronghold` and `example.walletdb` already exist by
+//! running the `create_wallet` example!
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --all-features --example get_balance
+//! ```
 
 use iota_sdk::wallet::{Result, Wallet};
 
-const ACCOUNT: &str = "Alice";
+// The account alias used in this example
+const ACCOUNT_ALIAS: &str = "Alice";
+// The wallet database folder
+const WALLET_DB_PATH: &str = "./example.walletdb";
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
-    // Get the account we generated with `01_create_wallet`
-    let account = wallet.get_account(ACCOUNT).await?;
+    // Access the wallet we generated with `--example create_wallet`
+    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
+    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
 
     // Sync and get the balance
     let _account_balance = account.sync(None).await?;
@@ -24,14 +33,6 @@ async fn main() -> Result<()> {
     let account_balance = account.balance().await?;
 
     println!("{account_balance:#?}");
-
-    let explorer_url = std::env::var("EXPLORER_URL").ok();
-    let prepended = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
-
-    println!("Addresses:");
-    for address in account.addresses().await? {
-        println!(" - {prepended}{}", address.address());
-    }
 
     Ok(())
 }

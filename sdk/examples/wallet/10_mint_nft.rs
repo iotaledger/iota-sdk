@@ -2,9 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will mint a native token.
-//! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example mint_nft --release`
+//! Make sure that `example.stronghold` and `example.walletdb` already exist by
+//! running the `create_wallet` example!
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --all-features --example mint_nft --release
+//! ```
 
 use iota_sdk::{
     types::block::output::{
@@ -15,24 +20,31 @@ use iota_sdk::{
     wallet::{NftOptions, Result, Wallet},
 };
 
-const ACCOUNT: &str = "Alice";
-const ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
-const SENDER: &str = "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy";
-const METADATA: &str = "some NFT metadata";
-const TAG: &str = "some NFT tag";
+// The account alias used in this example
+const ACCOUNT_ALIAS: &str = "Alice";
+// The base token amount sent with the NFT
+const AMOUNT: u64 = 1_000_000;
+// The NFT immutable metadata feature
 const IMMUTABLE_METADATA: &str = "some NFT immutable metadata";
-const SEND_AMOUNT: u64 = 1_000_000;
+// The NFT metadata feature
+const METADATA: &str = "some NFT metadata";
+// The minting address of the NFT
+const MINT_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
+// The NFT sender feature
+const SENDER: &str = "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy";
+// The NFT tag feature
+const TAG: &str = "some NFT tag";
+// The wallet database folder
+const WALLET_DB_PATH: &str = "./example.walletdb";
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
-
-    // Get the account we generated with `01_create_wallet`
-    let account = wallet.get_account(ACCOUNT).await?;
+    // Access the wallet we generated with `--example create_wallet`
+    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
+    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
 
     // Set the stronghold password
     wallet
@@ -40,13 +52,15 @@ async fn main() -> Result<()> {
         .await?;
 
     let nft_options = vec![NftOptions {
-        address: Some(ADDRESS.to_string()),
+        address: Some(MINT_ADDRESS.to_string()),
         sender: Some(SENDER.to_string()),
         metadata: Some(METADATA.as_bytes().to_vec()),
         tag: Some(TAG.as_bytes().to_vec()),
         issuer: Some(SENDER.to_string()),
         immutable_metadata: Some(IMMUTABLE_METADATA.as_bytes().to_vec()),
     }];
+
+    println!("Preparing minting transaction ...");
 
     let transaction = account.mint_nfts(nft_options, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
@@ -67,7 +81,7 @@ async fn main() -> Result<()> {
     let token_supply = account.client().get_token_supply().await?;
     let outputs = vec![
         // address of the owner of the NFT
-        NftOutputBuilder::new_with_amount(SEND_AMOUNT, NftId::null())
+        NftOutputBuilder::new_with_amount(AMOUNT, NftId::null())
             .add_unlock_condition(AddressUnlockCondition::new(*sender_address.as_ref()))
             .add_feature(SenderFeature::new(*sender_address.as_ref()))
             .add_immutable_feature(IssuerFeature::new(*sender_address.as_ref()))

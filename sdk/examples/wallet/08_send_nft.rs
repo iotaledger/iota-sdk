@@ -2,25 +2,33 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will send an nft.
-//! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example send_nft --release`
+//! Make sure that `example.stronghold` and `example.walletdb` already exist by
+//! running the `create_wallet` example!
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --all-features --example send_nft --release
+//! ```
 
 use iota_sdk::wallet::{AddressAndNftId, Result, Wallet};
 
-const ACCOUNT: &str = "Alice";
-const SEND_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
+// The account alias used in this example
+const ACCOUNT_ALIAS: &str = "Alice";
+// The address to send the tokens to
+const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
+// The wallet database folder
+const WALLET_DB_PATH: &str = "./example.walletdb";
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
+    // Access the wallet we generated with `--example create_wallet`
+    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
+    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
 
-    // Get the account we generated with `01_create_wallet`
-    let account = wallet.get_account(ACCOUNT).await?;
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
 
@@ -32,9 +40,11 @@ async fn main() -> Result<()> {
             .await?;
 
         let outputs = vec![AddressAndNftId {
-            address: SEND_ADDRESS.to_string(),
+            address: RECV_ADDRESS.to_string(),
             nft_id: *nft_id,
         }];
+
+        println!("Sending NFT '{}' to '{}' ...", nft_id, RECV_ADDRESS);
 
         let transaction = account.send_nft(outputs, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
@@ -49,6 +59,8 @@ async fn main() -> Result<()> {
             std::env::var("EXPLORER_URL").unwrap(),
             block_id
         );
+    } else {
+        println!("No available NFTs");
     }
 
     Ok(())
