@@ -1,6 +1,6 @@
 [package]
 name = "iota-sdk"
-version = "0.2.0"
+version = "0.3.0"
 authors = [ "IOTA Stiftung" ]
 edition = "2021"
 description = "The IOTA SDK provides developers with a seamless experience to develop on IOTA by providing account abstractions and clients to interact with node APIs."
