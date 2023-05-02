@@ -110,3 +110,57 @@ impl StorageManager {
             .unwrap_or_default())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{types::block::payload::transaction::TransactionId, wallet::storage::adapter::memory::Memory};
+
+    #[tokio::test]
+    async fn insert_get_remove_participation_event() {
+        let mut storage_manager = StorageManager::new(None, Box::<Memory>::default()).await.unwrap();
+        assert!(storage_manager.get_participation_events(0).await.unwrap().is_empty());
+
+        storage_manager
+            .insert_participation_event(0, ParticipationEventWithNodes::mock())
+            .await
+            .unwrap();
+        let events = storage_manager.get_participation_events(0).await.unwrap();
+        assert_eq!(events.len(), 1);
+
+        storage_manager
+            .remove_participation_event(0, events.keys().next().unwrap())
+            .await
+            .unwrap();
+        assert!(storage_manager.get_participation_events(0).await.unwrap().is_empty());
+    }
+
+    #[tokio::test]
+    async fn set_get_cached_participation_output_status() {
+        let mut storage_manager = StorageManager::new(None, Box::<Memory>::default()).await.unwrap();
+        assert!(
+            storage_manager
+                .get_cached_participation_output_status(0)
+                .await
+                .unwrap()
+                .is_empty()
+        );
+
+        let outputs_participation = vec![(
+            OutputId::new(TransactionId::new([3; 32]), 0).unwrap(),
+            OutputStatusResponse::mock(),
+        )]
+        .into_iter()
+        .collect::<HashMap<_, _>>();
+
+        storage_manager
+            .set_cached_participation_output_status(0, outputs_participation.clone())
+            .await
+            .unwrap();
+
+        assert_eq!(
+            storage_manager.get_cached_participation_output_status(0).await.unwrap(),
+            outputs_participation
+        );
+    }
+}

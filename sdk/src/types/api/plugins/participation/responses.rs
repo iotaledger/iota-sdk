@@ -60,3 +60,23 @@ pub struct AddressOutputsResponse {
     /// Outputs is a map of output status per output_id.
     pub outputs: HashMap<OutputId, OutputStatusResponse>,
 }
+
+impl OutputStatusResponse {
+    #[cfg(test)]
+    pub fn mock() -> Self {
+        Self {
+            participations: vec![(
+                ParticipationEventId::new([42; 32]),
+                TrackedParticipation {
+                    block_id: BlockId::new([23; 32]),
+                    amount: 100,
+                    start_milestone_index: 1000,
+                    end_milestone_index: 9999,
+                    answers: None,
+                },
+            )]
+            .into_iter()
+            .collect::<_>(),
+        }
+    }
+}
