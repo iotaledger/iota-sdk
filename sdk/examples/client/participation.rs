@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
     // Get outputs for address and request if they're participating
     let output_ids_response = client
         .basic_output_ids(vec![
-            QueryParameter::Address(bech32_address.to_string()),
+            QueryParameter::Address(bech32_address.clone()),
             QueryParameter::HasExpiration(false),
             QueryParameter::HasTimelock(false),
             QueryParameter::HasStorageDepositReturn(false),

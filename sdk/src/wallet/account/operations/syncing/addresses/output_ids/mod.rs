@@ -188,7 +188,7 @@ impl Account {
                     tasks.push(async move {
                         tokio::spawn(async move {
                             let output_ids = account
-                                .get_output_ids_for_address(address.bech32_address.inner, &sync_options)
+                                .get_output_ids_for_address(address.address.inner, &sync_options)
                                 .await?;
                             crate::wallet::Result::Ok((address, output_ids))
                         })

@@ -22,7 +22,7 @@ use crate::{
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
-            address::Address,
+            address::{Address, Bech32Address},
             output::{Output, OutputMetadata},
             protocol::ProtocolParameters,
         },
@@ -32,7 +32,10 @@ use crate::{
 
 impl<'a> ClientBlockBuilder<'a> {
     // Get basic outputs for an address without storage deposit return unlock condition
-    pub(crate) async fn basic_address_outputs(&self, address: String) -> Result<Vec<OutputWithMetadataResponse>> {
+    pub(crate) async fn basic_address_outputs(
+        &self,
+        address: &Bech32Address,
+    ) -> Result<Vec<OutputWithMetadataResponse>> {
         let mut output_ids = Vec::new();
 
         // First request to get all basic outputs that can directly be unlocked by the address.
@@ -50,7 +53,7 @@ impl<'a> ClientBlockBuilder<'a> {
         output_ids.extend(
             self.client
                 .basic_output_ids(vec![
-                    QueryParameter::ExpirationReturnAddress(address),
+                    QueryParameter::ExpirationReturnAddress(address.clone()),
                     QueryParameter::HasExpiration(true),
                     QueryParameter::HasStorageDepositReturn(false),
                     // Ignore outputs that aren't expired yet
@@ -166,7 +169,7 @@ impl<'a> ClientBlockBuilder<'a> {
             let mut address_index = gap_index;
 
             for (index, (bech32_address, internal)) in public_and_internal_addresses.iter().enumerate() {
-                let address_outputs = self.basic_address_outputs(bech32_address.to_string()).await?;
+                let address_outputs = self.basic_address_outputs(bech32_address).await?;
 
                 // If there are more than 20 (ADDRESS_GAP_RANGE) consecutive empty addresses, then we stop
                 // looking up the addresses belonging to the seed. Note that we don't

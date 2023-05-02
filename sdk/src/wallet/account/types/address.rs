@@ -14,7 +14,7 @@ use crate::types::block::{address::Bech32Address, output::OutputId};
 #[getset(get = "pub")]
 pub struct AccountAddress {
     /// The address.
-    pub(crate) bech32_address: Bech32Address,
+    pub(crate) address: Bech32Address,
     /// The address key index.
     #[getset(set = "pub(crate)")]
     pub(crate) key_index: u32,
@@ -28,7 +28,7 @@ pub struct AccountAddress {
 
 impl AccountAddress {
     pub fn into_bech32(self) -> Bech32Address {
-        self.bech32_address
+        self.address
     }
 }
 
@@ -38,7 +38,7 @@ impl AccountAddress {
 #[getset(get = "pub")]
 pub struct AddressWithUnspentOutputs {
     /// The address.
-    pub(crate) bech32_address: Bech32Address,
+    pub(crate) address: Bech32Address,
     /// The address key index.
     #[getset(set = "pub(crate)")]
     pub(crate) key_index: u32,
@@ -51,6 +51,6 @@ pub struct AddressWithUnspentOutputs {
 
 impl AddressWithUnspentOutputs {
     pub fn into_bech32(self) -> Bech32Address {
-        self.bech32_address
+        self.address
     }
 }

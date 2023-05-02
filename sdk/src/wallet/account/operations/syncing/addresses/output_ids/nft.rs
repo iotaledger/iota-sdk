@@ -26,23 +26,21 @@ impl Account {
             let mut output_ids = vec![];
             output_ids.extend(
                 self.client()
-                    .nft_output_ids(vec![QueryParameter::Address(bech32_address.to_string())])
+                    .nft_output_ids(vec![QueryParameter::Address(bech32_address.clone())])
                     .await?
                     .items,
             );
             output_ids.extend(
                 self.client()
                     .nft_output_ids(vec![QueryParameter::StorageDepositReturnAddress(
-                        bech32_address.to_string(),
+                        bech32_address.clone(),
                     )])
                     .await?
                     .items,
             );
             output_ids.extend(
                 self.client()
-                    .nft_output_ids(vec![QueryParameter::ExpirationReturnAddress(
-                        bech32_address.to_string(),
-                    )])
+                    .nft_output_ids(vec![QueryParameter::ExpirationReturnAddress(bech32_address.clone())])
                     .await?
                     .items,
             );
@@ -54,12 +52,12 @@ impl Account {
             let client = self.client();
             let tasks = vec![
                 async move {
-                    let bech32_address_ = bech32_address.to_string();
+                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     tokio::spawn(async move {
                         // Get nft outputs where the address is in the address unlock condition
                         client
-                            .nft_output_ids(vec![QueryParameter::Address(bech32_address_)])
+                            .nft_output_ids(vec![QueryParameter::Address(bech32_address)])
                             .await
                             .map_err(From::from)
                     })
@@ -67,12 +65,12 @@ impl Account {
                 }
                 .boxed(),
                 async move {
-                    let bech32_address_ = bech32_address.to_string();
+                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     tokio::spawn(async move {
                         // Get outputs where the address is in the storage deposit return unlock condition
                         client
-                            .nft_output_ids(vec![QueryParameter::StorageDepositReturnAddress(bech32_address_)])
+                            .nft_output_ids(vec![QueryParameter::StorageDepositReturnAddress(bech32_address)])
                             .await
                             .map_err(From::from)
                     })
@@ -80,12 +78,12 @@ impl Account {
                 }
                 .boxed(),
                 async move {
-                    let bech32_address_ = bech32_address.to_string();
+                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     tokio::spawn(async move {
                         // Get outputs where the address is in the expiration unlock condition
                         client
-                            .nft_output_ids(vec![QueryParameter::ExpirationReturnAddress(bech32_address_)])
+                            .nft_output_ids(vec![QueryParameter::ExpirationReturnAddress(bech32_address)])
                             .await
                             .map_err(From::from)
                     })

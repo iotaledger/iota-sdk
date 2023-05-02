@@ -281,8 +281,8 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            addresses[0].to_bech32("atoi"),
-            "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e".to_string()
+            &addresses[0].to_bech32("atoi").to_string(),
+            "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e"
         );
 
         // Remove garbage after test, but don't care about the result
@@ -326,8 +326,8 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            addresses[0].to_bech32("atoi"),
-            "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e".to_string()
+            &addresses[0].to_bech32("atoi").to_string(),
+            "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e"
         );
 
         // Remove garbage after test, but don't care about the result

@@ -25,7 +25,7 @@ use iota_sdk::{
             plugins::indexer::OutputIdsResponse,
         },
         block::{
-            address::dto::AddressDto,
+            address::{dto::AddressDto, Bech32Address},
             input::dto::UtxoInputDto,
             output::{
                 dto::{OutputDto, OutputMetadataDto},
@@ -238,7 +238,7 @@ pub enum Response {
     /// - [`HexPublicKeyToBech32Address`](crate::method::ClientMethod::HexPublicKeyToBech32Address)
     /// - [`HexToBech32`](crate::method::ClientMethod::HexToBech32)
     /// - [`NftIdToBech32`](crate::method::ClientMethod::NftIdToBech32)
-    Bech32Address(String),
+    Bech32Address(Bech32Address),
     /// - [`Faucet`](crate::method::UtilsMethod::Faucet)
     Faucet(String),
     /// Response for:

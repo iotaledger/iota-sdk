@@ -37,13 +37,13 @@ impl Account {
         {
             output_ids.extend(
                 client
-                    .alias_output_ids(vec![QueryParameter::Governor(bech32_address.to_string())])
+                    .alias_output_ids(vec![QueryParameter::Governor(bech32_address.clone())])
                     .await?
                     .items,
             );
             output_ids.extend(
                 client
-                    .alias_output_ids(vec![QueryParameter::StateController(bech32_address.to_string())])
+                    .alias_output_ids(vec![QueryParameter::StateController(bech32_address.clone())])
                     .await?
                     .items,
             );
@@ -54,11 +54,11 @@ impl Account {
             let tasks = vec![
                 // Get outputs where the address is in the governor address unlock condition
                 async move {
-                    let bech32_address_ = bech32_address.to_string();
+                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     task::spawn(async move {
                         client
-                            .alias_output_ids(vec![QueryParameter::Governor(bech32_address_)])
+                            .alias_output_ids(vec![QueryParameter::Governor(bech32_address)])
                             .await
                             .map_err(From::from)
                     })
@@ -67,11 +67,11 @@ impl Account {
                 .boxed(),
                 // Get outputs where the address is in the state controller unlock condition
                 async move {
-                    let bech32_address_ = bech32_address.to_string();
+                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     task::spawn(async move {
                         client
-                            .alias_output_ids(vec![QueryParameter::StateController(bech32_address_)])
+                            .alias_output_ids(vec![QueryParameter::StateController(bech32_address)])
                             .await
                             .map_err(From::from)
                     })

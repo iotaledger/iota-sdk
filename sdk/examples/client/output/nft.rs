@@ -82,7 +82,7 @@ async fn main() -> Result<()> {
     tokio::time::sleep(std::time::Duration::from_secs(20)).await;
 
     let output_ids_response = client
-        .basic_output_ids(vec![QueryParameter::Address(bech32_nft_address.to_string())])
+        .basic_output_ids(vec![QueryParameter::Address(bech32_nft_address.clone())])
         .await?;
     let output_response = client.get_output(&output_ids_response.items[0]).await?;
     let output = Output::try_from_dto(&output_response.output, token_supply)?;
@@ -94,7 +94,7 @@ async fn main() -> Result<()> {
         .with_input(output_ids_response.items[0].into())?
         .with_outputs(vec![
             NftOutputBuilder::new_with_amount(1_000_000 + output.amount(), nft_id)
-                .add_unlock_condition(AddressUnlockCondition::new(bech32_nft_address.inner()))
+                .add_unlock_condition(AddressUnlockCondition::new(&bech32_nft_address))
                 .finish_output(token_supply)?,
         ])?
         .finish()

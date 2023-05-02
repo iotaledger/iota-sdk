@@ -12,6 +12,7 @@ use super::account_method::AccountMethod;
 use crate::wallet::events::types::{WalletEvent, WalletEventType};
 use crate::{
     client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions, Url},
+    types::block::address::Bech32Address,
     wallet::{
         account::{operations::syncing::SyncOptions, types::AccountIdentifier},
         ClientOptions,
@@ -187,7 +188,7 @@ pub enum Message {
     /// Transforms a bech32 encoded address to hex
     /// Expected response: [`HexAddress`](crate::wallet::message_interface::Response::HexAddress)
     #[serde(rename_all = "camelCase")]
-    Bech32ToHex { bech32_address: String },
+    Bech32ToHex { bech32_address: Bech32Address },
     /// Transforms a hex encoded address to a bech32 encoded address
     /// Expected response: [`Bech32Address`](crate::wallet::message_interface::Response::Bech32Address)
     #[serde(rename_all = "camelCase")]

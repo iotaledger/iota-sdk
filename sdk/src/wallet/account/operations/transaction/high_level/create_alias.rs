@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::api::PreparedTransactionData,
     types::block::{
-        address::Address,
+        address::Bech32Address,
         output::{
             feature::MetadataFeature,
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
@@ -23,7 +23,7 @@ use crate::{
 pub struct AliasOutputOptions {
     /// Bech32 encoded address which will control the alias. Default will use the first
     /// address of the account
-    pub address: Option<String>,
+    pub address: Option<Bech32Address>,
     /// Immutable alias metadata
     pub immutable_metadata: Option<Vec<u8>>,
     /// Alias metadata
@@ -38,7 +38,7 @@ pub struct AliasOutputOptions {
 pub struct AliasOutputOptionsDto {
     /// Bech32 encoded address which will control the alias. Default will use the first
     /// address of the account
-    pub address: Option<String>,
+    pub address: Option<Bech32Address>,
     /// Immutable alias metadata, hex encoded bytes
     pub immutable_metadata: Option<String>,
     /// Alias metadata, hex encoded bytes
@@ -113,16 +113,15 @@ impl Account {
             .and_then(|options| options.address.as_ref())
         {
             Some(bech32_address) => {
-                let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(bech32_address)?;
-                self.client.bech32_hrp_matches(&bech32_hrp).await?;
-                address
+                self.client.bech32_hrp_matches(bech32_address.hrp()).await?;
+                *bech32_address.inner()
             }
             None => {
                 self.public_addresses()
                     .await
                     .first()
                     .expect("first address is generated during account creation")
-                    .bech32_address
+                    .address
                     .inner
             }
         };

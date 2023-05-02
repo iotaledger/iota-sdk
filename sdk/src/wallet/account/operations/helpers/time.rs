@@ -32,7 +32,7 @@ pub(crate) fn can_output_be_unlocked_now(
 
     Ok(account_addresses
         .iter()
-        .any(|a| a.bech32_address.inner == required_unlock_address)
+        .any(|a| a.address.inner == required_unlock_address)
         || alias_and_nft_addresses.iter().any(|a| *a == required_unlock_address))
 }
 
@@ -54,10 +54,7 @@ pub(crate) fn can_output_be_unlocked_forever_from_now_on(
         // the return address belongs to the account
         if let Some(expiration) = unlock_conditions.expiration() {
             if let Some(return_address) = expiration.return_address_expired(current_time) {
-                if !account_addresses
-                    .iter()
-                    .any(|a| a.bech32_address.inner == *return_address)
-                {
+                if !account_addresses.iter().any(|a| a.address.inner == *return_address) {
                     return false;
                 };
             } else {

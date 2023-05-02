@@ -3,6 +3,8 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::types::block::address::Bech32Address;
+
 const DEFAULT_ADDRESS_START_INDEX: u32 = 0;
 const DEFAULT_FORCE_SYNCING: bool = false;
 const DEFAULT_SYNC_INCOMING_TRANSACTIONS: bool = false;
@@ -17,7 +19,7 @@ pub struct SyncOptions {
     /// Specific Bech32 encoded addresses of the account to sync, if addresses are provided, then `address_start_index`
     /// will be ignored
     #[serde(default)]
-    pub addresses: Vec<String>,
+    pub addresses: Vec<Bech32Address>,
     /// Address index from which to start syncing addresses. 0 by default, using a higher index will be faster because
     /// addresses with a lower index will be skipped, but could result in a wrong balance for that reason
     #[serde(default = "default_address_start_index")]

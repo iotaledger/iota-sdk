@@ -4,7 +4,7 @@
 use alloc::string::String;
 
 use crate::types::block::{
-    address::{Address, NftAddress},
+    address::{Address, Bech32Address, NftAddress},
     output::OutputId,
 };
 
@@ -26,7 +26,7 @@ impl NftId {
     }
 
     /// Returns the bech32 encoding of the nft ID.
-    pub fn to_bech32(&self, bech32_hrp: &str) -> String {
+    pub fn to_bech32(&self, bech32_hrp: &str) -> Bech32Address {
         Address::Nft(NftAddress::new(*self)).to_bech32(bech32_hrp)
     }
 }

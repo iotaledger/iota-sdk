@@ -4,7 +4,7 @@
 use crate::{
     client::api::PreparedTransactionData,
     types::block::{
-        address::Address,
+        address::Bech32Address,
         output::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
@@ -28,13 +28,13 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct AddressWithAmount {
     /// Bech32 encoded address
-    address: String,
+    address: Bech32Address,
     /// Amount
     amount: u64,
     /// Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
     /// given the provided amount. If a storage deposit is needed and a return address is not provided, it will
     /// default to the first address of the account.
-    return_address: Option<String>,
+    return_address: Option<Bech32Address>,
     /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
     /// receiver already. The expiration will only be used if one is necessary given the provided amount. If an
     /// expiration is needed but not provided, it will default to one day.
@@ -42,7 +42,7 @@ pub struct AddressWithAmount {
 }
 
 impl AddressWithAmount {
-    pub fn new(address: String, amount: u64) -> Self {
+    pub fn new(address: Bech32Address, amount: u64) -> Self {
         Self {
             address,
             amount,
@@ -51,7 +51,7 @@ impl AddressWithAmount {
         }
     }
 
-    pub fn with_return_address(mut self, address: impl Into<Option<String>>) -> Self {
+    pub fn with_return_address(mut self, address: impl Into<Option<Bech32Address>>) -> Self {
         self.return_address = address.into();
         self
     }
@@ -113,25 +113,23 @@ impl Account {
             expiration,
         } in addresses_with_amount
         {
-            let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
-            self.client.bech32_hrp_matches(&bech32_hrp).await?;
+            self.client.bech32_hrp_matches(address.hrp()).await?;
             let return_address = return_address
-                .map(|address| {
-                    let (hrp, address) = Address::try_from_bech32_with_hrp(address)?;
-                    if bech32_hrp != hrp {
+                .map(|return_address| {
+                    if return_address.hrp() != address.hrp() {
                         Err(crate::client::Error::InvalidBech32Hrp {
-                            provided: hrp,
-                            expected: bech32_hrp,
+                            provided: return_address.hrp().to_string(),
+                            expected: address.hrp().to_string(),
                         })?;
                     }
-                    Ok::<_, Error>(address)
+                    Ok::<_, Error>(return_address)
                 })
                 .transpose()?
-                .unwrap_or(default_return_address.bech32_address.inner);
+                .unwrap_or_else(|| default_return_address.address.clone());
 
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
             let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                .add_unlock_condition(AddressUnlockCondition::new(address))
+                .add_unlock_condition(AddressUnlockCondition::new(&address))
                 .finish_output(token_supply)?;
 
             if amount >= output.amount() {
@@ -148,8 +146,8 @@ impl Account {
                 // Since it does need a storage deposit, calculate how much that should be
                 let storage_deposit_amount = minimum_storage_deposit_basic_native_tokens(
                     &rent_structure,
-                    &address,
-                    &return_address,
+                    address.inner(),
+                    return_address.inner(),
                     None,
                     token_supply,
                 )?;
@@ -170,7 +168,7 @@ impl Account {
                             // We send the storage_deposit_amount back to the sender, so only the additional amount is
                             // sent
                             StorageDepositReturnUnlockCondition::new(
-                                return_address,
+                                &return_address,
                                 storage_deposit_amount,
                                 token_supply,
                             )?,

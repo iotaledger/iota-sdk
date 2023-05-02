@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::api::PreparedTransactionData,
     types::block::{
-        address::Address,
+        address::Bech32Address,
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::AddressUnlockCondition,
@@ -26,15 +26,15 @@ use crate::{
 pub struct NftOptions {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
     /// first address of the account.
-    pub address: Option<String>,
+    pub address: Option<Bech32Address>,
     /// NFT sender feature.
-    pub sender: Option<String>,
+    pub sender: Option<Bech32Address>,
     /// NFT metadata feature.
     pub metadata: Option<Vec<u8>>,
     /// NFT tag feature.
     pub tag: Option<Vec<u8>>,
     /// NFT issuer feature.
-    pub issuer: Option<String>,
+    pub issuer: Option<Bech32Address>,
     /// NFT immutable metadata feature.
     pub immutable_metadata: Option<Vec<u8>>,
 }
@@ -45,15 +45,15 @@ pub struct NftOptions {
 pub struct NftOptionsDto {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
     /// first address of the account.
-    pub address: Option<String>,
+    pub address: Option<Bech32Address>,
     /// NFT sender feature, bech32 encoded address.
-    pub sender: Option<String>,
+    pub sender: Option<Bech32Address>,
     /// NFT metadata feature, hex encoded bytes.
     pub metadata: Option<String>,
     /// NFT tag feature, hex encoded bytes.
     pub tag: Option<String>,
     /// NFT issuer feature, bech32 encoded address.
-    pub issuer: Option<String>,
+    pub issuer: Option<Bech32Address>,
     /// Immutable NFT metadata, hex encoded bytes.
     pub immutable_metadata: Option<String>,
 }
@@ -135,16 +135,15 @@ impl Account {
         for nft_options in nfts_options {
             let address = match nft_options.address {
                 Some(address) => {
-                    let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
-                    self.client.bech32_hrp_matches(&bech32_hrp).await?;
-                    address
+                    self.client.bech32_hrp_matches(address.hrp()).await?;
+                    address.inner
                 }
                 // todo other error message
                 None => {
                     account_addresses
                         .first()
                         .ok_or(WalletError::FailedToGetRemainder)?
-                        .bech32_address
+                        .address
                         .inner
                 }
             };
@@ -155,7 +154,7 @@ impl Account {
                 .add_unlock_condition(AddressUnlockCondition::new(address));
 
             if let Some(sender) = nft_options.sender {
-                nft_builder = nft_builder.add_feature(SenderFeature::new(Address::try_from_bech32(sender)?));
+                nft_builder = nft_builder.add_feature(SenderFeature::new(&sender));
             }
 
             if let Some(metadata) = nft_options.metadata {
@@ -167,7 +166,7 @@ impl Account {
             }
 
             if let Some(issuer) = nft_options.issuer {
-                nft_builder = nft_builder.add_immutable_feature(IssuerFeature::new(Address::try_from_bech32(issuer)?));
+                nft_builder = nft_builder.add_immutable_feature(IssuerFeature::new(&issuer));
             }
 
             if let Some(immutable_metadata) = nft_options.immutable_metadata {

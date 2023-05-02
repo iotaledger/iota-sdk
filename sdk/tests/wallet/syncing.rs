@@ -55,7 +55,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
     let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
     let account_1 = wallet.create_account().finish().await?;
 
-    let account_1_address = *account_1.addresses().await?[0].bech32_address().as_ref();
+    let account_1_address = *account_1.addresses().await?[0].address().as_ref();
 
     let token_supply = account_0.client().get_token_supply().await?;
     // Only one basic output without further unlock conditions

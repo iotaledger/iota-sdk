@@ -9,7 +9,7 @@ use iota_sdk::{
     types::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
-            address::{Address, Bech32Address},
+            address::Bech32Address,
             output::{
                 unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken, NftId,
                 Output, OutputId, TokenId,
@@ -84,7 +84,7 @@ pub enum AccountCommand {
     /// Request funds from the faucet.
     Faucet {
         /// Address the faucet sends the funds to, defaults to the latest address.
-        address: Option<String>,
+        address: Option<Bech32Address>,
         /// URL of the faucet, default to <https://faucet.testnet.shimmer.network/api/enqueue>.
         url: Option<String>,
     },
@@ -112,7 +112,7 @@ pub enum AccountCommand {
     /// IOTA NFT Standard - TIP27: <https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md>.
     MintNft {
         /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
-        address: Option<String>,
+        address: Option<Bech32Address>,
         #[arg(long, group = "immutable_metadata")]
         /// Immutable metadata to attach to the NFT, e.g. --immutable-metadata-hex 0xdeadbeef.
         immutable_metadata_hex: Option<String>,
@@ -130,10 +130,10 @@ pub enum AccountCommand {
         tag: Option<String>,
         /// Sender feature to attach to the NFT, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         #[arg(long)]
-        sender: Option<String>,
+        sender: Option<Bech32Address>,
         /// Issuer feature to attach to the NFT, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         #[arg(long)]
-        issuer: Option<String>,
+        issuer: Option<Bech32Address>,
     },
     /// Generate a new address.
     NewAddress,
@@ -147,14 +147,14 @@ pub enum AccountCommand {
     /// Send an amount.
     Send {
         /// Address to send funds to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
-        address: String,
+        address: Bech32Address,
         /// Amount to send, e.g. 1000000.
         amount: u64,
         /// Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
         /// given the provided amount. If a storage deposit is needed and a return address is not provided, it will
         /// default to the first address of the account.
         #[arg(long)]
-        return_address: Option<String>,
+        return_address: Option<Bech32Address>,
         /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
         /// receiver already. The expiration will only be used if one is necessary given the provided amount. If an
         /// expiration is needed but not provided, it will default to one day.
@@ -459,12 +459,16 @@ pub async fn destroy_foundry_command(account: &Account, foundry_id: String) -> R
 }
 
 // `faucet` command
-pub async fn faucet_command(account: &Account, address: Option<String>, url: Option<String>) -> Result<(), Error> {
+pub async fn faucet_command(
+    account: &Account,
+    address: Option<Bech32Address>,
+    url: Option<String>,
+) -> Result<(), Error> {
     let address = if let Some(address) = address {
-        Bech32Address::try_from_str(address)?
+        address
     } else {
         match account.addresses().await?.last() {
-            Some(address) => address.bech32_address().clone(),
+            Some(address) => address.address().clone(),
             None => return Err(Error::NoAddressForFaucet),
         }
     };
@@ -540,12 +544,12 @@ pub async fn mint_native_token_command(
 // `mint-nft` command
 pub async fn mint_nft_command(
     account: &Account,
-    address: Option<String>,
+    address: Option<Bech32Address>,
     immutable_metadata: Option<Vec<u8>>,
     metadata: Option<Vec<u8>>,
     tag: Option<String>,
-    sender: Option<String>,
-    issuer: Option<String>,
+    sender: Option<Bech32Address>,
+    issuer: Option<Bech32Address>,
 ) -> Result<(), Error> {
     let tag = if let Some(hex) = tag {
         Some(prefix_hex::decode(hex).map_err(|e| Error::Miscellaneous(e.to_string()))?)
@@ -610,9 +614,9 @@ pub async fn outputs_command(account: &Account) -> Result<(), Error> {
 // `send` command
 pub async fn send_command(
     account: &Account,
-    address: String,
+    address: Bech32Address,
     amount: u64,
-    return_address: Option<String>,
+    return_address: Option<Bech32Address>,
     expiration: Option<u32>,
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
@@ -648,13 +652,13 @@ pub async fn send_native_token_command(
     amount: String,
     gift_storage_deposit: Option<bool>,
 ) -> Result<(), Error> {
+    let address = Bech32Address::try_from_str(address)?;
     let transaction = if gift_storage_deposit.unwrap_or(false) {
         // Send native tokens together with the required storage deposit
         let rent_structure = account.client().get_rent_structure().await?;
         let token_supply = account.client().get_token_supply().await?;
 
-        let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
-        account.client().bech32_hrp_matches(&bech32_hrp).await?;
+        account.client().bech32_hrp_matches(address.hrp()).await?;
 
         let outputs = vec![
             BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
@@ -675,7 +679,8 @@ pub async fn send_native_token_command(
                 TokenId::from_str(&token_id)?,
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
             )],
-            ..Default::default()
+            return_address: Default::default(),
+            expiration: Default::default(),
         }];
         account.send_native_tokens(outputs, None).await?
     };
@@ -691,6 +696,7 @@ pub async fn send_native_token_command(
 
 // `send-nft` command
 pub async fn send_nft_command(account: &Account, address: String, nft_id: String) -> Result<(), Error> {
+    let address = Bech32Address::try_from_str(address)?;
     let outputs = vec![AddressAndNftId {
         address,
         nft_id: NftId::from_str(&nft_id)?,
@@ -846,7 +852,7 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
 }
 
 async fn print_address(account: &Account, address: &AccountAddress) -> Result<(), Error> {
-    let mut log = format!("Address {}: {}", address.key_index(), address.bech32_address());
+    let mut log = format!("Address {}: {}", address.key_index(), address.address());
 
     if *address.internal() {
         log = format!("{log}\nChange address");
@@ -866,7 +872,7 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
                     output_data
                         .output
                         .required_and_unlocked_address(current_time, output_id, None)?;
-                if *address.bech32_address().as_ref() == required_address {
+                if *address.address().as_ref() == required_address {
                     let unlock_conditions = output_data
                         .output
                         .unlock_conditions()

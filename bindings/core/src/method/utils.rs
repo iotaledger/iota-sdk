@@ -3,7 +3,7 @@
 
 use derivative::Derivative;
 use iota_sdk::types::block::{
-    address::{dto::Ed25519AddressDto, AliasAddress},
+    address::{dto::Ed25519AddressDto, AliasAddress, Bech32Address},
     output::{AliasId, NftId, OutputId},
     payload::transaction::dto::{TransactionEssenceDto, TransactionPayloadDto},
     signature::dto::Ed25519SignatureDto,
@@ -21,7 +21,7 @@ pub enum UtilsMethod {
     /// Transforms bech32 to hex
     Bech32ToHex {
         /// Bech32 encoded address
-        bech32: String,
+        bech32: Bech32Address,
     },
     /// Transforms a hex encoded address to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -58,7 +58,7 @@ pub enum UtilsMethod {
     /// Returns a valid Address parsed from a String.
     ParseBech32Address {
         /// Address
-        address: String,
+        address: Bech32Address,
     },
     /// Checks if a String is a valid bech32 encoded address.
     IsAddressValid {

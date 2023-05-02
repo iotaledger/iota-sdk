@@ -6,7 +6,10 @@
 //!
 //! `cargo run --example send_micro_transaction --release`
 
-use iota_sdk::wallet::{account::TransactionOptions, AddressWithAmount, Result, Wallet};
+use iota_sdk::{
+    types::block::address::Bech32Address,
+    wallet::{account::TransactionOptions, AddressWithAmount, Result, Wallet},
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -28,7 +31,7 @@ async fn main() -> Result<()> {
 
     // Send a micro transaction with amount 1
     let outputs = vec![AddressWithAmount::new(
-        "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
+        Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu").unwrap(),
         1,
     )];
 

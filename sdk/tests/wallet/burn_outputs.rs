@@ -21,7 +21,7 @@ async fn mint_and_burn_nft() -> Result<()> {
     let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
     let nft_options = vec![NftOptions {
-        address: Some(account.addresses().await?[0].bech32_address().to_string()),
+        address: Some(account.addresses().await?[0].address().clone()),
         sender: None,
         metadata: Some(b"some nft metadata".to_vec()),
         tag: None,
@@ -71,11 +71,11 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
         NftOutputBuilder::new_with_amount(amount, NftId::null())
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(
-                    *account_0.addresses().await?[0].bech32_address().as_ref(),
+                    *account_0.addresses().await?[0].address().as_ref(),
                 )),
                 // immediately expired to account_1
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    *account_1.addresses().await?[0].bech32_address().as_ref(),
+                    *account_1.addresses().await?[0].address().as_ref(),
                     1,
                 )?),
             ])

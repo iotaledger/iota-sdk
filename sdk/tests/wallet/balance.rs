@@ -31,16 +31,16 @@ async fn balance_expiration() -> Result<()> {
             // Send to account 1 with expiration to account 2, both have no amount yet
             .with_unlock_conditions(vec![
                 UnlockCondition::Address(AddressUnlockCondition::new(
-                    *account_1.addresses().await?[0].bech32_address().as_ref(),
+                    *account_1.addresses().await?[0].address().as_ref(),
                 )),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    *account_2.addresses().await?[0].bech32_address().as_ref(),
+                    *account_2.addresses().await?[0].address().as_ref(),
                     // Current time + 20s
                     account_0.client().get_time_checked().await? + seconds_until_expired,
                 )?),
             ])
             .with_features(vec![SenderFeature::new(
-                *account_0.addresses().await?[0].bech32_address().as_ref(),
+                *account_0.addresses().await?[0].address().as_ref(),
             )])
             .finish_output(token_supply)?,
     ];
@@ -91,7 +91,7 @@ async fn balance_expiration() -> Result<()> {
         BasicOutputBuilder::new_with_amount(1_000_000)
             // Send to account 1 with expiration to account 2, both have no amount yet
             .with_unlock_conditions(vec![AddressUnlockCondition::new(
-                *account_1.addresses().await?[0].bech32_address().as_ref(),
+                *account_1.addresses().await?[0].address().as_ref(),
             )])
             .finish_output(token_supply)?,
     ];

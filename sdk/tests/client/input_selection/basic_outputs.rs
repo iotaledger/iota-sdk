@@ -6,7 +6,7 @@ use std::{collections::HashSet, str::FromStr};
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection, Requirement},
     types::block::{
-        address::{Address, AliasAddress, NftAddress},
+        address::{Address, AliasAddress, Bech32Address, NftAddress},
         output::{AliasId, NftId},
         protocol::protocol_parameters,
     },
@@ -622,7 +622,11 @@ fn alias_sender_zero_id() {
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
-        Some(&Address::from(AliasAddress::from(alias_id)).to_bech32("rms")),
+        Some(
+            &Bech32Address::new("rms", AliasAddress::from(alias_id))
+                .unwrap()
+                .to_string(),
+        ),
         None,
         None,
         None,
@@ -767,7 +771,7 @@ fn nft_sender_zero_id() {
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
-        Some(&Address::from(NftAddress::from(nft_id)).to_bech32("rms")),
+        Some(&Bech32Address::new("rms", NftAddress::from(nft_id)).unwrap().to_string()),
         None,
         None,
         None,

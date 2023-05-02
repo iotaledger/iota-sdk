@@ -8,7 +8,7 @@
 
 use iota_sdk::{
     types::block::{
-        address::Address,
+        address::Bech32Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken},
     },
     wallet::{AddressNativeTokens, Result, Wallet},
@@ -40,12 +40,14 @@ async fn main() -> Result<()> {
             .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        let bech32_address = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string();
+        let bech32_address =
+            Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu").unwrap();
 
         let outputs = vec![AddressNativeTokens {
             address: bech32_address.clone(),
             native_tokens: vec![(*token_id, U256::from(10))],
-            ..Default::default()
+            return_address: Default::default(),
+            expiration: Default::default(),
         }];
 
         println!("Preparing native token transaction...");
@@ -73,7 +75,7 @@ async fn main() -> Result<()> {
 
         let outputs = vec![
             BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(bech32_address)?))
+                .add_unlock_condition(AddressUnlockCondition::new(&bech32_address))
                 .with_native_tokens(vec![NativeToken::new(*token_id, U256::from(10))?])
                 .finish_output(account.client().get_token_supply().await?)?,
         ];

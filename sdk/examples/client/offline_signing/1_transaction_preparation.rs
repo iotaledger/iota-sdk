@@ -61,7 +61,7 @@ async fn main() -> Result<()> {
     write_prepared_transaction_to_file(PREPARED_TRANSACTION_FILE_NAME, &prepared_transaction)
 }
 
-fn read_addresses_from_file<P: AsRef<Path>>(path: P) -> Result<Vec<String>> {
+fn read_addresses_from_file<P: AsRef<Path>>(path: P) -> Result<Vec<Bech32Address>> {
     let mut file = File::open(&path).unwrap();
     let mut json = String::new();
     file.read_to_string(&mut json).unwrap();

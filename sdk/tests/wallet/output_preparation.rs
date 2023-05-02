@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 use iota_sdk::{
     types::block::{
-        address::Address,
+        address::{Address, Bech32Address},
         output::{NativeToken, NftId, TokenId},
     },
     wallet::{
@@ -247,11 +247,12 @@ async fn output_preparation() -> Result<()> {
     }
 
     let issuer_and_sender_address_bech32 =
-        String::from("rms1qq724zgvdujt3jdcd3xzsuqq7wl9pwq3dvsa5zvx49rj9tme8cat6qptyfm");
+        Bech32Address::try_from_str("rms1qq724zgvdujt3jdcd3xzsuqq7wl9pwq3dvsa5zvx49rj9tme8cat6qptyfm")?;
     // Roundtrip to get the correct bech32 HRP
-    let issuer_and_sender_address = Address::try_from_bech32(&issuer_and_sender_address_bech32)?
+    let issuer_and_sender_address = issuer_and_sender_address_bech32
+        .inner()
         .to_bech32(account.client().get_bech32_hrp().await?);
-    let expected_address = Address::try_from_bech32(&issuer_and_sender_address)?;
+    let expected_address = issuer_and_sender_address.inner();
 
     // sender address present when building basic output
     let output = account
@@ -281,7 +282,7 @@ async fn output_preparation() -> Result<()> {
     assert_eq!(output.unlock_conditions().unwrap().len(), 1);
     let features = output.features().unwrap();
     assert_eq!(features.len(), 1);
-    assert_eq!(features.sender().unwrap().address(), &expected_address);
+    assert_eq!(features.sender().unwrap().address(), expected_address);
 
     // error when adding issuer when building basic output
     let error = account
@@ -340,11 +341,10 @@ async fn output_preparation() -> Result<()> {
     let immutable_features = output.immutable_features().unwrap();
     // issuer feature
     assert_eq!(immutable_features.len(), 1);
-    let issuer_and_sender_address = Address::try_from_bech32(&issuer_and_sender_address)?;
     let issuer_feature = immutable_features.issuer().unwrap();
-    assert_eq!(issuer_feature.address(), &issuer_and_sender_address);
+    assert_eq!(issuer_feature.address(), issuer_and_sender_address.inner());
     let sender_feature = features.sender().unwrap();
-    assert_eq!(sender_feature.address(), &issuer_and_sender_address);
+    assert_eq!(sender_feature.address(), issuer_and_sender_address.inner());
 
     // nft with expiration
     let output = account
@@ -499,7 +499,8 @@ async fn prepare_nft_output_features_update() -> Result<()> {
 
     let wallet = make_wallet(storage_path, None, None).await?;
     let accounts = &create_accounts_with_funds(&wallet, 1).await?;
-    let address = accounts[0].addresses().await?[0].bech32_address().to_string();
+    let addresses = accounts[0].addresses().await?;
+    let address = addresses[0].address();
 
     let nft_options = vec![NftOptions {
         address: Some(address.clone()),
@@ -520,7 +521,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     let nft = accounts[0]
         .prepare_output(
             OutputOptions {
-                recipient_address: address,
+                recipient_address: address.clone(),
                 amount: 1_000_000,
                 assets: Some(Assets {
                     native_tokens: None,
@@ -542,10 +543,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
         .clone();
 
     assert_eq!(nft.amount(), 1_000_000);
-    assert_eq!(
-        nft.address(),
-        accounts[0].addresses().await?[0].bech32_address().as_ref()
-    );
+    assert_eq!(nft.address(), accounts[0].addresses().await?[0].address().as_ref());
     assert!(nft.features().sender().is_none());
     assert!(nft.features().tag().is_none());
     assert_eq!(nft.features().metadata().unwrap().data(), &[42]);
@@ -555,7 +553,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     );
     assert_eq!(
         nft.immutable_features().issuer().unwrap().address(),
-        accounts[0].addresses().await?[0].bech32_address().as_ref()
+        accounts[0].addresses().await?[0].address().as_ref()
     );
 
     tear_down(storage_path)

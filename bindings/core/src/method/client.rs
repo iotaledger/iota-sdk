@@ -15,6 +15,7 @@ use iota_sdk::{
         secret::SecretManagerDto,
     },
     types::block::{
+        address::Bech32Address,
         output::{
             dto::{AliasIdDto, NativeTokenDto, NftIdDto, TokenSchemeDto},
             feature::dto::FeatureDto,
@@ -376,7 +377,7 @@ pub enum ClientMethod {
     /// Function to find inputs from addresses for a provided amount (useful for offline signing)
     FindInputs {
         /// Addresses
-        addresses: Vec<String>,
+        addresses: Vec<Bech32Address>,
         /// Amount
         amount: u64,
     },
@@ -387,7 +388,7 @@ pub enum ClientMethod {
         /// Output IDs
         output_ids: Vec<OutputId>,
         /// Addresses
-        addresses: Vec<String>,
+        addresses: Vec<Bech32Address>,
     },
     /// Reattaches blocks for provided block id. Blocks can be reattached only if they are valid and haven't been
     /// confirmed for a while.

@@ -151,7 +151,7 @@ impl Account {
                                         |sdr| {
                                             if account_addresses
                                                 .iter()
-                                                .any(|a| a.bech32_address.inner == *sdr.return_address())
+                                                .any(|a| a.address.inner == *sdr.return_address())
                                             {
                                                 // sending to ourself, we get the full amount
                                                 output.amount()

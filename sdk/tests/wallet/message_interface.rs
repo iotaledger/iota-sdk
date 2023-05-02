@@ -8,7 +8,7 @@ use iota_sdk::wallet::events::types::WalletEvent;
 use iota_sdk::{
     client::{constants::SHIMMER_COIN_TYPE, secret::GenerateAddressOptions, ClientBuilder},
     types::block::{
-        address::Address,
+        address::{Address, Bech32Address},
         output::{dto::OutputDto, unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
     },
     wallet::{
@@ -167,7 +167,7 @@ async fn message_interface_events() -> Result<()> {
                 account_id: "alias".into(),
                 method: AccountMethod::RequestFundsFromFaucet {
                     url: FAUCET_URL.to_string(),
-                    address: account.public_addresses[0].bech32_address().to_string(),
+                    address: account.public_addresses[0].address().to_string(),
                 },
             };
 
@@ -342,12 +342,13 @@ async fn address_conversion_methods() -> Result<()> {
 
     let wallet_handle = create_message_handler(Some(options)).await.unwrap();
 
-    let bech32_address = "rms1qqk4svqpc89lxx89w7vksv9jgjjm2vwnrhad2j3cds9ev4cu434wjapdsxs";
+    let bech32_address =
+        Bech32Address::try_from_str("rms1qqk4svqpc89lxx89w7vksv9jgjjm2vwnrhad2j3cds9ev4cu434wjapdsxs").unwrap();
     let hex_address = "0x2d583001c1cbf318e577996830b244a5b531d31dfad54a386c0b96571cac6ae9";
 
     let response = wallet_handle
         .send_message(Message::Bech32ToHex {
-            bech32_address: bech32_address.into(),
+            bech32_address: bech32_address.clone(),
         })
         .await;
 
@@ -405,7 +406,7 @@ async fn message_interface_address_generation() -> Result<()> {
     match response {
         Response::Bech32Address(address) => {
             assert_eq!(
-                address,
+                address.to_string(),
                 "rms1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6v3ea5a"
             );
         }
@@ -424,7 +425,7 @@ async fn message_interface_address_generation() -> Result<()> {
     match response {
         Response::Bech32Address(address) => {
             assert_eq!(
-                address,
+                address.to_string(),
                 "rms1qr239vcjzxxdyre8jsek8wrdves9hnnk6mguplvs43cwftt4svaszsvy98h"
             );
         }

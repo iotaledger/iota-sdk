@@ -17,6 +17,7 @@ use crate::{
     types::{
         api::core::{dto::LedgerInclusionStateDto, response::OutputWithMetadataResponse},
         block::{
+            address::Bech32Address,
             input::{Input, UtxoInput, INPUT_COUNT_MAX},
             output::{Output, OutputId},
             parent::Parents,
@@ -188,14 +189,14 @@ impl Client {
 
     /// Function to find inputs from addresses for a provided amount (useful for offline signing), ignoring outputs with
     /// additional unlock conditions
-    pub async fn find_inputs(&self, addresses: Vec<String>, amount: u64) -> Result<Vec<UtxoInput>> {
+    pub async fn find_inputs(&self, addresses: Vec<Bech32Address>, amount: u64) -> Result<Vec<UtxoInput>> {
         // Get outputs from node and select inputs
         let mut available_outputs = Vec::new();
 
         for address in addresses {
             let output_ids_response = self
                 .basic_output_ids(vec![
-                    QueryParameter::Address(address.to_string()),
+                    QueryParameter::Address(address),
                     QueryParameter::HasExpiration(false),
                     QueryParameter::HasTimelock(false),
                     QueryParameter::HasStorageDepositReturn(false),
@@ -251,7 +252,7 @@ impl Client {
     pub async fn find_outputs(
         &self,
         output_ids: &[OutputId],
-        addresses: &[String],
+        addresses: &[Bech32Address],
     ) -> Result<Vec<OutputWithMetadataResponse>> {
         let mut output_responses = self.get_outputs(output_ids.to_vec()).await?;
 
@@ -261,7 +262,7 @@ impl Client {
             // Get output ids of outputs that can be controlled by this address without further unlock constraints
             let output_ids_response = self
                 .basic_output_ids(vec![
-                    QueryParameter::Address(address.to_string()),
+                    QueryParameter::Address(address.clone()),
                     QueryParameter::HasExpiration(false),
                     QueryParameter::HasTimelock(false),
                     QueryParameter::HasStorageDepositReturn(false),

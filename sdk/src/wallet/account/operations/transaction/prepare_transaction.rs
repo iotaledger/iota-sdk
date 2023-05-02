@@ -79,14 +79,14 @@ impl Account {
                                 account_index,
                                 WalletEvent::TransactionProgress(
                                     TransactionProgressEvent::GeneratingRemainderDepositAddress(AddressData {
-                                        address: remainder_address.bech32_address.to_string(),
+                                        address: remainder_address.address.clone(),
                                     }),
                                 ),
                             );
                         }
-                        Some(remainder_address.bech32_address().inner)
+                        Some(remainder_address.address().inner)
                     }
-                    RemainderValueStrategy::CustomAddress(address) => Some(address.bech32_address().inner),
+                    RemainderValueStrategy::CustomAddress(address) => Some(address.address().inner),
                 }
             }
             None => None,

@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::api::PreparedTransactionData,
     types::block::{
-        address::Address,
+        address::Bech32Address,
         output::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
@@ -28,16 +28,16 @@ use crate::{
 };
 
 /// Address, amount and native tokens for `send_native_tokens()`
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AddressNativeTokens {
     /// Bech32 encoded address
-    pub address: String,
+    pub address: Bech32Address,
     /// Native tokens
     pub native_tokens: Vec<(TokenId, U256)>,
     /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
     /// first address of the account
-    pub return_address: Option<String>,
+    pub return_address: Option<Bech32Address>,
     /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
     /// receiver before. Default is 1 day
     pub expiration: Option<u32>,
@@ -95,15 +95,16 @@ impl Account {
 
         let mut outputs = Vec::new();
         for address_with_amount in addresses_and_native_tokens {
-            let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address_with_amount.address)?;
-            self.client.bech32_hrp_matches(&bech32_hrp).await?;
+            self.client
+                .bech32_hrp_matches(address_with_amount.address.hrp())
+                .await?;
             // get minimum required amount for such an output, so we don't lock more than required
             // We have to check it for every output individually, because different address types and amount of
             // different native tokens require a different storage deposit
             let storage_deposit_amount = minimum_storage_deposit_basic_native_tokens(
                 &rent_structure,
-                &address,
-                &return_address.bech32_address.inner,
+                address_with_amount.address.inner(),
+                return_address.address.inner(),
                 Some(address_with_amount.native_tokens.clone()),
                 token_supply,
             )?;
@@ -126,18 +127,18 @@ impl Account {
                             })
                             .collect::<Result<Vec<NativeToken>>>()?,
                     )
-                    .add_unlock_condition(AddressUnlockCondition::new(address))
+                    .add_unlock_condition(AddressUnlockCondition::new(&address_with_amount.address))
                     .add_unlock_condition(
                         // We send the full storage_deposit_amount back to the sender, so only the native tokens are
                         // sent
                         StorageDepositReturnUnlockCondition::new(
-                            return_address.bech32_address.inner,
+                            &return_address.address,
                             storage_deposit_amount,
                             token_supply,
                         )?,
                     )
                     .add_unlock_condition(ExpirationUnlockCondition::new(
-                        return_address.bech32_address.inner,
+                        &return_address.address,
                         expiration_time,
                     )?)
                     .finish_output(token_supply)?,

@@ -48,7 +48,7 @@ impl Client {
                 // Get output ids of outputs that can be controlled by this address without further unlock constraints
                 let output_ids_response = self
                     .basic_output_ids(vec![
-                        QueryParameter::Address(address.to_string()),
+                        QueryParameter::Address(address.clone()),
                         QueryParameter::HasExpiration(false),
                         QueryParameter::HasTimelock(false),
                         QueryParameter::HasStorageDepositReturn(false),

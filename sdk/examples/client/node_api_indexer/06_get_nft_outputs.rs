@@ -6,7 +6,10 @@
 //!
 //! `cargo run --example node_api_indexer_get_nft_outputs --release -- [NODE URL] [ADDRESS]`
 
-use iota_sdk::client::{node_api::indexer::query_parameters::QueryParameter, Client, Result};
+use iota_sdk::{
+    client::{node_api::indexer::query_parameters::QueryParameter, Client, Result},
+    types::block::address::Bech32Address,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -24,9 +27,11 @@ async fn main() -> Result<()> {
         .finish()?;
 
     // Take the address from command line argument or use a default one.
-    let address = std::env::args()
-        .nth(2)
-        .unwrap_or_else(|| String::from("rms1qrrdjmdkadtcnuw0ue5n9g4fmkelrj3dl26eyeshkha3w3uu0wheu5z5qqz"));
+    let address = Bech32Address::try_from_str(
+        std::env::args()
+            .nth(2)
+            .unwrap_or_else(|| String::from("rms1qrrdjmdkadtcnuw0ue5n9g4fmkelrj3dl26eyeshkha3w3uu0wheu5z5qqz")),
+    )?;
 
     // Get output IDs of NFT outputs that can be controlled by this address without further unlock constraints.
     let output_ids_response = client

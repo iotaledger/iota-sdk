@@ -79,7 +79,7 @@ async fn main() -> Result<()> {
         };
         println!(
             "{}",
-            request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), addresses[0].bech32_address()).await?
+            request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), addresses[0].address()).await?
         );
         addresses
     };
@@ -96,7 +96,7 @@ async fn main() -> Result<()> {
                         // send one or two Mi for more different transactions
                         BasicOutputBuilder::new_with_amount(n * 1_000_000)
                             .add_unlock_condition(AddressUnlockCondition::new(
-                                ping_addresses_[address_index % amount_addresses].bech32_address(),
+                                ping_addresses_[address_index % amount_addresses].address(),
                             ))
                             .finish_output(pong_account_.client().get_token_supply().await?)?,
                     ];

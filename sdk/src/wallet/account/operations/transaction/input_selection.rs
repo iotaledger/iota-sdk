@@ -51,7 +51,7 @@ impl Account {
             .public_addresses()
             .iter()
             .chain(account_details.internal_addresses().iter())
-            .map(|address| *address.bech32_address.as_ref())
+            .map(|address| *address.address.as_ref())
             .collect();
 
         // Prevent consuming the voting output if not actually wanted

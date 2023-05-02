@@ -55,7 +55,7 @@ pub(crate) async fn create_accounts_with_funds(wallet: &Wallet, amount: usize) -
     let mut new_accounts = Vec::new();
     'accounts: for _ in 0..amount {
         let account = wallet.create_account().finish().await?;
-        request_funds_from_faucet(FAUCET_URL, account.addresses().await?[0].bech32_address()).await?;
+        request_funds_from_faucet(FAUCET_URL, account.addresses().await?[0].address()).await?;
 
         // Continue only after funds are received
         for _ in 0..30 {

@@ -203,8 +203,8 @@ async fn stronghold() {
     match response {
         Response::GeneratedAddresses(addresses) => {
             assert_eq!(
-                addresses[0],
-                "rms1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6v3ea5a".to_string(),
+                addresses[0].to_string(),
+                "rms1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6v3ea5a",
             );
         }
         response_type => panic!("Unexpected response type: {response_type:?}"),

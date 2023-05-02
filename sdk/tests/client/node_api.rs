@@ -59,7 +59,7 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let output_ids_response = client
             .basic_output_ids(vec![
-                QueryParameter::Address(addresses[0].to_string()),
+                QueryParameter::Address(addresses[0].clone()),
                 QueryParameter::HasExpiration(false),
                 QueryParameter::HasTimelock(false),
                 QueryParameter::HasStorageDepositReturn(false),
@@ -184,15 +184,18 @@ async fn test_get_address_outputs() {
     let client = setup_client_with_node_health_ignored();
     let secret_manager = setup_secret_manager();
 
-    let address = &client
+    let address = client
         .get_addresses(&secret_manager)
         .with_range(0..1)
         .finish()
         .await
-        .unwrap()[0];
+        .unwrap()
+        .into_iter()
+        .next()
+        .unwrap();
 
     let output_ids_response = client
-        .basic_output_ids(vec![QueryParameter::Address(address.to_string())])
+        .basic_output_ids(vec![QueryParameter::Address(address)])
         .await
         .unwrap();
 

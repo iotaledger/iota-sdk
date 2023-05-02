@@ -131,7 +131,7 @@ impl AccountBuilder {
                         != first_account_addresses
                             .first()
                             .ok_or(Error::FailedToGetRemainder)?
-                            .bech32_address
+                            .address
                             .inner
                     {
                         return Err(Error::InvalidMnemonic(
@@ -142,7 +142,7 @@ impl AccountBuilder {
                     // Get bech32_hrp from address
                     if let Some(address) = first_account_addresses.first() {
                         if bech32_hrp.is_none() {
-                            bech32_hrp = Some(address.bech32_address.hrp.clone());
+                            bech32_hrp = Some(address.address.hrp.clone());
                         }
                     }
                 }
@@ -159,7 +159,7 @@ impl AccountBuilder {
                     get_first_public_address(&self.secret_manager, self.coin_type, account_index).await?;
 
                 let first_public_account_address = AccountAddress {
-                    bech32_address: Bech32Address::new(bech32_hrp, first_public_address)?,
+                    address: Bech32Address::new(bech32_hrp, first_public_address)?,
                     key_index: 0,
                     internal: false,
                     used: false,

@@ -243,17 +243,13 @@ impl Account {
                     // deposit for the remaining amount and possible NTs
                     NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([AddressUnlockCondition::new(
-                            first_account_address.bech32_address.inner,
-                        )])
+                        .with_unlock_conditions([AddressUnlockCondition::new(first_account_address.address.inner)])
                         .finish_output(token_supply)?
                 } else {
                     NftOutputBuilder::from(nft_output)
                         .with_minimum_storage_deposit(rent_structure)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([AddressUnlockCondition::new(
-                            first_account_address.bech32_address.inner,
-                        )])
+                        .with_unlock_conditions([AddressUnlockCondition::new(first_account_address.address.inner)])
                         // Set native tokens empty, we will collect them from all inputs later
                         .with_native_tokens([])
                         .finish_output(token_supply)?
@@ -340,7 +336,7 @@ impl Account {
         if available_amount - required_amount_for_nfts > 0 {
             outputs_to_send.push(
                 BasicOutputBuilder::new_with_amount(available_amount - required_amount_for_nfts)
-                    .add_unlock_condition(AddressUnlockCondition::new(first_account_address.bech32_address.inner))
+                    .add_unlock_condition(AddressUnlockCondition::new(first_account_address.address.inner))
                     .with_native_tokens(new_native_tokens.finish()?)
                     .finish_output(token_supply)?,
             );

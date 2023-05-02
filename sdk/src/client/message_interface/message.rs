@@ -17,7 +17,7 @@ use crate::{
         secret::SecretManagerDto,
     },
     types::block::{
-        address::{dto::Ed25519AddressDto, AliasAddress},
+        address::{dto::Ed25519AddressDto, AliasAddress, Bech32Address},
         output::{
             dto::{AliasIdDto, NativeTokenDto, NftIdDto, TokenSchemeDto},
             feature::dto::FeatureDto,
@@ -426,7 +426,7 @@ pub enum Message {
     /// Function to find inputs from addresses for a provided amount (useful for offline signing)
     FindInputs {
         /// Addresses
-        addresses: Vec<String>,
+        addresses: Vec<Bech32Address>,
         /// Amount
         amount: u64,
     },
@@ -437,7 +437,7 @@ pub enum Message {
         /// Output IDs
         output_ids: Vec<OutputId>,
         /// Addresses
-        addresses: Vec<String>,
+        addresses: Vec<Bech32Address>,
     },
     /// Reattaches blocks for provided block id. Blocks can be reattached only if they are valid and haven't been
     /// confirmed for a while.
@@ -472,7 +472,7 @@ pub enum Message {
     /// Transforms bech32 to hex
     Bech32ToHex {
         /// Bech32 encoded address
-        bech32: String,
+        bech32: Bech32Address,
     },
     /// Transforms a hex encoded address to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -509,7 +509,7 @@ pub enum Message {
     /// Returns a valid Address parsed from a String.
     ParseBech32Address {
         /// Address
-        address: String,
+        address: Bech32Address,
     },
     /// Checks if a String is a valid bech32 encoded address.
     IsAddressValid {
@@ -560,7 +560,7 @@ pub enum Message {
         /// Faucet URL
         url: String,
         /// The address for request funds
-        address: String,
+        address: Bech32Address,
     },
     /// Compute the hash of a transaction essence.
     HashTransactionEssence {

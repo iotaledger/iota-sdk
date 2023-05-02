@@ -108,8 +108,8 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            addresses[0].to_bech32("atoi"),
-            "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e".to_string()
+            &addresses[0].to_bech32("atoi").to_string(),
+            "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e"
         );
     }
 
@@ -126,8 +126,8 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            addresses[0].to_bech32("atoi"),
-            "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r".to_string()
+            &addresses[0].to_bech32("atoi").to_string(),
+            "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r"
         );
     }
 }

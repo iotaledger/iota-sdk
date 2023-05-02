@@ -17,6 +17,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{placeholder::PlaceholderSecretManager, SecretManager},
     },
+    types::block::address::Bech32Address,
     wallet::{account::types::AccountAddress, AddressWithAmount, ClientOptions, Result, Wallet},
 };
 
@@ -30,7 +31,7 @@ async fn main() -> Result<()> {
 
     let outputs = vec![AddressWithAmount::new(
         // Address to which we want to send the amount.
-        "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
+        Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu").unwrap(),
         // The amount to send.
         1_000_000,
     )];

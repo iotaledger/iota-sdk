@@ -4,7 +4,7 @@
 use alloc::string::String;
 
 use crate::types::block::{
-    address::{Address, AliasAddress},
+    address::{Address, AliasAddress, Bech32Address},
     output::OutputId,
 };
 
@@ -26,7 +26,7 @@ impl AliasId {
     }
 
     /// Returns the bech32 encoding of the alias ID.
-    pub fn to_bech32(&self, bech32_hrp: &str) -> String {
+    pub fn to_bech32(&self, bech32_hrp: &str) -> Bech32Address {
         Address::Alias(AliasAddress::new(*self)).to_bech32(bech32_hrp)
     }
 }

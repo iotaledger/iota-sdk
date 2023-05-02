@@ -25,7 +25,7 @@ impl Account {
         Ok(self
             .client
             .basic_output_ids(vec![
-                QueryParameter::Address(bech32_address.to_string()),
+                QueryParameter::Address(bech32_address.clone()),
                 QueryParameter::HasExpiration(false),
                 QueryParameter::HasTimelock(false),
                 QueryParameter::HasStorageDepositReturn(false),
@@ -46,23 +46,21 @@ impl Account {
             let mut output_ids = vec![];
             output_ids.extend(
                 self.client()
-                    .basic_output_ids(vec![QueryParameter::Address(bech32_address.to_string())])
+                    .basic_output_ids(vec![QueryParameter::Address(bech32_address.clone())])
                     .await?
                     .items,
             );
             output_ids.extend(
                 self.client()
                     .basic_output_ids(vec![QueryParameter::StorageDepositReturnAddress(
-                        bech32_address.to_string(),
+                        bech32_address.clone(),
                     )])
                     .await?
                     .items,
             );
             output_ids.extend(
                 self.client()
-                    .basic_output_ids(vec![QueryParameter::ExpirationReturnAddress(
-                        bech32_address.to_string(),
-                    )])
+                    .basic_output_ids(vec![QueryParameter::ExpirationReturnAddress(bech32_address.clone())])
                     .await?
                     .items,
             );
@@ -76,7 +74,7 @@ impl Account {
             let tasks = vec![
                 // Get basic outputs
                 async move {
-                    let bech32_address = bech32_address.to_string();
+                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     tokio::spawn(async move {
                         client
@@ -89,7 +87,7 @@ impl Account {
                 .boxed(),
                 // Get outputs where the address is in the storage deposit return unlock condition
                 async move {
-                    let bech32_address = bech32_address.to_string();
+                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     tokio::spawn(async move {
                         client
@@ -102,7 +100,7 @@ impl Account {
                 .boxed(),
                 // Get outputs where the address is in an expired expiration unlock condition
                 async move {
-                    let bech32_address = bech32_address.to_string();
+                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     tokio::spawn(async move {
                         client

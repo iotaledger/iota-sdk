@@ -30,12 +30,12 @@ use crate::{
 #[serde(rename_all = "camelCase")]
 pub struct AddressWithAmountDto {
     /// Bech32 encoded address
-    pub address: String,
+    pub address: Bech32Address,
     /// Amount
     pub amount: String,
     /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
     /// first address of the account
-    pub return_address: Option<String>,
+    pub return_address: Option<Bech32Address>,
     /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
     /// receiver before. Default is 1 day
     pub expiration: Option<u32>,
@@ -71,7 +71,7 @@ pub struct AddressWithUnspentOutputsDto {
 impl From<&AddressWithUnspentOutputs> for AddressWithUnspentOutputsDto {
     fn from(value: &AddressWithUnspentOutputs) -> Self {
         Self {
-            address: value.bech32_address.clone(),
+            address: value.address.clone(),
             key_index: value.key_index,
             internal: value.internal,
             output_ids: value.output_ids.clone(),

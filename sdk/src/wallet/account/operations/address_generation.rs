@@ -50,7 +50,7 @@ impl Account {
         // get bech32_hrp
         let bech32_hrp = {
             match account_details.public_addresses.first() {
-                Some(address) => address.bech32_address.hrp.to_string(),
+                Some(address) => address.address.hrp.to_string(),
                 None => self.client.get_bech32_hrp().await?,
             }
         };
@@ -145,7 +145,7 @@ impl Account {
             .into_iter()
             .enumerate()
             .map(|(index, address)| AccountAddress {
-                bech32_address: Bech32Address::new(bech32_hrp.clone(), address).unwrap(),
+                address: Bech32Address::new(bech32_hrp.clone(), address).unwrap(),
                 key_index: highest_current_index_plus_one + index as u32,
                 internal: options.internal,
                 used: false,

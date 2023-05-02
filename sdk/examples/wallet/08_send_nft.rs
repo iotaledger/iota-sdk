@@ -6,7 +6,10 @@
 //!
 //! `cargo run --example send_nft --release`
 
-use iota_sdk::wallet::{AddressAndNftId, Result, Wallet};
+use iota_sdk::{
+    types::block::address::Bech32Address,
+    wallet::{AddressAndNftId, Result, Wallet},
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -29,7 +32,8 @@ async fn main() -> Result<()> {
             .await?;
 
         let outputs = vec![AddressAndNftId {
-            address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
+            address: Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")
+                .unwrap(),
             nft_id: *nft_id,
         }];
 

@@ -5,7 +5,10 @@
 
 use std::fmt;
 
-use crate::client::{Error, Result};
+use crate::{
+    client::{Error, Result},
+    types::block::address::Bech32Address,
+};
 
 // https://github.com/gohornet/hornet/blob/bb1271be9f3a638f6acdeb6de74eab64515f27f1/plugins/indexer/v1/routes.go#L54
 
@@ -44,6 +47,12 @@ impl QueryParameters {
         self.0.iter().any(|q| q.kind() == kind)
     }
 
+    // Tests if any query parameter matches a predicate.
+    #[cfg(test)]
+    pub(crate) fn any<F: Fn(&QueryParameter) -> bool>(&self, f: F) -> bool {
+        self.0.iter().any(f)
+    }
+
     /// Converts parameters to a single String.
     pub fn to_query_string(&self) -> Option<String> {
         if self.0.is_empty() {
@@ -65,9 +74,9 @@ impl QueryParameters {
 #[serde(rename_all = "camelCase")]
 pub enum QueryParameter {
     /// Bech32-encoded address that should be searched for.
-    Address(String),
+    Address(Bech32Address),
     /// Filter foundry outputs based on bech32-encoded address of the controlling alias.
-    AliasAddress(String),
+    AliasAddress(Bech32Address),
     /// Returns outputs that were created after a certain Unix timestamp.
     CreatedAfter(u32),
     /// Returns outputs that were created before a certain Unix timestamp.
@@ -76,13 +85,13 @@ pub enum QueryParameter {
     Cursor(String),
     /// Filters outputs based on the presence of a specific Bech32-encoded return address in the expiration unlock
     /// condition.
-    ExpirationReturnAddress(String),
+    ExpirationReturnAddress(Bech32Address),
     /// Returns outputs that expire after a certain Unix timestamp.
     ExpiresAfter(u32),
     /// Returns outputs that expire before a certain Unix timestamp.
     ExpiresBefore(u32),
     /// Filters outputs based on bech32-encoded governor (governance controller) address.
-    Governor(String),
+    Governor(Bech32Address),
     /// Filters outputs based on the presence of expiration unlock condition.
     HasExpiration(bool),
     /// Filters outputs based on the presence of native tokens.
@@ -92,7 +101,7 @@ pub enum QueryParameter {
     /// Filters outputs based on the presence of timelock unlock condition.
     HasTimelock(bool),
     /// Filters outputs based on bech32-encoded issuer address.
-    Issuer(String),
+    Issuer(Bech32Address),
     /// Filters outputs that have at most a certain number of distinct native tokens.
     MaxNativeTokenCount(u32),
     /// Filters outputs that have at least a certain number of distinct native tokens.
@@ -101,12 +110,12 @@ pub enum QueryParameter {
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
     PageSize(usize),
     /// Filters outputs based on the presence of validated Sender (bech32 encoded).
-    Sender(String),
+    Sender(Bech32Address),
     /// Filters outputs based on bech32-encoded state controller address.
-    StateController(String),
+    StateController(Bech32Address),
     /// Filters outputs based on the presence of a specific return address in the storage deposit return unlock
     /// condition.
-    StorageDepositReturnAddress(String),
+    StorageDepositReturnAddress(Bech32Address),
     /// Filters outputs based on matching Tag Block.
     Tag(String),
     /// Returns outputs that are timelocked after a certain Unix timestamp.
@@ -288,14 +297,18 @@ mod tests {
 
     #[test]
     fn query_parameter() {
-        let address1 =
-            QueryParameter::Address("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r".into());
-        let address2 =
-            QueryParameter::Address("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r".into());
-        let address3 =
-            QueryParameter::Address("atoi1qprxpfvaz2peggq6f8k9cj8zfsxuw69e4nszjyv5kuf8yt70t2847shpjak".into());
-        let state_controller =
-            QueryParameter::StateController("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r".into());
+        let address1 = QueryParameter::Address(
+            Bech32Address::try_from_str("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r").unwrap(),
+        );
+        let address2 = QueryParameter::Address(
+            Bech32Address::try_from_str("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r").unwrap(),
+        );
+        let address3 = QueryParameter::Address(
+            Bech32Address::try_from_str("atoi1qprxpfvaz2peggq6f8k9cj8zfsxuw69e4nszjyv5kuf8yt70t2847shpjak").unwrap(),
+        );
+        let state_controller = QueryParameter::StateController(
+            Bech32Address::try_from_str("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r").unwrap(),
+        );
 
         let mut query_parameters = QueryParameters::new(vec![address1, address2, state_controller]);
         // since address1 and address2 are of the same enum variant, we should only have one
@@ -304,8 +317,8 @@ mod tests {
         query_parameters.replace(address3);
         assert!(query_parameters.0.len() == 2);
         // Contains address query parameter
-        assert!(query_parameters.contains(QueryParameter::Address(String::new()).kind()));
+        assert!(query_parameters.any(|param| matches!(param, QueryParameter::Address(_))));
         // Contains no cursor query parameter
-        assert!(!query_parameters.contains(QueryParameter::Cursor(String::new()).kind()));
+        assert!(!query_parameters.any(|param| matches!(param, QueryParameter::Cursor(_))));
     }
 }

@@ -100,12 +100,12 @@ enum Build<'a> {
 
 fn build_basic_output(
     amount: u64,
-    bech32_address: &Bech32Address,
+    bech32_address: Bech32Address,
     native_tokens: Option<Vec<(&str, u64)>>,
-    bech32_sender: Option<&str>,
-    sdruc: Option<(&str, u64)>,
+    bech32_sender: Option<Bech32Address>,
+    sdruc: Option<(Bech32Address, u64)>,
     timelock: Option<u32>,
-    expiration: Option<(&str, u32)>,
+    expiration: Option<(Bech32Address, u32)>,
 ) -> Output {
     let mut builder =
         BasicOutputBuilder::new_with_amount(amount).add_unlock_condition(AddressUnlockCondition::new(bech32_address));
@@ -119,14 +119,12 @@ fn build_basic_output(
     }
 
     if let Some(bech32_sender) = bech32_sender {
-        builder = builder.add_feature(SenderFeature::new(Address::try_from_bech32(bech32_sender).unwrap()));
+        builder = builder.add_feature(SenderFeature::new(bech32_sender));
     }
 
     if let Some((address, amount)) = sdruc {
-        builder = builder.add_unlock_condition(
-            StorageDepositReturnUnlockCondition::new(Address::try_from_bech32(address).unwrap(), amount, TOKEN_SUPPLY)
-                .unwrap(),
-        );
+        builder = builder
+            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount, TOKEN_SUPPLY).unwrap());
     }
 
     if let Some(timelock) = timelock {
@@ -134,9 +132,7 @@ fn build_basic_output(
     }
 
     if let Some((address, timestamp)) = expiration {
-        builder = builder.add_unlock_condition(
-            ExpirationUnlockCondition::new(Address::try_from_bech32(address).unwrap(), timestamp).unwrap(),
-        );
+        builder = builder.add_unlock_condition(ExpirationUnlockCondition::new(address, timestamp).unwrap());
     }
 
     builder.finish_output(TOKEN_SUPPLY).unwrap()
@@ -146,12 +142,12 @@ fn build_basic_output(
 fn build_nft_output(
     amount: u64,
     nft_id: NftId,
-    bech32_address: &Bech32Address,
+    bech32_address: Bech32Address,
     native_tokens: Option<Vec<(&str, u64)>>,
-    bech32_sender: Option<&str>,
-    bech32_issuer: Option<&str>,
-    sdruc: Option<(&str, u64)>,
-    expiration: Option<(&str, u32)>,
+    bech32_sender: Option<Bech32Address>,
+    bech32_issuer: Option<Bech32Address>,
+    sdruc: Option<(Bech32Address, u64)>,
+    expiration: Option<(Bech32Address, u32)>,
 ) -> Output {
     let mut builder = NftOutputBuilder::new_with_amount(amount, nft_id)
         .add_unlock_condition(AddressUnlockCondition::new(bech32_address));
@@ -165,24 +161,20 @@ fn build_nft_output(
     }
 
     if let Some(bech32_sender) = bech32_sender {
-        builder = builder.add_feature(SenderFeature::new(Address::try_from_bech32(bech32_sender).unwrap()));
+        builder = builder.add_feature(SenderFeature::new(bech32_sender));
     }
 
     if let Some(bech32_issuer) = bech32_issuer {
-        builder = builder.add_immutable_feature(IssuerFeature::new(Address::try_from_bech32(bech32_issuer).unwrap()));
+        builder = builder.add_immutable_feature(IssuerFeature::new(bech32_issuer));
     }
 
     if let Some((address, amount)) = sdruc {
-        builder = builder.add_unlock_condition(
-            StorageDepositReturnUnlockCondition::new(Address::try_from_bech32(address).unwrap(), amount, TOKEN_SUPPLY)
-                .unwrap(),
-        );
+        builder = builder
+            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount, TOKEN_SUPPLY).unwrap());
     }
 
     if let Some((address, timestamp)) = expiration {
-        builder = builder.add_unlock_condition(
-            ExpirationUnlockCondition::new(Address::try_from_bech32(address).unwrap(), timestamp).unwrap(),
-        );
+        builder = builder.add_unlock_condition(ExpirationUnlockCondition::new(address, timestamp).unwrap());
     }
 
     builder.finish_output(TOKEN_SUPPLY).unwrap()
@@ -193,15 +185,12 @@ fn build_alias_output(
     amount: u64,
     alias_id: AliasId,
     state_index: u32,
-    state_address: &str,
-    governor_address: &str,
+    state_address: Bech32Address,
+    governor_address: Bech32Address,
     native_tokens: Option<Vec<(&str, u64)>>,
-    bech32_sender: Option<&str>,
-    bech32_issuer: Option<&str>,
+    bech32_sender: Option<Bech32Address>,
+    bech32_issuer: Option<Bech32Address>,
 ) -> Output {
-    let state_address = Address::try_from_bech32(state_address).unwrap();
-    let governor_address = Address::try_from_bech32(governor_address).unwrap();
-
     let mut builder = AliasOutputBuilder::new_with_amount(amount, alias_id)
         .with_state_index(state_index)
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(state_address))
@@ -216,11 +205,11 @@ fn build_alias_output(
     }
 
     if let Some(bech32_sender) = bech32_sender {
-        builder = builder.add_feature(SenderFeature::new(Address::try_from_bech32(bech32_sender).unwrap()));
+        builder = builder.add_feature(SenderFeature::new(bech32_sender));
     }
 
     if let Some(bech32_issuer) = bech32_issuer {
-        builder = builder.add_immutable_feature(IssuerFeature::new(Address::try_from_bech32(bech32_issuer).unwrap()));
+        builder = builder.add_immutable_feature(IssuerFeature::new(bech32_issuer));
     }
 
     builder.finish_output(TOKEN_SUPPLY).unwrap()
@@ -252,12 +241,12 @@ fn build_output_inner(build: Build) -> (Output, Option<Chain>) {
         Build::Basic(amount, bech32_address, native_tokens, bech32_sender, sdruc, timelock, expiration, chain) => (
             build_basic_output(
                 amount,
-                &Bech32Address::try_from_str(bech32_address).unwrap(),
+                Bech32Address::try_from_str(bech32_address).unwrap(),
                 native_tokens,
-                bech32_sender,
-                sdruc,
+                bech32_sender.map(|address| Bech32Address::try_from_str(address).unwrap()),
+                sdruc.map(|(address, exp)| (Bech32Address::try_from_str(address).unwrap(), exp)),
                 timelock,
-                expiration,
+                expiration.map(|(address, exp)| (Bech32Address::try_from_str(address).unwrap(), exp)),
             ),
             chain,
         ),
@@ -275,12 +264,12 @@ fn build_output_inner(build: Build) -> (Output, Option<Chain>) {
             build_nft_output(
                 amount,
                 nft_id,
-                &Bech32Address::try_from_str(bech32_address).unwrap(),
+                Bech32Address::try_from_str(bech32_address).unwrap(),
                 native_tokens,
-                bech32_sender,
-                bech32_issuer,
-                sdruc,
-                expiration,
+                bech32_sender.map(|address| Bech32Address::try_from_str(address).unwrap()),
+                bech32_issuer.map(|address| Bech32Address::try_from_str(address).unwrap()),
+                sdruc.map(|(address, exp)| (Bech32Address::try_from_str(address).unwrap(), exp)),
+                expiration.map(|(address, exp)| (Bech32Address::try_from_str(address).unwrap(), exp)),
             ),
             chain,
         ),
@@ -299,11 +288,11 @@ fn build_output_inner(build: Build) -> (Output, Option<Chain>) {
                 amount,
                 alias_id,
                 state_index,
-                state_address,
-                governor_address,
+                Bech32Address::try_from_str(state_address).unwrap(),
+                Bech32Address::try_from_str(governor_address).unwrap(),
                 native_tokens,
-                bech32_sender,
-                bech32_issuer,
+                bech32_sender.map(|address| Bech32Address::try_from_str(address).unwrap()),
+                bech32_issuer.map(|address| Bech32Address::try_from_str(address).unwrap()),
             ),
             chain,
         ),
@@ -375,7 +364,7 @@ fn is_remainder_or_return(
         // assert_eq!(output.as_basic().native_tokens().len(), 0);
 
         if let [UnlockCondition::Address(address_unlock_condition)] = output.unlock_conditions().as_ref() {
-            if *address_unlock_condition.address() != Address::try_from_bech32(address).unwrap() {
+            if address_unlock_condition.address() != Bech32Address::try_from_str(address).unwrap().inner() {
                 return false;
             }
         } else {

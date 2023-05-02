@@ -6,7 +6,7 @@ use core::str::FromStr;
 use iota_sdk::types::block::{
     address::{
         dto::{AddressDto, Ed25519AddressDto},
-        Address, Ed25519Address,
+        Address, Bech32Address, Ed25519Address,
     },
     Error,
 };
@@ -77,18 +77,15 @@ fn debug() {
 fn bech32() {
     let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS).unwrap());
 
-    assert_eq!(address.to_bech32("rms"), ED25519_BECH32);
+    assert_eq!(address.to_bech32("rms").to_string(), ED25519_BECH32);
 }
 
 #[test]
 fn bech32_roundtrip() {
     let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS).unwrap());
-    let bech32 = address.to_bech32("rms");
+    let bech32 = address.to_bech32("rms").to_string();
 
-    assert_eq!(
-        Address::try_from_bech32_with_hrp(bech32).unwrap(),
-        (String::from("rms"), address)
-    );
+    assert_eq!(Bech32Address::try_from_str(bech32), Bech32Address::new("rms", address));
 }
 
 #[test]

@@ -55,7 +55,7 @@ impl<'a> ClientBlockBuilder<'a> {
                     )
                     .await?;
                     let address_outputs = self
-                        .basic_address_outputs(sender_or_issuer_address.to_bech32(&bech32_hrp))
+                        .basic_address_outputs(&sender_or_issuer_address.to_bech32(&bech32_hrp))
                         .await?;
 
                     let mut found_output = false;

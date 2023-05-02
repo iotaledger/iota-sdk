@@ -23,7 +23,7 @@ use crate::{
         Client, Result,
     },
     types::block::{
-        address::{dto::AddressDto, Address, Bech32Address, Ed25519Address},
+        address::{dto::AddressDto, Address, Ed25519Address},
         input::dto::UtxoInputDto,
         output::{
             dto::{OutputBuilderAmountDto, OutputDto, RentStructureDto},
@@ -320,10 +320,7 @@ impl ClientMessageHandler {
                     .get_addresses(&secret_manager)
                     .set_options(options)?
                     .finish()
-                    .await?
-                    .into_iter()
-                    .map(|a| a.to_string())
-                    .collect();
+                    .await?;
                 Ok(Response::GeneratedAddresses(addresses))
             }
             Message::BuildAndPostBlock {
@@ -659,9 +656,9 @@ impl ClientMessageHandler {
                     .hex_public_key_to_bech32_address(&hex, bech32_hrp.as_deref())
                     .await?,
             )),
-            Message::ParseBech32Address { address } => Ok(Response::ParsedBech32Address(AddressDto::from(
-                &Address::try_from_bech32(address)?,
-            ))),
+            Message::ParseBech32Address { address } => {
+                Ok(Response::ParsedBech32Address(AddressDto::from(address.inner())))
+            }
             Message::IsAddressValid { address } => Ok(Response::Bool(Address::is_valid_bech32(&address))),
             Message::GenerateMnemonic => Ok(Response::GeneratedMnemonic(Client::generate_mnemonic()?)),
             Message::MnemonicToHexSeed { mut mnemonic } => {
@@ -690,9 +687,7 @@ impl ClientMessageHandler {
                 serial_number,
                 token_scheme_kind,
             ))),
-            Message::Faucet { url, address } => Ok(Response::Faucet(
-                request_funds_from_faucet(&url, &Bech32Address::try_from_str(address)?).await?,
-            )),
+            Message::Faucet { url, address } => Ok(Response::Faucet(request_funds_from_faucet(&url, &address).await?)),
             Message::HashTransactionEssence { essence } => Ok(Response::TransactionEssenceHash(prefix_hex::encode(
                 TransactionEssence::try_from_dto_unverified(&essence)?.hash(),
             ))),

@@ -20,7 +20,7 @@ async fn send_amount() -> Result<()> {
     let tx = account_0
         .send_amount(
             vec![AddressWithAmount::new(
-                account_1.addresses().await?[0].bech32_address().to_string(),
+                account_1.addresses().await?[0].address().clone(),
                 amount,
             )],
             None,
@@ -53,7 +53,7 @@ async fn send_amount_127_outputs() -> Result<()> {
         .send_amount(
             vec![
                 AddressWithAmount::new(
-                    account_1.addresses().await?[0].bech32_address().to_string(),
+                    account_1.addresses().await?[0].address().clone(),
                     amount,
                 );
                 // Only 127, because we need one remainder
@@ -88,7 +88,7 @@ async fn send_amount_custom_input() -> Result<()> {
     let amount = 1_000_000;
     let tx = account_0
         .send_amount(
-            vec![AddressWithAmount::new(account_1.addresses().await?[0].bech32_address().to_string(), amount); 10],
+            vec![AddressWithAmount::new(account_1.addresses().await?[0].address().clone(), amount); 10],
             None,
         )
         .await?;
@@ -105,7 +105,7 @@ async fn send_amount_custom_input() -> Result<()> {
     let tx = account_1
         .send_amount(
             vec![AddressWithAmount::new(
-                account_0.addresses().await?[0].bech32_address().to_string(),
+                account_0.addresses().await?[0].address().clone(),
                 amount,
             )],
             Some(TransactionOptions {
@@ -131,7 +131,7 @@ async fn send_nft() -> Result<()> {
     let accounts = &create_accounts_with_funds(&wallet, 2).await?;
 
     let nft_options = vec![NftOptions {
-        address: Some(accounts[0].addresses().await?[0].bech32_address().to_string()),
+        address: Some(accounts[0].addresses().await?[0].address().clone()),
         sender: None,
         metadata: Some(b"some nft metadata".to_vec()),
         tag: None,
@@ -149,7 +149,7 @@ async fn send_nft() -> Result<()> {
     let transaction = accounts[0]
         .send_nft(
             vec![AddressAndNftId {
-                address: accounts[1].addresses().await?[0].bech32_address().to_string(),
+                address: accounts[1].addresses().await?[0].address().clone(),
                 nft_id,
             }],
             None,

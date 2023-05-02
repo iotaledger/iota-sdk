@@ -58,8 +58,8 @@ async fn public_key_to_address() {
         .unwrap();
 
     assert_eq!(
-        public_key_address,
-        "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r".to_string()
+        public_key_address.to_string(),
+        "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r"
     );
 }
 
@@ -246,8 +246,8 @@ async fn address_generation() {
             let response = message_handler.send_message(message).await;
             match response {
                 Response::GeneratedAddresses(addresses) => {
-                    assert_eq!(addresses[0], address.bech32_address);
-                    if let Address::Ed25519(ed25519_address) = Address::try_from_bech32(&addresses[0]).unwrap() {
+                    assert_eq!(addresses[0].to_string(), address.bech32_address);
+                    if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
                         assert_eq!(ed25519_address.to_string(), address.ed25519_address);
                     } else {
                         panic!("Invalid address type")
@@ -295,8 +295,8 @@ async fn address_generation() {
             let response = message_handler.send_message(message).await;
             match response {
                 Response::GeneratedAddresses(addresses) => {
-                    assert_eq!(addresses[0], address.bech32_address);
-                    if let Address::Ed25519(ed25519_address) = Address::try_from_bech32(&addresses[0]).unwrap() {
+                    assert_eq!(addresses[0].to_string(), address.bech32_address);
+                    if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
                         assert_eq!(ed25519_address.to_string(), address.ed25519_address);
                     } else {
                         panic!("Invalid address type")

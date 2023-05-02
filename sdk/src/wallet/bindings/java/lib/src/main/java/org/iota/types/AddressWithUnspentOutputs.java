@@ -4,10 +4,11 @@
 package org.iota.types;
 
 import org.iota.types.ids.OutputId;
+
 public class AddressWithUnspentOutputs extends AbstractObject {
 
     /// The address.
-    private String address;
+    private String bech32Address;
     /// The address key index.
     private int keyIndex;
     /// Determines if an address is a public or an internal (change) address.
@@ -15,8 +16,8 @@ public class AddressWithUnspentOutputs extends AbstractObject {
     /// Output ids.
     private OutputId[] output_ids;
 
-    public String getAddress() {
-        return address;
+    public String getBech32Address() {
+        return bech32Address;
     }
 
     public int getKeyIndex() {
@@ -31,5 +32,3 @@ public class AddressWithUnspentOutputs extends AbstractObject {
         return output_ids;
     }
 }
-
-

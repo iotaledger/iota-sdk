@@ -6,7 +6,10 @@
 //!
 //! `cargo run --example node_api_indexer_get_foundry_outputs --release -- [NODE URL] [ADDRESS]`
 
-use iota_sdk::client::{node_api::indexer::query_parameters::QueryParameter, Client, Result};
+use iota_sdk::{
+    client::{node_api::indexer::query_parameters::QueryParameter, Client, Result},
+    types::block::address::Bech32Address,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -24,9 +27,11 @@ async fn main() -> Result<()> {
         .finish()?;
 
     // Take the address from command line argument or use a default one.
-    let alias_address = std::env::args()
-        .nth(2)
-        .unwrap_or_else(|| String::from("rms1prd5mdmy84mgzwwklzkrl8ym02p2y3dkr8af7lqclnv0pan7274uyjrmwx5"));
+    let alias_address = Bech32Address::try_from_str(
+        std::env::args()
+            .nth(2)
+            .unwrap_or_else(|| String::from("rms1prd5mdmy84mgzwwklzkrl8ym02p2y3dkr8af7lqclnv0pan7274uyjrmwx5")),
+    )?;
 
     // Get output IDs of foundry outputs that can be controlled by this address.
     let output_ids_response = client

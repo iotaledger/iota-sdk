@@ -6,7 +6,10 @@
 //!
 //! `cargo run --example wallet_transaction --release`
 
-use iota_sdk::wallet::{AddressWithAmount, Result, Wallet};
+use iota_sdk::{
+    types::block::address::Bech32Address,
+    wallet::{AddressWithAmount, Result, Wallet},
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -29,7 +32,7 @@ async fn main() -> Result<()> {
 
         // Send a transaction with 1 Mi
         let outputs = vec![AddressWithAmount::new(
-            "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
+            Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu").unwrap(),
             1_000_000,
         )];
         let transaction = account.send_amount(outputs, None).await?;
