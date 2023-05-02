@@ -1,4 +1,4 @@
-from iota_sdk import Wallet, Utils
+from iota_sdk import Wallet, Client
 
 import time
 
@@ -14,9 +14,12 @@ print(f'Synced: {response}')
 
 # Balance before funding
 balance = account.get_balance()
-print(f'balance before faucet request: { balance[ "baseCoin" ][ "available" ] }')
+print(
+    f'balance before faucet request: { balance[ "baseCoin" ][ "available" ] }')
 
-response = Utils.faucet("https://faucet.testnet.shimmer.network/api/enqueue", "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")
+response = Client().request_funds_from_faucet("https://faucet.testnet.shimmer.network/api/enqueue",
+                                              "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")
+print(response)
 
 time.sleep(20)
 
@@ -25,4 +28,5 @@ response = account.sync()
 
 # Balance after funding
 balance = account.get_balance()
-print(f'balance after faucet request: { balance[ "baseCoin" ][ "available" ] }')
+print(
+    f'balance after faucet request: { balance[ "baseCoin" ][ "available" ] }')

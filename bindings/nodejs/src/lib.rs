@@ -32,7 +32,7 @@ pub fn call_utils_method(mut cx: FunctionContext) -> JsResult<JsString> {
             return Ok(cx.string(serde_json::to_string(&Response::Error(err.into())).expect("json to string error")));
         }
     };
-    let response = crate::RUNTIME.block_on(async move { rust_call_utils_method(method).await });
+    let response = rust_call_utils_method(method);
 
     Ok(cx.string(serde_json::to_string(&response).unwrap()))
 }

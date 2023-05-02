@@ -4,7 +4,7 @@
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
-        Client,
+        request_funds_from_faucet, Client,
     },
     types::block::{
         input::dto::UtxoInputDto,
@@ -444,6 +444,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .hex_public_key_to_bech32_address(&hex, bech32_hrp.as_deref())
                 .await?,
         ),
+        ClientMethod::RequestFundsFromFaucet { url, address } => {
+            Response::Faucet(request_funds_from_faucet(&url, &address).await?)
+        }
     };
     Ok(response)
 }
