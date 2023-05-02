@@ -451,4 +451,11 @@ pub enum ClientMethod {
         /// Human readable part
         bech32_hrp: Option<String>,
     },
+    /// Requests funds for a given address from the faucet, for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.
+    RequestFundsFromFaucet {
+        /// Faucet URL
+        url: String,
+        /// The address for request funds
+        address: String,
+    },
 }

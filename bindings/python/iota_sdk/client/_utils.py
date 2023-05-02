@@ -34,3 +34,13 @@ class ClientUtils():
             'hex': hex,
             'bech32Hrp': bech32_hrp
         })
+
+    def request_funds_from_faucet(self, url, address):
+        """Requests funds from the faucet, for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.
+        """
+        return self._call_method(
+            'requestFundsFromFaucet', {
+                'url': url,
+                'address': address,
+            }
+        )

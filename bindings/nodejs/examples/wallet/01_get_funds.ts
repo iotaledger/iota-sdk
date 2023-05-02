@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Wallet, Utils, initLogger } from '@iota/sdk';
+import { Wallet, Client, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -10,6 +10,9 @@ require('dotenv').config({ path: '.env' });
 // This example requests funds from the faucet
 async function run() {
     initLogger();
+    if (!process.env.FAUCET_URL) {
+        throw new Error('.env FAUCET_URL is undefined, see .env.example');
+    }
     try {
         const wallet = new Wallet({
             storagePath: './alice-database',
@@ -20,7 +23,7 @@ async function run() {
         const accountAddresses = await account.addresses();
         console.log('Account addresses:', accountAddresses);
 
-        const faucetResponse = Utils.requestFundsFromFaucet(
+        const faucetResponse = await new Client({}).requestFundsFromFaucet(
             process.env.FAUCET_URL,
             accountAddresses[0].address,
         );

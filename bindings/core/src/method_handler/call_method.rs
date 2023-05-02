@@ -15,7 +15,7 @@ use crate::{
         client::call_client_method_internal, secret_manager::call_secret_manager_method_internal,
         utils::call_utils_method_internal, wallet::call_wallet_method_internal,
     },
-    panic::convert_async_panics,
+    panic::{convert_async_panics, convert_panics},
     response::Response,
     UtilsMethod,
 };
@@ -74,9 +74,9 @@ pub async fn call_wallet_method(wallet: &Wallet, method: WalletMethod) -> Respon
 }
 
 /// Call a utils method.
-pub async fn call_utils_method(method: UtilsMethod) -> Response {
+pub fn call_utils_method(method: UtilsMethod) -> Response {
     log::debug!("Utils method: {method:?}");
-    let result = convert_async_panics(|| async { call_utils_method_internal(method).await }).await;
+    let result = convert_panics(|| call_utils_method_internal(method));
 
     let response = result.unwrap_or_else(Response::Error);
 

@@ -428,3 +428,11 @@ export interface __ClearListenersMethod__ {
         topics: string[];
     };
 }
+
+export type __RequestFundsFromFaucetMethod__ = {
+    name: 'requestFundsFromFaucet';
+    data: {
+        url: string;
+        address: string;
+    };
+};
