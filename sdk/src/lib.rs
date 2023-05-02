@@ -13,9 +13,6 @@
     clippy::significant_drop_tightening
 )]
 
-#[cfg(feature = "serde")]
-#[macro_use]
-extern crate serde;
 extern crate alloc;
 
 #[cfg(feature = "client")]

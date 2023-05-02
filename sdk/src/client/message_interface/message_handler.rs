@@ -5,6 +5,7 @@ use std::{any::Any, panic::AssertUnwindSafe};
 
 use backtrace::Backtrace;
 use futures::{Future, FutureExt};
+use serde::Serialize;
 use zeroize::Zeroize;
 #[cfg(feature = "mqtt")]
 use {
