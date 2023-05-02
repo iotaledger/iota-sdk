@@ -313,6 +313,11 @@ path = "examples/client/07_mqtt.rs"
 required-features = [ "client", "mqtt" ]
 
 [[example]]
+name = "get_block"
+path = "examples/client/get_block.rs"
+required-features = [ "client" ]
+
+[[example]]
 name = "ledger_nano"
 path = "examples/client/ledger_nano.rs"
 required-features = [ "client", "ledger_nano" ]
