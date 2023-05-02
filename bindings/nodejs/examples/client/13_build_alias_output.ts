@@ -10,6 +10,7 @@ import {
     SenderFeature,
     Ed25519Address,
     IssuerFeature,
+    GovernorAddressUnlockCondition,
 } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
@@ -41,7 +42,7 @@ async function run() {
                 new StateControllerAddressUnlockCondition(
                     new Ed25519Address(hexAddress),
                 ),
-                new StateControllerAddressUnlockCondition(
+                new GovernorAddressUnlockCondition(
                     new Ed25519Address(hexAddress),
                 ),
             ],

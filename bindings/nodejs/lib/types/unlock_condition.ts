@@ -5,7 +5,6 @@ import {
     ADDRESS_UNLOCK_CONDITION_TYPE,
     EXPIRATION_UNLOCK_CONDITION_TYPE,
     GOVERNOR_ADDRESS_UNLOCK_CONDITION_TYPE,
-    IAddressUnlockCondition,
     IMMUTABLE_ALIAS_UNLOCK_CONDITION_TYPE,
     STATE_CONTROLLER_ADDRESS_UNLOCK_CONDITION_TYPE,
     STORAGE_DEPOSIT_RETURN_UNLOCK_CONDITION_TYPE,
@@ -25,7 +24,7 @@ enum UnlockConditionType {
     ImmutableAliasAddress = IMMUTABLE_ALIAS_UNLOCK_CONDITION_TYPE,
 }
 
-class UnlockCondition {
+abstract class UnlockCondition {
     private _type: UnlockConditionType;
 
     constructor(type: UnlockConditionType) {

@@ -33,10 +33,6 @@ import type {
     INodeInfo,
     IReceiptsResponse,
     ITreasury,
-    IBasicOutput,
-    IAliasOutput,
-    IFoundryOutput,
-    INftOutput,
     INodeInfoProtocol,
     UnlockTypes,
 } from '@iota/types';
@@ -937,7 +933,7 @@ export class Client {
      * Build a Foundry Output.
      */
     async buildFoundryOutput(
-        options: IFoundryOutputBuilderOptions,
+        options: FoundryOutputBuilderOptions,
     ): Promise<FoundryOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildFoundryOutput',

@@ -1,17 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    ALIAS_ADDRESS_TYPE,
-    ED25519_ADDRESS_TYPE,
-    HexEncodedString,
-    NFT_ADDRESS_TYPE,
-} from '@iota/types';
+import * as ADDRESS_TYPES from '@iota/types';
+
+import type { HexEncodedString } from '@iota/types';
 
 enum AddressType {
-    Ed25519 = ED25519_ADDRESS_TYPE,
-    Alias = ALIAS_ADDRESS_TYPE,
-    Nft = NFT_ADDRESS_TYPE,
+    Ed25519 = ADDRESS_TYPES.ED25519_ADDRESS_TYPE,
+    Alias = ADDRESS_TYPES.ALIAS_ADDRESS_TYPE,
+    Nft = ADDRESS_TYPES.NFT_ADDRESS_TYPE,
 }
 
 abstract class Address {
