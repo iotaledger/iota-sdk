@@ -5,7 +5,6 @@ use std::{any::Any, panic::AssertUnwindSafe};
 
 use backtrace::Backtrace;
 use futures::{Future, FutureExt};
-use serde::Serialize;
 use zeroize::Zeroize;
 #[cfg(feature = "mqtt")]
 use {
@@ -108,7 +107,7 @@ impl ClientMessageHandler {
     {
         self.client
             .subscribe(topics, move |topic_event| {
-                #[derive(Serialize)]
+                #[derive(serde::Serialize)]
                 struct MqttResponse {
                     topic: String,
                     payload: String,
