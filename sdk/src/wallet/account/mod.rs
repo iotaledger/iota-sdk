@@ -325,12 +325,12 @@ impl Account {
     }
 
     /// Returns outputs of the account
-    pub async fn outputs(&self, filter: impl Into<Option<FilterOptions>>) -> Result<Vec<OutputData>> {
+    pub async fn outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Result<Vec<OutputData>> {
         self.filter_outputs(self.read().await.outputs.values(), filter)
     }
 
     /// Returns unspent outputs of the account
-    pub async fn unspent_outputs(&self, filter: impl Into<Option<FilterOptions>>) -> Result<Vec<OutputData>> {
+    pub async fn unspent_outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Result<Vec<OutputData>> {
         self.filter_outputs(self.read().await.unspent_outputs.values(), filter)
     }
 
