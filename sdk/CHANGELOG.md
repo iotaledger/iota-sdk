@@ -21,8 +21,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.4.0 - 2023-MM-DD
 
+### Added
+
+- `FilterOptions::{alias_ids, foundry_ids, nft_ids}` fields;
+- `Account::{unspent_alias_output, unspent_foundry_output, unspent_nft_output}` methods;
+- `StrongholdAdapter::inner` method;
+
 ### Removed
 
+- `FilterOptions`'s `Hash` derivation;
 - `client_without_tls` feature in favor of separate `client` and `tls` features;
 
 ## 0.3.0 - 2023-05-02
