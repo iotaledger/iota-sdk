@@ -4,7 +4,7 @@
 use iota_sdk::{
     client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
     types::block::{
-        address::{Address, Ed25519Address},
+        address::{dto::AddressDto, Address, Ed25519Address},
         output::{AliasId, FoundryId, NftId},
         payload::{transaction::TransactionEssence, TransactionPayload},
         signature::Ed25519Signature,
@@ -27,7 +27,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => {
             Response::Bech32Address(hex_public_key_to_bech32_address(&hex, &bech32_hrp)?)
         }
-        UtilsMethod::ParseBech32Address { address } => Response::Bech32Address(address),
+        UtilsMethod::ParseBech32Address { address } => Response::ParsedBech32Address(AddressDto::from(address.inner())),
         UtilsMethod::IsAddressValid { address } => Response::Bool(Address::is_valid_bech32(&address)),
         UtilsMethod::GenerateMnemonic => Response::GeneratedMnemonic(Client::generate_mnemonic()?),
         UtilsMethod::MnemonicToHexSeed { mut mnemonic } => {
