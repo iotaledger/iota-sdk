@@ -1,16 +1,23 @@
 from iota_sdk import Client
+from dotenv import load_dotenv
+import json
+import os
+
+load_dotenv()
+
+node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 
 # Create a Client instance
-client = Client(nodes=['https://api.testnet.shimmer.network'])
+client = Client(nodes=[node_url])
 
 # Fetch a block ID from the node
-block_id = client.get_tips()[0]
-print(f'{block_id}')
+block_id = client.get_tips()
+print(f'Block ids: {block_id}')
 
 # Get the metadata for the block
-metadata = client.get_block_metadata(block_id)
-print(f'{metadata}')
+metadata = client.get_block_metadata(block_id[0])
+print(f'Block metadata: {json.dumps(metadata, indent=4)}')
 
 # Request the block by its id
-block = client.get_block_data(block_id)
-print(f'{block}')
+block = client.get_block_data(block_id[0])
+print(f'Block: {json.dumps(block, indent=4)}')

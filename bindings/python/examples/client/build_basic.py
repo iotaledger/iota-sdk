@@ -1,8 +1,14 @@
 from iota_sdk import *
+from dotenv import load_dotenv
 import json
+import os
+
+load_dotenv()
+
+node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 
 # Create a Client instance
-client = Client(nodes=['https://api.testnet.shimmer.network'])
+client = Client(nodes=[node_url])
 
 hex_address = Utils.bech32_to_hex(
     'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy')

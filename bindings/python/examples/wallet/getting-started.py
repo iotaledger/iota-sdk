@@ -2,16 +2,21 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk import Wallet, StrongholdSecretManager, CoinType, Utils
+from dotenv import load_dotenv
+import json
+import os
+
+load_dotenv()
 
 # A name to associate with the created account.
 ACCOUNT_ALIAS = 'Alice'
 
 # The node to connect to.
-NODE_URL = 'https://api.testnet.shimmer.network'
+NODE_URL = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 
 # A password to encrypt the stored data.
 # WARNING: Never hardcode passwords in production code.
-STRONGHOLD_PASSWORD = 'a-secure-password'
+STRONGHOLD_PASSWORD = os.environ.get('STRONGHOLD_PASSWORD', 'a-secure-password')
 
 # The path to store the account snapshot.
 STRONGHOLD_SNAPSHOT_PATH = 'vault.stronghold'
