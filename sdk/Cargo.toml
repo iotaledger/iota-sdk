@@ -74,7 +74,7 @@ dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 
 [features]
-default = [ "std", "serde", "tls", "client", "wallet" ]
+default = [ "client", "wallet", "tls" ]
 
 events = [  ]
 ledger_nano = [ "iota-ledger-nano" ]
