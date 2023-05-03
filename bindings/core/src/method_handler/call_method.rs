@@ -1,10 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(not(target_family = "wasm"))]
 use std::pin::Pin;
 
-#[cfg(not(target_family = "wasm"))]
 use futures::Future;
 use iota_sdk::{
     client::{secret::SecretManager, Client},
@@ -22,37 +20,33 @@ use crate::{
     UtilsMethod,
 };
 
-#[cfg(not(target_family = "wasm"))]
 pub trait CallMethod {
     type Method;
 
     // This uses a manual async_trait-like impl because it's not worth it to import the lib for one trait
-    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + Send + 'a>>;
+    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + 'a>>;
 }
 
-#[cfg(not(target_family = "wasm"))]
 impl CallMethod for Client {
     type Method = ClientMethod;
 
-    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + Send + 'a>> {
+    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + 'a>> {
         Box::pin(call_client_method(self, method))
     }
 }
 
-#[cfg(not(target_family = "wasm"))]
 impl CallMethod for Wallet {
     type Method = WalletMethod;
 
-    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + Send + 'a>> {
+    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + 'a>> {
         Box::pin(call_wallet_method(self, method))
     }
 }
 
-#[cfg(not(target_family = "wasm"))]
 impl CallMethod for SecretManager {
     type Method = SecretManagerMethod;
 
-    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + Send + 'a>> {
+    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + 'a>> {
         Box::pin(call_secret_manager_method(self, method))
     }
 }
