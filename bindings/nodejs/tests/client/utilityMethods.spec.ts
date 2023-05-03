@@ -20,6 +20,15 @@ describe('Client utility methods', () => {
         ).resolves.toBe(null);
     });
 
+    it('invalid mnemonic error', () => {
+        try {
+            Utils.verifyMnemonic('invalid mnemonic '.repeat(12));
+            throw 'should error';
+        } catch (e: any) {
+            expect(e.payload.error).toContain('NoSuchWord');
+        }
+    });
+
     it('converts address to hex and bech32', async () => {
         const address =
             'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy';

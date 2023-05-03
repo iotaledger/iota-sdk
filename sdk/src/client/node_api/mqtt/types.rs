@@ -6,7 +6,7 @@
 use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use regex::RegexSet;
-use serde::{de::Error as _, Deserialize, Deserializer};
+use serde::{de::Error as _, Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 
 use super::Error;
