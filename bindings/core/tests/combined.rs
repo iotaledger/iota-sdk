@@ -39,7 +39,7 @@ async fn generate_addresses() -> Result<()> {
     let response = client.call_method(method).await;
     match response {
         Response::GeneratedAddresses(addresses) => assert_eq!(
-            addresses[0],
+            addresses[0].to_string(),
             "atoi1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxxja54p"
         ),
         _ => panic!("Unexpected response type"),

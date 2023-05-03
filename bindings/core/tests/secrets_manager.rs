@@ -17,7 +17,7 @@ async fn generate_addresses() -> Result<()> {
     let response = secret_manager.call_method(method).await;
     match response {
         Response::GeneratedAddresses(addresses) => assert_eq!(
-            addresses[0],
+            addresses[0].to_string(),
             "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy"
         ),
         _ => panic!("Unexpected response type"),

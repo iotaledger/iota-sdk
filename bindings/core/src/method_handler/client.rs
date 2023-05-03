@@ -176,10 +176,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .get_addresses(&secret_manager)
                 .set_options(options)?
                 .finish()
-                .await?
-                .into_iter()
-                .map(|a| a.to_string())
-                .collect();
+                .await?;
             Response::GeneratedAddresses(addresses)
         }
         ClientMethod::BuildAndPostBlock {

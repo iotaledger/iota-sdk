@@ -67,7 +67,7 @@ pub enum Response {
     // Client responses
     /// Response for:
     /// - [`GenerateAddresses`](crate::method::ClientMethod::GenerateAddresses)
-    GeneratedAddresses(Vec<String>),
+    GeneratedAddresses(Vec<Bech32Address>),
     /// Response for:
     /// - [`GetNode`](crate::method::ClientMethod::GetNode)
     Node(Node),
