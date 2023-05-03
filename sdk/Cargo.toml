@@ -41,7 +41,7 @@ fern-logger = { version = "0.5.0", default-features = false, optional = true }
 futures = { version = "0.3.28", default-features = false, features = [ "thread-pool" ], optional = true }
 instant = { version = "0.1.12", default-features = false, optional = true }
 iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
-iota_stronghold = { version = "1.0.5", default-features = false, optional = true }
+iota_stronghold = { version = "1.1.0", default-features = false, optional = true }
 log = { version = "0.4.17", default-features = false, optional = true }
 num_cpus = { version = "1.15.0", default-features = false, optional = true }
 once_cell = { version = "1.17.1", default-features = false, optional = true }
@@ -74,7 +74,7 @@ dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 
 [features]
-default = [ "std", "serde" ]
+default = [ "std", "serde", "tls", "client", "wallet" ]
 
 events = [  ]
 ledger_nano = [ "iota-ledger-nano" ]
