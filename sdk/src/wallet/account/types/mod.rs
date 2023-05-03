@@ -10,7 +10,7 @@ pub mod participation;
 use std::str::FromStr;
 
 use crypto::keys::slip10::Chain;
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize};
 
 pub use self::{
     address::{AccountAddress, AddressWithUnspentOutputs},
@@ -42,6 +42,7 @@ use crate::{
 pub struct OutputData {
     /// The output id
     pub output_id: OutputId,
+    #[serde(deserialize_with = "output_metadata_deserialize_or_convert")]
     pub metadata: OutputMetadata,
     /// The actual Output
     pub output: Output,
@@ -54,6 +55,22 @@ pub struct OutputData {
     pub remainder: bool,
     // bip32 path
     pub chain: Option<Chain>,
+}
+
+// Custom deserialization to stay backwards compatible
+fn output_metadata_deserialize_or_convert<'de, D>(deserializer: D) -> std::result::Result<OutputMetadata, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value = serde_json::Value::deserialize(deserializer)?;
+
+    Ok(match serde_json::from_value::<OutputMetadata>(value.clone()) {
+        Ok(r) => r,
+        Err(_) => {
+            let dto = serde_json::from_value::<OutputMetadataDto>(value).map_err(de::Error::custom)?;
+            OutputMetadata::try_from(&dto).map_err(de::Error::custom)?
+        }
+    })
 }
 
 impl OutputData {
