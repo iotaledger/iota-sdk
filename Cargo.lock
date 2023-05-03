@@ -1463,21 +1463,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "iota-client-wasm"
-version = "0.1.0"
-dependencies = [
- "console_error_panic_hook",
- "getrandom",
- "instant",
- "iota-sdk",
- "js-sys",
- "serde_json",
- "tokio",
- "wasm-bindgen",
- "wasm-bindgen-futures",
-]
-
-[[package]]
 name = "iota-crypto"
 version = "0.15.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1619,6 +1604,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "iota-sdk-wasm"
+version = "0.1.0"
+dependencies = [
+ "console_error_panic_hook",
+ "getrandom",
+ "instant",
+ "iota-sdk-bindings-core",
+ "js-sys",
+ "log",
+ "serde_json",
+ "tokio",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+]
+
+[[package]]
 name = "iota-wallet-java"
 version = "0.1.0"
 dependencies = [
@@ -1656,23 +1658,6 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
-]
-
-[[package]]
-name = "iota-wallet-wasm"
-version = "0.1.0"
-dependencies = [
- "console_error_panic_hook",
- "getrandom",
- "instant",
- "iota-sdk",
- "js-sys",
- "log",
- "serde_json",
- "tokio",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "wasm-logger",
 ]
 
 [[package]]
