@@ -518,7 +518,7 @@ impl StrongholdAdapter {
     }
 
     /// Acquire the stronghold lock.
-    pub async fn get_stronghold(&self) -> MutexGuard<'_, Stronghold> {
+    pub async fn inner(&self) -> MutexGuard<'_, Stronghold> {
         self.stronghold.lock().await
     }
 }
