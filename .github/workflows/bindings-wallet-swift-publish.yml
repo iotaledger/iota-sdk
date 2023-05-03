@@ -1,0 +1,94 @@
+name: Create Swift iOS release (wallet)
+
+on: workflow_dispatch
+
+env:
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  release-ios:
+    name: Create iOS releases
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [macos-latest]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Get current date
+        run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+
+      - name: Cache cargo registry
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/registry
+          # Add date to the cache to keep it up to date
+          key: ${{ matrix.os }}-stable-cargo-registry-${{ hashFiles('**/Cargo.lock') }}-${{ env.CURRENT_DATE }}
+          # Restore from outdated cache for speed
+          restore-keys: |
+            ${{ matrix.os }}-stable-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+            ${{ matrix.os }}-stable-cargo-registry-
+
+      - name: Cache cargo index
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/git
+          # Add date to the cache to keep it up to date
+          key: ${{ matrix.os }}-stable-cargo-index-${{ hashFiles('**/Cargo.lock') }}-${{ env.CURRENT_DATE }}
+          # Restore from outdated cache for speed
+          restore-keys: |
+            ${{ matrix.os }}-stable-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+            ${{ matrix.os }}-stable-cargo-index-
+
+      - name: Add the iOS targets
+        # shell: zsh
+        working-directory: sdk/src/wallet/bindings/swift/
+        run: |
+          rustup target add aarch64-apple-ios x86_64-apple-ios
+
+      - name: Construct tag
+        # shell: bash
+        id: construct-tag
+        run: |
+          echo "tag=iota-wallet-swift-${{ steps.prepare-tag.outputs.group1 }}" >> $GITHUB_OUTPUT
+
+      - name: Build for the iOS targets
+        # shell: bash
+        working-directory: sdk/src/wallet/bindings/swift/
+        run: |
+          cargo build --target aarch64-apple-ios --release --lib
+          cargo build --target x86_64-apple-ios --release --lib
+
+      - name: Copy libiota-wallet.a to the correct location
+        # shell: bash
+        working-directory: target/
+        run: |
+          mkdir -p WalletFramework/x86_64-apple-ios
+          cp x86_64-apple-ios/release/libiota-wallet.a WalletFramework/x86_64-apple-ios
+          mkdir -p WalletFramework/aarch64-apple-ios
+          cp aarch64-apple-ios/release/libiota-wallet.a WalletFramework/aarch64-apple-ios
+          
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.0
+        with:
+          type: "zip"
+          filename: "WalletFramework.zip"
+          directory: target/WalletFramework
+
+      - name: Upload ZIP to Github
+        uses: softprops/action-gh-release@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            target/WalletFramework/WalletFramework.zip
+          tag_name: ${{ steps.construct-tag.outputs.tag }}
+          append_body: true
+          prerelease: true
