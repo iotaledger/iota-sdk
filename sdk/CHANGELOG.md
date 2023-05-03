@@ -27,6 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::{unspent_alias_output, unspent_foundry_output, unspent_nft_output}` methods;
 - `StrongholdAdapter::inner` method;
 
+### Changed
+
+- Features and UnlockConditions that take an `Address` now take `impl Into<Address>`;
+- Functions that accepted a string bech32 address now accept a `Bech32Address`;
+
 ### Removed
 
 - `FilterOptions`'s `Hash` derivation;
@@ -61,8 +66,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Lots of builder setters are now taking an `impl Into<Option<T>>` instead of a `T` parameter;
 - All `ledger_nano` related errors have been moved from the client error to a newly created `client::secret::ledger_nano::Error`;
 - All `stronghold` related errors have been moved from the client error to a newly created `client::stronghold::Error`;
-- Features and UnlockConditions that take an `Address` now take `impl Into<Address>`;
-- Functions that accepted a string bech32 address now accept a `Bech32Address`;
 
 ### Removed
 
