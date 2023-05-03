@@ -4,7 +4,7 @@
 use alloc::borrow::Cow;
 use std::ops::Range;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     client::{

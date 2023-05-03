@@ -107,7 +107,7 @@ impl ClientMessageHandler {
     {
         self.client
             .subscribe(topics, move |topic_event| {
-                #[derive(Serialize)]
+                #[derive(serde::Serialize)]
                 struct MqttResponse {
                     topic: String,
                     payload: String,

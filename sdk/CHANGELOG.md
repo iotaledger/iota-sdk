@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - `FilterOptions`'s `Hash` derivation;
+- `client_without_tls` feature in favor of separate `client` and `tls` features;
 
 ## 0.3.0 - 2023-05-02
 

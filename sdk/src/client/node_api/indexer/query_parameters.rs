@@ -5,6 +5,8 @@
 
 use std::fmt;
 
+use serde::{Deserialize, Serialize};
+
 use crate::{
     client::{Error, Result},
     types::block::address::Bech32Address,

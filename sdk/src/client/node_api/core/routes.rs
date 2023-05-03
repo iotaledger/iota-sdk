@@ -6,6 +6,7 @@
 use std::str::FromStr;
 
 use packable::PackableExt;
+use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::{

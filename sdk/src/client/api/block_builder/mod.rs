@@ -9,6 +9,7 @@ use core::borrow::Borrow;
 use std::ops::Range;
 
 use packable::bounded::TryIntoBoundedU16Error;
+use serde::{Deserialize, Serialize};
 
 pub use self::transaction::verify_semantic;
 use crate::{

@@ -1,6 +1,8 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::string::String;
+
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 
 /// Generates a random string with a given charset.
