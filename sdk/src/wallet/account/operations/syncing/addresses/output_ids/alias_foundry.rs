@@ -26,7 +26,7 @@ impl Account {
     /// Returns output ids of alias outputs
     pub(crate) async fn get_alias_and_foundry_output_ids(
         &self,
-        bech32_address: impl Borrow<Bech32Address>,
+        bech32_address: impl Borrow<Bech32Address> + Send,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[SYNC] get_alias_and_foundry_output_ids");

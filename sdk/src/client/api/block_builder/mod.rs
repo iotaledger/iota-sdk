@@ -164,7 +164,7 @@ impl<'a> ClientBlockBuilder<'a> {
     /// Set a transfer to the builder
     pub async fn with_output(
         mut self,
-        address: impl Borrow<Bech32Address>,
+        address: impl Borrow<Bech32Address> + Send,
         amount: u64,
     ) -> Result<ClientBlockBuilder<'a>> {
         let address = address.borrow();

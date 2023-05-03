@@ -20,7 +20,7 @@ impl Account {
     /// Returns output ids of nft outputs that have the address in any unlock condition
     pub(crate) async fn get_nft_output_ids_with_any_unlock_condition(
         &self,
-        bech32_address: impl Borrow<Bech32Address>,
+        bech32_address: impl Borrow<Bech32Address> + Send,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         let bech32_address = bech32_address.borrow();
 

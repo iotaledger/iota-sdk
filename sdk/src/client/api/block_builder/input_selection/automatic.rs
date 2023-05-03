@@ -35,15 +35,17 @@ impl<'a> ClientBlockBuilder<'a> {
     // Get basic outputs for an address without storage deposit return unlock condition
     pub(crate) async fn basic_address_outputs(
         &self,
-        address: impl Borrow<Bech32Address>,
+        address: impl Borrow<Bech32Address> + Send,
     ) -> Result<Vec<OutputWithMetadataResponse>> {
         let mut output_ids = Vec::new();
+
+        let address = address.borrow();
 
         // First request to get all basic outputs that can directly be unlocked by the address.
         output_ids.extend(
             self.client
                 .basic_output_ids(vec![
-                    QueryParameter::Address(address.borrow().clone()),
+                    QueryParameter::Address(address.clone()),
                     QueryParameter::HasStorageDepositReturn(false),
                 ])
                 .await?
@@ -54,7 +56,7 @@ impl<'a> ClientBlockBuilder<'a> {
         output_ids.extend(
             self.client
                 .basic_output_ids(vec![
-                    QueryParameter::ExpirationReturnAddress(address.borrow().clone()),
+                    QueryParameter::ExpirationReturnAddress(address.clone()),
                     QueryParameter::HasExpiration(true),
                     QueryParameter::HasStorageDepositReturn(false),
                     // Ignore outputs that aren't expired yet
