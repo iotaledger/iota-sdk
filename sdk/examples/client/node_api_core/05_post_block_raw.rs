@@ -24,7 +24,11 @@ async fn main() -> Result<()> {
     // Post the block as raw bytes.
     let block_id = client.post_block_raw(&block).await?;
 
-    println!("Posted: {block_id:?}");
+    println!(
+        "Posted raw block: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
+    );
 
     Ok(())
 }

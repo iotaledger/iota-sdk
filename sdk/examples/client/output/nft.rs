@@ -27,6 +27,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance.
@@ -61,10 +62,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!(
-        "Transaction with new NFT output sent: {node_url}/api/core/v2/blocks/{}",
-        block.id()
-    );
+    println!("Block with new NFT output sent: {explorer_url}/block/{}", block.id());
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
     //////////////////////////////////
@@ -103,7 +101,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Transaction with input(basic output) to NFT output sent: {node_url}/api/core/v2/blocks/{}",
+        "Block with input (basic output) to NFT output sent: {explorer_url}/block/{}",
         block.id()
     );
 
@@ -129,7 +127,7 @@ async fn main() -> Result<()> {
         .with_outputs(outputs)?
         .finish()
         .await?;
-    println!("Burn transaction sent: {node_url}/api/core/v2/blocks/{}", block.id());
+    println!("Block with burn transaction sent: {explorer_url}/block/{}", block.id());
     let _ = client.retry_until_included(&block.id(), None, None).await?;
     Ok(())
 }
