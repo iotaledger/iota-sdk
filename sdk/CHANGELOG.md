@@ -27,10 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::{unspent_alias_output, unspent_foundry_output, unspent_nft_output}` methods;
 - `StrongholdAdapter::inner` method;
 
-### Changed
-
-- `StorageManager` now accepts a generic storage instead of a boxed type, and the params have been reversed;
-
 ### Removed
 
 - `FilterOptions`'s `Hash` derivation;
