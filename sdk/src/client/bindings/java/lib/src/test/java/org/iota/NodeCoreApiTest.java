@@ -76,20 +76,6 @@ public class NodeCoreApiTest extends ApiTest {
     }
 
     @Test
-    public void testGetReceiptsMigratedAt() throws ClientException {
-        Receipt[] receipts = client.getReceiptsMigratedAt(client.getNodeInfo().getNodeInfo().get("status").getAsJsonObject().get("latestMilestone").getAsJsonObject().get("index").getAsInt());
-        for (Receipt r : receipts)
-            System.out.println(r);
-    }
-
-    @Test
-    public void testGetReceipts() throws ClientException {
-        Receipt[] receipts = client.getReceipts();
-        for (Receipt r : receipts)
-            System.out.println(r);
-    }
-
-    @Test
     public void testGetTreasury() throws ClientException {
         TreasuryResponse r = client.getTreasury();
         System.out.println(r);

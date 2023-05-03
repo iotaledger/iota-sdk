@@ -31,7 +31,6 @@ import type {
     IMilestonePayload,
     IMilestoneUtxoChangesResponse,
     INodeInfo,
-    IReceiptsResponse,
     ITreasury,
     IBasicOutput,
     IAliasOutput,
@@ -523,33 +522,6 @@ export class Client {
             name: 'getUtxoChangesByIndex',
             data: {
                 index,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get receipts.
-     */
-    async getReceipts(): Promise<IReceiptsResponse> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getReceipts',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the receipts by the given milestone index.
-     */
-    async getReceiptsMigratedAt(
-        milestoneIndex: number,
-    ): Promise<IReceiptsResponse[]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getReceiptsMigratedAt',
-            data: {
-                milestoneIndex,
             },
         });
 

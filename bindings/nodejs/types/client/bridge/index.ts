@@ -28,8 +28,6 @@ import type {
     __GetPeersMethod__,
     __PostBlockRawMethod__,
     __GetBlockRawMethod__,
-    __GetReceiptsMethod__,
-    __GetReceiptsMigratedAtMethod__,
     __GetTreasuryMethod__,
     __GetIncludedBlockMethod__,
     __GetIncludedBlockMetadataMethod__,
@@ -101,8 +99,6 @@ export type __ClientMethods__ =
     | __GetUtxoChangesByIdMethod__
     | __GetMilestoneByIndexMethod__
     | __GetUtxoChangesByIndexMethod__
-    | __GetReceiptsMethod__
-    | __GetReceiptsMigratedAtMethod__
     | __GetTreasuryMethod__
     | __GetIncludedBlockMethod__
     | __GetIncludedBlockMetadataMethod__

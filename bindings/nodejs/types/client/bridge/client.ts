@@ -229,17 +229,6 @@ export interface __GetUtxoChangesByIndexMethod__ {
     };
 }
 
-export interface __GetReceiptsMethod__ {
-    name: 'getReceipts';
-}
-
-export interface __GetReceiptsMigratedAtMethod__ {
-    name: 'getReceiptsMigratedAt';
-    data: {
-        milestoneIndex: number;
-    };
-}
-
 export interface __GetTreasuryMethod__ {
     name: 'getTreasury';
 }

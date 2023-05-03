@@ -13,19 +13,6 @@ const client = new Client({
 
 // Skip for CI
 describe.skip('UTXO methods', () => {
-    it('gets receipts', async () => {
-        const info = await client.getInfo();
-        const milestoneIndex = info.nodeInfo.status.confirmedMilestone.index;
-
-        const receipts = await client.getReceipts();
-        expect(receipts).toBeDefined();
-
-        const receiptsMigratedAt = await client.getReceiptsMigratedAt(
-            milestoneIndex,
-        );
-        expect(receiptsMigratedAt).toBeDefined();
-    });
-
     it('gets treasury', async () => {
         const treasury = await client.getTreasury();
 
