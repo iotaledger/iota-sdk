@@ -25,10 +25,9 @@ derive_more = { version = "0.99.17", default-features = false, features = [ "fro
 getset = { version = "0.1.2", default-features = false }
 hashbrown = { version = "0.13.2", default-features = false, features = [ "ahash", "inline-more" ] }
 hex = { version = "0.4.3", default-features = false }
-instant = { version = "0.1.12", default-features = false }
-iota-crypto = { version = "0.15.3", default-features = false, features = [ "blake2b", "ed25519", "ternary_encoding" ] }
+iota-crypto = { version = "0.18.0", default-features = false, features = [ "blake2b", "ed25519", "ternary_encoding" ] }
 iterator-sorted = { version = "0.1.0", default-features = false }
-packable = { version = "0.8.0", default-features = false, features = [ "primitive-types" ] }
+packable = { version = "0.8.1", default-features = false, features = [ "primitive-types" ] }
 prefix-hex = { version = "0.7.0", default-features = false, features = [ "primitive-types" ] }
 primitive-types = { version = "0.12.1", default-features = false }
 serde = { version = "1.0.160", default-features = false, features = [ "derive" ] }
@@ -40,6 +39,7 @@ backtrace = { version = "0.3.67", default-features = false, optional = true }
 derive_builder = { version = "0.12.0", default-features = false, optional = true }
 fern-logger = { version = "0.5.0", default-features = false, optional = true }
 futures = { version = "0.3.28", default-features = false, features = [ "thread-pool" ], optional = true }
+instant = { version = "0.1.12", default-features = false, optional = true }
 iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
 iota_stronghold = { version = "1.0.5", default-features = false, optional = true }
 log = { version = "0.4.17", default-features = false, optional = true }
@@ -62,10 +62,10 @@ tokio = { version = "1.27.0", default-features = false, features = [ "macros", "
 [target.'cfg(target_family = "wasm")'.dependencies]
 gloo-storage = { version = "0.2.2", default-features = false, optional = true }
 gloo-timers = { version = "0.2.6", default-features = false, features = [ "futures" ] }
-instant = { version = "0.1.12", default-features = false, features = [ "wasm-bindgen" ] }
+instant = { version = "0.1.12", default-features = false, features = [ "wasm-bindgen" ], optional = true }
 lazy_static = { version = "1.4.0", default-features = false }
 tokio = { version = "1.27.0", default-features = false, features = [ "macros", "rt", "time", "sync" ], optional = true }
-wasm-bindgen-futures = { version = "0.4.34", default-features = false }
+wasm-bindgen-futures = { version = "0.4.34", default-features = false, optional = true }
 
 [dev-dependencies]
 iota-sdk = { path = ".", default-features = false, features = [ "rand" ] }
@@ -85,12 +85,12 @@ pow = [ "std", "num_cpus", "iota-crypto/curl-p" ]
 rand = [ "dep:rand" ]
 rocksdb = [ "dep:rocksdb", "storage" ]
 serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std" ]
-std = [ "packable/std", "prefix-hex/std", "primitive-types/std", "rand?/std_rng", "regex?/std", "backtrace?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std" ]
+std = [ "packable/std", "prefix-hex/std", "primitive-types/std", "bech32/std", "bitflags/std", "rand?/std_rng", "regex?/std", "backtrace?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std" ]
 storage = [ "iota-crypto/chacha" ]
 stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha" ]
 tls = [ "reqwest/rustls-tls" ]
 
-client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10" ]
+client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10" ]
 wallet = [ "client" ]
 
 # Block examples
