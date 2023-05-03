@@ -169,7 +169,7 @@ pub enum AccountCommand {
     /// This will create an output with an expiration and storage deposit return unlock condition.
     SendNativeToken {
         /// Address to send the native tokens to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
-        address: String,
+        address: Bech32Address,
         /// Token ID to be sent, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
         token_id: String,
         /// Amount to send, e.g. 1000000.
@@ -180,7 +180,7 @@ pub enum AccountCommand {
     /// Send an NFT.
     SendNft {
         /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
-        address: String,
+        address: Bech32Address,
         /// NFT ID to be sent, e.g. 0xecadf10e6545aa82da4df2dfd2a496b457c8850d2cab49b7464cb273d3dffb07.
         nft_id: String,
     },
@@ -647,12 +647,11 @@ pub async fn send_command(
 // `send-native-token` command
 pub async fn send_native_token_command(
     account: &Account,
-    address: String,
+    address: Bech32Address,
     token_id: String,
     amount: String,
     gift_storage_deposit: Option<bool>,
 ) -> Result<(), Error> {
-    let address = Bech32Address::try_from_str(address)?;
     let transaction = if gift_storage_deposit.unwrap_or(false) {
         // Send native tokens together with the required storage deposit
         let rent_structure = account.client().get_rent_structure().await?;
@@ -695,8 +694,7 @@ pub async fn send_native_token_command(
 }
 
 // `send-nft` command
-pub async fn send_nft_command(account: &Account, address: String, nft_id: String) -> Result<(), Error> {
-    let address = Bech32Address::try_from_str(address)?;
+pub async fn send_nft_command(account: &Account, address: Bech32Address, nft_id: String) -> Result<(), Error> {
     let outputs = vec![AddressAndNftId {
         address,
         nft_id: NftId::from_str(&nft_id)?,
