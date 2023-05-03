@@ -73,11 +73,11 @@ impl Account {
                 let confirmed_output_data = account_details.outputs.get(transaction_output).expect("output exists");
                 log::debug!(
                     "[SYNC] confirmed transaction {transaction_id} in block {}",
-                    confirmed_output_data.metadata.block_id
+                    confirmed_output_data.metadata.block_id()
                 );
                 updated_transaction_and_outputs(
                     transaction,
-                    Some(BlockId::from_str(&confirmed_output_data.metadata.block_id)?),
+                    Some(*confirmed_output_data.metadata.block_id()),
                     InclusionState::Confirmed,
                     &mut updated_transactions,
                     &mut spent_output_ids,
@@ -248,7 +248,7 @@ fn process_transaction_with_unknown_state(
     for input in essence.inputs() {
         if let Input::Utxo(input) = input {
             if let Some(output_data) = account.outputs.get(input.output_id()) {
-                if !output_data.metadata.is_spent {
+                if !output_data.metadata.is_spent() {
                     // unspent output needs to be made available again
                     output_ids_to_unlock.push(*input.output_id());
                     all_inputs_spent = false;
