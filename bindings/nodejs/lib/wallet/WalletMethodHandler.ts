@@ -4,10 +4,10 @@
 import {
     callWalletMethodAsync,
     createWallet,
-    listenTo,
+    listenWalletAsync,
     destroyWallet,
-    getClient,
-} from './bindings';
+    getClientFromWallet,
+} from '../bindings';
 import type {
     EventType,
     WalletOptions,
@@ -63,7 +63,7 @@ export class WalletMethodHandler {
         eventTypes: EventType[],
         callback: (error: Error, result: string) => void,
     ): Promise<void> {
-        return listenTo(eventTypes, callback, this.methodHandler);
+        return listenWalletAsync(eventTypes, callback, this.methodHandler);
     }
 
     async destroy(): Promise<void> {
@@ -71,6 +71,6 @@ export class WalletMethodHandler {
     }
 
     async getClient(): Promise<Client> {
-        return new Client(await getClient(this.methodHandler));
+        return new Client(await getClientFromWallet(this.methodHandler));
     }
 }
