@@ -3,6 +3,7 @@
 
 //! Utility functions for IOTA
 
+use core::borrow::Borrow;
 use std::collections::HashMap;
 
 use crypto::{
@@ -89,9 +90,9 @@ pub fn verify_mnemonic(mnemonic: &str) -> Result<()> {
 }
 
 /// Requests funds from a faucet
-pub async fn request_funds_from_faucet(url: &str, bech32_address: &Bech32Address) -> Result<String> {
+pub async fn request_funds_from_faucet(url: &str, bech32_address: impl Borrow<Bech32Address>) -> Result<String> {
     let mut map = HashMap::new();
-    map.insert("address", bech32_address.to_string());
+    map.insert("address", bech32_address.borrow().to_string());
 
     let client = reqwest::Client::new();
     let faucet_response = client.post(url).json(&map).send().await?.text().await?;

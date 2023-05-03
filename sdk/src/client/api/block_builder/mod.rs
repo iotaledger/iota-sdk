@@ -5,6 +5,7 @@ pub mod input_selection;
 pub mod pow;
 pub mod transaction;
 
+use core::borrow::Borrow;
 use std::ops::Range;
 
 use packable::bounded::TryIntoBoundedU16Error;
@@ -161,7 +162,12 @@ impl<'a> ClientBlockBuilder<'a> {
     }
 
     /// Set a transfer to the builder
-    pub async fn with_output(mut self, address: &Bech32Address, amount: u64) -> Result<ClientBlockBuilder<'a>> {
+    pub async fn with_output(
+        mut self,
+        address: impl Borrow<Bech32Address>,
+        amount: u64,
+    ) -> Result<ClientBlockBuilder<'a>> {
+        let address = address.borrow();
         self.client.bech32_hrp_matches(address.hrp()).await?;
 
         let output = BasicOutputBuilder::new_with_amount(amount)

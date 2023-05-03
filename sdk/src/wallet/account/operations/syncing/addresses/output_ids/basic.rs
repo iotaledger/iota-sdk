@@ -1,6 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use core::borrow::Borrow;
 #[cfg(not(target_family = "wasm"))]
 use std::collections::HashSet;
 
@@ -19,8 +20,10 @@ impl Account {
     /// Returns output ids of basic outputs that have only the address unlock condition
     pub(crate) async fn get_basic_output_ids_with_address_unlock_condition_only(
         &self,
-        bech32_address: &Bech32Address,
+        bech32_address: impl Borrow<Bech32Address>,
     ) -> crate::client::Result<Vec<OutputId>> {
+        let bech32_address = bech32_address.borrow();
+
         // Only request basic outputs with `AddressUnlockCondition` only
         Ok(self
             .client
@@ -38,8 +41,9 @@ impl Account {
     /// `ExpirationUnlockCondition` or `StorageDepositReturnUnlockCondition`
     pub(crate) async fn get_basic_output_ids_with_any_unlock_condition(
         &self,
-        bech32_address: &Bech32Address,
+        bech32_address: impl Borrow<Bech32Address>,
     ) -> crate::wallet::Result<Vec<OutputId>> {
+        let bech32_address = bech32_address.borrow();
         // aliases and foundries
         #[cfg(target_family = "wasm")]
         {

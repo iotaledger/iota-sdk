@@ -3,6 +3,7 @@
 
 //! Automatic input selection for transactions
 
+use core::borrow::Borrow;
 use std::collections::HashSet;
 
 use crypto::keys::slip10::Chain;
@@ -34,7 +35,7 @@ impl<'a> ClientBlockBuilder<'a> {
     // Get basic outputs for an address without storage deposit return unlock condition
     pub(crate) async fn basic_address_outputs(
         &self,
-        address: &Bech32Address,
+        address: impl Borrow<Bech32Address>,
     ) -> Result<Vec<OutputWithMetadataResponse>> {
         let mut output_ids = Vec::new();
 
@@ -42,7 +43,7 @@ impl<'a> ClientBlockBuilder<'a> {
         output_ids.extend(
             self.client
                 .basic_output_ids(vec![
-                    QueryParameter::Address(address.clone()),
+                    QueryParameter::Address(address.borrow().clone()),
                     QueryParameter::HasStorageDepositReturn(false),
                 ])
                 .await?
@@ -53,7 +54,7 @@ impl<'a> ClientBlockBuilder<'a> {
         output_ids.extend(
             self.client
                 .basic_output_ids(vec![
-                    QueryParameter::ExpirationReturnAddress(address.clone()),
+                    QueryParameter::ExpirationReturnAddress(address.borrow().clone()),
                     QueryParameter::HasExpiration(true),
                     QueryParameter::HasStorageDepositReturn(false),
                     // Ignore outputs that aren't expired yet

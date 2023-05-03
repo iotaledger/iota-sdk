@@ -1,6 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use core::borrow::Borrow;
 use std::collections::HashSet;
 
 #[cfg(not(target_family = "wasm"))]
@@ -25,13 +26,15 @@ impl Account {
     /// Returns output ids of alias outputs
     pub(crate) async fn get_alias_and_foundry_output_ids(
         &self,
-        bech32_address: &Bech32Address,
+        bech32_address: impl Borrow<Bech32Address>,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[SYNC] get_alias_and_foundry_output_ids");
         let client = self.client();
 
         let mut output_ids = HashSet::new();
+
+        let bech32_address = bech32_address.borrow();
 
         #[cfg(target_family = "wasm")]
         {
