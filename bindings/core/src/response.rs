@@ -181,7 +181,7 @@ pub enum Response {
     RetryUntilIncludedSuccessful(Vec<(BlockId, BlockDto)>),
     /// Response for:
     /// - [`ConsolidateFunds`](crate::method::ClientMethod::ConsolidateFunds)
-    ConsolidatedFunds(String),
+    ConsolidatedFunds(Bech32Address),
     /// Response for:
     /// - [`FindInputs`](crate::method::ClientMethod::FindInputs)
     Inputs(Vec<UtxoInputDto>),

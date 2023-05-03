@@ -400,8 +400,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::ConsolidatedFunds(
                 client
                     .consolidate_funds(&secret_manager, generate_addresses_options)
-                    .await?
-                    .to_string(),
+                    .await?,
             )
         }
         ClientMethod::FindInputs { addresses, amount } => Response::Inputs(

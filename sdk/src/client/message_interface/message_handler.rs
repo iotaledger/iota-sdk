@@ -610,8 +610,7 @@ impl ClientMessageHandler {
                 Ok(Response::ConsolidatedFunds(
                     self.client
                         .consolidate_funds(&secret_manager, generate_addresses_options)
-                        .await?
-                        .to_string(),
+                        .await?,
                 ))
             }
             Message::FindInputs { addresses, amount } => Ok(Response::Inputs(
