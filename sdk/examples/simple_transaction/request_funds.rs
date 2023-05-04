@@ -3,7 +3,7 @@
 
 //! TODO: Example description
 //! 
-//! `cargo run --example get_funds --release`
+//! `cargo run --example request_funds --release`
 
 use iota_sdk::client::{secret::SecretManager, utils::request_funds_from_faucet, Client, Result};
 
@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
 
     let addresses = client
         .get_addresses(&secret_manager)
-        .with_account_index(0)
+        .with_account_index(1)
         .with_range(0..1)
         .finish()
         .await?;
