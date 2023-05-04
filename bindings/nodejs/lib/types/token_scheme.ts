@@ -12,7 +12,7 @@ abstract class TokenScheme {
     }
 
     /**
-     * The type of token schem.
+     * The type of token scheme.
      */
     getType(): TokenSchemeType {
         return this.type;
