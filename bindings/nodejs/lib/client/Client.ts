@@ -11,10 +11,10 @@ import type {
     INetworkInfo,
     INode,
     IAuth,
-    IBasicOutputBuilderOptions,
-    IAliasOutputBuilderOptions,
-    IFoundryOutputBuilderOptions,
-    INftOutputBuilderOptions,
+    IBasicOutputBuilderParams,
+    IAliasOutputBuilderParams,
+    IFoundryOutputBuilderParams,
+    INftOutputBuilderParams,
     FoundryQueryParameter,
     NftQueryParameter,
     AliasQueryParameter,
@@ -908,7 +908,7 @@ export class Client {
      * Build a Basic Output.
      */
     async buildBasicOutput(
-        options: IBasicOutputBuilderOptions,
+        options: IBasicOutputBuilderParams,
     ): Promise<IBasicOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildBasicOutput',
@@ -922,7 +922,7 @@ export class Client {
      * Build an Alias Output.
      */
     async buildAliasOutput(
-        options: IAliasOutputBuilderOptions,
+        options: IAliasOutputBuilderParams,
     ): Promise<IAliasOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildAliasOutput',
@@ -936,7 +936,7 @@ export class Client {
      * Build a Foundry Output.
      */
     async buildFoundryOutput(
-        options: IFoundryOutputBuilderOptions,
+        options: IFoundryOutputBuilderParams,
     ): Promise<IFoundryOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildFoundryOutput',
@@ -950,7 +950,7 @@ export class Client {
      * Build an Nft Output.
      */
     async buildNftOutput(
-        options: INftOutputBuilderOptions,
+        options: INftOutputBuilderParams,
     ): Promise<INftOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildNftOutput',

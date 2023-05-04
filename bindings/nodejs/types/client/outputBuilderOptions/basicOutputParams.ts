@@ -7,7 +7,7 @@ import type {
 /**
  * Options for building a Basic Output
  */
-export interface IBasicOutputBuilderOptions {
+export interface IBasicOutputBuilderParams {
     /**
      * If not provided, minimum storage deposit will be used
      */

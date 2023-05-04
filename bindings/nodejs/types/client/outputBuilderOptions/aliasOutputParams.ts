@@ -1,10 +1,10 @@
 import type { FeatureTypes, HexEncodedString } from '@iota/types';
-import type { IBasicOutputBuilderOptions } from './basicOutputParams';
+import type { IBasicOutputBuilderParams } from './basicOutputParams';
 
 /**
  * Options for building an Alias Output
  */
-export interface IAliasOutputBuilderOptions extends IBasicOutputBuilderOptions {
+export interface IAliasOutputBuilderParams extends IBasicOutputBuilderParams {
     aliasId: HexEncodedString;
     stateIndex?: number;
     stateMetadata?: HexEncodedString;

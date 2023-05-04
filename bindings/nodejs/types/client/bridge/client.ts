@@ -14,10 +14,10 @@ import type {
     QueryParameter,
 } from '../queryParameters';
 import type { IAuth } from '../network';
-import type { IBasicOutputBuilderOptions } from '../outputBuilderOptions/basicOutputParams';
-import type { IAliasOutputBuilderOptions } from '../outputBuilderOptions/aliasOutputParams';
-import type { IFoundryOutputBuilderOptions } from '../outputBuilderOptions/foundryOutputParams';
-import type { INftOutputBuilderOptions } from '../outputBuilderOptions/nftOutputParams';
+import type { IBasicOutputBuilderParams } from '../outputBuilderOptions/basicOutputParams';
+import type { IAliasOutputBuilderParams } from '../outputBuilderOptions/aliasOutputParams';
+import type { IFoundryOutputBuilderParams } from '../outputBuilderOptions/foundryOutputParams';
+import type { INftOutputBuilderParams } from '../outputBuilderOptions/nftOutputParams';
 
 export interface __GetInfoMethod__ {
     name: 'getInfo';
@@ -404,22 +404,22 @@ export interface __UnhealthyNodesMethod__ {
 
 export interface __BuildBasicOutputMethod__ {
     name: 'buildBasicOutput';
-    data: IBasicOutputBuilderOptions;
+    data: IBasicOutputBuilderParams;
 }
 
 export interface __BuildAliasOutputMethod__ {
     name: 'buildAliasOutput';
-    data: IAliasOutputBuilderOptions;
+    data: IAliasOutputBuilderParams;
 }
 
 export interface __BuildFoundryOutputMethod__ {
     name: 'buildFoundryOutput';
-    data: IFoundryOutputBuilderOptions;
+    data: IFoundryOutputBuilderParams;
 }
 
 export interface __BuildNftOutputMethod__ {
     name: 'buildNftOutput';
-    data: INftOutputBuilderOptions;
+    data: INftOutputBuilderParams;
 }
 
 export interface __ClearListenersMethod__ {

@@ -1,11 +1,11 @@
 import type { FeatureTypes, ISimpleTokenScheme } from '@iota/types';
-import type { IBasicOutputBuilderOptions } from './basicOutputParams';
+import type { IBasicOutputBuilderParams } from './basicOutputParams';
 
 /**
  * Options for building a Foundry Output
  */
-export interface IFoundryOutputBuilderOptions
-    extends IBasicOutputBuilderOptions {
+export interface IFoundryOutputBuilderParams
+    extends IBasicOutputBuilderParams {
     /**
      * The serial number of the foundry with respect to the controlling alias.
      */
