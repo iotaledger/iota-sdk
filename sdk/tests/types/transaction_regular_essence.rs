@@ -130,7 +130,7 @@ fn build_invalid_payload_kind() {
         .with_payload(rand_milestone_payload(42))
         .finish(&protocol_parameters);
 
-    assert!(matches!(essence, Err(Error::InvalidPayloadKind(4))));
+    assert!(matches!(essence, Err(Error::InvalidPayloadKind(7))));
 }
 
 #[test]
