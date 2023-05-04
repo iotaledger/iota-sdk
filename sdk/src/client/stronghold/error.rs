@@ -42,5 +42,5 @@ pub enum Error {
     },
     /// Migration error
     #[error("Stronghold migration error: {0}")]
-    Migration(#[from] engine::snapshot::migration::Error),
+    Migration(#[from] iota_stronghold::engine::snapshot::migration::Error),
 }

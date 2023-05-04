@@ -43,7 +43,6 @@ instant = { version = "0.1.12", default-features = false, optional = true }
 iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
 # iota_stronghold = { version = "1.0.5", default-features = false, optional = true }
 iota_stronghold = { git = "ssh://git@github.com/semenov-vladyslav/stronghold.rs", branch = "snapshot-migration-v3age", default-features = false, optional = true }
-stronghold_engine = { git = "ssh://git@github.com/semenov-vladyslav/stronghold.rs", branch = "snapshot-migration-v3age", default-features = false, optional = true }
 log = { version = "0.4.17", default-features = false, optional = true }
 num_cpus = { version = "1.15.0", default-features = false, optional = true }
 once_cell = { version = "1.17.1", default-features = false, optional = true }
@@ -89,7 +88,7 @@ rocksdb = [ "dep:rocksdb", "storage" ]
 serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std" ]
 std = [ "packable/std", "prefix-hex/std", "primitive-types/std", "bech32/std", "bitflags/std", "rand?/std_rng", "regex?/std", "backtrace?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std" ]
 storage = [ "iota-crypto/chacha" ]
-stronghold = [ "iota_stronghold", "stronghold_engine", "derive_builder", "iota-crypto/chacha" ]
+stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha" ]
 tls = [ "reqwest/rustls-tls" ]
 
 client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10" ]

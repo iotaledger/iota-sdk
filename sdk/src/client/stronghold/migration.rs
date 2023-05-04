@@ -19,7 +19,7 @@ impl StrongholdAdapter {
         new_password: Option<&str>,
     ) -> Result<(), Error> {
         log::debug!("migrate_v2_to_v3");
-        use engine::snapshot::migration::{migrate, Version};
+        use iota_stronghold::engine::snapshot::migration::{migrate, Version};
 
         const PBKDF_SALT: &[u8] = b"wallet.rs";
         // Safe as it's definitely not 0.

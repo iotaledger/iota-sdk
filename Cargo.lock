@@ -1576,7 +1576,6 @@ dependencies = [
  "serde-big-array",
  "serde_json",
  "serde_repr",
- "stronghold_engine",
  "thiserror",
  "tokio",
  "url",
