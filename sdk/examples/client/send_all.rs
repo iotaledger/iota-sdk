@@ -95,7 +95,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Transaction sent: {}/block/{}",
+        "Block with all outputs sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );

@@ -60,7 +60,7 @@ impl Account {
 
             outputs.push(OutputData {
                 output_id: OutputId::new(transaction_id, output_response.metadata.output_index)?,
-                metadata: output_response.metadata.clone(),
+                metadata: (&output_response.metadata).try_into()?,
                 output,
                 is_spent: output_response.metadata.is_spent,
                 address: associated_address.address.inner,
@@ -93,7 +93,7 @@ impl Account {
                     output_data.is_spent = false;
                     unspent_outputs.push((output_id, output_data.clone()));
                     outputs.push(OutputWithMetadataResponse {
-                        metadata: output_data.metadata.clone(),
+                        metadata: (&output_data.metadata).into(),
                         output: OutputDto::from(&output_data.output),
                     });
                 }

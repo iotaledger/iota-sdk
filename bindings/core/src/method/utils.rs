@@ -105,13 +105,6 @@ pub enum UtilsMethod {
         /// Token scheme kind
         token_scheme_kind: u8,
     },
-    /// Requests funds for a given address from the faucet.
-    Faucet {
-        /// Faucet URL
-        url: String,
-        /// The address for request funds
-        address: String,
-    },
     /// Compute the hash of a transaction essence.
     HashTransactionEssence {
         /// The transaction essence

@@ -20,11 +20,10 @@ use crate::method::account::AccountMethod;
 #[cfg(feature = "stronghold")]
 use crate::OmittedDebug;
 
-/// The messages that can be sent to the actor.
+/// The methods that can be sent to the actor.
 #[derive(Clone, Derivative, Serialize, Deserialize)]
 #[derivative(Debug)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
-#[allow(clippy::large_enum_variant)]
 pub enum WalletMethod {
     /// Creates an account.
     /// Expected response: [`Account`](crate::Response::Account)

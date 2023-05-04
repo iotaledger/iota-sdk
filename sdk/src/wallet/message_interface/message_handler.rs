@@ -897,6 +897,13 @@ impl WalletMessageHandler {
                 })
                 .await
             }
+            AccountMethod::SetDefaultSyncOptions { options } => {
+                convert_async_panics(|| async {
+                    account.set_default_sync_options(options).await?;
+                    Ok(Response::Ok(()))
+                })
+                .await
+            }
             AccountMethod::SendOutputs { outputs, options } => {
                 convert_async_panics(|| async {
                     let token_supply = account.client.get_token_supply().await?;

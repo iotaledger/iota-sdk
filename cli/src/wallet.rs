@@ -1,99 +1,103 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::{
-    client::secret::{stronghold::StrongholdSecretManager, SecretManager},
-    wallet::Wallet,
-};
-use zeroize::Zeroize;
+use iota_sdk::wallet::Wallet;
 
 use crate::{
     command::wallet::{
-        backup_command, change_password_command, init_command, migrate_command, mnemonic_command, new_command,
-        restore_command, set_node_command, sync_command, InitParameters, WalletCli, WalletCommand,
+        add_account, backup_command, change_password_command, init_command, mnemonic_command, new_command,
+        restore_command, set_node_command, sync_command, unlock_wallet, InitParameters, WalletCli, WalletCommand,
     },
     error::Error,
-    helper::get_password,
-    println_log_info,
+    helper::{get_account_alias, get_decision, get_password, pick_account, print_wallet_help},
+    println_log_error, println_log_info,
 };
 
 pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String>), Error> {
-    if let Some(WalletCommand::MigrateStronghold { path }) = cli.command {
-        migrate_command(path).await?;
-        return Ok((None, None));
-    }
-
-    if let Some(WalletCommand::Mnemonic) = cli.command {
-        mnemonic_command().await?;
-        return Ok((None, None));
-    }
-
-    let storage_path = cli.wallet_db_path;
+    let storage_path = std::path::Path::new(&cli.wallet_db_path);
     let snapshot_path = std::path::Path::new(&cli.stronghold_snapshot_path);
-    let snapshot_exists = snapshot_path.exists();
-    let mut password = if let Some(WalletCommand::Restore { .. }) = &cli.command {
-        get_password("Stronghold password", false)?
-    } else {
-        get_password("Stronghold password", !snapshot_path.exists())?
-    };
-    let secret_manager = SecretManager::Stronghold(
-        StrongholdSecretManager::builder()
-            .password(&password)
-            .build(snapshot_path)?,
-    );
 
     let (wallet, account) = if let Some(command) = cli.command {
-        if let WalletCommand::Init(init_parameters) = command {
-            (init_command(secret_manager, storage_path, init_parameters).await?, None)
-        } else if let WalletCommand::Restore { backup_path } = command {
-            (
-                restore_command(secret_manager, storage_path, backup_path, &password).await?,
-                None,
-            )
-        } else {
-            let wallet = Wallet::builder()
-                .with_secret_manager(secret_manager)
-                .with_storage_path(&storage_path)
-                .finish()
-                .await?;
-            let mut account = None;
-
-            match command {
-                WalletCommand::Backup { backup_path } => {
-                    backup_command(&wallet, backup_path, &password).await?;
-                    return Ok((None, None));
-                }
-                WalletCommand::ChangePassword => change_password_command(&wallet, &password).await?,
-                WalletCommand::New { alias } => account = Some(new_command(&wallet, alias).await?),
-                WalletCommand::SetNode { url } => set_node_command(&wallet, url).await?,
-                WalletCommand::Sync => sync_command(&wallet).await?,
-                // PANIC: this will never happen because these variants have already been checked.
-                WalletCommand::Init(_)
-                | WalletCommand::MigrateStronghold { .. }
-                | WalletCommand::Mnemonic
-                | WalletCommand::Restore { .. } => unreachable!(),
-            };
-
-            (wallet, account)
+        match command {
+            WalletCommand::Init(init_parameters) => {
+                let wallet = init_command(storage_path, snapshot_path, init_parameters).await?;
+                (Some(wallet), None)
+            }
+            WalletCommand::Restore { backup_path } => {
+                let wallet = restore_command(storage_path, snapshot_path, std::path::Path::new(&backup_path)).await?;
+                (Some(wallet), None)
+            }
+            WalletCommand::Backup { backup_path } => {
+                backup_command(storage_path, snapshot_path, std::path::Path::new(&backup_path)).await?;
+                return Ok((None, None));
+            }
+            WalletCommand::ChangePassword => {
+                let wallet = change_password_command(storage_path, snapshot_path).await?;
+                (Some(wallet), None)
+            }
+            WalletCommand::New { alias } => {
+                let (wallet, account) = new_command(storage_path, snapshot_path, alias).await?;
+                (Some(wallet), Some(account))
+            }
+            WalletCommand::SetNode { url } => {
+                let wallet = set_node_command(storage_path, snapshot_path, url).await?;
+                (Some(wallet), None)
+            }
+            WalletCommand::Sync => {
+                let wallet = sync_command(storage_path, snapshot_path).await?;
+                (Some(wallet), None)
+            }
+            WalletCommand::Mnemonic => {
+                mnemonic_command().await?;
+                return Ok((None, None));
+            }
         }
-    } else if snapshot_exists {
-        (
-            Wallet::builder()
-                .with_secret_manager(secret_manager)
-                .with_storage_path(&storage_path)
-                .finish()
-                .await?,
-            None,
-        )
     } else {
-        println_log_info!("Initializing wallet with default values.");
-        (
-            init_command(secret_manager, storage_path, InitParameters::default()).await?,
-            None,
-        )
+        // no command provided, i.e. `> ./wallet`
+        match (storage_path.exists(), snapshot_path.exists()) {
+            (true, true) => {
+                let password = get_password("Stronghold password", false)?;
+                let wallet = unlock_wallet(storage_path, snapshot_path, &password).await?;
+                if wallet.get_accounts().await?.is_empty() {
+                    create_initial_account(wallet).await?
+                } else if let Some(account) = pick_account(&wallet).await? {
+                    let alias = account.alias().await;
+                    (Some(wallet), Some(alias))
+                } else {
+                    (Some(wallet), None)
+                }
+            }
+            (false, false) => {
+                if get_decision("Create a new wallet with default parameters?")? {
+                    let wallet = init_command(storage_path, snapshot_path, InitParameters::default()).await?;
+                    println_log_info!("Created new wallet.");
+                    create_initial_account(wallet).await?
+                } else {
+                    print_wallet_help();
+                    (None, None)
+                }
+            }
+            (true, false) => {
+                println_log_error!("Stronghold snapshot not found at '{}'.", snapshot_path.display());
+                (None, None)
+            }
+            (false, true) => {
+                println_log_error!("Wallet database not found at '{}'.", storage_path.display());
+                (None, None)
+            }
+        }
     };
+    Ok((wallet, account))
+}
 
-    password.zeroize();
-
-    Ok((Some(wallet), account))
+async fn create_initial_account(wallet: Wallet) -> Result<(Option<Wallet>, Option<String>), Error> {
+    // Ask the user whether an initial account should be created.
+    if get_decision("Create initial account?")? {
+        let alias = get_account_alias("New account alias", &wallet).await?;
+        let alias = add_account(&wallet, Some(alias)).await?;
+        println_log_info!("Created initial account. Type `help` to see all available commands.");
+        Ok((Some(wallet), Some(alias)))
+    } else {
+        Ok((Some(wallet), None))
+    }
 }

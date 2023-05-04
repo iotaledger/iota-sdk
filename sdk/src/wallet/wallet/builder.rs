@@ -8,6 +8,7 @@ use std::sync::{
 #[cfg(feature = "storage")]
 use std::{collections::HashSet, path::PathBuf, sync::atomic::Ordering};
 
+use futures::{future::try_join_all, FutureExt};
 use serde::{Deserialize, Serialize};
 use tokio::sync::RwLock;
 
@@ -134,18 +135,12 @@ impl WalletBuilder {
         let storage = Memory::default();
 
         #[cfg(feature = "storage")]
-        let mut storage_manager = Arc::new(tokio::sync::Mutex::new(
-            StorageManager::new(
-                None,
-                Box::new(storage) as Box<dyn crate::wallet::storage::adapter::StorageAdapter + Send + Sync>,
-            )
-            .await?,
-        ));
+        let mut storage_manager = Arc::new(tokio::sync::Mutex::new(StorageManager::new(storage, None).await?));
 
         #[cfg(feature = "storage")]
         let read_manager_builder = storage_manager.lock().await.get_wallet_data().await?;
         #[cfg(not(feature = "storage"))]
-        let read_manager_builder: Option<WalletBuilder> = None;
+        let read_manager_builder: Option<Self> = None;
 
         // Prioritize provided client_options and secret_manager over stored ones
         let new_provided_client_options = if self.client_options.is_none() {
@@ -205,22 +200,21 @@ impl WalletBuilder {
         unlock_unused_inputs(&mut accounts)?;
         #[cfg(not(feature = "storage"))]
         let accounts = Vec::new();
-        let mut accounts: Vec<Account> = accounts
-            .into_iter()
-            .map(|a| {
-                Account::new(
-                    a,
-                    client.clone(),
-                    self.secret_manager
-                        .clone()
-                        .expect("secret_manager needs to be provided"),
-                    #[cfg(feature = "events")]
-                    event_emitter.clone(),
-                    #[cfg(feature = "storage")]
-                    storage_manager.clone(),
-                )
-            })
-            .collect::<_>();
+        let mut accounts: Vec<Account> = try_join_all(accounts.into_iter().map(|a| {
+            Account::new(
+                a,
+                client.clone(),
+                self.secret_manager
+                    .clone()
+                    .expect("secret_manager needs to be provided"),
+                #[cfg(feature = "events")]
+                event_emitter.clone(),
+                #[cfg(feature = "storage")]
+                storage_manager.clone(),
+            )
+            .boxed()
+        }))
+        .await?;
 
         // If the wallet builder is not set, it means the user provided it and we need to update the addresses.
         // In the other case it was loaded from the database and addresses are up to date.

@@ -23,6 +23,7 @@ use std::{collections::HashMap, ops::Range, str::FromStr};
 
 use async_trait::async_trait;
 use crypto::keys::slip10::Chain;
+use serde::{Deserialize, Serialize};
 use zeroize::ZeroizeOnDrop;
 
 #[cfg(feature = "ledger_nano")]
@@ -102,7 +103,6 @@ pub trait SecretManageExt: SecretManage {
 /// Supported secret managers
 
 // Boxes make this type clumsy to use.
-#[allow(clippy::large_enum_variant)]
 pub enum SecretManager {
     /// Secret manager that uses [`iota_stronghold`] as the backing storage.
     #[cfg(feature = "stronghold")]

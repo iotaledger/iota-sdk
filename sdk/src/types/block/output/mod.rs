@@ -28,6 +28,7 @@ pub mod nft;
 ///
 pub mod unlock_condition;
 
+use alloc::string::ToString;
 use core::ops::RangeInclusive;
 
 use derive_more::From;

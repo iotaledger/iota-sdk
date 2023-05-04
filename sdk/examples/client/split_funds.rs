@@ -44,7 +44,10 @@ async fn main() -> Result<()> {
     }
     let block = block_builder.finish().await?;
 
-    println!("Transaction sent: {node_url}/api/core/v2/blocks/{}", block.id());
-
+    println!(
+        "Block with split funds sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block.id()
+    );
     Ok(())
 }

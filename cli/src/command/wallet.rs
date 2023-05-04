@@ -1,9 +1,14 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::path::Path;
+
 use clap::{Args, Parser, Subcommand};
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, secret::SecretManager, stronghold::StrongholdAdapter},
+    client::{
+        constants::SHIMMER_COIN_TYPE,
+        secret::{stronghold::StrongholdSecretManager, SecretManager},
+    },
     wallet::{ClientOptions, Wallet},
 };
 use log::LevelFilter;
@@ -99,32 +104,42 @@ impl Default for InitParameters {
     }
 }
 
-pub async fn backup_command(wallet: &Wallet, path: String, password: &str) -> Result<(), Error> {
-    wallet.backup(path.clone().into(), password.into()).await?;
+pub async fn backup_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<(), Error> {
+    let password = get_password("Stronghold password", !snapshot_path.exists())?;
+    let wallet = unlock_wallet(storage_path, snapshot_path, &password).await?;
+    wallet.backup(backup_path.into(), password).await?;
 
-    println_log_info!("Wallet has been backed up to \"{path}\".");
+    println_log_info!("Wallet has been backed up to \"{}\".", backup_path.display());
 
     Ok(())
 }
 
-pub async fn change_password_command(wallet: &Wallet, current: &str) -> Result<(), Error> {
-    let mut new = get_password("Stronghold new password", true)?;
+pub async fn change_password_command(storage_path: &Path, snapshot_path: &Path) -> Result<Wallet, Error> {
+    let password = get_password("Stronghold password", !snapshot_path.exists())?;
+    let wallet = unlock_wallet(storage_path, snapshot_path, &password).await?;
+    let new_password = get_password("Stronghold new password", true)?;
+    wallet.change_stronghold_password(&password, &new_password).await?;
+    password.zeroize();
+    new_password.zeroize();
 
-    wallet.change_stronghold_password(current, &new).await?;
-    new.zeroize();
-
-    Ok(())
+    Ok(wallet)
 }
 
 pub async fn init_command(
-    secret_manager: SecretManager,
-    storage_path: String,
+    storage_path: &Path,
+    snapshot_path: &Path,
     parameters: InitParameters,
 ) -> Result<Wallet, Error> {
+    let password = get_password("Stronghold password", !snapshot_path.exists())?;
+    let secret_manager = SecretManager::Stronghold(
+        StrongholdSecretManager::builder()
+            .password(&password)
+            .build(snapshot_path)?,
+    );
     let wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(parameters.node_url.as_str())?)
-        .with_storage_path(&storage_path)
+        .with_storage_path(storage_path.to_str().expect("invalid unicode"))
         .with_coin_type(parameters.coin_type)
         .finish()
         .await?;
@@ -163,32 +178,31 @@ pub async fn mnemonic_command() -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn new_command(wallet: &Wallet, alias: Option<String>) -> Result<String, Error> {
-    let mut builder = wallet.create_account();
+pub async fn new_command(
+    storage_path: &Path,
+    snapshot_path: &Path,
+    alias: Option<String>,
+) -> Result<(Wallet, String), Error> {
+    let password = get_password("Stronghold password", !snapshot_path.exists())?;
+    let wallet = unlock_wallet(storage_path, snapshot_path, &password).await?;
 
-    if let Some(alias) = alias {
-        builder = builder.with_alias(alias);
-    }
+    let alias = add_account(&wallet, alias).await?;
 
-    let account = builder.finish().await?;
-    let alias = account.read().await.alias().to_string();
-
-    println_log_info!("Created account \"{alias}\"");
-
-    Ok(alias)
+    Ok((wallet, alias))
 }
 
-pub async fn restore_command(
-    secret_manager: SecretManager,
-    storage_path: String,
-    backup_path: String,
-    password: &str,
-) -> Result<Wallet, Error> {
+pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<Wallet, Error> {
+    let password = get_password("Stronghold password", false)?;
+    let secret_manager = SecretManager::Stronghold(
+        StrongholdSecretManager::builder()
+            .password(&password)
+            .build(snapshot_path)?,
+    );
     let wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         // Will be overwritten by the backup's value.
         .with_client_options(ClientOptions::new().with_node(DEFAULT_NODE_URL)?)
-        .with_storage_path(&storage_path)
+        .with_storage_path(storage_path.to_str().expect("invalid unicode"))
         // Will be overwritten by the backup's value.
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
@@ -201,16 +215,44 @@ pub async fn restore_command(
     Ok(wallet)
 }
 
-pub async fn set_node_command(wallet: &Wallet, url: String) -> Result<(), Error> {
+pub async fn set_node_command(storage_path: &Path, snapshot_path: &Path, url: String) -> Result<Wallet, Error> {
+    let password = get_password("Stronghold password", !snapshot_path.exists())?;
+    let wallet = unlock_wallet(storage_path, snapshot_path, &password).await?;
     wallet.set_client_options(ClientOptions::new().with_node(&url)?).await?;
 
-    Ok(())
+    Ok(wallet)
 }
 
-pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
+pub async fn sync_command(storage_path: &Path, snapshot_path: &Path) -> Result<Wallet, Error> {
+    let password = get_password("Stronghold password", !snapshot_path.exists())?;
+    let wallet = unlock_wallet(storage_path, snapshot_path, &password).await?;
     let total_balance = wallet.sync(None).await?;
 
     println_log_info!("Synchronized all accounts: {:?}", total_balance);
 
-    Ok(())
+    Ok(wallet)
+}
+
+pub async fn unlock_wallet(storage_path: &Path, snapshot_path: &Path, password: &str) -> Result<Wallet, Error> {
+    let secret_manager = SecretManager::Stronghold(
+        StrongholdSecretManager::builder()
+            .password(password)
+            .build(snapshot_path)?,
+    );
+    let wallet = Wallet::builder()
+        .with_secret_manager(secret_manager)
+        .with_storage_path(storage_path.to_str().expect("invalid unicode"))
+        .finish()
+        .await?;
+
+    Ok(wallet)
+}
+
+pub async fn add_account(wallet: &Wallet, alias: Option<String>) -> Result<String, Error> {
+    let account = wallet.create_account().with_alias(alias).finish().await?;
+    let alias = account.read().await.alias().to_string();
+
+    println_log_info!("Created account \"{alias}\"");
+
+    Ok(alias)
 }

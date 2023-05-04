@@ -9,7 +9,7 @@ use tokio::sync::RwLock;
 use crate::{
     client::secret::{SecretManager, SecretManagerDto},
     wallet::{
-        account::AccountDetails,
+        account::{AccountDetails, SyncOptions},
         storage::{constants::*, Storage, StorageAdapter},
         WalletBuilder,
     },
@@ -49,12 +49,12 @@ pub struct StorageManager {
 
 impl StorageManager {
     pub(crate) async fn new(
-        encryption_key: Option<[u8; 32]>,
-        storage: Box<dyn StorageAdapter + Send + Sync + 'static>,
+        storage: impl StorageAdapter + Send + Sync + 'static,
+        encryption_key: impl Into<Option<[u8; 32]>> + Send,
     ) -> crate::wallet::Result<Self> {
         let mut storage = Storage {
-            inner: storage,
-            encryption_key,
+            inner: Box::new(storage) as _,
+            encryption_key: encryption_key.into(),
         };
         // Get the db version or set it
         if let Some(db_schema_version) = storage.get::<u8>(DATABASE_SCHEMA_VERSION_KEY).await? {
@@ -180,5 +180,19 @@ impl StorageManager {
         self.storage
             .set(ACCOUNTS_INDEXATION_KEY, self.account_indexes.clone())
             .await
+    }
+
+    pub async fn set_default_sync_options(
+        &mut self,
+        account_index: u32,
+        sync_options: &SyncOptions,
+    ) -> crate::wallet::Result<()> {
+        let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}-{ACCOUNT_SYNC_OPTIONS}");
+        self.storage.set(&key, sync_options.clone()).await
+    }
+
+    pub async fn get_default_sync_options(&self, account_index: u32) -> crate::wallet::Result<Option<SyncOptions>> {
+        let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}-{ACCOUNT_SYNC_OPTIONS}");
+        self.storage.get(&key).await
     }
 }

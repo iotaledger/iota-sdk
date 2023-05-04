@@ -61,7 +61,10 @@ use std::{
 use derive_builder::Builder;
 use iota_stronghold::{KeyProvider, SnapshotPath, Stronghold};
 use log::{debug, error, warn};
-use tokio::{sync::Mutex, task::JoinHandle};
+use tokio::{
+    sync::{Mutex, MutexGuard},
+    task::JoinHandle,
+};
 use zeroize::Zeroizing;
 
 use self::common::PRIVATE_DATA_CLIENT_PATH;
@@ -519,6 +522,11 @@ impl StrongholdAdapter {
         self.stronghold.lock().await.clear()?;
 
         Ok(())
+    }
+
+    /// Acquire the stronghold lock.
+    pub async fn inner(&self) -> MutexGuard<'_, Stronghold> {
+        self.stronghold.lock().await
     }
 }
 
