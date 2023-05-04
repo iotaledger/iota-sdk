@@ -1,5 +1,12 @@
 name: covector status
-on: [pull_request]
+
+on:
+  push:
+    branches: [develop]
+    paths-ignore:
+      - "documentation/**"
+      - "cli/**"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
