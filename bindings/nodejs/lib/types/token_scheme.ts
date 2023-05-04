@@ -4,31 +4,38 @@ enum TokenSchemeType {
     Simple = 0,
 }
 
+abstract class TokenScheme {
+    private type: TokenSchemeType;
+
+    constructor(type: TokenSchemeType) {
+        this.type = type;
+    }
+
+    /**
+     * The type of token schem.
+     */
+    getType(): TokenSchemeType {
+        return this.type;
+    }
+}
+
 /**
  * Simple token scheme.
  */
-class SimpleTokenScheme {
+class SimpleTokenScheme extends TokenScheme {
     private mintedTokens: HexEncodedAmount;
-
     private meltedTokens: HexEncodedAmount;
-
     private maximumSupply: HexEncodedAmount;
-
-    private type: TokenSchemeType;
 
     constructor(
         mintedTokens: HexEncodedAmount,
         meltedTokens: HexEncodedAmount,
         maximumSupply: HexEncodedAmount,
     ) {
+        super(TokenSchemeType.Simple);
         this.mintedTokens = mintedTokens;
         this.meltedTokens = meltedTokens;
         this.maximumSupply = maximumSupply;
-        this.type = TokenSchemeType.Simple;
-    }
-
-    getType(): TokenSchemeType {
-        return this.type;
     }
 
     /**
