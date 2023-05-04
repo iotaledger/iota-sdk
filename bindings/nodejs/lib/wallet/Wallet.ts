@@ -252,6 +252,7 @@ export class Wallet {
         source: string,
         password: string,
         ignoreIfCoinTypeMismatch?: boolean,
+        ignoreIfBech32Mismatch?: string,
     ): Promise<void> {
         await this.methodHandler.callMethod({
             name: 'restoreBackup',
@@ -259,6 +260,7 @@ export class Wallet {
                 source,
                 password,
                 ignoreIfCoinTypeMismatch,
+                ignoreIfBech32Mismatch,
             },
         });
     }

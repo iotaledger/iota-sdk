@@ -111,6 +111,7 @@ pub enum Message {
         /// Stronghold file password.
         password: String,
         ignore_if_coin_type_mismatch: Option<bool>,
+        ignore_if_bech32_mismatch: Option<String>,
     },
     /// Removes the latest account (account with the largest account index).
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
@@ -259,9 +260,10 @@ impl Debug for Message {
                 source,
                 password: _,
                 ignore_if_coin_type_mismatch,
+                ignore_if_bech32_mismatch,
             } => write!(
                 f,
-                "RestoreBackup{{ source: {source:?}, password: <ommited>, ignore_if_coin_type_mismatch: {ignore_if_coin_type_mismatch:?} }}"
+                "RestoreBackup{{ source: {source:?}, password: <ommited>, ignore_if_coin_type_mismatch: {ignore_if_coin_type_mismatch:?}, ignore_if_bech32_mismatch: {ignore_if_bech32_mismatch:?} }}"
             ),
             Self::GenerateMnemonic => write!(f, "GenerateMnemonic"),
             Self::VerifyMnemonic { mnemonic: _ } => write!(f, "VerifyMnemonic{{ mnemonic: <omitted> }}"),

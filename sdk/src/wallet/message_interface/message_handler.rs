@@ -216,10 +216,16 @@ impl WalletMessageHandler {
                 source,
                 password,
                 ignore_if_coin_type_mismatch,
+                ignore_if_bech32_mismatch,
             } => {
                 convert_async_panics(|| async {
-                    self.restore_backup(source.to_path_buf(), password, ignore_if_coin_type_mismatch)
-                        .await
+                    self.restore_backup(
+                        source.to_path_buf(),
+                        password,
+                        ignore_if_coin_type_mismatch,
+                        ignore_if_bech32_mismatch.as_deref(),
+                    )
+                    .await
                 })
                 .await
             }
@@ -389,9 +395,15 @@ impl WalletMessageHandler {
         backup_path: PathBuf,
         stronghold_password: String,
         ignore_if_coin_type_mismatch: Option<bool>,
+        ignore_if_bech32_mismatch: Option<&str>,
     ) -> Result<Response> {
         self.wallet
-            .restore_backup(backup_path, stronghold_password, ignore_if_coin_type_mismatch)
+            .restore_backup(
+                backup_path,
+                stronghold_password,
+                ignore_if_coin_type_mismatch,
+                ignore_if_bech32_mismatch,
+            )
             .await?;
         Ok(Response::Ok(()))
     }

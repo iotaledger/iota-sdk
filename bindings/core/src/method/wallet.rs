@@ -118,6 +118,7 @@ pub enum WalletMethod {
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         password: String,
         ignore_if_coin_type_mismatch: Option<bool>,
+        ignore_if_bech32_mismatch: Option<String>,
     },
     /// Removes the latest account (account with the largest account index).
     /// Expected response: [`Ok`](crate::Response::Ok)
