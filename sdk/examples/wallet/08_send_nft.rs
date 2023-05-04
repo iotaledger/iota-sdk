@@ -34,17 +34,17 @@ async fn main() -> Result<()> {
         }];
 
         let transaction = account.send_nft(outputs, None).await?;
+        println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included
-        account
+        let block_id = account
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
 
-        println!("Transaction: {}", transaction.transaction_id);
         println!(
-            "Block sent: {}/api/core/v2/blocks/{}",
-            &std::env::var("NODE_URL").unwrap(),
-            transaction.block_id.expect("no block created yet")
+            "Block included: {}/block/{}",
+            std::env::var("EXPLORER_URL").unwrap(),
+            block_id
         );
     }
 

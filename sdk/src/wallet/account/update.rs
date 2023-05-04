@@ -101,7 +101,7 @@ impl Account {
                 if output_metadata_response.is_spent {
                     account_details.unspent_outputs.remove(&output_id);
                     if let Some(output_data) = account_details.outputs.get_mut(&output_id) {
-                        output_data.metadata = output_metadata_response;
+                        output_data.metadata = (&output_metadata_response).try_into()?;
                     }
                 } else {
                     // not spent, just not synced, skip
@@ -117,7 +117,7 @@ impl Account {
                     account_details.unspent_outputs.remove(&output_id);
                     // Update spent data fields
                     if let Some(output_data) = account_details.outputs.get_mut(&output_id) {
-                        output_data.metadata.is_spent = true;
+                        output_data.metadata.set_spent(true);
                         output_data.is_spent = true;
                         #[cfg(feature = "events")]
                         {

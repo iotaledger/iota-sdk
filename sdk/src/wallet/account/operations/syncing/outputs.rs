@@ -12,7 +12,7 @@ use crate::{
             input::Input,
             output::{
                 dto::{OutputDto, OutputMetadataDto},
-                OutputId, OutputMetadata, OutputWithMetadata,
+                OutputId, OutputWithMetadata,
             },
             payload::{
                 transaction::{TransactionEssence, TransactionId},
@@ -58,7 +58,7 @@ impl Account {
 
             outputs.push(OutputData {
                 output_id: output_with_meta.metadata().output_id().to_owned(),
-                metadata: OutputMetadataDto::from(&output_with_meta.metadata().clone()),
+                metadata: output_with_meta.metadata().clone(),
                 output: output_with_meta.output().clone(),
                 is_spent: output_with_meta.metadata().is_spent(),
                 address: associated_address.address.inner,
@@ -92,7 +92,7 @@ impl Account {
                     unspent_outputs.push((output_id, output_data.clone()));
                     outputs.push(OutputWithMetadata::new(
                         output_data.output.clone(),
-                        OutputMetadata::try_from(&output_data.metadata)?,
+                        output_data.metadata.clone(),
                     ));
                 }
                 None => unknown_outputs.push(output_id),

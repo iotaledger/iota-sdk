@@ -983,4 +983,19 @@ export class Client {
             },
         });
     }
+
+    /**
+     * Request funds from a faucet, for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.
+     */
+    async requestFundsFromFaucet(
+        url: string,
+        address: string,
+    ): Promise<string> {
+        const response = await this.methodHandler.callMethod({
+            name: 'requestFundsFromFaucet',
+            data: { url, address },
+        });
+
+        return JSON.parse(response).payload;
+    }
 }

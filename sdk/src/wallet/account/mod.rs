@@ -64,7 +64,7 @@ use crate::{
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
-            output::{FoundryId, FoundryOutput, Output, OutputId, TokenId},
+            output::{AliasId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
             payload::{
                 transaction::{TransactionEssence, TransactionId},
                 TransactionPayload,
@@ -76,7 +76,7 @@ use crate::{
 };
 
 /// Options to filter outputs
-#[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq, Hash)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct FilterOptions {
     /// Filter all outputs where the booked milestone index is below the specified timestamp
@@ -85,6 +85,12 @@ pub struct FilterOptions {
     pub upper_bound_booked_timestamp: Option<u32>,
     /// Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6).
     pub output_types: Option<Vec<u8>>,
+    /// Return all alias outputs matching these IDs.
+    pub alias_ids: Option<HashSet<AliasId>>,
+    /// Return all foundry outputs matching these IDs.
+    pub foundry_ids: Option<HashSet<FoundryId>>,
+    /// Return all nft outputs matching these IDs.
+    pub nft_ids: Option<HashSet<NftId>>,
 }
 
 /// Details of an account.
@@ -261,42 +267,109 @@ impl Account {
     fn filter_outputs<'a>(
         &self,
         outputs: impl Iterator<Item = &'a OutputData>,
-        filter: Option<FilterOptions>,
+        filter: impl Into<Option<FilterOptions>>,
     ) -> Result<Vec<OutputData>> {
-        let mut filtered_outputs = Vec::new();
+        let filter = filter.into();
 
-        for output in outputs {
-            if let Some(filter_options) = &filter {
-                if let Some(lower_bound_booked_timestamp) = filter_options.lower_bound_booked_timestamp {
-                    if output.metadata.milestone_timestamp_booked < lower_bound_booked_timestamp {
+        if let Some(filter) = filter {
+            let mut filtered_outputs = Vec::new();
+
+            for output in outputs {
+                match &output.output {
+                    Output::Alias(alias) => {
+                        if let Some(alias_ids) = &filter.alias_ids {
+                            let alias_id = alias.alias_id_non_null(&output.output_id);
+                            if alias_ids.contains(&alias_id) {
+                                filtered_outputs.push(output.clone());
+                                continue;
+                            }
+                        }
+                    }
+                    Output::Foundry(foundry) => {
+                        if let Some(foundry_ids) = &filter.foundry_ids {
+                            let foundry_id = foundry.id();
+                            if foundry_ids.contains(&foundry_id) {
+                                filtered_outputs.push(output.clone());
+                                continue;
+                            }
+                        }
+                    }
+                    Output::Nft(nft) => {
+                        if let Some(nft_ids) = &filter.nft_ids {
+                            let nft_id = nft.nft_id_non_null(&output.output_id);
+                            if nft_ids.contains(&nft_id) {
+                                filtered_outputs.push(output.clone());
+                                continue;
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+
+                if let Some(lower_bound_booked_timestamp) = filter.lower_bound_booked_timestamp {
+                    if output.metadata.milestone_timestamp_booked() < lower_bound_booked_timestamp {
                         continue;
                     }
                 }
-                if let Some(upper_bound_booked_timestamp) = filter_options.upper_bound_booked_timestamp {
-                    if output.metadata.milestone_timestamp_booked > upper_bound_booked_timestamp {
+                if let Some(upper_bound_booked_timestamp) = filter.upper_bound_booked_timestamp {
+                    if output.metadata.milestone_timestamp_booked() > upper_bound_booked_timestamp {
                         continue;
                     }
                 }
-                if let Some(output_types) = &filter_options.output_types {
+
+                if let Some(output_types) = &filter.output_types {
                     if !output_types.contains(&output.output.kind()) {
                         continue;
                     }
                 }
-            }
-            filtered_outputs.push(output.clone());
-        }
 
-        Ok(filtered_outputs)
+                filtered_outputs.push(output.clone());
+            }
+
+            Ok(filtered_outputs)
+        } else {
+            Ok(outputs.cloned().collect())
+        }
     }
 
     /// Returns outputs of the account
-    pub async fn outputs(&self, filter: Option<FilterOptions>) -> Result<Vec<OutputData>> {
+    pub async fn outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Result<Vec<OutputData>> {
         self.filter_outputs(self.read().await.outputs.values(), filter)
     }
 
     /// Returns unspent outputs of the account
-    pub async fn unspent_outputs(&self, filter: Option<FilterOptions>) -> Result<Vec<OutputData>> {
+    pub async fn unspent_outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Result<Vec<OutputData>> {
         self.filter_outputs(self.read().await.unspent_outputs.values(), filter)
+    }
+
+    /// Gets the unspent alias output matching the given ID.
+    pub async fn unspent_alias_output(&self, alias_id: &AliasId) -> Result<Option<OutputData>> {
+        self.unspent_outputs(FilterOptions {
+            alias_ids: Some([*alias_id].into()),
+            ..Default::default()
+        })
+        .await
+        .map(|res| res.get(0).cloned())
+    }
+
+    /// Gets the unspent foundry output matching the given ID.
+    pub async fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Result<Option<OutputData>> {
+        self.unspent_outputs(FilterOptions {
+            foundry_ids: Some([*foundry_id].into()),
+            ..Default::default()
+        })
+        .await
+        .map(|res| res.get(0).cloned())
+    }
+
+    /// Gets the unspent nft output matching the given ID.
+    pub async fn unspent_nft_output(&self, nft_id: &NftId) -> Result<Option<OutputData>> {
+        self.unspent_outputs(FilterOptions {
+            nft_ids: Some([*nft_id].into()),
+            ..Default::default()
+        })
+        .await
+        .map(|res| res.get(0).cloned())
     }
 
     /// Returns all incoming transactions of the account

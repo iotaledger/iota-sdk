@@ -34,8 +34,7 @@ async function run() {
         );
 
         console.log(
-            `Transaction sent: ${process.env.EXPLORER_URL}/block/` +
-                blockIdAndBlock[0],
+            `Empty block sent: ${process.env.EXPLORER_URL}/block/${blockIdAndBlock[0]}`,
         );
     } catch (error) {
         console.error(error);

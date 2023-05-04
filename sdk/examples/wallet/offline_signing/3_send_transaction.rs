@@ -32,11 +32,16 @@ async fn main() -> Result<()> {
         read_signed_transaction_from_file(account.client(), SIGNED_TRANSACTION_FILE_NAME).await?;
 
     // Sends offline signed transaction online.
-    let result = account.submit_and_store_transaction(signed_transaction_data).await?;
+    let transaction = account.submit_and_store_transaction(signed_transaction_data).await?;
+    println!("Transaction sent: {}", transaction.transaction_id);
 
+    let block_id = account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
     println!(
-        "Transaction sent: https://explorer.iota.org/devnet/block/{}",
-        result.transaction_id
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
     );
 
     Ok(())

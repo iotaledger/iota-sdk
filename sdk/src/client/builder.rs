@@ -8,6 +8,7 @@ use std::{
     time::Duration,
 };
 
+use serde::{Deserialize, Serialize};
 #[cfg(not(target_family = "wasm"))]
 use tokio::runtime::Runtime;
 

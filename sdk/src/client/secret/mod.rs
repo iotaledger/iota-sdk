@@ -23,6 +23,7 @@ use std::{collections::HashMap, ops::Range, str::FromStr};
 
 use async_trait::async_trait;
 use crypto::keys::slip10::Chain;
+use serde::{Deserialize, Serialize};
 use zeroize::ZeroizeOnDrop;
 
 #[cfg(feature = "ledger_nano")]

@@ -135,18 +135,12 @@ impl WalletBuilder {
         let storage = Memory::default();
 
         #[cfg(feature = "storage")]
-        let mut storage_manager = Arc::new(tokio::sync::Mutex::new(
-            StorageManager::new(
-                None,
-                Box::new(storage) as Box<dyn crate::wallet::storage::adapter::StorageAdapter + Send + Sync>,
-            )
-            .await?,
-        ));
+        let mut storage_manager = Arc::new(tokio::sync::Mutex::new(StorageManager::new(storage, None).await?));
 
         #[cfg(feature = "storage")]
         let read_manager_builder = storage_manager.lock().await.get_wallet_data().await?;
         #[cfg(not(feature = "storage"))]
-        let read_manager_builder: Option<WalletBuilder> = None;
+        let read_manager_builder: Option<Self> = None;
 
         // Prioritize provided client_options and secret_manager over stored ones
         let new_provided_client_options = if self.client_options.is_none() {

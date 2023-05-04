@@ -19,7 +19,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 0.3.0 - 2023-XX-XX
+## 0.4.0 - 2023-MM-DD
+
+### Added
+
+- `FilterOptions::{alias_ids, foundry_ids, nft_ids}` fields;
+- `Account::{unspent_alias_output, unspent_foundry_output, unspent_nft_output}` methods;
+- `StrongholdAdapter::inner` method;
+- `OutputMetadata::set_spent` method;
+
+### Changed
+
+- `OutputData::metadata` changed from `OutputMetadataDto` to `OutputMetadata`;
+
+### Removed
+
+- `FilterOptions`'s `Hash` derivation;
+- `client_without_tls` feature in favor of separate `client` and `tls` features;
+
+## 0.3.0 - 2023-05-02
 
 ### Added
 
@@ -30,7 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `SecretManageExt` is a super trait of `SecretManage`;
 - `OutputsToClaim::Amount` to allow claiming only outputs that will add an amount to the account;
 - `Account::{set_default_sync_options, default_sync_options}` methods;
-- `Wallet::get_client()`;
+- `Wallet::get_client` method;
+- `Wallet::get_account_aliases` method;
 
 ### Changed
 

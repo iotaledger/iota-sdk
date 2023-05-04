@@ -41,12 +41,17 @@ async fn main() -> Result<()> {
     }];
 
     let transaction = account.mint_nfts(nft_options, None).await?;
+    println!("Transaction sent: {}", transaction.transaction_id);
 
-    println!("Transaction: {}", transaction.transaction_id);
+    // Wait for transaction to get included
+    let block_id = account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
+
     println!(
-        "Block sent: {}/api/core/v2/blocks/{}",
-        &std::env::var("NODE_URL").unwrap(),
-        transaction.block_id.expect("no block created yet")
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
     );
 
     // Build nft output manually
@@ -62,21 +67,21 @@ async fn main() -> Result<()> {
     ];
 
     let transaction = account.send(outputs, None).await?;
+    println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for transaction to get included
-    account
+    let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
+    println!(
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
+    );
+
     // Ensure the account is synced after minting.
     account.sync(None).await?;
-
-    println!("Transaction: {}", transaction.transaction_id);
-    println!(
-        "Block sent: {}/api/core/v2/blocks/{}",
-        &std::env::var("NODE_URL").unwrap(),
-        transaction.block_id.expect("no block created yet")
-    );
 
     Ok(())
 }

@@ -153,3 +153,22 @@ jobs:
           #   - Waiting for https://github.com/mackwic/colored/pull/122 to be merged.
 
           args: --file Cargo.lock --deny warnings --ignore RUSTSEC-2021-0145
+
+  no_std:
+    name: Check `no_std` compatability
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the Source Code
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
+        with:
+          target: riscv64gc-unknown-none-elf
+
+      - name: Check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: --no-default-features -F serde -p iota-sdk --target=riscv64gc-unknown-none-elf

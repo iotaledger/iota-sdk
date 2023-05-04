@@ -9,7 +9,7 @@ import addon = require('../../build/Release/index.node');
 
 const { initLogger, sendMessage, messageHandlerNew, listen, destroy } = addon;
 
-const listenTo = (
+const listenWallet = (
     eventTypes: EventType[],
     callback: (error: Error, result: string) => void,
     handler: MessageHandler,
@@ -36,6 +36,6 @@ export {
     initLogger as internalInitLogger,
     sendMessageAsync,
     messageHandlerNew,
-    listenTo,
+    listenWallet,
     destroy,
 };
