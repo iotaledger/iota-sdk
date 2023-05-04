@@ -41,7 +41,6 @@ fn valid_topics() {
         Topic::try_new("outputs/unlock/address/iota1qrwfnskm4f7utdrxqnkfntfqxehtpj8s0kf68zkcwm0yrhuemzjp5sjfw5v/spent")
             .is_ok()
     );
-    assert!(Topic::try_new("receipts").is_ok());
 }
 
 #[test]

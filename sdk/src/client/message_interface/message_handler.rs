@@ -6,12 +6,9 @@ use std::{any::Any, panic::AssertUnwindSafe};
 use backtrace::Backtrace;
 use futures::{Future, FutureExt};
 use zeroize::Zeroize;
-#[cfg(feature = "mqtt")]
-use {
-    crate::client::mqtt::{MqttPayload, Topic},
-    crate::types::block::payload::milestone::option::dto::ReceiptMilestoneOptionDto,
-};
 
+#[cfg(feature = "mqtt")]
+use crate::client::mqtt::{MqttPayload, Topic};
 #[cfg(feature = "ledger_nano")]
 use crate::client::secret::ledger_nano::LedgerSecretManager;
 use crate::{
@@ -122,8 +119,6 @@ impl ClientMessageHandler {
                     }
                     MqttPayload::MilestonePayload(ms) => serde_json::to_string(&MilestonePayloadDto::from(ms))
                         .expect("failed to serialize MqttPayload::MilestonePayload"),
-                    MqttPayload::Receipt(receipt) => serde_json::to_string(&ReceiptMilestoneOptionDto::from(receipt))
-                        .expect("failed to serialize MqttPayload::Receipt"),
                 };
                 let response = MqttResponse {
                     topic: topic_event.topic.clone(),
@@ -542,10 +537,6 @@ impl ClientMessageHandler {
             )),
             Message::GetUtxoChangesByIndex { index } => Ok(Response::MilestoneUtxoChanges(
                 self.client.get_utxo_changes_by_index(index).await?,
-            )),
-            Message::GetReceipts => Ok(Response::Receipts(self.client.get_receipts().await?)),
-            Message::GetReceiptsMigratedAt { milestone_index } => Ok(Response::Receipts(
-                self.client.get_receipts_migrated_at(milestone_index).await?,
             )),
             Message::GetTreasury => Ok(Response::Treasury(self.client.get_treasury().await?)),
             Message::GetIncludedBlock { transaction_id } => Ok(Response::Block(BlockDto::from(

@@ -16,7 +16,7 @@ use iota_sdk::{
     types::{
         api::{
             core::{
-                dto::{PeerDto, ReceiptDto},
+                dto::PeerDto,
                 response::{
                     BlockMetadataResponse, InfoResponse as NodeInfo, OutputWithMetadataResponse, TreasuryResponse,
                     UtxoChangesResponse as MilestoneUTXOChanges,
@@ -155,10 +155,6 @@ pub enum Response {
     /// - [`GetUtxoChangesById`](crate::method::ClientMethod::GetUtxoChangesById)
     /// - [`GetUtxoChangesByIndex`](crate::method::ClientMethod::GetUtxoChangesByIndex)
     MilestoneUtxoChanges(MilestoneUTXOChanges),
-    /// Response for:
-    /// - [`GetReceipts`](crate::method::ClientMethod::GetReceipts)
-    /// - [`GetReceiptsMigratedAt`](crate::method::ClientMethod::GetReceiptsMigratedAt)
-    Receipts(Vec<ReceiptDto>),
     /// Response for:
     /// - [`GetTreasury`](crate::method::ClientMethod::GetTreasury)
     Treasury(TreasuryResponse),

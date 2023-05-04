@@ -16,10 +16,10 @@ use crate::{
     },
     types::{
         api::core::{
-            dto::{PeerDto, ReceiptDto},
+            dto::PeerDto,
             response::{
                 BlockMetadataResponse, BlockResponse, InfoResponse, MilestoneResponse, OutputWithMetadataResponse,
-                PeersResponse, ReceiptsResponse, RoutesResponse, SubmitBlockResponse, TipsResponse, TreasuryResponse,
+                PeersResponse, RoutesResponse, SubmitBlockResponse, TipsResponse, TreasuryResponse,
                 UtxoChangesResponse,
             },
         },
@@ -356,32 +356,6 @@ impl Client {
         self.node_manager
             .get_request::<OutputMetadataDto>(path, None, self.get_timeout(), false, true)
             .await
-    }
-
-    /// Gets all stored receipts.
-    /// GET /api/core/v2/receipts
-    pub async fn get_receipts(&self) -> Result<Vec<ReceiptDto>> {
-        let path = &"api/core/v2/receipts";
-
-        let resp = self
-            .node_manager
-            .get_request::<ReceiptsResponse>(path, None, DEFAULT_API_TIMEOUT, false, false)
-            .await?;
-
-        Ok(resp.receipts)
-    }
-
-    /// Gets the receipts by the given milestone index.
-    /// GET /api/core/v2/receipts/{migratedAt}
-    pub async fn get_receipts_migrated_at(&self, milestone_index: u32) -> Result<Vec<ReceiptDto>> {
-        let path = &format!("api/core/v2/receipts/{milestone_index}");
-
-        let resp = self
-            .node_manager
-            .get_request::<ReceiptsResponse>(path, None, DEFAULT_API_TIMEOUT, false, false)
-            .await?;
-
-        Ok(resp.receipts)
     }
 
     /// Gets the current treasury output.

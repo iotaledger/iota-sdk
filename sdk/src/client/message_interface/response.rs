@@ -13,7 +13,7 @@ use crate::{
     types::{
         api::{
             core::{
-                dto::{PeerDto, ReceiptDto},
+                dto::PeerDto,
                 response::{
                     BlockMetadataResponse, InfoResponse as NodeInfo, OutputWithMetadataResponse, TreasuryResponse,
                     UtxoChangesResponse as MilestoneUTXOChanges,
@@ -152,10 +152,6 @@ pub enum Response {
     /// - [`GetUtxoChangesById`](crate::client::message_interface::Message::GetUtxoChangesById)
     /// - [`GetUtxoChangesByIndex`](crate::client::message_interface::Message::GetUtxoChangesByIndex)
     MilestoneUtxoChanges(MilestoneUTXOChanges),
-    /// Response for:
-    /// - [`GetReceipts`](crate::client::message_interface::Message::GetReceipts)
-    /// - [`GetReceiptsMigratedAt`](crate::client::message_interface::Message::GetReceiptsMigratedAt)
-    Receipts(Vec<ReceiptDto>),
     /// Response for:
     /// - [`GetTreasury`](crate::client::message_interface::Message::GetTreasury)
     Treasury(TreasuryResponse),

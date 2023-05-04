@@ -173,27 +173,6 @@ public class Client extends NativeApi {
     }
 
     /**
-     * Returns the list of all the receipts that were migrated at the given milestone index
-     *
-     * @param milestoneIndex The index of the milestone to get the receipts for.
-     * @return Receipts
-     * @throws ClientException on error.
-     */
-    public Receipt[] getReceiptsMigratedAt(int milestoneIndex) throws ClientException {
-        return nodeCoreApi.getReceiptsMigratedAt(milestoneIndex);
-    }
-
-    /**
-     * Get all the receipts.
-     *
-     * @return An array of Receipt objects.
-     * @throws ClientException on error.
-     */
-    public Receipt[] getReceipts() throws ClientException {
-        return nodeCoreApi.getReceipts();
-    }
-
-    /**
      * Get the treasury balance
      *
      * @return TreasuryResponse

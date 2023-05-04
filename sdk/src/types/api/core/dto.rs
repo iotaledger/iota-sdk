@@ -3,8 +3,6 @@
 
 use alloc::{string::String, vec::Vec};
 
-use crate::types::block::payload::milestone::option::dto::ReceiptMilestoneOptionDto;
-
 /// Describes a peer.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
@@ -78,18 +76,6 @@ pub struct MetricsDto {
     pub sent_milestone_requests: u64,
     pub sent_heartbeats: u64,
     pub dropped_packets: u64,
-}
-
-/// Describes a receipt.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct ReceiptDto {
-    pub receipt: ReceiptMilestoneOptionDto,
-    pub milestone_index: u32,
 }
 
 /// Describes the ledger inclusion state of a transaction.

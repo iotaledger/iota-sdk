@@ -302,25 +302,6 @@ async fn test_get_utxo_changes_by_index() {
 
 #[ignore]
 #[tokio::test]
-async fn test_get_receipts() {
-    let r = setup_client_with_node_health_ignored().get_receipts().await.unwrap();
-
-    println!("{r:#?}");
-}
-
-#[ignore]
-#[tokio::test]
-async fn get_receipts_migrated_at() {
-    let r = setup_client_with_node_health_ignored()
-        .get_receipts_migrated_at(3)
-        .await
-        .unwrap();
-
-    println!("{r:#?}");
-}
-
-#[ignore]
-#[tokio::test]
 async fn test_get_treasury() {
     let r = setup_client_with_node_health_ignored().get_treasury().await.unwrap();
 

@@ -23,10 +23,7 @@ use tokio::sync::{
 pub use self::{error::Error, types::*};
 use crate::{
     client::{Client, NetworkInfo},
-    types::block::{
-        payload::{milestone::ReceiptMilestoneOption, MilestonePayload},
-        Block,
-    },
+    types::block::{payload::MilestonePayload, Block},
 };
 
 impl Client {
@@ -212,20 +209,6 @@ fn poll_mqtt(
                                             }),
                                             Err(e) => {
                                                 warn!("MilestonePayload unpacking failed: {:?}", e);
-                                                Err(())
-                                            }
-                                        }
-                                    } else if topic.contains("receipts") {
-                                        let payload = &*p.payload;
-                                        let protocol_parameters = &network_info.read().unwrap().protocol_parameters;
-
-                                        match ReceiptMilestoneOption::unpack_verified(payload, protocol_parameters) {
-                                            Ok(receipt) => Ok(TopicEvent {
-                                                topic,
-                                                payload: MqttPayload::Receipt(receipt),
-                                            }),
-                                            Err(e) => {
-                                                warn!("Receipt unpacking failed: {:?}", e);
                                                 Err(())
                                             }
                                         }

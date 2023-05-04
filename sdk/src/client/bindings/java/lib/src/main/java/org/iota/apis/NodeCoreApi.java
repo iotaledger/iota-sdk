@@ -119,31 +119,6 @@ public class NodeCoreApi {
         return new OutputMetadata(responsePayload);
     }
 
-    public Receipt[] getReceiptsMigratedAt(int milestoneIndex) throws ClientException {
-        JsonObject o = new JsonObject();
-        o.addProperty("milestoneIndex", milestoneIndex);
-
-        JsonArray responsePayload = (JsonArray) nativeApi.sendCommand(new ClientCommand("getReceiptsMigratedAt", o));
-
-        Receipt[] receipts = new Receipt[responsePayload.size()];
-        for (int i = 0; i < responsePayload.size(); i++) {
-            receipts[i] = new Receipt(responsePayload.get(i).getAsJsonObject());
-        }
-
-        return receipts;
-    }
-
-    public Receipt[] getReceipts() throws ClientException {
-        JsonArray responsePayload = (JsonArray) nativeApi.sendCommand(new ClientCommand("getReceipts"));
-
-        Receipt[] receipts = new Receipt[responsePayload.size()];
-        for (int i = 0; i < responsePayload.size(); i++) {
-            receipts[i] = new Receipt(responsePayload.get(i).getAsJsonObject());
-        }
-
-        return receipts;
-    }
-
     public TreasuryResponse getTreasury() throws ClientException {
         JsonObject responsePayload = (JsonObject) nativeApi.sendCommand(new ClientCommand("getTreasury"));
 
