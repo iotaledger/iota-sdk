@@ -23,7 +23,7 @@ use crate::{
 /// Address and NFT for `send_nft()`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct NftOptions {
+pub struct MintNftParams {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
     /// first address of the account.
     pub address: Option<String>,
@@ -39,10 +39,10 @@ pub struct NftOptions {
     pub immutable_metadata: Option<Vec<u8>>,
 }
 
-/// Dto for NftOptions.
+/// Dto for MintNftParams.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct NftOptionsDto {
+pub struct MintNftParamsDto {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
     /// first address of the account.
     pub address: Option<String>,
@@ -58,10 +58,10 @@ pub struct NftOptionsDto {
     pub immutable_metadata: Option<String>,
 }
 
-impl TryFrom<&NftOptionsDto> for NftOptions {
+impl TryFrom<&MintNftParamsDto> for MintNftParams {
     type Error = crate::wallet::Error;
 
-    fn try_from(value: &NftOptionsDto) -> crate::wallet::Result<Self> {
+    fn try_from(value: &MintNftParamsDto) -> crate::wallet::Result<Self> {
         Ok(Self {
             address: value.address.clone(),
             sender: value.sender.clone(),
@@ -94,7 +94,7 @@ impl Account {
     ///     prefix_hex::decode("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?
     ///         .try_into()
     ///         .unwrap();
-    /// let nft_options = vec![NftOptions {
+    /// let params = vec![MintNftParams {
     ///     address: Some("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string()),
     ///     sender: None,
     ///     metadata: Some(b"some nft metadata".to_vec()),
@@ -103,7 +103,7 @@ impl Account {
     ///     immutable_metadata: Some(b"some immutable nft metadata".to_vec()),
     /// }];
     ///
-    /// let transaction = account.mint_nfts(nft_options, None).await?;
+    /// let transaction = account.mint_nfts(params, None).await?;
     /// println!(
     ///     "Transaction sent: {}/transaction/{}",
     ///     std::env::var("EXPLORER_URL").unwrap(),
@@ -112,10 +112,10 @@ impl Account {
     /// ```
     pub async fn mint_nfts(
         &self,
-        nfts_options: Vec<NftOptions>,
-        options: Option<TransactionOptions>,
+        params: Vec<MintNftParams>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
-        let prepared_transaction = self.prepare_mint_nfts(nfts_options, options).await?;
+        let prepared_transaction = self.prepare_mint_nfts(params, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
 
@@ -123,8 +123,8 @@ impl Account {
     /// [Account.mint_nfts()](crate::account::Account.mint_nfts)
     async fn prepare_mint_nfts(
         &self,
-        nfts_options: Vec<NftOptions>,
-        options: Option<TransactionOptions>,
+        params: Vec<MintNftParams>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_mint_nfts");
         let rent_structure = self.client.get_rent_structure().await?;
@@ -132,8 +132,16 @@ impl Account {
         let account_addresses = self.addresses().await?;
         let mut outputs = Vec::new();
 
-        for nft_options in nfts_options {
-            let address = match nft_options.address {
+        for MintNftParams {
+            address,
+            sender,
+            metadata,
+            tag,
+            issuer,
+            immutable_metadata,
+        } in params
+        {
+            let address = match address {
                 Some(address) => {
                     let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
                     self.client.bech32_hrp_matches(&bech32_hrp).await?;
@@ -154,23 +162,23 @@ impl Account {
                 // Address which will own the nft
                 .add_unlock_condition(AddressUnlockCondition::new(address));
 
-            if let Some(sender) = nft_options.sender {
+            if let Some(sender) = sender {
                 nft_builder = nft_builder.add_feature(SenderFeature::new(Address::try_from_bech32(sender)?));
             }
 
-            if let Some(metadata) = nft_options.metadata {
+            if let Some(metadata) = metadata {
                 nft_builder = nft_builder.add_feature(MetadataFeature::new(metadata)?);
             }
 
-            if let Some(tag) = nft_options.tag {
+            if let Some(tag) = tag {
                 nft_builder = nft_builder.add_feature(TagFeature::new(tag)?);
             }
 
-            if let Some(issuer) = nft_options.issuer {
+            if let Some(issuer) = issuer {
                 nft_builder = nft_builder.add_immutable_feature(IssuerFeature::new(Address::try_from_bech32(issuer)?));
             }
 
-            if let Some(immutable_metadata) = nft_options.immutable_metadata {
+            if let Some(immutable_metadata) = immutable_metadata {
                 nft_builder = nft_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
             }
 

@@ -13,10 +13,10 @@ use crate::{
     wallet::account::{operations::transaction::Transaction, Account, TransactionOptions},
 };
 
-/// Address and nft for `send_nft()`
+/// Params `send_nft()`
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AddressAndNftId {
+pub struct SendNftParams {
     /// Bech32 encoded address
     pub address: String,
     /// Nft id
@@ -32,7 +32,7 @@ impl Account {
     /// internally, the options can define the RemainderValueStrategy. Custom inputs will be replaced with the
     /// required nft inputs. Address needs to be Bech32 encoded
     /// ```ignore
-    /// let outputs = vec![AddressAndNftId {
+    /// let outputs = vec![SendNftParams {
     ///     address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
     ///     nft_id: NftId::from_str("04f9b54d488d2e83a6c90db08ae4b39651bbba8a")?,
     /// }];
@@ -47,10 +47,10 @@ impl Account {
     /// ```
     pub async fn send_nft(
         &self,
-        addresses_and_nft_ids: Vec<AddressAndNftId>,
-        options: Option<TransactionOptions>,
+        params: Vec<SendNftParams>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
-        let prepared_transaction = self.prepare_send_nft(addresses_and_nft_ids, options).await?;
+        let prepared_transaction = self.prepare_send_nft(params, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
 
@@ -58,8 +58,8 @@ impl Account {
     /// [Account.send_nft()](crate::account::Account.send_nft)
     async fn prepare_send_nft(
         &self,
-        addresses_and_nft_ids: Vec<AddressAndNftId>,
-        options: Option<TransactionOptions>,
+        params: Vec<SendNftParams>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_send_nft");
 
@@ -68,14 +68,14 @@ impl Account {
 
         let mut outputs = Vec::new();
 
-        for address_and_nft_id in addresses_and_nft_ids {
-            let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address_and_nft_id.address)?;
+        for SendNftParams { address, nft_id } in params {
+            let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
             self.client.bech32_hrp_matches(&bech32_hrp).await?;
 
             // Find nft output from the inputs
             if let Some(nft_output_data) = unspent_outputs.iter().find(|o| {
                 if let Output::Nft(nft_output) = &o.output {
-                    address_and_nft_id.nft_id == nft_output.nft_id_non_null(&o.output_id)
+                    nft_id == nft_output.nft_id_non_null(&o.output_id)
                 } else {
                     false
                 }
@@ -83,7 +83,7 @@ impl Account {
                 if let Output::Nft(nft_output) = &nft_output_data.output {
                     // Set the nft id and new address unlock condition
                     let nft_builder = NftOutputBuilder::from(nft_output)
-                        .with_nft_id(address_and_nft_id.nft_id)
+                        .with_nft_id(nft_id)
                         .with_unlock_conditions(vec![AddressUnlockCondition::new(address)]);
                     outputs.push(nft_builder.finish_output(token_supply)?);
                 }

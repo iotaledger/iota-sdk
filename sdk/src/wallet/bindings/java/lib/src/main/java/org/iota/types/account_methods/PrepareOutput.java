@@ -3,17 +3,17 @@
 
 package org.iota.types.account_methods;
 
-import org.iota.types.OutputOptions;
+import org.iota.types.OutputParams;
 import org.iota.types.TransactionOptions;
 
 /// Prepare an output.
 public class PrepareOutput implements AccountMethod {
 
-    private OutputOptions options;
+    private OutputParams params;
     private TransactionOptions transactionOptions;
 
-    public PrepareOutput withOptions(OutputOptions options) {
-        this.options = options;
+    public PrepareOutput withParams(OutputParams params) {
+        this.params = params;
         return this;
     }
 
@@ -22,4 +22,3 @@ public class PrepareOutput implements AccountMethod {
         return this;
     }
 }
-

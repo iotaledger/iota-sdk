@@ -62,7 +62,7 @@ impl Account {
     pub async fn send(
         &self,
         outputs: Vec<Output>,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         // here to check before syncing, how to prevent duplicated verification (also in prepare_transaction())?
         // Checking it also here is good to return earlier if something is invalid
@@ -84,7 +84,7 @@ impl Account {
     pub async fn finish_transaction(
         &self,
         outputs: Vec<Output>,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!("[TRANSACTION] finish_transaction");
 

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use primitive_types::U256;
-use serde::{Deserialize, Serialize};
 
 use crate::{
     types::block::output::{AliasOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme},
@@ -15,22 +14,6 @@ use crate::{
     },
 };
 
-/// Address and foundry data for `mint_native_token()`
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct IncreaseNativeTokenSupplyOptions {}
-
-/// Dto for IncreaseNativeTokenSupplyOptions
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct IncreaseNativeTokenSupplyOptionsDto {}
-
-impl TryFrom<&IncreaseNativeTokenSupplyOptionsDto> for IncreaseNativeTokenSupplyOptions {
-    type Error = crate::wallet::Error;
-
-    fn try_from(_value: &IncreaseNativeTokenSupplyOptionsDto) -> crate::wallet::Result<Self> {
-        Ok(Self {})
-    }
-}
-
 impl Account {
     /// Function to mint more native tokens when the max supply isn't reached yet. The foundry needs to be controlled by
     /// this account. Address needs to be Bech32 encoded. This will not change the max supply.
@@ -38,7 +21,6 @@ impl Account {
     /// let tx = account.increase_native_token_supply(
     ///             TokenId::from_str("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?,
     ///             U256::from(100),
-    ///             native_token_options,
     ///             None
     ///         ).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
@@ -50,8 +32,7 @@ impl Account {
         &self,
         token_id: TokenId,
         mint_amount: U256,
-        _increase_native_token_supply_options: Option<IncreaseNativeTokenSupplyOptions>,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<MintTokenTransaction> {
         log::debug!("[TRANSACTION] increase_native_token_supply");
 

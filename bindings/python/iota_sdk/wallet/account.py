@@ -161,13 +161,13 @@ class Account:
         )
 
     def create_alias_output(self,
-                            alias_output_options,
+                            params,
                             options):
         """Create an alias output.
         """
         return self._call_account_method(
             'createAliasOutput', {
-                'aliasOutputOptions': alias_output_options,
+                'params': params,
                 'options': options
             }
         )
@@ -311,17 +311,16 @@ class Account:
             'increaseNativeTokenSupply', {
                 'tokenId': token_id,
                 'mintAmount': mint_amount,
-                'increaseNativeTokenSupplyOptions': increase_native_token_supply_options,
                 'options': options
             }
         )
 
-    def mint_native_token(self, native_token_options, options=None):
+    def mint_native_token(self, params, options=None):
         """Mint native token.
         """
         return self._call_account_method(
             'mintNativeToken', {
-                'nativeTokenOptions': native_token_options,
+                'mintNativeTokenParams': params,
                 'options': options
             }
         )
@@ -335,12 +334,12 @@ class Account:
             }
         )
 
-    def mint_nfts(self, nfts_options, options=None):
+    def mint_nfts(self, params, options=None):
         """Mint nfts.
         """
         return self._call_account_method(
             'mintNfts', {
-                'nftsOptions': nfts_options,
+                'mintNftParams': params,
                 'options': options
             }
         )
@@ -367,12 +366,12 @@ class Account:
             }
         )
 
-    def prepare_send_amount(self, addresses_with_amount, options=None):
+    def prepare_send_amount(self, params, options=None):
         """Prepare send amount.
         """
         return self._call_account_method(
             'prepareSendAmount', {
-                'addressesWithAmount': addresses_with_amount,
+                'addressesWithAmount': params,
                 'options': options
             }
         )
@@ -410,32 +409,32 @@ class Account:
             }
         )
 
-    def send_amount(self, addresses_with_amount, options=None):
+    def send_amount(self, params, options=None):
         """Send amount.
         """
         return self._call_account_method(
             'sendAmount', {
-                'addressesWithAmount': addresses_with_amount,
+                'addressesWithAmount': params,
                 'options': options
             }
         )
 
-    def send_native_tokens(self, addresses_and_native_tokens, options=None):
+    def send_native_tokens(self, params, options=None):
         """Send native tokens.
         """
         return self._call_account_method(
             'sendNativeTokens', {
-                'addressesAndNativeTokens': addresses_and_native_tokens,
+                'addressesAndNativeTokens': params,
                 'options': options
             }
         )
 
-    def send_nft(self, addresses_and_nft_ids, options=None):
+    def send_nft(self, params, options=None):
         """Send nft.
         """
         return self._call_account_method(
             'sendNft', {
-                'addressesAndNftIds': addresses_and_nft_ids,
+                'addressesAndNftIds': params,
                 'options': options
             }
         )

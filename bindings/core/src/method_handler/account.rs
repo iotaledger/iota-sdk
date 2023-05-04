@@ -15,10 +15,10 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{AccountBalanceDto, TransactionDto},
-            Account, AliasOutputOptions, MintTokenTransactionDto, OutputDataDto, OutputOptions, TransactionOptions,
+            Account, CreateAliasParams, MintTokenTransactionDto, OutputDataDto, OutputParams, TransactionOptions,
         },
         message_interface::AddressWithUnspentOutputsDto,
-        AddressWithAmount, IncreaseNativeTokenSupplyOptions, NativeTokenOptions, NftOptions,
+        MintNativeTokenParams, MintNftParams, SendAmountParams,
     },
 };
 use primitive_types::U256;
@@ -59,17 +59,14 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
-        AccountMethod::CreateAliasOutput {
-            alias_output_options,
-            options,
-        } => {
-            let alias_output_options = alias_output_options
-                .map(|options| AliasOutputOptions::try_from(&options))
+        AccountMethod::CreateAliasOutput { params, options } => {
+            let params = params
+                .map(|options| CreateAliasParams::try_from(&options))
                 .transpose()?;
 
             let transaction = account
                 .create_alias_output(
-                    alias_output_options,
+                    params,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -179,30 +176,21 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::IncreaseNativeTokenSupply {
             token_id,
             mint_amount,
-            increase_native_token_supply_options,
             options,
         } => {
-            let increase_native_token_supply_options = match increase_native_token_supply_options {
-                Some(native_token_options) => Some(IncreaseNativeTokenSupplyOptions::try_from(&native_token_options)?),
-                None => None,
-            };
             let transaction = account
                 .increase_native_token_supply(
                     TokenId::try_from(&token_id)?,
                     U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
-                    increase_native_token_supply_options,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
             Response::MintTokenTransaction(MintTokenTransactionDto::from(&transaction))
         }
-        AccountMethod::MintNativeToken {
-            native_token_options,
-            options,
-        } => {
+        AccountMethod::MintNativeToken { params, options } => {
             let transaction = account
                 .mint_native_token(
-                    NativeTokenOptions::try_from(&native_token_options)?,
+                    MintNativeTokenParams::try_from(&params)?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -216,13 +204,13 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
 
             Response::MinimumRequiredStorageDeposit(minimum_storage_deposit.to_string())
         }
-        AccountMethod::MintNfts { nfts_options, options } => {
+        AccountMethod::MintNfts { params, options } => {
             let transaction = account
                 .mint_nfts(
-                    nfts_options
+                    params
                         .iter()
-                        .map(NftOptions::try_from)
-                        .collect::<iota_sdk::wallet::Result<Vec<NftOptions>>>()?,
+                        .map(MintNftParams::try_from)
+                        .collect::<iota_sdk::wallet::Result<Vec<MintNftParams>>>()?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -230,12 +218,12 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::GetBalance => Response::Balance(AccountBalanceDto::from(&account.balance().await?)),
         AccountMethod::PrepareOutput {
-            options,
+            params: options,
             transaction_options,
         } => {
             let output = account
                 .prepare_output(
-                    OutputOptions::try_from(&options)?,
+                    OutputParams::try_from(&options)?,
                     transaction_options
                         .as_ref()
                         .map(TransactionOptions::try_from_dto)
@@ -244,16 +232,13 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::Output(OutputDto::from(&output))
         }
-        AccountMethod::PrepareSendAmount {
-            addresses_with_amount,
-            options,
-        } => {
+        AccountMethod::PrepareSendAmount { params, options } => {
             let data = account
                 .prepare_send_amount(
-                    addresses_with_amount
+                    params
                         .iter()
-                        .map(AddressWithAmount::try_from)
-                        .collect::<iota_sdk::wallet::Result<Vec<AddressWithAmount>>>()?,
+                        .map(SendAmountParams::try_from)
+                        .collect::<iota_sdk::wallet::Result<Vec<SendAmountParams>>>()?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -283,40 +268,31 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::BlockId(block_id)
         }
         AccountMethod::Sync { options } => Response::Balance(AccountBalanceDto::from(&account.sync(options).await?)),
-        AccountMethod::SendAmount {
-            addresses_with_amount,
-            options,
-        } => {
+        AccountMethod::SendAmount { params, options } => {
             let transaction = account
                 .send_amount(
-                    addresses_with_amount
+                    params
                         .iter()
-                        .map(AddressWithAmount::try_from)
-                        .collect::<iota_sdk::wallet::Result<Vec<AddressWithAmount>>>()?,
+                        .map(SendAmountParams::try_from)
+                        .collect::<iota_sdk::wallet::Result<Vec<SendAmountParams>>>()?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
-        AccountMethod::SendNativeTokens {
-            addresses_and_native_tokens,
-            options,
-        } => {
+        AccountMethod::SendNativeTokens { params, options } => {
             let transaction = account
                 .send_native_tokens(
-                    addresses_and_native_tokens.clone(),
+                    params.clone(),
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
-        AccountMethod::SendNft {
-            addresses_and_nft_ids,
-            options,
-        } => {
+        AccountMethod::SendNft { params, options } => {
             let transaction = account
                 .send_nft(
-                    addresses_and_nft_ids.clone(),
+                    params.clone(),
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;

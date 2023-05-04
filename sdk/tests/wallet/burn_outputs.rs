@@ -6,7 +6,7 @@ use iota_sdk::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         NftId, NftOutputBuilder, OutputId, UnlockCondition,
     },
-    wallet::{Account, NativeTokenOptions, NftOptions, Result, U256},
+    wallet::{Account, MintNativeTokenParams, MintNftParams, Result, U256},
 };
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
@@ -20,7 +20,7 @@ async fn mint_and_burn_nft() -> Result<()> {
     let wallet = make_wallet(storage_path, None, None).await?;
     let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
-    let nft_options = vec![NftOptions {
+    let nft_options = vec![MintNftParams {
         address: Some(account.addresses().await?[0].address().to_string()),
         sender: None,
         metadata: Some(b"some nft metadata".to_vec()),
@@ -121,14 +121,14 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     account.sync(None).await?;
 
     let circulating_supply = U256::from(60i32);
-    let native_token_options = NativeTokenOptions {
+    let params = MintNativeTokenParams {
         alias_id: None,
         circulating_supply,
         maximum_supply: U256::from(100i32),
         foundry_metadata: None,
     };
 
-    let mint_transaction = account.mint_native_token(native_token_options, None).await.unwrap();
+    let mint_transaction = account.mint_native_token(params, None).await.unwrap();
 
     account
         .retry_transaction_until_included(&mint_transaction.transaction.transaction_id, None, None)
@@ -253,7 +253,7 @@ async fn mint_and_burn_native_tokens() -> Result<()> {
 
     let mint_tx = account
         .mint_native_token(
-            NativeTokenOptions {
+            MintNativeTokenParams {
                 alias_id: None,
                 circulating_supply: native_token_amount,
                 maximum_supply: native_token_amount,

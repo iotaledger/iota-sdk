@@ -38,11 +38,8 @@ export type CustomAddress = {
     value: string;
 };
 
-/** Native token options for minting more native tokens */
-export interface IncreaseNativeTokenSupplyOptions { }
-
 /** Native token options for minting */
-export interface NativeTokenOptions {
+export interface MintNativeTokenParams {
     aliasId?: string;
     /** Hex encoded number */
     circulatingSupply: HexEncodedAmount;
@@ -53,7 +50,7 @@ export interface NativeTokenOptions {
 }
 
 /** Nft options for minting */
-export interface NftOptions {
+export interface MintNftParams {
     /** Bech32 encoded address to which the Nft will be minted. Default will use the
      * first address of the account
      */
@@ -71,7 +68,7 @@ export interface NftOptions {
 }
 
 /** Options for the alias output creation */
-export interface AliasOutputOptions {
+export interface AliasOutputParams {
     /** Bech32 encoded address to which the Nft will be minted. Default will use the
      * first address of the account
      */

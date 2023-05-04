@@ -38,17 +38,14 @@ pub use self::{
         },
         transaction::{
             high_level::{
-                create_alias::{AliasOutputOptions, AliasOutputOptionsDto},
+                create_alias::{CreateAliasParams, CreateAliasParamsDto},
                 minting::{
-                    increase_native_token_supply::{
-                        IncreaseNativeTokenSupplyOptions, IncreaseNativeTokenSupplyOptionsDto,
-                    },
-                    mint_native_token::{MintTokenTransactionDto, NativeTokenOptions, NativeTokenOptionsDto},
-                    mint_nfts::{NftOptions, NftOptionsDto},
+                    mint_native_token::{MintNativeTokenParams, MintNativeTokenParamsDto, MintTokenTransactionDto},
+                    mint_nfts::{MintNftParams, MintNftParamsDto},
                 },
             },
             prepare_output::{
-                Assets, Features, OutputOptions, OutputOptionsDto, ReturnStrategy, StorageDeposit, Unlocks,
+                Assets, Features, OutputParams, OutputParamsDto, ReturnStrategy, StorageDeposit, Unlocks,
             },
             RemainderValueStrategy, TransactionOptions, TransactionOptionsDto,
         },

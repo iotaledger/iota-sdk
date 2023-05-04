@@ -24,7 +24,7 @@ impl Account {
     pub(crate) async fn build_transaction_essence(
         &self,
         selected_transaction_data: Selected,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] build_transaction");
 
@@ -53,7 +53,7 @@ impl Account {
         essence_builder = essence_builder.with_outputs(selected_transaction_data.outputs);
 
         // Optional add a tagged payload
-        if let Some(options) = options {
+        if let Some(options) = options.into() {
             essence_builder = essence_builder.with_payload(options.tagged_data_payload);
         }
 

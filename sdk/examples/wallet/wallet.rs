@@ -12,7 +12,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    wallet::{AddressWithAmount, ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Result, SendAmountParams, Wallet},
 };
 
 #[tokio::main]
@@ -63,7 +63,7 @@ async fn main() -> Result<()> {
     println!("Addresses with balance: {}", addresses_with_unspent_outputs.len());
 
     // send transaction
-    let outputs = vec![AddressWithAmount::new(
+    let outputs = vec![SendAmountParams::new(
         "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
         1_000_000,
     )];

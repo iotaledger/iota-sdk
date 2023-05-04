@@ -21,7 +21,7 @@ use crate::{
             types::{AccountAddress, AddressWithUnspentOutputs, TransactionDto},
             AccountDetails, OutputDataDto,
         },
-        AddressWithAmount,
+        SendAmountParams,
     },
 };
 
@@ -41,7 +41,7 @@ pub struct AddressWithAmountDto {
     pub expiration: Option<u32>,
 }
 
-impl TryFrom<&AddressWithAmountDto> for AddressWithAmount {
+impl TryFrom<&AddressWithAmountDto> for SendAmountParams {
     type Error = crate::wallet::Error;
 
     fn try_from(value: &AddressWithAmountDto) -> crate::wallet::Result<Self> {

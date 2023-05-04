@@ -6,7 +6,7 @@
 //!
 //! `cargo run --example send_nft --release`
 
-use iota_sdk::wallet::{AddressAndNftId, Result, Wallet};
+use iota_sdk::wallet::{Result, SendNftParams, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
             .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        let outputs = vec![AddressAndNftId {
+        let outputs = vec![SendNftParams {
             address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
             nft_id: *nft_id,
         }];

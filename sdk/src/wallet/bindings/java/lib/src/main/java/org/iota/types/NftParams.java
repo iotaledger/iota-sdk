@@ -4,7 +4,8 @@
 package org.iota.types;
 
 import org.iota.types.ids.NftId;
-public class AddressAndNftId extends AbstractObject {
+
+public class NftParams extends AbstractObject {
 
     /// Bech32 encoded address
     private String address;
@@ -15,7 +16,7 @@ public class AddressAndNftId extends AbstractObject {
         return address;
     }
 
-    public AddressAndNftId withAddress(String address) {
+    public NftParams withAddress(String address) {
         this.address = address;
         return this;
     }
@@ -24,7 +25,7 @@ public class AddressAndNftId extends AbstractObject {
         return nftId;
     }
 
-    public AddressAndNftId withNftId(NftId nftId) {
+    public NftParams withNftId(NftId nftId) {
         this.nftId = nftId;
         return this;
     }

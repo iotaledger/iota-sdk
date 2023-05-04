@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 package org.iota.types;
-public class OutputOptions extends AbstractObject {
+
+public class OutputParams extends AbstractObject {
 
     private String recipientAddress;
     private String amount;
@@ -82,8 +83,10 @@ public class OutputOptions extends AbstractObject {
 
     public static class StorageDeposit extends AbstractObject {
         private ReturnStrategy returnStrategy;
-        // If account has 2 Mi, min storage deposit is 1 Mi and one wants to send 1.5 Mi, it wouldn't be possible with a
-        // 0.5 Mi remainder. To still send a transaction, the 0.5 can be added to the output automatically, if set to true
+        // If account has 2 Mi, min storage deposit is 1 Mi and one wants to send 1.5
+        // Mi, it wouldn't be possible with a
+        // 0.5 Mi remainder. To still send a transaction, the 0.5 can be added to the
+        // output automatically, if set to true
         private boolean useExcessIfLow;
 
         public ReturnStrategy getReturnStrategy() {
@@ -106,9 +109,11 @@ public class OutputOptions extends AbstractObject {
     }
 
     public enum ReturnStrategy {
-        // A storage deposit return unlock condition will be added with the required minimum storage deposit
+        // A storage deposit return unlock condition will be added with the required
+        // minimum storage deposit
         Return,
-        // The recipient address will get the additional amount to reach the minimum storage deposit gifted
+        // The recipient address will get the additional amount to reach the minimum
+        // storage deposit gifted
         Gift,
     }
 
@@ -116,7 +121,7 @@ public class OutputOptions extends AbstractObject {
         return recipientAddress;
     }
 
-    public OutputOptions withRecipientAddress(String recipientAddress) {
+    public OutputParams withRecipientAddress(String recipientAddress) {
         this.recipientAddress = recipientAddress;
         return this;
     }
@@ -125,7 +130,7 @@ public class OutputOptions extends AbstractObject {
         return amount;
     }
 
-    public OutputOptions withAmount(String amount) {
+    public OutputParams withAmount(String amount) {
         this.amount = amount;
         return this;
     }
@@ -134,7 +139,7 @@ public class OutputOptions extends AbstractObject {
         return assets;
     }
 
-    public OutputOptions withAssets(Assets assets) {
+    public OutputParams withAssets(Assets assets) {
         this.assets = assets;
         return this;
     }
@@ -143,7 +148,7 @@ public class OutputOptions extends AbstractObject {
         return features;
     }
 
-    public OutputOptions withFeatures(Features features) {
+    public OutputParams withFeatures(Features features) {
         this.features = features;
         return this;
     }
@@ -152,7 +157,7 @@ public class OutputOptions extends AbstractObject {
         return unlocks;
     }
 
-    public OutputOptions withUnlocks(Unlocks unlocks) {
+    public OutputParams withUnlocks(Unlocks unlocks) {
         this.unlocks = unlocks;
         return this;
     }
@@ -161,7 +166,7 @@ public class OutputOptions extends AbstractObject {
         return storageDeposit;
     }
 
-    public OutputOptions withStorageDeposit(StorageDeposit storageDeposit) {
+    public OutputParams withStorageDeposit(StorageDeposit storageDeposit) {
         this.storageDeposit = storageDeposit;
         return this;
     }

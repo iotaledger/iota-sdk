@@ -31,11 +31,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `OutputData::metadata` changed from `OutputMetadataDto` to `OutputMetadata`;
+- Rename messages `SendAmount::addresses_with_amount`, `SendNft::addresses_and_nft_ids`, `SendNativeTokens::addresses_and_native_tokens`, `CreateAliasOutput::alias_output_options`, `MintNfts::nftsOptions`, `MintNativeToken::native_token_options`, `PrepareOutput::options` to `params`.
+- Rename `AddressesWithAmount` to `SendAmountParams`.
+- Rename `AddressesAndNftIds` to `SendNftParams`.
+- Rename `AddressesAndNativeTokens` to `SendNativeTokensParams`.
+- Rename `AliasOutputOptions` to `CreateAliasParams`.
+- Rename `NftOptions` to `MintNftParams`.
+- Rename `NativeTokenOptions` to `MintNativeTokenParams`.
+- Rename `OutputOptions` to `OutputParams`.
 
 ### Removed
 
 - `FilterOptions`'s `Hash` derivation;
 - `client_without_tls` feature in favor of separate `client` and `tls` features;
+- `IncreaseNativeTokenSupplyOptions`;
 
 ## 0.3.0 - 2023-05-02
 

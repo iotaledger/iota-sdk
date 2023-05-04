@@ -6,7 +6,7 @@
 //!
 //! `cargo run --example wallet_transaction --release`
 
-use iota_sdk::wallet::{AddressWithAmount, Result, Wallet};
+use iota_sdk::wallet::{Result, SendAmountParams, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
             .await?;
 
         // Send a transaction with 1 Mi
-        let outputs = vec![AddressWithAmount::new(
+        let outputs = vec![SendAmountParams::new(
             "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
             1_000_000,
         )];

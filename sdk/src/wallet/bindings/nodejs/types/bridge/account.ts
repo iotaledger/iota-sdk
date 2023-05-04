@@ -13,16 +13,15 @@ import type {
     BuildNftOutputData,
 } from '../buildOutputData';
 import type { Node } from '../network';
-import type { OutputOptions } from '../outputOptions';
+import type { OutputParams } from '../outputParams';
 import type { OutputsToClaim } from '../output';
 import type { SignedTransactionEssence } from '../signedTransactionEssence';
 import type { PreparedTransactionData } from '../preparedTransactionData';
 import type {
-    AliasOutputOptions,
-    IncreaseNativeTokenSupplyOptions,
-    NativeTokenOptions,
+    AliasOutputParams,
+    MintNativeTokenParams,
     TransactionOptions,
-    NftOptions,
+    MintNftParams,
 } from '../transactionOptions';
 import type {
     ParticipationEventId,
@@ -85,7 +84,7 @@ export type __ConsolidateOutputsMethod__ = {
 export type __CreateAliasOutputMethod__ = {
     name: 'createAliasOutput';
     data: {
-        aliasOutputOptions?: AliasOutputOptions;
+        params?: AliasOutputParams;
         options?: TransactionOptions;
     };
 };
@@ -215,7 +214,6 @@ export type __IncreaseNativeTokenSupplyMethod__ = {
     data: {
         tokenId: string;
         mintAmount: HexEncodedAmount;
-        increaseNativeTokenSupplyOptions?: IncreaseNativeTokenSupplyOptions;
         options?: TransactionOptions;
     };
 };
@@ -223,7 +221,7 @@ export type __IncreaseNativeTokenSupplyMethod__ = {
 export type __MintNativeTokenMethod__ = {
     name: 'mintNativeToken';
     data: {
-        nativeTokenOptions: NativeTokenOptions;
+        mintNativeTokenParams: MintNativeTokenParams;
         options?: TransactionOptions;
     };
 };
@@ -231,7 +229,7 @@ export type __MintNativeTokenMethod__ = {
 export type __MintNftsMethod__ = {
     name: 'mintNfts';
     data: {
-        nftsOptions: NftOptions[];
+        mintNftParams: MintNftParams[];
         options?: TransactionOptions;
     };
 };
@@ -239,7 +237,7 @@ export type __MintNftsMethod__ = {
 export type __PrepareOutputMethod__ = {
     name: 'prepareOutput';
     data: {
-        options: OutputOptions;
+        options: OutputParams;
         transactionOptions?: TransactionOptions;
     };
 };

@@ -6,7 +6,7 @@
 //!
 //! `cargo run --example mint_native_token --release`
 
-use iota_sdk::wallet::{NativeTokenOptions, Result, Wallet, U256};
+use iota_sdk::wallet::{MintNativeTokenParams, Result, Wallet, U256};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -45,14 +45,14 @@ async fn main() -> Result<()> {
 
     println!("Preparing minting transaction...");
 
-    let native_token_options = NativeTokenOptions {
+    let params = MintNativeTokenParams {
         alias_id: None,
         circulating_supply: U256::from(100),
         maximum_supply: U256::from(100),
         foundry_metadata: None,
     };
 
-    let mint_txn = account.mint_native_token(native_token_options, None).await?;
+    let mint_txn = account.mint_native_token(params, None).await?;
     println!("Transaction sent: {}", mint_txn.transaction.transaction_id);
 
     // Wait for transaction to get included

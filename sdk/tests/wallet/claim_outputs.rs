@@ -8,7 +8,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{OutputsToClaim, TransactionOptions},
-        AddressNativeTokens, AddressWithAmount, NativeTokenOptions, Result, U256,
+        MintNativeTokenParams, Result, SendAmountParams, SendNativeTokensParams, U256,
     },
 };
 
@@ -28,8 +28,8 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
     let tx = accounts[1]
         .send_amount(
             vec![
-                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_string(), micro_amount),
-                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_string(), micro_amount),
+                SendAmountParams::new(accounts[0].addresses().await?[0].address().to_string(), micro_amount),
+                SendAmountParams::new(accounts[0].addresses().await?[0].address().to_string(), micro_amount),
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -82,8 +82,8 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
     let tx = accounts[1]
         .send_amount(
             vec![
-                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_string(), amount),
-                AddressWithAmount::new(accounts[0].addresses().await?[0].address().to_string(), 0),
+                SendAmountParams::new(accounts[0].addresses().await?[0].address().to_string(), amount),
+                SendAmountParams::new(accounts[0].addresses().await?[0].address().to_string(), 0),
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -202,7 +202,7 @@ async fn claim_2_native_tokens() -> Result<()> {
 
     let mint_tx_0 = accounts[1]
         .mint_native_token(
-            NativeTokenOptions {
+            MintNativeTokenParams {
                 alias_id: None,
                 circulating_supply: native_token_amount,
                 maximum_supply: native_token_amount,
@@ -218,7 +218,7 @@ async fn claim_2_native_tokens() -> Result<()> {
 
     let mint_tx_1 = accounts[1]
         .mint_native_token(
-            NativeTokenOptions {
+            MintNativeTokenParams {
                 alias_id: None,
                 circulating_supply: native_token_amount,
                 maximum_supply: native_token_amount,
@@ -235,13 +235,13 @@ async fn claim_2_native_tokens() -> Result<()> {
     let tx = accounts[1]
         .send_native_tokens(
             vec![
-                AddressNativeTokens {
+                SendNativeTokensParams {
                     address: accounts[0].addresses().await?[0].address().to_string(),
                     native_tokens: vec![(mint_tx_0.token_id, native_token_amount)],
                     expiration: None,
                     return_address: None,
                 },
-                AddressNativeTokens {
+                SendNativeTokensParams {
                     address: accounts[0].addresses().await?[0].address().to_string(),
                     native_tokens: vec![(mint_tx_1.token_id, native_token_amount)],
                     expiration: None,
@@ -310,7 +310,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
 
     let mint_tx_0 = account_0
         .mint_native_token(
-            NativeTokenOptions {
+            MintNativeTokenParams {
                 alias_id: None,
                 circulating_supply: native_token_amount,
                 maximum_supply: native_token_amount,
@@ -326,7 +326,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
 
     let mint_tx_1 = account_0
         .mint_native_token(
-            NativeTokenOptions {
+            MintNativeTokenParams {
                 alias_id: None,
                 circulating_supply: native_token_amount,
                 maximum_supply: native_token_amount,

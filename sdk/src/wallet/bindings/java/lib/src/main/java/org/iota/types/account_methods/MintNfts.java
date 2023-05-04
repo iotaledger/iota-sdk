@@ -3,17 +3,17 @@
 
 package org.iota.types.account_methods;
 
-import org.iota.types.NftOptions;
+import org.iota.types.MintNftParams;
 import org.iota.types.TransactionOptions;
 
 /// Mint nft.
 public class MintNfts implements AccountMethod {
 
-    private NftOptions[] nftsOptions;
+    private MintNftParams[] params;
     private TransactionOptions options;
 
-    public MintNfts withNftsOptions(NftOptions[] nftsOptions) {
-        this.nftsOptions = nftsOptions;
+    public MintNfts withParams(MintNftParams[] params) {
+        this.params = params;
         return this;
     }
 

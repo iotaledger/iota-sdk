@@ -19,7 +19,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{types::AccountAddress, Account, OutputsToClaim, TransactionOptions},
-        AddressAndNftId, AddressNativeTokens, AddressWithAmount, NativeTokenOptions, NftOptions, U256,
+        MintNativeTokenParams, MintNftParams, SendAmountParams, SendNativeTokensParams, SendNftParams, U256,
     },
 };
 
@@ -484,7 +484,6 @@ pub async fn increase_native_token_command(account: &Account, token_id: String, 
             TokenId::from_str(&token_id)?,
             U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
             None,
-            None,
         )
         .await?;
 
@@ -519,14 +518,14 @@ pub async fn mint_native_token_command(
         account.sync(None).await?;
     }
 
-    let native_token_options = NativeTokenOptions {
+    let params = MintNativeTokenParams {
         alias_id: None,
         circulating_supply: U256::from_dec_str(&circulating_supply).map_err(|e| Error::Miscellaneous(e.to_string()))?,
         maximum_supply: U256::from_dec_str(&maximum_supply).map_err(|e| Error::Miscellaneous(e.to_string()))?,
         foundry_metadata,
     };
 
-    let mint_transaction = account.mint_native_token(native_token_options, None).await?;
+    let mint_transaction = account.mint_native_token(params, None).await?;
 
     println_log_info!(
         "Native token minting transaction sent:\n{:?}\n{:?}",
@@ -552,7 +551,7 @@ pub async fn mint_nft_command(
     } else {
         None
     };
-    let nft_options = vec![NftOptions {
+    let nft_options = vec![MintNftParams {
         issuer,
         sender,
         tag,
@@ -617,7 +616,7 @@ pub async fn send_command(
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
     let outputs = vec![
-        AddressWithAmount::new(address, amount)
+        SendAmountParams::new(address, amount)
             .with_return_address(return_address)
             .with_expiration(expiration),
     ];
@@ -669,7 +668,7 @@ pub async fn send_native_token_command(
         account.send(outputs, None).await?
     } else {
         // Send native tokens with storage deposit return and expiration
-        let outputs = vec![AddressNativeTokens {
+        let outputs = vec![SendNativeTokensParams {
             address,
             native_tokens: vec![(
                 TokenId::from_str(&token_id)?,
@@ -691,7 +690,7 @@ pub async fn send_native_token_command(
 
 // `send-nft` command
 pub async fn send_nft_command(account: &Account, address: String, nft_id: String) -> Result<(), Error> {
-    let outputs = vec![AddressAndNftId {
+    let outputs = vec![SendNftParams {
         address,
         nft_id: NftId::from_str(&nft_id)?,
     }];

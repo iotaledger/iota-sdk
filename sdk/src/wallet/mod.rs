@@ -38,12 +38,11 @@ pub use self::{
     account::{
         operations::transaction::high_level::{
             minting::{
-                increase_native_token_supply::IncreaseNativeTokenSupplyOptions, mint_native_token::NativeTokenOptions,
-                mint_nfts::NftOptions,
+                mint_native_token::MintNativeTokenParams, mint_nfts::MintNftParams,
             },
-            send_amount::AddressWithAmount,
-            send_native_tokens::AddressNativeTokens,
-            send_nft::AddressAndNftId,
+            send_amount::SendAmountParams,
+            send_native_tokens::SendNativeTokensParams,
+            send_nft::SendNftParams,
         },
         Account,
     },

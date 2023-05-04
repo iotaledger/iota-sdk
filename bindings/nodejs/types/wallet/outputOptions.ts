@@ -1,7 +1,7 @@
 import type { HexEncodedString, INativeToken } from '@iota/types';
 
 /** Options for the creation of an output */
-export interface OutputOptions {
+export interface OutputParams {
     recipientAddress: string;
     amount: string;
     assets?: Assets;

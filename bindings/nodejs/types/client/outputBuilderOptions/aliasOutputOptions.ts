@@ -1,5 +1,5 @@
 import type { FeatureTypes, HexEncodedString } from '@iota/types';
-import type { IBasicOutputBuilderOptions } from './basicOutputOptions';
+import type { IBasicOutputBuilderOptions } from './basicOutputParams';
 
 /**
  * Options for building an Alias Output

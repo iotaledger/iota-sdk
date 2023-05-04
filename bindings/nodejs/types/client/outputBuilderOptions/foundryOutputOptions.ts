@@ -1,5 +1,5 @@
 import type { FeatureTypes, ISimpleTokenScheme } from '@iota/types';
-import type { IBasicOutputBuilderOptions } from './basicOutputOptions';
+import type { IBasicOutputBuilderOptions } from './basicOutputParams';
 
 /**
  * Options for building a Foundry Output

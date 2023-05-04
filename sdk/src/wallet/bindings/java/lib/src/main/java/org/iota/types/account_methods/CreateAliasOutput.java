@@ -8,12 +8,11 @@ import org.iota.types.TransactionOptions;
 /// Create an alias output.
 public class CreateAliasOutput implements AccountMethod {
 
-    private AliasOutputOptions aliasOutputOptions;
+    private AliasOutputParams params;
     private TransactionOptions options;
 
-
-    public CreateAliasOutput withAliasOutputOptions(AliasOutputOptions aliasOutputOptions) {
-        this.aliasOutputOptions = aliasOutputOptions;
+    public CreateAliasOutput withParams(AliasOutputParams params) {
+        this.params = params;
         return this;
     }
 
@@ -22,8 +21,9 @@ public class CreateAliasOutput implements AccountMethod {
         return this;
     }
 
-    public static class AliasOutputOptions {
-        /// Bech32 encoded address which will control the alias. Default will use the first
+    public static class AliasOutputParams {
+        /// Bech32 encoded address which will control the alias. Default will use the
+        /// first
         /// address of the account
         private String address;
         /// Immutable alias metadata, hex encoded bytes
@@ -33,22 +33,22 @@ public class CreateAliasOutput implements AccountMethod {
         /// Alias state metadata
         private String stateMetadata;
 
-        public AliasOutputOptions withAddress(String address) {
+        public AliasOutputParams withAddress(String address) {
             this.address = address;
             return this;
         }
 
-        public AliasOutputOptions withImmutableMetadata(String immutableMetadata) {
+        public AliasOutputParams withImmutableMetadata(String immutableMetadata) {
             this.immutableMetadata = immutableMetadata;
             return this;
         }
 
-        public AliasOutputOptions withMetadata(String metadata) {
+        public AliasOutputParams withMetadata(String metadata) {
             this.metadata = metadata;
             return this;
         }
 
-        public AliasOutputOptions withStateMetadata(String stateMetadata) {
+        public AliasOutputParams withStateMetadata(String stateMetadata) {
             this.stateMetadata = stateMetadata;
             return this;
         }

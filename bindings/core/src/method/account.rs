@@ -22,11 +22,11 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            AliasOutputOptionsDto, FilterOptions, IncreaseNativeTokenSupplyOptionsDto, NativeTokenOptionsDto,
-            NftOptionsDto, OutputOptionsDto, OutputsToClaim, SyncOptions, TransactionOptionsDto,
+            CreateAliasParamsDto, FilterOptions, MintNativeTokenParamsDto, MintNftParamsDto, OutputParamsDto,
+            OutputsToClaim, SyncOptions, TransactionOptionsDto,
         },
         message_interface::dtos::AddressWithAmountDto,
-        AddressAndNftId, AddressNativeTokens,
+        SendNativeTokensParams, SendNftParams,
     },
 };
 use serde::{Deserialize, Serialize};
@@ -67,7 +67,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     CreateAliasOutput {
-        alias_output_options: Option<AliasOutputOptionsDto>,
+        params: Option<CreateAliasParamsDto>,
         options: Option<TransactionOptionsDto>,
     },
     /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
@@ -162,21 +162,20 @@ pub enum AccountMethod {
         token_id: TokenIdDto,
         /// To be minted amount
         mint_amount: U256Dto,
-        increase_native_token_supply_options: Option<IncreaseNativeTokenSupplyOptionsDto>,
         options: Option<TransactionOptionsDto>,
     },
     /// Mint native token.
     /// Expected response: [`MintTokenTransaction`](crate::Response::MintTokenTransaction)
     #[serde(rename_all = "camelCase")]
     MintNativeToken {
-        native_token_options: NativeTokenOptionsDto,
+        params: MintNativeTokenParamsDto,
         options: Option<TransactionOptionsDto>,
     },
     /// Mint nft.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     MintNfts {
-        nfts_options: Vec<NftOptionsDto>,
+        params: Vec<MintNftParamsDto>,
         options: Option<TransactionOptionsDto>,
     },
     /// Get account balance information.
@@ -186,7 +185,7 @@ pub enum AccountMethod {
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
-        options: OutputOptionsDto,
+        params: OutputParamsDto,
         transaction_options: Option<TransactionOptionsDto>,
     },
     /// Prepare transaction.
@@ -199,7 +198,7 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareSendAmount {
-        addresses_with_amount: Vec<AddressWithAmountDto>,
+        params: Vec<AddressWithAmountDto>,
         options: Option<TransactionOptionsDto>,
     },
     /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
@@ -225,21 +224,21 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendAmount {
-        addresses_with_amount: Vec<AddressWithAmountDto>,
+        params: Vec<AddressWithAmountDto>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send native tokens.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendNativeTokens {
-        addresses_and_native_tokens: Vec<AddressNativeTokens>,
+        params: Vec<SendNativeTokensParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send nft.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendNft {
-        addresses_and_nft_ids: Vec<AddressAndNftId>,
+        params: Vec<SendNftParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Set the alias of the account.

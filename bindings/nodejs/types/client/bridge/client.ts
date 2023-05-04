@@ -14,10 +14,10 @@ import type {
     QueryParameter,
 } from '../queryParameters';
 import type { IAuth } from '../network';
-import type { IBasicOutputBuilderOptions } from '../outputBuilderOptions/basicOutputOptions';
-import type { IAliasOutputBuilderOptions } from '../outputBuilderOptions/aliasOutputOptions';
-import type { IFoundryOutputBuilderOptions } from '../outputBuilderOptions/foundryOutputOptions';
-import type { INftOutputBuilderOptions } from '../outputBuilderOptions/nftOutputOptions';
+import type { IBasicOutputBuilderOptions } from '../outputBuilderOptions/basicOutputParams';
+import type { IAliasOutputBuilderOptions } from '../outputBuilderOptions/aliasOutputParams';
+import type { IFoundryOutputBuilderOptions } from '../outputBuilderOptions/foundryOutputParams';
+import type { INftOutputBuilderOptions } from '../outputBuilderOptions/nftOutputParams';
 
 export interface __GetInfoMethod__ {
     name: 'getInfo';

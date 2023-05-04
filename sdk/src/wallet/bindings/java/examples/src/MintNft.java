@@ -11,35 +11,41 @@ import org.iota.types.ids.account.AccountAlias;
 import org.iota.types.secret.StrongholdSecretManager;
 
 public class MintNft {
-    public static void main(String[] args) throws WalletException, InterruptedException, InitializeWalletException {
-        // This example assumes that a wallet has already been created using the ´SetupWallet.java´ example.
-        // If you haven't run the ´SetupWallet.java´ example yet, you must run it first to be able to load the wallet as shown below:
-        Wallet wallet = new Wallet(new WalletConfig()
-                .withClientOptions(new ClientConfig().withNodes(Env.NODE))
-                .withSecretManager(new StrongholdSecretManager(Env.STRONGHOLD_PASSWORD, null, Env.STRONGHOLD_VAULT_PATH))
-                .withCoinType(CoinType.Shimmer)
-                .withStoragePath(Env.STORAGE_PATH)
-        );
+        public static void main(String[] args) throws WalletException, InterruptedException, InitializeWalletException {
+                // This example assumes that a wallet has already been created using the
+                // ´SetupWallet.java´ example.
+                // If you haven't run the ´SetupWallet.java´ example yet, you must run it first
+                // to be able to load the wallet as shown below:
+                Wallet wallet = new Wallet(new WalletConfig()
+                                .withClientOptions(new ClientConfig().withNodes(Env.NODE))
+                                .withSecretManager(
+                                                new StrongholdSecretManager(Env.STRONGHOLD_PASSWORD, null,
+                                                                Env.STRONGHOLD_VAULT_PATH))
+                                .withCoinType(CoinType.Shimmer)
+                                .withStoragePath(Env.STORAGE_PATH));
 
-        // Get account and sync it with the registered node to ensure that its balances are up-to-date.
-        Account a = wallet.getAccount(new AccountAlias(Env.ACCOUNT_NAME));
-        a.syncAccount(new SyncAccount().withOptions(new SyncOptions()));
+                // Get account and sync it with the registered node to ensure that its balances
+                // are up-to-date.
+                Account a = wallet.getAccount(new AccountAlias(Env.ACCOUNT_NAME));
+                a.syncAccount(new SyncAccount().withOptions(new SyncOptions()));
 
-        // Fund the account for this example.
-        ExampleUtils.fundAccount(a);
+                // Fund the account for this example.
+                ExampleUtils.fundAccount(a);
 
-        // TODO: replace with your own values.
-        NftOptions options = new NftOptions();
-        options.withMetadata("0x5368696d6d65722e20546f6b656e697a652045766572797468696e672e2048656c6c6f2066726f6d20746865204a6176612062696e64696e672e");
+                // TODO: replace with your own values.
+                MintNftParams params = new MintNftParams();
+                params.withMetadata(
+                                "0x5368696d6d65722e20546f6b656e697a652045766572797468696e672e2048656c6c6f2066726f6d20746865204a6176612062696e64696e672e");
 
-        // Send transaction.
-        Transaction transaction = a.mintNfts(new MintNfts().withNftsOptions(new NftOptions[] { options }));
+                // Send transaction.
+                Transaction transaction = a.mintNfts(new MintNfts().withParams(new MintNftParams[] { params }));
 
-        System.out.println("Transaction: " + transaction.getTransactionId());
-        System.out.println("Block sent: " + Env.EXPLORER + "/block/" + transaction.getBlockId());
+                System.out.println("Transaction: " + transaction.getTransactionId());
+                System.out.println("Block sent: " + Env.EXPLORER + "/block/" + transaction.getBlockId());
 
-        // In case you are done and don't need the wallet instance anymore you can destroy the instance to clean up memory.
-        // For this, check out the ´DestroyWallet.java´ example.
-    }
+                // In case you are done and don't need the wallet instance anymore you can
+                // destroy the instance to clean up memory.
+                // For this, check out the ´DestroyWallet.java´ example.
+        }
 
 }

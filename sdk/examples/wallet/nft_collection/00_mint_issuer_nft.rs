@@ -11,7 +11,7 @@ use iota_sdk::{
         output::{NftId, Output, OutputId},
         payload::transaction::TransactionEssence,
     },
-    wallet::{NftOptions, Result, Wallet},
+    wallet::{MintNftParams, Result, Wallet},
 };
 
 #[tokio::main]
@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let nft_options = vec![NftOptions {
+    let nft_options = vec![MintNftParams {
         address: None,
         immutable_metadata: Some(b"This NFT will be the issuer from the awesome NFT collection".to_vec()),
         issuer: None,

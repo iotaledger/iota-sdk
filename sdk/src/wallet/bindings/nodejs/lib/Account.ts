@@ -12,16 +12,15 @@ import type {
     AddressNativeTokens,
     AddressNftId,
     AddressWithUnspentOutputs,
-    AliasOutputOptions,
+    AliasOutputParams,
     FilterOptions,
     GenerateAddressOptions,
-    IncreaseNativeTokenSupplyOptions,
     MintTokenTransaction,
-    NativeTokenOptions,
-    NftOptions,
+    MintNativeTokenParams,
+    MintNftParams,
     Node,
     OutputData,
-    OutputOptions,
+    OutputParams,
     OutputsToClaim,
     PreparedTransactionData,
     Transaction,
@@ -228,13 +227,13 @@ export class Account {
 
     /**
      * `createAliasOutput` creates an alias output
-     * @param aliasOutputOptions The alias output options.
+     * @param params The alias output options.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns A transaction object.
      */
     async createAliasOutput(
-        aliasOutputOptions?: AliasOutputOptions,
+        params?: AliasOutputParams,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const resp = await this.messageHandler.callAccountMethod(
@@ -242,7 +241,7 @@ export class Account {
             {
                 name: 'createAliasOutput',
                 data: {
-                    aliasOutputOptions,
+                    params,
                     options: transactionOptions,
                 },
             },
@@ -689,7 +688,6 @@ export class Account {
      * Mint more native tokens.
      * @param tokenId The native token id.
      * @param mintAmount To be minted amount.
-     * @param increaseNativeTokenSupplyOptions Options for minting more tokens.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The minting transaction and the token ID.
@@ -697,7 +695,6 @@ export class Account {
     async increaseNativeTokenSupply(
         tokenId: string,
         mintAmount: HexEncodedAmount,
-        increaseNativeTokenSupplyOptions?: IncreaseNativeTokenSupplyOptions,
         transactionOptions?: TransactionOptions,
     ): Promise<MintTokenTransaction> {
         const response = await this.messageHandler.callAccountMethod(
@@ -707,7 +704,6 @@ export class Account {
                 data: {
                     tokenId,
                     mintAmount,
-                    increaseNativeTokenSupplyOptions,
                     options: transactionOptions,
                 },
             },
@@ -718,13 +714,13 @@ export class Account {
 
     /**
      * Mint native tokens.
-     * @param nativeTokenOptions The options for minting tokens.
+     * @param mintNativeTokenParams The options for minting tokens.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The minting transaction and the token ID.
      */
     async mintNativeToken(
-        nativeTokenOptions: NativeTokenOptions,
+        mintNativeTokenParams: MintNativeTokenParams,
         transactionOptions?: TransactionOptions,
     ): Promise<MintTokenTransaction> {
         const response = await this.messageHandler.callAccountMethod(
@@ -732,7 +728,7 @@ export class Account {
             {
                 name: 'mintNativeToken',
                 data: {
-                    nativeTokenOptions: nativeTokenOptions,
+                    mintNativeTokenParams: mintNativeTokenParams,
                     options: transactionOptions,
                 },
             },
@@ -743,13 +739,13 @@ export class Account {
 
     /**
      * Mint nfts.
-     * @param nftsOptions The options for minting nfts.
+     * @param mintNftParams The options for minting nfts.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The minting transaction.
      */
     async mintNfts(
-        nftsOptions: NftOptions[],
+        mintNftParams: MintNftParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const response = await this.messageHandler.callAccountMethod(
@@ -757,7 +753,7 @@ export class Account {
             {
                 name: 'mintNfts',
                 data: {
-                    nftsOptions,
+                    mintNftParams,
                     options: transactionOptions,
                 },
             },
@@ -780,7 +776,7 @@ export class Account {
      * @returns The prepared output.
      */
     async prepareOutput(
-        options: OutputOptions,
+        options: OutputParams,
         transactionOptions?: TransactionOptions,
     ): Promise<OutputTypes> {
         const response = await this.messageHandler.callAccountMethod(

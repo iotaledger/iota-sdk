@@ -24,9 +24,9 @@ use crate::{
     },
 };
 
-/// address with amount for `send_amount()`
+/// Parameters for `send_amount()`
 #[derive(Debug, Clone)]
-pub struct AddressWithAmount {
+pub struct SendAmountParams {
     /// Bech32 encoded address
     address: String,
     /// Amount
@@ -41,7 +41,7 @@ pub struct AddressWithAmount {
     expiration: Option<u32>,
 }
 
-impl AddressWithAmount {
+impl SendAmountParams {
     pub fn new(address: String, amount: u64) -> Self {
         Self {
             address,
@@ -68,7 +68,7 @@ impl Account {
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
-    /// let outputs = vec![AddressWithAmount{
+    /// let outputs = vec![SendAmountParams{
     ///     address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
     ///     amount: 1_000_000,
     /// }];
@@ -81,10 +81,10 @@ impl Account {
     /// ```
     pub async fn send_amount(
         &self,
-        addresses_with_amount: Vec<AddressWithAmount>,
+        params: Vec<SendAmountParams>,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
-        let prepared_transaction = self.prepare_send_amount(addresses_with_amount, options).await?;
+        let prepared_transaction = self.prepare_send_amount(params, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
 
@@ -92,7 +92,7 @@ impl Account {
     /// [Account.send_amount()](crate::account::Account.send_amount)
     pub async fn prepare_send_amount(
         &self,
-        addresses_with_amount: Vec<AddressWithAmount>,
+        params: Vec<SendAmountParams>,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_send_amount");
@@ -106,12 +106,12 @@ impl Account {
         let local_time = self.client.get_time_checked().await?;
 
         let mut outputs = Vec::new();
-        for AddressWithAmount {
+        for SendAmountParams {
             address,
             amount,
             return_address,
             expiration,
-        } in addresses_with_amount
+        } in params
         {
             let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
             self.client.bech32_hrp_matches(&bech32_hrp).await?;
