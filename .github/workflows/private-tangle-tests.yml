@@ -2,7 +2,7 @@ name: Build and run specific tests on a private tangle
 
 on:
   push:
-    branches: [develop, production]
+    branches: [develop, production, 2.0]
     paths:
       - ".github/workflows/private-tangle-tests.yml"
       - ".github/actions/**"
@@ -13,7 +13,7 @@ on:
       - "**Cargo.lock"
       - "!cli/**" # Exclude CLI
   pull_request:
-    branches: [develop, production]
+    branches: [develop, production, 2.0]
     paths:
       - ".github/workflows/private-tangle-tests.yml"
       - ".github/actions/**"

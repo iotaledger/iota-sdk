@@ -2,7 +2,7 @@ name: Test Docs Build
 
 on:
   pull_request:
-    branches: [develop, production]
+    branches: [develop, production, 2.0]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

@@ -2,7 +2,7 @@ name: Swift bindings checks (wallet)
 
 on:
   push:
-    branches: [develop, production]
+    branches: [develop, production, 2.0]
     paths:
       - ".github/actions/**"
       - "**.rs" # Include all rust files
@@ -15,7 +15,7 @@ on:
       - "sdk/src/wallet/bindings/swift/**"
       - ".github/workflows/bindings-wallet-swift.yml"
   pull_request:
-    branches: [develop, production]
+    branches: [develop, production, 2.0]
     paths:
       - ".github/actions/**"
       - "**.rs" # Include all rust files
