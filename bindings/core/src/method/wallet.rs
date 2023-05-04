@@ -8,11 +8,12 @@ use derivative::Derivative;
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
 use iota_sdk::{
-    client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions, Url},
+    client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions},
     wallet::{
         account::{types::AccountIdentifier, SyncOptions},
         ClientOptions,
     },
+    Url,
 };
 use serde::{Deserialize, Serialize};
 

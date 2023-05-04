@@ -8,7 +8,10 @@
 //!
 //! `cargo run --example burn_native_token --release`
 
-use iota_sdk::wallet::{Result, Wallet, U256};
+use iota_sdk::{
+    wallet::{Result, Wallet},
+    U256,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {

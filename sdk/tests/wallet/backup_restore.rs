@@ -5,13 +5,16 @@
 use std::path::PathBuf;
 
 #[cfg(all(feature = "stronghold", feature = "storage"))]
-use iota_sdk::client::{
-    constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
-    node_manager::node::{Node, NodeDto, Url},
-    secret::{mnemonic::MnemonicSecretManager, stronghold::StrongholdSecretManager, SecretManager},
-};
-#[cfg(all(feature = "stronghold", feature = "storage"))]
 use iota_sdk::wallet::{ClientOptions, Result, Wallet};
+#[cfg(all(feature = "stronghold", feature = "storage"))]
+use iota_sdk::{
+    client::{
+        constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
+        node_manager::node::{Node, NodeDto},
+        secret::{mnemonic::MnemonicSecretManager, stronghold::StrongholdSecretManager, SecretManager},
+    },
+    Url,
+};
 
 use crate::wallet::common::{setup, tear_down, NODE_LOCAL, NODE_OTHER};
 
