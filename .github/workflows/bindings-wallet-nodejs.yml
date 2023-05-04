@@ -2,7 +2,7 @@ name: Nodejs bindings checks (wallet)
 
 on:
   push:
-    branches: [develop, production]
+    branches: [develop, production, 2.0]
     paths:
       - ".github/actions/**"
       - "**.rs" # Include all rust files
@@ -16,7 +16,7 @@ on:
       - ".github/workflows/bindings-wallet-nodejs.yml"
       - ".patches/*"
   pull_request:
-    branches: [develop, production]
+    branches: [develop, production, 2.0]
     paths:
       - ".github/actions/**"
       - "**.rs" # Include all rust files
