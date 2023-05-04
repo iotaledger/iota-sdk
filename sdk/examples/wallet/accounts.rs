@@ -52,7 +52,7 @@ async fn main() -> Result<()> {
     let _account1 = if let Ok(account) = wallet.get_account(ACCOUNT_ALIAS_1).await {
         account
     } else {
-        println!("Creating account {ACCOUNT_ALIAS_1}");
+        println!("Creating account '{ACCOUNT_ALIAS_1}'");
         wallet
             .create_account()
             .with_alias(ACCOUNT_ALIAS_1.to_string())
@@ -64,7 +64,7 @@ async fn main() -> Result<()> {
     let account2 = if let Ok(account) = wallet.get_account(ACCOUNT_ALIAS_2).await {
         account
     } else {
-        println!("Creating account {ACCOUNT_ALIAS_2}");
+        println!("Creating account '{ACCOUNT_ALIAS_2}'");
         wallet
             .create_account()
             .with_alias(ACCOUNT_ALIAS_2.to_string())
@@ -79,7 +79,7 @@ async fn main() -> Result<()> {
         println!("- {}", account.alias());
     }
 
-    println!("Generating addresses for account '{ACCOUNT_ALIAS_2}'...");
+    println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses for account '{ACCOUNT_ALIAS_2}' ...");
     let addresses = account2.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
 
     let balance = account2.sync(None).await?;
