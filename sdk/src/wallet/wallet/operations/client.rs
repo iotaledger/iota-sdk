@@ -8,9 +8,10 @@ use crate::wallet::WalletBuilder;
 use crate::{
     client::{
         node_manager::node::{Node, NodeAuth, NodeDto},
-        Client, NodeInfoWrapper, Url,
+        Client, NodeInfoWrapper,
     },
     wallet::{ClientOptions, Wallet},
+    Url,
 };
 
 impl Wallet {
