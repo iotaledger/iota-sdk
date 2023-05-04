@@ -8,6 +8,7 @@ use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
         secret::{stronghold::StrongholdSecretManager, SecretManager},
+        stronghold::StrongholdAdapter,
     },
     wallet::{ClientOptions, Wallet},
 };
@@ -115,9 +116,9 @@ pub async fn backup_command(storage_path: &Path, snapshot_path: &Path, backup_pa
 }
 
 pub async fn change_password_command(storage_path: &Path, snapshot_path: &Path) -> Result<Wallet, Error> {
-    let password = get_password("Stronghold password", !snapshot_path.exists())?;
+    let mut password = get_password("Stronghold password", !snapshot_path.exists())?;
     let wallet = unlock_wallet(storage_path, snapshot_path, &password).await?;
-    let new_password = get_password("Stronghold new password", true)?;
+    let mut new_password = get_password("Stronghold new password", true)?;
     wallet.change_stronghold_password(&password, &new_password).await?;
     password.zeroize();
     new_password.zeroize();
