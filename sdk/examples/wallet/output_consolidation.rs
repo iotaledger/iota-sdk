@@ -3,39 +3,27 @@
 
 //! In this example we will consolidate basic outputs from an account with only an AddressUnlockCondition by sending
 //! them to the same address again.
-//! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example output_consolidation --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example output_consolidation
+//! ```
 
-use iota_sdk::{
-    client::{
-        constants::SHIMMER_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
-    },
-    wallet::{ClientOptions, Result, Wallet},
-};
+use iota_sdk::wallet::{Result, Wallet};
+
+// The account alias created in this example
+const ACCOUNT_ALIAS: &str = "Alice";
+// The wallet database folder created in this example
+const WALLET_DB_PATH: &str = "./example.walletdb";
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let mnemonic: &str = &std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
-    let mnemonic_secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic).unwrap();
-    let secret_manager = SecretManager::Mnemonic(mnemonic_secret_manager);
-
-    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
-
-    // Create the wallet
-    let wallet = Wallet::builder()
-        .with_secret_manager(secret_manager)
-        .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .finish()
-        .await?;
-
-    // Get the account we generated with `01_create_wallet`
-    let account = wallet.get_account("Alice").await?;
+    // Access the wallet we generated with `--example create_wallet`
+    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
+    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
 
     // Set the stronghold password
     wallet
@@ -43,7 +31,9 @@ async fn main() -> Result<()> {
         .await?;
 
     // Sync account to make sure account is updated with outputs from previous examples
+    print!("Syncing account...");
     let _ = account.sync(None).await?;
+    println!("done");
 
     // List unspent outputs before consolidation.
     // The output we created with example `03_get_funds` and the basic output from `09_mint_native_tokens` have only one
@@ -51,35 +41,46 @@ async fn main() -> Result<()> {
     // same `AddressUnlockCondition`(the first address of the account), so they will be consolidated into one
     // output.
     let outputs = account.unspent_outputs(None).await?;
-    println!("Outputs before consolidation:");
-    outputs.iter().for_each(|output_data| {
+    println!("Outputs BEFORE consolidation:");
+    outputs.iter().enumerate().for_each(|(i, output_data)| {
+        println!("OUTPUT #{i}");
         println!(
-            "address: {:?}\n amount: {:?}\n native tokens: {:?}\n",
+            "- address: {:?}\n- amount: {:?}\n- native tokens: {:?}",
             output_data.address.to_bech32("rms"),
             output_data.output.amount(),
             output_data.output.native_tokens()
         )
     });
 
+    print!("Sending consolidation transaction...");
+
     // Consolidate unspent outputs and print the consolidation transaction IDs
     // Set `force` to true to force the consolidation even though the `output_consolidation_threshold` isn't reached
     let transaction = account.consolidate_outputs(true, None).await?;
-    println!("Consolidation transaction id:\n{transaction:?}\n");
+    println!("done ({})", transaction.transaction_id);
 
     // Wait for the consolidation transaction to get confirmed
-    account
+    let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
+    println!(
+        "Block included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
+    );
 
     // Sync account
+    print!("Syncing account...");
     let _ = account.sync(None).await?;
+    println!("done");
 
     // Outputs after consolidation
     let outputs = account.unspent_outputs(None).await?;
-    println!("Outputs after consolidation:");
-    outputs.iter().for_each(|output_data| {
+    println!("Outputs AFTER consolidation:");
+    outputs.iter().enumerate().for_each(|(i, output_data)| {
+        println!("OUTPUT #{i}");
         println!(
-            "address: {:?}\n amount: {:?}\n native tokens: {:?}\n",
+            "- address: {:?}\n- amount: {:?}\n- native tokens: {:?}",
             output_data.address.to_bech32("rms"),
             output_data.output.amount(),
             output_data.output.native_tokens()

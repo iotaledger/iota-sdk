@@ -22,6 +22,8 @@ const ACCOUNT_ALIAS: &str = "Alice";
 const WALLET_DB_PATH: &str = "./example.walletdb";
 // The log file name
 const LOG_FILE_NAME: &str = "example.log";
+// The log level to use (error, warn, info, debug, trace)
+const LOG_LEVEL: log::LevelFilter = log::LevelFilter::Debug;
 // The number of addresses to generate
 const NUM_ADDRESSES_TO_GENERATE: u32 = 5;
 
@@ -34,7 +36,7 @@ async fn main() -> Result<()> {
     let logger_output_config = fern_logger::LoggerOutputConfigBuilder::new()
         .name(LOG_FILE_NAME)
         .target_exclusions(&["h2", "hyper", "rustls"])
-        .level_filter(log::LevelFilter::Debug);
+        .level_filter(LOG_LEVEL);
     let config = fern_logger::LoggerConfig::build()
         .with_output(logger_output_config)
         .finish();
@@ -65,7 +67,7 @@ async fn main() -> Result<()> {
     };
 
     print!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses...");
-    let _ = account.generate_addresses(5, None).await?;
+    let _ = account.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
     println!("done");
 
     print!("Syncing account...");
