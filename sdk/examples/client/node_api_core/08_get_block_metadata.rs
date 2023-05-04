@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
     });
 
     // Create a client with that node.
-    let client = Client::builder().with_node(&node_url)?.finish()?;
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Fetch a block ID from the node.
     let block_id = client.get_tips().await?[0];

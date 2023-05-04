@@ -17,7 +17,8 @@ async fn main() -> Result<()> {
     let client = Client::builder()
         .with_node(&node_url)?
         .with_pow_worker_count(1)
-        .finish()?;
+        .finish()
+        .await?;
 
     // Fetch a block ID from the node.
     let block_id = client.get_tips().await?[0];

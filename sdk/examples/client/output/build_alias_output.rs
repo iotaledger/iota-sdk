@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
     let node_url = std::env::var("NODE_URL").unwrap();
 
     // Create a client instance.
-    let client = Client::builder().with_node(&node_url)?.finish()?;
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let token_supply = client.get_token_supply().await?;
     let rent_structure = client.get_rent_structure().await?;

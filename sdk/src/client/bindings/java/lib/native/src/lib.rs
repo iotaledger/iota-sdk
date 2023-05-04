@@ -44,9 +44,19 @@ pub extern "system" fn Java_org_iota_apis_NativeApi_createMessageHandler(
                 return;
             }
 
-            match iota_sdk::client::message_interface::create_message_handler(Some(config)) {
-                Ok(message_handler) => {
-                    message_handler_store.replace(message_handler);
+            match Runtime::new() {
+                Ok(runtime) => {
+                    match runtime.block_on(iota_sdk::client::message_interface::create_message_handler(Some(
+                        config,
+                    ))) {
+                        Ok(message_handler) => {
+                            message_handler_store.replace(message_handler);
+                        }
+                        Err(err) => {
+                            env.throw_new("java/lang/Exception", err.to_string()).unwrap();
+                            // no return needed because no code has to be executed after
+                        }
+                    }
                 }
                 Err(err) => {
                     env.throw_new("java/lang/Exception", err.to_string()).unwrap();

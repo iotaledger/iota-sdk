@@ -25,7 +25,8 @@ impl Account {
         let client = Client::builder()
             .with_ignore_node_health()
             .with_node_auth(options.node.url.as_str(), options.node.auth.clone())?
-            .finish()?;
+            .finish()
+            .await?;
 
         let events_to_register = match &options.events_to_register {
             Some(events_to_register_) => {
@@ -116,7 +117,8 @@ impl Account {
         let client = Client::builder()
             .with_ignore_node_health()
             .with_node_auth(node.url.as_str(), node.auth.clone())?
-            .finish()?;
+            .finish()
+            .await?;
         Ok(client.events(event_type).await?.event_ids)
     }
 

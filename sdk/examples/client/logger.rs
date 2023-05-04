@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! TODO: Example description
-//! 
+//!
 //! `cargo run --example logger --release`
 
 use iota_sdk::client::{Client, Result};
@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
     });
 
     // Create a client with that node.
-    let client = Client::builder().with_node(&node_url)?.finish()?;
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Get node info.
     let info = client.get_info().await?;

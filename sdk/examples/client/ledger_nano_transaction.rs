@@ -20,7 +20,8 @@ async fn main() -> Result<()> {
     // Create a client instance
     let client = Client::builder()
         .with_node(&node_url)? // Insert your node URL here
-        .finish()?;
+        .finish()
+        .await?;
 
     let secret_manager = SecretManager::LedgerNano(LedgerSecretManager::new(true));
 

@@ -49,7 +49,7 @@ async fn addresses() {
 
 #[tokio::test]
 async fn public_key_to_address() {
-    let client = Client::builder().finish().unwrap();
+    let client = Client::builder().finish().await.unwrap();
     let hex_public_key = "0x2baaf3bca8ace9f862e60184bd3e79df25ff230f7eaaa4c7f03daa9833ba854a";
 
     let public_key_address = client
@@ -223,7 +223,7 @@ async fn address_generation() {
 
     #[cfg(feature = "message_interface")]
     {
-        let message_handler = message_interface::create_message_handler(None).unwrap();
+        let message_handler = message_interface::create_message_handler(None).await.unwrap();
         for address in &addresses_data {
             let options = GetAddressesBuilderOptions {
                 coin_type: Some(address.coin_type),
@@ -260,7 +260,7 @@ async fn address_generation() {
 
     #[cfg(all(feature = "message_interface", feature = "stronghold"))]
     {
-        let message_handler = message_interface::create_message_handler(None).unwrap();
+        let message_handler = message_interface::create_message_handler(None).await.unwrap();
         for address in addresses_data {
             let stronghold_filename = format!("{}.stronghold", address.bech32_address);
             let secret_manager_dto = StrongholdDto {

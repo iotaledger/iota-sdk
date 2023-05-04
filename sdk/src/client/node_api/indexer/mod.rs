@@ -33,6 +33,7 @@ impl Client {
 
         while let Some(cursor) = {
             let output_ids_response = self
+                .inner
                 .node_manager
                 .get_request::<OutputIdsResponse>(
                     route,

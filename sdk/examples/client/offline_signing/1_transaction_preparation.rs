@@ -35,7 +35,8 @@ async fn main() -> Result<()> {
     let online_client = Client::builder()
         // Insert your node URL in the .env.
         .with_node(&node_url)?
-        .finish()?;
+        .finish()
+        .await?;
 
     // Recovers addresses from example `0_address_generation`.
     let addresses = read_addresses_from_file(ADDRESS_FILE_NAME)?;

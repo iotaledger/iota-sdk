@@ -163,7 +163,7 @@ impl Wallet {
                 });
 
                 if restore_accounts {
-                    let client = self.client_options.read().await.clone().finish()?;
+                    let client = self.client_options.read().await.clone().finish().await?;
 
                     let restored_account = try_join_all(read_accounts.into_iter().map(|a| {
                         Account::new(

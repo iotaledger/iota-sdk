@@ -44,7 +44,7 @@ impl Client {
     /// Always fetches new tips after each tips interval elapses if no parents are provided.
     #[cfg(not(target_family = "wasm"))]
     async fn finish_multi_threaded_pow(&self, parents: Option<Parents>, payload: Option<Payload>) -> Result<Block> {
-        let pow_worker_count = self.pow_worker_count;
+        let pow_worker_count = self.inner.pow_worker_count;
         let min_pow_score = self.get_min_pow_score().await?;
         let tips_interval = self.get_tips_interval();
 

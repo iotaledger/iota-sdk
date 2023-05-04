@@ -18,10 +18,13 @@ pub struct Client {
 /// Create client for python-side usage.
 #[pyfunction]
 pub fn create_client(options: Option<String>) -> Result<Client> {
-    let client = match options {
-        Some(options) => ClientBuilder::new().from_json(&options)?.finish()?,
-        None => ClientBuilder::new().finish()?,
-    };
+    let runtime = tokio::runtime::Runtime::new()?;
+    let client = runtime.block_on(async move {
+        Result::Ok(match options {
+            Some(options) => ClientBuilder::new().from_json(&options)?.finish().await?,
+            None => ClientBuilder::new().finish().await?,
+        })
+    })?;
 
     Ok(Client { client })
 }

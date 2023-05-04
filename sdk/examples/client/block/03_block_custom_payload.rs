@@ -20,7 +20,7 @@ async fn main() -> Result<()> {
     });
 
     // Create a client with that node.
-    let client = Client::builder().with_node(&node_url)?.finish()?;
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Create a custom payload.
     let tagged_data_payload = TaggedDataPayload::new(b"Your tag".to_vec(), b"Your data".to_vec())?;

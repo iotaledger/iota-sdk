@@ -8,8 +8,6 @@ use std::{
     time::Duration,
 };
 
-#[cfg(not(target_family = "wasm"))]
-use tokio::runtime::Runtime;
 #[cfg(feature = "mqtt")]
 use {
     crate::client::node_api::mqtt::{BrokerOptions, MqttEvent, TopicHandlerMap},
@@ -32,74 +30,60 @@ use crate::{
 /// An instance of the client using HORNET or Bee URI
 #[derive(Clone)]
 pub struct Client {
-    #[allow(dead_code)]
-    #[cfg(not(target_family = "wasm"))]
-    pub(crate) runtime: Option<Arc<Runtime>>,
+    pub(crate) inner: Arc<ClientInner>,
+}
+
+pub(crate) struct ClientInner {
     /// Node manager
     pub(crate) node_manager: crate::client::node_manager::NodeManager,
-    /// Flag to stop the node syncing
-    #[cfg(not(target_family = "wasm"))]
-    pub(crate) sync_handle: Option<Arc<tokio::task::JoinHandle<()>>>,
-    /// A MQTT client to subscribe/unsubscribe to topics.
-    #[cfg(feature = "mqtt")]
-    pub(crate) mqtt_client: Arc<tokio::sync::RwLock<Option<MqttClient>>>,
-    #[cfg(feature = "mqtt")]
-    pub(crate) mqtt_topic_handlers: Arc<tokio::sync::RwLock<TopicHandlerMap>>,
-    #[cfg(feature = "mqtt")]
-    pub(crate) broker_options: BrokerOptions,
-    #[cfg(feature = "mqtt")]
-    pub(crate) mqtt_event_channel: (Arc<WatchSender<MqttEvent>>, WatchReceiver<MqttEvent>),
-    pub(crate) network_info: Arc<RwLock<NetworkInfo>>,
+    pub(crate) network_info: RwLock<NetworkInfo>,
     /// HTTP request timeout.
     pub(crate) api_timeout: Duration,
     /// HTTP request timeout for remote PoW API call.
     pub(crate) remote_pow_timeout: Duration,
-    #[allow(dead_code)] // not used for wasm
+    #[cfg(not(target_family = "wasm"))]
     /// pow_worker_count for local PoW.
     pub(crate) pow_worker_count: Option<usize>,
+    #[cfg(feature = "mqtt")]
+    pub(crate) mqtt: MqttInner,
+    #[cfg(not(target_family = "wasm"))]
+    pub(crate) sync_handle: Option<tokio::task::JoinHandle<()>>,
+}
+
+#[cfg(feature = "mqtt")]
+pub(crate) struct MqttInner {
+    /// A MQTT client to subscribe/unsubscribe to topics.
+    pub(crate) client: tokio::sync::RwLock<Option<MqttClient>>,
+    pub(crate) topic_handlers: tokio::sync::RwLock<TopicHandlerMap>,
+    pub(crate) broker_options: BrokerOptions,
+    pub(crate) sender: WatchSender<MqttEvent>,
+    pub(crate) receiver: WatchReceiver<MqttEvent>,
 }
 
 impl std::fmt::Debug for Client {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut d = f.debug_struct("Client");
-        d.field("node_manager", &self.node_manager);
+        d.field("node_manager", &self.inner.node_manager);
         #[cfg(feature = "mqtt")]
-        d.field("broker_options", &self.broker_options);
-        d.field("network_info", &self.network_info).finish()
+        d.field("broker_options", &self.inner.mqtt.broker_options);
+        d.field("network_info", &self.inner.network_info).finish()
     }
 }
 
-impl Drop for Client {
+impl Drop for ClientInner {
     /// Gracefully shutdown the `Client`
     fn drop(&mut self) {
         #[cfg(not(target_family = "wasm"))]
         if let Some(sync_handle) = self.sync_handle.take() {
-            // Since there are clones of the client, we need to make sure there is only one strong reference to the sync
-            // handle to abort it otherwise any clone could kill the task for all clients.
-            if let Ok(sync_handle) = Arc::try_unwrap(sync_handle) {
-                sync_handle.abort();
-            }
-        }
-
-        #[cfg(not(target_family = "wasm"))]
-        if let Some(runtime) = self.runtime.take() {
-            if let Ok(runtime) = Arc::try_unwrap(runtime) {
-                runtime.shutdown_background();
-            }
+            sync_handle.abort();
         }
 
         #[cfg(feature = "mqtt")]
-        let mqtt_client = self.mqtt_client.clone();
-        #[cfg(feature = "mqtt")]
-        std::thread::spawn(move || {
-            crate::client::async_runtime::block_on(async move {
-                if let Some(mqtt_client) = mqtt_client.write().await.take() {
-                    mqtt_client.disconnect().await.unwrap();
-                }
-            });
-        })
-        .join()
-        .unwrap();
+        {
+            if let Some(mqtt_client) = self.mqtt.client.blocking_write().take() {
+                mqtt_client.try_disconnect().unwrap();
+            }
+        }
     }
 }
 
@@ -124,6 +108,7 @@ impl Client {
             if let Some(last_sync) = *LAST_SYNC.lock().unwrap() {
                 if current_time < last_sync {
                     return Ok(self
+                        .inner
                         .network_info
                         .read()
                         .map_err(|_| crate::client::Error::PoisonError)?
@@ -132,6 +117,7 @@ impl Client {
             }
             let info = self.get_info().await?.node_info;
             let mut client_network_info = self
+                .inner
                 .network_info
                 .write()
                 .map_err(|_| crate::client::Error::PoisonError)?;
@@ -141,6 +127,7 @@ impl Client {
         }
 
         Ok(self
+            .inner
             .network_info
             .read()
             .map_err(|_| crate::client::Error::PoisonError)?
@@ -194,29 +181,32 @@ impl Client {
 
     /// returns the tips interval
     pub fn get_tips_interval(&self) -> u64 {
-        self.network_info
+        self.inner
+            .network_info
             .read()
             .map_or(DEFAULT_TIPS_INTERVAL, |info| info.tips_interval)
     }
 
     /// returns if local pow should be used or not
     pub fn get_local_pow(&self) -> bool {
-        self.network_info
+        self.inner
+            .network_info
             .read()
             .map_or(NetworkInfo::default().local_pow, |info| info.local_pow)
     }
 
     pub(crate) fn get_timeout(&self) -> Duration {
-        self.api_timeout
+        self.inner.api_timeout
     }
 
     pub(crate) fn get_remote_pow_timeout(&self) -> Duration {
-        self.remote_pow_timeout
+        self.inner.remote_pow_timeout
     }
 
     /// returns the fallback_to_local_pow
     pub fn get_fallback_to_local_pow(&self) -> bool {
-        self.network_info
+        self.inner
+            .network_info
             .read()
             .map_or(NetworkInfo::default().fallback_to_local_pow, |info| {
                 info.fallback_to_local_pow

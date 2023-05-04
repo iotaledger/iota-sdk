@@ -21,7 +21,8 @@ async fn main() -> Result<()> {
     let client = Client::builder()
         // The node needs to have the indexer plugin enabled.
         .with_node(&node_url)?
-        .finish()?;
+        .finish()
+        .await?;
 
     // Take the address from command line argument or use a default one.
     let address = std::env::args()

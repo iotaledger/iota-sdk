@@ -11,10 +11,10 @@ pub use self::{message::Message, message_handler::ClientMessageHandler, response
 use crate::client::{ClientBuilder, Result};
 
 /// Create message handler with client options
-pub fn create_message_handler(client_config: Option<String>) -> Result<ClientMessageHandler> {
+pub async fn create_message_handler(client_config: Option<String>) -> Result<ClientMessageHandler> {
     let client = match client_config {
-        Some(options) => ClientBuilder::new().from_json(&options)?.finish()?,
-        None => ClientBuilder::new().finish()?,
+        Some(options) => ClientBuilder::new().from_json(&options)?.finish().await?,
+        None => ClientBuilder::new().finish().await?,
     };
     Ok(ClientMessageHandler::with_client(client))
 }

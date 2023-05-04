@@ -5,7 +5,7 @@
 
 use std::{
     collections::{HashMap, HashSet},
-    sync::{Arc, RwLock},
+    sync::RwLock,
     time::Duration,
 };
 
@@ -218,7 +218,7 @@ impl NodeManagerBuilder {
         self
     }
 
-    pub(crate) fn build(self, healthy_nodes: Arc<RwLock<HashMap<Node, InfoResponse>>>) -> NodeManager {
+    pub(crate) fn build(self, healthy_nodes: HashMap<Node, InfoResponse>) -> NodeManager {
         NodeManager {
             primary_node: self.primary_node.map(|node| node.into()),
             primary_pow_node: self.primary_pow_node.map(|node| node.into()),
@@ -228,7 +228,7 @@ impl NodeManagerBuilder {
                 .map(|nodes| nodes.into_iter().map(|node| node.into()).collect()),
             ignore_node_health: self.ignore_node_health,
             node_sync_interval: self.node_sync_interval,
-            healthy_nodes,
+            healthy_nodes: RwLock::new(healthy_nodes),
             quorum: self.quorum,
             min_quorum_size: self.min_quorum_size,
             quorum_threshold: self.quorum_threshold,

@@ -20,7 +20,8 @@ async fn main() -> Result<()> {
     let client = Client::builder()
         .with_node(&node_url)?
         .with_ignore_node_health()
-        .finish()?;
+        .finish()
+        .await?;
 
     // Get routes.
     let routes = client.get_routes().await?;

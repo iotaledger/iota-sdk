@@ -23,11 +23,16 @@ pub struct ClientMethodHandler {
 #[wasm_bindgen(js_name = createClient)]
 #[allow(non_snake_case)]
 pub fn create_client(clientOptions: String) -> Result<ClientMethodHandler, JsValue> {
-    let client = ClientBuilder::new()
-        .from_json(&clientOptions)
-        .map_err(|err| err.to_string())?
-        .finish()
-        .map_err(|err| err.to_string())?;
+    let runtime = tokio::runtime::Runtime::new().map_err(|err| err.to_string())?;
+
+    let client = runtime.block_on(async move {
+        ClientBuilder::new()
+            .from_json(&clientOptions)
+            .map_err(|err| err.to_string())?
+            .finish()
+            .await
+            .map_err(|err| err.to_string())
+    })?;
 
     Ok(ClientMethodHandler {
         client: Rc::new(client),

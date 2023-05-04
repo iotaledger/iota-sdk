@@ -186,7 +186,8 @@ impl WalletBuilder {
             .client_options
             .clone()
             .ok_or(crate::wallet::Error::MissingParameter("client_options"))?
-            .finish()?;
+            .finish()
+            .await?;
 
         #[cfg(feature = "events")]
         let event_emitter = Arc::new(tokio::sync::Mutex::new(EventEmitter::new()));

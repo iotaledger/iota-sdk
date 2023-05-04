@@ -22,7 +22,7 @@ impl Wallet {
         *client_options = options.clone();
         drop(client_options);
 
-        let new_client = options.clone().finish()?;
+        let new_client = options.clone().finish().await?;
 
         for account in self.accounts.write().await.iter_mut() {
             account.update_account_with_new_client(new_client.clone()).await?;
@@ -49,7 +49,7 @@ impl Wallet {
 
         let client = match &accounts.first() {
             Some(account) => account.client.clone(),
-            None => self.client_options.read().await.clone().finish()?,
+            None => self.client_options.read().await.clone().finish().await?,
         };
 
         Ok(client)
@@ -160,7 +160,7 @@ impl Wallet {
                 .await?;
         }
 
-        let new_client = new_client_options.finish()?;
+        let new_client = new_client_options.finish().await?;
 
         for account in self.accounts.write().await.iter_mut() {
             account.update_account_with_new_client(new_client.clone()).await?;

@@ -26,7 +26,8 @@ async fn main() -> Result<()> {
     let client = Client::builder()
         // The node needs to have the indexer plugin enabled.
         .with_node(&node_url)?
-        .finish()?;
+        .finish()
+        .await?;
 
     // Take the alias ID from command line argument or use a default one.
     let alias_id = AliasId::from_str(

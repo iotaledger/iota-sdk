@@ -21,10 +21,14 @@ impl Finalize for ClientMethodHandler {}
 
 impl ClientMethodHandler {
     pub fn new(channel: Channel, options: String) -> Arc<Self> {
-        let client = ClientBuilder::new()
-            .from_json(&options)
-            .expect("error initializing client")
-            .finish()
+        let runtime = tokio::runtime::Runtime::new().expect("error initializing client");
+        let client = runtime
+            .block_on(
+                ClientBuilder::new()
+                    .from_json(&options)
+                    .expect("error initializing client")
+                    .finish(),
+            )
             .expect("error initializing client");
 
         Arc::new(Self { channel, client })

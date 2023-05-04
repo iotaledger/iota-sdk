@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will consolidate all funds in a range of addresses.
-//! 
+//!
 //! `cargo run --example consolidation --release`
 
 use iota_sdk::client::{
@@ -22,7 +22,7 @@ async fn main() -> Result<()> {
 
     let address_range = 0u32..150;
     // Create a client instance
-    let client = Client::builder().with_node(&node_url)?.finish()?;
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =
         SecretManager::try_from_hex_seed(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_SEED_1").unwrap())?;

@@ -9,9 +9,8 @@ use std::{
 };
 
 use serde::{Deserialize, Serialize};
-#[cfg(not(target_family = "wasm"))]
-use tokio::runtime::Runtime;
 
+use super::ClientInner;
 #[cfg(feature = "mqtt")]
 use crate::client::node_api::mqtt::{BrokerOptions, MqttEvent};
 use crate::{
@@ -327,69 +326,80 @@ impl ClientBuilder {
     }
 
     /// Build the Client instance.
-    pub fn finish(self) -> Result<Client> {
-        let network_info = Arc::new(RwLock::new(self.network_info));
-        let healthy_nodes = Arc::new(RwLock::new(HashMap::new()));
-
-        #[cfg(not(target_family = "wasm"))]
-        let (runtime, sync_handle) = {
-            let nodes = self
-                .node_manager_builder
-                .primary_node
-                .iter()
-                .chain(self.node_manager_builder.nodes.iter())
-                .map(|node| node.clone().into())
-                .collect();
-
-            let healthy_nodes_ = healthy_nodes.clone();
-            let network_info_ = network_info.clone();
-
-            let (runtime, sync_handle) = std::thread::spawn(move || {
-                let runtime = Runtime::new().expect("failed to create Tokio runtime");
-                if let Err(e) = runtime.block_on(Client::sync_nodes(
-                    &healthy_nodes_,
-                    &nodes,
-                    &network_info_,
-                    self.node_manager_builder.ignore_node_health,
-                )) {
-                    panic!("failed to sync nodes: {e:?}");
-                }
-                let sync_handle = Client::start_sync_process(
-                    &runtime,
-                    healthy_nodes_,
-                    nodes,
-                    self.node_manager_builder.node_sync_interval,
-                    network_info_,
-                    self.node_manager_builder.ignore_node_health,
-                );
-                (runtime, sync_handle)
-            })
-            .join()
-            .expect("failed to init node syncing process");
-            (Some(Arc::new(runtime)), Some(sync_handle))
-        };
+    #[cfg(not(target_family = "wasm"))]
+    pub async fn finish(self) -> Result<Client> {
+        let node_sync_interval = self.node_manager_builder.node_sync_interval;
+        let ignore_node_health = self.node_manager_builder.ignore_node_health;
+        let nodes = self
+            .node_manager_builder
+            .primary_node
+            .iter()
+            .chain(self.node_manager_builder.nodes.iter())
+            .map(|node| node.clone().into())
+            .collect();
 
         #[cfg(feature = "mqtt")]
         let (mqtt_event_tx, mqtt_event_rx) = tokio::sync::watch::channel(MqttEvent::Connected);
-        let client = Client {
-            node_manager: self.node_manager_builder.build(healthy_nodes),
-            #[cfg(not(target_family = "wasm"))]
-            runtime,
-            #[cfg(not(target_family = "wasm"))]
-            sync_handle: sync_handle.map(Arc::new),
-            #[cfg(feature = "mqtt")]
-            mqtt_client: Arc::new(tokio::sync::RwLock::new(None)),
-            #[cfg(feature = "mqtt")]
-            mqtt_topic_handlers: Default::default(),
-            #[cfg(feature = "mqtt")]
-            broker_options: self.broker_options,
-            #[cfg(feature = "mqtt")]
-            mqtt_event_channel: (Arc::new(mqtt_event_tx), mqtt_event_rx),
-            network_info,
-            api_timeout: self.api_timeout,
-            remote_pow_timeout: self.remote_pow_timeout,
-            pow_worker_count: self.pow_worker_count,
+
+        let mut client = Client {
+            inner: Arc::new(ClientInner {
+                node_manager: self.node_manager_builder.build(HashMap::new()),
+                network_info: RwLock::new(self.network_info),
+                api_timeout: self.api_timeout,
+                remote_pow_timeout: self.remote_pow_timeout,
+                pow_worker_count: self.pow_worker_count,
+                #[cfg(feature = "mqtt")]
+                mqtt: super::MqttInner {
+                    client: Default::default(),
+                    topic_handlers: Default::default(),
+                    broker_options: self.broker_options,
+                    sender: mqtt_event_tx,
+                    receiver: mqtt_event_rx,
+                },
+                sync_handle: None,
+            }),
         };
+
+        client.sync_nodes(&nodes, ignore_node_health).await?;
+        let client_clone = client.clone();
+
+        let sync_handle = tokio::spawn(async move {
+            client_clone
+                .start_sync_process(nodes, node_sync_interval, ignore_node_health)
+                .await
+        });
+
+        Arc::get_mut(&mut client.inner)
+            .unwrap()
+            .sync_handle
+            .replace(sync_handle);
+
+        Ok(client)
+    }
+
+    /// Build the Client instance.
+    #[cfg(target_family = "wasm")]
+    pub async fn finish(self) -> Result<Client> {
+        #[cfg(feature = "mqtt")]
+        let (mqtt_event_tx, mqtt_event_rx) = tokio::sync::watch::channel(MqttEvent::Connected);
+
+        let client = Client {
+            inner: Arc::new(ClientInner {
+                node_manager: self.node_manager_builder.build(HashMap::new()),
+                network_info: RwLock::new(self.network_info),
+                api_timeout: self.api_timeout,
+                remote_pow_timeout: self.remote_pow_timeout,
+                #[cfg(feature = "mqtt")]
+                mqtt: super::MqttInner {
+                    client: Default::default(),
+                    topic_handlers: Default::default(),
+                    broker_options: self.broker_options,
+                    sender: mqtt_event_tx,
+                    receiver: mqtt_event_rx,
+                },
+            }),
+        };
+
         Ok(client)
     }
 }
