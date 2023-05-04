@@ -8,10 +8,7 @@ use crate::types::block::{
         dto::{OutputDto, OutputMetadataDto},
         OutputId, OutputWithMetadata,
     },
-    payload::{
-        dto::MilestonePayloadDto,
-        milestone::{option::dto::ReceiptMilestoneOptionDto, MilestoneId},
-    },
+    payload::{dto::MilestonePayloadDto, milestone::MilestoneId},
     protocol::dto::ProtocolParametersDto,
     BlockDto, BlockId,
 };
@@ -250,27 +247,6 @@ impl From<OutputWithMetadata> for OutputWithMetadataResponse {
 pub enum OutputResponse {
     Json(Box<OutputWithMetadataResponse>),
     Raw(Vec<u8>),
-}
-
-/// Describes a receipt.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct ReceiptResponse {
-    pub receipt: ReceiptMilestoneOptionDto,
-    pub milestone_index: u32,
-}
-
-/// Response of:
-/// * GET /api/core/v2/receipts/{milestone_index}, returns all stored receipts for the given milestone index.
-/// * GET /api/core/v2/receipts, returns all stored receipts, independent of a milestone index.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ReceiptsResponse {
-    pub receipts: Vec<ReceiptResponse>,
 }
 
 /// Response of GET /api/core/v2/treasury.
