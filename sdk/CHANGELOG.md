@@ -32,8 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `OutputData::metadata` changed from `OutputMetadataDto` to `OutputMetadata`;
 - `Client::get_outputs()` and derived methods return `OutputWithMetadata` instead `OutputWithMetadataDto`
-- rename `Client::rename try_get_outputs()` into `Client::get_outputs_ignore_errors()`
-- rename `Client::try_get_outputs_metadata()` into `Client::get_outputs_metadata_ignore_errors`
+- rename `Client::try_get_outputs()` into `Client::get_outputs_ignore_errors()`
+- rename `Client::try_get_outputs_metadata()` into `Client::get_outputs_metadata_ignore_errors()`
 
 ### Removed
 
