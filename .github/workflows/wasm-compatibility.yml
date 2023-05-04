@@ -2,7 +2,7 @@ name: Wasm compatibility
 
 on:
   push:
-    branches: [develop, production]
+    branches: [develop, production, 2.0]
     paths:
       - ".github/workflows/wasm-compatibility.yml"
       - ".github/actions/**"
@@ -12,7 +12,7 @@ on:
       - "!**/bindings/**" # Exclude all bindings
       - "!cli/**" # Exclude CLI
   pull_request:
-    branches: [develop, production]
+    branches: [develop, production, 2.0]
     paths:
       - ".github/workflows/wasm-compatibility.yml"
       - ".github/actions/**"
