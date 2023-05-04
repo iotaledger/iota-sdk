@@ -49,7 +49,6 @@ import {
 import {
     IMilestoneUtxoChangesResponse,
     OutputResponse,
-    ReceiptsResponse,
     IOutputsResponse,
 } from '../types/models/api';
 
@@ -528,33 +527,6 @@ export class Client {
         });
 
         return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get receipts.
-     */
-    async getReceipts(): Promise<ReceiptsResponse> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getReceipts',
-        });
-        const parsed = JSON.parse(response) as Response<ReceiptsResponse>;
-        return plainToInstance(ReceiptsResponse, parsed.payload);
-    }
-
-    /**
-     * Get the receipts by the given milestone index.
-     */
-    async getReceiptsMigratedAt(
-        milestoneIndex: number,
-    ): Promise<ReceiptsResponse[]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getReceiptsMigratedAt',
-            data: {
-                milestoneIndex,
-            },
-        });
-        const parsed = JSON.parse(response) as Response<ReceiptsResponse[]>;
-        return plainToInstance(ReceiptsResponse, parsed.payload);
     }
 
     /**
