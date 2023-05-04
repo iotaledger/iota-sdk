@@ -32,6 +32,8 @@ use crate::{
 #[derive(Clone)]
 pub struct Client {
     pub(crate) inner: Arc<ClientInner>,
+    #[cfg(not(target_family = "wasm"))]
+    pub(crate) _sync_handle: Arc<SyncHandle>,
 }
 
 pub(crate) struct ClientInner {
@@ -47,8 +49,18 @@ pub(crate) struct ClientInner {
     pub(crate) pow_worker_count: Option<usize>,
     #[cfg(feature = "mqtt")]
     pub(crate) mqtt: MqttInner,
-    #[cfg(not(target_family = "wasm"))]
-    pub(crate) sync_handle: Option<tokio::task::JoinHandle<()>>,
+}
+
+#[derive(Default)]
+pub(crate) struct SyncHandle(pub(crate) Option<tokio::task::JoinHandle<()>>);
+
+impl Drop for SyncHandle {
+    fn drop(&mut self) {
+        #[cfg(not(target_family = "wasm"))]
+        if let Some(sync_handle) = self.0.take() {
+            sync_handle.abort();
+        }
+    }
 }
 
 #[cfg(feature = "mqtt")]
@@ -74,11 +86,6 @@ impl std::fmt::Debug for Client {
 impl Drop for ClientInner {
     /// Gracefully shutdown the `Client`
     fn drop(&mut self) {
-        #[cfg(not(target_family = "wasm"))]
-        if let Some(sync_handle) = self.sync_handle.take() {
-            sync_handle.abort();
-        }
-
         #[cfg(feature = "mqtt")]
         {
             if let Some(mqtt_client) = self.mqtt.client.blocking_write().take() {

@@ -3,8 +3,10 @@
 
 #[cfg(not(target_family = "wasm"))]
 use {
+    crate::client::ClientInner,
     crate::types::{api::core::response::InfoResponse, block::protocol::ProtocolParameters},
     std::collections::HashMap,
+    std::sync::Arc,
     std::{collections::HashSet, time::Duration},
     tokio::time::sleep,
 };
@@ -40,11 +42,13 @@ impl Client {
                     .collect()
             })
     }
+}
 
+impl ClientInner {
     /// Sync the node lists per node_sync_interval milliseconds
     #[cfg(not(target_family = "wasm"))]
     pub(crate) async fn start_sync_process(
-        &self,
+        self: Arc<Self>,
         nodes: HashSet<Node>,
         node_sync_interval: Duration,
         ignore_node_health: bool,
@@ -67,7 +71,7 @@ impl Client {
 
         for node in nodes {
             // Put the healthy node url into the network_nodes
-            match Self::get_node_info(node.url.as_ref(), node.auth.clone()).await {
+            match Client::get_node_info(node.url.as_ref(), node.auth.clone()).await {
                 Ok(info) => {
                     if info.status.is_healthy || ignore_node_health {
                         match network_nodes.get_mut(&info.protocol.network_name) {
@@ -100,7 +104,6 @@ impl Client {
         if let Some(nodes) = network_nodes.get(most_nodes.0) {
             if let Some((info, _node_url)) = nodes.first() {
                 let mut network_info = self
-                    .inner
                     .network_info
                     .write()
                     .map_err(|_| crate::client::Error::PoisonError)?;
@@ -116,7 +119,6 @@ impl Client {
 
         // Update the sync list.
         *self
-            .inner
             .node_manager
             .healthy_nodes
             .write()

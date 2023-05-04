@@ -341,27 +341,24 @@ impl ClientBuilder {
         #[cfg(feature = "mqtt")]
         let (mqtt_event_tx, mqtt_event_rx) = tokio::sync::watch::channel(MqttEvent::Connected);
 
-        let mut client = Client {
-            inner: Arc::new(ClientInner {
-                node_manager: self.node_manager_builder.build(HashMap::new()),
-                network_info: RwLock::new(self.network_info),
-                api_timeout: self.api_timeout,
-                remote_pow_timeout: self.remote_pow_timeout,
-                pow_worker_count: self.pow_worker_count,
-                #[cfg(feature = "mqtt")]
-                mqtt: super::MqttInner {
-                    client: Default::default(),
-                    topic_handlers: Default::default(),
-                    broker_options: self.broker_options,
-                    sender: mqtt_event_tx,
-                    receiver: mqtt_event_rx,
-                },
-                sync_handle: None,
-            }),
-        };
+        let client_inner = Arc::new(ClientInner {
+            node_manager: self.node_manager_builder.build(HashMap::new()),
+            network_info: RwLock::new(self.network_info),
+            api_timeout: self.api_timeout,
+            remote_pow_timeout: self.remote_pow_timeout,
+            pow_worker_count: self.pow_worker_count,
+            #[cfg(feature = "mqtt")]
+            mqtt: super::MqttInner {
+                client: Default::default(),
+                topic_handlers: Default::default(),
+                broker_options: self.broker_options,
+                sender: mqtt_event_tx,
+                receiver: mqtt_event_rx,
+            },
+        });
 
-        client.sync_nodes(&nodes, ignore_node_health).await?;
-        let client_clone = client.clone();
+        client_inner.sync_nodes(&nodes, ignore_node_health).await?;
+        let client_clone = client_inner.clone();
 
         let sync_handle = tokio::spawn(async move {
             client_clone
@@ -369,10 +366,10 @@ impl ClientBuilder {
                 .await
         });
 
-        Arc::get_mut(&mut client.inner)
-            .unwrap()
-            .sync_handle
-            .replace(sync_handle);
+        let client = Client {
+            inner: client_inner,
+            _sync_handle: Arc::new(super::SyncHandle(Some(sync_handle))),
+        };
 
         Ok(client)
     }
