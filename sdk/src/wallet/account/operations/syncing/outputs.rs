@@ -10,10 +10,7 @@ use crate::{
         api::core::response::OutputWithMetadataResponse,
         block::{
             input::Input,
-            output::{
-                dto::{OutputDto, OutputMetadataDto},
-                OutputId, OutputWithMetadata,
-            },
+            output::{OutputId, OutputWithMetadata},
             payload::{
                 transaction::{TransactionEssence, TransactionId},
                 Payload, TransactionPayload,
@@ -153,10 +150,7 @@ impl Account {
                                         get_inputs_for_transaction_payload(&client, transaction_payload).await?;
                                     let inputs_response: Vec<OutputWithMetadataResponse> = inputs_with_meta
                                         .into_iter()
-                                        .map(|o| OutputWithMetadataResponse {
-                                            output: OutputDto::from(o.output()),
-                                            metadata: OutputMetadataDto::from(o.metadata()),
-                                        })
+                                        .map(OutputWithMetadataResponse::from)
                                         .collect();
 
                                     let transaction = build_transaction_from_payload_and_inputs(
