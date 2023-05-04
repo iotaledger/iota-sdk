@@ -1,9 +1,12 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! TODO: Example description
+//! In this example, we will sync an account in the background.
 //!
-//! `cargo run --example background_syncing --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --all-features --example background_syncing --release
+//! ```
 
 use iota_sdk::{
     client::{

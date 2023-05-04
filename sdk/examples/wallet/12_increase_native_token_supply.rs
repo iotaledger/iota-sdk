@@ -64,7 +64,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    println!("Preparing minting transaction ...");
+    println!("Preparing minting transaction...");
 
     // Mint some more native tokens
     let mint_amount = U256::from(MINT_AMOUNT);

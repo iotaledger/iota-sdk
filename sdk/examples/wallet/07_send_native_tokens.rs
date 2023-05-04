@@ -62,7 +62,7 @@ async fn main() -> Result<()> {
         }];
 
         println!(
-            "Sending '{}' native tokens to '{}' ...",
+            "Sending '{}' native tokens to '{}'...",
             SEND_NATIVE_TOKEN_AMOUNT, bech32_address
         );
 

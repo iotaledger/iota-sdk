@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    println!("Preparing melting transaction ...");
+    println!("Preparing melting transaction...");
 
     // Melt some of the circulating supply
     let melt_amount = U256::from(MELT_AMOUNT);

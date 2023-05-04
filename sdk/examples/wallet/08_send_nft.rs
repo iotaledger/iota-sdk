@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
             nft_id: *nft_id,
         }];
 
-        println!("Sending NFT '{}' to '{}' ...", nft_id, RECV_ADDRESS);
+        println!("Sending NFT '{}' to '{}'...", nft_id, RECV_ADDRESS);
 
         let transaction = account.send_nft(outputs, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);

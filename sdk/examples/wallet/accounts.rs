@@ -79,7 +79,7 @@ async fn main() -> Result<()> {
         println!("- {}", account.alias());
     }
 
-    println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses for account '{ACCOUNT_ALIAS_2}' ...");
+    println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses for account '{ACCOUNT_ALIAS_2}'...");
     let addresses = account2.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
 
     let balance = account2.sync(None).await?;

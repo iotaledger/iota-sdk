@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
             .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        println!("Preparing destroying transaction ...");
+        println!("Preparing destroying transaction...");
 
         let transaction = account.destroy_foundry(*foundry_id, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);

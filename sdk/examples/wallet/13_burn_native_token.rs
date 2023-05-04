@@ -62,7 +62,7 @@ async fn main() -> Result<()> {
             .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        println!("Preparing burning transaction ...");
+        println!("Preparing burning transaction...");
 
         // Burn a native token
         let burn_amount = U256::from(BURN_AMOUNT);
