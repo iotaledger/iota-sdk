@@ -18,7 +18,7 @@ use iota_sdk::{
 };
 
 // The account aliases used in this example
-const ACCOUNT_ALIAS: &str = "logger";
+const ACCOUNT_ALIAS: &str = "Alice";
 // The wallet database folder
 const WALLET_DB_PATH: &str = "./example.walletdb";
 
