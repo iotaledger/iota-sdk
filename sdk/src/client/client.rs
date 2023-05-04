@@ -22,6 +22,7 @@ use crate::{
         builder::{ClientBuilder, NetworkInfo},
         constants::DEFAULT_TIPS_INTERVAL,
         error::Result,
+        node_manager::NodeManager,
         Error,
     },
     types::block::{output::RentStructure, protocol::ProtocolParameters},
@@ -35,14 +36,14 @@ pub struct Client {
 
 pub(crate) struct ClientInner {
     /// Node manager
-    pub(crate) node_manager: crate::client::node_manager::NodeManager,
+    pub(crate) node_manager: NodeManager,
     pub(crate) network_info: RwLock<NetworkInfo>,
     /// HTTP request timeout.
     pub(crate) api_timeout: Duration,
     /// HTTP request timeout for remote PoW API call.
     pub(crate) remote_pow_timeout: Duration,
-    #[cfg(not(target_family = "wasm"))]
     /// pow_worker_count for local PoW.
+    #[cfg(not(target_family = "wasm"))]
     pub(crate) pow_worker_count: Option<usize>,
     #[cfg(feature = "mqtt")]
     pub(crate) mqtt: MqttInner,
