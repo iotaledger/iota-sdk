@@ -32,21 +32,21 @@ class SimpleTokenScheme {
     }
 
     /**
-     * Amount of tokens minted by this foundry.
+     * Amount of tokens minted.
      */
     getMintedTokens(): HexEncodedAmount {
         return this.mintedTokens;
     }
 
     /**
-     * Amount of tokens melted by this foundry.
+     * Amount of tokens melted.
      */
     getMeltedTokens(): HexEncodedAmount {
         return this.meltedTokens;
     }
 
     /**
-     * Maximum supply of tokens controlled by this foundry.
+     * Maximum supply of tokens controlled.
      */
     getMaximumSupply(): HexEncodedAmount {
         return this.maximumSupply;

@@ -23,7 +23,7 @@ abstract class Address {
     }
 }
 /**
- * Ed25519Address address.
+ * Ed25519 Address.
  */
 class Ed25519Address extends Address {
     private pubKeyHash: HexEncodedString;

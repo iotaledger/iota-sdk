@@ -32,7 +32,7 @@ abstract class Output /*implements ICommonOutput*/ {
     }
 
     /**
-     * The amount of IOTA coins to held by the output.
+     * The amount of the output.
      */
     getAmount(): string {
         return this.amount;
@@ -161,6 +161,7 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
     }
     /**
      * Unique identifier of the alias, which is the BLAKE2b-160 hash of the Output ID that created it.
+     * Unless its a newly created alias, then the id is zeroed.
      */
     getAliasId(): HexEncodedString {
         return this.aliasId;
@@ -194,6 +195,7 @@ class NftOutput extends StateMetadataOutput /*implements INftOutput*/ {
     }
     /**
      * Unique identifier of the NFT, which is the BLAKE2b-160 hash of the Output ID that created it.
+     * Unless its newly minted, then the id is zeroed.
      */
     getNnftId(): HexEncodedString {
         return this.nftId;

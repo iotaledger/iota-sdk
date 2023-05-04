@@ -1,12 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    ISSUER_FEATURE_TYPE,
-    METADATA_FEATURE_TYPE,
-    SENDER_FEATURE_TYPE,
-    TAG_FEATURE_TYPE,
-} from '@iota/types';
 import { Address } from './address';
 /**
  * All of the feature block types.

@@ -57,7 +57,7 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition /*implements I
         this.returnAddress = returnAddress;
     }
     /**
-     * Amount of IOTA tokens the consuming transaction should deposit to the address defined in return address.
+     * Amount of tokens the consuming transaction must deposit to the address defined in return address.
      */
     getAmount(): string {
         return this.amount;
@@ -98,7 +98,8 @@ class ExpirationUnlockCondition extends UnlockCondition /*implements IExpiration
         this.unixTime = unixTime;
     }
     /**
-     * Unix time (seconds since Unix epoch) starting from which the output can be consumed.
+     * Before this unix time, the condition is allowed to unlock the output,
+     * after that only the address defined in return address.
      */
     getUnixTime(): number {
         return this.unixTime;
