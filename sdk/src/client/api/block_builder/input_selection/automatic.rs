@@ -185,8 +185,8 @@ impl<'a> ClientBlockBuilder<'a> {
                             )?;
                         if required_unlock_address == address {
                             available_inputs.push(InputSigningData {
-                                output: output_with_meta.output().clone(),
-                                output_metadata: output_with_meta.metadata().clone(),
+                                output: output_with_meta.output,
+                                output_metadata: output_with_meta.metadata,
                                 chain: Some(Chain::from_u32_hardened(vec![
                                     HD_WALLET_TYPE,
                                     self.coin_type,

@@ -185,8 +185,8 @@ impl<'a> ClientBlockBuilder<'a> {
                             };
 
                             required_inputs.push(InputSigningData {
-                                output: output_with_meta.output().to_owned(),
-                                output_metadata: output_with_meta.metadata().to_owned(),
+                                output: output_with_meta.output,
+                                output_metadata: output_with_meta.metadata,
                                 chain: address_index_internal.map(|(address_index, internal)| {
                                     Chain::from_u32_hardened(vec![
                                         HD_WALLET_TYPE,

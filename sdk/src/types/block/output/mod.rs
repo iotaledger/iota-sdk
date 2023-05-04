@@ -88,8 +88,8 @@ pub(crate) enum OutputBuilderAmount {
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OutputWithMetadata {
-    output: Output,
-    metadata: OutputMetadata,
+    pub(crate) output: Output,
+    pub(crate) metadata: OutputMetadata,
 }
 
 impl OutputWithMetadata {
