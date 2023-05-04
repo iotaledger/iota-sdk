@@ -61,11 +61,14 @@ impl Wallet {
     /// if ignore_if_coin_type_mismatch.is_some(), client options will not be restored
     /// if ignore_if_coin_type_mismatch == Some(true), client options coin type and accounts will not be restored if the
     /// coin type doesn't match
+    /// if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", no accounts
+    /// will be restored.
     pub async fn restore_backup(
         &self,
         backup_path: PathBuf,
         mut stronghold_password: String,
         ignore_if_coin_type_mismatch: Option<bool>,
+        ignore_if_bech32_hrp_mismatch: Option<&str>,
     ) -> crate::wallet::Result<()> {
         log::debug!("[restore_backup] loading stronghold backup");
 
@@ -146,22 +149,37 @@ impl Wallet {
 
         if !ignore_backup_values {
             if let Some(read_accounts) = read_accounts {
-                let client = self.client_options.read().await.clone().finish()?;
+                let restore_accounts = ignore_if_bech32_hrp_mismatch.map_or(true, |expected_bech32_hrp| {
+                    // Only restore if bech32 hrps match
+                    read_accounts.first().map_or(true, |account| {
+                        account
+                            .public_addresses
+                            .first()
+                            .expect("account needs to have a public address")
+                            .address()
+                            .hrp()
+                            == expected_bech32_hrp
+                    })
+                });
 
-                let restored_account = try_join_all(read_accounts.into_iter().map(|a| {
-                    Account::new(
-                        a,
-                        client.clone(),
-                        self.secret_manager.clone(),
-                        #[cfg(feature = "events")]
-                        self.event_emitter.clone(),
-                        #[cfg(feature = "storage")]
-                        self.storage_manager.clone(),
-                    )
-                    .boxed()
-                }))
-                .await?;
-                *accounts = restored_account;
+                if restore_accounts {
+                    let client = self.client_options.read().await.clone().finish()?;
+
+                    let restored_account = try_join_all(read_accounts.into_iter().map(|a| {
+                        Account::new(
+                            a,
+                            client.clone(),
+                            self.secret_manager.clone(),
+                            #[cfg(feature = "events")]
+                            self.event_emitter.clone(),
+                            #[cfg(feature = "storage")]
+                            self.storage_manager.clone(),
+                        )
+                        .boxed()
+                    }))
+                    .await?;
+                    *accounts = restored_account;
+                }
             }
         }
 
