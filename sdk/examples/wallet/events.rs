@@ -1,9 +1,13 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! TODO: Example description
+//! In this example, we'll demonstrate how to listen to wallet events by sending some amount of base coins to an
+//! address.
 //!
-//! `cargo run --example events --features=events --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --all-features --example events --release
+//! ```
 
 use iota_sdk::{
     client::{
@@ -17,10 +21,14 @@ use iota_sdk::{
     wallet::{ClientOptions, Result, Wallet},
 };
 
-const ACCOUNT: &str = "event_account";
-const ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
-const AMOUNT: u64 = 1_000_000;
-const NUM_ADDRESSES_TO_GENERATE: u32 = 5;
+// The account aliases used in this example
+const ACCOUNT_ALIAS: &str = "event_account";
+// The wallet database folder
+const WALLET_DB_PATH: &str = "./example.walletdb";
+// The amount of base coins we'll send
+const SEND_AMOUNT: u64 = 1_000_000;
+// The address we'll be sending coins to
+const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -36,38 +44,35 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_storage_path(WALLET_DB_PATH)
         .finish()
         .await?;
 
     wallet
         .listen(vec![], move |event| {
-            println!("Received an event {event:?}");
+            println!("RECEIVED AN EVENT:\n{:?}", event.event);
         })
         .await;
 
-    // Get account or create a new one
-    let account_alias = ACCOUNT;
-    let account = match wallet.get_account(account_alias.to_string()).await {
-        Ok(account) => account,
-        _ => {
-            // first we'll create an example account and store it
-            wallet
-                .create_account()
-                .with_alias(account_alias.to_string())
-                .finish()
-                .await?
-        }
+    // Get or create an account
+    let account = if let Ok(account) = wallet.get_account(ACCOUNT_ALIAS).await {
+        account
+    } else {
+        println!("Creating account '{ACCOUNT_ALIAS}'");
+        wallet
+            .create_account()
+            .with_alias(ACCOUNT_ALIAS.to_string())
+            .finish()
+            .await?
     };
 
-    let _address = account.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
-
     let balance = account.sync(None).await?;
-    println!("Balance: {balance:?}");
+    println!("Balance BEFORE:\n{:#?}", balance.base_coin());
 
     // send transaction
     let outputs = vec![
-        BasicOutputBuilder::new_with_amount(AMOUNT)
-            .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(ADDRESS)?))
+        BasicOutputBuilder::new_with_amount(SEND_AMOUNT)
+            .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(RECV_ADDRESS)?))
             .finish_output(account.client().get_token_supply().await?)?,
     ];
 
@@ -83,5 +88,9 @@ async fn main() -> Result<()> {
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
+
+    let balance = account.sync(None).await?;
+    println!("Balance AFTER:\n{:#?}", balance.base_coin());
+
     Ok(())
 }
