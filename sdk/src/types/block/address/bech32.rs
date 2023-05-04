@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::string::String;
+use alloc::{string::String, vec::Vec};
 use core::str::FromStr;
 
 use bech32::{FromBase32, ToBase32, Variant};
@@ -82,7 +82,7 @@ impl core::fmt::Debug for Bech32Address {
     }
 }
 
-impl<T: std::borrow::Borrow<Bech32Address>> From<T> for Address {
+impl<T: core::borrow::Borrow<Bech32Address>> From<T> for Address {
     fn from(value: T) -> Self {
         value.borrow().inner
     }
