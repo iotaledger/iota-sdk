@@ -17,7 +17,6 @@ import org.iota.types.output_builder.NftOutputBuilderParams;
 import org.iota.types.responses.NodeInfoResponse;
 import org.iota.types.responses.OutputIdsResponse;
 import org.iota.types.responses.ProtocolParametersResponse;
-import org.iota.types.responses.TreasuryResponse;
 import org.iota.types.responses.UtxoChangesResponse;
 import org.iota.types.secret.BuildBlockOptions;
 import org.iota.types.secret.GenerateAddressesOptions;
@@ -170,16 +169,6 @@ public class Client extends NativeApi {
      */
     public OutputMetadata getOutputMetadata(OutputId outputId) throws ClientException {
         return nodeCoreApi.getOutputMetadata(outputId);
-    }
-
-    /**
-     * Get the treasury balance
-     *
-     * @return TreasuryResponse
-     * @throws ClientException on error.
-     */
-    public TreasuryResponse getTreasury() throws ClientException {
-        return nodeCoreApi.getTreasury();
     }
 
     /**

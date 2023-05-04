@@ -6,7 +6,6 @@ package org.iota.types.unlocks;
 import com.google.gson.*;
 import com.google.gson.annotations.JsonAdapter;
 import org.iota.types.inputs.Input;
-import org.iota.types.inputs.TreasuryInput;
 import org.iota.types.inputs.UtxoInput;
 
 import java.lang.reflect.Type;

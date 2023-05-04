@@ -15,7 +15,7 @@ use crate::{
             core::{
                 dto::PeerDto,
                 response::{
-                    BlockMetadataResponse, InfoResponse as NodeInfo, OutputWithMetadataResponse, TreasuryResponse,
+                    BlockMetadataResponse, InfoResponse as NodeInfo, OutputWithMetadataResponse,
                     UtxoChangesResponse as MilestoneUTXOChanges,
                 },
             },
@@ -152,9 +152,6 @@ pub enum Response {
     /// - [`GetUtxoChangesById`](crate::client::message_interface::Message::GetUtxoChangesById)
     /// - [`GetUtxoChangesByIndex`](crate::client::message_interface::Message::GetUtxoChangesByIndex)
     MilestoneUtxoChanges(MilestoneUTXOChanges),
-    /// Response for:
-    /// - [`GetTreasury`](crate::client::message_interface::Message::GetTreasury)
-    Treasury(TreasuryResponse),
     /// Response for:
     /// - [`AliasOutputId`](crate::client::message_interface::Message::AliasOutputId)
     /// - [`NftOutputId`](crate::client::message_interface::Message::NftOutputId)

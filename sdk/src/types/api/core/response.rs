@@ -221,19 +221,6 @@ pub enum OutputResponse {
     Raw(Vec<u8>),
 }
 
-/// Response of GET /api/core/v2/treasury.
-/// Returns all information about the treasury.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct TreasuryResponse {
-    pub milestone_id: String,
-    pub amount: String,
-}
-
 /// Response of GET /api/core/v2/milestone/{milestone_index}.
 /// Returns information about a milestone.
 #[derive(Clone, Debug, Eq, PartialEq)]

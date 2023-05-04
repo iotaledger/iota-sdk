@@ -198,11 +198,6 @@ path = "examples/client/node_api_core/11_get_output_metadata.rs"
 required-features = [ "client" ]
 
 [[example]]
-name = "node_api_core_get_treasury"
-path = "examples/client/node_api_core/14_get_treasury.rs"
-required-features = [ "client" ]
-
-[[example]]
 name = "node_api_core_get_included_block"
 path = "examples/client/node_api_core/15_get_included_block.rs"
 required-features = [ "client" ]

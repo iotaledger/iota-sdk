@@ -19,8 +19,7 @@ use crate::{
             dto::PeerDto,
             response::{
                 BlockMetadataResponse, BlockResponse, InfoResponse, MilestoneResponse, OutputWithMetadataResponse,
-                PeersResponse, RoutesResponse, SubmitBlockResponse, TipsResponse, TreasuryResponse,
-                UtxoChangesResponse,
+                PeersResponse, RoutesResponse, SubmitBlockResponse, TipsResponse, UtxoChangesResponse,
             },
         },
         block::{
@@ -355,17 +354,6 @@ impl Client {
 
         self.node_manager
             .get_request::<OutputMetadataDto>(path, None, self.get_timeout(), false, true)
-            .await
-    }
-
-    /// Gets the current treasury output.
-    /// The treasury output contains all tokens from the legacy network that have not yet been migrated.
-    /// GET /api/core/v2/treasury
-    pub async fn get_treasury(&self) -> Result<TreasuryResponse> {
-        let path = "api/core/v2/treasury";
-
-        self.node_manager
-            .get_request(path, None, DEFAULT_API_TIMEOUT, false, false)
             .await
     }
 

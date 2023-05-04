@@ -13,12 +13,6 @@ const client = new Client({
 
 // Skip for CI
 describe.skip('UTXO methods', () => {
-    it('gets treasury', async () => {
-        const treasury = await client.getTreasury();
-
-        expect(treasury).toBeDefined();
-    });
-
     it('gets aliases output IDs', async () => {
         const aliasesOutputIds = await client.aliasOutputIds([
             {

@@ -7,7 +7,6 @@ import com.google.gson.*;
 import com.google.gson.annotations.JsonAdapter;
 import org.iota.types.AbstractObject;
 import org.iota.types.inputs.Input;
-import org.iota.types.inputs.TreasuryInput;
 import org.iota.types.inputs.UtxoInput;
 
 import java.lang.reflect.Type;
@@ -24,10 +23,6 @@ class OutputAdapter implements JsonDeserializer<Output>, JsonSerializer<Output>{
         Output output;
 
         switch (type) {
-            case 2: {
-                output = new Gson().fromJson(json, TreasuryOutput.class);
-                break;
-            }
             case 3: {
                 output = new Gson().fromJson(json, BasicOutput.class);
                 break;
@@ -59,8 +54,6 @@ class OutputAdapter implements JsonDeserializer<Output>, JsonSerializer<Output>{
             return new Gson().toJsonTree(src, FoundryOutput.class);
         } else if (src instanceof NftOutput) {
             return new Gson().toJsonTree(src, NftOutput.class);
-        } else if (src instanceof TreasuryOutput) {
-            return new Gson().toJsonTree(src, TreasuryOutput.class);
         } else throw new JsonParseException("unknown class: " + src.getClass().getSimpleName());
     }
 }

@@ -247,44 +247,6 @@ fn build_invalid_duplicate_utxo() {
     assert!(matches!(essence, Err(Error::DuplicateUtxo(_))));
 }
 
-// #[test]
-// fn build_invalid_input_kind() {
-//     let protocol_parameters = protocol_parameters();
-//     let input = Input::Treasury(TreasuryInput::new(MilestoneId::new(rand_bytes_array())));
-//     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-//     let address = Address::from(Ed25519Address::new(bytes));
-//     let amount = 1_000_000;
-//     let output = Output::Basic(
-//         BasicOutput::build_with_amount(amount)
-//             .add_unlock_condition(AddressUnlockCondition::new(address))
-//             .finish(protocol_parameters.token_supply())
-//             .unwrap(),
-//     );
-
-//     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-//         .add_input(input)
-//         .add_output(output)
-//         .finish(&protocol_parameters);
-
-//     assert!(matches!(essence, Err(Error::InvalidInputKind(1))));
-// }
-
-// #[test]
-// fn build_invalid_output_kind() {
-//     let protocol_parameters = protocol_parameters();
-//     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-//     let input = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-//     let amount = 1_000_000;
-//     let output = Output::Treasury(TreasuryOutput::new(amount, protocol_parameters.token_supply()).unwrap());
-
-//     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-//         .add_input(input)
-//         .add_output(output)
-//         .finish(&protocol_parameters);
-
-//     assert!(matches!(essence, Err(Error::InvalidOutputKind(2))));
-// }
-
 #[test]
 fn build_invalid_accumulated_output() {
     let protocol_parameters = protocol_parameters();

@@ -28,7 +28,6 @@ import type {
     __GetPeersMethod__,
     __PostBlockRawMethod__,
     __GetBlockRawMethod__,
-    __GetTreasuryMethod__,
     __GetIncludedBlockMethod__,
     __GetIncludedBlockMetadataMethod__,
     __HexToBech32Method__,
@@ -99,7 +98,6 @@ export type __ClientMethods__ =
     | __GetUtxoChangesByIdMethod__
     | __GetMilestoneByIndexMethod__
     | __GetUtxoChangesByIndexMethod__
-    | __GetTreasuryMethod__
     | __GetIncludedBlockMethod__
     | __GetIncludedBlockMetadataMethod__
     | __HexToBech32Method__

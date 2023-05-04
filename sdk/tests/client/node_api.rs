@@ -302,14 +302,6 @@ async fn test_get_utxo_changes_by_index() {
 
 #[ignore]
 #[tokio::test]
-async fn test_get_treasury() {
-    let r = setup_client_with_node_health_ignored().get_treasury().await.unwrap();
-
-    println!("{r:#?}");
-}
-
-#[ignore]
-#[tokio::test]
 async fn test_get_included_block() {
     let (_block_id, transaction_id) = setup_transaction_block().await;
 

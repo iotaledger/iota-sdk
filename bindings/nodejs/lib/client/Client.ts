@@ -31,7 +31,6 @@ import type {
     IMilestonePayload,
     IMilestoneUtxoChangesResponse,
     INodeInfo,
-    ITreasury,
     IBasicOutput,
     IAliasOutput,
     IFoundryOutput,
@@ -523,17 +522,6 @@ export class Client {
             data: {
                 index,
             },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the treasury output.
-     */
-    async getTreasury(): Promise<ITreasury> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getTreasury',
         });
 
         return JSON.parse(response).payload;

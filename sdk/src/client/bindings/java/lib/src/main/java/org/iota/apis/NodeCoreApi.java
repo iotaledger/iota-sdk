@@ -13,7 +13,6 @@ import org.iota.types.ids.MilestoneId;
 import org.iota.types.ids.OutputId;
 import org.iota.types.ids.TransactionId;
 import org.iota.types.responses.NodeInfoResponse;
-import org.iota.types.responses.TreasuryResponse;
 import org.iota.types.responses.UtxoChangesResponse;
 
 import java.util.Map;
@@ -117,12 +116,6 @@ public class NodeCoreApi {
         JsonObject responsePayload = (JsonObject) nativeApi.sendCommand(new ClientCommand("getOutputMetadata", o));
 
         return new OutputMetadata(responsePayload);
-    }
-
-    public TreasuryResponse getTreasury() throws ClientException {
-        JsonObject responsePayload = (JsonObject) nativeApi.sendCommand(new ClientCommand("getTreasury"));
-
-        return new TreasuryResponse(responsePayload);
     }
 
     public Block getIncludedBlock(TransactionId transactionId) throws ClientException {

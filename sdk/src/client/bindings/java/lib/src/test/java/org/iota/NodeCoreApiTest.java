@@ -11,7 +11,6 @@ import org.iota.types.ids.BlockId;
 import org.iota.types.ids.MilestoneId;
 import org.iota.types.ids.OutputId;
 import org.iota.types.responses.NodeInfoResponse;
-import org.iota.types.responses.TreasuryResponse;
 import org.iota.types.responses.UtxoChangesResponse;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -72,12 +71,6 @@ public class NodeCoreApiTest extends ApiTest {
     @Test
     public void testGetOutputMetadata() throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
         OutputMetadata r = client.getOutputMetadata(setupBasicOutput(generateAddress(client.generateMnemonic())));
-        System.out.println(r);
-    }
-
-    @Test
-    public void testGetTreasury() throws ClientException {
-        TreasuryResponse r = client.getTreasury();
         System.out.println(r);
     }
 

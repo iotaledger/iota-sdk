@@ -538,7 +538,6 @@ impl ClientMessageHandler {
             Message::GetUtxoChangesByIndex { index } => Ok(Response::MilestoneUtxoChanges(
                 self.client.get_utxo_changes_by_index(index).await?,
             )),
-            Message::GetTreasury => Ok(Response::Treasury(self.client.get_treasury().await?)),
             Message::GetIncludedBlock { transaction_id } => Ok(Response::Block(BlockDto::from(
                 &self.client.get_included_block(&transaction_id).await?,
             ))),

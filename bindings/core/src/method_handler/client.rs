@@ -335,7 +335,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetUtxoChangesByIndex { index } => {
             Response::MilestoneUtxoChanges(client.get_utxo_changes_by_index(index).await?)
         }
-        ClientMethod::GetTreasury => Response::Treasury(client.get_treasury().await?),
         ClientMethod::GetIncludedBlock { transaction_id } => {
             Response::Block(BlockDto::from(&client.get_included_block(&transaction_id).await?))
         }

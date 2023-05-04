@@ -25,10 +25,6 @@ class InputAdapter implements JsonDeserializer<Input>, JsonSerializer<Input> {
                 input = new Gson().fromJson(json, UtxoInput.class);
                 break;
             }
-            case 1: {
-                input = new Gson().fromJson(json, TreasuryInput.class);
-                break;
-            }
             default: throw new JsonParseException("unknown type: " + type);
         }
 
@@ -39,8 +35,6 @@ class InputAdapter implements JsonDeserializer<Input>, JsonSerializer<Input> {
     public JsonElement serialize(Input src, Type typeOfSrc, JsonSerializationContext context) {
         if (src instanceof UtxoInput) {
             return new Gson().toJsonTree(src, UtxoInput.class);
-        } else if (src instanceof TreasuryInput) {
-            return new Gson().toJsonTree(src, TreasuryInput.class);
         } else throw new JsonParseException("unknown class: " + src.getClass().getSimpleName());
     }
 

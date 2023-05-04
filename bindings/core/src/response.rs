@@ -18,7 +18,7 @@ use iota_sdk::{
             core::{
                 dto::PeerDto,
                 response::{
-                    BlockMetadataResponse, InfoResponse as NodeInfo, OutputWithMetadataResponse, TreasuryResponse,
+                    BlockMetadataResponse, InfoResponse as NodeInfo, OutputWithMetadataResponse,
                     UtxoChangesResponse as MilestoneUTXOChanges,
                 },
             },
@@ -155,9 +155,6 @@ pub enum Response {
     /// - [`GetUtxoChangesById`](crate::method::ClientMethod::GetUtxoChangesById)
     /// - [`GetUtxoChangesByIndex`](crate::method::ClientMethod::GetUtxoChangesByIndex)
     MilestoneUtxoChanges(MilestoneUTXOChanges),
-    /// Response for:
-    /// - [`GetTreasury`](crate::method::ClientMethod::GetTreasury)
-    Treasury(TreasuryResponse),
     /// Response for:
     /// - [`AliasOutputId`](crate::method::ClientMethod::AliasOutputId)
     /// - [`NftOutputId`](crate::method::ClientMethod::NftOutputId)

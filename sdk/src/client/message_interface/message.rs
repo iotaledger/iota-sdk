@@ -304,8 +304,6 @@ pub enum Message {
         /// Milestone Index
         index: u32,
     },
-    /// Get the treasury output.
-    GetTreasury,
     /// Returns the included block of the transaction.
     #[serde(rename_all = "camelCase")]
     GetIncludedBlock {
