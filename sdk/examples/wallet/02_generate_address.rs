@@ -37,13 +37,11 @@ async fn main() -> Result<()> {
     // Generate some addresses
     let addresses = account.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
 
-    println!("Addresses:");
+    println!("NEW ADDRESSES:");
     let explorer_url = std::env::var("EXPLORER_URL").ok();
     let prepended = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
     for address in account.addresses().await? {
         if addresses.contains(&address) {
-            println!(" - {prepended}{} new!", address.address());
-        } else {
             println!(" - {prepended}{}", address.address());
         }
     }

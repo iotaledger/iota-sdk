@@ -3,7 +3,12 @@
 
 //! In this example we check if an output has only an address unlock condition and that the address is from the account.
 //!
-//! `cargo run --example check_unlock_conditions --release`
+//! Make sure that `example.stronghold` and `example.walletdb` already exist by
+//! running the `create_wallet` example!
+//!
+//! ```sh
+//! cargo run --all-features --example check_unlock_conditions --release
+//! ```
 
 use iota_sdk::{
     types::block::{
@@ -13,23 +18,27 @@ use iota_sdk::{
     wallet::{Result, Wallet},
 };
 
-const ACCOUNT: &str = "Alice";
+// The account alias used in this example
+const ACCOUNT_ALIAS: &str = "Alice";
+// The wallet database folder
+const WALLET_DB_PATH: &str = "./example.walletdb";
+// The amount to build the basic output with
 const AMOUNT: u64 = 1_000_000;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
-
-    // Get the account we generated with `01_create_wallet`
-    let account = wallet.get_account(ACCOUNT).await?;
+    // Access the wallet we generated with `--example create_wallet`
+    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
+    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
 
     let account_addresses: Vec<Bech32Address> = account
         .addresses()
         .await?
         .into_iter()
-        .map(|a| a.address().clone())
+        .map(|address| address.address().clone())
         .collect();
+
+    println!("Account addresses: {:#?}", account_addresses);
 
     let output = BasicOutputBuilder::new_with_amount(AMOUNT)
         .add_unlock_condition(AddressUnlockCondition::new(*account_addresses[0].as_ref()))
@@ -43,7 +52,7 @@ async fn main() -> Result<()> {
         // Check that address in the unlock condition belongs to the account
         account_addresses
             .iter()
-            .any(|a| a.as_ref() == address_unlock_condition.address())
+            .any(|address| address.as_ref() == address_unlock_condition.address())
     } else {
         false
     };

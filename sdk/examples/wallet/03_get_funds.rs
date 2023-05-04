@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we request funds from the faucet to our address.
+//! In this example we request funds from the faucet to the first address in the account.
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
 //! running the `create_wallet` example!

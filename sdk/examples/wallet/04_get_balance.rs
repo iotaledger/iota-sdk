@@ -28,11 +28,16 @@ async fn main() -> Result<()> {
     let account = wallet.get_account(ACCOUNT_ALIAS).await?;
 
     // Sync and get the balance
-    let _account_balance = account.sync(None).await?;
+    let _ = account.sync(None).await?;
     // If already synced, just get the balance
-    let account_balance = account.balance().await?;
+    let balance = account.balance().await?;
+    println!("{balance:#?}");
 
-    println!("{account_balance:#?}");
-
+    println!("ADDRESSES:");
+    let explorer_url = std::env::var("EXPLORER_URL").ok();
+    let prepended = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
+    for address in account.addresses().await? {
+        println!(" - {prepended}{}", address.address());
+    }
     Ok(())
 }

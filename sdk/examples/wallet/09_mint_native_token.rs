@@ -64,19 +64,19 @@ async fn main() -> Result<()> {
         foundry_metadata: None,
     };
 
-    let mint_txn = account.mint_native_token(native_token_options, None).await?;
-    println!("Transaction sent: {}", mint_txn.transaction.transaction_id);
+    let transaction = account.mint_native_token(native_token_options, None).await?;
+    println!("Transaction sent: {}", transaction.transaction.transaction_id);
 
     // Wait for transaction to get included
     let block_id = account
-        .retry_transaction_until_included(&mint_txn.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&transaction.transaction.transaction_id, None, None)
         .await?;
-
     println!(
         "Block included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
+    println!("Minted token: {} ", transaction.token_id);
 
     // Ensure the account is synced after minting.
     account.sync(None).await?;

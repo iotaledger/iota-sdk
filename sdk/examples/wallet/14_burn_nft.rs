@@ -2,30 +2,37 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will burn an existing nft output.
-//! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example burn_nft --release`
+//! Make sure that `example.stronghold` and `example.walletdb` already exist by
+//! running the `create_wallet` example!
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --all-features --example burn_nft --release
+//! ```
 
 use iota_sdk::wallet::{Result, Wallet};
 
-const ACCOUNT: &str = "Alice";
+// The account alias used in this example
+const ACCOUNT_ALIAS: &str = "Alice";
+// The wallet database folder
+const WALLET_DB_PATH: &str = "./example.walletdb";
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
+    // Access the wallet we generated with `--example create_wallet`
+    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
+    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
 
-    // Get the account we generated with `01_create_wallet`
-    let account = wallet.get_account(ACCOUNT).await?;
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
 
     // Get the first nft
     if let Some(nft_id) = balance.nfts().first() {
-        println!("Balance before burning:\n{balance:?}",);
+        println!("Balance BEFORE burning:\n{balance:?}",);
 
         // Set the stronghold password
         wallet
@@ -47,7 +54,9 @@ async fn main() -> Result<()> {
 
         let balance = account.sync(None).await?;
 
-        println!("Balance after burning:\n{balance:?}",);
+        println!("Balance AFTER burning:\n{balance:?}",);
+    } else {
+        println!("No NFT available in account '{ACCOUNT_ALIAS}'");
     }
 
     Ok(())
