@@ -19,7 +19,7 @@ use packable::{
 };
 
 pub(crate) use self::{
-    milestone::{MilestoneMetadataLength, MilestoneOptionCount, ReceiptFundsCount, SignatureCount},
+    milestone::{MilestoneMetadataLength, MilestoneOptionCount, SignatureCount},
     tagged_data::{TagLength, TaggedDataLength},
     transaction::{InputCount, OutputCount},
 };
@@ -279,7 +279,7 @@ pub mod dto {
                 PayloadDto::Transaction(p) => {
                     Self::from(TransactionPayload::try_from_dto_with_params_inner(*p, params)?)
                 }
-                PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from_dto_with_params_inner(*p, params)?),
+                PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from(*p)?),
                 PayloadDto::TreasuryTransaction(p) => {
                     Self::from(TreasuryTransactionPayload::try_from_dto_with_params_inner(*p, params)?)
                 }

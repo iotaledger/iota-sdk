@@ -15,8 +15,8 @@ use crate::{
     },
     types::{
         api::core::response::{
-            BlockMetadataResponse, InfoResponse, OutputWithMetadataResponse, PeerResponse, ReceiptResponse,
-            ReceiptsResponse, RoutesResponse, SubmitBlockResponse, TipsResponse, TreasuryResponse, UtxoChangesResponse,
+            BlockMetadataResponse, InfoResponse, OutputWithMetadataResponse, PeerResponse, RoutesResponse,
+            SubmitBlockResponse, TipsResponse, TreasuryResponse, UtxoChangesResponse,
         },
         block::{
             output::{Output, OutputId, OutputMetadata, OutputWithMetadata},
@@ -305,36 +305,6 @@ impl ClientInner {
             .await
     }
 
-    /// Gets all stored receipts.
-    /// GET /api/core/v2/receipts
-    pub async fn get_receipts(&self) -> Result<Vec<ReceiptResponse>> {
-        let path = &"api/core/v2/receipts";
-
-        let resp = self
-            .node_manager
-            .read()
-            .await
-            .get_request::<ReceiptsResponse>(path, None, DEFAULT_API_TIMEOUT, false, false)
-            .await?;
-
-        Ok(resp.receipts)
-    }
-
-    /// Gets the receipts by the given milestone index.
-    /// GET /api/core/v2/receipts/{migratedAt}
-    pub async fn get_receipts_migrated_at(&self, milestone_index: u32) -> Result<Vec<ReceiptResponse>> {
-        let path = &format!("api/core/v2/receipts/{milestone_index}");
-
-        let resp = self
-            .node_manager
-            .read()
-            .await
-            .get_request::<ReceiptsResponse>(path, None, DEFAULT_API_TIMEOUT, false, false)
-            .await?;
-
-        Ok(resp.receipts)
-    }
-
     /// Gets the current treasury output.
     /// The treasury output contains all tokens from the legacy network that have not yet been migrated.
     /// GET /api/core/v2/treasury
@@ -397,17 +367,13 @@ impl ClientInner {
     pub async fn get_milestone_by_id(&self, milestone_id: &MilestoneId) -> Result<MilestonePayload> {
         let path = &format!("api/core/v2/milestones/{milestone_id}");
 
-        let dto = self
+        Ok(self
             .node_manager
             .read()
             .await
             .get_request::<MilestonePayloadDto>(path, None, self.get_timeout().await, false, true)
-            .await?;
-
-        Ok(MilestonePayload::try_from_dto_with_params(
-            dto,
-            self.get_protocol_parameters().await?,
-        )?)
+            .await?
+            .try_into()?)
     }
 
     /// Gets the milestone by the given milestone id.
@@ -439,17 +405,13 @@ impl ClientInner {
     pub async fn get_milestone_by_index(&self, index: u32) -> Result<MilestonePayload> {
         let path = &format!("api/core/v2/milestones/by-index/{index}");
 
-        let dto = self
+        Ok(self
             .node_manager
             .read()
             .await
             .get_request::<MilestonePayloadDto>(path, None, self.get_timeout().await, false, true)
-            .await?;
-
-        Ok(MilestonePayload::try_from_dto_with_params(
-            dto,
-            self.get_protocol_parameters().await?,
-        )?)
+            .await?
+            .try_into()?)
     }
 
     /// Gets the milestone by the given milestone index.

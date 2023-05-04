@@ -47,9 +47,6 @@ where
                 MqttPayload::MilestonePayload(ms) => {
                     serde_json::to_string(ms).expect("failed to serialize MqttPayload::MilestonePayload")
                 }
-                MqttPayload::Receipt(receipt) => {
-                    serde_json::to_string(receipt).expect("failed to serialize MqttPayload::Receipt")
-                }
                 e => panic!("received unknown mqtt type: {e:?}"),
             };
             let response = MqttResponse {
@@ -313,10 +310,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::GetUtxoChangesByIndex { index } => {
             Response::MilestoneUtxoChanges(client.get_utxo_changes_by_index(index).await?)
-        }
-        ClientMethod::GetReceipts => Response::Receipts(client.get_receipts().await?),
-        ClientMethod::GetReceiptsMigratedAt { milestone_index } => {
-            Response::Receipts(client.get_receipts_migrated_at(milestone_index).await?)
         }
         ClientMethod::GetTreasury => Response::Treasury(client.get_treasury().await?),
         ClientMethod::GetIncludedBlock { transaction_id } => {

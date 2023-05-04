@@ -43,7 +43,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             Response::BlockId(block.id())
         }
         UtilsMethod::MilestoneId { payload } => {
-            let payload = MilestonePayload::try_from_dto(payload)?;
+            let payload = MilestonePayload::try_from(payload)?;
             Response::MilestoneId(payload.id())
         }
         UtilsMethod::TransactionId { payload } => {

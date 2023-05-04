@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod parameters;
-mod receipt;
 
 use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
 
@@ -10,15 +9,9 @@ use derive_more::{Deref, From};
 use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
-pub(crate) use self::{parameters::BinaryParametersLength, receipt::ReceiptFundsCount};
-pub use self::{
-    parameters::ParametersMilestoneOption,
-    receipt::{MigratedFundsEntry, ReceiptMilestoneOption, TailTransactionHash},
-};
-use crate::types::{
-    block::{protocol::ProtocolParameters, Error},
-    ValidationParams,
-};
+pub(crate) use self::parameters::BinaryParametersLength;
+pub use self::parameters::ParametersMilestoneOption;
+use crate::types::block::{protocol::ProtocolParameters, Error};
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, From, Packable)]
@@ -26,9 +19,6 @@ use crate::types::{
 #[packable(tag_type = u8, with_error = Error::InvalidMilestoneOptionKind)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub enum MilestoneOption {
-    /// A receipt milestone option.
-    #[packable(tag = ReceiptMilestoneOption::KIND)]
-    Receipt(ReceiptMilestoneOption),
     /// A parameters milestone option.
     #[packable(tag = ParametersMilestoneOption::KIND)]
     Parameters(ParametersMilestoneOption),
@@ -38,7 +28,6 @@ impl MilestoneOption {
     /// Return the milestone option kind of a [`MilestoneOption`].
     pub fn kind(&self) -> u8 {
         match self {
-            Self::Receipt(_) => ReceiptMilestoneOption::KIND,
             Self::Parameters(_) => ParametersMilestoneOption::KIND,
         }
     }
@@ -130,15 +119,6 @@ impl MilestoneOptions {
             .ok()
     }
 
-    /// Gets a reference to a [`ReceiptMilestoneOption`], if any.
-    pub fn receipt(&self) -> Option<&ReceiptMilestoneOption> {
-        if let Some(MilestoneOption::Receipt(receipt)) = self.get(ReceiptMilestoneOption::KIND) {
-            Some(receipt)
-        } else {
-            None
-        }
-    }
-
     /// Gets a reference to a [`ParametersMilestoneOption`], if any.
     pub fn parameters(&self) -> Option<&ParametersMilestoneOption> {
         if let Some(MilestoneOption::Parameters(parameters)) = self.get(ParametersMilestoneOption::KIND) {
@@ -172,17 +152,12 @@ pub mod dto {
     use serde::{Deserialize, Serialize, Serializer};
     use serde_json::Value;
 
-    pub use self::{
-        parameters::dto::ParametersMilestoneOptionDto,
-        receipt::dto::{MigratedFundsEntryDto, ReceiptMilestoneOptionDto},
-    };
+    pub use self::parameters::dto::ParametersMilestoneOptionDto;
     use super::*;
-    use crate::types::{block::Error, TryFromDto};
+    use crate::types::block::Error;
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum MilestoneOptionDto {
-        /// A receipt milestone option.
-        Receipt(ReceiptMilestoneOptionDto),
         /// A parameters milestone option.
         Parameters(ParametersMilestoneOptionDto),
     }
@@ -197,11 +172,6 @@ pub mod dto {
                     .ok_or_else(|| serde::de::Error::custom("invalid milestone option type"))?
                     as u8
                 {
-                    ReceiptMilestoneOption::KIND => {
-                        Self::Receipt(ReceiptMilestoneOptionDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize receipt milestone option: {e}"))
-                        })?)
-                    }
                     ParametersMilestoneOption::KIND => {
                         Self::Parameters(ParametersMilestoneOptionDto::deserialize(value).map_err(|e| {
                             serde::de::Error::custom(format!("cannot deserialize parameters milestone option: {e}"))
@@ -221,7 +191,6 @@ pub mod dto {
             #[derive(Serialize)]
             #[serde(untagged)]
             enum MilestoneOptionDto_<'a> {
-                T1(&'a ReceiptMilestoneOptionDto),
                 T2(&'a ParametersMilestoneOptionDto),
             }
             #[derive(Serialize)]
@@ -230,9 +199,6 @@ pub mod dto {
                 milestone_option: MilestoneOptionDto_<'a>,
             }
             let milestone_option = match self {
-                Self::Receipt(o) => TypedMilestoneOption {
-                    milestone_option: MilestoneOptionDto_::T1(o),
-                },
                 Self::Parameters(o) => TypedMilestoneOption {
                     milestone_option: MilestoneOptionDto_::T2(o),
                 },
@@ -244,21 +210,16 @@ pub mod dto {
     impl From<&MilestoneOption> for MilestoneOptionDto {
         fn from(value: &MilestoneOption) -> Self {
             match value {
-                MilestoneOption::Receipt(v) => Self::Receipt(v.into()),
                 MilestoneOption::Parameters(v) => Self::Parameters(v.into()),
             }
         }
     }
 
-    impl TryFromDto for MilestoneOption {
-        type Dto = MilestoneOptionDto;
+    impl TryFrom<MilestoneOptionDto> for MilestoneOption {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            Ok(match dto {
-                MilestoneOptionDto::Receipt(v) => {
-                    Self::Receipt(ReceiptMilestoneOption::try_from_dto_with_params_inner(v, params)?)
-                }
+        fn try_from(value: MilestoneOptionDto) -> Result<Self, Self::Error> {
+            Ok(match value {
                 MilestoneOptionDto::Parameters(v) => Self::Parameters(v.try_into()?),
             })
         }
@@ -268,7 +229,6 @@ pub mod dto {
         /// Returns the milestone option kind of a [`MilestoneOptionDto`].
         pub fn kind(&self) -> u8 {
             match self {
-                Self::Receipt(_) => ReceiptMilestoneOption::KIND,
                 Self::Parameters(_) => ParametersMilestoneOption::KIND,
             }
         }

@@ -2,14 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
-    input::TreasuryInput,
-    output::TreasuryOutput,
-    payload::{
-        milestone::{
-            MilestoneEssence, MilestoneIndex, MilestoneOption, MilestoneOptions, ParametersMilestoneOption,
-            ReceiptMilestoneOption,
-        },
-        TreasuryTransactionPayload,
+    payload::milestone::{
+        MilestoneEssence, MilestoneIndex, MilestoneOption, MilestoneOptions, ParametersMilestoneOption,
     },
     protocol::protocol_parameters,
     rand::{
@@ -52,31 +46,14 @@ fn getters() {
     let target_milestone_index = rand_milestone_index();
     let binary_parameters =
         rand_bytes(rand_number_range(ParametersMilestoneOption::BINARY_PARAMETERS_LENGTH_RANGE) as usize);
-    let receipt = ReceiptMilestoneOption::new(
-        index,
-        true,
-        vec![rand::receipt::rand_migrated_funds_entry(
-            protocol_parameters.token_supply(),
-        )],
-        TreasuryTransactionPayload::new(
-            TreasuryInput::new(rand::milestone::rand_milestone_id()),
-            TreasuryOutput::new(1_000_000, protocol_parameters.token_supply()).unwrap(),
+    let options = MilestoneOptions::from_vec(vec![MilestoneOption::Parameters(
+        ParametersMilestoneOption::new(
+            target_milestone_index,
+            protocol_parameters.protocol_version(),
+            binary_parameters.clone(),
         )
         .unwrap(),
-        protocol_parameters.token_supply(),
-    )
-    .unwrap();
-    let options = MilestoneOptions::from_vec(vec![
-        MilestoneOption::Receipt(receipt.clone()),
-        MilestoneOption::Parameters(
-            ParametersMilestoneOption::new(
-                target_milestone_index,
-                protocol_parameters.protocol_version(),
-                binary_parameters.clone(),
-            )
-            .unwrap(),
-        ),
-    ])
+    )])
     .unwrap();
 
     let milestone_payload = MilestoneEssence::new(
@@ -114,7 +91,6 @@ fn getters() {
         milestone_payload.options().parameters().unwrap().binary_parameters(),
         binary_parameters
     );
-    assert_eq!(*milestone_payload.options().receipt().unwrap(), receipt);
 }
 
 #[test]

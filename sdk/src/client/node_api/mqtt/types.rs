@@ -10,10 +10,7 @@ use serde::{de::Error as _, Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 
 use super::Error;
-use crate::types::block::{
-    payload::{dto::MilestonePayloadDto, milestone::option::dto::ReceiptMilestoneOptionDto},
-    BlockDto,
-};
+use crate::types::block::{payload::dto::MilestonePayloadDto, BlockDto};
 
 type TopicHandler = Box<dyn Fn(&TopicEvent) + Send + Sync>;
 
@@ -40,8 +37,6 @@ pub enum MqttPayload {
     Block(BlockDto),
     /// In case it contains a `Milestone` object.
     MilestonePayload(MilestonePayloadDto),
-    /// In case it contains a `Receipt` object.
-    Receipt(ReceiptMilestoneOptionDto),
 }
 
 /// Mqtt events.
@@ -196,8 +191,6 @@ impl Topic {
                 r"^outputs/nft/0x([a-f0-9]{64})$",
                 r"^outputs/foundry/0x([a-f0-9]{76})$",
                 r"^outputs/unlock/(\+|address|storage-return|expiration|state-controller|governor|immutable-alias)/[\x21-\x7E]{1,30}1[A-Za-z0-9]+(?:/spent)?$",
-                // Receipt topics.
-                r"^receipts$",
             ]).expect("cannot build regex set") => RegexSet);
         valid_topics.is_match(&self.0)
     }
