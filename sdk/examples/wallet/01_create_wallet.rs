@@ -41,9 +41,9 @@ async fn main() -> Result<()> {
     // The mnemonic only needs to be stored the first time
     secret_manager.store_mnemonic(mnemonic).await?;
 
-    // Create the wallet with the secret_manager and client options
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
+    // Create the wallet
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .with_client_options(client_options)
