@@ -86,18 +86,9 @@ pub struct ClientMessageHandler {
 
 impl ClientMessageHandler {
     /// Creates a new instance of the message handler with the default client manager.
-    #[cfg(not(target_family = "wasm"))]
     pub async fn init() -> Result<Self> {
         Ok(Self {
             client: Client::builder().finish().await?,
-        })
-    }
-
-    /// Creates a new instance of the message handler with the default client manager.
-    #[cfg(target_family = "wasm")]
-    pub fn new() -> Self {
-        Ok(Self {
-            client: Client::builder().finish(),
         })
     }
 

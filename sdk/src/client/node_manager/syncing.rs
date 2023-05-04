@@ -44,9 +44,9 @@ impl Client {
     }
 }
 
+#[cfg(not(target_family = "wasm"))]
 impl ClientInner {
     /// Sync the node lists per node_sync_interval milliseconds
-    #[cfg(not(target_family = "wasm"))]
     pub(crate) async fn start_sync_process(
         self: Arc<Self>,
         nodes: HashSet<Node>,
@@ -63,7 +63,6 @@ impl ClientInner {
         }
     }
 
-    #[cfg(not(target_family = "wasm"))]
     pub(crate) async fn sync_nodes(&self, nodes: &HashSet<Node>, ignore_node_health: bool) -> Result<()> {
         log::debug!("sync_nodes");
         let mut healthy_nodes = HashMap::new();

@@ -1,8 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::rc::Rc;
-
 use iota_sdk_bindings_core::{
     call_client_method,
     iota_sdk::client::{Client, ClientBuilder},
@@ -16,14 +14,16 @@ use crate::{ArrayString, PromiseString};
 /// The Client method handler.
 #[wasm_bindgen(js_name = ClientMethodHandler)]
 pub struct ClientMethodHandler {
-    pub(crate) client: Rc<Client>,
+    pub(crate) client: Client,
 }
 
 /// Creates a method handler with the given client options.
 #[wasm_bindgen(js_name = createClient)]
 #[allow(non_snake_case)]
 pub fn create_client(clientOptions: String) -> Result<ClientMethodHandler, JsValue> {
-    let runtime = tokio::runtime::Runtime::new().map_err(|err| err.to_string())?;
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .build()
+        .map_err(|err| err.to_string())?;
 
     let client = runtime.block_on(async move {
         ClientBuilder::new()
@@ -34,9 +34,7 @@ pub fn create_client(clientOptions: String) -> Result<ClientMethodHandler, JsVal
             .map_err(|err| err.to_string())
     })?;
 
-    Ok(ClientMethodHandler {
-        client: Rc::new(client),
-    })
+    Ok(ClientMethodHandler { client })
 }
 
 /// Handles a method, returns the response as a JSON-encoded string.
@@ -45,7 +43,7 @@ pub fn create_client(clientOptions: String) -> Result<ClientMethodHandler, JsVal
 #[wasm_bindgen(js_name = callClientMethodAsync)]
 #[allow(non_snake_case)]
 pub fn call_client_method_async(method: String, methodHandler: &ClientMethodHandler) -> Result<PromiseString, JsValue> {
-    let client: Rc<Client> = Rc::clone(&methodHandler.client);
+    let client: Client = methodHandler.client.clone();
 
     let promise: js_sys::Promise = future_to_promise(async move {
         let method: ClientMethod = serde_json::from_str(&method).map_err(|err| err.to_string())?;

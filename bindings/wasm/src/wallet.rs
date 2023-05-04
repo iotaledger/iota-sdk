@@ -55,9 +55,7 @@ pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMe
         .block_on(async move { wallet.as_ref().expect("wallet got destroyed").get_client().await })
         .map_err(|e| e.to_string())?;
 
-    Ok(ClientMethodHandler {
-        client: Rc::new(client),
-    })
+    Ok(ClientMethodHandler { client })
 }
 
 /// Handles a method, returns the response as a JSON-encoded string.
