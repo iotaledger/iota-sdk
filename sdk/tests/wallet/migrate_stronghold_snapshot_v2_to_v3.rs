@@ -156,16 +156,16 @@ async fn stronghold_snapshot_with_data_v2_v3_migration() {
     assert_eq!(
         addresses,
         [
-            "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
-            "rms1qzzk86qv30l4e85ljtccxa0ruy8y7u8zn2dle3g8dv2tl2m4cu227a7n2wj",
-            "rms1qqjrtmslm36l3lyd8086w9qdxd9mudu2z2qyywlltpycn2ftxsdmu9ulj47",
-            "rms1qzz75j5h7vd5melxwersz49jja36m2vvnawedu0l6rlhg70ylzqp52lx8zf",
-            "rms1qzvs2rvq5ef79vhuel354mnvzfz049gyyf808zmjculuatt56u92vc4v4p3",
-            "rms1qpk0dj5lmv5r8d64f3x0qwx3jccredwa42xscdreqma73f3dxymaqdy645t",
-            "rms1qqlp6nurrz459jvvvuhv6t965v6cmlata57kf6auv6955uyp77uyw0egzgn",
-            "rms1qq2tu523zqzjxgdl69au8a9yewmd9ztctssv40dsv7lfd0tp36w4xdfzcyr",
-            "rms1qpw904c253cc9yn2dkhxx89u6r5j9vzezfatchrlugrkcvvhed3hckx6h2u",
-            "rms1qpa646cegkqsx9eht793nmux2vjwa63jrenqe87xq8j5wysfhu4l28k4ep9"
+            "rms1qr6n2qn5ps6l9r23l875suc0zzn9ztms5jkfhmst238exc3zl0vd5vkzhpy",
+            "rms1qq0pqye5wy99lmu3lny9vus7zr8gn3sptstkd0wq66aed5st94g5clekuw4",
+            "rms1qrj7c2rn4ac5kp2nqzyqssgqlsn9vz6hlyduuy7qgn9q4cw8gdrxc03mn0z",
+            "rms1qrfycvex0h666r3h5nqm3vq3jcvvfgj3nlsq0nwzss4zn5rxcrv9kxdwuh0",
+            "rms1qp24knzulhemnxhj9yvwryaya88e47x3kfatkrjcwsw9vuta3tu2vm9ve33",
+            "rms1qzmeyc8tq6uff73pca98t7e7esaxflhmw5ml7ecqw7qsahp0knu2sfgrrhl",
+            "rms1qpt29vjuj26wu5xdkq5ywclsh5jjrt8rtd354u2j9xyhjkslh7ngksye5zv",
+            "rms1qqmm5ngpxkwcg2fc25c5xe8k8l5txknndmm44ygj6fg2sjhrtrjwz6rkx2g",
+            "rms1qq6fjt9kgtu5lpetmmv9j7j7m9zwps8vm8y49ju5e3v3gtm974cgzsv2408",
+            "rms1qry8euv504maz2a7mvqlzfv2uy5v6f3r6n6rt3tap8tfan96exgpupgn0cy"
         ]
     );
 
