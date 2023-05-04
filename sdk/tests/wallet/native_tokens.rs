@@ -1,7 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::wallet::{account::SyncOptions, MintNativeTokenParams, Result, U256};
+use iota_sdk::{
+    wallet::{account::SyncOptions, MintNativeTokenParams, Result},
+    U256,
+};
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 

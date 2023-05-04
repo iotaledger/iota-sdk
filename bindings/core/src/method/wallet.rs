@@ -8,11 +8,12 @@ use derivative::Derivative;
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
 use iota_sdk::{
-    client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions, Url},
+    client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions},
     wallet::{
         account::{types::AccountIdentifier, SyncOptions},
         ClientOptions,
     },
+    Url,
 };
 use serde::{Deserialize, Serialize};
 
@@ -107,7 +108,10 @@ pub enum WalletMethod {
     /// mnemonic was stored, it will be gone.
     /// if ignore_if_coin_type_mismatch.is_some(), client options will not be restored
     /// if ignore_if_coin_type_mismatch == Some(true), client options coin type and accounts will not be restored if
-    /// the cointype doesn't match Expected response: [`Ok`](crate::Response::Ok)
+    /// the cointype doesn't match
+    /// if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", no accounts
+    /// will be restored.
+    /// Expected response: [`Ok`](crate::Response::Ok)
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
     #[serde(rename_all = "camelCase")]
@@ -117,7 +121,13 @@ pub enum WalletMethod {
         /// Stronghold file password.
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         password: String,
+        /// If ignore_if_coin_type_mismatch.is_some(), client options will not be restored.
+        /// If ignore_if_coin_type_mismatch == Some(true), client options coin type and accounts will not be restored
+        /// if the cointype doesn't match.
         ignore_if_coin_type_mismatch: Option<bool>,
+        /// If ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", no
+        /// accounts will be restored.
+        ignore_if_bech32_mismatch: Option<String>,
     },
     /// Removes the latest account (account with the largest account index).
     /// Expected response: [`Ok`](crate::Response::Ok)

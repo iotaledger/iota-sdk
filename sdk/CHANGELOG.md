@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::{unspent_alias_output, unspent_foundry_output, unspent_nft_output}` methods;
 - `StrongholdAdapter::inner` method;
 - `OutputMetadata::set_spent` method;
+- `ignore_if_bech32_mismatch` parameter to `Wallet::restore_backup()`;
 
 ### Changed
 

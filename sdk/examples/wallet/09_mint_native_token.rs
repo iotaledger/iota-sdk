@@ -6,7 +6,10 @@
 //!
 //! `cargo run --example mint_native_token --release`
 
-use iota_sdk::wallet::{MintNativeTokenParams, Result, Wallet, U256};
+use iota_sdk::{
+    wallet::{MintNativeTokenParams, Result, Wallet},
+    U256,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {

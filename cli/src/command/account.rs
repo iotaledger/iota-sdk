@@ -19,8 +19,9 @@ use iota_sdk::{
     },
     wallet::{
         account::{types::AccountAddress, Account, OutputsToClaim, TransactionOptions},
-        MintNativeTokenParams, MintNftParams, SendAmountParams, SendNativeTokensParams, SendNftParams, U256,
+        MintNativeTokenParams, MintNftParams, SendAmountParams, SendNativeTokensParams, SendNftParams,
     },
+    U256,
 };
 
 use crate::{error::Error, helper::to_utc_date_time, println_log_info};

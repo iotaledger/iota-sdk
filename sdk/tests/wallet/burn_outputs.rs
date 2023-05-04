@@ -6,7 +6,8 @@ use iota_sdk::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         NftId, NftOutputBuilder, OutputId, UnlockCondition,
     },
-    wallet::{Account, MintNativeTokenParams, MintNftParams, Result, U256},
+    wallet::{Account, MintNativeTokenParams, MintNftParams, Result},
+    U256,
 };
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};

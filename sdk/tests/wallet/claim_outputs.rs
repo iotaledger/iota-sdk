@@ -8,8 +8,9 @@ use iota_sdk::{
     },
     wallet::{
         account::{OutputsToClaim, TransactionOptions},
-        MintNativeTokenParams, Result, SendAmountParams, SendNativeTokensParams, U256,
+        MintNativeTokenParams, Result, SendAmountParams, SendNativeTokensParams,
     },
+    U256,
 };
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
