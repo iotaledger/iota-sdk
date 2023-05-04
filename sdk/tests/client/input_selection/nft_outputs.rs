@@ -592,7 +592,7 @@ fn missing_ed25519_issuer_transition() {
     )
     .select();
 
-    assert!(selected.is_ok());
+    assert!(selected.is_err());
 }
 
 #[test]
@@ -714,7 +714,7 @@ fn missing_alias_issuer_transition() {
     )
     .select();
 
-    assert!(selected.is_ok());
+    assert!(selected.is_err());
 }
 
 #[test]
@@ -836,7 +836,7 @@ fn missing_nft_issuer_transition() {
     )
     .select();
 
-    assert!(selected.is_ok());
+    assert!(selected.is_err());
 }
 
 #[test]

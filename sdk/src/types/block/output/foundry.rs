@@ -210,6 +210,10 @@ impl FoundryOutputBuilder {
 
         verify_allowed_features(&immutable_features, FoundryOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
+        if self.serial_number == 0 {
+            return Err(Error::InvalidZeroSerialNumber);
+        }
+
         let mut output = FoundryOutput {
             amount: 1u64,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,

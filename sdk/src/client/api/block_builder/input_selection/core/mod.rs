@@ -451,14 +451,13 @@ impl InputSelection {
                         })
                         .expect("ISA is broken because there is no alias input");
 
-                    if AliasOutput::transition(
+                    if let Err(err) = AliasOutput::transition(
                         alias_input.output.as_alias(),
                         alias_output,
                         &input_chains_foundries,
                         &self.outputs,
-                    )
-                    .is_err()
-                    {
+                    ) {
+                        log::debug!("validate_transitions error {err:?}");
                         let alias_transition =
                             if alias_input.output.as_alias().state_index() == alias_output.state_index() {
                                 AliasTransition::Governance

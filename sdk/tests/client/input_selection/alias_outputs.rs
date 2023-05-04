@@ -670,7 +670,7 @@ fn missing_ed25519_issuer_transition() {
     )
     .select();
 
-    assert!(selected.is_ok());
+    assert!(selected.is_err());
 }
 
 #[test]
@@ -792,7 +792,7 @@ fn missing_alias_issuer_transition() {
     )
     .select();
 
-    assert!(selected.is_ok());
+    assert!(selected.is_err());
 }
 
 #[test]
@@ -914,7 +914,7 @@ fn missing_nft_issuer_transition() {
     )
     .select();
 
-    assert!(selected.is_ok());
+    assert!(selected.is_err());
 }
 
 #[test]
@@ -939,7 +939,7 @@ fn increase_alias_amount() {
     let outputs = build_outputs(vec![Alias(
         3_000_000,
         alias_id_1,
-        0,
+        1,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
@@ -983,7 +983,7 @@ fn decrease_alias_amount() {
     let outputs = build_outputs(vec![Alias(
         1_000_000,
         alias_id_1,
-        0,
+        1,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
@@ -1658,17 +1658,20 @@ fn governor_sender_required_already_selected() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs(vec![Alias(
-        2_000_000,
-        alias_id_1,
-        0,
-        BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let inputs = build_inputs(vec![
+        Alias(
+            1_000_000,
+            alias_id_1,
+            0,
+            BECH32_ADDRESS_ED25519_0,
+            BECH32_ADDRESS_ED25519_1,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(1_000_000, BECH32_ADDRESS_ED25519_1, None, None, None, None, None, None),
+    ]);
     let outputs = build_outputs(vec![
         Alias(
             1_000_000,
@@ -1956,17 +1959,20 @@ fn remainder_address_in_governor() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs(vec![Alias(
-        2_000_000,
-        alias_id_1,
-        0,
-        BECH32_ADDRESS_ALIAS_2,
-        BECH32_ADDRESS_ED25519_0,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let inputs = build_inputs(vec![
+        Alias(
+            1_000_000,
+            alias_id_1,
+            0,
+            BECH32_ADDRESS_ALIAS_2,
+            BECH32_ADDRESS_ED25519_0,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+    ]);
     let outputs = build_outputs(vec![Alias(
         1_000_000,
         alias_id_1,
@@ -1985,6 +1991,8 @@ fn remainder_address_in_governor() {
         addresses(vec![BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
+    // Add the basic output so it will be consumed
+    .required_inputs(HashSet::from_iter(vec![*inputs[1].output_id()]))
     .select()
     .unwrap();
 

@@ -31,6 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `OutputWithMetadata::{into_output, into_metadata}` methods;
 - Storage and Backup migration;
 - Validation for transitions in the input selection;
+- Automatically increase foundry counter of alias outputs;
+- `types::block::Error::InvalidZeroSerialNumber` variant;
+- Validate that foundry outputs can't have serial number `0`;
 
 ### Changed
 

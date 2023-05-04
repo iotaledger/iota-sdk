@@ -4,11 +4,19 @@
 use std::{collections::HashSet, str::FromStr};
 
 use iota_sdk::{
-    client::api::input_selection::{Burn, Error, InputSelection, Requirement},
+    client::{
+        api::input_selection::{Burn, Error, InputSelection, Requirement},
+        secret::types::InputSigningData,
+    },
     types::block::{
         address::{Address, AliasAddress},
-        output::{AliasId, AliasOutputBuilder, AliasTransition, FoundryId, Output, SimpleTokenScheme, TokenId},
+        output::{
+            unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
+            AliasId, AliasOutputBuilder, AliasTransition, FoundryId, Output, OutputMetadata, SimpleTokenScheme,
+            TokenId,
+        },
         protocol::protocol_parameters,
+        rand::{block::rand_block_id, output::rand_output_id},
     },
 };
 use primitive_types::U256;
@@ -37,7 +45,7 @@ fn missing_input_alias_for_foundry() {
     let outputs = build_outputs(vec![Foundry(
         1_000_000,
         alias_id_2,
-        0,
+        1,
         SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
         None,
     )]);
@@ -72,13 +80,27 @@ fn existing_input_alias_for_foundry_alias() {
         None,
         None,
     )]);
-    let outputs = build_outputs(vec![Foundry(
+    let mut outputs = build_outputs(vec![Foundry(
         1_000_000,
         alias_id_2,
-        0,
+        1,
         SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
         None,
     )]);
+
+    outputs.push(
+        AliasOutputBuilder::new_with_amount(251_500, alias_id_2)
+            .add_unlock_condition(StateControllerAddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .add_unlock_condition(GovernorAddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .with_state_index(1)
+            .with_foundry_counter(1)
+            .finish_output(protocol_parameters.token_supply())
+            .unwrap(),
+    );
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -107,7 +129,7 @@ fn minted_native_tokens_in_new_remainder() {
     let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs(vec![
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
         Alias(
             1_000_000,
             alias_id_2,
@@ -123,7 +145,7 @@ fn minted_native_tokens_in_new_remainder() {
     let outputs = build_outputs(vec![Foundry(
         1_000_000,
         alias_id_2,
-        0,
+        1,
         SimpleTokenScheme::new(U256::from(10), U256::from(0), U256::from(10)).unwrap(),
         None,
     )]);
@@ -157,7 +179,7 @@ fn minted_native_tokens_in_new_remainder() {
 fn minted_native_tokens_in_provided_output() {
     let protocol_parameters = protocol_parameters();
     let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
-    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id_2), 0, SimpleTokenScheme::KIND);
+    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id_2), 1, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
 
     let inputs = build_inputs(vec![
@@ -178,7 +200,7 @@ fn minted_native_tokens_in_provided_output() {
         Foundry(
             1_000_000,
             alias_id_2,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(100)).unwrap(),
             None,
         ),
@@ -215,34 +237,38 @@ fn melt_native_tokens() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs(vec![
+    let mut inputs = build_inputs(vec![
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Alias(
-            1_000_000,
-            alias_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
         Foundry(
             1_000_000,
             alias_id_1,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(10), U256::from(0), U256::from(10)).unwrap(),
             Some(vec![(
-                "0x0811111111111111111111111111111111111111111111111111111111111111110000000000",
+                "0x0811111111111111111111111111111111111111111111111111111111111111110100000000",
                 10,
             )]),
         ),
     ]);
+    let alias_output = AliasOutputBuilder::new_with_amount(1_000_000, alias_id_1)
+        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_foundry_counter(1)
+        .finish_output(protocol_parameters.token_supply())
+        .unwrap();
+    inputs.push(InputSigningData {
+        output: alias_output.clone(),
+        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        chain: None,
+    });
     let outputs = build_outputs(vec![Foundry(
         1_000_000,
         alias_id_1,
-        0,
+        1,
         // Melt 5 native tokens
         SimpleTokenScheme::new(U256::from(10), U256::from(5), U256::from(10)).unwrap(),
         None,
@@ -282,7 +308,7 @@ fn destroy_foundry_with_alias_state_transition() {
         Alias(
             50_300,
             alias_id_2,
-            0,
+            1,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -293,7 +319,7 @@ fn destroy_foundry_with_alias_state_transition() {
         Foundry(
             52_800,
             alias_id_2,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
             None,
         ),
@@ -330,7 +356,7 @@ fn destroy_foundry_with_alias_governance_transition() {
         Alias(
             1_000_000,
             alias_id_2,
-            0,
+            1,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -341,7 +367,7 @@ fn destroy_foundry_with_alias_governance_transition() {
         Foundry(
             1_000_000,
             alias_id_2,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
             None,
         ),
@@ -372,7 +398,7 @@ fn destroy_foundry_with_alias_burn() {
         Alias(
             1_000_000,
             alias_id_2,
-            0,
+            1,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -383,7 +409,7 @@ fn destroy_foundry_with_alias_burn() {
         Foundry(
             1_000_000,
             alias_id_2,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
             None,
         ),
@@ -427,7 +453,7 @@ fn prefer_basic_to_foundry() {
         Alias(
             1_000_000,
             alias_id_1,
-            0,
+            1,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -438,7 +464,7 @@ fn prefer_basic_to_foundry() {
         Foundry(
             1_000_000,
             alias_id_1,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
             None,
         ),
@@ -474,31 +500,37 @@ fn simple_foundry_transition_basic_not_needed() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs(vec![
+    let mut inputs = build_inputs(vec![
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
         Foundry(
             1_000_000,
             alias_id_1,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
             None,
         ),
-        Alias(
-            2_000_000,
-            alias_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
     ]);
+    let alias_output = AliasOutputBuilder::new_with_amount(2_000_000, alias_id_1)
+        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_state_index(1)
+        .with_foundry_counter(1)
+        .finish_output(protocol_parameters.token_supply())
+        .unwrap();
+    inputs.push(InputSigningData {
+        output: alias_output.clone(),
+        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        chain: None,
+    });
+
     let outputs = build_outputs(vec![Foundry(
         1_000_000,
         alias_id_1,
-        0,
+        1,
         SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
         None,
     )]);
@@ -543,31 +575,36 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs(vec![
+    let mut inputs = build_inputs(vec![
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
         Foundry(
             2_000_000,
             alias_id_1,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
             None,
         ),
-        Alias(
-            2_000_000,
-            alias_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
     ]);
+    let alias_output = AliasOutputBuilder::new_with_amount(2_000_000, alias_id_1)
+        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_foundry_counter(1)
+        .with_state_index(1)
+        .finish_output(protocol_parameters.token_supply())
+        .unwrap();
+    inputs.push(InputSigningData {
+        output: alias_output.clone(),
+        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        chain: None,
+    });
     let outputs = build_outputs(vec![Foundry(
         1_000_000,
         alias_id_1,
-        0,
+        1,
         SimpleTokenScheme::new(U256::from(10), U256::from(10), U256::from(10)).unwrap(),
         None,
     )]);
@@ -688,33 +725,37 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
 fn mint_and_burn_at_the_same_time() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
-    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id_1), 0, SimpleTokenScheme::KIND);
+    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id_1), 1, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
 
-    let inputs = build_inputs(vec![
-        Alias(
-            2_000_000,
-            alias_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Foundry(
-            1_000_000,
-            alias_id_1,
-            0,
-            SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(200)).unwrap(),
-            Some(vec![(&token_id.to_string(), 100)]),
-        ),
-    ]);
+    let mut inputs = build_inputs(vec![Foundry(
+        1_000_000,
+        alias_id_1,
+        1,
+        SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(200)).unwrap(),
+        Some(vec![(&token_id.to_string(), 100)]),
+    )]);
+    let alias_output = AliasOutputBuilder::new_with_amount(2_000_000, alias_id_1)
+        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_foundry_counter(1)
+        .with_state_index(1)
+        .finish_output(protocol_parameters.token_supply())
+        .unwrap();
+    inputs.push(InputSigningData {
+        output: alias_output.clone(),
+        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        chain: None,
+    });
+
     let outputs = build_outputs(vec![Foundry(
         1_000_000,
         alias_id_1,
-        0,
+        1,
         SimpleTokenScheme::new(U256::from(120), U256::from(0), U256::from(200)).unwrap(),
         Some(vec![(&token_id.to_string(), 110)]),
     )]);
@@ -737,7 +778,7 @@ fn mint_and_burn_at_the_same_time() {
             if output.is_alias() {
                 assert_eq!(output.amount(), 2_000_000);
                 assert_eq!(output.as_alias().native_tokens().len(), 0);
-                assert_eq!(output.as_alias().state_index(), 1);
+                assert_eq!(output.as_alias().state_index(), 2);
                 assert_eq!(*output.as_alias().alias_id(), alias_id_1);
                 assert_eq!(output.as_alias().unlock_conditions().len(), 2);
                 assert_eq!(output.as_alias().features().len(), 0);
@@ -764,27 +805,32 @@ fn take_amount_from_alias_and_foundry_to_fund_basic() {
     let foundry_id = FoundryId::build(&AliasAddress::from(alias_id_1), 0, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
 
-    let inputs = build_inputs(vec![
-        Alias(
-            2_000_000,
-            alias_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+    let mut inputs = build_inputs(vec![
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
         Foundry(
             1_000_000,
             alias_id_1,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(200)).unwrap(),
             Some(vec![(&token_id.to_string(), 100)]),
         ),
     ]);
+    let alias_output = AliasOutputBuilder::new_with_amount(2_000_000, alias_id_1)
+        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_foundry_counter(1)
+        .with_state_index(1)
+        .finish_output(protocol_parameters.token_supply())
+        .unwrap();
+    inputs.push(InputSigningData {
+        output: alias_output.clone(),
+        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        chain: None,
+    });
     let outputs = build_outputs(vec![Basic(
         3_200_000,
         BECH32_ADDRESS_ED25519_0,
@@ -827,7 +873,7 @@ fn mint_native_tokens_but_burn_alias() {
         Alias(
             2_000_000,
             alias_id_1,
-            0,
+            1,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -838,7 +884,7 @@ fn mint_native_tokens_but_burn_alias() {
         Foundry(
             1_000_000,
             alias_id_1,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(100)).unwrap(),
             None,
         ),
@@ -846,7 +892,7 @@ fn mint_native_tokens_but_burn_alias() {
     let outputs = build_outputs(vec![Foundry(
         1_000_000,
         alias_id_1,
-        0,
+        1,
         SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(100)).unwrap(),
         Some(vec![(&token_id.to_string(), 100)]),
     )]);
@@ -870,14 +916,14 @@ fn mint_native_tokens_but_burn_alias() {
 fn melted_tokens_not_provided() {
     let protocol_parameters = protocol_parameters();
     let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
-    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id_1), 0, SimpleTokenScheme::KIND);
+    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id_1), 1, SimpleTokenScheme::KIND);
     let token_id_1 = TokenId::from(foundry_id);
 
     let inputs = build_inputs(vec![
         Alias(
             2_000_000,
             alias_id_1,
-            0,
+            1,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -888,7 +934,7 @@ fn melted_tokens_not_provided() {
         Foundry(
             1_000_000,
             alias_id_1,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(100)).unwrap(),
             None,
         ),
@@ -896,7 +942,7 @@ fn melted_tokens_not_provided() {
     let outputs = build_outputs(vec![Foundry(
         1_000_000,
         alias_id_1,
-        0,
+        1,
         SimpleTokenScheme::new(U256::from(100), U256::from(100), U256::from(100)).unwrap(),
         None,
     )]);
@@ -929,7 +975,7 @@ fn burned_tokens_not_provided() {
         Alias(
             2_000_000,
             alias_id_1,
-            0,
+            1,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -940,7 +986,7 @@ fn burned_tokens_not_provided() {
         Foundry(
             1_000_000,
             alias_id_1,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(100)).unwrap(),
             None,
         ),
@@ -948,7 +994,7 @@ fn burned_tokens_not_provided() {
     let outputs = build_outputs(vec![Foundry(
         1_000_000,
         alias_id_1,
-        0,
+        1,
         SimpleTokenScheme::new(U256::from(100), U256::from(0), U256::from(100)).unwrap(),
         None,
     )]);
@@ -976,30 +1022,33 @@ fn foundry_in_outputs_and_required() {
     let protocol_parameters = protocol_parameters();
     let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
 
-    let inputs = build_inputs(vec![
-        Alias(
-            1_251_500,
-            alias_id_2,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Foundry(
-            1_000_000,
-            alias_id_2,
-            0,
-            SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
-            None,
-        ),
-    ]);
+    let mut inputs = build_inputs(vec![Foundry(
+        1_000_000,
+        alias_id_2,
+        1,
+        SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
+        None,
+    )]);
+    let alias_output = AliasOutputBuilder::new_with_amount(1_251_500, alias_id_2)
+        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_foundry_counter(1)
+        .with_state_index(1)
+        .finish_output(protocol_parameters.token_supply())
+        .unwrap();
+    inputs.push(InputSigningData {
+        output: alias_output.clone(),
+        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        chain: None,
+    });
     let outputs = build_outputs(vec![Foundry(
         1_000_000,
         alias_id_2,
-        0,
+        1,
         SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
         None,
     )]);

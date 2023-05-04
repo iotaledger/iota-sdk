@@ -597,7 +597,7 @@ fn burn_foundry_present() {
         Foundry(
             1_000_000,
             alias_id_1,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
             None,
         ),
@@ -735,21 +735,21 @@ fn burn_foundries_present() {
         Foundry(
             1_000_000,
             alias_id_1,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
             None,
         ),
         Foundry(
             1_000_000,
             alias_id_1,
-            1,
+            2,
             SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
             None,
         ),
         Alias(
             1_000_000,
             alias_id_1,
-            0,
+            2,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -815,7 +815,7 @@ fn burn_foundry_in_outputs() {
         Foundry(
             1_000_000,
             alias_id_1,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
             None,
         ),
@@ -825,7 +825,7 @@ fn burn_foundry_in_outputs() {
         Foundry(
             1_000_000,
             alias_id_1,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
             None,
         ),

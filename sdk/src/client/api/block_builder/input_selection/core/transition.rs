@@ -44,11 +44,24 @@ impl InputSelection {
             return Ok(None);
         }
 
+        let mut highest_foundry_serial_number = 0;
+        for output in self.outputs.iter() {
+            if let Output::Foundry(foundry) = output {
+                if let ChainId::Foundry(foundry_id) = foundry.chain_id() {
+                    if *foundry_id.alias_address().alias_id() == alias_id {
+                        highest_foundry_serial_number =
+                            u32::max(highest_foundry_serial_number, foundry_id.serial_number());
+                    }
+                }
+            }
+        }
+
         // Remove potential sender feature because it will not be needed anymore as it only needs to be verified once.
         let features = input.features().iter().cloned().filter(|feature| !feature.is_sender());
 
         let mut builder = AliasOutputBuilder::from(input)
             .with_alias_id(alias_id)
+            .with_foundry_counter(u32::max(highest_foundry_serial_number, input.foundry_counter()))
             .with_features(features);
 
         if alias_transition.is_state() {
