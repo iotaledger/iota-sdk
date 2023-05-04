@@ -275,7 +275,7 @@ impl InputSelection {
                         input_signing_data.output_id(),
                         alias_transition.map(|(alias_transition, _)| alias_transition),
                     )
-                    // PANIC: safe to unwrap, because we filtered treasury outputs out before
+                    // PANIC: safe to unwrap, because we filtered outputs before
                     .unwrap();
 
                 input_address.is_ed25519()
@@ -333,7 +333,7 @@ impl InputSelection {
                                     input.output_id(),
                                     alias_transition.map(|(alias_transition, _)| alias_transition),
                                 )
-                                // PANIC: safe to unwrap, because we filtered treasury outputs out before
+                                // PANIC: safe to unwrap, because we filtered outputs before
                                 .unwrap();
 
                             input_address == alias_or_nft_address
