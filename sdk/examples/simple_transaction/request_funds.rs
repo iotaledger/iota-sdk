@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
 
     let addresses = client
         .get_addresses(&secret_manager)
-        .with_account_index(1)
+        .with_account_index(0)
         .with_range(0..1)
         .finish()
         .await?;
