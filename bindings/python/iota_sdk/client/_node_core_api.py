@@ -133,18 +133,6 @@ class NodeCoreAPI():
             'index': index
         })
 
-    def get_receipts(self):
-        """Get all receipts.
-        """
-        return self._call_method('getReceipts')
-
-    def get_receipts_migrated_at(self, milestone_index: int):
-        """Get the receipts by the given milestone index.
-        """
-        return self._call_method('getReceiptsMigratedAt', {
-            'milestoneIndex': milestone_index
-        })
-
     def get_treasury(self):
         """Get the treasury output.
         """
