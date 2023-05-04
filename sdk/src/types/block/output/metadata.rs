@@ -86,6 +86,11 @@ impl OutputMetadata {
         self.is_spent
     }
 
+    /// Sets whether the output is spent ot not.
+    pub fn set_spent(&mut self, spent: bool) {
+        self.is_spent = spent;
+    }
+
     /// Returns the milestone index spent of the [`OutputMetadata`].
     pub fn milestone_index_spent(&self) -> Option<u32> {
         self.milestone_index_spent

@@ -310,12 +310,12 @@ impl Account {
                 }
 
                 if let Some(lower_bound_booked_timestamp) = filter.lower_bound_booked_timestamp {
-                    if output.metadata.milestone_timestamp_booked < lower_bound_booked_timestamp {
+                    if output.metadata.milestone_timestamp_booked() < lower_bound_booked_timestamp {
                         continue;
                     }
                 }
                 if let Some(upper_bound_booked_timestamp) = filter.upper_bound_booked_timestamp {
-                    if output.metadata.milestone_timestamp_booked > upper_bound_booked_timestamp {
+                    if output.metadata.milestone_timestamp_booked() > upper_bound_booked_timestamp {
                         continue;
                     }
                 }
