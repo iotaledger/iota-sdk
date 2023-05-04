@@ -1,9 +1,15 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! TODO: Example description
+//! In this example we will print the details of two accounts in the wallet. If an account doesn't exist yet it will be
+//! created. For the second account it will generate as many addresses as defined in the constant.
 //!
-//! `cargo run --example accounts --release`
+//! Make sure there's no `example.stronghold` file and no `example.walletdb` folder yet!
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --all-features --example accounts --release
+//! ```
 
 use std::time::Instant;
 
@@ -16,8 +22,12 @@ use iota_sdk::{
     wallet::{ClientOptions, Result, Wallet},
 };
 
-const ACCOUNT_1: &str = "alice";
-const ACCOUNT_2: &str = "bob";
+// The account aliases used in this example
+const ACCOUNT_ALIAS_1: &str = "Alice";
+const ACCOUNT_ALIAS_2: &str = "Bob";
+// The wallet database folder
+const WALLET_DB_PATH: &str = "./example.walletdb";
+// The number of addresses to generate
 const NUM_ADDRESSES_TO_GENERATE: u32 = 5;
 
 #[tokio::main]
@@ -34,63 +44,81 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_storage_path(WALLET_DB_PATH)
         .finish()
         .await?;
 
-    // Get account or create a new one
-    let account_alias = ACCOUNT_1;
-
-    // create first account
-    let _first_account = match wallet.get_account(account_alias).await {
-        Ok(account) => account,
-        _ => {
-            // first we'll create an example account and store it
-            wallet
-                .create_account()
-                .with_alias(account_alias.to_string())
-                .finish()
-                .await?
-        }
+    // Get or create first account
+    let _account1 = if let Ok(account) = wallet.get_account(ACCOUNT_ALIAS_1).await {
+        account
+    } else {
+        println!("Creating account {ACCOUNT_ALIAS_1}");
+        wallet
+            .create_account()
+            .with_alias(ACCOUNT_ALIAS_1.to_string())
+            .finish()
+            .await?
     };
 
-    // create second account
-    let account_alias = ACCOUNT_2;
-    let account = match wallet.get_account(account_alias).await {
-        Ok(account) => account,
-        _ => {
-            wallet
-                .create_account()
-                .with_alias(account_alias.to_string())
-                .finish()
-                .await?
-        }
+    // Get or create second account
+    let account2 = if let Ok(account) = wallet.get_account(ACCOUNT_ALIAS_2).await {
+        account
+    } else {
+        println!("Creating account {ACCOUNT_ALIAS_2}");
+        wallet
+            .create_account()
+            .with_alias(ACCOUNT_ALIAS_2.to_string())
+            .finish()
+            .await?
     };
 
     let accounts = wallet.get_accounts().await?;
+    println!("WALLET ACCOUNTS:");
     for account in accounts {
-        let a = account.read().await;
-        println!("Accounts: {a:#?}");
+        let account = account.read().await;
+        println!("- {}", account.alias());
     }
 
-    let addresses = account.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
+    println!("Generating addresses for account '{ACCOUNT_ALIAS_2}'...");
+    let addresses = account2.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
 
+    let balance = account2.sync(None).await?;
+    let funds_before = balance.base_coin().available();
+
+    println!("Requesting funds from faucet...");
+    let faucet_response = request_funds_from_faucet(
+        &std::env::var("FAUCET_URL").unwrap(),
+        &addresses[0].address().to_string(),
+    )
+    .await?;
+    println!("Response from faucet: {}", faucet_response.trim_end());
+
+    println!("Waiting for funds (timeout=60s)...");
+    // Check for changes to the balance
+    let start = std::time::Instant::now();
+    let balance = loop {
+        if start.elapsed().as_secs() > 60 {
+            println!("Timeout: waiting for funds took too long");
+            return Ok(());
+        };
+        let now = Instant::now();
+        let balance = account2.sync(None).await?;
+        if balance.base_coin().available() > funds_before {
+            println!("Syncing took: {:.2?}", now.elapsed());
+            break balance;
+        } else {
+            tokio::time::sleep(instant::Duration::from_secs(2)).await;
+        }
+    };
+
+    println!("New available funds: {}", balance.base_coin().available());
+
+    let addresses = account2.addresses().await?;
     println!(
-        "{}",
-        request_funds_from_faucet(
-            &std::env::var("FAUCET_URL").unwrap(),
-            &addresses[0].address().to_string()
-        )
-        .await?
+        "Number of addresses in {ACCOUNT_ALIAS_2}'s account: {}",
+        addresses.len()
     );
-    tokio::time::sleep(std::time::Duration::from_secs(15)).await;
-
-    let addresses = account.addresses().await?;
-    println!("Addresses: {}", addresses.len());
-
-    let now = Instant::now();
-    let balance = account.sync(None).await?;
-    println!("Syncing took: {:.2?}", now.elapsed());
-    println!("Balance: {balance:?}");
+    println!("{ACCOUNT_ALIAS_2}'s base coin balance:\n{:#?}", balance.base_coin());
 
     Ok(())
 }
