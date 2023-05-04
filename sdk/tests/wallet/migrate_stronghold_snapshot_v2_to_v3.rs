@@ -93,8 +93,6 @@ async fn stronghold_snapshot_v2_v3_migration() {
         )
         .await;
 
-    println!("{error:?}");
-
     match error {
         Err(WalletError::Client(err)) => {
             assert!(matches!(
@@ -106,6 +104,46 @@ async fn stronghold_snapshot_v2_v3_migration() {
     }
 
     std::fs::remove_file("./tests/wallet/fixtures/v3.stronghold").unwrap();
+    tear_down(storage_path).unwrap();
+}
+
+#[cfg(feature = "stronghold")]
+#[tokio::test]
+async fn stronghold_snapshot_v2_v3_migration_same_path() {
+    let storage_path = "test-storage/stronghold_snapshot_v2_v3_migration_same_path";
+    setup(storage_path).unwrap();
+
+    std::fs::copy(
+        "./tests/wallet/fixtures/v2.stronghold",
+        "./tests/wallet/fixtures/v2-copy.stronghold",
+    )
+    .unwrap();
+
+    let error = StrongholdSecretManager::builder()
+        .password("current_password")
+        .build("./tests/wallet/fixtures/v2-copy.stronghold");
+
+    assert!(matches!(
+        error,
+        Err(StrongholdError::UnsupportedSnapshotVersion { found, expected }) if found == 2 && expected == 3
+    ));
+
+    StrongholdAdapter::migrate_v2_to_v3(
+        "./tests/wallet/fixtures/v2-copy.stronghold",
+        "current_password",
+        Some("./tests/wallet/fixtures/v2-copy.stronghold"),
+        Some("new_password"),
+    )
+    .unwrap();
+
+    SecretManager::Stronghold(
+        StrongholdSecretManager::builder()
+            .password("new_password")
+            .build("./tests/wallet/fixtures/v2-copy.stronghold")
+            .unwrap(),
+    );
+
+    std::fs::remove_file("./tests/wallet/fixtures/v2-copy.stronghold").unwrap();
     tear_down(storage_path).unwrap();
 }
 

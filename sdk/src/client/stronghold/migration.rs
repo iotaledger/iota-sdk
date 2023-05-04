@@ -1,7 +1,11 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{num::NonZeroU32, ops::Deref, path::Path};
+use std::{
+    num::NonZeroU32,
+    ops::Deref,
+    path::{Path, PathBuf},
+};
 
 use crypto::ciphers::chacha::{self};
 use iota_stronghold::{Client, SnapshotPath, Stronghold};
@@ -24,11 +28,9 @@ impl StrongholdAdapter {
         const PBKDF_SALT: &[u8] = b"wallet.rs";
         // Safe as it's definitely not 0.
         const PBKDF_ITER: NonZeroU32 = unsafe { NonZeroU32::new_unchecked(100) };
-        const TMP_FILE: &str = "migration_v2_to_v3.stronghold";
 
         let mut buffer = [0u8; 32];
-        // TODO handle unwrap
-        let tmp_path = current_path.as_ref().parent().unwrap().join(TMP_FILE);
+        let tmp_path = PathBuf::from(current_path.as_ref().to_string_lossy().to_string() + "-tmp");
 
         // Safe to unwrap because rounds > 0.
         crypto::keys::pbkdf::PBKDF2_HMAC_SHA512(current_password.as_bytes(), PBKDF_SALT, PBKDF_ITER, buffer.as_mut());
