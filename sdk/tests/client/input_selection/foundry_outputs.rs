@@ -261,7 +261,7 @@ fn melt_native_tokens() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     inputs.push(InputSigningData {
-        output: alias_output.clone(),
+        output: alias_output,
         output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
         chain: None,
     });
@@ -522,7 +522,7 @@ fn simple_foundry_transition_basic_not_needed() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     inputs.push(InputSigningData {
-        output: alias_output.clone(),
+        output: alias_output,
         output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
         chain: None,
     });
@@ -597,7 +597,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     inputs.push(InputSigningData {
-        output: alias_output.clone(),
+        output: alias_output,
         output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
         chain: None,
     });
@@ -747,7 +747,7 @@ fn mint_and_burn_at_the_same_time() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     inputs.push(InputSigningData {
-        output: alias_output.clone(),
+        output: alias_output,
         output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
         chain: None,
     });
@@ -827,7 +827,7 @@ fn take_amount_from_alias_and_foundry_to_fund_basic() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     inputs.push(InputSigningData {
-        output: alias_output.clone(),
+        output: alias_output,
         output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
         chain: None,
     });
@@ -1041,7 +1041,7 @@ fn foundry_in_outputs_and_required() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     inputs.push(InputSigningData {
-        output: alias_output.clone(),
+        output: alias_output,
         output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
         chain: None,
     });
