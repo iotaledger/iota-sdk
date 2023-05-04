@@ -10,12 +10,6 @@ wallet = Wallet("./alice-database")
 
 account = wallet.get_account("Alice")
 
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    print(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
-    sys.exit(1)
-
-wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
-
 accountAddresses = account.addresses()
 
 # using prepare_output

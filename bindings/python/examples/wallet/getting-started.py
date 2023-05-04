@@ -12,7 +12,7 @@ load_dotenv()
 ACCOUNT_ALIAS = 'Alice'
 
 # The node to connect to.
-NODE_URL = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
+node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 
 # A password to encrypt the stored data.
 # WARNING: Never hardcode passwords in production code.
@@ -27,7 +27,7 @@ secret_manager = StrongholdSecretManager(
 
 # Set up and store the wallet.
 client_options = {
-    'nodes': [NODE_URL],
+    'nodes': [node_url],
 }
 
 wallet = Wallet(

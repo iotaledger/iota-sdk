@@ -16,9 +16,9 @@ log_config = {
 # Init the logger
 init_logger(json.dumps(log_config))
 
-NODE_URL = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
+node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 client_options = {
-    'nodes': [NODE_URL],
+    'nodes': [node_url],
 }
 
 # Shimmer coin type

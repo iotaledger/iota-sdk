@@ -11,8 +11,8 @@ node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 client = Client(nodes=[node_url])
 
 # Fetch a block ID from the node
-block_id = client.get_tips()
-print(f'Block ids: {block_id}')
+block_ids = client.get_tips()
+print(f'Block id: {block_id[0]}')
 
 # Get the metadata for the block
 metadata = client.get_block_metadata(block_id[0])
