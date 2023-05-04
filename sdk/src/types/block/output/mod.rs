@@ -91,12 +91,6 @@ pub struct OutputWithMetadata {
     metadata: OutputMetadata,
 }
 
-impl AsRef<Self> for OutputWithMetadata {
-    fn as_ref(&self) -> &Self {
-        self
-    }
-}
-
 impl OutputWithMetadata {
     /// Creates a new [`OutputWithMetadata`].
     pub fn new(output: Output, metadata: OutputMetadata) -> Self {

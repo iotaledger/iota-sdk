@@ -338,8 +338,8 @@ impl Client {
             .get_request(path, None, self.get_timeout(), false, true)
             .await?;
 
-        // ? can this be unverified?
-        let output = Output::try_from_dto_unverified(&response.output)?;
+        let token_supply = self.get_token_supply().await?;
+        let output = Output::try_from_dto(&response.output, token_supply)?;
         let metadata = OutputMetadata::try_from(&response.metadata)?;
 
         Ok(OutputWithMetadata::new(output, metadata))

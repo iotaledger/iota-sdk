@@ -219,6 +219,12 @@ impl From<&OutputWithMetadata> for OutputWithMetadataResponse {
     }
 }
 
+impl From<OutputWithMetadata> for OutputWithMetadataResponse {
+    fn from(value: OutputWithMetadata) -> Self {
+        Self::from(&value)
+    }
+}
+
 /// Response of GET /api/core/v2/outputs/{output_id}.
 /// Returns an output and its metadata as JSON or raw bytes.
 #[derive(Clone, Debug, Eq, PartialEq)]

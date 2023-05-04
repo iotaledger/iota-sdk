@@ -323,7 +323,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             client
                 .get_output(&output_id)
                 .await
-                .map(|o| OutputWithMetadataResponse::from(&o))?,
+                .map(OutputWithMetadataResponse::from)?,
         ),
         ClientMethod::GetOutputMetadata { output_id } => {
             Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
