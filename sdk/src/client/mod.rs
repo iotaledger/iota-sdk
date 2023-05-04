@@ -52,10 +52,6 @@ pub mod storage;
 pub mod stronghold;
 pub mod utils;
 
-pub use crypto::{self, keys::slip10::Seed};
-pub use packable;
-pub use url::Url;
-
 #[cfg(feature = "mqtt")]
 pub use self::node_api::mqtt;
 pub use self::{

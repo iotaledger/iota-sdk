@@ -11,11 +11,12 @@ use super::account_method::AccountMethod;
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{WalletEvent, WalletEventType};
 use crate::{
-    client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions, Url},
+    client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions},
     wallet::{
         account::{operations::syncing::SyncOptions, types::AccountIdentifier},
         ClientOptions,
     },
+    Url,
 };
 
 /// The messages that can be sent to the actor.

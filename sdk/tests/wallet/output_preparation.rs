@@ -10,8 +10,9 @@ use iota_sdk::{
     },
     wallet::{
         account::{Assets, Features, OutputOptions, ReturnStrategy, StorageDeposit, Unlocks},
-        NftOptions, Result, U256,
+        NftOptions, Result,
     },
+    U256,
 };
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
