@@ -101,7 +101,10 @@ pub enum Message {
     /// mnemonic was stored, it will be gone.
     /// if ignore_if_coin_type_mismatch.is_some(), client options will not be restored
     /// if ignore_if_coin_type_mismatch == Some(true), client options coin type and accounts will not be restored if
-    /// the cointype doesn't match Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
+    /// the cointype doesn't match
+    /// if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", no accounts
+    /// will be restored.
+    /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
     #[serde(rename_all = "camelCase")]
@@ -110,7 +113,12 @@ pub enum Message {
         source: PathBuf,
         /// Stronghold file password.
         password: String,
+        /// If ignore_if_coin_type_mismatch.is_some(), client options will not be restored.
+        /// If ignore_if_coin_type_mismatch == Some(true), client options coin type and accounts will not be restored
+        /// if the cointype doesn't match.
         ignore_if_coin_type_mismatch: Option<bool>,
+        /// If ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", no
+        /// accounts will be restored.
         ignore_if_bech32_mismatch: Option<String>,
     },
     /// Removes the latest account (account with the largest account index).

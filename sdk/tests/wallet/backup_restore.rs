@@ -442,7 +442,6 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
 
 #[tokio::test]
 #[cfg(all(feature = "stronghold", feature = "storage"))]
-// Backup and restore with Stronghold
 async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
     let storage_path = "test-storage/backup_and_restore_bech32_hrp_mismatch";
     setup(storage_path)?;

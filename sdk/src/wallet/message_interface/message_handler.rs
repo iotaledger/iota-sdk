@@ -1,8 +1,6 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "stronghold")]
-use std::path::PathBuf;
 #[cfg(feature = "participation")]
 use std::str::FromStr;
 use std::{
@@ -151,7 +149,11 @@ impl WalletMessageHandler {
             }
             #[cfg(feature = "stronghold")]
             Message::Backup { destination, password } => {
-                convert_async_panics(|| async { self.backup(destination.to_path_buf(), password).await }).await
+                convert_async_panics(|| async {
+                    self.wallet.backup(destination.to_path_buf(), password).await?;
+                    Ok(Response::Ok(()))
+                })
+                .await
             }
             #[cfg(feature = "stronghold")]
             Message::ChangeStrongholdPassword {
@@ -219,13 +221,15 @@ impl WalletMessageHandler {
                 ignore_if_bech32_mismatch,
             } => {
                 convert_async_panics(|| async {
-                    self.restore_backup(
-                        source.to_path_buf(),
-                        password,
-                        ignore_if_coin_type_mismatch,
-                        ignore_if_bech32_mismatch.as_deref(),
-                    )
-                    .await
+                    self.wallet
+                        .restore_backup(
+                            source.to_path_buf(),
+                            password,
+                            ignore_if_coin_type_mismatch,
+                            ignore_if_bech32_mismatch.as_deref(),
+                        )
+                        .await?;
+                    Ok(Response::Ok(()))
                 })
                 .await
             }
@@ -381,31 +385,6 @@ impl WalletMessageHandler {
         log::debug!("Response: {:?}", response);
 
         response
-    }
-
-    #[cfg(feature = "stronghold")]
-    async fn backup(&self, backup_path: PathBuf, stronghold_password: String) -> Result<Response> {
-        self.wallet.backup(backup_path, stronghold_password).await?;
-        Ok(Response::Ok(()))
-    }
-
-    #[cfg(feature = "stronghold")]
-    async fn restore_backup(
-        &self,
-        backup_path: PathBuf,
-        stronghold_password: String,
-        ignore_if_coin_type_mismatch: Option<bool>,
-        ignore_if_bech32_mismatch: Option<&str>,
-    ) -> Result<Response> {
-        self.wallet
-            .restore_backup(
-                backup_path,
-                stronghold_password,
-                ignore_if_coin_type_mismatch,
-                ignore_if_bech32_mismatch,
-            )
-            .await?;
-        Ok(Response::Ok(()))
     }
 
     async fn call_account_method(&self, account_id: &AccountIdentifier, method: AccountMethod) -> Result<Response> {
