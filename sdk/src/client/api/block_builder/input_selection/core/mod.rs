@@ -22,7 +22,7 @@ use crate::{
     types::block::{
         address::{Address, AliasAddress, NftAddress},
         input::INPUT_COUNT_RANGE,
-        output::{AliasTransition, ChainId, Output, OutputId, OUTPUT_COUNT_RANGE},
+        output::{AliasOutput, AliasTransition, ChainId, Output, OutputId, OUTPUT_COUNT_RANGE},
         protocol::ProtocolParameters,
     },
     utils::unix_timestamp_now,
@@ -403,10 +403,98 @@ impl InputSelection {
             return Err(Error::InvalidOutputCount(self.outputs.len()));
         }
 
+        self.validate_transitions()?;
+
         Ok(Selected {
             inputs: Self::sort_input_signing_data(self.selected_inputs, &self.outputs, Some(self.timestamp))?,
             outputs: self.outputs,
             remainder,
         })
+    }
+
+    fn validate_transitions(&self) -> Result<(), Error> {
+        let mut input_aliases = Vec::new();
+        let mut input_chains_foundries = hashbrown::HashMap::new();
+        let mut input_nfts = Vec::new();
+        for input in &self.selected_inputs {
+            match &input.output {
+                Output::Alias(_) => {
+                    input_aliases.push(input);
+                }
+                Output::Foundry(foundry) => {
+                    input_chains_foundries.insert(foundry.chain_id(), &input.output);
+                }
+                Output::Nft(_) => {
+                    input_nfts.push(input);
+                }
+                _ => {}
+            }
+        }
+
+        // Validate alias output transition
+        for output in self.outputs.iter() {
+            match output {
+                Output::Alias(alias_output) => {
+                    // Null id outputs are just minted and can't be a transition
+                    if alias_output.alias_id().is_null() {
+                        continue;
+                    }
+
+                    let alias_input = input_aliases
+                        .iter()
+                        .find(|i| {
+                            if let Output::Alias(alias_input) = &i.output {
+                                *alias_output.alias_id() == alias_input.alias_id_non_null(i.output_id())
+                            } else {
+                                false
+                            }
+                        })
+                        .expect("ISA is broken because there is no alias input");
+
+                    if AliasOutput::transition(
+                        alias_input.output.as_alias(),
+                        alias_output,
+                        &input_chains_foundries,
+                        &self.outputs,
+                    )
+                    .is_err()
+                    {
+                        let alias_transition =
+                            if alias_input.output.as_alias().state_index() == alias_output.state_index() {
+                                AliasTransition::Governance
+                            } else {
+                                AliasTransition::State
+                            };
+                        return Err(Error::UnfulfillableRequirement(Requirement::Alias(
+                            *alias_output.alias_id(),
+                            alias_transition,
+                        )));
+                    }
+                }
+                Output::Nft(nft_output) => {
+                    // Null id outputs are just minted and can't be a transition
+                    if nft_output.nft_id().is_null() {
+                        continue;
+                    }
+
+                    let nft_input = input_nfts
+                        .iter()
+                        .find(|i| {
+                            if let Output::Nft(nft_input) = &i.output {
+                                *nft_output.nft_id() == nft_input.nft_id_non_null(i.output_id())
+                            } else {
+                                false
+                            }
+                        })
+                        .expect("ISA is broken because there is no nft input");
+
+                    if nft_input.output.as_nft().immutable_features() != nft_output.immutable_features() {
+                        return Err(Error::UnfulfillableRequirement(Requirement::Nft(*nft_output.nft_id())));
+                    }
+                }
+                _ => {}
+            }
+        }
+        Ok(())
     }
 }

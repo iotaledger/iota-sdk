@@ -4,11 +4,18 @@
 use std::str::FromStr;
 
 use iota_sdk::{
-    client::api::input_selection::{Burn, Error, InputSelection, Requirement},
+    client::{
+        api::input_selection::{Burn, Error, InputSelection, Requirement},
+        secret::types::InputSigningData,
+    },
     types::block::{
         address::Address,
-        output::{NftId, Output},
+        output::{
+            feature::MetadataFeature, unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output,
+            OutputMetadata,
+        },
         protocol::protocol_parameters,
+        rand::{block::rand_block_id, output::rand_output_id},
     },
 };
 
@@ -1174,4 +1181,49 @@ fn transitioned_zero_nft_id_no_longer_is_zero() {
             );
         }
     });
+}
+
+#[test]
+fn changed_immutable_metadata() {
+    let protocol_parameters = protocol_parameters();
+    let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
+
+    let nft_output =
+        NftOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), nft_id_1)
+            .with_immutable_features(MetadataFeature::new(vec![1, 2, 3]))
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output(protocol_parameters.token_supply())
+            .unwrap();
+
+    let inputs = vec![InputSigningData {
+        output: nft_output.clone(),
+        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        chain: None,
+    }];
+
+    // New nft output with changed immutable metadata feature
+    let updated_alias_output = NftOutputBuilder::from(nft_output.as_nft())
+        .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+        .with_immutable_features(MetadataFeature::new(vec![4, 5, 6]))
+        .finish_output(protocol_parameters.token_supply())
+        .unwrap();
+
+    let outputs = vec![updated_alias_output];
+
+    let selected = InputSelection::new(
+        inputs,
+        outputs,
+        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        protocol_parameters,
+    )
+    .select();
+
+    assert!(matches!(
+        selected,
+        Err(Error::UnfulfillableRequirement(Requirement::Nft(
+            nft_id,
+        ))) if nft_id == nft_id_1
+    ));
 }

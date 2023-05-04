@@ -4,11 +4,18 @@
 use std::{collections::HashSet, str::FromStr};
 
 use iota_sdk::{
-    client::api::input_selection::{Burn, Error, InputSelection, Requirement},
+    client::{
+        api::input_selection::{Burn, Error, InputSelection, Requirement},
+        secret::types::InputSigningData,
+    },
     types::block::{
         address::Address,
-        output::{AliasId, AliasOutputBuilder, AliasTransition, Output},
+        output::{
+            unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
+            AliasId, AliasOutputBuilder, AliasTransition, Output, OutputMetadata,
+        },
         protocol::protocol_parameters,
+        rand::{block::rand_block_id, output::rand_output_id},
     },
 };
 
@@ -2289,5 +2296,102 @@ fn sender_in_governor_but_not_owned() {
     assert!(matches!(
         selected,
         Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()
+    ));
+}
+
+#[test]
+fn new_state_metadata() {
+    let protocol_parameters = protocol_parameters();
+    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+
+    let alias_output =
+        AliasOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id_1)
+            .with_state_metadata(vec![1, 2, 3])
+            .add_unlock_condition(StateControllerAddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .add_unlock_condition(GovernorAddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output(protocol_parameters.token_supply())
+            .unwrap();
+
+    let inputs = vec![InputSigningData {
+        output: alias_output.clone(),
+        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        chain: None,
+    }];
+
+    // New alias output, with updated state index
+    let updated_alias_output = AliasOutputBuilder::from(alias_output.as_alias())
+        .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+        .with_state_metadata(vec![3, 4, 5])
+        .with_state_index(alias_output.as_alias().state_index() + 1)
+        .finish_output(protocol_parameters.token_supply())
+        .unwrap();
+
+    let outputs = vec![updated_alias_output];
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs.clone(),
+        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        protocol_parameters,
+    )
+    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.outputs, &outputs));
+}
+
+#[test]
+fn new_state_metadata_but_same_state_index() {
+    let protocol_parameters = protocol_parameters();
+    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+
+    let alias_output =
+        AliasOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id_1)
+            .with_state_metadata(vec![1, 2, 3])
+            .add_unlock_condition(StateControllerAddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .add_unlock_condition(GovernorAddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output(protocol_parameters.token_supply())
+            .unwrap();
+
+    let inputs = vec![InputSigningData {
+        output: alias_output.clone(),
+        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        chain: None,
+    }];
+
+    // New alias output, without updated state index
+    let updated_alias_output = AliasOutputBuilder::from(alias_output.as_alias())
+        .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+        .with_state_metadata(vec![3, 4, 5])
+        .finish_output(protocol_parameters.token_supply())
+        .unwrap();
+
+    let outputs = vec![updated_alias_output];
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs,
+        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        protocol_parameters,
+    )
+    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .select();
+
+    assert!(matches!(
+        selected,
+        Err(Error::UnfulfillableRequirement(Requirement::Alias(
+            alias_id,
+            _alias_transition,
+        ))) if alias_id == alias_id_1
     ));
 }

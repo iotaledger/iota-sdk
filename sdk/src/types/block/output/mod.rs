@@ -358,9 +358,12 @@ impl Output {
             (None, Some(Self::Nft(next_state))) => NftOutput::creation(next_state, context),
 
             // Transitions.
-            (Some(Self::Alias(current_state)), Some(Self::Alias(next_state))) => {
-                AliasOutput::transition(current_state, next_state, context)
-            }
+            (Some(Self::Alias(current_state)), Some(Self::Alias(next_state))) => AliasOutput::transition(
+                current_state,
+                next_state,
+                &context.input_chains,
+                context.essence.outputs(),
+            ),
             (Some(Self::Foundry(current_state)), Some(Self::Foundry(next_state))) => {
                 FoundryOutput::transition(current_state, next_state, context)
             }
