@@ -17,7 +17,7 @@ use crate::types::block::{
     parent::ParentCount,
     payload::{
         milestone::BinaryParametersLength, InputCount, MilestoneMetadataLength, MilestoneOptionCount, OutputCount,
-        ReceiptFundsCount, SignatureCount, TagLength, TaggedDataLength,
+        SignatureCount, TagLength, TaggedDataLength,
     },
     unlock::{UnlockCount, UnlockIndex},
 };
@@ -71,8 +71,6 @@ pub enum Error {
     InvalidParentCount(<ParentCount as TryFrom<usize>>::Error),
     InvalidPayloadKind(u32),
     InvalidPayloadLength { expected: usize, actual: usize },
-    InvalidReceiptFundsCount(<ReceiptFundsCount as TryFrom<usize>>::Error),
-    InvalidReceiptFundsSum(u128),
     InvalidReferenceIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidSignature,
     InvalidSignatureKind(u8),
@@ -111,7 +109,6 @@ pub enum Error {
     ParentsNotUniqueSorted,
     ProtocolVersionMismatch { expected: u8, actual: u8 },
     NonceNotFound,
-    ReceiptFundsNotUniqueSorted,
     RemainingBytesAfterBlock,
     SelfControlledAliasOutput(AliasId),
     SelfDepositNft(NftId),
@@ -222,8 +219,6 @@ impl fmt::Display for Error {
             Self::InvalidPayloadLength { expected, actual } => {
                 write!(f, "invalid payload length: expected {expected} but got {actual}")
             }
-            Self::InvalidReceiptFundsCount(count) => write!(f, "invalid receipt funds count: {count}"),
-            Self::InvalidReceiptFundsSum(sum) => write!(f, "invalid receipt amount sum: {sum}"),
             Self::InvalidReferenceIndex(index) => write!(f, "invalid reference index: {index}"),
             Self::InvalidSignature => write!(f, "invalid signature provided"),
             Self::InvalidSignatureKind(k) => write!(f, "invalid signature kind: {k}"),
@@ -298,9 +293,6 @@ impl fmt::Display for Error {
             }
             Self::NonceNotFound => {
                 write!(f, "nonce miner could not find a nonce")
-            }
-            Self::ReceiptFundsNotUniqueSorted => {
-                write!(f, "receipt funds are not unique and/or sorted")
             }
             Self::RemainingBytesAfterBlock => {
                 write!(f, "remaining bytes after block")
