@@ -16,7 +16,7 @@ use crate::{
     types::{
         api::core::response::{
             BlockMetadataResponse, BlockResponse, InfoResponse, MilestoneResponse, OutputWithMetadataResponse,
-            PeerResponse, RoutesResponse, SubmitBlockResponse, TipsResponse, TreasuryResponse, UtxoChangesResponse,
+            PeerResponse, RoutesResponse, SubmitBlockResponse, TipsResponse, UtxoChangesResponse,
         },
         block::{
             output::{dto::OutputMetadataDto, Output, OutputId, OutputMetadata, OutputWithMetadata},
@@ -306,19 +306,6 @@ impl ClientInner {
             .await?;
 
         Ok(OutputMetadata::try_from(metadata)?)
-    }
-
-    /// Gets the current treasury output.
-    /// The treasury output contains all tokens from the legacy network that have not yet been migrated.
-    /// GET /api/core/v2/treasury
-    pub async fn get_treasury(&self) -> Result<TreasuryResponse> {
-        let path = "api/core/v2/treasury";
-
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, DEFAULT_API_TIMEOUT, false, false)
-            .await
     }
 
     /// Returns the block, as object, that was included in the ledger for a given TransactionId.
