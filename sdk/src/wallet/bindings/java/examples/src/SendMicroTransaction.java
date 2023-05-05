@@ -34,7 +34,7 @@ public class SendMicroTransaction {
 
                 // Configure outputs
                 Transaction transaction = account.sendAmount(
-                                new org.iota.types.account_methods.SendAmount().withParams(outputs)
+                                new org.iota.types.account_methods.SendAmount().withParams(params)
                                                 .withOptions(new TransactionOptions().withAllowMicroAmount(true)));
 
                 // Print transaction

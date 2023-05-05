@@ -34,9 +34,7 @@ pub(crate) mod task;
 pub use self::{
     account::{
         operations::transaction::high_level::{
-            minting::{
-                mint_native_token::MintNativeTokenParams, mint_nfts::MintNftParams,
-            },
+            minting::{mint_native_token::MintNativeTokenParams, mint_nfts::MintNftParams},
             send_amount::SendAmountParams,
             send_native_tokens::SendNativeTokensParams,
             send_nft::SendNftParams,

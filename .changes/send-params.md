@@ -13,3 +13,4 @@ Rename `AliasOutputOptions` to `CreateAliasParams`.
 Rename `NftOptions` to `MintNftParams`.
 Rename `NativeTokenOptions` to `MintNativeTokenParams`.
 Rename `OutputOptions` to `OutputParams`.
+Rename various `BuilderOptions` to `BuilderParams`.

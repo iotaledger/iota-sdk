@@ -14,10 +14,10 @@ import type {
     QueryParameter,
 } from '../queryParameters';
 import type { IAuth } from '../network';
-import type { BasicOutputBuilderParams } from '../outputBuilderOptions/basicOutputParams';
-import type { AliasOutputBuilderParams } from '../outputBuilderOptions/aliasOutputParams';
-import type { FoundryOutputBuilderParams } from '../outputBuilderOptions/foundryOutputParams';
-import type { NftOutputBuilderParams } from '../outputBuilderOptions/nftOutputParams';
+import type { BasicOutputBuilderParams } from '../outputBuilderParams/basicOutputParams';
+import type { AliasOutputBuilderParams } from '../outputBuilderParams/aliasOutputParams';
+import type { FoundryOutputBuilderParams } from '../outputBuilderParams/foundryOutputParams';
+import type { NftOutputBuilderParams } from '../outputBuilderParams/nftOutputParams';
 
 export interface __GetInfoMethod__ {
     name: 'getInfo';
