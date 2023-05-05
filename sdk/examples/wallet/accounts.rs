@@ -22,8 +22,9 @@ use iota_sdk::{
     wallet::{ClientOptions, Result, Wallet},
 };
 
-// The account aliases used in this example
+// The alias of the first account
 const ACCOUNT_ALIAS_1: &str = "Alice";
+// The alias of the second account
 const ACCOUNT_ALIAS_2: &str = "Bob";
 // The wallet database folder
 const WALLET_DB_PATH: &str = "./example.walletdb";
@@ -42,9 +43,9 @@ async fn main() -> Result<()> {
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
+        .with_storage_path(WALLET_DB_PATH)
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_storage_path(WALLET_DB_PATH)
         .finish()
         .await?;
 
@@ -84,6 +85,7 @@ async fn main() -> Result<()> {
 
     let balance = account2.sync(None).await?;
     let funds_before = balance.base_coin().available();
+    println!("Current available funds: {funds_before}");
 
     println!("Requesting funds from faucet...");
     let faucet_response = request_funds_from_faucet(
@@ -104,7 +106,7 @@ async fn main() -> Result<()> {
         let now = Instant::now();
         let balance = account2.sync(None).await?;
         if balance.base_coin().available() > funds_before {
-            println!("Syncing took: {:.2?}", now.elapsed());
+            println!("Account synced in: {:.2?}", now.elapsed());
             break balance;
         } else {
             tokio::time::sleep(instant::Duration::from_secs(2)).await;

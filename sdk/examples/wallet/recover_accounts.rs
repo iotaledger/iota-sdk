@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
     let account = &accounts[accounts.len() - 1];
     let now = Instant::now();
     let balance = account.sync(None).await?;
-    println!("Syncing took: {:.2?}", now.elapsed());
+    println!("Account synced in: {:.2?}", now.elapsed());
     println!("Balance: {balance:?}");
 
     Ok(())

@@ -31,9 +31,8 @@ async fn main() -> Result<()> {
         .await?;
 
     // Sync account to make sure account is updated with outputs from previous examples
-    print!("Syncing account...");
     let _ = account.sync(None).await?;
-    println!("done");
+    println!("Account synced");
 
     // List unspent outputs before consolidation.
     // The output we created with example `03_get_funds` and the basic output from `09_mint_native_tokens` have only one
@@ -52,27 +51,26 @@ async fn main() -> Result<()> {
         )
     });
 
-    print!("Sending consolidation transaction...");
+    println!("Sending consolidation transaction...");
 
     // Consolidate unspent outputs and print the consolidation transaction IDs
     // Set `force` to true to force the consolidation even though the `output_consolidation_threshold` isn't reached
     let transaction = account.consolidate_outputs(true, None).await?;
-    println!("done ({})", transaction.transaction_id);
+    println!("Done ({})", transaction.transaction_id);
 
     // Wait for the consolidation transaction to get confirmed
     let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Block included: {}/block/{}",
+        "Transaction included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
 
     // Sync account
-    print!("Syncing account...");
     let _ = account.sync(None).await?;
-    println!("done");
+    println!("Account synced");
 
     // Outputs after consolidation
     let outputs = account.unspent_outputs(None).await?;

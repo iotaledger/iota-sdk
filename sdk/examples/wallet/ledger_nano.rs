@@ -44,9 +44,9 @@ async fn main() -> Result<()> {
     let secret_manager = LedgerSecretManager::new(true);
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::LedgerNano(secret_manager))
+        .with_storage_path(WALLET_DB_PATH)
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_storage_path(WALLET_DB_PATH)
         .finish()
         .await?;
 
@@ -71,10 +71,9 @@ async fn main() -> Result<()> {
 
     println!("ADDRESSES:\n{addresses:#?}");
 
-    println!("Syncing...");
     let now = Instant::now();
     let balance = account.sync(None).await?;
-    println!("took: {:.2?}", now.elapsed());
+    println!("Account synced in: {:.2?}", now.elapsed());
 
     println!("Balance BEFORE:\n{:?}", balance.base_coin());
 
@@ -87,15 +86,14 @@ async fn main() -> Result<()> {
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Block included: {}/block/{}",
+        "Transaction included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
 
-    println!("Syncing...");
     let now = Instant::now();
     let balance = account.sync(None).await?;
-    println!("took: {:.2?}", now.elapsed());
+    println!("Account synced in: {:.2?}", now.elapsed());
 
     println!("Balance AFTER:\n{:?}", balance.base_coin());
 

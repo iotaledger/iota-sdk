@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
         // Send a transaction with 1 Mi
         let outputs = vec![AddressWithAmount::new(RECV_ADDRESS.to_string(), SEND_AMOUNT)];
         let transaction = account.send_amount(outputs, None).await?;
-        println!("Transaction sent: {}", transaction.transaction_id);
+        println!("Done ({})", transaction.transaction_id);
 
         // Wait for transaction to get included
         let block_id = account
@@ -52,7 +52,7 @@ async fn main() -> Result<()> {
             .await?;
 
         println!(
-            "Block included: {}/block/{}",
+            "Transaction included: {}/block/{}",
             std::env::var("EXPLORER_URL").unwrap(),
             block_id
         );

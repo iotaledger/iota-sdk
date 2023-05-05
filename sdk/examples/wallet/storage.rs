@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
     println!("addresses: {:?}", account.addresses().await?.len());
     let now = Instant::now();
     let balance = account.sync(None).await?;
-    println!("Syncing took: {:.2?}", now.elapsed());
+    println!("Account synced in: {:.2?}", now.elapsed());
     println!("Balance: {balance:?}");
 
     #[cfg(debug_assertions)]

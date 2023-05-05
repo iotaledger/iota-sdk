@@ -90,8 +90,8 @@ async fn main() -> Result<()> {
             if let Err(e) = thread {
                 println!("{e}");
                 // Sync when getting an error, because that's probably when no outputs are available anymore
-                println!("Syncing account...");
-                account.sync(None).await?;
+                let _ = account.sync(None).await?;
+                println!("Account synced");
             }
         }
     }

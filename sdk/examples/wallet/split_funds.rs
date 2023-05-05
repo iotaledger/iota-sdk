@@ -59,7 +59,7 @@ async fn main() -> Result<()> {
 
     let now = Instant::now();
     let balance = account.sync(None).await?;
-    println!("Syncing took: {:.2?}", now.elapsed());
+    println!("Account synced in: {:.2?}", now.elapsed());
     println!("Balance: {balance:?}");
 
     let addresses_with_unspent_outputs = account.addresses_with_unspent_outputs().await?;

@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
 
     let now = Instant::now();
     let balance = account.sync(None).await?;
-    println!("Syncing took: {:.2?}", now.elapsed());
+    println!("Account synced in: {:.2?}", now.elapsed());
     println!("Balance: {balance:?}");
 
     let addresses_with_unspent_outputs = account.addresses_with_unspent_outputs().await?;
@@ -74,14 +74,14 @@ async fn main() -> Result<()> {
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Block included: {}/block/{}",
+        "Transaction included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
 
     let now = Instant::now();
     let balance = account.sync(None).await?;
-    println!("Syncing took: {:.2?}", now.elapsed());
+    println!("Account synced in: {:.2?}", now.elapsed());
     println!("Balance: {balance:?}");
 
     // // switch to mainnet
@@ -90,7 +90,7 @@ async fn main() -> Result<()> {
     // manager.set_client_options(client_options).await?;
     // let now = Instant::now();
     // manager.sync(None).await?;
-    // println!("Syncing took: {:.2?}", now.elapsed());
+    // println!("Account synced in: {:.2?}", now.elapsed());
     // println!("Balance: {:?}", account.balance().await?);
 
     // // switch back to testnet
@@ -99,7 +99,7 @@ async fn main() -> Result<()> {
     // manager.set_client_options(client_options).await?;
     // let now = Instant::now();
     // manager.sync(None).await?;
-    // println!("Syncing took: {:.2?}", now.elapsed());
+    // println!("Account synced in: {:.2?}", now.elapsed());
     // println!("Balance: {:?}", account.balance().await?);
 
     Ok(())

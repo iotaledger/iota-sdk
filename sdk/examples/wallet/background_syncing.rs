@@ -33,13 +33,13 @@ async fn main() -> Result<()> {
         MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
+        .with_storage_path(WALLET_DB_PATH)
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_storage_path(WALLET_DB_PATH)
         .finish()
         .await?;
 
-    // Get or create first account
+    // Get or create new account
     let account = if let Ok(account) = wallet.get_account(ACCOUNT_ALIAS).await {
         account
     } else {
@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
     // Manually sync to ensure we have the correct funds to start with
     let balance = account.sync(None).await?;
     let funds_before = balance.base_coin().available();
-    println!("Funds BEFORE: {funds_before}");
+    println!("Current available funds: {funds_before}");
 
     wallet.start_background_syncing(None, None).await?;
     println!("Started background syncing");
@@ -85,7 +85,7 @@ async fn main() -> Result<()> {
             tokio::time::sleep(instant::Duration::from_secs(2)).await;
         }
     };
-    println!("Funds AfTER: {funds_after}");
+    println!("New available funds: {funds_after}");
 
     wallet.stop_background_syncing().await?;
     println!("Stopped background syncing");

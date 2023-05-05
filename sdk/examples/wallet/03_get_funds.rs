@@ -30,35 +30,37 @@ async fn main() -> Result<()> {
     let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
     let account = wallet.get_account(ACCOUNT_ALIAS).await?;
     let balance = account.sync(None).await?;
-
-    let address = account.addresses().await?;
+    let addresses = account.addresses().await?;
 
     let funds_before = balance.base_coin().available();
+    println!("Current available funds: {funds_before}");
 
-    println!("Starting available funds: {funds_before}");
     println!("Requesting funds from faucet...");
-    let faucet_response =
-        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &address[0].address().to_string()).await?;
+    let faucet_response = request_funds_from_faucet(
+        &std::env::var("FAUCET_URL").unwrap(),
+        &addresses[0].address().to_string(),
+    )
+    .await?;
 
     println!("Response from faucet: {}", faucet_response.trim_end());
 
     println!("Waiting for funds (timeout=60s)...");
     // Check for changes to the balance
     let start = std::time::Instant::now();
-    let balance = loop {
+    let funds_after = loop {
         if start.elapsed().as_secs() > 60 {
             println!("Timeout: waiting for funds took too long");
             return Ok(());
         };
         let balance = account.sync(None).await?;
-        if balance.base_coin().available() > funds_before {
-            break balance;
+        let funds_after = balance.base_coin().available();
+        if funds_after > funds_before {
+            break funds_after;
         } else {
             tokio::time::sleep(instant::Duration::from_secs(2)).await;
         }
     };
-
-    println!("New available funds: {}", balance.base_coin().available());
+    println!("New available funds: {funds_after}");
 
     Ok(())
 }

@@ -48,9 +48,9 @@ async fn main() -> Result<()> {
         MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
+        .with_storage_path(WALLET_DB_PATH)
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_storage_path(WALLET_DB_PATH)
         .finish()
         .await?;
 
@@ -66,13 +66,12 @@ async fn main() -> Result<()> {
             .await?
     };
 
-    print!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses...");
+    println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses...");
     let _ = account.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
-    println!("done");
+    println!("Done");
 
-    print!("Syncing account...");
     let _ = account.sync(None).await?;
-    println!("done");
+    println!("Account synced");
 
     Ok(())
 }

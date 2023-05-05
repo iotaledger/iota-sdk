@@ -76,7 +76,7 @@ async fn main() -> Result<()> {
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Block included: {}/block/{}",
+        "Transaction included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
@@ -103,7 +103,7 @@ async fn main() -> Result<()> {
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Block included: {}/block/{}",
+        "Transaction included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );

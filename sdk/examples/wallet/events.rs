@@ -42,9 +42,9 @@ async fn main() -> Result<()> {
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
+        .with_storage_path(WALLET_DB_PATH)
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_storage_path(WALLET_DB_PATH)
         .finish()
         .await?;
 
@@ -84,7 +84,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Block included: {}/block/{}",
+        "Transaction included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
