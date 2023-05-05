@@ -104,7 +104,7 @@ impl Account {
         log::debug!("[SYNC] spent_or_not_synced_outputs: {spent_or_not_synced_output_ids:?}");
         let spent_or_unsynced_output_metadata_responses = self
             .client
-            .try_get_outputs_metadata(spent_or_not_synced_output_ids.clone())
+            .get_outputs_metadata_ignore_errors(spent_or_not_synced_output_ids.clone())
             .await?;
 
         // Add the output response to the output ids, the output response is optional, because an output could be

@@ -9,15 +9,12 @@ pub mod routes;
 use crate::client::constants::MAX_PARALLEL_API_REQUESTS;
 use crate::{
     client::{Client, Result},
-    types::{
-        api::core::response::OutputWithMetadataResponse,
-        block::output::{dto::OutputMetadataDto, OutputId},
-    },
+    types::block::output::{dto::OutputMetadataDto, OutputId, OutputWithMetadata},
 };
 
 impl Client {
     /// Request outputs by their output ID in parallel
-    pub async fn get_outputs(&self, output_ids: Vec<OutputId>) -> Result<Vec<OutputWithMetadataResponse>> {
+    pub async fn get_outputs(&self, output_ids: Vec<OutputId>) -> Result<Vec<OutputWithMetadata>> {
         let mut outputs = Vec::new();
 
         #[cfg(target_family = "wasm")]
@@ -49,7 +46,7 @@ impl Client {
 
     /// Request outputs by their output ID in parallel, ignoring failed requests
     /// Useful to get data about spent outputs, that might not be pruned yet
-    pub async fn try_get_outputs(&self, output_ids: Vec<OutputId>) -> Result<Vec<OutputWithMetadataResponse>> {
+    pub async fn get_outputs_ignore_errors(&self, output_ids: Vec<OutputId>) -> Result<Vec<OutputWithMetadata>> {
         let mut outputs = Vec::new();
 
         #[cfg(target_family = "wasm")]
@@ -75,7 +72,10 @@ impl Client {
     }
 
     /// Requests metadata for outputs by their output ID in parallel, ignoring failed requests
-    pub async fn try_get_outputs_metadata(&self, output_ids: Vec<OutputId>) -> Result<Vec<OutputMetadataDto>> {
+    pub async fn get_outputs_metadata_ignore_errors(
+        &self,
+        output_ids: Vec<OutputId>,
+    ) -> Result<Vec<OutputMetadataDto>> {
         let mut output_metadata_responses = Vec::new();
 
         #[cfg(target_family = "wasm")]

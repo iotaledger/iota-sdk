@@ -1,4 +1,9 @@
 from iota_sdk import Wallet
+from dotenv import load_dotenv
+import json
+import os
+
+load_dotenv()
 
 # In this example we will prepare an output with an address and expiration unlock condition and send it
 
@@ -6,7 +11,11 @@ wallet = Wallet("./alice-database")
 
 account = wallet.get_account("Alice")
 
-wallet.set_stronghold_password("some_hopefully_secure_password")
+if 'STRONGHOLD_PASSWORD' not in os.environ:
+    print(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+    sys.exit(1)
+
+wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # using prepare_output
 output = account.prepare_output(
@@ -19,34 +28,9 @@ output = account.prepare_output(
             },
     }
 )
-print(f"Output: {output}")
-
-# using build_basic_output
-output = account.build_basic_output(
-    amount="1000000",
-    native_tokens=[],
-    unlock_conditions=[
-        {
-            "type": 0,
-            "address": {
-                "type": 0,
-                "pubKeyHash": "0x47c5f5b6af30518757f3afe86717aaa1f78aaf12c2821103a2d2fc4e92182174",
-            },
-        },
-        {
-            "type": 3,
-            "returnAddress": {
-                "type": 0,
-                "pubKeyHash": "0x8297ac4149c80cca8225e5f2da36df89a93cd2998d7f6d488c97250a881e65af",
-            },
-            "unixTime": 1676570528,
-        },
-    ],
-    features=[],
-)
-print(f"Output: {output}")
+print(f"Output: {json.dumps(output, indent=4)}")
 
 account.sync()
 
 transaction = account.send_outputs([output])
-print(f'Sent transaction: {transaction}')
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')

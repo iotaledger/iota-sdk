@@ -1,9 +1,10 @@
 from iota_sdk import Wallet
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # In this example we will send an nft
-
-# Explorer url
-EXPLORER = "https://explorer.shimmer.network/testnet"
 
 wallet = Wallet('./alice-database')
 
@@ -11,9 +12,12 @@ account = wallet.get_account('Alice')
 
 # Sync account with the node
 response = account.sync()
-print(f'Synced: {response}')
 
-wallet.set_stronghold_password("some_hopefully_secure_password")
+if 'STRONGHOLD_PASSWORD' not in os.environ:
+    print(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+    sys.exit(1)
+
+wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 outputs = [{
     "address": "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
@@ -22,5 +26,4 @@ outputs = [{
 
 transaction = account.send_nft(outputs)
 
-print(f'Transaction: {transaction["transactionId"]}')
-print(f'Block sent: {EXPLORER}/block/" + {transaction["blockId"]}');
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
