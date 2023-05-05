@@ -78,6 +78,9 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """
         client_config = dict(locals())
         del client_config['self']
+        # Delete client_handle, because it's not needed here and can't be serialized
+        if "client_handle" in client_config:
+            del client_config["client_handle"]
 
         if isinstance(nodes, list):
             nodes = [node.as_dict() if isinstance(node, Node)
@@ -104,9 +107,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             client_config['remote_pow_timeout'] = {'secs': int(client_config['remote_pow_timeout'].total_seconds(
             )), 'nanos': get_remaining_nano_seconds(client_config['remote_pow_timeout'])}
 
-        # Delete client_handle, because it's not needed here and can't be serialized
-        if "client_handle" in client_config:
-            del client_config["client_handle"]
         client_config = humps.camelize(client_config)
         client_config = dumps(client_config)
 
