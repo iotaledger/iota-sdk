@@ -948,9 +948,7 @@ export class Client {
     /**
      * Build an Nft Output.
      */
-    async buildNftOutput(
-        params: NftOutputBuilderParams,
-    ): Promise<NftOutput> {
+    async buildNftOutput(params: NftOutputBuilderParams): Promise<NftOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildNftOutput',
             data: params,
