@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Client::get_outputs()` and derived methods return `OutputWithMetadata` instead of `OutputWithMetadataDto`;
 - rename `Client::try_get_outputs()` into `Client::get_outputs_ignore_errors()`;
 - rename `Client::try_get_outputs_metadata()` into `Client::get_outputs_metadata_ignore_errors()`;
+- MQTT connections to a node using https will now use wss/tls with native certificates;
 
 ### Removed
 
