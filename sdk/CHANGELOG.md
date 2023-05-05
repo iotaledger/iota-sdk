@@ -33,7 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Validation for transitions in the input selection;
 - Automatically increase foundry counter of alias outputs;
 - `types::block::Error::InvalidZeroSerialNumber` variant;
-- Validate that foundry outputs can't have serial number `0`;
 
 ### Changed
 
@@ -73,6 +72,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Storage records decryption;
+
+### Fixed
+
+- Validation for transitions in the input selection;
+- Automatically increase foundry counter of alias outputs;
+- Validate that foundry outputs can't have serial number `0`;
 
 ## 0.3.0 - 2023-05-02
 

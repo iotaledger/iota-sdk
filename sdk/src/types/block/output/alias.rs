@@ -496,7 +496,7 @@ impl AliasOutput {
     }
 
     // Transition, just without full ValidationContext
-    pub(crate) fn transition(
+    pub(crate) fn transition_inner(
         current_state: &Self,
         next_state: &Self,
         input_chains: &HashMap<ChainId, &Output>,
@@ -582,7 +582,7 @@ impl StateTransitionVerifier for AliasOutput {
         next_state: &Self,
         context: &ValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
-        Self::transition(
+        Self::transition_inner(
             current_state,
             next_state,
             &context.input_chains,

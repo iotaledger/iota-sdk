@@ -47,11 +47,9 @@ impl InputSelection {
         let mut highest_foundry_serial_number = 0;
         for output in self.outputs.iter() {
             if let Output::Foundry(foundry) = output {
-                if let ChainId::Foundry(foundry_id) = foundry.chain_id() {
-                    if *foundry_id.alias_address().alias_id() == alias_id {
-                        highest_foundry_serial_number =
-                            u32::max(highest_foundry_serial_number, foundry_id.serial_number());
-                    }
+                if *foundry.id().alias_address().alias_id() == alias_id {
+                    highest_foundry_serial_number =
+                        u32::max(highest_foundry_serial_number, foundry.id().serial_number());
                 }
             }
         }

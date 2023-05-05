@@ -451,7 +451,7 @@ impl InputSelection {
                         })
                         .expect("ISA is broken because there is no alias input");
 
-                    if let Err(err) = AliasOutput::transition(
+                    if let Err(err) = AliasOutput::transition_inner(
                         alias_input.output.as_alias(),
                         alias_output,
                         &input_chains_foundries,

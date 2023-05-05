@@ -198,6 +198,10 @@ impl FoundryOutputBuilder {
 
     ///
     pub fn finish_unverified(self) -> Result<FoundryOutput, Error> {
+        if self.serial_number == 0 {
+            return Err(Error::InvalidZeroSerialNumber);
+        }
+
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions(&unlock_conditions)?;
@@ -209,10 +213,6 @@ impl FoundryOutputBuilder {
         let immutable_features = Features::from_set(self.immutable_features)?;
 
         verify_allowed_features(&immutable_features, FoundryOutput::ALLOWED_IMMUTABLE_FEATURES)?;
-
-        if self.serial_number == 0 {
-            return Err(Error::InvalidZeroSerialNumber);
-        }
 
         let mut output = FoundryOutput {
             amount: 1u64,
