@@ -46,7 +46,7 @@ class Wallet():
     def get_client(self):
         """Get the client instance
         """
-        return Client(_client_handle=get_client_from_wallet(self.handle))
+        return Client(client_handle=get_client_from_wallet(self.handle))
 
     @_call_method_routine
     def _call_method(self, name, data=None):
