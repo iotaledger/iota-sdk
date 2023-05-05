@@ -133,11 +133,6 @@ class NodeCoreAPI():
             'index': index
         })
 
-    def get_treasury(self):
-        """Get the treasury output.
-        """
-        return self._call_method('getTreasury')
-
     def get_included_block(self, transaction_id: HexStr) -> Block:
         """Returns the included block of the transaction.
         """

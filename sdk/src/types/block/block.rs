@@ -239,6 +239,7 @@ impl Packable for Block {
     }
 }
 
+// TODO not needed anymore?
 fn verify_payload(payload: Option<&Payload>) -> Result<(), Error> {
     if !matches!(
         payload,
