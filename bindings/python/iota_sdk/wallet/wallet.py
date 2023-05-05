@@ -1,7 +1,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import destroy_wallet, create_wallet, listen_wallet
+from iota_sdk import destroy_wallet, create_wallet, listen_wallet, get_client_from_wallet, Client
 from iota_sdk.wallet.account import Account, _call_method_routine
 from json import dumps
 
@@ -42,6 +42,11 @@ class Wallet():
         """Get the account instance
         """
         return Account(account_id, self.handle)
+
+    def get_client(self):
+        """Get the client instance
+        """
+        return Client(_client_handle=get_client_from_wallet(self.handle))
 
     @_call_method_routine
     def _call_method(self, name, data=None):

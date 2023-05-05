@@ -35,7 +35,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         user_agent=None,
         local_pow=None,
         fallback_to_local_pow=None,
-        pow_worker_count=None
+        pow_worker_count=None,
+        _client_handle=None
     ):
         """Initialize the IOTA Client.
 
@@ -103,11 +104,16 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             client_config['remote_pow_timeout'] = {'secs': int(client_config['remote_pow_timeout'].total_seconds(
             )), 'nanos': get_remaining_nano_seconds(client_config['remote_pow_timeout'])}
 
+        # Set _client_handle to None here, because it can't be serialized
+        client_config["_client_handle"]=None
         client_config = humps.camelize(client_config)
         client_config = dumps(client_config)
 
         # Create the message handler
-        self.handle = iota_sdk.create_client(client_config)
+        if _client_handle is None:
+            self.handle = iota_sdk.create_client(client_config)
+        else:
+            self.handle = _client_handle
 
     def _call_method(self, name, data=None):
         """Dumps json string and call call_client_method()
