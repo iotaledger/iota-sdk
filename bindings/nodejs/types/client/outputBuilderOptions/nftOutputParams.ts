@@ -1,10 +1,11 @@
-import type { FeatureTypes, HexEncodedString } from '@iota/types';
-import type { IBasicOutputBuilderParams } from './basicOutputParams';
+import type { HexEncodedString } from '@iota/types';
+import { Feature } from '../../../lib';
+import type { BasicOutputBuilderParams } from './basicOutputParams';
 
 /**
  * Options for building an Nft Output
  */
-export interface INftOutputBuilderParams extends IBasicOutputBuilderParams {
+export interface NftOutputBuilderParams extends BasicOutputBuilderParams {
     nftId: HexEncodedString;
-    immutableFeatures?: FeatureTypes[];
+    immutableFeatures?: Feature[];
 }

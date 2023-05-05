@@ -44,11 +44,11 @@ public class HighLevelApi {
         return outputs;
     }
 
-    public List<Map.Entry<Output, OutputMetadata>> tryGetOutputs(OutputId[] outputIds) throws ClientException {
+    public List<Map.Entry<Output, OutputMetadata>> getOutputsIgnoreErrors(OutputId[] outputIds) throws ClientException {
         JsonObject o = new JsonObject();
         o.add("outputIds", JsonUtils.toJson(outputIds));
 
-        JsonArray responsePayload = (JsonArray) nativeApi.sendCommand(new ClientCommand("tryGetOutputs", o));
+        JsonArray responsePayload = (JsonArray) nativeApi.sendCommand(new ClientCommand("getOutputsIgnoreErrors", o));
 
         List<Map.Entry<Output, OutputMetadata>> outputs = new ArrayList<>();
         for (int i = 0; i < responsePayload.size(); i++) {

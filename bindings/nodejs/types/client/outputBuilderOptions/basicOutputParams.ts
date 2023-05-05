@@ -1,13 +1,10 @@
-import type {
-    FeatureTypes,
-    INativeToken,
-    UnlockConditionTypes,
-} from '@iota/types';
+import { INativeToken } from '@iota/types';
+import { UnlockCondition, Feature } from '../../../lib';
 
 /**
  * Options for building a Basic Output
  */
-export interface IBasicOutputBuilderParams {
+export interface BasicOutputBuilderParams {
     /**
      * If not provided, minimum storage deposit will be used
      */
@@ -19,9 +16,9 @@ export interface IBasicOutputBuilderParams {
     /**
      * The unlock conditions for the output.
      */
-    unlockConditions: UnlockConditionTypes[];
+    unlockConditions: UnlockCondition[];
     /**
      * Features to be contained by the output.
      */
-    features?: FeatureTypes[];
+    features?: Feature[];
 }

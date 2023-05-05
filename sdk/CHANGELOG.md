@@ -40,6 +40,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename `NftOptions` to `MintNftParams`.
 - Rename `NativeTokenOptions` to `MintNativeTokenParams`.
 - Rename `OutputOptions` to `OutputParams`.
+- `Client::get_outputs()` and derived methods return `OutputWithMetadata` instead of `OutputWithMetadataDto`;
+- rename `Client::try_get_outputs()` into `Client::get_outputs_ignore_errors()`;
+- rename `Client::try_get_outputs_metadata()` into `Client::get_outputs_metadata_ignore_errors()`;
 
 ### Removed
 

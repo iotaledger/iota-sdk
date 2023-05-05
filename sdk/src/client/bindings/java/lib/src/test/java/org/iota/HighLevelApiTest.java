@@ -29,9 +29,9 @@ public class HighLevelApiTest extends ApiTest {
     }
 
     @Test
-    public void testTryGetOutputs() throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
+    public void getOutputsIgnoreErrors() throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
         OutputId[] outputs = new OutputId[] { setupBasicOutput(generateAddress(client.generateMnemonic())) };
-        for (Map.Entry e : client.tryGetOutputs(outputs)) {
+        for (Map.Entry e : client.getOutputsIgnoreErrors(outputs)) {
             System.out.println(e.getKey());
         }
     }

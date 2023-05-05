@@ -7,7 +7,7 @@ import type {
     AccountMetadata,
     SyncOptions,
     AccountMeta,
-    Address,
+    AccountAddress,
     SendAmountParams,
     SendNativeTokensParams,
     SendNftParams,
@@ -348,7 +348,9 @@ export class Account {
      * @param options Options for address generation.
      * @returns The address.
      */
-    async generateAddress(options?: GenerateAddressOptions): Promise<Address> {
+    async generateAddress(
+        options?: GenerateAddressOptions,
+    ): Promise<AccountAddress> {
         const addresses = await this.generateAddresses(1, options);
         return addresses[0];
     }
@@ -362,7 +364,7 @@ export class Account {
     async generateAddresses(
         amount: number,
         options?: GenerateAddressOptions,
-    ): Promise<Address[]> {
+    ): Promise<AccountAddress[]> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -548,7 +550,7 @@ export class Account {
      * List all the addresses of the account.
      * @returns The addresses.
      */
-    async addresses(): Promise<Address[]> {
+    async addresses(): Promise<AccountAddress[]> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {

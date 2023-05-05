@@ -385,7 +385,7 @@ pub enum Message {
     /// Try to get OutputWithMetadataResponse from provided OutputIds (requests are sent in parallel and errors are
     /// ignored, can be useful for spent outputs)
     #[serde(rename_all = "camelCase")]
-    TryGetOutputs {
+    GetOutputsIgnoreErrors {
         /// Output IDs
         output_ids: Vec<OutputId>,
     },

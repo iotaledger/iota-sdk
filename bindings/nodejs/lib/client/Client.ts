@@ -11,10 +11,10 @@ import type {
     INetworkInfo,
     INode,
     IAuth,
-    IBasicOutputBuilderParams,
-    IAliasOutputBuilderParams,
-    IFoundryOutputBuilderParams,
-    INftOutputBuilderParams,
+    BasicOutputBuilderParams,
+    AliasOutputBuilderParams,
+    FoundryOutputBuilderParams,
+    NftOutputBuilderParams,
     FoundryQueryParameter,
     NftQueryParameter,
     AliasQueryParameter,
@@ -33,15 +33,12 @@ import type {
     INodeInfo,
     IReceiptsResponse,
     ITreasury,
-    IBasicOutput,
-    IAliasOutput,
-    IFoundryOutput,
-    INftOutput,
     INodeInfoProtocol,
     UnlockTypes,
 } from '@iota/types';
 import type { INodeInfoWrapper } from '../../types/client/nodeInfo';
 import { SecretManagerType } from '../../types/secretManager/secretManager';
+import { AliasOutput, BasicOutput, FoundryOutput, NftOutput } from '../types';
 
 /** The Client to interact with nodes. */
 export class Client {
@@ -755,9 +752,11 @@ export class Client {
      * Try to get OutputResponse from provided OutputIds (requests are sent
      * in parallel and errors are ignored, can be useful for spent outputs)
      */
-    async tryGetOutputs(outputIds: string[]): Promise<IOutputResponse[]> {
+    async getOutputsIgnoreErrors(
+        outputIds: string[],
+    ): Promise<IOutputResponse[]> {
         const response = await this.methodHandler.callMethod({
-            name: 'tryGetOutputs',
+            name: 'getOutputsIgnoreErrors',
             data: {
                 outputIds,
             },
@@ -908,11 +907,11 @@ export class Client {
      * Build a Basic Output.
      */
     async buildBasicOutput(
-        options: IBasicOutputBuilderParams,
-    ): Promise<IBasicOutput> {
+        params: BasicOutputBuilderParams,
+    ): Promise<BasicOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildBasicOutput',
-            data: options,
+            data: params,
         });
 
         return JSON.parse(response).payload;
@@ -922,11 +921,11 @@ export class Client {
      * Build an Alias Output.
      */
     async buildAliasOutput(
-        options: IAliasOutputBuilderParams,
-    ): Promise<IAliasOutput> {
+        params: AliasOutputBuilderParams,
+    ): Promise<AliasOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildAliasOutput',
-            data: options,
+            data: params,
         });
 
         return JSON.parse(response).payload;
@@ -936,11 +935,11 @@ export class Client {
      * Build a Foundry Output.
      */
     async buildFoundryOutput(
-        options: IFoundryOutputBuilderParams,
-    ): Promise<IFoundryOutput> {
+        params: FoundryOutputBuilderParams,
+    ): Promise<FoundryOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildFoundryOutput',
-            data: options,
+            data: params,
         });
 
         return JSON.parse(response).payload;
@@ -950,11 +949,11 @@ export class Client {
      * Build an Nft Output.
      */
     async buildNftOutput(
-        options: INftOutputBuilderParams,
-    ): Promise<INftOutput> {
+        params: NftOutputBuilderParams,
+    ): Promise<NftOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildNftOutput',
-            data: options,
+            data: params,
         });
 
         return JSON.parse(response).payload;

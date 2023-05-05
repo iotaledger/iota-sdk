@@ -1,20 +1,24 @@
 from iota_sdk import Wallet
+from dotenv import load_dotenv
 import time
+import os
+
+load_dotenv()
 
 # In this example we will mint native tokens
-
-# Explorer url
-EXPLORER = "https://explorer.shimmer.network/testnet"
 
 wallet = Wallet('./alice-database')
 
 account = wallet.get_account('Alice')
 
+if 'STRONGHOLD_PASSWORD' not in os.environ:
+    print(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+    sys.exit(1)
+
+wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
+
 # Sync account with the node
 response = account.sync()
-print(f'Synced: {response}')
-
-wallet.set_stronghold_password("some_hopefully_secure_password")
 
 transaction = account.create_alias_output(None, None)
 
@@ -31,6 +35,4 @@ params = {
 }
 
 transaction = account.mint_native_token(params, None)
-
-print(f'Transaction: {transaction["transactionId"]}')
-print(f'Block sent: {EXPLORER}/block/" + {transaction["blockId"]}');
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["transaction"]["blockId"]}')

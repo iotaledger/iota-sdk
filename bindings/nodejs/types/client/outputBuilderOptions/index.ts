@@ -1,11 +1,11 @@
-import type { IBasicOutputBuilderParams } from './basicOutputParams';
-import type { IAliasOutputBuilderParams } from './aliasOutputParams';
-import type { IFoundryOutputBuilderParams } from './foundryOutputParams';
-import type { INftOutputBuilderParams } from './nftOutputParams';
+import type { BasicOutputBuilderParams } from './basicOutputParams';
+import type { AliasOutputBuilderParams } from './aliasOutputParams';
+import type { FoundryOutputBuilderParams } from './foundryOutputParams';
+import type { NftOutputBuilderParams } from './nftOutputParams';
 
 export {
-    IBasicOutputBuilderParams,
-    IAliasOutputBuilderParams,
-    IFoundryOutputBuilderParams,
-    INftOutputBuilderParams,
+    BasicOutputBuilderParams,
+    AliasOutputBuilderParams,
+    FoundryOutputBuilderParams,
+    NftOutputBuilderParams,
 };

@@ -19,20 +19,13 @@ use crate::{
         secret::types::InputSigningData,
         Error, Result,
     },
-    types::{
-        api::core::response::OutputWithMetadataResponse,
-        block::{
-            address::Address,
-            output::{Output, OutputMetadata},
-            protocol::ProtocolParameters,
-        },
-    },
+    types::block::{address::Address, output::OutputWithMetadata, protocol::ProtocolParameters},
     utils::unix_timestamp_now,
 };
 
 impl<'a> ClientBlockBuilder<'a> {
     // Get basic outputs for an address without storage deposit return unlock condition
-    pub(crate) async fn basic_address_outputs(&self, address: String) -> Result<Vec<OutputWithMetadataResponse>> {
+    pub(crate) async fn basic_address_outputs(&self, address: String) -> Result<Vec<OutputWithMetadata>> {
         let mut output_ids = Vec::new();
 
         // First request to get all basic outputs that can directly be unlocked by the address.
@@ -72,7 +65,6 @@ impl<'a> ClientBlockBuilder<'a> {
         let mut gap_index = self.initial_address_index;
         let mut empty_address_count: u64 = 0;
         let mut cached_error = None;
-        let token_supply = self.client.get_token_supply().await?;
 
         log::debug!("[get_inputs from utxo chains]");
 
@@ -181,21 +173,20 @@ impl<'a> ClientBlockBuilder<'a> {
                     // Reset counter if there is an output
                     empty_address_count = 0;
 
-                    for output_response in address_outputs {
-                        let output = Output::try_from_dto(&output_response.output, token_supply)?;
+                    for output_with_meta in address_outputs {
                         let address = Address::try_from_bech32(str_address)?;
 
                         // We can ignore the unlocked_alias_or_nft_address, since we only requested basic outputs
-                        let (required_unlock_address, _unlocked_alias_or_nft_address) = output
-                            .required_and_unlocked_address(
+                        let (required_unlock_address, _unlocked_alias_or_nft_address) =
+                            output_with_meta.output().required_and_unlocked_address(
                                 current_time,
-                                &output_response.metadata.output_id()?,
+                                output_with_meta.metadata().output_id(),
                                 None,
                             )?;
                         if required_unlock_address == address {
                             available_inputs.push(InputSigningData {
-                                output,
-                                output_metadata: OutputMetadata::try_from(&output_response.metadata)?,
+                                output: output_with_meta.output,
+                                output_metadata: output_with_meta.metadata,
                                 chain: Some(Chain::from_u32_hardened(vec![
                                     HD_WALLET_TYPE,
                                     self.coin_type,
