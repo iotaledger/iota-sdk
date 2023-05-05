@@ -88,9 +88,13 @@ impl Drop for ClientInner {
     fn drop(&mut self) {
         #[cfg(feature = "mqtt")]
         {
-            if let Some(mqtt_client) = self.mqtt.client.blocking_write().take() {
-                mqtt_client.try_disconnect().unwrap();
-            }
+            tokio::task::block_in_place(move || {
+                tokio::runtime::Handle::current().block_on(async move {
+                    if let Some(mqtt_client) = self.mqtt.client.write().await.take() {
+                        mqtt_client.try_disconnect().unwrap();
+                    }
+                });
+            });
         }
     }
 }
