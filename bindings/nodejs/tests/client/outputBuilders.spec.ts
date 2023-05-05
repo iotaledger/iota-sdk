@@ -1,4 +1,4 @@
-import { Client, Utils } from '../../lib';
+import { AddressUnlockCondition, AliasAddress, Client, Ed25519Address, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition, SimpleTokenScheme, StateControllerAddressUnlockCondition, Utils } from '../../lib';
 import '../customMatchers';
 import 'dotenv/config';
 
@@ -32,13 +32,9 @@ describe.skip('Output builder methods', () => {
         const basicOutput = await client.buildBasicOutput({
             amount: '1000000',
             unlockConditions: [
-                {
-                    type: 0,
-                    address: {
-                        type: 0,
-                        pubKeyHash: hexAddress,
-                    },
-                },
+                new AddressUnlockCondition(
+                    new Ed25519Address(hexAddress),
+                ),
             ],
         });
 
@@ -61,20 +57,12 @@ describe.skip('Output builder methods', () => {
         const aliasOutput = await client.buildAliasOutput({
             aliasId,
             unlockConditions: [
-                {
-                    type: 4,
-                    address: {
-                        type: 0,
-                        pubKeyHash: hexAddress,
-                    },
-                },
-                {
-                    type: 5,
-                    address: {
-                        type: 0,
-                        pubKeyHash: hexAddress,
-                    },
-                },
+                new StateControllerAddressUnlockCondition(
+                    new Ed25519Address(hexAddress),
+                ),
+                new GovernorAddressUnlockCondition(
+                    new Ed25519Address(hexAddress),
+                ),
             ],
         });
 
@@ -94,20 +82,12 @@ describe.skip('Output builder methods', () => {
                     amount: '0x32',
                 },
             ],
-            tokenScheme: {
-                type: 0,
-                meltedTokens: '0x0',
-                mintedTokens: '0x32',
-                maximumSupply: '0x64',
-            },
+            // 10 hex encoded
+            tokenScheme: new SimpleTokenScheme('0xa', '0x0', '0xa'),
             unlockConditions: [
-                {
-                    type: 6,
-                    address: {
-                        type: 8,
-                        aliasId,
-                    },
-                },
+                new ImmutableAliasAddressUnlockCondition(
+                    new AliasAddress(aliasId),
+                ),
             ],
         });
 
@@ -128,13 +108,9 @@ describe.skip('Output builder methods', () => {
         const nftOutput = await client.buildNftOutput({
             nftId: '0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3',
             unlockConditions: [
-                {
-                    type: 0,
-                    address: {
-                        type: 0,
-                        pubKeyHash: hexAddress,
-                    },
-                },
+                new AddressUnlockCondition(
+                    new Ed25519Address(hexAddress),
+                ),
             ],
         });
 

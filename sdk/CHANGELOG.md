@@ -26,10 +26,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `FilterOptions::{alias_ids, foundry_ids, nft_ids}` fields;
 - `Account::{unspent_alias_output, unspent_foundry_output, unspent_nft_output}` methods;
 - `StrongholdAdapter::inner` method;
+- `OutputMetadata::set_spent` method;
+- `ignore_if_bech32_mismatch` parameter to `Wallet::restore_backup()`;
+
+### Changed
+
+- `OutputData::metadata` changed from `OutputMetadataDto` to `OutputMetadata`;
+- `Client::get_outputs()` and derived methods return `OutputWithMetadata` instead of `OutputWithMetadataDto`;
+- rename `Client::try_get_outputs()` into `Client::get_outputs_ignore_errors()`;
+- rename `Client::try_get_outputs_metadata()` into `Client::get_outputs_metadata_ignore_errors()`;
 
 ### Removed
 
 - `FilterOptions`'s `Hash` derivation;
+- `client_without_tls` feature in favor of separate `client` and `tls` features;
 
 ## 0.3.0 - 2023-05-02
 

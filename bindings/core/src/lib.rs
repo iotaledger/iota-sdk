@@ -22,12 +22,12 @@ use serde::Deserialize;
 
 #[cfg(feature = "mqtt")]
 pub use self::method_handler::listen_mqtt;
+#[cfg(not(target_family = "wasm"))]
+pub use self::method_handler::CallMethod;
 pub use self::{
     error::{Error, Result},
     method::{AccountMethod, ClientMethod, SecretManagerMethod, UtilsMethod, WalletMethod},
-    method_handler::{
-        call_client_method, call_secret_manager_method, call_utils_method, call_wallet_method, CallMethod,
-    },
+    method_handler::{call_client_method, call_secret_manager_method, call_utils_method, call_wallet_method},
     response::Response,
 };
 

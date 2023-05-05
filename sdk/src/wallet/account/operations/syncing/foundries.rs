@@ -36,16 +36,13 @@ impl Account {
                 .await
             });
         }
-
-        let token_supply = self.client.get_token_supply().await?;
         let results = futures::future::try_join_all(tasks).await?;
 
         // Update account with new foundries.
         for result in results {
             if let Some(foundry_output_with_metadata) = result? {
-                let output = Output::try_from_dto(&foundry_output_with_metadata.output, token_supply)?;
-                if let Output::Foundry(foundry) = output {
-                    foundries.insert(foundry.id(), foundry);
+                if let Output::Foundry(foundry) = foundry_output_with_metadata.output() {
+                    foundries.insert(foundry.id(), foundry.to_owned());
                 }
             }
         }

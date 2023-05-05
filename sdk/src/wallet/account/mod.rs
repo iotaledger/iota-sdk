@@ -232,10 +232,7 @@ impl Account {
         let foundry_output_id = self.client.foundry_output_id(foundry_id).await?;
         let output_response = self.client.get_output(&foundry_output_id).await?;
 
-        Ok(Output::try_from_dto(
-            &output_response.output,
-            self.client.get_token_supply().await?,
-        )?)
+        Ok(output_response.output().to_owned())
     }
 
     /// Get the [`Transaction`] of a transaction stored in the account
@@ -310,12 +307,12 @@ impl Account {
                 }
 
                 if let Some(lower_bound_booked_timestamp) = filter.lower_bound_booked_timestamp {
-                    if output.metadata.milestone_timestamp_booked < lower_bound_booked_timestamp {
+                    if output.metadata.milestone_timestamp_booked() < lower_bound_booked_timestamp {
                         continue;
                     }
                 }
                 if let Some(upper_bound_booked_timestamp) = filter.upper_bound_booked_timestamp {
-                    if output.metadata.milestone_timestamp_booked > upper_bound_booked_timestamp {
+                    if output.metadata.milestone_timestamp_booked() > upper_bound_booked_timestamp {
                         continue;
                     }
                 }

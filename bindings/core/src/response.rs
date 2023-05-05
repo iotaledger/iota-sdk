@@ -140,7 +140,7 @@ pub enum Response {
     OutputMetadata(OutputMetadataDto),
     /// Response for:
     /// - [`GetOutputs`](crate::method::ClientMethod::GetOutputs)
-    /// - [`TryGetOutputs`](crate::method::ClientMethod::TryGetOutputs)
+    /// - [`GetOutputsIgnoreErrors`](crate::method::ClientMethod::GetOutputsIgnoreErrors)
     /// - [`FindOutputs`](crate::method::ClientMethod::FindOutputs)
     Outputs(Vec<OutputWithMetadataResponse>),
     /// Response for:

@@ -93,6 +93,7 @@ export type __RestoreBackupMethod__ = {
         source: string;
         password: string;
         ignoreIfCoinTypeMismatch?: boolean;
+        ignoreIfBech32Mismatch?: string;
     };
 };
 

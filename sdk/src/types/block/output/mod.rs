@@ -28,6 +28,7 @@ pub mod nft;
 ///
 pub mod unlock_condition;
 
+use alloc::string::ToString;
 use core::ops::RangeInclusive;
 
 use derive_more::From;
@@ -81,6 +82,31 @@ pub const OUTPUT_INDEX_RANGE: RangeInclusive<u16> = 0..=OUTPUT_INDEX_MAX; // [0.
 pub(crate) enum OutputBuilderAmount {
     Amount(u64),
     MinimumStorageDeposit(RentStructure),
+}
+
+/// Contains the generic [`Output`] with associated [`OutputMetadata`].
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct OutputWithMetadata {
+    pub(crate) output: Output,
+    pub(crate) metadata: OutputMetadata,
+}
+
+impl OutputWithMetadata {
+    /// Creates a new [`OutputWithMetadata`].
+    pub fn new(output: Output, metadata: OutputMetadata) -> Self {
+        Self { output, metadata }
+    }
+
+    /// Returns the [`Output`].
+    pub fn output(&self) -> &Output {
+        &self.output
+    }
+
+    /// Returns the [`OutputMetadata`].
+    pub fn metadata(&self) -> &OutputMetadata {
+        &self.metadata
+    }
 }
 
 /// A generic output that can represent different types defining the deposit of funds.

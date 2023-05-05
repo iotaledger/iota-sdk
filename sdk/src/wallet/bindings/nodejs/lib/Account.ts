@@ -349,9 +349,7 @@ export class Account {
      * @param options Options for address generation.
      * @returns The address.
      */
-    async generateAddress(
-        options?: GenerateAddressOptions,
-    ): Promise<Address> {
+    async generateAddress(options?: GenerateAddressOptions): Promise<Address> {
         const addresses = await this.generateAddresses(1, options);
         return addresses[0];
     }
@@ -1070,7 +1068,7 @@ export class Account {
      * Sync the account by fetching new information from the nodes.
      * Will also retry pending transactions if necessary.
      * A custom default can be set using setDefaultSyncOptions.
-     * 
+     *
      * @param options Optional synchronization options.
      * @returns The account balance.
      */

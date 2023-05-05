@@ -8,6 +8,7 @@ pub mod transaction;
 use std::ops::Range;
 
 use packable::bounded::TryIntoBoundedU16Error;
+use serde::{Deserialize, Serialize};
 
 pub use self::transaction::verify_semantic;
 use crate::{

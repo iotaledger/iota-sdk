@@ -19,11 +19,7 @@ use crate::{
         secret::types::InputSigningData,
         Result,
     },
-    types::block::{
-        address::Address,
-        output::{Output, OutputMetadata},
-        protocol::ProtocolParameters,
-    },
+    types::block::{address::Address, protocol::ProtocolParameters},
 };
 
 impl<'a> ClientBlockBuilder<'a> {
@@ -40,16 +36,15 @@ impl<'a> ClientBlockBuilder<'a> {
 
         let mut inputs_data = Vec::new();
         let current_time = self.client.get_time_checked().await?;
-        let token_supply = self.client.get_token_supply().await?;
 
         if let Some(inputs) = &self.inputs {
             for input in inputs {
-                let output_response = self.client.get_output(input.output_id()).await?;
-                let output = Output::try_from_dto(&output_response.output, token_supply)?;
+                let output_with_meta = self.client.get_output(input.output_id()).await?;
 
-                if !output_response.metadata.is_spent {
-                    let alias_transition = is_alias_transition_internal(&output, *input.output_id(), &self.outputs);
-                    let (unlock_address, _) = output.required_and_unlocked_address(
+                if !output_with_meta.metadata().is_spent() {
+                    let alias_transition =
+                        is_alias_transition_internal(output_with_meta.output(), *input.output_id(), &self.outputs);
+                    let (unlock_address, _) = output_with_meta.output().required_and_unlocked_address(
                         current_time,
                         input.output_id(),
                         alias_transition.map(|g| g.0),
@@ -79,8 +74,8 @@ impl<'a> ClientBlockBuilder<'a> {
                     };
 
                     inputs_data.push(InputSigningData {
-                        output,
-                        output_metadata: OutputMetadata::try_from(&output_response.metadata)?,
+                        output: output_with_meta.output,
+                        output_metadata: output_with_meta.metadata,
                         chain: address_index_internal.map(|(address_index, internal)| {
                             Chain::from_u32_hardened(vec![
                                 HD_WALLET_TYPE,
