@@ -15,10 +15,7 @@ use crate::types::block::{
         NativeTokenCount, NftId, OutputIndex, StateMetadataLength, TagFeatureLength,
     },
     parent::ParentCount,
-    payload::{
-        milestone::BinaryParametersLength, InputCount, MilestoneMetadataLength, MilestoneOptionCount, OutputCount,
-        SignatureCount, TagLength, TaggedDataLength,
-    },
+    payload::{InputCount, OutputCount, TagLength, TaggedDataLength},
     unlock::{UnlockCount, UnlockIndex},
 };
 
@@ -45,7 +42,6 @@ pub enum Error {
     InsufficientStorageDepositAmount { amount: u64, required: u64 },
     StorageDepositReturnExceedsOutputAmount { deposit: u64, amount: u64 },
     InsufficientStorageDepositReturnAmount { deposit: u64, required: u64 },
-    InvalidBinaryParametersLength(<BinaryParametersLength as TryFrom<usize>>::Error),
     InvalidEssenceKind(u8),
     InvalidFeatureCount(<FeatureCount as TryFrom<usize>>::Error),
     InvalidFeatureKind(u8),
@@ -58,8 +54,6 @@ pub enum Error {
     InvalidBlockLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
-    InvalidMilestoneMetadataLength(<MilestoneMetadataLength as TryFrom<usize>>::Error),
-    InvalidMilestoneOptionCount(<MilestoneOptionCount as TryFrom<usize>>::Error),
     InvalidMilestoneOptionKind(u8),
     InvalidMigratedFundsEntryAmount(u64),
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
@@ -91,7 +85,6 @@ pub enum Error {
     InvalidUnlockConditionKind(u8),
     InvalidFoundryZeroSerialNumber,
     MigratedFundsNotSorted,
-    MilestoneInvalidSignatureCount(<SignatureCount as TryFrom<usize>>::Error),
     MilestonePublicKeysSignaturesCountMismatch { key_count: usize, sig_count: usize },
     MilestoneOptionsNotUniqueSorted,
     MilestoneSignaturesNotUniqueSorted,
@@ -158,9 +151,6 @@ impl fmt::Display for Error {
             Self::InvalidAddressKind(k) => write!(f, "invalid address kind: {k}"),
             Self::InvalidAliasIndex(index) => write!(f, "invalid alias index: {index}"),
             Self::InvalidBech32Hrp(err) => write!(f, "invalid bech32 hrp: {err}"),
-            Self::InvalidBinaryParametersLength(length) => {
-                write!(f, "invalid binary parameters length: {length}")
-            }
             Self::InvalidControllerKind(k) => write!(f, "invalid controller kind: {k}"),
             Self::InvalidStorageDepositAmount(amount) => {
                 write!(f, "invalid storage deposit amount: {amount}")
@@ -197,10 +187,6 @@ impl fmt::Display for Error {
             Self::InvalidMetadataFeatureLength(length) => {
                 write!(f, "invalid metadata feature length {length}")
             }
-            Self::InvalidMilestoneMetadataLength(length) => {
-                write!(f, "invalid milestone metadata length {length}")
-            }
-            Self::InvalidMilestoneOptionCount(count) => write!(f, "invalid milestone option count: {count}"),
             Self::InvalidMilestoneOptionKind(k) => write!(f, "invalid milestone option kind: {k}"),
             Self::InvalidMigratedFundsEntryAmount(amount) => {
                 write!(f, "invalid migrated funds entry amount: {amount}")
@@ -253,9 +239,6 @@ impl fmt::Display for Error {
             Self::InvalidFoundryZeroSerialNumber => write!(f, "invalid foundry zero serial number"),
             Self::MigratedFundsNotSorted => {
                 write!(f, "migrated funds are not sorted")
-            }
-            Self::MilestoneInvalidSignatureCount(count) => {
-                write!(f, "invalid milestone signature count: {count}")
             }
             Self::MilestonePublicKeysSignaturesCountMismatch { key_count, sig_count } => {
                 write!(

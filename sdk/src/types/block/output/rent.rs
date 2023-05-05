@@ -10,7 +10,7 @@ use packable::{
     Packable,
 };
 
-use crate::types::block::{output::OutputId, payload::milestone::MilestoneIndex, BlockId, Error};
+use crate::types::block::{output::OutputId, BlockId, Error};
 
 const DEFAULT_BYTE_COST: u32 = 100;
 const DEFAULT_BYTE_COST_FACTOR_KEY: u8 = 10;
@@ -89,9 +89,9 @@ impl RentStructure {
 
     /// Returns the byte offset of the [`RentStructure`].
     pub fn byte_offset(&self) -> u32 {
+        // TODO MilestoneIndex has been removed, check how the specs will evolve about that.
         size_of::<OutputId>() as u32 * self.v_byte_factor_key as u32
             + size_of::<BlockId>() as u32 * self.v_byte_factor_data as u32
-            + size_of::<MilestoneIndex>() as u32 * self.v_byte_factor_data as u32
             + size_of::<ConfirmationUnixTimestamp>() as u32 * self.v_byte_factor_data as u32
     }
 }

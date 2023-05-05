@@ -34,17 +34,17 @@ async fn main() -> Result<()> {
     );
 
     // Get the block metadata.
-    let metadata = client.get_block_metadata(&block_id).await?;
+    // let metadata = client.get_block_metadata(&block_id).await?;
 
-    if let Some(ms_index) = metadata.referenced_by_milestone_index {
-        let ms = client.get_milestone_by_index(ms_index).await?;
-        println!(
-            "Block {block_id} got confirmed by milestone {ms_index} at timestamp {}.",
-            ms.essence().timestamp()
-        );
-    } else {
-        println!("Block {block_id} is not confirmed.")
-    }
+    // if let Some(ms_index) = metadata.referenced_by_milestone_index {
+    //     let ms = client.get_milestone_by_index(ms_index).await?;
+    //     println!(
+    //         "Block {block_id} got confirmed by milestone {ms_index} at timestamp {}.",
+    //         ms.essence().timestamp()
+    //     );
+    // } else {
+    //     println!("Block {block_id} is not confirmed.")
+    // }
 
     Ok(())
 }

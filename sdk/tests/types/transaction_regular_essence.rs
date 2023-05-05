@@ -17,10 +17,7 @@ use iota_sdk::types::block::{
         Payload,
     },
     protocol::protocol_parameters,
-    rand::{
-        output::rand_inputs_commitment,
-        payload::{rand_milestone_payload, rand_tagged_data_payload},
-    },
+    rand::{output::rand_inputs_commitment, payload::rand_tagged_data_payload},
     Error,
 };
 use packable::bounded::TryIntoBoundedU16Error;
@@ -108,30 +105,30 @@ fn build_valid_add_inputs_outputs() {
     assert!(essence.is_ok());
 }
 
-#[test]
-fn build_invalid_payload_kind() {
-    let protocol_parameters = protocol_parameters();
-    let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
-    let amount = 1_000_000;
-    let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish(protocol_parameters.token_supply())
-            .unwrap(),
-    );
+// #[test]
+// fn build_invalid_payload_kind() {
+//     let protocol_parameters = protocol_parameters();
+//     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
+//     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
+//     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+//     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
+//     let address = Address::from(Ed25519Address::new(bytes));
+//     let amount = 1_000_000;
+//     let output = Output::Basic(
+//         BasicOutput::build_with_amount(amount)
+//             .add_unlock_condition(AddressUnlockCondition::new(address))
+//             .finish(protocol_parameters.token_supply())
+//             .unwrap(),
+//     );
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-        .with_inputs([input1, input2])
-        .add_output(output)
-        .with_payload(rand_milestone_payload(42))
-        .finish(&protocol_parameters);
+//     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+//         .with_inputs(vec![input1, input2])
+//         .add_output(output)
+//         .with_payload(rand_milestone_payload(42))
+//         .finish(&protocol_parameters);
 
-    assert!(matches!(essence, Err(Error::InvalidPayloadKind(7))));
-}
+//     assert!(matches!(essence, Err(Error::InvalidPayloadKind(7))));
+// }
 
 #[test]
 fn build_invalid_input_count_low() {

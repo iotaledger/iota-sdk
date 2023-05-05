@@ -8,7 +8,6 @@ use crate::types::block::{
         dto::{OutputDto, OutputMetadataDto},
         OutputWithMetadata,
     },
-    payload::dto::MilestonePayloadDto,
     protocol::dto::ProtocolParametersDto,
     BlockDto,
 };
@@ -246,20 +245,6 @@ impl From<OutputWithMetadata> for OutputWithMetadataResponse {
 )]
 pub enum OutputResponse {
     Json(Box<OutputWithMetadataResponse>),
-    Raw(Vec<u8>),
-}
-
-/// Response of GET /api/core/v2/milestone/{milestone_index}.
-/// Returns information about a milestone.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase"),
-    serde(untagged)
-)]
-pub enum MilestoneResponse {
-    Json(MilestonePayloadDto),
     Raw(Vec<u8>),
 }
 

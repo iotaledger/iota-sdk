@@ -11,8 +11,6 @@ pub mod bool;
 pub mod bytes;
 /// Module providing random input generation utilities.
 pub mod input;
-/// Module providing random milestone generation utilities.
-pub mod milestone;
 /// Module providing random milestone option generation utilities.
 pub mod milestone_option;
 /// Module providing random number generation utilities.

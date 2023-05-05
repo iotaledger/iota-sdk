@@ -28,11 +28,7 @@ use iota_sdk::{
                 dto::{OutputDto, OutputMetadataDto},
                 AliasId, FoundryId, NftId, OutputId,
             },
-            payload::{
-                dto::{MilestonePayloadDto, PayloadDto},
-                milestone::MilestoneId,
-                transaction::TransactionId,
-            },
+            payload::{dto::PayloadDto, transaction::TransactionId},
             protocol::dto::ProtocolParametersDto,
             signature::dto::Ed25519SignatureDto,
             unlock::dto::UnlockDto,
@@ -148,10 +144,6 @@ pub enum Response {
     /// - [`FindOutputs`](crate::method::ClientMethod::FindOutputs)
     Outputs(Vec<OutputWithMetadataResponse>),
     /// Response for:
-    /// - [`GetMilestoneById`](crate::method::ClientMethod::GetMilestoneById)
-    /// - [`GetMilestoneByIndex`](crate::method::ClientMethod::GetMilestoneByIndex)
-    Milestone(MilestonePayloadDto),
-    /// Response for:
     /// - [`GetMilestoneByIdRaw`](crate::method::ClientMethod::GetMilestoneByIdRaw)
     /// - [`GetMilestoneByIndexRaw`](crate::method::ClientMethod::GetMilestoneByIndexRaw)
     MilestoneRaw(Vec<u8>),
@@ -199,9 +191,6 @@ pub enum Response {
     /// Response for:
     /// - [`MnemonicToHexSeed`](crate::method::UtilsMethod::MnemonicToHexSeed)
     MnemonicHexSeed(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
-    /// Response for:
-    /// - [`MilestoneId`](crate::method::UtilsMethod::MilestoneId)
-    MilestoneId(MilestoneId),
     /// Response for:
     /// - [`TransactionId`](crate::method::UtilsMethod::TransactionId)
     TransactionId(TransactionId),
