@@ -5,15 +5,12 @@ use crate::types::block::{
     payload::{
         milestone::{MilestoneEssence, MilestoneOptions, MilestonePayload},
         tagged_data::TaggedDataPayload,
-        treasury_transaction::TreasuryTransactionPayload,
         Payload,
     },
     rand::{
         bytes::{rand_bytes, rand_bytes_array},
-        input::rand_treasury_input,
         milestone::{rand_merkle_root, rand_milestone_id, rand_milestone_index},
         number::{rand_number, rand_number_range},
-        output::rand_treasury_output,
         parents::rand_parents,
     },
     signature::{Ed25519Signature, Signature},
@@ -26,11 +23,6 @@ pub fn rand_tagged_data_payload() -> TaggedDataPayload {
         rand_bytes(rand_number_range(0..10000)),
     )
     .unwrap()
-}
-
-/// Generates a random treasury transaction payload.
-pub fn rand_treasury_transaction_payload(token_supply: u64) -> TreasuryTransactionPayload {
-    TreasuryTransactionPayload::new(rand_treasury_input(), rand_treasury_output(token_supply)).unwrap()
 }
 
 /// Generates a random milestone payload.

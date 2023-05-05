@@ -228,19 +228,6 @@ impl From<OutputWithMetadata> for OutputWithMetadataResponse {
     }
 }
 
-/// Response of GET /api/core/v2/treasury.
-/// Returns all information about the treasury.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct TreasuryResponse {
-    pub milestone_id: MilestoneId,
-    pub amount: String,
-}
-
 /// Response of GET /api/core/v2/milestone/{milestone_index}/utxo-changes.
 /// Returns all UTXO changes that happened at a specific milestone.
 #[derive(Clone, Debug, Eq, PartialEq)]
