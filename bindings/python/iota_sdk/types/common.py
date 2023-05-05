@@ -52,9 +52,9 @@ class Node():
         return config
 
 
-class AddressWithAmount():
+class SendAmountParams():
     def __init__(self, address, amount):
-        """Initialise an AddressWithAmount
+        """Initialise a SendAmountParams
 
         Parameters
         ----------

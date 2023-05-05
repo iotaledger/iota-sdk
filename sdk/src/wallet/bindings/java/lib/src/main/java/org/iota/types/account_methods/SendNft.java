@@ -3,16 +3,16 @@
 
 package org.iota.types.account_methods;
 
-import org.iota.types.NftParams;
+import org.iota.types.SendNftParams;
 import org.iota.types.TransactionOptions;
 
 /// Send nft.
 public class SendNft implements AccountMethod {
 
-    private NftParams[] params;
+    private SendNftParams[] params;
     private TransactionOptions options;
 
-    public SendNft withParams(NftParams[] params) {
+    public SendNft withParams(SendNftParams[] params) {
         this.params = params;
         return this;
     }

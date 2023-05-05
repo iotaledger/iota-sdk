@@ -13,16 +13,18 @@ import org.iota.types.ids.TokenId;
 
 import java.lang.reflect.Type;
 
-public class AddressNativeTokens extends AbstractObject {
+public class SendNativeTokensParams extends AbstractObject {
 
     /// Bech32 encoded address
     private String address;
     /// Native tokens
     private NativeTokenTuple[] nativeTokens;
-    /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
+    /// Bech32 encoded address return address, to which the storage deposit will be
+    /// returned. Default will use the
     /// first address of the account
     private String returnAddress;
-    /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
+    /// Expiration in seconds, after which the output will be available for the
+    /// sender again, if not spent by the
     /// receiver before. Default is 1 day
     private int expiration;
 
@@ -30,7 +32,7 @@ public class AddressNativeTokens extends AbstractObject {
         return address;
     }
 
-    public AddressNativeTokens withAddress(String address) {
+    public SendNativeTokensParams withAddress(String address) {
         this.address = address;
         return this;
     }
@@ -39,7 +41,7 @@ public class AddressNativeTokens extends AbstractObject {
         return nativeTokens;
     }
 
-    public AddressNativeTokens withNativeTokens(NativeTokenTuple[] nativeTokens) {
+    public SendNativeTokensParams withNativeTokens(NativeTokenTuple[] nativeTokens) {
         this.nativeTokens = nativeTokens;
         return this;
     }
@@ -48,7 +50,7 @@ public class AddressNativeTokens extends AbstractObject {
         return returnAddress;
     }
 
-    public AddressNativeTokens withReturnAddress(String returnAddress) {
+    public SendNativeTokensParams withReturnAddress(String returnAddress) {
         this.returnAddress = returnAddress;
         return this;
     }
@@ -57,7 +59,7 @@ public class AddressNativeTokens extends AbstractObject {
         return expiration;
     }
 
-    public AddressNativeTokens withExpiration(int expiration) {
+    public SendNativeTokensParams withExpiration(int expiration) {
         this.expiration = expiration;
         return this;
     }
@@ -90,4 +92,3 @@ public class AddressNativeTokens extends AbstractObject {
     }
 
 }
-

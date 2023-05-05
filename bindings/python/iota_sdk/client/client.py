@@ -445,7 +445,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             End of the input range
         inputs : Array of Inputs
             Inputs to use
-        output : AddressWithAmount
+        output : SendAmountParams
             Address and amount to send to
         outputs : Array of Outputs
             Outputs to use

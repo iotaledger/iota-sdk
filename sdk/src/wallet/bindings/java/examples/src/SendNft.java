@@ -35,7 +35,7 @@ public class SendNft {
 
                 // Send transaction.
                 Transaction transaction = a.sendNft(new org.iota.types.account_methods.SendNft()
-                                .withParams(new NftParams[] { new NftParams()
+                                .withParams(new SendNftParams[] { new SendNftParams()
                                                 .withAddress(receiverAddress)
                                                 .withNftId(nftId)
                                 }));

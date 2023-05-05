@@ -3,17 +3,17 @@
 
 package org.iota.types.account_methods;
 
-import org.iota.types.AddressWithAmount;
+import org.iota.types.SendAmountParams;
 import org.iota.types.TransactionOptions;
 
 /// Send amount.
 public class SendAmount implements AccountMethod {
 
-    private AddressWithAmount[] addressesWithAmount;
+    private SendAmountParams[] params;
     private TransactionOptions options;
 
-    public SendAmount withAddressesWithAmount(AddressWithAmount[] addressesWithAmount) {
-        this.addressesWithAmount = addressesWithAmount;
+    public SendAmount withParams(SendAmountParams[] params) {
+        this.params = params;
         return this;
     }
 

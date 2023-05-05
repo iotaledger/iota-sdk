@@ -28,7 +28,7 @@ use crate::{
 /// Dto for address with amount for `send_amount()`
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AddressWithAmountDto {
+pub struct SendAmountParamsDto {
     /// Bech32 encoded address
     pub address: String,
     /// Amount
@@ -41,10 +41,10 @@ pub struct AddressWithAmountDto {
     pub expiration: Option<u32>,
 }
 
-impl TryFrom<&AddressWithAmountDto> for SendAmountParams {
+impl TryFrom<&SendAmountParamsDto> for SendAmountParams {
     type Error = crate::wallet::Error;
 
-    fn try_from(value: &AddressWithAmountDto) -> crate::wallet::Result<Self> {
+    fn try_from(value: &SendAmountParamsDto) -> crate::wallet::Result<Self> {
         Ok(Self::new(
             value.address.clone(),
             u64::from_str(&value.amount).map_err(|_| crate::client::Error::InvalidAmount(value.amount.clone()))?,

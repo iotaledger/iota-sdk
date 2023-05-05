@@ -8,9 +8,9 @@ import type {
     SyncOptions,
     AccountMeta,
     Address,
-    AddressWithAmount,
-    AddressNativeTokens,
-    AddressNftId,
+    SendAmountParams,
+    SendNativeTokensParams,
+    SendNftParams,
     AddressWithUnspentOutputs,
     AliasOutputParams,
     FilterOptions,
@@ -712,13 +712,13 @@ export class Account {
 
     /**
      * Mint native tokens.
-     * @param mintNativeTokenParams The options for minting tokens.
+     * @param params The options for minting tokens.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The minting transaction and the token ID.
      */
     async mintNativeToken(
-        mintNativeTokenParams: MintNativeTokenParams,
+        params: MintNativeTokenParams,
         transactionOptions?: TransactionOptions,
     ): Promise<MintTokenTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -726,7 +726,7 @@ export class Account {
             {
                 name: 'mintNativeToken',
                 data: {
-                    mintNativeTokenParams: mintNativeTokenParams,
+                    params: params,
                     options: transactionOptions,
                 },
             },
@@ -737,13 +737,13 @@ export class Account {
 
     /**
      * Mint nfts.
-     * @param mintNftParams The options for minting nfts.
+     * @param params The options for minting nfts.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The minting transaction.
      */
     async mintNfts(
-        mintNftParams: MintNftParams[],
+        params: MintNftParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -751,7 +751,7 @@ export class Account {
             {
                 name: 'mintNfts',
                 data: {
-                    mintNftParams,
+                    params,
                     options: transactionOptions,
                 },
             },
@@ -774,7 +774,7 @@ export class Account {
      * @returns The prepared output.
      */
     async prepareOutput(
-        options: OutputParams,
+        params: OutputParams,
         transactionOptions?: TransactionOptions,
     ): Promise<OutputTypes> {
         const response = await this.methodHandler.callAccountMethod(
@@ -782,7 +782,7 @@ export class Account {
             {
                 name: 'prepareOutput',
                 data: {
-                    options,
+                    params,
                     transactionOptions,
                 },
             },
@@ -792,13 +792,13 @@ export class Account {
 
     /**
      * Prepare a send amount transaction, useful for offline signing.
-     * @param addressesWithAmount Address with amounts to send.
+     * @param params Address with amounts to send.
      * @param options The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The prepared transaction data.
      */
     async prepareSendAmount(
-        addressesWithAmount: AddressWithAmount[],
+        params: SendAmountParams[],
         options?: TransactionOptions,
     ): Promise<PreparedTransactionData> {
         const response = await this.methodHandler.callAccountMethod(
@@ -806,7 +806,7 @@ export class Account {
             {
                 name: 'prepareSendAmount',
                 data: {
-                    addressesWithAmount,
+                    params,
                     options,
                 },
             },
@@ -878,13 +878,13 @@ export class Account {
 
     /**
      * Send a transaction with amounts from input addresses.
-     * @param addressesWithAmount Addresses with amounts.
+     * @param params Addresses with amounts.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The sent transaction.
      */
     async sendAmount(
-        addressesWithAmount: AddressWithAmount[],
+        params: SendAmountParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -892,7 +892,7 @@ export class Account {
             {
                 name: 'sendAmount',
                 data: {
-                    addressesWithAmount,
+                    params,
                     options: transactionOptions,
                 },
             },
@@ -903,13 +903,13 @@ export class Account {
 
     /**
      * Send native tokens.
-     * @param addressesAndNativeTokens Addresses amounts and native tokens.
+     * @param params Addresses amounts and native tokens.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The sent transaction.
      */
     async sendNativeTokens(
-        addressesAndNativeTokens: AddressNativeTokens[],
+        params: SendNativeTokensParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -917,7 +917,7 @@ export class Account {
             {
                 name: 'sendNativeTokens',
                 data: {
-                    addressesAndNativeTokens,
+                    params,
                     options: transactionOptions,
                 },
             },
@@ -928,13 +928,13 @@ export class Account {
 
     /**
      * Send nft.
-     * @param addressesAndNftIds Addresses and nft ids.
+     * @param params Addresses and nft ids.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The sent transaction.
      */
     async sendNft(
-        addressesAndNftIds: AddressNftId[],
+        params: SendNftParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -942,7 +942,7 @@ export class Account {
             {
                 name: 'sendNft',
                 data: {
-                    addressesAndNftIds,
+                    params,
                     options: transactionOptions,
                 },
             },

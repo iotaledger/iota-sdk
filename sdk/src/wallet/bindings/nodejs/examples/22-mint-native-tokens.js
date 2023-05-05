@@ -21,7 +21,7 @@ async function run() {
         await account.sync();
 
         // If we omit the AccountAddress field the first address of the account is used by default
-        const mintNativeTokenParams = {
+        const params = {
             // Hello in bytes
             foundryMetadata: '0x48656c6c6f',
             circulatingSupply: '0x64',
@@ -29,7 +29,7 @@ async function run() {
         };
 
         let { transaction } = await account.mintNativeToken(
-            mintNativeTokenParams,
+            params,
         );
         console.log(
             `Check your block on ${process.env.EXPLORER_URL}/block/${response.blockId}`,

@@ -320,7 +320,7 @@ class Account:
         """
         return self._call_account_method(
             'mintNativeToken', {
-                'mintNativeTokenParams': params,
+                'params': params,
                 'options': options
             }
         )
@@ -339,7 +339,7 @@ class Account:
         """
         return self._call_account_method(
             'mintNfts', {
-                'mintNftParams': params,
+                'params': params,
                 'options': options
             }
         )
@@ -371,7 +371,7 @@ class Account:
         """
         return self._call_account_method(
             'prepareSendAmount', {
-                'addressesWithAmount': params,
+                'params': params,
                 'options': options
             }
         )
@@ -414,7 +414,7 @@ class Account:
         """
         return self._call_account_method(
             'sendAmount', {
-                'addressesWithAmount': params,
+                'params': params,
                 'options': options
             }
         )
@@ -424,7 +424,7 @@ class Account:
         """
         return self._call_account_method(
             'sendNativeTokens', {
-                'addressesAndNativeTokens': params,
+                'params': params,
                 'options': options
             }
         )
@@ -434,7 +434,7 @@ class Account:
         """
         return self._call_account_method(
             'sendNft', {
-                'addressesAndNftIds': params,
+                'params': params,
                 'options': options
             }
         )

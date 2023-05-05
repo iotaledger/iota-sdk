@@ -1,9 +1,9 @@
 import type { OutputTypes, HexEncodedAmount } from '@iota/types';
 import type { SyncOptions, FilterOptions } from '../account';
 import type {
-    AddressWithAmount,
-    AddressNativeTokens,
-    AddressNftId,
+    SendAmountParams,
+    SendNativeTokensParams,
+    SendNftParams,
     GenerateAddressOptions,
 } from '../address';
 import type {
@@ -221,7 +221,7 @@ export type __IncreaseNativeTokenSupplyMethod__ = {
 export type __MintNativeTokenMethod__ = {
     name: 'mintNativeToken';
     data: {
-        mintNativeTokenParams: MintNativeTokenParams;
+        params: MintNativeTokenParams;
         options?: TransactionOptions;
     };
 };
@@ -229,7 +229,7 @@ export type __MintNativeTokenMethod__ = {
 export type __MintNftsMethod__ = {
     name: 'mintNfts';
     data: {
-        mintNftParams: MintNftParams[];
+        params: MintNftParams[];
         options?: TransactionOptions;
     };
 };
@@ -237,7 +237,7 @@ export type __MintNftsMethod__ = {
 export type __PrepareOutputMethod__ = {
     name: 'prepareOutput';
     data: {
-        options: OutputParams;
+        params: OutputParams;
         transactionOptions?: TransactionOptions;
     };
 };
@@ -245,7 +245,7 @@ export type __PrepareOutputMethod__ = {
 export type __PrepareSendAmountMethod__ = {
     name: 'prepareSendAmount';
     data: {
-        addressesWithAmount: AddressWithAmount[];
+        params: SendAmountParams[];
         options?: TransactionOptions;
     };
 };
@@ -277,7 +277,7 @@ export type __RetryTransactionUntilIncludedMethod__ = {
 export type __SendAmountMethod__ = {
     name: 'sendAmount';
     data: {
-        addressesWithAmount: AddressWithAmount[];
+        params: SendAmountParams[];
         options?: TransactionOptions;
     };
 };
@@ -285,7 +285,7 @@ export type __SendAmountMethod__ = {
 export type __SendNativeTokensMethod__ = {
     name: 'sendNativeTokens';
     data: {
-        addressesAndNativeTokens: AddressNativeTokens[];
+        params: SendNativeTokensParams[];
         options?: TransactionOptions;
     };
 };
@@ -293,7 +293,7 @@ export type __SendNativeTokensMethod__ = {
 export type __SendNftMethod__ = {
     name: 'sendNft';
     data: {
-        addressesAndNftIds: AddressNftId[];
+        params: SendNftParams[];
         options?: TransactionOptions;
     };
 };

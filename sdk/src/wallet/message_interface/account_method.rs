@@ -41,7 +41,7 @@ use crate::{
             },
             FilterOptions,
         },
-        message_interface::dtos::AddressWithAmountDto,
+        message_interface::dtos::SendAmountParamsDto,
         SendNativeTokensParams, SendNftParams,
     },
 };
@@ -268,7 +268,7 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareSendAmount {
-        params: Vec<AddressWithAmountDto>,
+        params: Vec<SendAmountParamsDto>,
         options: Option<TransactionOptionsDto>,
     },
     /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
@@ -294,7 +294,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendAmount {
-        params: Vec<AddressWithAmountDto>,
+        params: Vec<SendAmountParamsDto>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send native tokens.

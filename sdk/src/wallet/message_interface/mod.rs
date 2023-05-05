@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize, Serializer};
 
 pub use self::{
     account_method::AccountMethod,
-    dtos::{AddressWithAmountDto, AddressWithUnspentOutputsDto},
+    dtos::{AddressWithUnspentOutputsDto, SendAmountParamsDto},
     message::Message,
     message_handler::WalletMessageHandler,
     response::Response,
