@@ -2,36 +2,36 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! TODO: Example description
-//! 
+//!
 //! `cargo run --example request_funds --release`
 
-use iota_sdk::client::{secret::SecretManager, utils::request_funds_from_faucet, Client, Result};
+use iota_sdk::{
+    client::utils::request_funds_from_faucet,
+    wallet::{Result, Wallet},
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let node_url = std::env::var("NODE_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
-    // Create a client instance
-    let client = Client::builder()
-        .with_node(&node_url)? // Insert the node here
-        .finish()?;
+    // Create the wallet
+    let wallet = Wallet::builder().finish().await?;
 
-    let secret_manager =
-        SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+    // Get the account we generated with `01_create_wallet`
+    let account = wallet.get_account("Alice").await?;
+    println!("Account ID");
 
-    let addresses = client
-        .get_addresses(&secret_manager)
-        .with_account_index(0)
-        .with_range(0..1)
-        .finish()
+    wallet
+        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
-    println!("{}", addresses[0]);
 
-    let faucet_response = request_funds_from_faucet(&faucet_url, &addresses[0]).await?;
+    let address = account.generate_addresses(1, None).await?;
+    println!("Generated address: {}", address[0].address());
+
+    let faucet_response = request_funds_from_faucet(&faucet_url, &address[0].address().to_string()).await?;
 
     println!("{faucet_response}");
     Ok(())
