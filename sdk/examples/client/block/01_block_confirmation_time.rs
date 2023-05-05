@@ -27,6 +27,11 @@ async fn main() -> Result<()> {
 
     // Try to check if the block has been confirmed.
     let _ = client.retry_until_included(&block_id, None, None).await?;
+    println!(
+        "Block with no payload included: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
+    );
 
     // Get the block metadata.
     let metadata = client.get_block_metadata(&block_id).await?;

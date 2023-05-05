@@ -27,14 +27,13 @@ pub(super) const DERIVE_OUTPUT_RECORD_PATH: &[u8] = b"iota-wallet-derived";
 pub(super) const PRIVATE_DATA_CLIENT_PATH: &[u8] = b"iota_seed";
 
 const PBKDF_SALT: &[u8] = b"wallet.rs";
-const PBKDF_ITER: usize = 100;
+const PBKDF_ITER: core::num::NonZeroU32 = unsafe { core::num::NonZeroU32::new_unchecked(100) };
 
 /// Hash a password, deriving a key, for accessing Stronghold.
 pub(super) fn key_provider_from_password(password: &str) -> KeyProvider {
     let mut buffer = [0u8; 64];
 
-    // Safe to unwrap because rounds > 0.
-    crypto::keys::pbkdf::PBKDF2_HMAC_SHA512(password.as_bytes(), PBKDF_SALT, PBKDF_ITER, buffer.as_mut()).unwrap();
+    crypto::keys::pbkdf::PBKDF2_HMAC_SHA512(password.as_bytes(), PBKDF_SALT, PBKDF_ITER, buffer.as_mut());
 
     // PANIC: the passphrase length is guaranteed to be 32.
     let key_provider = KeyProvider::with_passphrase_truncated(buffer[..32].to_vec()).unwrap();

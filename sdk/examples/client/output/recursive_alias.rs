@@ -26,6 +26,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance.
@@ -48,13 +49,12 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     // create three new alias outputs
     //////////////////////////////////
-    let alias_output_builder =
-        AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone(), AliasId::null())
-            .add_feature(SenderFeature::new(address))
-            .with_state_metadata(vec![1, 2, 3])
-            .add_immutable_feature(IssuerFeature::new(address))
-            .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
-            .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
+    let alias_output_builder = AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())
+        .add_feature(SenderFeature::new(address))
+        .with_state_metadata(vec![1, 2, 3])
+        .add_immutable_feature(IssuerFeature::new(address))
+        .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
+        .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
 
     let outputs = vec![alias_output_builder.clone().finish_output(token_supply)?; 3];
 
@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Transaction with new alias outputs sent: {node_url}/api/core/v2/blocks/{}",
+        "Block with new alias outputs sent: {explorer_url}/block/{}",
         block_1.id()
     );
     let _ = client.retry_until_included(&block_1.id(), None, None).await?;
@@ -111,7 +111,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Transaction with alias id set and ownership assigned to the first alias sent: {node_url}/api/core/v2/blocks/{}",
+        "Block with alias id set and ownership assigned to the first alias sent: {explorer_url}/block/{}",
         block_2.id()
     );
     let _ = client.retry_until_included(&block_2.id(), None, None).await?;
@@ -137,7 +137,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Transaction with state metadata of the third alias updated sent: {node_url}/api/core/v2/blocks/{}",
+        "Block with state metadata of the third alias updated sent: {explorer_url}/block/{}",
         block_3.id()
     );
     let _ = client.retry_until_included(&block_3.id(), None, None).await?;
@@ -162,7 +162,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Another transaction with state metadata of the third alias updated sent: {node_url}/api/core/v2/blocks/{}",
+        "Another block with state metadata of the third alias updated sent: {explorer_url}/block/{}",
         block_3.id()
     );
     let _ = client.retry_until_included(&block_3.id(), None, None).await?;

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use clap::Parser;
+use colored::Colorize;
 use dialoguer::Input;
 use iota_sdk::wallet::Account;
 
@@ -19,7 +20,7 @@ use crate::{
         AccountCli, AccountCommand,
     },
     error::Error,
-    helper::bytes_from_hex_or_file,
+    helper::{bytes_from_hex_or_file, print_account_help},
     println_log_error,
 };
 
@@ -46,16 +47,12 @@ pub async fn account_prompt_internal(account: Account, history: &mut AccountHist
         account.alias().clone()
     };
     let command: String = Input::new()
-        .with_prompt(format!("Account \"{}\"", alias))
+        .with_prompt(format!("Account \"{}\"", alias).green().to_string())
         .history_with(history)
         .completion_with(&ACCOUNT_COMPLETION)
         .interact_text()?;
     match command.as_str() {
-        "h" => {
-            if let Err(err) = AccountCli::try_parse_from(vec!["Account:", "help"]) {
-                println!("{err}");
-            }
-        }
+        "h" => print_account_help(),
         "clear" => {
             // Clear console
             let _ = std::process::Command::new("clear").status();

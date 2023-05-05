@@ -31,6 +31,10 @@ macro_rules! println_log_error {
 }
 
 fn logger_init(cli: &WalletCli) -> Result<(), Error> {
+    std::panic::set_hook(Box::new(move |panic_info| {
+        println_log_error!("{panic_info}");
+    }));
+
     let archive = LoggerOutputConfigBuilder::default()
         .name("archive.log")
         .level_filter(cli.log_level)
@@ -51,7 +55,7 @@ async fn run(cli: WalletCli) -> Result<(), Error> {
             Some(account) => account::account_prompt(wallet.get_account(account).await?).await?,
             None => {
                 if let Some(account) = pick_account(&wallet).await? {
-                    account::account_prompt(wallet.get_account(account).await?).await?;
+                    account::account_prompt(account).await?;
                 }
             }
         }
@@ -76,6 +80,12 @@ async fn main() {
         println!("{e}");
         return;
     }
+
+    log::info!(
+        "Starting {} v{}",
+        std::env!("CARGO_PKG_NAME"),
+        std::env!("CARGO_PKG_VERSION")
+    );
 
     if let Err(e) = run(cli).await {
         println_log_error!("{e}");

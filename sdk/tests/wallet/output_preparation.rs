@@ -10,8 +10,9 @@ use iota_sdk::{
     },
     wallet::{
         account::{Assets, Features, OutputOptions, ReturnStrategy, StorageDeposit, Unlocks},
-        NftOptions, Result, U256,
+        NftOptions, Result,
     },
+    U256,
 };
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
@@ -411,7 +412,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure.clone(), token_supply)?;
+    output.verify_storage_deposit(rent_structure, token_supply)?;
     assert_eq!(output.amount(), 50601);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -432,7 +433,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure.clone(), token_supply)?;
+    output.verify_storage_deposit(rent_structure, token_supply)?;
     assert_eq!(output.amount(), 85199);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -457,7 +458,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure.clone(), token_supply)?;
+    output.verify_storage_deposit(rent_structure, token_supply)?;
     assert_eq!(output.amount(), 85199);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);

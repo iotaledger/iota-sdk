@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
     }
 
     println!(
-        "\nBlock with tag and data sent: {}/block/{}",
+        "Block with tag and data sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );

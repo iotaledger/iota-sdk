@@ -334,7 +334,7 @@ pub enum ClientMethod {
     /// Try to get OutputWithMetadataResponse from provided OutputIds (requests are sent in parallel and errors are
     /// ignored, can be useful for spent outputs)
     #[serde(rename_all = "camelCase")]
-    TryGetOutputs {
+    GetOutputsIgnoreErrors {
         /// Output IDs
         output_ids: Vec<OutputId>,
     },
@@ -450,5 +450,12 @@ pub enum ClientMethod {
         hex: String,
         /// Human readable part
         bech32_hrp: Option<String>,
+    },
+    /// Requests funds for a given address from the faucet, for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.
+    RequestFundsFromFaucet {
+        /// Faucet URL
+        url: String,
+        /// The address for request funds
+        address: String,
     },
 }

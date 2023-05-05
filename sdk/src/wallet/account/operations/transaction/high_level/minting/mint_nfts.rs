@@ -105,9 +105,9 @@ impl Account {
     ///
     /// let transaction = account.mint_nfts(nft_options, None).await?;
     /// println!(
-    ///     "Transaction: {} Block sent: http://localhost:14265/api/core/v2/blocks/{}",
+    ///     "Transaction sent: {}/transaction/{}",
+    ///     std::env::var("EXPLORER_URL").unwrap(),
     ///     transaction.transaction_id,
-    ///     transaction.block_id.expect("no block created yet")
     /// );
     /// ```
     pub async fn mint_nfts(
@@ -150,10 +150,9 @@ impl Account {
             };
 
             // NftId needs to be set to 0 for the creation
-            let mut nft_builder =
-                NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure.clone(), NftId::null())
-                    // Address which will own the nft
-                    .add_unlock_condition(AddressUnlockCondition::new(address));
+            let mut nft_builder = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())
+                // Address which will own the nft
+                .add_unlock_condition(AddressUnlockCondition::new(address));
 
             if let Some(sender) = nft_options.sender {
                 nft_builder = nft_builder.add_feature(SenderFeature::new(Address::try_from_bech32(sender)?));

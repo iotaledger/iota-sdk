@@ -26,7 +26,7 @@ impl Account {
     pub(crate) async fn get_alias_and_foundry_output_ids(
         &self,
         bech32_address: &str,
-        sync_options: SyncOptions,
+        sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[SYNC] get_alias_and_foundry_output_ids");
         let client = self.client();
@@ -104,18 +104,16 @@ impl Account {
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[SYNC] get_foundry_output_ids");
         // Get alias outputs, so we can then get the foundry outputs with the alias addresses
-        let alias_output_responses = self.get_outputs(alias_output_ids.iter().cloned().collect()).await?;
+        let alias_outputs_with_meta = self.get_outputs(alias_output_ids.iter().copied().collect()).await?;
 
         let bech32_hrp = self.client.get_bech32_hrp().await?;
-        let token_supply = self.client.get_token_supply().await?;
 
         let mut tasks = vec![];
 
-        for alias_output_response in alias_output_responses {
-            let output = Output::try_from_dto(&alias_output_response.output, token_supply)?;
-            if let Output::Alias(alias_output) = output {
-                let output_id = alias_output_response.metadata.output_id()?;
-                let alias_address = AliasAddress::from(alias_output.alias_id_non_null(&output_id));
+        for alias_output_with_meta in alias_outputs_with_meta {
+            if let Output::Alias(alias_output) = alias_output_with_meta.output() {
+                let alias_address =
+                    AliasAddress::from(alias_output.alias_id_non_null(alias_output_with_meta.metadata().output_id()));
                 let alias_bech32_address = Address::Alias(alias_address).to_bech32(bech32_hrp.clone());
                 let client = self.client.clone();
                 tasks.push(Box::pin(task::spawn(async move {

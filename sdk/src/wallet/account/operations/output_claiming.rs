@@ -23,11 +23,11 @@ use crate::{
 /// Enum to specify which outputs should be claimed
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum OutputsToClaim {
-    None = 0,
-    MicroTransactions = 1,
-    NativeTokens = 2,
-    Nfts = 3,
-    All = 4,
+    MicroTransactions,
+    NativeTokens,
+    Nfts,
+    Amount,
+    All,
 }
 
 impl Account {
@@ -48,90 +48,69 @@ impl Account {
 
         // Get outputs for the claim
         let mut output_ids_to_claim: HashSet<OutputId> = HashSet::new();
-        for (output_id, output_data) in &account_details.unspent_outputs {
+        for (output_id, output_data) in account_details
+            .unspent_outputs
+            .iter()
+            .filter(|(_, o)| o.output.is_basic() || o.output.is_nft())
+        {
             // Don't use outputs that are locked for other transactions
-            if !account_details.locked_outputs.contains(output_id) {
-                if let Some(output) = account_details.outputs.get(output_id) {
-                    match &output.output {
-                        Output::Basic(basic_output) => {
-                            // If there is a single [UnlockCondition], then it's an
-                            // [AddressUnlockCondition] and we own it already without
-                            // further restrictions
-                            if basic_output.unlock_conditions().len() != 1
-                                && can_output_be_unlocked_now(
-                                    // We use the addresses with unspent outputs, because other addresses of the
-                                    // account without unspent outputs can't be related to this output
-                                    &account_details.addresses_with_unspent_outputs,
-                                    // outputs controlled by an alias or nft are currently not considered
-                                    &[],
-                                    output,
-                                    local_time,
-                                    // Not relevant without alias addresses
-                                    None,
-                                )?
-                            {
-                                match outputs_to_claim {
-                                    OutputsToClaim::MicroTransactions => {
-                                        if let Some(sdr) = basic_output.unlock_conditions().storage_deposit_return() {
-                                            // Only micro transaction if not the same
-                                            if sdr.amount() != basic_output.amount() {
-                                                output_ids_to_claim.insert(output_data.output_id);
-                                            }
-                                        }
+            if !account_details.locked_outputs.contains(output_id) && account_details.outputs.contains_key(output_id) {
+                if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
+                    // If there is a single [UnlockCondition], then it's an
+                    // [AddressUnlockCondition] and we own it already without
+                    // further restrictions
+                    if unlock_conditions.len() != 1
+                        && can_output_be_unlocked_now(
+                            // We use the addresses with unspent outputs, because other addresses of the
+                            // account without unspent outputs can't be related to this output
+                            &account_details.addresses_with_unspent_outputs,
+                            // outputs controlled by an alias or nft are currently not considered
+                            &[],
+                            output_data,
+                            local_time,
+                            // Not relevant without alias addresses
+                            None,
+                        )?
+                    {
+                        match outputs_to_claim {
+                            OutputsToClaim::MicroTransactions => {
+                                if let Some(sdr) = unlock_conditions.storage_deposit_return() {
+                                    // If expired, it's not a micro transaction anymore
+                                    if unlock_conditions.is_expired(local_time) {
+                                        continue;
                                     }
-                                    OutputsToClaim::NativeTokens => {
-                                        if !basic_output.native_tokens().is_empty() {
-                                            output_ids_to_claim.insert(output_data.output_id);
-                                        }
-                                    }
-                                    OutputsToClaim::All => {
+                                    // Only micro transaction if not the same
+                                    if sdr.amount() != output_data.output.amount() {
                                         output_ids_to_claim.insert(output_data.output_id);
                                     }
-                                    _ => {}
                                 }
                             }
-                        }
-                        Output::Nft(nft_output) => {
-                            // Ignore outputs with a single [UnlockCondition], because then it's an
-                            // [AddressUnlockCondition] and we own it already without
-                            // further restrictions
-                            if nft_output.unlock_conditions().len() != 1
-                                && can_output_be_unlocked_now(
-                                    // We use the addresses with unspent outputs, because other addresses of the
-                                    // account without unspent outputs can't be related to this output
-                                    &account_details.addresses_with_unspent_outputs,
-                                    // outputs controlled by an alias or nft are currently not considered
-                                    &[],
-                                    output,
-                                    local_time,
-                                    // Not relevant without alias addresses
-                                    None,
-                                )?
-                            {
-                                match outputs_to_claim {
-                                    OutputsToClaim::MicroTransactions => {
-                                        if let Some(sdr) = nft_output.unlock_conditions().storage_deposit_return() {
-                                            // Only micro transaction if not the same
-                                            if sdr.amount() != nft_output.amount() {
-                                                output_ids_to_claim.insert(output_data.output_id);
-                                            }
-                                        }
-                                    }
-                                    OutputsToClaim::NativeTokens => {
-                                        if !nft_output.native_tokens().is_empty() {
-                                            output_ids_to_claim.insert(output_data.output_id);
-                                        }
-                                    }
-                                    OutputsToClaim::Nfts | OutputsToClaim::All => {
-                                        output_ids_to_claim.insert(output_data.output_id);
-                                    }
-                                    _ => {}
+                            OutputsToClaim::NativeTokens => {
+                                if !output_data.output.native_tokens().map(|n| n.is_empty()).unwrap_or(true) {
+                                    output_ids_to_claim.insert(output_data.output_id);
                                 }
                             }
+                            OutputsToClaim::Nfts => {
+                                if output_data.output.is_nft() {
+                                    output_ids_to_claim.insert(output_data.output_id);
+                                }
+                            }
+                            OutputsToClaim::Amount => {
+                                let mut claimable_amount = output_data.output.amount();
+                                if !unlock_conditions.is_expired(local_time) {
+                                    claimable_amount -= unlock_conditions
+                                        .storage_deposit_return()
+                                        .map(|s| s.amount())
+                                        .unwrap_or_default()
+                                };
+                                if claimable_amount > 0 {
+                                    output_ids_to_claim.insert(output_data.output_id);
+                                }
+                            }
+                            OutputsToClaim::All => {
+                                output_ids_to_claim.insert(output_data.output_id);
+                            }
                         }
-                        // Other output types can't have [`ExpirationUnlockCondition`],
-                        // [`StorageDepositReturnUnlockCondition`] or [`TimelockUnlockCondition`]
-                        _ => {}
                     }
                 }
             }
@@ -268,7 +247,7 @@ impl Account {
                         .finish_output(token_supply)?
                 } else {
                     NftOutputBuilder::from(nft_output)
-                        .with_minimum_storage_deposit(rent_structure.clone())
+                        .with_minimum_storage_deposit(rent_structure)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
                         .with_unlock_conditions([AddressUnlockCondition::new(first_account_address.address.inner)])
                         // Set native tokens empty, we will collect them from all inputs later

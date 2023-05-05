@@ -9,13 +9,13 @@ license = "Apache-2.0"
 publish = false
 
 [dependencies]
-iota-sdk = { path = "../../sdk", default-features = false, features = [ "wallet", "message_interface" ] }
+iota-sdk = { path = "../../sdk", default-features = false, features = [ "wallet", "tls", "message_interface" ] }
 
 backtrace = { version = "0.3.67", default-features = false }
 derivative = { version = "2.2.0", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 futures =  { version = "0.3.26", default-features = false }
-iota-crypto = { version = "0.15.3", default-features = false }
+iota-crypto = { version = "0.18.0", default-features = false, features = [ "slip10" ] }
 log = { version = "0.4.17", default-features = false }
 packable = { version = "0.8.0", default-features = false }
 prefix-hex = { version = "0.7.0", default-features = false }

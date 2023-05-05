@@ -7,42 +7,6 @@
     }
   },
   "packages": {
-    "client-nodejs-binding": {
-      "path": "./sdk/src/client/bindings/nodejs",
-      "manager": "javascript",
-      "getPublishedVersion": "npm view ${ pkgFile.pkg.name }@develop version",
-      "prepublish": [
-        {
-          "command": "false || dasel put -f Cargo.toml '.dependencies.iota-sdk.rev' -v $GITHUB_SHA"
-        },
-        {
-          "command": "dasel put -f Cargo.toml '.dependencies.iota-sdk.git' -v https://github.com/iotaledger/iota-sdk"
-        },
-        {
-          "command": "dasel put -t json -f Cargo.toml '.dependencies.iota-sdk.features' -v '[\"message_interface\", \"mqtt\"]'"
-        },
-        {
-          "command": "dasel delete -f Cargo.toml '.dependencies.iota-sdk.path'"
-        },
-        {
-          "command": "dasel delete -f Cargo.toml '.dependencies.iota-sdk.default-features'"
-        },
-        {
-          "command": "yarn --ignore-scripts"
-        },
-        {
-          "command": "tsc"
-        },
-        {
-          "command": "cat Cargo.toml"
-        }
-      ],
-      "publish": [
-        {
-          "command": "yarn publish --access public --loglevel silly --tag develop"
-        }
-      ]
-    },
     "wallet-nodejs-binding": {
       "path": "./sdk/src/wallet/bindings/nodejs",
       "manager": "javascript",

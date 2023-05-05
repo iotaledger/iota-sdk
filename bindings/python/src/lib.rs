@@ -36,7 +36,7 @@ pub fn init_logger(config: String) -> PyResult<()> {
 #[pyfunction]
 pub fn call_utils_method(method: String) -> Result<String> {
     let method = serde_json::from_str::<UtilsMethod>(&method)?;
-    let response = crate::block_on(async { rust_call_utils_method(method).await });
+    let response = rust_call_utils_method(method);
     Ok(serde_json::to_string(&response)?)
 }
 

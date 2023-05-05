@@ -1,5 +1,24 @@
 # Changelog
 
+## \[2.0.3-rc.34]
+
+- Added `OutputsToClaim::Amount` and removed `OutputsToClaim::None`.
+  - [824298d0](https://github.com/iotaledger/iota-sdk/commit/824298d0c725bde2769401fd2eaab4218fb225d3) Add amount claim ([#335](https://github.com/iotaledger/iota-sdk/pull/335)) on 2023-04-27
+- Add an optional ignoreIfBech32Mismatch field to `restoreBackup()`.
+  - [8dd3b6cf](https://github.com/iotaledger/iota-sdk/commit/8dd3b6cf3264541ad0567660ab6d4b8268b5cc1c) Add ignore_if_bech32\_mismatch to restore_backup() ([#382](https://github.com/iotaledger/iota-sdk/pull/382)) on 2023-05-04
+
+## \[2.0.3-rc.33]
+
+- Rename `SendNativeTokens::addresses_native_tokens` to `addresses_and_native_tokens`.
+  - [301f2a3](https://github.com/iotaledger/iota-sdk/commit/301f2a3473175633b5112019ac34c7b41d83aee9) Add SyncOptions fallback ([#219](https://github.com/iotaledger/iota-sdk/pull/219)) on 2023-04-26
+- Added `Account::setDefaultSyncOptions` to update the default sync options.
+  - [301f2a3](https://github.com/iotaledger/iota-sdk/commit/301f2a3473175633b5112019ac34c7b41d83aee9) Add SyncOptions fallback ([#219](https://github.com/iotaledger/iota-sdk/pull/219)) on 2023-04-26
+- Remove `AddressGenerationOptions` in favor of `GenerateAddressOptions`, which now contains the `internal` flag.
+  - [301f2a3](https://github.com/iotaledger/iota-sdk/commit/301f2a3473175633b5112019ac34c7b41d83aee9) Add SyncOptions fallback ([#219](https://github.com/iotaledger/iota-sdk/pull/219)) on 2023-04-26
+- Add EventStatus enum.
+  ParticipationEventStatus::status is now `EventStatus` instead of `string`.
+  - [301f2a3](https://github.com/iotaledger/iota-sdk/commit/301f2a3473175633b5112019ac34c7b41d83aee9) Add SyncOptions fallback ([#219](https://github.com/iotaledger/iota-sdk/pull/219)) on 2023-04-26
+
 ## \[2.0.3-rc.32]
 
 - Add `BaseCoinBalance.voting_power` field.
