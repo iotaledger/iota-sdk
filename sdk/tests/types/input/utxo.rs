@@ -31,7 +31,6 @@ fn is_methods() {
     let input = Input::from(UtxoInput::from_str(OUTPUT_ID).unwrap());
 
     assert!(input.is_utxo());
-    assert!(!input.is_treasury());
 }
 
 #[test]
@@ -40,7 +39,6 @@ fn as_methods() {
     let input = Input::from(utxo_input);
 
     assert_eq!(input.as_utxo(), &utxo_input);
-    assert!(std::panic::catch_unwind(|| input.as_treasury()).is_err());
 }
 
 #[test]

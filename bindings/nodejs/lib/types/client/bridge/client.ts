@@ -224,10 +224,6 @@ export interface __GetUtxoChangesByIndexMethod__ {
     };
 }
 
-export interface __GetTreasuryMethod__ {
-    name: 'getTreasury';
-}
-
 export interface __GetIncludedBlockMethod__ {
     name: 'getIncludedBlock';
     data: {

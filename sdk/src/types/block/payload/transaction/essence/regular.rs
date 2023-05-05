@@ -212,13 +212,9 @@ fn verify_inputs<const VERIFY: bool>(inputs: &[Input]) -> Result<(), Error> {
         let mut seen_utxos = HashSet::new();
 
         for input in inputs.iter() {
-            match input {
-                Input::Utxo(utxo) => {
-                    if !seen_utxos.insert(utxo) {
-                        return Err(Error::DuplicateUtxo(*utxo));
-                    }
-                }
-                _ => return Err(Error::InvalidInputKind(input.kind())),
+            let Input::Utxo(utxo) = input;
+            if !seen_utxos.insert(utxo) {
+                return Err(Error::DuplicateUtxo(*utxo));
             }
         }
     }
@@ -242,7 +238,6 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
                 Output::Alias(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
                 Output::Foundry(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
                 Output::Nft(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
-                _ => return Err(Error::InvalidOutputKind(output.kind())),
             };
 
             amount_sum = amount_sum
@@ -288,7 +283,6 @@ fn verify_outputs_unverified<const VERIFY: bool>(outputs: &[Output]) -> Result<(
                 Output::Alias(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
                 Output::Foundry(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
                 Output::Nft(output) => (output.amount(), output.native_tokens(), Some(output.chain_id())),
-                _ => return Err(Error::InvalidOutputKind(output.kind())),
             };
 
             amount_sum = amount_sum
