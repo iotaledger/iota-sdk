@@ -83,22 +83,6 @@ impl std::fmt::Debug for Client {
     }
 }
 
-impl Drop for ClientInner {
-    /// Gracefully shutdown the `Client`
-    fn drop(&mut self) {
-        #[cfg(feature = "mqtt")]
-        {
-            tokio::task::block_in_place(move || {
-                tokio::runtime::Handle::current().block_on(async move {
-                    if let Some(mqtt_client) = self.mqtt.client.write().await.take() {
-                        mqtt_client.try_disconnect().unwrap();
-                    }
-                });
-            });
-        }
-    }
-}
-
 impl Client {
     /// Create the builder to instantiate the IOTA Client.
     pub fn builder() -> ClientBuilder {
