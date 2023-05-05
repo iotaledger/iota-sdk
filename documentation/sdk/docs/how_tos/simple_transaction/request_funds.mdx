@@ -23,7 +23,7 @@ import PythonOutput from "../../libraries/python/how_tos/simple_transaction/requ
 import TipFaucet from "../../_admonitions/_tip_faucet.md";
 
 Once you have created your account<!-- TODO [created your account](01_create_a_wallet_account.mdx) -->,
-you can start using wallet.rs for value transactions. Since these examples target the testnet, you can request funds
+you can start using the IOTA SDK for value transactions. Since these examples target the testnet, you can request funds
 using the `request_funds_from_faucet` function.
 
 <TipFaucet/>
@@ -32,7 +32,7 @@ using the `request_funds_from_faucet` function.
 
 The following example will:
 
-1. Create an account manager.
+1. Create a wallet.
 2. Get Alice's account which was created in the first guide<!-- TODO [created in the first guide](01_create_a_wallet_account.mdx) -->.
 3. Retrieve an address<!-- TODO [address](02_generate_address.mdx)  --> related to Alice's account.
 4. Request funds to the `FAUCET_URL` you defined in the `.env` file.
