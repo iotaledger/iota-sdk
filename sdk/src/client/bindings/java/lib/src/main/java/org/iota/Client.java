@@ -400,8 +400,8 @@ public class Client extends NativeApi {
      * @return A list of entries, where each entry is a pair of an output and its metadata.
      * @throws ClientException on error.
      */
-    public List<Map.Entry<Output, OutputMetadata>> tryGetOutputs(OutputId[] outputIds) throws ClientException {
-        return highLevelApi.tryGetOutputs(outputIds);
+    public List<Map.Entry<Output, OutputMetadata>> getOutputsIgnoreErrors(OutputId[] outputIds) throws ClientException {
+        return highLevelApi.getOutputsIgnoreErrors(outputIds);
     }
 
     /**

@@ -332,8 +332,8 @@ export interface __FoundryOutputIdMethod__ {
     };
 }
 
-export interface __TryGetOutputsMethod__ {
-    name: 'tryGetOutputs';
+export interface __GetOutputsIgnoreErrorsMethod__ {
+    name: 'getOutputsIgnoreErrors';
     data: {
         outputIds: string[];
     };
