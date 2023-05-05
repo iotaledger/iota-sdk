@@ -1,11 +1,17 @@
 from iota_sdk import Client, LedgerNanoSecretManager, SecretManager
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # In this example we will get the ledger status and generate an address
 # To use the ledger nano simulator clone https://github.com/iotaledger/ledger-shimmer-app, run `git submodule init && git submodule update --recursive`,
 # then `./build.sh -m nanos|nanox|nanosplus -s` and use `True` in `LedgerNanoSecretManager(True)`.
 
+node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
+
 # Create a Client instance
-client = Client(nodes=['https://api.testnet.shimmer.network'])
+client = Client(nodes=[node_url])
 
 is_simulator = True
 

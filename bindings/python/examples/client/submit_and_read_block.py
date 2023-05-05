@@ -9,9 +9,15 @@
 # Import the python iota client
 # Make sure you have first installed it with `pip install iota_sdk`
 from iota_sdk import Client, hex_to_utf8, utf8_to_hex
+from dotenv import load_dotenv
+import os
 
-# Create an Client instance
-client = Client(nodes=['https://api.testnet.shimmer.network'])
+load_dotenv()
+
+node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
+
+# Create a Client instance
+client = Client(nodes=[node_url])
 
 
 ########################################################
@@ -84,6 +90,4 @@ print(f'\nYour message, read from the Shimmer network:')
 print(f'  {message_out}')
 
 # Or see the message online, with the testnet explorer
-explorer_url = 'https://explorer.iota.org/testnet/block/'+block_id
-print(f'\nOr see the message with the testnet explorer:')
-print(f'  {explorer_url}')
+print(f'\nOr see the message with the testnet explorer: {os.environ["EXPLORER_URL"]}/block/{block_id}')
