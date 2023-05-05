@@ -94,8 +94,8 @@ pub enum Error {
     #[error("the requested data {0} was not found.")]
     NotFound(String),
     /// Requested output id not found for this type
-    #[error("No output for {0}")]
-    NoOutput(&'static str),
+    #[error("No output found for {0} id: {1}")]
+    NoOutput(&'static str, String),
     /// PlaceholderSecretManager can't be used for address generation or signing
     #[error("placeholderSecretManager can't be used for address generation or signing")]
     PlaceholderSecretManager,

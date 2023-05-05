@@ -59,7 +59,7 @@ impl Client {
             .get_output_ids(&route, QueryParameters::empty(), true, false)
             .await?
             .first()
-            .ok_or_else(|| Error::NoOutput("alias"))?))
+            .ok_or_else(|| Error::NoOutput("alias", alias_id.to_string()))?))
     }
 
     /// Get foundry outputs filtered by the given parameters.
@@ -84,7 +84,7 @@ impl Client {
             .get_output_ids(&route, QueryParameters::empty(), true, false)
             .await?
             .first()
-            .ok_or_else(|| Error::NoOutput("foundry"))?))
+            .ok_or_else(|| Error::NoOutput("foundry", foundry_id.to_string()))?))
     }
 
     /// Get NFT outputs filtered by the given parameters.
@@ -110,6 +110,6 @@ impl Client {
             .get_output_ids(&route, QueryParameters::empty(), true, false)
             .await?
             .first()
-            .ok_or_else(|| Error::NoOutput("nft"))?))
+            .ok_or_else(|| Error::NoOutput("nft", nft_id.to_string()))?))
     }
 }

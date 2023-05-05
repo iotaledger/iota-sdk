@@ -29,7 +29,10 @@ impl Account {
                 task::spawn(async move {
                     match client.foundry_output_id(foundry_id).await {
                         Ok(output_id) => Ok(Some(client.get_output(&output_id).await?)),
-                        Err(crate::client::Error::NoOutput("foundry")) => Ok(None),
+                        Err(crate::client::Error::NoOutput("foundry", id)) => {
+                            log::debug!("{}", crate::client::Error::NoOutput("foundry", id));
+                            Ok(None)
+                        }
                         Err(e) => Err(crate::wallet::Error::Client(e.into())),
                     }
                 })

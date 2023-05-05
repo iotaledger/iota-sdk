@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Client::get_outputs()` and derived methods return `OutputWithMetadata` instead of `OutputWithMetadataDto`;
 - rename `Client::try_get_outputs()` into `Client::get_outputs_ignore_errors()`;
 - rename `Client::try_get_outputs_metadata()` into `Client::get_outputs_metadata_ignore_errors()`;
+- All `Node` related errors have been moved from the client error to a newly created `client::node_api::Error`;
 
 ### Removed
 
@@ -71,7 +72,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Lots of builder setters are now taking an `impl Into<Option<T>>` instead of a `T` parameter;
 - All `ledger_nano` related errors have been moved from the client error to a newly created `client::secret::ledger_nano::Error`;
 - All `stronghold` related errors have been moved from the client error to a newly created `client::stronghold::Error`;
-- All `Node` related errors have been moved from the client error to a newly created `client::node_api::Error`;
 
 ### Removed
 
