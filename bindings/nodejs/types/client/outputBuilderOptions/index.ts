@@ -1,11 +1,11 @@
-import type { IBasicOutputBuilderOptions } from './basicOutputOptions';
-import type { IAliasOutputBuilderOptions } from './aliasOutputOptions';
-import type { IFoundryOutputBuilderOptions } from './foundryOutputOptions';
-import type { INftOutputBuilderOptions } from './nftOutputOptions';
+import type { BasicOutputBuilderOptions } from './basicOutputOptions';
+import type { AliasOutputBuilderOptions } from './aliasOutputOptions';
+import type { FoundryOutputBuilderOptions } from './foundryOutputOptions';
+import type { NftOutputBuilderOptions } from './nftOutputOptions';
 
 export {
-    IBasicOutputBuilderOptions,
-    IAliasOutputBuilderOptions,
-    IFoundryOutputBuilderOptions,
-    INftOutputBuilderOptions,
+    BasicOutputBuilderOptions,
+    AliasOutputBuilderOptions,
+    FoundryOutputBuilderOptions,
+    NftOutputBuilderOptions,
 };

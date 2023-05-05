@@ -11,10 +11,10 @@ import type {
     INetworkInfo,
     INode,
     IAuth,
-    IBasicOutputBuilderOptions,
-    IAliasOutputBuilderOptions,
-    IFoundryOutputBuilderOptions,
-    INftOutputBuilderOptions,
+    BasicOutputBuilderOptions,
+    AliasOutputBuilderOptions,
+    FoundryOutputBuilderOptions,
+    NftOutputBuilderOptions,
     FoundryQueryParameter,
     NftQueryParameter,
     AliasQueryParameter,
@@ -33,15 +33,12 @@ import type {
     INodeInfo,
     IReceiptsResponse,
     ITreasury,
-    IBasicOutput,
-    IAliasOutput,
-    IFoundryOutput,
-    INftOutput,
     INodeInfoProtocol,
     UnlockTypes,
 } from '@iota/types';
 import type { INodeInfoWrapper } from '../../types/client/nodeInfo';
 import { SecretManagerType } from '../../types/secretManager/secretManager';
+import { AliasOutput, BasicOutput, FoundryOutput, NftOutput } from '../types';
 
 /** The Client to interact with nodes. */
 export class Client {
@@ -910,8 +907,8 @@ export class Client {
      * Build a Basic Output.
      */
     async buildBasicOutput(
-        options: IBasicOutputBuilderOptions,
-    ): Promise<IBasicOutput> {
+        options: BasicOutputBuilderOptions,
+    ): Promise<BasicOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildBasicOutput',
             data: options,
@@ -924,8 +921,8 @@ export class Client {
      * Build an Alias Output.
      */
     async buildAliasOutput(
-        options: IAliasOutputBuilderOptions,
-    ): Promise<IAliasOutput> {
+        options: AliasOutputBuilderOptions,
+    ): Promise<AliasOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildAliasOutput',
             data: options,
@@ -938,8 +935,8 @@ export class Client {
      * Build a Foundry Output.
      */
     async buildFoundryOutput(
-        options: IFoundryOutputBuilderOptions,
-    ): Promise<IFoundryOutput> {
+        options: FoundryOutputBuilderOptions,
+    ): Promise<FoundryOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildFoundryOutput',
             data: options,
@@ -951,9 +948,7 @@ export class Client {
     /**
      * Build an Nft Output.
      */
-    async buildNftOutput(
-        options: INftOutputBuilderOptions,
-    ): Promise<INftOutput> {
+    async buildNftOutput(options: NftOutputBuilderOptions): Promise<NftOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildNftOutput',
             data: options,
