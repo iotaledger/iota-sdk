@@ -262,8 +262,6 @@ pub enum OutputKind {
     Foundry,
     /// Nft output.
     Nft,
-    /// Treasury output.
-    Treasury,
 }
 
 impl FromStr for OutputKind {
@@ -275,7 +273,6 @@ impl FromStr for OutputKind {
             "Basic" => Self::Basic,
             "Foundry" => Self::Foundry,
             "Nft" => Self::Nft,
-            "Treasury" => Self::Treasury,
             _ => return Err(crate::wallet::Error::InvalidOutputKind(s.to_string())),
         };
         Ok(kind)

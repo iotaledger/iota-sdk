@@ -16,7 +16,7 @@ use crate::{
     types::{
         api::core::response::{
             BlockMetadataResponse, InfoResponse, OutputWithMetadataResponse, PeerResponse, RoutesResponse,
-            SubmitBlockResponse, TipsResponse, TreasuryResponse, UtxoChangesResponse,
+            SubmitBlockResponse, TipsResponse, UtxoChangesResponse,
         },
         block::{
             output::{Output, OutputId, OutputMetadata, OutputWithMetadata},
@@ -302,19 +302,6 @@ impl ClientInner {
             .read()
             .await
             .get_request::<OutputMetadata>(path, None, self.get_timeout().await, false, true)
-            .await
-    }
-
-    /// Gets the current treasury output.
-    /// The treasury output contains all tokens from the legacy network that have not yet been migrated.
-    /// GET /api/core/v2/treasury
-    pub async fn get_treasury(&self) -> Result<TreasuryResponse> {
-        let path = "api/core/v2/treasury";
-
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, DEFAULT_API_TIMEOUT, false, false)
             .await
     }
 

@@ -7,12 +7,7 @@ use iota_sdk::{
         parent::Parents,
         payload::{Payload, TaggedDataPayload},
         protocol::protocol_parameters,
-        rand::{
-            block::rand_block_ids,
-            number::rand_number,
-            parents::rand_parents,
-            payload::{rand_tagged_data_payload, rand_treasury_transaction_payload},
-        },
+        rand::{block::rand_block_ids, number::rand_number, parents::rand_parents, payload::rand_tagged_data_payload},
         Block, BlockBuilder, Error,
     },
 };
@@ -46,16 +41,6 @@ fn invalid_length() {
         .finish();
 
     assert!(matches!(res, Err(Error::InvalidBlockLength(len)) if len == Block::LENGTH_MAX + 33));
-}
-
-#[test]
-fn invalid_payload_kind() {
-    let protocol_parameters = protocol_parameters();
-    let res = BlockBuilder::new(rand_parents())
-        .with_payload(rand_treasury_transaction_payload(protocol_parameters.token_supply()))
-        .finish();
-
-    assert!(matches!(res, Err(Error::InvalidPayloadKind(4))))
 }
 
 #[test]

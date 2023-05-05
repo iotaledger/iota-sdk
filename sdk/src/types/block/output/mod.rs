@@ -13,7 +13,6 @@ mod rent;
 mod state_transition;
 mod token_id;
 mod token_scheme;
-mod treasury;
 
 ///
 pub mod alias;
@@ -64,7 +63,6 @@ pub use self::{
     state_transition::{StateTransitionError, StateTransitionVerifier},
     token_id::TokenId,
     token_scheme::{SimpleTokenScheme, TokenScheme},
-    treasury::TreasuryOutput,
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
 use super::protocol::ProtocolParameters;
@@ -125,8 +123,6 @@ impl OutputWithMetadata {
 /// A generic output that can represent different types defining the deposit of funds.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From)]
 pub enum Output {
-    /// A treasury output.
-    Treasury(TreasuryOutput),
     /// A basic output.
     Basic(BasicOutput),
     /// An alias output.
@@ -140,7 +136,6 @@ pub enum Output {
 impl core::fmt::Debug for Output {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Treasury(output) => output.fmt(f),
             Self::Basic(output) => output.fmt(f),
             Self::Alias(output) => output.fmt(f),
             Self::Foundry(output) => output.fmt(f),
@@ -156,7 +151,6 @@ impl Output {
     /// Return the output kind of an [`Output`].
     pub fn kind(&self) -> u8 {
         match self {
-            Self::Treasury(_) => TreasuryOutput::KIND,
             Self::Basic(_) => BasicOutput::KIND,
             Self::Alias(_) => AliasOutput::KIND,
             Self::Foundry(_) => FoundryOutput::KIND,
@@ -167,7 +161,6 @@ impl Output {
     /// Returns the amount of an [`Output`].
     pub fn amount(&self) -> u64 {
         match self {
-            Self::Treasury(output) => output.amount(),
             Self::Basic(output) => output.amount(),
             Self::Alias(output) => output.amount(),
             Self::Foundry(output) => output.amount(),
@@ -178,7 +171,6 @@ impl Output {
     /// Returns the native tokens of an [`Output`], if any.
     pub fn native_tokens(&self) -> Option<&NativeTokens> {
         match self {
-            Self::Treasury(_) => None,
             Self::Basic(output) => Some(output.native_tokens()),
             Self::Alias(output) => Some(output.native_tokens()),
             Self::Foundry(output) => Some(output.native_tokens()),
@@ -189,7 +181,6 @@ impl Output {
     /// Returns the unlock conditions of an [`Output`], if any.
     pub fn unlock_conditions(&self) -> Option<&UnlockConditions> {
         match self {
-            Self::Treasury(_) => None,
             Self::Basic(output) => Some(output.unlock_conditions()),
             Self::Alias(output) => Some(output.unlock_conditions()),
             Self::Foundry(output) => Some(output.unlock_conditions()),
@@ -200,7 +191,6 @@ impl Output {
     /// Returns the features of an [`Output`], if any.
     pub fn features(&self) -> Option<&Features> {
         match self {
-            Self::Treasury(_) => None,
             Self::Basic(output) => Some(output.features()),
             Self::Alias(output) => Some(output.features()),
             Self::Foundry(output) => Some(output.features()),
@@ -211,7 +201,6 @@ impl Output {
     /// Returns the immutable features of an [`Output`], if any.
     pub fn immutable_features(&self) -> Option<&Features> {
         match self {
-            Self::Treasury(_) => None,
             Self::Basic(_) => None,
             Self::Alias(output) => Some(output.immutable_features()),
             Self::Foundry(output) => Some(output.immutable_features()),
@@ -222,26 +211,10 @@ impl Output {
     /// Returns the chain identifier of an [`Output`], if any.
     pub fn chain_id(&self) -> Option<ChainId> {
         match self {
-            Self::Treasury(_) => None,
             Self::Basic(_) => None,
             Self::Alias(output) => Some(output.chain_id()),
             Self::Foundry(output) => Some(output.chain_id()),
             Self::Nft(output) => Some(output.chain_id()),
-        }
-    }
-
-    /// Checks whether the output is a [`TreasuryOutput`].
-    pub fn is_treasury(&self) -> bool {
-        matches!(self, Self::Treasury(_))
-    }
-
-    /// Gets the output as an actual [`TreasuryOutput`].
-    /// PANIC: do not call on a non-treasury output.
-    pub fn as_treasury(&self) -> &TreasuryOutput {
-        if let Self::Treasury(output) = self {
-            output
-        } else {
-            panic!("as_treasury called on a non-treasury output");
         }
     }
 
@@ -339,7 +312,6 @@ impl Output {
                 Some(Address::Nft(output.nft_address(output_id))),
             )),
             Self::Foundry(output) => Ok((Address::Alias(*output.alias_address()), None)),
-            Self::Treasury(_) => Err(Error::UnsupportedOutputKind(TreasuryOutput::KIND)),
         }
     }
 
@@ -425,10 +397,6 @@ impl Packable for Output {
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         match self {
-            Self::Treasury(output) => {
-                TreasuryOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
             Self::Basic(output) => {
                 BasicOutput::KIND.pack(packer)?;
                 output.pack(packer)
@@ -455,7 +423,6 @@ impl Packable for Output {
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         Ok(match u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
-            TreasuryOutput::KIND => Self::from(TreasuryOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             BasicOutput::KIND => Self::from(BasicOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             AliasOutput::KIND => Self::from(AliasOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             FoundryOutput::KIND => Self::from(FoundryOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
@@ -514,7 +481,6 @@ pub mod dto {
         foundry::dto::FoundryOutputDto,
         nft::dto::NftOutputDto,
         token_scheme::dto::{SimpleTokenSchemeDto, TokenSchemeDto},
-        treasury::dto::TreasuryOutputDto,
     };
     use crate::types::{block::Error, TryFromDto};
 
@@ -537,7 +503,6 @@ pub mod dto {
     /// Describes all the different output types.
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum OutputDto {
-        Treasury(TreasuryOutputDto),
         Basic(BasicOutputDto),
         Alias(AliasOutputDto),
         Foundry(FoundryOutputDto),
@@ -547,7 +512,6 @@ pub mod dto {
     impl From<&Output> for OutputDto {
         fn from(value: &Output) -> Self {
             match value {
-                Output::Treasury(o) => Self::Treasury(o.into()),
                 Output::Basic(o) => Self::Basic(o.into()),
                 Output::Alias(o) => Self::Alias(o.into()),
                 Output::Foundry(o) => Self::Foundry(o.into()),
@@ -562,7 +526,6 @@ pub mod dto {
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
             Ok(match dto {
-                OutputDto::Treasury(o) => Self::Treasury(TreasuryOutput::try_from_dto_with_params_inner(o, params)?),
                 OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from_dto_with_params_inner(o, params)?),
                 OutputDto::Alias(o) => Self::Alias(AliasOutput::try_from_dto_with_params_inner(o, params)?),
                 OutputDto::Foundry(o) => Self::Foundry(FoundryOutput::try_from_dto_with_params_inner(o, params)?),
@@ -580,11 +543,6 @@ pub mod dto {
                     .and_then(Value::as_u64)
                     .ok_or_else(|| serde::de::Error::custom("invalid output type"))? as u8
                 {
-                    TreasuryOutput::KIND => {
-                        Self::Treasury(TreasuryOutputDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize treasury output: {e}"))
-                        })?)
-                    }
                     BasicOutput::KIND => Self::Basic(
                         BasicOutputDto::deserialize(value)
                             .map_err(|e| serde::de::Error::custom(format!("cannot deserialize basic output: {e}")))?,
@@ -615,7 +573,6 @@ pub mod dto {
             #[derive(Serialize)]
             #[serde(untagged)]
             enum OutputDto_<'a> {
-                T1(&'a TreasuryOutputDto),
                 T2(&'a BasicOutputDto),
                 T3(&'a AliasOutputDto),
                 T4(&'a FoundryOutputDto),
@@ -627,9 +584,6 @@ pub mod dto {
                 output: OutputDto_<'a>,
             }
             let output = match self {
-                Self::Treasury(o) => TypedOutput {
-                    output: OutputDto_::T1(o),
-                },
                 Self::Basic(o) => TypedOutput {
                     output: OutputDto_::T2(o),
                 },

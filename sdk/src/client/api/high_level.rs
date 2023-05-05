@@ -48,9 +48,8 @@ impl Client {
 
         let input_ids = inputs
             .iter()
-            .filter_map(|i| match i {
-                Input::Utxo(input) => Some(*input.output_id()),
-                Input::Treasury(_) => None,
+            .map(|i| match i {
+                Input::Utxo(input) => *input.output_id(),
             })
             .collect::<Vec<_>>();
 

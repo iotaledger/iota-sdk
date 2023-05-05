@@ -207,12 +207,9 @@ pub(crate) async fn get_inputs_for_transaction_payload(
     let output_ids = essence
         .inputs()
         .iter()
-        .filter_map(|input| {
-            if let Input::Utxo(input) = input {
-                Some(*input.output_id())
-            } else {
-                None
-            }
+        .map(|input| {
+            let Input::Utxo(input) = input;
+            *input.output_id()
         })
         .collect::<Vec<_>>();
 

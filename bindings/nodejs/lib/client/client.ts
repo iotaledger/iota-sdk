@@ -35,7 +35,6 @@ import {
     Payload,
     TransactionPayload,
     MilestonePayload,
-    TreasuryOutput,
     Output,
 } from '../types/block';
 import { HexEncodedString } from '../utils';
@@ -531,17 +530,6 @@ export class Client {
         });
 
         return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the treasury output.
-     */
-    async getTreasury(): Promise<TreasuryOutput> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getTreasury',
-        });
-
-        return Output.parse(JSON.parse(response).payload) as TreasuryOutput;
     }
 
     /**
