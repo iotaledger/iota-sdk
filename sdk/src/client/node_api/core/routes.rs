@@ -25,7 +25,7 @@ use crate::{
             },
         },
         block::{
-            output::{dto::OutputMetadataDto, OutputId},
+            output::{dto::OutputMetadataDto, Output, OutputId, OutputMetadata, OutputWithMetadata},
             payload::{
                 milestone::{MilestoneId, MilestonePayload},
                 transaction::TransactionId,
@@ -347,13 +347,20 @@ impl Client {
 
     /// Finds an output, as JSON, by its OutputId (TransactionId + output_index).
     /// GET /api/core/v2/outputs/{outputId}
-    pub async fn get_output(&self, output_id: &OutputId) -> Result<OutputWithMetadataResponse> {
+    pub async fn get_output(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
         let path = &format!("api/core/v2/outputs/{output_id}");
 
-        self.inner
+        let response: OutputWithMetadataResponse = self
+            .inner
             .node_manager
             .get_request(path, None, self.get_timeout(), false, true)
-            .await
+            .await?;
+
+        let token_supply = self.get_token_supply().await?;
+        let output = Output::try_from_dto(&response.output, token_supply)?;
+        let metadata = OutputMetadata::try_from(&response.metadata)?;
+
+        Ok(OutputWithMetadata::new(output, metadata))
     }
 
     /// Finds an output, as raw bytes, by its OutputId (TransactionId + output_index).
