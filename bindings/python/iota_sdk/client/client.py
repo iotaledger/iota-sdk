@@ -104,8 +104,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             client_config['remote_pow_timeout'] = {'secs': int(client_config['remote_pow_timeout'].total_seconds(
             )), 'nanos': get_remaining_nano_seconds(client_config['remote_pow_timeout'])}
 
-        # Set _client_handle to None here, because it can't be serialized
-        client_config["_client_handle"]=None
+        # Delete _client_handle, because it's not needed here and can't be serialized
+        del client_config["_client_handle"]
         client_config = humps.camelize(client_config)
         client_config = dumps(client_config)
 
