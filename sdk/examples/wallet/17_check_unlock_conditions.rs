@@ -7,7 +7,7 @@
 //! running the `create_wallet` example!
 //!
 //! ```sh
-//! cargo run --all-features --example check_unlock_conditions --release
+//! cargo run --release --all-features --example check_unlock_conditions
 //! ```
 
 use iota_sdk::{

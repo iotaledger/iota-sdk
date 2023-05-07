@@ -8,7 +8,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --all-features --example increase_native_token_supply --release
+//! cargo run --release --all-features --example increase_native_token_supply
 //! ```
 
 use std::str::FromStr;

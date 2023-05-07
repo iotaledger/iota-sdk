@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
     // Consolidate unspent outputs and print the consolidation transaction IDs
     // Set `force` to true to force the consolidation even though the `output_consolidation_threshold` isn't reached
     let transaction = account.consolidate_outputs(true, None).await?;
-    println!("Done ({})", transaction.transaction_id);
+    println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for the consolidation transaction to get confirmed
     let block_id = account

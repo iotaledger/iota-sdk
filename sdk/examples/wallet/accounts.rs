@@ -8,7 +8,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --all-features --example accounts --release
+//! cargo run --release --all-features --example accounts
 //! ```
 
 use std::time::Instant;

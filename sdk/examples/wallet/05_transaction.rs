@@ -8,7 +8,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --all-features --example wallet_transaction --release
+//! cargo run --release --all-features --example wallet_transaction
 //! ```
 
 use iota_sdk::wallet::{AddressWithAmount, Result, Wallet};
@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
         // Send a transaction with 1 Mi
         let outputs = vec![AddressWithAmount::new(RECV_ADDRESS.to_string(), SEND_AMOUNT)];
         let transaction = account.send_amount(outputs, None).await?;
-        println!("Done ({})", transaction.transaction_id);
+        println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included
         let block_id = account

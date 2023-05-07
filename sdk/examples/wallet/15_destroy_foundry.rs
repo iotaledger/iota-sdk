@@ -9,7 +9,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --all-features --example destroy_foundry --release
+//! cargo run --release --all-features --example destroy_foundry
 //! ```
 
 use iota_sdk::wallet::{Result, Wallet};

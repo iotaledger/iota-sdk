@@ -5,7 +5,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --all-features --example background_syncing --release
+//! cargo run --release --all-features --example background_syncing
 //! ```
 
 use iota_sdk::{

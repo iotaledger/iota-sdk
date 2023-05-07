@@ -5,7 +5,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --all-features --example logger --release
+//! cargo run --release --all-features --example logger
 //! ```
 
 use iota_sdk::{
@@ -68,10 +68,10 @@ async fn main() -> Result<()> {
 
     println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses...");
     let _ = account.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
-    println!("Done");
 
+    println!("Syncing account");
     let _ = account.sync(None).await?;
-    println!("Account synced");
 
+    println!("Example finished successfully");
     Ok(())
 }

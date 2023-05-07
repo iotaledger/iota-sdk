@@ -11,7 +11,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --all-features --example ledger_nano --release
+//! cargo run --release --all-features --example ledger_nano
 //! ```
 
 use std::time::Instant;

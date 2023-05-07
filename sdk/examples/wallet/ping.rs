@@ -12,9 +12,20 @@ use iota_sdk::{
         request_funds_from_faucet,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{account::types::AccountAddress, Account, ClientOptions, Result, Wallet},
 };
+use tokio::task::JoinSet;
+
+// The alias of the first account
+const ACCOUNT_ALIAS_1: &str = "Ping";
+// The alias of the second account
+const ACCOUNT_ALIAS_2: &str = "Pong";
+// The wallet database folder
+const WALLET_DB_PATH: &str = "./example.ping.walletdb";
+// The maximum number of addresses to send funds to
+const NUM_RECV_ADDRESSES: usize = 2;
+// The base amount of coins to send (the actual amount will be multiples of that)
+const BASE_AMOUNT: u64 = 1_000_000;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -28,106 +39,140 @@ async fn main() -> Result<()> {
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
+        .with_storage_path(WALLET_DB_PATH)
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_storage_path("pingdb")
         .finish()
         .await?;
 
-    // Get account or create a new one
-    let account_alias = "ping";
-    let ping_account = match wallet.get_account(account_alias.to_string()).await {
-        Ok(account) => account,
-        _ => {
-            // first we'll create an example account and store it
-            wallet
-                .create_account()
-                .with_alias(account_alias.to_string())
-                .finish()
-                .await?
-        }
-    };
-    let account_alias = "pong";
-    let pong_account = match wallet.get_account(account_alias.to_string()).await {
-        Ok(account) => account,
-        _ => {
-            // first we'll create an example account and store it
-            wallet
-                .create_account()
-                .with_alias(account_alias.to_string())
-                .finish()
-                .await?
-        }
-    };
+    let ping_account = get_or_create_account(&wallet, ACCOUNT_ALIAS_1).await?;
+    let pong_account = get_or_create_account(&wallet, ACCOUNT_ALIAS_2).await?;
 
-    let amount_addresses = 5;
-    // generate addresses so we find all funds
-    if ping_account.addresses().await?.len() < amount_addresses {
-        ping_account
-            .generate_addresses((amount_addresses - ping_account.addresses().await?.len()) as u32, None)
-            .await?;
-    }
-    let balance = ping_account.sync(None).await?;
-    println!("Balance: {balance:?}");
-    // generate addresses from the second account to which we will send funds
-    let pong_addresses = {
-        let mut addresses = pong_account.addresses().await?;
-        if addresses.len() < amount_addresses {
-            addresses = pong_account
-                .generate_addresses((amount_addresses - addresses.len()) as u32, None)
-                .await?
-        };
-        println!(
-            "{}",
-            request_funds_from_faucet(
-                &std::env::var("FAUCET_URL").unwrap(),
-                &addresses[0].address().to_string()
-            )
-            .await?
-        );
-        addresses
-    };
+    let ping_send_address = &ping_account.addresses().await?[0];
+    let pong_addresses = generate_addresses(&pong_account, ACCOUNT_ALIAS_2).await?;
 
-    for address_index in 0..1000 {
-        let mut threads = Vec::new();
-        for n in 1..4 {
-            let ping_account_ = ping_account.clone();
-            let pong_addresses_ = pong_addresses.clone();
-            threads.push(async move {
-                tokio::spawn(async move {
-                    // send transaction
-                    let outputs = vec![
-                        // send one or two Mi for more different transactions
-                        BasicOutputBuilder::new_with_amount(n * 1_000_000)
-                            .add_unlock_condition(AddressUnlockCondition::new(
-                                *pong_addresses_[address_index % amount_addresses].address().as_ref(),
-                            ))
-                            .finish_output(ping_account_.client().get_token_supply().await?)?,
-                    ];
-                    let tx = ping_account_.send(outputs, None).await?;
+    sync_print_balance(&ping_account, ACCOUNT_ALIAS_1).await?;
+    sync_print_balance(&pong_account, ACCOUNT_ALIAS_2).await?;
 
-                    println!(
-                        "Block from thread {} sent: {}/block/{}",
-                        n,
-                        std::env::var("EXPLORER_URL").unwrap(),
-                        tx.block_id.expect("no block created yet")
-                    );
-                    iota_sdk::wallet::Result::Ok(n)
-                })
-                .await
+    may_request_funds(&ping_account, &ping_send_address.address().to_string()).await?;
+
+    let mut tasks: JoinSet<Result<usize>> = JoinSet::new();
+    let num_threads = num_cpus::get().min(4);
+
+    for address_index in 0..NUM_RECV_ADDRESSES {
+        println!("next address: {address_index}");
+        for thread_index in 1..=num_threads {
+            println!("next thread {thread_index}");
+            let ping_account_clone = ping_account.clone();
+            let pong_addresses_clone = pong_addresses.clone();
+
+            tasks.spawn(async move {
+                let amount = (address_index + thread_index) as u64 * BASE_AMOUNT;
+                let recv_address = pong_addresses_clone[address_index % NUM_RECV_ADDRESSES].address();
+                println!("Sending '{amount}' coins to '{recv_address}'...");
+
+                let outputs = vec![iota_sdk::wallet::AddressWithAmount::new(
+                    recv_address.to_string(),
+                    amount,
+                )];
+                let transaction = ping_account_clone.send_amount(outputs, None).await?;
+
+                println!(
+                    "Transaction to address {} from thread {thread_index}/{num_threads} sent: {}",
+                    recv_address, transaction.transaction_id
+                );
+
+                // Wait for transaction to get included
+                let block_id = ping_account_clone
+                    .retry_transaction_until_included(&transaction.transaction_id, None, None)
+                    .await?;
+
+                println!(
+                    "Transaction included: {}/block/{}",
+                    std::env::var("EXPLORER_URL").unwrap(),
+                    block_id
+                );
+
+                iota_sdk::wallet::Result::Ok(thread_index)
             });
         }
 
-        let results = futures::future::try_join_all(threads).await?;
-        for thread in results {
-            if let Err(e) = thread {
-                println!("{e}");
+        while let Some(Ok(result)) = tasks.join_next().await {
+            match result {
+                Ok(thread_index) => println!("Thread {thread_index} finished"),
+                Err(e) => println!("{e}"),
             }
         }
-        tokio::time::sleep(std::time::Duration::from_secs(1)).await;
     }
-    // wait until user press enter so background tasks keep running
-    let mut input = String::new();
-    std::io::stdin().read_line(&mut input).unwrap();
+
+    sync_print_balance(&ping_account, ACCOUNT_ALIAS_1).await?;
+    sync_print_balance(&pong_account, ACCOUNT_ALIAS_2).await?;
+
+    println!("Example finished successfully");
+    Ok(())
+}
+
+async fn sync_print_balance(account: &Account, alias: &str) -> Result<()> {
+    let balance = account.sync(None).await?;
+    println!("{alias}'s account synced");
+    println!("{alias}'s balance:\n{:#?}", balance.base_coin());
+    Ok(())
+}
+
+async fn get_or_create_account(wallet: &Wallet, alias: &str) -> Result<Account> {
+    let account = if let Ok(account) = wallet.get_account(alias).await {
+        account
+    } else {
+        println!("Creating account '{alias}'");
+        wallet.create_account().with_alias(alias.to_string()).finish().await?
+    };
+    Ok(account)
+}
+
+async fn generate_addresses(account: &Account, alias: &str) -> Result<Vec<AccountAddress>> {
+    if account.addresses().await?.len() < NUM_RECV_ADDRESSES {
+        let num_addresses_to_generate = NUM_RECV_ADDRESSES - account.addresses().await?.len();
+        println!("Generating {num_addresses_to_generate} addresses for {alias}...");
+        account
+            .generate_addresses(num_addresses_to_generate as u32, None)
+            .await?;
+    }
+    account.addresses().await
+}
+
+async fn may_request_funds(account: &Account, address: &str) -> Result<()> {
+    let balance = account.sync(None).await?;
+    let funds_before = balance.base_coin().available();
+    println!("Current available funds: {funds_before}");
+
+    if funds_before < NUM_RECV_ADDRESSES as u64 * num_cpus::get().min(4) as u64 * BASE_AMOUNT {
+        println!("Requesting funds from faucet...");
+        let faucet_response = request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), address).await?;
+        println!("Response from faucet: {}", faucet_response.trim_end());
+        if faucet_response.contains("error") {
+            return Ok(());
+        }
+
+        println!("Waiting for funds (timeout=60s)...");
+        // Check for changes to the balance
+        let start = std::time::Instant::now();
+        let funds_after = loop {
+            if start.elapsed().as_secs() > 60 {
+                println!("Timeout: waiting for funds took too long");
+                return Ok(());
+            };
+            let balance = account.sync(None).await?;
+            let funds_after = balance.base_coin().available();
+            if funds_after > funds_before {
+                break funds_after;
+            } else {
+                tokio::time::sleep(instant::Duration::from_secs(2)).await;
+            }
+        };
+        println!("New available funds: {funds_after}");
+    } else {
+        println!("No faucet request necessary");
+    }
+
     Ok(())
 }

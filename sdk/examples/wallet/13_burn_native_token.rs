@@ -10,7 +10,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --all-features --example burn_native_token --release
+//! cargo run --release --all-features --example burn_native_token
 //! ```
 
 use std::str::FromStr;

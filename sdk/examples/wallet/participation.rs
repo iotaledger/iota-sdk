@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example, we will:
-//! * fetch participation/voting events from a node and register all of them
+//! * fetch participation/voting events from a node and register some or all of them with our wallet
 //! * increase and decrease our voting power
 //! * try to vote (the example aborts if you vote on an already ended voting)
 //! * if a voting occurred, stops the voting and destroys the voting output
@@ -24,7 +24,7 @@ use iota_sdk::{
     wallet::{account::types::participation::ParticipationEventRegistrationOptions, Result, Wallet},
 };
 
-// The account alias created in this example
+// The account alias used in this example
 const ACCOUNT_ALIAS: &str = "Alice";
 // The wallet database folder created in this example
 const WALLET_DB_PATH: &str = "./example.walletdb";

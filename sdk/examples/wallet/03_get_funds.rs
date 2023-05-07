@@ -8,7 +8,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --all-features --example get_funds --release
+//! cargo run --release --all-features --example get_funds
 //! ```
 
 use iota_sdk::{
