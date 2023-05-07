@@ -1,7 +1,8 @@
-from iota_sdk import Wallet, Client
+from iota_sdk import Wallet
 from dotenv import load_dotenv
 import json
 import os
+import sys
 import time
 
 load_dotenv()
@@ -30,7 +31,7 @@ print(
 addresses = account.generate_addresses(1)
 
 FAUCET_URL = os.environ.get('FAUCET_URL', 'https://faucet.testnet.shimmer.network/api/enqueue')
-response = Client().request_funds_from_faucet(FAUCET_URL, address=addresses[0]['address'])
+response = wallet.get_client().request_funds_from_faucet(FAUCET_URL, address=addresses[0]['address'])
 print(json.dumps(response, indent=4))
 
 time.sleep(20)
