@@ -1,10 +1,15 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will try to send transactions from multiple threads simultaneously to the first 1000 addresses of
-//! the second account (pong_account).
+//! In this example we will send coins from the first address of one account (ping) to several different addresses
+//! of another account (pong) in parallel using up to 4 threads.
 //!
-//! `cargo run --example ping --release`
+//! Non-existing accounts will be created and funded automatically.
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example multithread
+//! ```
 
 use iota_sdk::{
     client::{
@@ -23,7 +28,7 @@ const ACCOUNT_ALIAS_2: &str = "Pong";
 // The wallet database folder
 const WALLET_DB_PATH: &str = "./example.ping.walletdb";
 // The maximum number of addresses to send funds to
-const NUM_RECV_ADDRESSES: usize = 2;
+const NUM_RECV_ADDRESSES: usize = 3;
 // The base amount of coins to send (the actual amount will be multiples of that)
 const BASE_AMOUNT: u64 = 1_000_000;
 
@@ -56,29 +61,42 @@ async fn main() -> Result<()> {
 
     may_request_funds(&ping_account, &ping_send_address.address().to_string()).await?;
 
-    let mut tasks: JoinSet<Result<usize>> = JoinSet::new();
-    let num_threads = num_cpus::get().min(4);
+    let mut tasks: JoinSet<Result<(usize, usize)>> = JoinSet::new();
+    let num_threads_per_address = num_cpus::get().min(4);
 
     for address_index in 0..NUM_RECV_ADDRESSES {
-        println!("next address: {address_index}");
-        for thread_index in 1..=num_threads {
-            println!("next thread {thread_index}");
+        for thread_index in 1..=num_threads_per_address {
             let ping_account_clone = ping_account.clone();
             let pong_addresses_clone = pong_addresses.clone();
 
             tasks.spawn(async move {
-                let amount = (address_index + thread_index) as u64 * BASE_AMOUNT;
+                let amount = ((address_index + thread_index) % 3 + 1) as u64 * BASE_AMOUNT;
                 let recv_address = pong_addresses_clone[address_index % NUM_RECV_ADDRESSES].address();
                 println!("Sending '{amount}' coins to '{recv_address}'...");
 
-                let outputs = vec![iota_sdk::wallet::AddressWithAmount::new(
-                    recv_address.to_string(),
-                    amount,
-                )];
-                let transaction = ping_account_clone.send_amount(outputs, None).await?;
+                let transaction = if (address_index + thread_index) % 2 == 0 {
+                    // ALTERNATIVE 1: using `account.send_amount``
+                    let outputs = vec![iota_sdk::wallet::AddressWithAmount::new(
+                        recv_address.to_string(),
+                        amount,
+                    )];
+                    ping_account_clone.send_amount(outputs, None).await?
+                } else {
+                    // ALTERNATIVE 2: using `account.send`
+                    let outputs = vec![
+                        iota_sdk::types::block::output::BasicOutputBuilder::new_with_amount(amount)
+                            .add_unlock_condition(
+                                iota_sdk::types::block::output::unlock_condition::AddressUnlockCondition::new(
+                                    *recv_address.as_ref(),
+                                ),
+                            )
+                            .finish_output(ping_account_clone.client().get_token_supply().await?)?,
+                    ];
+                    ping_account_clone.send(outputs, None).await?
+                };
 
                 println!(
-                    "Transaction to address {} from thread {thread_index}/{num_threads} sent: {}",
+                    "Transaction to address {} from thread {thread_index}/{num_threads_per_address} sent: {}",
                     recv_address, transaction.transaction_id
                 );
 
@@ -93,15 +111,15 @@ async fn main() -> Result<()> {
                     block_id
                 );
 
-                iota_sdk::wallet::Result::Ok(thread_index)
+                iota_sdk::wallet::Result::Ok((address_index, thread_index))
             });
         }
+    }
 
-        while let Some(Ok(result)) = tasks.join_next().await {
-            match result {
-                Ok(thread_index) => println!("Thread {thread_index} finished"),
-                Err(e) => println!("{e}"),
-            }
+    while let Some(Ok(result)) = tasks.join_next().await {
+        match result {
+            Ok((address_index, thread_index)) => println!("Thread {address_index}:{thread_index} finished"),
+            Err(e) => println!("{e}"),
         }
     }
 

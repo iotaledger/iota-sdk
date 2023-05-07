@@ -585,13 +585,8 @@ path = "examples/wallet/output_consolidation.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
-name = "ping"
-path = "examples/wallet/ping.rs"
-required-features = [ "wallet", "storage" ]
-
-[[example]]
-name = "pong"
-path = "examples/wallet/pong.rs"
+name = "multithread"
+path = "examples/wallet/multithread.rs"
 required-features = [ "wallet", "storage" ]
 
 [[example]]
