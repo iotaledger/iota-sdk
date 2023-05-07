@@ -1,9 +1,11 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! TODO: Example description
+//! In this example, we will recover a wallet from a given mnemonic.
 //!
-//! `cargo run --example recover_accounts --release`
+//! Make sure there's no folder yet at `WALLET_DB_PATH`.
+//!
+//! `cargo run --release --all-features --example recover_accounts`
 
 use std::time::Instant;
 
@@ -14,6 +16,9 @@ use iota_sdk::{
     },
     wallet::{ClientOptions, Result, Wallet},
 };
+
+// The wallet database folder created in this example
+const WALLET_DB_PATH: &str = "./example.walletdb";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -27,6 +32,7 @@ async fn main() -> Result<()> {
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
+        .with_storage_path(WALLET_DB_PATH)
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
@@ -34,17 +40,14 @@ async fn main() -> Result<()> {
 
     let accounts = wallet.recover_accounts(0, 2, 2, None).await?;
 
+    println!("Recovered {} accounts", accounts.len());
     for account in accounts.iter() {
-        println!("{}", account.read().await.index());
+        println!("ACCOUNT #{}:", account.read().await.index());
+        let now = Instant::now();
+        let balance = account.sync(None).await?;
+        println!("Account synced in: {:.2?}", now.elapsed());
+        println!("Balance: {balance:#?}");
     }
-    println!("Accounts len: {:?}", accounts.len());
-
-    // get latest account
-    let account = &accounts[accounts.len() - 1];
-    let now = Instant::now();
-    let balance = account.sync(None).await?;
-    println!("Account synced in: {:.2?}", now.elapsed());
-    println!("Balance: {balance:?}");
 
     Ok(())
 }
