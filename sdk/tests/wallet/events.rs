@@ -4,7 +4,7 @@
 use iota_sdk::{
     types::block::{
         address::{Address, Ed25519Address},
-        output::{dto::OutputMetadataDto, Output, OutputId},
+        output::{Output, OutputId},
         payload::transaction::TransactionId,
         rand::output::{rand_basic_output, rand_output_metadata},
     },
@@ -35,7 +35,7 @@ fn wallet_events_serde() {
 
     let output_data_dto = OutputDataDto::from(&OutputData {
         output_id: OutputId::null(),
-        metadata: OutputMetadataDto::from(&rand_output_metadata()),
+        metadata: rand_output_metadata(),
         output: Output::from(rand_basic_output(1_813_620_509_061_365)),
         is_spent: false,
         address: Address::Ed25519(Ed25519Address::new([0; Ed25519Address::LENGTH])),
