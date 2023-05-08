@@ -14,7 +14,6 @@ curl -SL --progress-bar --fail https://github.com/iotaledger/iota-sdk/releases/d
 rm -rf ../android/libs && mkdir -p ../android/libs             
 cp -rv iota-wallet.jar ../android/libs
 
-# 🛑 temporarily using host https://files.iota.org/firefly/bindings until Swift mobile CI will be done.
 echo Installing Swift libraries
 curl -SL --progress-bar --fail https://github.com/iotaledger/iota-sdk/releases/download/iota-wallet-swift-0.1.0/WalletFramework-0.1.0.zip > iota-wallet-swift.zip
 unzip iota-wallet-swift.zip             
