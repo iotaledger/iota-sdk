@@ -29,7 +29,7 @@ const WALLET_DB_PATH: &str = "./example.walletdb";
 // The base coin amount to send
 const SEND_AMOUNT: u64 = 1_000_000;
 // The maximum number of addresses funds are distributed to
-const MAX_ADDRESSES_TO_SPLIT_FUNDS: usize = 150;
+const MAX_ADDRESSES_TO_SPLIT_FUNDS: usize = 15;
 
 #[tokio::main]
 async fn main() -> Result<()> {
