@@ -6,7 +6,7 @@ use core::borrow::Borrow;
 
 use packable::{prefix::StringPrefix, Packable};
 
-use super::address::Hrp;
+use super::address::{Hrp, HrpLike};
 use crate::types::block::{helper::network_name_to_id, output::RentStructure, Error, PROTOCOL_VERSION};
 
 /// Defines the parameters of the protocol.
@@ -66,7 +66,7 @@ impl ProtocolParameters {
     pub fn new(
         protocol_version: u8,
         network_name: String,
-        bech32_hrp: Hrp,
+        bech32_hrp: impl HrpLike,
         min_pow_score: u32,
         below_max_depth: u8,
         rent_structure: RentStructure,
@@ -75,7 +75,7 @@ impl ProtocolParameters {
         Ok(Self {
             protocol_version,
             network_name: <StringPrefix<u8>>::try_from(network_name).map_err(Error::InvalidStringPrefix)?,
-            bech32_hrp,
+            bech32_hrp: bech32_hrp.to_hrp()?,
             min_pow_score,
             below_max_depth,
             rent_structure,

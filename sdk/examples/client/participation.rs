@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
     let bech32_address = client.get_addresses(&secret_manager).with_range(0..1).finish().await?[0];
 
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
-    request_funds_from_faucet(&faucet_url, bech32_address).await?;
+    request_funds_from_faucet(&faucet_url, &bech32_address).await?;
 
     let address_participation = client.address_staking_status(bech32_address).await?;
     println!("{address_participation:#?}");

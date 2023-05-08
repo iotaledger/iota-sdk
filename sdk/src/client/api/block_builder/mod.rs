@@ -5,7 +5,6 @@ pub mod input_selection;
 pub mod pow;
 pub mod transaction;
 
-use core::borrow::Borrow;
 use std::ops::Range;
 
 use packable::bounded::TryIntoBoundedU16Error;
@@ -18,7 +17,7 @@ use crate::{
         Result,
     },
     types::block::{
-        address::{Address, Bech32Address, Ed25519Address},
+        address::{Address, Bech32Address, Bech32AddressLike, Ed25519Address},
         input::{dto::UtxoInputDto, UtxoInput, INPUT_COUNT_MAX},
         output::{
             dto::OutputDto, unlock_condition::AddressUnlockCondition, BasicOutputBuilder, Output, OUTPUT_COUNT_RANGE,
@@ -163,16 +162,12 @@ impl<'a> ClientBlockBuilder<'a> {
     }
 
     /// Set a transfer to the builder
-    pub async fn with_output(
-        mut self,
-        address: impl Borrow<Bech32Address> + Send,
-        amount: u64,
-    ) -> Result<ClientBlockBuilder<'a>> {
-        let address = address.borrow();
+    pub async fn with_output(mut self, address: impl Bech32AddressLike, amount: u64) -> Result<ClientBlockBuilder<'a>> {
+        let address = address.to_bech32()?;
         self.client.bech32_hrp_matches(address.hrp()).await?;
 
         let output = BasicOutputBuilder::new_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(*address.inner()))
+            .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish_output(self.client.get_token_supply().await?)?;
         self.outputs.push(output);
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
@@ -261,7 +256,7 @@ impl<'a> ClientBlockBuilder<'a> {
         if let Some(output) = options.output {
             self = self
                 .with_output(
-                    &Bech32Address::try_from_str(&output.address)?,
+                    Bech32Address::try_from_str(&output.address)?,
                     output
                         .amount
                         .parse::<u64>()

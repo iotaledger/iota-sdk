@@ -3,7 +3,6 @@
 
 //! Utility functions for IOTA
 
-use core::borrow::Borrow;
 use std::collections::HashMap;
 
 use crypto::{
@@ -17,37 +16,36 @@ use super::Client;
 use crate::{
     client::{Error, Result},
     types::block::{
-        address::{Address, Bech32Address, Ed25519Address, Hrp},
+        address::{Address, Bech32Address, Bech32AddressLike, Ed25519Address, HrpLike},
         output::{AliasId, NftId},
         payload::TaggedDataPayload,
     },
 };
 
 /// Transforms bech32 to hex
-pub fn bech32_to_hex(bech32: &Bech32Address) -> Result<String> {
-    let hex_string = match bech32.inner() {
+pub fn bech32_to_hex(bech32: impl Bech32AddressLike) -> Result<String> {
+    Ok(match bech32.to_bech32()?.inner() {
         Address::Ed25519(ed) => ed.to_string(),
         Address::Alias(alias) => alias.to_string(),
         Address::Nft(nft) => nft.to_string(),
-    };
-    Ok(hex_string)
+    })
 }
 
 /// Transforms a hex encoded address to a bech32 encoded address
-pub fn hex_to_bech32(hex: &str, bech32_hrp: Hrp) -> Result<Bech32Address> {
+pub fn hex_to_bech32(hex: &str, bech32_hrp: impl HrpLike) -> Result<Bech32Address> {
     let address: Ed25519Address = hex.parse::<Ed25519Address>()?;
-    Ok(Address::Ed25519(address).to_bech32(bech32_hrp))
+    Ok(Address::Ed25519(address).try_to_bech32(bech32_hrp)?)
 }
 
 /// Transforms a prefix hex encoded public key to a bech32 encoded address
-pub fn hex_public_key_to_bech32_address(hex: &str, bech32_hrp: Hrp) -> Result<Bech32Address> {
+pub fn hex_public_key_to_bech32_address(hex: &str, bech32_hrp: impl HrpLike) -> Result<Bech32Address> {
     let public_key: [u8; Ed25519Address::LENGTH] = prefix_hex::decode(hex)?;
 
     let address = Blake2b256::digest(public_key)
         .try_into()
         .map_err(|_e| Error::Blake2b256("hashing the public key failed."))?;
     let address: Ed25519Address = Ed25519Address::new(address);
-    Ok(Address::Ed25519(address).to_bech32(bech32_hrp))
+    Ok(Address::Ed25519(address).try_to_bech32(bech32_hrp)?)
 }
 
 /// Generates a new mnemonic.
@@ -90,9 +88,9 @@ pub fn verify_mnemonic(mnemonic: &str) -> Result<()> {
 }
 
 /// Requests funds from a faucet
-pub async fn request_funds_from_faucet(url: &str, bech32_address: impl Borrow<Bech32Address> + Send) -> Result<String> {
+pub async fn request_funds_from_faucet(url: &str, bech32_address: &Bech32Address) -> Result<String> {
     let mut map = HashMap::new();
-    map.insert("address", bech32_address.borrow().to_string());
+    map.insert("address", bech32_address.to_string());
 
     let client = reqwest::Client::new();
     let faucet_response = client.post(url).json(&map).send().await?.text().await?;
@@ -101,12 +99,16 @@ pub async fn request_funds_from_faucet(url: &str, bech32_address: impl Borrow<Be
 
 impl Client {
     /// Transforms bech32 to hex
-    pub fn bech32_to_hex(bech32: &Bech32Address) -> crate::client::Result<String> {
+    pub fn bech32_to_hex(bech32: impl Bech32AddressLike) -> crate::client::Result<String> {
         bech32_to_hex(bech32)
     }
 
     /// Transforms a hex encoded address to a bech32 encoded address
-    pub async fn hex_to_bech32(&self, hex: &str, bech32_hrp: Option<Hrp>) -> crate::client::Result<Bech32Address> {
+    pub async fn hex_to_bech32(
+        &self,
+        hex: &str,
+        bech32_hrp: Option<impl HrpLike>,
+    ) -> crate::client::Result<Bech32Address> {
         match bech32_hrp {
             Some(hrp) => Ok(hex_to_bech32(hex, hrp)?),
             None => Ok(hex_to_bech32(hex, self.get_bech32_hrp().await?)?),
@@ -117,10 +119,10 @@ impl Client {
     pub async fn alias_id_to_bech32(
         &self,
         alias_id: AliasId,
-        bech32_hrp: Option<Hrp>,
+        bech32_hrp: Option<impl HrpLike>,
     ) -> crate::client::Result<Bech32Address> {
         match bech32_hrp {
-            Some(hrp) => Ok(alias_id.to_bech32(hrp)),
+            Some(hrp) => Ok(alias_id.to_bech32(hrp.to_hrp()?)),
             None => Ok(alias_id.to_bech32(self.get_bech32_hrp().await?)),
         }
     }
@@ -129,10 +131,10 @@ impl Client {
     pub async fn nft_id_to_bech32(
         &self,
         nft_id: NftId,
-        bech32_hrp: Option<Hrp>,
+        bech32_hrp: Option<impl HrpLike>,
     ) -> crate::client::Result<Bech32Address> {
         match bech32_hrp {
-            Some(hrp) => Ok(nft_id.to_bech32(hrp)),
+            Some(hrp) => Ok(nft_id.to_bech32(hrp.to_hrp()?)),
             None => Ok(nft_id.to_bech32(self.get_bech32_hrp().await?)),
         }
     }
@@ -141,7 +143,7 @@ impl Client {
     pub async fn hex_public_key_to_bech32_address(
         &self,
         hex: &str,
-        bech32_hrp: Option<Hrp>,
+        bech32_hrp: Option<impl HrpLike>,
     ) -> crate::client::Result<Bech32Address> {
         match bech32_hrp {
             Some(hrp) => Ok(hex_public_key_to_bech32_address(hex, hrp)?),

@@ -21,7 +21,7 @@ use crate::{
         Error, Result,
     },
     types::block::{
-        address::{Address, Bech32Address},
+        address::{Address, Bech32AddressLike},
         output::OutputWithMetadata,
         protocol::ProtocolParameters,
     },
@@ -32,8 +32,9 @@ impl<'a> ClientBlockBuilder<'a> {
     // Get basic outputs for an address without storage deposit return unlock condition
     pub(crate) async fn basic_address_outputs(
         &self,
-        address: impl Borrow<Bech32Address> + Send,
+        address: impl Bech32AddressLike,
     ) -> Result<Vec<OutputWithMetadata>> {
+        let address = address.to_bech32()?;
         let mut output_ids = Vec::new();
 
         let address = address.borrow();
@@ -168,7 +169,7 @@ impl<'a> ClientBlockBuilder<'a> {
             let mut address_index = gap_index;
 
             for (index, (bech32_address, internal)) in public_and_internal_addresses.iter().enumerate() {
-                let address_outputs = self.basic_address_outputs(bech32_address).await?;
+                let address_outputs = self.basic_address_outputs(*bech32_address).await?;
 
                 // If there are more than 20 (ADDRESS_GAP_RANGE) consecutive empty addresses, then we stop
                 // looking up the addresses belonging to the seed. Note that we don't

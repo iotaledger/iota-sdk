@@ -37,11 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - rename `Client::try_get_outputs_metadata()` into `Client::get_outputs_metadata_ignore_errors()`;
 - MQTT connections to a node using https will now use wss/tls with native certificates;
 - `ClientBuilder::finish` is now async;
-
-### Changed
-
 - Features and UnlockConditions that take an `Address` now take `impl Into<Address>`;
 - Functions that accepted a string bech32 address now accept a `Bech32Address`;
+- Functions that accepted a string bech32 HRP now accept an `Hrp`;
 
 ### Removed
 

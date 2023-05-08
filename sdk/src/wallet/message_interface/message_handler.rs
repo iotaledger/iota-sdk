@@ -23,7 +23,7 @@ use crate::{
         request_funds_from_faucet, utils, Client, NodeInfoWrapper,
     },
     types::block::{
-        address::Hrp,
+        address::HrpLike,
         output::{
             dto::{OutputBuilderAmountDto, OutputDto},
             AliasId, AliasOutput, BasicOutput, FoundryOutput, NftId, NftOutput, Output, Rent, TokenId,
@@ -345,7 +345,7 @@ impl WalletMessageHandler {
                 .await
             }
             Message::Bech32ToHex { bech32_address } => {
-                convert_panics(|| Ok(Response::HexAddress(utils::bech32_to_hex(&bech32_address)?)))
+                convert_panics(|| Ok(Response::HexAddress(utils::bech32_to_hex(bech32_address)?)))
             }
             Message::HexToBech32 { hex, bech32_hrp } => {
                 convert_async_panics(|| async {
@@ -1033,7 +1033,7 @@ impl WalletMessageHandler {
     }
 
     /// The create account message handler.
-    async fn create_account(&self, alias: Option<String>, bech32_hrp: Option<Hrp>) -> Result<Response> {
+    async fn create_account(&self, alias: Option<String>, bech32_hrp: Option<impl HrpLike>) -> Result<Response> {
         let mut builder = self.wallet.create_account();
 
         if let Some(alias) = alias {
@@ -1041,7 +1041,7 @@ impl WalletMessageHandler {
         }
 
         if let Some(bech32_hrp) = bech32_hrp {
-            builder = builder.with_bech32_hrp(bech32_hrp);
+            builder = builder.with_bech32_hrp(bech32_hrp.to_hrp()?);
         }
 
         match builder.finish().await {

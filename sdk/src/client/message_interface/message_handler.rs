@@ -656,7 +656,7 @@ impl ClientMessageHandler {
                 let (block_id, block) = self.client.promote_unchecked(&block_id).await?;
                 Ok(Response::Promoted((block_id, BlockDto::from(&block))))
             }
-            Message::Bech32ToHex { bech32 } => Ok(Response::Bech32ToHex(Client::bech32_to_hex(&bech32)?)),
+            Message::Bech32ToHex { bech32 } => Ok(Response::Bech32ToHex(Client::bech32_to_hex(bech32)?)),
             Message::HexToBech32 { hex, bech32_hrp } => Ok(Response::Bech32Address(
                 self.client.hex_to_bech32(&hex, bech32_hrp).await?,
             )),

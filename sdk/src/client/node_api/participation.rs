@@ -5,8 +5,6 @@
 //! <https://github.com/iota-community/treasury/blob/main/specifications/hornet-participation-plugin.md#public-node-endpoints>
 //! <https://github.com/iotaledger/inx-participation/blob/develop/core/participation/routes.go>
 
-use core::borrow::Borrow;
-
 use crate::{
     client::{Client, Result},
     types::{
@@ -17,7 +15,7 @@ use crate::{
                 ParticipationEventType,
             },
         },
-        block::{address::Bech32Address, output::OutputId},
+        block::{address::Bech32AddressLike, output::OutputId},
     },
 };
 
@@ -78,11 +76,8 @@ impl Client {
     }
 
     /// RouteAddressBech32Status is the route to get the staking rewards for the given bech32 address.
-    pub async fn address_staking_status(
-        &self,
-        bech32_address: impl Borrow<Bech32Address> + Send,
-    ) -> Result<AddressStakingStatus> {
-        let route = format!("api/participation/v1/addresses/{}", bech32_address.borrow());
+    pub async fn address_staking_status(&self, bech32_address: impl Bech32AddressLike) -> Result<AddressStakingStatus> {
+        let route = format!("api/participation/v1/addresses/{}", bech32_address.as_string());
 
         self.inner
             .node_manager
@@ -93,9 +88,9 @@ impl Client {
     /// RouteAddressBech32Outputs is the route to get the outputs for the given bech32 address.
     pub async fn address_participation_output_ids(
         &self,
-        bech32_address: impl Borrow<Bech32Address> + Send,
+        bech32_address: impl Bech32AddressLike,
     ) -> Result<AddressOutputsResponse> {
-        let route = format!("api/participation/v1/addresses/{}/outputs", bech32_address.borrow());
+        let route = format!("api/participation/v1/addresses/{}/outputs", bech32_address.as_string());
 
         self.inner
             .node_manager

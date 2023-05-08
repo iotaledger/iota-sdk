@@ -77,7 +77,7 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
         .with_secret_manager(&secret_manager)
         .with_output_hex(
             // Send funds back to the sender.
-            &bech32_to_hex(&addresses[1].to_bech32(client.get_bech32_hrp().await.unwrap())).unwrap(),
+            &bech32_to_hex(addresses[1].to_bech32(client.get_bech32_hrp().await.unwrap())).unwrap(),
             // The amount to spend, cannot be zero.
             1_000_000,
         )

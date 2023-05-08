@@ -11,7 +11,7 @@ use crate::{
     types::{
         api::plugins::indexer::OutputIdsResponse,
         block::{
-            address::{Address, AliasAddress, Bech32Address},
+            address::{Address, AliasAddress, Bech32AddressLike},
             output::{Output, OutputId},
         },
     },
@@ -25,11 +25,12 @@ impl Account {
     /// Returns output ids of alias outputs
     pub(crate) async fn get_alias_and_foundry_output_ids(
         &self,
-        bech32_address: Bech32Address,
+        bech32_address: impl Bech32AddressLike,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[SYNC] get_alias_and_foundry_output_ids");
         let client = self.client();
+        let bech32_address = bech32_address.to_bech32()?;
 
         let mut output_ids = HashSet::new();
 
@@ -54,7 +55,6 @@ impl Account {
             let tasks = vec![
                 // Get outputs where the address is in the governor address unlock condition
                 async move {
-                    let bech32_address = bech32_address;
                     let client = client.clone();
                     task::spawn(async move {
                         client
@@ -67,7 +67,6 @@ impl Account {
                 .boxed(),
                 // Get outputs where the address is in the state controller unlock condition
                 async move {
-                    let bech32_address = bech32_address;
                     let client = client.clone();
                     task::spawn(async move {
                         client

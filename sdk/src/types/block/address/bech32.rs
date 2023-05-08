@@ -121,6 +121,56 @@ impl PartialEq<str> for Hrp {
 #[cfg(feature = "serde")]
 string_serde_impl!(Hrp);
 
+pub trait HrpLike: Send {
+    fn to_hrp(self) -> Result<Hrp, Error>;
+
+    fn as_string(&self) -> String;
+
+    fn to_hrp_unchecked(self) -> Hrp;
+}
+
+impl HrpLike for Hrp {
+    fn to_hrp(self) -> Result<Hrp, Error> {
+        Ok(self)
+    }
+
+    fn as_string(&self) -> String {
+        self.to_string()
+    }
+
+    fn to_hrp_unchecked(self) -> Hrp {
+        self
+    }
+}
+
+impl HrpLike for &Hrp {
+    fn to_hrp(self) -> Result<Hrp, Error> {
+        Ok(*self)
+    }
+
+    fn as_string(&self) -> String {
+        self.to_string()
+    }
+
+    fn to_hrp_unchecked(self) -> Hrp {
+        *self
+    }
+}
+
+impl<T: AsRef<str> + Send> HrpLike for T {
+    fn to_hrp(self) -> Result<Hrp, Error> {
+        Hrp::from_str(self.as_ref())
+    }
+
+    fn as_string(&self) -> String {
+        self.as_ref().to_string()
+    }
+
+    fn to_hrp_unchecked(self) -> Hrp {
+        Hrp::from_str_unchecked(self.as_ref())
+    }
+}
+
 /// An address and its network type.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, AsRef, Deref)]
 pub struct Bech32Address {
@@ -157,9 +207,9 @@ impl Bech32Address {
     }
 
     /// Creates a new address wrapper by parsing a string HRP.
-    pub fn try_new(hrp: impl Into<String>, inner: impl Into<Address>) -> Result<Self, Error> {
+    pub fn try_new(hrp: impl HrpLike, inner: impl Into<Address>) -> Result<Self, Error> {
         Ok(Self {
-            hrp: hrp.into().parse()?,
+            hrp: hrp.to_hrp()?,
             inner: inner.into(),
         })
     }
@@ -232,3 +282,39 @@ impl<T: core::borrow::Borrow<Bech32Address>> From<T> for Address {
 
 #[cfg(feature = "serde")]
 string_serde_impl!(Bech32Address);
+
+pub trait Bech32AddressLike: Send {
+    fn to_bech32(self) -> Result<Bech32Address, Error>;
+
+    fn as_string(&self) -> String;
+}
+
+impl Bech32AddressLike for Bech32Address {
+    fn to_bech32(self) -> Result<Bech32Address, Error> {
+        Ok(self)
+    }
+
+    fn as_string(&self) -> String {
+        self.to_string()
+    }
+}
+
+impl Bech32AddressLike for &Bech32Address {
+    fn to_bech32(self) -> Result<Bech32Address, Error> {
+        Ok(*self)
+    }
+
+    fn as_string(&self) -> String {
+        self.to_string()
+    }
+}
+
+impl<T: AsRef<str> + Send> Bech32AddressLike for T {
+    fn to_bech32(self) -> Result<Bech32Address, Error> {
+        Bech32Address::try_from_str(self)
+    }
+
+    fn as_string(&self) -> String {
+        self.as_ref().to_string()
+    }
+}
