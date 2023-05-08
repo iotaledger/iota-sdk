@@ -637,14 +637,13 @@ fn missing_ed25519_issuer_created() {
 #[test]
 fn missing_ed25519_issuer_transition() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
 
-    let inputs = build_inputs(vec![Alias(
+    let inputs = build_inputs(vec![Basic(
         1_000_000,
-        alias_id_2,
-        0,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
+        None,
+        None,
         None,
         None,
         None,
@@ -652,7 +651,7 @@ fn missing_ed25519_issuer_transition() {
     )]);
     let outputs = build_outputs(vec![Alias(
         1_000_000,
-        alias_id_2,
+        alias_id_0,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -670,7 +669,10 @@ fn missing_ed25519_issuer_transition() {
     )
     .select();
 
-    assert!(selected.is_err());
+    assert!(matches!(
+        selected,
+        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()
+    ));
 }
 
 #[test]
@@ -759,6 +761,7 @@ fn missing_alias_issuer_created() {
 #[test]
 fn missing_alias_issuer_transition() {
     let protocol_parameters = protocol_parameters();
+    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
     let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs(vec![Alias(
@@ -774,7 +777,7 @@ fn missing_alias_issuer_transition() {
     )]);
     let outputs = build_outputs(vec![Alias(
         1_000_000,
-        alias_id_2,
+        alias_id_0,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -792,7 +795,10 @@ fn missing_alias_issuer_transition() {
     )
     .select();
 
-    assert!(selected.is_err());
+    assert!(matches!(
+        selected,
+        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
+    ));
 }
 
 #[test]
@@ -881,14 +887,13 @@ fn missing_nft_issuer_created() {
 #[test]
 fn missing_nft_issuer_transition() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
+    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
 
-    let inputs = build_inputs(vec![Alias(
+    let inputs = build_inputs(vec![Basic(
         1_000_000,
-        alias_id_2,
-        0,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
+        None,
+        None,
         None,
         None,
         None,
@@ -896,7 +901,7 @@ fn missing_nft_issuer_transition() {
     )]);
     let outputs = build_outputs(vec![Alias(
         1_000_000,
-        alias_id_2,
+        alias_id_0,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -914,7 +919,10 @@ fn missing_nft_issuer_transition() {
     )
     .select();
 
-    assert!(selected.is_err());
+    assert!(matches!(
+        selected,
+        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()
+    ));
 }
 
 #[test]
