@@ -23,7 +23,9 @@ async function run() {
         const accountAddresses = await account.addresses();
         console.log('Account addresses:', accountAddresses);
 
-        const faucetResponse = await (await wallet.getClient()).requestFundsFromFaucet(
+        const faucetResponse = await (
+            await wallet.getClient()
+        ).requestFundsFromFaucet(
             process.env.FAUCET_URL,
             accountAddresses[0].address,
         );
