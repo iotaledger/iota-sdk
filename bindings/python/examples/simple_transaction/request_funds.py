@@ -28,7 +28,7 @@ balance = account.get_balance()
 print(
     f'balance before faucet request: { balance[ "baseCoin" ][ "available" ] }')
 
-addresses = account.generate_addresses(1)
+addresses = account.addresses()
 
 FAUCET_URL = os.environ.get('FAUCET_URL', 'https://faucet.testnet.shimmer.network/api/enqueue')
 response = wallet.get_client().request_funds_from_faucet(FAUCET_URL, address=addresses[0]['address'])

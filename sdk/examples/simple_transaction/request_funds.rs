@@ -28,10 +28,10 @@ async fn main() -> Result<()> {
         .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let address = account.generate_addresses(1, None).await?;
-    println!("Generated address: {}", address[0].address());
+    let address = account.addresses().await?[0].address().to_string();
+    println!("Address: {}", address);
 
-    let faucet_response = request_funds_from_faucet(&faucet_url, &address[0].address().to_string()).await?;
+    let faucet_response = request_funds_from_faucet(&faucet_url, &address).await?;
 
     println!("{faucet_response}");
     Ok(())
