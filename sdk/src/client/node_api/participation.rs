@@ -31,7 +31,8 @@ impl Client {
             ParticipationEventType::Staking => "type=1",
         });
 
-        self.node_manager
+        self.inner
+            .node_manager
             .get_request(route, query, self.get_timeout(), false, false)
             .await
     }
@@ -40,7 +41,8 @@ impl Client {
     pub async fn event(&self, event_id: &ParticipationEventId) -> Result<ParticipationEventData> {
         let route = format!("api/participation/v1/events/{event_id}");
 
-        self.node_manager
+        self.inner
+            .node_manager
             .get_request(&route, None, self.get_timeout(), false, false)
             .await
     }
@@ -53,7 +55,8 @@ impl Client {
     ) -> Result<ParticipationEventStatus> {
         let route = format!("api/participation/v1/events/{event_id}/status");
 
-        self.node_manager
+        self.inner
+            .node_manager
             .get_request(
                 &route,
                 milestone_index.map(|index| index.to_string()).as_deref(),
@@ -68,7 +71,8 @@ impl Client {
     pub async fn output_status(&self, output_id: &OutputId) -> Result<OutputStatusResponse> {
         let route = format!("api/participation/v1/outputs/{output_id}");
 
-        self.node_manager
+        self.inner
+            .node_manager
             .get_request(&route, None, self.get_timeout(), false, false)
             .await
     }
@@ -80,7 +84,8 @@ impl Client {
     ) -> Result<AddressStakingStatus> {
         let route = format!("api/participation/v1/addresses/{}", bech32_address.borrow());
 
-        self.node_manager
+        self.inner
+            .node_manager
             .get_request(&route, None, self.get_timeout(), false, false)
             .await
     }
@@ -92,7 +97,8 @@ impl Client {
     ) -> Result<AddressOutputsResponse> {
         let route = format!("api/participation/v1/addresses/{}/outputs", bech32_address.borrow());
 
-        self.node_manager
+        self.inner
+            .node_manager
             .get_request(&route, None, self.get_timeout(), false, false)
             .await
     }

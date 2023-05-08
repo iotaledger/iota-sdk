@@ -62,7 +62,8 @@ async fn account_recovery_with_balance_and_empty_addresses() -> Result<()> {
     let mnemonic = Client::generate_mnemonic()?;
     let client = Client::builder()
         .with_node(crate::wallet::common::NODE_LOCAL)?
-        .finish()?;
+        .finish()
+        .await?;
 
     let secret_manager = SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(&mnemonic)?);
 
