@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example, we will create addresses with a ledger nano hardware wallet.
+//! In this example we will create addresses with a ledger nano hardware wallet.
 //!
 //! To use the ledger nano simulator
 //! * clone https://github.com/iotaledger/ledger-shimmer-app,

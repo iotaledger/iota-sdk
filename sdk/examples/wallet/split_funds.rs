@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example, we will split funds TODO
+//! In this example we will split funds among a pre-defined number of addresses.
 //!
 //! Make sure there's no folder yet at `WALLET_DB_PATH`.
 //! For this example it's best to use a fresh mnemonic and start with a balance on the first address only.

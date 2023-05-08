@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example, we'll demonstrate how to listen to wallet events by sending some amount of base coins to an
+//! In this example we'll demonstrate how to listen to wallet events by sending some amount of base coins to an
 //! address.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:

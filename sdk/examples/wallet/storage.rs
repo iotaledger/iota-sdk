@@ -1,9 +1,12 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! TODO: Example description
+//! In this example we will verifiy the integrity of the wallet database.
 //!
-//! `cargo run --example storage --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example storage
+//! ```
 
 use std::time::Instant;
 
@@ -19,7 +22,7 @@ use iota_sdk::{
 const ACCOUNT_ALIAS: &str = "Alice";
 // The wallet database folder created in this example
 const WALLET_DB_PATH: &str = "./example.walletdb";
-// The maximum number of addresses funds are distributed to
+// The maximum number of addresses to generate
 const MAX_ADDRESSES_TO_GENERATE: usize = 3;
 
 #[tokio::main]
@@ -41,7 +44,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get account or create a new one
-    let account = create_account(&wallet, ACCOUNT_ALIAS).await?;
+    let account = get_or_create_account(&wallet, ACCOUNT_ALIAS).await?;
 
     let addresses = generate_max_addresses(&account, ACCOUNT_ALIAS, MAX_ADDRESSES_TO_GENERATE).await?;
     let bech32_addresses = addresses
@@ -58,11 +61,10 @@ async fn main() -> Result<()> {
     wallet.verify_integrity().await?;
 
     println!("Example finished successfully");
-
     Ok(())
 }
 
-async fn create_account(wallet: &Wallet, alias: &str) -> Result<Account> {
+async fn get_or_create_account(wallet: &Wallet, alias: &str) -> Result<Account> {
     Ok(if let Ok(account) = wallet.get_account(alias).await {
         account
     } else {

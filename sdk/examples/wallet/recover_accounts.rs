@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example, we will recover a wallet from a given mnemonic.
+//! In this example we will recover a wallet from a given mnemonic.
 //!
 //! Make sure there's no folder yet at `WALLET_DB_PATH`.
 //!

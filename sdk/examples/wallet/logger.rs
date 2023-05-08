@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example, we will write out all wallet logging events to a dedicated log file.
+//! In this example we will write out all wallet logging events to a dedicated log file.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh

@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example, we will:
+//! In this example we will:
 //! * fetch participation/voting events from a node and register some or all of them with our wallet
 //! * increase and decrease our voting power
 //! * try to vote (the example aborts if you vote on an already ended voting)

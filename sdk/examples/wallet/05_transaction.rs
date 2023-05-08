@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
             .await?;
 
         println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
-        // Send a transaction with 1 Mi
+        // Send a transaction
         let outputs = vec![AddressWithAmount::new(RECV_ADDRESS.to_string(), SEND_AMOUNT)];
         let transaction = account.send_amount(outputs, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);

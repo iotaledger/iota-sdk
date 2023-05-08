@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example, we'll create a new wallet, a mnemonic, and an initial account. Then, we'll print the first address
+//! In this example we will create a new wallet, a mnemonic, and an initial account. Then, we'll print the first address
 //! of that account.
 //!
 //! Make sure there's no `example.stronghold` file and no `example.walletdb` folder yet!
