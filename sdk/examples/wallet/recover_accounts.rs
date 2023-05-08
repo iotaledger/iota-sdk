@@ -5,7 +5,10 @@
 //!
 //! Make sure there's no folder yet at `WALLET_DB_PATH`.
 //!
-//! `cargo run --release --all-features --example recover_accounts`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example recover_accounts
+//! ```
 
 use std::time::Instant;
 

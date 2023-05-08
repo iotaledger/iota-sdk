@@ -19,7 +19,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
         utils::request_funds_from_faucet,
     },
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{Account, ClientOptions, Result, Wallet},
 };
 
 // The alias of the first account
@@ -50,28 +50,9 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get or create first account
-    let _account1 = if let Ok(account) = wallet.get_account(ACCOUNT_ALIAS_1).await {
-        account
-    } else {
-        println!("Creating account '{ACCOUNT_ALIAS_1}'");
-        wallet
-            .create_account()
-            .with_alias(ACCOUNT_ALIAS_1.to_string())
-            .finish()
-            .await?
-    };
-
+    let _ = create_account(&wallet, ACCOUNT_ALIAS_1).await?;
     // Get or create second account
-    let account2 = if let Ok(account) = wallet.get_account(ACCOUNT_ALIAS_2).await {
-        account
-    } else {
-        println!("Creating account '{ACCOUNT_ALIAS_2}'");
-        wallet
-            .create_account()
-            .with_alias(ACCOUNT_ALIAS_2.to_string())
-            .finish()
-            .await?
-    };
+    let account2 = create_account(&wallet, ACCOUNT_ALIAS_2).await?;
 
     let accounts = wallet.get_accounts().await?;
     println!("WALLET ACCOUNTS:");
@@ -123,4 +104,13 @@ async fn main() -> Result<()> {
     println!("{ACCOUNT_ALIAS_2}'s base coin balance:\n{:#?}", balance.base_coin());
 
     Ok(())
+}
+
+async fn create_account(wallet: &Wallet, alias: &str) -> Result<Account> {
+    Ok(if let Ok(account) = wallet.get_account(alias).await {
+        account
+    } else {
+        println!("Creating account '{alias}'");
+        wallet.create_account().with_alias(alias.to_string()).finish().await?
+    })
 }
