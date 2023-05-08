@@ -19,7 +19,8 @@ async fn main() -> Result<()> {
     let client = Client::builder()
         .with_node("https://api.testnet.shimmer.network")?
         // .with_mqtt_broker_options(BrokerOptions::new().use_ws(false))
-        .finish()?;
+        .finish()
+        .await?;
 
     let (tx, rx) = channel();
     let tx = Arc::new(Mutex::new(tx));

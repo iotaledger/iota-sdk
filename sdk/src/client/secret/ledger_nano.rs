@@ -16,7 +16,7 @@ use iota_ledger_nano::{
 use packable::{error::UnexpectedEOF, unpacker::SliceUnpacker, Packable, PackableExt};
 use tokio::sync::Mutex;
 
-use super::{GenerateAddressOptions, SecretManage, SecretManageExt};
+use super::{GenerateAddressOptions, SecretManage, SignTransactionEssence};
 use crate::{
     client::secret::{
         is_alias_transition,
@@ -206,7 +206,7 @@ pub fn needs_blind_signing(prepared_transaction: &PreparedTransactionData, buffe
 }
 
 #[async_trait]
-impl SecretManageExt for LedgerSecretManager {
+impl SignTransactionEssence for LedgerSecretManager {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction: &PreparedTransactionData,

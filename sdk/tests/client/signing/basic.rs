@@ -6,7 +6,7 @@ use iota_sdk::{
     client::{
         api::{transaction::validate_transaction_payload_length, verify_semantic, PreparedTransactionData},
         constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-        secret::{SecretManage, SecretManageExt, SecretManager},
+        secret::{SecretManage, SecretManager, SignTransactionEssence},
         Client, Result,
     },
     types::block::{

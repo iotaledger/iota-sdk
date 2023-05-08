@@ -11,7 +11,7 @@ pub(crate) mod syncing;
 
 use std::{
     collections::{HashMap, HashSet},
-    sync::{Arc, RwLock},
+    sync::RwLock,
     time::Duration,
 };
 
@@ -28,7 +28,6 @@ use crate::{
 
 // The node manager takes care of selecting node(s) for requests until a result is returned or if quorum is enabled it
 // will send the requests for some endpoints to multiple nodes and compares the results.
-#[derive(Clone)]
 pub(crate) struct NodeManager {
     pub(crate) primary_node: Option<Node>,
     primary_pow_node: Option<Node>,
@@ -36,7 +35,7 @@ pub(crate) struct NodeManager {
     permanodes: Option<HashSet<Node>>,
     pub(crate) ignore_node_health: bool,
     node_sync_interval: Duration,
-    pub(crate) healthy_nodes: Arc<RwLock<HashMap<Node, InfoResponse>>>,
+    pub(crate) healthy_nodes: RwLock<HashMap<Node, InfoResponse>>,
     quorum: bool,
     min_quorum_size: usize,
     quorum_threshold: usize,
