@@ -1,7 +1,6 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use core::borrow::Borrow;
 #[cfg(not(target_family = "wasm"))]
 use std::collections::HashSet;
 
@@ -20,30 +19,26 @@ impl Account {
     /// Returns output ids of nft outputs that have the address in any unlock condition
     pub(crate) async fn get_nft_output_ids_with_any_unlock_condition(
         &self,
-        bech32_address: impl Borrow<Bech32Address> + Send,
+        bech32_address: Bech32Address,
     ) -> crate::wallet::Result<Vec<OutputId>> {
-        let bech32_address = bech32_address.borrow();
-
         #[cfg(target_family = "wasm")]
         {
             let mut output_ids = vec![];
             output_ids.extend(
                 self.client()
-                    .nft_output_ids(vec![QueryParameter::Address(bech32_address.clone())])
+                    .nft_output_ids(vec![QueryParameter::Address(bech32_address)])
                     .await?
                     .items,
             );
             output_ids.extend(
                 self.client()
-                    .nft_output_ids(vec![QueryParameter::StorageDepositReturnAddress(
-                        bech32_address.clone(),
-                    )])
+                    .nft_output_ids(vec![QueryParameter::StorageDepositReturnAddress(bech32_address)])
                     .await?
                     .items,
             );
             output_ids.extend(
                 self.client()
-                    .nft_output_ids(vec![QueryParameter::ExpirationReturnAddress(bech32_address.clone())])
+                    .nft_output_ids(vec![QueryParameter::ExpirationReturnAddress(bech32_address)])
                     .await?
                     .items,
             );
@@ -55,7 +50,6 @@ impl Account {
             let client = self.client();
             let tasks = vec![
                 async move {
-                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     tokio::spawn(async move {
                         // Get nft outputs where the address is in the address unlock condition
@@ -68,7 +62,6 @@ impl Account {
                 }
                 .boxed(),
                 async move {
-                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     tokio::spawn(async move {
                         // Get outputs where the address is in the storage deposit return unlock condition
@@ -81,7 +74,6 @@ impl Account {
                 }
                 .boxed(),
                 async move {
-                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     tokio::spawn(async move {
                         // Get outputs where the address is in the expiration unlock condition

@@ -623,7 +623,7 @@ fn alias_sender_zero_id() {
         BECH32_ADDRESS_ED25519_0,
         None,
         Some(
-            &Bech32Address::new("rms", AliasAddress::from(alias_id))
+            &Bech32Address::try_new("rms", AliasAddress::from(alias_id))
                 .unwrap()
                 .to_string(),
         ),
@@ -771,7 +771,11 @@ fn nft_sender_zero_id() {
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
-        Some(&Bech32Address::new("rms", NftAddress::from(nft_id)).unwrap().to_string()),
+        Some(
+            &Bech32Address::try_new("rms", NftAddress::from(nft_id))
+                .unwrap()
+                .to_string(),
+        ),
         None,
         None,
         None,

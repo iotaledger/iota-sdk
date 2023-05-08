@@ -1,7 +1,6 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use core::borrow::Borrow;
 use std::collections::HashSet;
 
 #[cfg(not(target_family = "wasm"))]
@@ -26,7 +25,7 @@ impl Account {
     /// Returns output ids of alias outputs
     pub(crate) async fn get_alias_and_foundry_output_ids(
         &self,
-        bech32_address: impl Borrow<Bech32Address> + Send,
+        bech32_address: Bech32Address,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[SYNC] get_alias_and_foundry_output_ids");
@@ -34,19 +33,17 @@ impl Account {
 
         let mut output_ids = HashSet::new();
 
-        let bech32_address = bech32_address.borrow();
-
         #[cfg(target_family = "wasm")]
         {
             output_ids.extend(
                 client
-                    .alias_output_ids(vec![QueryParameter::Governor(bech32_address.clone())])
+                    .alias_output_ids(vec![QueryParameter::Governor(bech32_address)])
                     .await?
                     .items,
             );
             output_ids.extend(
                 client
-                    .alias_output_ids(vec![QueryParameter::StateController(bech32_address.clone())])
+                    .alias_output_ids(vec![QueryParameter::StateController(bech32_address)])
                     .await?
                     .items,
             );
@@ -57,7 +54,7 @@ impl Account {
             let tasks = vec![
                 // Get outputs where the address is in the governor address unlock condition
                 async move {
-                    let bech32_address = bech32_address.clone();
+                    let bech32_address = bech32_address;
                     let client = client.clone();
                     task::spawn(async move {
                         client
@@ -70,7 +67,7 @@ impl Account {
                 .boxed(),
                 // Get outputs where the address is in the state controller unlock condition
                 async move {
-                    let bech32_address = bech32_address.clone();
+                    let bech32_address = bech32_address;
                     let client = client.clone();
                     task::spawn(async move {
                         client

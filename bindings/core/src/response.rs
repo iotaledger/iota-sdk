@@ -25,7 +25,7 @@ use iota_sdk::{
             plugins::indexer::OutputIdsResponse,
         },
         block::{
-            address::{dto::AddressDto, Bech32Address},
+            address::{dto::AddressDto, Bech32Address, Hrp},
             input::dto::UtxoInputDto,
             output::{
                 dto::{OutputDto, OutputMetadataDto},
@@ -79,7 +79,7 @@ pub enum Response {
     NetworkId(u64),
     /// Response for:
     /// - [`GetBech32Hrp`](crate::method::ClientMethod::GetBech32Hrp)
-    Bech32Hrp(String),
+    Bech32Hrp(Hrp),
     /// Response for:
     /// - [`GetMinPowScore`](crate::method::ClientMethod::GetMinPowScore)
     MinPowScore(u32),

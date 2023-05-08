@@ -46,7 +46,7 @@ impl<'a> ClientBlockBuilder<'a> {
                     // Check if the address is derived from the seed
                     let (address_index, internal) = search_address(
                         self.secret_manager.ok_or(Error::MissingParameter("secret manager"))?,
-                        &bech32_hrp,
+                        bech32_hrp,
                         self.coin_type,
                         self.account_index,
                         self.input_range.clone(),
@@ -54,7 +54,7 @@ impl<'a> ClientBlockBuilder<'a> {
                     )
                     .await?;
                     let address_outputs = self
-                        .basic_address_outputs(&sender_or_issuer_address.to_bech32(&bech32_hrp))
+                        .basic_address_outputs(&sender_or_issuer_address.to_bech32(bech32_hrp))
                         .await?;
 
                     let mut found_output = false;
@@ -111,7 +111,7 @@ impl<'a> ClientBlockBuilder<'a> {
                                         Address::Ed25519(_) => Some(
                                             search_address(
                                                 secret_manager,
-                                                &bech32_hrp,
+                                                bech32_hrp,
                                                 self.coin_type,
                                                 self.account_index,
                                                 self.input_range.clone(),
@@ -168,7 +168,7 @@ impl<'a> ClientBlockBuilder<'a> {
                                         Address::Ed25519(_) => Some(
                                             search_address(
                                                 secret_manager,
-                                                &bech32_hrp,
+                                                bech32_hrp,
                                                 self.coin_type,
                                                 self.account_index,
                                                 self.input_range.clone(),

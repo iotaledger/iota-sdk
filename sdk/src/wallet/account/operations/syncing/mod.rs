@@ -189,9 +189,7 @@ impl Account {
                         .iter_mut()
                         .find(|a| a.address.inner == ed25519_address)
                         .ok_or_else(|| {
-                            crate::wallet::Error::AddressNotFoundInAccount(
-                                ed25519_address.to_bech32(bech32_hrp.clone()),
-                            )
+                            crate::wallet::Error::AddressNotFoundInAccount(ed25519_address.to_bech32(bech32_hrp))
                         })?;
                     address_with_unspent_outputs.output_ids.extend(output_ids.clone());
 

@@ -8,7 +8,7 @@ use iota_sdk::wallet::events::types::WalletEvent;
 use iota_sdk::{
     client::{constants::SHIMMER_COIN_TYPE, secret::GenerateAddressOptions, ClientBuilder},
     types::block::{
-        address::{Address, Bech32Address},
+        address::{Address, Bech32Address, Hrp},
         output::{dto::OutputDto, unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
     },
     wallet::{
@@ -348,7 +348,7 @@ async fn address_conversion_methods() -> Result<()> {
 
     let response = wallet_handle
         .send_message(Message::Bech32ToHex {
-            bech32_address: bech32_address.clone(),
+            bech32_address: bech32_address,
         })
         .await;
 
@@ -399,7 +399,7 @@ async fn message_interface_address_generation() -> Result<()> {
             account_index: 0,
             address_index: 0,
             options: None,
-            bech32_hrp: Some("rms".to_string()),
+            bech32_hrp: Some(Hrp::from_str_unchecked("rms")),
         })
         .await;
 
@@ -418,7 +418,7 @@ async fn message_interface_address_generation() -> Result<()> {
             account_index: 10,
             address_index: 10,
             options: Some(GenerateAddressOptions::internal()),
-            bech32_hrp: Some("rms".to_string()),
+            bech32_hrp: Some(Hrp::from_str_unchecked("rms")),
         })
         .await;
 

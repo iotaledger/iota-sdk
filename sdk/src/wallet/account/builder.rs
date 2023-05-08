@@ -14,7 +14,7 @@ use crate::wallet::events::EventEmitter;
 use crate::wallet::storage::manager::StorageManager;
 use crate::{
     client::secret::{SecretManage, SecretManager},
-    types::block::address::{Address, Bech32Address},
+    types::block::address::{Address, Bech32Address, Hrp},
     wallet::{
         account::{types::AccountAddress, Account, AccountDetails},
         ClientOptions, Error,
@@ -25,7 +25,7 @@ use crate::{
 pub struct AccountBuilder {
     addresses: Option<Vec<AccountAddress>>,
     alias: Option<String>,
-    bech32_hrp: Option<String>,
+    bech32_hrp: Option<Hrp>,
     client_options: Arc<RwLock<ClientOptions>>,
     coin_type: u32,
     secret_manager: Arc<RwLock<SecretManager>>,
@@ -75,7 +75,7 @@ impl AccountBuilder {
     }
 
     /// Set the bech32 HRP
-    pub fn with_bech32_hrp(mut self, bech32_hrp: impl Into<Option<String>>) -> Self {
+    pub fn with_bech32_hrp(mut self, bech32_hrp: impl Into<Option<Hrp>>) -> Self {
         self.bech32_hrp = bech32_hrp.into();
         self
     }
@@ -145,7 +145,7 @@ impl AccountBuilder {
                     // Get bech32_hrp from address
                     if let Some(address) = first_account_addresses.first() {
                         if bech32_hrp.is_none() {
-                            bech32_hrp = Some(address.address.hrp.clone());
+                            bech32_hrp = Some(address.address.hrp);
                         }
                     }
                 }
@@ -162,7 +162,7 @@ impl AccountBuilder {
                     get_first_public_address(&self.secret_manager, self.coin_type, account_index).await?;
 
                 let first_public_account_address = AccountAddress {
-                    address: Bech32Address::new(bech32_hrp, first_public_address)?,
+                    address: Bech32Address::new(bech32_hrp, first_public_address),
                     key_index: 0,
                     internal: false,
                     used: false,

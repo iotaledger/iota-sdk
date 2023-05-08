@@ -52,7 +52,7 @@ impl TryFrom<&AliasOutputOptionsDto> for AliasOutputOptions {
 
     fn try_from(value: &AliasOutputOptionsDto) -> crate::wallet::Result<Self> {
         Ok(Self {
-            address: value.address.clone(),
+            address: value.address,
             immutable_metadata: match &value.immutable_metadata {
                 Some(metadata) => {
                     Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("immutable_metadata"))?)

@@ -20,7 +20,7 @@ use iota_sdk::{
         secret::{GenerateAddressOptions, SecretManager},
         Client,
     },
-    types::block::address::Address,
+    types::block::address::{Address, Hrp},
 };
 use serde::{Deserialize, Serialize};
 
@@ -53,7 +53,7 @@ async fn public_key_to_address() {
     let hex_public_key = "0x2baaf3bca8ace9f862e60184bd3e79df25ff230f7eaaa4c7f03daa9833ba854a";
 
     let public_key_address = client
-        .hex_public_key_to_bech32_address(hex_public_key, Some("atoi"))
+        .hex_public_key_to_bech32_address(hex_public_key, Some(Hrp::from_str_unchecked("atoi")))
         .await
         .unwrap();
 
@@ -148,7 +148,7 @@ async fn address_generation() {
     #[derive(Serialize, Deserialize)]
     struct AddressData {
         mnemonic: String,
-        bech32_hrp: String,
+        bech32_hrp: Hrp,
         coin_type: u32,
         account_index: u32,
         internal: bool,
@@ -166,7 +166,7 @@ async fn address_generation() {
     for address in &addresses_data {
         let secret_manager = SecretManager::try_from_mnemonic(&address.mnemonic).unwrap();
         let addresses = GetAddressesBuilder::new(&secret_manager)
-            .with_bech32_hrp(address.bech32_hrp.clone())
+            .with_bech32_hrp(address.bech32_hrp)
             .with_coin_type(address.coin_type)
             .with_account_index(address.account_index)
             .with_range(address.address_index..address.address_index + 1)

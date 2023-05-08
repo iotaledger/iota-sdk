@@ -3,7 +3,7 @@
 
 use derivative::Derivative;
 use iota_sdk::types::block::{
-    address::{dto::Ed25519AddressDto, AliasAddress, Bech32Address},
+    address::{dto::Ed25519AddressDto, AliasAddress, Bech32Address, Hrp},
     output::{AliasId, NftId, OutputId},
     payload::transaction::dto::{TransactionEssenceDto, TransactionPayloadDto},
     signature::dto::Ed25519SignatureDto,
@@ -29,7 +29,7 @@ pub enum UtilsMethod {
         /// Hex encoded bech32 address
         hex: String,
         /// Human readable part
-        bech32_hrp: String,
+        bech32_hrp: Hrp,
     },
     /// Transforms an alias id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -37,7 +37,7 @@ pub enum UtilsMethod {
         /// Alias ID
         alias_id: AliasId,
         /// Human readable part
-        bech32_hrp: String,
+        bech32_hrp: Hrp,
     },
     /// Transforms an nft id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -45,7 +45,7 @@ pub enum UtilsMethod {
         /// Nft ID
         nft_id: NftId,
         /// Human readable part
-        bech32_hrp: String,
+        bech32_hrp: Hrp,
     },
     /// Transforms a hex encoded public key to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -53,7 +53,7 @@ pub enum UtilsMethod {
         /// Hex encoded public key
         hex: String,
         /// Human readable part
-        bech32_hrp: String,
+        bech32_hrp: Hrp,
     },
     /// Returns a valid Address parsed from a String.
     ParseBech32Address {

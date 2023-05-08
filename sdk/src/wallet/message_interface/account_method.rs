@@ -260,7 +260,7 @@ pub enum AccountMethod {
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
-        options: OutputOptionsDto,
+        options: Box<OutputOptionsDto>,
         transaction_options: Option<TransactionOptionsDto>,
     },
     /// Prepare transaction.

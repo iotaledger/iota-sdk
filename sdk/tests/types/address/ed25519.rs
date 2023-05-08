@@ -77,15 +77,18 @@ fn debug() {
 fn bech32() {
     let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS).unwrap());
 
-    assert_eq!(address.to_bech32("rms"), ED25519_BECH32);
+    assert_eq!(address.to_bech32_unchecked("rms"), ED25519_BECH32);
 }
 
 #[test]
 fn bech32_roundtrip() {
     let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS).unwrap());
-    let bech32 = address.to_bech32("rms").to_string();
+    let bech32 = address.to_bech32_unchecked("rms").to_string();
 
-    assert_eq!(Bech32Address::try_from_str(bech32), Bech32Address::new("rms", address));
+    assert_eq!(
+        Bech32Address::try_from_str(bech32),
+        Bech32Address::try_new("rms", address)
+    );
 }
 
 #[test]

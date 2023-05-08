@@ -46,10 +46,10 @@ impl TryFrom<&AddressWithAmountDto> for AddressWithAmount {
 
     fn try_from(value: &AddressWithAmountDto) -> crate::wallet::Result<Self> {
         Ok(Self::new(
-            value.address.clone(),
+            value.address,
             u64::from_str(&value.amount).map_err(|_| crate::client::Error::InvalidAmount(value.amount.clone()))?,
         )
-        .with_return_address(value.return_address.clone())
+        .with_return_address(value.return_address)
         .with_expiration(value.expiration))
     }
 }
@@ -71,7 +71,7 @@ pub struct AddressWithUnspentOutputsDto {
 impl From<&AddressWithUnspentOutputs> for AddressWithUnspentOutputsDto {
     fn from(value: &AddressWithUnspentOutputs) -> Self {
         Self {
-            address: value.address.clone(),
+            address: value.address,
             key_index: value.key_index,
             internal: value.internal,
             output_ids: value.output_ids.clone(),

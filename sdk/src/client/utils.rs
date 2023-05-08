@@ -17,7 +17,7 @@ use super::Client;
 use crate::{
     client::{Error, Result},
     types::block::{
-        address::{Address, Bech32Address, Ed25519Address},
+        address::{Address, Bech32Address, Ed25519Address, Hrp},
         output::{AliasId, NftId},
         payload::TaggedDataPayload,
     },
@@ -34,13 +34,13 @@ pub fn bech32_to_hex(bech32: &Bech32Address) -> Result<String> {
 }
 
 /// Transforms a hex encoded address to a bech32 encoded address
-pub fn hex_to_bech32(hex: &str, bech32_hrp: &str) -> Result<Bech32Address> {
+pub fn hex_to_bech32(hex: &str, bech32_hrp: Hrp) -> Result<Bech32Address> {
     let address: Ed25519Address = hex.parse::<Ed25519Address>()?;
     Ok(Address::Ed25519(address).to_bech32(bech32_hrp))
 }
 
 /// Transforms a prefix hex encoded public key to a bech32 encoded address
-pub fn hex_public_key_to_bech32_address(hex: &str, bech32_hrp: &str) -> Result<Bech32Address> {
+pub fn hex_public_key_to_bech32_address(hex: &str, bech32_hrp: Hrp) -> Result<Bech32Address> {
     let public_key: [u8; Ed25519Address::LENGTH] = prefix_hex::decode(hex)?;
 
     let address = Blake2b256::digest(public_key)
@@ -106,10 +106,10 @@ impl Client {
     }
 
     /// Transforms a hex encoded address to a bech32 encoded address
-    pub async fn hex_to_bech32(&self, hex: &str, bech32_hrp: Option<&str>) -> crate::client::Result<Bech32Address> {
+    pub async fn hex_to_bech32(&self, hex: &str, bech32_hrp: Option<Hrp>) -> crate::client::Result<Bech32Address> {
         match bech32_hrp {
             Some(hrp) => Ok(hex_to_bech32(hex, hrp)?),
-            None => Ok(hex_to_bech32(hex, &self.get_bech32_hrp().await?)?),
+            None => Ok(hex_to_bech32(hex, self.get_bech32_hrp().await?)?),
         }
     }
 
@@ -117,11 +117,11 @@ impl Client {
     pub async fn alias_id_to_bech32(
         &self,
         alias_id: AliasId,
-        bech32_hrp: Option<&str>,
+        bech32_hrp: Option<Hrp>,
     ) -> crate::client::Result<Bech32Address> {
         match bech32_hrp {
             Some(hrp) => Ok(alias_id.to_bech32(hrp)),
-            None => Ok(alias_id.to_bech32(&self.get_bech32_hrp().await?)),
+            None => Ok(alias_id.to_bech32(self.get_bech32_hrp().await?)),
         }
     }
 
@@ -129,11 +129,11 @@ impl Client {
     pub async fn nft_id_to_bech32(
         &self,
         nft_id: NftId,
-        bech32_hrp: Option<&str>,
+        bech32_hrp: Option<Hrp>,
     ) -> crate::client::Result<Bech32Address> {
         match bech32_hrp {
             Some(hrp) => Ok(nft_id.to_bech32(hrp)),
-            None => Ok(nft_id.to_bech32(&self.get_bech32_hrp().await?)),
+            None => Ok(nft_id.to_bech32(self.get_bech32_hrp().await?)),
         }
     }
 
@@ -141,11 +141,11 @@ impl Client {
     pub async fn hex_public_key_to_bech32_address(
         &self,
         hex: &str,
-        bech32_hrp: Option<&str>,
+        bech32_hrp: Option<Hrp>,
     ) -> crate::client::Result<Bech32Address> {
         match bech32_hrp {
             Some(hrp) => Ok(hex_public_key_to_bech32_address(hex, hrp)?),
-            None => Ok(hex_public_key_to_bech32_address(hex, &self.get_bech32_hrp().await?)?),
+            None => Ok(hex_public_key_to_bech32_address(hex, self.get_bech32_hrp().await?)?),
         }
     }
 

@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
             Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu").unwrap();
 
         let outputs = vec![AddressNativeTokens {
-            address: bech32_address.clone(),
+            address: bech32_address,
             native_tokens: vec![(*token_id, U256::from(10))],
             return_address: Default::default(),
             expiration: Default::default(),

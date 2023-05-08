@@ -118,7 +118,7 @@ async fn shimmer_coin_type() -> Result<()> {
 
     // Creating a new account with providing a coin type will use the Shimmer coin type with shimmer testnet bech32 hrp
     assert_eq!(
-        Bech32Address::new("smr", account.addresses().await?[0].address())?.to_string(),
+        Bech32Address::try_new("smr", account.addresses().await?[0].address())?.to_string(),
         // Address generated with bip32 path: [44, 4219, 0, 0, 0]
         "smr1qq724zgvdujt3jdcd3xzsuqq7wl9pwq3dvsa5zvx49rj9tme8cat65xq7jz"
     );
@@ -150,7 +150,7 @@ async fn iota_coin_type() -> Result<()> {
 
     // Creating a new account with providing a coin type will use the iota coin type with shimmer testnet bech32 hrp
     assert_eq!(
-        Bech32Address::new("smr", account.addresses().await?[0].address())?.to_string(),
+        Bech32Address::try_new("smr", account.addresses().await?[0].address())?.to_string(),
         // Address generated with bip32 path: [44, 4218, 0, 0, 0]
         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
     );
@@ -181,7 +181,7 @@ async fn wallet_address_generation() -> Result<()> {
     let address = wallet.generate_address(0, 0, None).await?;
 
     assert_eq!(
-        address.to_bech32("smr"),
+        address.to_bech32_unchecked("smr"),
         // Address generated with bip32 path: [44, 4218, 0, 0, 0]
         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
     );
@@ -210,7 +210,7 @@ async fn wallet_address_generation() -> Result<()> {
         let address = wallet.generate_address(0, 0, None).await?;
 
         assert_eq!(
-            address.to_bech32("smr"),
+            address.to_bech32_unchecked("smr"),
             // Address generated with bip32 path: [44, 4218, 0, 0, 0]
             "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
         );

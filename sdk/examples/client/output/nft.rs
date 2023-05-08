@@ -73,7 +73,7 @@ async fn main() -> Result<()> {
     let nft_id = NftId::from(&nft_output_id);
 
     let nft_address = NftAddress::new(nft_id);
-    let bech32_nft_address = Bech32Address::new(client.get_bech32_hrp().await?, nft_address)?;
+    let bech32_nft_address = Bech32Address::new(client.get_bech32_hrp().await?, nft_address);
     println!("bech32_nft_address {bech32_nft_address}");
     println!(
         "Faucet request {:?}",

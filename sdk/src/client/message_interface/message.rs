@@ -17,7 +17,7 @@ use crate::{
         secret::SecretManagerDto,
     },
     types::block::{
-        address::{dto::Ed25519AddressDto, AliasAddress, Bech32Address},
+        address::{dto::Ed25519AddressDto, AliasAddress, Bech32Address, Hrp},
         output::{
             dto::{AliasIdDto, NativeTokenDto, NftIdDto, TokenSchemeDto},
             feature::dto::FeatureDto,
@@ -480,7 +480,7 @@ pub enum Message {
         /// Hex encoded bech32 address
         hex: String,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Transforms an alias id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -488,7 +488,7 @@ pub enum Message {
         /// Alias ID
         alias_id: AliasId,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Transforms an nft id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -496,7 +496,7 @@ pub enum Message {
         /// Nft ID
         nft_id: NftId,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Transforms a hex encoded public key to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -504,7 +504,7 @@ pub enum Message {
         /// Hex encoded public key
         hex: String,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Returns a valid Address parsed from a String.
     ParseBech32Address {

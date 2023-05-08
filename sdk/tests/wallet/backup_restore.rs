@@ -497,7 +497,7 @@ async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
             PathBuf::from("test-storage/backup_and_restore_bech32_hrp_mismatch/backup.stronghold"),
             stronghold_password.to_string(),
             None,
-            Some("otherhrp"),
+            Some(iota_sdk::types::block::address::Hrp::from_str_unchecked("otherhrp")),
         )
         .await?;
 

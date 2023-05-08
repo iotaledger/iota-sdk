@@ -117,7 +117,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                     source,
                     password,
                     ignore_if_coin_type_mismatch,
-                    ignore_if_bech32_mismatch.as_deref(),
+                    ignore_if_bech32_mismatch,
                 )
                 .await?;
             Response::Ok

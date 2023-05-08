@@ -281,7 +281,7 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            addresses[0].to_bech32("atoi"),
+            addresses[0].to_bech32_unchecked("atoi"),
             "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e"
         );
 
@@ -326,7 +326,7 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            addresses[0].to_bech32("atoi"),
+            addresses[0].to_bech32_unchecked("atoi"),
             "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e"
         );
 

@@ -127,20 +127,17 @@ impl Account {
                             })
                             .collect::<Result<Vec<NativeToken>>>()?,
                     )
-                    .add_unlock_condition(AddressUnlockCondition::new(&address_with_amount.address))
+                    .add_unlock_condition(AddressUnlockCondition::new(address_with_amount.address))
                     .add_unlock_condition(
                         // We send the full storage_deposit_amount back to the sender, so only the native tokens are
                         // sent
                         StorageDepositReturnUnlockCondition::new(
-                            &return_address.address,
+                            return_address.address,
                             storage_deposit_amount,
                             token_supply,
                         )?,
                     )
-                    .add_unlock_condition(ExpirationUnlockCondition::new(
-                        &return_address.address,
-                        expiration_time,
-                    )?)
+                    .add_unlock_condition(ExpirationUnlockCondition::new(return_address.address, expiration_time)?)
                     .finish_output(token_supply)?,
             )
         }

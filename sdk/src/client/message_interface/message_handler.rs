@@ -366,7 +366,7 @@ impl ClientMessageHandler {
                 let protocol_response = ProtocolParametersDto {
                     protocol_version: params.protocol_version(),
                     network_name: params.network_name().to_string(),
-                    bech32_hrp: params.bech32_hrp().to_string(),
+                    bech32_hrp: *params.bech32_hrp(),
                     min_pow_score: params.min_pow_score(),
                     below_max_depth: params.below_max_depth(),
                     rent_structure: RentStructureDto {
@@ -658,18 +658,16 @@ impl ClientMessageHandler {
             }
             Message::Bech32ToHex { bech32 } => Ok(Response::Bech32ToHex(Client::bech32_to_hex(&bech32)?)),
             Message::HexToBech32 { hex, bech32_hrp } => Ok(Response::Bech32Address(
-                self.client.hex_to_bech32(&hex, bech32_hrp.as_deref()).await?,
+                self.client.hex_to_bech32(&hex, bech32_hrp).await?,
             )),
             Message::AliasIdToBech32 { alias_id, bech32_hrp } => Ok(Response::Bech32Address(
-                self.client.alias_id_to_bech32(alias_id, bech32_hrp.as_deref()).await?,
+                self.client.alias_id_to_bech32(alias_id, bech32_hrp).await?,
             )),
             Message::NftIdToBech32 { nft_id, bech32_hrp } => Ok(Response::Bech32Address(
-                self.client.nft_id_to_bech32(nft_id, bech32_hrp.as_deref()).await?,
+                self.client.nft_id_to_bech32(nft_id, bech32_hrp).await?,
             )),
             Message::HexPublicKeyToBech32Address { hex, bech32_hrp } => Ok(Response::Bech32Address(
-                self.client
-                    .hex_public_key_to_bech32_address(&hex, bech32_hrp.as_deref())
-                    .await?,
+                self.client.hex_public_key_to_bech32_address(&hex, bech32_hrp).await?,
             )),
             Message::ParseBech32Address { address } => {
                 Ok(Response::ParsedBech32Address(AddressDto::from(address.inner())))

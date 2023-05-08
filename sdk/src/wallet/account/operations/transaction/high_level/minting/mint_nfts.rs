@@ -63,8 +63,8 @@ impl TryFrom<&NftOptionsDto> for NftOptions {
 
     fn try_from(value: &NftOptionsDto) -> crate::wallet::Result<Self> {
         Ok(Self {
-            address: value.address.clone(),
-            sender: value.sender.clone(),
+            address: value.address,
+            sender: value.sender,
             metadata: match &value.metadata {
                 Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("metadata"))?),
                 None => None,
@@ -73,7 +73,7 @@ impl TryFrom<&NftOptionsDto> for NftOptions {
                 Some(tag) => Some(prefix_hex::decode(tag).map_err(|_| BlockError::InvalidField("tag"))?),
                 None => None,
             },
-            issuer: value.issuer.clone(),
+            issuer: value.issuer,
             immutable_metadata: match &value.immutable_metadata {
                 Some(metadata) => {
                     Some(prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("immutable_metadata"))?)
@@ -154,7 +154,7 @@ impl Account {
                 .add_unlock_condition(AddressUnlockCondition::new(address));
 
             if let Some(sender) = nft_options.sender {
-                nft_builder = nft_builder.add_feature(SenderFeature::new(&sender));
+                nft_builder = nft_builder.add_feature(SenderFeature::new(sender));
             }
 
             if let Some(metadata) = nft_options.metadata {
@@ -166,7 +166,7 @@ impl Account {
             }
 
             if let Some(issuer) = nft_options.issuer {
-                nft_builder = nft_builder.add_immutable_feature(IssuerFeature::new(&issuer));
+                nft_builder = nft_builder.add_immutable_feature(IssuerFeature::new(issuer));
             }
 
             if let Some(immutable_metadata) = nft_options.immutable_metadata {

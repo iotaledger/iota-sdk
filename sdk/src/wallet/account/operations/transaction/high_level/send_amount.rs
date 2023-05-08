@@ -117,19 +117,19 @@ impl Account {
             let return_address = return_address
                 .map(|return_address| {
                     if return_address.hrp() != address.hrp() {
-                        Err(crate::client::Error::InvalidBech32Hrp {
-                            provided: return_address.hrp().to_string(),
-                            expected: address.hrp().to_string(),
+                        Err(crate::client::Error::Bech32HrpMismatch {
+                            provided: *return_address.hrp(),
+                            expected: *address.hrp(),
                         })?;
                     }
                     Ok::<_, Error>(return_address)
                 })
                 .transpose()?
-                .unwrap_or_else(|| default_return_address.address.clone());
+                .unwrap_or(default_return_address.address);
 
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
             let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                .add_unlock_condition(AddressUnlockCondition::new(&address))
+                .add_unlock_condition(AddressUnlockCondition::new(address))
                 .finish_output(token_supply)?;
 
             if amount >= output.amount() {
@@ -168,7 +168,7 @@ impl Account {
                             // We send the storage_deposit_amount back to the sender, so only the additional amount is
                             // sent
                             StorageDepositReturnUnlockCondition::new(
-                                &return_address,
+                                return_address,
                                 storage_deposit_amount,
                                 token_supply,
                             )?,

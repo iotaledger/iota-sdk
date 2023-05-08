@@ -472,7 +472,7 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
 #[test]
 fn serialize() {
     use crate::types::block::{
-        address::{Address, Ed25519Address},
+        address::{Address, Ed25519Address, Hrp},
         input::{Input, UtxoInput},
         output::{unlock_condition::AddressUnlockCondition, BasicOutput, InputsCommitment, Output},
         payload::{
@@ -492,7 +492,7 @@ fn serialize() {
     let protocol_parameters = ProtocolParameters::new(
         2,
         String::from("testnet"),
-        String::from("rms"),
+        Hrp::from_str_unchecked("rms"),
         1500,
         15,
         crate::types::block::output::RentStructure::new(500, 10, 1),

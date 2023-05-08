@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
 
     let secret_manager =
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
-    let bech32_address = &client.get_addresses(&secret_manager).with_range(0..1).finish().await?[0];
+    let bech32_address = client.get_addresses(&secret_manager).with_range(0..1).finish().await?[0];
 
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
     request_funds_from_faucet(&faucet_url, bech32_address).await?;
@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
     // Get outputs for address and request if they're participating
     let output_ids_response = client
         .basic_output_ids(vec![
-            QueryParameter::Address(bech32_address.clone()),
+            QueryParameter::Address(bech32_address),
             QueryParameter::HasExpiration(false),
             QueryParameter::HasTimelock(false),
             QueryParameter::HasStorageDepositReturn(false),

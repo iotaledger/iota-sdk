@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
             address: None,
             immutable_metadata: Some(format!("{{\"standard\":\"IRC27\",\"version\":\"v1.0\",\"type\":\"video/mp4\",\"uri\":\"ipfs://wrongcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5Ywrong\",\"name\":\"Shimmer OG NFT #{index}\",\"description\":\"The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.\",\"issuerName\":\"IOTA Foundation\",\"collectionId\":\"{issuer_nft_id}\",\"collectionName\":\"Shimmer OG\" }}").as_bytes().to_vec()),
             // The NFT address from the NFT we minted in mint_issuer_nft example
-            issuer: Some(Bech32Address::new(&bech32_hrp, NftAddress::new(issuer_nft_id))?),
+            issuer: Some(Bech32Address::new(bech32_hrp, NftAddress::new(issuer_nft_id))),
             metadata: None,
             sender: None,
             tag: None,

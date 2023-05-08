@@ -70,7 +70,7 @@ impl From<NetworkInfo> for NetworkInfoDto {
             protocol_parameters: ProtocolParametersDto {
                 protocol_version: info.protocol_parameters.protocol_version(),
                 network_name: info.protocol_parameters.network_name().to_string(),
-                bech32_hrp: info.protocol_parameters.bech32_hrp().to_string(),
+                bech32_hrp: *info.protocol_parameters.bech32_hrp(),
                 min_pow_score: info.protocol_parameters.min_pow_score(),
                 below_max_depth: info.protocol_parameters.below_max_depth(),
                 rent_structure: RentStructureDto {

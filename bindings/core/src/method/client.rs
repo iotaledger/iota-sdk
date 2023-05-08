@@ -15,7 +15,7 @@ use iota_sdk::{
         secret::SecretManagerDto,
     },
     types::block::{
-        address::Bech32Address,
+        address::{Bech32Address, Hrp},
         output::{
             dto::{AliasIdDto, NativeTokenDto, NftIdDto, TokenSchemeDto},
             feature::dto::FeatureDto,
@@ -426,7 +426,7 @@ pub enum ClientMethod {
         /// Hex encoded bech32 address
         hex: String,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Transforms an alias id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -434,7 +434,7 @@ pub enum ClientMethod {
         /// Alias ID
         alias_id: AliasId,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Transforms an nft id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -442,7 +442,7 @@ pub enum ClientMethod {
         /// Nft ID
         nft_id: NftId,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Transforms a hex encoded public key to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -450,7 +450,7 @@ pub enum ClientMethod {
         /// Hex encoded public key
         hex: String,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Requests funds for a given address from the faucet, for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.
     RequestFundsFromFaucet {

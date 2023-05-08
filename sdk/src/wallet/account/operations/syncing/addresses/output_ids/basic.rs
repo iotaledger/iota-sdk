@@ -1,7 +1,6 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use core::borrow::Borrow;
 #[cfg(not(target_family = "wasm"))]
 use std::collections::HashSet;
 
@@ -20,15 +19,13 @@ impl Account {
     /// Returns output ids of basic outputs that have only the address unlock condition
     pub(crate) async fn get_basic_output_ids_with_address_unlock_condition_only(
         &self,
-        bech32_address: impl Borrow<Bech32Address> + Send,
+        bech32_address: Bech32Address,
     ) -> crate::client::Result<Vec<OutputId>> {
-        let bech32_address = bech32_address.borrow();
-
         // Only request basic outputs with `AddressUnlockCondition` only
         Ok(self
             .client
             .basic_output_ids(vec![
-                QueryParameter::Address(bech32_address.clone()),
+                QueryParameter::Address(bech32_address),
                 QueryParameter::HasExpiration(false),
                 QueryParameter::HasTimelock(false),
                 QueryParameter::HasStorageDepositReturn(false),
@@ -41,30 +38,27 @@ impl Account {
     /// `ExpirationUnlockCondition` or `StorageDepositReturnUnlockCondition`
     pub(crate) async fn get_basic_output_ids_with_any_unlock_condition(
         &self,
-        bech32_address: impl Borrow<Bech32Address> + Send,
+        bech32_address: Bech32Address,
     ) -> crate::wallet::Result<Vec<OutputId>> {
-        let bech32_address = bech32_address.borrow();
         // aliases and foundries
         #[cfg(target_family = "wasm")]
         {
             let mut output_ids = vec![];
             output_ids.extend(
                 self.client()
-                    .basic_output_ids(vec![QueryParameter::Address(bech32_address.clone())])
+                    .basic_output_ids(vec![QueryParameter::Address(bech32_address)])
                     .await?
                     .items,
             );
             output_ids.extend(
                 self.client()
-                    .basic_output_ids(vec![QueryParameter::StorageDepositReturnAddress(
-                        bech32_address.clone(),
-                    )])
+                    .basic_output_ids(vec![QueryParameter::StorageDepositReturnAddress(bech32_address)])
                     .await?
                     .items,
             );
             output_ids.extend(
                 self.client()
-                    .basic_output_ids(vec![QueryParameter::ExpirationReturnAddress(bech32_address.clone())])
+                    .basic_output_ids(vec![QueryParameter::ExpirationReturnAddress(bech32_address)])
                     .await?
                     .items,
             );
@@ -78,7 +72,6 @@ impl Account {
             let tasks = vec![
                 // Get basic outputs
                 async move {
-                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     tokio::spawn(async move {
                         client
@@ -91,7 +84,6 @@ impl Account {
                 .boxed(),
                 // Get outputs where the address is in the storage deposit return unlock condition
                 async move {
-                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     tokio::spawn(async move {
                         client
@@ -104,7 +96,6 @@ impl Account {
                 .boxed(),
                 // Get outputs where the address is in an expired expiration unlock condition
                 async move {
-                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     tokio::spawn(async move {
                         client

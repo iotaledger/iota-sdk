@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 
 use iota_sdk::{
     client::{api::GetAddressesBuilderOptions, constants::SHIMMER_COIN_TYPE, secret::SecretManagerDto, ClientBuilder},
-    wallet::account::types::AccountIdentifier,
+    wallet::account::types::AccountIdentifier, types::block::address::Hrp,
 };
 use iota_sdk_bindings_core::{AccountMethod, CallMethod, ClientMethod, Response, Result, WalletMethod, WalletOptions};
 
@@ -28,7 +28,7 @@ async fn generate_addresses() -> Result<()> {
         coin_type: None,
         account_index: None,
         range: Some(0..10),
-        bech32_hrp: Some("atoi".to_string()),
+        bech32_hrp: Some(Hrp::from_str_unchecked("atoi")),
         options: None,
     };
     let method = ClientMethod::GenerateAddresses {

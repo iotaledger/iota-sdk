@@ -8,7 +8,12 @@ mod nft;
 
 use derive_more::From;
 
-pub use self::{alias::AliasAddress, bech32::Bech32Address, ed25519::Ed25519Address, nft::NftAddress};
+pub use self::{
+    alias::AliasAddress,
+    bech32::{Bech32Address, Hrp},
+    ed25519::Ed25519Address,
+    nft::NftAddress,
+};
 use crate::types::block::{
     output::{Output, OutputId},
     semantic::{ConflictReason, ValidationContext},
@@ -108,10 +113,20 @@ impl Address {
         Bech32Address::try_from_str(address).map(|res| res.inner)
     }
 
+    /// Try to encode this address to a bech32 string with the given string Human Readable Part as prefix.
+    pub fn try_to_bech32<T: AsRef<str>>(&self, hrp: T) -> Result<Bech32Address, Error> {
+        Ok(Bech32Address::try_new(hrp.as_ref(), self)?)
+    }
+
     /// Encodes this address to a bech32 string with the given Human Readable Part as prefix.
-    pub fn to_bech32<T: AsRef<str>>(&self, hrp: T) -> Bech32Address {
-        // PANIC: encoding can't fail as `self` has already been validated and built.
-        Bech32Address::new(hrp.as_ref(), self).unwrap()
+    pub fn to_bech32(&self, hrp: Hrp) -> Bech32Address {
+        Bech32Address::new(hrp, self)
+    }
+
+    /// Encodes this address to a bech32 string with the given string Human Readable Part as prefix without checking
+    /// validity.
+    pub fn to_bech32_unchecked<T: AsRef<str>>(&self, hrp: T) -> Bech32Address {
+        Bech32Address::new(Hrp::from_str_unchecked(hrp.as_ref()), self)
     }
 
     /// Checks if an string is a valid bech32 encoded address.

@@ -50,7 +50,7 @@ impl Account {
         // We start building with minimum storage deposit, so we know the minimum required amount and can later replace
         // it, if needed
         let mut first_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-            .add_unlock_condition(AddressUnlockCondition::new(&options.recipient_address));
+            .add_unlock_condition(AddressUnlockCondition::new(options.recipient_address));
 
         if let Some(assets) = options.assets {
             if let Some(native_tokens) = assets.native_tokens {
@@ -219,7 +219,7 @@ impl Account {
 
         // Set new address unlock condition
         first_output_builder =
-            first_output_builder.with_unlock_conditions(vec![AddressUnlockCondition::new(&options.recipient_address)]);
+            first_output_builder.with_unlock_conditions(vec![AddressUnlockCondition::new(options.recipient_address)]);
 
         if let Some(assets) = options.assets {
             if let Some(native_tokens) = assets.native_tokens {
@@ -454,7 +454,7 @@ impl TryFrom<&OutputOptionsDto> for OutputOptions {
 
     fn try_from(value: &OutputOptionsDto) -> crate::wallet::Result<Self> {
         Ok(Self {
-            recipient_address: value.recipient_address.clone(),
+            recipient_address: value.recipient_address,
             amount: u64::from_str(&value.amount)
                 .map_err(|_| crate::client::Error::InvalidAmount(value.amount.clone()))?,
             assets: match &value.assets {

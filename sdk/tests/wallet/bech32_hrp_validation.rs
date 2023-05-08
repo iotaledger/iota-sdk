@@ -22,7 +22,7 @@ async fn bech32_hrp_send_amount() -> Result<()> {
     let error = account
         .send_amount(
             vec![AddressWithAmount::new(
-                Bech32Address::new("wronghrp", account.addresses().await?[0].address())?,
+                Bech32Address::try_new("wronghrp", account.addresses().await?[0].address())?,
                 1_000_000,
             )],
             None,
@@ -34,7 +34,7 @@ async fn bech32_hrp_send_amount() -> Result<()> {
 
     match error {
         Error::Client(error) => match *error {
-            ClientError::InvalidBech32Hrp { provided, expected } => {
+            ClientError::Bech32HrpMismatch { provided, expected } => {
                 assert_eq!(provided, "wronghrp".to_string());
                 assert_eq!(expected, bech32_hrp);
             }
@@ -58,7 +58,7 @@ async fn bech32_hrp_prepare_output() -> Result<()> {
     let error = account
         .prepare_output(
             OutputOptions {
-                recipient_address: account.addresses().await?[0].address().as_ref().to_bech32("wronghrp"),
+                recipient_address: account.addresses().await?[0].address().as_ref().to_bech32_unchecked("wronghrp"),
                 amount: 1_000_000,
                 assets: None,
                 features: None,
@@ -74,7 +74,7 @@ async fn bech32_hrp_prepare_output() -> Result<()> {
 
     match error {
         Error::Client(error) => match *error {
-            ClientError::InvalidBech32Hrp { provided, expected } => {
+            ClientError::Bech32HrpMismatch { provided, expected } => {
                 assert_eq!(provided, "wronghrp".to_string());
                 assert_eq!(expected, bech32_hrp);
             }

@@ -59,7 +59,7 @@ impl Account {
                         |a| (a.key_index, a.internal),
                     )
                     .map_err(|_| {
-                        crate::wallet::Error::AddressNotFoundInAccount(address_with_unspent_outputs.address.clone())
+                        crate::wallet::Error::AddressNotFoundInAccount(address_with_unspent_outputs.address)
                     })?;
                 account_details.internal_addresses[position].used = true;
             } else {
@@ -73,7 +73,7 @@ impl Account {
                         |a| (a.key_index, a.internal),
                     )
                     .map_err(|_| {
-                        crate::wallet::Error::AddressNotFoundInAccount(address_with_unspent_outputs.address.clone())
+                        crate::wallet::Error::AddressNotFoundInAccount(address_with_unspent_outputs.address)
                     })?;
                 account_details.public_addresses[position].used = true;
             }
@@ -279,13 +279,13 @@ impl Account {
         log::debug!("[UPDATE ACCOUNT WITH NEW CLIENT] new bech32_hrp: {}", bech32_hrp);
         let mut account_details = self.write().await;
         for address in &mut account_details.addresses_with_unspent_outputs {
-            address.address.hrp = bech32_hrp.clone();
+            address.address.hrp = bech32_hrp;
         }
         for address in &mut account_details.public_addresses {
-            address.address.hrp = bech32_hrp.clone();
+            address.address.hrp = bech32_hrp;
         }
         for address in &mut account_details.internal_addresses {
-            address.address.hrp = bech32_hrp.clone();
+            address.address.hrp = bech32_hrp;
         }
 
         account_details.inaccessible_incoming_transactions.clear();

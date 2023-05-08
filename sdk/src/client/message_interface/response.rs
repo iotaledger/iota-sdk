@@ -22,7 +22,7 @@ use crate::{
             plugins::indexer::OutputIdsResponse,
         },
         block::{
-            address::{dto::AddressDto, Bech32Address},
+            address::{dto::AddressDto, Bech32Address, Hrp},
             input::dto::UtxoInputDto,
             output::{
                 dto::{OutputDto, OutputMetadataDto},
@@ -71,7 +71,7 @@ pub enum Response {
     NetworkId(u64),
     /// Response for:
     /// - [`GetBech32Hrp`](crate::client::message_interface::Message::GetBech32Hrp)
-    Bech32Hrp(String),
+    Bech32Hrp(Hrp),
     /// Response for:
     /// - [`GetMinPowScore`](crate::client::message_interface::Message::GetMinPowScore)
     MinPowScore(u32),

@@ -23,6 +23,7 @@ use crate::{
         request_funds_from_faucet, utils, Client, NodeInfoWrapper,
     },
     types::block::{
+        address::Hrp,
         output::{
             dto::{OutputBuilderAmountDto, OutputDto},
             AliasId, AliasOutput, BasicOutput, FoundryOutput, NftId, NftOutput, Output, Rent, TokenId,
@@ -226,7 +227,7 @@ impl WalletMessageHandler {
                             source.to_path_buf(),
                             password,
                             ignore_if_coin_type_mismatch,
-                            ignore_if_bech32_mismatch.as_deref(),
+                            ignore_if_bech32_mismatch,
                         )
                         .await?;
                     Ok(Response::Ok(()))
@@ -352,11 +353,11 @@ impl WalletMessageHandler {
                         Some(bech32_hrp) => bech32_hrp,
                         None => match self.wallet.get_node_info().await {
                             Ok(node_info_wrapper) => node_info_wrapper.node_info.protocol.bech32_hrp,
-                            Err(_) => SHIMMER_TESTNET_BECH32_HRP.into(),
+                            Err(_) => SHIMMER_TESTNET_BECH32_HRP,
                         },
                     };
 
-                    Ok(Response::Bech32Address(utils::hex_to_bech32(&hex, &bech32_hrp)?))
+                    Ok(Response::Bech32Address(utils::hex_to_bech32(&hex, bech32_hrp)?))
                 })
                 .await
             }
@@ -751,7 +752,7 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let output = account
                         .prepare_output(
-                            OutputOptions::try_from(&options)?,
+                            OutputOptions::try_from(options.as_ref())?,
                             transaction_options
                                 .as_ref()
                                 .map(TransactionOptions::try_from_dto)
@@ -1032,7 +1033,7 @@ impl WalletMessageHandler {
     }
 
     /// The create account message handler.
-    async fn create_account(&self, alias: Option<String>, bech32_hrp: Option<String>) -> Result<Response> {
+    async fn create_account(&self, alias: Option<String>, bech32_hrp: Option<Hrp>) -> Result<Response> {
         let mut builder = self.wallet.create_account();
 
         if let Some(alias) = alias {
