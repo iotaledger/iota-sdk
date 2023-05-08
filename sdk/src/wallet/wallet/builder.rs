@@ -210,7 +210,7 @@ impl WalletBuilder {
             Account::new(
                 a,
                 // Safe to unwrap because we create the client if accounts aren't empty
-                client.as_ref().expect("client must exists").clone(),
+                client.as_ref().expect("client must exist").clone(),
                 self.secret_manager
                     .clone()
                     .expect("secret_manager needs to be provided"),
@@ -229,7 +229,7 @@ impl WalletBuilder {
             for account in accounts.iter_mut() {
                 // Safe to unwrap because we create the client if accounts aren't empty
                 account
-                    .update_account_with_new_client(client.as_ref().expect("client must exists").clone())
+                    .update_account_with_new_client(client.as_ref().expect("client must exist").clone())
                     .await?;
             }
         }
