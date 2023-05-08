@@ -54,7 +54,7 @@ class Node():
 
 class SendAmountParams():
     def __init__(self, address, amount):
-        """Initialise a SendAmountParams
+        """Initialise SendAmountParams
 
         Parameters
         ----------
