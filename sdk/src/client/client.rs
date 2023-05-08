@@ -114,7 +114,6 @@ impl ClientInner {
             if let Some(last_sync) = *LAST_SYNC.lock().unwrap() {
                 if current_time < last_sync {
                     return Ok(self
-                        .inner
                         .network_info
                         .read()
                         .map_err(|_| crate::client::Error::PoisonError)?
@@ -123,7 +122,6 @@ impl ClientInner {
             }
             let info = self.get_info().await?.node_info;
             let mut client_network_info = self
-                .inner
                 .network_info
                 .write()
                 .map_err(|_| crate::client::Error::PoisonError)?;
