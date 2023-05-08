@@ -728,7 +728,7 @@ export class Account {
             {
                 name: 'mintNativeToken',
                 data: {
-                    params: params,
+                    params,
                     options: transactionOptions,
                 },
             },

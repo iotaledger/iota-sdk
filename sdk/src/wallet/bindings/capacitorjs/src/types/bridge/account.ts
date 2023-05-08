@@ -237,7 +237,7 @@ export type __MintNftsMethod__ = {
 export type __PrepareOutputMethod__ = {
     name: 'prepareOutput';
     data: {
-        options: OutputParams;
+        params: OutputParams;
         transactionOptions?: TransactionOptions;
     };
 };

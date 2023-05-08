@@ -768,7 +768,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          * @returns The prepared output.
          */
         async prepareOutput(
-            options: OutputParams,
+            params: OutputParams,
             transactionOptions?: TransactionOptions,
         ): Promise<OutputTypes> {
             const response = await messageHandler.callAccountMethod(
@@ -776,7 +776,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
                 {
                     name: 'prepareOutput',
                     data: {
-                        options,
+                        params,
                         transactionOptions,
                     },
                 },

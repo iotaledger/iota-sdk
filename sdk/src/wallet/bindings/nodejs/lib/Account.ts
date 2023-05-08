@@ -774,7 +774,7 @@ export class Account {
      * @returns The prepared output.
      */
     async prepareOutput(
-        options: OutputParams,
+        params: OutputParams,
         transactionOptions?: TransactionOptions,
     ): Promise<OutputTypes> {
         const response = await this.messageHandler.callAccountMethod(
@@ -782,7 +782,7 @@ export class Account {
             {
                 name: 'prepareOutput',
                 data: {
-                    options,
+                    params,
                     transactionOptions,
                 },
             },
