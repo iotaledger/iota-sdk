@@ -128,7 +128,8 @@ impl Wallet {
                     .read()
                     .await
                     .clone()
-                    .finish()?
+                    .finish()
+                    .await?
                     .get_bech32_hrp()
                     .await?
             }
