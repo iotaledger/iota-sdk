@@ -221,7 +221,7 @@ mod tests {
         let mut storage_manager = StorageManager::new(None, Box::<Memory>::default()).await.unwrap();
         assert!(storage_manager.get_accounts().await.unwrap().is_empty());
 
-        let account_details = AccountDetails::get_test_account_details();
+        let account_details = AccountDetails::mock();
 
         storage_manager.save_account(&account_details).await.unwrap();
         let accounts = storage_manager.get_accounts().await.unwrap();

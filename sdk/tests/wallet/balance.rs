@@ -17,7 +17,7 @@ use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear
 
 #[test]
 fn balance_to_dto() {
-    let balance = AccountBalance::rand();
+    let balance = AccountBalance::rand_mock();
     let balance_dto = AccountBalanceDto::from(&balance);
 
     assert_eq!(balance.base_coin().total().to_string(), balance_dto.base_coin.total);
@@ -60,7 +60,7 @@ fn balance_to_dto() {
 
 #[test]
 fn balance_add_assign() {
-    let mut balance_1 = AccountBalance::rand();
+    let mut balance_1 = AccountBalance::rand_mock();
     let total_1 = balance_1.base_coin().total();
     let available_1 = balance_1.base_coin().available();
     #[cfg(feature = "participation")]
@@ -76,7 +76,7 @@ fn balance_add_assign() {
     let num_foundries_1 = balance_1.foundries().len();
     let num_nfts_1 = balance_1.nfts().len();
 
-    let balance_2 = AccountBalance::rand();
+    let balance_2 = AccountBalance::rand_mock();
     let total_2 = balance_2.base_coin().total();
     let available_2 = balance_2.base_coin().available();
     #[cfg(feature = "participation")]

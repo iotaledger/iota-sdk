@@ -253,9 +253,9 @@ impl From<&NativeTokensBalance> for NativeTokensBalanceDto {
     }
 }
 
-#[cfg(feature = "rand")]
 impl AccountBalance {
-    pub fn rand() -> Self {
+    #[cfg(feature = "rand")]
+    pub fn rand_mock() -> Self {
         use rand::Rng;
 
         use crate::types::block::rand::bytes::rand_bytes_array;
