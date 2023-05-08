@@ -29,7 +29,7 @@ const WALLET_DB_PATH: &str = "./example.walletdb";
 // The base coin amount to send
 const SEND_AMOUNT: u64 = 1_000_000;
 // The maximum number of addresses funds are distributed to
-const MAX_ADDRESSES_TO_SPLIT_FUNDS: usize = 15;
+const MAX_ADDRESSES_TO_SPLIT_FUNDS: usize = 150;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -67,7 +67,7 @@ async fn main() -> Result<()> {
 
     let token_supply = account.client().get_token_supply().await?;
 
-    // send transaction
+    // Send split transactions
     for addresses_chunk in addresses.chunks(2).map(|chunk| chunk.to_vec()) {
         let outputs_per_transaction = addresses_chunk
             .into_iter()
