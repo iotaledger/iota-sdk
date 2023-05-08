@@ -55,7 +55,7 @@ pub use self::{
     },
     types::OutputDataDto,
 };
-use super::Wallet;
+use super::wallet::WalletInner;
 use crate::{
     client::Client,
     types::{
@@ -145,7 +145,7 @@ pub struct AccountDetails {
 pub struct Account {
     inner: Arc<AccountInner>,
     pub(crate) client: Client,
-    pub(crate) wallet: Wallet,
+    pub(crate) wallet: Arc<WalletInner>,
 }
 
 #[derive(Debug)]
@@ -169,7 +169,7 @@ impl Deref for Account {
 
 impl Account {
     /// Create a new Account with an AccountDetails
-    pub(crate) async fn new(details: AccountDetails, client: Client, wallet: Wallet) -> Result<Self> {
+    pub(crate) async fn new(details: AccountDetails, client: Client, wallet: Arc<WalletInner>) -> Result<Self> {
         #[cfg(feature = "storage")]
         let default_sync_options = wallet
             .storage_manager
@@ -186,7 +186,6 @@ impl Account {
             wallet,
             inner: Arc::new(AccountInner {
                 details: RwLock::new(details),
-
                 last_synced: Default::default(),
                 default_sync_options: Mutex::new(default_sync_options),
             }),

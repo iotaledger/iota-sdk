@@ -168,7 +168,7 @@ impl Wallet {
                     let restored_account = try_join_all(
                         read_accounts
                             .into_iter()
-                            .map(|a| Account::new(a, client.clone(), self.clone()).boxed()),
+                            .map(|a| Account::new(a, client.clone(), self.inner.clone()).boxed()),
                     )
                     .await?;
                     *accounts = restored_account;

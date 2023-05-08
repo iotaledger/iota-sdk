@@ -163,7 +163,7 @@ impl AccountBuilder {
             native_token_foundries: HashMap::new(),
         };
 
-        let account = Account::new(account, client, self.wallet.clone()).await?;
+        let account = Account::new(account, client, self.wallet.inner.clone()).await?;
         #[cfg(feature = "storage")]
         account.save(None).await?;
         accounts.push(account.clone());

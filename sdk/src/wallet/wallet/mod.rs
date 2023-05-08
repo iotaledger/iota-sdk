@@ -34,6 +34,8 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct Wallet {
     pub(crate) inner: Arc<WalletInner>,
+    // should we use a hashmap instead of a vec like in wallet.rs?
+    pub(crate) accounts: Arc<RwLock<Vec<Account>>>,
 }
 
 impl core::ops::Deref for Wallet {
@@ -59,8 +61,6 @@ impl Wallet {
 
 #[derive(Debug)]
 pub struct WalletInner {
-    // should we use a hashmap instead of a vec like in wallet.rs?
-    pub(crate) accounts: RwLock<Vec<Account>>,
     // 0 = not running, 1 = running, 2 = stopping
     pub(crate) background_syncing_status: AtomicUsize,
     pub(crate) client_options: RwLock<ClientOptions>,
@@ -74,7 +74,7 @@ pub struct WalletInner {
     pub(crate) storage_manager: tokio::sync::Mutex<StorageManager>,
 }
 
-impl WalletInner {
+impl Wallet {
     /// Get all accounts
     pub async fn get_accounts(&self) -> crate::wallet::Result<Vec<Account>> {
         Ok(self.accounts.read().await.clone())
@@ -128,11 +128,6 @@ impl WalletInner {
         Ok(())
     }
 
-    /// Get the [SecretManager]
-    pub fn get_secret_manager(&self) -> &RwLock<SecretManager> {
-        &self.secret_manager
-    }
-
     /// Get the balance of all accounts added together
     pub async fn balance(&self) -> crate::wallet::Result<AccountBalance> {
         let mut balance = AccountBalance::default();
@@ -154,6 +149,13 @@ impl WalletInner {
         }
 
         Ok(balance)
+    }
+}
+
+impl WalletInner {
+    /// Get the [SecretManager]
+    pub fn get_secret_manager(&self) -> &RwLock<SecretManager> {
+        &self.secret_manager
     }
 
     /// Listen to wallet events, empty vec will listen to all events
