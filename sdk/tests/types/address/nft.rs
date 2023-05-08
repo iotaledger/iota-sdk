@@ -87,7 +87,7 @@ fn debug() {
 fn bech32() {
     let address = Address::from(NftAddress::from_str(NFT_ID).unwrap());
 
-    assert_eq!(address.to_bech32("rms").to_string(), NFT_BECH32);
+    assert_eq!(address.to_bech32("rms"), NFT_BECH32);
 }
 
 #[test]

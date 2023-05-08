@@ -82,6 +82,36 @@ impl core::fmt::Debug for Bech32Address {
     }
 }
 
+impl PartialEq<String> for Bech32Address {
+    fn eq(&self, other: &String) -> bool {
+        self.to_string().eq(other)
+    }
+}
+
+// impl PartialEq<String> for &Bech32Address {
+//     fn eq(&self, other: &String) -> bool {
+//         self.to_string().eq(other)
+//     }
+// }
+
+impl PartialEq<&str> for Bech32Address {
+    fn eq(&self, other: &&str) -> bool {
+        self.to_string().eq(other)
+    }
+}
+
+impl PartialEq<str> for Bech32Address {
+    fn eq(&self, other: &str) -> bool {
+        self.to_string().eq(other)
+    }
+}
+
+// impl PartialEq<str> for &Bech32Address {
+//     fn eq(&self, other: &str) -> bool {
+//         self.to_string().eq(other)
+//     }
+// }
+
 impl<T: core::borrow::Borrow<Bech32Address>> From<T> for Address {
     fn from(value: T) -> Self {
         value.borrow().inner

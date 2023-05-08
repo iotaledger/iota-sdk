@@ -181,7 +181,7 @@ async fn wallet_address_generation() -> Result<()> {
     let address = wallet.generate_address(0, 0, None).await?;
 
     assert_eq!(
-        address.to_bech32("smr").to_string(),
+        address.to_bech32("smr"),
         // Address generated with bip32 path: [44, 4218, 0, 0, 0]
         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
     );
@@ -210,7 +210,7 @@ async fn wallet_address_generation() -> Result<()> {
         let address = wallet.generate_address(0, 0, None).await?;
 
         assert_eq!(
-            address.to_bech32("smr").to_string(),
+            address.to_bech32("smr"),
             // Address generated with bip32 path: [44, 4218, 0, 0, 0]
             "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
         );
