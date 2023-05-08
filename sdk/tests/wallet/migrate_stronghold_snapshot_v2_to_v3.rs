@@ -111,9 +111,6 @@ async fn stronghold_snapshot_v2_v3_migration() {
 #[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn stronghold_snapshot_v2_v3_migration_same_path() {
-    let storage_path = "test-storage/stronghold_snapshot_v2_v3_migration_same_path";
-    setup(storage_path).unwrap();
-
     std::fs::copy(
         "./tests/wallet/fixtures/v2.stronghold",
         "./tests/wallet/fixtures/v2-copy.stronghold",
@@ -145,15 +142,14 @@ async fn stronghold_snapshot_v2_v3_migration_same_path() {
     );
 
     std::fs::remove_file("./tests/wallet/fixtures/v2-copy.stronghold").unwrap();
-    tear_down(storage_path).unwrap();
 }
 
 #[cfg(feature = "stronghold")]
 #[tokio::test]
-async fn stronghold_snapshot_with_data_v2_v3_migration() {
+async fn stronghold_snapshot_v2_v3_migration_with_backup() {
     let error = StrongholdSecretManager::builder()
         .password("current_password")
-        .build("./tests/wallet/fixtures/v2_backup.stronghold");
+        .build("./tests/wallet/fixtures/v2_with_backup.stronghold");
 
     assert!(matches!(
         error,
@@ -161,16 +157,16 @@ async fn stronghold_snapshot_with_data_v2_v3_migration() {
     ));
 
     StrongholdAdapter::migrate_v2_to_v3(
-        "./tests/wallet/fixtures/v2_backup.stronghold",
+        "./tests/wallet/fixtures/v2_with_backup.stronghold",
         "current_password",
-        Some("./tests/wallet/fixtures/v3WalletBackup.stronghold"),
+        Some("./tests/wallet/fixtures/v3_with_backup.stronghold"),
         Some("new_password"),
     )
     .unwrap();
 
     let mut stronghold_secret_manager = StrongholdSecretManager::builder()
         .password("new_password")
-        .build("./tests/wallet/fixtures/v3WalletBackup.stronghold")
+        .build("./tests/wallet/fixtures/v3_with_backup.stronghold")
         .unwrap();
 
     let coin_type_bytes = stronghold_secret_manager
@@ -208,5 +204,5 @@ async fn stronghold_snapshot_with_data_v2_v3_migration() {
         ]
     );
 
-    std::fs::remove_file("./tests/wallet/fixtures/v3WalletBackup.stronghold").unwrap();
+    std::fs::remove_file("./tests/wallet/fixtures/v3_with_backup.stronghold").unwrap();
 }
