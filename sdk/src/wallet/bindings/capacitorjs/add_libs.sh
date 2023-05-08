@@ -15,7 +15,10 @@ rm -rf ../android/libs && mkdir -p ../android/libs
 cp -rv iota-wallet.jar ../android/libs
 
 echo Installing Swift libraries
-curl -SL --progress-bar --fail https://github.com/iotaledger/iota-sdk/releases/download/iota-wallet-swift-0.1.0/WalletFramework-0.1.0.zip > iota-wallet-swift.zip
+# retrieve the latest version and tag of of latest release made
+latest_tag=$(git tag | sort -rV | grep swift | head -n1)
+latest_version=$(echo $latest_tag | grep -o [0-9\.] | tr -d '\n')
+curl -SL --progress-bar --fail https://github.com/iotaledger/iota-sdk/releases/download/$latest_tag/WalletFramework-$latest_version.zip > iota-wallet-swift.zip
 unzip iota-wallet-swift.zip             
 rm -f ../ios/WalletFramework.xcframework/ios-x86/WalletFramework.framework/WalletFramework
 rm -f ../ios/WalletFramework.xcframework/ios-arm64/WalletFramework.framework/WalletFramework
