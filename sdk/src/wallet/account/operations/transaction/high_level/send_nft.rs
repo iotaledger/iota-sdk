@@ -13,7 +13,7 @@ use crate::{
     wallet::account::{operations::transaction::Transaction, Account, TransactionOptions},
 };
 
-/// Params `send_nft()`
+/// Params for `send_nft()`
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SendNftParams {

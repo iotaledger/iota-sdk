@@ -1,7 +1,5 @@
 ---
-"iota-sdk-bindings-core": patch
-"iota-sdk-nodejs": patch
-"iota-sdk-python": patch
+"wallet-nodejs-binding": patch
 ---
 
 Remove `IncreaseNativeTokenSupplyOptions`. 
