@@ -19,9 +19,10 @@
 use std::str::FromStr;
 
 use iota_sdk::{
-    client::{node_manager::node::Node, Url},
+    client::node_manager::node::Node,
     types::api::plugins::participation::types::ParticipationEventId,
     wallet::{account::types::participation::ParticipationEventRegistrationOptions, Result, Wallet},
+    Url,
 };
 
 // The account alias used in this example

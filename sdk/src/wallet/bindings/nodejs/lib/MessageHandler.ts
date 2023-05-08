@@ -4,7 +4,7 @@
 import {
     sendMessageAsync,
     messageHandlerNew,
-    listenTo,
+    listenWallet,
     destroy,
 } from './bindings';
 import type {
@@ -61,7 +61,7 @@ export class MessageHandler {
         eventTypes: EventType[],
         callback: (error: Error, result: string) => void,
     ): Promise<void> {
-        return listenTo(eventTypes, callback, this.messageHandler);
+        return listenWallet(eventTypes, callback, this.messageHandler);
     }
 
     async destroy(): Promise<void> {

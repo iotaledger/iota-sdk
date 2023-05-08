@@ -5,13 +5,16 @@
 use std::path::PathBuf;
 
 #[cfg(all(feature = "stronghold", feature = "storage"))]
-use iota_sdk::client::{
-    constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
-    node_manager::node::{Node, NodeDto, Url},
-    secret::{mnemonic::MnemonicSecretManager, stronghold::StrongholdSecretManager, SecretManager},
-};
-#[cfg(all(feature = "stronghold", feature = "storage"))]
 use iota_sdk::wallet::{ClientOptions, Result, Wallet};
+#[cfg(all(feature = "stronghold", feature = "storage"))]
+use iota_sdk::{
+    client::{
+        constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
+        node_manager::node::{Node, NodeDto},
+        secret::{mnemonic::MnemonicSecretManager, stronghold::StrongholdSecretManager, SecretManager},
+    },
+    Url,
+};
 
 use crate::wallet::common::{setup, tear_down, NODE_LOCAL, NODE_OTHER};
 
@@ -70,6 +73,7 @@ async fn backup_and_restore() -> Result<()> {
             PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
             "wrong password".to_string(),
             None,
+            None,
         )
         .await
         .unwrap_err();
@@ -79,6 +83,7 @@ async fn backup_and_restore() -> Result<()> {
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
             stronghold_password.to_string(),
+            None,
             None,
         )
         .await?;
@@ -159,6 +164,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore_mnemonic_secret_manager/backup.stronghold"),
             stronghold_password.to_string(),
+            None,
             None,
         )
         .await?;
@@ -243,6 +249,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
             PathBuf::from("test-storage/backup_and_restore_different_coin_type/backup.stronghold"),
             stronghold_password.to_string(),
             Some(true),
+            None,
         )
         .await?;
 
@@ -325,6 +332,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
             PathBuf::from("test-storage/backup_and_restore_same_coin_type/backup.stronghold"),
             stronghold_password.to_string(),
             Some(true),
+            None,
         )
         .await?;
 
@@ -405,6 +413,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
             PathBuf::from("test-storage/backup_and_restore_different_coin_type_dont_ignore/backup.stronghold"),
             stronghold_password.to_string(),
             Some(false),
+            None,
         )
         .await?;
 
@@ -431,5 +440,86 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
+    tear_down(storage_path)
+}
+
+#[tokio::test]
+#[cfg(all(feature = "stronghold", feature = "storage"))]
+async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
+    let storage_path = "test-storage/backup_and_restore_bech32_hrp_mismatch";
+    setup(storage_path)?;
+
+    let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
+
+    let stronghold_password = "some_hopefully_secure_password";
+
+    // Create directory if not existing, because stronghold panics otherwise
+    std::fs::create_dir_all(storage_path).ok();
+    let stronghold = StrongholdSecretManager::builder()
+        .password(stronghold_password)
+        .build("test-storage/backup_and_restore_bech32_hrp_mismatch/1.stronghold")?;
+
+    stronghold.store_mnemonic("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string()).await.unwrap();
+
+    let wallet = Wallet::builder()
+        .with_secret_manager(SecretManager::Stronghold(stronghold))
+        .with_client_options(client_options.clone())
+        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_storage_path("test-storage/backup_and_restore_bech32_hrp_mismatch/1")
+        .finish()
+        .await?;
+
+    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+
+    wallet
+        .backup(
+            PathBuf::from("test-storage/backup_and_restore_bech32_hrp_mismatch/backup.stronghold"),
+            stronghold_password.to_string(),
+        )
+        .await?;
+
+    // restore from backup
+
+    let stronghold =
+        StrongholdSecretManager::builder().build("test-storage/backup_and_restore_bech32_hrp_mismatch/2.stronghold")?;
+
+    let restore_wallet = Wallet::builder()
+        .with_storage_path("test-storage/backup_and_restore_bech32_hrp_mismatch/2")
+        .with_secret_manager(SecretManager::Stronghold(stronghold))
+        .with_client_options(ClientOptions::new().with_node(NODE_OTHER)?)
+        // Build with a different coin type, to check if it gets replaced by the one from the backup
+        .with_coin_type(IOTA_COIN_TYPE)
+        .finish()
+        .await?;
+
+    restore_wallet
+        .restore_backup(
+            PathBuf::from("test-storage/backup_and_restore_bech32_hrp_mismatch/backup.stronghold"),
+            stronghold_password.to_string(),
+            None,
+            Some("otherhrp"),
+        )
+        .await?;
+
+    // Validate restored data
+
+    // compare restored client options
+    let client_options = restore_wallet.get_client_options().await;
+    let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
+    assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
+
+    // No restored accounts because the bech32 hrp was different
+    let restored_accounts = restore_wallet.get_accounts().await?;
+    assert!(restored_accounts.is_empty());
+
+    // Restored coin type is used
+    let new_account = restore_wallet.create_account().finish().await?;
+    assert_eq!(new_account.read().await.coin_type(), &SHIMMER_COIN_TYPE);
+
+    // secret manager is the same
+    assert_eq!(
+        account.generate_addresses(1, None).await?,
+        new_account.generate_addresses(1, None).await?
+    );
     tear_down(storage_path)
 }

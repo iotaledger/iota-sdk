@@ -116,6 +116,7 @@ export type __RestoreBackupMessage__ = {
         source: string;
         password: string;
         ignoreIfCoinTypeMismatch?: boolean;
+        ignoreIfBech32Mismatch?: string;
     };
 };
 

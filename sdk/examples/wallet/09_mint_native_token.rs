@@ -11,7 +11,10 @@
 //! cargo run --release --all-features --example mint_native_token
 //! ```
 
-use iota_sdk::wallet::{NativeTokenOptions, Result, Wallet, U256};
+use iota_sdk::{
+    wallet::{NativeTokenOptions, Result, Wallet},
+    U256,
+};
 
 // The account alias used in this example
 const ACCOUNT_ALIAS: &str = "Alice";

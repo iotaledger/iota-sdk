@@ -41,7 +41,7 @@ pub fn call_utils_method(mut cx: FunctionContext) -> JsResult<JsString> {
 fn main(mut cx: ModuleContext) -> NeonResult<()> {
     cx.export_function("initLogger", init_logger)?;
 
-    cx.export_function("callUtilsMethod", call_utils_method)?;
+    cx.export_function("callUtilsMethodRust", call_utils_method)?;
 
     // Client
     cx.export_function("callClientMethod", client::call_client_method)?;
@@ -56,7 +56,7 @@ fn main(mut cx: ModuleContext) -> NeonResult<()> {
     cx.export_function("callWalletMethod", wallet::call_wallet_method)?;
     cx.export_function("createWallet", wallet::create_wallet)?;
     cx.export_function("destroyWallet", wallet::destroy_wallet)?;
-    cx.export_function("getClient", wallet::get_client)?;
+    cx.export_function("getClientFromWallet", wallet::get_client)?;
     cx.export_function("listenWallet", wallet::listen_wallet)?;
 
     Ok(())

@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
     });
 
     // Create a client with that node.
-    let client = Client::builder().with_node(&node_url)?.finish()?;
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Use tips as custom parents.
     let parents = client.get_tips().await?;

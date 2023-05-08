@@ -3,7 +3,7 @@
 
 //! The parents module defines the core data type for storing the blocks directly approved by a block.
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
 use core::ops::RangeInclusive;
 
 use derive_more::Deref;
