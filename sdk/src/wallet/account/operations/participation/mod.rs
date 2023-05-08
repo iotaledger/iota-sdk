@@ -39,7 +39,7 @@ pub struct AccountParticipationOverview {
 }
 
 /// A participation event with the provided client nodes.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct ParticipationEventWithNodes {
     /// The event id.
     pub id: ParticipationEventId,

@@ -501,8 +501,10 @@ fn serialize() {
     serde_json::from_str::<AccountDetails>(&serde_json::to_string(&account).unwrap()).unwrap();
 }
 
+#[cfg(test)]
 impl AccountDetails {
-    #[cfg(test)]
+    /// Returns the following account details:
+    /// index: 0, coin_type: 4218, alias: "Alice", all fields containing arrays/maps are empty
     pub(crate) fn mock() -> Self {
         Self {
             index: 0,

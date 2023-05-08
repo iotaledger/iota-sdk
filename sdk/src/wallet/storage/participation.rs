@@ -121,15 +121,22 @@ mod tests {
         let mut storage_manager = StorageManager::new(None, Box::<Memory>::default()).await.unwrap();
         assert!(storage_manager.get_participation_events(0).await.unwrap().is_empty());
 
-        storage_manager
-            .insert_participation_event(0, ParticipationEventWithNodes::mock())
-            .await
-            .unwrap();
-        let events = storage_manager.get_participation_events(0).await.unwrap();
-        assert_eq!(events.len(), 1);
+        let event_with_nodes = ParticipationEventWithNodes::mock();
+        let event_with_nodes_id = event_with_nodes.id;
 
         storage_manager
-            .remove_participation_event(0, events.keys().next().unwrap())
+            .insert_participation_event(0, event_with_nodes.clone())
+            .await
+            .unwrap();
+        let participation_events = storage_manager.get_participation_events(0).await.unwrap();
+
+        let mut expected = HashMap::new();
+        expected.insert(event_with_nodes_id, event_with_nodes);
+
+        assert_eq!(participation_events, expected);
+
+        storage_manager
+            .remove_participation_event(0, &event_with_nodes_id)
             .await
             .unwrap();
         assert!(storage_manager.get_participation_events(0).await.unwrap().is_empty());
@@ -146,11 +153,10 @@ mod tests {
                 .is_empty()
         );
 
-        let outputs_participation = vec![(
+        let outputs_participation = std::iter::once((
             OutputId::new(TransactionId::new([3; 32]), 0).unwrap(),
             OutputStatusResponse::mock(),
-        )]
-        .into_iter()
+        ))
         .collect::<HashMap<_, _>>();
 
         storage_manager
