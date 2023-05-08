@@ -34,7 +34,7 @@ impl Account {
         // store outputs with network_id
         let network_id = self.client.get_network_id().await?;
         let mut outputs = Vec::new();
-        let account_details = self.read().await;
+        let account_details = self.details().await;
 
         for output_with_meta in outputs_with_meta {
             // check if we know the transaction that created this output and if we created it (if we store incoming
@@ -79,7 +79,7 @@ impl Account {
         let mut outputs = Vec::new();
         let mut unknown_outputs = Vec::new();
         let mut unspent_outputs = Vec::new();
-        let mut account_details = self.write().await;
+        let mut account_details = self.details_mut().await;
 
         for output_id in output_ids {
             match account_details.outputs.get_mut(&output_id) {
@@ -127,7 +127,7 @@ impl Account {
         // Limit parallel requests to 100, to avoid timeouts
         for transaction_ids_chunk in transaction_ids.chunks(100).map(|x: &[TransactionId]| x.to_vec()) {
             let mut tasks = Vec::new();
-            let account_details = self.read().await;
+            let account_details = self.details().await;
 
             for transaction_id in transaction_ids_chunk {
                 // Don't request known or inaccessible transactions again
@@ -176,7 +176,7 @@ impl Account {
 
             let results = futures::future::try_join_all(tasks).await?;
             // Update account with new transactions
-            let mut account_details = self.write().await;
+            let mut account_details = self.details_mut().await;
             for res in results {
                 match res? {
                     (transaction_id, Some(transaction)) => {

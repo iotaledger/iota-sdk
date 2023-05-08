@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
     let accounts = wallet.recover_accounts(0, 2, 2, None).await?;
 
     for account in accounts.iter() {
-        println!("{}", account.read().await.index());
+        println!("{}", account.details().await.index());
     }
     println!("Accounts len: {:?}", accounts.len());
 

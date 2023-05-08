@@ -18,18 +18,17 @@ impl Wallet {
         interval: Option<Duration>,
     ) -> crate::wallet::Result<()> {
         log::debug!("[start_background_syncing]");
-        let background_syncing_status = self.background_syncing_status.clone();
         // stop existing process if running
-        if background_syncing_status.load(Ordering::Relaxed) == 1 {
-            background_syncing_status.store(2, Ordering::Relaxed);
+        if self.background_syncing_status.load(Ordering::Relaxed) == 1 {
+            self.background_syncing_status.store(2, Ordering::Relaxed);
         };
-        while background_syncing_status.load(Ordering::Relaxed) == 2 {
+        while self.background_syncing_status.load(Ordering::Relaxed) == 2 {
             log::debug!("[background_syncing]: waiting for the old process to stop");
             sleep(Duration::from_secs(1)).await;
         }
 
-        background_syncing_status.store(1, Ordering::Relaxed);
-        let accounts = self.accounts.clone();
+        self.background_syncing_status.store(1, Ordering::Relaxed);
+        let wallet = self.clone();
         let _background_syncing = std::thread::spawn(move || {
             #[cfg(not(target_family = "wasm"))]
             let runtime = tokio::runtime::Builder::new_multi_thread()
@@ -44,9 +43,9 @@ impl Wallet {
             runtime.block_on(async {
                 'outer: loop {
                     log::debug!("[background_syncing]: syncing accounts");
-                    for account in accounts.read().await.iter() {
+                    for account in wallet.accounts.read().await.iter() {
                         // Check if the process should stop before syncing each account so it stops faster
-                        if background_syncing_status.load(Ordering::Relaxed) == 2 {
+                        if wallet.background_syncing_status.load(Ordering::Relaxed) == 2 {
                             log::debug!("[background_syncing]: stopping");
                             break 'outer;
                         }
@@ -58,14 +57,14 @@ impl Wallet {
                     // split interval syncing to seconds so stopping the process doesn't have to wait long
                     let seconds = interval.unwrap_or(DEFAULT_BACKGROUNDSYNCING_INTERVAL).as_secs();
                     for _ in 0..seconds {
-                        if background_syncing_status.load(Ordering::Relaxed) == 2 {
+                        if wallet.background_syncing_status.load(Ordering::Relaxed) == 2 {
                             log::debug!("[background_syncing]: stopping");
                             break 'outer;
                         }
                         sleep(Duration::from_secs(1)).await;
                     }
                 }
-                background_syncing_status.store(0, Ordering::Relaxed);
+                wallet.background_syncing_status.store(0, Ordering::Relaxed);
                 log::debug!("[background_syncing]: stopped");
             });
         });

@@ -26,10 +26,10 @@ use crate::wallet::{
 };
 use crate::{
     client::secret::SecretManager,
-    wallet::{Account, ClientOptions, Wallet},
+    wallet::{wallet::WalletInner, Account, ClientOptions, Wallet},
 };
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 /// Builder for the wallet.
 pub struct WalletBuilder {
     client_options: Option<ClientOptions>,
@@ -135,12 +135,12 @@ impl WalletBuilder {
         let storage = Memory::default();
 
         #[cfg(feature = "storage")]
-        let mut storage_manager = Arc::new(tokio::sync::Mutex::new(StorageManager::new(storage, None).await?));
+        let mut storage_manager = tokio::sync::Mutex::new(StorageManager::new(storage, None).await?);
 
         #[cfg(feature = "storage")]
-        let read_manager_builder = storage_manager.lock().await.get_wallet_data().await?;
+        let mut read_manager_builder = storage_manager.lock().await.get_wallet_data().await?;
         #[cfg(not(feature = "storage"))]
-        let read_manager_builder: Option<Self> = None;
+        let mut read_manager_builder: Option<Self> = None;
 
         // Prioritize provided client_options and secret_manager over stored ones
         let new_provided_client_options = if self.client_options.is_none() {
@@ -183,7 +183,7 @@ impl WalletBuilder {
         storage_manager.lock().await.save_wallet_data(&self).await?;
 
         #[cfg(feature = "events")]
-        let event_emitter = Arc::new(tokio::sync::Mutex::new(EventEmitter::new()));
+        let event_emitter = tokio::sync::Mutex::new(EventEmitter::new());
 
         #[cfg(feature = "storage")]
         let mut accounts = storage_manager.lock().await.get_accounts().await.unwrap_or_default();
@@ -206,18 +206,35 @@ impl WalletBuilder {
                     .await?,
             )
         };
+        let wallet = Wallet {
+            inner: Arc::new(WalletInner {
+                accounts: RwLock::new(Vec::new()),
+                background_syncing_status: AtomicUsize::new(0),
+                client_options: RwLock::new(
+                    self.client_options
+                        .ok_or(crate::wallet::Error::MissingParameter("client_options"))?,
+                ),
+                coin_type: AtomicU32::new(self.coin_type.ok_or(crate::wallet::Error::MissingParameter(
+                    "coin_type (IOTA: 4218, Shimmer: 4219)",
+                ))?),
+                secret_manager: self
+                    .secret_manager
+                    .ok_or(crate::wallet::Error::MissingParameter("secret_manager"))?,
+                #[cfg(feature = "events")]
+                event_emitter,
+                #[cfg(feature = "storage")]
+                storage_options,
+                #[cfg(feature = "storage")]
+                storage_manager,
+            }),
+        };
+
         let mut accounts: Vec<Account> = try_join_all(accounts.into_iter().map(|a| {
             Account::new(
                 a,
                 // Safe to unwrap because we create the client if accounts aren't empty
                 client.as_ref().expect("client must exist").clone(),
-                self.secret_manager
-                    .clone()
-                    .expect("secret_manager needs to be provided"),
-                #[cfg(feature = "events")]
-                event_emitter.clone(),
-                #[cfg(feature = "storage")]
-                storage_manager.clone(),
+                wallet.clone(),
             )
             .boxed()
         }))
@@ -234,26 +251,9 @@ impl WalletBuilder {
             }
         }
 
-        Ok(Wallet {
-            accounts: Arc::new(RwLock::new(accounts)),
-            background_syncing_status: Arc::new(AtomicUsize::new(0)),
-            client_options: Arc::new(RwLock::new(
-                self.client_options
-                    .ok_or(crate::wallet::Error::MissingParameter("client_options"))?,
-            )),
-            coin_type: Arc::new(AtomicU32::new(self.coin_type.ok_or(
-                crate::wallet::Error::MissingParameter("coin_type (IOTA: 4218, Shimmer: 4219)"),
-            )?)),
-            secret_manager: self
-                .secret_manager
-                .ok_or(crate::wallet::Error::MissingParameter("secret_manager"))?,
-            #[cfg(feature = "events")]
-            event_emitter,
-            #[cfg(feature = "storage")]
-            storage_options,
-            #[cfg(feature = "storage")]
-            storage_manager,
-        })
+        *wallet.inner.accounts.write().await = accounts;
+
+        Ok(wallet)
     }
 
     #[cfg(feature = "storage")]

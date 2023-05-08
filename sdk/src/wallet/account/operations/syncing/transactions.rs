@@ -28,7 +28,7 @@ impl Account {
     /// be synced again
     pub(crate) async fn sync_pending_transactions(&self) -> crate::wallet::Result<bool> {
         log::debug!("[SYNC] sync pending transactions");
-        let account_details = self.read().await;
+        let account_details = self.details().await;
 
         // only set to true if a transaction got confirmed for which we don't have an output
         // (transaction_output.is_none())

@@ -137,7 +137,7 @@ impl WalletMessageHandler {
                     let accounts = self.wallet.get_accounts().await?;
                     let mut account_indexes = Vec::new();
                     for account in accounts.iter() {
-                        account_indexes.push(*account.read().await.index());
+                        account_indexes.push(*account.details().await.index());
                     }
                     Ok(Response::AccountIndexes(account_indexes))
                 })
@@ -199,7 +199,7 @@ impl WalletMessageHandler {
                         .await?;
                     let mut account_dtos = Vec::new();
                     for account in accounts {
-                        let account = account.read().await;
+                        let account = account.details().await;
                         account_dtos.push(AccountDetailsDto::from(&*account));
                     }
                     Ok(Response::Accounts(account_dtos))
@@ -338,7 +338,7 @@ impl WalletMessageHandler {
             #[cfg(feature = "events")]
             Message::EmitTestEvent { event } => {
                 convert_async_panics(|| async {
-                    self.wallet.emit_test_event(event.clone()).await?;
+                    self.wallet.emit_test_event(event.clone()).await;
                     Ok(Response::Ok(()))
                 })
                 .await
@@ -1045,7 +1045,7 @@ impl WalletMessageHandler {
 
         match builder.finish().await {
             Ok(account) => {
-                let account = account.read().await;
+                let account = account.details().await;
                 Ok(Response::Account(AccountDetailsDto::from(&*account)))
             }
             Err(e) => Err(e),
@@ -1054,7 +1054,7 @@ impl WalletMessageHandler {
 
     async fn get_account(&self, account_id: &AccountIdentifier) -> Result<Response> {
         let account = self.wallet.get_account(account_id.clone()).await?;
-        let account = account.read().await;
+        let account = account.details().await;
         Ok(Response::Account(AccountDetailsDto::from(&*account)))
     }
 
@@ -1062,7 +1062,7 @@ impl WalletMessageHandler {
         let accounts = self.wallet.get_accounts().await?;
         let mut account_dtos = Vec::new();
         for account in accounts {
-            let account = account.read().await;
+            let account = account.details().await;
             account_dtos.push(AccountDetailsDto::from(&*account));
         }
         Ok(Response::Accounts(account_dtos))
