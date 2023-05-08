@@ -84,6 +84,31 @@ pub(crate) enum OutputBuilderAmount {
     MinimumStorageDeposit(RentStructure),
 }
 
+/// Contains the generic [`Output`] with associated [`OutputMetadata`].
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct OutputWithMetadata {
+    pub(crate) output: Output,
+    pub(crate) metadata: OutputMetadata,
+}
+
+impl OutputWithMetadata {
+    /// Creates a new [`OutputWithMetadata`].
+    pub fn new(output: Output, metadata: OutputMetadata) -> Self {
+        Self { output, metadata }
+    }
+
+    /// Returns the [`Output`].
+    pub fn output(&self) -> &Output {
+        &self.output
+    }
+
+    /// Returns the [`OutputMetadata`].
+    pub fn metadata(&self) -> &OutputMetadata {
+        &self.metadata
+    }
+}
+
 /// A generic output that can represent different types defining the deposit of funds.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From)]
 #[cfg_attr(

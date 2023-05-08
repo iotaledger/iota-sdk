@@ -21,7 +21,8 @@ async fn main() -> Result<()> {
     let client = Client::builder()
         // The node needs to have the indexer plugin enabled.
         .with_node(&node_url)?
-        .finish()?;
+        .finish()
+        .await?;
 
     // Get a single page with random output IDs by providing only `QueryParameter::Cursor(_)`.
     let output_ids_response = client

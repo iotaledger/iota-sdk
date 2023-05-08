@@ -90,6 +90,7 @@ async fn stronghold_snapshot_v2_v3_migration() {
             PathBuf::from("./tests/wallet/fixtures/v3.stronghold"),
             "wrong_password".to_string(),
             Some(false),
+            None,
         )
         .await;
 

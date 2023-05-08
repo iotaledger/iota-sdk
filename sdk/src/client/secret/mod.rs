@@ -81,17 +81,13 @@ pub trait SecretManage: Send + Sync {
     }
 }
 
-/// An extension to [`SecretManager`].
-///
-/// This trait is automatically implemented for any type that implements [`SecretManager`] - it contains methods for
-/// internal use that are based on the methods in [`SecretManager`]. Secret managers don't implement this on their
-/// sides.
+/// Defines a type that can sign a transaction essence.
 #[async_trait]
-pub trait SecretManageExt: SecretManage {
+pub trait SignTransactionEssence: SecretManage {
     /// Signs transaction essence.
     ///
     /// Secret managers usually don't implement this, as the default implementation has taken care of the placement of
-    /// blocks (e.g. references between them). [SecretManager::signature_unlock()] will be invoked every time a
+    /// blocks (e.g. references between them). [`SecretManager::signature_unlock()`] will be invoked every time a
     /// necessary signing action needs to be performed.
     async fn sign_transaction_essence(
         &self,
@@ -273,7 +269,7 @@ impl SecretManage for SecretManager {
 }
 
 #[async_trait]
-impl SecretManageExt for SecretManager {
+impl SignTransactionEssence for SecretManager {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
@@ -293,7 +289,11 @@ impl SecretManageExt for SecretManager {
                 self.default_sign_transaction_essence(prepared_transaction_data, time)
                     .await
             }
-            Self::Placeholder(_) => self.sign_transaction_essence(prepared_transaction_data, time).await,
+            Self::Placeholder(secret_manager) => {
+                secret_manager
+                    .sign_transaction_essence(prepared_transaction_data, time)
+                    .await
+            }
         }
     }
 }
@@ -310,7 +310,7 @@ impl SecretManager {
     }
 
     // Shared implementation for MnemonicSecretManager and StrongholdSecretManager
-    async fn default_sign_transaction_essence<'a>(
+    async fn default_sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
         time: Option<u32>,

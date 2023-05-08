@@ -210,7 +210,7 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
         .await?;
 
     wallet
-        .restore_backup(backup_path.into(), password.to_string(), None)
+        .restore_backup(backup_path.into(), password.to_string(), None, None)
         .await?;
 
     Ok(wallet)

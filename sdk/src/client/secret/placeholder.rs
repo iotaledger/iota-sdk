@@ -8,7 +8,7 @@ use std::ops::Range;
 use async_trait::async_trait;
 use crypto::keys::slip10::Chain;
 
-use super::{GenerateAddressOptions, SecretManage, SecretManageExt};
+use super::{GenerateAddressOptions, SecretManage, SignTransactionEssence};
 use crate::{
     client::{secret::PreparedTransactionData, Error},
     types::block::{address::Address, signature::Ed25519Signature, unlock::Unlocks},
@@ -38,7 +38,7 @@ impl SecretManage for PlaceholderSecretManager {
 }
 
 #[async_trait]
-impl SecretManageExt for PlaceholderSecretManager {
+impl SignTransactionEssence for PlaceholderSecretManager {
     async fn sign_transaction_essence(
         &self,
         _prepared_transaction_data: &PreparedTransactionData,

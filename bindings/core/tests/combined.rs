@@ -18,7 +18,7 @@ async fn generate_addresses() -> Result<()> {
     }"#
     .to_string();
 
-    let client = ClientBuilder::new().from_json(&client_config)?.finish()?;
+    let client = ClientBuilder::new().from_json(&client_config)?.finish().await?;
 
     let secret_manager = format!(
         "{{\"mnemonic\":\"{}\"}}",

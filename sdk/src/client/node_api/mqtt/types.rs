@@ -55,7 +55,7 @@ pub enum MqttEvent {
 
 /// The MQTT broker options.
 
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq, Eq)]
+#[derive(Copy, Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 #[must_use]
 pub struct BrokerOptions {

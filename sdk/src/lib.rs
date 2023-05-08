@@ -27,3 +27,9 @@ pub mod types;
 pub mod wallet;
 // Utilities used in multiple submodules
 pub mod utils;
+
+pub use crypto;
+pub use packable;
+pub use primitive_types::U256;
+#[cfg(feature = "url")]
+pub use url::Url;

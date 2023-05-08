@@ -254,7 +254,7 @@ impl Account {
             client_builder = client_builder.with_node_auth(node.url.as_str(), node.auth.clone())?;
         }
 
-        Ok(client_builder.finish()?)
+        Ok(client_builder.finish().await?)
     }
 
     /// Checks if events in the participations ended and removes them.
