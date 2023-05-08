@@ -32,10 +32,9 @@ async function run() {
             secretManager,
             options,
         );
-        console.log('Block:', blockIdAndBlock, '\n');
 
         console.log(
-            `Block sent: ${process.env.EXPLORER_URL}/block/${blockIdAndBlock[0]}\n`,
+            `Block sent: ${process.env.EXPLORER_URL}/block/${blockIdAndBlock[0]}`,
         );
 
         const fetchedBlock = await client.getBlock(blockIdAndBlock[0]);

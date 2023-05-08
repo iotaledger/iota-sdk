@@ -24,7 +24,8 @@ async fn main() -> Result<()> {
     // Create a client instance
     let client = Client::builder()
         .with_node(&node_url)? // Insert your node URL here
-        .finish()?;
+        .finish()
+        .await?;
 
     let secret_manager =
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
@@ -32,7 +33,8 @@ async fn main() -> Result<()> {
     // Generate addresses with default account index and range
     let addresses = client.get_addresses(&secret_manager).finish().await?;
 
-    println!("List of generated public addresses:\n{addresses:#?}\n");
+    println!("List of generated public addresses:");
+    println!("{addresses:#?}\n");
 
     // Generate addresses with custom account index and range
     let addresses = client
@@ -42,7 +44,8 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!("List of generated public addresses:\n{addresses:#?}\n");
+    println!("List of generated public addresses:\n");
+    println!("{addresses:#?}\n");
 
     // Generate internal addresses with custom account index and range
     let addresses = client
@@ -53,7 +56,8 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!("List of generated internal addresses:\n{addresses:#?}\n");
+    println!("List of generated internal addresses:\n");
+    println!("{addresses:#?}\n");
 
     // Generating addresses with `client.get_addresses(&secret_manager)`, will by default get the bech32_hrp (Bech32
     // human readable part) from the node info, generating it "offline" requires setting it with
@@ -65,7 +69,8 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!("List of offline generated public addresses:\n{addresses:#?}\n");
+    println!("List of offline generated public addresses:\n");
+    println!("{addresses:#?}\n");
 
     Ok(())
 }

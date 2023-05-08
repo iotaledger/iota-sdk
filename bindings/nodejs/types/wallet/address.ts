@@ -8,7 +8,7 @@ export enum AddressType {
 }
 
 /** An Address of the Account */
-export interface Address {
+export interface AccountAddress {
     address: string;
     keyIndex: number;
     internal: boolean;

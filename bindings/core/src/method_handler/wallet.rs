@@ -110,9 +110,15 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             source,
             password,
             ignore_if_coin_type_mismatch,
+            ignore_if_bech32_mismatch,
         } => {
             wallet
-                .restore_backup(source, password, ignore_if_coin_type_mismatch)
+                .restore_backup(
+                    source,
+                    password,
+                    ignore_if_coin_type_mismatch,
+                    ignore_if_bech32_mismatch.as_deref(),
+                )
                 .await?;
             Response::Ok
         }

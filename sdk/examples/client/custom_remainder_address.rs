@@ -17,6 +17,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance
     let client = Client::builder()
@@ -39,7 +40,7 @@ async fn main() -> Result<()> {
 
     println!(
         "automatically funding sender address with faucet: {}",
-        request_funds_from_faucet("http://localhost:8091/api/enqueue", sender_address).await?
+        request_funds_from_faucet(faucet_url, sender_address).await?
     );
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
@@ -63,7 +64,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Transaction sent: {}/block/{}",
+        "Block with custom remainder sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );

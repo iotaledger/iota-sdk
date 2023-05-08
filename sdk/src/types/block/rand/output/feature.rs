@@ -1,6 +1,8 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::vec::Vec;
+
 use crate::types::block::{
     output::feature::{Feature, FeatureFlags, IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
     rand::{address::rand_address, bytes::rand_bytes, number::rand_number_range},

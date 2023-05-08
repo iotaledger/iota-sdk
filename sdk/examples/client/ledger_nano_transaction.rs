@@ -20,7 +20,8 @@ async fn main() -> Result<()> {
     // Create a client instance
     let client = Client::builder()
         .with_node(&node_url)? // Insert your node URL here
-        .finish()?;
+        .finish()
+        .await?;
 
     let secret_manager = SecretManager::LedgerNano(LedgerSecretManager::new(true));
 
@@ -47,7 +48,11 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!("Transaction sent with block-id: {}", block.id());
+    println!(
+        "Block using ledger nano sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block.id()
+    );
 
     Ok(())
 }

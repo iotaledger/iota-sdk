@@ -1,8 +1,20 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Client, initLogger, Utils } from '@iota/sdk';
-import type { UnlockConditionTypes } from '@iota/types';
+import {
+    Client,
+    initLogger,
+    Utils,
+    UnlockCondition,
+    AddressUnlockCondition,
+    MetadataFeature,
+    SenderFeature,
+    TagFeature,
+    StorageDepositReturnUnlockCondition,
+    Ed25519Address,
+    ExpirationUnlockCondition,
+    TimelockUnlockCondition,
+} from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -24,13 +36,8 @@ async function run() {
             'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
         );
 
-        const addressUnlockCondition: UnlockConditionTypes = {
-            type: 0,
-            address: {
-                type: 0,
-                pubKeyHash: hexAddress,
-            },
-        };
+        const addressUnlockCondition: UnlockCondition =
+            new AddressUnlockCondition(new Ed25519Address(hexAddress));
 
         // Build most basic output with amound and a single address unlock condition
         const basicOutput = await client.buildBasicOutput({
@@ -45,11 +52,8 @@ async function run() {
             amount: '1000000',
             unlockConditions: [addressUnlockCondition],
             features: [
-                {
-                    type: 2,
-                    // "Hello, World!" hex encoded
-                    data: '0x48656c6c6f2c20576f726c6421',
-                },
+                // "Hello, World!" hex encoded
+                new MetadataFeature('0x48656c6c6f2c20576f726c6421'),
             ],
         });
 
@@ -60,14 +64,10 @@ async function run() {
             amount: '1000000',
             unlockConditions: [
                 addressUnlockCondition,
-                {
-                    type: 1,
-                    returnAddress: {
-                        type: 0,
-                        pubKeyHash: hexAddress,
-                    },
-                    amount: '1000000',
-                },
+                new StorageDepositReturnUnlockCondition(
+                    new Ed25519Address(hexAddress),
+                    '1000000',
+                ),
             ],
         });
 
@@ -78,14 +78,10 @@ async function run() {
             amount: '1000000',
             unlockConditions: [
                 addressUnlockCondition,
-                {
-                    type: 3,
-                    returnAddress: {
-                        type: 0,
-                        pubKeyHash: hexAddress,
-                    },
-                    unixTime: 1,
-                },
+                new ExpirationUnlockCondition(
+                    new Ed25519Address(hexAddress),
+                    1,
+                ),
             ],
         });
 
@@ -96,10 +92,7 @@ async function run() {
             amount: '1000000',
             unlockConditions: [
                 addressUnlockCondition,
-                {
-                    type: 2,
-                    unixTime: 1,
-                },
+                new TimelockUnlockCondition(1),
             ],
         });
 
@@ -109,13 +102,7 @@ async function run() {
         const basicOutputWithTag = await client.buildBasicOutput({
             amount: '1000000',
             unlockConditions: [addressUnlockCondition],
-            features: [
-                {
-                    type: 3,
-                    // "Hello, World!" hex encoded
-                    tag: '0x48656c6c6f2c20576f726c6421',
-                },
-            ],
+            features: [new TagFeature('0x48656c6c6f2c20576f726c6421')],
         });
 
         console.log(JSON.stringify(basicOutputWithTag, null, 2));
@@ -124,12 +111,7 @@ async function run() {
         const basicOutputWithSender = await client.buildBasicOutput({
             amount: '1000000',
             unlockConditions: [addressUnlockCondition],
-            features: [
-                {
-                    type: 0,
-                    sender: hexAddress,
-                },
-            ],
+            features: [new SenderFeature(new Ed25519Address(hexAddress))],
         });
 
         console.log(JSON.stringify(basicOutputWithSender, null, 2));

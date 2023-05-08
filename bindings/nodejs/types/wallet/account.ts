@@ -1,4 +1,4 @@
-import type { Address, AddressWithUnspentOutputs } from './address';
+import type { AccountAddress, AddressWithUnspentOutputs } from './address';
 import type { OutputData } from './output';
 import type { Transaction } from './transaction';
 import type {
@@ -128,8 +128,8 @@ export interface AccountMeta {
     index: number;
     coinType: CoinType;
     alias: string;
-    publicAddresses: Address[];
-    internalAddresses: Address[];
+    publicAddresses: AccountAddress[];
+    internalAddresses: AccountAddress[];
     addressesWithUnspentOutputs: AddressWithUnspentOutputs[];
     outputs: { [outputId: string]: OutputData };
     /** Output IDs of unspent outputs that are currently used as input for transactions */

@@ -20,16 +20,16 @@ async function run() {
     });
 
     try {
-        // Create block with no payload.
-        const blockIdAndBlock = await client.buildAndPostBlock();
-        console.log('Block:', blockIdAndBlock, '\n');
+        // Fetch a block ID from the node.
+        const blockIds = await client.getTips();
+        console.log('Block IDs:', blockIds, '\n');
 
         // Get the metadata for the block.
-        const blockMetadata = await client.getBlockMetadata(blockIdAndBlock[0]);
+        const blockMetadata = await client.getBlockMetadata(blockIds[0]);
         console.log('Block metadata: ', blockMetadata, '\n');
 
         // Request the block by its id.
-        const blockData = await client.getBlock(blockIdAndBlock[0]);
+        const blockData = await client.getBlock(blockIds[0]);
         console.log('Block data: ', blockData, '\n');
     } catch (error) {
         console.error('Error: ', error);

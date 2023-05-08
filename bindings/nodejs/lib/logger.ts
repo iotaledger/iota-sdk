@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ILoggerConfig } from '../types/loggerConfig';
-import { initLogger as initLoggerBinding } from './client/bindings';
+import { initLogger as initLoggerBinding } from './bindings';
 
 const defaultLoggerConfig: ILoggerConfig = {
     colorEnabled: true,

@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance.
-    let client = Client::builder().with_node(&node_url)?.finish()?;
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
@@ -59,7 +59,8 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Transaction with new alias output sent: {node_url}/api/core/v2/blocks/{}",
+        "Transaction with new alias output sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -83,8 +84,10 @@ async fn main() -> Result<()> {
         .with_outputs(outputs)?
         .finish()
         .await?;
+
     println!(
-        "Transaction with alias id set sent: {node_url}/api/core/v2/blocks/{}",
+        "Block with alias id set sent: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;

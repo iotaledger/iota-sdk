@@ -49,12 +49,12 @@ pub struct StorageManager {
 
 impl StorageManager {
     pub(crate) async fn new(
-        encryption_key: Option<[u8; 32]>,
-        storage: Box<dyn StorageAdapter + Send + Sync + 'static>,
+        storage: impl StorageAdapter + Send + Sync + 'static,
+        encryption_key: impl Into<Option<[u8; 32]>> + Send,
     ) -> crate::wallet::Result<Self> {
         let mut storage = Storage {
-            inner: storage,
-            encryption_key,
+            inner: Box::new(storage) as _,
+            encryption_key: encryption_key.into(),
         };
         // Get the db version or set it
         if let Some(db_schema_version) = storage.get::<u8>(DATABASE_SCHEMA_VERSION_KEY).await? {

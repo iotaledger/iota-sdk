@@ -31,10 +31,17 @@ async fn main() -> Result<()> {
             .await?;
 
         let transaction = account.destroy_foundry(*foundry_id, None).await?;
+        println!("Transaction sent: {}", transaction.transaction_id);
 
-        account
+        let block_id = account
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
+
+        println!(
+            "Block included: {}/block/{}",
+            std::env::var("EXPLORER_URL").unwrap(),
+            block_id
+        );
 
         let balance = account.sync(None).await?;
 

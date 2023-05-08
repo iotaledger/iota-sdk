@@ -6,7 +6,7 @@
 use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use regex::RegexSet;
-use serde::{de::Error as _, Deserialize, Deserializer};
+use serde::{de::Error as _, Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 
 use super::Error;
@@ -55,7 +55,7 @@ pub enum MqttEvent {
 
 /// The MQTT broker options.
 
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq, Eq)]
+#[derive(Copy, Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 #[must_use]
 pub struct BrokerOptions {

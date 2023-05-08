@@ -47,10 +47,9 @@ async function run() {
                 amount: '1000000',
             },
         });
-        console.log('Block: ', blockIdAndBlock, '\n');
 
         console.log(
-            `Transaction sent: ${process.env.EXPLORER_URL}/block/${blockIdAndBlock[0]}`,
+            `Block sent: ${process.env.EXPLORER_URL}/block/${blockIdAndBlock[0]}`,
         );
     } catch (error) {
         console.error('Error: ', error);

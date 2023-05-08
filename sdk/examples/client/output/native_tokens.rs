@@ -26,10 +26,11 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance.
-    let client = Client::builder().with_node(&node_url)?.finish()?;
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
@@ -85,8 +86,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!("Transaction sent: {node_url}/api/core/v2/blocks/{}", block.id());
-    println!("Block metadata: {node_url}/api/core/v2/blocks/{}/metadata", block.id());
+    println!("Block with native tokens sent: {explorer_url}/block/{}", block.id());
 
     Ok(())
 }

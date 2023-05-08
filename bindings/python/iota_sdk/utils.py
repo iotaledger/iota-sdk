@@ -133,17 +133,6 @@ class Utils():
             'address': address,
         })
 
-    @staticmethod
-    def faucet(url, address):
-        """Requests funds from the faucet
-        """
-        return _call_method(
-            'faucet', {
-                'url': url,
-                'address': address,
-            }
-        )
-
 
 class UtilsError(Exception):
     """utils error"""

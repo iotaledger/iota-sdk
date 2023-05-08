@@ -1,12 +1,14 @@
-from iota_sdk import Wallet
+from iota_sdk import Wallet, Utils
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # In this example we check if an output has only an address unlock condition and that the address is from the account.
 
 wallet = Wallet("./alice-database")
 
 account = wallet.get_account("Alice")
-
-wallet.set_stronghold_password("some_hopefully_secure_password")
 
 accountAddresses = account.addresses()
 
@@ -19,7 +21,7 @@ output = account.prepare_output(
 )
 
 def hexAddress(address):
-    return wallet.bech32_to_hex(address['address'])
+    return Utils.bech32_to_hex(address['address'])
 
 hexEncodedAccountAddresses = map(hexAddress, accountAddresses)
 

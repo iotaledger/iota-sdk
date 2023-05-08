@@ -36,7 +36,7 @@ pub fn init_logger(config: String) -> PyResult<()> {
 #[pyfunction]
 pub fn call_utils_method(method: String) -> Result<String> {
     let method = serde_json::from_str::<UtilsMethod>(&method)?;
-    let response = crate::block_on(async { rust_call_utils_method(method).await });
+    let response = rust_call_utils_method(method);
     Ok(serde_json::to_string(&response)?)
 }
 
@@ -57,6 +57,7 @@ fn iota_sdk(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(create_wallet, m)?).unwrap();
     m.add_function(wrap_pyfunction!(call_wallet_method, m)?).unwrap();
     m.add_function(wrap_pyfunction!(destroy_wallet, m)?).unwrap();
+    m.add_function(wrap_pyfunction!(get_client_from_wallet, m)?).unwrap();
     m.add_function(wrap_pyfunction!(listen_wallet, m)?).unwrap();
 
     Ok(())
