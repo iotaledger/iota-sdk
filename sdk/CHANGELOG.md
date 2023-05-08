@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MQTT connections to a node using https will now use wss/tls with native certificates;
 - `ClientBuilder::finish` is now async;
 - `Account::read` and `write` now accessible via `details` and `details_mut`;
+- `Wallet::emit_test_event` no longer returns a `Result`;
 
 ### Removed
 
