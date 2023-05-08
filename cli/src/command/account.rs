@@ -34,6 +34,7 @@ pub struct AccountCli {
 }
 
 #[derive(Debug, Subcommand)]
+#[allow(clippy::large_enum_variant)]
 pub enum AccountCommand {
     /// List the account addresses.
     Addresses,
@@ -469,7 +470,7 @@ pub async fn faucet_command(
         address
     } else {
         match account.addresses().await?.last() {
-            Some(address) => address.address().clone(),
+            Some(address) => *address.address(),
             None => return Err(Error::NoAddressForFaucet),
         }
     };

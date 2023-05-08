@@ -5,7 +5,8 @@ use std::collections::BTreeMap;
 
 use iota_sdk::{
     client::{api::GetAddressesBuilderOptions, constants::SHIMMER_COIN_TYPE, secret::SecretManagerDto, ClientBuilder},
-    wallet::account::types::AccountIdentifier, types::block::address::Hrp,
+    types::block::address::Hrp,
+    wallet::account::types::AccountIdentifier,
 };
 use iota_sdk_bindings_core::{AccountMethod, CallMethod, ClientMethod, Response, Result, WalletMethod, WalletOptions};
 

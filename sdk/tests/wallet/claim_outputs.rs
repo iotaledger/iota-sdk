@@ -29,8 +29,8 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
     let tx = accounts[1]
         .send_amount(
             vec![
-                AddressWithAmount::new(accounts[0].addresses().await?[0].address().clone(), micro_amount),
-                AddressWithAmount::new(accounts[0].addresses().await?[0].address().clone(), micro_amount),
+                AddressWithAmount::new(*accounts[0].addresses().await?[0].address(), micro_amount),
+                AddressWithAmount::new(*accounts[0].addresses().await?[0].address(), micro_amount),
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -83,8 +83,8 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
     let tx = accounts[1]
         .send_amount(
             vec![
-                AddressWithAmount::new(accounts[0].addresses().await?[0].address().clone(), amount),
-                AddressWithAmount::new(accounts[0].addresses().await?[0].address().clone(), 0),
+                AddressWithAmount::new(*accounts[0].addresses().await?[0].address(), amount),
+                AddressWithAmount::new(*accounts[0].addresses().await?[0].address(), 0),
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -237,13 +237,13 @@ async fn claim_2_native_tokens() -> Result<()> {
         .send_native_tokens(
             vec![
                 AddressNativeTokens {
-                    address: accounts[0].addresses().await?[0].address().clone(),
+                    address: *accounts[0].addresses().await?[0].address(),
                     native_tokens: vec![(mint_tx_0.token_id, native_token_amount)],
                     expiration: None,
                     return_address: None,
                 },
                 AddressNativeTokens {
-                    address: accounts[0].addresses().await?[0].address().clone(),
+                    address: *accounts[0].addresses().await?[0].address(),
                     native_tokens: vec![(mint_tx_1.token_id, native_token_amount)],
                     expiration: None,
                     return_address: None,

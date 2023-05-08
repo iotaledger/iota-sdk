@@ -32,7 +32,7 @@ impl Client {
             .finish()
             .await?;
 
-        let consolidation_address = addresses[0].clone();
+        let consolidation_address = addresses[0];
 
         'consolidation: loop {
             let mut block_ids = Vec::new();
@@ -45,7 +45,7 @@ impl Client {
                 // Get output ids of outputs that can be controlled by this address without further unlock constraints
                 let output_ids_response = self
                     .basic_output_ids(vec![
-                        QueryParameter::Address(address.clone()),
+                        QueryParameter::Address(*address),
                         QueryParameter::HasExpiration(false),
                         QueryParameter::HasTimelock(false),
                         QueryParameter::HasStorageDepositReturn(false),
@@ -85,7 +85,7 @@ impl Client {
                     }
 
                     let consolidation_output = BasicOutputBuilder::new_with_amount(total_amount)
-                        .add_unlock_condition(AddressUnlockCondition::new(&consolidation_address))
+                        .add_unlock_condition(AddressUnlockCondition::new(consolidation_address))
                         .with_native_tokens(total_native_tokens.finish()?)
                         .finish_output(token_supply)?;
 

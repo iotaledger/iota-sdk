@@ -214,8 +214,8 @@ impl Client {
         let expected = self.get_bech32_hrp().await?;
         if bech32_hrp != &expected {
             return Err(Error::Bech32HrpMismatch {
-                provided: *bech32_hrp,
-                expected,
+                provided: bech32_hrp.to_string(),
+                expected: expected.to_string(),
             });
         };
         Ok(())

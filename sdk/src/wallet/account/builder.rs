@@ -120,7 +120,7 @@ impl AccountBuilder {
         let addresses = match &self.addresses {
             Some(addresses) => addresses.clone(),
             None => {
-                let mut bech32_hrp = self.bech32_hrp.clone();
+                let mut bech32_hrp = self.bech32_hrp;
                 if let Some(first_account) = accounts.first() {
                     let first_account_coin_type = *first_account.read().await.coin_type();
                     // Generate the first address of the first account and compare it to the stored address from the

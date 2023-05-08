@@ -35,8 +35,8 @@ async fn bech32_hrp_send_amount() -> Result<()> {
     match error {
         Error::Client(error) => match *error {
             ClientError::Bech32HrpMismatch { provided, expected } => {
-                assert_eq!(provided, "wronghrp".to_string());
-                assert_eq!(expected, bech32_hrp);
+                assert_eq!(provided, "wronghrp");
+                assert_eq!(expected, bech32_hrp.to_string());
             }
             _ => panic!("expected InvalidBech32Hrp error variant"),
         },
@@ -58,7 +58,10 @@ async fn bech32_hrp_prepare_output() -> Result<()> {
     let error = account
         .prepare_output(
             OutputOptions {
-                recipient_address: account.addresses().await?[0].address().as_ref().to_bech32_unchecked("wronghrp"),
+                recipient_address: account.addresses().await?[0]
+                    .address()
+                    .as_ref()
+                    .to_bech32_unchecked("wronghrp"),
                 amount: 1_000_000,
                 assets: None,
                 features: None,
@@ -75,8 +78,8 @@ async fn bech32_hrp_prepare_output() -> Result<()> {
     match error {
         Error::Client(error) => match *error {
             ClientError::Bech32HrpMismatch { provided, expected } => {
-                assert_eq!(provided, "wronghrp".to_string());
-                assert_eq!(expected, bech32_hrp);
+                assert_eq!(provided, "wronghrp");
+                assert_eq!(expected, bech32_hrp.to_string());
             }
             _ => panic!("expected InvalidBech32Hrp error variant"),
         },

@@ -19,7 +19,9 @@ use iota_sdk::{
         },
         secret::{stronghold::StrongholdSecretManager, SecretManager, SignTransactionEssence},
     },
-    types::block::{output::RentStructureBuilder, payload::TransactionPayload, protocol::ProtocolParameters, address::Hrp},
+    types::block::{
+        address::Hrp, output::RentStructureBuilder, payload::TransactionPayload, protocol::ProtocolParameters,
+    },
     wallet::Result,
 };
 

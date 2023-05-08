@@ -88,7 +88,7 @@ impl Account {
                             self.event_emitter.lock().await.emit(
                                 account_details.index,
                                 WalletEvent::LedgerAddressGeneration(AddressData {
-                                    address: address[0].to_bech32(bech32_hrp.clone()),
+                                    address: address[0].to_bech32(bech32_hrp),
                                 }),
                             );
                         }

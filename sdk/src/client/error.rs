@@ -13,7 +13,7 @@ use serde::{
 
 use crate::{
     client::{api::input_selection::Error as InputSelectionError, node_api::indexer::QueryParameter},
-    types::block::{address::Hrp, semantic::ConflictReason},
+    types::block::semantic::ConflictReason,
 };
 
 /// Type alias of `Result` in iota-client
@@ -29,9 +29,9 @@ pub enum Error {
     #[error("invalid bech32 hrp for the connected network: {provided}, expected: {expected}")]
     Bech32HrpMismatch {
         /// The bech32 human readable part from the provided address.
-        provided: Hrp,
+        provided: String,
         /// The expected bech32 human readable part.
-        expected: Hrp,
+        expected: String,
     },
     /// Blake2b256 Error
     #[error("{0}")]

@@ -42,7 +42,7 @@ impl<'a> ClientBlockBuilder<'a> {
         output_ids.extend(
             self.client
                 .basic_output_ids(vec![
-                    QueryParameter::Address(address.clone()),
+                    QueryParameter::Address(*address),
                     QueryParameter::HasStorageDepositReturn(false),
                 ])
                 .await?
@@ -53,7 +53,7 @@ impl<'a> ClientBlockBuilder<'a> {
         output_ids.extend(
             self.client
                 .basic_output_ids(vec![
-                    QueryParameter::ExpirationReturnAddress(address.clone()),
+                    QueryParameter::ExpirationReturnAddress(*address),
                     QueryParameter::HasExpiration(true),
                     QueryParameter::HasStorageDepositReturn(false),
                     // Ignore outputs that aren't expired yet
@@ -160,8 +160,8 @@ impl<'a> ClientBlockBuilder<'a> {
             let mut public_and_internal_addresses = Vec::new();
 
             for index in 0..addresses.public.len() {
-                public_and_internal_addresses.push((addresses.public[index].clone(), false));
-                public_and_internal_addresses.push((addresses.internal[index].clone(), true));
+                public_and_internal_addresses.push((addresses.public[index], false));
+                public_and_internal_addresses.push((addresses.internal[index], true));
             }
 
             // For each address, get the address outputs.

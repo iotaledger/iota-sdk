@@ -118,8 +118,8 @@ impl Account {
                 .map(|return_address| {
                     if return_address.hrp() != address.hrp() {
                         Err(crate::client::Error::Bech32HrpMismatch {
-                            provided: *return_address.hrp(),
-                            expected: *address.hrp(),
+                            provided: return_address.hrp().to_string(),
+                            expected: address.hrp().to_string(),
                         })?;
                     }
                     Ok::<_, Error>(return_address)

@@ -115,7 +115,7 @@ impl Address {
 
     /// Try to encode this address to a bech32 string with the given string Human Readable Part as prefix.
     pub fn try_to_bech32<T: AsRef<str>>(&self, hrp: T) -> Result<Bech32Address, Error> {
-        Ok(Bech32Address::try_new(hrp.as_ref(), self)?)
+        Bech32Address::try_new(hrp.as_ref(), self)
     }
 
     /// Encodes this address to a bech32 string with the given Human Readable Part as prefix.

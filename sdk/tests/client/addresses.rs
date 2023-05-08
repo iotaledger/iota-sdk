@@ -200,7 +200,7 @@ async fn address_generation() {
             .unwrap();
 
         let addresses = GetAddressesBuilder::new(&SecretManager::Stronghold(stronghold_secret_manager))
-            .with_bech32_hrp(address.bech32_hrp.clone())
+            .with_bech32_hrp(address.bech32_hrp)
             .with_coin_type(address.coin_type)
             .with_account_index(address.account_index)
             .with_range(address.address_index..address.address_index + 1)
@@ -232,7 +232,7 @@ async fn address_generation() {
                     start: address.address_index,
                     end: address.address_index + 1,
                 }),
-                bech32_hrp: Some(address.bech32_hrp.clone()),
+                bech32_hrp: Some(address.bech32_hrp),
                 options: Some(GenerateAddressOptions {
                     internal: address.internal,
                     ..Default::default()

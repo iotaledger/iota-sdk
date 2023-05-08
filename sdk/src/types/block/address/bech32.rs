@@ -1,7 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{string::String, vec::Vec};
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 use core::str::FromStr;
 
 use bech32::{FromBase32, ToBase32, Variant};
@@ -47,7 +50,7 @@ impl FromStr for Hrp {
                 len: len as _,
             })
         } else {
-            Err(Error::InvalidBech32Hrp(hrp.to_owned()))
+            Err(Error::InvalidBech32Hrp(hrp.to_string()))
         }
     }
 }
@@ -83,7 +86,7 @@ impl Packable for Hrp {
 
         if len > 83 {
             return Err(UnpackError::Packable(Error::InvalidBech32Hrp(
-                "hrp len above 83".to_owned(),
+                "hrp len above 83".to_string(),
             )));
         }
 

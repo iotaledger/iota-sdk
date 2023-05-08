@@ -114,7 +114,7 @@ impl Account {
             if let Output::Alias(alias_output) = alias_output_with_meta.output() {
                 let alias_address =
                     AliasAddress::from(alias_output.alias_id_non_null(alias_output_with_meta.metadata().output_id()));
-                let alias_bech32_address = Address::Alias(alias_address).to_bech32(bech32_hrp.clone());
+                let alias_bech32_address = Address::Alias(alias_address).to_bech32(bech32_hrp);
                 let client = self.client.clone();
                 tasks.push(Box::pin(task::spawn(async move {
                     client

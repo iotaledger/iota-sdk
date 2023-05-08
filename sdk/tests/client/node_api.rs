@@ -59,7 +59,7 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let output_ids_response = client
             .basic_output_ids(vec![
-                QueryParameter::Address(addresses[0].clone()),
+                QueryParameter::Address(addresses[0]),
                 QueryParameter::HasExpiration(false),
                 QueryParameter::HasTimelock(false),
                 QueryParameter::HasStorageDepositReturn(false),

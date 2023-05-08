@@ -33,7 +33,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500,
                 assets: None,
                 features: None,
@@ -52,7 +52,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500000,
                 assets: None,
                 features: None,
@@ -73,7 +73,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500000,
                 assets: Some(Assets {
                     native_tokens: Some(vec![native_token]),
@@ -94,7 +94,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 300000,
                 assets: None,
                 features: Some(Features {
@@ -119,7 +119,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 1,
                 assets: None,
                 features: Some(Features {
@@ -147,7 +147,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 12000,
                 assets: None,
                 features: Some(Features {
@@ -172,7 +172,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 1,
                 assets: None,
                 features: Some(Features {
@@ -201,7 +201,7 @@ async fn output_preparation() -> Result<()> {
     let error = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500000,
                 assets: Some(Assets {
                     native_tokens: None,
@@ -225,7 +225,7 @@ async fn output_preparation() -> Result<()> {
     if let Ok(output) = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500000,
                 assets: Some(Assets {
                     native_tokens: None,
@@ -259,7 +259,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500000,
                 assets: Some(Assets {
                     native_tokens: Some(vec![native_token]),
@@ -269,7 +269,7 @@ async fn output_preparation() -> Result<()> {
                     metadata: None,
                     tag: None,
                     issuer: None,
-                    sender: Some(issuer_and_sender_address.clone()),
+                    sender: Some(issuer_and_sender_address),
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -289,13 +289,13 @@ async fn output_preparation() -> Result<()> {
     let error = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500000,
                 assets: None,
                 features: Some(Features {
                     metadata: None,
                     tag: None,
-                    issuer: Some(issuer_and_sender_address.clone()),
+                    issuer: Some(issuer_and_sender_address),
                     sender: None,
                 }),
                 unlocks: None,
@@ -314,7 +314,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500000,
                 assets: Some(Assets {
                     native_tokens: None,
@@ -325,8 +325,8 @@ async fn output_preparation() -> Result<()> {
                 features: Some(Features {
                     metadata: None,
                     tag: None,
-                    issuer: Some(issuer_and_sender_address.clone()),
-                    sender: Some(issuer_and_sender_address.clone()),
+                    issuer: Some(issuer_and_sender_address),
+                    sender: Some(issuer_and_sender_address),
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -351,7 +351,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500,
                 assets: Some(Assets {
                     native_tokens: None,
@@ -401,7 +401,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let output = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 8001,
                 assets: None,
                 features: None,
@@ -422,7 +422,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let output = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 42599,
                 assets: None,
                 features: None,
@@ -444,7 +444,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let output = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 42599,
                 assets: None,
                 features: None,
@@ -469,7 +469,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let output = account
         .prepare_output(
             OutputOptions {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 42599,
                 assets: None,
                 features: None,
@@ -504,11 +504,11 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     let address = addresses[0].address();
 
     let nft_options = vec![NftOptions {
-        address: Some(address.clone()),
-        sender: Some(address.clone()),
+        address: Some(*address),
+        sender: Some(*address),
         metadata: Some(b"some nft metadata".to_vec()),
         tag: Some(b"some nft tag".to_vec()),
-        issuer: Some(address.clone()),
+        issuer: Some(*address),
         immutable_metadata: Some(b"some immutable nft metadata".to_vec()),
     }];
 
@@ -522,7 +522,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     let nft = accounts[0]
         .prepare_output(
             OutputOptions {
-                recipient_address: address.clone(),
+                recipient_address: *address,
                 amount: 1_000_000,
                 assets: Some(Assets {
                     native_tokens: None,

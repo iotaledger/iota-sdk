@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
     // Get output IDs of alias outputs that can be controlled by this address.
     let output_ids_response = client
         .alias_output_ids(vec![
-            QueryParameter::Governor(address.clone()),
+            QueryParameter::Governor(address),
             QueryParameter::StateController(address),
         ])
         .await?;

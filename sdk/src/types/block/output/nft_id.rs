@@ -4,7 +4,7 @@
 use alloc::string::String;
 
 use crate::types::block::{
-    address::{Address, Bech32Address, NftAddress, Hrp},
+    address::{Address, Bech32Address, Hrp, NftAddress},
     output::OutputId,
 };
 

@@ -34,6 +34,7 @@ use serde::{Deserialize, Serialize};
 /// Each public account method.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
+#[allow(clippy::large_enum_variant)]
 pub enum AccountMethod {
     /// Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
     /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's

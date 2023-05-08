@@ -75,7 +75,7 @@ async fn main() -> Result<()> {
 
         let outputs = vec![
             BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                .add_unlock_condition(AddressUnlockCondition::new(&bech32_address))
+                .add_unlock_condition(AddressUnlockCondition::new(bech32_address))
                 .with_native_tokens(vec![NativeToken::new(*token_id, U256::from(10))?])
                 .finish_output(account.client().get_token_supply().await?)?,
         ];

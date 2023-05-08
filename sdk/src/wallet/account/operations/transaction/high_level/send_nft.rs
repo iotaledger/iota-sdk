@@ -83,7 +83,7 @@ impl Account {
                     // Set the nft id and new address unlock condition
                     let nft_builder = NftOutputBuilder::from(nft_output)
                         .with_nft_id(address_and_nft_id.nft_id)
-                        .with_unlock_conditions(vec![AddressUnlockCondition::new(&address_and_nft_id.address)]);
+                        .with_unlock_conditions(vec![AddressUnlockCondition::new(address_and_nft_id.address)]);
                     outputs.push(nft_builder.finish_output(token_supply)?);
                 }
             } else {

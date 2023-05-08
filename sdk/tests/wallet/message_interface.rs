@@ -167,7 +167,7 @@ async fn message_interface_events() -> Result<()> {
                 account_id: "alias".into(),
                 method: AccountMethod::RequestFundsFromFaucet {
                     url: FAUCET_URL.to_string(),
-                    address: account.public_addresses[0].address().clone(),
+                    address: *account.public_addresses[0].address(),
                 },
             };
 
@@ -347,9 +347,7 @@ async fn address_conversion_methods() -> Result<()> {
     let hex_address = "0x2d583001c1cbf318e577996830b244a5b531d31dfad54a386c0b96571cac6ae9";
 
     let response = wallet_handle
-        .send_message(Message::Bech32ToHex {
-            bech32_address: bech32_address,
-        })
+        .send_message(Message::Bech32ToHex { bech32_address })
         .await;
 
     match response {
