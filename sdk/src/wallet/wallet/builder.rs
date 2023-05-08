@@ -182,13 +182,6 @@ impl WalletBuilder {
         #[cfg(feature = "storage")]
         storage_manager.lock().await.save_wallet_data(&self).await?;
 
-        let client = self
-            .client_options
-            .clone()
-            .ok_or(crate::wallet::Error::MissingParameter("client_options"))?
-            .finish()
-            .await?;
-
         #[cfg(feature = "events")]
         let event_emitter = Arc::new(tokio::sync::Mutex::new(EventEmitter::new()));
 
@@ -201,10 +194,23 @@ impl WalletBuilder {
         unlock_unused_inputs(&mut accounts)?;
         #[cfg(not(feature = "storage"))]
         let accounts = Vec::new();
+        // Client is only required if there are existing accounts
+        let client = if accounts.is_empty() {
+            None
+        } else {
+            Some(
+                self.client_options
+                    .clone()
+                    .ok_or(crate::wallet::Error::MissingParameter("client_options"))?
+                    .finish()
+                    .await?,
+            )
+        };
         let mut accounts: Vec<Account> = try_join_all(accounts.into_iter().map(|a| {
             Account::new(
                 a,
-                client.clone(),
+                // Safe to unwrap because we create the client if accounts aren't empty
+                client.as_ref().expect("client must exist").clone(),
                 self.secret_manager
                     .clone()
                     .expect("secret_manager needs to be provided"),
@@ -221,7 +227,10 @@ impl WalletBuilder {
         // In the other case it was loaded from the database and addresses are up to date.
         if new_provided_client_options {
             for account in accounts.iter_mut() {
-                account.update_account_with_new_client(client.clone()).await?;
+                // Safe to unwrap because we create the client if accounts aren't empty
+                account
+                    .update_account_with_new_client(client.as_ref().expect("client must exist").clone())
+                    .await?;
             }
         }
 
