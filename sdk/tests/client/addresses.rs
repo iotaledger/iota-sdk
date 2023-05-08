@@ -213,7 +213,7 @@ async fn address_generation() {
             .unwrap();
 
         assert_eq!(addresses[0], address.bech32_address);
-        if let Address::Ed25519(ed25519_address) = &addresses[0].inner() {
+        if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
             assert_eq!(ed25519_address.to_string(), address.ed25519_address);
         } else {
             panic!("Invalid address type")
