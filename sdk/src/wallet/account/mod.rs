@@ -577,7 +577,15 @@ impl AccountDetails {
             index: 0,
             coin_type: 4218,
             alias: "Alice".to_string(),
-            public_addresses: Vec::new(),
+            public_addresses: vec![AccountAddress {
+                address: crate::types::block::address::Bech32Address::from_str(
+                    "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
+                )
+                .unwrap(),
+                key_index: 0,
+                internal: false,
+                used: false,
+            }],
             internal_addresses: Vec::new(),
             addresses_with_unspent_outputs: Vec::new(),
             outputs: HashMap::new(),
