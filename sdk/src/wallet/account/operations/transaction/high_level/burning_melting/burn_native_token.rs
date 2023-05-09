@@ -48,6 +48,26 @@ impl Account {
     /// Function to burn native tokens. This doesn't require the foundry output which minted them, but will not increase
     /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
     /// recommended to use `decrease_native_token_supply()`, if the foundry output is available.
+    pub async fn get_inputs_outputs_for_burn_native_tokens(
+        &self,
+        token_id: TokenId,
+        burn_amount: U256,
+    ) -> crate::wallet::Result<(Vec<OutputId>, Vec<Output>)> {
+        log::debug!("[TRANSACTION] burn_native_token");
+
+        let StrippedOutputAggregate {
+            // why
+            custom_inputs,
+            amount: _,
+            outputs,
+        } = self.get_burn_inputs_and_outputs(token_id, burn_amount).await?;
+
+        Ok((custom_inputs, outputs))
+    }
+
+    /// Function to burn native tokens. This doesn't require the foundry output which minted them, but will not increase
+    /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
+    /// recommended to use `decrease_native_token_supply()`, if the foundry output is available.
     pub async fn burn_native_token(
         &self,
         token_id: TokenId,

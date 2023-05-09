@@ -18,6 +18,45 @@ use crate::{
 
 impl Account {
     /// Function to burn an nft output.
+    pub async fn get_inputs_outputs_for_burn_nft(
+        &self,
+        nft_id: NftId,
+    ) -> crate::wallet::Result<(Vec<OutputId>, Vec<Output>)> {
+        log::debug!("[TRANSACTION] burn_nft");
+
+        let current_time = self.client().get_time_checked().await?;
+
+        let mut owned_outputs = Vec::new();
+
+        for output_data in self.unspent_outputs(None).await? {
+            if can_output_be_unlocked_now(
+                // Don't provide any addresses here, since we're only interested in outputs that can be unlocked by
+                // the nft address
+                &[],
+                &[Address::Nft(NftAddress::new(nft_id))],
+                &output_data,
+                current_time,
+                None,
+            )? {
+                owned_outputs.push(output_data);
+            }
+        }
+
+        if !owned_outputs.is_empty() {
+            return Err(Error::BurningOrMeltingFailed(format!(
+                "nft still owns outputs: {:?}",
+                owned_outputs.iter().map(|o| o.output_id).collect::<Vec<OutputId>>()
+            )));
+        }
+
+        let (output_id, basic_output) = self.output_id_and_basic_output_for_nft(nft_id).await?;
+        let custom_inputs = vec![output_id];
+        let outputs = vec![basic_output];
+
+        Ok((custom_inputs, outputs))
+    }
+
+    /// Function to burn an nft output.
     pub async fn burn_nft(
         &self,
         nft_id: NftId,

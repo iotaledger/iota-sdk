@@ -18,6 +18,49 @@ use crate::{
 
 impl Account {
     /// Function to destroy an alias output.
+    pub async fn get_inputs_outputs_for_destroy_alias(
+        &self,
+        alias_id: AliasId,
+    ) -> crate::wallet::Result<(Vec<OutputId>, Vec<Output>)> {
+        log::debug!("[TRANSACTION] destroy_alias");
+
+        let current_time = self.client().get_time_checked().await?;
+
+        let mut owned_outputs = Vec::new();
+
+        for output_data in self.unspent_outputs(None).await? {
+            if can_output_be_unlocked_now(
+                // Don't provide any addresses here, since we're only interested in outputs that can be unlocked by
+                // the alias address
+                &[],
+                &[Address::Alias(AliasAddress::new(alias_id))],
+                &output_data,
+                current_time,
+                None,
+            )? {
+                owned_outputs.push(output_data);
+            }
+        }
+
+        if !owned_outputs.is_empty() {
+            return Err(Error::BurningOrMeltingFailed(format!(
+                "alias still owns outputs: {:?}",
+                owned_outputs.iter().map(|o| o.output_id).collect::<Vec<OutputId>>()
+            )));
+        }
+
+        let (output_id, basic_output) = self.output_id_and_basic_output_for_alias(alias_id).await?;
+
+        let (custom_inputs, outputs) = {
+            let custom_inputs = vec![output_id];
+            let outputs = vec![basic_output];
+            (custom_inputs, outputs)
+        };
+
+        Ok((custom_inputs, outputs))
+    }
+
+    /// Function to destroy an alias output.
     pub async fn destroy_alias(
         &self,
         alias_id: AliasId,
