@@ -6,7 +6,8 @@ use std::str::FromStr;
 
 use iota_sdk::{
     client::api::{
-        PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
+        input_selection::Burn, PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData,
+        SignedTransactionDataDto,
     },
     types::block::{
         output::{dto::OutputDto, AliasId, NftId, Output, Rent, TokenId},
@@ -43,8 +44,8 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::BurnNft { nft_id, options } => {
             let transaction = account
-                .burn_nft(
-                    NftId::try_from(&nft_id)?,
+                .burn(
+                    Burn::new().add_nft(NftId::try_from(&nft_id)?),
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;

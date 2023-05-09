@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 use clap::{Parser, Subcommand};
 use iota_sdk::{
-    client::request_funds_from_faucet,
+    client::{api::input_selection::Burn, request_funds_from_faucet},
     types::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
@@ -278,7 +278,9 @@ pub async fn burn_native_token_command(account: &Account, token_id: String, amou
 pub async fn burn_nft_command(account: &Account, nft_id: String) -> Result<(), Error> {
     println_log_info!("Burning nft {nft_id}.");
 
-    let transaction = account.burn_nft(NftId::from_str(&nft_id)?, None).await?;
+    let transaction = account
+        .burn(Burn::new().add_nft(NftId::from_str(&nft_id)?), None)
+        .await?;
 
     println_log_info!(
         "Burning transaction sent:\n{:?}\n{:?}",

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
+    client::api::input_selection::Burn,
     types::block::output::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         NftId, NftOutputBuilder, OutputId, UnlockCondition,
@@ -43,7 +44,7 @@ async fn mint_and_burn_nft() -> Result<()> {
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
     assert!(search.is_some());
 
-    let transaction = account.burn_nft(nft_id, None).await.unwrap();
+    let transaction = account.burn(Burn::new().add_nft(nft_id), None).await.unwrap();
     account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
@@ -92,7 +93,7 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
     let nft_id = NftId::from(&output_id);
 
     account_1.sync(None).await?;
-    let transaction = account_1.burn_nft(nft_id, None).await?;
+    let transaction = account_1.burn(Burn::new().add_nft(nft_id), None).await?;
     account_1
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;

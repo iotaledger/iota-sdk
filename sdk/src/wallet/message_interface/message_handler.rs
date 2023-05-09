@@ -18,7 +18,7 @@ use zeroize::Zeroize;
 use crate::wallet::events::types::{Event, WalletEventType};
 use crate::{
     client::{
-        api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
+        api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto, input_selection::Burn},
         constants::SHIMMER_TESTNET_BECH32_HRP,
         request_funds_from_faucet, utils, Client, NodeInfoWrapper,
     },
@@ -511,8 +511,8 @@ impl WalletMessageHandler {
             AccountMethod::BurnNft { nft_id, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .burn_nft(
-                            NftId::try_from(&nft_id)?,
+                        .burn(
+                            Burn::new().add_nft(NftId::try_from(&nft_id)?),
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
