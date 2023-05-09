@@ -85,18 +85,18 @@ impl Account {
         options: Option<TransactionOptions>,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_send_native_tokens");
-        let rent_structure = self.client.get_rent_structure().await?;
-        let token_supply = self.client.get_token_supply().await?;
+        let rent_structure = self.client().get_rent_structure().await?;
+        let token_supply = self.client().get_token_supply().await?;
 
         let account_addresses = self.addresses().await?;
         let return_address = account_addresses.first().ok_or(Error::FailedToGetRemainder)?;
 
-        let local_time = self.client.get_time_checked().await?;
+        let local_time = self.client().get_time_checked().await?;
 
         let mut outputs = Vec::new();
         for address_with_amount in addresses_and_native_tokens {
             let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address_with_amount.address)?;
-            self.client.bech32_hrp_matches(&bech32_hrp).await?;
+            self.client().bech32_hrp_matches(&bech32_hrp).await?;
             // get minimum required amount for such an output, so we don't lock more than required
             // We have to check it for every output individually, because different address types and amount of
             // different native tokens require a different storage deposit

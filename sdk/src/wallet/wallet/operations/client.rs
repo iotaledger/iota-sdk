@@ -7,63 +7,50 @@ use std::collections::HashSet;
 use crate::wallet::WalletBuilder;
 use crate::{
     client::{
-        node_manager::node::{Node, NodeAuth, NodeDto},
-        Client, NodeInfoWrapper,
+        node_manager::{
+            builder::NodeManagerBuilder,
+            node::{Node, NodeAuth, NodeDto},
+        },
+        Client, ClientBuilder, NodeInfoWrapper,
     },
-    wallet::{ClientOptions, Wallet},
+    wallet::Wallet,
     Url,
 };
 
 impl Wallet {
-    /// Sets the client options for all accounts and sets the new bech32_hrp for the addresses.
-    pub async fn set_client_options(&self, options: ClientOptions) -> crate::wallet::Result<()> {
-        log::debug!("[set_client_options]");
+    pub fn client(&self) -> &Client {
+        &self.client
+    }
 
-        let mut client_options = self.client_options.write().await;
-        *client_options = options.clone();
-        drop(client_options);
+    pub async fn client_options(&self) -> ClientBuilder {
+        ClientBuilder::from_client(self.client()).await
+    }
 
-        let new_client = options.clone().finish().await?;
-
-        for account in self.accounts.write().await.iter_mut() {
-            account.update_account_with_new_client(new_client.clone()).await?;
-        }
-
-        #[cfg(feature = "storage")]
+    pub async fn set_client_options(&self, client_options: ClientBuilder) -> crate::wallet::Result<()> {
+        let ClientBuilder {
+            node_manager_builder,
+            #[cfg(feature = "mqtt")]
+            broker_options,
+            network_info,
+            api_timeout,
+            remote_pow_timeout,
+            pow_worker_count,
+        } = client_options;
+        self.client.update_node_manager(node_manager_builder).await?;
+        *self.client.network_info.write().await = network_info;
+        *self.client.api_timeout.write().await = api_timeout;
+        *self.client.remote_pow_timeout.write().await = remote_pow_timeout;
+        *self.client.pow_worker_count.write().await = pow_worker_count;
+        #[cfg(feature = "mqtt")]
         {
-            // Update wallet data with new client options
-            let wallet_builder = WalletBuilder::from_wallet(self).await.with_client_options(options);
-
-            self.storage_manager
-                .lock()
-                .await
-                .save_wallet_data(&wallet_builder)
-                .await?;
+            *self.client.mqtt.broker_options.write().await = broker_options;
         }
-
         Ok(())
-    }
-
-    /// Try to get the Client from the first account and only build a new one if we have no account
-    pub async fn get_client(&self) -> crate::wallet::Result<Client> {
-        let accounts = self.accounts.read().await;
-
-        let client = match &accounts.first() {
-            Some(account) => account.client.clone(),
-            None => self.client_options.read().await.clone().finish().await?,
-        };
-
-        Ok(client)
-    }
-
-    /// Get the used client options.
-    pub async fn get_client_options(&self) -> ClientOptions {
-        self.client_options.read().await.clone()
     }
 
     /// Get the node info.
     pub async fn get_node_info(&self) -> crate::wallet::Result<NodeInfoWrapper> {
-        let node_info_wrapper = self.get_client().await?.get_info().await?;
+        let node_info_wrapper = self.client().get_info().await?;
 
         Ok(node_info_wrapper)
     }
@@ -71,16 +58,16 @@ impl Wallet {
     /// Update the authentication for a node.
     pub async fn update_node_auth(&self, url: Url, auth: Option<NodeAuth>) -> crate::wallet::Result<()> {
         log::debug!("[update_node_auth]");
-        let mut client_options = self.client_options.write().await;
+        let mut node_manager_builder = NodeManagerBuilder::from(&*self.client.node_manager.read().await);
 
-        if let Some(primary_node) = &client_options.node_manager_builder.primary_node {
+        if let Some(primary_node) = &node_manager_builder.primary_node {
             let (node_url, disabled) = match &primary_node {
                 NodeDto::Url(node_url) => (node_url, false),
                 NodeDto::Node(node) => (&node.url, node.disabled),
             };
 
             if node_url == &url {
-                client_options.node_manager_builder.primary_node = Some(NodeDto::Node(Node {
+                node_manager_builder.primary_node = Some(NodeDto::Node(Node {
                     url: url.clone(),
                     auth: auth.clone(),
                     disabled,
@@ -88,14 +75,14 @@ impl Wallet {
             }
         }
 
-        if let Some(primary_pow_node) = &client_options.node_manager_builder.primary_pow_node {
+        if let Some(primary_pow_node) = &node_manager_builder.primary_pow_node {
             let (node_url, disabled) = match &primary_pow_node {
                 NodeDto::Url(node_url) => (node_url, false),
                 NodeDto::Node(node) => (&node.url, node.disabled),
             };
 
             if node_url == &url {
-                client_options.node_manager_builder.primary_pow_node = Some(NodeDto::Node(Node {
+                node_manager_builder.primary_pow_node = Some(NodeDto::Node(Node {
                     url: url.clone(),
                     auth: auth.clone(),
                     disabled,
@@ -103,7 +90,7 @@ impl Wallet {
             }
         }
 
-        if let Some(permanodes) = &client_options.node_manager_builder.permanodes {
+        if let Some(permanodes) = &node_manager_builder.permanodes {
             let mut new_permanodes = HashSet::new();
             for node in permanodes.iter() {
                 let (node_url, disabled) = match &node {
@@ -121,11 +108,11 @@ impl Wallet {
                     new_permanodes.insert(node.clone());
                 }
             }
-            client_options.node_manager_builder.permanodes = Some(new_permanodes);
+            node_manager_builder.permanodes = Some(new_permanodes);
         }
 
         let mut new_nodes = HashSet::new();
-        for node in client_options.node_manager_builder.nodes.iter() {
+        for node in node_manager_builder.nodes.iter() {
             let (node_url, disabled) = match &node {
                 NodeDto::Url(node_url) => (node_url, false),
                 NodeDto::Node(node) => (&node.url, node.disabled),
@@ -141,30 +128,21 @@ impl Wallet {
                 new_nodes.insert(node.clone());
             }
         }
-        client_options.node_manager_builder.nodes = new_nodes;
-
-        let new_client_options = client_options.clone();
-        // Need to drop client_options here to prevent a deadlock
-        drop(client_options);
+        node_manager_builder.nodes = new_nodes;
 
         #[cfg(feature = "storage")]
         {
-            // Update wallet data with new client options
-            let wallet_builder = WalletBuilder::from_wallet(self)
-                .await
-                .with_client_options(new_client_options.clone());
-
             self.storage_manager
                 .lock()
                 .await
-                .save_wallet_data(&wallet_builder)
+                .save_wallet_data(&WalletBuilder::from_wallet(self).await)
                 .await?;
         }
 
-        let new_client = new_client_options.finish().await?;
+        self.client.update_node_manager(node_manager_builder).await?;
 
         for account in self.accounts.write().await.iter_mut() {
-            account.update_account_with_new_client(new_client.clone()).await?;
+            account.update_account_with_new_client().await?;
         }
 
         Ok(())

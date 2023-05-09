@@ -105,8 +105,8 @@ impl Account {
         options: Option<TransactionOptions>,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_create_alias_output");
-        let rent_structure = self.client.get_rent_structure().await?;
-        let token_supply = self.client.get_token_supply().await?;
+        let rent_structure = self.client().get_rent_structure().await?;
+        let token_supply = self.client().get_token_supply().await?;
 
         let controller_address = match alias_output_options
             .as_ref()
@@ -114,7 +114,7 @@ impl Account {
         {
             Some(bech32_address) => {
                 let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(bech32_address)?;
-                self.client.bech32_hrp_matches(&bech32_hrp).await?;
+                self.client().bech32_hrp_matches(&bech32_hrp).await?;
                 address
             }
             None => {

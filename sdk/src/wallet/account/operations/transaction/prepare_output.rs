@@ -36,17 +36,17 @@ impl Account {
         transaction_options: Option<TransactionOptions>,
     ) -> crate::wallet::Result<Output> {
         log::debug!("[OUTPUT] prepare_output {options:?}");
-        let token_supply = self.client.get_token_supply().await?;
+        let token_supply = self.client().get_token_supply().await?;
 
         let (bech32_hrp, recipient_address) = Address::try_from_bech32_with_hrp(&options.recipient_address)?;
-        self.client.bech32_hrp_matches(&bech32_hrp).await?;
+        self.client().bech32_hrp_matches(&bech32_hrp).await?;
 
         if let Some(assets) = &options.assets {
             if let Some(nft_id) = assets.nft_id {
                 return self.prepare_nft_output(options, transaction_options, nft_id).await;
             }
         }
-        let rent_structure = self.client.get_rent_structure().await?;
+        let rent_structure = self.client().get_rent_structure().await?;
 
         // We start building with minimum storage deposit, so we know the minimum required amount and can later replace
         // it, if needed
@@ -188,8 +188,8 @@ impl Account {
     ) -> crate::wallet::Result<Output> {
         log::debug!("[OUTPUT] prepare_nft_output {options:?}");
 
-        let token_supply = self.client.get_token_supply().await?;
-        let rent_structure = self.client.get_rent_structure().await?;
+        let token_supply = self.client().get_token_supply().await?;
+        let rent_structure = self.client().get_rent_structure().await?;
         let unspent_nft_outputs = self
             .unspent_outputs(Some(FilterOptions {
                 output_types: Some(vec![NftOutput::KIND]),

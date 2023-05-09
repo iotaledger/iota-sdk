@@ -127,8 +127,8 @@ impl Account {
         options: Option<TransactionOptions>,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_mint_nfts");
-        let rent_structure = self.client.get_rent_structure().await?;
-        let token_supply = self.client.get_token_supply().await?;
+        let rent_structure = self.client().get_rent_structure().await?;
+        let token_supply = self.client().get_token_supply().await?;
         let account_addresses = self.addresses().await?;
         let mut outputs = Vec::new();
 
@@ -136,7 +136,7 @@ impl Account {
             let address = match nft_options.address {
                 Some(address) => {
                     let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
-                    self.client.bech32_hrp_matches(&bech32_hrp).await?;
+                    self.client().bech32_hrp_matches(&bech32_hrp).await?;
                     address
                 }
                 // todo other error message

@@ -34,10 +34,12 @@ impl ClientInner {
         while let Some(cursor) = {
             let output_ids_response = self
                 .node_manager
+                .read()
+                .await
                 .get_request::<OutputIdsResponse>(
                     route,
                     query_parameters.to_query_string().as_deref(),
-                    self.get_timeout(),
+                    self.get_timeout().await,
                     need_quorum,
                     prefer_permanode,
                 )

@@ -25,7 +25,7 @@ pub(crate) async fn store_data_to_stronghold(
         .insert(BACKUP_SCHEMA_VERSION_KEY.as_bytes(), &[BACKUP_SCHEMA_VERSION])
         .await?;
 
-    let client_options = wallet.client_options.read().await.to_json()?;
+    let client_options = wallet.client_options().await.to_json()?;
     stronghold
         .insert(CLIENT_OPTIONS_KEY.as_bytes(), client_options.as_bytes())
         .await?;

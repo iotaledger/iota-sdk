@@ -24,7 +24,7 @@ impl Account {
                 continue;
             }
 
-            let client = self.client.clone();
+            let client = self.client().clone();
             tasks.push(async move {
                 task::spawn(async move {
                     match client.foundry_output_id(foundry_id).await {

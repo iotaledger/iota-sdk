@@ -261,3 +261,23 @@ pub fn validate_url(url: Url) -> Result<Url> {
     }
     Ok(url)
 }
+
+impl From<&NodeManager> for NodeManagerBuilder {
+    fn from(value: &NodeManager) -> Self {
+        Self {
+            primary_node: value.primary_node.clone().map(|n| NodeDto::Node(n)),
+            primary_pow_node: value.primary_pow_node.clone().map(|n| NodeDto::Node(n)),
+            nodes: value.nodes.iter().cloned().map(|n| NodeDto::Node(n)).collect(),
+            permanodes: value
+                .permanodes
+                .as_ref()
+                .map(|p| p.iter().cloned().map(|n| NodeDto::Node(n)).collect()),
+            ignore_node_health: value.ignore_node_health,
+            node_sync_interval: value.node_sync_interval,
+            quorum: value.quorum,
+            min_quorum_size: value.min_quorum_size,
+            quorum_threshold: value.quorum_threshold,
+            user_agent: value.http_client.user_agent.clone(),
+        }
+    }
+}

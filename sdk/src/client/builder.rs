@@ -2,15 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! Builder of the Client Instance
-use std::{
-    collections::HashMap,
-    sync::{Arc, RwLock},
-    time::Duration,
-};
+use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use serde::{Deserialize, Serialize};
 
-use super::ClientInner;
+use super::{node_manager::builder::NodeManagerBuilder, ClientInner};
 #[cfg(feature = "mqtt")]
 use crate::client::node_api::mqtt::{BrokerOptions, MqttEvent};
 use crate::{
@@ -328,6 +324,8 @@ impl ClientBuilder {
     /// Build the Client instance.
     #[cfg(not(target_family = "wasm"))]
     pub async fn finish(self) -> Result<Client> {
+        use tokio::sync::RwLock;
+
         let node_sync_interval = self.node_manager_builder.node_sync_interval;
         let ignore_node_health = self.node_manager_builder.ignore_node_health;
         let nodes = self
@@ -342,18 +340,18 @@ impl ClientBuilder {
         let (mqtt_event_tx, mqtt_event_rx) = tokio::sync::watch::channel(MqttEvent::Connected);
 
         let client_inner = Arc::new(ClientInner {
-            node_manager: self.node_manager_builder.build(HashMap::new()),
+            node_manager: RwLock::new(self.node_manager_builder.build(HashMap::new())),
             network_info: RwLock::new(self.network_info),
-            api_timeout: self.api_timeout,
-            remote_pow_timeout: self.remote_pow_timeout,
-            pow_worker_count: self.pow_worker_count,
+            api_timeout: RwLock::new(self.api_timeout),
+            remote_pow_timeout: RwLock::new(self.remote_pow_timeout),
+            pow_worker_count: RwLock::new(self.pow_worker_count),
             #[cfg(feature = "mqtt")]
             mqtt: super::MqttInner {
                 client: Default::default(),
                 topic_handlers: Default::default(),
-                broker_options: self.broker_options,
-                sender: mqtt_event_tx,
-                receiver: mqtt_event_rx,
+                broker_options: RwLock::new(self.broker_options),
+                sender: RwLock::new(mqtt_event_tx),
+                receiver: RwLock::new(mqtt_event_rx),
             },
         });
 
@@ -368,7 +366,7 @@ impl ClientBuilder {
 
         let client = Client {
             inner: client_inner,
-            _sync_handle: Arc::new(super::SyncHandle(Some(sync_handle))),
+            _sync_handle: Arc::new(RwLock::new(super::SyncHandle(Some(sync_handle)))),
         };
 
         Ok(client)
@@ -398,5 +396,17 @@ impl ClientBuilder {
         };
 
         Ok(client)
+    }
+
+    pub async fn from_client(client: &Client) -> Self {
+        Self {
+            node_manager_builder: NodeManagerBuilder::from(&*client.inner.node_manager.read().await),
+            #[cfg(feature = "mqtt")]
+            broker_options: client.inner.mqtt.broker_options.read().await.clone(),
+            network_info: client.inner.network_info.read().await.clone(),
+            api_timeout: client.get_timeout().await,
+            remote_pow_timeout: client.get_remote_pow_timeout().await,
+            pow_worker_count: *client.inner.pow_worker_count.read().await,
+        }
     }
 }
