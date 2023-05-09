@@ -570,8 +570,10 @@ fn serialize() {
 
 #[cfg(test)]
 impl AccountDetails {
-    /// Returns the following account details:
-    /// index: 0, coin_type: 4218, alias: "Alice", all fields containing arrays/maps are empty
+    /// Returns a mock of this type with the following values:
+    /// index: 0, coin_type: 4218, alias: "Alice", public_addresses: contains a single public account address
+    /// (rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy), all other fields are set to their Rust
+    /// defaults.
     pub(crate) fn mock() -> Self {
         Self {
             index: 0,
