@@ -302,8 +302,8 @@ impl Participations {
     }
 }
 
+#[cfg(test)]
 impl ParticipationEventData {
-    #[cfg(test)]
     pub fn mock() -> Self {
         Self {
             name: "test".to_string(),
@@ -316,8 +316,8 @@ impl ParticipationEventData {
     }
 }
 
+#[cfg(test)]
 impl StakingEventPayload {
-    #[cfg(test)]
     pub fn mock() -> Self {
         Self {
             kind: 1,

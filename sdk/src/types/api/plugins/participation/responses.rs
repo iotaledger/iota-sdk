@@ -61,8 +61,8 @@ pub struct AddressOutputsResponse {
     pub outputs: HashMap<OutputId, OutputStatusResponse>,
 }
 
+#[cfg(test)]
 impl OutputStatusResponse {
-    #[cfg(test)]
     pub fn mock() -> Self {
         Self {
             participations: vec![(

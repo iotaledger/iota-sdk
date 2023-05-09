@@ -310,8 +310,8 @@ fn is_valid_participation_output(output: &Output) -> bool {
     }
 }
 
+#[cfg(test)]
 impl ParticipationEventWithNodes {
-    #[cfg(test)]
     pub fn mock() -> Self {
         Self {
             id: ParticipationEventId::new([42; 32]),
