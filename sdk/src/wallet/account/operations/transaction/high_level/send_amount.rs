@@ -9,7 +9,7 @@ use crate::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
             },
-            BasicOutputBuilder, Rent,
+            BasicOutputBuilder,
         },
     },
     wallet::{
@@ -130,13 +130,16 @@ impl Account {
                 .unwrap_or(default_return_address.address.inner);
 
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
-            let output = BasicOutputBuilder::new_with_amount(amount)
+            let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
                 .finish_output(token_supply)?;
-            let rent_cost = output.rent_cost(&rent_structure);
 
-            if amount >= rent_cost {
-                outputs.push(output)
+            if amount >= output.amount() {
+                outputs.push(
+                    BasicOutputBuilder::from(output.as_basic())
+                        .with_amount(amount)
+                        .finish_output(token_supply)?,
+                )
             } else {
                 let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
                     local_time + expiration_time

@@ -225,6 +225,10 @@ impl Account {
         let mut locked_native_tokens = NativeTokensBuilder::new();
 
         for locked_output in &account_details.locked_outputs {
+            // Skip potentially_locked_outputs, as their amounts aren't added to the balance
+            if account_balance.potentially_locked_outputs.contains_key(locked_output) {
+                continue;
+            }
             if let Some(output_data) = account_details.unspent_outputs.get(locked_output) {
                 // Only check outputs that are in this network
                 if output_data.network_id == network_id {
@@ -247,7 +251,7 @@ impl Account {
 
         for native_token in total_native_tokens.finish_set()? {
             // Check if some amount is currently locked
-            let locked_amount = locked_native_tokens.iter().find_map(|(id, amount)| {
+            let locked_native_token_amount = locked_native_tokens.iter().find_map(|(id, amount)| {
                 if id == native_token.token_id() {
                     Some(amount)
                 } else {
@@ -265,7 +269,7 @@ impl Account {
                 token_id: *native_token.token_id(),
                 metadata,
                 total: native_token.amount(),
-                available: native_token.amount() - *locked_amount.unwrap_or(&U256::from(0u8)),
+                available: native_token.amount() - *locked_native_token_amount.unwrap_or(&U256::from(0u8)),
             })
         }
 

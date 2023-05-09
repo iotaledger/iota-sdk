@@ -22,7 +22,7 @@ const DEFAULT_DEVELOPMENT_SEED: &str = "0x256a818b2aac458941f7274985a410e57fb750
 
 // Sends a tagged data block to the node to test against it.
 async fn setup_tagged_data_block() -> BlockId {
-    let client = setup_client_with_node_health_ignored();
+    let client = setup_client_with_node_health_ignored().await;
 
     client
         .block()
@@ -40,7 +40,7 @@ pub fn setup_secret_manager() -> SecretManager {
 
 // Sends a transaction block to the node to test against it.
 async fn setup_transaction_block() -> (BlockId, TransactionId) {
-    let client = setup_client_with_node_health_ignored();
+    let client = setup_client_with_node_health_ignored().await;
     let secret_manager = setup_secret_manager();
 
     let addresses = client
@@ -87,6 +87,7 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
         .id();
 
     let block = setup_client_with_node_health_ignored()
+        .await
         .get_block(&block_id)
         .await
         .unwrap();
@@ -105,6 +106,7 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
 #[tokio::test]
 async fn test_get_health() {
     let r = setup_client_with_node_health_ignored()
+        .await
         .get_health(NODE_LOCAL)
         .await
         .unwrap();
@@ -121,7 +123,7 @@ async fn test_get_info() {
 #[ignore]
 #[tokio::test]
 async fn test_get_tips() {
-    let r = setup_client_with_node_health_ignored().get_tips().await.unwrap();
+    let r = setup_client_with_node_health_ignored().await.get_tips().await.unwrap();
     println!("{r:#?}");
 }
 
@@ -142,7 +144,7 @@ async fn test_post_block_with_transaction() {
 #[ignore]
 #[tokio::test]
 async fn test_get_block_data() {
-    let client = setup_client_with_node_health_ignored();
+    let client = setup_client_with_node_health_ignored().await;
 
     let block_id = setup_tagged_data_block().await;
     let r = client.get_block(&block_id).await.unwrap();
@@ -156,6 +158,7 @@ async fn test_get_block_metadata() {
     let block_id = setup_tagged_data_block().await;
 
     let r = setup_client_with_node_health_ignored()
+        .await
         .get_block_metadata(&block_id)
         .await
         .unwrap();
@@ -169,6 +172,7 @@ async fn test_get_block_raw() {
     let block_id = setup_tagged_data_block().await;
 
     let r = setup_client_with_node_health_ignored()
+        .await
         .get_block_raw(&block_id)
         .await
         .unwrap();
@@ -179,7 +183,7 @@ async fn test_get_block_raw() {
 #[ignore]
 #[tokio::test]
 async fn test_get_address_outputs() {
-    let client = setup_client_with_node_health_ignored();
+    let client = setup_client_with_node_health_ignored().await;
     let secret_manager = setup_secret_manager();
 
     let address = client
@@ -207,6 +211,7 @@ async fn test_get_output() {
     let (_block_id, transaction_id) = setup_transaction_block().await;
 
     let r = setup_client_with_node_health_ignored()
+        .await
         .get_output(&OutputId::new(transaction_id, 0).unwrap())
         .await
         .unwrap();
@@ -217,7 +222,7 @@ async fn test_get_output() {
 #[ignore]
 #[tokio::test]
 async fn test_get_peers() {
-    let r = setup_client_with_node_health_ignored().get_peers().await.unwrap();
+    let r = setup_client_with_node_health_ignored().await.get_peers().await.unwrap();
 
     println!("{r:#?}");
 }
@@ -225,7 +230,7 @@ async fn test_get_peers() {
 #[ignore]
 #[tokio::test]
 async fn test_get_milestone_by_id() {
-    let client = setup_client_with_node_health_ignored();
+    let client = setup_client_with_node_health_ignored().await;
 
     let node_info = client.get_info().await.unwrap();
 
@@ -249,7 +254,7 @@ async fn test_get_milestone_by_id() {
 #[ignore]
 #[tokio::test]
 async fn test_get_milestone_by_index() {
-    let client = setup_client_with_node_health_ignored();
+    let client = setup_client_with_node_health_ignored().await;
 
     let node_info = client.get_info().await.unwrap();
 
@@ -264,7 +269,7 @@ async fn test_get_milestone_by_index() {
 #[ignore]
 #[tokio::test]
 async fn test_get_utxo_changes_by_id() {
-    let client = setup_client_with_node_health_ignored();
+    let client = setup_client_with_node_health_ignored().await;
 
     let node_info = client.get_info().await.unwrap();
 
@@ -288,7 +293,7 @@ async fn test_get_utxo_changes_by_id() {
 #[ignore]
 #[tokio::test]
 async fn test_get_utxo_changes_by_index() {
-    let client = setup_client_with_node_health_ignored();
+    let client = setup_client_with_node_health_ignored().await;
 
     let node_info = client.get_info().await.unwrap();
 
@@ -303,7 +308,11 @@ async fn test_get_utxo_changes_by_index() {
 #[ignore]
 #[tokio::test]
 async fn test_get_receipts() {
-    let r = setup_client_with_node_health_ignored().get_receipts().await.unwrap();
+    let r = setup_client_with_node_health_ignored()
+        .await
+        .get_receipts()
+        .await
+        .unwrap();
 
     println!("{r:#?}");
 }
@@ -312,6 +321,7 @@ async fn test_get_receipts() {
 #[tokio::test]
 async fn get_receipts_migrated_at() {
     let r = setup_client_with_node_health_ignored()
+        .await
         .get_receipts_migrated_at(3)
         .await
         .unwrap();
@@ -322,7 +332,11 @@ async fn get_receipts_migrated_at() {
 #[ignore]
 #[tokio::test]
 async fn test_get_treasury() {
-    let r = setup_client_with_node_health_ignored().get_treasury().await.unwrap();
+    let r = setup_client_with_node_health_ignored()
+        .await
+        .get_treasury()
+        .await
+        .unwrap();
 
     println!("{r:#?}");
 }
@@ -333,6 +347,7 @@ async fn test_get_included_block() {
     let (_block_id, transaction_id) = setup_transaction_block().await;
 
     let r = setup_client_with_node_health_ignored()
+        .await
         .get_included_block(&transaction_id)
         .await
         .unwrap();

@@ -1,6 +1,8 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::vec::Vec;
+
 use rand::Rng;
 
 /// Generates a [`Vec`] of random bytes with a given length.

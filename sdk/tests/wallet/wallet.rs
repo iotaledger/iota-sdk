@@ -1,10 +1,13 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "storage")]
-use iota_sdk::client::node_manager::node::{Node, NodeDto, Url};
 #[cfg(feature = "stronghold")]
 use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
+#[cfg(feature = "storage")]
+use iota_sdk::{
+    client::node_manager::node::{Node, NodeDto},
+    Url,
+};
 use iota_sdk::{
     client::{
         constants::IOTA_COIN_TYPE,

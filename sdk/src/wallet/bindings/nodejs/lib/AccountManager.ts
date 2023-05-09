@@ -287,11 +287,14 @@ export class AccountManager {
      * stored, it will be gone.
      * if ignore_if_coin_type_mismatch is provided client options will not be restored
      * if ignore_if_coin_type_mismatch == true, client options coin type and accounts will not be restored if the cointype doesn't match
+     * if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", no accounts
+     * will be restored.
      */
     async restoreBackup(
         source: string,
         password: string,
         ignoreIfCoinTypeMismatch?: boolean,
+        ignoreIfBech32Mismatch?: string,
     ): Promise<void> {
         await this.messageHandler.sendMessage({
             cmd: 'restoreBackup',
@@ -299,6 +302,7 @@ export class AccountManager {
                 source,
                 password,
                 ignoreIfCoinTypeMismatch,
+                ignoreIfBech32Mismatch,
             },
         });
     }

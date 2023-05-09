@@ -9,10 +9,10 @@ public class GetOutputsWithAdditionalUnlockConditions implements AccountMethod {
     private OutputsToClaim outputsToClaim;
 
     public enum OutputsToClaim {
-        None,
         MicroTransactions,
         NativeTokens,
         Nfts,
+        Amount,
         All,
     }
 

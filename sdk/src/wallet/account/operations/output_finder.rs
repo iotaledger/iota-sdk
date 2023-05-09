@@ -16,9 +16,13 @@ impl Account {
     pub(crate) async fn search_addresses_with_outputs(
         &self,
         mut address_gap_limit: u32,
-        mut sync_options: Option<SyncOptions>,
+        sync_options: Option<SyncOptions>,
     ) -> crate::wallet::Result<usize> {
         log::debug!("[search_addresses_with_outputs]");
+        let mut sync_options = match sync_options {
+            Some(opt) => opt,
+            None => self.default_sync_options().await.clone(),
+        };
 
         // store the current index, so we can remove new addresses with higher indexes later again, if they don't have
         // outputs
@@ -34,36 +38,33 @@ impl Account {
             )
         };
 
-        // Generate addresses below the start indexes
-        if let Some(sync_options) = &sync_options {
-            // public addresses
-            if sync_options.address_start_index != 0 {
-                let mut address_amount_to_generate =
-                    sync_options.address_start_index.abs_diff(highest_public_address_index);
-                // -1 if it's larger than 0, to get the correct amount, because the address with the actual start index
-                // gets generated later
-                address_amount_to_generate = address_amount_to_generate.saturating_sub(1);
-                log::debug!(
-                    "[search_addresses_with_outputs] generate {address_amount_to_generate} public addresses below the start index"
-                );
-                self.generate_addresses(address_amount_to_generate, None).await?;
+        // public addresses
+        if sync_options.address_start_index != 0 {
+            let mut address_amount_to_generate =
+                sync_options.address_start_index.abs_diff(highest_public_address_index);
+            // -1 if it's larger than 0, to get the correct amount, because the address with the actual start index
+            // gets generated later
+            address_amount_to_generate = address_amount_to_generate.saturating_sub(1);
+            log::debug!(
+                "[search_addresses_with_outputs] generate {address_amount_to_generate} public addresses below the start index"
+            );
+            self.generate_addresses(address_amount_to_generate, None).await?;
+        }
+        // internal addresses
+        if sync_options.address_start_index_internal != 0 {
+            let mut address_amount_to_generate = sync_options
+                .address_start_index_internal
+                .abs_diff(highest_internal_address_index.unwrap_or(0));
+            // -1 if it's larger than 0, to get the correct amount, because the address with the actual start index
+            // gets generated later
+            if address_amount_to_generate > 0 && highest_internal_address_index.is_some() {
+                address_amount_to_generate -= 1;
             }
-            // internal addresses
-            if sync_options.address_start_index_internal != 0 {
-                let mut address_amount_to_generate = sync_options
-                    .address_start_index_internal
-                    .abs_diff(highest_internal_address_index.unwrap_or(0));
-                // -1 if it's larger than 0, to get the correct amount, because the address with the actual start index
-                // gets generated later
-                if address_amount_to_generate > 0 && highest_internal_address_index.is_some() {
-                    address_amount_to_generate -= 1;
-                }
-                log::debug!(
-                    "[search_addresses_with_outputs] generate {address_amount_to_generate} internal addresses below the start index"
-                );
-                self.generate_addresses(address_amount_to_generate, Some(GenerateAddressOptions::internal()))
-                    .await?;
-            }
+            log::debug!(
+                "[search_addresses_with_outputs] generate {address_amount_to_generate} internal addresses below the start index"
+            );
+            self.generate_addresses(address_amount_to_generate, Some(GenerateAddressOptions::internal()))
+                .await?;
         }
 
         let mut address_gap_limit_internal = address_gap_limit;
@@ -108,23 +109,10 @@ impl Account {
                 // +1, because we don't want to sync the latest address again
                 .unwrap_or_else(|| highest_internal_address_index.unwrap_or(0) + 1);
 
-            let sync_options = match &mut sync_options {
-                Some(sync_options) => {
-                    sync_options.force_syncing = true;
-                    sync_options.address_start_index = address_start_index;
-                    sync_options.address_start_index_internal = address_start_index_internal;
-                    Some(sync_options.clone())
-                }
-                None => Some(SyncOptions {
-                    force_syncing: true,
-                    // skip previous addresses
-                    address_start_index,
-                    address_start_index_internal,
-                    ..Default::default()
-                }),
-            };
-
-            self.sync(sync_options).await?;
+            sync_options.force_syncing = true;
+            sync_options.address_start_index = address_start_index;
+            sync_options.address_start_index_internal = address_start_index_internal;
+            self.sync(Some(sync_options.clone())).await?;
 
             let output_count = self.read().await.unspent_outputs.len();
 

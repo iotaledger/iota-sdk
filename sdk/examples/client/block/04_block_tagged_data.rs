@@ -20,7 +20,7 @@ async fn main() -> Result<()> {
     });
 
     // Create a client with that node.
-    let client = Client::builder().with_node(&node_url)?.finish()?;
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Create and send the block with tag and data.
     let block = client
@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
     }
 
     println!(
-        "\nBlock with tag and data sent: {}/block/{}",
+        "Block with tag and data sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );

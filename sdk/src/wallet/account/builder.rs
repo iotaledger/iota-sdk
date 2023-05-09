@@ -110,7 +110,10 @@ impl AccountBuilder {
             }
         }
 
-        let client = self.client_options.read().await.clone().finish()?;
+        let client = match accounts.first() {
+            Some(account) => account.client.clone(),
+            None => self.client_options.read().await.clone().finish().await?,
+        };
 
         // If addresses are provided we will use them directly without the additional checks, because then we assume
         // that it's for offline signing and the secretManager can't be used
@@ -194,7 +197,8 @@ impl AccountBuilder {
             self.event_emitter.clone(),
             #[cfg(feature = "storage")]
             self.storage_manager.clone(),
-        );
+        )
+        .await?;
         #[cfg(feature = "storage")]
         account.save(None).await?;
         accounts.push(account.clone());

@@ -3,7 +3,6 @@
 
 /// MQTT related errors.
 #[derive(Debug, thiserror::Error)]
-#[allow(clippy::large_enum_variant)]
 pub enum Error {
     /// Client error.
     #[error("client error {0}")]

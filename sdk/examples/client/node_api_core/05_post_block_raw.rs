@@ -17,14 +17,18 @@ async fn main() -> Result<()> {
     });
 
     // Create a client with that node.
-    let client = Client::builder().with_node(&node_url)?.finish()?;
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Create the block.
     let block = client.block().finish().await?;
     // Post the block as raw bytes.
     let block_id = client.post_block_raw(&block).await?;
 
-    println!("Posted: {block_id:?}");
+    println!(
+        "Posted raw block: {}/block/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
+        block_id
+    );
 
     Ok(())
 }

@@ -85,9 +85,9 @@ impl Account {
     ///
     /// let transaction = account.create_alias_output(alias_options, None).await?;
     /// println!(
-    ///     "Transaction: {} Block sent: http://localhost:14265/api/core/v2/blocks/{}",
-    ///     transaction.transaction_id,
-    ///     transaction.block_id.expect("no block created yet")
+    ///     "Transaction sent: {}/transaction/{}",
+    ///     std::env::var("EXPLORER_URL").unwrap(),
+    ///     transaction.transaction_id
     /// );
     /// ```
     pub async fn create_alias_output(

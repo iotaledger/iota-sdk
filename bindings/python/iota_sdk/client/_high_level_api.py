@@ -10,11 +10,11 @@ class HighLevelAPI():
             'outputIds': output_ids
         })
 
-    def try_get_outputs(self, output_ids):
+    def get_outputs_ignore_errors(self, output_ids):
         """Try to get OutputResponse from provided OutputIds.
            Requests are sent in parallel and errors are ignored, can be useful for spent outputs.
         """
-        return self._call_method('tryGetOutputs', {
+        return self._call_method('getOutputsIgnoreErrors', {
             'outputIds': output_ids
         })
 

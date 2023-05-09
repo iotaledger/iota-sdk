@@ -8,7 +8,10 @@
 //!
 //! `cargo run --example burn_native_token --release`
 
-use iota_sdk::wallet::{Result, Wallet, U256};
+use iota_sdk::{
+    wallet::{Result, Wallet},
+    U256,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -40,10 +43,17 @@ async fn main() -> Result<()> {
         // Burn a native token
         let burn_amount = U256::from(1);
         let transaction = account.burn_native_token(*token_id, burn_amount, None).await?;
+        println!("Transaction sent: {}", transaction.transaction_id);
 
-        account
+        let block_id = account
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
+
+        println!(
+            "Block included: {}/block/{}",
+            std::env::var("EXPLORER_URL").unwrap(),
+            block_id
+        );
 
         let balance = account.sync(None).await?;
 

@@ -21,7 +21,8 @@ async fn main() -> Result<()> {
     let client = Client::builder()
         // The node needs to have the indexer plugin enabled.
         .with_node(&node_url)?
-        .finish()?;
+        .finish()
+        .await?;
 
     // Take the address from command line argument or use a default one.
     let address = std::env::args()
@@ -36,12 +37,12 @@ async fn main() -> Result<()> {
         ])
         .await?;
 
-    println!("Address output IDs {output_ids_response:#?}");
+    println!("Alias output IDs: {output_ids_response:#?}");
 
     // Get the outputs by their IDs.
     let outputs_responses = client.get_outputs(output_ids_response.items).await?;
 
-    println!("Alias outputs: {outputs_responses:#?}");
+    println!("{outputs_responses:#?}");
 
     Ok(())
 }

@@ -111,7 +111,7 @@ impl Account {
             #[cfg(target_family = "wasm")]
             {
                 results.push(
-                    self.get_alias_and_foundry_output_ids(&bech32_address, sync_options.clone())
+                    self.get_alias_and_foundry_output_ids(&bech32_address, sync_options)
                         .await,
                 )
             }
@@ -125,7 +125,7 @@ impl Account {
                         let account = self.clone();
                         tokio::spawn(async move {
                             account
-                                .get_alias_and_foundry_output_ids(&bech32_address, sync_options)
+                                .get_alias_and_foundry_output_ids(&bech32_address, &sync_options)
                                 .await
                         })
                         .await

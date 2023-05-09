@@ -21,7 +21,6 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 /// Error type of the iota client crate.
 #[derive(Debug, thiserror::Error)]
-#[allow(clippy::large_enum_variant)]
 pub enum Error {
     /// Block dtos error
     #[error("{0}")]

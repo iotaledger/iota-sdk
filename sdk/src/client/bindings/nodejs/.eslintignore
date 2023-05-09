@@ -1,7 +1,0 @@
-scripts
-target
-**/node_modules/
-**/out/
-**/tests/
-**/dist
-package.json

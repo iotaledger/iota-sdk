@@ -25,7 +25,8 @@ async fn main() -> Result<()> {
     // Create a client instance
     let client = Client::builder()
         .with_node(&node_url)? // Insert your node URL here
-        .finish()?;
+        .finish()
+        .await?;
 
     // First address from the seed below is atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r
     let secret_manager =
@@ -58,7 +59,7 @@ async fn main() -> Result<()> {
     println!("{block:#?}");
 
     println!(
-        "Transaction sent: {}/block/{}",
+        "Block with custom inputs sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );

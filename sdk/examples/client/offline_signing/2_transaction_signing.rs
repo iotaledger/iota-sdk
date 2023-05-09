@@ -14,7 +14,7 @@ use std::{
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
-        secret::{SecretManageExt, SecretManager},
+        secret::{SecretManager, SignTransactionEssence},
         Result,
     },
     types::block::payload::transaction::TransactionPayload,
