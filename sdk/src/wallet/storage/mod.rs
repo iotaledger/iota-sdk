@@ -49,7 +49,7 @@ impl Storage {
         }
     }
 
-    async fn set<T: Serialize + Send>(&mut self, key: &str, record: T) -> crate::wallet::Result<()> {
+    async fn set<T: Serialize + Send>(&self, key: &str, record: T) -> crate::wallet::Result<()> {
         let record = serde_json::to_string(&record)?;
         self.inner
             .set(
@@ -65,7 +65,7 @@ impl Storage {
     }
 
     #[allow(dead_code)]
-    async fn batch_set(&mut self, records: HashMap<String, String>) -> crate::wallet::Result<()> {
+    async fn batch_set(&self, records: HashMap<String, String>) -> crate::wallet::Result<()> {
         self.inner
             .batch_set(if let Some(key) = &self.encryption_key {
                 let mut encrypted_records = HashMap::new();
@@ -80,7 +80,7 @@ impl Storage {
             .await
     }
 
-    async fn remove(&mut self, key: &str) -> crate::wallet::Result<()> {
+    async fn remove(&self, key: &str) -> crate::wallet::Result<()> {
         self.inner.remove(key).await
     }
 }

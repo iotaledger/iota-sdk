@@ -35,7 +35,7 @@ impl Wallet {
             let wallet_builder = WalletBuilder::from_wallet(self).await.with_client_options(options);
 
             self.storage_manager
-                .lock()
+                .read()
                 .await
                 .save_wallet_data(&wallet_builder)
                 .await?;
@@ -155,7 +155,7 @@ impl Wallet {
                 .with_client_options(new_client_options.clone());
 
             self.storage_manager
-                .lock()
+                .read()
                 .await
                 .save_wallet_data(&wallet_builder)
                 .await?;

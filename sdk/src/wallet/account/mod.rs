@@ -157,7 +157,7 @@ pub struct Account {
     #[cfg(feature = "events")]
     pub(crate) event_emitter: Arc<Mutex<EventEmitter>>,
     #[cfg(feature = "storage")]
-    pub(crate) storage_manager: Arc<Mutex<StorageManager>>,
+    pub(crate) storage_manager: Arc<RwLock<StorageManager>>,
 }
 
 // impl Deref so we can use `account.read()` instead of `account.details.read()`
@@ -176,11 +176,11 @@ impl Account {
         client: Client,
         secret_manager: Arc<RwLock<SecretManager>>,
         #[cfg(feature = "events")] event_emitter: Arc<Mutex<EventEmitter>>,
-        #[cfg(feature = "storage")] storage_manager: Arc<Mutex<StorageManager>>,
+        #[cfg(feature = "storage")] storage_manager: Arc<RwLock<StorageManager>>,
     ) -> Result<Self> {
         #[cfg(feature = "storage")]
         let default_sync_options = storage_manager
-            .lock()
+            .read()
             .await
             .get_default_sync_options(*details.index())
             .await?
@@ -403,13 +403,13 @@ impl Account {
         log::debug!("[save] saving account to database");
         match updated_account {
             Some(account) => {
-                let mut storage_manager = self.storage_manager.lock().await;
+                let mut storage_manager = self.storage_manager.write().await;
                 storage_manager.save_account(account).await?;
                 drop(storage_manager);
             }
             None => {
                 let account_details = self.read().await;
-                let mut storage_manager = self.storage_manager.lock().await;
+                let mut storage_manager = self.storage_manager.write().await;
                 storage_manager.save_account(&account_details).await?;
                 drop(storage_manager);
                 drop(account_details);

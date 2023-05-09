@@ -91,7 +91,7 @@ impl Wallet {
                 #[cfg(feature = "storage")]
                 {
                     log::debug!("[recover_accounts] delete empty account {}", account_index);
-                    self.storage_manager.lock().await.remove_account(account_index).await?;
+                    self.storage_manager.write().await.remove_account(account_index).await?;
                 }
             }
         }

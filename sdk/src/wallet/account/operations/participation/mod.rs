@@ -61,7 +61,7 @@ impl Account {
 
         let mut spent_cached_outputs = self
             .storage_manager
-            .lock()
+            .read()
             .await
             .get_cached_participation_output_status(self.read().await.index)
             .await?;
@@ -209,7 +209,7 @@ impl Account {
         // Only store updated data if new outputs got added
         if spent_cached_outputs.len() > restored_spent_cached_outputs_len {
             self.storage_manager
-                .lock()
+                .read()
                 .await
                 .set_cached_participation_output_status(self.read().await.index, spent_cached_outputs)
                 .await?;
@@ -239,7 +239,7 @@ impl Account {
         let account_index = self.read().await.index;
         let events = self
             .storage_manager
-            .lock()
+            .read()
             .await
             .get_participation_events(account_index)
             .await?;
@@ -268,7 +268,7 @@ impl Account {
         let account_index = self.read().await.index;
         let events = self
             .storage_manager
-            .lock()
+            .read()
             .await
             .get_participation_events(account_index)
             .await?;

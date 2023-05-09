@@ -32,6 +32,7 @@ prefix-hex = { version = "0.7.0", default-features = false, features = [ "primit
 primitive-types = { version = "0.12.1", default-features = false }
 serde = { version = "1.0.160", default-features = false, features = [ "derive" ] }
 serde_json = { version = "1.0.95", default-features = false, features = [ "alloc" ] }
+time = { version = "0.3.20", default-features = false, features = [ "serde", "macros" ] }
 
 # Optional dependencies
 async-trait = { version = "0.1.68", default-features = false, optional = true }

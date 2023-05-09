@@ -59,7 +59,7 @@ impl Account {
             };
             let account_index = self.read().await.index;
             self.storage_manager
-                .lock()
+                .read()
                 .await
                 .insert_participation_event(account_index, event_with_node.clone())
                 .await?;
@@ -73,7 +73,7 @@ impl Account {
     pub async fn deregister_participation_event(&self, id: &ParticipationEventId) -> crate::wallet::Result<()> {
         let account_index = self.read().await.index;
         self.storage_manager
-            .lock()
+            .read()
             .await
             .remove_participation_event(account_index, id)
             .await?;
@@ -88,7 +88,7 @@ impl Account {
         let account_index = self.read().await.index;
         Ok(self
             .storage_manager
-            .lock()
+            .read()
             .await
             .get_participation_events(account_index)
             .await?
@@ -102,7 +102,7 @@ impl Account {
     ) -> crate::wallet::Result<HashMap<ParticipationEventId, ParticipationEventWithNodes>> {
         let account_index = self.read().await.index;
         self.storage_manager
-            .lock()
+            .read()
             .await
             .get_participation_events(account_index)
             .await

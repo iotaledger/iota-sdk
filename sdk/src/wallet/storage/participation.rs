@@ -17,7 +17,7 @@ use crate::{
 
 impl StorageManager {
     pub(crate) async fn insert_participation_event(
-        &mut self,
+        &self,
         account_index: u32,
         event_with_nodes: ParticipationEventWithNodes,
     ) -> crate::wallet::Result<()> {
@@ -41,7 +41,7 @@ impl StorageManager {
     }
 
     pub(crate) async fn remove_participation_event(
-        &mut self,
+        &self,
         account_index: u32,
         id: &ParticipationEventId,
     ) -> crate::wallet::Result<()> {
@@ -81,7 +81,7 @@ impl StorageManager {
     }
 
     pub(crate) async fn set_cached_participation_output_status(
-        &mut self,
+        &self,
         account_index: u32,
         outputs_participation: HashMap<OutputId, OutputStatusResponse>,
     ) -> crate::wallet::Result<()> {

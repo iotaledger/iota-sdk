@@ -29,7 +29,7 @@ impl Account {
         #[cfg(feature = "storage")]
         {
             let index = *self.read().await.index();
-            let mut storage_manager = self.storage_manager.lock().await;
+            let storage_manager = self.storage_manager.read().await;
             storage_manager.set_default_sync_options(index, &options).await?;
         }
 

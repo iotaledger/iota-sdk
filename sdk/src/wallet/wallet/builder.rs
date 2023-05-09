@@ -26,7 +26,7 @@ use crate::wallet::{
 };
 use crate::{
     client::secret::SecretManager,
-    wallet::{Account, ClientOptions, Wallet},
+    wallet::{migration::MigrationVersion, Account, ClientOptions, Wallet},
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -38,6 +38,7 @@ pub struct WalletBuilder {
     storage_options: Option<StorageOptions>,
     #[serde(default, skip_serializing, skip_deserializing)]
     pub(crate) secret_manager: Option<Arc<RwLock<SecretManager>>>,
+    pub(crate) migration: Option<MigrationVersion>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -135,10 +136,12 @@ impl WalletBuilder {
         let storage = Memory::default();
 
         #[cfg(feature = "storage")]
-        let mut storage_manager = Arc::new(tokio::sync::Mutex::new(StorageManager::new(storage, None).await?));
+        let mut storage_manager = Arc::new(tokio::sync::RwLock::new(
+            StorageManager::new(storage, None, self.migration.clone()).await?,
+        ));
 
         #[cfg(feature = "storage")]
-        let read_manager_builder = storage_manager.lock().await.get_wallet_data().await?;
+        let read_manager_builder = storage_manager.read().await.get_wallet_data().await?;
         #[cfg(not(feature = "storage"))]
         let read_manager_builder: Option<Self> = None;
 
@@ -180,13 +183,13 @@ impl WalletBuilder {
 
         // Store wallet data in storage
         #[cfg(feature = "storage")]
-        storage_manager.lock().await.save_wallet_data(&self).await?;
+        storage_manager.read().await.save_wallet_data(&self).await?;
 
         #[cfg(feature = "events")]
         let event_emitter = Arc::new(tokio::sync::Mutex::new(EventEmitter::new()));
 
         #[cfg(feature = "storage")]
-        let mut accounts = storage_manager.lock().await.get_accounts().await.unwrap_or_default();
+        let mut accounts = storage_manager.write().await.get_accounts().await.unwrap_or_default();
 
         // It happened that inputs got locked, the transaction failed, but they weren't unlocked again, so we do this
         // here
@@ -263,6 +266,7 @@ impl WalletBuilder {
             coin_type: Some(wallet.coin_type.load(Ordering::Relaxed)),
             storage_options: Some(wallet.storage_options.clone()),
             secret_manager: Some(wallet.secret_manager.clone()),
+            migration: Some(wallet.storage_manager.read().await.migration.clone()),
         }
     }
 }

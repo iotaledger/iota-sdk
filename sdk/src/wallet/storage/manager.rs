@@ -10,6 +10,7 @@ use crate::{
     client::secret::{SecretManager, SecretManagerDto},
     wallet::{
         account::{AccountDetails, SyncOptions},
+        migration::{latest_migration_version, MigrationVersion},
         storage::{constants::*, Storage, StorageAdapter},
         WalletBuilder,
     },
@@ -45,14 +46,16 @@ pub struct StorageManager {
     pub(crate) storage: Storage,
     // account indexes for accounts in the database
     account_indexes: Vec<u32>,
+    pub(crate) migration: MigrationVersion,
 }
 
 impl StorageManager {
     pub(crate) async fn new(
         storage: impl StorageAdapter + Send + Sync + 'static,
         encryption_key: impl Into<Option<[u8; 32]>> + Send,
+        migration: impl Into<Option<MigrationVersion>> + Send,
     ) -> crate::wallet::Result<Self> {
-        let mut storage = Storage {
+        let storage = Storage {
             inner: Box::new(storage) as _,
             encryption_key: encryption_key.into(),
         };
@@ -74,6 +77,7 @@ impl StorageManager {
         let storage_manager = Self {
             storage,
             account_indexes,
+            migration: migration.into().unwrap_or(latest_migration_version()),
         };
 
         Ok(storage_manager)
@@ -92,7 +96,7 @@ impl StorageManager {
         self.storage.get(key).await
     }
 
-    pub async fn save_wallet_data(&mut self, wallet_builder: &WalletBuilder) -> crate::wallet::Result<()> {
+    pub async fn save_wallet_data(&self, wallet_builder: &WalletBuilder) -> crate::wallet::Result<()> {
         log::debug!("save_wallet_data");
         self.storage.set(WALLET_INDEXATION_KEY, wallet_builder).await?;
 
@@ -183,7 +187,7 @@ impl StorageManager {
     }
 
     pub async fn set_default_sync_options(
-        &mut self,
+        &self,
         account_index: u32,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<()> {

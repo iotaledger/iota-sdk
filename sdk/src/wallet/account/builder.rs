@@ -33,7 +33,7 @@ pub struct AccountBuilder {
     #[cfg(feature = "events")]
     event_emitter: Arc<tokio::sync::Mutex<EventEmitter>>,
     #[cfg(feature = "storage")]
-    storage_manager: Arc<tokio::sync::Mutex<StorageManager>>,
+    storage_manager: Arc<tokio::sync::RwLock<StorageManager>>,
 }
 
 impl AccountBuilder {
@@ -44,7 +44,7 @@ impl AccountBuilder {
         coin_type: u32,
         secret_manager: Arc<RwLock<SecretManager>>,
         #[cfg(feature = "events")] event_emitter: Arc<tokio::sync::Mutex<EventEmitter>>,
-        #[cfg(feature = "storage")] storage_manager: Arc<tokio::sync::Mutex<StorageManager>>,
+        #[cfg(feature = "storage")] storage_manager: Arc<tokio::sync::RwLock<StorageManager>>,
     ) -> Self {
         Self {
             addresses: None,

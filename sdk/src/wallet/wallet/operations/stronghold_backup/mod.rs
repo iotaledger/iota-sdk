@@ -202,7 +202,7 @@ impl Wallet {
             // drop secret manager, otherwise we get a deadlock in save_wallet_data
             drop(secret_manager);
             self.storage_manager
-                .lock()
+                .read()
                 .await
                 .save_wallet_data(&wallet_builder)
                 .await?;

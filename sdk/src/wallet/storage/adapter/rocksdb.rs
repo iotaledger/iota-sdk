@@ -48,13 +48,13 @@ impl StorageAdapter for RocksdbStorageAdapter {
     }
 
     /// Saves or updates a record on the storage.
-    async fn set(&mut self, key: &str, record: String) -> crate::wallet::Result<()> {
+    async fn set(&self, key: &str, record: String) -> crate::wallet::Result<()> {
         self.db.lock().await.put(key.as_bytes(), record.as_bytes())?;
         Ok(())
     }
 
     /// Batch writes records to the storage.
-    async fn batch_set(&mut self, records: HashMap<String, String>) -> crate::wallet::Result<()> {
+    async fn batch_set(&self, records: HashMap<String, String>) -> crate::wallet::Result<()> {
         let mut batch = WriteBatch::default();
         for (key, value) in records {
             batch.put(key.as_bytes(), value.as_bytes());
@@ -64,7 +64,7 @@ impl StorageAdapter for RocksdbStorageAdapter {
     }
 
     /// Removes a record from the storage.
-    async fn remove(&mut self, key: &str) -> crate::wallet::Result<()> {
+    async fn remove(&self, key: &str) -> crate::wallet::Result<()> {
         self.db.lock().await.delete(key.as_bytes())?;
         Ok(())
     }
