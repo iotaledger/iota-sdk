@@ -925,7 +925,7 @@ fn burn_foundry_and_its_alias() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
+        outputs,
         addresses(vec![BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
