@@ -12,7 +12,7 @@ use crate::{
         api::{
             address::search_address,
             block_builder::input_selection::{Burn, InputSelection, Selected},
-            input_selection::{core::requirement::alias::is_alias_transition_internal, is_alias_transition},
+            input_selection::is_alias_transition,
             ClientBlockBuilder,
         },
         constants::HD_WALLET_TYPE,
@@ -43,7 +43,7 @@ impl<'a> ClientBlockBuilder<'a> {
 
                 if !output_with_meta.metadata().is_spent() {
                     let alias_transition =
-                        is_alias_transition_internal(output_with_meta.output(), *input.output_id(), &self.outputs);
+                        is_alias_transition(output_with_meta.output(), *input.output_id(), &self.outputs);
                     let (unlock_address, _) = output_with_meta.output().required_and_unlocked_address(
                         current_time,
                         input.output_id(),
@@ -98,7 +98,7 @@ impl<'a> ClientBlockBuilder<'a> {
         // Assume that we own the addresses for inputs that are provided
         let mut available_input_addresses = Vec::new();
         for input in &inputs_data {
-            let alias_transition = is_alias_transition(input, &self.outputs);
+            let alias_transition = is_alias_transition(&input.output, *input.output_id(), &self.outputs);
             let (required_unlock_address, unlocked_alias_or_nft_address) = input.output.required_and_unlocked_address(
                 current_time,
                 input.output_id(),

@@ -7,18 +7,7 @@ use crate::{
     types::block::output::{AliasId, AliasTransition, Output, OutputId},
 };
 
-// Returns
-// - the alias transition type of a given input and outputs
-// - whether the output was provided or not, to differentiate a burn from a proper governance transition
-pub(crate) fn is_alias_transition(input: &InputSigningData, outputs: &[Output]) -> Option<(AliasTransition, bool)> {
-    is_alias_transition_internal(&input.output, *input.output_id(), outputs)
-}
-
-pub(crate) fn is_alias_transition_internal(
-    input: &Output,
-    input_id: OutputId,
-    outputs: &[Output],
-) -> Option<(AliasTransition, bool)> {
+pub fn is_alias_transition(input: &Output, input_id: OutputId, outputs: &[Output]) -> Option<(AliasTransition, bool)> {
     if let Output::Alias(alias_input) = &input {
         let alias_id = alias_input.alias_id_non_null(&input_id);
         // Checks if the alias exists in the outputs and gets the transition type.
@@ -136,7 +125,9 @@ impl InputSelection {
         // PANIC: safe to unwrap as it's been checked that both can't be None at the same time.
         let input = selected_input.unwrap_or_else(|| &self.available_inputs[available_index.unwrap()]);
 
-        if is_alias_transition(input, &self.outputs) == Some((AliasTransition::Governance, true)) {
+        if is_alias_transition(&input.output, *input.output_id(), &self.outputs)
+            == Some((AliasTransition::Governance, true))
+        {
             return Err(Error::UnfulfillableRequirement(Requirement::Alias(
                 alias_id,
                 alias_transition,

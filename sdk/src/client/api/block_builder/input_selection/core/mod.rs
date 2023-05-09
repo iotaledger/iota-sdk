@@ -60,7 +60,8 @@ pub struct Selected {
 
 impl InputSelection {
     fn required_alias_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
-        let alias_transition = is_alias_transition(input, &self.outputs).map(|transition| transition.0);
+        let alias_transition =
+            is_alias_transition(&input.output, *input.output_id(), &self.outputs).map(|transition| transition.0);
         let required_address = input
             .output
             .required_and_unlocked_address(self.timestamp, input.output_id(), alias_transition)?
@@ -267,7 +268,8 @@ impl InputSelection {
         // filter for ed25519 address first
         let (mut sorted_inputs, alias_nft_address_inputs): (Vec<InputSigningData>, Vec<InputSigningData>) =
             inputs.into_iter().partition(|input_signing_data| {
-                let alias_transition = is_alias_transition(input_signing_data, outputs);
+                let alias_transition =
+                    is_alias_transition(&input_signing_data.output, *input_signing_data.output_id(), outputs);
                 let (input_address, _) = input_signing_data
                     .output
                     .required_and_unlocked_address(
@@ -282,7 +284,7 @@ impl InputSelection {
             });
 
         for input in alias_nft_address_inputs {
-            let alias_transition = is_alias_transition(&input, outputs);
+            let alias_transition = is_alias_transition(&input.output, *input.output_id(), outputs);
             let (input_address, _) = input.output.required_and_unlocked_address(
                 time,
                 input.output_id(),
@@ -325,7 +327,11 @@ impl InputSelection {
                     if let Some(alias_or_nft_address) = alias_or_nft_address {
                         // Check for existing outputs for this address, and insert before
                         match sorted_inputs.iter().position(|input_signing_data| {
-                            let alias_transition = is_alias_transition(input_signing_data, outputs);
+                            let alias_transition = is_alias_transition(
+                                &input_signing_data.output,
+                                *input_signing_data.output_id(),
+                                outputs,
+                            );
                             let (input_address, _) = input_signing_data
                                 .output
                                 .required_and_unlocked_address(
