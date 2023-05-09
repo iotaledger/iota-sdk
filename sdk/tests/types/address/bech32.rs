@@ -16,6 +16,6 @@ fn ctors() {
     let bech32_address_test = ED25519_BECH32.parse::<Bech32Address>().unwrap();
     assert_eq!(bech32_address_1, bech32_address_test);
 
-    let bech32_address_2 = Bech32Address::try_from_str(ED25519_BECH32).unwrap();
+    let bech32_address_2 = ED25519_BECH32.parse::<Bech32Address>().unwrap();
     assert_eq!(bech32_address_1, bech32_address_2);
 }

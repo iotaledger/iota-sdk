@@ -38,7 +38,6 @@ impl Storage {
                         Ok(Some(serde_json::from_str(&String::from_utf8_lossy(
                             &chacha::aead_decrypt(key, record.as_bytes())?,
                         ))?))
-                        // Ok(Some(serde_json::from_str(&decrypt_record(&record, key).unwrap())?))
                     } else {
                         Ok(Some(serde_json::from_str(&record)?))
                     }
