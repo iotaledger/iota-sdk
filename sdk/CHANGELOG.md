@@ -39,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ClientBuilder::finish` is now async;
 - `Account::read` and `write` now accessible via `details` and `details_mut`;
 - `Wallet::emit_test_event` no longer returns a `Result`;
-
+- `AccountBuilder::new` now takes a wallet;
 ### Removed
 
 - `FilterOptions`'s `Hash` derivation;
