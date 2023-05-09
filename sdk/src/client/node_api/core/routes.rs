@@ -37,7 +37,7 @@ use crate::{
 
 
 /// Info path is the exact path extension for node APIs to request their info.
-pub(crate) static INFO_PATH: &'static str = "api/core/v2/info";
+pub(crate) static INFO_PATH: &str = "api/core/v2/info";
 
 /// NodeInfo wrapper which contains the node info and the url from the node (useful when multiple nodes are used)
 #[derive(Debug, Serialize, Deserialize)]
