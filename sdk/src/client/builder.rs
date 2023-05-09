@@ -402,7 +402,7 @@ impl ClientBuilder {
         Self {
             node_manager_builder: NodeManagerBuilder::from(&*client.inner.node_manager.read().await),
             #[cfg(feature = "mqtt")]
-            broker_options: client.inner.mqtt.broker_options.read().await.clone(),
+            broker_options: *client.inner.mqtt.broker_options.read().await,
             network_info: client.inner.network_info.read().await.clone(),
             api_timeout: client.get_timeout().await,
             remote_pow_timeout: client.get_remote_pow_timeout().await,

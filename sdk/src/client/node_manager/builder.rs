@@ -265,13 +265,13 @@ pub fn validate_url(url: Url) -> Result<Url> {
 impl From<&NodeManager> for NodeManagerBuilder {
     fn from(value: &NodeManager) -> Self {
         Self {
-            primary_node: value.primary_node.clone().map(|n| NodeDto::Node(n)),
-            primary_pow_node: value.primary_pow_node.clone().map(|n| NodeDto::Node(n)),
-            nodes: value.nodes.iter().cloned().map(|n| NodeDto::Node(n)).collect(),
+            primary_node: value.primary_node.clone().map(NodeDto::Node),
+            primary_pow_node: value.primary_pow_node.clone().map(NodeDto::Node),
+            nodes: value.nodes.iter().cloned().map(NodeDto::Node).collect(),
             permanodes: value
                 .permanodes
                 .as_ref()
-                .map(|p| p.iter().cloned().map(|n| NodeDto::Node(n)).collect()),
+                .map(|p| p.iter().cloned().map(NodeDto::Node).collect()),
             ignore_node_health: value.ignore_node_health,
             node_sync_interval: value.node_sync_interval,
             quorum: value.quorum,
