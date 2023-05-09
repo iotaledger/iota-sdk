@@ -35,7 +35,6 @@ use crate::{
     },
 };
 
-
 /// Info path is the exact path extension for node APIs to request their info.
 pub(crate) static INFO_PATH: &str = "api/core/v2/info";
 
