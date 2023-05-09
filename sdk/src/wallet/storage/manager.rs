@@ -204,7 +204,7 @@ mod tests {
 
     #[tokio::test]
     async fn id() {
-        let storage_manager = StorageManager::new(None, Box::<Memory>::default()).await.unwrap();
+        let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert_eq!(storage_manager.id(), STORAGE_ID);
         assert!(!storage_manager.is_encrypted());
     }
@@ -223,16 +223,16 @@ mod tests {
             b: 42,
             c: -420,
         };
-        let mut storage = Box::<Memory>::default();
+        let mut storage = Memory::default();
         storage.set("key", serde_json::to_string(&rec).unwrap()).await.unwrap();
 
-        let storage_manager = StorageManager::new(None, storage).await.unwrap();
+        let storage_manager = StorageManager::new(storage, None).await.unwrap();
         assert_eq!(Some(rec), storage_manager.get::<Record>("key").await.unwrap());
     }
 
     #[tokio::test]
     async fn save_remove_account() {
-        let mut storage_manager = StorageManager::new(None, Box::<Memory>::default()).await.unwrap();
+        let mut storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert!(storage_manager.get_accounts().await.unwrap().is_empty());
 
         let account_details = AccountDetails::mock();
@@ -248,7 +248,7 @@ mod tests {
 
     #[tokio::test]
     async fn save_get_wallet_data() {
-        let mut storage_manager = StorageManager::new(None, Box::<Memory>::default()).await.unwrap();
+        let mut storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert!(storage_manager.get_wallet_data().await.unwrap().is_none());
 
         let wallet_builder = WalletBuilder::new();

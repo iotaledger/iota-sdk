@@ -118,7 +118,7 @@ mod tests {
 
     #[tokio::test]
     async fn insert_get_remove_participation_event() {
-        let mut storage_manager = StorageManager::new(None, Box::<Memory>::default()).await.unwrap();
+        let mut storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert!(storage_manager.get_participation_events(0).await.unwrap().is_empty());
 
         let event_with_nodes = ParticipationEventWithNodes::mock();
@@ -144,7 +144,7 @@ mod tests {
 
     #[tokio::test]
     async fn set_get_cached_participation_output_status() {
-        let mut storage_manager = StorageManager::new(None, Box::<Memory>::default()).await.unwrap();
+        let mut storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert!(
             storage_manager
                 .get_cached_participation_output_status(0)
