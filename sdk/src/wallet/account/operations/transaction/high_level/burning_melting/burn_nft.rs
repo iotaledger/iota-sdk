@@ -2,28 +2,25 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::api::input_selection::Burn,
+    client::api::{input_selection::Burn, PreparedTransactionData},
     types::block::{
         address::{Address, NftAddress},
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NftId, Output, OutputId},
     },
     wallet::{
-        account::{
-            operations::{helpers::time::can_output_be_unlocked_now, transaction::Transaction},
-            Account, TransactionOptions,
-        },
+        account::{operations::helpers::time::can_output_be_unlocked_now, Account, TransactionOptions},
         Error,
     },
 };
 
 impl Account {
     /// Function to burn an nft output.
-    pub async fn burn_nft(
+    pub async fn prepare_burn_nft(
         &self,
         nft_id: NftId,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
-        log::debug!("[TRANSACTION] burn_nft");
+    ) -> crate::wallet::Result<PreparedTransactionData> {
+        log::debug!("[TRANSACTION] prepare_burn_nft");
 
         let current_time = self.client().get_time_checked().await?;
 
@@ -67,7 +64,7 @@ impl Account {
             }),
         };
 
-        self.send(outputs, options).await
+        self.prepare_transaction(outputs, options).await
     }
 
     // Get the current output id for the nft and build a basic output with the amount, native tokens and

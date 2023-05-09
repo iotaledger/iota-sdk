@@ -144,7 +144,7 @@ export class Account {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'burnNativeToken',
+                name: 'prepareBurnNativeToken',
                 data: {
                     tokenId,
                     burnAmount,
@@ -171,7 +171,7 @@ export class Account {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'burnNft',
+                name: 'prepareBurnNft',
                 data: {
                     nftId,
                     options: transactionOptions,

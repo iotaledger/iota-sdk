@@ -491,32 +491,32 @@ impl WalletMessageHandler {
 
                 Ok(Response::Output(OutputDto::from(&output)))
             }
-            AccountMethod::BurnNativeToken {
+            AccountMethod::PrepareBurnNativeToken {
                 token_id,
                 burn_amount,
                 options,
             } => {
                 convert_async_panics(|| async {
-                    let transaction = account
-                        .burn_native_token(
+                    let data = account
+                        .prepare_burn_native_token(
                             TokenId::try_from(&token_id)?,
                             U256::try_from(&burn_amount).map_err(|_| Error::InvalidField("burn_amount"))?,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
                 })
                 .await
             }
-            AccountMethod::BurnNft { nft_id, options } => {
+            AccountMethod::PrepareBurnNft { nft_id, options } => {
                 convert_async_panics(|| async {
-                    let transaction = account
-                        .burn_nft(
+                    let data = account
+                        .prepare_burn_nft(
                             NftId::try_from(&nft_id)?,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
                 })
                 .await
             }

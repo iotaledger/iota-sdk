@@ -27,28 +27,28 @@ use crate::{method::AccountMethod, Response, Result};
 
 pub(crate) async fn call_account_method_internal(account: &Account, method: AccountMethod) -> Result<Response> {
     let response = match method {
-        AccountMethod::BurnNativeToken {
+        AccountMethod::PrepareBurnNativeToken {
             token_id,
             burn_amount,
             options,
         } => {
-            let transaction = account
-                .burn_native_token(
+            let data = account
+                .prepare_burn_native_token(
                     TokenId::try_from(&token_id)?,
                     U256::try_from(&burn_amount).map_err(|_| Error::InvalidField("burn_amount"))?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        AccountMethod::BurnNft { nft_id, options } => {
-            let transaction = account
-                .burn_nft(
+        AccountMethod::PrepareBurnNft { nft_id, options } => {
+            let data = account
+                .prepare_burn_nft(
                     NftId::try_from(&nft_id)?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         AccountMethod::ConsolidateOutputs {
             force,

@@ -4,8 +4,6 @@ import type {
     __BuildBasicOutputMethod__,
     __BuildFoundryOutputMethod__,
     __BuildNftOutputMethod__,
-    __BurnNativeTokenMethod__,
-    __BurnNftMethod__,
     __ClaimOutputsMethod__,
     __ConsolidateOutputsMethod__,
     __CreateAliasOutputMethod__,
@@ -23,6 +21,8 @@ import type {
     __AddressesWithUnspentOutputsMethod__,
     __OutputsMethod__,
     __PendingTransactionsMethod__,
+    __PrepareBurnNativeTokenMethod__,
+    __PrepareBurnNftMethod__,
     __IncomingTransactionsMethod__,
     __TransactionsMethod__,
     __UnspentOutputsMethod__,
@@ -91,8 +91,6 @@ export type __AccountMethod__ =
     | __BuildBasicOutputMethod__
     | __BuildFoundryOutputMethod__
     | __BuildNftOutputMethod__
-    | __BurnNativeTokenMethod__
-    | __BurnNftMethod__
     | __ClaimOutputsMethod__
     | __ConsolidateOutputsMethod__
     | __CreateAliasOutputMethod__
@@ -114,6 +112,8 @@ export type __AccountMethod__ =
     | __AddressesWithUnspentOutputsMethod__
     | __OutputsMethod__
     | __PendingTransactionsMethod__
+    | __PrepareBurnNativeTokenMethod__
+    | __PrepareBurnNftMethod__
     | __IncomingTransactionsMethod__
     | __TransactionsMethod__
     | __UnspentOutputsMethod__

@@ -35,27 +35,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 pub enum AccountMethod {
-    /// Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
-    /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
-    /// recommended to use melting, if the foundry output is available.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    BurnNativeToken {
-        /// Native token id
-        token_id: TokenIdDto,
-        /// To be burned amount
-        burn_amount: U256Dto,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
-    /// deposit return, timelock or expiration unlock condition. This should be preferred over burning, because after
-    /// burning, the foundry can never be destroyed anymore.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    BurnNft {
-        nft_id: NftIdDto,
-        options: Option<TransactionOptionsDto>,
-    },
     /// Consolidate outputs.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
@@ -181,6 +160,27 @@ pub enum AccountMethod {
     /// Get account balance information.
     /// Expected response: [`Balance`](crate::Response::Balance)
     GetBalance,
+    /// Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
+    /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
+    /// recommended to use melting, if the foundry output is available.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareBurnNativeToken {
+        /// Native token id
+        token_id: TokenIdDto,
+        /// To be burned amount
+        burn_amount: U256Dto,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
+    /// deposit return, timelock or expiration unlock condition. This should be preferred over burning, because after
+    /// burning, the foundry can never be destroyed anymore.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareBurnNft {
+        nft_id: NftIdDto,
+        options: Option<TransactionOptionsDto>,
+    },
     /// Prepare an output.
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]

@@ -9,7 +9,7 @@ use std::{
 use primitive_types::U256;
 
 use crate::{
-    client::api::input_selection::Burn,
+    client::api::{input_selection::Burn, PreparedTransactionData},
     types::block::{
         input::INPUT_COUNT_MAX,
         output::{
@@ -17,7 +17,7 @@ use crate::{
             NftOutputBuilder, Output, OutputId, TokenId, OUTPUT_COUNT_MAX,
         },
     },
-    wallet::account::{operations::transaction::Transaction, types::OutputData, Account, TransactionOptions},
+    wallet::account::{types::OutputData, Account, TransactionOptions},
 };
 
 const NATIVE_TOKEN_OVERFLOW: &str = "NativeTokensOverflow";
@@ -48,13 +48,13 @@ impl Account {
     /// Function to burn native tokens. This doesn't require the foundry output which minted them, but will not increase
     /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
     /// recommended to use `decrease_native_token_supply()`, if the foundry output is available.
-    pub async fn burn_native_token(
+    pub async fn prepare_burn_native_token(
         &self,
         token_id: TokenId,
         burn_amount: U256,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
-        log::debug!("[TRANSACTION] burn_native_token");
+    ) -> crate::wallet::Result<PreparedTransactionData> {
+        log::debug!("[TRANSACTION] prepare_burn_native_token");
 
         let StrippedOutputAggregate {
             custom_inputs,
@@ -76,7 +76,7 @@ impl Account {
             }),
         };
 
-        self.send(outputs, options).await
+        self.prepare_transaction(outputs, options).await
     }
 
     // Get inputs with the required native token amount and create new outputs, just with the to be burned native token

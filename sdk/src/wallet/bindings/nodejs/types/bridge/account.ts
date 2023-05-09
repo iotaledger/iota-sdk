@@ -49,8 +49,8 @@ export type __BuildNftOutputMethod__ = {
     data: BuildNftOutputData;
 };
 
-export type __BurnNativeTokenMethod__ = {
-    name: 'burnNativeToken';
+export type __PrepareBurnNativeTokenMethod__ = {
+    name: 'prepareBurnNativeToken';
     data: {
         tokenId: string;
         burnAmount: HexEncodedAmount;
@@ -58,8 +58,8 @@ export type __BurnNativeTokenMethod__ = {
     };
 };
 
-export type __BurnNftMethod__ = {
-    name: 'burnNft';
+export type __PrepareBurnNftMethod__ = {
+    name: 'prepareBurnNft';
     data: {
         nftId: string;
         options?: TransactionOptions;

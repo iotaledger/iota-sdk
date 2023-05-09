@@ -257,13 +257,15 @@ pub async fn addresses_command(account: &Account) -> Result<(), Error> {
 pub async fn burn_native_token_command(account: &Account, token_id: String, amount: String) -> Result<(), Error> {
     println_log_info!("Burning native token {token_id} {amount}.");
 
-    let transaction = account
-        .burn_native_token(
+    let prepared_transaction = account
+        .prepare_burn_native_token(
             TokenId::from_str(&token_id)?,
             U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
             None,
         )
         .await?;
+
+    let transaction = account.sign_and_submit_transaction(prepared_transaction).await?;
 
     println_log_info!(
         "Burning transaction sent:\n{:?}\n{:?}",
@@ -278,7 +280,9 @@ pub async fn burn_native_token_command(account: &Account, token_id: String, amou
 pub async fn burn_nft_command(account: &Account, nft_id: String) -> Result<(), Error> {
     println_log_info!("Burning nft {nft_id}.");
 
-    let transaction = account.burn_nft(NftId::from_str(&nft_id)?, None).await?;
+    let prepared_transaction = account.prepare_burn_nft(NftId::from_str(&nft_id)?, None).await?;
+
+    let transaction = account.sign_and_submit_transaction(prepared_transaction).await?;
 
     println_log_info!(
         "Burning transaction sent:\n{:?}\n{:?}",
