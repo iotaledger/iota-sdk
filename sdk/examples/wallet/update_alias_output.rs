@@ -8,7 +8,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example eupdate_alias_output
+//! cargo run --release --all-features --example update_alias_output
 //! ```
 
 use std::{env, str::FromStr, time::Instant};

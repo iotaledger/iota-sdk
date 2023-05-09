@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will verifiy the integrity of the wallet database.
+//! In this example we will verify the integrity of the wallet database.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
