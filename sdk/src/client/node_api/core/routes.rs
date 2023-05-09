@@ -93,7 +93,7 @@ impl Client {
     pub async fn get_info(&self) -> Result<NodeInfoWrapper> {
         self.inner
             .node_manager
-            .get_request(&INFO_PATH, None, self.get_timeout(), false, false)
+            .get_request(INFO_PATH, None, self.get_timeout(), false, false)
             .await
     }
 
@@ -108,7 +108,7 @@ impl Client {
                     .map_err(|_| crate::client::Error::UrlAuth("password"))?;
             }
         }
-        url.set_path(&INFO_PATH);
+        url.set_path(INFO_PATH);
 
         let resp: InfoResponse =
             crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())
