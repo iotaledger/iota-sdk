@@ -10,13 +10,11 @@ const ED25519_BECH32: &str = "rms1qr47gz3xxjqpjrwd0yu5glhqrth6w0t08npney8000ust2
 fn ctors() {
     let ed25519_address = ED25519_ADDRESS.parse::<Ed25519Address>().unwrap();
     let address = Address::Ed25519(ed25519_address);
-    let bech32_address_1 = Bech32Address::new("rms".to_string(), address).unwrap();
-    assert_eq!(bech32_address_1.inner(), &address);
-    assert_eq!(bech32_address_1.hrp(), "rms");
+    let bech32_address = Bech32Address::new("rms".to_string(), address).unwrap();
+    assert_eq!(bech32_address.inner(), &address);
+    assert_eq!(bech32_address.hrp(), "rms");
 
-    let bech32_address_test = ED25519_BECH32.parse::<Bech32Address>().unwrap();
-    assert_eq!(bech32_address_1, bech32_address_test);
-
-    let bech32_address_2 = ED25519_BECH32.parse::<Bech32Address>().unwrap();
-    assert_eq!(bech32_address_1, bech32_address_2);
+    // This makes sure that the custom `try_from_str` method does the same as `FromStr::from_str` trait impl.
+    assert_eq!(bech32_address, ED25519_BECH32.parse::<Bech32Address>().unwrap());
+    assert_eq!(bech32_address, Bech32Address::try_from_str(ED25519_BECH32).unwrap());
 }
