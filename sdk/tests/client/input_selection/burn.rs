@@ -885,3 +885,59 @@ fn burn_native_tokens() {
         Some(vec![(TOKEN_ID_1, 80), (TOKEN_ID_2, 70)])
     ));
 }
+
+#[test]
+fn burn_foundry_and_its_alias() {
+    let protocol_parameters = protocol_parameters();
+    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
+
+    let inputs = build_inputs(vec![
+        Foundry(
+            1_000_000,
+            alias_id_1,
+            0,
+            SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
+            None,
+        ),
+        Alias(
+            1_000_000,
+            alias_id_1,
+            0,
+            BECH32_ADDRESS_ED25519_0,
+            BECH32_ADDRESS_ED25519_0,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+    ]);
+    let outputs = build_outputs(vec![Basic(
+        500_000,
+        BECH32_ADDRESS_ED25519_0,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )]);
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs.clone(),
+        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        protocol_parameters,
+    )
+    .burn(
+        Burn::new()
+            .add_foundry(inputs[0].output.as_foundry().id())
+            .add_alias(alias_id_1),
+    )
+    .select();
+
+    assert!(matches!(
+        selected,
+        Err(Error::UnfulfillableRequirement(Requirement::Alias(alias_id, AliasTransition::State))) if alias_id == alias_id_1
+    ));
+}
