@@ -3,7 +3,7 @@
 
 use crypto::keys::slip10::Chain;
 use derivative::Derivative;
-use iota_sdk::client::api::{GetAddressesBuilderOptions, PreparedTransactionDataDto};
+use iota_sdk::client::api::{GenerateEvmAddressOptions, GetAddressesBuilderOptions, PreparedTransactionDataDto};
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "stronghold")]
@@ -19,6 +19,8 @@ pub enum SecretManagerMethod {
         /// Addresses generation options
         options: GetAddressesBuilderOptions,
     },
+    /// Generate EVM addresses.
+    GenerateEvmAddress { options: GenerateEvmAddressOptions },
     /// Get the ledger status
     /// Expected response: [`LedgerNanoStatus`](crate::Response::LedgerNanoStatus)
     #[cfg(feature = "ledger_nano")]

@@ -24,6 +24,10 @@ pub(crate) async fn call_secret_manager_method_internal(
                 .await?;
             Response::GeneratedAddresses(addresses)
         }
+        SecretManagerMethod::GenerateEvmAddress { options } => {
+            let addresses = todo!();
+            Response::GeneratedAddresses(addresses)
+        }
         #[cfg(feature = "ledger_nano")]
         SecretManagerMethod::GetLedgerNanoStatus => {
             if let SecretManager::LedgerNano(secret_manager) = secret_manager {

@@ -240,3 +240,9 @@ pub async fn search_address(
         range: format!("{range:?}"),
     })
 }
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct GenerateEvmAddressOptions {
+    pub index: usize,
+    pub internal: bool,
+}
