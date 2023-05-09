@@ -253,8 +253,8 @@ impl From<&NativeTokensBalance> for NativeTokensBalanceDto {
     }
 }
 
+#[cfg(feature = "rand")]
 impl AccountBalance {
-    #[cfg(feature = "rand")]
     pub fn rand_mock() -> Self {
         use rand::Rng;
 
