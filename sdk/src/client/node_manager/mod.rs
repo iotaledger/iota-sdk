@@ -227,7 +227,7 @@ impl NodeManager {
                 match self.http_client.get(node.clone(), timeout).await {
                     Ok(res) => {
                         // Handle node_info extra because we also want to return the url
-                        if path == "api/core/v2/info" {
+                        if path == crate::client::node_api::core::routes::INFO_PATH {
                             let node_info: InfoResponse = res.into_json().await?;
                             let wrapper = crate::client::node_api::core::routes::NodeInfoWrapper {
                                 node_info,

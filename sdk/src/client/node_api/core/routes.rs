@@ -35,6 +35,10 @@ use crate::{
     },
 };
 
+
+/// Info path is the exact path extension for node APIs to request their info.
+pub(crate) static INFO_PATH: &'static str = "api/core/v2/info";
+
 /// NodeInfo wrapper which contains the node info and the url from the node (useful when multiple nodes are used)
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -87,11 +91,9 @@ impl Client {
     /// Returns general information about the node.
     /// GET /api/core/v2/info
     pub async fn get_info(&self) -> Result<NodeInfoWrapper> {
-        let path = "api/core/v2/info";
-
         self.inner
             .node_manager
-            .get_request(path, None, self.get_timeout(), false, false)
+            .get_request(&INFO_PATH, None, self.get_timeout(), false, false)
             .await
     }
 
@@ -106,8 +108,7 @@ impl Client {
                     .map_err(|_| crate::client::Error::UrlAuth("password"))?;
             }
         }
-        let path = "api/core/v2/info";
-        url.set_path(path);
+        url.set_path(&INFO_PATH);
 
         let resp: InfoResponse =
             crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())
@@ -187,12 +188,11 @@ impl Client {
                 let block_with_local_pow = match block_res {
                     Ok(block) => {
                         // reset local PoW state
-                        let mut client_network_info = self
-                            .inner
+                        self.inner
                             .network_info
                             .write()
-                            .map_err(|_| crate::client::Error::PoisonError)?;
-                        client_network_info.local_pow = false;
+                            .map_err(|_| crate::client::Error::PoisonError)?
+                            .local_pow = false;
                         block
                     }
                     Err(e) => {
@@ -256,12 +256,11 @@ impl Client {
                 let block_with_local_pow = match block_res {
                     Ok(block) => {
                         // reset local PoW state
-                        let mut client_network_info = self
-                            .inner
+                        self.inner
                             .network_info
                             .write()
-                            .map_err(|_| crate::client::Error::PoisonError)?;
-                        client_network_info.local_pow = false;
+                            .map_err(|_| crate::client::Error::PoisonError)?
+                            .local_pow = false;
                         block
                     }
                     Err(e) => {
