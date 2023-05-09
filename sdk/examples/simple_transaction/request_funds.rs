@@ -22,14 +22,9 @@ async fn main() -> Result<()> {
 
     // Get the account we generated with `01_create_wallet`
     let account = wallet.get_account("Alice").await?;
-    println!("Account ID");
-
-    wallet
-        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
-        .await?;
 
     let address = account.addresses().await?[0].address().to_string();
-    println!("Address: {}", address);
+    println!("{address}");
 
     let faucet_response = request_funds_from_faucet(&faucet_url, &address).await?;
 
