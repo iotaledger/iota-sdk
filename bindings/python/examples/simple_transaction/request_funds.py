@@ -18,8 +18,6 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
     print(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
     sys.exit(1)
 
-wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
-
 # Sync account with the node
 response = account.sync()
 
