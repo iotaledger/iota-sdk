@@ -895,7 +895,7 @@ fn burn_foundry_and_its_alias() {
         Foundry(
             1_000_000,
             alias_id_1,
-            0,
+            1,
             SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
             None,
         ),
