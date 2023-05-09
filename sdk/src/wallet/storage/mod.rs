@@ -56,8 +56,6 @@ impl Storage {
                 key,
                 if let Some(key) = &self.encryption_key {
                     let output = chacha::aead_encrypt(key, record.as_bytes())?;
-                    // let mut output = Vec::new();
-                    // encrypt_record(record.as_bytes(), key, &mut output).unwrap();
                     serde_json::to_string(&output)?
                 } else {
                     record
