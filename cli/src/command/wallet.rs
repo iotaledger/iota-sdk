@@ -164,6 +164,8 @@ pub async fn migrate_command(path: Option<String>) -> Result<(), Error> {
     StrongholdAdapter::migrate_v2_to_v3(
         path.as_deref().unwrap_or(DEFAULT_STRONGHOLD_SNAPSHOT_PATH),
         &password,
+        "wallet.rs",
+        100,
         None,
         None,
     )?;

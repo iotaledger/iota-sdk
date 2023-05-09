@@ -315,6 +315,8 @@ impl WalletMessageHandler {
             Message::MigrateStrongholdSnapshotV2ToV3 {
                 current_path,
                 current_password,
+                salt,
+                rounds,
                 new_path,
                 new_password,
             } => {
@@ -322,6 +324,8 @@ impl WalletMessageHandler {
                     StrongholdAdapter::migrate_v2_to_v3(
                         &current_path,
                         &current_password,
+                        &salt,
+                        rounds,
                         new_path.as_ref(),
                         new_password.as_deref(),
                     )?;

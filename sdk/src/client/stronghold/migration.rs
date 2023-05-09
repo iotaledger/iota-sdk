@@ -19,21 +19,24 @@ impl StrongholdAdapter {
     pub fn migrate_v2_to_v3<P: AsRef<Path>>(
         current_path: P,
         current_password: &str,
+        salt: &str,
+        rounds: u32,
         new_path: Option<P>,
         new_password: Option<&str>,
     ) -> Result<(), Error> {
         log::debug!("migrate_v2_to_v3");
         use iota_stronghold::engine::snapshot::migration::{migrate, Version};
 
-        const PBKDF_SALT: &[u8] = b"wallet.rs";
-        // Safe as it's definitely not 0.
-        const PBKDF_ITER: NonZeroU32 = unsafe { NonZeroU32::new_unchecked(100) };
-
         let mut buffer = [0u8; 32];
         let tmp_path = PathBuf::from(current_path.as_ref().to_string_lossy().to_string() + "-tmp");
 
-        // Safe to unwrap because rounds > 0.
-        crypto::keys::pbkdf::PBKDF2_HMAC_SHA512(current_password.as_bytes(), PBKDF_SALT, PBKDF_ITER, buffer.as_mut());
+        crypto::keys::pbkdf::PBKDF2_HMAC_SHA512(
+            current_password.as_bytes(),
+            salt.as_bytes(),
+            // TODO
+            NonZeroU32::try_from(rounds).unwrap(),
+            buffer.as_mut(),
+        );
 
         let current_version = Version::V2 {
             path: current_path.as_ref(),

@@ -180,6 +180,8 @@ pub enum Message {
     MigrateStrongholdSnapshotV2ToV3 {
         current_path: String,
         current_password: String,
+        salt: String,
+        rounds: u32,
         new_path: Option<String>,
         new_password: Option<String>,
     },
@@ -317,13 +319,15 @@ impl Debug for Message {
             }
             Self::MigrateStrongholdSnapshotV2ToV3 {
                 current_path,
-                new_path,
                 current_password: _,
+                salt,
+                rounds,
+                new_path,
                 new_password: _,
             } => {
                 write!(
                     f,
-                    "MigrateStrongholdSnapshotV2ToV3{{ current_path: {current_path}, new_path: {new_path:?}, current_password: <omitted>, new_password: <omitted> }}"
+                    "MigrateStrongholdSnapshotV2ToV3{{ current_path: {current_path}, current_password: <omitted>, salt: {salt}, rounds: {rounds}, new_path: {new_path:?}, new_password: <omitted> }}"
                 )
             }
             #[cfg(feature = "stronghold")]

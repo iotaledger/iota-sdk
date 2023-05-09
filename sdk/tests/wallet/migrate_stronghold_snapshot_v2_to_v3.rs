@@ -17,6 +17,9 @@ use iota_sdk::{
 
 use crate::wallet::common::{setup, tear_down, NODE_LOCAL};
 
+const PBKDF_SALT: &str = "wallet.rs";
+const PBKDF_ITER: u32 = 100;
+
 #[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn stronghold_snapshot_v2_v3_migration() {
@@ -35,6 +38,8 @@ async fn stronghold_snapshot_v2_v3_migration() {
     StrongholdAdapter::migrate_v2_to_v3(
         "./tests/wallet/fixtures/v2.stronghold",
         "current_password",
+        PBKDF_SALT,
+        PBKDF_ITER,
         Some("./tests/wallet/fixtures/v3.stronghold"),
         Some("new_password"),
     )
@@ -129,17 +134,17 @@ async fn stronghold_snapshot_v2_v3_migration_same_path() {
     StrongholdAdapter::migrate_v2_to_v3(
         "./tests/wallet/fixtures/v2-copy.stronghold",
         "current_password",
+        PBKDF_SALT,
+        PBKDF_ITER,
         Some("./tests/wallet/fixtures/v2-copy.stronghold"),
         Some("new_password"),
     )
     .unwrap();
 
-    SecretManager::Stronghold(
-        StrongholdSecretManager::builder()
-            .password("new_password")
-            .build("./tests/wallet/fixtures/v2-copy.stronghold")
-            .unwrap(),
-    );
+    StrongholdSecretManager::builder()
+        .password("new_password")
+        .build("./tests/wallet/fixtures/v2-copy.stronghold")
+        .unwrap();
 
     std::fs::remove_file("./tests/wallet/fixtures/v2-copy.stronghold").unwrap();
 }
@@ -159,6 +164,8 @@ async fn stronghold_snapshot_v2_v3_migration_with_backup() {
     StrongholdAdapter::migrate_v2_to_v3(
         "./tests/wallet/fixtures/v2_with_backup.stronghold",
         "current_password",
+        PBKDF_SALT,
+        PBKDF_ITER,
         Some("./tests/wallet/fixtures/v3_with_backup.stronghold"),
         Some("new_password"),
     )

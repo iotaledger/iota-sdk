@@ -17,7 +17,7 @@ use iota_sdk::{
 use jni::{
     objects::{GlobalRef, JClass, JObject, JObjectArray, JStaticMethodID, JString, JValue},
     signature::{Primitive, ReturnType},
-    sys::{jclass, jobject, jstring},
+    sys::{jclass, jint, jobject, jstring},
     JNIEnv, JavaVM,
 };
 #[cfg(target_os = "android")]
@@ -246,6 +246,8 @@ pub unsafe extern "system" fn Java_org_iota_api_NativeApi_migrateStrongholdSnaps
     _class: JClass,
     current_path: JString,
     current_password: JString,
+    salt: JString,
+    rounds: jint,
     new_path: JString,
     new_password: JString,
 ) -> jstring {
@@ -253,12 +255,16 @@ pub unsafe extern "system" fn Java_org_iota_api_NativeApi_migrateStrongholdSnaps
 
     let current_path = string_from_jni!(env, current_path, std::ptr::null_mut());
     let current_password = string_from_jni!(env, current_password, std::ptr::null_mut());
+    let salt = string_from_jni!(env, salt, std::ptr::null_mut());
+    let rounds = rounds as u32;
     let new_path = env.get_string(&new_path).map(String::from).ok();
     let new_password = env.get_string(&new_password).map(String::from).ok();
 
     let ret = StrongholdAdapter::migrate_v2_to_v3(
         &current_path,
         &current_password,
+        &salt,
+        rounds,
         new_path.as_ref(),
         new_password.as_deref(),
     );
