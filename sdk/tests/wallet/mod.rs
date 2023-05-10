@@ -20,3 +20,4 @@ mod syncing;
 mod transactions;
 #[allow(clippy::module_inception)]
 mod wallet;
+mod wallet_storage;
