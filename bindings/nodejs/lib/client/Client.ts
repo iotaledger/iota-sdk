@@ -11,10 +11,10 @@ import type {
     INetworkInfo,
     INode,
     IAuth,
-    BasicOutputBuilderOptions,
-    AliasOutputBuilderOptions,
-    FoundryOutputBuilderOptions,
-    NftOutputBuilderOptions,
+    BasicOutputBuilderParams,
+    AliasOutputBuilderParams,
+    FoundryOutputBuilderParams,
+    NftOutputBuilderParams,
     FoundryQueryParameter,
     NftQueryParameter,
     AliasQueryParameter,
@@ -907,11 +907,11 @@ export class Client {
      * Build a Basic Output.
      */
     async buildBasicOutput(
-        options: BasicOutputBuilderOptions,
+        params: BasicOutputBuilderParams,
     ): Promise<BasicOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildBasicOutput',
-            data: options,
+            data: params,
         });
 
         return JSON.parse(response).payload;
@@ -921,11 +921,11 @@ export class Client {
      * Build an Alias Output.
      */
     async buildAliasOutput(
-        options: AliasOutputBuilderOptions,
+        params: AliasOutputBuilderParams,
     ): Promise<AliasOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildAliasOutput',
-            data: options,
+            data: params,
         });
 
         return JSON.parse(response).payload;
@@ -935,11 +935,11 @@ export class Client {
      * Build a Foundry Output.
      */
     async buildFoundryOutput(
-        options: FoundryOutputBuilderOptions,
+        params: FoundryOutputBuilderParams,
     ): Promise<FoundryOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildFoundryOutput',
-            data: options,
+            data: params,
         });
 
         return JSON.parse(response).payload;
@@ -948,10 +948,10 @@ export class Client {
     /**
      * Build an Nft Output.
      */
-    async buildNftOutput(options: NftOutputBuilderOptions): Promise<NftOutput> {
+    async buildNftOutput(params: NftOutputBuilderParams): Promise<NftOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildNftOutput',
-            data: options,
+            data: params,
         });
 
         return JSON.parse(response).payload;

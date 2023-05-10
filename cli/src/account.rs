@@ -43,7 +43,7 @@ pub async fn account_prompt(account: Account) -> Result<(), Error> {
 // loop on the account prompt
 pub async fn account_prompt_internal(account: Account, history: &mut AccountHistory) -> Result<bool, Error> {
     let alias = {
-        let account = account.read().await;
+        let account = account.details().await;
         account.alias().clone()
     };
     let command: String = Input::new()

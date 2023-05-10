@@ -18,7 +18,7 @@ impl Wallet {
         match &account_id {
             AccountIdentifier::Index(index) => {
                 for account in accounts.iter() {
-                    let account_details = account.read().await;
+                    let account_details = account.details().await;
 
                     if account_details.index() == index {
                         return Ok(account.clone());
@@ -27,7 +27,7 @@ impl Wallet {
             }
             AccountIdentifier::Alias(alias) => {
                 for account in accounts.iter() {
-                    let account_details = account.read().await;
+                    let account_details = account.details().await;
 
                     if account_details.alias() == alias {
                         return Ok(account.clone());

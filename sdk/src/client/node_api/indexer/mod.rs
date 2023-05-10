@@ -8,11 +8,11 @@ pub mod routes;
 
 pub(crate) use self::query_parameters::{QueryParameter, QueryParameters};
 use crate::{
-    client::{Client, Result},
+    client::{ClientInner, Result},
     types::api::plugins::indexer::OutputIdsResponse,
 };
 
-impl Client {
+impl ClientInner {
     /// Get all output ids for a provided URL route and query parameters.
     /// If a `QueryParameter::Cursor(_)` is provided, only a single page will be queried.
     pub async fn get_output_ids(
@@ -33,7 +33,6 @@ impl Client {
 
         while let Some(cursor) = {
             let output_ids_response = self
-                .inner
                 .node_manager
                 .get_request::<OutputIdsResponse>(
                     route,

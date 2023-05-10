@@ -3,7 +3,6 @@
 
 #[cfg(not(target_family = "wasm"))]
 use {
-    crate::client::ClientInner,
     crate::types::{api::core::response::InfoResponse, block::protocol::ProtocolParameters},
     std::collections::HashMap,
     std::sync::Arc,
@@ -12,16 +11,16 @@ use {
 };
 
 use super::Node;
-use crate::client::{Client, Error, Result};
+use crate::client::{ClientInner, Error, Result};
 
-impl Client {
+impl ClientInner {
     /// Get a node candidate from the healthy node pool.
     pub fn get_node(&self) -> Result<Node> {
-        if let Some(primary_node) = &self.inner.node_manager.primary_node {
+        if let Some(primary_node) = &self.node_manager.primary_node {
             return Ok(primary_node.clone());
         }
 
-        let pool = self.inner.node_manager.nodes.clone();
+        let pool = self.node_manager.nodes.clone();
 
         pool.into_iter().next().ok_or(Error::HealthyNodePoolEmpty)
     }
@@ -29,13 +28,11 @@ impl Client {
     /// returns the unhealthy nodes.
     #[cfg(not(target_family = "wasm"))]
     pub fn unhealthy_nodes(&self) -> HashSet<&Node> {
-        self.inner
-            .node_manager
+        self.node_manager
             .healthy_nodes
             .read()
             .map_or(HashSet::new(), |healthy_nodes| {
-                self.inner
-                    .node_manager
+                self.node_manager
                     .nodes
                     .iter()
                     .filter(|node| !healthy_nodes.contains_key(node))
@@ -70,7 +67,7 @@ impl ClientInner {
 
         for node in nodes {
             // Put the healthy node url into the network_nodes
-            match Client::get_node_info(node.url.as_ref(), node.auth.clone()).await {
+            match crate::client::Client::get_node_info(node.url.as_ref(), node.auth.clone()).await {
                 Ok(info) => {
                     if info.status.is_healthy || ignore_node_health {
                         match network_nodes.get_mut(&info.protocol.network_name) {
