@@ -90,7 +90,6 @@ impl Migration for Migrate {
         //             .ok_or(Error::Storage("missing bech32 hrp".to_owned()))?,
         //     )?;
         //     let wallet_builder = serde_json::from_value::<WalletBuilder>(wallet.clone())?;
-
         //     storage.save_wallet_data(&wallet_builder).await?;
         // }
         Ok(())
