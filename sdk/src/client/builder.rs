@@ -126,6 +126,7 @@ pub struct ClientBuilder {
     pub remote_pow_timeout: Duration,
     /// The amount of threads to be used for proof of work
     #[serde(default)]
+    #[cfg(not(target_family = "wasm"))]
     pub pow_worker_count: Option<usize>,
 }
 
@@ -159,6 +160,7 @@ impl Default for ClientBuilder {
             network_info: NetworkInfo::default(),
             api_timeout: DEFAULT_API_TIMEOUT,
             remote_pow_timeout: DEFAULT_REMOTE_POW_API_TIMEOUT,
+            #[cfg(not(target_family = "wasm"))]
             pow_worker_count: None,
         }
     }
@@ -285,6 +287,7 @@ impl ClientBuilder {
     }
 
     /// Sets the amount of workers that should be used for PoW, default is num_cpus::get().
+    #[cfg(not(target_family = "wasm"))]
     pub fn with_pow_worker_count(mut self, worker_count: impl Into<Option<usize>>) -> Self {
         self.pow_worker_count = worker_count.into();
         self
@@ -375,22 +378,24 @@ impl ClientBuilder {
     /// Build the Client instance.
     #[cfg(target_family = "wasm")]
     pub async fn finish(self) -> Result<Client> {
+        use tokio::sync::RwLock;
+
         #[cfg(feature = "mqtt")]
         let (mqtt_event_tx, mqtt_event_rx) = tokio::sync::watch::channel(MqttEvent::Connected);
 
         let client = Client {
             inner: Arc::new(ClientInner {
-                node_manager: self.node_manager_builder.build(HashMap::new()),
+                node_manager: RwLock::new(self.node_manager_builder.build(HashMap::new())),
                 network_info: RwLock::new(self.network_info),
-                api_timeout: self.api_timeout,
-                remote_pow_timeout: self.remote_pow_timeout,
+                api_timeout: RwLock::new(self.api_timeout),
+                remote_pow_timeout: RwLock::new(self.remote_pow_timeout),
                 #[cfg(feature = "mqtt")]
                 mqtt: super::MqttInner {
                     client: Default::default(),
                     topic_handlers: Default::default(),
-                    broker_options: self.broker_options,
-                    sender: mqtt_event_tx,
-                    receiver: mqtt_event_rx,
+                    broker_options: RwLock::new(self.broker_options),
+                    sender: RwLock::new(mqtt_event_tx),
+                    receiver: RwLock::new(mqtt_event_rx),
                 },
             }),
         };
@@ -400,13 +405,14 @@ impl ClientBuilder {
 
     pub async fn from_client(client: &Client) -> Self {
         Self {
-            node_manager_builder: NodeManagerBuilder::from(&*client.inner.node_manager.read().await),
+            node_manager_builder: NodeManagerBuilder::from(&*client.node_manager.read().await),
             #[cfg(feature = "mqtt")]
-            broker_options: *client.inner.mqtt.broker_options.read().await,
-            network_info: client.inner.network_info.read().await.clone(),
+            broker_options: *client.mqtt.broker_options.read().await,
+            network_info: client.network_info.read().await.clone(),
             api_timeout: client.get_timeout().await,
             remote_pow_timeout: client.get_remote_pow_timeout().await,
-            pow_worker_count: *client.inner.pow_worker_count.read().await,
+            #[cfg(not(target_family = "wasm"))]
+            pow_worker_count: *client.pow_worker_count.read().await,
         }
     }
 }

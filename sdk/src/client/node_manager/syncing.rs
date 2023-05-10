@@ -1,10 +1,11 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::collections::HashMap;
+
 #[cfg(not(target_family = "wasm"))]
 use {
     crate::types::{api::core::response::InfoResponse, block::protocol::ProtocolParameters},
-    std::collections::HashMap,
     std::{collections::HashSet, time::Duration},
     tokio::time::sleep,
 };
@@ -126,6 +127,7 @@ impl ClientInner {
 }
 
 impl Client {
+    #[cfg(not(target_family = "wasm"))]
     pub async fn update_node_manager(&self, node_manager_builder: NodeManagerBuilder) -> crate::wallet::Result<()> {
         let node_sync_interval = node_manager_builder.node_sync_interval;
         let ignore_node_health = node_manager_builder.ignore_node_health;
@@ -148,6 +150,12 @@ impl Client {
         });
 
         *self._sync_handle.write().await = crate::client::SyncHandle(Some(sync_handle));
+        Ok(())
+    }
+
+    #[cfg(target_family = "wasm")]
+    pub async fn update_node_manager(&self, node_manager_builder: NodeManagerBuilder) -> crate::wallet::Result<()> {
+        *self.node_manager.write().await = node_manager_builder.build(HashMap::new());
         Ok(())
     }
 }

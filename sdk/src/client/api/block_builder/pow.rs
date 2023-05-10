@@ -90,7 +90,7 @@ impl ClientInner {
     #[cfg(target_family = "wasm")]
     async fn finish_single_threaded_pow(&self, parents: Option<Parents>, payload: Option<Payload>) -> Result<Block> {
         let min_pow_score: u32 = self.get_min_pow_score().await?;
-        let tips_interval: u64 = self.get_tips_interval();
+        let tips_interval: u64 = self.get_tips_interval().await;
 
         loop {
             let parents = match &parents {
