@@ -200,7 +200,7 @@ impl From<&InputSigningData> for InputSigningDataDto {
                 chain
                     .segments()
                     .iter()
-                    .map(|seg| u32::from_be_bytes(seg.bs()) ^ Segment::HARDEN_MASK)
+                    .map(|seg| u32::from_be_bytes(seg.bs()) & !Segment::HARDEN_MASK)
                     .collect::<Vec<u32>>()
             }),
         }
