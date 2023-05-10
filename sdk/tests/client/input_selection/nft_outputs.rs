@@ -681,21 +681,22 @@ fn missing_alias_issuer_created() {
 #[test]
 fn missing_alias_issuer_transition() {
     let protocol_parameters = protocol_parameters();
-    let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
+    let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs(vec![Nft(
         1_000_000,
+        nft_id_2,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
-        None,
+        Some(BECH32_ADDRESS_ALIAS_1),
         None,
         None,
         None,
     )]);
     let outputs = build_outputs(vec![Nft(
         1_000_000,
-        nft_id_0,
+        nft_id_2,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
@@ -713,10 +714,7 @@ fn missing_alias_issuer_transition() {
     )
     .select();
 
-    assert!(matches!(
-        selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
-    ));
+    assert!(selected.is_ok());
 }
 
 #[test]
@@ -805,21 +803,22 @@ fn missing_nft_issuer_created() {
 #[test]
 fn missing_nft_issuer_transition() {
     let protocol_parameters = protocol_parameters();
-    let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
+    let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs(vec![Nft(
         1_000_000,
+        nft_id_2,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
-        None,
+        Some(BECH32_ADDRESS_NFT_1),
         None,
         None,
         None,
     )]);
     let outputs = build_outputs(vec![Nft(
         1_000_000,
-        nft_id_0,
+        nft_id_2,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
@@ -837,10 +836,7 @@ fn missing_nft_issuer_transition() {
     )
     .select();
 
-    assert!(matches!(
-        selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()
-    ));
+    assert!(selected.is_ok());
 }
 
 #[test]
