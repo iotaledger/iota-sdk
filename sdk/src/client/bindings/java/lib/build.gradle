@@ -102,8 +102,8 @@ publishing {
 
             pom {
                 name = 'iota-client'
-                description = 'Java binding to the iota.rs library.'
-                url = 'https://github.com/iotaledger/iota.rs'
+                description = 'Java binding to the iota-sdk library.'
+                url = 'https://github.com/iotaledger/iota-sdk'
                 inceptionYear = '2022'
 
                 licenses {
@@ -122,9 +122,9 @@ publishing {
                 }
 
                 scm {
-                    connection = 'scm:git:git:github.com/iotaledger/iota.rs.git'
-                    developerConnection = 'scm:git:ssh://github.com/iotaledger/iota.rs.git'
-                    url = 'https://github.com/iotaledger/iota.rs'
+                    connection = 'scm:git:git:github.com/iotaledger/iota-sdk.git'
+                    developerConnection = 'scm:git:ssh://github.com/iotaledger/iota-sdk.git'
+                    url = 'https://github.com/iotaledger/iota-sdk'
                 }
             }
         }

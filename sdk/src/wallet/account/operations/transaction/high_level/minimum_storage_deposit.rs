@@ -16,7 +16,7 @@ use crate::{
     wallet::Result,
 };
 
-// todo: move to bee-block/iota.rs
+// TODO: move to block module?
 
 /// Computes the minimum amount that an output needs to have, when sent with [AddressUnlockCondition],
 /// [StorageDepositReturnUnlockCondition] and [ExpirationUnlockCondition].
