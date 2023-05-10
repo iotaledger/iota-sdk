@@ -157,7 +157,7 @@ impl Account {
     /// Get an existing alias output
     pub(crate) async fn get_alias_output(&self, alias_id: Option<AliasId>) -> Option<(AliasId, OutputData)> {
         log::debug!("[get_alias_output]");
-        self.read()
+        self.details()
             .await
             .unspent_outputs()
             .values()

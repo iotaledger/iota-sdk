@@ -73,7 +73,7 @@ impl Account {
     // Get the current output id for the nft and build a basic output with the amount, native tokens and
     // governor address from the nft output.
     async fn output_id_and_basic_output_for_nft(&self, nft_id: NftId) -> crate::wallet::Result<(OutputId, Output)> {
-        let account_details = self.read().await;
+        let account_details = self.details().await;
         let token_supply = self.client.get_token_supply().await?;
         let current_time = self.client.get_time_checked().await?;
 

@@ -36,7 +36,7 @@ impl Account {
     ) -> crate::wallet::Result<MintTokenTransaction> {
         log::debug!("[TRANSACTION] increase_native_token_supply");
 
-        let account_details = self.read().await;
+        let account_details = self.details().await;
         let token_supply = self.client.get_token_supply().await?;
         let existing_foundry_output = account_details.unspent_outputs().values().find(|output_data| {
             if let Output::Foundry(output) = &output_data.output {

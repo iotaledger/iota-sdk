@@ -46,6 +46,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - rename `Client::try_get_outputs_metadata()` into `Client::get_outputs_metadata_ignore_errors()`;
 - MQTT connections to a node using https will now use wss/tls with native certificates;
 - `ClientBuilder::finish` is now async;
+- `Account::read` and `write` now accessible via `details` and `details_mut`;
+- `Wallet::emit_test_event` no longer returns a `Result`;
+- `AccountBuilder::new` now takes a wallet;
 
 ### Removed
 

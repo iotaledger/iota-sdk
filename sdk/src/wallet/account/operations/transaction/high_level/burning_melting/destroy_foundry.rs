@@ -81,7 +81,7 @@ impl Account {
         let mut existing_alias_output_data = None;
         let mut existing_foundry_output = None;
 
-        for (output_id, output_data) in self.read().await.unspent_outputs().iter() {
+        for (output_id, output_data) in self.details().await.unspent_outputs().iter() {
             match &output_data.output {
                 Output::Alias(output) => {
                     if output.alias_id_non_null(output_id) == alias_id {

@@ -12,7 +12,7 @@ use crate::{
             },
             QueryParameters,
         },
-        Client, Result,
+        ClientInner, Result,
     },
     types::{
         api::plugins::indexer::OutputIdsResponse,
@@ -22,7 +22,7 @@ use crate::{
 
 // hornet: https://github.com/gohornet/hornet/blob/develop/plugins/indexer/routes.go
 
-impl Client {
+impl ClientInner {
     /// Get basic outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
     /// Query parameters: "address", "hasStorageDepositReturn", "storageDepositReturnAddress",

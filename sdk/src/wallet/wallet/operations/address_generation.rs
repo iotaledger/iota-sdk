@@ -55,12 +55,13 @@ impl Wallet {
 
                         let bech32_hrp = self.get_bech32_hrp().await?;
 
-                        self.event_emitter.lock().await.emit(
+                        self.emit(
                             account_index,
                             WalletEvent::LedgerAddressGeneration(AddressData {
                                 address: address[0].to_bech32(bech32_hrp),
                             }),
-                        );
+                        )
+                        .await;
                     }
 
                     // Generate with prompt so the user can verify

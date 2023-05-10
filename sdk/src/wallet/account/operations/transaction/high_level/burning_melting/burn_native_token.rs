@@ -94,7 +94,7 @@ impl Account {
         let mut alias_selection = HashMap::new();
         let mut foundry_selection = Vec::new();
 
-        for (output_id, output_data) in self.read().await.unspent_outputs().iter() {
+        for (output_id, output_data) in self.details().await.unspent_outputs().iter() {
             match &output_data.output {
                 Output::Basic(_) | Output::Nft(_) => {
                     if let Some((amount, output)) = strip_native_token_if_found(token_id, output_data, token_supply)? {
@@ -287,7 +287,7 @@ impl Account {
             }
             None => {
                 // Find controlling alias
-                for (output_id, output_data) in self.read().await.unspent_outputs().iter() {
+                for (output_id, output_data) in self.details().await.unspent_outputs().iter() {
                     match &output_data.output {
                         Output::Alias(alias_output) => {
                             if alias_output.alias_id_non_null(output_id) == alias_id {
