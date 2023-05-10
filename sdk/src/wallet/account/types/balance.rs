@@ -293,8 +293,6 @@ impl AccountBalance {
         )
         .collect::<Vec<_>>();
 
-        println!("Native tokens: {:#?}", native_tokens);
-
         let aliases = std::iter::repeat_with(|| AliasId::from(rand_bytes_array()))
             .take(rand::thread_rng().gen_range(0..10))
             .collect::<Vec<_>>();
