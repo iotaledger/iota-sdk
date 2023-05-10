@@ -70,7 +70,7 @@ async fn main() -> Result<()> {
     // Mint some more native tokens
     let mint_amount = U256::from(MINT_AMOUNT);
     let transaction = account
-        .increase_native_token_supply(token_id, mint_amount, None, None)
+        .increase_native_token_supply(token_id, mint_amount, None)
         .await?;
     println!("Transaction sent: {}", transaction.transaction.transaction_id);
 

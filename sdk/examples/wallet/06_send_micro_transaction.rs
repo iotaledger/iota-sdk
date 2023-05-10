@@ -11,7 +11,7 @@
 //! cargo run --release --all-features --example send_micro_transaction
 //! ```
 
-use iota_sdk::wallet::{account::TransactionOptions, AddressWithAmount, Result, Wallet};
+use iota_sdk::wallet::{account::TransactionOptions, Result, SendAmountParams, Wallet};
 
 // The account alias used in this example
 const ACCOUNT_ALIAS: &str = "Alice";
@@ -39,10 +39,10 @@ async fn main() -> Result<()> {
         .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    println!("Sending '{}' coins to '{}'...", SEND_MICRO_AMOUNT, RECV_ADDRESS);
+    println!("Sending '{}' coin(s) to '{}'...", SEND_MICRO_AMOUNT, RECV_ADDRESS);
 
     // Send a micro transaction
-    let outputs = vec![AddressWithAmount::new(RECV_ADDRESS.to_string(), SEND_MICRO_AMOUNT)];
+    let outputs = vec![SendAmountParams::new(RECV_ADDRESS.to_string(), SEND_MICRO_AMOUNT)];
 
     let transaction = account
         .send_amount(

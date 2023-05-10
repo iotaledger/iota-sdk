@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
     let accounts = wallet.get_accounts().await?;
     println!("WALLET ACCOUNTS:");
     for account in accounts {
-        let account = account.read().await;
+        let account = account.details().await;
         println!("- {}", account.alias());
     }
 

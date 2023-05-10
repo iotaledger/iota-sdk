@@ -16,7 +16,7 @@ use iota_sdk::{
         address::Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken},
     },
-    wallet::{AddressNativeTokens, Result, Wallet},
+    wallet::{Result, SendNativeTokensParams, Wallet},
 };
 use primitive_types::U256;
 
@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
 
         let bech32_address = RECV_ADDRESS.to_string();
 
-        let outputs = vec![AddressNativeTokens {
+        let outputs = vec![SendNativeTokensParams {
             address: bech32_address.clone(),
             native_tokens: vec![(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))],
             ..Default::default()

@@ -11,7 +11,7 @@
 //! cargo run --release --all-features --example send_nft
 //! ```
 
-use iota_sdk::wallet::{AddressAndNftId, Result, Wallet};
+use iota_sdk::wallet::{Result, SendNftParams, Wallet};
 
 // The account alias used in this example
 const ACCOUNT_ALIAS: &str = "Alice";
@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
             .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        let outputs = vec![AddressAndNftId {
+        let outputs = vec![SendNftParams {
             address: RECV_ADDRESS.to_string(),
             nft_id: *nft_id,
         }];

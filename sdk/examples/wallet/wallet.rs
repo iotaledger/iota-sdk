@@ -23,7 +23,8 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    wallet::{Account, AddressWithAmount, ClientOptions, Result, Wallet},
+    types::block::payload::transaction::TransactionId,
+    wallet::{Account, ClientOptions, Result, SendAmountParams, Wallet},
 };
 
 // The account alias used in this example
@@ -56,8 +57,9 @@ async fn main() -> Result<()> {
     print_addresses_with_funds(&account).await?;
 
     println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
-    let outputs = vec![AddressWithAmount::new(RECV_ADDRESS.to_string(), SEND_AMOUNT)];
-    send_and_wait_for_inclusion(&account, outputs).await?;
+    let outputs = vec![SendAmountParams::new(RECV_ADDRESS.to_string(), SEND_AMOUNT)];
+    let transaction = account.send_amount(outputs, None).await?;
+    wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
     sync_print_balance(&account, false).await?;
 
@@ -92,8 +94,8 @@ async fn print_accounts(wallet: &Wallet) -> Result<()> {
     let accounts = wallet.get_accounts().await?;
     println!("Accounts:");
     for account in accounts {
-        let account = account.read().await;
-        println!("- {}", account.alias());
+        let details = account.details().await;
+        println!("- {}", details.alias());
     }
     Ok(())
 }
@@ -150,16 +152,15 @@ async fn print_addresses_with_funds(account: &Account) -> Result<()> {
     Ok(())
 }
 
-async fn send_and_wait_for_inclusion(account: &Account, outputs: Vec<AddressWithAmount>) -> Result<()> {
-    let transaction = account.send_amount(outputs, None).await?;
+async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
         std::env::var("EXPLORER_URL").unwrap(),
-        transaction.transaction_id
+        transaction_id
     );
     // Wait for transaction to get included
     let block_id = account
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .retry_transaction_until_included(transaction_id, None, None)
         .await?;
     println!(
         "Transaction included: {}/block/{}",

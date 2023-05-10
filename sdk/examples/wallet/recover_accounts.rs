@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
 
     println!("Recovered {} accounts", accounts.len());
     for account in accounts.iter() {
-        println!("ACCOUNT #{}:", account.read().await.index());
+        println!("ACCOUNT #{}:", account.details().await.index());
         let now = Instant::now();
         let balance = account.sync(None).await?;
         println!("Account synced in: {:.2?}", now.elapsed());

@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will generate an address for an already exisiting wallet.
+//! In this example we will generate an address for an already existing wallet.
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
 //! running the `create_wallet` example!

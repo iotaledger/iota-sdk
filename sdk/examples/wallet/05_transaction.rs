@@ -11,7 +11,7 @@
 //! cargo run --release --all-features --example wallet_transaction
 //! ```
 
-use iota_sdk::wallet::{AddressWithAmount, Result, Wallet};
+use iota_sdk::wallet::{Result, SendAmountParams, Wallet};
 
 // The account alias used in this example
 const ACCOUNT_ALIAS: &str = "Alice";
@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
 
         println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
         // Send a transaction
-        let outputs = vec![AddressWithAmount::new(RECV_ADDRESS.to_string(), SEND_AMOUNT)];
+        let outputs = vec![SendAmountParams::new(RECV_ADDRESS.to_string(), SEND_AMOUNT)];
         let transaction = account.send_amount(outputs, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 

@@ -76,7 +76,7 @@ async fn main() -> Result<()> {
 
                 let transaction = if (address_index + thread_index) % 2 == 0 {
                     // ALTERNATIVE 1: using `account.send_amount``
-                    let outputs = vec![iota_sdk::wallet::AddressWithAmount::new(
+                    let outputs = vec![iota_sdk::wallet::SendAmountParams::new(
                         recv_address.to_string(),
                         amount,
                     )];

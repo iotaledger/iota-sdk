@@ -38,7 +38,7 @@ impl Account {
             return Ok(vec![]);
         }
 
-        let account_details = self.read().await;
+        let account_details = self.details().await;
 
         // get the highest index for the public or internal addresses
         let highest_current_index_plus_one = if options.internal {
@@ -57,7 +57,7 @@ impl Account {
 
         let address_range = highest_current_index_plus_one..highest_current_index_plus_one + amount;
 
-        let addresses = match &*self.secret_manager.read().await {
+        let addresses = match &*self.wallet.secret_manager.read().await {
             #[cfg(feature = "ledger_nano")]
             SecretManager::LedgerNano(ledger_nano) => {
                 // If we don't sync, then we want to display the prompt on the ledger with the address. But the user
@@ -85,12 +85,13 @@ impl Account {
                                     Some(changed_options),
                                 )
                                 .await?;
-                            self.event_emitter.lock().await.emit(
+                            self.emit(
                                 account_details.index,
                                 WalletEvent::LedgerAddressGeneration(AddressData {
                                     address: address[0].to_bech32(bech32_hrp.clone()),
                                 }),
-                            );
+                            )
+                            .await;
                         }
                         // Generate with prompt so the user can verify
                         let address = ledger_nano

@@ -12,7 +12,7 @@
 //! ```
 
 use iota_sdk::{
-    wallet::{NativeTokenOptions, Result, Wallet},
+    wallet::{MintNativeTokenParams, Result, Wallet},
     U256,
 };
 
@@ -60,14 +60,14 @@ async fn main() -> Result<()> {
 
     println!("Preparing minting transaction...");
 
-    let native_token_options = NativeTokenOptions {
+    let params = MintNativeTokenParams {
         alias_id: None,
         circulating_supply: U256::from(CIRCULATING_SUPPLY),
         maximum_supply: U256::from(MAXIMUM_SUPPLY),
         foundry_metadata: None,
     };
 
-    let transaction = account.mint_native_token(native_token_options, None).await?;
+    let transaction = account.mint_native_token(params, None).await?;
     println!("Transaction sent: {}", transaction.transaction.transaction_id);
 
     // Wait for transaction to get included

@@ -17,7 +17,7 @@ use iota_sdk::{
         unlock_condition::AddressUnlockCondition,
         NftId, NftOutputBuilder,
     },
-    wallet::{NftOptions, Result, Wallet},
+    wallet::{MintNftParams, Result, Wallet},
 };
 
 // The account alias used in this example
@@ -56,8 +56,8 @@ async fn main() -> Result<()> {
         .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // Build an NFT using `NftOptions` and use the `mint_nfts` API
-    let nft_options = vec![NftOptions {
+    // Build an NFT using `MintNftParams` and use the `mint_nfts` API
+    let nft_params = vec![MintNftParams {
         address: Some(NFT1_OWNER_ADDRESS.to_string()),
         sender: Some(sender_address.to_string()),
         metadata: Some(NFT1_METADATA.as_bytes().to_vec()),
@@ -68,7 +68,7 @@ async fn main() -> Result<()> {
 
     println!("Preparing NFT 1 minting transaction...");
 
-    let transaction = account.mint_nfts(nft_options, None).await?;
+    let transaction = account.mint_nfts(nft_params, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for transaction to get included

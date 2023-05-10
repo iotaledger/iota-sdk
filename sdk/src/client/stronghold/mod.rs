@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! [Stronghold] integration for iota.rs.
+//! [Stronghold] integration for the iota-sdk.
 //!
 //! Stronghold can be used as a multi-purpose secret service providing:
 //!

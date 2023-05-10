@@ -21,7 +21,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{ledger_nano::LedgerSecretManager, SecretManager},
     },
-    wallet::{AddressWithAmount, ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Result, SendAmountParams, Wallet},
 };
 
 // The account alias used in this example
@@ -78,7 +78,7 @@ async fn main() -> Result<()> {
     println!("Balance BEFORE:\n{:?}", balance.base_coin());
 
     println!("Preparing value transaction...");
-    let outputs = vec![AddressWithAmount::new(RECV_ADDRESS.to_string(), SEND_AMOUNT)];
+    let outputs = vec![SendAmountParams::new(RECV_ADDRESS.to_string(), SEND_AMOUNT)];
     let transaction = account.send_amount(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
