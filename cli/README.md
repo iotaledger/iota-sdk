@@ -2,7 +2,7 @@
 
 ![cli-wallet](./documentation/static/img/cli-wallet.gif)
 
-Command line interface application for the [IOTA wallet library](https://github.com/iotaledger/iota-sdk).
+Command line interface application for the [IOTA sdk wallet](https://github.com/iotaledger/iota-sdk).
 
 ## Usage
 
