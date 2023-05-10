@@ -8,7 +8,7 @@
 use std::{collections::HashMap, ops::Range};
 
 use async_trait::async_trait;
-use crypto::keys::slip10::Chain;
+use crypto::keys::slip10::{Chain, Segment};
 use iota_ledger_nano::{
     get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index, Packable as LedgerNanoPackable,
     TransportTypes,
@@ -32,11 +32,6 @@ use crate::{
     },
     utils::unix_timestamp_now,
 };
-
-/// Hardened const for the bip path.
-///
-/// See also: <https://wiki.trezor.io/Hardened_and_non-hardened_derivation>.
-pub const HARDENED: u32 = 0x8000_0000;
 
 /// Ledger nano errors.
 #[derive(Debug, thiserror::Error)]
@@ -142,11 +137,11 @@ impl SecretManage for LedgerSecretManager {
         options: Option<GenerateAddressOptions>,
     ) -> Result<Vec<Address>, Self::Error> {
         let options = options.unwrap_or_default();
-        let bip32_account = account_index | HARDENED;
+        let bip32_account = account_index | Segment::HARDEN_MASK;
 
         let bip32 = LedgerBIP32Index {
-            bip32_index: address_indexes.start | HARDENED,
-            bip32_change: u32::from(options.internal) | HARDENED,
+            bip32_index: address_indexes.start | Segment::HARDEN_MASK,
+            bip32_change: u32::from(options.internal) | Segment::HARDEN_MASK,
         };
 
         // lock the mutex to prevent multiple simultaneous requests to a ledger
@@ -241,8 +236,8 @@ impl SignTransactionEssence for LedgerSecretManager {
             coin_type = Some(bip32_indices[1]);
             account_index = Some(bip32_indices[2]);
             input_bip32_indices.push(LedgerBIP32Index {
-                bip32_change: bip32_indices[3] | HARDENED,
-                bip32_index: bip32_indices[4] | HARDENED,
+                bip32_change: bip32_indices[3] | Segment::HARDEN_MASK,
+                bip32_index: bip32_indices[4] | Segment::HARDEN_MASK,
             });
         }
 
@@ -250,8 +245,8 @@ impl SignTransactionEssence for LedgerSecretManager {
             return Err(Error::NoAvailableInputsProvided)?;
         }
 
-        let coin_type = coin_type.unwrap() & !HARDENED;
-        let bip32_account = account_index.unwrap() | HARDENED;
+        let coin_type = coin_type.unwrap() & !Segment::HARDEN_MASK;
+        let bip32_account = account_index.unwrap() | Segment::HARDEN_MASK;
 
         // pack essence and hash into vec
         let essence_bytes = prepared_transaction.essence.pack_to_vec();
@@ -289,8 +284,8 @@ impl SignTransactionEssence for LedgerSecretManager {
                         (
                             Some(&a.address),
                             LedgerBIP32Index {
-                                bip32_change: remainder_bip32_indices[3] | HARDENED,
-                                bip32_index: remainder_bip32_indices[4] | HARDENED,
+                                bip32_change: remainder_bip32_indices[3] | Segment::HARDEN_MASK,
+                                bip32_index: remainder_bip32_indices[4] | Segment::HARDEN_MASK,
                             },
                         )
                     }

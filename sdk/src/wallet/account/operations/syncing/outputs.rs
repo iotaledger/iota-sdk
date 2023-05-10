@@ -5,7 +5,7 @@ use crypto::keys::slip10::Chain;
 use instant::Instant;
 
 use crate::{
-    client::Client,
+    client::{constants::HD_WALLET_TYPE, Client},
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
@@ -46,7 +46,7 @@ impl Account {
 
             // 44 is for BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
             let chain = Chain::from_u32_hardened(vec![
-                44,
+                HD_WALLET_TYPE,
                 account_details.coin_type,
                 account_details.index,
                 associated_address.internal as u32,

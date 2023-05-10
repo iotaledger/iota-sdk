@@ -35,6 +35,7 @@ import type {
     ITreasury,
     INodeInfoProtocol,
     UnlockTypes,
+    HexEncodedString,
 } from '@iota/types';
 import type { INodeInfoWrapper } from '../../types/client/nodeInfo';
 import { SecretManagerType } from '../../types/secretManager/secretManager';
@@ -273,9 +274,7 @@ export class Client {
      */
     async signatureUnlock(
         secretManager: SecretManagerType,
-        // Uses `Array<number>` instead of `Uint8Array` because the latter serializes
-        // as an object rather than an array, which results in errors with serde.
-        transactionEssenceHash: Array<number>,
+        transactionEssenceHash: HexEncodedString,
         chain: IBip32Chain,
     ): Promise<UnlockTypes> {
         const response = await this.methodHandler.callMethod({
