@@ -5,9 +5,9 @@ import json
 
 load_dotenv()
 
-# Create the log configuration, the log will be outputted in 'iota.rs.log'
+# Create the log configuration, the log will be outputted in 'client.log'
 log_config = {
-    'name': 'iota.rs.log',
+    'name': 'client.log',
     'levelFilter': 'debug',
     'targetExclusions': ["h2", "hyper", "rustls"]
 }

@@ -16,16 +16,17 @@ impl Account {
     ) -> crate::wallet::Result<BlockId> {
         log::debug!("[TRANSACTION] send_payload");
         #[cfg(feature = "events")]
-        let account_index = self.read().await.index;
+        let account_index = self.details().await.index;
 
         let local_pow = self.client.get_local_pow();
         if local_pow {
             log::debug!("[TRANSACTION] doing local pow");
             #[cfg(feature = "events")]
-            self.event_emitter.lock().await.emit(
+            self.emit(
                 account_index,
                 WalletEvent::TransactionProgress(TransactionProgressEvent::PerformingPow),
-            );
+            )
+            .await;
         }
         let block = self
             .client
@@ -33,10 +34,11 @@ impl Account {
             .await?;
 
         #[cfg(feature = "events")]
-        self.event_emitter.lock().await.emit(
+        self.emit(
             account_index,
             WalletEvent::TransactionProgress(TransactionProgressEvent::Broadcasting),
-        );
+        )
+        .await;
         let block_id = self.client.post_block(&block).await?;
         log::debug!("[TRANSACTION] submitted block {}", block_id);
         Ok(block_id)

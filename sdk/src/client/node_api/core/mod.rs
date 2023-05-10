@@ -26,11 +26,11 @@ impl Client {
         for output_ids_chunk in output_ids.chunks(MAX_PARALLEL_API_REQUESTS).map(<[OutputId]>::to_vec) {
             let mut tasks = Vec::new();
             for output_id in output_ids_chunk {
-                let client_ = self.clone();
+                let client = self.clone();
 
                 tasks.push(async move {
                     tokio::spawn(async move {
-                        let output_response = client_.get_output(&output_id).await?;
+                        let output_response = client.get_output(&output_id).await?;
                         crate::client::Result::Ok(output_response)
                     })
                     .await

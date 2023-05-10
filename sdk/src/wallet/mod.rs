@@ -35,13 +35,10 @@ pub(crate) mod task;
 pub use self::{
     account::{
         operations::transaction::high_level::{
-            minting::{
-                increase_native_token_supply::IncreaseNativeTokenSupplyOptions, mint_native_token::NativeTokenOptions,
-                mint_nfts::NftOptions,
-            },
-            send_amount::AddressWithAmount,
-            send_native_tokens::AddressNativeTokens,
-            send_nft::AddressAndNftId,
+            minting::{mint_native_token::MintNativeTokenParams, mint_nfts::MintNftParams},
+            send_amount::SendAmountParams,
+            send_native_tokens::SendNativeTokensParams,
+            send_nft::SendNftParams,
         },
         Account,
     },

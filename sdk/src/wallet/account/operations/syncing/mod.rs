@@ -28,8 +28,8 @@ impl Account {
     pub async fn set_default_sync_options(&self, options: SyncOptions) -> crate::wallet::Result<()> {
         #[cfg(feature = "storage")]
         {
-            let index = *self.read().await.index();
-            let storage_manager = self.storage_manager.read().await;
+            let index = *self.details().await.index();
+            let storage_manager = self.wallet.storage_manager.read().await;
             storage_manager.set_default_sync_options(index, &options).await?;
         }
 

@@ -27,7 +27,7 @@ impl Account {
         // store the current index, so we can remove new addresses with higher indexes later again, if they don't have
         // outputs
         let (highest_public_address_index, highest_internal_address_index) = {
-            let account_details = self.read().await;
+            let account_details = self.details().await;
             (
                 account_details
                     .public_addresses
@@ -74,7 +74,7 @@ impl Account {
             // Also needs to be in the loop so it gets updated every round for internal use without modifying the values
             // outside
             let (highest_public_address_index, highest_internal_address_index) = {
-                let account_details = self.read().await;
+                let account_details = self.details().await;
                 (
                     account_details
                         .public_addresses
@@ -114,7 +114,7 @@ impl Account {
             sync_options.address_start_index_internal = address_start_index_internal;
             self.sync(Some(sync_options.clone())).await?;
 
-            let output_count = self.read().await.unspent_outputs.len();
+            let output_count = self.details().await.unspent_outputs.len();
 
             // break if we didn't find more outputs with the new addresses
             if output_count <= latest_outputs_count {
@@ -126,7 +126,7 @@ impl Account {
             // Update address_gap_limit to only generate the amount of addresses we need to have `address_gap_limit`
             // amount of empty addresses after the latest one with outputs
 
-            let account_details = self.read().await;
+            let account_details = self.details().await;
 
             let highest_address_index = account_details
                 .public_addresses
@@ -228,7 +228,7 @@ impl Account {
         old_highest_public_address_index: u32,
         old_highest_internal_address_index: Option<u32>,
     ) {
-        let mut account_details = self.write().await;
+        let mut account_details = self.details_mut().await;
 
         let (internal_addresses_with_unspent_outputs, public_addresses_with_spent_outputs): (
             Vec<&AddressWithUnspentOutputs>,

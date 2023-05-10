@@ -8,11 +8,11 @@ use crate::pow::miner::{Miner, MinerBuilder, MinerCancel};
 #[cfg(target_family = "wasm")]
 use crate::pow::wasm_miner::{SingleThreadedMiner, SingleThreadedMinerBuilder};
 use crate::{
-    client::{Client, Error, Result},
+    client::{ClientInner, Error, Result},
     types::block::{parent::Parents, payload::Payload, Block, BlockBuilder, Error as BlockError},
 };
 
-impl Client {
+impl ClientInner {
     /// Finishes the block with local PoW if needed.
     /// Without local PoW, it will finish the block with a 0 nonce.
     pub async fn finish_block_builder(&self, parents: Option<Parents>, payload: Option<Payload>) -> Result<Block> {
@@ -44,7 +44,7 @@ impl Client {
     /// Always fetches new tips after each tips interval elapses if no parents are provided.
     #[cfg(not(target_family = "wasm"))]
     async fn finish_multi_threaded_pow(&self, parents: Option<Parents>, payload: Option<Payload>) -> Result<Block> {
-        let pow_worker_count = self.inner.pow_worker_count;
+        let pow_worker_count = self.pow_worker_count;
         let min_pow_score = self.get_min_pow_score().await?;
         let tips_interval = self.get_tips_interval();
 
