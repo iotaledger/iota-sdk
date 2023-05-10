@@ -14,7 +14,7 @@ async fn check_existing_db() -> Result<()> {
     let storage_path = "check_existing_db_test";
     setup(storage_path)?;
     // Copy db so the original doesn't get modified
-    copy_folder("./tests/wallet/check_existing_db_test", storage_path).unwrap();
+    copy_folder("./tests/wallet/fixtures/check_existing_db_test", storage_path).unwrap();
 
     let manager = Wallet::builder().with_storage_path(storage_path).finish().await?;
 
