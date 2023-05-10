@@ -34,3 +34,4 @@ pub use primitive_types::U256;
 #[cfg(feature = "url")]
 pub use url::Url;
 pub use wallet::migration::migrate as migrate_wallet;
+// pub use wallet::migration::latest_migration_version;

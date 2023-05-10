@@ -17,7 +17,7 @@ impl Migration for Migrate {
     const WALLET_VERSION: &'static str = "0.3.0";
     const DATE: time::Date = time::macros::date!(2023 - 05 - 09);
 
-    async fn migrate(storage: &StorageManager) -> Result<()> {
+    async fn migrate(_storage: &StorageManager) -> Result<()> {
         if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
             let hrp_value = wallet
                 .get_mut("clientOptions")

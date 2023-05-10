@@ -7,15 +7,15 @@ use serde::{Deserialize, Serialize};
 use super::storage::manager::StorageManager;
 use crate::wallet::Result;
 
-pub mod migrate_0;
+// mod migrate_0;
 
-pub type LatestMigration = migrate_0::Migrate;
+// pub type LatestMigration = migrate_0::Migrate;
 
 /// The list of migrations, in order.
 const MIGRATIONS: &[&'static dyn DynMigration] = &[
     // In order to add a new migration, change the `LatestMigration` type above and add an entry at the bottom of this
     // list.
-    &migrate_0::Migrate,
+    //&migrate_0::Migrate,
 ];
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -32,7 +32,7 @@ impl std::fmt::Display for MigrationVersion {
 }
 
 #[async_trait]
-pub trait Migration {
+pub(crate) trait Migration {
     const ID: usize;
     const WALLET_VERSION: &'static str;
     const DATE: time::Date;
@@ -81,6 +81,6 @@ pub async fn migrate(storage: &StorageManager) -> Result<()> {
     Ok(())
 }
 
-pub fn latest_migration_version() -> MigrationVersion {
-    <LatestMigration as Migration>::version()
-}
+// pub fn latest_migration_version() -> MigrationVersion {
+//     <LatestMigration as Migration>::version()
+// }
