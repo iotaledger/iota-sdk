@@ -93,6 +93,10 @@ impl StorageManager {
         self.storage.encryption_key.is_some()
     }
 
+    pub(crate) async fn set<T: Serialize + Send>(&self, key: &str, record: T) -> crate::wallet::Result<()> {
+        self.storage.set(key, record).await
+    }
+
     pub async fn get<T: for<'de> Deserialize<'de>>(&self, key: &str) -> crate::wallet::Result<Option<T>> {
         self.storage.get(key).await
     }

@@ -5,7 +5,7 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 use super::storage::manager::StorageManager;
-use crate::wallet::Result;
+use crate::wallet::{storage::constants::MIGRATION_VERSION_KEY, Result};
 
 // mod migrate_0;
 
@@ -65,6 +65,7 @@ impl<T: Migration + Send + Sync> DynMigration for T {
         let version = self.version();
         log::info!("Migrating to version {}", version);
         T::migrate(storage).await?;
+        storage.set(MIGRATION_VERSION_KEY, version).await?;
         Ok(())
     }
 }
