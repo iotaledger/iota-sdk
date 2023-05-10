@@ -435,7 +435,9 @@ pub async fn decrease_native_token_command(account: &Account, token_id: String, 
 pub async fn destroy_alias_command(account: &Account, alias_id: String) -> Result<(), Error> {
     println_log_info!("Destroying alias {alias_id}.");
 
-    let transaction = account.destroy_alias(AliasId::from_str(&alias_id)?, None).await?;
+    let transaction = account
+        .burn(Burn::new().add_alias(AliasId::from_str(&alias_id)?), None)
+        .await?;
 
     println_log_info!(
         "Destroying alias transaction sent:\n{:?}\n{:?}",

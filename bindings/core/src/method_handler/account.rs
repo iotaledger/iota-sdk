@@ -78,8 +78,8 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::DestroyAlias { alias_id, options } => {
             let transaction = account
-                .destroy_alias(
-                    AliasId::try_from(&alias_id)?,
+                .burn(
+                    Burn::new().add_alias(AliasId::try_from(&alias_id)?),
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;

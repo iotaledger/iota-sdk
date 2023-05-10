@@ -218,7 +218,7 @@ async fn destroy_alias(account: &Account) -> Result<()> {
     // Let's destroy the first alias we can find
     let alias_id = *balance.aliases().first().unwrap();
     println!("alias_id -> {alias_id}");
-    let transaction = account.destroy_alias(alias_id, None).await.unwrap();
+    let transaction = account.burn(Burn::new().add_alias(alias_id), None).await.unwrap();
     account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;

@@ -6,7 +6,10 @@
 //!
 //! `cargo run --example destroy_alias --release`
 
-use iota_sdk::wallet::{Result, Wallet};
+use iota_sdk::{
+    client::api::input_selection::Burn,
+    wallet::{Result, Wallet},
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -30,7 +33,7 @@ async fn main() -> Result<()> {
             .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        let transaction = account.destroy_alias(*alias_id, None).await?;
+        let transaction = account.burn(Burn::new().add_alias(*alias_id), None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         let block_id = account

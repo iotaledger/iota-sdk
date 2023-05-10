@@ -18,7 +18,10 @@ use zeroize::Zeroize;
 use crate::wallet::events::types::{Event, WalletEventType};
 use crate::{
     client::{
-        api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto, input_selection::Burn},
+        api::{
+            input_selection::Burn, PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData,
+            SignedTransactionDataDto,
+        },
         constants::SHIMMER_TESTNET_BECH32_HRP,
         request_funds_from_faucet, utils, Client, NodeInfoWrapper,
     },
@@ -554,8 +557,8 @@ impl WalletMessageHandler {
             AccountMethod::DestroyAlias { alias_id, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .destroy_alias(
-                            AliasId::try_from(&alias_id)?,
+                        .burn(
+                            Burn::new().add_alias(AliasId::try_from(&alias_id)?),
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
