@@ -16,7 +16,7 @@ impl Account {
     pub async fn destroy_foundry(
         &self,
         foundry_id: FoundryId,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!("[TRANSACTION] destroy_foundry");
 
@@ -32,7 +32,7 @@ impl Account {
             existing_foundry_output_data.output_id,
         ];
 
-        let options = match options {
+        let options = match options.into() {
             Some(mut options) => {
                 options.custom_inputs.replace(custom_inputs);
                 options.burn = Some(Burn::new().add_foundry(foundry_id));

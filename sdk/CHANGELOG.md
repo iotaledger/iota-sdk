@@ -28,10 +28,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `StrongholdAdapter::inner` method;
 - `OutputMetadata::set_spent` method;
 - `ignore_if_bech32_mismatch` parameter to `Wallet::restore_backup()`;
+- `OutputWithMetadata::{into_output, into_metadata}` methods;
 
 ### Changed
 
 - `OutputData::metadata` changed from `OutputMetadataDto` to `OutputMetadata`;
+- Rename messages `SendAmount::addresses_with_amount`, `SendNft::addresses_and_nft_ids`, `SendNativeTokens::addresses_and_native_tokens`, `CreateAliasOutput::alias_output_options`, `MintNfts::nftsOptions`, `MintNativeToken::native_token_options`, `PrepareOutput::options` to `params`.
+- Rename `AddressesWithAmount` to `SendAmountParams`.
+- Rename `AddressesAndNftIds` to `SendNftParams`.
+- Rename `AddressesAndNativeTokens` to `SendNativeTokensParams`.
+- Rename `AliasOutputOptions` to `CreateAliasParams`.
+- Rename `NftOptions` to `MintNftParams`.
+- Rename `NativeTokenOptions` to `MintNativeTokenParams`.
+- Rename `OutputOptions` to `OutputParams`.
 - `Client::get_outputs()` and derived methods return `OutputWithMetadata` instead of `OutputWithMetadataDto`;
 - rename `Client::try_get_outputs()` into `Client::get_outputs_ignore_errors()`;
 - rename `Client::try_get_outputs_metadata()` into `Client::get_outputs_metadata_ignore_errors()`;
@@ -40,11 +49,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::read` and `write` now accessible via `details` and `details_mut`;
 - `Wallet::emit_test_event` no longer returns a `Result`;
 - `Client`, `Wallet`, and `Account` fns updated to reflect internal reorganization;
+- `AccountBuilder::new` now takes a wallet;
 
 ### Removed
 
 - `FilterOptions`'s `Hash` derivation;
 - `client_without_tls` feature in favor of separate `client` and `tls` features;
+- `IncreaseNativeTokenSupplyOptions`;
 
 ## 0.3.0 - 2023-05-02
 

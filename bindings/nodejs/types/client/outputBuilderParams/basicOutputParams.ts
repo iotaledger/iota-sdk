@@ -4,7 +4,7 @@ import { UnlockCondition, Feature } from '../../../lib';
 /**
  * Options for building a Basic Output
  */
-export interface BasicOutputBuilderOptions {
+export interface BasicOutputBuilderParams {
     /**
      * If not provided, minimum storage deposit will be used
      */
