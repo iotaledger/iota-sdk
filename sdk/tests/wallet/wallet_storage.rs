@@ -8,7 +8,6 @@ use iota_sdk::wallet::{Result, Wallet};
 use crate::wallet::common::{setup, tear_down};
 
 #[cfg(all(feature = "stronghold", feature = "rocksdb"))]
-#[cfg(not(target_os = "windows"))]
 #[tokio::test]
 async fn check_existing_db() -> Result<()> {
     let storage_path = "check_existing_db_test";
