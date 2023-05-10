@@ -637,22 +637,23 @@ fn missing_ed25519_issuer_created() {
 #[test]
 fn missing_ed25519_issuer_transition() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs(vec![Alias(
         1_000_000,
+        alias_id_1,
+        1,
+        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
-        None,
-        None,
-        None,
+        Some(BECH32_ADDRESS_ED25519_1),
         None,
     )]);
     let outputs = build_outputs(vec![Alias(
         1_000_000,
-        alias_id_0,
-        0,
+        alias_id_1,
+        2,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
@@ -669,10 +670,7 @@ fn missing_ed25519_issuer_transition() {
     )
     .select();
 
-    assert!(matches!(
-        selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()
-    ));
+    assert!(selected.is_ok());
 }
 
 #[test]

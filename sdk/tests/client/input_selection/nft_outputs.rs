@@ -559,21 +559,22 @@ fn missing_ed25519_issuer_created() {
 #[test]
 fn missing_ed25519_issuer_transition() {
     let protocol_parameters = protocol_parameters();
-    let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
+    let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs(vec![Nft(
         1_000_000,
+        nft_id_1,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
-        None,
+        Some(BECH32_ADDRESS_ED25519_1),
         None,
         None,
         None,
     )]);
     let outputs = build_outputs(vec![Nft(
         1_000_000,
-        nft_id_0,
+        nft_id_1,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
@@ -591,10 +592,7 @@ fn missing_ed25519_issuer_transition() {
     )
     .select();
 
-    assert!(matches!(
-        selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()
-    ));
+    assert!(selected.is_ok());
 }
 
 #[test]

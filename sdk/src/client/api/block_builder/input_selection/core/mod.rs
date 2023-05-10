@@ -22,7 +22,10 @@ use crate::{
     types::block::{
         address::{Address, AliasAddress, NftAddress},
         input::INPUT_COUNT_RANGE,
-        output::{AliasOutput, AliasTransition, ChainId, Output, OutputId, OUTPUT_COUNT_RANGE},
+        output::{
+            AliasOutput, AliasTransition, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId,
+            OUTPUT_COUNT_RANGE,
+        },
         protocol::ProtocolParameters,
     },
     utils::unix_timestamp_now,
@@ -413,16 +416,23 @@ impl InputSelection {
     }
 
     fn validate_transitions(&self) -> Result<(), Error> {
+        let mut input_native_tokens_builder = NativeTokensBuilder::new();
+        let mut output_native_tokens_builder = NativeTokensBuilder::new();
         let mut input_aliases = Vec::new();
         let mut input_chains_foundries = hashbrown::HashMap::new();
+        let mut input_foundries = Vec::new();
         let mut input_nfts = Vec::new();
         for input in &self.selected_inputs {
+            if let Some(native_tokens) = input.output.native_tokens() {
+                input_native_tokens_builder.add_native_tokens(native_tokens.clone())?;
+            }
             match &input.output {
                 Output::Alias(_) => {
                     input_aliases.push(input);
                 }
                 Output::Foundry(foundry) => {
                     input_chains_foundries.insert(foundry.chain_id(), &input.output);
+                    input_foundries.push(input);
                 }
                 Output::Nft(_) => {
                     input_nfts.push(input);
@@ -431,7 +441,26 @@ impl InputSelection {
             }
         }
 
-        // Validate alias output transition
+        let input_native_tokens = hashbrown::HashMap::from_iter(
+            input_native_tokens_builder
+                .finish_vec()?
+                .into_iter()
+                .map(|n| (*n.token_id(), n.amount())),
+        );
+        for output in self.outputs.iter() {
+            if let Some(native_token) = output.native_tokens() {
+                output_native_tokens_builder.add_native_tokens(native_token.clone())?;
+            }
+        }
+
+        let output_native_tokens = hashbrown::HashMap::from_iter(
+            output_native_tokens_builder
+                .finish_vec()?
+                .into_iter()
+                .map(|n| (*n.token_id(), n.amount())),
+        );
+
+        // Validate utxo chain transitions
         for output in self.outputs.iter() {
             match output {
                 Output::Alias(alias_output) => {
@@ -470,6 +499,28 @@ impl InputSelection {
                         )));
                     }
                 }
+                Output::Foundry(foundry_output) => {
+                    let foundry_input = input_foundries.iter().find(|i| {
+                        if let Output::Foundry(foundry_input) = &i.output {
+                            foundry_output.id() == foundry_input.id()
+                        } else {
+                            false
+                        }
+                    });
+                    if let Some(foundry_input) = foundry_input {
+                        if let Err(err) = FoundryOutput::transition_inner(
+                            foundry_input.output.as_foundry(),
+                            foundry_output,
+                            &input_native_tokens,
+                            &output_native_tokens,
+                        ) {
+                            log::debug!("validate_transitions error {err:?}");
+                            return Err(Error::UnfulfillableRequirement(Requirement::Foundry(
+                                foundry_output.id(),
+                            )));
+                        }
+                    }
+                }
                 Output::Nft(nft_output) => {
                     // Null id outputs are just minted and can't be a transition
                     if nft_output.nft_id().is_null() {
@@ -487,10 +538,12 @@ impl InputSelection {
                         })
                         .expect("ISA is broken because there is no nft input");
 
-                    if nft_input.output.as_nft().immutable_features() != nft_output.immutable_features() {
+                    if let Err(err) = NftOutput::transition_inner(nft_input.output.as_nft(), nft_output) {
+                        log::debug!("validate_transitions error {err:?}");
                         return Err(Error::UnfulfillableRequirement(Requirement::Nft(*nft_output.nft_id())));
                     }
                 }
+                // other output types don't do transitions
                 _ => {}
             }
         }

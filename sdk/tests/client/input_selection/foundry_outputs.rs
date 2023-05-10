@@ -762,40 +762,17 @@ fn mint_and_burn_at_the_same_time() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
+        outputs,
         addresses(vec![BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .burn(Burn::new().add_native_token(token_id, 10))
-    .select()
-    .unwrap();
+    .select();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
-        if !outputs.contains(output) {
-            if output.is_alias() {
-                assert_eq!(output.amount(), 2_000_000);
-                assert_eq!(output.as_alias().native_tokens().len(), 0);
-                assert_eq!(output.as_alias().state_index(), 2);
-                assert_eq!(*output.as_alias().alias_id(), alias_id_1);
-                assert_eq!(output.as_alias().unlock_conditions().len(), 2);
-                assert_eq!(output.as_alias().features().len(), 0);
-                assert_eq!(output.as_alias().immutable_features().len(), 0);
-                assert_eq!(
-                    *output.as_alias().state_controller_address(),
-                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
-                );
-                assert_eq!(
-                    *output.as_alias().governor_address(),
-                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
-                );
-            } else {
-                panic!("unexpected output type")
-            }
-        }
-    });
+    assert!(matches!(
+        selected,
+        Err(Error::UnfulfillableRequirement(Requirement::Foundry(id))) if id == foundry_id
+    ));
 }
 
 #[test]
