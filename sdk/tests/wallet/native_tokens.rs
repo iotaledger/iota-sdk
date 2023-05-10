@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    wallet::{account::SyncOptions, NativeTokenOptions, Result},
+    wallet::{account::SyncOptions, MintNativeTokenParams, Result},
     U256,
 };
 
@@ -26,7 +26,7 @@ async fn mint_and_increase_native_token_supply() -> Result<()> {
 
     let mint_tx = account
         .mint_native_token(
-            NativeTokenOptions {
+            MintNativeTokenParams {
                 alias_id: None,
                 circulating_supply: U256::from(50),
                 maximum_supply: U256::from(100),
@@ -51,7 +51,7 @@ async fn mint_and_increase_native_token_supply() -> Result<()> {
     );
 
     let mint_tx = account
-        .increase_native_token_supply(mint_tx.token_id, U256::from(50), None, None)
+        .increase_native_token_supply(mint_tx.token_id, U256::from(50), None)
         .await?;
     account
         .retry_transaction_until_included(&mint_tx.transaction.transaction_id, None, None)
@@ -91,7 +91,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
 
     let mint_tx = account
         .mint_native_token(
-            NativeTokenOptions {
+            MintNativeTokenParams {
                 alias_id: None,
                 circulating_supply: U256::from(50),
                 maximum_supply: U256::from(100),

@@ -6,7 +6,7 @@
 //! <https://github.com/iotaledger/inx-participation/blob/develop/core/participation/routes.go>
 
 use crate::{
-    client::{Client, Result},
+    client::{ClientInner, Result},
     types::{
         api::plugins::participation::{
             responses::{AddressOutputsResponse, EventsResponse, OutputStatusResponse},
@@ -19,7 +19,7 @@ use crate::{
     },
 };
 
-impl Client {
+impl ClientInner {
     /// RouteParticipationEvents is the route to list all events, returning their ID, the event name and status.
     pub async fn events(&self, event_type: Option<ParticipationEventType>) -> Result<EventsResponse> {
         let route = "api/participation/v1/events";
@@ -29,8 +29,7 @@ impl Client {
             ParticipationEventType::Staking => "type=1",
         });
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request(route, query, self.get_timeout(), false, false)
             .await
     }
@@ -39,8 +38,7 @@ impl Client {
     pub async fn event(&self, event_id: &ParticipationEventId) -> Result<ParticipationEventData> {
         let route = format!("api/participation/v1/events/{event_id}");
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request(&route, None, self.get_timeout(), false, false)
             .await
     }
@@ -53,8 +51,7 @@ impl Client {
     ) -> Result<ParticipationEventStatus> {
         let route = format!("api/participation/v1/events/{event_id}/status");
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request(
                 &route,
                 milestone_index.map(|index| index.to_string()).as_deref(),
@@ -69,8 +66,7 @@ impl Client {
     pub async fn output_status(&self, output_id: &OutputId) -> Result<OutputStatusResponse> {
         let route = format!("api/participation/v1/outputs/{output_id}");
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request(&route, None, self.get_timeout(), false, false)
             .await
     }
@@ -79,8 +75,7 @@ impl Client {
     pub async fn address_staking_status(&self, bech32_address: impl Bech32AddressLike) -> Result<AddressStakingStatus> {
         let route = format!("api/participation/v1/addresses/{}", bech32_address.as_string());
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request(&route, None, self.get_timeout(), false, false)
             .await
     }
@@ -92,8 +87,7 @@ impl Client {
     ) -> Result<AddressOutputsResponse> {
         let route = format!("api/participation/v1/addresses/{}/outputs", bech32_address.as_string());
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request(&route, None, self.get_timeout(), false, false)
             .await
     }

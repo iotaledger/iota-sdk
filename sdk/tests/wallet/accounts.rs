@@ -53,8 +53,8 @@ async fn remove_latest_account() -> Result<()> {
         let accounts = wallet.get_accounts().await.unwrap();
         assert!(accounts.len() == 1);
         assert_eq!(
-            *accounts.get(0).unwrap().read().await.index(),
-            *first_account.read().await.index()
+            *accounts.get(0).unwrap().details().await.index(),
+            *first_account.details().await.index()
         );
 
         // Remove `first_account`.
@@ -80,7 +80,7 @@ async fn remove_latest_account() -> Result<()> {
 
         let recreated_account = wallet.create_account().finish().await?;
         assert_eq!(wallet.get_accounts().await.unwrap().len(), 1);
-        let recreated_account_index = *recreated_account.read().await.index();
+        let recreated_account_index = *recreated_account.details().await.index();
 
         recreated_account_index
     };
@@ -92,7 +92,10 @@ async fn remove_latest_account() -> Result<()> {
 
     // Check if accounts with `recreated_account_index` exist.
     assert_eq!(accounts.len(), 1);
-    assert_eq!(*accounts.get(0).unwrap().read().await.index(), recreated_account_index);
+    assert_eq!(
+        *accounts.get(0).unwrap().details().await.index(),
+        recreated_account_index
+    );
 
     #[cfg(debug_assertions)]
     wallet.verify_integrity().await?;
@@ -153,13 +156,13 @@ async fn account_rename_alias() -> Result<()> {
     let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
 
     assert_eq!(account.alias().await, "Alice".to_string());
-    assert_eq!(account.read().await.alias(), "Alice");
+    assert_eq!(account.details().await.alias(), "Alice");
 
     // rename account
     account.set_alias("Bob").await?;
 
     assert_eq!(account.alias().await, "Bob".to_string());
-    assert_eq!(account.read().await.alias(), "Bob");
+    assert_eq!(account.details().await.alias(), "Bob");
 
     tear_down(storage_path)
 }

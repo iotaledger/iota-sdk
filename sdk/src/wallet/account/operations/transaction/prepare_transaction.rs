@@ -74,15 +74,16 @@ impl Account {
                         let remainder_address = self.generate_remainder_address().await?;
                         #[cfg(feature = "events")]
                         {
-                            let account_index = self.read().await.index;
-                            self.event_emitter.lock().await.emit(
+                            let account_index = self.details().await.index;
+                            self.emit(
                                 account_index,
                                 WalletEvent::TransactionProgress(
                                     TransactionProgressEvent::GeneratingRemainderDepositAddress(AddressData {
                                         address: remainder_address.address,
                                     }),
                                 ),
-                            );
+                            )
+                            .await;
                         }
                         Some(remainder_address.address().inner)
                     }

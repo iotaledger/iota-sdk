@@ -17,7 +17,7 @@ const DEFAULT_RETRY_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
 
 impl Account {
     /// Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
-    /// milestone). This function is re-exported from the client library and default interval is as defined in iota.rs.
+    /// milestone). This function is re-exported from the client library and default interval is as defined there.
     /// Returns the included block at first position and additional reattached blocks
     pub async fn retry_until_included(
         &self,
@@ -41,7 +41,7 @@ impl Account {
     ) -> crate::wallet::Result<BlockId> {
         log::debug!("[retry_transaction_until_included]");
 
-        let transaction = self.read().await.transactions.get(transaction_id).cloned();
+        let transaction = self.details().await.transactions.get(transaction_id).cloned();
 
         if let Some(transaction) = transaction {
             if transaction.inclusion_state == InclusionState::Confirmed {

@@ -62,7 +62,7 @@ impl Account {
     pub async fn send(
         &self,
         outputs: Vec<Output>,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         // here to check before syncing, how to prevent duplicated verification (also in prepare_transaction())?
         // Checking it also here is good to return earlier if something is invalid
@@ -84,7 +84,7 @@ impl Account {
     pub async fn finish_transaction(
         &self,
         outputs: Vec<Output>,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!("[TRANSACTION] finish_transaction");
 
@@ -179,7 +179,7 @@ impl Account {
             inputs,
         };
 
-        let mut account_details = self.write().await;
+        let mut account_details = self.details_mut().await;
 
         account_details.transactions.insert(transaction_id, transaction.clone());
         account_details.pending_transactions.insert(transaction_id);
@@ -194,7 +194,7 @@ impl Account {
 
     // unlock outputs
     async fn unlock_inputs(&self, inputs: &[InputSigningData]) -> crate::wallet::Result<()> {
-        let mut account_details = self.write().await;
+        let mut account_details = self.details_mut().await;
         for input_signing_data in inputs {
             let output_id = input_signing_data.output_id();
             account_details.locked_outputs.remove(output_id);

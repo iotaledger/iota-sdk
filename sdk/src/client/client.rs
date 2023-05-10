@@ -36,7 +36,15 @@ pub struct Client {
     pub(crate) _sync_handle: Arc<SyncHandle>,
 }
 
-pub(crate) struct ClientInner {
+impl core::ops::Deref for Client {
+    type Target = ClientInner;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+pub struct ClientInner {
     /// Node manager
     pub(crate) node_manager: NodeManager,
     pub(crate) network_info: RwLock<NetworkInfo>,
@@ -88,7 +96,9 @@ impl Client {
     pub fn builder() -> ClientBuilder {
         ClientBuilder::new()
     }
+}
 
+impl ClientInner {
     /// Gets the network related information such as network_id and min_pow_score
     /// and if it's the default one, sync it first and set the NetworkInfo.
     pub async fn get_network_info(&self) -> Result<NetworkInfo> {
@@ -104,7 +114,6 @@ impl Client {
             if let Some(last_sync) = *LAST_SYNC.lock().unwrap() {
                 if current_time < last_sync {
                     return Ok(self
-                        .inner
                         .network_info
                         .read()
                         .map_err(|_| crate::client::Error::PoisonError)?
@@ -113,7 +122,6 @@ impl Client {
             }
             let info = self.get_info().await?.node_info;
             let mut client_network_info = self
-                .inner
                 .network_info
                 .write()
                 .map_err(|_| crate::client::Error::PoisonError)?;
@@ -123,7 +131,6 @@ impl Client {
         }
 
         Ok(self
-            .inner
             .network_info
             .read()
             .map_err(|_| crate::client::Error::PoisonError)?
@@ -177,32 +184,29 @@ impl Client {
 
     /// returns the tips interval
     pub fn get_tips_interval(&self) -> u64 {
-        self.inner
-            .network_info
+        self.network_info
             .read()
             .map_or(DEFAULT_TIPS_INTERVAL, |info| info.tips_interval)
     }
 
     /// returns if local pow should be used or not
     pub fn get_local_pow(&self) -> bool {
-        self.inner
-            .network_info
+        self.network_info
             .read()
             .map_or(NetworkInfo::default().local_pow, |info| info.local_pow)
     }
 
     pub(crate) fn get_timeout(&self) -> Duration {
-        self.inner.api_timeout
+        self.api_timeout
     }
 
     pub(crate) fn get_remote_pow_timeout(&self) -> Duration {
-        self.inner.remote_pow_timeout
+        self.remote_pow_timeout
     }
 
     /// returns the fallback_to_local_pow
     pub fn get_fallback_to_local_pow(&self) -> bool {
-        self.inner
-            .network_info
+        self.network_info
             .read()
             .map_or(NetworkInfo::default().fallback_to_local_pow, |info| {
                 info.fallback_to_local_pow

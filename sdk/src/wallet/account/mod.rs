@@ -38,29 +38,23 @@ pub use self::{
         },
         transaction::{
             high_level::{
-                create_alias::{AliasOutputOptions, AliasOutputOptionsDto},
+                create_alias::{CreateAliasParams, CreateAliasParamsDto},
                 minting::{
-                    increase_native_token_supply::{
-                        IncreaseNativeTokenSupplyOptions, IncreaseNativeTokenSupplyOptionsDto,
-                    },
-                    mint_native_token::{MintTokenTransactionDto, NativeTokenOptions, NativeTokenOptionsDto},
-                    mint_nfts::{NftOptions, NftOptionsDto},
+                    mint_native_token::{MintNativeTokenParams, MintNativeTokenParamsDto, MintTokenTransactionDto},
+                    mint_nfts::{MintNftParams, MintNftParamsDto},
                 },
             },
             prepare_output::{
-                Assets, Features, OutputOptions, OutputOptionsDto, ReturnStrategy, StorageDeposit, Unlocks,
+                Assets, Features, OutputParams, OutputParamsDto, ReturnStrategy, StorageDeposit, Unlocks,
             },
             RemainderValueStrategy, TransactionOptions, TransactionOptionsDto,
         },
     },
     types::OutputDataDto,
 };
-#[cfg(feature = "events")]
-use crate::wallet::events::EventEmitter;
-#[cfg(feature = "storage")]
-use crate::wallet::storage::manager::StorageManager;
+use super::wallet::WalletInner;
 use crate::{
-    client::{secret::SecretManager, Client},
+    client::Client,
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
@@ -146,40 +140,36 @@ pub struct AccountDetails {
 /// A thread guard over an account, so we can lock the account during operations.
 #[derive(Debug, Clone)]
 pub struct Account {
-    details: Arc<RwLock<AccountDetails>>,
+    inner: Arc<AccountInner>,
     pub(crate) client: Client,
-    pub(crate) secret_manager: Arc<RwLock<SecretManager>>,
+    pub(crate) wallet: Arc<WalletInner>,
+}
+
+#[derive(Debug)]
+pub struct AccountInner {
+    details: RwLock<AccountDetails>,
     // mutex to prevent multiple sync calls at the same or almost the same time, the u128 is a timestamp
     // if the last synced time was < `MIN_SYNC_INTERVAL` second ago, we don't sync, but only calculate the balance
     // again, because sending transactions can change that
-    pub(crate) last_synced: Arc<Mutex<u128>>,
-    pub(crate) default_sync_options: Arc<Mutex<SyncOptions>>,
-    #[cfg(feature = "events")]
-    pub(crate) event_emitter: Arc<Mutex<EventEmitter>>,
-    #[cfg(feature = "storage")]
-    pub(crate) storage_manager: Arc<Mutex<StorageManager>>,
+    pub(crate) last_synced: Mutex<u128>,
+    pub(crate) default_sync_options: Mutex<SyncOptions>,
 }
 
-// impl Deref so we can use `account.read()` instead of `account.details.read()`
+// impl Deref so we can use `account.details()` instead of `account.details.read()`
 impl Deref for Account {
-    type Target = RwLock<AccountDetails>;
+    type Target = AccountInner;
 
     fn deref(&self) -> &Self::Target {
-        self.details.deref()
+        &self.inner
     }
 }
 
 impl Account {
     /// Create a new Account with an AccountDetails
-    pub(crate) async fn new(
-        details: AccountDetails,
-        client: Client,
-        secret_manager: Arc<RwLock<SecretManager>>,
-        #[cfg(feature = "events")] event_emitter: Arc<Mutex<EventEmitter>>,
-        #[cfg(feature = "storage")] storage_manager: Arc<Mutex<StorageManager>>,
-    ) -> Result<Self> {
+    pub(crate) async fn new(details: AccountDetails, client: Client, wallet: Arc<WalletInner>) -> Result<Self> {
         #[cfg(feature = "storage")]
-        let default_sync_options = storage_manager
+        let default_sync_options = wallet
+            .storage_manager
             .lock()
             .await
             .get_default_sync_options(*details.index())
@@ -189,20 +179,14 @@ impl Account {
         let default_sync_options = Default::default();
 
         Ok(Self {
-            details: Arc::new(RwLock::new(details)),
             client,
-            secret_manager,
-            last_synced: Default::default(),
-            default_sync_options: Arc::new(Mutex::new(default_sync_options)),
-            #[cfg(feature = "events")]
-            event_emitter,
-            #[cfg(feature = "storage")]
-            storage_manager,
+            wallet,
+            inner: Arc::new(AccountInner {
+                details: RwLock::new(details),
+                last_synced: Default::default(),
+                default_sync_options: Mutex::new(default_sync_options),
+            }),
         })
-    }
-
-    pub async fn alias(&self) -> String {
-        self.read().await.alias.clone()
     }
 
     // Get the Client
@@ -210,17 +194,12 @@ impl Account {
         &self.client
     }
 
-    /// Get the [`OutputData`] of an output stored in the account
-    pub async fn get_output(&self, output_id: &OutputId) -> Option<OutputData> {
-        self.read().await.outputs().get(output_id).cloned()
-    }
-
     /// Get the [`Output`] that minted a native token by the token ID. First try to get it
     /// from the account, if it isn't in the account try to get it from the node
     pub async fn get_foundry_output(&self, native_token_id: TokenId) -> Result<Output> {
         let foundry_id = FoundryId::from(native_token_id);
 
-        for output_data in self.read().await.outputs().values() {
+        for output_data in self.details().await.outputs().values() {
             if let Output::Foundry(foundry_output) = &output_data.output {
                 if foundry_output.id() == foundry_id {
                     return Ok(output_data.output.clone());
@@ -235,20 +214,70 @@ impl Account {
         Ok(output_response.output().to_owned())
     }
 
+    /// Save the account to the database, accepts the updated_account as option so we don't need to drop it before
+    /// saving
+    #[cfg(feature = "storage")]
+    pub(crate) async fn save(&self, updated_account: Option<&AccountDetails>) -> Result<()> {
+        log::debug!("[save] saving account to database");
+        match updated_account {
+            Some(account) => {
+                let mut storage_manager = self.wallet.storage_manager.lock().await;
+                storage_manager.save_account(account).await?;
+                drop(storage_manager);
+            }
+            None => {
+                let account_details = self.details().await;
+                let mut storage_manager = self.wallet.storage_manager.lock().await;
+                storage_manager.save_account(&account_details).await?;
+                drop(storage_manager);
+                drop(account_details);
+            }
+        }
+        Ok(())
+    }
+
+    #[cfg(feature = "events")]
+    pub(crate) async fn emit(&self, account_index: u32, wallet_event: super::events::types::WalletEvent) {
+        self.wallet.emit(account_index, wallet_event).await
+    }
+}
+
+impl AccountInner {
+    pub async fn details(&self) -> tokio::sync::RwLockReadGuard<'_, AccountDetails> {
+        self.details.read().await
+    }
+
+    pub async fn details_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, AccountDetails> {
+        self.details.write().await
+    }
+
+    pub async fn alias(&self) -> String {
+        self.details().await.alias.clone()
+    }
+
+    /// Get the [`OutputData`] of an output stored in the account
+    pub async fn get_output(&self, output_id: &OutputId) -> Option<OutputData> {
+        self.details().await.outputs().get(output_id).cloned()
+    }
+
     /// Get the [`Transaction`] of a transaction stored in the account
     pub async fn get_transaction(&self, transaction_id: &TransactionId) -> Option<Transaction> {
-        self.read().await.transactions().get(transaction_id).cloned()
+        self.details().await.transactions().get(transaction_id).cloned()
     }
 
     /// Get the transaction with inputs of an incoming transaction stored in the account
     /// List might not be complete, if the node pruned the data already
     pub async fn get_incoming_transaction_data(&self, transaction_id: &TransactionId) -> Option<Transaction> {
-        self.read().await.incoming_transactions().get(transaction_id).cloned()
+        self.details()
+            .await
+            .incoming_transactions()
+            .get(transaction_id)
+            .cloned()
     }
 
     /// Returns all addresses of the account
     pub async fn addresses(&self) -> Result<Vec<AccountAddress>> {
-        let account_details = self.read().await;
+        let account_details = self.details().await;
         let mut all_addresses = account_details.public_addresses().clone();
         all_addresses.extend(account_details.internal_addresses().clone());
         Ok(all_addresses.to_vec())
@@ -256,12 +285,12 @@ impl Account {
 
     /// Returns all public addresses of the account
     pub(crate) async fn public_addresses(&self) -> Vec<AccountAddress> {
-        self.read().await.public_addresses().to_vec()
+        self.details().await.public_addresses().to_vec()
     }
 
     /// Returns only addresses of the account with balance
     pub async fn addresses_with_unspent_outputs(&self) -> Result<Vec<AddressWithUnspentOutputs>> {
-        Ok(self.read().await.addresses_with_unspent_outputs().to_vec())
+        Ok(self.details().await.addresses_with_unspent_outputs().to_vec())
     }
 
     fn filter_outputs<'a>(
@@ -334,12 +363,12 @@ impl Account {
 
     /// Returns outputs of the account
     pub async fn outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Result<Vec<OutputData>> {
-        self.filter_outputs(self.read().await.outputs.values(), filter)
+        self.filter_outputs(self.details().await.outputs.values(), filter)
     }
 
     /// Returns unspent outputs of the account
     pub async fn unspent_outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Result<Vec<OutputData>> {
-        self.filter_outputs(self.read().await.unspent_outputs.values(), filter)
+        self.filter_outputs(self.details().await.unspent_outputs.values(), filter)
     }
 
     /// Gets the unspent alias output matching the given ID.
@@ -374,18 +403,18 @@ impl Account {
 
     /// Returns all incoming transactions of the account
     pub async fn incoming_transactions(&self) -> Result<HashMap<TransactionId, Transaction>> {
-        Ok(self.read().await.incoming_transactions.clone())
+        Ok(self.details().await.incoming_transactions.clone())
     }
 
     /// Returns all transactions of the account
     pub async fn transactions(&self) -> Result<Vec<Transaction>> {
-        Ok(self.read().await.transactions.values().cloned().collect())
+        Ok(self.details().await.transactions.values().cloned().collect())
     }
 
     /// Returns all pending transactions of the account
     pub async fn pending_transactions(&self) -> Result<Vec<Transaction>> {
         let mut transactions = Vec::new();
-        let account_details = self.read().await;
+        let account_details = self.details().await;
 
         for transaction_id in &account_details.pending_transactions {
             if let Some(transaction) = account_details.transactions.get(transaction_id) {
@@ -394,28 +423,6 @@ impl Account {
         }
 
         Ok(transactions)
-    }
-
-    /// Save the account to the database, accepts the updated_account as option so we don't need to drop it before
-    /// saving
-    #[cfg(feature = "storage")]
-    pub(crate) async fn save(&self, updated_account: Option<&AccountDetails>) -> Result<()> {
-        log::debug!("[save] saving account to database");
-        match updated_account {
-            Some(account) => {
-                let mut storage_manager = self.storage_manager.lock().await;
-                storage_manager.save_account(account).await?;
-                drop(storage_manager);
-            }
-            None => {
-                let account_details = self.read().await;
-                let mut storage_manager = self.storage_manager.lock().await;
-                storage_manager.save_account(&account_details).await?;
-                drop(storage_manager);
-                drop(account_details);
-            }
-        }
-        Ok(())
     }
 }
 

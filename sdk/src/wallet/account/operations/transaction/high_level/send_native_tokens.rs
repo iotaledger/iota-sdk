@@ -27,10 +27,10 @@ use crate::{
     },
 };
 
-/// Address, amount and native tokens for `send_native_tokens()`
+/// Params for `send_native_tokens()`
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AddressNativeTokens {
+pub struct SendNativeTokensParams {
     /// Bech32 encoded address
     pub address: Bech32Address,
     /// Native tokens
@@ -51,7 +51,7 @@ impl Account {
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
-    /// let outputs = vec![AddressNativeTokens {
+    /// let outputs = vec![SendNativeTokensParams {
     ///     address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
     ///     native_tokens: vec![(
     ///         TokenId::from_str("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?,
@@ -68,12 +68,10 @@ impl Account {
     /// ```
     pub async fn send_native_tokens(
         &self,
-        addresses_and_native_tokens: Vec<AddressNativeTokens>,
-        options: Option<TransactionOptions>,
+        params: Vec<SendNativeTokensParams>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
-        let prepared_transaction = self
-            .prepare_send_native_tokens(addresses_and_native_tokens, options)
-            .await?;
+        let prepared_transaction = self.prepare_send_native_tokens(params, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
 
@@ -81,45 +79,59 @@ impl Account {
     /// [Account.send_native_tokens()](crate::account::Account.send_native_tokens)
     async fn prepare_send_native_tokens(
         &self,
-        addresses_and_native_tokens: Vec<AddressNativeTokens>,
-        options: Option<TransactionOptions>,
+        params: Vec<SendNativeTokensParams>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_send_native_tokens");
         let rent_structure = self.client.get_rent_structure().await?;
         let token_supply = self.client.get_token_supply().await?;
 
         let account_addresses = self.addresses().await?;
-        let return_address = account_addresses.first().ok_or(Error::FailedToGetRemainder)?;
+        let default_return_address = account_addresses.first().ok_or(Error::FailedToGetRemainder)?;
 
         let local_time = self.client.get_time_checked().await?;
 
         let mut outputs = Vec::new();
-        for address_with_amount in addresses_and_native_tokens {
-            self.client
-                .bech32_hrp_matches(address_with_amount.address.hrp())
-                .await?;
+        for SendNativeTokensParams {
+            address,
+            native_tokens,
+            return_address,
+            expiration,
+        } in params
+        {
+            self.client.bech32_hrp_matches(address.hrp()).await?;
+            let return_address = return_address
+                .map(|addr| {
+                    if address.hrp() != addr.hrp() {
+                        Err(crate::client::Error::Bech32HrpMismatch {
+                            provided: addr.hrp().to_string(),
+                            expected: address.hrp().to_string(),
+                        })?;
+                    }
+                    Ok::<_, Error>(addr)
+                })
+                .transpose()?
+                .unwrap_or(default_return_address.address);
+
             // get minimum required amount for such an output, so we don't lock more than required
             // We have to check it for every output individually, because different address types and amount of
             // different native tokens require a different storage deposit
             let storage_deposit_amount = minimum_storage_deposit_basic_native_tokens(
                 &rent_structure,
-                address_with_amount.address.inner(),
-                return_address.address.inner(),
-                Some(address_with_amount.native_tokens.clone()),
+                address.inner(),
+                return_address.inner(),
+                Some(native_tokens.clone()),
                 token_supply,
             )?;
 
-            let expiration_time = address_with_amount
-                .expiration
-                .map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
-                    local_time + expiration_time
-                });
+            let expiration_time = expiration.map_or(local_time + DEFAULT_EXPIRATION_TIME, |expiration_time| {
+                local_time + expiration_time
+            });
 
             outputs.push(
                 BasicOutputBuilder::new_with_amount(storage_deposit_amount)
                     .with_native_tokens(
-                        address_with_amount
-                            .native_tokens
+                        native_tokens
                             .into_iter()
                             .map(|(id, amount)| {
                                 NativeToken::new(id, amount)
@@ -127,17 +139,13 @@ impl Account {
                             })
                             .collect::<Result<Vec<NativeToken>>>()?,
                     )
-                    .add_unlock_condition(AddressUnlockCondition::new(address_with_amount.address))
+                    .add_unlock_condition(AddressUnlockCondition::new(address))
                     .add_unlock_condition(
                         // We send the full storage_deposit_amount back to the sender, so only the native tokens are
                         // sent
-                        StorageDepositReturnUnlockCondition::new(
-                            return_address.address,
-                            storage_deposit_amount,
-                            token_supply,
-                        )?,
+                        StorageDepositReturnUnlockCondition::new(return_address, storage_deposit_amount, token_supply)?,
                     )
-                    .add_unlock_condition(ExpirationUnlockCondition::new(return_address.address, expiration_time)?)
+                    .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_time)?)
                     .finish_output(token_supply)?,
             )
         }

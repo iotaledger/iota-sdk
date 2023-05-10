@@ -13,7 +13,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::address::Bech32Address,
-    wallet::{AddressWithAmount, ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Result, SendAmountParams, Wallet},
 };
 
 #[tokio::main]
@@ -64,7 +64,7 @@ async fn main() -> Result<()> {
     println!("Addresses with balance: {}", addresses_with_unspent_outputs.len());
 
     // send transaction
-    let outputs = vec![AddressWithAmount::new(
+    let outputs = vec![SendAmountParams::new(
         Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu").unwrap(),
         1_000_000,
     )];

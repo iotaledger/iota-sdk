@@ -32,17 +32,19 @@ impl Account {
     /// unlock conditions replaced
     pub async fn prepare_output(
         &self,
-        options: OutputOptions,
-        transaction_options: Option<TransactionOptions>,
+        params: OutputParams,
+        transaction_options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Output> {
-        log::debug!("[OUTPUT] prepare_output {options:?}");
+        log::debug!("[OUTPUT] prepare_output {params:?}");
         let token_supply = self.client.get_token_supply().await?;
 
-        self.client.bech32_hrp_matches(options.recipient_address.hrp()).await?;
+        let transaction_options = transaction_options.into();
 
-        if let Some(assets) = &options.assets {
+        self.client.bech32_hrp_matches(params.recipient_address.hrp()).await?;
+
+        if let Some(assets) = &params.assets {
             if let Some(nft_id) = assets.nft_id {
-                return self.prepare_nft_output(options, transaction_options, nft_id).await;
+                return self.prepare_nft_output(params, transaction_options, nft_id).await;
             }
         }
         let rent_structure = self.client.get_rent_structure().await?;
@@ -50,15 +52,15 @@ impl Account {
         // We start building with minimum storage deposit, so we know the minimum required amount and can later replace
         // it, if needed
         let mut first_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-            .add_unlock_condition(AddressUnlockCondition::new(options.recipient_address));
+            .add_unlock_condition(AddressUnlockCondition::new(params.recipient_address));
 
-        if let Some(assets) = options.assets {
+        if let Some(assets) = params.assets {
             if let Some(native_tokens) = assets.native_tokens {
                 first_output_builder = first_output_builder.with_native_tokens(native_tokens);
             }
         }
 
-        if let Some(features) = options.features {
+        if let Some(features) = params.features {
             if let Some(_issuer) = features.issuer {
                 return Err(crate::wallet::Error::MissingParameter("nft_id"));
             }
@@ -80,7 +82,7 @@ impl Account {
             }
         }
 
-        if let Some(unlocks) = options.unlocks {
+        if let Some(unlocks) = params.unlocks {
             if let Some(expiration_unix_time) = unlocks.expiration_unix_time {
                 let remainder_address = self.get_remainder_address(transaction_options.clone()).await?;
 
@@ -98,13 +100,13 @@ impl Account {
         let mut second_output_builder = BasicOutputBuilder::from(&first_output);
 
         // Update the amount
-        match options.amount.cmp(&first_output.amount()) {
+        match params.amount.cmp(&first_output.amount()) {
             Ordering::Greater | Ordering::Equal => {
                 // if it's larger than the minimum storage deposit, just replace it
-                second_output_builder = second_output_builder.with_amount(options.amount);
+                second_output_builder = second_output_builder.with_amount(params.amount);
             }
             Ordering::Less => {
-                let storage_deposit = options.storage_deposit.unwrap_or_default();
+                let storage_deposit = params.storage_deposit.unwrap_or_default();
                 // Gift return strategy doesn't need a change, since the amount is already the minimum storage
                 // deposit
                 if storage_deposit.return_strategy.unwrap_or_default() == ReturnStrategy::Return {
@@ -152,15 +154,15 @@ impl Account {
         // We might have added more unlock conditions, so we check the minimum storage deposit again and update the
         // amounts if needed
         if second_output.amount() < required_storage_deposit {
-            let mut new_sdr_amount = required_storage_deposit - options.amount;
+            let mut new_sdr_amount = required_storage_deposit - params.amount;
             let minimum_storage_deposit = minimum_storage_deposit_basic_output(&rent_structure, &None, token_supply)?;
             let mut final_output_amount = required_storage_deposit;
-            if required_storage_deposit < options.amount + minimum_storage_deposit {
+            if required_storage_deposit < params.amount + minimum_storage_deposit {
                 // return amount must be >= minimum_storage_deposit
                 new_sdr_amount = minimum_storage_deposit;
 
                 // increase the output amount by the additional required amount for the SDR
-                final_output_amount += minimum_storage_deposit - (required_storage_deposit - options.amount);
+                final_output_amount += minimum_storage_deposit - (required_storage_deposit - params.amount);
             }
             third_output_builder = third_output_builder.with_amount(final_output_amount);
 
@@ -180,11 +182,13 @@ impl Account {
     /// Prepare an nft output
     async fn prepare_nft_output(
         &self,
-        options: OutputOptions,
-        transaction_options: Option<TransactionOptions>,
+        params: OutputParams,
+        transaction_options: impl Into<Option<TransactionOptions>> + Send,
         nft_id: NftId,
     ) -> crate::wallet::Result<Output> {
-        log::debug!("[OUTPUT] prepare_nft_output {options:?}");
+        log::debug!("[OUTPUT] prepare_nft_output {params:?}");
+
+        let transaction_options = transaction_options.into();
 
         let token_supply = self.client.get_token_supply().await?;
         let rent_structure = self.client.get_rent_structure().await?;
@@ -219,15 +223,15 @@ impl Account {
 
         // Set new address unlock condition
         first_output_builder =
-            first_output_builder.with_unlock_conditions(vec![AddressUnlockCondition::new(options.recipient_address)]);
+            first_output_builder.with_unlock_conditions(vec![AddressUnlockCondition::new(params.recipient_address)]);
 
-        if let Some(assets) = options.assets {
+        if let Some(assets) = params.assets {
             if let Some(native_tokens) = assets.native_tokens {
                 first_output_builder = first_output_builder.with_native_tokens(native_tokens);
             }
         }
 
-        if let Some(features) = options.features {
+        if let Some(features) = params.features {
             if let Some(tag) = features.tag {
                 first_output_builder = first_output_builder.add_feature(TagFeature::new(
                     prefix_hex::decode(tag).map_err(|_| Error::InvalidField("tag"))?,
@@ -249,7 +253,7 @@ impl Account {
             }
         }
 
-        if let Some(unlocks) = options.unlocks {
+        if let Some(unlocks) = params.unlocks {
             if let Some(expiration_unix_time) = unlocks.expiration_unix_time {
                 let remainder_address = self.get_remainder_address(transaction_options.clone()).await?;
 
@@ -269,13 +273,13 @@ impl Account {
         let mut second_output_builder = NftOutputBuilder::from(&first_output);
 
         // Update the amount
-        match options.amount.cmp(&first_output.amount()) {
+        match params.amount.cmp(&first_output.amount()) {
             Ordering::Greater | Ordering::Equal => {
                 // if it's larger than the minimum storage deposit, just replace it
-                second_output_builder = second_output_builder.with_amount(options.amount);
+                second_output_builder = second_output_builder.with_amount(params.amount);
             }
             Ordering::Less => {
-                let storage_deposit = options.storage_deposit.unwrap_or_default();
+                let storage_deposit = params.storage_deposit.unwrap_or_default();
                 // Gift return strategy doesn't need a change, since the amount is already the minimum storage
                 // deposit
                 if storage_deposit.return_strategy.unwrap_or_default() == ReturnStrategy::Return {
@@ -323,15 +327,15 @@ impl Account {
         // We might have added more unlock conditions, so we check the minimum storage deposit again and update the
         // amounts if needed
         if second_output.amount() < required_storage_deposit {
-            let mut new_sdr_amount = required_storage_deposit - options.amount;
+            let mut new_sdr_amount = required_storage_deposit - params.amount;
             let minimum_storage_deposit = minimum_storage_deposit_basic_output(&rent_structure, &None, token_supply)?;
             let mut final_output_amount = required_storage_deposit;
-            if required_storage_deposit < options.amount + minimum_storage_deposit {
+            if required_storage_deposit < params.amount + minimum_storage_deposit {
                 // return amount must be >= minimum_storage_deposit
                 new_sdr_amount = minimum_storage_deposit;
 
                 // increase the output amount by the additional required amount for the SDR
-                final_output_amount += minimum_storage_deposit - (required_storage_deposit - options.amount);
+                final_output_amount += minimum_storage_deposit - (required_storage_deposit - params.amount);
             }
             third_output_builder = third_output_builder.with_amount(final_output_amount);
 
@@ -351,8 +355,10 @@ impl Account {
     // Get a remainder address based on transaction_options or use the first account address
     async fn get_remainder_address(
         &self,
-        transaction_options: Option<TransactionOptions>,
+        transaction_options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Address> {
+        let transaction_options = transaction_options.into();
+
         let remainder_address = match &transaction_options {
             Some(options) => {
                 match &options.remainder_value_strategy {
@@ -385,7 +391,7 @@ impl Account {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-pub struct OutputOptions {
+pub struct OutputParams {
     pub recipient_address: Bech32Address,
     pub amount: u64,
     pub assets: Option<Assets>,
@@ -436,7 +442,7 @@ pub enum ReturnStrategy {
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct OutputOptionsDto {
+pub struct OutputParamsDto {
     recipient_address: Bech32Address,
     amount: String,
     #[serde(default)]
@@ -449,10 +455,10 @@ pub struct OutputOptionsDto {
     storage_deposit: Option<StorageDeposit>,
 }
 
-impl TryFrom<&OutputOptionsDto> for OutputOptions {
+impl TryFrom<&OutputParamsDto> for OutputParams {
     type Error = crate::wallet::Error;
 
-    fn try_from(value: &OutputOptionsDto) -> crate::wallet::Result<Self> {
+    fn try_from(value: &OutputParamsDto) -> crate::wallet::Result<Self> {
         Ok(Self {
             recipient_address: value.recipient_address,
             amount: u64::from_str(&value.amount)

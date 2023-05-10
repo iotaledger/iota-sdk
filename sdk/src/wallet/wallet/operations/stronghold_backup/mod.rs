@@ -166,18 +166,11 @@ impl Wallet {
                 if restore_accounts {
                     let client = self.client_options.read().await.clone().finish().await?;
 
-                    let restored_account = try_join_all(read_accounts.into_iter().map(|a| {
-                        Account::new(
-                            a,
-                            client.clone(),
-                            self.secret_manager.clone(),
-                            #[cfg(feature = "events")]
-                            self.event_emitter.clone(),
-                            #[cfg(feature = "storage")]
-                            self.storage_manager.clone(),
-                        )
-                        .boxed()
-                    }))
+                    let restored_account = try_join_all(
+                        read_accounts
+                            .into_iter()
+                            .map(|a| Account::new(a, client.clone(), self.inner.clone()).boxed()),
+                    )
                     .await?;
                     *accounts = restored_account;
                 }

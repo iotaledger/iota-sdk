@@ -8,7 +8,7 @@
 
 use iota_sdk::{
     types::block::address::Bech32Address,
-    wallet::{account::TransactionOptions, AddressWithAmount, Result, Wallet},
+    wallet::{account::TransactionOptions, Result, SendAmountParams, Wallet},
 };
 
 #[tokio::main]
@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Send a micro transaction with amount 1
-    let outputs = vec![AddressWithAmount::new(
+    let outputs = vec![SendAmountParams::new(
         Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu").unwrap(),
         1,
     )];

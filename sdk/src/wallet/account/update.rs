@@ -24,7 +24,7 @@ use crate::{
 impl Account {
     /// Set the alias for the account
     pub async fn set_alias(&self, alias: &str) -> crate::wallet::Result<()> {
-        let mut account_details = self.write().await;
+        let mut account_details = self.details_mut().await;
         account_details.alias = alias.to_string();
         #[cfg(feature = "storage")]
         self.save(Some(&account_details)).await?;
@@ -42,7 +42,7 @@ impl Account {
         log::debug!("[SYNC] Update account with new synced transactions");
 
         let network_id = self.client.get_network_id().await?;
-        let mut account_details = self.write().await;
+        let mut account_details = self.details_mut().await;
         #[cfg(feature = "events")]
         let account_index = account_details.index;
 
@@ -121,12 +121,13 @@ impl Account {
                         output_data.is_spent = true;
                         #[cfg(feature = "events")]
                         {
-                            self.event_emitter.lock().await.emit(
+                            self.emit(
                                 account_index,
                                 WalletEvent::SpentOutput(Box::new(SpentOutputEvent {
                                     output: OutputDataDto::from(&*output_data),
                                 })),
-                            );
+                            )
+                            .await;
                         }
                     }
                 }
@@ -146,7 +147,7 @@ impl Account {
                     let transaction = account_details
                         .incoming_transactions
                         .get(output_data.output_id.transaction_id());
-                    self.event_emitter.lock().await.emit(
+                    self.emit(
                         account_index,
                         WalletEvent::NewOutput(Box::new(NewOutputEvent {
                             output: OutputDataDto::from(&output_data),
@@ -159,7 +160,8 @@ impl Account {
                                     .collect()
                             }),
                         })),
-                    );
+                    )
+                    .await;
                 }
             };
             if !output_data.is_spent {
@@ -189,7 +191,7 @@ impl Account {
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] Update account with new synced transactions");
 
-        let mut account_details = self.write().await;
+        let mut account_details = self.details_mut().await;
 
         for transaction in updated_transactions {
             match transaction.inclusion_state {
@@ -202,13 +204,14 @@ impl Account {
                     );
                     #[cfg(feature = "events")]
                     {
-                        self.event_emitter.lock().await.emit(
+                        self.emit(
                             account_details.index,
                             WalletEvent::TransactionInclusion(TransactionInclusionEvent {
                                 transaction_id,
                                 inclusion_state: transaction.inclusion_state,
                             }),
-                        );
+                        )
+                        .await;
                     }
                 }
                 _ => {}
@@ -254,7 +257,7 @@ impl Account {
     ) -> crate::wallet::Result<()> {
         log::debug!("[update_account_addresses]");
 
-        let mut account_details = self.write().await;
+        let mut account_details = self.details_mut().await;
 
         // add addresses to the account
         if internal {
@@ -277,7 +280,7 @@ impl Account {
         self.client = client;
         let bech32_hrp = self.client.get_bech32_hrp().await?;
         log::debug!("[UPDATE ACCOUNT WITH NEW CLIENT] new bech32_hrp: {}", bech32_hrp);
-        let mut account_details = self.write().await;
+        let mut account_details = self.details_mut().await;
         for address in &mut account_details.addresses_with_unspent_outputs {
             address.address.hrp = bech32_hrp;
         }

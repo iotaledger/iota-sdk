@@ -16,7 +16,7 @@ export interface Address {
 }
 
 /** Address with a base token amount */
-export interface AddressWithAmount {
+export interface SendAmountParams {
     address: string;
     amount: string;
     returnAddress?: string;
@@ -32,7 +32,7 @@ export interface AddressWithUnspentOutputs {
 }
 
 /** Address with native tokens */
-export interface AddressNativeTokens {
+export interface SendNativeTokensParams {
     address: string;
     nativeTokens: [string, HexEncodedAmount][];
     returnAddress?: string;
@@ -40,7 +40,7 @@ export interface AddressNativeTokens {
 }
 
 /** Address with an NftId */
-export interface AddressNftId {
+export interface SendNftParams {
     address: string;
     nftId: string;
 }

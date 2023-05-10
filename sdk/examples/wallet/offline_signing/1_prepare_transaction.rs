@@ -18,7 +18,7 @@ use iota_sdk::{
         secret::{placeholder::PlaceholderSecretManager, SecretManager},
     },
     types::block::address::Bech32Address,
-    wallet::{account::types::AccountAddress, AddressWithAmount, ClientOptions, Result, Wallet},
+    wallet::{account::types::AccountAddress, ClientOptions, Result, SendAmountParams, Wallet},
 };
 
 const ADDRESS_FILE_NAME: &str = "examples/wallet/offline_signing/addresses.json";
@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let outputs = vec![AddressWithAmount::new(
+    let outputs = vec![SendAmountParams::new(
         // Address to which we want to send the amount.
         Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu").unwrap(),
         // The amount to send.

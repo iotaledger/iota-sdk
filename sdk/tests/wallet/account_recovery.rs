@@ -46,7 +46,7 @@ async fn account_recovery_existing_accounts() -> Result<()> {
 
     // accounts should still be ordered
     for (index, account) in accounts.iter().enumerate() {
-        assert_eq!(&(index as u32), account.read().await.index());
+        assert_eq!(&(index as u32), account.details().await.index());
     }
     // accounts should be 2 because we created 2 accounts before and no new account was found with balance
     assert_eq!(2, accounts.len());
@@ -88,12 +88,12 @@ async fn account_recovery_with_balance_and_empty_addresses() -> Result<()> {
 
     // accounts should still be ordered
     for (index, account) in accounts.iter().enumerate() {
-        assert_eq!(&(index as u32), account.read().await.index());
+        assert_eq!(&(index as u32), account.details().await.index());
     }
     // accounts should be 3 because account with index 2 has balance
     assert_eq!(3, accounts.len());
 
-    let account_with_balance = accounts[2].read().await;
+    let account_with_balance = accounts[2].details().await;
     // should have 3 addresses
     assert_eq!(3, account_with_balance.public_addresses().len());
     tear_down(storage_path)
