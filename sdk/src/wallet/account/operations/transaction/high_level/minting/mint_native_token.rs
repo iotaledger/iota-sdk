@@ -23,7 +23,7 @@ use crate::{
 /// Address and foundry data for `mint_native_token()`
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct NativeTokenOptions {
+pub struct MintNativeTokenParams {
     /// The alias id which should be used to create the foundry.
     pub alias_id: Option<AliasId>,
     /// Circulating supply
@@ -34,10 +34,10 @@ pub struct NativeTokenOptions {
     pub foundry_metadata: Option<Vec<u8>>,
 }
 
-/// Dto for NativeTokenOptions
+/// Dto for MintNativeTokenParams
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct NativeTokenOptionsDto {
+pub struct MintNativeTokenParamsDto {
     /// The alias id which should be used to create the foundry.
     pub alias_id: Option<AliasIdDto>,
     /// Circulating supply
@@ -48,10 +48,10 @@ pub struct NativeTokenOptionsDto {
     pub foundry_metadata: Option<String>,
 }
 
-impl TryFrom<&NativeTokenOptionsDto> for NativeTokenOptions {
+impl TryFrom<&MintNativeTokenParamsDto> for MintNativeTokenParams {
     type Error = crate::wallet::Error;
 
-    fn try_from(value: &NativeTokenOptionsDto) -> crate::wallet::Result<Self> {
+    fn try_from(value: &MintNativeTokenParamsDto) -> crate::wallet::Result<Self> {
         Ok(Self {
             alias_id: match &value.alias_id {
                 Some(alias_id) => Some(AliasId::try_from(alias_id)?),
@@ -101,14 +101,14 @@ impl Account {
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
-    /// let native_token_options = NativeTokenOptions {
+    /// let params = MintNativeTokenParams {
     ///     alias_id: None,
     ///     circulating_supply: U256::from(100),
     ///     maximum_supply: U256::from(100),
     ///     foundry_metadata: None
     /// };
     ///
-    /// let tx = account.mint_native_token(native_token_options, None,).await?;
+    /// let tx = account.mint_native_token(params, None,).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
     /// if let Some(block_id) = tx.block_id {
     ///     println!("Block sent: {}", block_id);
@@ -116,15 +116,15 @@ impl Account {
     /// ```
     pub async fn mint_native_token(
         &self,
-        native_token_options: NativeTokenOptions,
-        options: Option<TransactionOptions>,
+        params: MintNativeTokenParams,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<MintTokenTransaction> {
         log::debug!("[TRANSACTION] mint_native_token");
         let rent_structure = self.client.get_rent_structure().await?;
         let token_supply = self.client.get_token_supply().await?;
 
         let (alias_id, alias_output) = self
-            .get_alias_output(native_token_options.alias_id)
+            .get_alias_output(params.alias_id)
             .await
             .ok_or_else(|| crate::wallet::Error::MintingFailed("Missing alias output".to_string()))?;
 
@@ -150,14 +150,14 @@ impl Account {
                         rent_structure,
                         alias_output.foundry_counter() + 1,
                         TokenScheme::Simple(SimpleTokenScheme::new(
-                            native_token_options.circulating_supply,
+                            params.circulating_supply,
                             U256::from(0u8),
-                            native_token_options.maximum_supply,
+                            params.maximum_supply,
                         )?),
                     )
                     .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
 
-                    if let Some(foundry_metadata) = native_token_options.foundry_metadata {
+                    if let Some(foundry_metadata) = params.foundry_metadata {
                         foundry_builder = foundry_builder.add_immutable_feature(MetadataFeature::new(foundry_metadata)?)
                     }
 

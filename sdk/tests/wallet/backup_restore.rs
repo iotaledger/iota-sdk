@@ -92,7 +92,7 @@ async fn backup_and_restore() -> Result<()> {
 
     // Restored coin type is used
     let new_account = restore_wallet.create_account().finish().await?;
-    assert_eq!(new_account.read().await.coin_type(), &SHIMMER_COIN_TYPE);
+    assert_eq!(new_account.details().await.coin_type(), &SHIMMER_COIN_TYPE);
 
     // compare restored client options
     let client_options = restore_wallet.get_client_options().await;
@@ -173,7 +173,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
 
     // Restored coin type is used
     let new_account = restore_wallet.create_account().finish().await?;
-    assert_eq!(new_account.read().await.coin_type(), &SHIMMER_COIN_TYPE);
+    assert_eq!(new_account.details().await.coin_type(), &SHIMMER_COIN_TYPE);
 
     // compare restored client options
     let client_options = restore_wallet.get_client_options().await;
@@ -260,7 +260,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
 
     // Restored coin type is not used and it's still the same one
     let new_account = restore_wallet.create_account().finish().await?;
-    assert_eq!(new_account.read().await.coin_type(), &IOTA_COIN_TYPE);
+    assert_eq!(new_account.details().await.coin_type(), &IOTA_COIN_TYPE);
     // secret manager is the same
     assert_eq!(
         new_account.addresses().await?[0].address().to_string(),
@@ -428,7 +428,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
 
     // Restored coin type is used
     let new_account = restore_wallet.create_account().finish().await?;
-    assert_eq!(new_account.read().await.coin_type(), &SHIMMER_COIN_TYPE);
+    assert_eq!(new_account.details().await.coin_type(), &SHIMMER_COIN_TYPE);
     // secret manager is restored
     assert_eq!(
         new_account.addresses().await?[0].address().to_string(),
@@ -514,7 +514,7 @@ async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
 
     // Restored coin type is used
     let new_account = restore_wallet.create_account().finish().await?;
-    assert_eq!(new_account.read().await.coin_type(), &SHIMMER_COIN_TYPE);
+    assert_eq!(new_account.details().await.coin_type(), &SHIMMER_COIN_TYPE);
 
     // secret manager is the same
     assert_eq!(

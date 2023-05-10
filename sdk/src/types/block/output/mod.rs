@@ -103,9 +103,19 @@ impl OutputWithMetadata {
         &self.output
     }
 
+    /// Consumes self and returns the [`Output`].
+    pub fn into_output(self) -> Output {
+        self.output
+    }
+
     /// Returns the [`OutputMetadata`].
     pub fn metadata(&self) -> &OutputMetadata {
         &self.metadata
+    }
+
+    /// Consumes self and returns the [`OutputMetadata`].
+    pub fn into_metadata(self) -> OutputMetadata {
+        self.metadata
     }
 }
 

@@ -14,9 +14,11 @@ curl -SL --progress-bar --fail https://github.com/iotaledger/iota-sdk/releases/d
 rm -rf ../android/libs && mkdir -p ../android/libs             
 cp -rv iota-wallet.jar ../android/libs
 
-# 🛑 temporarily using host https://files.iota.org/firefly/bindings until Swift mobile CI will be done.
 echo Installing Swift libraries
-curl -SL --progress-bar --fail https://files.iota.org/firefly/bindings/WalletFramework-1.0.0-alpha.0.zip > iota-wallet-swift.zip
+# retrieve the latest version and tag from the latest release
+latest_tag=$(git tag | sort -rV | grep swift | head -n1)
+latest_version=$(echo $latest_tag | grep -o [0-9\.] | tr -d '\n')
+curl -SL --progress-bar --fail https://github.com/iotaledger/iota-sdk/releases/download/$latest_tag/WalletFramework-$latest_version.zip > iota-wallet-swift.zip
 unzip iota-wallet-swift.zip             
 rm -f ../ios/WalletFramework.xcframework/ios-x86/WalletFramework.framework/WalletFramework
 rm -f ../ios/WalletFramework.xcframework/ios-arm64/WalletFramework.framework/WalletFramework

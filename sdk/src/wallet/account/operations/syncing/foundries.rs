@@ -15,7 +15,7 @@ impl Account {
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] request_and_store_foundry_outputs");
 
-        let mut foundries = self.read().await.native_token_foundries().clone();
+        let mut foundries = self.details().await.native_token_foundries().clone();
         let mut tasks = Vec::new();
 
         for foundry_id in foundry_ids {
@@ -47,7 +47,7 @@ impl Account {
             }
         }
 
-        let mut account_details = self.write().await;
+        let mut account_details = self.details_mut().await;
         account_details.native_token_foundries = foundries;
 
         Ok(())

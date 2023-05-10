@@ -52,7 +52,7 @@ impl Account {
         &self,
         token_id: TokenId,
         burn_amount: U256,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!("[TRANSACTION] burn_native_token");
 
@@ -63,7 +63,7 @@ impl Account {
         } = self.get_burn_inputs_and_outputs(token_id, burn_amount).await?;
 
         // Set custom inputs and allow burning
-        let options = match options {
+        let options = match options.into() {
             Some(mut options) => {
                 options.custom_inputs.replace(custom_inputs);
                 options.burn = Some(Burn::new().add_native_token(token_id, burn_amount));
@@ -94,7 +94,7 @@ impl Account {
         let mut alias_selection = HashMap::new();
         let mut foundry_selection = Vec::new();
 
-        for (output_id, output_data) in self.read().await.unspent_outputs().iter() {
+        for (output_id, output_data) in self.details().await.unspent_outputs().iter() {
             match &output_data.output {
                 Output::Basic(_) | Output::Nft(_) => {
                     if let Some((amount, output)) = strip_native_token_if_found(token_id, output_data, token_supply)? {
@@ -287,7 +287,7 @@ impl Account {
             }
             None => {
                 // Find controlling alias
-                for (output_id, output_data) in self.read().await.unspent_outputs().iter() {
+                for (output_id, output_data) in self.details().await.unspent_outputs().iter() {
                     match &output_data.output {
                         Output::Alias(alias_output) => {
                             if alias_output.alias_id_non_null(output_id) == alias_id {

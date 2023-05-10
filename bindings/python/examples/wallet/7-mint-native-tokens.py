@@ -27,12 +27,12 @@ time.sleep(7)
 
 account.sync()
 
-native_token_options = {
+params = {
     # 1000 hex encoded
     "circulatingSupply": "0x3e8",
     "maximumSupply": "0x3e8",
     "foundryMetadata": "0xab",
 }
 
-transaction = account.mint_native_token(native_token_options, None)
+transaction = account.mint_native_token(params, None)
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["transaction"]["blockId"]}')
