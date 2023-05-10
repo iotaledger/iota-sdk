@@ -42,15 +42,15 @@ impl std::ops::AddAssign for AccountBalance {
         self.base_coin += rhs.base_coin;
         self.required_storage_deposit += rhs.required_storage_deposit;
 
-        for native_token_balance in rhs.native_tokens.into_iter() {
+        for rhs_native_token_balance in rhs.native_tokens.into_iter() {
             if let Some(total_native_token_balance) = self
                 .native_tokens
                 .iter_mut()
-                .find(|n| n.token_id == native_token_balance.token_id)
+                .find(|lhs_native_token_balance| lhs_native_token_balance.token_id == rhs_native_token_balance.token_id)
             {
-                *total_native_token_balance += native_token_balance;
+                *total_native_token_balance += rhs_native_token_balance;
             } else {
-                self.native_tokens.push(native_token_balance);
+                self.native_tokens.push(rhs_native_token_balance);
             }
         }
 
@@ -263,6 +263,8 @@ impl AccountBalance {
         let token_supply = crate::types::block::protocol::protocol_parameters().token_supply();
         let total = rand::thread_rng().gen_range(128..token_supply / 1000000);
 
+        let mut generator = 0u8;
+        // up to 10 fully random native token ids
         let native_tokens = std::iter::repeat_with(|| {
             let token_id = TokenId::from(rand_bytes_array());
             let total = rand::thread_rng().gen_range(1..10000u32);
@@ -273,8 +275,25 @@ impl AccountBalance {
                 ..Default::default()
             }
         })
-        .take(rand::thread_rng().gen_range(0..10))
+        .take(rand::thread_rng().gen_range(1..10))
+        // up to 10 deterministic native token ids
+        .chain(
+            std::iter::repeat_with(|| {
+                generator += 1;
+                let token_id = TokenId::from([generator; TokenId::LENGTH]);
+                let total = rand::thread_rng().gen_range(1..10000u32);
+                NativeTokensBalance {
+                    token_id,
+                    total: U256::from(total),
+                    available: U256::from(rand::thread_rng().gen_range(1..total)),
+                    ..Default::default()
+                }
+            })
+            .take(rand::thread_rng().gen_range(1..10)),
+        )
         .collect::<Vec<_>>();
+
+        println!("Native tokens: {:#?}", native_tokens);
 
         let aliases = std::iter::repeat_with(|| AliasId::from(rand_bytes_array()))
             .take(rand::thread_rng().gen_range(0..10))
