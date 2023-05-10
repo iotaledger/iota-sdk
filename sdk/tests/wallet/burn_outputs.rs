@@ -196,7 +196,7 @@ async fn destroy_foundry(account: &Account) -> Result<()> {
     // idea
     let foundry_id = *balance.foundries().first().unwrap();
 
-    let transaction = account.destroy_foundry(foundry_id, None).await.unwrap();
+    let transaction = account.burn(Burn::new().add_foundry(foundry_id), None).await.unwrap();
     account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
@@ -270,7 +270,10 @@ async fn mint_and_burn_native_tokens() -> Result<()> {
     account.sync(None).await?;
 
     let tx = account
-        .burn_native_token(mint_tx.token_id, native_token_amount, None)
+        .burn(
+            Burn::new().add_native_token(mint_tx.token_id, native_token_amount),
+            None,
+        )
         .await?;
     account
         .retry_transaction_until_included(&tx.transaction_id, None, None)

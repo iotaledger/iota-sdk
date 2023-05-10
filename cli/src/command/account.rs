@@ -258,9 +258,11 @@ pub async fn burn_native_token_command(account: &Account, token_id: String, amou
     println_log_info!("Burning native token {token_id} {amount}.");
 
     let transaction = account
-        .burn_native_token(
-            TokenId::from_str(&token_id)?,
-            U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+        .burn(
+            Burn::new().add_native_token(
+                TokenId::from_str(&token_id)?,
+                U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+            ),
             None,
         )
         .await?;
@@ -452,7 +454,9 @@ pub async fn destroy_alias_command(account: &Account, alias_id: String) -> Resul
 pub async fn destroy_foundry_command(account: &Account, foundry_id: String) -> Result<(), Error> {
     println_log_info!("Destroying foundry {foundry_id}.");
 
-    let transaction = account.destroy_foundry(FoundryId::from_str(&foundry_id)?, None).await?;
+    let transaction = account
+        .burn(Burn::new().add_foundry(FoundryId::from_str(&foundry_id)?), None)
+        .await?;
 
     println_log_info!(
         "Destroying foundry transaction sent:\n{:?}\n{:?}",

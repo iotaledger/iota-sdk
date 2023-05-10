@@ -34,9 +34,11 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             options,
         } => {
             let transaction = account
-                .burn_native_token(
-                    TokenId::try_from(&token_id)?,
-                    U256::try_from(&burn_amount).map_err(|_| Error::InvalidField("burn_amount"))?,
+                .burn(
+                    Burn::new().add_native_token(
+                        TokenId::try_from(&token_id)?,
+                        U256::try_from(&burn_amount).map_err(|_| Error::InvalidField("burn_amount"))?,
+                    ),
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -87,8 +89,8 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::DestroyFoundry { foundry_id, options } => {
             let transaction = account
-                .destroy_foundry(
-                    foundry_id,
+                .burn(
+                    Burn::new().add_foundry(foundry_id),
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;

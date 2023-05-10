@@ -13,8 +13,8 @@ use crate::{
 };
 
 impl Account {
-    /// Function to burn an nft output.
-    pub async fn get_inputs_outputs_for_burn_nft(
+    /// Function that returns the inputs and outputs for burning an nft.
+    pub(super) async fn get_inputs_outputs_for_burn_nft(
         &self,
         nft_id: NftId,
     ) -> crate::wallet::Result<(Vec<OutputId>, Vec<Output>)> {

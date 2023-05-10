@@ -13,8 +13,8 @@ use crate::{
 };
 
 impl Account {
-    /// Function to destroy an alias output.
-    pub async fn get_inputs_outputs_for_destroy_alias(
+    /// Function that returns the inputs and outputs for destroying an alias.
+    pub(super) async fn get_inputs_outputs_for_destroy_alias(
         &self,
         alias_id: AliasId,
     ) -> crate::wallet::Result<(Vec<OutputId>, Vec<Output>)> {

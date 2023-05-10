@@ -9,7 +9,6 @@ use std::{
 use primitive_types::U256;
 
 use crate::{
-    client::api::input_selection::Burn,
     types::block::{
         input::INPUT_COUNT_MAX,
         output::{
@@ -17,7 +16,7 @@ use crate::{
             NftOutputBuilder, Output, OutputId, TokenId, OUTPUT_COUNT_MAX,
         },
     },
-    wallet::account::{operations::transaction::Transaction, types::OutputData, Account, TransactionOptions},
+    wallet::account::{types::OutputData, Account},
 };
 
 const NATIVE_TOKEN_OVERFLOW: &str = "NativeTokensOverflow";
@@ -45,67 +44,12 @@ struct StrippedOutputAggregate {
 }
 
 impl Account {
-    /// Function to burn native tokens. This doesn't require the foundry output which minted them, but will not increase
-    /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
-    /// recommended to use `decrease_native_token_supply()`, if the foundry output is available.
-    pub async fn get_inputs_outputs_for_burn_native_tokens(
-        &self,
-        token_id: TokenId,
-        burn_amount: U256,
-    ) -> crate::wallet::Result<(Vec<OutputId>, Vec<Output>)> {
-        log::debug!("[TRANSACTION] burn_native_token");
-
-        let StrippedOutputAggregate {
-            // why
-            custom_inputs,
-            amount: _,
-            outputs,
-        } = self.get_burn_inputs_and_outputs(token_id, burn_amount).await?;
-
-        Ok((custom_inputs, outputs))
-    }
-
-    /// Function to burn native tokens. This doesn't require the foundry output which minted them, but will not increase
-    /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
-    /// recommended to use `decrease_native_token_supply()`, if the foundry output is available.
-    pub async fn burn_native_token(
-        &self,
-        token_id: TokenId,
-        burn_amount: U256,
-        options: Option<TransactionOptions>,
-    ) -> crate::wallet::Result<Transaction> {
-        log::debug!("[TRANSACTION] burn_native_token");
-
-        let StrippedOutputAggregate {
-            custom_inputs,
-            amount: _,
-            outputs,
-        } = self.get_burn_inputs_and_outputs(token_id, burn_amount).await?;
-
-        // Set custom inputs and allow burning
-        let options = match options {
-            Some(mut options) => {
-                options.custom_inputs.replace(custom_inputs);
-                options.burn = Some(Burn::new().add_native_token(token_id, burn_amount));
-                Some(options)
-            }
-            None => Some(TransactionOptions {
-                custom_inputs: Some(custom_inputs),
-                burn: Some(Burn::new().add_native_token(token_id, burn_amount)),
-                ..Default::default()
-            }),
-        };
-
-        self.send(outputs, options).await
-    }
-
-    // Get inputs with the required native token amount and create new outputs, just with the to be burned native token
-    // amount removed.
-    async fn get_burn_inputs_and_outputs(
+    /// Function that returns the inputs and outputs to burn native tokens
+    pub(super) async fn get_inputs_outputs_for_burn_native_tokens(
         &self,
         token_id: TokenId,
         burn_token_amount: U256,
-    ) -> crate::wallet::Result<StrippedOutputAggregate> {
+    ) -> crate::wallet::Result<(Vec<OutputId>, Vec<Output>)> {
         let token_supply = self.client.get_token_supply().await?;
 
         let mut basic_and_nft_selection = Vec::new();
@@ -195,7 +139,7 @@ impl Account {
             )));
         }
 
-        Ok(aggregate)
+        Ok((aggregate.custom_inputs, aggregate.outputs))
     }
 
     /// Aggregate foundry and alias outputs that sum up to

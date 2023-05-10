@@ -2,20 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::api::input_selection::Burn,
     types::block::output::{
         AliasId, AliasOutputBuilder, FoundryId, NativeTokensBuilder, Output, OutputId, TokenScheme,
     },
     wallet::{
-        account::{operations::transaction::Transaction, types::OutputData, Account, TransactionOptions},
+        account::{types::OutputData, Account},
         Error,
     },
 };
 
 impl Account {
-    /// Function to destroy a foundry output with a circulating supply of 0.
-    /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
-    pub async fn get_inputs_outputs_for_destroy_foundry(
+    /// Function that returns the inputs and outputs for destroying a foundry.
+    pub(super) async fn get_inputs_outputs_for_destroy_foundry(
         &self,
         foundry_id: FoundryId,
     ) -> crate::wallet::Result<(Vec<OutputId>, Vec<Output>)> {
@@ -58,67 +56,6 @@ impl Account {
         };
 
         Ok((custom_inputs, outputs))
-    }
-
-    /// Function to destroy a foundry output with a circulating supply of 0.
-    /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
-    pub async fn destroy_foundry(
-        &self,
-        foundry_id: FoundryId,
-        options: Option<TransactionOptions>,
-    ) -> crate::wallet::Result<Transaction> {
-        log::debug!("[TRANSACTION] destroy_foundry");
-
-        let token_supply = self.client.get_token_supply().await?;
-        let alias_id = *foundry_id.alias_address().alias_id();
-        let (existing_alias_output_data, existing_foundry_output_data) =
-            self.find_alias_and_foundry_output_data(alias_id, foundry_id).await?;
-
-        validate_empty_state(&existing_foundry_output_data.output)?;
-
-        let custom_inputs = vec![
-            existing_alias_output_data.output_id,
-            existing_foundry_output_data.output_id,
-        ];
-
-        let options = match options {
-            Some(mut options) => {
-                options.custom_inputs.replace(custom_inputs);
-                options.burn = Some(Burn::new().add_foundry(foundry_id));
-                Some(options)
-            }
-            None => Some(TransactionOptions {
-                custom_inputs: Some(custom_inputs),
-                burn: Some(Burn::new().add_foundry(foundry_id)),
-                ..Default::default()
-            }),
-        };
-
-        let outputs = match existing_alias_output_data.output {
-            Output::Alias(alias_output) => {
-                let amount = alias_output.amount() + existing_foundry_output_data.output.amount();
-                let mut native_tokens_builder = NativeTokensBuilder::from(alias_output.native_tokens().clone());
-                // Transfer native tokens from foundry to alias
-                if let Output::Foundry(foundry_output) = existing_foundry_output_data.output {
-                    native_tokens_builder.add_native_tokens(foundry_output.native_tokens().clone())?;
-                } else {
-                    unreachable!("We already checked output is a foundry");
-                }
-                // Create the new alias output with updated amount, state_index and native token if not burning foundry
-                // tokens
-                let alias_output = AliasOutputBuilder::from(&alias_output)
-                    .with_alias_id(alias_id)
-                    .with_amount(amount)
-                    .with_native_tokens(native_tokens_builder.finish()?)
-                    .with_state_index(alias_output.state_index() + 1)
-                    .finish(token_supply)?;
-
-                vec![Output::Alias(alias_output)]
-            }
-            _ => unreachable!("We checked if it's an alias output before"),
-        };
-
-        self.send(outputs, options).await
     }
 
     /// Find and return unspent `OutputData` for given `alias_id` and `foundry_id`

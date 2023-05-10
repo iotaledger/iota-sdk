@@ -501,9 +501,11 @@ impl WalletMessageHandler {
             } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .burn_native_token(
-                            TokenId::try_from(&token_id)?,
-                            U256::try_from(&burn_amount).map_err(|_| Error::InvalidField("burn_amount"))?,
+                        .burn(
+                            Burn::new().add_native_token(
+                                TokenId::try_from(&token_id)?,
+                                U256::try_from(&burn_amount).map_err(|_| Error::InvalidField("burn_amount"))?,
+                            ),
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
@@ -569,8 +571,8 @@ impl WalletMessageHandler {
             AccountMethod::DestroyFoundry { foundry_id, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .destroy_foundry(
-                            foundry_id,
+                        .burn(
+                            Burn::new().add_foundry(foundry_id),
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
