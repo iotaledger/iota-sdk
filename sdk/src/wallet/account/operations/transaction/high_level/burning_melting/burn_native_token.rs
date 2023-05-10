@@ -52,7 +52,7 @@ impl Account {
         &self,
         token_id: TokenId,
         burn_amount: U256,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!("[TRANSACTION] burn_native_token");
 
@@ -63,7 +63,7 @@ impl Account {
         } = self.get_burn_inputs_and_outputs(token_id, burn_amount).await?;
 
         // Set custom inputs and allow burning
-        let options = match options {
+        let options = match options.into() {
             Some(mut options) => {
                 options.custom_inputs.replace(custom_inputs);
                 options.burn = Some(Burn::new().add_native_token(token_id, burn_amount));

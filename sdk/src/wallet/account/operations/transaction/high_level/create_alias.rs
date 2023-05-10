@@ -17,10 +17,10 @@ use crate::{
     wallet::account::{types::Transaction, Account, OutputData, TransactionOptions},
 };
 
-/// Alias output options for `create_alias_output()`
+/// Params `create_alias_output()`
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AliasOutputOptions {
+pub struct CreateAliasParams {
     /// Bech32 encoded address which will control the alias. Default will use the first
     /// address of the account
     pub address: Option<String>,
@@ -35,7 +35,7 @@ pub struct AliasOutputOptions {
 /// Dto for aliasOptions
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AliasOutputOptionsDto {
+pub struct CreateAliasParamsDto {
     /// Bech32 encoded address which will control the alias. Default will use the first
     /// address of the account
     pub address: Option<String>,
@@ -47,10 +47,10 @@ pub struct AliasOutputOptionsDto {
     pub state_metadata: Option<String>,
 }
 
-impl TryFrom<&AliasOutputOptionsDto> for AliasOutputOptions {
+impl TryFrom<&CreateAliasParamsDto> for CreateAliasParams {
     type Error = crate::wallet::Error;
 
-    fn try_from(value: &AliasOutputOptionsDto) -> crate::wallet::Result<Self> {
+    fn try_from(value: &CreateAliasParamsDto) -> crate::wallet::Result<Self> {
         Ok(Self {
             address: value.address.clone(),
             immutable_metadata: match &value.immutable_metadata {
@@ -76,14 +76,14 @@ impl TryFrom<&AliasOutputOptionsDto> for AliasOutputOptions {
 impl Account {
     /// Function to create an alias output.
     /// ```ignore
-    /// let alias_options = AliasOutputOptions {
+    /// let params = CreateAliasParams {
     ///     address: None,
     ///     immutable_metadata: Some(b"some immutable alias metadata".to_vec()),
     ///     metadata: Some(b"some alias metadata".to_vec()),
     ///     state_metadata: Some(b"some alias state metadata".to_vec()),
     /// };
     ///
-    /// let transaction = account.create_alias_output(alias_options, None).await?;
+    /// let transaction = account.create_alias_output(params, None).await?;
     /// println!(
     ///     "Transaction sent: {}/transaction/{}",
     ///     std::env::var("EXPLORER_URL").unwrap(),
@@ -92,26 +92,23 @@ impl Account {
     /// ```
     pub async fn create_alias_output(
         &self,
-        alias_output_options: Option<AliasOutputOptions>,
-        options: Option<TransactionOptions>,
+        params: Option<CreateAliasParams>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
-        let prepared_transaction = self.prepare_create_alias_output(alias_output_options, options).await?;
+        let prepared_transaction = self.prepare_create_alias_output(params, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
 
     pub(crate) async fn prepare_create_alias_output(
         &self,
-        alias_output_options: Option<AliasOutputOptions>,
-        options: Option<TransactionOptions>,
+        params: Option<CreateAliasParams>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_create_alias_output");
         let rent_structure = self.client.get_rent_structure().await?;
         let token_supply = self.client.get_token_supply().await?;
 
-        let controller_address = match alias_output_options
-            .as_ref()
-            .and_then(|options| options.address.as_ref())
-        {
+        let controller_address = match params.as_ref().and_then(|options| options.address.as_ref()) {
             Some(bech32_address) => {
                 let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(bech32_address)?;
                 self.client.bech32_hrp_matches(&bech32_hrp).await?;
@@ -133,15 +130,21 @@ impl Account {
                 .with_foundry_counter(0)
                 .add_unlock_condition(StateControllerAddressUnlockCondition::new(controller_address))
                 .add_unlock_condition(GovernorAddressUnlockCondition::new(controller_address));
-        if let Some(options) = alias_output_options {
-            if let Some(immutable_metadata) = options.immutable_metadata {
+        if let Some(CreateAliasParams {
+            immutable_metadata,
+            metadata,
+            state_metadata,
+            ..
+        }) = params
+        {
+            if let Some(immutable_metadata) = immutable_metadata {
                 alias_output_builder =
                     alias_output_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
             }
-            if let Some(metadata) = options.metadata {
+            if let Some(metadata) = metadata {
                 alias_output_builder = alias_output_builder.add_feature(MetadataFeature::new(metadata)?);
             }
-            if let Some(state_metadata) = options.state_metadata {
+            if let Some(state_metadata) = state_metadata {
                 alias_output_builder = alias_output_builder.with_state_metadata(state_metadata);
             }
         }

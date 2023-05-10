@@ -18,7 +18,7 @@ impl Account {
         &self,
         token_id: TokenId,
         melt_amount: U256,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!("[TRANSACTION] decrease_native_token_supply");
 

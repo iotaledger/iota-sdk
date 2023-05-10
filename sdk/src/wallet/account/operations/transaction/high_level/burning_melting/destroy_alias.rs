@@ -21,7 +21,7 @@ impl Account {
     pub async fn destroy_alias(
         &self,
         alias_id: AliasId,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!("[TRANSACTION] destroy_alias");
 
@@ -58,7 +58,7 @@ impl Account {
             (custom_inputs, outputs)
         };
 
-        let options = match options {
+        let options = match options.into() {
             Some(mut options) => {
                 options.custom_inputs.replace(custom_inputs);
                 options.burn = Some(Burn::new().add_alias(alias_id));

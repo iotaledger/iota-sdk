@@ -21,7 +21,7 @@ impl Account {
     pub async fn burn_nft(
         &self,
         nft_id: NftId,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!("[TRANSACTION] burn_nft");
 
@@ -54,7 +54,7 @@ impl Account {
         let custom_inputs = vec![output_id];
         let outputs = vec![basic_output];
 
-        let options = match options {
+        let options = match options.into() {
             Some(mut options) => {
                 options.custom_inputs.replace(custom_inputs);
                 options.burn = Some(Burn::new().add_nft(nft_id));
