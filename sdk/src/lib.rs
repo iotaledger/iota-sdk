@@ -33,5 +33,5 @@ pub use packable;
 pub use primitive_types::U256;
 #[cfg(feature = "url")]
 pub use url::Url;
-#[cfg(feature = "wallet")]
-pub use wallet::migration::{latest_migration_version, migrate as migrate_wallet};
+#[cfg(all(feature = "wallet", feature = "storage"))]
+pub use wallet::storage::migration::{latest_migration_version, migrate as migrate_wallet};

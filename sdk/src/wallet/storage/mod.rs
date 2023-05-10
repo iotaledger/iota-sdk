@@ -7,6 +7,7 @@ pub mod adapter;
 pub mod constants;
 /// Storage manager.
 pub mod manager;
+pub(crate) mod migration;
 /// Storage functions related to participation.
 #[cfg(feature = "participation")]
 #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]

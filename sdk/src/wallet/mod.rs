@@ -11,7 +11,6 @@ pub mod account;
 #[cfg(feature = "message_interface")]
 #[cfg_attr(docsrs, doc(cfg(feature = "message_interface")))]
 pub mod message_interface;
-pub(crate) mod migration;
 /// The wallet module.
 #[allow(clippy::module_inception)]
 pub mod wallet;

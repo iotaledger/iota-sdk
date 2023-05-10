@@ -4,8 +4,8 @@
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
-use super::storage::manager::StorageManager;
-use crate::wallet::{storage::constants::MIGRATION_VERSION_KEY, Result};
+use super::{constants::MIGRATION_VERSION_KEY, manager::StorageManager};
+use crate::wallet::Result;
 
 mod migrate_0;
 
