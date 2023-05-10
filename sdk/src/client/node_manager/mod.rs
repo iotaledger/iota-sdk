@@ -187,7 +187,7 @@ impl NodeManager {
 
         // Track amount of results for quorum
         let mut result_counter = 0;
-        let mut error = None;
+        let mut error: Option<Error> = None;
         // Send requests parallel for quorum
         #[cfg(target_family = "wasm")]
         let wasm = true;
@@ -264,10 +264,9 @@ impl NodeManager {
             }
         }
 
-        let res = result
-            .into_iter()
-            .max_by_key(|v| v.1)
-            .ok_or_else(|| error.unwrap_or(Error::NotFound(path.to_string())))?;
+        // Safe unwrap, there are nodes because we throw on empty nodepool.
+        // Each node will throw an error or return Ok()
+        let res = result.into_iter().max_by_key(|v| v.1).ok_or_else(|| error.unwrap())?;
 
         // Return if quorum is false or check if quorum was reached
         if !self.quorum
@@ -310,7 +309,9 @@ impl NodeManager {
                 }
             }
         }
-        Err(error.unwrap_or(Error::NotFound(path.to_string())))
+        // Safe unwrap, there are nodes because we throw on empty nodepool.
+        // Each node will throw an error or return Ok()
+        Err(error.unwrap())
     }
 
     pub(crate) async fn post_request_bytes<T: serde::de::DeserializeOwned>(
@@ -337,7 +338,9 @@ impl NodeManager {
                 }
             }
         }
-        Err(error.unwrap_or(Error::NotFound(path.to_string())))
+        // Safe unwrap, there are nodes because we throw on empty nodepool.
+        // Each node will throw an error or return Ok()
+        Err(error.unwrap())
     }
 
     pub(crate) async fn post_request_json<T: serde::de::DeserializeOwned>(
@@ -364,6 +367,8 @@ impl NodeManager {
                 }
             }
         }
-        Err(error.unwrap_or(Error::NotFound(path.to_string())))
+        // Safe unwrap, there are nodes because we throw on empty nodepool.
+        // Each node will throw an error or return Ok()
+        Err(error.unwrap())
     }
 }

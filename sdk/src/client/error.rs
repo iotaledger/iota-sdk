@@ -90,9 +90,6 @@ pub enum Error {
     /// The block doesn't need to be promoted or reattached
     #[error("block ID `{0}` doesn't need to be promoted or reattached")]
     NoNeedPromoteOrReattach(String),
-    /// The requested data was not found.
-    #[error("the requested data {0} was not found.")]
-    NotFound(String),
     /// Requested output id not found for this type
     #[error("No output found for {0}")]
     NoOutput(String),
