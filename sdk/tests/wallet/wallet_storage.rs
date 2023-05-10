@@ -5,8 +5,7 @@ use std::{fs, io, path::Path};
 
 use iota_sdk::wallet::{Result, Wallet};
 
-use crate::wallet::common::tear_down;
-use crate::wallet::common::setup;
+use crate::wallet::common::{setup, tear_down};
 
 #[cfg(all(feature = "stronghold", feature = "rocksdb"))]
 #[tokio::test]
@@ -44,7 +43,10 @@ async fn check_existing_db() -> Result<()> {
     );
     assert!(addresses[1].internal());
 
-    assert_eq!(account.generate_addresses(1, None).await?[0].address().to_string(), "rms1qzjclfjq0azmq2yzkkk7ugfhdf55nzvs57r8twk2h36wuqv950dxv00tzfx");
+    assert_eq!(
+        account.generate_addresses(1, None).await?[0].address().to_string(),
+        "rms1qzjclfjq0azmq2yzkkk7ugfhdf55nzvs57r8twk2h36wuqv950dxv00tzfx"
+    );
 
     let transactions = account.transactions().await?;
     assert_eq!(transactions.len(), 2);
