@@ -26,7 +26,7 @@ use crate::wallet::{
 };
 use crate::{
     client::secret::SecretManager,
-    wallet::{migration::MigrationVersion, Account, ClientOptions, Wallet},
+    wallet::{Account, ClientOptions, Wallet},
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -38,7 +38,6 @@ pub struct WalletBuilder {
     storage_options: Option<StorageOptions>,
     #[serde(default, skip_serializing, skip_deserializing)]
     pub(crate) secret_manager: Option<Arc<RwLock<SecretManager>>>,
-    pub(crate) migration: Option<MigrationVersion>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -136,9 +135,7 @@ impl WalletBuilder {
         let storage = Memory::default();
 
         #[cfg(feature = "storage")]
-        let mut storage_manager = Arc::new(tokio::sync::RwLock::new(
-            StorageManager::new(storage, None, self.migration.clone()).await?,
-        ));
+        let mut storage_manager = Arc::new(tokio::sync::RwLock::new(StorageManager::new(storage, None).await?));
 
         #[cfg(feature = "storage")]
         let read_manager_builder = storage_manager.read().await.get_wallet_data().await?;
@@ -266,7 +263,6 @@ impl WalletBuilder {
             coin_type: Some(wallet.coin_type.load(Ordering::Relaxed)),
             storage_options: Some(wallet.storage_options.clone()),
             secret_manager: Some(wallet.secret_manager.clone()),
-            migration: Some(wallet.storage_manager.read().await.migration.clone()),
         }
     }
 }

@@ -70,11 +70,12 @@ impl<T: Migration + Send + Sync> DynMigration for T {
 }
 
 pub async fn migrate(storage: &StorageManager) -> Result<()> {
-    let last_migration = storage.migration.clone();
-    if last_migration.id >= MIGRATIONS.len() {
+    let last_migration = storage.migration.as_ref();
+    if last_migration.map(|m| m.id >= MIGRATIONS.len()).unwrap_or_default() {
         return Ok(());
     }
-    for &migration in &MIGRATIONS[last_migration.id + 1..] {
+    let next_migration = last_migration.map(|m| m.id + 1).unwrap_or_default();
+    for &migration in &MIGRATIONS[next_migration..] {
         migration.migrate(storage).await?;
     }
     Ok(())

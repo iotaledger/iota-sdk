@@ -10,7 +10,7 @@ use crate::{
     client::secret::{SecretManager, SecretManagerDto},
     wallet::{
         account::{AccountDetails, SyncOptions},
-        migration::{latest_migration_version, MigrationVersion},
+        migration::MigrationVersion,
         storage::{constants::*, Storage, StorageAdapter},
         WalletBuilder,
     },
@@ -46,14 +46,13 @@ pub struct StorageManager {
     pub(crate) storage: Storage,
     // account indexes for accounts in the database
     account_indexes: Vec<u32>,
-    pub(crate) migration: MigrationVersion,
+    pub(crate) migration: Option<MigrationVersion>,
 }
 
 impl StorageManager {
     pub(crate) async fn new(
         storage: impl StorageAdapter + Send + Sync + 'static,
         encryption_key: impl Into<Option<[u8; 32]>> + Send,
-        migration: impl Into<Option<MigrationVersion>> + Send,
     ) -> crate::wallet::Result<Self> {
         let storage = Storage {
             inner: Box::new(storage) as _,
@@ -74,10 +73,12 @@ impl StorageManager {
 
         let account_indexes = storage.get(ACCOUNTS_INDEXATION_KEY).await?.unwrap_or_default();
 
+        let migration = storage.get(MIGRATION_VERSION_KEY).await?;
+
         let storage_manager = Self {
             storage,
             account_indexes,
-            migration: migration.into().unwrap_or(latest_migration_version()),
+            migration,
         };
 
         Ok(storage_manager)
