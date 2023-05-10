@@ -13,7 +13,7 @@ use crate::{
     client::{
         constants::{DEFAULT_API_TIMEOUT, DEFAULT_USER_AGENT},
         node_manager::node::{Node, NodeAuth},
-        Client, Error, Result,
+        Client, ClientInner, Error, Result,
     },
     types::{
         api::core::{
@@ -48,7 +48,7 @@ pub struct NodeInfoWrapper {
     pub url: String,
 }
 
-impl Client {
+impl ClientInner {
     // Node routes.
 
     /// Returns the health of the node.
@@ -81,8 +81,7 @@ impl Client {
     pub async fn get_routes(&self) -> Result<RoutesResponse> {
         let path = "api/routes";
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request(path, None, self.get_timeout(), false, false)
             .await
     }
@@ -90,40 +89,9 @@ impl Client {
     /// Returns general information about the node.
     /// GET /api/core/v2/info
     pub async fn get_info(&self) -> Result<NodeInfoWrapper> {
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request(INFO_PATH, None, self.get_timeout(), false, false)
             .await
-    }
-
-    /// GET /api/core/v2/info endpoint
-    pub async fn get_node_info(url: &str, auth: Option<NodeAuth>) -> Result<InfoResponse> {
-        let mut url = crate::client::node_manager::builder::validate_url(Url::parse(url)?)?;
-        if let Some(auth) = &auth {
-            if let Some((name, password)) = &auth.basic_auth_name_pwd {
-                url.set_username(name)
-                    .map_err(|_| crate::client::Error::UrlAuth("username"))?;
-                url.set_password(Some(password))
-                    .map_err(|_| crate::client::Error::UrlAuth("password"))?;
-            }
-        }
-        url.set_path(INFO_PATH);
-
-        let resp: InfoResponse =
-            crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())
-                .get(
-                    Node {
-                        url,
-                        auth,
-                        disabled: false,
-                    },
-                    DEFAULT_API_TIMEOUT,
-                )
-                .await?
-                .into_json()
-                .await?;
-
-        Ok(resp)
     }
 
     // Tangle routes.
@@ -134,7 +102,6 @@ impl Client {
         let path = "api/core/v2/tips";
 
         let resp = self
-            .inner
             .node_manager
             .get_request::<TipsResponse>(path, None, self.get_timeout(), false, false)
             .await?;
@@ -161,7 +128,6 @@ impl Client {
 
         // fallback to local PoW if remote PoW fails
         let resp = match self
-            .inner
             .node_manager
             .post_request_json::<SubmitBlockResponse>(path, timeout, serde_json::to_value(block_dto)?, local_pow)
             .await
@@ -172,23 +138,16 @@ impl Client {
                     return Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow));
                 }
 
-                // Without this we get:within `impl Future<Output = [async output]>`, the trait `Send` is not
-                // implemented for `std::sync::RwLockWriteGuard<'_, NetworkInfo>`
-                {
-                    let mut client_network_info = self
-                        .inner
-                        .network_info
-                        .write()
-                        .map_err(|_| crate::client::Error::PoisonError)?;
-                    // switch to local PoW
-                    client_network_info.local_pow = true;
-                }
+                self.network_info
+                    .write()
+                    .map_err(|_| crate::client::Error::PoisonError)?
+                    .local_pow = true;
+
                 let block_res = self.finish_block_builder(None, block.payload().cloned()).await;
                 let block_with_local_pow = match block_res {
                     Ok(block) => {
                         // reset local PoW state
-                        self.inner
-                            .network_info
+                        self.network_info
                             .write()
                             .map_err(|_| crate::client::Error::PoisonError)?
                             .local_pow = false;
@@ -196,8 +155,7 @@ impl Client {
                     }
                     Err(e) => {
                         // reset local PoW state
-                        self.inner
-                            .network_info
+                        self.network_info
                             .write()
                             .map_err(|_| crate::client::Error::PoisonError)?
                             .local_pow = false;
@@ -206,8 +164,7 @@ impl Client {
                 };
                 let block_dto = BlockDto::from(&block_with_local_pow);
 
-                self.inner
-                    .node_manager
+                self.node_manager
                     .post_request_json(path, timeout, serde_json::to_value(block_dto)?, true)
                     .await?
             }
@@ -230,7 +187,6 @@ impl Client {
 
         // fallback to local Pow if remote Pow fails
         let resp = match self
-            .inner
             .node_manager
             .post_request_bytes::<SubmitBlockResponse>(path, timeout, &block.pack_to_vec(), local_pow)
             .await
@@ -240,23 +196,17 @@ impl Client {
                 if !self.get_fallback_to_local_pow() {
                     return Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow));
                 }
-                // Without this we get:within `impl Future<Output = [async output]>`, the trait `Send` is not
-                // implemented for `std::sync::RwLockWriteGuard<'_, NetworkInfo>`
-                {
-                    let mut client_network_info = self
-                        .inner
-                        .network_info
-                        .write()
-                        .map_err(|_| crate::client::Error::PoisonError)?;
-                    // switch to local PoW
-                    client_network_info.local_pow = true;
-                }
+
+                self.network_info
+                    .write()
+                    .map_err(|_| crate::client::Error::PoisonError)?
+                    .local_pow = true;
+
                 let block_res = self.finish_block_builder(None, block.payload().cloned()).await;
                 let block_with_local_pow = match block_res {
                     Ok(block) => {
                         // reset local PoW state
-                        self.inner
-                            .network_info
+                        self.network_info
                             .write()
                             .map_err(|_| crate::client::Error::PoisonError)?
                             .local_pow = false;
@@ -264,16 +214,14 @@ impl Client {
                     }
                     Err(e) => {
                         // reset local PoW state
-                        self.inner
-                            .network_info
+                        self.network_info
                             .write()
                             .map_err(|_| crate::client::Error::PoisonError)?
                             .local_pow = false;
                         return Err(e);
                     }
                 };
-                self.inner
-                    .node_manager
+                self.node_manager
                     .post_request_bytes(path, timeout, &block_with_local_pow.pack_to_vec(), true)
                     .await?
             }
@@ -289,7 +237,6 @@ impl Client {
         let path = &format!("api/core/v2/blocks/{block_id}");
 
         let resp = self
-            .inner
             .node_manager
             .get_request::<BlockResponse>(path, None, self.get_timeout(), false, true)
             .await?;
@@ -305,8 +252,7 @@ impl Client {
     pub async fn get_block_raw(&self, block_id: &BlockId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v2/blocks/{block_id}");
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request_bytes(path, None, self.get_timeout())
             .await
     }
@@ -316,8 +262,7 @@ impl Client {
     pub async fn get_block_metadata(&self, block_id: &BlockId) -> Result<BlockMetadataResponse> {
         let path = &format!("api/core/v2/blocks/{block_id}/metadata");
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request(path, None, self.get_timeout(), true, true)
             .await
     }
@@ -330,7 +275,6 @@ impl Client {
         let path = &format!("api/core/v2/outputs/{output_id}");
 
         let response: OutputWithMetadataResponse = self
-            .inner
             .node_manager
             .get_request(path, None, self.get_timeout(), false, true)
             .await?;
@@ -347,8 +291,7 @@ impl Client {
     pub async fn get_output_raw(&self, output_id: &OutputId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v2/outputs/{output_id}");
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request_bytes(path, None, self.get_timeout())
             .await
     }
@@ -358,8 +301,7 @@ impl Client {
     pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadataDto> {
         let path = &format!("api/core/v2/outputs/{output_id}/metadata");
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request::<OutputMetadataDto>(path, None, self.get_timeout(), false, true)
             .await
     }
@@ -370,7 +312,6 @@ impl Client {
         let path = &"api/core/v2/receipts";
 
         let resp = self
-            .inner
             .node_manager
             .get_request::<ReceiptsResponse>(path, None, DEFAULT_API_TIMEOUT, false, false)
             .await?;
@@ -384,7 +325,6 @@ impl Client {
         let path = &format!("api/core/v2/receipts/{milestone_index}");
 
         let resp = self
-            .inner
             .node_manager
             .get_request::<ReceiptsResponse>(path, None, DEFAULT_API_TIMEOUT, false, false)
             .await?;
@@ -398,8 +338,7 @@ impl Client {
     pub async fn get_treasury(&self) -> Result<TreasuryResponse> {
         let path = "api/core/v2/treasury";
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request(path, None, DEFAULT_API_TIMEOUT, false, false)
             .await
     }
@@ -410,7 +349,6 @@ impl Client {
         let path = &format!("api/core/v2/transactions/{transaction_id}/included-block");
 
         let resp = self
-            .inner
             .node_manager
             .get_request::<BlockResponse>(path, None, self.get_timeout(), true, true)
             .await?;
@@ -426,8 +364,7 @@ impl Client {
     pub async fn get_included_block_raw(&self, transaction_id: &TransactionId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v2/transactions/{transaction_id}/included-block");
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request_bytes(path, None, self.get_timeout())
             .await
     }
@@ -437,8 +374,7 @@ impl Client {
     pub async fn get_included_block_metadata(&self, transaction_id: &TransactionId) -> Result<BlockMetadataResponse> {
         let path = &format!("api/core/v2/transactions/{transaction_id}/included-block/metadata");
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request(path, None, self.get_timeout(), true, true)
             .await
     }
@@ -451,7 +387,6 @@ impl Client {
         let path = &format!("api/core/v2/milestones/{milestone_id}");
 
         let resp = self
-            .inner
             .node_manager
             .get_request::<MilestoneResponse>(path, None, self.get_timeout(), false, true)
             .await?;
@@ -470,8 +405,7 @@ impl Client {
     pub async fn get_milestone_by_id_raw(&self, milestone_id: &MilestoneId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v2/milestones/{milestone_id}");
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request_bytes(path, None, self.get_timeout())
             .await
     }
@@ -481,8 +415,7 @@ impl Client {
     pub async fn get_utxo_changes_by_id(&self, milestone_id: &MilestoneId) -> Result<UtxoChangesResponse> {
         let path = &format!("api/core/v2/milestones/{milestone_id}/utxo-changes");
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request(path, None, self.get_timeout(), false, false)
             .await
     }
@@ -493,7 +426,6 @@ impl Client {
         let path = &format!("api/core/v2/milestones/by-index/{index}");
 
         let resp = self
-            .inner
             .node_manager
             .get_request::<MilestoneResponse>(path, None, self.get_timeout(), false, true)
             .await?;
@@ -512,8 +444,7 @@ impl Client {
     pub async fn get_milestone_by_index_raw(&self, index: u32) -> Result<Vec<u8>> {
         let path = &format!("api/core/v2/milestones/by-index/{index}");
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request_bytes(path, None, self.get_timeout())
             .await
     }
@@ -523,8 +454,7 @@ impl Client {
     pub async fn get_utxo_changes_by_index(&self, index: u32) -> Result<UtxoChangesResponse> {
         let path = &format!("api/core/v2/milestones/by-index/{index}/utxo-changes");
 
-        self.inner
-            .node_manager
+        self.node_manager
             .get_request(path, None, self.get_timeout(), false, false)
             .await
     }
@@ -536,7 +466,6 @@ impl Client {
         let path = "api/core/v2/peers";
 
         let resp = self
-            .inner
             .node_manager
             .get_request::<PeersResponse>(path, None, self.get_timeout(), false, false)
             .await?;
@@ -563,4 +492,37 @@ impl Client {
     // // RouteControlSnapshotsCreate is the control route to manually create a snapshot files.
     // // POST creates a snapshot (full, delta or both).
     // RouteControlSnapshotsCreate = "/control/snapshots/create"
+}
+
+impl Client {
+    /// GET /api/core/v2/info endpoint
+    pub async fn get_node_info(url: &str, auth: Option<NodeAuth>) -> Result<InfoResponse> {
+        let mut url = crate::client::node_manager::builder::validate_url(Url::parse(url)?)?;
+        if let Some(auth) = &auth {
+            if let Some((name, password)) = &auth.basic_auth_name_pwd {
+                url.set_username(name)
+                    .map_err(|_| crate::client::Error::UrlAuth("username"))?;
+                url.set_password(Some(password))
+                    .map_err(|_| crate::client::Error::UrlAuth("password"))?;
+            }
+        }
+        let path = "api/core/v2/info";
+        url.set_path(path);
+
+        let resp: InfoResponse =
+            crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())
+                .get(
+                    Node {
+                        url,
+                        auth,
+                        disabled: false,
+                    },
+                    DEFAULT_API_TIMEOUT,
+                )
+                .await?
+                .into_json()
+                .await?;
+
+        Ok(resp)
+    }
 }

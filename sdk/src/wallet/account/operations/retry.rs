@@ -41,7 +41,7 @@ impl Account {
     ) -> crate::wallet::Result<BlockId> {
         log::debug!("[retry_transaction_until_included]");
 
-        let transaction = self.read().await.transactions.get(transaction_id).cloned();
+        let transaction = self.details().await.transactions.get(transaction_id).cloned();
 
         if let Some(transaction) = transaction {
             if transaction.inclusion_state == InclusionState::Confirmed {

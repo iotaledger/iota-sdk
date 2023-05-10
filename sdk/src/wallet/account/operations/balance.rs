@@ -36,7 +36,7 @@ impl Account {
         let mut total_rent_amount = 0;
         let mut total_native_tokens = NativeTokensBuilder::new();
 
-        let account_details = self.read().await;
+        let account_details = self.details().await;
 
         let relevant_unspent_outputs = account_details
             .unspent_outputs

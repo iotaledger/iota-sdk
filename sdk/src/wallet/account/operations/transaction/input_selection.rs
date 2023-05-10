@@ -34,14 +34,15 @@ impl Account {
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
         // lock so the same inputs can't be selected in multiple transactions
-        let mut account_details = self.write().await;
+        let mut account_details = self.details_mut().await;
         let protocol_parameters = self.client.get_protocol_parameters().await?;
 
         #[cfg(feature = "events")]
-        self.event_emitter.lock().await.emit(
+        self.emit(
             account_details.index,
             WalletEvent::TransactionProgress(TransactionProgressEvent::SelectingInputs),
-        );
+        )
+        .await;
 
         let current_time = self.client.get_time_checked().await?;
         #[allow(unused_mut)]

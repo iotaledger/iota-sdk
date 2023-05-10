@@ -16,7 +16,7 @@ use tokio::sync::watch::Receiver as WatchReceiver;
 
 pub use self::{error::Error, types::*};
 use crate::{
-    client::Client,
+    client::{Client, ClientInner},
     types::block::{
         payload::{milestone::ReceiptMilestoneOption, MilestonePayload},
         Block,
@@ -42,10 +42,12 @@ impl Client {
     pub async fn unsubscribe(&self, topics: Vec<Topic>) -> Result<(), Error> {
         MqttManager::new(self).with_topics(topics).unsubscribe().await
     }
+}
 
+impl ClientInner {
     /// Returns the mqtt event receiver.
     pub fn mqtt_event_receiver(&self) -> WatchReceiver<MqttEvent> {
-        self.inner.mqtt.receiver.clone()
+        self.mqtt.receiver.clone()
     }
 }
 

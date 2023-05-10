@@ -5,7 +5,7 @@ pub(crate) mod builder;
 pub(crate) mod operations;
 
 use std::sync::{
-    atomic::{AtomicU32, AtomicUsize, Ordering},
+    atomic::{AtomicU32, AtomicUsize},
     Arc,
 };
 
@@ -31,21 +31,19 @@ use crate::{
 
 /// The wallet, used to create and get accounts. One wallet can hold many accounts, but they should
 /// all share the same secret_manager type with the same seed/mnemonic.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Wallet {
+    pub(crate) inner: Arc<WalletInner>,
     // should we use a hashmap instead of a vec like in wallet.rs?
     pub(crate) accounts: Arc<RwLock<Vec<Account>>>,
-    // 0 = not running, 1 = running, 2 = stopping
-    pub(crate) background_syncing_status: Arc<AtomicUsize>,
-    pub(crate) client_options: Arc<RwLock<ClientOptions>>,
-    pub(crate) coin_type: Arc<AtomicU32>,
-    pub(crate) secret_manager: Arc<RwLock<SecretManager>>,
-    #[cfg(feature = "events")]
-    pub(crate) event_emitter: Arc<tokio::sync::Mutex<EventEmitter>>,
-    #[cfg(feature = "storage")]
-    pub(crate) storage_options: StorageOptions,
-    #[cfg(feature = "storage")]
-    pub(crate) storage_manager: Arc<tokio::sync::Mutex<StorageManager>>,
+}
+
+impl core::ops::Deref for Wallet {
+    type Target = WalletInner;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
 }
 
 impl Wallet {
@@ -57,18 +55,26 @@ impl Wallet {
     /// Create a new account
     pub fn create_account(&self) -> AccountBuilder {
         log::debug!("creating account");
-        AccountBuilder::new(
-            self.accounts.clone(),
-            self.client_options.clone(),
-            self.coin_type.load(Ordering::Relaxed),
-            self.secret_manager.clone(),
-            #[cfg(feature = "events")]
-            self.event_emitter.clone(),
-            #[cfg(feature = "storage")]
-            self.storage_manager.clone(),
-        )
+        AccountBuilder::new(self.clone())
     }
+}
 
+#[derive(Debug)]
+pub struct WalletInner {
+    // 0 = not running, 1 = running, 2 = stopping
+    pub(crate) background_syncing_status: AtomicUsize,
+    pub(crate) client_options: RwLock<ClientOptions>,
+    pub(crate) coin_type: AtomicU32,
+    pub(crate) secret_manager: Arc<RwLock<SecretManager>>,
+    #[cfg(feature = "events")]
+    pub(crate) event_emitter: tokio::sync::Mutex<EventEmitter>,
+    #[cfg(feature = "storage")]
+    pub(crate) storage_options: StorageOptions,
+    #[cfg(feature = "storage")]
+    pub(crate) storage_manager: tokio::sync::Mutex<StorageManager>,
+}
+
+impl Wallet {
     /// Get all accounts
     pub async fn get_accounts(&self) -> crate::wallet::Result<Vec<Account>> {
         Ok(self.accounts.read().await.clone())
@@ -79,7 +85,7 @@ impl Wallet {
         let accounts = self.accounts.read().await;
         let mut aliases = Vec::with_capacity(accounts.len());
         for handle in accounts.iter() {
-            aliases.push(handle.read().await.alias().clone());
+            aliases.push(handle.details().await.alias().clone());
         }
         Ok(aliases)
     }
@@ -90,7 +96,7 @@ impl Wallet {
         let mut accounts = self.accounts.write().await;
 
         for account in accounts.iter() {
-            let account_index = *account.read().await.index();
+            let account_index = *account.details().await.index();
             if let Some(largest_account_index) = largest_account_index_opt {
                 if account_index > largest_account_index {
                     largest_account_index_opt = Some(account_index);
@@ -103,7 +109,7 @@ impl Wallet {
         if let Some(largest_account_index) = largest_account_index_opt {
             for i in 0..accounts.len() {
                 if let Some(account) = accounts.get(i) {
-                    if *account.read().await.index() == largest_account_index {
+                    if *account.details().await.index() == largest_account_index {
                         let _ = accounts.remove(i);
 
                         #[cfg(feature = "storage")]
@@ -120,11 +126,6 @@ impl Wallet {
         }
 
         Ok(())
-    }
-
-    /// Get the [SecretManager]
-    pub fn get_secret_manager(&self) -> Arc<RwLock<SecretManager>> {
-        self.secret_manager.clone()
     }
 
     /// Get the balance of all accounts added together
@@ -148,6 +149,13 @@ impl Wallet {
         }
 
         Ok(balance)
+    }
+}
+
+impl WalletInner {
+    /// Get the [SecretManager]
+    pub fn get_secret_manager(&self) -> &RwLock<SecretManager> {
+        &self.secret_manager
     }
 
     /// Listen to wallet events, empty vec will listen to all events
@@ -180,12 +188,16 @@ impl Wallet {
         Ok(())
     }
 
+    #[cfg(feature = "events")]
+    pub(crate) async fn emit(&self, account_index: u32, event: crate::wallet::events::types::WalletEvent) {
+        self.event_emitter.lock().await.emit(account_index, event);
+    }
+
     /// Helper function to test events. Emits a provided event with account index 0.
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
-    pub async fn emit_test_event(&self, event: crate::wallet::events::types::WalletEvent) -> crate::wallet::Result<()> {
-        self.event_emitter.lock().await.emit(0, event);
-        Ok(())
+    pub async fn emit_test_event(&self, event: crate::wallet::events::types::WalletEvent) {
+        self.emit(0, event).await
     }
 }
 
