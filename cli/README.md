@@ -55,7 +55,7 @@ export WALLET_DATABASE_PATH=/path/to/database # or add it to your .bashrc, .zshr
 To run the CLI from source, install Rust (usually through [Rustup](https://rustup.rs/)) and run the following commands:
 
 ```
-git clone https://github.com/iotaledger/iota-sdk
+git clone --depth 1 https://github.com/iotaledger/iota-sdk
 cd cli
 cargo run -- [COMMAND] [OPTIONS]
 ```
