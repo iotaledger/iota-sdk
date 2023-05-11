@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::api::input_selection::Burn,
+    client::api::{input_selection::Burn, PreparedTransactionData},
     types::block::{
         address::{Address, AliasAddress},
         output::{unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, Output, OutputId},
@@ -23,7 +23,18 @@ impl Account {
         alias_id: AliasId,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
-        log::debug!("[TRANSACTION] destroy_alias");
+        let prepared_transaction = self.prepare_destroy_alias(alias_id, options).await?;
+        self.sign_and_submit_transaction(prepared_transaction).await
+    }
+
+    /// Function to prepare the transaction for
+    /// [Account.destroy_alias()](crate::account::Account.destroy_alias)
+    pub async fn prepare_destroy_alias(
+        &self,
+        alias_id: AliasId,
+        options: impl Into<Option<TransactionOptions>> + Send,
+    ) -> crate::wallet::Result<PreparedTransactionData> {
+        log::debug!("[TRANSACTION] prepare_destroy_alias");
 
         let current_time = self.client().get_time_checked().await?;
 
@@ -71,7 +82,7 @@ impl Account {
             }),
         };
 
-        self.send(outputs, options).await
+        self.prepare_transaction(outputs, options).await
     }
 
     // Get the current output id for the alias and build a basic output with the amount, native tokens and

@@ -99,7 +99,9 @@ impl Account {
         self.sign_and_submit_transaction(prepared_transaction).await
     }
 
-    pub(crate) async fn prepare_create_alias_output(
+    /// Function to prepare the transaction for
+    /// [Account.create_alias_output()](crate::account::Account.create_alias_output)
+    pub async fn prepare_create_alias_output(
         &self,
         params: Option<CreateAliasParams>,
         options: impl Into<Option<TransactionOptions>> + Send,

@@ -35,37 +35,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 pub enum AccountMethod {
-    /// Consolidate outputs.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    ConsolidateOutputs {
-        force: bool,
-        output_consolidation_threshold: Option<usize>,
-    },
-    /// Create an alias output.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    CreateAliasOutput {
-        params: Option<CreateAliasParamsDto>,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
-    /// storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
-    /// sent to the governor address.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    DestroyAlias {
-        alias_id: AliasIdDto,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Function to destroy a foundry output with a circulating supply of 0.
-    /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    DestroyFoundry {
-        foundry_id: FoundryId,
-        options: Option<TransactionOptionsDto>,
-    },
     /// Generate new unused addresses.
     /// Expected response: [`GeneratedAddress`](crate::Response::GeneratedAddress)
     GenerateAddresses {
@@ -118,31 +87,10 @@ pub enum AccountMethod {
     /// Returns all pending transactions of the account
     /// Expected response: [`Transactions`](crate::Response::Transactions)
     PendingTransactions,
-    /// Melt native tokens. This happens with the foundry output which minted them, by increasing it's
-    /// `melted_tokens` field.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    DecreaseNativeTokenSupply {
-        /// Native token id
-        token_id: TokenIdDto,
-        /// To be melted amount
-        melt_amount: U256Dto,
-        options: Option<TransactionOptionsDto>,
-    },
     /// Calculate the minimum required storage deposit for an output.
     /// Expected response:
     /// [`MinimumRequiredStorageDeposit`](crate::Response::MinimumRequiredStorageDeposit)
     MinimumRequiredStorageDeposit { output: OutputDto },
-    /// Mint more native token.
-    /// Expected response: [`MintTokenTransaction`](crate::Response::MintTokenTransaction)
-    #[serde(rename_all = "camelCase")]
-    IncreaseNativeTokenSupply {
-        /// Native token id
-        token_id: TokenIdDto,
-        /// To be minted amount
-        mint_amount: U256Dto,
-        options: Option<TransactionOptionsDto>,
-    },
     /// Get account balance information.
     /// Expected response: [`Balance`](crate::Response::Balance)
     GetBalance,
@@ -165,6 +113,58 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     PrepareBurnNft {
         nft_id: NftIdDto,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Consolidate outputs.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareConsolidateOutputs {
+        force: bool,
+        output_consolidation_threshold: Option<usize>,
+    },
+    /// Create an alias output.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareCreateAliasOutput {
+        params: Option<CreateAliasParamsDto>,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Melt native tokens. This happens with the foundry output which minted them, by increasing it's
+    /// `melted_tokens` field.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareDecreaseNativeTokenSupply {
+        /// Native token id
+        token_id: TokenIdDto,
+        /// To be melted amount
+        melt_amount: U256Dto,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
+    /// storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
+    /// sent to the governor address.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareDestroyAlias {
+        alias_id: AliasIdDto,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Function to destroy a foundry output with a circulating supply of 0.
+    /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareDestroyFoundry {
+        foundry_id: FoundryId,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Mint more native token.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareIncreaseNativeTokenSupply {
+        /// Native token id
+        token_id: TokenIdDto,
+        /// To be minted amount
+        mint_amount: U256Dto,
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare to Mint native token.
@@ -253,6 +253,11 @@ pub enum AccountMethod {
     SendOutputs {
         outputs: Vec<OutputDto>,
         options: Option<TransactionOptionsDto>,
+    },
+    /// Validate the transaction, sign it, submit it to a node and store it in the account.
+    /// Expected response: [`SignedTransactionData`](crate::Response::SignedTransactionData)
+    SignAndSubmitTransaction {
+        prepared_transaction_data: PreparedTransactionDataDto,
     },
     /// Sign a prepared transaction.
     /// Expected response: [`SignedTransactionData`](crate::Response::SignedTransactionData)

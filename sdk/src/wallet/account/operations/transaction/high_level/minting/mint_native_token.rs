@@ -126,6 +126,8 @@ impl Account {
             .map(|transaction| MintTokenTransaction { token_id, transaction })
     }
 
+    /// Function to prepare the transaction for
+    /// [Account.mint_native_token()](crate::account::Account.mint_native_token)
     pub async fn prepare_mint_native_token(
         &self,
         params: MintNativeTokenParams,

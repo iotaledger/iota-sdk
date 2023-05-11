@@ -17,7 +17,10 @@ use crate::{
             NftOutputBuilder, Output, OutputId, TokenId, OUTPUT_COUNT_MAX,
         },
     },
-    wallet::account::{types::OutputData, Account, TransactionOptions},
+    wallet::account::{
+        types::{OutputData, Transaction},
+        Account, TransactionOptions,
+    },
 };
 
 const NATIVE_TOKEN_OVERFLOW: &str = "NativeTokensOverflow";
@@ -48,6 +51,18 @@ impl Account {
     /// Function to burn native tokens. This doesn't require the foundry output which minted them, but will not increase
     /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
     /// recommended to use `decrease_native_token_supply()`, if the foundry output is available.
+    pub async fn burn_native_token(
+        &self,
+        token_id: TokenId,
+        burn_amount: U256,
+        options: impl Into<Option<TransactionOptions>> + Send,
+    ) -> crate::wallet::Result<Transaction> {
+        let prepared_transaction = self.prepare_burn_native_token(token_id, burn_amount, options).await?;
+        self.sign_and_submit_transaction(prepared_transaction).await
+    }
+
+    /// Function to prepare the transaction for
+    /// [Account.burn_native_token()](crate::account::Account.burn_native_token)
     pub async fn prepare_burn_native_token(
         &self,
         token_id: TokenId,

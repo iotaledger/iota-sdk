@@ -27,46 +27,6 @@ use crate::{method::AccountMethod, Response, Result};
 
 pub(crate) async fn call_account_method_internal(account: &Account, method: AccountMethod) -> Result<Response> {
     let response = match method {
-        AccountMethod::ConsolidateOutputs {
-            force,
-            output_consolidation_threshold,
-        } => {
-            let transaction = account
-                .consolidate_outputs(force, output_consolidation_threshold)
-                .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
-        }
-        AccountMethod::CreateAliasOutput { params, options } => {
-            let params = params
-                .map(|options| CreateAliasParams::try_from(&options))
-                .transpose()?;
-
-            let transaction = account
-                .create_alias_output(
-                    params,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
-        }
-        AccountMethod::DestroyAlias { alias_id, options } => {
-            let transaction = account
-                .destroy_alias(
-                    AliasId::try_from(&alias_id)?,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
-        }
-        AccountMethod::DestroyFoundry { foundry_id, options } => {
-            let transaction = account
-                .destroy_foundry(
-                    foundry_id,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
-        }
         AccountMethod::GenerateAddresses { amount, options } => {
             let address = account.generate_addresses(amount, options).await?;
             Response::GeneratedAddress(address)
@@ -128,7 +88,6 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                     .collect(),
             )
         }
-
         AccountMethod::PrepareBurnNativeToken {
             token_id,
             burn_amount,
@@ -151,6 +110,74 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 )
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        }
+        AccountMethod::PrepareConsolidateOutputs {
+            force,
+            output_consolidation_threshold,
+        } => {
+            let data = account
+                .prepare_consolidate_outputs(force, output_consolidation_threshold)
+                .await?;
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        }
+        AccountMethod::PrepareCreateAliasOutput { params, options } => {
+            let params = params
+                .map(|options| CreateAliasParams::try_from(&options))
+                .transpose()?;
+
+            let data = account
+                .prepare_create_alias_output(
+                    params,
+                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                )
+                .await?;
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        }
+        AccountMethod::PrepareDecreaseNativeTokenSupply {
+            token_id,
+            melt_amount,
+            options,
+        } => {
+            let data = account
+                .prepare_decrease_native_token_supply(
+                    TokenId::try_from(&token_id)?,
+                    U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
+                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                )
+                .await?;
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        }
+        AccountMethod::PrepareDestroyAlias { alias_id, options } => {
+            let data = account
+                .prepare_destroy_alias(
+                    AliasId::try_from(&alias_id)?,
+                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                )
+                .await?;
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        }
+        AccountMethod::PrepareDestroyFoundry { foundry_id, options } => {
+            let data = account
+                .prepare_destroy_foundry(
+                    foundry_id,
+                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                )
+                .await?;
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        }
+        AccountMethod::PrepareIncreaseNativeTokenSupply {
+            token_id,
+            mint_amount,
+            options,
+        } => {
+            let data = account
+                .prepare_increase_native_token_supply(
+                    TokenId::try_from(&token_id)?,
+                    U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
+                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                )
+                .await?;
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data.1))
         }
         AccountMethod::PrepareMintNfts { params, options } => {
             let data = account
@@ -198,34 +225,6 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::PendingTransactions => {
             let transactions = account.pending_transactions().await?;
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
-        }
-        AccountMethod::DecreaseNativeTokenSupply {
-            token_id,
-            melt_amount,
-            options,
-        } => {
-            let transaction = account
-                .decrease_native_token_supply(
-                    TokenId::try_from(&token_id)?,
-                    U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
-        }
-        AccountMethod::IncreaseNativeTokenSupply {
-            token_id,
-            mint_amount,
-            options,
-        } => {
-            let transaction = account
-                .increase_native_token_supply(
-                    TokenId::try_from(&token_id)?,
-                    U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
-            Response::MintTokenTransaction(MintTokenTransactionDto::from(&transaction))
         }
         AccountMethod::MinimumRequiredStorageDeposit { output } => {
             let output = Output::try_from_dto(&output, account.client().get_token_supply().await?)?;
@@ -317,6 +316,17 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                         .collect::<iota_sdk::wallet::Result<Vec<Output>>>()?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
+                .await?;
+            Response::SentTransaction(TransactionDto::from(&transaction))
+        }
+        AccountMethod::SignAndSubmitTransaction {
+            prepared_transaction_data,
+        } => {
+            let transaction = account
+                .sign_and_submit_transaction(PreparedTransactionData::try_from_dto(
+                    &prepared_transaction_data,
+                    &account.client().get_protocol_parameters().await?,
+                )?)
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }

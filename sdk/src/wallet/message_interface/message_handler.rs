@@ -32,9 +32,7 @@ use crate::{
     wallet::{
         account::{
             operations::transaction::{
-                high_level::{create_alias::CreateAliasParams, minting::mint_native_token::MintTokenTransactionDto},
-                prepare_output::OutputParams,
-                TransactionOptions,
+                high_level::create_alias::CreateAliasParams, prepare_output::OutputParams, TransactionOptions,
             },
             types::{AccountBalanceDto, AccountIdentifier, TransactionDto},
             OutputDataDto,
@@ -491,53 +489,13 @@ impl WalletMessageHandler {
 
                 Ok(Response::Output(OutputDto::from(&output)))
             }
-            AccountMethod::ConsolidateOutputs {
+            AccountMethod::PrepareConsolidateOutputs {
                 force,
                 output_consolidation_threshold,
             } => {
                 convert_async_panics(|| async {
                     let transaction = account
                         .consolidate_outputs(force, output_consolidation_threshold)
-                        .await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
-                })
-                .await
-            }
-            AccountMethod::CreateAliasOutput { params, options } => {
-                convert_async_panics(|| async {
-                    let params = params
-                        .map(|options| CreateAliasParams::try_from(&options))
-                        .transpose()?;
-
-                    let transaction = account
-                        .create_alias_output(
-                            params,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
-                        .await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
-                })
-                .await
-            }
-            AccountMethod::DestroyAlias { alias_id, options } => {
-                convert_async_panics(|| async {
-                    let transaction = account
-                        .destroy_alias(
-                            AliasId::try_from(&alias_id)?,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
-                        .await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
-                })
-                .await
-            }
-            AccountMethod::DestroyFoundry { foundry_id, options } => {
-                convert_async_panics(|| async {
-                    let transaction = account
-                        .destroy_foundry(
-                            foundry_id,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
@@ -622,42 +580,6 @@ impl WalletMessageHandler {
                     transactions.iter().map(TransactionDto::from).collect(),
                 ))
             }
-            AccountMethod::DecreaseNativeTokenSupply {
-                token_id,
-                melt_amount,
-                options,
-            } => {
-                convert_async_panics(|| async {
-                    let transaction = account
-                        .decrease_native_token_supply(
-                            TokenId::try_from(&token_id)?,
-                            U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
-                        .await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
-                })
-                .await
-            }
-            AccountMethod::IncreaseNativeTokenSupply {
-                token_id,
-                mint_amount,
-                options,
-            } => {
-                convert_async_panics(|| async {
-                    let transaction = account
-                        .increase_native_token_supply(
-                            TokenId::try_from(&token_id)?,
-                            U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
-                        .await?;
-                    Ok(Response::MintTokenTransaction(MintTokenTransactionDto::from(
-                        &transaction,
-                    )))
-                })
-                .await
-            }
             AccountMethod::MinimumRequiredStorageDeposit { output } => {
                 convert_async_panics(|| async {
                     let output = Output::try_from_dto(&output, account.client.get_token_supply().await?)?;
@@ -672,7 +594,80 @@ impl WalletMessageHandler {
                 .await
             }
             AccountMethod::GetBalance => Ok(Response::Balance(AccountBalanceDto::from(&account.balance().await?))),
+            AccountMethod::PrepareCreateAliasOutput { params, options } => {
+                convert_async_panics(|| async {
+                    let params = params
+                        .map(|options| CreateAliasParams::try_from(&options))
+                        .transpose()?;
 
+                    let data = account
+                        .prepare_create_alias_output(
+                            params,
+                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                        )
+                        .await?;
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
+                })
+                .await
+            }
+            AccountMethod::PrepareDestroyAlias { alias_id, options } => {
+                convert_async_panics(|| async {
+                    let data = account
+                        .prepare_destroy_alias(
+                            AliasId::try_from(&alias_id)?,
+                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                        )
+                        .await?;
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
+                })
+                .await
+            }
+            AccountMethod::PrepareDestroyFoundry { foundry_id, options } => {
+                convert_async_panics(|| async {
+                    let data = account
+                        .prepare_destroy_foundry(
+                            foundry_id,
+                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                        )
+                        .await?;
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
+                })
+                .await
+            }
+            AccountMethod::PrepareDecreaseNativeTokenSupply {
+                token_id,
+                melt_amount,
+                options,
+            } => {
+                convert_async_panics(|| async {
+                    let data = account
+                        .prepare_decrease_native_token_supply(
+                            TokenId::try_from(&token_id)?,
+                            U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
+                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                        )
+                        .await?;
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
+                })
+                .await
+            }
+            AccountMethod::PrepareIncreaseNativeTokenSupply {
+                token_id,
+                mint_amount,
+                options,
+            } => {
+                convert_async_panics(|| async {
+                    let data = account
+                        .prepare_increase_native_token_supply(
+                            TokenId::try_from(&token_id)?,
+                            U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
+                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                        )
+                        .await?;
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data.1)))
+                })
+                .await
+            }
             AccountMethod::PrepareBurnNativeToken {
                 token_id,
                 burn_amount,

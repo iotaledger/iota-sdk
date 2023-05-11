@@ -8,13 +8,26 @@ use crate::{
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NftId, Output, OutputId},
     },
     wallet::{
-        account::{operations::helpers::time::can_output_be_unlocked_now, Account, TransactionOptions},
+        account::{
+            operations::helpers::time::can_output_be_unlocked_now, types::Transaction, Account, TransactionOptions,
+        },
         Error,
     },
 };
 
 impl Account {
     /// Function to burn an nft output.
+    pub async fn burn_nft(
+        &self,
+        nft_id: NftId,
+        options: impl Into<Option<TransactionOptions>> + Send,
+    ) -> crate::wallet::Result<Transaction> {
+        let prepared_transaction = self.prepare_burn_nft(nft_id, options).await?;
+        self.sign_and_submit_transaction(prepared_transaction).await
+    }
+
+    /// Function to prepare the transaction for
+    /// [Account.burn_nft()](crate::account::Account.burn_nft)
     pub async fn prepare_burn_nft(
         &self,
         nft_id: NftId,

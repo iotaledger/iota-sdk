@@ -104,37 +104,6 @@ pub enum AccountMethod {
         features: Option<Vec<FeatureDto>>,
         immutable_features: Option<Vec<FeatureDto>>,
     },
-    /// Consolidate outputs.
-    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    ConsolidateOutputs {
-        force: bool,
-        output_consolidation_threshold: Option<usize>,
-    },
-    /// Create an alias output.
-    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    CreateAliasOutput {
-        params: Option<CreateAliasParamsDto>,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
-    /// storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
-    /// sent to the governor address.
-    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    DestroyAlias {
-        alias_id: AliasIdDto,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Function to destroy a foundry output with a circulating supply of 0.
-    /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
-    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    DestroyFoundry {
-        foundry_id: FoundryId,
-        options: Option<TransactionOptionsDto>,
-    },
     /// Generate new unused addresses.
     /// Expected response: [`GeneratedAddress`](crate::wallet::message_interface::Response::GeneratedAddress)
     GenerateAddresses {
@@ -188,34 +157,65 @@ pub enum AccountMethod {
     /// Returns all pending transactions of the account
     /// Expected response: [`Transactions`](crate::wallet::message_interface::Response::Transactions)
     PendingTransactions,
-    /// Melt native tokens. This happens with the foundry output which minted them, by increasing it's
-    /// `melted_tokens` field.
+    /// Calculate the minimum required storage deposit for an output.
+    /// Expected response:
+    /// [`MinimumRequiredStorageDeposit`](crate::wallet::message_interface::Response::MinimumRequiredStorageDeposit)
+    MinimumRequiredStorageDeposit { output: OutputDto },
+    /// Get account balance information.
+    /// Expected response: [`Balance`](crate::wallet::message_interface::Response::Balance)
+    GetBalance,
+    /// Consolidate outputs.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
-    DecreaseNativeTokenSupply {
+    PrepareConsolidateOutputs {
+        force: bool,
+        output_consolidation_threshold: Option<usize>,
+    },
+    /// Create an alias output.
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareCreateAliasOutput {
+        params: Option<CreateAliasParamsDto>,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
+    /// storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
+    /// sent to the governor address.
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareDestroyAlias {
+        alias_id: AliasIdDto,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Function to destroy a foundry output with a circulating supply of 0.
+    /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareDestroyFoundry {
+        foundry_id: FoundryId,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Melt native tokens. This happens with the foundry output which minted them, by increasing it's
+    /// `melted_tokens` field.
+    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareDecreaseNativeTokenSupply {
         /// Native token id
         token_id: TokenIdDto,
         /// To be melted amount
         melt_amount: U256Dto,
         options: Option<TransactionOptionsDto>,
     },
-    /// Calculate the minimum required storage deposit for an output.
-    /// Expected response:
-    /// [`MinimumRequiredStorageDeposit`](crate::wallet::message_interface::Response::MinimumRequiredStorageDeposit)
-    MinimumRequiredStorageDeposit { output: OutputDto },
     /// Mint more native token.
-    /// Expected response: [`MintTokenTransaction`](crate::wallet::message_interface::Response::MintTokenTransaction)
+    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
-    IncreaseNativeTokenSupply {
+    PrepareIncreaseNativeTokenSupply {
         /// Native token id
         token_id: TokenIdDto,
         /// To be minted amount
         mint_amount: U256Dto,
         options: Option<TransactionOptionsDto>,
     },
-    /// Get account balance information.
-    /// Expected response: [`Balance`](crate::wallet::message_interface::Response::Balance)
-    GetBalance,
     /// Prepare an output.
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[serde(rename_all = "camelCase")]

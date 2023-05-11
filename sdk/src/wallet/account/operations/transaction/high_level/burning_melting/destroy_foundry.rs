@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::api::input_selection::Burn,
+    client::api::{input_selection::Burn, PreparedTransactionData},
     types::block::output::{AliasId, AliasOutputBuilder, FoundryId, NativeTokensBuilder, Output, TokenScheme},
     wallet::{
         account::{operations::transaction::Transaction, types::OutputData, Account, TransactionOptions},
@@ -18,7 +18,18 @@ impl Account {
         foundry_id: FoundryId,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
-        log::debug!("[TRANSACTION] destroy_foundry");
+        let prepared_transaction = self.prepare_destroy_foundry(foundry_id, options).await?;
+        self.sign_and_submit_transaction(prepared_transaction).await
+    }
+
+    /// Function to prepare the transaction for
+    /// [Account.destroy_foundry()](crate::account::Account.destroy_foundry)
+    pub async fn prepare_destroy_foundry(
+        &self,
+        foundry_id: FoundryId,
+        options: impl Into<Option<TransactionOptions>> + Send,
+    ) -> crate::wallet::Result<PreparedTransactionData> {
+        log::debug!("[TRANSACTION] prepare_destroy_foundry");
 
         let token_supply = self.client.get_token_supply().await?;
         let alias_id = *foundry_id.alias_address().alias_id();
@@ -69,7 +80,7 @@ impl Account {
             _ => unreachable!("We checked if it's an alias output before"),
         };
 
-        self.send(outputs, options).await
+        self.prepare_transaction(outputs, options).await
     }
 
     /// Find and return unspent `OutputData` for given `alias_id` and `foundry_id`
