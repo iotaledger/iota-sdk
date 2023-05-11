@@ -212,12 +212,12 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             client.unsubscribe(topics).await?;
             Response::Ok
         }
-        ClientMethod::GetNode => Response::Node(client.get_node()?),
+        ClientMethod::GetNode => Response::Node(client.get_node().await?),
         ClientMethod::GetNetworkInfo => Response::NetworkInfo(client.get_network_info().await?.into()),
         ClientMethod::GetNetworkId => Response::NetworkId(client.get_network_id().await?),
         ClientMethod::GetBech32Hrp => Response::Bech32Hrp(client.get_bech32_hrp().await?),
         ClientMethod::GetMinPowScore => Response::MinPowScore(client.get_min_pow_score().await?),
-        ClientMethod::GetTipsInterval => Response::TipsInterval(client.get_tips_interval()),
+        ClientMethod::GetTipsInterval => Response::TipsInterval(client.get_tips_interval().await),
         ClientMethod::GetProtocolParameters => {
             let params = client.get_protocol_parameters().await?;
             let protocol_response = ProtocolParametersDto {
@@ -235,8 +235,8 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             };
             Response::ProtocolParameters(protocol_response)
         }
-        ClientMethod::GetLocalPow => Response::Bool(client.get_local_pow()),
-        ClientMethod::GetFallbackToLocalPow => Response::Bool(client.get_fallback_to_local_pow()),
+        ClientMethod::GetLocalPow => Response::Bool(client.get_local_pow().await),
+        ClientMethod::GetFallbackToLocalPow => Response::Bool(client.get_fallback_to_local_pow().await),
         ClientMethod::PrepareTransaction {
             secret_manager,
             options,
@@ -293,9 +293,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::BlockIdWithBlock(block_id, BlockDto::from(&block))
         }
         #[cfg(not(target_family = "wasm"))]
-        ClientMethod::UnhealthyNodes => {
-            Response::UnhealthyNodes(client.unhealthy_nodes().into_iter().cloned().collect())
-        }
+        ClientMethod::UnhealthyNodes => Response::UnhealthyNodes(client.unhealthy_nodes().await.into_iter().collect()),
         ClientMethod::GetHealth { url } => Response::Bool(client.get_health(&url).await?),
         ClientMethod::GetNodeInfo { url, auth } => Response::NodeInfo(Client::get_node_info(&url, auth).await?),
         ClientMethod::GetInfo => Response::Info(client.get_info().await?),

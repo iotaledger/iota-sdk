@@ -95,7 +95,7 @@ async fn backup_and_restore() -> Result<()> {
     assert_eq!(new_account.details().await.coin_type(), &SHIMMER_COIN_TYPE);
 
     // compare restored client options
-    let client_options = restore_wallet.get_client_options().await;
+    let client_options = restore_wallet.client_options().await;
     let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
@@ -176,7 +176,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
     assert_eq!(new_account.details().await.coin_type(), &SHIMMER_COIN_TYPE);
 
     // compare restored client options
-    let client_options = restore_wallet.get_client_options().await;
+    let client_options = restore_wallet.client_options().await;
     let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
@@ -268,7 +268,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
     );
 
     // compare restored client options
-    let client_options = restore_wallet.get_client_options().await;
+    let client_options = restore_wallet.client_options().await;
     let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_OTHER).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
@@ -349,7 +349,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
     );
 
     // compare client options, they are not restored
-    let client_options = restore_wallet.get_client_options().await;
+    let client_options = restore_wallet.client_options().await;
     let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_OTHER).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
@@ -436,7 +436,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     );
 
     // compare client options, they are not restored
-    let client_options = restore_wallet.get_client_options().await;
+    let client_options = restore_wallet.client_options().await;
     let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
@@ -504,7 +504,7 @@ async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
     // Validate restored data
 
     // compare restored client options
-    let client_options = restore_wallet.get_client_options().await;
+    let client_options = restore_wallet.client_options().await;
     let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 

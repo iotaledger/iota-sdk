@@ -30,8 +30,8 @@ impl Account {
         log::debug!("[TRANSACTION] prepare_transaction");
         let options = options.into();
         let prepare_transaction_start_time = Instant::now();
-        let rent_structure = self.client.get_rent_structure().await?;
-        let token_supply = self.client.get_token_supply().await?;
+        let rent_structure = self.client().get_rent_structure().await?;
+        let token_supply = self.client().get_token_supply().await?;
 
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {

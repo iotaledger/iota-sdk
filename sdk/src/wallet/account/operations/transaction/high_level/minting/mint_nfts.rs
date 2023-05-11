@@ -127,8 +127,8 @@ impl Account {
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_mint_nfts");
-        let rent_structure = self.client.get_rent_structure().await?;
-        let token_supply = self.client.get_token_supply().await?;
+        let rent_structure = self.client().get_rent_structure().await?;
+        let token_supply = self.client().get_token_supply().await?;
         let account_addresses = self.addresses().await?;
         let mut outputs = Vec::new();
 
@@ -143,8 +143,8 @@ impl Account {
         {
             let address = match address {
                 Some(address) => {
-                    self.client.bech32_hrp_matches(address.hrp()).await?;
-                    address.inner
+                    self.client().bech32_hrp_matches(address.hrp()).await?;
+                    address
                 }
                 // todo other error message
                 None => {
@@ -152,7 +152,6 @@ impl Account {
                         .first()
                         .ok_or(WalletError::FailedToGetRemainder)?
                         .address
-                        .inner
                 }
             };
 

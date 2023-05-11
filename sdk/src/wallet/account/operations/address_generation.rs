@@ -51,7 +51,7 @@ impl Account {
         let bech32_hrp = {
             match account_details.public_addresses.first() {
                 Some(address) => address.address.hrp,
-                None => self.client.get_bech32_hrp().await?,
+                None => self.client().get_bech32_hrp().await?,
             }
         };
 

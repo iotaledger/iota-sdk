@@ -64,12 +64,12 @@ impl Account {
         log::debug!("[TRANSACTION] prepare_send_nft");
 
         let unspent_outputs = self.unspent_outputs(None).await?;
-        let token_supply = self.client.get_token_supply().await?;
+        let token_supply = self.client().get_token_supply().await?;
 
         let mut outputs = Vec::new();
 
         for SendNftParams { address, nft_id } in params {
-            self.client.bech32_hrp_matches(address.hrp()).await?;
+            self.client().bech32_hrp_matches(address.hrp()).await?;
 
             // Find nft output from the inputs
             if let Some(nft_output_data) = unspent_outputs.iter().find(|o| {

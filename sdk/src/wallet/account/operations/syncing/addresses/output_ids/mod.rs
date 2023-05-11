@@ -31,7 +31,7 @@ impl Account {
         address: Address,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
-        let bech32_address = Bech32Address::new(self.client.get_bech32_hrp().await?, address);
+        let bech32_address = Bech32Address::new(self.client().get_bech32_hrp().await?, address);
 
         if sync_options.sync_only_most_basic_outputs {
             let output_ids = self

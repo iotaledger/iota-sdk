@@ -355,12 +355,12 @@ impl ClientMessageHandler {
                 self.client.unsubscribe(topics).await?;
                 Ok(Response::Ok)
             }
-            Message::GetNode => Ok(Response::Node(self.client.get_node()?)),
+            Message::GetNode => Ok(Response::Node(self.client.get_node().await?)),
             Message::GetNetworkInfo => Ok(Response::NetworkInfo(self.client.get_network_info().await?.into())),
             Message::GetNetworkId => Ok(Response::NetworkId(self.client.get_network_id().await?)),
             Message::GetBech32Hrp => Ok(Response::Bech32Hrp(self.client.get_bech32_hrp().await?)),
             Message::GetMinPowScore => Ok(Response::MinPowScore(self.client.get_min_pow_score().await?)),
-            Message::GetTipsInterval => Ok(Response::TipsInterval(self.client.get_tips_interval())),
+            Message::GetTipsInterval => Ok(Response::TipsInterval(self.client.get_tips_interval().await)),
             Message::GetProtocolParameters => {
                 let params = self.client.get_protocol_parameters().await?;
                 let protocol_response = ProtocolParametersDto {
@@ -378,8 +378,8 @@ impl ClientMessageHandler {
                 };
                 Ok(Response::ProtocolParameters(protocol_response))
             }
-            Message::GetLocalPow => Ok(Response::Bool(self.client.get_local_pow())),
-            Message::GetFallbackToLocalPow => Ok(Response::Bool(self.client.get_fallback_to_local_pow())),
+            Message::GetLocalPow => Ok(Response::Bool(self.client.get_local_pow().await)),
+            Message::GetFallbackToLocalPow => Ok(Response::Bool(self.client.get_fallback_to_local_pow().await)),
             #[cfg(feature = "ledger_nano")]
             Message::GetLedgerNanoStatus { is_simulator } => {
                 let ledger_nano = LedgerSecretManager::new(is_simulator);
@@ -493,7 +493,7 @@ impl ClientMessageHandler {
             }
             #[cfg(not(target_family = "wasm"))]
             Message::UnhealthyNodes => Ok(Response::UnhealthyNodes(
-                self.client.unhealthy_nodes().into_iter().cloned().collect(),
+                self.client.unhealthy_nodes().await.into_iter().collect(),
             )),
             Message::GetHealth { url } => Ok(Response::Bool(self.client.get_health(&url).await?)),
             Message::GetNodeInfo { url, auth } => Ok(Response::NodeInfo(Client::get_node_info(&url, auth).await?)),

@@ -24,7 +24,7 @@ impl Account {
         let bech32_address = bech32_address.to_bech32()?;
         // Only request basic outputs with `AddressUnlockCondition` only
         Ok(self
-            .client
+            .client()
             .basic_output_ids(vec![
                 QueryParameter::Address(bech32_address),
                 QueryParameter::HasExpiration(false),

@@ -290,7 +290,7 @@ impl Client {
         // Post the modified
         let block_id = self.post_block_raw(&reattach_block).await?;
         // Get block if we use remote Pow, because the node will change parents and nonce
-        let block = if self.get_local_pow() {
+        let block = if self.get_local_pow().await {
             reattach_block
         } else {
             self.get_block(&block_id).await?
@@ -321,7 +321,7 @@ impl Client {
 
         let block_id = self.post_block_raw(&promote_block).await?;
         // Get block if we use remote Pow, because the node will change parents and nonce.
-        let block = if self.get_local_pow() {
+        let block = if self.get_local_pow().await {
             promote_block
         } else {
             self.get_block(&block_id).await?

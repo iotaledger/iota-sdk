@@ -52,6 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Functions that accepted a string bech32 HRP now accept an `Hrp`;
 - `Account::read` and `write` now accessible via `details` and `details_mut`;
 - `Wallet::emit_test_event` no longer returns a `Result`;
+- `Client`, `Wallet`, and `Account` fns updated to reflect internal reorganization;
 - `AccountBuilder::new` now takes a wallet;
 - `InputSigningDataDto::chain` is now `Vec<u32>` instead of `Chain`;
 

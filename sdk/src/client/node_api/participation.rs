@@ -30,7 +30,9 @@ impl ClientInner {
         });
 
         self.node_manager
-            .get_request(route, query, self.get_timeout(), false, false)
+            .read()
+            .await
+            .get_request(route, query, self.get_timeout().await, false, false)
             .await
     }
 
@@ -39,7 +41,9 @@ impl ClientInner {
         let route = format!("api/participation/v1/events/{event_id}");
 
         self.node_manager
-            .get_request(&route, None, self.get_timeout(), false, false)
+            .read()
+            .await
+            .get_request(&route, None, self.get_timeout().await, false, false)
             .await
     }
 
@@ -52,10 +56,12 @@ impl ClientInner {
         let route = format!("api/participation/v1/events/{event_id}/status");
 
         self.node_manager
+            .read()
+            .await
             .get_request(
                 &route,
                 milestone_index.map(|index| index.to_string()).as_deref(),
-                self.get_timeout(),
+                self.get_timeout().await,
                 false,
                 false,
             )
@@ -67,7 +73,9 @@ impl ClientInner {
         let route = format!("api/participation/v1/outputs/{output_id}");
 
         self.node_manager
-            .get_request(&route, None, self.get_timeout(), false, false)
+            .read()
+            .await
+            .get_request(&route, None, self.get_timeout().await, false, false)
             .await
     }
 
@@ -76,7 +84,9 @@ impl ClientInner {
         let route = format!("api/participation/v1/addresses/{}", bech32_address.as_string());
 
         self.node_manager
-            .get_request(&route, None, self.get_timeout(), false, false)
+            .read()
+            .await
+            .get_request(&route, None, self.get_timeout().await, false, false)
             .await
     }
 
@@ -88,7 +98,9 @@ impl ClientInner {
         let route = format!("api/participation/v1/addresses/{}/outputs", bech32_address.as_string());
 
         self.node_manager
-            .get_request(&route, None, self.get_timeout(), false, false)
+            .read()
+            .await
+            .get_request(&route, None, self.get_timeout().await, false, false)
             .await
     }
 }
