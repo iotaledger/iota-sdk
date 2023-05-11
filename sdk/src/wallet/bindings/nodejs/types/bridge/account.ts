@@ -59,23 +59,6 @@ export type __BurnMethod__ = {
     };
 };
 
-export type __BurnNativeTokenMethod__ = {
-    name: 'burnNativeToken';
-    data: {
-        tokenId: string;
-        burnAmount: HexEncodedAmount;
-        options?: TransactionOptions;
-    };
-};
-
-export type __BurnNftMethod__ = {
-    name: 'burnNft';
-    data: {
-        nftId: string;
-        options?: TransactionOptions;
-    };
-};
-
 export type __ClaimOutputsMethod__ = {
     name: 'claimOutputs';
     data: {
@@ -112,22 +95,6 @@ export type __DeregisterParticipationEventMethod__ = {
     name: 'deregisterParticipationEvent';
     data: {
         eventId: ParticipationEventId;
-    };
-};
-
-export type __DestroyAliasMethod__ = {
-    name: 'destroyAlias';
-    data: {
-        aliasId: string;
-        options?: TransactionOptions;
-    };
-};
-
-export type __DestroyFoundryMethod__ = {
-    name: 'destroyFoundry';
-    data: {
-        foundryId: string;
-        options?: TransactionOptions;
     };
 };
 

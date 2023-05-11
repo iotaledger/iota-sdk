@@ -144,6 +144,11 @@ export class Account {
 
      * When burn(destroy) foundry outputs with a circulating supply of 0.
      * Native tokens in the foundry (minted by other foundries) will be transactioned to the controlling alias.
+
+     * @param burn The outputs to burn
+     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * or custom inputs.
+     * @returns The resulting transaction.
      */
     async burn(
         burn: Burn,

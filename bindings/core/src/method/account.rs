@@ -18,8 +18,8 @@ use iota_sdk::{
     types::block::{
         dto::U256Dto,
         output::{
-            dto::{AliasIdDto, NftIdDto, OutputDto, TokenIdDto},
-            FoundryId, OutputId,
+            dto::{OutputDto, TokenIdDto},
+            OutputId,
         },
         payload::transaction::TransactionId,
     },
@@ -38,6 +38,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 pub enum AccountMethod {
+    /// Burn outputs.
+
     /// When burn **native tokens**. This doesn't require the foundry output which minted them, but will not increase
     /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
     /// recommended to use melting, if the foundry output is available.

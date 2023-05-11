@@ -5,14 +5,10 @@ import type {
     __BuildFoundryOutputMethod__,
     __BuildNftOutputMethod__,
     __BurnMethod__,
-    __BurnNativeTokenMethod__,
-    __BurnNftMethod__,
     __ClaimOutputsMethod__,
     __ConsolidateOutputsMethod__,
     __CreateAliasOutputMethod__,
     __DecreaseNativeTokenSupplyMethod__,
-    __DestroyAliasMethod__,
-    __DestroyFoundryMethod__,
     __DeregisterParticipationEventMethod__,
     __GenerateAddressesMethod__,
     __GetBalanceMethod__,
@@ -87,15 +83,11 @@ export type __AccountMethod__ =
     | __BuildBasicOutputMethod__
     | __BuildFoundryOutputMethod__
     | __BuildNftOutputMethod__
-    | __BurnNativeTokenMethod__
     | __BurnMethod__
-    | __BurnNftMethod__
     | __ClaimOutputsMethod__
     | __ConsolidateOutputsMethod__
     | __CreateAliasOutputMethod__
     | __DeregisterParticipationEventMethod__
-    | __DestroyAliasMethod__
-    | __DestroyFoundryMethod__
     | __GenerateAddressesMethod__
     | __GetBalanceMethod__
     | __GetOutputMethod__
