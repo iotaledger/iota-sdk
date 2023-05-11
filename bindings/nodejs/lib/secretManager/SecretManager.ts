@@ -72,9 +72,7 @@ export class SecretManager {
      * Create a signature unlock using the provided `secretManager`.
      */
     async signatureUnlock(
-        // Uses `Array<number>` instead of `Uint8Array` because the latter serializes
-        // as an object rather than an array, which results in errors with serde.
-        transactionEssenceHash: Array<number>,
+        transactionEssenceHash: HexEncodedString,
         chain: IBip32Chain,
     ): Promise<UnlockTypes> {
         const response = await this.methodHandler.callMethod({

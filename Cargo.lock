@@ -1684,8 +1684,7 @@ dependencies = [
 [[package]]
 name = "iota_stronghold"
 version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3e57cd1727c075944711ed81489440b48854c84f50b02a0f71880f743f28bfe"
+source = "git+https://github.com/iotaledger/stronghold.rs#6429593593aa3ce55955cfcdc37bb67a6df52787"
 dependencies = [
  "bincode",
  "hkdf",
@@ -2953,8 +2952,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stronghold-derive"
 version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2835db23c4724c05a2f85b81c4681f4aa8ea158edc8a7f4ad791c916fb766c2e"
+source = "git+https://github.com/iotaledger/stronghold.rs#6429593593aa3ce55955cfcdc37bb67a6df52787"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2964,8 +2962,7 @@ dependencies = [
 [[package]]
 name = "stronghold-runtime"
 version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d63da38fbab65242815a3c6f24d1562f2809b05977f7bf550ce064f3cf68746"
+source = "git+https://github.com/iotaledger/stronghold.rs#6429593593aa3ce55955cfcdc37bb67a6df52787"
 dependencies = [
  "dirs",
  "iota-crypto",
@@ -2983,8 +2980,7 @@ dependencies = [
 [[package]]
 name = "stronghold-utils"
 version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8300214898af5e153e7f66e49dbd1c6a21585f2d592d9f24f58b969792475ed6"
+source = "git+https://github.com/iotaledger/stronghold.rs#6429593593aa3ce55955cfcdc37bb67a6df52787"
 dependencies = [
  "rand",
  "stronghold-derive",
@@ -2993,8 +2989,7 @@ dependencies = [
 [[package]]
 name = "stronghold_engine"
 version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83af0e217ad1a14e0eb6220cc5e83b84da7f02ea768da2dfdb70942588e4332b"
+source = "git+https://github.com/iotaledger/stronghold.rs#6429593593aa3ce55955cfcdc37bb67a6df52787"
 dependencies = [
  "anyhow",
  "dirs-next",
