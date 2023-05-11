@@ -144,6 +144,7 @@ pub async fn migrate_backup(storage: &crate::client::stronghold::StrongholdAdapt
     Ok(())
 }
 
+#[allow(unused)]
 pub fn latest_migration_version() -> MigrationVersion {
     <LatestMigration as Migration>::version()
 }

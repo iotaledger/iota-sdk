@@ -78,13 +78,7 @@ pub(crate) async fn read_data_from_stronghold_snapshot(
     Option<SecretManagerDto>,
     Option<Vec<AccountDetails>>,
 )> {
-    // Get version
-    let version = stronghold.get(BACKUP_MIGRATION_VERSION_KEY.as_bytes()).await?;
-    if let Some(version) = version {
-        if latest_migration_version() != serde_json::from_slice(&version)? {
-            migrate_backup(stronghold).await?;
-        }
-    }
+    migrate_backup(stronghold).await?;
 
     // Get client_options
     let client_options_bytes = stronghold.get(CLIENT_OPTIONS_KEY.as_bytes()).await?;
