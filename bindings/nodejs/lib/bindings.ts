@@ -8,7 +8,7 @@ import type { SecretManagerMethodHandler } from './secretManager/SecretManagerMe
 import type { ClientMethodHandler } from './client/ClientMethodHandler';
 
 // @ts-ignore: path is set to match runtime transpiled js path
-import addon = require('../../../build/Release/index.node');
+import addon = require('../../build/Release/index.node');
 
 const {
     callUtilsMethodRust,
