@@ -51,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Wallet::emit_test_event` no longer returns a `Result`;
 - `AccountBuilder::new` now takes a wallet;
 - `InputSigningDataDto::chain` is now `Vec<u32>` instead of `Chain`;
+- Most `StrongholdAdapter` fns no longer require a mutable reference;
 
 ### Removed
 
