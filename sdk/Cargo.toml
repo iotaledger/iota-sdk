@@ -32,7 +32,6 @@ prefix-hex = { version = "0.7.0", default-features = false, features = [ "primit
 primitive-types = { version = "0.12.1", default-features = false }
 serde = { version = "1.0.160", default-features = false, features = [ "derive" ] }
 serde_json = { version = "1.0.95", default-features = false, features = [ "alloc" ] }
-time = { version = "0.3.20", default-features = false, features = [ "serde", "macros" ] }
 
 # Optional dependencies
 async-trait = { version = "0.1.68", default-features = false, optional = true }
@@ -54,6 +53,7 @@ rocksdb = { version = "0.20.1", default-features = false, features = [ "lz4" ], 
 rumqttc = { version = "0.20.0", default-features = false, features = [ "websocket" ], optional = true }
 serde-big-array = { version = "0.5.1", default-features = false, optional = true }
 serde_repr = { version = "0.1.12", default-features = false, optional = true }
+time = { version = "0.3.20", default-features = false, features = [ "serde", "macros" ], optional = true }
 thiserror = { version = "1.0.40", default-features = false, optional = true }
 url = { version = "2.3.1", default-features = false, features = [ "serde" ], optional = true }
 zeroize = { version = "1.6.0", default-features = false, features = [ "zeroize_derive" ], optional = true }
@@ -88,8 +88,8 @@ rand = [ "dep:rand" ]
 rocksdb = [ "dep:rocksdb", "storage" ]
 serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std" ]
 std = [ "packable/std", "prefix-hex/std", "primitive-types/std", "bech32/std", "bitflags/std", "rand?/std_rng", "regex?/std", "backtrace?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std" ]
-storage = [ "iota-crypto/chacha" ]
-stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha" ]
+storage = [ "iota-crypto/chacha", "dep:time" ]
+stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time" ]
 tls = [ "reqwest?/rustls-tls", "rumqttc?/use-rustls" ]
 
 client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10" ]

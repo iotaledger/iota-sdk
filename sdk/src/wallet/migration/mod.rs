@@ -1,12 +1,12 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod migrate_0;
+
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 use crate::wallet::Result;
-
-mod migrate_0;
 
 pub type LatestMigration = migrate_0::Migrate;
 
