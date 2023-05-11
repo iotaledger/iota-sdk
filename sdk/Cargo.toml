@@ -98,12 +98,12 @@ wallet = [ "client" ]
 
 [[example]]
 name = "request_funds"
-path = "examples/how-tos/simple_transaction/request_funds.rs"
+path = "examples/how_tos/simple_transaction/request_funds.rs"
 required-features = [ "wallet" ]
 
 [[example]]
 name = "simple_transaction"
-path = "examples/how-tos/simple_transaction/simple_transaction.rs"
+path = "examples/how_tos/simple_transaction/simple_transaction.rs"
 required-features = [ "wallet", "stronghold" ]
 
 # Block examples

@@ -5,7 +5,7 @@ import { Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/wallet/01_get_funds.js
+// node ./dist/how_tos/simple_transaction/request_funds.js
 
 // This example requests funds from the faucet
 async function run() {
