@@ -32,7 +32,6 @@ abstract class WalletEvent {
     }
 }
 
-// TransactionInclusion = 4,
 // TransactionProgress = 5
 
 class ConsolidationRequiredWalletEvent extends WalletEvent {

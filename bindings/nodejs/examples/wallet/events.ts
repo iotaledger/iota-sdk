@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Wallet, CoinType, initLogger } from '@iota/sdk';
+import { Wallet, CoinType, initLogger, ConsolidationRequiredWalletEvent } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -44,7 +44,7 @@ async function run() {
 
         await wallet.listen([], callback);
 
-        await wallet.emitTestEvent({ type: 0 });
+        await wallet.emitTestEvent(new ConsolidationRequiredWalletEvent);
         await wallet.emitTestEvent({ type: 5, progress: "SelectingInputs" });
 
         await wallet.destroy()
