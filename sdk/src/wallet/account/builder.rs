@@ -123,7 +123,7 @@ impl AccountBuilder {
                 let bech32_hrp = {
                     match bech32_hrp {
                         Some(bech32_hrp) => bech32_hrp,
-                        None => self.wallet.client.get_bech32_hrp().await?,
+                        None => self.wallet.client().get_bech32_hrp().await?,
                     }
                 };
 
