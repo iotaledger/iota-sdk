@@ -39,7 +39,7 @@ pub struct AccountParticipationOverview {
 }
 
 /// A participation event with the provided client nodes.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct ParticipationEventWithNodes {
     /// The event id.
     pub id: ParticipationEventId,
@@ -311,5 +311,16 @@ fn is_valid_participation_output(output: &Output) -> bool {
             .map_or(false, |tag| tag.tag() == PARTICIPATION_TAG.as_bytes())
     } else {
         false
+    }
+}
+
+#[cfg(test)]
+impl ParticipationEventWithNodes {
+    pub fn mock() -> Self {
+        Self {
+            id: ParticipationEventId::new([42; 32]),
+            data: ParticipationEventData::mock(),
+            nodes: vec![],
+        }
     }
 }
