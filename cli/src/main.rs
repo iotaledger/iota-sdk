@@ -12,7 +12,7 @@ mod wallet;
 use clap::Parser;
 use fern_logger::{LoggerConfigBuilder, LoggerOutputConfigBuilder};
 
-use self::{command::wallet::WalletCli, error::Error, helper::pick_account, wallet::new_wallet};
+use self::{command::wallet::WalletCli, error::Error, wallet::new_wallet};
 
 #[macro_export]
 macro_rules! println_log_info {
@@ -51,13 +51,8 @@ async fn run(cli: WalletCli) -> Result<(), Error> {
     let (wallet, account) = new_wallet(cli.clone()).await?;
 
     if let Some(wallet) = wallet {
-        match cli.account.or(account) {
-            Some(account) => account::account_prompt(wallet.get_account(account).await?).await?,
-            None => {
-                if let Some(account) = pick_account(&wallet).await? {
-                    account::account_prompt(account).await?;
-                }
-            }
+        if let Some(account) = cli.account.or(account) {
+            account::account_prompt(wallet.get_account(account).await?).await?;
         }
     }
 
