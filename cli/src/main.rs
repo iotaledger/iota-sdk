@@ -48,10 +48,10 @@ fn logger_init(cli: &WalletCli) -> Result<(), Error> {
 }
 
 async fn run(cli: WalletCli) -> Result<(), Error> {
-    let (wallet, account) = new_wallet(cli.clone()).await?;
+    let (wallet, account) = new_wallet(cli).await?;
 
     if let Some(wallet) = wallet {
-        if let Some(account) = cli.account.or(account) {
+        if let Some(account) = account {
             account::account_prompt(wallet.get_account(account).await?).await?;
         }
     }
