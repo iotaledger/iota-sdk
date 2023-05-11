@@ -232,7 +232,7 @@ mod tests {
             b: 42,
             c: -420,
         };
-        let mut storage = Memory::default();
+        let storage = Memory::default();
         storage.set("key", serde_json::to_string(&rec).unwrap()).await.unwrap();
 
         let storage_manager = StorageManager::new(storage, None).await.unwrap();
@@ -257,7 +257,7 @@ mod tests {
 
     #[tokio::test]
     async fn save_get_wallet_data() {
-        let mut storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
+        let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert!(storage_manager.get_wallet_data().await.unwrap().is_none());
 
         let wallet_builder = WalletBuilder::new();

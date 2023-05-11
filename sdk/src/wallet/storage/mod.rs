@@ -115,7 +115,7 @@ mod tests {
             c: i64,
         }
 
-        let mut storage = Storage {
+        let storage = Storage {
             inner: Box::<Memory>::default(),
             encryption_key: None,
         };
@@ -142,7 +142,7 @@ mod tests {
             c: i64,
         }
 
-        let mut storage = Storage {
+        let storage = Storage {
             inner: Box::<Memory>::default(),
             encryption_key: None,
         };
@@ -177,7 +177,7 @@ mod tests {
 
         let encryption_key = crate::types::block::rand::bytes::rand_bytes_array::<32>();
 
-        let mut storage = Storage {
+        let storage = Storage {
             inner: Box::<Memory>::default(),
             encryption_key: Some(encryption_key),
         };
