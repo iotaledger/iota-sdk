@@ -10,11 +10,11 @@ Ensure you have first installed the latest stable version of Rust and Cargo.
 
 For current system architecture
 ```
-cd wallet.rs/bindings/swift
+cd iota-sdk/bindings/swift
 cargo build
 ```
 
-For debug build, copy `wallet.rs/bindings/swift/iota_wallet_ffi.h` and `wallet.rs/bindings/swift/target/debug/libiota_wallet.dylib` to `wallet.rs/bindings/swift/xcode/IotaWallet/iota_wallet`.
+For debug build, copy `iota-sdk/bindings/swift/iota_wallet_ffi.h` and `iota-sdk/bindings/swift/target/debug/libiota_wallet.dylib` to `iota-sdk/bindings/swift/xcode/IotaWallet/iota_wallet`.
 
-Open and `build wallet.rs/bindings/swift/xcode/IotaWallet/IotaWallet.xcodeproj`. The xcode build product is an Objective-C framework that can be used in Swift.
+Open and `build iota-sdk/bindings/swift/xcode/IotaWallet/IotaWallet.xcodeproj`. The xcode build product is an Objective-C framework that can be used in Swift.
 

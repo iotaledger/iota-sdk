@@ -31,7 +31,7 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct Wallet {
     pub(crate) inner: Arc<WalletInner>,
-    // should we use a hashmap instead of a vec like in wallet.rs?
+    // TODO should we use a hashmap instead of a vec?
     pub(crate) accounts: Arc<RwLock<Vec<Account>>>,
 }
 

@@ -14,7 +14,7 @@
 alice-database
 test-storage
 wallet/test-storage
-*/walletdb
+**/walletdb
 offline_walletdb
 online_walletdb
 /pingdb

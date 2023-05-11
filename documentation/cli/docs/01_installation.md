@@ -4,7 +4,7 @@
 
 ### 1. Download
 
-Go to https://github.com/iotaledger/wallet.rs/releases and download the latest CLI release binary for your platform.
+Go to https://github.com/iotaledger/iota-sdk/releases and download the latest CLI release binary for your platform.
 
 `cli-wallet` is available on `linux`, `macos` and `windows`.
 
@@ -34,8 +34,8 @@ https://www.rust-lang.org/tools/install
 ### 2. Compile
 
 ```sh
-git clone https://github.com/iotaledger/wallet.rs -b develop
-cd wallet.rs/cli
+git clone https://github.com/iotaledger/iota-sdk -b develop
+cd iota-sdk/cli
 cargo build --profile production
 ```
 

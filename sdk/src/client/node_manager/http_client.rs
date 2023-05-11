@@ -10,7 +10,7 @@ use serde::de::DeserializeOwned;
 use serde_json::Value;
 
 use crate::client::{
-    error::{Error, Result},
+    node_api::error::{Error, Result},
     node_manager::node::Node,
 };
 pub(crate) struct Response(reqwest::Response);
@@ -24,6 +24,7 @@ impl Response {
         self.0.json().await.map_err(Into::into)
     }
 
+    #[cfg(not(target_family = "wasm"))]
     pub(crate) async fn into_text(self) -> Result<String> {
         self.0.text().await.map_err(Into::into)
     }
@@ -52,11 +53,23 @@ impl HttpClient {
         if status.is_success() {
             Ok(Response(response))
         } else {
-            Err(Error::ResponseError {
-                code: status.as_u16(),
-                text: response.text().await?,
-                url: url.to_string(),
-            })
+            let text = response.text().await?;
+            // Different urls, nodes and versions give different replies
+            if text == *"no available nodes with remote Pow"
+                || text.contains("proof of work is not available on this node")
+                || text.contains("proof of work is not enabled")
+                || text.contains("`Pow` not enabled")
+            {
+                Err(Error::UnavailablePow)
+            } else if status.as_u16() == 404 {
+                Err(Error::NotFound(url.to_string()))
+            } else {
+                Err(Error::ResponseError {
+                    code: status.as_u16(),
+                    text,
+                    url: url.to_string(),
+                })
+            }
         }
     }
 

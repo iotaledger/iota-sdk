@@ -2,8 +2,8 @@
 
 ![cli-wallet](/img/cli-wallet.gif)
 
-The [cli-wallet](https://github.com/iotaledger/wallet.rs/tree/develop/cli) is a stateful Command Line Interface wrapper around
-[wallet.rs](https://github.com/iotaledger/wallet.rs).
+The [cli-wallet](https://github.com/iotaledger/iota-sdk/tree/develop/cli) is a stateful Command Line Interface wrapper around
+[iota-sdk](https://github.com/iotaledger/iota-sdk).
 
 Directly from your terminal, it allows you to:
 - Create a wallet;
