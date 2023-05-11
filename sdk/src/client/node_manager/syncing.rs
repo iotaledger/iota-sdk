@@ -10,7 +10,7 @@ use {
     tokio::time::sleep,
 };
 
-use super::{builder::NodeManagerBuilder, Node};
+use super::{Node, NodeManager};
 use crate::client::{Client, ClientInner, Error, Result};
 
 impl ClientInner {
@@ -128,17 +128,17 @@ impl ClientInner {
 
 impl Client {
     #[cfg(not(target_family = "wasm"))]
-    pub async fn update_node_manager(&self, node_manager_builder: NodeManagerBuilder) -> crate::wallet::Result<()> {
-        let node_sync_interval = node_manager_builder.node_sync_interval;
-        let ignore_node_health = node_manager_builder.ignore_node_health;
-        let nodes = node_manager_builder
+    pub async fn update_node_manager(&self, node_manager: NodeManager) -> crate::wallet::Result<()> {
+        let node_sync_interval = node_manager.node_sync_interval;
+        let ignore_node_health = node_manager.ignore_node_health;
+        let nodes = node_manager
             .primary_node
             .iter()
-            .chain(node_manager_builder.nodes.iter())
+            .chain(node_manager.nodes.iter())
             .map(|node| node.clone().into())
             .collect();
 
-        *self.node_manager.write().await = node_manager_builder.build(HashMap::new());
+        *self.node_manager.write().await = node_manager;
 
         self.sync_nodes(&nodes, ignore_node_health).await?;
         let client = self.clone();
@@ -154,8 +154,8 @@ impl Client {
     }
 
     #[cfg(target_family = "wasm")]
-    pub async fn update_node_manager(&self, node_manager_builder: NodeManagerBuilder) -> crate::wallet::Result<()> {
-        *self.node_manager.write().await = node_manager_builder.build(HashMap::new());
+    pub async fn update_node_manager(&self, node_manager: NodeManager) -> crate::wallet::Result<()> {
+        *self.node_manager.write().await = node_manager;
         Ok(())
     }
 }

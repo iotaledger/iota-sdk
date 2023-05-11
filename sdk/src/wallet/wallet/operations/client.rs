@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 #[cfg(feature = "storage")]
 use crate::wallet::WalletBuilder;
@@ -37,7 +37,9 @@ impl Wallet {
             #[cfg(not(target_family = "wasm"))]
             pow_worker_count,
         } = client_options;
-        self.client.update_node_manager(node_manager_builder).await?;
+        self.client
+            .update_node_manager(node_manager_builder.build(HashMap::new()))
+            .await?;
         *self.client.network_info.write().await = network_info;
         *self.client.api_timeout.write().await = api_timeout;
         *self.client.remote_pow_timeout.write().await = remote_pow_timeout;
@@ -143,7 +145,9 @@ impl Wallet {
                 .await?;
         }
 
-        self.client.update_node_manager(node_manager_builder).await?;
+        self.client
+            .update_node_manager(node_manager_builder.build(HashMap::new()))
+            .await?;
 
         for account in self.accounts.write().await.iter_mut() {
             account.update_account_with_new_client().await?;
