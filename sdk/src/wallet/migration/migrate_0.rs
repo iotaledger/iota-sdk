@@ -28,10 +28,11 @@ pub struct Migrate;
 #[async_trait]
 impl Migration for Migrate {
     const ID: usize = 0;
-    const WALLET_VERSION: &'static str = "0.3.0";
+    const SDK_VERSION: &'static str = "0.3.0";
     const DATE: time::Date = time::macros::date!(2023 - 05 - 09);
 
-    async fn migrate(storage: &StorageManager) -> Result<()> {
+    #[cfg(feature = "storage")]
+    async fn migrate_storage(storage: &crate::wallet::storage::manager::StorageManager) -> Result<()> {
         if let Some(account_indexes) = storage.get::<Vec<u32>>(ACCOUNTS_INDEXATION_KEY).await? {
             for account_index in account_indexes {
                 if let Some(mut account) = storage
@@ -74,7 +75,7 @@ impl Migration for Migrate {
                             &format!("{ACCOUNT_INDEXATION_KEY}{account_index}"),
                             serde_json::from_value::<AccountDetails>(account)?,
                         )
-                        .await?
+                        .await?;
                 }
             }
         }
@@ -92,6 +93,59 @@ impl Migration for Migrate {
         //     let wallet_builder = serde_json::from_value::<WalletBuilder>(wallet.clone())?;
         //     storage.save_wallet_data(&wallet_builder).await?;
         // }
+        Ok(())
+    }
+
+    #[cfg(feature = "stronghold")]
+    async fn migrate_backup(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
+        use crate::{
+            client::storage::StorageProvider,
+            wallet::wallet::operations::stronghold_backup::stronghold_snapshot::ACCOUNTS_KEY,
+        };
+
+        if let Some(mut accounts) = storage
+            .get(ACCOUNTS_KEY.as_bytes())
+            .await?
+            .map(|bytes| serde_json::from_slice::<Vec<serde_json::Value>>(&bytes))
+            .transpose()?
+        {
+            for account in &mut accounts {
+                ConvertIncomingTransactions::check(
+                    account
+                        .get_mut("incomingTransactions")
+                        .ok_or(Error::Storage("missing incoming transactions".to_owned()))?,
+                )?;
+                for output_data in account
+                    .get_mut("outputs")
+                    .ok_or(Error::Storage("missing outputs".to_owned()))?
+                    .as_object_mut()
+                    .ok_or(Error::Storage("malformatted outputs".to_owned()))?
+                    .values_mut()
+                {
+                    ConvertOutputMetadata::check(
+                        output_data
+                            .get_mut("metadata")
+                            .ok_or(Error::Storage("missing metadata".to_owned()))?,
+                    )?;
+                }
+                for output_data in account
+                    .get_mut("unspentOutputs")
+                    .ok_or(Error::Storage("missing unspent outputs".to_owned()))?
+                    .as_object_mut()
+                    .ok_or(Error::Storage("malformatted unspent outputs".to_owned()))?
+                    .values_mut()
+                {
+                    ConvertOutputMetadata::check(
+                        output_data
+                            .get_mut("metadata")
+                            .ok_or(Error::Storage("missing metadata".to_owned()))?,
+                    )?;
+                }
+            }
+            storage
+                .insert(ACCOUNTS_KEY.as_bytes(), serde_json::to_string(&accounts)?.as_bytes())
+                .await?;
+        }
         Ok(())
     }
 }

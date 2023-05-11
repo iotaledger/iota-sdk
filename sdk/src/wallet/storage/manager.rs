@@ -10,7 +10,8 @@ use crate::{
     client::secret::{SecretManager, SecretManagerDto},
     wallet::{
         account::{AccountDetails, SyncOptions},
-        storage::{constants::*, migration::MigrationVersion, Storage, StorageAdapter},
+        migration::MigrationVersion,
+        storage::{constants::*, Storage, StorageAdapter},
         WalletBuilder,
     },
 };

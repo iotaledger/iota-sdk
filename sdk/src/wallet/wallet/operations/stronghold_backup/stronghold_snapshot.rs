@@ -5,24 +5,30 @@ use std::sync::atomic::Ordering;
 
 use crate::{
     client::{secret::SecretManagerDto, storage::StorageProvider, stronghold::StrongholdAdapter},
-    wallet::{account::AccountDetails, ClientOptions, Wallet},
+    wallet::{
+        account::AccountDetails,
+        migration::{latest_migration_version, migrate_backup},
+        ClientOptions, Wallet,
+    },
 };
 
 pub(crate) const CLIENT_OPTIONS_KEY: &str = "client_options";
 pub(crate) const COIN_TYPE_KEY: &str = "coin_type";
 pub(crate) const SECRET_MANAGER_KEY: &str = "secret_manager";
 pub(crate) const ACCOUNTS_KEY: &str = "accounts";
-pub(crate) const BACKUP_SCHEMA_VERSION_KEY: &str = "backup_schema_version";
-pub(crate) const BACKUP_SCHEMA_VERSION: u8 = 1;
+pub(crate) const BACKUP_MIGRATION_VERSION_KEY: &str = "backup_schema_version";
 
 pub(crate) async fn store_data_to_stronghold(
     wallet: &Wallet,
-    stronghold: &mut StrongholdAdapter,
+    stronghold: &StrongholdAdapter,
     secret_manager_dto: SecretManagerDto,
 ) -> crate::wallet::Result<()> {
     // Set backup_schema_version
     stronghold
-        .insert(BACKUP_SCHEMA_VERSION_KEY.as_bytes(), &[BACKUP_SCHEMA_VERSION])
+        .insert(
+            BACKUP_MIGRATION_VERSION_KEY.as_bytes(),
+            serde_json::to_string(&latest_migration_version())?.as_bytes(),
+        )
         .await?;
 
     let client_options = wallet.client_options.read().await.to_json()?;
@@ -65,7 +71,7 @@ pub(crate) async fn store_data_to_stronghold(
 }
 
 pub(crate) async fn read_data_from_stronghold_snapshot(
-    stronghold: &mut StrongholdAdapter,
+    stronghold: &StrongholdAdapter,
 ) -> crate::wallet::Result<(
     Option<ClientOptions>,
     Option<u32>,
@@ -73,10 +79,10 @@ pub(crate) async fn read_data_from_stronghold_snapshot(
     Option<Vec<AccountDetails>>,
 )> {
     // Get version
-    let version = stronghold.get(BACKUP_SCHEMA_VERSION_KEY.as_bytes()).await?;
+    let version = stronghold.get(BACKUP_MIGRATION_VERSION_KEY.as_bytes()).await?;
     if let Some(version) = version {
-        if version[0] != BACKUP_SCHEMA_VERSION {
-            return Err(crate::wallet::Error::Backup("invalid backup_schema_version"));
+        if latest_migration_version() != serde_json::from_slice(&version)? {
+            migrate_backup(stronghold).await?;
         }
     }
 
