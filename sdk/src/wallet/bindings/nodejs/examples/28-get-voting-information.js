@@ -20,15 +20,15 @@ async function run() {
         })
         const eventId = Object.keys(registeredEvents)[0]
 
-        // get the participation events that are stored in wallet.rs
+        // get the participation events from the storage
         const events = await account.getParticipationEvents()
         console.log('List of registered events:', events)
 
-        // get the participation event with a specific id that is stored in wallet.rs
+        // get the participation event with a specific id from the storage
         const event = await account.getParticipationEvent(eventId)
         console.log(`Event ${eventId}:`, event)
 
-        // get the status of a participation event that is stored in wallet.rs
+        // get the status of a participation event from the storage
         const eventStatus = await account.getParticipationEventStatus(eventId)
         console.log('Event Status:', eventStatus)
 

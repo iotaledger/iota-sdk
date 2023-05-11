@@ -20,7 +20,7 @@ pub use self::{
     },
 };
 use crate::{
-    client::secret::types::InputSigningData,
+    client::{constants::HD_WALLET_TYPE, secret::types::InputSigningData},
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
@@ -93,7 +93,7 @@ impl OutputData {
                 .find(|a| a.address.inner == unlock_address)
             {
                 Some(Chain::from_u32_hardened(vec![
-                    44,
+                    HD_WALLET_TYPE,
                     account.coin_type,
                     account.index,
                     address.internal as u32,

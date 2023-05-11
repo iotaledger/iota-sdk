@@ -44,11 +44,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Client::get_outputs()` and derived methods return `OutputWithMetadata` instead of `OutputWithMetadataDto`;
 - rename `Client::try_get_outputs()` into `Client::get_outputs_ignore_errors()`;
 - rename `Client::try_get_outputs_metadata()` into `Client::get_outputs_metadata_ignore_errors()`;
+- All `Node` related errors have been moved from the client error to a newly created `client::node_api::Error`;
 - MQTT connections to a node using https will now use wss/tls with native certificates;
 - `ClientBuilder::finish` is now async;
 - `Account::read` and `write` now accessible via `details` and `details_mut`;
 - `Wallet::emit_test_event` no longer returns a `Result`;
 - `AccountBuilder::new` now takes a wallet;
+- `InputSigningDataDto::chain` is now `Vec<u32>` instead of `Chain`;
 - Custom `Serialize` and `Deserialize` impls for `WalletEvent` to have an integer `type` as tag;
 
 ### Removed
@@ -56,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `FilterOptions`'s `Hash` derivation;
 - `client_without_tls` feature in favor of separate `client` and `tls` features;
 - `IncreaseNativeTokenSupplyOptions`;
+- `HARDENED` const;
 
 ## 0.3.0 - 2023-05-02
 

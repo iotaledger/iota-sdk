@@ -301,3 +301,32 @@ impl Participations {
         Ok(Self { participations })
     }
 }
+
+#[cfg(test)]
+impl ParticipationEventData {
+    pub fn mock() -> Self {
+        Self {
+            name: "test".to_string(),
+            milestone_index_commence: 0,
+            milestone_index_start: 1000,
+            milestone_index_end: 9999,
+            payload: ParticipationEventPayload::StakingEventPayload(StakingEventPayload::mock()),
+            additional_info: "test".to_string(),
+        }
+    }
+}
+
+#[cfg(test)]
+impl StakingEventPayload {
+    pub fn mock() -> Self {
+        Self {
+            kind: 1,
+            text: "staking".to_string(),
+            symbol: ":rocket:".to_string(),
+            numerator: 100,
+            denominator: 100,
+            required_minimum_rewards: 100,
+            additional_info: "test".to_string(),
+        }
+    }
+}
