@@ -86,25 +86,19 @@ pub enum Error {
     MissingParameter(&'static str),
     /// Error on API request
     #[error("node error: {0}")]
-    Node(String),
+    Node(#[from] crate::client::node_api::error::Error),
     /// The block doesn't need to be promoted or reattached
     #[error("block ID `{0}` doesn't need to be promoted or reattached")]
     NoNeedPromoteOrReattach(String),
-    /// The requested data was not found.
-    #[error("the requested data {0} was not found.")]
-    NotFound(String),
-    /// Output Error
-    #[error("output error: {0}")]
-    Output(&'static str),
+    /// Requested output id not found for this type
+    #[error("No output found for {0}")]
+    NoOutput(String),
     /// PlaceholderSecretManager can't be used for address generation or signing
     #[error("placeholderSecretManager can't be used for address generation or signing")]
     PlaceholderSecretManager,
     /// Rw lock failed.
     #[error("rw lock failed")]
     PoisonError,
-    /// PoW error
-    #[error("{0}")]
-    Pow(String),
     /// Prefix hex string convert error
     #[error("{0}")]
     PrefixHex(#[from] prefix_hex::Error),
@@ -124,19 +118,6 @@ pub enum Error {
         /// The minimum quorum threshold.
         minimum_threshold: usize,
     },
-    /// Error from RestAPI calls with unexpected status code response
-    #[error("response error with status code {code}: {text}, URL: {url}")]
-    ResponseError {
-        /// The status code.
-        code: u16,
-        /// The text from the response.
-        text: String,
-        /// The url of the API.
-        url: String,
-    },
-    /// reqwest error
-    #[error("{0}")]
-    Reqwest(#[from] reqwest::Error),
     /// Specifically used for `TryInfo` implementations for `SecretManager`.
     #[error("cannot unwrap a SecretManager: type mismatch!")]
     SecretManagerMismatch,

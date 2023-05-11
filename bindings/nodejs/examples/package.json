@@ -7,7 +7,7 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@iota/sdk": "../",
+        "@iota/sdk": "link:../",
         "dotenv": "^16.0.0"
     },
     "devDependencies": {
