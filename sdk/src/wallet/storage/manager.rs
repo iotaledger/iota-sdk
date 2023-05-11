@@ -8,9 +8,9 @@ use tokio::sync::RwLock;
 
 use crate::{
     client::secret::{SecretManager, SecretManagerDto},
+    migrate_storage,
     wallet::{
         account::{AccountDetails, SyncOptions},
-        migration::MigrationVersion,
         storage::{constants::*, Storage, StorageAdapter},
         WalletBuilder,
     },
@@ -46,7 +46,6 @@ pub struct StorageManager {
     pub(crate) storage: Storage,
     // account indexes for accounts in the database
     account_indexes: Vec<u32>,
-    pub(crate) migration: Option<MigrationVersion>,
 }
 
 impl StorageManager {
@@ -58,6 +57,8 @@ impl StorageManager {
             inner: Box::new(storage) as _,
             encryption_key: encryption_key.into(),
         };
+        migrate_storage(&storage).await?;
+
         // Get the db version or set it
         if let Some(db_schema_version) = storage.get::<u8>(DATABASE_SCHEMA_VERSION_KEY).await? {
             if db_schema_version != DATABASE_SCHEMA_VERSION {
@@ -73,12 +74,9 @@ impl StorageManager {
 
         let account_indexes = storage.get(ACCOUNTS_INDEXATION_KEY).await?.unwrap_or_default();
 
-        let migration = storage.get(MIGRATION_VERSION_KEY).await?;
-
         let storage_manager = Self {
             storage,
             account_indexes,
-            migration,
         };
 
         Ok(storage_manager)
@@ -91,10 +89,6 @@ impl StorageManager {
     #[cfg(test)]
     pub fn is_encrypted(&self) -> bool {
         self.storage.encryption_key.is_some()
-    }
-
-    pub(crate) async fn set<T: Serialize + Send>(&self, key: &str, record: T) -> crate::wallet::Result<()> {
-        self.storage.set(key, record).await
     }
 
     pub async fn get<T: for<'de> Deserialize<'de>>(&self, key: &str) -> crate::wallet::Result<Option<T>> {

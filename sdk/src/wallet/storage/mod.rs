@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 use self::adapter::StorageAdapter;
 
 #[derive(Debug)]
-pub(crate) struct Storage {
+pub struct Storage {
     inner: Box<dyn StorageAdapter + Sync + Send>,
     encryption_key: Option<[u8; 32]>,
 }
@@ -30,7 +30,7 @@ impl Storage {
         self.inner.id()
     }
 
-    async fn get<T: for<'de> Deserialize<'de>>(&self, key: &str) -> crate::wallet::Result<Option<T>> {
+    pub(crate) async fn get<T: for<'de> Deserialize<'de>>(&self, key: &str) -> crate::wallet::Result<Option<T>> {
         match self.inner.get(key).await? {
             Some(record) => {
                 if let Some(key) = &self.encryption_key {
@@ -49,7 +49,7 @@ impl Storage {
         }
     }
 
-    async fn set<T: Serialize + Send>(&self, key: &str, record: T) -> crate::wallet::Result<()> {
+    pub(crate) async fn set<T: Serialize + Send>(&self, key: &str, record: T) -> crate::wallet::Result<()> {
         let record = serde_json::to_string(&record)?;
         self.inner
             .set(

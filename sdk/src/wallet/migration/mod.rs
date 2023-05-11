@@ -45,7 +45,7 @@ pub(crate) trait Migration {
     }
 
     #[cfg(feature = "storage")]
-    async fn migrate_storage(storage: &super::storage::manager::StorageManager) -> Result<()>;
+    async fn migrate_storage(storage: &super::storage::Storage) -> Result<()>;
 
     #[cfg(feature = "stronghold")]
     async fn migrate_backup(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()>;
@@ -56,7 +56,7 @@ trait DynMigration: Send + Sync {
     fn version(&self) -> MigrationVersion;
 
     #[cfg(feature = "storage")]
-    async fn migrate_storage(&self, storage: &super::storage::manager::StorageManager) -> Result<()>;
+    async fn migrate_storage(&self, storage: &super::storage::Storage) -> Result<()>;
 
     #[cfg(feature = "stronghold")]
     async fn migrate_backup(&self, storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()>;
@@ -69,7 +69,7 @@ impl<T: Migration + Send + Sync> DynMigration for T {
     }
 
     #[cfg(feature = "storage")]
-    async fn migrate_storage(&self, storage: &super::storage::manager::StorageManager) -> Result<()> {
+    async fn migrate_storage(&self, storage: &super::storage::Storage) -> Result<()> {
         use crate::wallet::storage::constants::MIGRATION_VERSION_KEY;
 
         let version = self.version();
@@ -100,9 +100,15 @@ impl<T: Migration + Send + Sync> DynMigration for T {
 }
 
 #[cfg(feature = "storage")]
-pub async fn migrate_storage(storage: &super::storage::manager::StorageManager) -> Result<()> {
-    let last_migration = storage.migration.as_ref();
-    if last_migration.map(|m| m.id >= MIGRATIONS.len()).unwrap_or_default() {
+pub async fn migrate_storage(storage: &super::storage::Storage) -> Result<()> {
+    use super::storage::constants::MIGRATION_VERSION_KEY;
+
+    let last_migration = storage.get::<MigrationVersion>(MIGRATION_VERSION_KEY).await?;
+    if last_migration
+        .as_ref()
+        .map(|m| m.id == LatestMigration::ID)
+        .unwrap_or_default()
+    {
         return Ok(());
     }
     let next_migration = last_migration.map(|m| m.id + 1).unwrap_or_default();
@@ -126,7 +132,7 @@ pub async fn migrate_backup(storage: &crate::client::stronghold::StrongholdAdapt
         .transpose()?;
     if last_migration
         .as_ref()
-        .map(|m| m.id >= MIGRATIONS.len())
+        .map(|m| m.id == LatestMigration::ID)
         .unwrap_or_default()
     {
         return Ok(());

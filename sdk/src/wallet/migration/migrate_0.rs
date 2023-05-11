@@ -31,7 +31,7 @@ impl Migration for Migrate {
     const DATE: time::Date = time::macros::date!(2023 - 05 - 09);
 
     #[cfg(feature = "storage")]
-    async fn migrate_storage(storage: &crate::wallet::storage::manager::StorageManager) -> Result<()> {
+    async fn migrate_storage(storage: &crate::wallet::storage::Storage) -> Result<()> {
         use crate::wallet::{
             account::AccountDetails,
             storage::constants::{ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY},
