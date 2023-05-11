@@ -15,7 +15,7 @@ use crate::{
         },
     },
     wallet::{
-        account::{build_transaction_from_payload_and_inputs, types::Transaction, AccountDetails},
+        account::{build_transaction_from_payload_and_inputs, types::Transaction},
         Error,
     },
 };
@@ -32,7 +32,10 @@ impl Migration for Migrate {
 
     #[cfg(feature = "storage")]
     async fn migrate_storage(storage: &crate::wallet::storage::manager::StorageManager) -> Result<()> {
-        use crate::wallet::storage::constants::{ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY};
+        use crate::wallet::{
+            account::AccountDetails,
+            storage::constants::{ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY},
+        };
 
         if let Some(account_indexes) = storage.get::<Vec<u32>>(ACCOUNTS_INDEXATION_KEY).await? {
             for account_index in account_indexes {
