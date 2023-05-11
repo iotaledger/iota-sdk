@@ -20,7 +20,7 @@ async function run() {
 
         const account = await wallet.getAccount('Alice');
 
-        const address = (await account.addresses())[2].address;
+        const address = (await account.addresses())[0].address;
         console.log(address);
 
         const faucetResponse = await (
