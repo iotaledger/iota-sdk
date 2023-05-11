@@ -1,8 +1,6 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::HashMap;
-
 #[cfg(not(target_family = "wasm"))]
 use {
     crate::types::{api::core::response::InfoResponse, block::protocol::ProtocolParameters},
@@ -64,6 +62,8 @@ impl ClientInner {
     }
 
     pub(crate) async fn sync_nodes(&self, nodes: &HashSet<Node>, ignore_node_health: bool) -> Result<()> {
+        use std::collections::HashMap;
+
         log::debug!("sync_nodes");
         let mut healthy_nodes = HashMap::new();
         let mut network_nodes: HashMap<String, Vec<(InfoResponse, Node)>> = HashMap::new();
@@ -135,7 +135,7 @@ impl Client {
             .primary_node
             .iter()
             .chain(node_manager.nodes.iter())
-            .map(|node| node.clone().into())
+            .cloned()
             .collect();
 
         *self.node_manager.write().await = node_manager;

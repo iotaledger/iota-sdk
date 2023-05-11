@@ -275,9 +275,9 @@ impl Account {
 
     // Should only be called from the Wallet so all accounts are on the same state
     // Will update the addresses with a possible new Bech32 HRP and clear the inaccessible_incoming_transactions.
-    pub(crate) async fn update_account_with_new_client(&mut self) -> crate::wallet::Result<()> {
+    pub(crate) async fn update_account_bech32_hrp(&mut self) -> crate::wallet::Result<()> {
         let bech32_hrp = self.client().get_bech32_hrp().await?;
-        log::debug!("[UPDATE ACCOUNT WITH NEW CLIENT] new bech32_hrp: {}", bech32_hrp);
+        log::debug!("[UPDATE ACCOUNT WITH BECH32 HRP] new bech32_hrp: {}", bech32_hrp);
         let mut account_details = self.details_mut().await;
         for address in &mut account_details.addresses_with_unspent_outputs {
             address.address.hrp = bech32_hrp.clone();
@@ -294,7 +294,7 @@ impl Account {
         #[cfg(feature = "storage")]
         {
             log::debug!(
-                "[SYNC] storing account {} after updating it with new client options",
+                "[SYNC] storing account {} after updating it with new bech32 hrp",
                 account_details.alias()
             );
             self.save(Some(&account_details)).await?;

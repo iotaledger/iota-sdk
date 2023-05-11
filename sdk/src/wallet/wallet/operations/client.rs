@@ -150,7 +150,7 @@ impl Wallet {
             .await?;
 
         for account in self.accounts.write().await.iter_mut() {
-            account.update_account_with_new_client().await?;
+            account.update_account_bech32_hrp().await?;
         }
 
         Ok(())

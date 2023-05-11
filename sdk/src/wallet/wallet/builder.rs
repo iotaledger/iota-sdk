@@ -228,7 +228,7 @@ impl WalletBuilder {
         if new_provided_client_options {
             for account in accounts.iter_mut() {
                 // Safe to unwrap because we create the client if accounts aren't empty
-                account.update_account_with_new_client().await?;
+                account.update_account_bech32_hrp().await?;
             }
         }
 
