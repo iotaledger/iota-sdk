@@ -1,5 +1,9 @@
 import type { IOutputResponse, ITransactionPayload } from '@iota/types';
 import type { OutputData } from './output';
+import type { InclusionState } from './transaction';
+
+// TODO where?
+export type TransactionId = string;
 
 /**
  * All of the wallet event types.
@@ -28,7 +32,6 @@ abstract class WalletEvent {
     }
 }
 
-// SpentOutput = 3,
 // TransactionInclusion = 4,
 // TransactionProgress = 5
 
@@ -91,14 +94,44 @@ class NewOutputWalletEvent extends WalletEvent {
 }
 
 class SpentOutputWalletEvent extends WalletEvent {
-    constructor() {
+    output: OutputData;
+
+    constructor(output: OutputData,) {
         super(WalletEventType.SpentOutput);
+        this.output = output;
+    }
+
+    /**
+    * The output.
+    */
+    getOutput(): OutputData {
+        return this.output;
     }
 }
 
 class TransactionInclusionWalletEvent extends WalletEvent {
-    constructor() {
+    transactionId: TransactionId;
+    inclusionState: InclusionState;
+
+    constructor(transactionId: TransactionId,
+        inclusionState: InclusionState) {
         super(WalletEventType.TransactionInclusion);
+        this.transactionId = transactionId;
+        this.inclusionState = inclusionState;
+    }
+
+    /**
+    * The transaction ID.
+    */
+    getTransactionId(): TransactionId {
+        return this.transactionId;
+    }
+
+    /**
+    * The transaction ID.
+    */
+    getInclusionState(): InclusionState {
+        return this.inclusionState;
     }
 }
 
