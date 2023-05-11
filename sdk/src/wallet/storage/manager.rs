@@ -8,9 +8,9 @@ use tokio::sync::RwLock;
 
 use crate::{
     client::secret::{SecretManager, SecretManagerDto},
-    migrate_storage,
     wallet::{
         account::{AccountDetails, SyncOptions},
+        migration::migrate_storage,
         storage::{constants::*, Storage, StorageAdapter},
         WalletBuilder,
     },
