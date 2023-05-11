@@ -37,7 +37,7 @@ impl Response {
 #[derive(Clone)]
 pub(crate) struct HttpClient {
     client: reqwest::Client,
-    user_agent: String,
+    pub(crate) user_agent: String,
 }
 
 impl HttpClient {

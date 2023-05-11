@@ -140,7 +140,6 @@ pub struct AccountDetails {
 #[derive(Debug, Clone)]
 pub struct Account {
     inner: Arc<AccountInner>,
-    pub(crate) client: Client,
     pub(crate) wallet: Arc<WalletInner>,
 }
 
@@ -165,7 +164,7 @@ impl Deref for Account {
 
 impl Account {
     /// Create a new Account with an AccountDetails
-    pub(crate) async fn new(details: AccountDetails, client: Client, wallet: Arc<WalletInner>) -> Result<Self> {
+    pub(crate) async fn new(details: AccountDetails, wallet: Arc<WalletInner>) -> Result<Self> {
         #[cfg(feature = "storage")]
         let default_sync_options = wallet
             .storage_manager
@@ -178,7 +177,6 @@ impl Account {
         let default_sync_options = Default::default();
 
         Ok(Self {
-            client,
             wallet,
             inner: Arc::new(AccountInner {
                 details: RwLock::new(details),
@@ -190,7 +188,7 @@ impl Account {
 
     // Get the Client
     pub fn client(&self) -> &Client {
-        &self.client
+        &self.wallet.client
     }
 
     /// Get the [`Output`] that minted a native token by the token ID. First try to get it
@@ -207,8 +205,8 @@ impl Account {
         }
 
         // Foundry was not found in the account, try to get it from the node
-        let foundry_output_id = self.client.foundry_output_id(foundry_id).await?;
-        let output_response = self.client.get_output(&foundry_output_id).await?;
+        let foundry_output_id = self.client().foundry_output_id(foundry_id).await?;
+        let output_response = self.client().get_output(&foundry_output_id).await?;
 
         Ok(output_response.output().to_owned())
     }

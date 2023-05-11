@@ -116,7 +116,7 @@ impl Wallet {
         if ignore_if_coin_type_mismatch.is_none() {
             if let Some(read_client_options) = read_client_options {
                 // If the nodes are from the same network as the current client options, then extend it
-                *self.client_options.write().await = read_client_options;
+                self.set_client_options(read_client_options).await?;
             }
         }
 
@@ -163,12 +163,10 @@ impl Wallet {
                 });
 
                 if restore_accounts {
-                    let client = self.client_options.read().await.clone().finish().await?;
-
                     let restored_account = try_join_all(
                         read_accounts
                             .into_iter()
-                            .map(|a| Account::new(a, client.clone(), self.inner.clone()).boxed()),
+                            .map(|a| Account::new(a, self.inner.clone()).boxed()),
                     )
                     .await?;
                     *accounts = restored_account;
@@ -190,7 +188,7 @@ impl Wallet {
                         .into_string()
                         .expect("can't convert os string"),
                 )
-                .with_client_options(self.client_options.read().await.clone())
+                .with_client_options(self.client_options().await)
                 .with_coin_type(self.coin_type.load(Ordering::Relaxed));
             // drop secret manager, otherwise we get a deadlock in save_wallet_data
             drop(secret_manager);
