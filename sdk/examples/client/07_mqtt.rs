@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
     let (tx, rx) = channel();
     let tx = Arc::new(Mutex::new(tx));
 
-    let mut event_rx = client.mqtt_event_receiver();
+    let mut event_rx = client.mqtt_event_receiver().await;
     tokio::spawn(async move {
         while event_rx.changed().await.is_ok() {
             let event = event_rx.borrow();

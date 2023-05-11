@@ -66,7 +66,7 @@ impl Account {
     ) -> crate::wallet::Result<Transaction> {
         // here to check before syncing, how to prevent duplicated verification (also in prepare_transaction())?
         // Checking it also here is good to return earlier if something is invalid
-        let protocol_parameters = self.client.get_protocol_parameters().await?;
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
 
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {
@@ -123,7 +123,7 @@ impl Account {
         );
 
         // Validate transaction before sending and storing it
-        let local_time = self.client.get_time_checked().await?;
+        let local_time = self.client().get_time_checked().await?;
 
         let conflict = verify_semantic(
             &signed_transaction_data.inputs_data,
@@ -156,7 +156,7 @@ impl Account {
         let transaction_id = signed_transaction_data.transaction_payload.id();
 
         // store transaction payload to account (with db feature also store the account to the db)
-        let network_id = self.client.get_network_id().await?;
+        let network_id = self.client().get_network_id().await?;
 
         let inputs = signed_transaction_data
             .inputs_data

@@ -106,7 +106,7 @@ impl Account {
         // Get alias outputs, so we can then get the foundry outputs with the alias addresses
         let alias_outputs_with_meta = self.get_outputs(alias_output_ids.iter().copied().collect()).await?;
 
-        let bech32_hrp = self.client.get_bech32_hrp().await?;
+        let bech32_hrp = self.client().get_bech32_hrp().await?;
 
         let mut tasks = vec![];
 
@@ -115,7 +115,7 @@ impl Account {
                 let alias_address =
                     AliasAddress::from(alias_output.alias_id_non_null(alias_output_with_meta.metadata().output_id()));
                 let alias_bech32_address = Address::Alias(alias_address).to_bech32(bech32_hrp.clone());
-                let client = self.client.clone();
+                let client = self.client().clone();
                 tasks.push(Box::pin(task::spawn(async move {
                     client
                         .foundry_output_ids(vec![QueryParameter::AliasAddress(alias_bech32_address)])

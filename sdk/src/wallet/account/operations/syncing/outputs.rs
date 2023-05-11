@@ -32,7 +32,7 @@ impl Account {
     ) -> crate::wallet::Result<Vec<OutputData>> {
         log::debug!("[SYNC] convert output_responses");
         // store outputs with network_id
-        let network_id = self.client.get_network_id().await?;
+        let network_id = self.client().get_network_id().await?;
         let mut outputs = Vec::new();
         let account_details = self.details().await;
 
@@ -104,7 +104,7 @@ impl Account {
         drop(account_details);
 
         if !unknown_outputs.is_empty() {
-            outputs.extend(self.client.get_outputs(unknown_outputs).await?);
+            outputs.extend(self.client().get_outputs(unknown_outputs).await?);
         }
 
         log::debug!(
@@ -140,7 +140,7 @@ impl Account {
                     continue;
                 }
 
-                let client = self.client.clone();
+                let client = self.client().clone();
                 tasks.push(async move {
                     task::spawn(async move {
                         match client.get_included_block(&transaction_id).await {

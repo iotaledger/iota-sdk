@@ -362,7 +362,7 @@ impl<'a> ClientBlockBuilder<'a> {
 
         let block_id = self.client.post_block_raw(&final_block).await?;
         // Get block if we use remote PoW, because the node will change parents and nonce
-        if self.client.get_local_pow() {
+        if self.client.get_local_pow().await {
             Ok(final_block)
         } else {
             // Request block multiple times because the node maybe didn't process it completely in this time
