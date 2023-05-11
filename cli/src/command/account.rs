@@ -9,7 +9,7 @@ use iota_sdk::{
     types::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
-            address::Bech32Address,
+            address::{Bech32Address, Bech32AddressLike},
             output::{
                 unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken, NftId,
                 Output, OutputId, TokenId,
@@ -615,15 +615,15 @@ pub async fn outputs_command(account: &Account) -> Result<(), Error> {
 // `send` command
 pub async fn send_command(
     account: &Account,
-    address: Bech32Address,
+    address: impl Bech32AddressLike,
     amount: u64,
-    return_address: Option<Bech32Address>,
+    return_address: Option<impl Bech32AddressLike>,
     expiration: Option<u32>,
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
     let outputs = vec![
-        SendAmountParams::new(address, amount)
-            .with_return_address(return_address)
+        SendAmountParams::new(address.to_bech32()?, amount)
+            .with_return_address(return_address.map(Bech32AddressLike::to_bech32).transpose()?)
             .with_expiration(expiration),
     ];
     let transaction = account
@@ -648,11 +648,12 @@ pub async fn send_command(
 // `send-native-token` command
 pub async fn send_native_token_command(
     account: &Account,
-    address: Bech32Address,
+    address: impl Bech32AddressLike,
     token_id: String,
     amount: String,
     gift_storage_deposit: Option<bool>,
 ) -> Result<(), Error> {
+    let address = address.to_bech32()?;
     let transaction = if gift_storage_deposit.unwrap_or(false) {
         // Send native tokens together with the required storage deposit
         let rent_structure = account.client().get_rent_structure().await?;
@@ -695,9 +696,9 @@ pub async fn send_native_token_command(
 }
 
 // `send-nft` command
-pub async fn send_nft_command(account: &Account, address: Bech32Address, nft_id: String) -> Result<(), Error> {
+pub async fn send_nft_command(account: &Account, address: impl Bech32AddressLike, nft_id: String) -> Result<(), Error> {
     let outputs = vec![SendNftParams {
-        address,
+        address: address.to_bech32()?,
         nft_id: NftId::from_str(&nft_id)?,
     }];
     let transaction = account.send_nft(outputs, None).await?;
