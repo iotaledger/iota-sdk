@@ -164,7 +164,9 @@ impl Account {
                                     Ok((transaction_id, None))
                                 }
                             }
-                            Err(crate::client::Error::NotFound(_)) => Ok((transaction_id, None)),
+                            Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {
+                                Ok((transaction_id, None))
+                            }
                             Err(e) => Err(crate::wallet::Error::Client(e.into())),
                         }
                     })

@@ -4,7 +4,6 @@
 use std::str::FromStr;
 
 use crate::{
-    client::Error as ClientError,
     types::{
         api::core::dto::LedgerInclusionStateDto,
         block::{input::Input, output::OutputId, payload::transaction::TransactionEssence, BlockId},
@@ -168,7 +167,7 @@ impl Account {
                             }
                         }
                     }
-                    Err(ClientError::NotFound(_)) => {
+                    Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {
                         // no need to reattach if one input got spent
                         if input_got_spent {
                             process_transaction_with_unknown_state(

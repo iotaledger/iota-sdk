@@ -140,7 +140,9 @@ impl NodeManager {
 
         if nodes_with_modified_url.is_empty() {
             if use_pow_nodes {
-                return Err(Error::Node("no available nodes with remote Pow".into()));
+                return Err(crate::client::Error::Node(
+                    crate::client::node_api::error::Error::UnavailablePow,
+                ));
             }
             return Err(crate::client::Error::HealthyNodePoolEmpty);
         }
@@ -185,7 +187,7 @@ impl NodeManager {
 
         // Track amount of results for quorum
         let mut result_counter = 0;
-        let mut error = None;
+        let mut error: Option<Error> = None;
         // Send requests parallel for quorum
         #[cfg(target_family = "wasm")]
         let wasm = true;
@@ -213,11 +215,8 @@ impl NodeManager {
                                 result_counter += 1;
                             },
                         ),
-                        Err(Error::ResponseError { code: 404, url, .. }) => {
-                            error.replace(crate::client::Error::NotFound(url));
-                        }
                         Err(err) => {
-                            error.replace(err);
+                            error.replace(err.into());
                         }
                     }
                 }
@@ -227,63 +226,47 @@ impl NodeManager {
             for node in nodes {
                 match self.http_client.get(node.clone(), timeout).await {
                     Ok(res) => {
-                        match res.status() {
-                            200 => {
-                                // Handle node_info extra because we also want to return the url
-                                if path == "api/core/v2/info" {
-                                    let node_info: InfoResponse = res.into_json().await?;
-                                    let wrapper = crate::client::node_api::core::routes::NodeInfoWrapper {
-                                        node_info,
-                                        url: format!("{}://{}", node.url.scheme(), node.url.host_str().unwrap_or("")),
-                                    };
-                                    let serde_res = serde_json::to_string(&wrapper)?;
-                                    return Ok(serde_json::from_str(&serde_res)?);
-                                }
+                        // Handle node_info extra because we also want to return the url
+                        if path == crate::client::node_api::core::routes::INFO_PATH {
+                            let node_info: InfoResponse = res.into_json().await?;
+                            let wrapper = crate::client::node_api::core::routes::NodeInfoWrapper {
+                                node_info,
+                                url: format!("{}://{}", node.url.scheme(), node.url.host_str().unwrap_or("")),
+                            };
+                            let serde_res = serde_json::to_string(&wrapper)?;
+                            return Ok(serde_json::from_str(&serde_res)?);
+                        }
 
-                                match res.into_json::<T>().await {
-                                    Ok(result_data) => {
-                                        let counters = result.entry(serde_json::to_string(&result_data)?).or_insert(0);
-                                        *counters += 1;
-                                        result_counter += 1;
-                                        // Without quorum it's enough if we got one response
-                                        if !self.quorum
-                                            || result_counter >= self.min_quorum_size
-                                            || !need_quorum
-                                            // with query we ignore quorum because the nodes can store a different amount of history
-                                            || query.is_some()
-                                        {
-                                            break;
-                                        }
-                                    }
-                                    Err(e) => {
-                                        error.replace(e);
-                                    }
+                        match res.into_json::<T>().await {
+                            Ok(result_data) => {
+                                let counters = result.entry(serde_json::to_string(&result_data)?).or_insert(0);
+                                *counters += 1;
+                                result_counter += 1;
+                                // Without quorum it's enough if we got one response
+                                if !self.quorum
+                                    || result_counter >= self.min_quorum_size
+                                    || !need_quorum
+                                    // with query we ignore quorum because the nodes can store a different amount of history
+                                    || query.is_some()
+                                {
+                                    break;
                                 }
                             }
-
-                            _ => {
-                                error.replace(crate::client::Error::Node(
-                                    res.into_text()
-                                        .await
-                                        .unwrap_or_else(|_| "couldn't convert node response into text".to_string()),
-                                ));
+                            Err(e) => {
+                                error.replace(e.into());
                             }
                         }
                     }
-                    Err(Error::ResponseError { code: 404, url, .. }) => {
-                        error.replace(crate::client::Error::NotFound(url));
-                    }
                     Err(err) => {
-                        error.replace(err);
+                        error.replace(err.into());
                     }
                 }
             }
         }
 
-        let res = result
-            .into_iter()
-            .max_by_key(|v| v.1)
-            .ok_or_else(|| error.unwrap_or_else(|| Error::Node("couldn't get a result from any node".into())))?;
+        // Safe unwrap, there are nodes because we throw on empty nodepool.
+        // Each node will throw an error or return Ok()
+        let res = result.into_iter().max_by_key(|v| v.1).ok_or_else(|| error.unwrap())?;
 
         // Return if quorum is false or check if quorum was reached
         if !self.quorum
@@ -316,27 +299,19 @@ impl NodeManager {
         for node in nodes {
             match self.http_client.get_bytes(node, timeout).await {
                 Ok(res) => {
-                    let status = res.status();
-                    if let Ok(res_text) = res.into_bytes().await {
-                        // Without quorum it's enough if we got one response
-                        match status {
-                            200 => return Ok(res_text),
-                            _ => error.replace(crate::client::Error::Node(
-                                String::from_utf8(res_text)
-                                    .map_err(|_| Error::Node("non UTF8 node response".into()))?,
-                            )),
-                        };
-                    }
-                }
-                Err(Error::ResponseError { code: 404, url, .. }) => {
-                    error.replace(crate::client::Error::NotFound(url));
+                    match res.into_bytes().await {
+                        Ok(res_text) => return Ok(res_text),
+                        Err(e) => error.replace(e.into()),
+                    };
                 }
                 Err(err) => {
-                    error.replace(err);
+                    error.replace(err.into());
                 }
             }
         }
-        Err(error.unwrap_or_else(|| Error::Node("couldn't get a result from any node".into())))
+        // Safe unwrap, there are nodes because we throw on empty nodepool.
+        // Each node will throw an error or return Ok()
+        Err(error.unwrap())
     }
 
     pub(crate) async fn post_request_bytes<T: serde::de::DeserializeOwned>(
@@ -353,24 +328,19 @@ impl NodeManager {
         for node in nodes {
             match self.http_client.post_bytes(node, timeout, body).await {
                 Ok(res) => {
-                    match res.status() {
-                        200 | 201 => match res.into_json::<T>().await {
-                            Ok(res) => return Ok(res),
-                            Err(e) => error.replace(e),
-                        },
-                        _ => error.replace(crate::client::Error::Node(
-                            res.into_text()
-                                .await
-                                .unwrap_or_else(|_| "couldn't convert node response into text".to_string()),
-                        )),
+                    match res.into_json::<T>().await {
+                        Ok(res) => return Ok(res),
+                        Err(e) => error.replace(e.into()),
                     };
                 }
                 Err(e) => {
-                    error.replace(crate::client::Error::Node(e.to_string()));
+                    error.replace(Error::Node(e));
                 }
             }
         }
-        Err(error.unwrap_or_else(|| Error::Node("couldn't get a result from any node".into())))
+        // Safe unwrap, there are nodes because we throw on empty nodepool.
+        // Each node will throw an error or return Ok()
+        Err(error.unwrap())
     }
 
     pub(crate) async fn post_request_json<T: serde::de::DeserializeOwned>(
@@ -387,23 +357,18 @@ impl NodeManager {
         for node in nodes {
             match self.http_client.post_json(node, timeout, json.clone()).await {
                 Ok(res) => {
-                    match res.status() {
-                        200 | 201 => match res.into_json::<T>().await {
-                            Ok(res) => return Ok(res),
-                            Err(e) => error.replace(e),
-                        },
-                        _ => error.replace(crate::client::Error::Node(
-                            res.into_text()
-                                .await
-                                .unwrap_or_else(|_| "couldn't convert node response into text".to_string()),
-                        )),
+                    match res.into_json::<T>().await {
+                        Ok(res) => return Ok(res),
+                        Err(e) => error.replace(e.into()),
                     };
                 }
                 Err(e) => {
-                    error.replace(crate::client::Error::Node(e.to_string()));
+                    error.replace(Error::Node(e));
                 }
             }
         }
-        Err(error.unwrap_or_else(|| Error::Node("couldn't get a result from any node".into())))
+        // Safe unwrap, there are nodes because we throw on empty nodepool.
+        // Each node will throw an error or return Ok()
+        Err(error.unwrap())
     }
 }

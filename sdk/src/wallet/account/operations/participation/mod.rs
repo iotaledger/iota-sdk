@@ -196,7 +196,7 @@ impl Account {
                                 }
                             }
                         }
-                        Err(crate::client::Error::NotFound(_)) => {}
+                        Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {}
                         Err(e) => return Err(crate::wallet::Error::Client(e.into())),
                     }
                 }
