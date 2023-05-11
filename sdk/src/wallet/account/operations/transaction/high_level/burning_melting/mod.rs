@@ -10,21 +10,29 @@ use crate::{
     },
 };
 
-pub(crate) mod burn_native_token;
-pub(crate) mod burn_nft;
+mod burn_native_token;
+mod burn_nft;
 pub(crate) mod decrease_native_token_supply;
-pub(crate) mod destroy_alias;
-pub(crate) mod destroy_foundry;
+mod destroy_alias;
+mod destroy_foundry;
 
 impl Account {
     /// A generic `burn()` function that can be used to burn native tokens, nfts, foundries and aliases
-    ///
-    /// When **burning native tokens** it doesn't require the foundry output which minted them, but will
-    /// not increase the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output.
-    /// Therefore it's recommended to use `decrease_native_token_supply()`, if the foundry output is available.
-    ///
-    /// When **burning a foundry**, the circulating supply be 0. Native tokens in the foundry (minted by other
-    /// foundries) will be transacted to the controlling alias
+
+    /// When burn **native tokens**. This doesn't require the foundry output which minted them, but will not increase
+    /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
+    /// recommended to use melting, if the foundry output is available.
+
+    /// When burn **nft** outputs. Outputs controlled by it will be sweeped before if they don't have a storage
+    /// deposit return, timelock or expiration unlock condition. This should be preferred over burning, because after
+    /// burning, the foundry can never be destroyed anymore.
+
+    /// When burn(destroy) an **alias** outputs. Outputs controlled by it will be sweeped before if they don't have a
+    /// storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
+    /// sent to the governor address.
+
+    /// When burn(destroy) **foundry** outputs with a circulating supply of 0.
+    /// Native tokens in the foundry (minted by other foundries) will be transactioned to the controlling alias.
     pub async fn burn(&self, burn: Burn, options: Option<TransactionOptions>) -> crate::wallet::Result<Transaction> {
         let mut all_outputs: Vec<Output> = Default::default();
         let mut all_inputs: Vec<OutputId> = Default::default();

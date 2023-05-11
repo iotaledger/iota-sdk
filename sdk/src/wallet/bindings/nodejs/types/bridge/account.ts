@@ -29,6 +29,7 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventType,
 } from '../participation';
+import { Burn } from '../burn';
 
 export type __BuildAliasOutputMethod__ = {
     name: 'buildAliasOutput';
@@ -48,6 +49,14 @@ export type __BuildFoundryOutputMethod__ = {
 export type __BuildNftOutputMethod__ = {
     name: 'buildNftOutput';
     data: BuildNftOutputData;
+};
+
+export type __BurnMethod__ = {
+    name: 'burn';
+    data: {
+        burn: Burn,
+        options?: TransactionOptions;
+    };
 };
 
 export type __BurnNativeTokenMethod__ = {

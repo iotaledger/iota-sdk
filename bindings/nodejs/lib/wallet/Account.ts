@@ -48,7 +48,7 @@ import type {
     INftOutput,
     OutputTypes,
 } from '@iota/types';
-import { INode } from '../client';
+import { Burn, INode } from '../client';
 
 /** The Account class. */
 export class Account {
@@ -128,53 +128,33 @@ export class Account {
     }
 
     /**
-     * Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
+     * A generic `burn()` function that can be used to burn native tokens, nfts, foundries and aliases.
+
+     * When burn native tokens. This doesn't require the foundry output which minted them, but will not increase
      * the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
      * recommended to use melting, if the foundry output is available.
-     * @param tokenId The native token id.
-     * @param burnAmount The to be burned amount.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
-     * or custom inputs.
-     * @returns The transaction.
-     */
-    async burnNativeToken(
-        tokenId: string,
-        burnAmount: HexEncodedAmount,
-        transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
-        const resp = await this.methodHandler.callAccountMethod(
-            this.meta.index,
-            {
-                name: 'burnNativeToken',
-                data: {
-                    tokenId,
-                    burnAmount,
-                    options: transactionOptions,
-                },
-            },
-        );
-        return JSON.parse(resp).payload;
-    }
 
-    /**
-     * Burn an nft output. Outputs controlled by it will be sweeped before if they don't have a storage
+     * When burn nft outputs. Outputs controlled by it will be sweeped before if they don't have a storage
      * deposit return, timelock or expiration unlock condition. This should be preferred over burning, because after
      * burning, the foundry can never be destroyed anymore.
-     * @param nftId The NftId.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
-     * or custom inputs.
-     * @returns The transaction.
+
+     * When burn(destroy) an alias outputs. Outputs controlled by it will be sweeped before if they don't have a
+     * storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
+     * sent to the governor address.
+
+     * When burn(destroy) foundry outputs with a circulating supply of 0.
+     * Native tokens in the foundry (minted by other foundries) will be transactioned to the controlling alias.
      */
-    async burnNft(
-        nftId: string,
+    async burn(
+        burn: Burn,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const resp = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'burnNft',
+                name: 'burn',
                 data: {
-                    nftId,
+                    burn,
                     options: transactionOptions,
                 },
             },
@@ -287,57 +267,6 @@ export class Account {
                 name: 'deregisterParticipationEvent',
                 data: {
                     eventId,
-                },
-            },
-        );
-        return JSON.parse(resp).payload;
-    }
-
-    /**
-     * Destroy an alias output. Outputs controlled by it will be sweeped before if they don't have a
-     * storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
-     * sent to the governor address.
-     * @param aliasId The AliasId.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
-     * or custom inputs.
-     * @returns The transaction.
-     */
-    async destroyAlias(
-        aliasId: string,
-        transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
-        const resp = await this.methodHandler.callAccountMethod(
-            this.meta.index,
-            {
-                name: 'destroyAlias',
-                data: {
-                    aliasId,
-                    options: transactionOptions,
-                },
-            },
-        );
-        return JSON.parse(resp).payload;
-    }
-
-    /**
-     * Function to destroy a foundry output with a circulating supply of 0.
-     * Native tokens in the foundry (minted by other foundries) will be transactioned to the controlling alias.
-     * @param foundryId The FoundryId.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
-     * or custom inputs.
-     * @returns The transaction.
-     */
-    async destroyFoundry(
-        foundryId: string,
-        transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
-        const resp = await this.methodHandler.callAccountMethod(
-            this.meta.index,
-            {
-                name: 'destroyFoundry',
-                data: {
-                    foundryId,
-                    options: transactionOptions,
                 },
             },
         );

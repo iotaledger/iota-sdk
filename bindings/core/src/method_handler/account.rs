@@ -10,7 +10,7 @@ use iota_sdk::{
         SignedTransactionDataDto,
     },
     types::block::{
-        output::{dto::OutputDto, AliasId, NftId, Output, Rent, TokenId},
+        output::{dto::OutputDto, Output, Rent, TokenId},
         Error,
     },
     wallet::{
@@ -28,26 +28,10 @@ use crate::{method::AccountMethod, Response, Result};
 
 pub(crate) async fn call_account_method_internal(account: &Account, method: AccountMethod) -> Result<Response> {
     let response = match method {
-        AccountMethod::BurnNativeToken {
-            token_id,
-            burn_amount,
-            options,
-        } => {
+        AccountMethod::Burn { burn, options } => {
             let transaction = account
                 .burn(
-                    Burn::new().add_native_token(
-                        TokenId::try_from(&token_id)?,
-                        U256::try_from(&burn_amount).map_err(|_| Error::InvalidField("burn_amount"))?,
-                    ),
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
-        }
-        AccountMethod::BurnNft { nft_id, options } => {
-            let transaction = account
-                .burn(
-                    Burn::new().add_nft(NftId::try_from(&nft_id)?),
+                    Burn::try_from(&burn)?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -73,24 +57,6 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let transaction = account
                 .create_alias_output(
                     alias_output_options,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
-        }
-        AccountMethod::DestroyAlias { alias_id, options } => {
-            let transaction = account
-                .burn(
-                    Burn::new().add_alias(AliasId::try_from(&alias_id)?),
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
-        }
-        AccountMethod::DestroyFoundry { foundry_id, options } => {
-            let transaction = account
-                .burn(
-                    Burn::new().add_foundry(foundry_id),
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;

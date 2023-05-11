@@ -4,6 +4,7 @@ import type {
     __BuildBasicOutputMethod__,
     __BuildFoundryOutputMethod__,
     __BuildNftOutputMethod__,
+    __BurnMethod__,
     __BurnNativeTokenMethod__,
     __BurnNftMethod__,
     __ClaimOutputsMethod__,
@@ -87,6 +88,7 @@ export type __AccountMethod__ =
     | __BuildFoundryOutputMethod__
     | __BuildNftOutputMethod__
     | __BurnNativeTokenMethod__
+    | __BurnMethod__
     | __BurnNftMethod__
     | __ClaimOutputsMethod__
     | __ConsolidateOutputsMethod__
