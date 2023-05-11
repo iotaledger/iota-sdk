@@ -143,24 +143,10 @@ pub enum AccountMethod {
         mint_amount: U256Dto,
         options: Option<TransactionOptionsDto>,
     },
-    /// Mint native token.
-    /// Expected response: [`MintTokenTransaction`](crate::Response::MintTokenTransaction)
-    #[serde(rename_all = "camelCase")]
-    MintNativeToken {
-        params: MintNativeTokenParamsDto,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Mint nft.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    MintNfts {
-        params: Vec<MintNftParamsDto>,
-        options: Option<TransactionOptionsDto>,
-    },
     /// Get account balance information.
     /// Expected response: [`Balance`](crate::Response::Balance)
     GetBalance,
-    /// Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
+    /// Prepare to Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
     /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
     /// recommended to use melting, if the foundry output is available.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
@@ -172,7 +158,7 @@ pub enum AccountMethod {
         burn_amount: U256Dto,
         options: Option<TransactionOptionsDto>,
     },
-    /// Burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
+    /// Prepare to Burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
     /// deposit return, timelock or expiration unlock condition. This should be preferred over burning, because after
     /// burning, the foundry can never be destroyed anymore.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
@@ -181,12 +167,40 @@ pub enum AccountMethod {
         nft_id: NftIdDto,
         options: Option<TransactionOptionsDto>,
     },
+    /// Prepare to Mint native token.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareMintNativeToken {
+        params: MintNativeTokenParamsDto,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Prepare to Mint nft.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareMintNfts {
+        params: Vec<MintNftParamsDto>,
+        options: Option<TransactionOptionsDto>,
+    },
     /// Prepare an output.
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
         params: OutputParamsDto,
         transaction_options: Option<TransactionOptionsDto>,
+    },
+    /// Prepare to Send native tokens.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareSendNativeTokens {
+        params: Vec<SendNativeTokensParams>,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Prepare to Send nft.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareSendNft {
+        params: Vec<SendNftParams>,
+        options: Option<TransactionOptionsDto>,
     },
     /// Prepare transaction.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
@@ -225,20 +239,6 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     SendAmount {
         params: Vec<SendAmountParamsDto>,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Send native tokens.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    SendNativeTokens {
-        params: Vec<SendNativeTokensParams>,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Send nft.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    SendNft {
-        params: Vec<SendNftParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Set the alias of the account.

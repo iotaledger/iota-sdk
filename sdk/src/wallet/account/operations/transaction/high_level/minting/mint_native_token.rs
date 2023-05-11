@@ -5,6 +5,7 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    client::api::PreparedTransactionData,
     types::block::{
         address::AliasAddress,
         dto::U256Dto,
@@ -119,6 +120,17 @@ impl Account {
         params: MintNativeTokenParams,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<MintTokenTransaction> {
+        let (token_id, prepared_transaction) = self.prepare_mint_native_token(params, options).await?;
+        self.sign_and_submit_transaction(prepared_transaction)
+            .await
+            .map(|transaction| MintTokenTransaction { token_id, transaction })
+    }
+
+    pub async fn prepare_mint_native_token(
+        &self,
+        params: MintNativeTokenParams,
+        options: impl Into<Option<TransactionOptions>> + Send,
+    ) -> crate::wallet::Result<(TokenId, PreparedTransactionData)> {
         log::debug!("[TRANSACTION] mint_native_token");
         let rent_structure = self.client.get_rent_structure().await?;
         let token_supply = self.client.get_token_supply().await?;
@@ -164,9 +176,10 @@ impl Account {
                     foundry_builder.finish_output(token_supply)?
                 }, // Native Tokens will be added automatically in the remainder output in try_select_inputs()
             ];
-            self.send(outputs, options)
+
+            self.prepare_transaction(outputs, options)
                 .await
-                .map(|transaction| MintTokenTransaction { token_id, transaction })
+                .map(|transaction| (token_id, transaction))
         } else {
             unreachable!("We checked if it's an alias output before")
         }

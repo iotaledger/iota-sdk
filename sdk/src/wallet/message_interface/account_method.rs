@@ -213,20 +213,6 @@ pub enum AccountMethod {
         mint_amount: U256Dto,
         options: Option<TransactionOptionsDto>,
     },
-    /// Mint native token.
-    /// Expected response: [`MintTokenTransaction`](crate::wallet::message_interface::Response::MintTokenTransaction)
-    #[serde(rename_all = "camelCase")]
-    MintNativeToken {
-        params: MintNativeTokenParamsDto,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Mint nft.
-    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    MintNfts {
-        params: Vec<MintNftParamsDto>,
-        options: Option<TransactionOptionsDto>,
-    },
     /// Get account balance information.
     /// Expected response: [`Balance`](crate::wallet::message_interface::Response::Balance)
     GetBalance,
@@ -250,7 +236,6 @@ pub enum AccountMethod {
         params: Vec<SendAmountParamsDto>,
         options: Option<TransactionOptionsDto>,
     },
-
     /// Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
     /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
     /// recommended to use melting, if the foundry output is available.
@@ -272,6 +257,34 @@ pub enum AccountMethod {
         nft_id: NftIdDto,
         options: Option<TransactionOptionsDto>,
     },
+    /// Mint native token.
+    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareMintNativeToken {
+        params: MintNativeTokenParamsDto,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Mint nft.
+    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareMintNfts {
+        params: Vec<MintNftParamsDto>,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Send native tokens.
+    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareSendNativeTokens {
+        params: Vec<SendNativeTokensParams>,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Send nft.
+    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareSendNft {
+        params: Vec<SendNftParams>,
+        options: Option<TransactionOptionsDto>,
+    },
     /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
     /// included (referenced by a milestone). Returns the included block id.
     /// Expected response: [`BlockId`](crate::wallet::message_interface::Response::BlockId)
@@ -291,27 +304,6 @@ pub enum AccountMethod {
         /// Sync options
         options: Option<SyncOptions>,
     },
-    /// Send amount.
-    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    SendAmount {
-        params: Vec<SendAmountParamsDto>,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Send native tokens.
-    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    SendNativeTokens {
-        params: Vec<SendNativeTokensParams>,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Send nft.
-    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    SendNft {
-        params: Vec<SendNftParams>,
-        options: Option<TransactionOptionsDto>,
-    },
     /// Set the alias of the account.
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
     SetAlias { alias: String },
@@ -329,6 +321,12 @@ pub enum AccountMethod {
     /// Expected response: [`SignedTransactionData`](crate::wallet::message_interface::Response::SignedTransactionData)
     #[serde(rename_all = "camelCase")]
     SignTransactionEssence {
+        prepared_transaction_data: PreparedTransactionDataDto,
+    },
+    /// Validate the transaction, sign it, submit it to a node and store it in the account.
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    #[serde(rename_all = "camelCase")]
+    SignAndSubmitTransaction {
         prepared_transaction_data: PreparedTransactionDataDto,
     },
     /// Validate the transaction, submit it to a node and store it in the account.

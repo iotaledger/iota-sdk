@@ -491,35 +491,6 @@ impl WalletMessageHandler {
 
                 Ok(Response::Output(OutputDto::from(&output)))
             }
-            AccountMethod::PrepareBurnNativeToken {
-                token_id,
-                burn_amount,
-                options,
-            } => {
-                convert_async_panics(|| async {
-                    let data = account
-                        .prepare_burn_native_token(
-                            TokenId::try_from(&token_id)?,
-                            U256::try_from(&burn_amount).map_err(|_| Error::InvalidField("burn_amount"))?,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
-                        .await?;
-                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
-                })
-                .await
-            }
-            AccountMethod::PrepareBurnNft { nft_id, options } => {
-                convert_async_panics(|| async {
-                    let data = account
-                        .prepare_burn_nft(
-                            NftId::try_from(&nft_id)?,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
-                        .await?;
-                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
-                })
-                .await
-            }
             AccountMethod::ConsolidateOutputs {
                 force,
                 output_consolidation_threshold,
@@ -687,20 +658,6 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::MintNativeToken { params, options } => {
-                convert_async_panics(|| async {
-                    let transaction = account
-                        .mint_native_token(
-                            MintNativeTokenParams::try_from(&params)?,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
-                        .await?;
-                    Ok(Response::MintTokenTransaction(MintTokenTransactionDto::from(
-                        &transaction,
-                    )))
-                })
-                .await
-            }
             AccountMethod::MinimumRequiredStorageDeposit { output } => {
                 convert_async_panics(|| async {
                     let output = Output::try_from_dto(&output, account.client.get_token_supply().await?)?;
@@ -714,10 +671,41 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::MintNfts { params, options } => {
+            AccountMethod::GetBalance => Ok(Response::Balance(AccountBalanceDto::from(&account.balance().await?))),
+
+            AccountMethod::PrepareBurnNativeToken {
+                token_id,
+                burn_amount,
+                options,
+            } => {
                 convert_async_panics(|| async {
-                    let transaction = account
-                        .mint_nfts(
+                    let data = account
+                        .prepare_burn_native_token(
+                            TokenId::try_from(&token_id)?,
+                            U256::try_from(&burn_amount).map_err(|_| Error::InvalidField("burn_amount"))?,
+                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                        )
+                        .await?;
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
+                })
+                .await
+            }
+            AccountMethod::PrepareBurnNft { nft_id, options } => {
+                convert_async_panics(|| async {
+                    let data = account
+                        .prepare_burn_nft(
+                            NftId::try_from(&nft_id)?,
+                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                        )
+                        .await?;
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
+                })
+                .await
+            }
+            AccountMethod::PrepareMintNfts { params, options } => {
+                convert_async_panics(|| async {
+                    let data = account
+                        .prepare_mint_nfts(
                             params
                                 .iter()
                                 .map(MintNftParams::try_from)
@@ -725,11 +713,22 @@ impl WalletMessageHandler {
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
                 })
                 .await
             }
-            AccountMethod::GetBalance => Ok(Response::Balance(AccountBalanceDto::from(&account.balance().await?))),
+            AccountMethod::PrepareMintNativeToken { params, options } => {
+                convert_async_panics(|| async {
+                    let data = account
+                        .prepare_mint_native_token(
+                            MintNativeTokenParams::try_from(&params)?,
+                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                        )
+                        .await?;
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data.1)))
+                })
+                .await
+            }
             AccountMethod::PrepareOutput {
                 params: options,
                 transaction_options,
@@ -779,6 +778,30 @@ impl WalletMessageHandler {
                 })
                 .await
             }
+            AccountMethod::PrepareSendNativeTokens { params, options } => {
+                convert_async_panics(|| async {
+                    let data = account
+                        .prepare_send_native_tokens(
+                            params.clone(),
+                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                        )
+                        .await?;
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
+                })
+                .await
+            }
+            AccountMethod::PrepareSendNft { params, options } => {
+                convert_async_panics(|| async {
+                    let data = account
+                        .prepare_send_nft(
+                            params.clone(),
+                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                        )
+                        .await?;
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
+                })
+                .await
+            }
             AccountMethod::RetryTransactionUntilIncluded {
                 transaction_id,
                 interval,
@@ -795,45 +818,6 @@ impl WalletMessageHandler {
             AccountMethod::SyncAccount { options } => Ok(Response::Balance(AccountBalanceDto::from(
                 &account.sync(options).await?,
             ))),
-            AccountMethod::SendAmount { params, options } => {
-                convert_async_panics(|| async {
-                    let transaction = account
-                        .send_amount(
-                            params
-                                .iter()
-                                .map(SendAmountParams::try_from)
-                                .collect::<Result<Vec<SendAmountParams>>>()?,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
-                        .await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
-                })
-                .await
-            }
-            AccountMethod::SendNativeTokens { params, options } => {
-                convert_async_panics(|| async {
-                    let transaction = account
-                        .send_native_tokens(
-                            params.clone(),
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
-                        .await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
-                })
-                .await
-            }
-            AccountMethod::SendNft { params, options } => {
-                convert_async_panics(|| async {
-                    let transaction = account
-                        .send_nft(
-                            params.clone(),
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
-                        .await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
-                })
-                .await
-            }
             AccountMethod::SetAlias { alias } => {
                 convert_async_panics(|| async {
                     account.set_alias(&alias).await?;
@@ -877,6 +861,19 @@ impl WalletMessageHandler {
                     Ok(Response::SignedTransactionData(SignedTransactionDataDto::from(
                         &signed_transaction_data,
                     )))
+                })
+                .await
+            }
+            AccountMethod::SignAndSubmitTransaction {
+                prepared_transaction_data,
+            } => {
+                convert_async_panics(|| async {
+                    let prepared_transaction_data = PreparedTransactionData::try_from_dto(
+                        &prepared_transaction_data,
+                        &account.client.get_protocol_parameters().await?,
+                    )?;
+                    let transaction = account.sign_and_submit_transaction(prepared_transaction_data).await?;
+                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
             }

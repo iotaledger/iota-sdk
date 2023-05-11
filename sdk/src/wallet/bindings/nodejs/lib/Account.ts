@@ -717,14 +717,14 @@ export class Account {
      * or custom inputs.
      * @returns The minting transaction and the token ID.
      */
-    async mintNativeToken(
+    async prepareMintNativeToken(
         params: MintNativeTokenParams,
         transactionOptions?: TransactionOptions,
-    ): Promise<MintTokenTransaction> {
+    ): Promise<PreparedTransactionData> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'mintNativeToken',
+                name: 'prepareMintNativeToken',
                 data: {
                     params: params,
                     options: transactionOptions,
@@ -742,14 +742,14 @@ export class Account {
      * or custom inputs.
      * @returns The minting transaction.
      */
-    async mintNfts(
+    async prepareMintNfts(
         params: MintNftParams[],
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransactionData> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'mintNfts',
+                name: 'prepareMintNfts',
                 data: {
                     params,
                     options: transactionOptions,

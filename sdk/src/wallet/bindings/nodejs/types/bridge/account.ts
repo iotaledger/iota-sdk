@@ -218,16 +218,16 @@ export type __IncreaseNativeTokenSupplyMethod__ = {
     };
 };
 
-export type __MintNativeTokenMethod__ = {
-    name: 'mintNativeToken';
+export type __PrepareMintNativeTokenMethod__ = {
+    name: 'prepareMintNativeToken';
     data: {
         params: MintNativeTokenParams;
         options?: TransactionOptions;
     };
 };
 
-export type __MintNftsMethod__ = {
-    name: 'mintNfts';
+export type __PrepareMintNftsMethod__ = {
+    name: 'prepareMintNfts';
     data: {
         params: MintNftParams[];
         options?: TransactionOptions;

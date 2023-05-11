@@ -28,8 +28,8 @@ import type {
     __UnspentOutputsMethod__,
     __MinimumRequiredStorageDepositMethod__,
     __IncreaseNativeTokenSupplyMethod__,
-    __MintNativeTokenMethod__,
-    __MintNftsMethod__,
+    __PrepareMintNativeTokenMethod__,
+    __PrepareMintNftsMethod__,
     __PrepareOutputMethod__,
     __PrepareSendAmountMethod__,
     __PrepareTransactionMethod__,
@@ -120,8 +120,8 @@ export type __AccountMethod__ =
     | __DecreaseNativeTokenSupplyMethod__
     | __MinimumRequiredStorageDepositMethod__
     | __IncreaseNativeTokenSupplyMethod__
-    | __MintNativeTokenMethod__
-    | __MintNftsMethod__
+    | __PrepareMintNativeTokenMethod__
+    | __PrepareMintNftsMethod__
     | __PrepareOutputMethod__
     | __PrepareSendAmountMethod__
     | __PrepareTransactionMethod__
