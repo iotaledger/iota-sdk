@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will send coins from the first address of the 1st account  to several different addresses
-//! of the 2nd account in parallel using up to 4 threads.
+//! of the 2nd account in parallel using up to a configured number of threads.
 //!
 //! Non-existing accounts will be created and funded automatically.
 //!
@@ -27,6 +27,8 @@ use tokio::task::JoinSet;
 const NUM_RECV_ADDRESSES: usize = 3;
 // The base amount of coins to send (the actual amount will be multiples of that)
 const BASE_AMOUNT: u64 = 1_000_000;
+// The maximum number of CPU cores to use
+const MAX_CPUS_TO_USE: usize = 4;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -60,7 +62,7 @@ async fn main() -> Result<()> {
     may_request_funds(&account1, &account1_send_address.address().to_string()).await?;
 
     let mut tasks: JoinSet<Result<(usize, usize)>> = JoinSet::new();
-    let num_threads_per_address = num_cpus::get().min(4);
+    let num_threads_per_address = num_cpus::get().min(MAX_CPUS_TO_USE);
 
     for address_index in 0..NUM_RECV_ADDRESSES {
         for thread_index in 1..=num_threads_per_address {
@@ -163,7 +165,7 @@ async fn may_request_funds(account: &Account, address: &str) -> Result<()> {
     let funds_before = balance.base_coin().available();
     println!("Current available funds: {funds_before}");
 
-    if funds_before < NUM_RECV_ADDRESSES as u64 * num_cpus::get().min(4) as u64 * BASE_AMOUNT {
+    if funds_before < NUM_RECV_ADDRESSES as u64 * num_cpus::get().min(MAX_CPUS_TO_USE) as u64 * BASE_AMOUNT {
         println!("Requesting funds from faucet...");
         let faucet_response = request_funds_from_faucet(&var("FAUCET_URL").unwrap(), address).await?;
         println!("Response from faucet: {}", faucet_response.trim_end());
