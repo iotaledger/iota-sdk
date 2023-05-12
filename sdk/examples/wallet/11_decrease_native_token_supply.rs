@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    println!("Preparing melting transaction...");
+    println!("Sending the melting transaction...");
 
     // Melt some of the circulating supply
     let melt_amount = U256::from(MELT_AMOUNT);

@@ -40,7 +40,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    println!("Preparing alias output transaction...");
+    println!("Sending alias output transaction...");
 
     // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs
     let transaction = account.create_alias_output(None, None).await?;
@@ -59,7 +59,7 @@ async fn main() -> Result<()> {
     account.sync(None).await?;
     println!("Account synced");
 
-    println!("Preparing minting transaction...");
+    println!("Sending the minting transaction...");
 
     let params = MintNativeTokenParams {
         alias_id: None,

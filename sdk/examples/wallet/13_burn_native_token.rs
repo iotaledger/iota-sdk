@@ -63,7 +63,7 @@ async fn main() -> Result<()> {
             .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        println!("Preparing burning transaction...");
+        println!("Sending the burning transaction...");
 
         // Burn a native token
         let burn_amount = U256::from(BURN_AMOUNT);

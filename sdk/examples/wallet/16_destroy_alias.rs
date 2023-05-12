@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
             .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        println!("Preparing destroying transaction...");
+        println!("Sending the destroy-alias transaction...");
 
         let transaction = account.destroy_alias(*alias_id, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);

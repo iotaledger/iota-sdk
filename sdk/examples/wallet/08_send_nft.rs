@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will send an nft.
+//! In this example we will send an NFT (Non-fungible token).
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
 //! running the `create_wallet` example!

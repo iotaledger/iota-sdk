@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    println!("Preparing create-alias transaction...");
+    println!("Sending the create-alias transaction...");
 
     // Create an alias output
     let transaction = account.create_alias_output(None, None).await?;

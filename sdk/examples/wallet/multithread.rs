@@ -1,8 +1,8 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will send coins from the first address of one account (ping) to several different addresses
-//! of another account (pong) in parallel using up to 4 threads.
+//! In this example we will send coins from the first address of the 1st account  to several different addresses
+//! of the 2nd account in parallel using up to 4 threads.
 //!
 //! Non-existing accounts will be created and funded automatically.
 //!
@@ -64,12 +64,12 @@ async fn main() -> Result<()> {
 
     for address_index in 0..NUM_RECV_ADDRESSES {
         for thread_index in 1..=num_threads_per_address {
-            let ping_account_clone = account1.clone();
-            let pong_addresses_clone = account2_recv_addresses.clone();
+            let account1_clone = account1.clone();
+            let account2_recv_addresses_clone = account2_recv_addresses.clone();
 
             tasks.spawn(async move {
                 let amount = ((address_index + thread_index) % 3 + 1) as u64 * BASE_AMOUNT;
-                let recv_address = pong_addresses_clone[address_index % NUM_RECV_ADDRESSES].address();
+                let recv_address = account2_recv_addresses_clone[address_index % NUM_RECV_ADDRESSES].address();
                 println!("Sending '{amount}' coins to '{recv_address}'...");
 
                 let transaction = if (address_index + thread_index) % 2 == 0 {
@@ -78,7 +78,7 @@ async fn main() -> Result<()> {
                         recv_address.to_string(),
                         amount,
                     )];
-                    ping_account_clone.send_amount(outputs, None).await?
+                    account1_clone.send_amount(outputs, None).await?
                 } else {
                     // ALTERNATIVE 2: using `account.send`
                     let outputs = vec![
@@ -88,9 +88,9 @@ async fn main() -> Result<()> {
                                     *recv_address.as_ref(),
                                 ),
                             )
-                            .finish_output(ping_account_clone.client().get_token_supply().await?)?,
+                            .finish_output(account1_clone.client().get_token_supply().await?)?,
                     ];
-                    ping_account_clone.send(outputs, None).await?
+                    account1_clone.send(outputs, None).await?
                 };
 
                 println!(
@@ -99,7 +99,7 @@ async fn main() -> Result<()> {
                 );
 
                 // Wait for transaction to get included
-                let block_id = ping_account_clone
+                let block_id = account1_clone
                     .retry_transaction_until_included(&transaction.transaction_id, None, None)
                     .await?;
 

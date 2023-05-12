@@ -77,7 +77,7 @@ async fn main() -> Result<()> {
 
     println!("Balance BEFORE:\n{:?}", balance.base_coin());
 
-    println!("Preparing value transaction...");
+    println!("Sending the coin-transfer transaction...");
     let outputs = vec![SendAmountParams::new(RECV_ADDRESS.to_string(), SEND_AMOUNT)];
     let transaction = account.send_amount(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);

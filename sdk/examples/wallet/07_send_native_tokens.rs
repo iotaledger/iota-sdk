@@ -83,7 +83,7 @@ async fn main() -> Result<()> {
         account.sync(None).await?;
         println!("Account synced");
 
-        println!("Preparing basic output transaction...");
+        println!("Sending basic output transaction...");
 
         // Send native tokens together with the required storage deposit
         let rent_structure = account.client().get_rent_structure().await?;

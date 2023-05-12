@@ -67,7 +67,7 @@ async fn main() -> Result<()> {
         immutable_metadata: Some(NFT1_IMMUTABLE_METADATA.as_bytes().to_vec()),
     }];
 
-    println!("Preparing NFT 1 minting transaction...");
+    println!("Sending minting transaction for NFT 1...");
 
     let transaction = account.mint_nfts(nft_params, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
@@ -94,7 +94,7 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
     ];
 
-    println!("Preparing NFT 2 minting transaction...");
+    println!("Sending minting transaction for NFT 2...");
 
     let transaction = account.send(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
