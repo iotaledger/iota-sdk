@@ -2346,7 +2346,6 @@ fn new_state_metadata() {
         addresses(vec![BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
     .select()
     .unwrap();
 
@@ -2387,12 +2386,11 @@ fn new_state_metadata_but_same_state_index() {
     let outputs = vec![updated_alias_output];
 
     let selected = InputSelection::new(
-        inputs.clone(),
+        inputs,
         outputs,
         addresses(vec![BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
     .select();
 
     assert!(matches!(
