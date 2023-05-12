@@ -63,17 +63,21 @@ impl Storage {
     }
 
     #[allow(dead_code)]
-    async fn batch_set(&mut self, records: HashMap<String, String>) -> crate::wallet::Result<()> {
+    async fn batch_set<T: Serialize + Send>(&mut self, records: HashMap<String, T>) -> crate::wallet::Result<()> {
         self.inner
             .batch_set(if let Some(key) = &self.encryption_key {
                 let mut encrypted_records = HashMap::new();
                 for (id, record) in records {
-                    let output = chacha::aead_encrypt(key, record.as_bytes())?;
-                    encrypted_records.insert(id, serde_json::to_string(&output)?);
+                    let encrypted_bytes = chacha::aead_encrypt(key, serde_json::to_string(&record)?.as_bytes())?;
+                    encrypted_records.insert(id, serde_json::to_string(&encrypted_bytes)?);
                 }
                 encrypted_records
             } else {
-                records
+                let mut plain_records = HashMap::new();
+                for (id, record) in records {
+                    plain_records.insert(id, serde_json::to_string(&record)?);
+                }
+                plain_records
             })
             .await
     }
@@ -150,14 +154,18 @@ mod tests {
             c: rand::random(),
         })
         .enumerate()
-        .map(|(key, record)| (key.to_string(), serde_json::to_string(&record).unwrap()))
+        .map(|(key, record)| (key.to_string(), record))
         .take(10)
         .collect::<HashMap<_, _>>();
 
-        storage.batch_set(records).await.unwrap();
+        storage.batch_set(records.clone()).await.unwrap();
 
-        for index in 0..10 {
-            assert!(storage.get::<Record>(&index.to_string()).await.unwrap().is_some());
+        // we also check an index that doesn't exist
+        for index in 0..11 {
+            assert_eq!(
+                records.get(&index.to_string()),
+                storage.get::<Record>(&index.to_string()).await.unwrap().as_ref()
+            );
         }
     }
 
