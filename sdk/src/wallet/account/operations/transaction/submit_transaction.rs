@@ -18,7 +18,7 @@ impl Account {
         #[cfg(feature = "events")]
         let account_index = self.details().await.index;
 
-        let local_pow = self.client.get_local_pow();
+        let local_pow = self.client().get_local_pow().await;
         if local_pow {
             log::debug!("[TRANSACTION] doing local pow");
             #[cfg(feature = "events")]
@@ -29,7 +29,7 @@ impl Account {
             .await;
         }
         let block = self
-            .client
+            .client()
             .finish_block_builder(None, Some(Payload::from(transaction_payload)))
             .await?;
 
@@ -39,7 +39,7 @@ impl Account {
             WalletEvent::TransactionProgress(TransactionProgressEvent::Broadcasting),
         )
         .await;
-        let block_id = self.client.post_block(&block).await?;
+        let block_id = self.client().post_block(&block).await?;
         log::debug!("[TRANSACTION] submitted block {}", block_id);
         Ok(block_id)
     }
