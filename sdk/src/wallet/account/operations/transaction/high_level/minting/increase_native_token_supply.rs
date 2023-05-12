@@ -4,12 +4,13 @@
 use primitive_types::U256;
 
 use crate::{
-    client::api::PreparedTransactionData,
     types::block::output::{AliasOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme},
     wallet::{
         account::{
-            operations::transaction::high_level::minting::mint_native_token::MintTokenTransaction, Account,
-            TransactionOptions,
+            operations::transaction::high_level::minting::mint_native_token::{
+                MintTokenTransaction, PreparedMintTokenTransaction,
+            },
+            Account, TransactionOptions,
         },
         Error,
     },
@@ -39,9 +40,9 @@ impl Account {
             .prepare_increase_native_token_supply(token_id, mint_amount, options)
             .await?;
 
-        let transaction = self.sign_and_submit_transaction(prepared.1).await?;
+        let transaction = self.sign_and_submit_transaction(prepared.transaction).await?;
         Ok(MintTokenTransaction {
-            token_id: prepared.0,
+            token_id: prepared.token_id,
             transaction: transaction,
         })
     }
@@ -53,7 +54,7 @@ impl Account {
         token_id: TokenId,
         mint_amount: U256,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<(TokenId, PreparedTransactionData)> {
+    ) -> crate::wallet::Result<PreparedMintTokenTransaction> {
         log::debug!("[TRANSACTION] increase_native_token_supply");
 
         let account_details = self.details().await;
@@ -133,6 +134,6 @@ impl Account {
 
         self.prepare_transaction(outputs, options)
             .await
-            .map(|prepared| (token_id, prepared))
+            .map(|transaction| PreparedMintTokenTransaction { token_id, transaction })
     }
 }

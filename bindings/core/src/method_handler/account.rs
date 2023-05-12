@@ -15,7 +15,7 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{AccountBalanceDto, TransactionDto},
-            Account, CreateAliasParams, OutputDataDto, OutputParams, PrepareMintTokenTransactionDto,
+            Account, CreateAliasParams, OutputDataDto, OutputParams, PreparedMintTokenTransactionDto,
             TransactionOptions,
         },
         message_interface::AddressWithUnspentOutputsDto,
@@ -178,7 +178,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data.1))
+            Response::PreparedMintTokenTransaction(PreparedMintTokenTransactionDto::from(&data))
         }
         AccountMethod::PrepareMintNfts { params, options } => {
             let data = account
@@ -199,7 +199,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
-            Response::PrepareMintTokenTransaction(PrepareMintTokenTransactionDto::from(&data))
+            Response::PreparedMintTokenTransaction(PreparedMintTokenTransactionDto::from(&data))
         }
         AccountMethod::PrepareSendNativeTokens { params, options } => {
             let data = account
@@ -423,6 +423,9 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::GetParticipationEvents => {
             let events = account.get_participation_events().await?;
             Response::ParticipationEvents(events)
+        }
+        AccountMethod::RequestFundsFromFaucet { url, address } => {
+            Response::Faucet(iota_sdk::client::request_funds_from_faucet(&url, &address).await?)
         }
     };
     Ok(response)

@@ -15,13 +15,13 @@ import type {
     AliasOutputParams,
     FilterOptions,
     GenerateAddressOptions,
-    MintTokenTransaction,
     MintNativeTokenParams,
     MintNftParams,
     Node,
     OutputData,
     OutputParams,
     OutputsToClaim,
+    PreparedMintTokenTransaction,
     PreparedTransactionData,
     Transaction,
     TransactionOptions,
@@ -208,14 +208,14 @@ export class Account {
      * @param outputConsolidationThreshold A default threshold is used if this is omitted.
      * @returns The consolidation transaction.
      */
-    async consolidateOutputs(
+    async prepareConsolidateOutputs(
         force: boolean,
         outputConsolidationThreshold?: number,
     ): Promise<Transaction> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'consolidateOutputs',
+                name: 'prepareConsolidateOutputs',
                 data: {
                     force,
                     outputConsolidationThreshold,
@@ -232,14 +232,14 @@ export class Account {
      * or custom inputs.
      * @returns A transaction object.
      */
-    async createAliasOutput(
+    async prepareCreateAliasOutput(
         params?: AliasOutputParams,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'createAliasOutput',
+                name: 'prepareCreateAliasOutput',
                 data: {
                     params,
                     options: transactionOptions,
@@ -258,7 +258,7 @@ export class Account {
      * or custom inputs.
      * @returns The transaction.
      */
-    async decreaseNativeTokenSupply(
+    async prepareDecreaseNativeTokenSupply(
         tokenId: string,
         meltAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
@@ -266,7 +266,7 @@ export class Account {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'decreaseNativeTokenSupply',
+                name: 'prepareDecreaseNativeTokenSupply',
                 data: {
                     tokenId,
                     meltAmount,
@@ -301,14 +301,14 @@ export class Account {
      * or custom inputs.
      * @returns The transaction.
      */
-    async destroyAlias(
+    async prepareDestroyAlias(
         aliasId: string,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'destroyAlias',
+                name: 'prepareDestroyAlias',
                 data: {
                     aliasId,
                     options: transactionOptions,
@@ -326,14 +326,14 @@ export class Account {
      * or custom inputs.
      * @returns The transaction.
      */
-    async destroyFoundry(
+    async prepareDestroyFoundry(
         foundryId: string,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'destroyFoundry',
+                name: 'prepareDestroyFoundry',
                 data: {
                     foundryId,
                     options: transactionOptions,
@@ -690,15 +690,15 @@ export class Account {
      * or custom inputs.
      * @returns The minting transaction and the token ID.
      */
-    async increaseNativeTokenSupply(
+    async prepareIncreaseNativeTokenSupply(
         tokenId: string,
         mintAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
-    ): Promise<MintTokenTransaction> {
+    ): Promise<PreparedMintTokenTransaction> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'increaseNativeTokenSupply',
+                name: 'prepareIncreaseNativeTokenSupply',
                 data: {
                     tokenId,
                     mintAmount,
@@ -720,7 +720,7 @@ export class Account {
     async prepareMintNativeToken(
         params: MintNativeTokenParams,
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<PreparedMintTokenTransaction> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -925,14 +925,14 @@ export class Account {
      * or custom inputs.
      * @returns The sent transaction.
      */
-    async sendNativeTokens(
+    async prepareSendNativeTokens(
         params: SendNativeTokensParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'sendNativeTokens',
+                name: 'prepareSendNativeTokens',
                 data: {
                     params,
                     options: transactionOptions,
@@ -950,14 +950,14 @@ export class Account {
      * or custom inputs.
      * @returns The sent transaction.
      */
-    async sendNft(
+    async prepareSendNft(
         params: SendNftParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'sendNft',
+                name: 'prepareSendNft',
                 data: {
                     params,
                     options: transactionOptions,
@@ -1048,7 +1048,7 @@ export class Account {
      async signAndSubmitTransaction(
         preparedTransactionData: PreparedTransactionData,
     ): Promise<Transaction> {
-        const response = await this.messageHandler.callAccountMethod(
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'signAndSubmitTransaction',

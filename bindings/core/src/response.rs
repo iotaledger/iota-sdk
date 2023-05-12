@@ -44,7 +44,7 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{AccountAddress, AccountBalanceDto, TransactionDto},
-            OutputDataDto, PrepareMintTokenTransactionDto,
+            OutputDataDto, PreparedMintTokenTransactionDto,
         },
         message_interface::dtos::{AccountDetailsDto, AddressWithUnspentOutputsDto},
     },
@@ -317,12 +317,14 @@ pub enum Response {
     /// [`PrepareSendNativeTokens`](crate::method::AccountMethod::PrepareSendNativeTokens),
     /// [`PrepareSendNft`](crate::method::AccountMethod::PrepareSendNft),
     /// [`PrepareSendAmount`](crate::method::AccountMethod::PrepareSendAmount),
-    ///
     /// [`PrepareVote`](crate::method::AccountMethod::PrepareVote)
     /// [`PrepareStopParticipating`](crate::method::AccountMethod::PrepareStopParticipating)
     /// [`PrepareIncreaseVotingPower`](crate::method::AccountMethod::PrepareIncreaseVotingPower)
     /// [`PrepareDecreaseVotingPower`](crate::method::AccountMethod::PrepareDecreaseVotingPower)
     PreparedTransaction(PreparedTransactionDataDto),
+    /// Response for
+    /// - [`PrepareMintNativeToken`](crate::method::AccountMethod::PrepareMintNativeToken),
+    PreparedMintTokenTransaction(PreparedMintTokenTransactionDto),
     /// Response for
     /// - [`GetTransaction`](crate::method::AccountMethod::GetTransaction),
     Transaction(Option<Box<TransactionDto>>),
@@ -352,9 +354,6 @@ pub enum Response {
     /// - [`SendAmount`](crate::method::AccountMethod::SendAmount),
     /// - [`SubmitAndStoreTransaction`](crate::method::AccountMethod::SubmitAndStoreTransaction)
     SentTransaction(TransactionDto),
-    /// Response for
-    /// - [`PrepareMintNativeToken`](crate::method::AccountMethod::PrepareMintNativeToken),
-    PrepareMintTokenTransaction(PrepareMintTokenTransactionDto),
     /// Response for
     /// - [`GetParticipationEvent`](crate::method::AccountMethod::GetParticipationEvent)
     /// - [`RegisterParticipationEvents`](crate::method::AccountMethod::RegisterParticipationEvents)

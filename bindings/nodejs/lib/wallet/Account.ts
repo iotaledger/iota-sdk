@@ -15,12 +15,12 @@ import type {
     AliasOutputParams,
     FilterOptions,
     GenerateAddressOptions,
-    MintTokenTransaction,
     MintNativeTokenParams,
     MintNftParams,
     OutputData,
     OutputParams,
     OutputsToClaim,
+    PreparedMintTokenTransaction,
     PreparedTransactionData,
     Transaction,
     TransactionOptions,
@@ -696,7 +696,7 @@ export class Account {
         tokenId: string,
         mintAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
-    ): Promise<MintTokenTransaction> {
+    ): Promise<PreparedMintTokenTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -722,7 +722,7 @@ export class Account {
     async prepareMintNativeToken(
         params: MintNativeTokenParams,
         transactionOptions?: TransactionOptions,
-    ): Promise<MintTokenTransaction> {
+    ): Promise<PreparedMintTokenTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {

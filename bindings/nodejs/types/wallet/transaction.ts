@@ -1,4 +1,5 @@
 import type { IOutputResponse, ITransactionPayload } from '@iota/types';
+import { PreparedTransactionData } from './preparedTransactionData';
 
 /** Possible InclusionStates of transactions sent with the wallet */
 export enum InclusionState {
@@ -31,6 +32,14 @@ export interface Transaction {
     /** Note that can be set when sending a transaction and is only stored locally */
     note?: string;
     inputs: IOutputResponse[];
+}
+
+/** The result of preparing a minting operation */
+export interface PreparedMintTokenTransaction {
+    /** The token id of the minted token */
+    tokenId: string;
+    /** The prepared transaction which will mint the token */
+    transaction: PreparedTransactionData;
 }
 
 /** The result of a minting operation */

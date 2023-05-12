@@ -25,7 +25,7 @@ use crate::{
     },
     wallet::{
         account::{
-            operations::transaction::high_level::minting::mint_native_token::PrepareMintTokenTransactionDto,
+            operations::transaction::high_level::minting::mint_native_token::PreparedMintTokenTransactionDto,
             types::{address::AccountAddress, AccountBalanceDto, TransactionDto},
             OutputDataDto,
         },
@@ -91,7 +91,7 @@ pub enum Response {
     PreparedTransaction(PreparedTransactionDataDto),
     /// Response for
     /// [`PrepareMintNativeToken`](crate::wallet::message_interface::AccountMethod::PrepareMintNativeToken),
-    PrepareMintTokenTransaction(PrepareMintTokenTransactionDto),
+    PreparedMintTokenTransaction(PreparedMintTokenTransactionDto),
     /// Response for
     /// [`GetTransaction`](crate::wallet::message_interface::AccountMethod::GetTransaction),
     Transaction(Option<Box<TransactionDto>>),
@@ -221,8 +221,8 @@ impl Debug for Response {
                 write!(f, "IncomingTransactionsData({transactions_data:?})")
             }
             Self::SentTransaction(transaction) => write!(f, "SentTransaction({transaction:?})"),
-            Self::PrepareMintTokenTransaction(mint_transaction) => {
-                write!(f, "PrepareMintTokenTransaction({mint_transaction:?})")
+            Self::PreparedMintTokenTransaction(mint_transaction) => {
+                write!(f, "PreparedMintTokenTransaction({mint_transaction:?})")
             }
             Self::StrongholdPasswordIsAvailable(is_available) => {
                 write!(f, "StrongholdPasswordIsAvailable({is_available:?})")

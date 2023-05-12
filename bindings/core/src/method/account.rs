@@ -357,4 +357,6 @@ pub enum AccountMethod {
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     GetParticipationEvents,
+    /// Expected response: [`Faucet`](crate::Response::Faucet)
+    RequestFundsFromFaucet { url: String, address: String },
 }

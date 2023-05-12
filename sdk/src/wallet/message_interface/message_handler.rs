@@ -33,7 +33,7 @@ use crate::{
         account::{
             operations::transaction::{
                 high_level::{
-                    create_alias::CreateAliasParams, minting::mint_native_token::PrepareMintTokenTransactionDto,
+                    create_alias::CreateAliasParams, minting::mint_native_token::PreparedMintTokenTransactionDto,
                 },
                 prepare_output::OutputParams,
                 TransactionOptions,
@@ -498,10 +498,10 @@ impl WalletMessageHandler {
                 output_consolidation_threshold,
             } => {
                 convert_async_panics(|| async {
-                    let transaction = account
-                        .consolidate_outputs(force, output_consolidation_threshold)
+                    let data = account
+                        .prepare_consolidate_outputs(force, output_consolidation_threshold)
                         .await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
                 })
                 .await
             }
@@ -668,7 +668,9 @@ impl WalletMessageHandler {
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
-                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data.1)))
+                    Ok(Response::PreparedMintTokenTransaction(
+                        PreparedMintTokenTransactionDto::from(&data),
+                    ))
                 })
                 .await
             }
@@ -724,8 +726,8 @@ impl WalletMessageHandler {
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
-                    Ok(Response::PrepareMintTokenTransaction(
-                        PrepareMintTokenTransactionDto::from(&data),
+                    Ok(Response::PreparedMintTokenTransaction(
+                        PreparedMintTokenTransactionDto::from(&data),
                     ))
                 })
                 .await

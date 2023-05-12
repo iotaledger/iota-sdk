@@ -42,7 +42,7 @@ pub use self::{
                 minting::{
                     mint_native_token::{
                         MintNativeTokenParams, MintNativeTokenParamsDto, MintTokenTransactionDto,
-                        PrepareMintTokenTransactionDto,
+                        PreparedMintTokenTransactionDto,
                     },
                     mint_nfts::{MintNftParams, MintNftParamsDto},
                 },
