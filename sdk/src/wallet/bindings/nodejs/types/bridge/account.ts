@@ -73,24 +73,24 @@ export type __ClaimOutputsMethod__ = {
     };
 };
 
-export type __ConsolidateOutputsMethod__ = {
-    name: 'consolidateOutputs';
+export type __PrepareConsolidateOutputsMethod__ = {
+    name: 'prepareConsolidateOutputs';
     data: {
         force: boolean;
         outputConsolidationThreshold?: number;
     };
 };
 
-export type __CreateAliasOutputMethod__ = {
-    name: 'createAliasOutput';
+export type __PrepareCreateAliasOutputMethod__ = {
+    name: 'prepareCreateAliasOutput';
     data: {
         params?: AliasOutputParams;
         options?: TransactionOptions;
     };
 };
 
-export type __DecreaseNativeTokenSupplyMethod__ = {
-    name: 'decreaseNativeTokenSupply';
+export type __PrepareDecreaseNativeTokenSupplyMethod__ = {
+    name: 'prepareDecreaseNativeTokenSupply';
     data: {
         tokenId: string;
         meltAmount: HexEncodedAmount;
@@ -105,16 +105,16 @@ export type __DeregisterParticipationEventMethod__ = {
     };
 };
 
-export type __DestroyAliasMethod__ = {
-    name: 'destroyAlias';
+export type __PrepareDestroyAliasMethod__ = {
+    name: 'prepareDestroyAlias';
     data: {
         aliasId: string;
         options?: TransactionOptions;
     };
 };
 
-export type __DestroyFoundryMethod__ = {
-    name: 'destroyFoundry';
+export type __PrepareDestroyFoundryMethod__ = {
+    name: 'prepareDestroyFoundry';
     data: {
         foundryId: string;
         options?: TransactionOptions;
@@ -209,8 +209,8 @@ export type __MinimumRequiredStorageDepositMethod__ = {
     };
 };
 
-export type __IncreaseNativeTokenSupplyMethod__ = {
-    name: 'increaseNativeTokenSupply';
+export type __PrepareIncreaseNativeTokenSupplyMethod__ = {
+    name: 'prepareIncreaseNativeTokenSupply';
     data: {
         tokenId: string;
         mintAmount: HexEncodedAmount;
@@ -330,6 +330,13 @@ export type __SetDefaultSyncOptionsMethod__ = {
 
 export type __SignTransactionEssenceMethod__ = {
     name: 'signTransactionEssence';
+    data: {
+        preparedTransactionData: PreparedTransactionData;
+    };
+};
+
+export type __SignAndSubmitTransaction__ = {
+    name: 'signAndSubmitTransaction';
     data: {
         preparedTransactionData: PreparedTransactionData;
     };

@@ -136,11 +136,11 @@ export class Account {
      * or custom inputs.
      * @returns The transaction.
      */
-    async burnNativeToken(
+    async prepareBurnNativeToken(
         tokenId: string,
         burnAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransactionData> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -164,10 +164,10 @@ export class Account {
      * or custom inputs.
      * @returns The transaction.
      */
-    async burnNft(
+    async prepareBurnNft(
         nftId: string,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransactionData> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -211,7 +211,7 @@ export class Account {
     async prepareConsolidateOutputs(
         force: boolean,
         outputConsolidationThreshold?: number,
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransactionData> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -235,7 +235,7 @@ export class Account {
     async prepareCreateAliasOutput(
         params?: AliasOutputParams,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransactionData> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -262,7 +262,7 @@ export class Account {
         tokenId: string,
         meltAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransactionData> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -304,7 +304,7 @@ export class Account {
     async prepareDestroyAlias(
         aliasId: string,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransactionData> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -329,7 +329,7 @@ export class Account {
     async prepareDestroyFoundry(
         foundryId: string,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransactionData> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -878,7 +878,7 @@ export class Account {
         transactionId: string,
         interval?: number,
         maxAttempts?: number,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<string> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -928,7 +928,7 @@ export class Account {
     async prepareSendNativeTokens(
         params: SendNativeTokensParams[],
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransactionData> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -953,7 +953,7 @@ export class Account {
     async prepareSendNft(
         params: SendNftParams[],
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransactionData> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1048,7 +1048,7 @@ export class Account {
      async signAndSubmitTransaction(
         preparedTransactionData: PreparedTransactionData,
     ): Promise<Transaction> {
-        const response = await this.methodHandler.callAccountMethod(
+        const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'signAndSubmitTransaction',
@@ -1104,7 +1104,7 @@ export class Account {
     async prepareVote(
         eventId?: ParticipationEventId,
         answers?: number[],
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransactionData> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1120,7 +1120,7 @@ export class Account {
 
     async prepareStopParticipating(
         eventId: ParticipationEventId,
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransactionData> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1153,7 +1153,7 @@ export class Account {
         return JSON.parse(resp).payload;
     }
 
-    async prepareVotingPower(amount: string): Promise<Transaction> {
+    async prepareVotingPower(amount: string): Promise<PreparedTransactionData> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1166,7 +1166,7 @@ export class Account {
         return JSON.parse(resp).payload;
     }
 
-    async prepareDecreaseVotingPower(amount: string): Promise<Transaction> {
+    async prepareDecreaseVotingPower(amount: string): Promise<PreparedTransactionData> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {

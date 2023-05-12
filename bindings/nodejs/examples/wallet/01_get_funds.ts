@@ -23,7 +23,7 @@ async function run() {
         const accountAddresses = await account.addresses();
         console.log('Account addresses:', accountAddresses);
 
-        const faucetResponse = await new Client({}).requestFundsFromFaucet(
+        const faucetResponse = await account.requestFundsFromFaucet(
             process.env.FAUCET_URL,
             accountAddresses[0].address,
         );

@@ -265,6 +265,14 @@ export type __RegisterParticipationEventsMethod__ = {
     };
 };
 
+export type __RequestFundsFromFaucetMethod__ = {
+    name: 'requestFundsFromFaucet';
+    data: {
+        url: string;
+        address: string;
+    };
+};
+
 export type __RetryTransactionUntilIncludedMethod__ = {
     name: 'retryTransactionUntilIncluded';
     data: {

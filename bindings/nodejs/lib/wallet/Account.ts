@@ -880,6 +880,23 @@ export class Account {
     }
 
     /**
+     * Request funds from a faucet.
+     */
+     async requestFundsFromFaucet(
+        url: string,
+        address: string,
+    ): Promise<string> {
+        const response = await this.methodHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'requestFundsFromFaucet',
+                data: { url, address },
+            },
+        );
+        return JSON.parse(response).payload;
+    }
+
+    /**
      * Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
      * included (referenced by a milestone). Returns the included block id.
      */
@@ -887,7 +904,7 @@ export class Account {
         transactionId: string,
         interval?: number,
         maxAttempts?: number,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<string> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
