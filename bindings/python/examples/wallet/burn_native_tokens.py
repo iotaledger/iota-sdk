@@ -9,12 +9,12 @@ load_dotenv()
 
 wallet = Wallet("./alice-database")
 
-account = wallet.get_account("Alice")
+account = wallet.get_account('Alice')
 
 # Sync account with the node
 response = account.sync()
 
-if "STRONGHOLD_PASSWORD" not in os.environ:
+if 'STRONGHOLD_PASSWORD' not in os.environ:
     print(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
     sys.exit(1)
 
@@ -29,4 +29,5 @@ to_burn = Burn().add_token(token_id, burn_amount)
 
 # Send transaction.
 transaction = account.burn(token_id, burn_amount)
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
+print(
+    f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
