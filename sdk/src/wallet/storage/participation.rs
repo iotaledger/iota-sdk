@@ -17,7 +17,7 @@ use crate::{
 
 impl StorageManager {
     pub(crate) async fn insert_participation_event(
-        &mut self,
+        &self,
         account_index: u32,
         event_with_nodes: ParticipationEventWithNodes,
     ) -> crate::wallet::Result<()> {
@@ -41,7 +41,7 @@ impl StorageManager {
     }
 
     pub(crate) async fn remove_participation_event(
-        &mut self,
+        &self,
         account_index: u32,
         id: &ParticipationEventId,
     ) -> crate::wallet::Result<()> {
@@ -81,7 +81,7 @@ impl StorageManager {
     }
 
     pub(crate) async fn set_cached_participation_output_status(
-        &mut self,
+        &self,
         account_index: u32,
         outputs_participation: HashMap<OutputId, OutputStatusResponse>,
     ) -> crate::wallet::Result<()> {
@@ -108,5 +108,65 @@ impl StorageManager {
             .get(&format!("{PARTICIPATION_CACHED_OUTPUTS}{account_index}"))
             .await?
             .unwrap_or_default())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{types::block::payload::transaction::TransactionId, wallet::storage::adapter::memory::Memory};
+
+    #[tokio::test]
+    async fn insert_get_remove_participation_event() {
+        let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
+        assert!(storage_manager.get_participation_events(0).await.unwrap().is_empty());
+
+        let event_with_nodes = ParticipationEventWithNodes::mock();
+        let event_with_nodes_id = event_with_nodes.id;
+
+        storage_manager
+            .insert_participation_event(0, event_with_nodes.clone())
+            .await
+            .unwrap();
+        let participation_events = storage_manager.get_participation_events(0).await.unwrap();
+
+        let mut expected = HashMap::new();
+        expected.insert(event_with_nodes_id, event_with_nodes);
+
+        assert_eq!(participation_events, expected);
+
+        storage_manager
+            .remove_participation_event(0, &event_with_nodes_id)
+            .await
+            .unwrap();
+        assert!(storage_manager.get_participation_events(0).await.unwrap().is_empty());
+    }
+
+    #[tokio::test]
+    async fn set_get_cached_participation_output_status() {
+        let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
+        assert!(
+            storage_manager
+                .get_cached_participation_output_status(0)
+                .await
+                .unwrap()
+                .is_empty()
+        );
+
+        let outputs_participation = std::iter::once((
+            OutputId::new(TransactionId::new([3; 32]), 0).unwrap(),
+            OutputStatusResponse::mock(),
+        ))
+        .collect::<HashMap<_, _>>();
+
+        storage_manager
+            .set_cached_participation_output_status(0, outputs_participation.clone())
+            .await
+            .unwrap();
+
+        assert_eq!(
+            storage_manager.get_cached_participation_output_status(0).await.unwrap(),
+            outputs_participation
+        );
     }
 }

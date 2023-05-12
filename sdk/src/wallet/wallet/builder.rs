@@ -194,24 +194,14 @@ impl WalletBuilder {
         unlock_unused_inputs(&mut accounts)?;
         #[cfg(not(feature = "storage"))]
         let accounts = Vec::new();
-        // Client is only required if there are existing accounts
-        let client = if accounts.is_empty() {
-            None
-        } else {
-            Some(
-                self.client_options
-                    .clone()
-                    .ok_or(crate::wallet::Error::MissingParameter("client_options"))?
-                    .finish()
-                    .await?,
-            )
-        };
         let wallet_inner = Arc::new(WalletInner {
             background_syncing_status: AtomicUsize::new(0),
-            client_options: RwLock::new(
-                self.client_options
-                    .ok_or(crate::wallet::Error::MissingParameter("client_options"))?,
-            ),
+            client: self
+                .client_options
+                .clone()
+                .ok_or(crate::wallet::Error::MissingParameter("client_options"))?
+                .finish()
+                .await?,
             coin_type: AtomicU32::new(self.coin_type.ok_or(crate::wallet::Error::MissingParameter(
                 "coin_type (IOTA: 4218, Shimmer: 4219)",
             ))?),
@@ -223,18 +213,14 @@ impl WalletBuilder {
             #[cfg(feature = "storage")]
             storage_options,
             #[cfg(feature = "storage")]
-            storage_manager: tokio::sync::Mutex::new(storage_manager),
+            storage_manager: tokio::sync::RwLock::new(storage_manager),
         });
 
-        let mut accounts: Vec<Account> = try_join_all(accounts.into_iter().map(|a| {
-            Account::new(
-                a,
-                // Safe to unwrap because we create the client if accounts aren't empty
-                client.as_ref().expect("client must exist").clone(),
-                wallet_inner.clone(),
-            )
-            .boxed()
-        }))
+        let mut accounts: Vec<Account> = try_join_all(
+            accounts
+                .into_iter()
+                .map(|a| Account::new(a, wallet_inner.clone()).boxed()),
+        )
         .await?;
 
         // If the wallet builder is not set, it means the user provided it and we need to update the addresses.
@@ -242,9 +228,7 @@ impl WalletBuilder {
         if new_provided_client_options {
             for account in accounts.iter_mut() {
                 // Safe to unwrap because we create the client if accounts aren't empty
-                account
-                    .update_account_with_new_client(client.as_ref().expect("client must exist").clone())
-                    .await?;
+                account.update_account_bech32_hrp().await?;
             }
         }
 
@@ -257,7 +241,7 @@ impl WalletBuilder {
     #[cfg(feature = "storage")]
     pub(crate) async fn from_wallet(wallet: &Wallet) -> Self {
         Self {
-            client_options: Some(wallet.client_options.read().await.clone()),
+            client_options: Some(ClientOptions::from_client(wallet.client()).await),
             coin_type: Some(wallet.coin_type.load(Ordering::Relaxed)),
             storage_options: Some(wallet.storage_options.clone()),
             secret_manager: Some(wallet.secret_manager.clone()),

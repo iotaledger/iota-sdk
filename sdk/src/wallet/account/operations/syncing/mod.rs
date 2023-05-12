@@ -29,7 +29,7 @@ impl Account {
         #[cfg(feature = "storage")]
         {
             let index = *self.details().await.index();
-            let mut storage_manager = self.wallet.storage_manager.lock().await;
+            let storage_manager = self.wallet.storage_manager.read().await;
             storage_manager.set_default_sync_options(index, &options).await?;
         }
 
@@ -103,7 +103,7 @@ impl Account {
         // Request possible spent outputs
         log::debug!("[SYNC] spent_or_not_synced_outputs: {spent_or_not_synced_output_ids:?}");
         let spent_or_unsynced_output_metadata_responses = self
-            .client
+            .client()
             .get_outputs_metadata_ignore_errors(spent_or_not_synced_output_ids.clone())
             .await?;
 

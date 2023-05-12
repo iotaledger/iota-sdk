@@ -35,7 +35,7 @@ impl Account {
         let voting_output = self.get_voting_output().await?;
         // lock so the same inputs can't be selected in multiple transactions
         let mut account_details = self.details_mut().await;
-        let protocol_parameters = self.client.get_protocol_parameters().await?;
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
 
         #[cfg(feature = "events")]
         self.emit(
@@ -44,7 +44,7 @@ impl Account {
         )
         .await;
 
-        let current_time = self.client.get_time_checked().await?;
+        let current_time = self.client().get_time_checked().await?;
         #[allow(unused_mut)]
         let mut forbidden_inputs = account_details.locked_outputs.clone();
 

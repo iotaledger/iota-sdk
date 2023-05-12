@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `OutputMetadata::set_spent` method;
 - `ignore_if_bech32_mismatch` parameter to `Wallet::restore_backup()`;
 - `OutputWithMetadata::{into_output, into_metadata}` methods;
+- Storage and Backup migration;
 
 ### Changed
 
@@ -44,17 +45,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Client::get_outputs()` and derived methods return `OutputWithMetadata` instead of `OutputWithMetadataDto`;
 - rename `Client::try_get_outputs()` into `Client::get_outputs_ignore_errors()`;
 - rename `Client::try_get_outputs_metadata()` into `Client::get_outputs_metadata_ignore_errors()`;
+- All `Node` related errors have been moved from the client error to a newly created `client::node_api::Error`;
 - MQTT connections to a node using https will now use wss/tls with native certificates;
 - `ClientBuilder::finish` is now async;
 - `Account::read` and `write` now accessible via `details` and `details_mut`;
 - `Wallet::emit_test_event` no longer returns a `Result`;
+- `Client`, `Wallet`, and `Account` fns updated to reflect internal reorganization;
 - `AccountBuilder::new` now takes a wallet;
+- `InputSigningDataDto::chain` is now `Vec<u32>` instead of `Chain`;
+- Most `StrongholdAdapter` fns no longer require a mutable reference;
+- `StorageProvider` fns no longer require a mutable reference;
 
 ### Removed
 
 - `FilterOptions`'s `Hash` derivation;
 - `client_without_tls` feature in favor of separate `client` and `tls` features;
 - `IncreaseNativeTokenSupplyOptions`;
+- `HARDENED` const;
 
 ## 0.3.0 - 2023-05-02
 

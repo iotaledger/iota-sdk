@@ -20,7 +20,7 @@ use std::{
 };
 
 use getset::{Getters, Setters};
-use serde::{de, Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Serialize};
 use tokio::sync::{Mutex, RwLock};
 
 #[cfg(feature = "participation")]
@@ -124,8 +124,7 @@ pub struct AccountDetails {
     // Maybe pending transactions even additionally separated?
     pending_transactions: HashSet<TransactionId>,
     /// Transaction payloads for received outputs with inputs when not pruned before syncing, can be used to determine
-    /// the sender address/es
-    #[serde(deserialize_with = "deserialize_or_convert")]
+    /// the sender address(es)
     incoming_transactions: HashMap<TransactionId, Transaction>,
     /// Some incoming transactions can be pruned by the node before we requested them, then this node can never return
     /// it. To avoid useless requests, these transaction ids are stored here and cleared when new client options are
@@ -141,7 +140,6 @@ pub struct AccountDetails {
 #[derive(Debug, Clone)]
 pub struct Account {
     inner: Arc<AccountInner>,
-    pub(crate) client: Client,
     pub(crate) wallet: Arc<WalletInner>,
 }
 
@@ -166,11 +164,11 @@ impl Deref for Account {
 
 impl Account {
     /// Create a new Account with an AccountDetails
-    pub(crate) async fn new(details: AccountDetails, client: Client, wallet: Arc<WalletInner>) -> Result<Self> {
+    pub(crate) async fn new(details: AccountDetails, wallet: Arc<WalletInner>) -> Result<Self> {
         #[cfg(feature = "storage")]
         let default_sync_options = wallet
             .storage_manager
-            .lock()
+            .read()
             .await
             .get_default_sync_options(*details.index())
             .await?
@@ -179,7 +177,6 @@ impl Account {
         let default_sync_options = Default::default();
 
         Ok(Self {
-            client,
             wallet,
             inner: Arc::new(AccountInner {
                 details: RwLock::new(details),
@@ -191,7 +188,7 @@ impl Account {
 
     // Get the Client
     pub fn client(&self) -> &Client {
-        &self.client
+        &self.wallet.client
     }
 
     /// Get the [`Output`] that minted a native token by the token ID. First try to get it
@@ -208,8 +205,8 @@ impl Account {
         }
 
         // Foundry was not found in the account, try to get it from the node
-        let foundry_output_id = self.client.foundry_output_id(foundry_id).await?;
-        let output_response = self.client.get_output(&foundry_output_id).await?;
+        let foundry_output_id = self.client().foundry_output_id(foundry_id).await?;
+        let output_response = self.client().get_output(&foundry_output_id).await?;
 
         Ok(output_response.output().to_owned())
     }
@@ -221,13 +218,13 @@ impl Account {
         log::debug!("[save] saving account to database");
         match updated_account {
             Some(account) => {
-                let mut storage_manager = self.wallet.storage_manager.lock().await;
+                let mut storage_manager = self.wallet.storage_manager.write().await;
                 storage_manager.save_account(account).await?;
                 drop(storage_manager);
             }
             None => {
                 let account_details = self.details().await;
-                let mut storage_manager = self.wallet.storage_manager.lock().await;
+                let mut storage_manager = self.wallet.storage_manager.write().await;
                 storage_manager.save_account(&account_details).await?;
                 drop(storage_manager);
                 drop(account_details);
@@ -426,32 +423,6 @@ impl AccountInner {
     }
 }
 
-// Custom deserialization to stay backwards compatible
-fn deserialize_or_convert<'de, D>(deserializer: D) -> std::result::Result<HashMap<TransactionId, Transaction>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let value = serde_json::Value::deserialize(deserializer)?;
-
-    type NewType = HashMap<TransactionId, Transaction>;
-    type OldType = HashMap<TransactionId, (TransactionPayload, Vec<OutputWithMetadataResponse>)>;
-
-    Ok(match serde_json::from_value::<NewType>(value.clone()) {
-        Ok(r) => r,
-        Err(_) => {
-            let v = serde_json::from_value::<OldType>(value).map_err(de::Error::custom)?;
-            let mut new = HashMap::new();
-            for (tx_id, (tx_payload, inputs)) in v {
-                new.insert(
-                    tx_id,
-                    build_transaction_from_payload_and_inputs(tx_id, tx_payload, inputs).map_err(de::Error::custom)?,
-                );
-            }
-            new
-        }
-    })
-}
-
 pub(crate) fn build_transaction_from_payload_and_inputs(
     tx_id: TransactionId,
     tx_payload: TransactionPayload,
@@ -573,4 +544,38 @@ fn serialize() {
     };
 
     serde_json::from_str::<AccountDetails>(&serde_json::to_string(&account).unwrap()).unwrap();
+}
+
+#[cfg(test)]
+impl AccountDetails {
+    /// Returns a mock of this type with the following values:
+    /// index: 0, coin_type: 4218, alias: "Alice", public_addresses: contains a single public account address
+    /// (rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy), all other fields are set to their Rust
+    /// defaults.
+    pub(crate) fn mock() -> Self {
+        Self {
+            index: 0,
+            coin_type: 4218,
+            alias: "Alice".to_string(),
+            public_addresses: vec![AccountAddress {
+                address: crate::types::block::address::Bech32Address::from_str(
+                    "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
+                )
+                .unwrap(),
+                key_index: 0,
+                internal: false,
+                used: false,
+            }],
+            internal_addresses: Vec::new(),
+            addresses_with_unspent_outputs: Vec::new(),
+            outputs: HashMap::new(),
+            locked_outputs: HashSet::new(),
+            unspent_outputs: HashMap::new(),
+            transactions: HashMap::new(),
+            pending_transactions: HashSet::new(),
+            incoming_transactions: HashMap::new(),
+            inaccessible_incoming_transactions: HashSet::new(),
+            native_token_foundries: HashMap::new(),
+        }
+    }
 }

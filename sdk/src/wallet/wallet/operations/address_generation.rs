@@ -124,16 +124,7 @@ impl Wallet {
                 .address
                 .hrp
                 .clone(),
-            None => {
-                self.client_options
-                    .read()
-                    .await
-                    .clone()
-                    .finish()
-                    .await?
-                    .get_bech32_hrp()
-                    .await?
-            }
+            None => self.client().get_bech32_hrp().await?,
         })
     }
 }
