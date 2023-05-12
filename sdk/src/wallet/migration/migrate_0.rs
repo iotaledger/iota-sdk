@@ -88,11 +88,11 @@ impl Migration for Migrate {
         if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
             ConvertHrp::check(
                 wallet
-                    .get_mut("clientOptions")
+                    .get_mut("client_options")
                     .ok_or(Error::Storage("missing client options".to_owned()))?
                     .get_mut("protocolParameters")
                     .ok_or(Error::Storage("missing protocol params".to_owned()))?
-                    .get_mut("bech32Hrp")
+                    .get_mut("bech32_hrp")
                     .ok_or(Error::Storage("missing bech32 hrp".to_owned()))?,
             )?;
             storage
@@ -162,7 +162,7 @@ impl Migration for Migrate {
                 client_options
                     .get_mut("protocolParameters")
                     .ok_or(Error::Storage("missing protocol params".to_owned()))?
-                    .get_mut("bech32Hrp")
+                    .get_mut("bech32_hrp")
                     .ok_or(Error::Storage("missing bech32 hrp".to_owned()))?,
             )?;
             storage
