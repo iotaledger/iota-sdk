@@ -5,7 +5,7 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::api::PreparedTransactionData,
+    client::api::{PreparedTransactionData, PreparedTransactionDataDto},
     types::block::{
         address::AliasAddress,
         dto::U256Dto,
@@ -96,6 +96,31 @@ impl From<&MintTokenTransaction> for MintTokenTransactionDto {
     }
 }
 
+/// The result of a minting native token transaction
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PrepareMintTokenTransaction {
+    pub token_id: TokenId,
+    pub transaction: PreparedTransactionData,
+}
+
+/// Dto for MintTokenTransaction
+#[derive(Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PrepareMintTokenTransactionDto {
+    pub token_id: TokenId,
+    pub transaction: PreparedTransactionDataDto,
+}
+
+impl From<&PrepareMintTokenTransaction> for PrepareMintTokenTransactionDto {
+    fn from(value: &PrepareMintTokenTransaction) -> Self {
+        Self {
+            token_id: value.token_id,
+            transaction: PreparedTransactionDataDto::from(&value.transaction),
+        }
+    }
+}
+
 impl Account {
     /// Function to create a new foundry output with minted native tokens.
     /// Calls [Account.send()](crate::account::Account.send) internally, the options can define the
@@ -120,10 +145,13 @@ impl Account {
         params: MintNativeTokenParams,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<MintTokenTransaction> {
-        let (token_id, prepared_transaction) = self.prepare_mint_native_token(params, options).await?;
-        self.sign_and_submit_transaction(prepared_transaction)
+        let prepared = self.prepare_mint_native_token(params, options).await?;
+        self.sign_and_submit_transaction(prepared.transaction)
             .await
-            .map(|transaction| MintTokenTransaction { token_id, transaction })
+            .map(|transaction| MintTokenTransaction {
+                token_id: prepared.token_id,
+                transaction,
+            })
     }
 
     /// Function to prepare the transaction for
@@ -132,7 +160,7 @@ impl Account {
         &self,
         params: MintNativeTokenParams,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<(TokenId, PreparedTransactionData)> {
+    ) -> crate::wallet::Result<PrepareMintTokenTransaction> {
         log::debug!("[TRANSACTION] mint_native_token");
         let rent_structure = self.client.get_rent_structure().await?;
         let token_supply = self.client.get_token_supply().await?;
@@ -181,7 +209,7 @@ impl Account {
 
             self.prepare_transaction(outputs, options)
                 .await
-                .map(|transaction| (token_id, transaction))
+                .map(|transaction| PrepareMintTokenTransaction { token_id, transaction })
         } else {
             unreachable!("We checked if it's an alias output before")
         }

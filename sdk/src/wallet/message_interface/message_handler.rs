@@ -32,7 +32,11 @@ use crate::{
     wallet::{
         account::{
             operations::transaction::{
-                high_level::create_alias::CreateAliasParams, prepare_output::OutputParams, TransactionOptions,
+                high_level::{
+                    create_alias::CreateAliasParams, minting::mint_native_token::PrepareMintTokenTransactionDto,
+                },
+                prepare_output::OutputParams,
+                TransactionOptions,
             },
             types::{AccountBalanceDto, AccountIdentifier, TransactionDto},
             OutputDataDto,
@@ -720,7 +724,9 @@ impl WalletMessageHandler {
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
-                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data.1)))
+                    Ok(Response::PrepareMintTokenTransaction(
+                        PrepareMintTokenTransactionDto::from(&data),
+                    ))
                 })
                 .await
             }
@@ -893,18 +899,18 @@ impl WalletMessageHandler {
                 .await
             }
             #[cfg(feature = "participation")]
-            AccountMethod::Vote { event_id, answers } => {
+            AccountMethod::PrepareVote { event_id, answers } => {
                 convert_async_panics(|| async {
-                    let transaction = account.vote(event_id, answers).await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
+                    let data = account.prepare_vote(event_id, answers).await?;
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
                 })
                 .await
             }
             #[cfg(feature = "participation")]
-            AccountMethod::StopParticipating { event_id } => {
+            AccountMethod::PrepareStopParticipating { event_id } => {
                 convert_async_panics(|| async {
-                    let transaction = account.stop_participating(event_id).await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
+                    let data = account.prepare_stop_participating(event_id).await?;
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
                 })
                 .await
             }
@@ -917,26 +923,26 @@ impl WalletMessageHandler {
                 .await
             }
             #[cfg(feature = "participation")]
-            AccountMethod::IncreaseVotingPower { amount } => {
+            AccountMethod::PrepareIncreaseVotingPower { amount } => {
                 convert_async_panics(|| async {
-                    let transaction = account
-                        .increase_voting_power(
+                    let data = account
+                        .prepare_increase_voting_power(
                             u64::from_str(&amount).map_err(|_| crate::client::Error::InvalidAmount(amount.clone()))?,
                         )
                         .await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
                 })
                 .await
             }
             #[cfg(feature = "participation")]
-            AccountMethod::DecreaseVotingPower { amount } => {
+            AccountMethod::PrepareDecreaseVotingPower { amount } => {
                 convert_async_panics(|| async {
-                    let transaction = account
-                        .decrease_voting_power(
+                    let data = account
+                        .prepare_decrease_voting_power(
                             u64::from_str(&amount).map_err(|_| crate::client::Error::InvalidAmount(amount.clone()))?,
                         )
                         .await?;
-                    Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
+                    Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
                 })
                 .await
             }

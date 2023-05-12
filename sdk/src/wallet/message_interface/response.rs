@@ -25,7 +25,7 @@ use crate::{
     },
     wallet::{
         account::{
-            operations::transaction::high_level::minting::mint_native_token::MintTokenTransactionDto,
+            operations::transaction::high_level::minting::mint_native_token::PrepareMintTokenTransactionDto,
             types::{address::AccountAddress, AccountBalanceDto, TransactionDto},
             OutputDataDto,
         },
@@ -77,7 +77,21 @@ pub enum Response {
     /// Response for
     /// [`PrepareSendAmount`](crate::wallet::message_interface::AccountMethod::PrepareSendAmount),
     /// [`PrepareTransaction`](crate::wallet::message_interface::AccountMethod::PrepareTransaction)
+    /// [`PrepareCreateAliasOutput`](crate::wallet::message_interface::AccountMethod::PrepareCreateAliasOutput)
+    /// [`PrepareConsolidateOutputs`](crate::wallet::message_interface::AccountMethod::PrepareConsolidateOutputs)
+    /// [`PrepareMintNfts`](crate::wallet::message_interface::AccountMethod::PrepareMintNfts),
+    /// [`PrepareSendNativeTokens`](crate::wallet::message_interface::AccountMethod::PrepareSendNativeTokens),
+    /// [`PrepareSendNft`](crate::wallet::message_interface::AccountMethod::PrepareSendNft),
+    /// [`PrepareSendAmount`](crate::wallet::message_interface::AccountMethod::PrepareSendAmount),
+    ///
+    /// [`PrepareVote`](crate::wallet::message_interface::AccountMethod::PrepareVote)
+    /// [`PrepareStopParticipating`](crate::wallet::message_interface::AccountMethod::PrepareStopParticipating)
+    /// [`PrepareIncreaseVotingPower`](crate::wallet::message_interface::AccountMethod::PrepareIncreaseVotingPower)
+    /// [`PrepareDecreaseVotingPower`](crate::wallet::message_interface::AccountMethod::PrepareDecreaseVotingPower)
     PreparedTransaction(PreparedTransactionDataDto),
+    /// Response for
+    /// [`PrepareMintNativeToken`](crate::wallet::message_interface::AccountMethod::PrepareMintNativeToken),
+    PrepareMintTokenTransaction(PrepareMintTokenTransactionDto),
     /// Response for
     /// [`GetTransaction`](crate::wallet::message_interface::AccountMethod::GetTransaction),
     Transaction(Option<Box<TransactionDto>>),
@@ -108,24 +122,10 @@ pub enum Response {
     /// [`IncomingTransactions`](crate::wallet::message_interface::AccountMethod::IncomingTransactions),
     IncomingTransactionsData(Vec<(TransactionId, TransactionDto)>),
     /// Response for
-    /// [`ConsolidateOutputs`](crate::wallet::message_interface::AccountMethod::ConsolidateOutputs)
     /// [`ClaimOutputs`](crate::wallet::message_interface::AccountMethod::ClaimOutputs)
-    /// [`CreateAliasOutput`](crate::wallet::message_interface::AccountMethod::CreateAliasOutput)
-    /// [`SendAmount`](crate::wallet::message_interface::AccountMethod::SendAmount),
-    /// [`MintNfts`](crate::wallet::message_interface::AccountMethod::MintNfts),
-    /// [`SendAmount`](crate::wallet::message_interface::AccountMethod::SendAmount),
-    /// [`SendNativeTokens`](crate::wallet::message_interface::AccountMethod::SendNativeTokens),
-    /// [`SendNft`](crate::wallet::message_interface::AccountMethod::SendNft),
     /// [`SendOutputs`](crate::wallet::message_interface::AccountMethod::SendOutputs)
     /// [`SubmitAndStoreTransaction`](crate::wallet::message_interface::AccountMethod::SubmitAndStoreTransaction)
-    /// [`Vote`](crate::wallet::message_interface::AccountMethod::Vote)
-    /// [`StopParticipating`](crate::wallet::message_interface::AccountMethod::StopParticipating)
-    /// [`IncreaseVotingPower`](crate::wallet::message_interface::AccountMethod::IncreaseVotingPower)
-    /// [`DecreaseVotingPower`](crate::wallet::message_interface::AccountMethod::DecreaseVotingPower)
     SentTransaction(TransactionDto),
-    /// Response for
-    /// [`MintNativeToken`](crate::wallet::message_interface::AccountMethod::MintNativeToken),
-    MintTokenTransaction(MintTokenTransactionDto),
     /// Response for
     /// [`IsStrongholdPasswordAvailable`](crate::wallet::message_interface::Message::IsStrongholdPasswordAvailable)
     StrongholdPasswordIsAvailable(bool),
@@ -221,8 +221,8 @@ impl Debug for Response {
                 write!(f, "IncomingTransactionsData({transactions_data:?})")
             }
             Self::SentTransaction(transaction) => write!(f, "SentTransaction({transaction:?})"),
-            Self::MintTokenTransaction(mint_transaction) => {
-                write!(f, "MintTokenTransaction({mint_transaction:?})")
+            Self::PrepareMintTokenTransaction(mint_transaction) => {
+                write!(f, "PrepareMintTokenTransaction({mint_transaction:?})")
             }
             Self::StrongholdPasswordIsAvailable(is_available) => {
                 write!(f, "StrongholdPasswordIsAvailable({is_available:?})")

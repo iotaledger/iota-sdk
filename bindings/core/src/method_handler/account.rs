@@ -15,7 +15,8 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{AccountBalanceDto, TransactionDto},
-            Account, CreateAliasParams, MintTokenTransactionDto, OutputDataDto, OutputParams, TransactionOptions,
+            Account, CreateAliasParams, OutputDataDto, OutputParams, PrepareMintTokenTransactionDto,
+            TransactionOptions,
         },
         message_interface::AddressWithUnspentOutputsDto,
         MintNativeTokenParams, MintNftParams, SendAmountParams,
@@ -198,7 +199,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data.1))
+            Response::PrepareMintTokenTransaction(PrepareMintTokenTransactionDto::from(&data))
         }
         AccountMethod::PrepareSendNativeTokens { params, options } => {
             let data = account
@@ -319,17 +320,6 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
-        AccountMethod::SignAndSubmitTransaction {
-            prepared_transaction_data,
-        } => {
-            let transaction = account
-                .sign_and_submit_transaction(PreparedTransactionData::try_from_dto(
-                    &prepared_transaction_data,
-                    &account.client().get_protocol_parameters().await?,
-                )?)
-                .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
-        }
         AccountMethod::SignTransactionEssence {
             prepared_transaction_data,
         } => {
@@ -340,6 +330,17 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 )?)
                 .await?;
             Response::SignedTransactionData(SignedTransactionDataDto::from(&signed_transaction_data))
+        }
+        AccountMethod::SignAndSubmitTransaction {
+            prepared_transaction_data,
+        } => {
+            let transaction = account
+                .sign_and_submit_transaction(PreparedTransactionData::try_from_dto(
+                    &prepared_transaction_data,
+                    &account.client().get_protocol_parameters().await?,
+                )?)
+                .await?;
+            Response::SentTransaction(TransactionDto::from(&transaction))
         }
         AccountMethod::SubmitAndStoreTransaction {
             signed_transaction_data,
@@ -356,14 +357,14 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
         #[cfg(feature = "participation")]
-        AccountMethod::Vote { event_id, answers } => {
-            let transaction = account.vote(event_id, answers).await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+        AccountMethod::PrepareVote { event_id, answers } => {
+            let data = account.prepare_vote(event_id, answers).await?;
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         #[cfg(feature = "participation")]
-        AccountMethod::StopParticipating { event_id } => {
-            let transaction = account.stop_participating(event_id).await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+        AccountMethod::PrepareStopParticipating { event_id } => {
+            let data = account.prepare_stop_participating(event_id).await?;
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         #[cfg(feature = "participation")]
         AccountMethod::GetVotingPower => {
@@ -376,22 +377,22 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::AccountParticipationOverview(overview)
         }
         #[cfg(feature = "participation")]
-        AccountMethod::IncreaseVotingPower { amount } => {
-            let transaction = account
-                .increase_voting_power(
+        AccountMethod::PrepareIncreaseVotingPower { amount } => {
+            let data = account
+                .prepare_increase_voting_power(
                     u64::from_str(&amount).map_err(|_| iota_sdk::client::Error::InvalidAmount(amount.clone()))?,
                 )
                 .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         #[cfg(feature = "participation")]
-        AccountMethod::DecreaseVotingPower { amount } => {
-            let transaction = account
-                .decrease_voting_power(
+        AccountMethod::PrepareDecreaseVotingPower { amount } => {
+            let data = account
+                .prepare_decrease_voting_power(
                     u64::from_str(&amount).map_err(|_| iota_sdk::client::Error::InvalidAmount(amount.clone()))?,
                 )
                 .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         #[cfg(feature = "participation")]
         AccountMethod::RegisterParticipationEvents { options } => {

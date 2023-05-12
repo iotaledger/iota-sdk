@@ -49,8 +49,8 @@ export type __BuildNftOutputMethod__ = {
     data: BuildNftOutputData;
 };
 
-export type __BurnNativeTokenMethod__ = {
-    name: 'burnNativeToken';
+export type __PrepareBurnNativeTokenMethod__ = {
+    name: 'prepareBurnNativeToken';
     data: {
         tokenId: string;
         burnAmount: HexEncodedAmount;
@@ -58,8 +58,8 @@ export type __BurnNativeTokenMethod__ = {
     };
 };
 
-export type __BurnNftMethod__ = {
-    name: 'burnNft';
+export type __PrepareBurnNftMethod__ = {
+    name: 'prepareBurnNft';
     data: {
         nftId: string;
         options?: TransactionOptions;
@@ -73,24 +73,24 @@ export type __ClaimOutputsMethod__ = {
     };
 };
 
-export type __ConsolidateOutputsMethod__ = {
-    name: 'consolidateOutputs';
+export type __PrepareConsolidateOutputsMethod__ = {
+    name: 'prepareConsolidateOutputs';
     data: {
         force: boolean;
         outputConsolidationThreshold?: number;
     };
 };
 
-export type __CreateAliasOutputMethod__ = {
-    name: 'createAliasOutput';
+export type __PrepareCreateAliasOutputMethod__ = {
+    name: 'prepareCreateAliasOutput';
     data: {
         params?: AliasOutputParams;
         options?: TransactionOptions;
     };
 };
 
-export type __DecreaseNativeTokenSupplyMethod__ = {
-    name: 'decreaseNativeTokenSupply';
+export type __PrepareDecreaseNativeTokenSupplyMethod__ = {
+    name: 'prepareDecreaseNativeTokenSupply';
     data: {
         tokenId: string;
         meltAmount: HexEncodedAmount;
@@ -105,16 +105,16 @@ export type __DeregisterParticipationEventMethod__ = {
     };
 };
 
-export type __DestroyAliasMethod__ = {
-    name: 'destroyAlias';
+export type __PrepareDestroyAliasMethod__ = {
+    name: 'prepareDestroyAlias';
     data: {
         aliasId: string;
         options?: TransactionOptions;
     };
 };
 
-export type __DestroyFoundryMethod__ = {
-    name: 'destroyFoundry';
+export type __PrepareDestroyFoundryMethod__ = {
+    name: 'prepareDestroyFoundry';
     data: {
         foundryId: string;
         options?: TransactionOptions;
@@ -209,8 +209,8 @@ export type __MinimumRequiredStorageDepositMethod__ = {
     };
 };
 
-export type __IncreaseNativeTokenSupplyMethod__ = {
-    name: 'increaseNativeTokenSupply';
+export type __PrepareIncreaseNativeTokenSupplyMethod__ = {
+    name: 'prepareIncreaseNativeTokenSupply';
     data: {
         tokenId: string;
         mintAmount: HexEncodedAmount;
@@ -218,16 +218,16 @@ export type __IncreaseNativeTokenSupplyMethod__ = {
     };
 };
 
-export type __MintNativeTokenMethod__ = {
-    name: 'mintNativeToken';
+export type __PrepareMintNativeTokenMethod__ = {
+    name: 'prepareMintNativeToken';
     data: {
         params: MintNativeTokenParams;
         options?: TransactionOptions;
     };
 };
 
-export type __MintNftsMethod__ = {
-    name: 'mintNfts';
+export type __PrepareMintNftsMethod__ = {
+    name: 'prepareMintNfts';
     data: {
         params: MintNftParams[];
         options?: TransactionOptions;
@@ -282,16 +282,16 @@ export type __SendAmountMethod__ = {
     };
 };
 
-export type __SendNativeTokensMethod__ = {
-    name: 'sendNativeTokens';
+export type __PrepareSendNativeTokensMethod__ = {
+    name: 'prepareSendNativeTokens';
     data: {
         params: SendNativeTokensParams[];
         options?: TransactionOptions;
     };
 };
 
-export type __SendNftMethod__ = {
-    name: 'sendNft';
+export type __PrepareSendNftMethod__ = {
+    name: 'prepareSendNft';
     data: {
         params: SendNftParams[];
         options?: TransactionOptions;
@@ -327,6 +327,13 @@ export type __SignTransactionEssenceMethod__ = {
     };
 };
 
+export type __SignAndSubmitTransaction__ = {
+    name: 'signAndSubmitTransaction';
+    data: {
+        preparedTransactionData: PreparedTransactionData;
+    };
+};
+
 export type __SubmitAndStoreTransactionMethod__ = {
     name: 'submitAndStoreTransaction';
     data: {
@@ -341,16 +348,16 @@ export type __SyncAccountMethod__ = {
     };
 };
 
-export type __VoteMethod__ = {
-    name: 'vote';
+export type __PrepareVoteMethod__ = {
+    name: 'prepareVote';
     data: {
         eventId?: ParticipationEventId;
         answers?: number[];
     };
 };
 
-export type __StopParticipatingMethod__ = {
-    name: 'stopParticipating';
+export type __PrepareStopParticipatingMethod__ = {
+    name: 'prepareStopParticipating';
     data: {
         eventId: ParticipationEventId;
     };
@@ -363,8 +370,8 @@ export type __GetParticipationOverviewMethod__ = {
     };
 };
 
-export type __IncreaseVotingPowerMethod__ = {
-    name: 'increaseVotingPower';
+export type __PrepareIncreaseVotingPowerMethod__ = {
+    name: 'prepareIncreaseVotingPower';
     data: {
         amount: string;
     };
@@ -396,8 +403,8 @@ export type __GetParticipationEventStatusMethod__ = {
     };
 };
 
-export type __DecreaseVotingPowerMethod__ = {
-    name: 'decreaseVotingPower';
+export type __PrepareDecreaseVotingPowerMethod__ = {
+    name: 'prepareDecreaseVotingPower';
     data: {
         amount: string;
     };

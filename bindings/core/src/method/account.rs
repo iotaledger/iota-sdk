@@ -272,24 +272,24 @@ pub enum AccountMethod {
         signed_transaction_data: SignedTransactionDataDto,
     },
     /// Claim outputs.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     ClaimOutputs { output_ids_to_claim: Vec<OutputId> },
     /// Vote for a participation event.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[serde(rename_all = "camelCase")]
-    Vote {
+    PrepareVote {
         event_id: Option<ParticipationEventId>,
         answers: Option<Vec<u8>>,
     },
     /// Stop participating for an event.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[serde(rename_all = "camelCase")]
-    StopParticipating { event_id: ParticipationEventId },
+    PrepareStopParticipating { event_id: ParticipationEventId },
     /// Get the account's total voting power (voting or NOT voting).
     /// Expected response: [`VotingPower`](crate::Response::VotingPower)
     #[cfg(feature = "participation")]
@@ -309,16 +309,16 @@ pub enum AccountMethod {
     /// special output, which is really a basic one with some metadata.
     /// This will stop voting in most cases (if there is a remainder output), but the voting data isn't lost and
     /// calling `Vote` without parameters will revote. Expected response:
-    /// [`SentTransaction`](crate::Response::SentTransaction)
+    /// [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    IncreaseVotingPower { amount: String },
+    PrepareIncreaseVotingPower { amount: String },
     /// Reduces an account's "voting power" by a given amount.
     /// This will stop voting, but the voting data isn't lost and calling `Vote` without parameters will revote.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    DecreaseVotingPower { amount: String },
+    PrepareDecreaseVotingPower { amount: String },
     /// Stores participation information locally and returns the event.
     ///
     /// This will NOT store the node url and auth inside the client options.

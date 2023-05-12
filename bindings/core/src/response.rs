@@ -44,7 +44,7 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{AccountAddress, AccountBalanceDto, TransactionDto},
-            MintTokenTransactionDto, OutputDataDto,
+            OutputDataDto, PrepareMintTokenTransactionDto,
         },
         message_interface::dtos::{AccountDetailsDto, AddressWithUnspentOutputsDto},
     },
@@ -239,7 +239,7 @@ pub enum Response {
     /// - [`HexToBech32`](crate::method::ClientMethod::HexToBech32)
     /// - [`NftIdToBech32`](crate::method::ClientMethod::NftIdToBech32)
     Bech32Address(String),
-    /// - [`Faucet`](crate::method::UtilsMethod::Faucet)
+    /// - [`Faucet`](crate::method::ClientMethod::RequestFundsFromFaucet)
     Faucet(String),
     /// Response for:
     /// - [`GenerateMnemonic`](crate::method::UtilsMethod::GenerateMnemonic)
@@ -308,9 +308,20 @@ pub enum Response {
     /// - [`Outputs`](crate::method::AccountMethod::Outputs),
     /// - [`UnspentOutputs`](crate::method::AccountMethod::UnspentOutputs)
     OutputsData(Vec<OutputDataDto>),
-    /// Response for
-    /// - [`PrepareSendAmount`](crate::method::AccountMethod::PrepareSendAmount),
-    /// - [`PrepareTransaction`](crate::method::AccountMethod::PrepareTransaction)
+    /// Response for    
+    /// [`PrepareSendAmount`](crate::method::AccountMethod::PrepareSendAmount),
+    /// [`PrepareTransaction`](crate::method::AccountMethod::PrepareTransaction)
+    /// [`PrepareCreateAliasOutput`](crate::method::AccountMethod::PrepareCreateAliasOutput)
+    /// [`PrepareConsolidateOutputs`](crate::method::AccountMethod::PrepareConsolidateOutputs)
+    /// [`PrepareMintNfts`](crate::method::AccountMethod::PrepareMintNfts),
+    /// [`PrepareSendNativeTokens`](crate::method::AccountMethod::PrepareSendNativeTokens),
+    /// [`PrepareSendNft`](crate::method::AccountMethod::PrepareSendNft),
+    /// [`PrepareSendAmount`](crate::method::AccountMethod::PrepareSendAmount),
+    ///
+    /// [`PrepareVote`](crate::method::AccountMethod::PrepareVote)
+    /// [`PrepareStopParticipating`](crate::method::AccountMethod::PrepareStopParticipating)
+    /// [`PrepareIncreaseVotingPower`](crate::method::AccountMethod::PrepareIncreaseVotingPower)
+    /// [`PrepareDecreaseVotingPower`](crate::method::AccountMethod::PrepareDecreaseVotingPower)
     PreparedTransaction(PreparedTransactionDataDto),
     /// Response for
     /// - [`GetTransaction`](crate::method::AccountMethod::GetTransaction),
@@ -337,24 +348,13 @@ pub enum Response {
     /// - [`IncomingTransactions`](crate::method::AccountMethod::IncomingTransactions),
     IncomingTransactionsData(Vec<(TransactionId, TransactionDto)>),
     /// Response for
-    /// - [`ConsolidateOutputs`](crate::method::AccountMethod::ConsolidateOutputs)
     /// - [`ClaimOutputs`](crate::method::AccountMethod::ClaimOutputs)
-    /// - [`CreateAliasOutput`](crate::method::AccountMethod::CreateAliasOutput)
     /// - [`SendAmount`](crate::method::AccountMethod::SendAmount),
-    /// - [`MintNfts`](crate::method::AccountMethod::MintNfts),
-    /// - [`SendAmount`](crate::method::AccountMethod::SendAmount),
-    /// - [`SendNativeTokens`](crate::method::AccountMethod::SendNativeTokens),
-    /// - [`SendNft`](crate::method::AccountMethod::SendNft),
-    /// - [`SendOutputs`](crate::method::AccountMethod::SendOutputs)
     /// - [`SubmitAndStoreTransaction`](crate::method::AccountMethod::SubmitAndStoreTransaction)
-    /// - [`Vote`](crate::method::AccountMethod::Vote)
-    /// - [`StopParticipating`](crate::method::AccountMethod::StopParticipating)
-    /// - [`IncreaseVotingPower`](crate::method::AccountMethod::IncreaseVotingPower)
-    /// - [`DecreaseVotingPower`](crate::method::AccountMethod::DecreaseVotingPower)
     SentTransaction(TransactionDto),
     /// Response for
-    /// - [`MintNativeToken`](crate::method::AccountMethod::MintNativeToken),
-    MintTokenTransaction(MintTokenTransactionDto),
+    /// - [`PrepareMintNativeToken`](crate::method::AccountMethod::PrepareMintNativeToken),
+    PrepareMintTokenTransaction(PrepareMintTokenTransactionDto),
     /// Response for
     /// - [`GetParticipationEvent`](crate::method::AccountMethod::GetParticipationEvent)
     /// - [`RegisterParticipationEvents`](crate::method::AccountMethod::RegisterParticipationEvents)

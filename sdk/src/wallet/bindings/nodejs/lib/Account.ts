@@ -1041,6 +1041,26 @@ export class Account {
     }
 
     /**
+     * Sign a prepared transaction, and send it.
+     * @param preparedTransactionData The prepared transaction data to sign and submit.
+     * @returns The transaction.
+     */
+     async signAndSubmitTransaction(
+        preparedTransactionData: PreparedTransactionData,
+    ): Promise<Transaction> {
+        const response = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'signAndSubmitTransaction',
+                data: {
+                    preparedTransactionData,
+                },
+            },
+        );
+        return JSON.parse(response).payload;
+    }
+
+    /**
      * Validate the transaction, submit it to a node and store it in the account.
      * @param signedTransactionData A signed transaction to submit and store.
      * @returns The sent transaction.
@@ -1081,14 +1101,14 @@ export class Account {
         return JSON.parse(resp).payload;
     }
 
-    async vote(
+    async prepareVote(
         eventId?: ParticipationEventId,
         answers?: number[],
     ): Promise<Transaction> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'vote',
+                name: 'prepareVote',
                 data: {
                     eventId,
                     answers,
@@ -1098,13 +1118,13 @@ export class Account {
         return JSON.parse(resp).payload;
     }
 
-    async stopParticipating(
+    async prepareStopParticipating(
         eventId: ParticipationEventId,
     ): Promise<Transaction> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'stopParticipating',
+                name: 'prepareStopParticipating',
                 data: {
                     eventId,
                 },
@@ -1133,11 +1153,11 @@ export class Account {
         return JSON.parse(resp).payload;
     }
 
-    async increaseVotingPower(amount: string): Promise<Transaction> {
+    async prepareVotingPower(amount: string): Promise<Transaction> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'increaseVotingPower',
+                name: 'prepareIncreaseVotingPower',
                 data: {
                     amount,
                 },
@@ -1146,11 +1166,11 @@ export class Account {
         return JSON.parse(resp).payload;
     }
 
-    async decreaseVotingPower(amount: string): Promise<Transaction> {
+    async prepareDecreaseVotingPower(amount: string): Promise<Transaction> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'decreaseVotingPower',
+                name: 'prepareDecreaseVotingPower',
                 data: {
                     amount,
                 },

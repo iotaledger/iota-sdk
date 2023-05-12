@@ -290,16 +290,16 @@ export type __SendAmountMethod__ = {
     };
 };
 
-export type __SendNativeTokensMethod__ = {
-    name: 'sendNativeTokens';
+export type __PrepareSendNativeTokensMethod__ = {
+    name: 'prepareSendNativeTokens';
     data: {
         params: SendNativeTokensParams[];
         options?: TransactionOptions;
     };
 };
 
-export type __SendNftMethod__ = {
-    name: 'sendNft';
+export type __PrepareSendNftMethod__ = {
+    name: 'prepareSendNft';
     data: {
         params: SendNftParams[];
         options?: TransactionOptions;
@@ -349,16 +349,16 @@ export type __SyncAccountMethod__ = {
     };
 };
 
-export type __VoteMethod__ = {
-    name: 'vote';
+export type __PrepareVoteMethod__ = {
+    name: 'prepareVote';
     data: {
         eventId?: ParticipationEventId;
         answers?: number[];
     };
 };
 
-export type __StopParticipatingMethod__ = {
-    name: 'stopParticipating';
+export type __PrepareStopParticipatingMethod__ = {
+    name: 'prepareStopParticipating';
     data: {
         eventId: ParticipationEventId;
     };
@@ -371,8 +371,8 @@ export type __GetParticipationOverviewMethod__ = {
     };
 };
 
-export type __IncreaseVotingPowerMethod__ = {
-    name: 'increaseVotingPower';
+export type __PrepareIncreaseVotingPowerMethod__ = {
+    name: 'prepareIncreaseVotingPower';
     data: {
         amount: string;
     };
@@ -404,8 +404,8 @@ export type __GetParticipationEventStatusMethod__ = {
     };
 };
 
-export type __DecreaseVotingPowerMethod__ = {
-    name: 'decreaseVotingPower';
+export type __PrepareDecreaseVotingPowerMethod__ = {
+    name: 'prepareDecreaseVotingPower';
     data: {
         amount: string;
     };
