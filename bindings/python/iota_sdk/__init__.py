@@ -8,6 +8,7 @@ from .wallet.wallet import Wallet, Account
 from .secret_manager.secret_manager import *
 from .prefix_hex import *
 from .types.address import *
+from .types.burn import *
 from .types.common import *
 from .types.feature import *
 from .types.native_token import *

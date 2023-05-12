@@ -1,10 +1,10 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from __future__ import annotations  # For Burn reference in BurnDto
+from __future__ import annotations  # For Burn reference in Burn
 from dataclasses import dataclass
 from typing import List, Optional, Dict, Any
-from types.native_token import NativeToken
+from iota_sdk.types.native_token import NativeToken
 
 
 @dataclass
