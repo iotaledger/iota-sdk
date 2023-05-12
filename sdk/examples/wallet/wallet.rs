@@ -51,7 +51,7 @@ async fn main() -> Result<()> {
     generate_addresses(&account, MAX_ADDRESSES_TO_GENERATE).await?;
     print_addresses(&account).await?;
 
-    // Uncomment to print the full balance
+    // Change to `true` to print the full balance report
     sync_print_balance(&account, false).await?;
 
     print_addresses_with_funds(&account).await?;

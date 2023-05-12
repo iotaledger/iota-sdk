@@ -37,7 +37,7 @@ const WALLET_DB_PATH: &str = "./example.walletdb";
 #[tokio::main]
 async fn main() -> Result<()> {
     if TOKEN_ID == "0x08847bd287c912fadedb6bf38900bda9f2d377b75b2a0bece8738699f56ebca4130100000000" {
-        println!("You need to change the token id before you can run this example!");
+        println!("You need to change the TOKEN_ID constant before you can run this example successfully!");
         return Ok(());
     }
 
