@@ -10,6 +10,8 @@ use crate::wallet::Result;
 
 pub type LatestMigration = migrate_0::Migrate;
 
+pub(crate) const MIGRATION_VERSION_KEY: &str = "migration-version";
+
 /// The list of migrations, in order.
 const MIGRATIONS: &[&'static dyn DynMigration] = &[
     // In order to add a new migration, change the `LatestMigration` type above and add an entry at the bottom of this
@@ -70,8 +72,6 @@ impl<T: Migration + Send + Sync> DynMigration for T {
 
     #[cfg(feature = "storage")]
     async fn migrate_storage(&self, storage: &super::storage::Storage) -> Result<()> {
-        use crate::wallet::storage::constants::MIGRATION_VERSION_KEY;
-
         let version = self.version();
         log::info!("Migrating to version {}", version);
         T::migrate_storage(storage).await?;
@@ -81,17 +81,14 @@ impl<T: Migration + Send + Sync> DynMigration for T {
 
     #[cfg(feature = "stronghold")]
     async fn migrate_backup(&self, storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
-        use crate::{
-            client::storage::StorageProvider,
-            wallet::wallet::operations::stronghold_backup::stronghold_snapshot::BACKUP_MIGRATION_VERSION_KEY,
-        };
+        use crate::client::storage::StorageProvider;
 
         let version = self.version();
         log::info!("Migrating backups to version {}", version);
         T::migrate_backup(storage).await?;
         storage
             .insert(
-                BACKUP_MIGRATION_VERSION_KEY.as_bytes(),
+                MIGRATION_VERSION_KEY.as_bytes(),
                 serde_json::to_string(&version)?.as_bytes(),
             )
             .await?;
@@ -101,8 +98,6 @@ impl<T: Migration + Send + Sync> DynMigration for T {
 
 #[cfg(feature = "storage")]
 pub async fn migrate_storage(storage: &super::storage::Storage) -> Result<()> {
-    use super::storage::constants::MIGRATION_VERSION_KEY;
-
     let last_migration = storage.get::<MigrationVersion>(MIGRATION_VERSION_KEY).await?;
     if last_migration
         .as_ref()
@@ -120,13 +115,10 @@ pub async fn migrate_storage(storage: &super::storage::Storage) -> Result<()> {
 
 #[cfg(feature = "stronghold")]
 pub async fn migrate_backup(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
-    use crate::{
-        client::storage::StorageProvider,
-        wallet::wallet::operations::stronghold_backup::stronghold_snapshot::BACKUP_MIGRATION_VERSION_KEY,
-    };
+    use crate::client::storage::StorageProvider;
 
     let last_migration = storage
-        .get(BACKUP_MIGRATION_VERSION_KEY.as_bytes())
+        .get(MIGRATION_VERSION_KEY.as_bytes())
         .await?
         .map(|bytes| serde_json::from_slice::<MigrationVersion>(&bytes))
         .transpose()?;

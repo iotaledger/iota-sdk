@@ -7,7 +7,7 @@ use crate::{
     client::{secret::SecretManagerDto, storage::StorageProvider, stronghold::StrongholdAdapter},
     wallet::{
         account::AccountDetails,
-        migration::{latest_migration_version, migrate_backup},
+        migration::{latest_migration_version, migrate_backup, MIGRATION_VERSION_KEY},
         ClientOptions, Wallet,
     },
 };
@@ -16,7 +16,6 @@ pub(crate) const CLIENT_OPTIONS_KEY: &str = "client_options";
 pub(crate) const COIN_TYPE_KEY: &str = "coin_type";
 pub(crate) const SECRET_MANAGER_KEY: &str = "secret_manager";
 pub(crate) const ACCOUNTS_KEY: &str = "accounts";
-pub(crate) const BACKUP_MIGRATION_VERSION_KEY: &str = "backup_schema_version";
 
 pub(crate) async fn store_data_to_stronghold(
     wallet: &Wallet,
@@ -26,7 +25,7 @@ pub(crate) async fn store_data_to_stronghold(
     // Set backup_schema_version
     stronghold
         .insert(
-            BACKUP_MIGRATION_VERSION_KEY.as_bytes(),
+            MIGRATION_VERSION_KEY.as_bytes(),
             serde_json::to_string(&latest_migration_version())?.as_bytes(),
         )
         .await?;

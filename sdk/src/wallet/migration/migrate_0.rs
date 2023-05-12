@@ -150,6 +150,7 @@ impl Migration for Migrate {
                 .insert(ACCOUNTS_KEY.as_bytes(), serde_json::to_string(&accounts)?.as_bytes())
                 .await?;
         }
+        storage.delete("backup_schema_version".as_bytes()).await?;
         Ok(())
     }
 }
