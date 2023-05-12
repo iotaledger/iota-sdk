@@ -34,5 +34,8 @@ params = {
     "foundryMetadata": "0xab",
 }
 
-transaction = account.prepare_mint_native_token(params, None).finish()
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["transaction"]["blockId"]}')
+transaction = account.prepare_mint_native_token(params, None)
+print(f'Token id: {transaction.token_id()}')
+
+transaction = transaction.finish()
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')

@@ -256,6 +256,7 @@ pub enum AccountMethod {
     },
     /// Validate the transaction, sign it, submit it to a node and store it in the account.
     /// Expected response: [`SignedTransactionData`](crate::Response::SignedTransactionData)
+    #[serde(rename_all = "camelCase")]
     SignAndSubmitTransaction {
         prepared_transaction_data: PreparedTransactionDataDto,
     },
