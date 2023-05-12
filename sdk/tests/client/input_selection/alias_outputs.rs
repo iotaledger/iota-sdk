@@ -759,24 +759,23 @@ fn missing_alias_issuer_created() {
 #[test]
 fn missing_alias_issuer_transition() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
     let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs(vec![Alias(
         1_000_000,
         alias_id_2,
-        0,
+        1,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
-        None,
+        Some(BECH32_ADDRESS_ALIAS_1),
         None,
     )]);
     let outputs = build_outputs(vec![Alias(
         1_000_000,
-        alias_id_0,
-        0,
+        alias_id_2,
+        1,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
@@ -793,10 +792,7 @@ fn missing_alias_issuer_transition() {
     )
     .select();
 
-    assert!(matches!(
-        selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ALIAS_1).unwrap()
-    ));
+    assert!(selected.is_ok());
 }
 
 #[test]
@@ -885,21 +881,22 @@ fn missing_nft_issuer_created() {
 #[test]
 fn missing_nft_issuer_transition() {
     let protocol_parameters = protocol_parameters();
-    let alias_id_0 = AliasId::from_str(ALIAS_ID_0).unwrap();
+    let alias_id_1 = AliasId::from_str(ALIAS_ID_1).unwrap();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs(vec![Alias(
         1_000_000,
+        alias_id_1,
+        0,
+        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
-        None,
-        None,
-        None,
+        Some(BECH32_ADDRESS_NFT_1),
         None,
     )]);
     let outputs = build_outputs(vec![Alias(
         1_000_000,
-        alias_id_0,
+        alias_id_1,
         0,
         BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
@@ -917,10 +914,7 @@ fn missing_nft_issuer_transition() {
     )
     .select();
 
-    assert!(matches!(
-        selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()
-    ));
+    assert!(selected.is_ok());
 }
 
 #[test]
