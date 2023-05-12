@@ -3,6 +3,8 @@
 
 from enum import Enum
 
+HD_WALLET_TYPE = 44
+
 
 class CoinType(Enum):
     IOTA = 4218
