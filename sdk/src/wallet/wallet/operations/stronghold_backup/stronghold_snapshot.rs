@@ -5,24 +5,29 @@ use std::sync::atomic::Ordering;
 
 use crate::{
     client::{secret::SecretManagerDto, storage::StorageProvider, stronghold::StrongholdAdapter},
-    wallet::{account::AccountDetails, ClientOptions, Wallet},
+    wallet::{
+        account::AccountDetails,
+        migration::{latest_migration_version, migrate_backup, MIGRATION_VERSION_KEY},
+        ClientOptions, Wallet,
+    },
 };
 
 pub(crate) const CLIENT_OPTIONS_KEY: &str = "client_options";
 pub(crate) const COIN_TYPE_KEY: &str = "coin_type";
 pub(crate) const SECRET_MANAGER_KEY: &str = "secret_manager";
 pub(crate) const ACCOUNTS_KEY: &str = "accounts";
-pub(crate) const BACKUP_SCHEMA_VERSION_KEY: &str = "backup_schema_version";
-pub(crate) const BACKUP_SCHEMA_VERSION: u8 = 1;
 
 pub(crate) async fn store_data_to_stronghold(
     wallet: &Wallet,
-    stronghold: &mut StrongholdAdapter,
+    stronghold: &StrongholdAdapter,
     secret_manager_dto: SecretManagerDto,
 ) -> crate::wallet::Result<()> {
-    // Set backup_schema_version
+    // Set migration version
     stronghold
-        .insert(BACKUP_SCHEMA_VERSION_KEY.as_bytes(), &[BACKUP_SCHEMA_VERSION])
+        .insert(
+            MIGRATION_VERSION_KEY.as_bytes(),
+            serde_json::to_string(&latest_migration_version())?.as_bytes(),
+        )
         .await?;
 
     let client_options = wallet.client_options().await.to_json()?;
@@ -65,20 +70,14 @@ pub(crate) async fn store_data_to_stronghold(
 }
 
 pub(crate) async fn read_data_from_stronghold_snapshot(
-    stronghold: &mut StrongholdAdapter,
+    stronghold: &StrongholdAdapter,
 ) -> crate::wallet::Result<(
     Option<ClientOptions>,
     Option<u32>,
     Option<SecretManagerDto>,
     Option<Vec<AccountDetails>>,
 )> {
-    // Get version
-    let version = stronghold.get(BACKUP_SCHEMA_VERSION_KEY.as_bytes()).await?;
-    if let Some(version) = version {
-        if version[0] != BACKUP_SCHEMA_VERSION {
-            return Err(crate::wallet::Error::Backup("invalid backup_schema_version"));
-        }
-    }
+    migrate_backup(stronghold).await?;
 
     // Get client_options
     let client_options_bytes = stronghold.get(CLIENT_OPTIONS_KEY.as_bytes()).await?;

@@ -62,7 +62,7 @@ impl Account {
         let mut spent_cached_outputs = self
             .wallet
             .storage_manager
-            .lock()
+            .read()
             .await
             .get_cached_participation_output_status(self.details().await.index)
             .await?;
@@ -211,7 +211,7 @@ impl Account {
         if spent_cached_outputs.len() > restored_spent_cached_outputs_len {
             self.wallet
                 .storage_manager
-                .lock()
+                .read()
                 .await
                 .set_cached_participation_output_status(self.details().await.index, spent_cached_outputs)
                 .await?;
@@ -242,7 +242,7 @@ impl Account {
         let events = self
             .wallet
             .storage_manager
-            .lock()
+            .read()
             .await
             .get_participation_events(account_index)
             .await?;
@@ -272,7 +272,7 @@ impl Account {
         let events = self
             .wallet
             .storage_manager
-            .lock()
+            .read()
             .await
             .get_participation_events(account_index)
             .await?;
