@@ -191,7 +191,7 @@ mod tests {
         })
         .enumerate()
         .map(|(key, record)| (key.to_string(), record))
-        .take(1)
+        .take(10)
         .collect::<HashMap<_, _>>();
 
         storage
