@@ -23,5 +23,5 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 foundry_id = "0x08429fe5864378ce70699fc2d22bb144cb86a3c4833d136e3b95c5dadfd6ba0cef0500000000"
 
 # Send transaction.
-transaction = account.destroy_foundry(foundry_id)
+transaction = account.prepare_destroy_foundry(foundry_id).finish()
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')

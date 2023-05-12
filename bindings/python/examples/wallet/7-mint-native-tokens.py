@@ -20,7 +20,7 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 # Sync account with the node
 response = account.sync()
 
-transaction = account.create_alias_output(None, None)
+transaction = account.prepare_create_alias_output(None, None).finish()
 
 # Wait a few seconds for the transaction to get confirmed
 time.sleep(7)
@@ -34,5 +34,5 @@ params = {
     "foundryMetadata": "0xab",
 }
 
-transaction = account.mint_native_token(params, None)
+transaction = account.prepare_mint_native_token(params, None).finish()
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["transaction"]["blockId"]}')
