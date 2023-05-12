@@ -447,3 +447,129 @@ pub mod dto {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use packable::PackableExt;
+
+    use super::*;
+    use crate::types::block::{
+        output::{
+            dto::{OutputBuilderAmountDto, OutputDto},
+            FoundryId, SimpleTokenScheme, TokenId,
+        },
+        protocol::protocol_parameters,
+        rand::{
+            address::rand_alias_address,
+            output::{
+                feature::{rand_allowed_features, rand_metadata_feature, rand_sender_feature},
+                rand_basic_output,
+                unlock_condition::rand_address_unlock_condition,
+            },
+        },
+    };
+
+    #[test]
+    fn builder() {
+        let protocol_parameters = protocol_parameters();
+        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
+        let address_1 = rand_address_unlock_condition();
+        let address_2 = rand_address_unlock_condition();
+        let sender_1 = rand_sender_feature();
+        let sender_2 = rand_sender_feature();
+
+        let mut builder = BasicOutput::build_with_amount(0)
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_unlock_condition(address_1)
+            .add_feature(sender_1)
+            .replace_feature(sender_2);
+
+        let output = builder.clone().finish_unverified().unwrap();
+        assert_eq!(output.unlock_conditions().address(), Some(&address_1));
+        assert_eq!(output.features().sender(), Some(&sender_2));
+
+        builder = builder
+            .clear_unlock_conditions()
+            .clear_features()
+            .replace_unlock_condition(address_2);
+        let output = builder.clone().finish_unverified().unwrap();
+        assert_eq!(output.unlock_conditions().address(), Some(&address_2));
+        assert!(output.features().is_empty());
+
+        let metadata = rand_metadata_feature();
+
+        let output = builder
+            .with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+            .add_unlock_condition(rand_address_unlock_condition())
+            .with_features([Feature::from(metadata.clone()), sender_1.into()])
+            .finish(protocol_parameters.token_supply())
+            .unwrap();
+
+        assert_eq!(
+            output.amount(),
+            Output::Basic(output.clone()).rent_cost(protocol_parameters.rent_structure())
+        );
+        assert_eq!(output.features().metadata(), Some(&metadata));
+        assert_eq!(output.features().sender(), Some(&sender_1));
+    }
+
+    #[test]
+    fn pack_unpack() {
+        let protocol_parameters = protocol_parameters();
+        let output = rand_basic_output(protocol_parameters.token_supply());
+        let bytes = output.pack_to_vec();
+        let output_unpacked = BasicOutput::unpack_verified(bytes, &protocol_parameters).unwrap();
+        assert_eq!(output, output_unpacked);
+    }
+
+    #[test]
+    fn to_from_dto() {
+        let protocol_parameters = protocol_parameters();
+        let output = rand_basic_output(protocol_parameters.token_supply());
+        let dto = OutputDto::Basic((&output).into());
+        let output_unver = Output::try_from_dto_unverified(&dto).unwrap();
+        assert_eq!(&output, output_unver.as_basic());
+        let output_ver = Output::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
+        assert_eq!(&output, output_ver.as_basic());
+
+        let output_split = BasicOutput::try_from_dtos(
+            OutputBuilderAmountDto::Amount(output.amount().to_string()),
+            Some(output.native_tokens().iter().map(Into::into).collect()),
+            output.unlock_conditions().iter().map(Into::into).collect(),
+            Some(output.features().iter().map(Into::into).collect()),
+            protocol_parameters.token_supply(),
+        )
+        .unwrap();
+        assert_eq!(output, output_split);
+
+        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
+        let address = rand_address_unlock_condition();
+
+        let test_split_dto = |builder: BasicOutputBuilder| {
+            let output_split = BasicOutput::try_from_dtos(
+                (&builder.amount).into(),
+                Some(builder.native_tokens.iter().map(Into::into).collect()),
+                builder.unlock_conditions.iter().map(Into::into).collect(),
+                Some(builder.features.iter().map(Into::into).collect()),
+                protocol_parameters.token_supply(),
+            )
+            .unwrap();
+            assert_eq!(
+                builder.finish(protocol_parameters.token_supply()).unwrap(),
+                output_split
+            );
+        };
+
+        let builder = BasicOutput::build_with_amount(100)
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_unlock_condition(address)
+            .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
+        test_split_dto(builder);
+
+        let builder = BasicOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure())
+            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
+            .add_unlock_condition(address)
+            .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
+        test_split_dto(builder);
+    }
+}

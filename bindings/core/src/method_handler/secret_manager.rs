@@ -1,12 +1,13 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::keys::slip10::Chain;
 use iota_sdk::{
     client::{
         api::{GetAddressesBuilder, PreparedTransactionData},
         secret::{SecretManage, SecretManager},
     },
-    types::block::{payload::dto::PayloadDto, signature::dto::Ed25519SignatureDto, unlock::Unlock, Error},
+    types::block::{payload::dto::PayloadDto, signature::dto::Ed25519SignatureDto, unlock::Unlock},
 };
 
 use crate::{method::SecretManagerMethod, response::Response, Result};
@@ -50,19 +51,18 @@ pub(crate) async fn call_secret_manager_method_internal(
             transaction_essence_hash,
             chain,
         } => {
-            let transaction_essence_hash: [u8; 32] = transaction_essence_hash
-                .try_into()
-                .map_err(|_| Error::InvalidField("expected 32 bytes for transactionEssenceHash"))?;
-
+            let transaction_essence_hash: [u8; 32] = prefix_hex::decode(transaction_essence_hash)?;
             let unlock: Unlock = secret_manager
-                .signature_unlock(&transaction_essence_hash, &chain)
+                .signature_unlock(&transaction_essence_hash, &Chain::from_u32_hardened(chain))
                 .await?;
 
             Response::SignatureUnlock((&unlock).into())
         }
         SecretManagerMethod::SignEd25519 { message, chain } => {
             let msg: Vec<u8> = prefix_hex::decode(message)?;
-            let signature = secret_manager.sign_ed25519(&msg, &chain).await?;
+            let signature = secret_manager
+                .sign_ed25519(&msg, &Chain::from_u32_hardened(chain))
+                .await?;
             Response::Ed25519Signature(Ed25519SignatureDto::from(&signature))
         }
         #[cfg(feature = "stronghold")]

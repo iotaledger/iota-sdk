@@ -70,10 +70,10 @@ impl Account {
         log::debug!("[OUTPUT_CONSOLIDATION] consolidating outputs if needed");
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
-        let current_time = self.client.get_time_checked().await?;
-        let token_supply = self.client.get_token_supply().await?;
+        let current_time = self.client().get_time_checked().await?;
+        let token_supply = self.client().get_token_supply().await?;
         let mut outputs_to_consolidate = Vec::new();
-        let account_details = self.read().await;
+        let account_details = self.details().await;
         let account_addresses = &account_details.addresses_with_unspent_outputs[..];
 
         for (output_id, output_data) in account_details.unspent_outputs() {
@@ -95,7 +95,7 @@ impl Account {
         drop(account_details);
 
         let output_consolidation_threshold = output_consolidation_threshold.unwrap_or({
-            match &*self.secret_manager.read().await {
+            match &*self.wallet.secret_manager.read().await {
                 #[cfg(feature = "ledger_nano")]
                 SecretManager::LedgerNano(_) => DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD,
                 _ => DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
@@ -117,7 +117,7 @@ impl Account {
             });
         }
 
-        let max_inputs = match &*self.secret_manager.read().await {
+        let max_inputs = match &*self.wallet.secret_manager.read().await {
             #[cfg(feature = "ledger_nano")]
             SecretManager::LedgerNano(ledger) => {
                 let ledger_nano_status = ledger.get_ledger_nano_status().await;

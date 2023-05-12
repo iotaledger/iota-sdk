@@ -5,7 +5,7 @@ export * from './bridge';
 export * from './buildOutputData';
 export * from './event';
 export * from './output';
-export * from './outputOptions';
+export * from './outputParams';
 export * from './participation';
 export * from './preparedTransactionData';
 export * from './signedTransactionEssence';

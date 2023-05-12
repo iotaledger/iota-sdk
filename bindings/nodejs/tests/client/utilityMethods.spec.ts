@@ -116,14 +116,8 @@ describe('Client utility methods', () => {
         const message = '0x494f5441';
         const signature = await new SecretManager(secretManager).signEd25519(
             message,
-            // [44, 4218, 0, 0, 0] IOTA coin type, first account, first public address
-            [
-                { hardened: true, bs: [128, 0, 0, 44] },
-                { hardened: true, bs: [128, 0, 16, 123] },
-                { hardened: true, bs: [128, 0, 0, 0] },
-                { hardened: true, bs: [128, 0, 0, 0] },
-                { hardened: true, bs: [128, 0, 0, 0] },
-            ],
+            // HD-Wallet type, IOTA coin type, first account, public, first address
+            [44, 4218, 0, 0, 0],
         );
 
         const bech32Address = Utils.hexPublicKeyToBech32Address(

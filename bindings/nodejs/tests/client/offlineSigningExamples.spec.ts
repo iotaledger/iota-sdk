@@ -102,7 +102,7 @@ describe('Offline signing examples', () => {
         }
 
         const unlock = await new SecretManager(secretManager).signatureUnlock(
-            hexToBytes(txEssenceHash),
+            txEssenceHash,
             preparedTx.inputsData[0].chain,
         );
 
@@ -118,15 +118,3 @@ describe('Offline signing examples', () => {
         });
     });
 });
-
-// Convert a hex string to a byte array
-function hexToBytes(hex: string) {
-    // Remove hex prefix if existent
-    if (hex.startsWith('0x')) {
-        hex = hex.slice(2);
-    }
-    const bytes = [];
-    for (let c = 0; c < hex.length; c += 2)
-        bytes.push(parseInt(hex.substr(c, 2), 16));
-    return bytes;
-}

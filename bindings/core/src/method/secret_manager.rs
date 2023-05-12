@@ -1,7 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::keys::slip10::Chain;
 use derivative::Derivative;
 use iota_sdk::client::api::{GenerateEvmAddressOptions, GetAddressesBuilderOptions, PreparedTransactionDataDto};
 use serde::{Deserialize, Serialize};
@@ -30,16 +29,16 @@ pub enum SecretManagerMethod {
     #[serde(rename_all = "camelCase")]
     SignatureUnlock {
         /// Transaction Essence Hash
-        transaction_essence_hash: Vec<u8>,
+        transaction_essence_hash: String,
         /// Chain to sign the essence hash with
-        chain: Chain,
+        chain: Vec<u32>,
     },
     /// Signs a message with an Ed25519 private key.
     SignEd25519 {
         /// The message to sign, hex encoded String
         message: String,
         /// Chain to sign the essence hash with
-        chain: Chain,
+        chain: Vec<u32>,
     },
     /// Sign a transaction
     #[serde(rename_all = "camelCase")]

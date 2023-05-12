@@ -12,7 +12,7 @@ use iota_sdk::{
         unlock_condition::AddressUnlockCondition,
         NftId, NftOutputBuilder,
     },
-    wallet::{NftOptions, Result, Wallet},
+    wallet::{MintNftParams, Result, Wallet},
 };
 
 #[tokio::main]
@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let nft_options = vec![NftOptions {
+    let nft_options = vec![MintNftParams {
         address: Some("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string()),
         sender: Some("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string()),
         metadata: Some(b"some NFT metadata".to_vec()),

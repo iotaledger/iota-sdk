@@ -30,8 +30,8 @@ impl Account {
         log::debug!("[TRANSACTION] prepare_transaction");
         let options = options.into();
         let prepare_transaction_start_time = Instant::now();
-        let rent_structure = self.client.get_rent_structure().await?;
-        let token_supply = self.client.get_token_supply().await?;
+        let rent_structure = self.client().get_rent_structure().await?;
+        let token_supply = self.client().get_token_supply().await?;
 
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {
@@ -74,15 +74,16 @@ impl Account {
                         let remainder_address = self.generate_remainder_address().await?;
                         #[cfg(feature = "events")]
                         {
-                            let account_index = self.read().await.index;
-                            self.event_emitter.lock().await.emit(
+                            let account_index = self.details().await.index;
+                            self.emit(
                                 account_index,
                                 WalletEvent::TransactionProgress(
                                     TransactionProgressEvent::GeneratingRemainderDepositAddress(AddressData {
                                         address: remainder_address.address.to_string(),
                                     }),
                                 ),
-                            );
+                            )
+                            .await;
                         }
                         Some(remainder_address.address().inner)
                     }
