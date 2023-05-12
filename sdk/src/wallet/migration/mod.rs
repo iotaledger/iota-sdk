@@ -99,15 +99,7 @@ impl<T: Migration + Send + Sync> DynMigration for T {
 #[cfg(feature = "storage")]
 pub async fn migrate_storage(storage: &super::storage::Storage) -> Result<()> {
     let last_migration = storage.get::<MigrationVersion>(MIGRATION_VERSION_KEY).await?;
-    if last_migration
-        .as_ref()
-        .map(|m| m.id == LatestMigration::ID)
-        .unwrap_or_default()
-    {
-        return Ok(());
-    }
-    let next_migration = last_migration.map(|m| m.id + 1).unwrap_or_default();
-    for &migration in &MIGRATIONS[next_migration..] {
+    for migration in migrations(last_migration)? {
         migration.migrate_storage(storage).await?;
     }
     Ok(())
@@ -122,18 +114,25 @@ pub async fn migrate_backup(storage: &crate::client::stronghold::StrongholdAdapt
         .await?
         .map(|bytes| serde_json::from_slice::<MigrationVersion>(&bytes))
         .transpose()?;
-    if last_migration
-        .as_ref()
-        .map(|m| m.id == LatestMigration::ID)
-        .unwrap_or_default()
-    {
-        return Ok(());
-    }
-    let next_migration = last_migration.map(|m| m.id + 1).unwrap_or_default();
-    for &migration in &MIGRATIONS[next_migration..] {
+    for migration in migrations(last_migration)? {
         migration.migrate_backup(storage).await?;
     }
     Ok(())
+}
+
+fn migrations(last_migration: Option<MigrationVersion>) -> Result<impl Iterator<Item = &'static dyn DynMigration>> {
+    Ok(match last_migration {
+        Some(last_migration) => {
+            if last_migration.id > LatestMigration::ID {
+                return Err(crate::wallet::Error::Migration(format!(
+                    "invalid migration version: {last_migration}, current sdk version: {}",
+                    env!("CARGO_PKG_VERSION")
+                )));
+            }
+            MIGRATIONS[last_migration.id + 1..].iter().copied()
+        }
+        None => MIGRATIONS.iter().copied(),
+    })
 }
 
 #[allow(unused)]

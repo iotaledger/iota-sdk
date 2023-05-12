@@ -22,7 +22,7 @@ pub(crate) async fn store_data_to_stronghold(
     stronghold: &StrongholdAdapter,
     secret_manager_dto: SecretManagerDto,
 ) -> crate::wallet::Result<()> {
-    // Set backup_schema_version
+    // Set migration version
     stronghold
         .insert(
             MIGRATION_VERSION_KEY.as_bytes(),

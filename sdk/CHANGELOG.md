@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `OutputMetadata::set_spent` method;
 - `ignore_if_bech32_mismatch` parameter to `Wallet::restore_backup()`;
 - `OutputWithMetadata::{into_output, into_metadata}` methods;
+- Storage and Backup migration;
 
 ### Changed
 
