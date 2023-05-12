@@ -8,7 +8,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example wallet_transaction
+//! cargo run --release --all-features --example simple_transaction
 //! ```
 
 use std::env::var;
@@ -45,7 +45,6 @@ async fn main() -> Result<()> {
         // Send a transaction
         let outputs = vec![SendAmountParams::new(RECV_ADDRESS.to_string(), SEND_AMOUNT)];
         let transaction = account.send_amount(outputs, None).await?;
-        println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included
         let block_id = account

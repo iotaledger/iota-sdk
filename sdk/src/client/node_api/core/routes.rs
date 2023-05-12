@@ -35,6 +35,9 @@ use crate::{
     },
 };
 
+/// Info path is the exact path extension for node APIs to request their info.
+pub(crate) static INFO_PATH: &str = "api/core/v2/info";
+
 /// NodeInfo wrapper which contains the node info and the url from the node (useful when multiple nodes are used)
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -79,17 +82,19 @@ impl ClientInner {
         let path = "api/routes";
 
         self.node_manager
-            .get_request(path, None, self.get_timeout(), false, false)
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, false, false)
             .await
     }
 
     /// Returns general information about the node.
     /// GET /api/core/v2/info
     pub async fn get_info(&self) -> Result<NodeInfoWrapper> {
-        let path = "api/core/v2/info";
-
         self.node_manager
-            .get_request(path, None, self.get_timeout(), false, false)
+            .read()
+            .await
+            .get_request(INFO_PATH, None, self.get_timeout().await, false, false)
             .await
     }
 
@@ -102,7 +107,9 @@ impl ClientInner {
 
         let resp = self
             .node_manager
-            .get_request::<TipsResponse>(path, None, self.get_timeout(), false, false)
+            .read()
+            .await
+            .get_request::<TipsResponse>(path, None, self.get_timeout().await, false, false)
             .await?;
 
         resp.tips
@@ -117,72 +124,52 @@ impl ClientInner {
     /// POST JSON to /api/core/v2/blocks
     pub async fn post_block(&self, block: &Block) -> Result<BlockId> {
         let path = "api/core/v2/blocks";
-        let local_pow = self.get_local_pow();
+        let local_pow = self.get_local_pow().await;
         let timeout = if local_pow {
-            self.get_timeout()
+            self.get_timeout().await
         } else {
-            self.get_remote_pow_timeout()
+            self.get_remote_pow_timeout().await
         };
         let block_dto = BlockDto::from(block);
 
         // fallback to local PoW if remote PoW fails
         let resp = match self
             .node_manager
+            .read()
+            .await
             .post_request_json::<SubmitBlockResponse>(path, timeout, serde_json::to_value(block_dto)?, local_pow)
             .await
         {
             Ok(res) => res,
-            Err(e) => {
-                if let Error::Node(e) = e {
-                    let fallback_to_local_pow = self.get_fallback_to_local_pow();
-                    // hornet and bee return different error blocks
-                    if (e == *"no available nodes with remote Pow"
-                        || e.contains("proof of work is not enabled")
-                        || e.contains("`Pow` not enabled"))
-                        && fallback_to_local_pow
-                    {
-                        // Without this we get:within `impl Future<Output = [async output]>`, the trait `Send` is not
-                        // implemented for `std::sync::RwLockWriteGuard<'_, NetworkInfo>`
-                        {
-                            let mut client_network_info = self
-                                .network_info
-                                .write()
-                                .map_err(|_| crate::client::Error::PoisonError)?;
-                            // switch to local PoW
-                            client_network_info.local_pow = true;
-                        }
-                        let block_res = self.finish_block_builder(None, block.payload().cloned()).await;
-                        let block_with_local_pow = match block_res {
-                            Ok(block) => {
-                                // reset local PoW state
-                                let mut client_network_info = self
-                                    .network_info
-                                    .write()
-                                    .map_err(|_| crate::client::Error::PoisonError)?;
-                                client_network_info.local_pow = false;
-                                block
-                            }
-                            Err(e) => {
-                                // reset local PoW state
-                                self.network_info
-                                    .write()
-                                    .map_err(|_| crate::client::Error::PoisonError)?
-                                    .local_pow = false;
-                                return Err(e);
-                            }
-                        };
-                        let block_dto = BlockDto::from(&block_with_local_pow);
-
-                        self.node_manager
-                            .post_request_json(path, timeout, serde_json::to_value(block_dto)?, true)
-                            .await?
-                    } else {
-                        return Err(Error::Node(e));
-                    }
-                } else {
-                    return Err(e);
+            Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow)) => {
+                if !self.get_fallback_to_local_pow().await {
+                    return Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow));
                 }
+
+                self.network_info.write().await.local_pow = true;
+
+                let block_res = self.finish_block_builder(None, block.payload().cloned()).await;
+                let block_with_local_pow = match block_res {
+                    Ok(block) => {
+                        // reset local PoW state
+                        self.network_info.write().await.local_pow = false;
+                        block
+                    }
+                    Err(e) => {
+                        // reset local PoW state
+                        self.network_info.write().await.local_pow = false;
+                        return Err(e);
+                    }
+                };
+                let block_dto = BlockDto::from(&block_with_local_pow);
+
+                self.node_manager
+                    .read()
+                    .await
+                    .post_request_json(path, timeout, serde_json::to_value(block_dto)?, true)
+                    .await?
             }
+            Err(e) => return Err(e),
         };
 
         Ok(BlockId::from_str(&resp.block_id)?)
@@ -192,69 +179,49 @@ impl ClientInner {
     /// POST /api/core/v2/blocks
     pub async fn post_block_raw(&self, block: &Block) -> Result<BlockId> {
         let path = "api/core/v2/blocks";
-        let local_pow = self.get_local_pow();
+        let local_pow = self.get_local_pow().await;
         let timeout = if local_pow {
-            self.get_timeout()
+            self.get_timeout().await
         } else {
-            self.get_remote_pow_timeout()
+            self.get_remote_pow_timeout().await
         };
 
         // fallback to local Pow if remote Pow fails
         let resp = match self
             .node_manager
+            .read()
+            .await
             .post_request_bytes::<SubmitBlockResponse>(path, timeout, &block.pack_to_vec(), local_pow)
             .await
         {
             Ok(res) => res,
-            Err(e) => {
-                if let Error::Node(e) = e {
-                    let fallback_to_local_pow = self.get_fallback_to_local_pow();
-                    // hornet and bee return different error blocks
-                    if (e == *"no available nodes with remote Pow"
-                        || e.contains("proof of work is not enabled")
-                        || e.contains("`Pow` not enabled"))
-                        && fallback_to_local_pow
-                    {
-                        // Without this we get:within `impl Future<Output = [async output]>`, the trait `Send` is not
-                        // implemented for `std::sync::RwLockWriteGuard<'_, NetworkInfo>`
-                        {
-                            let mut client_network_info = self
-                                .network_info
-                                .write()
-                                .map_err(|_| crate::client::Error::PoisonError)?;
-                            // switch to local PoW
-                            client_network_info.local_pow = true;
-                        }
-                        let block_res = self.finish_block_builder(None, block.payload().cloned()).await;
-                        let block_with_local_pow = match block_res {
-                            Ok(block) => {
-                                // reset local PoW state
-                                let mut client_network_info = self
-                                    .network_info
-                                    .write()
-                                    .map_err(|_| crate::client::Error::PoisonError)?;
-                                client_network_info.local_pow = false;
-                                block
-                            }
-                            Err(e) => {
-                                // reset local PoW state
-                                self.network_info
-                                    .write()
-                                    .map_err(|_| crate::client::Error::PoisonError)?
-                                    .local_pow = false;
-                                return Err(e);
-                            }
-                        };
-                        self.node_manager
-                            .post_request_bytes(path, timeout, &block_with_local_pow.pack_to_vec(), true)
-                            .await?
-                    } else {
-                        return Err(Error::Node(e));
-                    }
-                } else {
-                    return Err(e);
+            Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow)) => {
+                if !self.get_fallback_to_local_pow().await {
+                    return Err(Error::Node(crate::client::node_api::error::Error::UnavailablePow));
                 }
+
+                self.network_info.write().await.local_pow = true;
+
+                let block_res = self.finish_block_builder(None, block.payload().cloned()).await;
+                let block_with_local_pow = match block_res {
+                    Ok(block) => {
+                        // reset local PoW state
+                        self.network_info.write().await.local_pow = false;
+                        block
+                    }
+                    Err(e) => {
+                        // reset local PoW state
+                        self.network_info.write().await.local_pow = false;
+                        return Err(e);
+                    }
+                };
+                self.node_manager
+                    .read()
+                    .await
+                    .post_request_bytes(path, timeout, &block_with_local_pow.pack_to_vec(), true)
+                    .await?
             }
+            Err(e) => return Err(e),
         };
 
         Ok(BlockId::from_str(&resp.block_id)?)
@@ -267,7 +234,9 @@ impl ClientInner {
 
         let resp = self
             .node_manager
-            .get_request::<BlockResponse>(path, None, self.get_timeout(), false, true)
+            .read()
+            .await
+            .get_request::<BlockResponse>(path, None, self.get_timeout().await, false, true)
             .await?;
 
         match resp {
@@ -282,7 +251,9 @@ impl ClientInner {
         let path = &format!("api/core/v2/blocks/{block_id}");
 
         self.node_manager
-            .get_request_bytes(path, None, self.get_timeout())
+            .read()
+            .await
+            .get_request_bytes(path, None, self.get_timeout().await)
             .await
     }
 
@@ -292,7 +263,9 @@ impl ClientInner {
         let path = &format!("api/core/v2/blocks/{block_id}/metadata");
 
         self.node_manager
-            .get_request(path, None, self.get_timeout(), true, true)
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, true, true)
             .await
     }
 
@@ -305,7 +278,9 @@ impl ClientInner {
 
         let response: OutputWithMetadataResponse = self
             .node_manager
-            .get_request(path, None, self.get_timeout(), false, true)
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, false, true)
             .await?;
 
         let token_supply = self.get_token_supply().await?;
@@ -321,7 +296,9 @@ impl ClientInner {
         let path = &format!("api/core/v2/outputs/{output_id}");
 
         self.node_manager
-            .get_request_bytes(path, None, self.get_timeout())
+            .read()
+            .await
+            .get_request_bytes(path, None, self.get_timeout().await)
             .await
     }
 
@@ -331,7 +308,9 @@ impl ClientInner {
         let path = &format!("api/core/v2/outputs/{output_id}/metadata");
 
         self.node_manager
-            .get_request::<OutputMetadataDto>(path, None, self.get_timeout(), false, true)
+            .read()
+            .await
+            .get_request::<OutputMetadataDto>(path, None, self.get_timeout().await, false, true)
             .await
     }
 
@@ -342,6 +321,8 @@ impl ClientInner {
 
         let resp = self
             .node_manager
+            .read()
+            .await
             .get_request::<ReceiptsResponse>(path, None, DEFAULT_API_TIMEOUT, false, false)
             .await?;
 
@@ -355,6 +336,8 @@ impl ClientInner {
 
         let resp = self
             .node_manager
+            .read()
+            .await
             .get_request::<ReceiptsResponse>(path, None, DEFAULT_API_TIMEOUT, false, false)
             .await?;
 
@@ -368,6 +351,8 @@ impl ClientInner {
         let path = "api/core/v2/treasury";
 
         self.node_manager
+            .read()
+            .await
             .get_request(path, None, DEFAULT_API_TIMEOUT, false, false)
             .await
     }
@@ -379,7 +364,9 @@ impl ClientInner {
 
         let resp = self
             .node_manager
-            .get_request::<BlockResponse>(path, None, self.get_timeout(), true, true)
+            .read()
+            .await
+            .get_request::<BlockResponse>(path, None, self.get_timeout().await, true, true)
             .await?;
 
         match resp {
@@ -394,7 +381,9 @@ impl ClientInner {
         let path = &format!("api/core/v2/transactions/{transaction_id}/included-block");
 
         self.node_manager
-            .get_request_bytes(path, None, self.get_timeout())
+            .read()
+            .await
+            .get_request_bytes(path, None, self.get_timeout().await)
             .await
     }
 
@@ -404,7 +393,9 @@ impl ClientInner {
         let path = &format!("api/core/v2/transactions/{transaction_id}/included-block/metadata");
 
         self.node_manager
-            .get_request(path, None, self.get_timeout(), true, true)
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, true, true)
             .await
     }
 
@@ -417,7 +408,9 @@ impl ClientInner {
 
         let resp = self
             .node_manager
-            .get_request::<MilestoneResponse>(path, None, self.get_timeout(), false, true)
+            .read()
+            .await
+            .get_request::<MilestoneResponse>(path, None, self.get_timeout().await, false, true)
             .await?;
 
         match resp {
@@ -435,7 +428,9 @@ impl ClientInner {
         let path = &format!("api/core/v2/milestones/{milestone_id}");
 
         self.node_manager
-            .get_request_bytes(path, None, self.get_timeout())
+            .read()
+            .await
+            .get_request_bytes(path, None, self.get_timeout().await)
             .await
     }
 
@@ -445,7 +440,9 @@ impl ClientInner {
         let path = &format!("api/core/v2/milestones/{milestone_id}/utxo-changes");
 
         self.node_manager
-            .get_request(path, None, self.get_timeout(), false, false)
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, false, false)
             .await
     }
 
@@ -456,7 +453,9 @@ impl ClientInner {
 
         let resp = self
             .node_manager
-            .get_request::<MilestoneResponse>(path, None, self.get_timeout(), false, true)
+            .read()
+            .await
+            .get_request::<MilestoneResponse>(path, None, self.get_timeout().await, false, true)
             .await?;
 
         match resp {
@@ -474,7 +473,9 @@ impl ClientInner {
         let path = &format!("api/core/v2/milestones/by-index/{index}");
 
         self.node_manager
-            .get_request_bytes(path, None, self.get_timeout())
+            .read()
+            .await
+            .get_request_bytes(path, None, self.get_timeout().await)
             .await
     }
 
@@ -484,7 +485,9 @@ impl ClientInner {
         let path = &format!("api/core/v2/milestones/by-index/{index}/utxo-changes");
 
         self.node_manager
-            .get_request(path, None, self.get_timeout(), false, false)
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, false, false)
             .await
     }
 
@@ -496,7 +499,9 @@ impl ClientInner {
 
         let resp = self
             .node_manager
-            .get_request::<PeersResponse>(path, None, self.get_timeout(), false, false)
+            .read()
+            .await
+            .get_request::<PeersResponse>(path, None, self.get_timeout().await, false, false)
             .await?;
 
         Ok(resp.0)

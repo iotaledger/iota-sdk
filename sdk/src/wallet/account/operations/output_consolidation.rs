@@ -70,8 +70,8 @@ impl Account {
         log::debug!("[OUTPUT_CONSOLIDATION] consolidating outputs if needed");
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
-        let current_time = self.client.get_time_checked().await?;
-        let token_supply = self.client.get_token_supply().await?;
+        let current_time = self.client().get_time_checked().await?;
+        let token_supply = self.client().get_token_supply().await?;
         let mut outputs_to_consolidate = Vec::new();
         let account_details = self.details().await;
         let account_addresses = &account_details.addresses_with_unspent_outputs[..];

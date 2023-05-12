@@ -24,12 +24,12 @@ impl Account {
                 continue;
             }
 
-            let client = self.client.clone();
+            let client = self.client().clone();
             tasks.push(async move {
                 task::spawn(async move {
                     match client.foundry_output_id(foundry_id).await {
                         Ok(output_id) => Ok(Some(client.get_output(&output_id).await?)),
-                        Err(crate::client::Error::NotFound(_)) => Ok(None),
+                        Err(crate::client::Error::NoOutput(_)) => Ok(None),
                         Err(e) => Err(crate::wallet::Error::Client(e.into())),
                     }
                 })

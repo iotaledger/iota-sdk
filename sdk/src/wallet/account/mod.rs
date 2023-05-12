@@ -141,7 +141,6 @@ pub struct AccountDetails {
 #[derive(Debug, Clone)]
 pub struct Account {
     inner: Arc<AccountInner>,
-    pub(crate) client: Client,
     pub(crate) wallet: Arc<WalletInner>,
 }
 
@@ -166,7 +165,7 @@ impl Deref for Account {
 
 impl Account {
     /// Create a new Account with an AccountDetails
-    pub(crate) async fn new(details: AccountDetails, client: Client, wallet: Arc<WalletInner>) -> Result<Self> {
+    pub(crate) async fn new(details: AccountDetails, wallet: Arc<WalletInner>) -> Result<Self> {
         #[cfg(feature = "storage")]
         let default_sync_options = wallet
             .storage_manager
@@ -179,7 +178,6 @@ impl Account {
         let default_sync_options = Default::default();
 
         Ok(Self {
-            client,
             wallet,
             inner: Arc::new(AccountInner {
                 details: RwLock::new(details),
@@ -191,7 +189,7 @@ impl Account {
 
     // Get the Client
     pub fn client(&self) -> &Client {
-        &self.client
+        &self.wallet.client
     }
 
     /// Get the [`Output`] that minted a native token by the token ID. First try to get it
@@ -208,8 +206,8 @@ impl Account {
         }
 
         // Foundry was not found in the account, try to get it from the node
-        let foundry_output_id = self.client.foundry_output_id(foundry_id).await?;
-        let output_response = self.client.get_output(&foundry_output_id).await?;
+        let foundry_output_id = self.client().foundry_output_id(foundry_id).await?;
+        let output_response = self.client().get_output(&foundry_output_id).await?;
 
         Ok(output_response.output().to_owned())
     }
@@ -573,4 +571,38 @@ fn serialize() {
     };
 
     serde_json::from_str::<AccountDetails>(&serde_json::to_string(&account).unwrap()).unwrap();
+}
+
+#[cfg(test)]
+impl AccountDetails {
+    /// Returns a mock of this type with the following values:
+    /// index: 0, coin_type: 4218, alias: "Alice", public_addresses: contains a single public account address
+    /// (rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy), all other fields are set to their Rust
+    /// defaults.
+    pub(crate) fn mock() -> Self {
+        Self {
+            index: 0,
+            coin_type: 4218,
+            alias: "Alice".to_string(),
+            public_addresses: vec![AccountAddress {
+                address: crate::types::block::address::Bech32Address::from_str(
+                    "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
+                )
+                .unwrap(),
+                key_index: 0,
+                internal: false,
+                used: false,
+            }],
+            internal_addresses: Vec::new(),
+            addresses_with_unspent_outputs: Vec::new(),
+            outputs: HashMap::new(),
+            locked_outputs: HashSet::new(),
+            unspent_outputs: HashMap::new(),
+            transactions: HashMap::new(),
+            pending_transactions: HashSet::new(),
+            incoming_transactions: HashMap::new(),
+            inaccessible_incoming_transactions: HashSet::new(),
+            native_token_foundries: HashMap::new(),
+        }
+    }
 }

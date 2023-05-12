@@ -4,6 +4,9 @@
 
 Ensure you have first installed the required dependencies for the library [here](https://github.com/iotaledger/iota-sdk/tree/develop/sdk#readme) and on Windows also LLVM, our workflow uses `https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.1/LLVM-11.0.1-win64.exe`. On Windows, you may also need to set an environment variable `RUSTFLAGS` to `-C target-feature=+crt-static`.
 
+- Python < 3.11
+- Yarn v1
+
 ## Installation
 
 - Using NPM:

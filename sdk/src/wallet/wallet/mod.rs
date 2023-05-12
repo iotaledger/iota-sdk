@@ -23,10 +23,7 @@ use crate::wallet::events::{
 use crate::wallet::storage::manager::StorageManager;
 use crate::{
     client::{secret::SecretManager, verify_mnemonic, Client},
-    wallet::{
-        account::{builder::AccountBuilder, operations::syncing::SyncOptions, types::AccountBalance, Account},
-        ClientOptions,
-    },
+    wallet::account::{builder::AccountBuilder, operations::syncing::SyncOptions, types::AccountBalance, Account},
 };
 
 /// The wallet, used to create and get accounts. One wallet can hold many accounts, but they should
@@ -63,7 +60,7 @@ impl Wallet {
 pub struct WalletInner {
     // 0 = not running, 1 = running, 2 = stopping
     pub(crate) background_syncing_status: AtomicUsize,
-    pub(crate) client_options: RwLock<ClientOptions>,
+    pub(crate) client: Client,
     pub(crate) coin_type: AtomicU32,
     pub(crate) secret_manager: Arc<RwLock<SecretManager>>,
     #[cfg(feature = "events")]
