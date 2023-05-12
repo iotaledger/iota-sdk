@@ -34,23 +34,14 @@ impl Storage {
         match self.inner.get(key).await? {
             Some(record) => {
                 if let Some(encryption_key) = &self.encryption_key {
-                    if let Ok(record) = serde_json::from_str::<Vec<u8>>(&record) {
-                        Ok(Some(serde_json::from_str(&String::from_utf8_lossy(
-                            &chacha::aead_decrypt(encryption_key, &record)?,
-                        ))?))
-                    } else {
-                        Ok(Some(serde_json::from_str(&record)?))
+                    if let Ok(encrypted_bytes) = serde_json::from_str::<Vec<u8>>(&record) {
+                        return Ok(Some(serde_json::from_str(&String::from_utf8_lossy(
+                            &chacha::aead_decrypt(encryption_key, &encrypted_bytes)?,
+                        ))?));
                     }
-                    // if serde_json::from_str::<Vec<u8>>(&record).is_ok() {
-                    //     Ok(Some(serde_json::from_str(&String::from_utf8_lossy(
-                    //         &chacha::aead_decrypt(encryption_key, record.as_bytes())?,
-                    //     ))?))
-                    // } else {
-                    //     Ok(Some(serde_json::from_str(&record)?))
-                    // }
-                } else {
-                    Ok(Some(serde_json::from_str(&record)?))
                 }
+
+                Ok(Some(serde_json::from_str(&record)?))
             }
             None => Ok(None),
         }
@@ -62,8 +53,8 @@ impl Storage {
             .set(
                 key,
                 if let Some(encryption_key) = &self.encryption_key {
-                    let output = chacha::aead_encrypt(encryption_key, record.as_bytes())?;
-                    serde_json::to_string(&output)?
+                    let encrypted_bytes = chacha::aead_encrypt(encryption_key, record.as_bytes())?;
+                    serde_json::to_string(&encrypted_bytes)?
                 } else {
                     record
                 },
@@ -109,7 +100,6 @@ mod tests {
             inner: Box::<Memory>::default(),
             encryption_key: None,
         };
-
         assert_eq!(storage.id(), STORAGE_ID);
     }
 
@@ -166,14 +156,13 @@ mod tests {
 
         storage.batch_set(records).await.unwrap();
 
-        assert!(storage.get::<Record>("0").await.unwrap().is_some());
-        assert!(storage.get::<Record>("9").await.unwrap().is_some());
+        for index in 0..10 {
+            assert!(storage.get::<Record>(&index.to_string()).await.unwrap().is_some());
+        }
     }
 
     #[cfg(feature = "rand")]
-    // TODO: uncomment this test when the bug described in Issue #354 has been fixed.
     #[tokio::test]
-    // #[allow(dead_code)]
     async fn get_set_encrypted() {
         #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
         struct Record {
@@ -183,7 +172,6 @@ mod tests {
         }
 
         let encryption_key = crate::types::block::rand::bytes::rand_bytes_array::<32>();
-        // let encryption_key = [1u8; 32];
 
         let mut storage = Storage {
             inner: Box::<Memory>::default(),
