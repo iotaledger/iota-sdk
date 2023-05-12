@@ -9,10 +9,7 @@ use iota_sdk::{
 };
 use iota_sdk::{
     client::{
-        api::{
-            input_selection::{Burn, BurnDto},
-            PreparedTransactionDataDto, SignedTransactionDataDto,
-        },
+        api::{input_selection::BurnDto, PreparedTransactionDataDto, SignedTransactionDataDto},
         secret::GenerateAddressOptions,
     },
     types::block::{
