@@ -63,21 +63,17 @@ impl Storage {
     }
 
     #[allow(dead_code)]
-    async fn batch_set<T: Serialize + Send>(&self, records: HashMap<String, T>) -> crate::wallet::Result<()> {
+    async fn batch_set(&self, records: HashMap<String, String>) -> crate::wallet::Result<()> {
         self.inner
             .batch_set(if let Some(key) = &self.encryption_key {
                 let mut encrypted_records = HashMap::with_capacity(records.len());
                 for (id, record) in records {
-                    let encrypted_bytes = chacha::aead_encrypt(key, serde_json::to_string(&record)?.as_bytes())?;
+                    let encrypted_bytes = chacha::aead_encrypt(key, record.as_bytes())?;
                     encrypted_records.insert(id, serde_json::to_string(&encrypted_bytes)?);
                 }
                 encrypted_records
             } else {
-                let mut plain_records = HashMap::with_capacity(records.len());
-                for (id, record) in records {
-                    plain_records.insert(id, serde_json::to_string(&record)?);
-                }
-                plain_records
+                records
             })
             .await
     }
@@ -135,42 +131,6 @@ mod tests {
 
     #[cfg(feature = "rand")]
     #[tokio::test]
-    async fn batch_set() {
-        #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
-        struct Record {
-            a: String,
-            b: u32,
-            c: i64,
-        }
-
-        let storage = Storage {
-            inner: Box::<Memory>::default(),
-            encryption_key: None,
-        };
-
-        let records = std::iter::repeat_with(|| Record {
-            a: "test".to_string(),
-            b: rand::random(),
-            c: rand::random(),
-        })
-        .enumerate()
-        .map(|(key, record)| (key.to_string(), record))
-        .take(10)
-        .collect::<HashMap<_, _>>();
-
-        storage.batch_set(records.clone()).await.unwrap();
-
-        // we also check an index that doesn't exist
-        for index in 0..11 {
-            assert_eq!(
-                records.get(&index.to_string()),
-                storage.get::<Record>(&index.to_string()).await.unwrap().as_ref()
-            );
-        }
-    }
-
-    #[cfg(feature = "rand")]
-    #[tokio::test]
     async fn get_set_encrypted() {
         #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
         struct Record {
@@ -180,7 +140,6 @@ mod tests {
         }
 
         let encryption_key = crate::types::block::rand::bytes::rand_bytes_array::<32>();
-
         let storage = Storage {
             inner: Box::<Memory>::default(),
             encryption_key: Some(encryption_key),
@@ -194,5 +153,64 @@ mod tests {
         storage.set("key", rec.clone()).await.unwrap();
 
         assert_eq!(Some(rec), storage.get::<Record>("key").await.unwrap());
+    }
+
+    #[cfg(feature = "rand")]
+    #[tokio::test]
+    async fn batch_set() {
+        let storage = Storage {
+            inner: Box::<Memory>::default(),
+            encryption_key: None,
+        };
+        batch_set_test(storage).await;
+    }
+
+    #[cfg(feature = "rand")]
+    #[tokio::test]
+    async fn batch_set_encrypted() {
+        let encryption_key = crate::types::block::rand::bytes::rand_bytes_array::<32>();
+        let storage = Storage {
+            inner: Box::<Memory>::default(),
+            encryption_key: Some(encryption_key),
+        };
+        batch_set_test(storage).await;
+    }
+
+    #[cfg(feature = "rand")]
+    async fn batch_set_test(storage: Storage) {
+        #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+        struct Record {
+            a: String,
+            b: u32,
+            c: i64,
+        }
+        let records = std::iter::repeat_with(|| Record {
+            a: "test".to_string(),
+            b: rand::random(),
+            c: rand::random(),
+        })
+        .enumerate()
+        .map(|(key, record)| (key.to_string(), record))
+        .take(1)
+        .collect::<HashMap<_, _>>();
+
+        storage
+            .batch_set(
+                records
+                    .clone()
+                    .into_iter()
+                    .map(|(k, v)| (k, serde_json::to_string(&v).unwrap()))
+                    .collect::<_>(),
+            )
+            .await
+            .unwrap();
+
+        // we also check an index that doesn't exist
+        for index in 0..11 {
+            assert_eq!(
+                records.get(&index.to_string()),
+                storage.get::<Record>(&index.to_string()).await.unwrap().as_ref()
+            );
+        }
     }
 }
