@@ -4,6 +4,7 @@
 from iota_sdk.wallet.common import _call_method_routine
 from iota_sdk.types.burn import Burn
 
+
 class Account:
     def __init__(self, account_id, handle):
         self.account_id = account_id
@@ -123,20 +124,10 @@ class Account:
         """
         A generic `burn()` function that can be used to burn native tokens, nfts, foundries and aliases.
 
-        When burn native tokens. This doesn't require the foundry output which minted them, but will not increase
+        When burn **native tokens**. This doesn't require the foundry output which minted them, but will not increase
         the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
         recommended to use melting, if the foundry output is available.
 
-        When burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
-        deposit return, timelock or expiration unlock condition. This should be preferred over burning, because after
-        burning, the foundry can never be destroyed anymore.
-
-        When burn(destroy) an alias output. Outputs controlled by it will be swept before if they don't have a
-        storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
-        sent to the governor address.
-
-        when burn(destroy) a foundry output with a circulating supply of 0.
-        Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
         """
         return self._call_account_method(
             'burn', {

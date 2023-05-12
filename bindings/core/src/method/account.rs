@@ -41,17 +41,6 @@ pub enum AccountMethod {
     /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
     /// recommended to use melting, if the foundry output is available.
 
-    /// When burn **nft** outputs. Outputs controlled by it will be sweeped before if they don't have a storage
-    /// deposit return, timelock or expiration unlock condition. This should be preferred over burning, because after
-    /// burning, the foundry can never be destroyed anymore.
-
-    /// When burn(destroy) an **alias** outputs. Outputs controlled by it will be sweeped before if they don't have a
-    /// storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
-    /// sent to the governor address.
-
-    /// When burn(destroy) **foundry** outputs with a circulating supply of 0.
-    /// Native tokens in the foundry (minted by other foundries) will be transactioned to the controlling alias.
-
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     Burn {
         burn: BurnDto,
