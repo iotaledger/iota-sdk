@@ -10,7 +10,7 @@
 //! cargo run --release --all-features --example recover_accounts
 //! ```
 
-use std::time::Instant;
+use std::{env::var, time::Instant};
 
 use iota_sdk::{
     client::{
@@ -19,9 +19,6 @@ use iota_sdk::{
     },
     wallet::{ClientOptions, Result, Wallet},
 };
-
-// The wallet database folder created in this example
-const WALLET_DB_PATH: &str = "./example.walletdb";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -35,7 +32,7 @@ async fn main() -> Result<()> {
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
-        .with_storage_path(WALLET_DB_PATH)
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()

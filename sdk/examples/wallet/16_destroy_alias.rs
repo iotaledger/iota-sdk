@@ -12,12 +12,9 @@
 //! cargo run --release --all-features --example destroy_alias
 //! ```
 
-use iota_sdk::wallet::{Result, Wallet};
+use std::env::var;
 
-// The account alias used in this example
-const ACCOUNT_ALIAS: &str = "Alice";
-// The wallet database folder
-const WALLET_DB_PATH: &str = "./example.walletdb";
+use iota_sdk::wallet::{Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -25,8 +22,11 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Access the wallet we generated with `--example create_wallet`
-    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
-    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
+    let account = wallet.get_account(&var("ACCOUNT_ALIAS_1").unwrap()).await?;
 
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
@@ -38,7 +38,7 @@ async fn main() -> Result<()> {
 
         // Set the stronghold password
         wallet
-            .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+            .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
         println!("Preparing destroying transaction...");
@@ -52,7 +52,7 @@ async fn main() -> Result<()> {
 
         println!(
             "Transaction included: {}/block/{}",
-            std::env::var("EXPLORER_URL").unwrap(),
+            var("EXPLORER_URL").unwrap(),
             block_id
         );
 

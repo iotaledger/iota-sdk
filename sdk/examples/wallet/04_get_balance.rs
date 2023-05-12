@@ -11,12 +11,9 @@
 //! cargo run --release --all-features --example get_balance
 //! ```
 
-use iota_sdk::wallet::{Result, Wallet};
+use std::env::var;
 
-// The account alias used in this example
-const ACCOUNT_ALIAS: &str = "Alice";
-// The wallet database folder
-const WALLET_DB_PATH: &str = "./example.walletdb";
+use iota_sdk::wallet::{Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -24,8 +21,11 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Access the wallet we generated with `--example create_wallet`
-    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
-    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
+    let account = wallet.get_account(&var("ACCOUNT_ALIAS_1").unwrap()).await?;
 
     // Sync and get the balance
     let _ = account.sync(None).await?;
@@ -34,7 +34,7 @@ async fn main() -> Result<()> {
     println!("{balance:#?}");
 
     println!("ADDRESSES:");
-    let explorer_url = std::env::var("EXPLORER_URL").ok();
+    let explorer_url = var("EXPLORER_URL").ok();
     let prepended = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
     for address in account.addresses().await? {
         println!(" - {prepended}{}", address.address());

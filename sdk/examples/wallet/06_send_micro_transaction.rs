@@ -11,16 +11,14 @@
 //! cargo run --release --all-features --example send_micro_transaction
 //! ```
 
+use std::env::var;
+
 use iota_sdk::wallet::{account::TransactionOptions, Result, SendAmountParams, Wallet};
 
-// The account alias used in this example
-const ACCOUNT_ALIAS: &str = "Alice";
 // The base coin micro amount to send
 const SEND_MICRO_AMOUNT: u64 = 1;
 // The address to send the coins to
 const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
-// The wallet database folder
-const WALLET_DB_PATH: &str = "./example.walletdb";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -28,15 +26,18 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Access the wallet we generated with `--example create_wallet`
-    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
-    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
+    let account = wallet.get_account(&var("ACCOUNT_ALIAS_1").unwrap()).await?;
 
     // May want to ensure the account is synced before sending a transaction.
     account.sync(None).await?;
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     println!("Sending '{}' coin(s) to '{}'...", SEND_MICRO_AMOUNT, RECV_ADDRESS);
@@ -62,7 +63,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
 

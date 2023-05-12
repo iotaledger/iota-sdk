@@ -11,15 +11,12 @@
 //! cargo run --release --all-features --example get_funds
 //! ```
 
+use std::env::var;
+
 use iota_sdk::{
     client::request_funds_from_faucet,
     wallet::{Result, Wallet},
 };
-
-// The account alias used in this example
-const ACCOUNT_ALIAS: &str = "Alice";
-// The wallet database folder
-const WALLET_DB_PATH: &str = "./example.walletdb";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -27,20 +24,23 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Access the wallet we generated with `--example create_wallet`
-    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
-    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
+    let account = wallet.get_account(&var("ACCOUNT_ALIAS_1").unwrap()).await?;
+
     let balance = account.sync(None).await?;
+    println!("Account synced");
+
     let addresses = account.addresses().await?;
 
     let funds_before = balance.base_coin().available();
     println!("Current available funds: {funds_before}");
 
     println!("Requesting funds from faucet...");
-    let faucet_response = request_funds_from_faucet(
-        &std::env::var("FAUCET_URL").unwrap(),
-        &addresses[0].address().to_string(),
-    )
-    .await?;
+    let faucet_response =
+        request_funds_from_faucet(&var("FAUCET_URL").unwrap(), &addresses[0].address().to_string()).await?;
 
     println!("Response from faucet: {}", faucet_response.trim_end());
 

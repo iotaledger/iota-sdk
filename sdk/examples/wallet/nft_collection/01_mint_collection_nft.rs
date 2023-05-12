@@ -12,7 +12,7 @@
 //! cargo run --release --all-features --example mint_collection_nft
 //! ```
 
-use std::str::FromStr;
+use std::{env::var, str::FromStr};
 
 use iota_sdk::{
     types::block::{
@@ -23,10 +23,6 @@ use iota_sdk::{
     wallet::{Account, MintNftParams, Result, Wallet},
 };
 
-// The account alias created in this example
-const ACCOUNT_ALIAS: &str = "Alice";
-// The wallet database folder created in this example
-const WALLET_DB_PATH: &str = "./example.walletdb";
 // !!! Replace with the NFT address from the NFT we minted in `mint_issuer_nft` example !!!
 // const ISSUER_NFT_ID: &str = "0x13c490ac052e575cffd40e170c2d46c6029b8b68cdf0e899b34cde93d2a7b28a";
 const ISSUER_NFT_ID: &str = "0xe009d73b326b5e3c3430734695421d34fc0f820005181c987962d31daf25db82";
@@ -57,15 +53,18 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Access the wallet we generated with `--example create_wallet`
-    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
-    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
+    let account = wallet.get_account(&var("ACCOUNT_ALIAS_1").unwrap()).await?;
 
     account.sync(None).await?;
     println!("Account synced!");
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Create the metadata with another index for each
@@ -114,7 +113,7 @@ fn get_immutable_metadata(index: usize, issuer_nft_id: NftId) -> String {
 async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         transaction_id
     );
     // Wait for transaction to get included
@@ -123,7 +122,7 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
     Ok(())

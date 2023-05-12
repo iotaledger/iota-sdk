@@ -11,14 +11,12 @@
 //! cargo run --release --all-features --example generate_address`
 //! ```
 
+use std::env::var;
+
 use iota_sdk::wallet::{Result, Wallet};
 
-// The account alias used in this example
-const ACCOUNT_ALIAS: &str = "Alice";
 // The number of addresses to generate
 const NUM_ADDRESSES_TO_GENERATE: u32 = 1;
-// The wallet database folder
-const WALLET_DB_PATH: &str = "./example.walletdb";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -26,19 +24,22 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Access the wallet we generated with `--example create_wallet`
-    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
-    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
+    let account = wallet.get_account(&var("ACCOUNT_ALIAS_1").unwrap()).await?;
 
     // Provide the stronghold password
     wallet
-        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Generate some addresses
     let addresses = account.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
 
     println!("NEW ADDRESSES:");
-    let explorer_url = std::env::var("EXPLORER_URL").ok();
+    let explorer_url = var("EXPLORER_URL").ok();
     let prepended = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
     for address in account.addresses().await? {
         if addresses.contains(&address) {

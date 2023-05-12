@@ -11,6 +11,8 @@
 //! cargo run --release --all-features --example mint_nft
 //! ```
 
+use std::env::var;
+
 use iota_sdk::{
     types::block::output::{
         feature::{IssuerFeature, SenderFeature},
@@ -20,10 +22,6 @@ use iota_sdk::{
     wallet::{MintNftParams, Result, Wallet},
 };
 
-// The account alias used in this example
-const ACCOUNT_ALIAS: &str = "Alice";
-// The wallet database folder
-const WALLET_DB_PATH: &str = "./example.walletdb";
 // The owner address of the first NFT we'll mint
 const NFT1_OWNER_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
 // The metadata of the first minted NFT
@@ -41,8 +39,11 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Access the wallet we generated with `--example create_wallet`
-    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
-    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
+    let account = wallet.get_account(&var("ACCOUNT_ALIAS_1").unwrap()).await?;
 
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
@@ -53,7 +54,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Build an NFT using `MintNftParams` and use the `mint_nfts` API
@@ -77,7 +78,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
     println!("Minted NFT 1");
@@ -104,7 +105,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
     println!("Minted NFT 2");

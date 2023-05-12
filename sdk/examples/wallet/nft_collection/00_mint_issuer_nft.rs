@@ -11,6 +11,8 @@
 //! cargo run --release --all-features --example mint_issuer_nft
 //! ```
 
+use std::env::var;
+
 use iota_sdk::{
     types::block::{
         output::{NftId, Output, OutputId},
@@ -19,25 +21,24 @@ use iota_sdk::{
     wallet::{Account, MintNftParams, Result, Wallet},
 };
 
-// The account alias created in this example
-const ACCOUNT_ALIAS: &str = "Alice";
-// The wallet database folder created in this example
-const WALLET_DB_PATH: &str = "./example.walletdb";
-
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
     // Access the wallet we generated with `--example create_wallet`
-    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
-    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
+    let account = wallet.get_account(&var("ACCOUNT_ALIAS_1").unwrap()).await?;
 
     let _ = account.sync(None).await?;
+    println!("Account synced!");
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Issue the minting transaction and wait for it's inclusion
@@ -71,7 +72,7 @@ async fn main() -> Result<()> {
 async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         transaction_id
     );
     // Wait for transaction to get included
@@ -80,7 +81,7 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
     Ok(())

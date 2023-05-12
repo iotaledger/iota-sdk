@@ -13,7 +13,7 @@
 //! cargo run --release --all-features --example burn_native_token
 //! ```
 
-use std::str::FromStr;
+use std::{env::var, str::FromStr};
 
 use iota_sdk::{
     types::block::output::TokenId,
@@ -21,8 +21,6 @@ use iota_sdk::{
     U256,
 };
 
-// The account alias used in this example
-const ACCOUNT_ALIAS: &str = "Alice";
 // The native token id. Replace it with a TokenId that is available in the account, the foundry output which minted it,
 // also needs to be available. You can check this by running the `get_balance` example. You can mint a new native token
 // by running the `mint_native_token` example.
@@ -31,8 +29,6 @@ const TOKEN_ID: &str = "0x08847bd287c912fadedb6bf38900bda9f2d377b75b2a0bece87386
 const MIN_AVAILABLE_AMOUNT: u64 = 11;
 // The amount of the native token to burn
 const BURN_AMOUNT: u64 = 1;
-// The wallet database folder
-const WALLET_DB_PATH: &str = "./example.walletdb";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -45,8 +41,12 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Access the wallet we generated with `--example create_wallet`
-    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
-    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
+    let alias = var("ACCOUNT_ALIAS_1").unwrap();
+    let account = wallet.get_account(&alias).await?;
 
     let token_id = TokenId::from_str(TOKEN_ID)?;
 
@@ -60,7 +60,7 @@ async fn main() -> Result<()> {
 
         // Set the stronghold password
         wallet
-            .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+            .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
         println!("Preparing burning transaction...");
@@ -77,7 +77,7 @@ async fn main() -> Result<()> {
             .await?;
         println!(
             "Transaction included: {}/block/{}",
-            std::env::var("EXPLORER_URL").unwrap(),
+            var("EXPLORER_URL").unwrap(),
             block_id
         );
         println!(
@@ -100,7 +100,7 @@ async fn main() -> Result<()> {
         }
     } else {
         println!(
-            "Native token '{TOKEN_ID}' doesn't exist or there's not at least '{MIN_AVAILABLE_AMOUNT}' tokens of it in account '{ACCOUNT_ALIAS}'"
+            "Native token '{TOKEN_ID}' doesn't exist or there's not at least '{MIN_AVAILABLE_AMOUNT}' tokens of it in account '{alias}'"
         );
     }
 

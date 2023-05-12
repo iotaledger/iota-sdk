@@ -11,7 +11,7 @@
 //! cargo run --release --all-features --example split_funds
 //! ```
 
-use std::time::Instant;
+use std::{env::var, time::Instant};
 
 use iota_sdk::{
     client::{
@@ -22,10 +22,6 @@ use iota_sdk::{
     wallet::{account::types::AccountAddress, Account, ClientOptions, Result, Wallet},
 };
 
-// The account alias used in this example
-const ACCOUNT_ALIAS: &str = "Alice";
-// The wallet database folder created in this example
-const WALLET_DB_PATH: &str = "./example.walletdb";
 // The base coin amount to send
 const SEND_AMOUNT: u64 = 1_000_000;
 // The maximum number of addresses funds are distributed to
@@ -36,28 +32,29 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
 
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(&var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
-        .with_storage_path(WALLET_DB_PATH)
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
         .await?;
 
     // Get account or create a new one
-    let account = create_account(&wallet, ACCOUNT_ALIAS).await?;
+    let alias = var("ACCOUNT_ALIAS_1").unwrap();
+    let account = create_account(&wallet, &alias).await?;
 
-    let _ = generate_max_addresses(&account, ACCOUNT_ALIAS, MAX_ADDRESSES_TO_SPLIT_FUNDS).await?;
+    let _ = generate_max_addresses(&account, MAX_ADDRESSES_TO_SPLIT_FUNDS).await?;
 
     let addresses = account.addresses().await?;
     println!("Total address count: {}", addresses.len());
 
-    sync_print_balance(&account, ACCOUNT_ALIAS).await?;
+    sync_print_balance(&account).await?;
 
     let addresses_with_unspent_outputs = account.addresses_with_unspent_outputs().await?;
     println!(
@@ -87,7 +84,7 @@ async fn main() -> Result<()> {
         let transaction = account.send(outputs_per_transaction, None).await?;
         println!(
             "Transaction sent: {}/transaction/{}",
-            std::env::var("EXPLORER_URL").unwrap(),
+            var("EXPLORER_URL").unwrap(),
             transaction.transaction_id
         );
 
@@ -98,12 +95,12 @@ async fn main() -> Result<()> {
 
         println!(
             "Transaction included: {}/block/{}",
-            std::env::var("EXPLORER_URL").unwrap(),
+            var("EXPLORER_URL").unwrap(),
             block_id
         );
     }
 
-    sync_print_balance(&account, ACCOUNT_ALIAS).await?;
+    sync_print_balance(&account).await?;
 
     let addresses_with_unspent_outputs = account.addresses_with_unspent_outputs().await?;
     println!(
@@ -125,7 +122,8 @@ async fn create_account(wallet: &Wallet, alias: &str) -> Result<Account> {
     })
 }
 
-async fn sync_print_balance(account: &Account, alias: &str) -> Result<()> {
+async fn sync_print_balance(account: &Account) -> Result<()> {
+    let alias = account.alias().await;
     let now = Instant::now();
     let balance = account.sync(None).await?;
     println!("{alias}'s account synced in: {:.2?}", now.elapsed());
@@ -133,7 +131,8 @@ async fn sync_print_balance(account: &Account, alias: &str) -> Result<()> {
     Ok(())
 }
 
-async fn generate_max_addresses(account: &Account, alias: &str, max: usize) -> Result<Vec<AccountAddress>> {
+async fn generate_max_addresses(account: &Account, max: usize) -> Result<Vec<AccountAddress>> {
+    let alias = account.alias().await;
     if account.addresses().await?.len() < max {
         let num_addresses_to_generate = max - account.addresses().await?.len();
         println!("Generating {num_addresses_to_generate} addresses for account '{alias}'...");

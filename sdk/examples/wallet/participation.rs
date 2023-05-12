@@ -16,7 +16,7 @@
 //! cargo run --release --all-features --example wallet_participation
 //! ```
 
-use std::str::FromStr;
+use std::{env::var, str::FromStr};
 
 use iota_sdk::{
     client::node_manager::node::Node,
@@ -25,10 +25,6 @@ use iota_sdk::{
     Url,
 };
 
-// The account alias used in this example
-const ACCOUNT_ALIAS: &str = "Alice";
-// The wallet database folder created in this example
-const WALLET_DB_PATH: &str = "./example.walletdb";
 // The node that runs the participation plugin
 const PARTICPATION_NODE_URL: &str = "https://api.testnet.shimmer.network";
 // Some (voted on) participation event. You need to change it to perform an actual vote, otherwise the example will
@@ -50,15 +46,16 @@ async fn main() -> Result<()> {
 
     // Access the wallet we generated with `--example create_wallet`
     let wallet = Wallet::builder()
+        // TODO: is this needed?
         // .with_client_options(ClientOptions::new().with_ignore_node_health())
-        .with_storage_path(WALLET_DB_PATH)
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
+    let account = wallet.get_account(&var("ACCOUNT_ALIAS_1").unwrap()).await?;
 
     // Provide the stronghold password
     wallet
-        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     let event_id = ParticipationEventId::from_str(PARTICIPATION_EVENT_ID_1)?;
@@ -146,7 +143,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
 
@@ -171,7 +168,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
 
@@ -196,7 +193,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
 
@@ -223,7 +220,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
 
@@ -247,7 +244,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
 

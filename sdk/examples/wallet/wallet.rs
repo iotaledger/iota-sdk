@@ -16,7 +16,7 @@
 //! cargo run --release --all-features --example wallet
 //! ```
 
-use std::time::Instant;
+use std::{env::var, time::Instant};
 
 use iota_sdk::{
     client::{
@@ -27,10 +27,6 @@ use iota_sdk::{
     wallet::{Account, ClientOptions, Result, SendAmountParams, Wallet},
 };
 
-// The account alias used in this example
-const ACCOUNT_ALIAS: &str = "Alice";
-// The wallet database folder created in this example
-const WALLET_DB_PATH: &str = "./example.walletdb";
 // The number of addresses to generate in this account
 const MAX_ADDRESSES_TO_GENERATE: usize = 10;
 // The amount of coins to send
@@ -45,7 +41,8 @@ async fn main() -> Result<()> {
 
     let wallet = restore_wallet().await?;
 
-    let account = get_or_create_account(&wallet, ACCOUNT_ALIAS).await?;
+    let alias = var("ACCOUNT_ALIAS_1").unwrap();
+    let account = get_or_create_account(&wallet, &alias).await?;
     print_accounts(&wallet).await?;
 
     generate_addresses(&account, MAX_ADDRESSES_TO_GENERATE).await?;
@@ -68,12 +65,12 @@ async fn main() -> Result<()> {
 }
 
 async fn restore_wallet() -> Result<Wallet> {
-    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(&var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
     Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
-        .with_storage_path(WALLET_DB_PATH)
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
@@ -155,7 +152,7 @@ async fn print_addresses_with_funds(account: &Account) -> Result<()> {
 async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         transaction_id
     );
     // Wait for transaction to get included
@@ -164,7 +161,7 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
     Ok(())

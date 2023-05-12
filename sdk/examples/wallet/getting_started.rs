@@ -11,6 +11,8 @@
 //! cargo run --release --all-features --example wallet_getting_started
 //! ```
 
+use std::env::var;
+
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -19,13 +21,6 @@ use iota_sdk::{
     wallet::{ClientOptions, Result, Wallet},
 };
 
-// The account alias created in this example
-const ACCOUNT_ALIAS: &str = "Alice";
-// The Stronghold snapshot file created in this example
-const STRONGHOLD_SNAPSHOT_PATH: &str = "./example.stronghold";
-// The wallet database folder created in this example
-const WALLET_DB_PATH: &str = "./example.walletdb";
-
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
@@ -33,15 +28,15 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let secret_manager = StrongholdSecretManager::builder()
-        .password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
-        .build(STRONGHOLD_SNAPSHOT_PATH)?;
+        .password(&var("STRONGHOLD_PASSWORD").unwrap())
+        .build(var("STRONGHOLD_SNAPSHOT_PATH").unwrap())?;
 
-    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
 
     // Create the wallet
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
-        .with_storage_path(WALLET_DB_PATH)
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
@@ -53,11 +48,8 @@ async fn main() -> Result<()> {
     wallet.store_mnemonic(mnemonic).await?;
 
     // Create an account.
-    let account = wallet
-        .create_account()
-        .with_alias(ACCOUNT_ALIAS.to_string())
-        .finish()
-        .await?;
+    let alias = var("ACCOUNT_ALIAS_1").unwrap();
+    let account = wallet.create_account().with_alias(alias).finish().await?;
 
     // Get the first address and print it.
     let addresses = account.addresses().await?;

@@ -8,6 +8,8 @@
 //! cargo run --release --all-features --example background_syncing
 //! ```
 
+use std::env::var;
+
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -17,38 +19,30 @@ use iota_sdk::{
     wallet::{ClientOptions, Result, Wallet},
 };
 
-// The account aliases used in this example
-const ACCOUNT_ALIAS: &str = "Alice";
-// The wallet database folder
-const WALLET_DB_PATH: &str = "./example.walletdb";
-
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
     // Create a wallet
-    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(&var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
-        .with_storage_path(WALLET_DB_PATH)
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
         .await?;
 
     // Get or create new account
-    let account = if let Ok(account) = wallet.get_account(ACCOUNT_ALIAS).await {
+    let alias = var("ACCOUNT_ALIAS_1").unwrap();
+    let account = if let Ok(account) = wallet.get_account(&alias).await {
         account
     } else {
-        println!("Creating account '{ACCOUNT_ALIAS}'");
-        wallet
-            .create_account()
-            .with_alias(ACCOUNT_ALIAS.to_string())
-            .finish()
-            .await?
+        println!("Creating account '{alias}'");
+        wallet.create_account().with_alias(alias).finish().await?
     };
     let addresses = account.addresses().await?;
 
@@ -61,11 +55,8 @@ async fn main() -> Result<()> {
     println!("Started background syncing");
 
     println!("Requesting funds from faucet...");
-    let faucet_response = request_funds_from_faucet(
-        &std::env::var("FAUCET_URL").unwrap(),
-        &addresses[0].address().to_string(),
-    )
-    .await?;
+    let faucet_response =
+        request_funds_from_faucet(&var("FAUCET_URL").unwrap(), &addresses[0].address().to_string()).await?;
     println!("Response from faucet: {}", faucet_response.trim_end());
 
     println!("Waiting for funds (timeout=60s)...");

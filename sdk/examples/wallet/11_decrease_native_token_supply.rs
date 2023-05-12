@@ -11,7 +11,7 @@
 //! cargo run --release --all-features --example decrease_native_token_supply
 //! ```
 
-use std::str::FromStr;
+use std::{env::var, str::FromStr};
 
 use iota_sdk::{
     types::block::output::TokenId,
@@ -19,16 +19,12 @@ use iota_sdk::{
     U256,
 };
 
-// The account alias used in this example
-const ACCOUNT_ALIAS: &str = "Alice";
 // The native token id. Replace it with a TokenId that is available in the account, the foundry output which minted it,
 // also needs to be available. You can check this by running the `get_balance` example. You can mint a new native token
 // by running the `mint_native_token` example.
 const TOKEN_ID: &str = "0x08847bd287c912fadedb6bf38900bda9f2d377b75b2a0bece8738699f56ebca4130100000000";
 // The amount of native tokens to melt
 const MELT_AMOUNT: u64 = 10;
-// The wallet database folder
-const WALLET_DB_PATH: &str = "./example.walletdb";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -41,8 +37,11 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Access the wallet we generated with `--example create_wallet`
-    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
-    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
+    let account = wallet.get_account(&var("ACCOUNT_ALIAS_1").unwrap()).await?;
 
     let token_id = TokenId::from_str(TOKEN_ID)?;
 
@@ -64,7 +63,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     println!("Preparing melting transaction...");
@@ -82,7 +81,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
     println!("Melted {} native tokens ({})", melt_amount, token_id);

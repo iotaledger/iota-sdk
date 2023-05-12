@@ -11,6 +11,8 @@
 //! cargo run --release --all-features --example multithread
 //! ```
 
+use std::env::var;
+
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -21,12 +23,6 @@ use iota_sdk::{
 };
 use tokio::task::JoinSet;
 
-// The alias of the first account
-const ACCOUNT_ALIAS_1: &str = "Ping";
-// The alias of the second account
-const ACCOUNT_ALIAS_2: &str = "Pong";
-// The wallet database folder
-const WALLET_DB_PATH: &str = "./example.ping.walletdb";
 // The maximum number of addresses to send funds to
 const NUM_RECV_ADDRESSES: usize = 3;
 // The base amount of coins to send (the actual amount will be multiples of that)
@@ -37,37 +33,39 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
 
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(&var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
-        .with_storage_path(WALLET_DB_PATH)
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
         .await?;
 
-    let ping_account = get_or_create_account(&wallet, ACCOUNT_ALIAS_1).await?;
-    let pong_account = get_or_create_account(&wallet, ACCOUNT_ALIAS_2).await?;
+    let alias1 = var("ACCOUNT_ALIAS_1").unwrap();
+    let account1 = get_or_create_account(&wallet, &alias1).await?;
+    let alias2 = var("ACCOUNT_ALIAS_2").unwrap();
+    let account2 = get_or_create_account(&wallet, &alias2).await?;
 
-    let ping_send_address = &ping_account.addresses().await?[0];
-    let pong_addresses = generate_addresses(&pong_account, ACCOUNT_ALIAS_2).await?;
+    let account1_send_address = &account1.addresses().await?[0];
+    let account2_recv_addresses = generate_addresses(&account2).await?;
 
-    sync_print_balance(&ping_account, ACCOUNT_ALIAS_1).await?;
-    sync_print_balance(&pong_account, ACCOUNT_ALIAS_2).await?;
+    sync_print_balance(&account1).await?;
+    sync_print_balance(&account2).await?;
 
-    may_request_funds(&ping_account, &ping_send_address.address().to_string()).await?;
+    may_request_funds(&account1, &account1_send_address.address().to_string()).await?;
 
     let mut tasks: JoinSet<Result<(usize, usize)>> = JoinSet::new();
     let num_threads_per_address = num_cpus::get().min(4);
 
     for address_index in 0..NUM_RECV_ADDRESSES {
         for thread_index in 1..=num_threads_per_address {
-            let ping_account_clone = ping_account.clone();
-            let pong_addresses_clone = pong_addresses.clone();
+            let ping_account_clone = account1.clone();
+            let pong_addresses_clone = account2_recv_addresses.clone();
 
             tasks.spawn(async move {
                 let amount = ((address_index + thread_index) % 3 + 1) as u64 * BASE_AMOUNT;
@@ -107,7 +105,7 @@ async fn main() -> Result<()> {
 
                 println!(
                     "Transaction included: {}/block/{}",
-                    std::env::var("EXPLORER_URL").unwrap(),
+                    var("EXPLORER_URL").unwrap(),
                     block_id
                 );
 
@@ -123,14 +121,15 @@ async fn main() -> Result<()> {
         }
     }
 
-    sync_print_balance(&ping_account, ACCOUNT_ALIAS_1).await?;
-    sync_print_balance(&pong_account, ACCOUNT_ALIAS_2).await?;
+    sync_print_balance(&account1).await?;
+    sync_print_balance(&account2).await?;
 
     println!("Example finished successfully");
     Ok(())
 }
 
-async fn sync_print_balance(account: &Account, alias: &str) -> Result<()> {
+async fn sync_print_balance(account: &Account) -> Result<()> {
+    let alias = account.alias().await;
     let balance = account.sync(None).await?;
     println!("{alias}'s account synced");
     println!("{alias}'s balance:\n{:#?}", balance.base_coin());
@@ -147,7 +146,8 @@ async fn get_or_create_account(wallet: &Wallet, alias: &str) -> Result<Account> 
     Ok(account)
 }
 
-async fn generate_addresses(account: &Account, alias: &str) -> Result<Vec<AccountAddress>> {
+async fn generate_addresses(account: &Account) -> Result<Vec<AccountAddress>> {
+    let alias = account.alias().await;
     if account.addresses().await?.len() < NUM_RECV_ADDRESSES {
         let num_addresses_to_generate = NUM_RECV_ADDRESSES - account.addresses().await?.len();
         println!("Generating {num_addresses_to_generate} addresses for {alias}...");
@@ -165,7 +165,7 @@ async fn may_request_funds(account: &Account, address: &str) -> Result<()> {
 
     if funds_before < NUM_RECV_ADDRESSES as u64 * num_cpus::get().min(4) as u64 * BASE_AMOUNT {
         println!("Requesting funds from faucet...");
-        let faucet_response = request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), address).await?;
+        let faucet_response = request_funds_from_faucet(&var("FAUCET_URL").unwrap(), address).await?;
         println!("Response from faucet: {}", faucet_response.trim_end());
         if faucet_response.contains("error") {
             return Ok(());

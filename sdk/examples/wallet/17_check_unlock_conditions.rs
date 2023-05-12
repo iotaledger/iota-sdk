@@ -10,6 +10,8 @@
 //! cargo run --release --all-features --example check_unlock_conditions
 //! ```
 
+use std::env::var;
+
 use iota_sdk::{
     types::block::{
         address::Bech32Address,
@@ -18,18 +20,20 @@ use iota_sdk::{
     wallet::{Result, Wallet},
 };
 
-// The account alias used in this example
-const ACCOUNT_ALIAS: &str = "Alice";
-// The wallet database folder
-const WALLET_DB_PATH: &str = "./example.walletdb";
 // The amount to build the basic output with
 const AMOUNT: u64 = 1_000_000;
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
+
     // Access the wallet we generated with `--example create_wallet`
-    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
-    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
+    let account = wallet.get_account(&var("ACCOUNT_ALIAS_1").unwrap()).await?;
 
     let account_addresses: Vec<Bech32Address> = account
         .addresses()

@@ -14,7 +14,7 @@
 //! cargo run --release --all-features --example ledger_nano
 //! ```
 
-use std::time::Instant;
+use std::{env::var, time::Instant};
 
 use iota_sdk::{
     client::{
@@ -26,21 +26,21 @@ use iota_sdk::{
 
 // The account alias used in this example
 const ACCOUNT_ALIAS: &str = "ledger";
+// The wallet database folder created in this example
+const WALLET_DB_PATH: &str = "./example.ledger_nano.walletdb";
 // The number of addresses to generate
 const NUM_ADDRESSES_TO_GENERATE: u32 = 1;
 // The address to send coins to
 const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
 // The amount of base coins we'll send
 const SEND_AMOUNT: u64 = 1_000_000;
-// The wallet database folder created in this example
-const WALLET_DB_PATH: &str = "./example.ledger_nano.walletdb";
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
     let secret_manager = LedgerSecretManager::new(true);
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::LedgerNano(secret_manager))
@@ -87,7 +87,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
 

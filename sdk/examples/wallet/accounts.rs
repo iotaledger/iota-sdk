@@ -11,7 +11,7 @@
 //! cargo run --release --all-features --example accounts
 //! ```
 
-use std::time::Instant;
+use std::{env::var, time::Instant};
 
 use iota_sdk::{
     client::{
@@ -22,12 +22,6 @@ use iota_sdk::{
     wallet::{Account, ClientOptions, Result, Wallet},
 };
 
-// The alias of the first account
-const ACCOUNT_ALIAS_1: &str = "Alice";
-// The alias of the second account
-const ACCOUNT_ALIAS_2: &str = "Bob";
-// The wallet database folder
-const WALLET_DB_PATH: &str = "./example.walletdb";
 // The number of addresses to generate
 const NUM_ADDRESSES_TO_GENERATE: u32 = 5;
 
@@ -36,23 +30,26 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
 
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(&var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
-        .with_storage_path(WALLET_DB_PATH)
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
         .await?;
 
     // Get or create first account
-    let _ = create_account(&wallet, ACCOUNT_ALIAS_1).await?;
+    let alias1 = var("ACCOUNT_ALIAS_1").unwrap();
+    let _ = create_account(&wallet, &alias1).await?;
+
     // Get or create second account
-    let account2 = create_account(&wallet, ACCOUNT_ALIAS_2).await?;
+    let alias2 = var("ACCOUNT_ALIAS_2").unwrap();
+    let account2 = create_account(&wallet, &alias2).await?;
 
     let accounts = wallet.get_accounts().await?;
     println!("WALLET ACCOUNTS:");
@@ -61,7 +58,7 @@ async fn main() -> Result<()> {
         println!("- {}", account.alias());
     }
 
-    println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses for account '{ACCOUNT_ALIAS_2}'...");
+    println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses for account '{alias2}'...");
     let addresses = account2.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
 
     let balance = account2.sync(None).await?;
@@ -69,11 +66,8 @@ async fn main() -> Result<()> {
     println!("Current available funds: {funds_before}");
 
     println!("Requesting funds from faucet...");
-    let faucet_response = request_funds_from_faucet(
-        &std::env::var("FAUCET_URL").unwrap(),
-        &addresses[0].address().to_string(),
-    )
-    .await?;
+    let faucet_response =
+        request_funds_from_faucet(&var("FAUCET_URL").unwrap(), &addresses[0].address().to_string()).await?;
     println!("Response from faucet: {}", faucet_response.trim_end());
 
     println!("Waiting for funds (timeout=60s)...");
@@ -97,11 +91,8 @@ async fn main() -> Result<()> {
     println!("New available funds: {}", balance.base_coin().available());
 
     let addresses = account2.addresses().await?;
-    println!(
-        "Number of addresses in {ACCOUNT_ALIAS_2}'s account: {}",
-        addresses.len()
-    );
-    println!("{ACCOUNT_ALIAS_2}'s base coin balance:\n{:#?}", balance.base_coin());
+    println!("Number of addresses in {alias2}'s account: {}", addresses.len());
+    println!("{alias2}'s base coin balance:\n{:#?}", balance.base_coin());
 
     Ok(())
 }

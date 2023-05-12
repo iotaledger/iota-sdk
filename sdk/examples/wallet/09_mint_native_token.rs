@@ -11,19 +11,17 @@
 //! cargo run --release --all-features --example mint_native_token
 //! ```
 
+use std::env::var;
+
 use iota_sdk::{
     wallet::{MintNativeTokenParams, Result, Wallet},
     U256,
 };
 
-// The account alias used in this example
-const ACCOUNT_ALIAS: &str = "Alice";
 // The circulating supply of the native token
 const CIRCULATING_SUPPLY: u64 = 100;
 // The maximum supply of the native token
 const MAXIMUM_SUPPLY: u64 = 100;
-// The wallet database folder
-const WALLET_DB_PATH: &str = "./example.walletdb";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -31,12 +29,15 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Access the wallet we generated with `--example create_wallet`
-    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
-    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
+    let account = wallet.get_account(&var("ACCOUNT_ALIAS_1").unwrap()).await?;
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     println!("Preparing alias output transaction...");
@@ -51,7 +52,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
 
@@ -76,7 +77,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
     println!("Minted token: {} ", transaction.token_id);

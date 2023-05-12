@@ -11,17 +11,13 @@
 //! cargo run --release --all-features --example update_alias_output
 //! ```
 
-use std::{env, str::FromStr, time::Instant};
+use std::{env::var, str::FromStr, time::Instant};
 
 use iota_sdk::{
     types::block::output::{AliasId, AliasOutput, AliasOutputBuilder, Output},
     wallet::{account::FilterOptions, Account, Result, Wallet},
 };
 
-// The account alias used in this example
-const ACCOUNT_ALIAS: &str = "Alice";
-// The wallet database folder created in this example
-const WALLET_DB_PATH: &str = "./example.walletdb";
 // Replace with an alias id held in an unspent output of the account
 const ALIAS_ID: &str = "0xc94fc4d280d63c7de09c8cc49ecefba6192e104d200ab7472db9e943e0feef7c";
 // Replace with the correct increment of the current state index of your alias
@@ -35,14 +31,17 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Get the account we generated with `01_create_wallet`
-    let wallet = Wallet::builder().with_storage_path(WALLET_DB_PATH).finish().await?;
-    let account = wallet.get_account(ACCOUNT_ALIAS).await?;
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
+    let account = wallet.get_account(&var("ACCOUNT_ALIAS_1").unwrap()).await?;
 
-    sync_print_balance(&account, ACCOUNT_ALIAS).await?;
+    sync_and_print_balance(&account).await?;
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Get the alias output by its alias id
@@ -88,7 +87,8 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn sync_print_balance(account: &Account, alias: &str) -> Result<()> {
+async fn sync_and_print_balance(account: &Account) -> Result<()> {
+    let alias = account.alias().await;
     let now = Instant::now();
     let balance = account.sync(None).await?;
     println!("{alias}'s account synced in: {:.2?}", now.elapsed());
@@ -101,7 +101,7 @@ async fn send_and_wait_for_inclusion(account: &Account, outputs: Vec<Output>) ->
     let transaction = account.send(outputs, None).await?;
     println!(
         "Transaction sent: {}/transaction/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         transaction.transaction_id
     );
     // Wait for transaction to get included
@@ -110,7 +110,7 @@ async fn send_and_wait_for_inclusion(account: &Account, outputs: Vec<Output>) ->
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
     Ok(())
