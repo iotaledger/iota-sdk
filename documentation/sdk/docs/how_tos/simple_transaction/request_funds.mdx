@@ -12,15 +12,15 @@ keywords:
 - rust
 ---
 
+import CodeBlock from '@theme/CodeBlock';
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
-import RustCode from "../../libraries/how_tos/simple_transaction/request_funds/rust/_code_sample.mdx";
-import NodejsCode from "../../libraries/how_tos/simple_transaction/request_funds/nodejs/_code_sample.mdx";
-import PythonCode from "../../libraries/how_tos/simple_transaction/request_funds/python/_code_sample.mdx";
-import Output from "../../libraries/how_tos/simple_transaction/request_funds/_expected_output.mdx";
+import RustCode from '!!raw-loader!../../../../../sdk/examples/how_tos/simple_transaction/request_funds.rs';
+import NodejsCode from '!!raw-loader!../../../../../bindings/nodejs/examples/how_tos/simple_transaction/request_funds.ts';
+import PythonCode from '!!raw-loader!../../../../../bindings/python/examples/how_tos/simple_transaction/request_funds.py';
 import TipFaucet from "../../_admonitions/_tip_faucet.md";
 
-Once you have created your account<!-- TODO [created your account](01_create_a_wallet_account.mdx) -->,
+Once you have created your account<!-- TODO [created your account](01_create_a_wallet_account(dot)mdx) -->,
 you can start using the IOTA SDK for value transactions. Since these examples target the testnet, you can request funds
 using the `request_funds_from_faucet` function.
 
@@ -31,22 +31,31 @@ using the `request_funds_from_faucet` function.
 The following example will:
 
 1. Create a wallet.
-2. Get Alice's account which was created in the first guide<!-- TODO [created in the first guide](01_create_a_wallet_account.mdx) -->.
+2. Get Alice's account which was created in the first guide<!-- TODO [created in the first guide](01_create_a_wallet_account(dot)mdx) -->.
 3. Retrieve an address related to Alice's account.
 4. Request funds to the `FAUCET_URL` you defined in the `.env` file.
 
 <Tabs groupId="language">
     <TabItem value="rust" label="Rust">
-        <RustCode/>
+        <CodeBlock className="language-rust">
+            {RustCode}
+        </CodeBlock>
     </TabItem>
     <TabItem value="nodejs" label="Nodejs">
-        <NodejsCode/>
+        <CodeBlock className="language-typescript">
+            {NodejsCode}
+        </CodeBlock>
     </TabItem>
     <TabItem value="python" label="Python">
-        <PythonCode/>
+        <CodeBlock className="language-typescript">
+            {PythonCode}
+        </CodeBlock>
     </TabItem>
 </Tabs>
 
 ## Expected Output
 
-<Output/>
+```plaintext
+rms1qpjt6zr7rfvl27le5xjcv0qhr90l92wtm6eu6v6jhtgvrjp7mwufq6nqxn8
+{"address":"rms1qpjt6zr7rfvl27le5xjcv0qhr90l92wtm6eu6v6jhtgvrjp7mwufq6nqxn8","waitingRequests":11}
+```

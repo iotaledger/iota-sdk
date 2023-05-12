@@ -12,12 +12,12 @@ keywords:
 - rust
 ---
 
+import CodeBlock from '@theme/CodeBlock';
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
-import RustCode from "../../libraries/how_tos/simple_transaction/simple_transaction/rust/_code_sample.mdx";
-import NodejsCode from "../../libraries/how_tos/simple_transaction/simple_transaction/nodejs/_code_sample.mdx";
-import PythonCode from "../../libraries/how_tos/simple_transaction/simple_transaction/python/_code_sample.mdx";
-import Output from "../../libraries/how_tos/simple_transaction/simple_transaction/_expected_output.mdx";
+import RustCode from '!!raw-loader!../../../../../sdk/examples/how_tos/simple_transaction/request_funds.rs';
+import NodejsCode from '!!raw-loader!../../../../../bindings/nodejs/examples/how_tos/simple_transaction/request_funds.ts';
+import PythonCode from '!!raw-loader!../../../../../bindings/python/examples/how_tos/simple_transaction/request_funds.py';
 import TipFaucet from "../../_admonitions/_tip_faucet.md";
 
 Once you have created your account<!-- TODO [created your account]() --> and
@@ -37,16 +37,25 @@ The following example will:
 
 <Tabs groupId="language">
     <TabItem value="rust" label="Rust">
-        <RustCode/>
+        <CodeBlock className="language-rust">
+            {RustCode}
+        </CodeBlock>
     </TabItem>
     <TabItem value="nodejs" label="Nodejs">
-        <NodejsCode/>
+        <CodeBlock className="language-typescript">
+            {NodejsCode}
+        </CodeBlock>
     </TabItem>
     <TabItem value="python" label="Python">
-        <PythonCode/>
+        <CodeBlock className="language-typescript">
+            {PythonCode}
+        </CodeBlock>
     </TabItem>
 </Tabs>
 
 ## Expected Output
 
-<Output/>
+```plaintext
+rms1qpjt6zr7rfvl27le5xjcv0qhr90l92wtm6eu6v6jhtgvrjp7mwufq6nqxn8
+{"address":"rms1qpjt6zr7rfvl27le5xjcv0qhr90l92wtm6eu6v6jhtgvrjp7mwufq6nqxn8","waitingRequests":11}
+```
