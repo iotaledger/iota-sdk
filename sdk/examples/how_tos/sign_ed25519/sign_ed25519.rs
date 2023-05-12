@@ -44,9 +44,8 @@ async fn main() -> Result<()> {
     ]);
 
     let message = FOUNDRY_METADATA.as_bytes();
-
     let signature = SecretManager::Stronghold(stronghold)
-        .sign_ed25519(&message, &bip32_chain)
+        .sign_ed25519(message, &bip32_chain)
         .await?;
     println!(
         "Public key: {}\nSignature: {}",
