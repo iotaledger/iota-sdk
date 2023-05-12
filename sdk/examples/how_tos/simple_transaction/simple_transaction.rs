@@ -4,7 +4,7 @@
 //! In this example we will send a transaction.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example wallet_transaction --release`
+//! `cargo run --example simple_transaction --release`
 
 use iota_sdk::{
     types::block::address::Bech32Address,
@@ -36,7 +36,6 @@ async fn main() -> Result<()> {
             1_000_000,
         )];
         let transaction = account.send_amount(outputs, None).await?;
-        println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included
         let block_id = account
@@ -44,7 +43,7 @@ async fn main() -> Result<()> {
             .await?;
 
         println!(
-            "Block included: {}/block/{}",
+            "Block sent: {}/block/{}",
             std::env::var("EXPLORER_URL").unwrap(),
             block_id
         );

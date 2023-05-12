@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 use self::adapter::StorageAdapter;
 
 #[derive(Debug)]
-pub(crate) struct Storage {
+pub struct Storage {
     inner: Box<dyn StorageAdapter + Sync + Send>,
     encryption_key: Option<[u8; 32]>,
 }
@@ -30,7 +30,7 @@ impl Storage {
         self.inner.id()
     }
 
-    async fn get<T: for<'de> Deserialize<'de>>(&self, key: &str) -> crate::wallet::Result<Option<T>> {
+    pub(crate) async fn get<T: for<'de> Deserialize<'de>>(&self, key: &str) -> crate::wallet::Result<Option<T>> {
         match self.inner.get(key).await? {
             Some(record) => {
                 if let Some(key) = &self.encryption_key {
@@ -49,7 +49,7 @@ impl Storage {
         }
     }
 
-    async fn set<T: Serialize + Send>(&mut self, key: &str, record: T) -> crate::wallet::Result<()> {
+    pub(crate) async fn set<T: Serialize + Send>(&self, key: &str, record: T) -> crate::wallet::Result<()> {
         let record = serde_json::to_string(&record)?;
         self.inner
             .set(
@@ -65,7 +65,7 @@ impl Storage {
     }
 
     #[allow(dead_code)]
-    async fn batch_set(&mut self, records: HashMap<String, String>) -> crate::wallet::Result<()> {
+    async fn batch_set(&self, records: HashMap<String, String>) -> crate::wallet::Result<()> {
         self.inner
             .batch_set(if let Some(key) = &self.encryption_key {
                 let mut encrypted_records = HashMap::new();
@@ -80,7 +80,7 @@ impl Storage {
             .await
     }
 
-    async fn remove(&mut self, key: &str) -> crate::wallet::Result<()> {
+    async fn remove(&self, key: &str) -> crate::wallet::Result<()> {
         self.inner.remove(key).await
     }
 }
@@ -115,7 +115,7 @@ mod tests {
             c: i64,
         }
 
-        let mut storage = Storage {
+        let storage = Storage {
             inner: Box::<Memory>::default(),
             encryption_key: None,
         };
@@ -142,7 +142,7 @@ mod tests {
             c: i64,
         }
 
-        let mut storage = Storage {
+        let storage = Storage {
             inner: Box::<Memory>::default(),
             encryption_key: None,
         };
@@ -177,7 +177,7 @@ mod tests {
 
         let encryption_key = crate::types::block::rand::bytes::rand_bytes_array::<32>();
 
-        let mut storage = Storage {
+        let storage = Storage {
             inner: Box::<Memory>::default(),
             encryption_key: Some(encryption_key),
         };

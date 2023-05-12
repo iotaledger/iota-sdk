@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod stronghold_snapshot;
+pub(crate) mod stronghold_snapshot;
 
 use std::{fs, path::PathBuf, sync::atomic::Ordering};
 
@@ -22,11 +22,11 @@ impl Wallet {
     /// stronghold_password must be the current one when Stronghold is used as SecretManager.
     pub async fn backup(&self, backup_path: PathBuf, mut stronghold_password: String) -> crate::wallet::Result<()> {
         log::debug!("[backup] creating a stronghold backup");
-        let mut secret_manager = self.secret_manager.write().await;
+        let secret_manager = self.secret_manager.read().await;
 
         let secret_manager_dto = SecretManagerDto::from(&*secret_manager);
 
-        match &mut *secret_manager {
+        match &*secret_manager {
             // Backup with existing stronghold
             SecretManager::Stronghold(stronghold) => {
                 stronghold.set_password(&stronghold_password).await?;
@@ -39,11 +39,11 @@ impl Wallet {
             // Backup with new stronghold
             _ => {
                 // If the SecretManager is not Stronghold we'll create a new one for the backup
-                let mut backup_stronghold = StrongholdSecretManager::builder()
+                let backup_stronghold = StrongholdSecretManager::builder()
                     .password(&stronghold_password)
                     .build(backup_path)?;
 
-                store_data_to_stronghold(self, &mut backup_stronghold, secret_manager_dto).await?;
+                store_data_to_stronghold(self, &backup_stronghold, secret_manager_dto).await?;
 
                 // Write snapshot to backup path
                 backup_stronghold.write_stronghold_snapshot(None).await?;
@@ -94,12 +94,12 @@ impl Wallet {
         };
 
         // We'll create a new stronghold to load the backup
-        let mut new_stronghold = StrongholdSecretManager::builder()
+        let new_stronghold = StrongholdSecretManager::builder()
             .password(&stronghold_password)
             .build(backup_path.clone())?;
 
         let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =
-            read_data_from_stronghold_snapshot(&mut new_stronghold).await?;
+            read_data_from_stronghold_snapshot(&new_stronghold).await?;
 
         // If the coin type is not matching the current one, then the addresses in the accounts will also not be
         // correct, so we will not restore them
@@ -194,7 +194,7 @@ impl Wallet {
             // drop secret manager, otherwise we get a deadlock in save_wallet_data
             drop(secret_manager);
             self.storage_manager
-                .lock()
+                .read()
                 .await
                 .save_wallet_data(&wallet_builder)
                 .await?;

@@ -20,7 +20,7 @@ use std::{
 };
 
 use getset::{Getters, Setters};
-use serde::{de, Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Serialize};
 use tokio::sync::{Mutex, RwLock};
 
 #[cfg(feature = "participation")]
@@ -124,8 +124,7 @@ pub struct AccountDetails {
     // Maybe pending transactions even additionally separated?
     pending_transactions: HashSet<TransactionId>,
     /// Transaction payloads for received outputs with inputs when not pruned before syncing, can be used to determine
-    /// the sender address/es
-    #[serde(deserialize_with = "deserialize_or_convert")]
+    /// the sender address(es)
     incoming_transactions: HashMap<TransactionId, Transaction>,
     /// Some incoming transactions can be pruned by the node before we requested them, then this node can never return
     /// it. To avoid useless requests, these transaction ids are stored here and cleared when new client options are
@@ -169,7 +168,7 @@ impl Account {
         #[cfg(feature = "storage")]
         let default_sync_options = wallet
             .storage_manager
-            .lock()
+            .read()
             .await
             .get_default_sync_options(*details.index())
             .await?
@@ -219,13 +218,13 @@ impl Account {
         log::debug!("[save] saving account to database");
         match updated_account {
             Some(account) => {
-                let mut storage_manager = self.wallet.storage_manager.lock().await;
+                let mut storage_manager = self.wallet.storage_manager.write().await;
                 storage_manager.save_account(account).await?;
                 drop(storage_manager);
             }
             None => {
                 let account_details = self.details().await;
-                let mut storage_manager = self.wallet.storage_manager.lock().await;
+                let mut storage_manager = self.wallet.storage_manager.write().await;
                 storage_manager.save_account(&account_details).await?;
                 drop(storage_manager);
                 drop(account_details);
@@ -422,32 +421,6 @@ impl AccountInner {
 
         Ok(transactions)
     }
-}
-
-// Custom deserialization to stay backwards compatible
-fn deserialize_or_convert<'de, D>(deserializer: D) -> std::result::Result<HashMap<TransactionId, Transaction>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let value = serde_json::Value::deserialize(deserializer)?;
-
-    type NewType = HashMap<TransactionId, Transaction>;
-    type OldType = HashMap<TransactionId, (TransactionPayload, Vec<OutputWithMetadataResponse>)>;
-
-    Ok(match serde_json::from_value::<NewType>(value.clone()) {
-        Ok(r) => r,
-        Err(_) => {
-            let v = serde_json::from_value::<OldType>(value).map_err(de::Error::custom)?;
-            let mut new = HashMap::new();
-            for (tx_id, (tx_payload, inputs)) in v {
-                new.insert(
-                    tx_id,
-                    build_transaction_from_payload_and_inputs(tx_id, tx_payload, inputs).map_err(de::Error::custom)?,
-                );
-            }
-            new
-        }
-    })
 }
 
 pub(crate) fn build_transaction_from_payload_and_inputs(
