@@ -95,6 +95,18 @@ tls = [ "reqwest?/rustls-tls", "rumqttc?/use-rustls" ]
 client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10" ]
 wallet = [ "client" ]
 
+# Simple Transaction Examples
+
+[[example]]
+name = "request_funds"
+path = "examples/how_tos/simple_transaction/request_funds.rs"
+required-features = [ "wallet" ]
+
+[[example]]
+name = "simple_transaction"
+path = "examples/how_tos/simple_transaction/simple_transaction.rs"
+required-features = [ "wallet", "stronghold" ]
+
 # Block examples
 
 [[example]]
@@ -471,19 +483,9 @@ path = "examples/wallet/02_generate_address.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
-name = "get_funds"
-path = "examples/wallet/03_get_funds.rs"
-required-features = [ "wallet" ]
-
-[[example]]
 name = "get_balance"
 path = "examples/wallet/04_get_balance.rs"
 required-features = [ "wallet" ]
-
-[[example]]
-name = "wallet_transaction"
-path = "examples/wallet/05_transaction.rs"
-required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "send_micro_transaction"

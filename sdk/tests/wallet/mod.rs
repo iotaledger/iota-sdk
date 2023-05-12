@@ -19,3 +19,5 @@ mod syncing;
 mod transactions;
 #[allow(clippy::module_inception)]
 mod wallet;
+#[cfg(not(target_os = "windows"))]
+mod wallet_storage;
