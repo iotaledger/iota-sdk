@@ -3,6 +3,7 @@
 
 use std::collections::HashMap;
 
+use packable::prefix::StringPrefix;
 use serde::de::DeserializeOwned;
 
 use super::*;
@@ -10,6 +11,7 @@ use crate::{
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
+            address::Hrp,
             output::{dto::OutputMetadataDto, OutputMetadata},
             payload::{transaction::TransactionId, TransactionPayload},
         },
@@ -19,8 +21,6 @@ use crate::{
         Error,
     },
 };
-// use crate::types::block::address::Hrp;
-// use packable::prefix::StringPrefix;
 
 pub struct Migrate;
 
@@ -34,7 +34,8 @@ impl Migration for Migrate {
     async fn migrate_storage(storage: &crate::wallet::storage::Storage) -> Result<()> {
         use crate::wallet::{
             account::AccountDetails,
-            storage::constants::{ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY},
+            storage::constants::{ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, WALLET_INDEXATION_KEY},
+            WalletBuilder,
         };
 
         if let Some(account_indexes) = storage.get::<Vec<u32>>(ACCOUNTS_INDEXATION_KEY).await? {
@@ -84,19 +85,20 @@ impl Migration for Migrate {
             }
         }
 
-        // if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
-        //     ConvertHrp::check(
-        //         wallet
-        //             .get_mut("clientOptions")
-        //             .ok_or(Error::Storage("missing client options".to_owned()))?
-        //             .get_mut("protocolParameters")
-        //             .ok_or(Error::Storage("missing protocol params".to_owned()))?
-        //             .get_mut("bech32Hrp")
-        //             .ok_or(Error::Storage("missing bech32 hrp".to_owned()))?,
-        //     )?;
-        //     let wallet_builder = serde_json::from_value::<WalletBuilder>(wallet.clone())?;
-        //     storage.save_wallet_data(&wallet_builder).await?;
-        // }
+        if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
+            ConvertHrp::check(
+                wallet
+                    .get_mut("clientOptions")
+                    .ok_or(Error::Storage("missing client options".to_owned()))?
+                    .get_mut("protocolParameters")
+                    .ok_or(Error::Storage("missing protocol params".to_owned()))?
+                    .get_mut("bech32Hrp")
+                    .ok_or(Error::Storage("missing bech32 hrp".to_owned()))?,
+            )?;
+            storage
+                .set(WALLET_INDEXATION_KEY, serde_json::from_value::<WalletBuilder>(wallet)?)
+                .await?;
+        }
         Ok(())
     }
 
@@ -104,7 +106,7 @@ impl Migration for Migrate {
     async fn migrate_backup(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
         use crate::{
             client::storage::StorageProvider,
-            wallet::wallet::operations::stronghold_backup::stronghold_snapshot::ACCOUNTS_KEY,
+            wallet::wallet::operations::stronghold_backup::stronghold_snapshot::{ACCOUNTS_KEY, CLIENT_OPTIONS_KEY},
         };
 
         if let Some(mut accounts) = storage
@@ -148,6 +150,26 @@ impl Migration for Migrate {
             }
             storage
                 .insert(ACCOUNTS_KEY.as_bytes(), serde_json::to_string(&accounts)?.as_bytes())
+                .await?;
+        }
+        if let Some(mut client_options) = storage
+            .get(CLIENT_OPTIONS_KEY.as_bytes())
+            .await?
+            .map(|bytes| serde_json::from_slice::<serde_json::Value>(&bytes))
+            .transpose()?
+        {
+            ConvertHrp::check(
+                client_options
+                    .get_mut("protocolParameters")
+                    .ok_or(Error::Storage("missing protocol params".to_owned()))?
+                    .get_mut("bech32Hrp")
+                    .ok_or(Error::Storage("missing bech32 hrp".to_owned()))?,
+            )?;
+            storage
+                .insert(
+                    CLIENT_OPTIONS_KEY.as_bytes(),
+                    serde_json::to_string(&client_options)?.as_bytes(),
+                )
                 .await?;
         }
         storage.delete(b"backup_schema_version").await.ok();
@@ -196,12 +218,12 @@ impl Convert for ConvertOutputMetadata {
     }
 }
 
-// struct ConvertHrp;
-// impl Convert for ConvertHrp {
-//     type New = Hrp;
-//     type Old = StringPrefix<u8>;
+struct ConvertHrp;
+impl Convert for ConvertHrp {
+    type New = Hrp;
+    type Old = StringPrefix<u8>;
 
-//     fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
-//         Ok(Self::New::from_str_unchecked(old.as_str()))
-//     }
-// }
+    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
+        Ok(Self::New::from_str_unchecked(old.as_str()))
+    }
+}

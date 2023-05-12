@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
     // Get the account we generated with `01_create_wallet`
     let account = wallet.get_account("Alice").await?;
 
-    let address = account.addresses().await?[0].address().to_string();
+    let address = *account.addresses().await?[0].address();
     println!("{address}");
 
     let faucet_response = request_funds_from_faucet(&faucet_url, &address).await?;

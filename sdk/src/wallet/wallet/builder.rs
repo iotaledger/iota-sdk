@@ -36,7 +36,7 @@ pub struct WalletBuilder {
     coin_type: Option<u32>,
     #[cfg(feature = "storage")]
     storage_options: Option<StorageOptions>,
-    #[serde(default, skip_serializing, skip_deserializing)]
+    #[serde(default, skip)]
     pub(crate) secret_manager: Option<Arc<RwLock<SecretManager>>>,
 }
 
