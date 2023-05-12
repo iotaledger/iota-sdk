@@ -84,7 +84,7 @@ impl<T: Migration + Send + Sync> DynMigration for T {
         use crate::client::storage::StorageProvider;
 
         let version = self.version();
-        log::info!("Migrating backups to version {}", version);
+        log::info!("Migrating backup to version {}", version);
         T::migrate_backup(storage).await?;
         storage
             .insert(
