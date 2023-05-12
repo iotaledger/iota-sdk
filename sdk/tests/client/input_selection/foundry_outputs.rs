@@ -80,27 +80,13 @@ fn existing_input_alias_for_foundry_alias() {
         None,
         None,
     )]);
-    let mut outputs = build_outputs(vec![Foundry(
+    let outputs = build_outputs(vec![Foundry(
         1_000_000,
         alias_id_2,
         1,
         SimpleTokenScheme::new(U256::from(0), U256::from(0), U256::from(10)).unwrap(),
         None,
     )]);
-
-    outputs.push(
-        AliasOutputBuilder::new_with_amount(251_500, alias_id_2)
-            .add_unlock_condition(StateControllerAddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .add_unlock_condition(GovernorAddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .with_state_index(1)
-            .with_foundry_counter(1)
-            .finish_output(protocol_parameters.token_supply())
-            .unwrap(),
-    );
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -129,7 +115,7 @@ fn minted_native_tokens_in_new_remainder() {
     let alias_id_2 = AliasId::from_str(ALIAS_ID_2).unwrap();
 
     let inputs = build_inputs(vec![
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
         Alias(
             1_000_000,
             alias_id_2,
