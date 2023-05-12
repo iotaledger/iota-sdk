@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will send 100 basic outputs to our first address.
-//! 
+//!
 //! `cargo run --example split_funds --release`
 
 use iota_sdk::client::{request_funds_from_faucet, secret::SecretManager, Client, Result};
@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
     let node_url = std::env::var("NODE_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
-    let client = Client::builder().with_node(&node_url)?.finish()?;
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;

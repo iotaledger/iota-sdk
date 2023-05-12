@@ -6,7 +6,7 @@
 //! <https://github.com/iotaledger/inx-participation/blob/develop/core/participation/routes.go>
 
 use crate::{
-    client::{Client, Result},
+    client::{ClientInner, Result},
     types::{
         api::plugins::participation::{
             responses::{AddressOutputsResponse, EventsResponse, OutputStatusResponse},
@@ -19,7 +19,7 @@ use crate::{
     },
 };
 
-impl Client {
+impl ClientInner {
     /// RouteParticipationEvents is the route to list all events, returning their ID, the event name and status.
     pub async fn events(&self, event_type: Option<ParticipationEventType>) -> Result<EventsResponse> {
         let route = "api/participation/v1/events";
@@ -30,7 +30,9 @@ impl Client {
         });
 
         self.node_manager
-            .get_request(route, query, self.get_timeout(), false, false)
+            .read()
+            .await
+            .get_request(route, query, self.get_timeout().await, false, false)
             .await
     }
 
@@ -39,7 +41,9 @@ impl Client {
         let route = format!("api/participation/v1/events/{event_id}");
 
         self.node_manager
-            .get_request(&route, None, self.get_timeout(), false, false)
+            .read()
+            .await
+            .get_request(&route, None, self.get_timeout().await, false, false)
             .await
     }
 
@@ -52,10 +56,12 @@ impl Client {
         let route = format!("api/participation/v1/events/{event_id}/status");
 
         self.node_manager
+            .read()
+            .await
             .get_request(
                 &route,
                 milestone_index.map(|index| index.to_string()).as_deref(),
-                self.get_timeout(),
+                self.get_timeout().await,
                 false,
                 false,
             )
@@ -67,7 +73,9 @@ impl Client {
         let route = format!("api/participation/v1/outputs/{output_id}");
 
         self.node_manager
-            .get_request(&route, None, self.get_timeout(), false, false)
+            .read()
+            .await
+            .get_request(&route, None, self.get_timeout().await, false, false)
             .await
     }
 
@@ -76,7 +84,9 @@ impl Client {
         let route = format!("api/participation/v1/addresses/{bech32_address}");
 
         self.node_manager
-            .get_request(&route, None, self.get_timeout(), false, false)
+            .read()
+            .await
+            .get_request(&route, None, self.get_timeout().await, false, false)
             .await
     }
 
@@ -85,7 +95,9 @@ impl Client {
         let route = format!("api/participation/v1/addresses/{bech32_address}/outputs");
 
         self.node_manager
-            .get_request(&route, None, self.get_timeout(), false, false)
+            .read()
+            .await
+            .get_request(&route, None, self.get_timeout().await, false, false)
             .await
     }
 }

@@ -26,10 +26,10 @@ use crate::wallet::{
 };
 use crate::{
     client::secret::SecretManager,
-    wallet::{Account, ClientOptions, Wallet},
+    wallet::{wallet::WalletInner, Account, ClientOptions, Wallet},
 };
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 /// Builder for the wallet.
 pub struct WalletBuilder {
     client_options: Option<ClientOptions>,
@@ -135,12 +135,12 @@ impl WalletBuilder {
         let storage = Memory::default();
 
         #[cfg(feature = "storage")]
-        let mut storage_manager = Arc::new(tokio::sync::Mutex::new(StorageManager::new(storage, None).await?));
+        let mut storage_manager = StorageManager::new(storage, None).await?;
 
         #[cfg(feature = "storage")]
-        let read_manager_builder = storage_manager.lock().await.get_wallet_data().await?;
+        let mut read_manager_builder = storage_manager.get_wallet_data().await?;
         #[cfg(not(feature = "storage"))]
-        let read_manager_builder: Option<Self> = None;
+        let mut read_manager_builder: Option<Self> = None;
 
         // Prioritize provided client_options and secret_manager over stored ones
         let new_provided_client_options = if self.client_options.is_none() {
@@ -180,19 +180,13 @@ impl WalletBuilder {
 
         // Store wallet data in storage
         #[cfg(feature = "storage")]
-        storage_manager.lock().await.save_wallet_data(&self).await?;
-
-        let client = self
-            .client_options
-            .clone()
-            .ok_or(crate::wallet::Error::MissingParameter("client_options"))?
-            .finish()?;
+        storage_manager.save_wallet_data(&self).await?;
 
         #[cfg(feature = "events")]
-        let event_emitter = Arc::new(tokio::sync::Mutex::new(EventEmitter::new()));
+        let event_emitter = tokio::sync::Mutex::new(EventEmitter::new());
 
         #[cfg(feature = "storage")]
-        let mut accounts = storage_manager.lock().await.get_accounts().await.unwrap_or_default();
+        let mut accounts = storage_manager.get_accounts().await.unwrap_or_default();
 
         // It happened that inputs got locked, the transaction failed, but they weren't unlocked again, so we do this
         // here
@@ -200,40 +194,17 @@ impl WalletBuilder {
         unlock_unused_inputs(&mut accounts)?;
         #[cfg(not(feature = "storage"))]
         let accounts = Vec::new();
-        let mut accounts: Vec<Account> = try_join_all(accounts.into_iter().map(|a| {
-            Account::new(
-                a,
-                client.clone(),
-                self.secret_manager
-                    .clone()
-                    .expect("secret_manager needs to be provided"),
-                #[cfg(feature = "events")]
-                event_emitter.clone(),
-                #[cfg(feature = "storage")]
-                storage_manager.clone(),
-            )
-            .boxed()
-        }))
-        .await?;
-
-        // If the wallet builder is not set, it means the user provided it and we need to update the addresses.
-        // In the other case it was loaded from the database and addresses are up to date.
-        if new_provided_client_options {
-            for account in accounts.iter_mut() {
-                account.update_account_with_new_client(client.clone()).await?;
-            }
-        }
-
-        Ok(Wallet {
-            accounts: Arc::new(RwLock::new(accounts)),
-            background_syncing_status: Arc::new(AtomicUsize::new(0)),
-            client_options: Arc::new(RwLock::new(
-                self.client_options
-                    .ok_or(crate::wallet::Error::MissingParameter("client_options"))?,
-            )),
-            coin_type: Arc::new(AtomicU32::new(self.coin_type.ok_or(
-                crate::wallet::Error::MissingParameter("coin_type (IOTA: 4218, Shimmer: 4219)"),
-            )?)),
+        let wallet_inner = Arc::new(WalletInner {
+            background_syncing_status: AtomicUsize::new(0),
+            client: self
+                .client_options
+                .clone()
+                .ok_or(crate::wallet::Error::MissingParameter("client_options"))?
+                .finish()
+                .await?,
+            coin_type: AtomicU32::new(self.coin_type.ok_or(crate::wallet::Error::MissingParameter(
+                "coin_type (IOTA: 4218, Shimmer: 4219)",
+            ))?),
             secret_manager: self
                 .secret_manager
                 .ok_or(crate::wallet::Error::MissingParameter("secret_manager"))?,
@@ -242,14 +213,35 @@ impl WalletBuilder {
             #[cfg(feature = "storage")]
             storage_options,
             #[cfg(feature = "storage")]
-            storage_manager,
+            storage_manager: tokio::sync::Mutex::new(storage_manager),
+        });
+
+        let mut accounts: Vec<Account> = try_join_all(
+            accounts
+                .into_iter()
+                .map(|a| Account::new(a, wallet_inner.clone()).boxed()),
+        )
+        .await?;
+
+        // If the wallet builder is not set, it means the user provided it and we need to update the addresses.
+        // In the other case it was loaded from the database and addresses are up to date.
+        if new_provided_client_options {
+            for account in accounts.iter_mut() {
+                // Safe to unwrap because we create the client if accounts aren't empty
+                account.update_account_bech32_hrp().await?;
+            }
+        }
+
+        Ok(Wallet {
+            inner: wallet_inner,
+            accounts: Arc::new(RwLock::new(accounts)),
         })
     }
 
     #[cfg(feature = "storage")]
     pub(crate) async fn from_wallet(wallet: &Wallet) -> Self {
         Self {
-            client_options: Some(wallet.client_options.read().await.clone()),
+            client_options: Some(ClientOptions::from_client(wallet.client()).await),
             coin_type: Some(wallet.coin_type.load(Ordering::Relaxed)),
             storage_options: Some(wallet.storage_options.clone()),
             secret_manager: Some(wallet.secret_manager.clone()),

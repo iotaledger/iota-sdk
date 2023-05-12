@@ -29,7 +29,7 @@ async fn update_client_options() -> Result<()> {
     let node_dto_old = NodeDto::Node(Node::from(Url::parse(NODE_OTHER).unwrap()));
     let node_dto_new = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
 
-    let client_options = wallet.get_client_options().await;
+    let client_options = wallet.client_options().await;
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto_old));
     assert!(!client_options.node_manager_builder.nodes.contains(&node_dto_new));
 
@@ -37,7 +37,7 @@ async fn update_client_options() -> Result<()> {
         .set_client_options(ClientOptions::new().with_node(NODE_LOCAL)?)
         .await?;
 
-    let client_options = wallet.get_client_options().await;
+    let client_options = wallet.client_options().await;
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto_new));
     assert!(!client_options.node_manager_builder.nodes.contains(&node_dto_old));
 
@@ -234,7 +234,7 @@ async fn update_node_auth() -> Result<()> {
         .update_node_auth(Url::parse(NODE_OTHER).unwrap(), Some(node_auth.clone()))
         .await?;
 
-    let client_options = wallet.get_client_options().await;
+    let client_options = wallet.client_options().await;
 
     let node = client_options.node_manager_builder.nodes.into_iter().next().unwrap();
     if let NodeDto::Node(node) = node {

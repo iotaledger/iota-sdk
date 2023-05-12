@@ -49,15 +49,13 @@ pub async fn destroy_wallet(method_handler: &WalletMethodHandler) -> Result<(), 
 pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMethodHandler, JsValue> {
     let wallet = method_handler.wallet.borrow_mut();
 
-    let client = tokio::runtime::Builder::new_current_thread()
-        .build()
-        .unwrap()
-        .block_on(async move { wallet.as_ref().expect("wallet got destroyed").get_client().await })
-        .map_err(|e| e.to_string())?;
+    let client = wallet
+        .as_ref()
+        .ok_or_else(|| "wallet got destroyed".to_string())?
+        .client()
+        .clone();
 
-    Ok(ClientMethodHandler {
-        client: Rc::new(client),
-    })
+    Ok(ClientMethodHandler { client })
 }
 
 /// Handles a method, returns the response as a JSON-encoded string.

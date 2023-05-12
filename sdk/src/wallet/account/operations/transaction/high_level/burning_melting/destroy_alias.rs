@@ -62,8 +62,8 @@ impl Account {
         &self,
         alias_id: AliasId,
     ) -> crate::wallet::Result<(OutputId, Output)> {
-        let account_details = self.read().await;
-        let token_supply = self.client.get_token_supply().await?;
+        let account_details = self.details().await;
+        let token_supply = self.client().get_token_supply().await?;
 
         let (output_id, output_data) = account_details
             .unspent_outputs()

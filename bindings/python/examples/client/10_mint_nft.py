@@ -1,10 +1,19 @@
 from iota_sdk import *
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 
 # Create a Client instance
-client = Client(nodes=['https://api.testnet.shimmer.network'])
+client = Client(nodes=[node_url])
 
-secret_manager = MnemonicSecretManager('flame fever pig forward exact dash body idea link scrub tennis minute ' +
-                                       'surge unaware prosper over waste kitten ceiling human knife arch situate civil')
+if 'NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1' not in os.environ:
+    print(".env mnemonic is undefined, see .env.example")
+    sys.exit(1)
+
+secret_manager = MnemonicSecretManager(os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1'])
 
 nft_output = client.build_nft_output(
     unlock_conditions=[
@@ -25,4 +34,4 @@ nft_output = client.build_nft_output(
 
 # Create and post a block with the nft output
 block = client.build_and_post_block(secret_manager, outputs=[nft_output])
-print(dumps(block, indent=4))
+print(f'NFT mint block sent: {os.environ["EXPLORER_URL"]}/block/{block[0]}')

@@ -14,7 +14,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{ledger_nano::LedgerSecretManager, SecretManager},
     },
-    wallet::{AddressWithAmount, ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Result, SendAmountParams, Wallet},
 };
 
 #[tokio::main]
@@ -60,7 +60,7 @@ async fn main() -> Result<()> {
     println!("Balance: {balance:?}");
 
     // send transaction
-    let outputs = vec![AddressWithAmount::new(
+    let outputs = vec![SendAmountParams::new(
         "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
         1_000_000,
     )];

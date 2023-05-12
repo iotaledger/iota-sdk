@@ -6,23 +6,17 @@
 mod error;
 pub mod types;
 
-use std::{
-    sync::{Arc, RwLock as StdRwLock},
-    time::Instant,
-};
+use std::{sync::Arc, time::Instant};
 
 use crypto::utils;
 use log::warn;
 use packable::PackableExt;
 use rumqttc::{AsyncClient, Event, EventLoop, Incoming, MqttOptions, NetworkOptions, QoS, SubscribeFilter, Transport};
-use tokio::sync::{
-    watch::{Receiver as WatchReceiver, Sender},
-    RwLock,
-};
+use tokio::sync::watch::Receiver as WatchReceiver;
 
 pub use self::{error::Error, types::*};
 use crate::{
-    client::{Client, NetworkInfo},
+    client::{Client, ClientInner},
     types::block::{
         payload::{milestone::ReceiptMilestoneOption, MilestonePayload},
         Block,
@@ -48,29 +42,31 @@ impl Client {
     pub async fn unsubscribe(&self, topics: Vec<Topic>) -> Result<(), Error> {
         MqttManager::new(self).with_topics(topics).unsubscribe().await
     }
+}
 
+impl ClientInner {
     /// Returns the mqtt event receiver.
-    pub fn mqtt_event_receiver(&self) -> WatchReceiver<MqttEvent> {
-        self.mqtt_event_channel.1.clone()
+    pub async fn mqtt_event_receiver(&self) -> WatchReceiver<MqttEvent> {
+        self.mqtt.receiver.read().await.clone()
     }
 }
 
 async fn set_mqtt_client(client: &Client) -> Result<(), Error> {
     // if the client was disconnected, we clear it so we can start over
-    if *client.mqtt_event_receiver().borrow() == MqttEvent::Disconnected {
-        *client.mqtt_client.write().await = None;
+    if *client.mqtt_event_receiver().await.borrow() == MqttEvent::Disconnected {
+        *client.mqtt.client.write().await = None;
     }
-    let exists = client.mqtt_client.read().await.is_some();
+    let exists = client.mqtt.client.read().await.is_some();
 
     if !exists {
-        let nodes = if !client.node_manager.ignore_node_health {
+        let node_manager = client.node_manager.read().await;
+        let nodes = if !node_manager.ignore_node_health {
             #[cfg(not(target_family = "wasm"))]
             {
-                client
-                    .node_manager
+                node_manager
                     .healthy_nodes
                     .read()
-                    .map_or(client.node_manager.nodes.clone(), |healthy_nodes| {
+                    .map_or(node_manager.nodes.clone(), |healthy_nodes| {
                         healthy_nodes.iter().map(|(node, _)| node.clone()).collect()
                     })
             }
@@ -79,32 +75,40 @@ async fn set_mqtt_client(client: &Client) -> Result<(), Error> {
                 client.node_manager.nodes.clone()
             }
         } else {
-            client.node_manager.nodes.clone()
+            node_manager.nodes.clone()
         };
         for node in &nodes {
             let host = node.url.host_str().expect("can't get host from URL");
             let mut entropy = [0u8; 8];
             utils::rand::fill(&mut entropy)?;
             let id = format!("iotasdk{}", prefix_hex::encode(entropy));
-            let port = client.broker_options.port;
-            let mut uri = format!(
-                "{}://{}:{}/api/mqtt/v1",
-                if node.url.scheme() == "https" { "wss" } else { "ws" },
-                host,
-                node.url.port_or_known_default().unwrap_or(port)
-            );
-
-            if !client.broker_options.use_ws {
-                uri = host.to_string();
+            let broker_options = client.mqtt.broker_options.read().await;
+            let port = broker_options.port;
+            let secure = node.url.scheme() == "https";
+            let mqtt_options = if broker_options.use_ws {
+                let uri = format!(
+                    "{}://{host}:{}/api/mqtt/v1",
+                    if secure { "wss" } else { "ws" },
+                    node.url.port_or_known_default().unwrap_or(port)
+                );
+                let mut mqtt_options = MqttOptions::new(id, uri, port);
+                if secure {
+                    mqtt_options.set_transport(Transport::wss_with_default_config());
+                } else {
+                    mqtt_options.set_transport(Transport::ws());
+                }
+                mqtt_options
+            } else {
+                let uri = host.to_string();
+                let mut mqtt_options = MqttOptions::new(id, uri, port);
+                if secure {
+                    mqtt_options.set_transport(Transport::tls_with_default_config());
+                }
+                mqtt_options
             };
-            let mut mqtt_options = MqttOptions::new(id, uri, port);
-            if client.broker_options.use_ws {
-                mqtt_options.set_transport(Transport::ws());
-            }
             let (_, mut connection) = AsyncClient::new(mqtt_options.clone(), 10);
-            connection.set_network_options(
-                *NetworkOptions::new().set_connection_timeout(client.broker_options.timeout.as_secs()),
-            );
+            connection
+                .set_network_options(*NetworkOptions::new().set_connection_timeout(broker_options.timeout.as_secs()));
             // poll the event loop until we find a ConnAck event,
             // which means that the mqtt client is ready to be used on this host
             // if the event loop returns an error, we check the next node
@@ -119,29 +123,16 @@ async fn set_mqtt_client(client: &Client) -> Result<(), Error> {
             // if we found a valid mqtt connection, loop it on a separate thread
             if got_ack {
                 let (mqtt_client, connection) = AsyncClient::new(mqtt_options, 10);
-                client.mqtt_client.write().await.replace(mqtt_client.clone());
-                poll_mqtt(
-                    mqtt_client,
-                    client.mqtt_topic_handlers.clone(),
-                    client.broker_options.clone(),
-                    client.mqtt_event_channel.0.clone(),
-                    connection,
-                    client.network_info.clone(),
-                );
+                client.mqtt.client.write().await.replace(mqtt_client);
+                poll_mqtt(client, connection);
             }
         }
     }
     Ok(())
 }
 
-fn poll_mqtt(
-    mqtt_client: AsyncClient,
-    mqtt_topic_handlers_guard: Arc<RwLock<TopicHandlerMap>>,
-    options: BrokerOptions,
-    event_sender: Arc<Sender<MqttEvent>>,
-    mut event_loop: EventLoop,
-    network_info: Arc<StdRwLock<NetworkInfo>>,
-) {
+fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
+    let client = client.clone();
     std::thread::spawn(move || {
         let runtime = tokio::runtime::Builder::new_current_thread()
             .enable_all()
@@ -159,37 +150,48 @@ fn poll_mqtt(
 
             loop {
                 let event = event_loop.poll().await;
-                let mqtt_topic_handlers_guard = mqtt_topic_handlers_guard.clone();
 
                 match event {
                     Ok(Event::Incoming(Incoming::ConnAck(_))) => {
-                        let _ = event_sender.send(MqttEvent::Connected);
+                        let _ = client.mqtt.sender.read().await.send(MqttEvent::Connected);
                         if !is_subscribed {
                             is_subscribed = true;
                             // resubscribe topics
-                            let topics = mqtt_topic_handlers_guard
+                            let topics = client
+                                .inner
+                                .mqtt
+                                .topic_handlers
                                 .read()
                                 .await
                                 .keys()
                                 .map(|t| SubscribeFilter::new(t.topic().to_string(), QoS::AtLeastOnce))
                                 .collect::<Vec<SubscribeFilter>>();
                             if !topics.is_empty() {
-                                let _ = mqtt_client.subscribe_many(topics).await;
+                                let _ = client
+                                    .inner
+                                    .mqtt
+                                    .client
+                                    .write()
+                                    .await
+                                    .as_mut()
+                                    .unwrap()
+                                    .subscribe_many(topics)
+                                    .await;
                             }
                         }
                     }
                     Ok(Event::Incoming(Incoming::Publish(p))) => {
                         let topic = p.topic.clone();
-                        let network_info = network_info.clone();
+                        let client = client.clone();
 
                         crate::client::async_runtime::spawn(async move {
-                            let mqtt_topic_handlers = mqtt_topic_handlers_guard.read().await;
+                            let mqtt_topic_handlers = client.mqtt.topic_handlers.read().await;
 
                             if let Some(handlers) = mqtt_topic_handlers.get(&Topic::new_unchecked(topic.clone())) {
                                 let event = {
                                     if topic.contains("blocks") || topic.contains("included-block") {
                                         let payload = &*p.payload;
-                                        let protocol_parameters = &network_info.read().unwrap().protocol_parameters;
+                                        let protocol_parameters = &client.network_info.read().await.protocol_parameters;
 
                                         match Block::unpack_verified(payload, protocol_parameters) {
                                             Ok(block) => Ok(TopicEvent {
@@ -203,7 +205,7 @@ fn poll_mqtt(
                                         }
                                     } else if topic.contains("milestones") {
                                         let payload = &*p.payload;
-                                        let protocol_parameters = &network_info.read().unwrap().protocol_parameters;
+                                        let protocol_parameters = &client.network_info.read().await.protocol_parameters;
 
                                         match MilestonePayload::unpack_verified(payload, protocol_parameters) {
                                             Ok(milestone_payload) => Ok(TopicEvent {
@@ -217,7 +219,7 @@ fn poll_mqtt(
                                         }
                                     } else if topic.contains("receipts") {
                                         let payload = &*p.payload;
-                                        let protocol_parameters = &network_info.read().unwrap().protocol_parameters;
+                                        let protocol_parameters = &client.network_info.read().await.protocol_parameters;
 
                                         match ReceiptMilestoneOption::unpack_verified(payload, protocol_parameters) {
                                             Ok(receipt) => Ok(TopicEvent {
@@ -256,8 +258,9 @@ fn poll_mqtt(
                         } else {
                             connection_failure_count = 1;
                         }
-                        if connection_failure_count == options.max_reconnection_attempts {
-                            let _ = event_sender.send(MqttEvent::Disconnected);
+                        if connection_failure_count == client.mqtt.broker_options.read().await.max_reconnection_attempts
+                        {
+                            let _ = client.mqtt.sender.read().await.send(MqttEvent::Disconnected);
                             break;
                         }
                         error_instant = Instant::now();
@@ -299,14 +302,12 @@ impl<'a> MqttManager<'a> {
     /// Disconnects the broker.
     /// This will clear the stored topic handlers and close the MQTT connection.
     pub async fn disconnect(self) -> Result<(), Error> {
-        if let Some(client) = &*self.client.mqtt_client.write().await {
+        if let Some(client) = &*self.client.mqtt.client.write().await {
             client.disconnect().await?;
-            let mqtt_topic_handlers = &self.client.mqtt_topic_handlers;
-            let mut mqtt_topic_handlers = mqtt_topic_handlers.write().await;
-            mqtt_topic_handlers.clear();
+            self.client.mqtt.topic_handlers.write().await.clear();
         }
 
-        *self.client.mqtt_client.write().await = None;
+        *self.client.mqtt.client.write().await = None;
 
         Ok(())
     }
@@ -349,7 +350,9 @@ impl<'a> MqttTopicManager<'a> {
                 >);
         set_mqtt_client(self.client).await?;
         self.client
-            .mqtt_client
+            .inner
+            .mqtt
+            .client
             .write()
             .await
             .as_ref()
@@ -362,8 +365,7 @@ impl<'a> MqttTopicManager<'a> {
             )
             .await?;
         {
-            let mqtt_topic_handlers = &self.client.mqtt_topic_handlers;
-            let mut mqtt_topic_handlers = mqtt_topic_handlers.write().await;
+            let mut mqtt_topic_handlers = self.client.mqtt.topic_handlers.write().await;
             for topic in self.topics {
                 #[allow(clippy::option_if_let_else)]
                 match mqtt_topic_handlers.get_mut(&topic) {
@@ -381,8 +383,7 @@ impl<'a> MqttTopicManager<'a> {
     /// If no topics were provided, the function will unsubscribe from every subscribed topic.
     pub async fn unsubscribe(self) -> Result<(), Error> {
         let topics = {
-            let mqtt_topic_handlers = &self.client.mqtt_topic_handlers;
-            let mqtt_topic_handlers = mqtt_topic_handlers.read().await;
+            let mqtt_topic_handlers = self.client.mqtt.topic_handlers.read().await;
             if self.topics.is_empty() {
                 mqtt_topic_handlers.keys().cloned().collect()
             } else {
@@ -390,22 +391,21 @@ impl<'a> MqttTopicManager<'a> {
             }
         };
 
-        if let Some(client) = &*self.client.mqtt_client.write().await {
+        if let Some(client) = &*self.client.mqtt.client.write().await {
             for topic in &topics {
                 client.unsubscribe(topic.topic()).await?;
             }
         }
 
         let empty_topic_handlers = {
-            let mqtt_topic_handlers = &self.client.mqtt_topic_handlers;
-            let mut mqtt_topic_handlers = mqtt_topic_handlers.write().await;
+            let mut mqtt_topic_handlers = self.client.mqtt.topic_handlers.write().await;
             for topic in topics {
                 mqtt_topic_handlers.remove(&topic);
             }
             mqtt_topic_handlers.is_empty()
         };
 
-        if self.client.broker_options.automatic_disconnect && empty_topic_handlers {
+        if self.client.mqtt.broker_options.read().await.automatic_disconnect && empty_topic_handlers {
             MqttManager::new(self.client).disconnect().await?;
         }
 

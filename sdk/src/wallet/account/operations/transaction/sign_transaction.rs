@@ -12,7 +12,7 @@ use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
         api::{transaction::validate_transaction_payload_length, PreparedTransactionData, SignedTransactionData},
-        secret::SecretManageExt,
+        secret::SignTransactionEssence,
     },
     wallet::account::{operations::transaction::TransactionPayload, Account},
 };
@@ -26,34 +26,38 @@ impl Account {
         log::debug!("[TRANSACTION] sign_transaction_essence");
         log::debug!("[TRANSACTION] prepared_transaction_data {prepared_transaction_data:?}");
         #[cfg(feature = "events")]
-        self.event_emitter.lock().await.emit(
-            self.read().await.index,
+        self.emit(
+            self.details().await.index,
             WalletEvent::TransactionProgress(TransactionProgressEvent::SigningTransaction),
-        );
+        )
+        .await;
 
         #[cfg(all(feature = "events", feature = "ledger_nano"))]
-        if let SecretManager::LedgerNano(ledger) = &*self.secret_manager.read().await {
+        if let SecretManager::LedgerNano(ledger) = &*self.wallet.secret_manager.read().await {
             let ledger_nano_status = ledger.get_ledger_nano_status().await;
             if let Some(buffer_size) = ledger_nano_status.buffer_size() {
                 if needs_blind_signing(prepared_transaction_data, buffer_size) {
-                    self.event_emitter.lock().await.emit(
-                        self.read().await.index,
+                    self.emit(
+                        self.details().await.index,
                         WalletEvent::TransactionProgress(TransactionProgressEvent::PreparedTransactionEssenceHash(
                             prefix_hex::encode(prepared_transaction_data.essence.hash()),
                         )),
-                    );
+                    )
+                    .await;
                 } else {
-                    self.event_emitter.lock().await.emit(
-                        self.read().await.index,
+                    self.emit(
+                        self.details().await.index,
                         WalletEvent::TransactionProgress(TransactionProgressEvent::PreparedTransaction(Box::new(
                             PreparedTransactionDataDto::from(prepared_transaction_data),
                         ))),
-                    );
+                    )
+                    .await;
                 }
             }
         }
 
         let unlocks = match self
+            .wallet
             .secret_manager
             .read()
             .await

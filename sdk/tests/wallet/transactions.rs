@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::wallet::{account::TransactionOptions, AddressAndNftId, AddressWithAmount, NftOptions, Result};
+use iota_sdk::wallet::{account::TransactionOptions, MintNftParams, Result, SendAmountParams, SendNftParams};
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
@@ -19,7 +19,7 @@ async fn send_amount() -> Result<()> {
     let amount = 1_000_000;
     let tx = account_0
         .send_amount(
-            vec![AddressWithAmount::new(
+            vec![SendAmountParams::new(
                 account_1.addresses().await?[0].address().to_string(),
                 amount,
             )],
@@ -52,7 +52,7 @@ async fn send_amount_127_outputs() -> Result<()> {
     let tx = account_0
         .send_amount(
             vec![
-                AddressWithAmount::new(
+                SendAmountParams::new(
                     account_1.addresses().await?[0].address().to_string(),
                     amount,
                 );
@@ -88,7 +88,7 @@ async fn send_amount_custom_input() -> Result<()> {
     let amount = 1_000_000;
     let tx = account_0
         .send_amount(
-            vec![AddressWithAmount::new(account_1.addresses().await?[0].address().to_string(), amount); 10],
+            vec![SendAmountParams::new(account_1.addresses().await?[0].address().to_string(), amount); 10],
             None,
         )
         .await?;
@@ -104,7 +104,7 @@ async fn send_amount_custom_input() -> Result<()> {
     let custom_input = &account_1.unspent_outputs(None).await?[5];
     let tx = account_1
         .send_amount(
-            vec![AddressWithAmount::new(
+            vec![SendAmountParams::new(
                 account_0.addresses().await?[0].address().to_string(),
                 amount,
             )],
@@ -130,7 +130,7 @@ async fn send_nft() -> Result<()> {
     let wallet = make_wallet(storage_path, None, None).await?;
     let accounts = &create_accounts_with_funds(&wallet, 2).await?;
 
-    let nft_options = vec![NftOptions {
+    let nft_options = vec![MintNftParams {
         address: Some(accounts[0].addresses().await?[0].address().to_string()),
         sender: None,
         metadata: Some(b"some nft metadata".to_vec()),
@@ -148,7 +148,7 @@ async fn send_nft() -> Result<()> {
     // Send to account 1
     let transaction = accounts[0]
         .send_nft(
-            vec![AddressAndNftId {
+            vec![SendNftParams {
                 address: accounts[1].addresses().await?[0].address().to_string(),
                 nft_id,
             }],

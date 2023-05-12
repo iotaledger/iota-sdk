@@ -5,7 +5,7 @@ use crypto::keys::slip10::Chain;
 use instant::Instant;
 
 use crate::{
-    client::Client,
+    client::{constants::HD_WALLET_TYPE, Client},
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
@@ -32,9 +32,9 @@ impl Account {
     ) -> crate::wallet::Result<Vec<OutputData>> {
         log::debug!("[SYNC] convert output_responses");
         // store outputs with network_id
-        let network_id = self.client.get_network_id().await?;
+        let network_id = self.client().get_network_id().await?;
         let mut outputs = Vec::new();
-        let account_details = self.read().await;
+        let account_details = self.details().await;
 
         for output_with_meta in outputs_with_meta {
             // check if we know the transaction that created this output and if we created it (if we store incoming
@@ -46,7 +46,7 @@ impl Account {
 
             // 44 is for BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
             let chain = Chain::from_u32_hardened(vec![
-                44,
+                HD_WALLET_TYPE,
                 account_details.coin_type,
                 account_details.index,
                 associated_address.internal as u32,
@@ -79,7 +79,7 @@ impl Account {
         let mut outputs = Vec::new();
         let mut unknown_outputs = Vec::new();
         let mut unspent_outputs = Vec::new();
-        let mut account_details = self.write().await;
+        let mut account_details = self.details_mut().await;
 
         for output_id in output_ids {
             match account_details.outputs.get_mut(&output_id) {
@@ -104,7 +104,7 @@ impl Account {
         drop(account_details);
 
         if !unknown_outputs.is_empty() {
-            outputs.extend(self.client.get_outputs(unknown_outputs).await?);
+            outputs.extend(self.client().get_outputs(unknown_outputs).await?);
         }
 
         log::debug!(
@@ -127,7 +127,7 @@ impl Account {
         // Limit parallel requests to 100, to avoid timeouts
         for transaction_ids_chunk in transaction_ids.chunks(100).map(|x: &[TransactionId]| x.to_vec()) {
             let mut tasks = Vec::new();
-            let account_details = self.read().await;
+            let account_details = self.details().await;
 
             for transaction_id in transaction_ids_chunk {
                 // Don't request known or inaccessible transactions again
@@ -140,7 +140,7 @@ impl Account {
                     continue;
                 }
 
-                let client = self.client.clone();
+                let client = self.client().clone();
                 tasks.push(async move {
                     task::spawn(async move {
                         match client.get_included_block(&transaction_id).await {
@@ -164,7 +164,9 @@ impl Account {
                                     Ok((transaction_id, None))
                                 }
                             }
-                            Err(crate::client::Error::NotFound(_)) => Ok((transaction_id, None)),
+                            Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {
+                                Ok((transaction_id, None))
+                            }
                             Err(e) => Err(crate::wallet::Error::Client(e.into())),
                         }
                     })
@@ -176,7 +178,7 @@ impl Account {
 
             let results = futures::future::try_join_all(tasks).await?;
             // Update account with new transactions
-            let mut account_details = self.write().await;
+            let mut account_details = self.details_mut().await;
             for res in results {
                 match res? {
                     (transaction_id, Some(transaction)) => {

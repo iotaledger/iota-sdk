@@ -62,11 +62,11 @@ impl Account {
     pub async fn send(
         &self,
         outputs: Vec<Output>,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         // here to check before syncing, how to prevent duplicated verification (also in prepare_transaction())?
         // Checking it also here is good to return earlier if something is invalid
-        let protocol_parameters = self.client.get_protocol_parameters().await?;
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
 
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {
@@ -84,7 +84,7 @@ impl Account {
     pub async fn finish_transaction(
         &self,
         outputs: Vec<Output>,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!("[TRANSACTION] finish_transaction");
 
@@ -123,7 +123,7 @@ impl Account {
         );
 
         // Validate transaction before sending and storing it
-        let local_time = self.client.get_time_checked().await?;
+        let local_time = self.client().get_time_checked().await?;
 
         let conflict = verify_semantic(
             &signed_transaction_data.inputs_data,
@@ -156,7 +156,7 @@ impl Account {
         let transaction_id = signed_transaction_data.transaction_payload.id();
 
         // store transaction payload to account (with db feature also store the account to the db)
-        let network_id = self.client.get_network_id().await?;
+        let network_id = self.client().get_network_id().await?;
 
         let inputs = signed_transaction_data
             .inputs_data
@@ -179,7 +179,7 @@ impl Account {
             inputs,
         };
 
-        let mut account_details = self.write().await;
+        let mut account_details = self.details_mut().await;
 
         account_details.transactions.insert(transaction_id, transaction.clone());
         account_details.pending_transactions.insert(transaction_id);
@@ -194,7 +194,7 @@ impl Account {
 
     // unlock outputs
     async fn unlock_inputs(&self, inputs: &[InputSigningData]) -> crate::wallet::Result<()> {
-        let mut account_details = self.write().await;
+        let mut account_details = self.details_mut().await;
         for input_signing_data in inputs {
             let output_id = input_signing_data.output_id();
             account_details.locked_outputs.remove(output_id);

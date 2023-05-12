@@ -39,7 +39,7 @@ pub struct AccountParticipationOverview {
 }
 
 /// A participation event with the provided client nodes.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct ParticipationEventWithNodes {
     /// The event id.
     pub id: ParticipationEventId,
@@ -60,10 +60,11 @@ impl Account {
         // TODO: Could use the address endpoint in the future when https://github.com/iotaledger/inx-participation/issues/50 is done.
 
         let mut spent_cached_outputs = self
+            .wallet
             .storage_manager
             .lock()
             .await
-            .get_cached_participation_output_status(self.read().await.index)
+            .get_cached_participation_output_status(self.details().await.index)
             .await?;
         let restored_spent_cached_outputs_len = spent_cached_outputs.len();
         log::debug!(
@@ -195,7 +196,7 @@ impl Account {
                                 }
                             }
                         }
-                        Err(crate::client::Error::NotFound(_)) => {}
+                        Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {}
                         Err(e) => return Err(crate::wallet::Error::Client(e.into())),
                     }
                 }
@@ -208,10 +209,11 @@ impl Account {
         );
         // Only store updated data if new outputs got added
         if spent_cached_outputs.len() > restored_spent_cached_outputs_len {
-            self.storage_manager
+            self.wallet
+                .storage_manager
                 .lock()
                 .await
-                .set_cached_participation_output_status(self.read().await.index, spent_cached_outputs)
+                .set_cached_participation_output_status(self.details().await.index, spent_cached_outputs)
                 .await?;
         }
 
@@ -236,8 +238,9 @@ impl Account {
     /// If event isn't found, the client from the account will be returned.
     pub(crate) async fn get_client_for_event(&self, id: &ParticipationEventId) -> crate::wallet::Result<Client> {
         log::debug!("[get_client_for_event]");
-        let account_index = self.read().await.index;
+        let account_index = self.details().await.index;
         let events = self
+            .wallet
             .storage_manager
             .lock()
             .await
@@ -254,7 +257,7 @@ impl Account {
             client_builder = client_builder.with_node_auth(node.url.as_str(), node.auth.clone())?;
         }
 
-        Ok(client_builder.finish()?)
+        Ok(client_builder.finish().await?)
     }
 
     /// Checks if events in the participations ended and removes them.
@@ -265,8 +268,9 @@ impl Account {
         log::debug!("[remove_ended_participation_events]");
         let latest_milestone_index = self.client().get_info().await?.node_info.status.latest_milestone.index;
 
-        let account_index = self.read().await.index;
+        let account_index = self.details().await.index;
         let events = self
+            .wallet
             .storage_manager
             .lock()
             .await
@@ -307,5 +311,16 @@ fn is_valid_participation_output(output: &Output) -> bool {
             .map_or(false, |tag| tag.tag() == PARTICIPATION_TAG.as_bytes())
     } else {
         false
+    }
+}
+
+#[cfg(test)]
+impl ParticipationEventWithNodes {
+    pub fn mock() -> Self {
+        Self {
+            id: ParticipationEventId::new([42; 32]),
+            data: ParticipationEventData::mock(),
+            nodes: vec![],
+        }
     }
 }

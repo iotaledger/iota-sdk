@@ -146,6 +146,12 @@ class Account:
             {"burn": burn.as_dict(), "options": options},
         )
 
+    def create_alias_output(self, params, options):
+        """Create an alias output."""
+        return self._call_account_method(
+            "createAliasOutput", {"params": params, "options": options}
+        )
+
     def consolidate_outputs(self, force, output_consolidation_threshold):
         """Consolidate outputs."""
         return self._call_account_method(
@@ -235,19 +241,13 @@ class Account:
         """Mint more native token."""
         return self._call_account_method(
             "increaseNativeTokenSupply",
-            {
-                "tokenId": token_id,
-                "mintAmount": mint_amount,
-                "increaseNativeTokenSupplyOptions": increase_native_token_supply_options,
-                "options": options,
-            },
+            {"tokenId": token_id, "mintAmount": mint_amount, "options": options},
         )
 
-    def mint_native_token(self, native_token_options, options=None):
+    def mint_native_token(self, params, options=None):
         """Mint native token."""
         return self._call_account_method(
-            "mintNativeToken",
-            {"nativeTokenOptions": native_token_options, "options": options},
+            "mintNativeToken", {"params": params, "options": options}
         )
 
     def minimum_required_storage_deposit(self, output):
@@ -256,10 +256,10 @@ class Account:
             "minimumRequiredStorageDeposit", {"output": output}
         )
 
-    def mint_nfts(self, nfts_options, options=None):
+    def mint_nfts(self, params, options=None):
         """Mint nfts."""
         return self._call_account_method(
-            "mintNfts", {"nftsOptions": nfts_options, "options": options}
+            "mintNfts", {"params": params, "options": options}
         )
 
     def get_balance(self):
@@ -279,11 +279,10 @@ class Account:
             {"options": output_options, "transactionOptions": transaction_options},
         )
 
-    def prepare_send_amount(self, addresses_with_amount, options=None):
+    def prepare_send_amount(self, params, options=None):
         """Prepare send amount."""
         return self._call_account_method(
-            "prepareSendAmount",
-            {"addressesWithAmount": addresses_with_amount, "options": options},
+            "prepareSendAmount", {"params": params, "options": options}
         )
 
     def prepare_transaction(self, outputs, options=None):
@@ -319,27 +318,132 @@ class Account:
             },
         )
 
-    def send_amount(self, addresses_with_amount, options=None):
+    def send_amount(self, params, options=None):
         """Send amount."""
         return self._call_account_method(
-            "sendAmount",
-            {"addressesWithAmount": addresses_with_amount, "options": options},
+            "sendAmount", {"params": params, "options": options}
         )
 
-    def send_native_tokens(self, addresses_and_native_tokens, options=None):
+    def send_native_tokens(self, params, options=None):
         """Send native tokens."""
         return self._call_account_method(
-            "sendNativeTokens",
+            "sendNativeTokens", {"params": params, "options": options}
+        )
+
+    def send_nft(self, params, options=None):
+        """Send nft."""
+        return self._call_account_method(
+            "sendNft", {"params": params, "options": options}
+        )
+
+    def set_alias(self, alias):
+        """Set alias."""
+        return self._call_account_method("setAlias", {"alias": alias})
+
+    def set_default_sync_options(self, options):
+        """Set the fallback SyncOptions for account syncing.
+        If storage is enabled, will persist during restarts.
+        """
+        return self._call_account_method("setDefaultSyncOptions", {"options": options})
+
+    def sign_transaction_essence(self, prepared_transaction_data):
+        """Sign a transaction essence."""
+        return self._call_account_method(
+            "signTransactionEssence",
+            {"preparedTransactionData": prepared_transaction_data},
+        )
+
+    def submit_and_store_transaction(self, signed_transaction_data):
+        """Submit and store transaction."""
+        return self._call_account_method(
+            "submitAndStoreTransaction",
+            {"signedTransactionData": signed_transaction_data},
+        )
+
+    def claim_outputs(self, output_ids_to_claim):
+        """Claim outputs."""
+        return self._call_account_method(
+            "claimOutputs", {"outputIdsToClaim": output_ids_to_claim}
+        )
+
+    def send_outputs(self, outputs, options=None):
+        """Send outputs in a transaction."""
+        return self._call_account_method(
+            "sendOutputs",
             {
-                "addressesAndNativeTokens": addresses_and_native_tokens,
+                "outputs": outputs,
                 "options": options,
             },
         )
 
-    def send_nft(self, addresses_and_nft_ids, options=None):
+    def prepare_output(self, output_options, transaction_options=None):
+        """Prepare an output for sending
+        If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
+        be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full
+        minimum required storage deposit will be sent to the recipient.
+        When the assets contain an nft_id, the data from the existing nft output will be used, just with the address
+        unlock conditions replaced
+        """
+        return self._call_account_method(
+            "prepareOutput",
+            {"options": output_options, "transactionOptions": transaction_options},
+        )
+
+    def prepare_send_amount(self, params, options=None):
+        """Prepare send amount."""
+        return self._call_account_method(
+            "prepareSendAmount", {"params": params, "options": options}
+        )
+
+    def prepare_transaction(self, outputs, options=None):
+        """Prepare transaction."""
+        return self._call_account_method(
+            "prepareTransaction", {"outputs": outputs, "options": options}
+        )
+
+    def retry_transaction_until_included(
+        self, transaction_id, interval=None, max_attempts=None
+    ):
+        """Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
+        included (referenced by a milestone). Returns the included block id.
+        """
+        return self._call_account_method(
+            "retryTransactionUntilIncluded",
+            {
+                "transactionId": transaction_id,
+                "interval": interval,
+                "maxAttempts": max_attempts,
+            },
+        )
+
+    def sync(self, options=None):
+        """Sync the account by fetching new information from the nodes.
+        Will also retry pending transactions and consolidate outputs if necessary.
+        A custom default can be set using set_default_sync_options
+        """
+        return self._call_account_method(
+            "sync",
+            {
+                "options": options,
+            },
+        )
+
+    def send_amount(self, params, options=None):
+        """Send amount."""
+        return self._call_account_method(
+            "sendAmount", {"params": params, "options": options}
+        )
+
+    def send_native_tokens(self, params, options=None):
+        """Send native tokens."""
+        return self._call_account_method(
+            "sendNativeTokens", {"params": params, "options": options}
+        )
+
+    def send_nft(self, params, options=None):
         """Send nft."""
         return self._call_account_method(
-            "sendNft", {"addressesAndNftIds": addresses_and_nft_ids, "options": options}
+            "sendNft", {"params": params, "options": options}
         )
 
     def set_alias(self, alias):

@@ -7,7 +7,7 @@ export * from './event';
 export * from './loggerConfig';
 export * from './network';
 export * from './output';
-export * from './outputOptions';
+export * from './outputParams';
 export * from './participation';
 export * from './preparedTransactionData';
 export * from './secretManager';

@@ -16,10 +16,15 @@ impl Account {
     pub(super) async fn get_inputs_outputs_for_destroy_foundry(
         &self,
         foundry_id: FoundryId,
+<<<<<<< HEAD
     ) -> crate::wallet::Result<(Vec<OutputId>, Vec<Output>)> {
+=======
+        options: impl Into<Option<TransactionOptions>> + Send,
+    ) -> crate::wallet::Result<Transaction> {
+>>>>>>> develop
         log::debug!("[TRANSACTION] destroy_foundry");
 
-        let token_supply = self.client.get_token_supply().await?;
+        let token_supply = self.client().get_token_supply().await?;
         let alias_id = *foundry_id.alias_address().alias_id();
         let (existing_alias_output_data, existing_foundry_output_data) =
             self.find_alias_and_foundry_output_data(alias_id, foundry_id).await?;
@@ -31,6 +36,22 @@ impl Account {
             existing_foundry_output_data.output_id,
         ];
 
+<<<<<<< HEAD
+=======
+        let options = match options.into() {
+            Some(mut options) => {
+                options.custom_inputs.replace(custom_inputs);
+                options.burn = Some(Burn::new().add_foundry(foundry_id));
+                Some(options)
+            }
+            None => Some(TransactionOptions {
+                custom_inputs: Some(custom_inputs),
+                burn: Some(Burn::new().add_foundry(foundry_id)),
+                ..Default::default()
+            }),
+        };
+
+>>>>>>> develop
         let outputs = match existing_alias_output_data.output {
             Output::Alias(alias_output) => {
                 let amount = alias_output.amount() + existing_foundry_output_data.output.amount();
@@ -67,7 +88,7 @@ impl Account {
         let mut existing_alias_output_data = None;
         let mut existing_foundry_output = None;
 
-        for (output_id, output_data) in self.read().await.unspent_outputs().iter() {
+        for (output_id, output_data) in self.details().await.unspent_outputs().iter() {
             match &output_data.output {
                 Output::Alias(output) => {
                     if output.alias_id_non_null(output_id) == alias_id {

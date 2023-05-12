@@ -8,20 +8,19 @@ import type {
     SyncOptions,
     AccountMeta,
     Address,
-    AddressWithAmount,
-    AddressNativeTokens,
-    AddressNftId,
+    SendAmountParams,
+    SendNativeTokensParams,
+    SendNftParams,
     AddressWithUnspentOutputs,
-    AliasOutputOptions,
+    AliasOutputParams,
     FilterOptions,
     GenerateAddressOptions,
-    IncreaseNativeTokenSupplyOptions,
     MintTokenTransaction,
-    NativeTokenOptions,
-    NftOptions,
+    MintNativeTokenParams,
+    MintNftParams,
     Node,
     OutputData,
-    OutputOptions,
+    OutputParams,
     OutputsToClaim,
     PreparedTransactionData,
     Transaction,
@@ -207,13 +206,13 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
 
         /**
          * `createAliasOutput` creates an alias output
-         * @param aliasOutputOptions The alias output options.
+         * @param params The alias output options.
          * @param transactionOptions The options to define a `RemainderValueStrategy`
          * or custom inputs.
          * @returns A transaction object.
          */
         async createAliasOutput(
-            aliasOutputOptions?: AliasOutputOptions,
+            params?: AliasOutputParams,
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const resp = await messageHandler.callAccountMethod(
@@ -221,7 +220,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
                 {
                     name: 'createAliasOutput',
                     data: {
-                        aliasOutputOptions,
+                        params,
                         options: transactionOptions,
                     },
                 },
@@ -617,7 +616,6 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          * Mint more native tokens.
          * @param tokenId The native token id.
          * @param mintAmount To be minted amount.
-         * @param increaseNativeTokenSupplyOptions Options for minting more tokens.
          * @param transactionOptions The options to define a `RemainderValueStrategy`
          * or custom inputs.
          * @returns The minting transaction and the token ID.
@@ -625,7 +623,6 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
         async increaseNativeTokenSupply(
             tokenId: string,
             mintAmount: HexEncodedAmount,
-            increaseNativeTokenSupplyOptions?: IncreaseNativeTokenSupplyOptions,
             transactionOptions?: TransactionOptions,
         ): Promise<MintTokenTransaction> {
             const response = await messageHandler.callAccountMethod(
@@ -635,7 +632,6 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
                     data: {
                         tokenId,
                         mintAmount,
-                        increaseNativeTokenSupplyOptions,
                         options: transactionOptions,
                     },
                 },
@@ -646,13 +642,13 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
 
         /**
          * Mint native tokens.
-         * @param nativeTokenOptions The options for minting tokens.
+         * @param params The options for minting tokens.
          * @param transactionOptions The options to define a `RemainderValueStrategy`
          * or custom inputs.
          * @returns The minting transaction and the token ID.
          */
         async mintNativeToken(
-            nativeTokenOptions: NativeTokenOptions,
+            params: MintNativeTokenParams,
             transactionOptions?: TransactionOptions,
         ): Promise<MintTokenTransaction> {
             const response = await messageHandler.callAccountMethod(
@@ -660,7 +656,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
                 {
                     name: 'mintNativeToken',
                     data: {
-                        nativeTokenOptions: nativeTokenOptions,
+                        params: params,
                         options: transactionOptions,
                     },
                 },
@@ -671,13 +667,13 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
 
         /**
          * Mint nfts.
-         * @param nftsOptions The options for minting nfts.
+         * @param params The options for minting nfts.
          * @param transactionOptions The options to define a `RemainderValueStrategy`
          * or custom inputs.
          * @returns The minting transaction.
          */
         async mintNfts(
-            nftsOptions: NftOptions[],
+            params: MintNftParams[],
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const response = await messageHandler.callAccountMethod(
@@ -685,7 +681,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
                 {
                     name: 'mintNfts',
                     data: {
-                        nftsOptions,
+                        params,
                         options: transactionOptions,
                     },
                 },
@@ -708,7 +704,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          * @returns The prepared output.
          */
         async prepareOutput(
-            options: OutputOptions,
+            params: OutputParams,
             transactionOptions?: TransactionOptions,
         ): Promise<OutputTypes> {
             const response = await messageHandler.callAccountMethod(
@@ -716,7 +712,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
                 {
                     name: 'prepareOutput',
                     data: {
-                        options,
+                        params,
                         transactionOptions,
                     },
                 },
@@ -726,13 +722,13 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
 
         /**
          * Prepare a send amount transaction, useful for offline signing.
-         * @param addressesWithAmount Address with amounts to send.
+         * @param params Address with amounts to send.
          * @param options The options to define a `RemainderValueStrategy`
          * or custom inputs.
          * @returns The prepared transaction data.
          */
         async prepareSendAmount(
-            addressesWithAmount: AddressWithAmount[],
+            params: SendAmountParams[],
             options?: TransactionOptions,
         ): Promise<PreparedTransactionData> {
             const response = await messageHandler.callAccountMethod(
@@ -740,7 +736,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
                 {
                     name: 'prepareSendAmount',
                     data: {
-                        addressesWithAmount,
+                        params,
                         options,
                     },
                 },
@@ -829,13 +825,13 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
 
         /**
          * Send a transaction with amounts from input addresses.
-         * @param addressesWithAmount Addresses with amounts.
+         * @param params Addresses with amounts.
          * @param transactionOptions The options to define a `RemainderValueStrategy`
          * or custom inputs.
          * @returns The sent transaction.
          */
         async sendAmount(
-            addressesWithAmount: AddressWithAmount[],
+            params: SendAmountParams[],
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const response = await messageHandler.callAccountMethod(
@@ -843,7 +839,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
                 {
                     name: 'sendAmount',
                     data: {
-                        addressesWithAmount,
+                        params,
                         options: transactionOptions,
                     },
                 },
@@ -854,13 +850,13 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
 
         /**
          * Send native tokens.
-         * @param addressesAndNativeTokens Addresses amounts and native tokens.
+         * @param params Addresses amounts and native tokens.
          * @param transactionOptions The options to define a `RemainderValueStrategy`
          * or custom inputs.
          * @returns The sent transaction.
          */
         async sendNativeTokens(
-            addressesAndNativeTokens: AddressNativeTokens[],
+            params: SendNativeTokensParams[],
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const response = await messageHandler.callAccountMethod(
@@ -868,7 +864,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
                 {
                     name: 'sendNativeTokens',
                     data: {
-                        addressesAndNativeTokens,
+                        params,
                         options: transactionOptions,
                     },
                 },
@@ -879,13 +875,13 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
 
         /**
          * Send nft.
-         * @param addressesAndNftIds Addresses and nft ids.
+         * @param params Addresses and nft ids.
          * @param transactionOptions The options to define a `RemainderValueStrategy`
          * or custom inputs.
          * @returns The sent transaction.
          */
         async sendNft(
-            addressesAndNftIds: AddressNftId[],
+            params: SendNftParams[],
             transactionOptions?: TransactionOptions,
         ): Promise<Transaction> {
             const response = await messageHandler.callAccountMethod(
@@ -893,7 +889,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
                 {
                     name: 'sendNft',
                     data: {
-                        addressesAndNftIds,
+                        params,
                         options: transactionOptions,
                     },
                 },

@@ -58,7 +58,7 @@ impl Account {
         let mut alias_selection = HashMap::new();
         let mut foundry_selection = Vec::new();
 
-        for (output_id, output_data) in self.read().await.unspent_outputs().iter() {
+        for (output_id, output_data) in self.details().await.unspent_outputs().iter() {
             match &output_data.output {
                 Output::Basic(_) | Output::Nft(_) => {
                     if let Some((amount, output)) = strip_native_token_if_found(token_id, output_data, token_supply)? {
@@ -152,7 +152,7 @@ impl Account {
         stripped_foundry_output: Vec<StrippedOutput>,
         stripped_alias_outputs: HashMap<AliasId, StrippedOutput>,
     ) -> crate::wallet::Result<StrippedOutputAggregate> {
-        let token_supply = self.client.get_token_supply().await?;
+        let token_supply = self.client().get_token_supply().await?;
         let mut stripped_foundry_outputs = stripped_foundry_output;
         let mut stripped_alias_outputs = stripped_alias_outputs;
         // Sort descending order based on token amount
@@ -232,7 +232,7 @@ impl Account {
         aggregate: &mut StrippedOutputAggregate,
         stripped_alias_outputs: &mut HashMap<AliasId, StrippedOutput>,
     ) -> crate::wallet::Result<bool> {
-        let token_supply = self.client.get_token_supply().await?;
+        let token_supply = self.client().get_token_supply().await?;
 
         match stripped_alias_outputs.remove(&alias_id) {
             Some(StrippedOutput {
@@ -251,7 +251,7 @@ impl Account {
             }
             None => {
                 // Find controlling alias
-                for (output_id, output_data) in self.read().await.unspent_outputs().iter() {
+                for (output_id, output_data) in self.details().await.unspent_outputs().iter() {
                     match &output_data.output {
                         Output::Alias(alias_output) => {
                             if alias_output.alias_id_non_null(output_id) == alias_id {
