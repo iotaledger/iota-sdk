@@ -22,7 +22,7 @@ async fn check_existing_db() -> Result<()> {
 
     assert_eq!(manager.get_accounts().await?.len(), 1);
 
-    let client_options = manager.get_client_options().await;
+    let client_options = manager.client_options().await;
     assert_eq!(client_options.node_manager_builder.nodes.len(), 1);
 
     let account = manager.get_account("Alice").await?;
