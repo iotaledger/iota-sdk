@@ -52,6 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Client`, `Wallet`, and `Account` fns updated to reflect internal reorganization;
 - `AccountBuilder::new` now takes a wallet;
 - `InputSigningDataDto::chain` is now `Vec<u32>` instead of `Chain`;
+- `Account::burn_native_tokens()`, `Account::burn_nft()`, `Account::destroy_foundry()`, `Account::destroy_alias()` merged into `Account::burn()`;
 
 ### Removed
 
