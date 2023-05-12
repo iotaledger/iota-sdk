@@ -23,6 +23,9 @@ const FOUNDRY_METADATA = {
     decimals: 6,
     logoUrl: 'https://my.website/nativeToken.png',
 };
+const ACCOUNT_INDEX = 0;
+const INTERNAL_ADDRESS = false;
+const ADDRESS_INDEX = 0;
 
 async function run() {
     initLogger();
@@ -50,14 +53,18 @@ async function run() {
             process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1,
         );
 
-        const message = utf8ToHex(JSON.stringify(FOUNDRY_METADATA));
-        const ed25519Signature = await secretManager.signEd25519(message, [
+        const bip32Chain = [
             HD_WALLET_TYPE,
             CoinType.Shimmer,
-            0,
-            0,
-            0,
-        ]);
+            ACCOUNT_INDEX,
+            INTERNAL_ADDRESS ? 1 : 0,
+            ADDRESS_INDEX,
+        ];
+        const message = utf8ToHex(JSON.stringify(FOUNDRY_METADATA));
+        const ed25519Signature = await secretManager.signEd25519(
+            message,
+            bip32Chain,
+        );
         console.log(
             `Public key: ${ed25519Signature.publicKey}\nSignature: ${ed25519Signature.signature}`,
         );
