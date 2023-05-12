@@ -16,7 +16,7 @@ use std::env::var;
 use iota_sdk::wallet::{Result, Wallet};
 
 // The number of addresses to generate
-const NUM_ADDRESSES_TO_GENERATE: u32 = 1;
+const NUM_ADDRESSES_TO_GENERATE: u32 = 2;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -35,15 +35,23 @@ async fn main() -> Result<()> {
         .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // Generate some addresses
-    let addresses = account.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
-
-    println!("NEW ADDRESSES:");
     let explorer_url = var("EXPLORER_URL").ok();
     let prepended = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
+
+    println!("Current addresses:");
     for address in account.addresses().await? {
-        if addresses.contains(&address) {
+        println!(" - {prepended}{}", address.address());
+    }
+
+    // Generate some addresses
+    let addresses = account.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
+    println!("Generated {} new addresses:", addresses.len());
+    let account_addresses = account.addresses().await?;
+    for address in addresses.iter() {
+        if account_addresses.contains(address) {
             println!(" - {prepended}{}", address.address());
+        } else {
+            unreachable!("this should never happen");
         }
     }
     Ok(())
