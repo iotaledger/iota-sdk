@@ -16,12 +16,7 @@ impl Account {
     pub(super) async fn get_inputs_outputs_for_destroy_foundry(
         &self,
         foundry_id: FoundryId,
-<<<<<<< HEAD
     ) -> crate::wallet::Result<(Vec<OutputId>, Vec<Output>)> {
-=======
-        options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
->>>>>>> develop
         log::debug!("[TRANSACTION] destroy_foundry");
 
         let token_supply = self.client().get_token_supply().await?;
@@ -36,22 +31,6 @@ impl Account {
             existing_foundry_output_data.output_id,
         ];
 
-<<<<<<< HEAD
-=======
-        let options = match options.into() {
-            Some(mut options) => {
-                options.custom_inputs.replace(custom_inputs);
-                options.burn = Some(Burn::new().add_foundry(foundry_id));
-                Some(options)
-            }
-            None => Some(TransactionOptions {
-                custom_inputs: Some(custom_inputs),
-                burn: Some(Burn::new().add_foundry(foundry_id)),
-                ..Default::default()
-            }),
-        };
-
->>>>>>> develop
         let outputs = match existing_alias_output_data.output {
             Output::Alias(alias_output) => {
                 let amount = alias_output.amount() + existing_foundry_output_data.output.amount();

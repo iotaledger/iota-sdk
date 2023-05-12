@@ -50,7 +50,7 @@ impl Account {
         token_id: TokenId,
         burn_token_amount: U256,
     ) -> crate::wallet::Result<(Vec<OutputId>, Vec<Output>)> {
-        let token_supply = self.client.get_token_supply().await?;
+        let token_supply = self.client().get_token_supply().await?;
 
         let mut basic_and_nft_selection = Vec::new();
 
