@@ -106,6 +106,18 @@ required-features = [ "stronghold" ]
 name = "verify_ed25519_signature"
 path = "examples/how_tos/sign_and_verify_ed25519/verify_ed25519_signature.rs"
 
+# Account and Addresses Examples
+
+[[example]]
+name = "create_account"
+path = "examples/how_tos/accounts_and_addresses/create_account.rs"
+required-features = [ "wallet", "rocksdb", "stronghold" ]
+
+[[example]]
+name = "create_address"
+path = "examples/how_tos/accounts_and_addresses/create_address.rs"
+required-features = [ "wallet", "rocksdb", "stronghold" ]
+
 # Simple Transaction Examples
 
 [[example]]
@@ -117,13 +129,6 @@ required-features = [ "wallet" ]
 name = "simple_transaction"
 path = "examples/how_tos/simple_transaction/simple_transaction.rs"
 required-features = [ "wallet", "stronghold" ]
-
-# Account and Addresses Examples
-
-[[example]]
-name = "create_account"
-path = "examples/how_tos/accounts_and_addresses/create_account.rs"
-required-features = [ "wallet", "rocksdb", "stronghold" ]
 
 # Block examples
 
@@ -489,11 +494,6 @@ required-features = [ "wallet", "stronghold" ]
 name = "3_send_transaction"
 path = "examples/wallet/offline_signing/3_send_transaction.rs"
 required-features = [ "wallet", "storage" ]
-
-[[example]]
-name = "generate_address"
-path = "examples/wallet/02_generate_address.rs"
-required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "get_balance"
