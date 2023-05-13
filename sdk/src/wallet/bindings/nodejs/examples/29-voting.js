@@ -26,7 +26,9 @@ async function run() {
         await account.sync();
 
         // Start with increasing your voting power to vote
-        transaction = await account.increaseVotingPower('5000000');
+        transaction = await account
+            .prepareIncreaseVotingPower('5000000')
+            .then((prepared) => prepared.finish());
         console.log('Increase Voting Power Transaction:', transaction);
         await waitAndSync(account);
 
@@ -35,7 +37,9 @@ async function run() {
         console.log('Voting Power:', votingPower);
 
         // Once the transaction went through, call the vote method
-        transaction = await account.vote(EVENT_ID, [0]);
+        transaction = await account
+            .prepareVote(EVENT_ID, [0])
+            .then((prepared) => prepared.finish());
         console.log('Voting Transaction:', transaction);
         await waitAndSync(account);
 
@@ -47,7 +51,9 @@ async function run() {
         );
 
         // Decrease your voting power
-        transaction = await account.decreaseVotingPower('500000');
+        transaction = await account
+            .prepareDecreaseVotingPower('500000')
+            .then((prepared) => prepared.finish());
         console.log('Decrease Voting Power Transaction', transaction);
         await waitAndSync(account);
 
@@ -59,7 +65,9 @@ async function run() {
         );
 
         // Stop voting for a given event
-        transaction = await account.stopParticipating(EVENT_ID);
+        transaction = await account
+            .prepareStopParticipating(EVENT_ID)
+            .then((prepared) => prepared.finish());
         console.log('Stop Participation Transaction', transaction);
         await waitAndSync(account);
     } catch (error) {

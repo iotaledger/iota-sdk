@@ -1157,7 +1157,9 @@ export class Account {
         return JSON.parse(response).payload;
     }
 
-    async prepareVotingPower(amount: string): Promise<PreparedTransactionData> {
+    async prepareIncreaseVotingPower(
+        amount: string,
+    ): Promise<PreparedTransactionData> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
