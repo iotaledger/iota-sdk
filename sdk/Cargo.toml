@@ -118,6 +118,13 @@ name = "simple_transaction"
 path = "examples/how_tos/simple_transaction/simple_transaction.rs"
 required-features = [ "wallet", "stronghold" ]
 
+# Account and Addresses Examples
+
+[[example]]
+name = "create_account"
+path = "examples/how_tos/accounts_and_addresses/create_account.rs"
+required-features = [ "wallet", "rocksdb", "stronghold" ]
+
 # Block examples
 
 [[example]]
@@ -482,11 +489,6 @@ required-features = [ "wallet", "stronghold" ]
 name = "3_send_transaction"
 path = "examples/wallet/offline_signing/3_send_transaction.rs"
 required-features = [ "wallet", "storage" ]
-
-[[example]]
-name = "create_wallet"
-path = "examples/wallet/01_create_wallet.rs"
-required-features = [ "wallet", "storage", "stronghold" ]
 
 [[example]]
 name = "generate_address"

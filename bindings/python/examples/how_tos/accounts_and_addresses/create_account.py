@@ -2,6 +2,7 @@ from iota_sdk import Wallet, StrongholdSecretManager, CoinType
 from dotenv import load_dotenv
 import json
 import os
+import sys
 
 load_dotenv()
 
@@ -31,4 +32,4 @@ account = wallet.store_mnemonic(
     os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1'])
 
 account = wallet.create_account('Alice')
-print(json.dumps(account, indent=4))
+print("Account created: ", account['alias'])
