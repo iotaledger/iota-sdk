@@ -31,9 +31,6 @@ class PreparedTransactionData:
     def sign_and_submit_transaction(self):
         return self.account.sign_and_submit_transaction(self.prepared_transaction_data())
 
-    def submit_and_store_transaction(self):
-        return self.account.submit_and_store_transaction(self.prepared_transaction_data())
-
 class PreparedMintTokenTransaction(PreparedTransactionData):
 
     def token_id(self):

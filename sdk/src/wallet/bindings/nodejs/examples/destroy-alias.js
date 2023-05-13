@@ -14,7 +14,7 @@ async function run() {
 
         await account.sync();
 
-        let tx = await account.destroyAlias(ALIAS_ID);
+        let tx = await account.prepareDestroyAlias(ALIAS_ID).then(prepared => prepared.finish());;
         console.log(tx);
     } catch (error) {
         console.log('Error: ', error);

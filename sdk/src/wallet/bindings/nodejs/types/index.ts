@@ -9,6 +9,7 @@ export * from './network';
 export * from './output';
 export * from './outputParams';
 export * from './participation';
+export * from './preparedMintTokenTransactionData';
 export * from './preparedTransactionData';
 export * from './secretManager';
 export * from './signedTransactionEssence';

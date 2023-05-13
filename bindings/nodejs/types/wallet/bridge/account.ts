@@ -16,7 +16,7 @@ import type { INode } from '../../client';
 import type { OutputParams } from '../outputParams';
 import type { OutputsToClaim } from '../output';
 import type { SignedTransactionEssence } from '../signedTransactionEssence';
-import type { PreparedTransactionData } from '../preparedTransactionData';
+import type { IPreparedTransactionData, PreparedTransactionData } from '../preparedTransactionData';
 import type {
     AliasOutputParams,
     MintNativeTokenParams,

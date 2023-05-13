@@ -12,7 +12,7 @@ async function run() {
         await account.sync();
 
         // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs.
-        let tx = await account.createAliasOutput()
+        let tx = await account.prepareCreateAliasOutput().then(prepared => prepared.finish());
         console.log(tx);
     } catch (error) {
         console.log('Error: ', error);

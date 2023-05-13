@@ -33,19 +33,3 @@ export interface Transaction {
     note?: string;
     inputs: IOutputResponse[];
 }
-
-/** The result of preparing a minting operation */
-export interface PreparedMintTokenTransaction {
-    /** The token id of the minted token */
-    tokenId: string;
-    /** The prepared transaction which will mint the token */
-    transaction: PreparedTransactionData;
-}
-
-/** The result of a minting operation */
-export interface MintTokenTransaction {
-    /** The token id of the minted token */
-    tokenId: string;
-    /** The transaction which minted the token */
-    transaction: Transaction;
-}

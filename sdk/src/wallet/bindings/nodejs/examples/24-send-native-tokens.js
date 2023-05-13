@@ -21,13 +21,13 @@ async function run() {
         // Send native tokens with a storage deposit return and an expiraiton of one day
         // This means that the receiver has to claim the output in time (can be done with 21-claim-outputs.js),
         // where the storage deposit of the output is returned, or if not, the sender gets full control back after one day passed.
-        const response = await account.sendNativeTokens([
+        const response = await account.prepareSendNativeTokens([
             {
                 //TODO: Replace with the address of your choice!
                 address: 'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0',
                 nativeTokens: [[tokenId, tokenAmount]],
             }
-        ]);
+        ]).then(prepared => prepared.finish());
 
         console.log(response);
 

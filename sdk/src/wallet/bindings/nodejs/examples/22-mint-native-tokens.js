@@ -12,7 +12,7 @@ async function run() {
         await account.sync();
 
         // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs.
-        let tx = await account.createAliasOutput()
+        let tx = await account.prepareCreateAliasOutput().then(prepared => prepared.finish())
         console.log('Transaction ID: ', tx.transactionId);
 
         // Wait for transaction inclusion
@@ -28,9 +28,9 @@ async function run() {
             maximumSupply: '0x64',
         };
 
-        let { transaction } = await account.mintNativeToken(
+        let response = await account.prepareMintNativeToken(
             params,
-        );
+        ).then(prepared => prepared.finish())
         console.log(
             `Check your block on ${process.env.EXPLORER_URL}/block/${response.blockId}`,
         );
