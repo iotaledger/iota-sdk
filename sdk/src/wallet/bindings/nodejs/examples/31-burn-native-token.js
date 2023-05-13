@@ -16,9 +16,11 @@ async function run() {
         let tokenId =
             '0x08e81324605a946192ad414cf10da992ba5b97001ed4242de084e72cf19a924f7b0100000000';
         // `100` hex encoded
-        let burnAmount = "0x64"
+        let burnAmount = '0x64';
 
-        const response = await account.prepareBurnNativeToken(tokenId, burnAmount).then(prepared => prepared.finish());;
+        const response = await account
+            .prepareBurnNativeToken(tokenId, burnAmount)
+            .then((prepared) => prepared.finish());
 
         console.log(response);
 

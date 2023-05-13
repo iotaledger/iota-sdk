@@ -1,4 +1,4 @@
-const path = require('path')
+const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const { AccountManager, CoinType } = require('@iota/wallet');
 
@@ -7,7 +7,9 @@ async function getUnlockedManager() {
         throw new Error('.env NODE_URL is undefined, see .env.example');
     }
     if (!process.env.STRONGHOLD_PASSWORD) {
-        throw new Error('.env STRONGHOLD_PASSWORD is undefined, see .env.example');
+        throw new Error(
+            '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
+        );
     }
 
     const manager = new AccountManager({

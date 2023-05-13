@@ -9,7 +9,7 @@ async function run() {
     initLogger({
         name: './wallet.log',
         levelFilter: 'debug',
-        targetExclusions: ["h2", "hyper", "rustls"]
+        targetExclusions: ['h2', 'hyper', 'rustls'],
     });
 
     try {

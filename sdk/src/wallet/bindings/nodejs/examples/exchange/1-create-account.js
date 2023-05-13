@@ -29,10 +29,9 @@ async function run() {
         await manager.storeMnemonic(process.env.MNEMONIC);
 
         const account = await manager.createAccount({
-            alias: 'Alice'
+            alias: 'Alice',
         });
         console.log('Account created:', account);
-
     } catch (error) {
         console.log('Error: ', error);
     }

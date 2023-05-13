@@ -10,24 +10,34 @@ async function run() {
 
         const account = await manager.getAccount('Alice');
 
-        let accountAddresses = await account.addresses()
+        let accountAddresses = await account.addresses();
 
         const output = await account.prepareOutput({
             recipientAddress: accountAddresses[0].address,
-            amount: "1000000",
+            amount: '1000000',
         });
 
-        let hexEncodedAccountAddresses = await Promise.all(accountAddresses.map(async (a) => await manager.bech32ToHex(a.address)));
+        let hexEncodedAccountAddresses = await Promise.all(
+            accountAddresses.map(
+                async (a) => await manager.bech32ToHex(a.address),
+            ),
+        );
 
-        let controlledByAccount = false
-        if (output.unlockConditions.length === 1 &&
+        let controlledByAccount = false;
+        if (
+            output.unlockConditions.length === 1 &&
             output.unlockConditions[0].type === 0 &&
-            hexEncodedAccountAddresses.includes(output.unlockConditions[0].address.pubKeyHash)) {
-                controlledByAccount = true
+            hexEncodedAccountAddresses.includes(
+                output.unlockConditions[0].address.pubKeyHash,
+            )
+        ) {
+            controlledByAccount = true;
         }
 
-        console.log("The output has only an address unlock condition and the address is from the account: " + controlledByAccount)
-
+        console.log(
+            'The output has only an address unlock condition and the address is from the account: ' +
+                controlledByAccount,
+        );
     } catch (error) {
         console.log('Error: ', error);
     }

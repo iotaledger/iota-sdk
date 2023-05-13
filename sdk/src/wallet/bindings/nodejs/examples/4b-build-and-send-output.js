@@ -14,14 +14,16 @@ async function run() {
         // The address has to be specified in Ed25519 format
         const output = await account.buildBasicOutput({
             amount: '2000000',
-            unlockConditions: [{
-                type: 0,
-                address: {
+            unlockConditions: [
+                {
                     type: 0,
-                    pubKeyHash:`0xc6cf27e8d7c54c420c1315f83567c6bd1b5fad7e9ffa83996680f2aedb2ed0be`
+                    address: {
+                        type: 0,
+                        pubKeyHash: `0xc6cf27e8d7c54c420c1315f83567c6bd1b5fad7e9ffa83996680f2aedb2ed0be`,
+                    },
                 },
-            }]
-        })
+            ],
+        });
 
         const response = await account.sendOutputs([output]);
 

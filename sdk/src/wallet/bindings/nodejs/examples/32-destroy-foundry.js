@@ -16,7 +16,9 @@ async function run() {
         let foundryId =
             '0x08e6210d29881310db2afde095e594f6f006fcdbd06e7a83b74bd2bdf3b5190d0e0200000000';
 
-        const response = await account.prepareDestroyFoundry(foundryId).then(prepared => prepared.finish());;
+        const response = await account
+            .prepareDestroyFoundry(foundryId)
+            .then((prepared) => prepared.finish());
 
         console.log(response);
 

@@ -1,7 +1,7 @@
 /**
  * This example generates an address without storing it.
  */
-const path = require('path')
+const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const { AccountManager, CoinType } = require('@iota/wallet');
 
@@ -14,7 +14,7 @@ async function run() {
             false,
             0,
             { ledgerNanoPrompt: false },
-            "tst"
+            'tst',
         );
         console.log('Address:', address);
     } catch (error) {
@@ -43,7 +43,7 @@ async function createAccountManager() {
     try {
         await manager.storeMnemonic(process.env.MNEMONIC);
     } catch (e) {
-        console.log(e)
+        console.log(e);
     }
     return manager;
 }

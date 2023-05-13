@@ -10,7 +10,7 @@ async function run() {
         initLogger({
             name: './wallet.log',
             levelFilter: 'debug',
-            targetExclusions: ["h2", "hyper", "rustls", "message_interface"]
+            targetExclusions: ['h2', 'hyper', 'rustls', 'message_interface'],
         });
 
         let manager = await getUnlockedManager();
@@ -34,15 +34,13 @@ async function run() {
 
         console.log(response);
 
-
         await manager.stopBackgroundSync();
-        await manager.clearStrongholdPassword()
+        await manager.clearStrongholdPassword();
         await manager.destroy();
 
         manager = await getUnlockedManager();
-        let accounts = await manager.getAccounts()
-        console.log(accounts)
-
+        let accounts = await manager.getAccounts();
+        console.log(accounts);
     } catch (error) {
         console.log('Error: ', error);
     }

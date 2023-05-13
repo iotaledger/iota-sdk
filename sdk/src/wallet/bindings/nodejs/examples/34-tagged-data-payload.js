@@ -15,19 +15,22 @@ async function run() {
             'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0';
         const amount = '500000';
 
-        const response = await account.sendAmount([
-            {
-                address,
-                amount,
-            },
-        ],
+        const response = await account.sendAmount(
+            [
+                {
+                    address,
+                    amount,
+                },
+            ],
             {
                 taggedDataPayload: {
                     type: 5,
                     // 'Stardust' hex encoded
-                    tag: "0x5374617264757374", data: "0x5374617264757374"
-                }
-            });
+                    tag: '0x5374617264757374',
+                    data: '0x5374617264757374',
+                },
+            },
+        );
 
         console.log(response);
 
@@ -39,6 +42,5 @@ async function run() {
     }
     process.exit(0);
 }
-
 
 run();

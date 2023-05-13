@@ -15,7 +15,10 @@ async function run() {
             throw new Error('.env FAUCET_URL is undefined, see .env.example');
         }
 
-        const faucetResponse = await account.requestFundsFromFaucet(process.env.FAUCET_URL, addressObject.address);
+        const faucetResponse = await account.requestFundsFromFaucet(
+            process.env.FAUCET_URL,
+            addressObject.address,
+        );
 
         console.log(faucetResponse);
     } catch (error) {

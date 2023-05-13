@@ -1,7 +1,7 @@
 /**
  * This example restores a secured backup file.
  */
-const path = require('path')
+const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const { AccountManager, CoinType } = require('@iota/wallet');
 async function run() {
@@ -14,7 +14,7 @@ async function run() {
             },
             coinType: CoinType.Shimmer,
             secretManager: {
-                stronghold: { snapshotPath: 'restore.stronghold'},
+                stronghold: { snapshotPath: 'restore.stronghold' },
             },
         };
 
