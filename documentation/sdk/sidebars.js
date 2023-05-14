@@ -16,8 +16,19 @@ module.exports = {
       id: 'welcome',
     },
     {
-      type: 'doc',
-      id: 'overview',
+      type: 'category',
+      label: 'Overview',
+      items: [
+        {
+          type: 'doc',
+          id: 'overview',
+          label: 'SDK Overview'
+        },
+        {
+          type: 'doc',
+          id: 'explanations/account_approaches'
+        }
+      ]
     },
     {
       type: 'category',
