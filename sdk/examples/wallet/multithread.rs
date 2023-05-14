@@ -56,8 +56,8 @@ async fn main() -> Result<()> {
     let account1_send_address = &account1.addresses().await?[0];
     let account2_recv_addresses = generate_addresses(&account2).await?;
 
-    sync_print_balance(&account1).await?;
-    sync_print_balance(&account2).await?;
+    sync_and_print_balance(&account1).await?;
+    sync_and_print_balance(&account2).await?;
 
     may_request_funds(&account1, &account1_send_address.address().to_string()).await?;
 
@@ -123,14 +123,14 @@ async fn main() -> Result<()> {
         }
     }
 
-    sync_print_balance(&account1).await?;
-    sync_print_balance(&account2).await?;
+    sync_and_print_balance(&account1).await?;
+    sync_and_print_balance(&account2).await?;
 
     println!("Example finished successfully");
     Ok(())
 }
 
-async fn sync_print_balance(account: &Account) -> Result<()> {
+async fn sync_and_print_balance(account: &Account) -> Result<()> {
     let alias = account.alias().await;
     let balance = account.sync(None).await?;
     println!("{alias}'s account synced");
