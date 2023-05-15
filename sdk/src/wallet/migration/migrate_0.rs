@@ -1,41 +1,25 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use core::str::FromStr;
 use std::collections::HashMap;
 
 use serde::de::DeserializeOwned;
 
 use super::*;
-use crate::{
-    types::{
-        api::core::response::OutputWithMetadataResponse,
-        block::{
-            output::{dto::OutputMetadataDto, OutputMetadata},
-            payload::{transaction::TransactionId, TransactionPayload},
-        },
-    },
-    wallet::{
-        account::{build_transaction_from_payload_and_inputs, types::Transaction},
-        Error,
-    },
-};
-// use crate::types::block::address::Hrp;
-// use packable::prefix::StringPrefix;
+use crate::wallet::Error;
 
 pub struct Migrate;
 
 #[async_trait]
 impl Migration for Migrate {
     const ID: usize = 0;
-    const SDK_VERSION: &'static str = "0.3.0";
-    const DATE: time::Date = time::macros::date!(2023 - 05 - 09);
+    const SDK_VERSION: &'static str = "0.4.0";
+    const DATE: time::Date = time::macros::date!(2023 - 05 - 15);
 
     #[cfg(feature = "storage")]
     async fn migrate_storage(storage: &crate::wallet::storage::Storage) -> Result<()> {
-        use crate::wallet::{
-            account::AccountDetails,
-            storage::constants::{ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY},
-        };
+        use crate::wallet::storage::constants::{ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY};
 
         if let Some(account_indexes) = storage.get::<Vec<u32>>(ACCOUNTS_INDEXATION_KEY).await? {
             for account_index in account_indexes {
@@ -75,28 +59,11 @@ impl Migration for Migrate {
                         )?;
                     }
                     storage
-                        .set(
-                            &format!("{ACCOUNT_INDEXATION_KEY}{account_index}"),
-                            serde_json::from_value::<AccountDetails>(account)?,
-                        )
+                        .set(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"), account)
                         .await?;
                 }
             }
         }
-
-        // if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
-        //     ConvertHrp::check(
-        //         wallet
-        //             .get_mut("clientOptions")
-        //             .ok_or(Error::Storage("missing client options".to_owned()))?
-        //             .get_mut("protocolParameters")
-        //             .ok_or(Error::Storage("missing protocol params".to_owned()))?
-        //             .get_mut("bech32Hrp")
-        //             .ok_or(Error::Storage("missing bech32 hrp".to_owned()))?,
-        //     )?;
-        //     let wallet_builder = serde_json::from_value::<WalletBuilder>(wallet.clone())?;
-        //     storage.save_wallet_data(&wallet_builder).await?;
-        // }
         Ok(())
     }
 
@@ -169,18 +136,139 @@ trait Convert {
     fn convert(old: Self::Old) -> crate::wallet::Result<Self::New>;
 }
 
+mod types {
+    use serde::{Deserialize, Serialize};
+
+    use crate::{impl_id, string_serde_impl};
+
+    impl_id!(
+        pub TransactionId,
+        32,
+        "A transaction identifier, the BLAKE2b-256 hash of the transaction bytes. See <https://www.blake2.net/> for more information."
+    );
+
+    #[cfg(feature = "serde")]
+    string_serde_impl!(TransactionId);
+
+    #[derive(Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct Transaction {
+        pub payload: TransactionPayload,
+        pub block_id: Option<serde_json::Value>,
+        pub inclusion_state: InclusionState,
+        pub timestamp: u128,
+        pub transaction_id: TransactionId,
+        pub network_id: u64,
+        pub incoming: bool,
+        pub note: Option<String>,
+        #[serde(default)]
+        pub inputs: Vec<OutputWithMetadataResponse>,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    pub struct TransactionPayload {
+        pub essence: TransactionEssence,
+        pub unlocks: serde_json::Value,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    #[serde(tag = "type", content = "data")]
+    pub enum TransactionEssence {
+        Regular(RegularTransactionEssence),
+    }
+
+    #[derive(Serialize, Deserialize)]
+    pub struct RegularTransactionEssence {
+        pub network_id: u64,
+        pub inputs: serde_json::Value,
+        pub inputs_commitment: serde_json::Value,
+        pub outputs: serde_json::Value,
+        pub payload: serde_json::Value,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct OutputWithMetadataResponse {
+        pub metadata: OutputMetadataDto,
+        pub output: serde_json::Value,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    pub struct OutputId {
+        pub transaction_id: TransactionId,
+        pub index: serde_json::Value,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct OutputMetadata {
+        pub block_id: serde_json::Value,
+        pub output_id: OutputId,
+        pub is_spent: bool,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub milestone_index_spent: Option<u32>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub milestone_timestamp_spent: Option<u32>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub transaction_id_spent: Option<TransactionId>,
+        pub milestone_index_booked: u32,
+        pub milestone_timestamp_booked: u32,
+        pub ledger_index: u32,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct OutputMetadataDto {
+        pub block_id: serde_json::Value,
+        pub transaction_id: String,
+        pub output_index: serde_json::Value,
+        pub is_spent: bool,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub milestone_index_spent: Option<u32>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub milestone_timestamp_spent: Option<u32>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub transaction_id_spent: Option<String>,
+        pub milestone_index_booked: u32,
+        pub milestone_timestamp_booked: u32,
+        pub ledger_index: u32,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    pub enum InclusionState {
+        Pending,
+        Confirmed,
+        Conflicting,
+        UnknownPruned,
+    }
+}
+
 struct ConvertIncomingTransactions;
 impl Convert for ConvertIncomingTransactions {
-    type New = HashMap<TransactionId, Transaction>;
-    type Old = HashMap<TransactionId, (TransactionPayload, Vec<OutputWithMetadataResponse>)>;
+    type New = HashMap<types::TransactionId, types::Transaction>;
+    type Old = HashMap<types::TransactionId, (types::TransactionPayload, Vec<types::OutputWithMetadataResponse>)>;
 
     fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
         let mut new = HashMap::new();
         for (tx_id, (tx_payload, inputs)) in old {
-            new.insert(
-                tx_id,
-                build_transaction_from_payload_and_inputs(tx_id, tx_payload, inputs)?,
-            );
+            let types::TransactionEssence::Regular(tx_essence) = &tx_payload.essence;
+            let txn = types::Transaction {
+                network_id: tx_essence.network_id,
+                payload: tx_payload,
+                block_id: inputs
+                    .first()
+                    .map(|i: &types::OutputWithMetadataResponse| i.metadata.block_id.clone()),
+                inclusion_state: types::InclusionState::Confirmed,
+                timestamp: inputs
+                    .first()
+                    .and_then(|i| i.metadata.milestone_timestamp_spent.map(|t| t as u128 * 1000))
+                    .unwrap_or_else(|| crate::utils::unix_timestamp_now().as_millis()),
+                transaction_id: tx_id,
+                incoming: true,
+                note: None,
+                inputs,
+            };
+            new.insert(tx_id, txn);
         }
         Ok(new)
     }
@@ -188,20 +276,27 @@ impl Convert for ConvertIncomingTransactions {
 
 struct ConvertOutputMetadata;
 impl Convert for ConvertOutputMetadata {
-    type New = OutputMetadata;
-    type Old = OutputMetadataDto;
+    type New = types::OutputMetadata;
+    type Old = types::OutputMetadataDto;
 
     fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
-        Ok(Self::New::try_from(&old)?)
+        Ok(Self::New {
+            block_id: old.block_id,
+            output_id: types::OutputId {
+                transaction_id: types::TransactionId::from_str(&old.transaction_id)?,
+                index: old.output_index,
+            },
+            is_spent: old.is_spent,
+            milestone_index_spent: old.milestone_index_spent,
+            milestone_timestamp_spent: old.milestone_timestamp_spent,
+            transaction_id_spent: old
+                .transaction_id_spent
+                .as_ref()
+                .map(|s| types::TransactionId::from_str(s))
+                .transpose()?,
+            milestone_index_booked: old.milestone_index_booked,
+            milestone_timestamp_booked: old.milestone_timestamp_booked,
+            ledger_index: old.ledger_index,
+        })
     }
 }
-
-// struct ConvertHrp;
-// impl Convert for ConvertHrp {
-//     type New = Hrp;
-//     type Old = StringPrefix<u8>;
-
-//     fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
-//         Ok(Self::New::from_str_unchecked(old.as_str()))
-//     }
-// }
