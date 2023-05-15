@@ -12,11 +12,11 @@ import type {
     BuildFoundryOutputData,
     BuildNftOutputData,
 } from '../buildOutputData';
-import type { INode } from '../../client';
+import type { INode, IPreparedTransactionData } from '../../client';
 import type { OutputParams } from '../outputParams';
 import type { OutputsToClaim } from '../output';
 import type { SignedTransactionEssence } from '../signedTransactionEssence';
-import type { IPreparedTransactionData, PreparedTransactionData } from '../preparedTransactionData';
+import type { PreparedTransactionData } from '../preparedTransactionData';
 import type {
     AliasOutputParams,
     MintNativeTokenParams,
@@ -331,14 +331,14 @@ export type __SetDefaultSyncOptionsMethod__ = {
 export type __SignTransactionEssenceMethod__ = {
     name: 'signTransactionEssence';
     data: {
-        preparedTransactionData: PreparedTransactionData;
+        preparedTransactionData: IPreparedTransactionData;
     };
 };
 
 export type __SignAndSubmitTransaction__ = {
     name: 'signAndSubmitTransaction';
     data: {
-        preparedTransactionData: PreparedTransactionData;
+        preparedTransactionData: IPreparedTransactionData;
     };
 };
 

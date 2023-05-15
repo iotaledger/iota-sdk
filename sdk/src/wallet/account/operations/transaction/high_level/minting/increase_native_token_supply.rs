@@ -43,7 +43,7 @@ impl Account {
         let transaction = self.sign_and_submit_transaction(prepared.transaction).await?;
         Ok(MintTokenTransaction {
             token_id: prepared.token_id,
-            transaction: transaction,
+            transaction,
         })
     }
 

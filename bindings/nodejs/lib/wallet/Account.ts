@@ -1031,7 +1031,7 @@ export class Account {
      * @returns The signed transaction essence.
      */
     async signTransactionEssence(
-        preparedTransactionData: PreparedTransactionData,
+        preparedTransactionData: IPreparedTransactionData,
     ): Promise<SignedTransactionEssence> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
@@ -1051,7 +1051,7 @@ export class Account {
      * @returns The transaction.
      */
     async signAndSubmitTransaction(
-        preparedTransactionData: PreparedTransactionData,
+        preparedTransactionData: IPreparedTransactionData,
     ): Promise<Transaction> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,

@@ -4,7 +4,12 @@ import type {
     ITransactionEssence,
     OutputTypes,
 } from '@iota/types';
-import { Account, SignedTransactionEssence, Transaction } from '../../lib';
+import {
+    Account,
+    IPreparedTransactionData,
+    SignedTransactionEssence,
+    Transaction,
+} from '../../lib';
 import type { Segment } from './output';
 
 /**
@@ -13,7 +18,7 @@ import type { Segment } from './output';
  * `Account` object. It provides methods to retrieve the prepared transaction data, sign
  * the transaction and sign+submit/finish the transaction.
  */
- export class PreparedTransactionData {
+export class PreparedTransactionData {
     private _preparedData: IPreparedTransactionData;
     private _account: Account;
 
@@ -73,63 +78,4 @@ import type { Segment } from './output';
             this.preparedTransactionData(),
         );
     }
-}
-
-/**
- * Prepared transaction data, useful for offline signing.
- */
-export interface IPreparedTransactionData {
-    /**
-     * Transaction essence
-     */
-    essence: ITransactionEssence;
-    /**
-     * Required address information for signing
-     */
-    inputsData: InputSigningData[];
-    /**
-     * Optional remainder output information
-     */
-    remainder?: RemainderData;
-}
-
-/**
- * Data for transaction inputs for signing and ordering of unlock blocks
- */
-export interface InputSigningData {
-    /**
-     * The output
-     */
-    output: OutputTypes;
-    /**
-     * The output metadata
-     */
-    outputMetaData: IOutputMetadataResponse;
-    /**
-     * The chain derived from seed, only for ed25519 addresses
-     */
-    chain?: Segment[];
-    /**
-     * The bech32 encoded address, required because of alias outputs where we have multiple possible unlock
-     * conditions, because we otherwise don't know which one we need
-     */
-    bech32Address: string;
-}
-
-/**
- * Data for a remainder output, used for ledger nano
- */
-export interface RemainderData {
-    /**
-     * The remainder output
-     */
-    output: OutputTypes;
-    /**
-     * The chain derived from seed, for the remainder addresses
-     */
-    chain?: Segment[];
-    /**
-     * The remainder address
-     */
-    address: AddressTypes;
 }
