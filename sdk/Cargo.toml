@@ -98,13 +98,13 @@ wallet = [ "client" ]
 # Sign Ed25519 Examples
 
 [[example]]
-name = "sign_ed25519"
-path = "examples/how_tos/sign_ed25519/sign_ed25519.rs"
+name = "sign_and_verify_ed25519"
+path = "examples/how_tos/sign_and_verify_ed25519/sign_ed25519.rs"
 required-features = [ "stronghold" ]
 
 [[example]]
 name = "verify_ed25519_signature"
-path = "examples/how_tos/sign_ed25519/verify_ed25519_signature.rs"
+path = "examples/how_tos/sign_and_verify_ed25519/verify_ed25519_signature.rs"
 
 # Simple Transaction Examples
 

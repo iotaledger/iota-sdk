@@ -5,7 +5,7 @@ import { Ed25519Address, Utils, utf8ToHex } from '@iota/sdk';
 
 // In this example we will verify an Ed25519 signature.
 // Run with command:
-// node ./dist/how_tos/sign_ed25519/verify-ed25519_signature.js
+// node ./dist/how_tos/sign_and_verify_ed25519/verify-ed25519_signature.js
 
 const FOUNDRY_METADATA = {
     standard: 'IRC30',
