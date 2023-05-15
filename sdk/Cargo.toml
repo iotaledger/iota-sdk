@@ -109,6 +109,11 @@ path = "examples/how_tos/sign_and_verify_ed25519/verify_ed25519_signature.rs"
 # Account and Addresses Examples
 
 [[example]]
+name = "create_mnemonic"
+path = "examples/how_tos/accounts_and_addresses/create_mnemonic.rs"
+required-features = [ "client" ]
+
+[[example]]
 name = "create_account"
 path = "examples/how_tos/accounts_and_addresses/create_account.rs"
 required-features = [ "wallet", "rocksdb", "stronghold" ]
@@ -332,11 +337,6 @@ path = "examples/client/node_api_indexer/07_get_random_basic_outputs.rs"
 required-features = [ "client" ]
 
 #######
-
-[[example]]
-name = "generate_mnemonic"
-path = "examples/client/00_generate_mnemonic.rs"
-required-features = [ "client" ]
 
 [[example]]
 name = "generate_addresses"

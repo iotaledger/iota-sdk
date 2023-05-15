@@ -4,15 +4,13 @@
 import { Utils } from '@iota/sdk';
 
 // Run with command:
-// yarn run-example ./utils/generate_mnemonic.ts
+// yarn run-example ./how_tos/accounts_and_addresses/create_mnemonic.ts
 
 // In this example we will generate a random BIP39 mnemonic
 async function run() {
     try {
         const mnemonic = Utils.generateMnemonic();
         console.log('Mnemonic: ' + mnemonic);
-        // Example output:
-        // Mnemonic: endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river
     } catch (error) {
         console.error('Error: ', error);
     }
