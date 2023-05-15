@@ -136,6 +136,7 @@ trait Convert {
     fn convert(old: Self::Old) -> crate::wallet::Result<Self::New>;
 }
 
+#[allow(dead_code)]
 mod types {
     use serde::{Deserialize, Serialize};
 
