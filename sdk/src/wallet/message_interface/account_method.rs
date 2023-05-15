@@ -18,10 +18,10 @@ use crate::{
     types::block::{
         dto::U256Dto,
         output::{
-            dto::{NativeTokenDto, OutputDto, TokenIdDto, TokenSchemeDto},
+            dto::{NativeTokenDto, OutputDto, TokenSchemeDto},
             feature::dto::FeatureDto,
             unlock_condition::dto::UnlockConditionDto,
-            AliasId, FoundryId, NftId, OutputId,
+            AliasId, FoundryId, NftId, OutputId, TokenId,
         },
         payload::transaction::TransactionId,
     },
@@ -111,7 +111,7 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     BurnNativeToken {
         /// Native token id
-        token_id: TokenIdDto,
+        token_id: TokenId,
         /// To be burned amount
         burn_amount: U256Dto,
         options: Option<TransactionOptionsDto>,
@@ -169,7 +169,7 @@ pub enum AccountMethod {
     /// Get the [`Output`](crate::types::block::output::Output) that minted a native token by its TokenId
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[serde(rename_all = "camelCase")]
-    GetFoundryOutput { token_id: TokenIdDto },
+    GetFoundryOutput { token_id: TokenId },
     /// Get outputs with additional unlock conditions
     /// Expected response: [`OutputIds`](crate::wallet::message_interface::Response::OutputIds)
     #[serde(rename_all = "camelCase")]
@@ -215,7 +215,7 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     DecreaseNativeTokenSupply {
         /// Native token id
-        token_id: TokenIdDto,
+        token_id: TokenId,
         /// To be melted amount
         melt_amount: U256Dto,
         options: Option<TransactionOptionsDto>,
@@ -229,7 +229,7 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     IncreaseNativeTokenSupply {
         /// Native token id
-        token_id: TokenIdDto,
+        token_id: TokenId,
         /// To be minted amount
         mint_amount: U256Dto,
         options: Option<TransactionOptionsDto>,

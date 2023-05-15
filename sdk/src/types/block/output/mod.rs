@@ -516,7 +516,6 @@ pub mod dto {
         native_token::dto::NativeTokenDto,
         nft::dto::NftOutputDto,
         rent::dto::RentStructureDto,
-        token_id::dto::TokenIdDto,
         token_scheme::dto::{SimpleTokenSchemeDto, TokenSchemeDto},
         treasury::dto::TreasuryOutputDto,
     };
