@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[cfg(feature = "serde")]
-pub(crate) mod serde;
+pub mod serde;
 
 #[cfg(feature = "instant")]
 pub fn unix_timestamp_now() -> core::time::Duration {
