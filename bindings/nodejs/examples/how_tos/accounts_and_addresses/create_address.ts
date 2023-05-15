@@ -7,7 +7,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // node ./dist/how_tos/accounts_and_addresses/create_address.js
 
-// This example syncs the account and prints the balance
+// This example creates an address
 async function run() {
     initLogger();
     try {
