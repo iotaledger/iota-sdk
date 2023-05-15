@@ -17,7 +17,6 @@ use iota_sdk::{
             types::{AccountBalanceDto, TransactionDto},
             Account, CreateAliasParams, MintTokenTransactionDto, OutputDataDto, OutputParams, TransactionOptions,
         },
-        message_interface::AddressWithUnspentOutputsDto,
         MintNativeTokenParams, MintNftParams,
     },
 };
@@ -131,7 +130,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::AddressesWithUnspentOutputs => {
             let addresses = account.addresses_with_unspent_outputs().await?;
-            Response::AddressesWithUnspentOutputs(addresses.iter().map(AddressWithUnspentOutputsDto::from).collect())
+            Response::AddressesWithUnspentOutputs(addresses)
         }
         AccountMethod::Outputs { filter_options } => {
             let outputs = account.outputs(filter_options).await?;

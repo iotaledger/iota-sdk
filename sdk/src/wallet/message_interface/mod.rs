@@ -11,8 +11,7 @@ use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
 use serde::{Deserialize, Serialize, Serializer};
 
 pub use self::{
-    account_method::AccountMethod, dtos::AddressWithUnspentOutputsDto, message::Message,
-    message_handler::WalletMessageHandler, response::Response,
+    account_method::AccountMethod, message::Message, message_handler::WalletMessageHandler, response::Response,
 };
 use crate::{
     client::secret::{SecretManager, SecretManagerDto},

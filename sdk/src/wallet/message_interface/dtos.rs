@@ -9,7 +9,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     types::block::{
-        address::Bech32Address,
         output::{dto::FoundryOutputDto, FoundryId, OutputId},
         payload::transaction::TransactionId,
     },
@@ -18,31 +17,6 @@ use crate::{
         AccountDetails, OutputDataDto,
     },
 };
-
-/// Dto for an account address with output_ids of unspent outputs.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct AddressWithUnspentOutputsDto {
-    /// The address.
-    pub address: Bech32Address,
-    /// The address key index.
-    pub key_index: u32,
-    /// Determines if an address is a public or an internal (change) address.
-    pub internal: bool,
-    /// Output ids
-    pub output_ids: Vec<OutputId>,
-}
-
-impl From<&AddressWithUnspentOutputs> for AddressWithUnspentOutputsDto {
-    fn from(value: &AddressWithUnspentOutputs) -> Self {
-        Self {
-            address: value.address.clone(),
-            key_index: value.key_index,
-            internal: value.internal,
-            output_ids: value.output_ids.clone(),
-        }
-    }
-}
 
 /// Dto for an Account.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -59,7 +33,7 @@ pub struct AccountDetailsDto {
     /// Internal addresses
     pub internal_addresses: Vec<AccountAddress>,
     /// Addresses with unspent outputs
-    pub addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputsDto>,
+    pub addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
     /// Outputs
     pub outputs: HashMap<OutputId, OutputDataDto>,
     /// Unspent outputs that are currently used as input for transactions
@@ -85,11 +59,7 @@ impl From<&AccountDetails> for AccountDetailsDto {
             alias: value.alias().clone(),
             public_addresses: value.public_addresses.clone(),
             internal_addresses: value.internal_addresses.clone(),
-            addresses_with_unspent_outputs: value
-                .addresses_with_unspent_outputs()
-                .iter()
-                .map(AddressWithUnspentOutputsDto::from)
-                .collect(),
+            addresses_with_unspent_outputs: value.addresses_with_unspent_outputs().clone(),
             outputs: value
                 .outputs()
                 .iter()

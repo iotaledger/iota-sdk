@@ -41,7 +41,6 @@ use crate::{
         },
         message_interface::{
             account_method::AccountMethod, dtos::AccountDetailsDto, message::Message, response::Response,
-            AddressWithUnspentOutputsDto,
         },
         MintNativeTokenParams, MintNftParams, Result, Wallet,
     },
@@ -617,9 +616,7 @@ impl WalletMessageHandler {
             }
             AccountMethod::AddressesWithUnspentOutputs => {
                 let addresses = account.addresses_with_unspent_outputs().await?;
-                Ok(Response::AddressesWithUnspentOutputs(
-                    addresses.iter().map(AddressWithUnspentOutputsDto::from).collect(),
-                ))
+                Ok(Response::AddressesWithUnspentOutputs(addresses))
             }
             AccountMethod::Outputs { filter_options } => {
                 let outputs = account.outputs(filter_options).await?;
