@@ -316,13 +316,8 @@ impl ClientMessageHandler {
                 secret_manager,
                 options,
             } => {
-                let secret_manager = (&secret_manager).try_into()?;
-                let addresses = self
-                    .client
-                    .get_addresses(&secret_manager)
-                    .set_options(options)?
-                    .finish()
-                    .await?;
+                let secret_manager = SecretManager::try_from(&secret_manager)?;
+                let addresses = secret_manager.get_addresses(options).await?;
                 Ok(Response::GeneratedAddresses(addresses))
             }
             Message::BuildAndPostBlock {

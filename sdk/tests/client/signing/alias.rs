@@ -56,13 +56,7 @@ async fn sign_alias_state_transition() -> Result<()> {
         None,
         None,
         None,
-        Some(Chain::from_u32_hardened(vec![
-            HD_WALLET_TYPE,
-            SHIMMER_COIN_TYPE,
-            0,
-            0,
-            0,
-        ])),
+        Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
     )]);
 
     let outputs = build_outputs(vec![Alias(
@@ -145,13 +139,7 @@ async fn sign_alias_governance_transition() -> Result<()> {
         None,
         None,
         None,
-        Some(Chain::from_u32_hardened(vec![
-            HD_WALLET_TYPE,
-            SHIMMER_COIN_TYPE,
-            0,
-            0,
-            1,
-        ])),
+        Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 1])),
     )]);
 
     let outputs = build_outputs(vec![Alias(
@@ -236,13 +224,7 @@ async fn alias_reference_unlocks() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened(vec![
-                HD_WALLET_TYPE,
-                SHIMMER_COIN_TYPE,
-                0,
-                0,
-                0,
-            ])),
+            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
         ),
         Basic(1_000_000, alias_bech32_address, None, None, None, None, None, None),
         Basic(1_000_000, alias_bech32_address, None, None, None, None, None, None),

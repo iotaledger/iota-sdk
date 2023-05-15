@@ -6,7 +6,7 @@
 //! `cargo run --example stronghold --features=stronghold --release`
 
 use iota_sdk::client::{
-    api::GetAddressesBuilder,
+    api::GetAddressesOptions,
     constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
     secret::{stronghold::StrongholdSecretManager, SecretManager},
     Result,
@@ -25,12 +25,14 @@ async fn main() -> Result<()> {
     stronghold_secret_manager.store_mnemonic(mnemonic).await?;
 
     // Generate addresses with custom account index and range
-    let addresses = GetAddressesBuilder::new(&SecretManager::Stronghold(stronghold_secret_manager))
-        .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_account_index(0)
-        .with_range(0..1)
-        .finish()
+    let addresses = SecretManager::Stronghold(stronghold_secret_manager)
+        .get_addresses(
+            GetAddressesOptions::default()
+                .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_account_index(0)
+                .with_range(0..1),
+        )
         .await?;
 
     println!("First public address: {}", addresses[0]);

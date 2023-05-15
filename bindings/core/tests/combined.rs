@@ -4,7 +4,7 @@
 use std::collections::BTreeMap;
 
 use iota_sdk::{
-    client::{api::GetAddressesBuilderOptions, constants::SHIMMER_COIN_TYPE, secret::SecretManagerDto, ClientBuilder},
+    client::{api::GetAddressesOptions, constants::SHIMMER_COIN_TYPE, secret::SecretManagerDto, ClientBuilder},
     wallet::account::types::AccountIdentifier,
 };
 use iota_sdk_bindings_core::{AccountMethod, CallMethod, ClientMethod, Response, Result, WalletMethod, WalletOptions};
@@ -24,13 +24,7 @@ async fn generate_addresses() -> Result<()> {
         "{{\"mnemonic\":\"{}\"}}",
         "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river"
     );
-    let options = GetAddressesBuilderOptions {
-        coin_type: None,
-        account_index: None,
-        range: Some(0..10),
-        bech32_hrp: Some("atoi".to_string()),
-        options: None,
-    };
+    let options = GetAddressesOptions::default().with_range(0..10).with_bech32_hrp("atoi");
     let method = ClientMethod::GenerateAddresses {
         secret_manager: serde_json::from_str::<SecretManagerDto>(&secret_manager).unwrap(),
         options,

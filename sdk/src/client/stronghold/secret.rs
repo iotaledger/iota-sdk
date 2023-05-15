@@ -6,9 +6,12 @@
 use std::ops::Range;
 
 use async_trait::async_trait;
-use crypto::hashes::{blake2b::Blake2b256, Digest};
+use crypto::{
+    hashes::{blake2b::Blake2b256, Digest},
+    signatures::secp256k1_ecdsa::EvmAddress,
+};
 use iota_stronghold::{
-    procedures::{self, Chain, KeyType, Slip10DeriveInput},
+    procedures::{self, Chain, Curve, KeyType, Slip10DeriveInput},
     Location,
 };
 use zeroize::Zeroize;
@@ -57,7 +60,7 @@ impl SecretManage for StrongholdAdapter {
         let internal = options.map(|o| o.internal).unwrap_or_default();
 
         for address_index in address_indexes {
-            let bip_path = vec![HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index];
+            let bip_path = [HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index];
             let chain = Chain::from_u32_hardened(bip_path);
 
             let derive_location = Location::generic(
@@ -70,7 +73,7 @@ impl SecretManage for StrongholdAdapter {
             );
 
             // Derive a SLIP-10 private key in the vault.
-            self.slip10_derive(chain, seed_location.clone(), derive_location.clone())
+            self.slip10_derive(Curve::Ed25519, chain, seed_location.clone(), derive_location.clone())
                 .await?;
 
             // Get the Ed25519 public key from the derived SLIP-10 private key in the vault.
@@ -92,6 +95,64 @@ impl SecretManage for StrongholdAdapter {
 
             // Collect it.
             addresses.push(address);
+        }
+
+        Ok(addresses)
+    }
+
+    async fn generate_evm_addresses(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: Option<GenerateAddressOptions>,
+    ) -> Result<Vec<EvmAddress>, Self::Error> {
+        // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
+        // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
+        // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
+        // Thus, we put an extra guard here to prevent this methods from being invoked when our cached key has
+        // been cleared.
+        if !self.is_key_available().await {
+            return Err(Error::KeyCleared);
+        }
+
+        // Stronghold arguments.
+        let seed_location = Slip10DeriveInput::Seed(Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH));
+
+        // Addresses to return.
+        let mut addresses = Vec::new();
+        let internal = options.map(|o| o.internal).unwrap_or_default();
+
+        for address_index in address_indexes {
+            let bip_path = [HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index];
+            let chain = Chain::from_u32_hardened(bip_path);
+
+            let derive_location = Location::generic(
+                SECRET_VAULT_PATH,
+                [
+                    DERIVE_OUTPUT_RECORD_PATH,
+                    &chain.segments().iter().flat_map(|seg| seg.bs()).collect::<Vec<u8>>(),
+                ]
+                .concat(),
+            );
+
+            // Derive a SLIP-10 private key in the vault.
+            self.slip10_derive(Curve::Secp256k1, chain, seed_location.clone(), derive_location.clone())
+                .await?;
+
+            // Get the Secp256k1 public key from the derived SLIP-10 private key in the vault.
+            let public_key = self.secp256k1_ecdsa_public_key(derive_location.clone()).await?;
+
+            // Cleanup location afterwards
+            self.stronghold
+                .lock()
+                .await
+                .get_client(PRIVATE_DATA_CLIENT_PATH)?
+                .vault(SECRET_VAULT_PATH)
+                .delete_secret(derive_location.record_path())?;
+
+            // Collect it.
+            addresses.push(public_key.to_evm_address());
         }
 
         Ok(addresses)
@@ -120,7 +181,7 @@ impl SecretManage for StrongholdAdapter {
         );
 
         // Derive a SLIP-10 private key in the vault.
-        self.slip10_derive(chain.clone(), seed_location, derive_location.clone())
+        self.slip10_derive(Curve::Ed25519, chain.clone(), seed_location, derive_location.clone())
             .await?;
 
         // Get the Ed25519 public key from the derived SLIP-10 private key in the vault.
@@ -157,13 +218,24 @@ impl StrongholdAdapter {
     }
 
     /// Execute [Procedure::SLIP10Derive] in Stronghold to derive a SLIP-10 private key in the Stronghold vault.
-    async fn slip10_derive(&self, chain: Chain, input: Slip10DeriveInput, output: Location) -> Result<(), Error> {
+    async fn slip10_derive(
+        &self,
+        curve: Curve,
+        chain: Chain,
+        input: Slip10DeriveInput,
+        output: Location,
+    ) -> Result<(), Error> {
         if let Err(err) = self
             .stronghold
             .lock()
             .await
             .get_client(PRIVATE_DATA_CLIENT_PATH)?
-            .execute_procedure(procedures::Slip10Derive { chain, input, output })
+            .execute_procedure(procedures::Slip10Derive {
+                curve,
+                chain,
+                input,
+                output,
+            })
         {
             match err {
                 iota_stronghold::procedures::ProcedureError::Engine(ref e) => {
@@ -184,8 +256,8 @@ impl StrongholdAdapter {
         Ok(())
     }
 
-    /// Execute [Procedure::Ed25519PublicKey] in Stronghold to get an Ed25519 public key from the SLIP-10 private key
-    /// located in `private_key`.
+    /// Execute [Procedure::PublicKey] in Stronghold to get an Ed25519 public key from the SLIP-10
+    /// private key located in `private_key`.
     async fn ed25519_public_key(&self, private_key: Location) -> Result<[u8; 32], Error> {
         Ok(self
             .stronghold
@@ -195,7 +267,27 @@ impl StrongholdAdapter {
             .execute_procedure(procedures::PublicKey {
                 ty: KeyType::Ed25519,
                 private_key,
-            })?)
+            })?
+            .try_into()
+            .unwrap())
+    }
+
+    /// Execute [Procedure::PublicKey] in Stronghold to get a Secp256k1Ecdsa public key from the
+    /// SLIP-10 private key located in `private_key`.
+    async fn secp256k1_ecdsa_public_key(
+        &self,
+        private_key: Location,
+    ) -> Result<crypto::signatures::secp256k1_ecdsa::PublicKey, Error> {
+        let bytes = self
+            .stronghold
+            .lock()
+            .await
+            .get_client(PRIVATE_DATA_CLIENT_PATH)?
+            .execute_procedure(procedures::PublicKey {
+                ty: KeyType::Secp256k1Ecdsa,
+                private_key,
+            })?;
+        Ok(crypto::signatures::secp256k1_ecdsa::PublicKey::try_from_slice(&bytes)?)
     }
 
     /// Execute [Procedure::Ed25519Sign] in Stronghold to sign `msg` with `private_key` stored in the Stronghold vault.

@@ -5,8 +5,8 @@
 
 use iota_sdk::{
     client::{
-        bech32_to_hex, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
-        secret::SecretManager, Client,
+        api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
+        request_funds_from_faucet, secret::SecretManager, Client,
     },
     types::block::{
         output::OutputId,
@@ -43,10 +43,13 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
     let client = setup_client_with_node_health_ignored().await;
     let secret_manager = setup_secret_manager();
 
-    let addresses = client
-        .get_addresses(&secret_manager)
-        .with_range(0..2)
-        .get_raw()
+    let addresses = secret_manager
+        .get_raw_addresses(
+            GetAddressesOptions::from_client(&client)
+                .await
+                .unwrap()
+                .with_range(0..2),
+        )
         .await
         .unwrap();
     let address = addresses[0].to_bech32(client.get_bech32_hrp().await.unwrap());
@@ -186,10 +189,13 @@ async fn test_get_address_outputs() {
     let client = setup_client_with_node_health_ignored().await;
     let secret_manager = setup_secret_manager();
 
-    let address = client
-        .get_addresses(&secret_manager)
-        .with_range(0..1)
-        .get_raw()
+    let address = secret_manager
+        .get_raw_addresses(
+            GetAddressesOptions::from_client(&client)
+                .await
+                .unwrap()
+                .with_range(0..1),
+        )
         .await
         .unwrap()[0];
 

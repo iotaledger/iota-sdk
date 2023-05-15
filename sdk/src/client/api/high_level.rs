@@ -5,13 +5,12 @@ use std::collections::HashSet;
 
 use crate::{
     client::{
-        api::{input_selection::Error as InputSelectionError, ClientBlockBuilder, GetAddressesBuilder},
+        api::{input_selection::Error as InputSelectionError, ClientBlockBuilder},
         constants::{
             DEFAULT_RETRY_UNTIL_INCLUDED_INTERVAL, DEFAULT_RETRY_UNTIL_INCLUDED_MAX_AMOUNT, FIVE_MINUTES_IN_SECONDS,
         },
         error::{Error, Result},
         node_api::indexer::query_parameters::QueryParameter,
-        secret::SecretManager,
         Client,
     },
     types::{
@@ -60,11 +59,6 @@ impl Client {
     /// A generic send function for easily sending transaction or tagged data blocks.
     pub fn block(&self) -> ClientBlockBuilder<'_> {
         ClientBlockBuilder::new(self)
-    }
-
-    /// Return a list of addresses from a secret manager regardless of their validity.
-    pub fn get_addresses<'a>(&'a self, secret_manager: &'a SecretManager) -> GetAddressesBuilder<'a> {
-        GetAddressesBuilder::new(secret_manager).with_client(self)
     }
 
     /// Find all blocks by provided block IDs.

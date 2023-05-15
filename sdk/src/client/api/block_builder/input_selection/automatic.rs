@@ -12,7 +12,7 @@ use crate::{
         api::{
             block_builder::input_selection::core::{Error as InputSelectionError, InputSelection, Selected},
             input_selection::is_alias_transition,
-            ClientBlockBuilder, ADDRESS_GAP_RANGE,
+            ClientBlockBuilder, GetAddressesOptions, ADDRESS_GAP_RANGE,
         },
         constants::HD_WALLET_TYPE,
         node_api::indexer::query_parameters::QueryParameter,
@@ -121,14 +121,15 @@ impl<'a> ClientBlockBuilder<'a> {
         let selected_transaction_data = 'input_selection: loop {
             // Get the addresses in the BIP path/index ~ path/index+20.
             let addresses = self
-                .client
-                .get_addresses(
-                    self.secret_manager
-                        .ok_or(crate::client::Error::MissingParameter("secret manager"))?,
+                .secret_manager
+                .ok_or(crate::client::Error::MissingParameter("secret manager"))?
+                .get_all_addresses(
+                    GetAddressesOptions::default()
+                        .with_coin_type(self.coin_type)
+                        .with_account_index(account_index)
+                        .with_range(gap_index..gap_index + ADDRESS_GAP_RANGE)
+                        .with_bech32_hrp(self.client.get_bech32_hrp().await?),
                 )
-                .with_account_index(account_index)
-                .with_range(gap_index..gap_index + ADDRESS_GAP_RANGE)
-                .get_all()
                 .await?;
 
             available_input_addresses.extend(
@@ -187,7 +188,7 @@ impl<'a> ClientBlockBuilder<'a> {
                             available_inputs.push(InputSigningData {
                                 output: output_with_meta.output,
                                 output_metadata: output_with_meta.metadata,
-                                chain: Some(Chain::from_u32_hardened(vec![
+                                chain: Some(Chain::from_u32_hardened([
                                     HD_WALLET_TYPE,
                                     self.coin_type,
                                     account_index,

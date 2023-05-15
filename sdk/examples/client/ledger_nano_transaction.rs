@@ -6,6 +6,7 @@
 //! `cargo run --example ledger_nano_transaction --features=ledger_nano --release`
 
 use iota_sdk::client::{
+    api::GetAddressesOptions,
     secret::{ledger_nano::LedgerSecretManager, SecretManager},
     Client, Result,
 };
@@ -26,11 +27,13 @@ async fn main() -> Result<()> {
     let secret_manager = SecretManager::LedgerNano(LedgerSecretManager::new(true));
 
     // Generate addresses with custom account index and range
-    let addresses = client
-        .get_addresses(&secret_manager)
-        .with_account_index(0)
-        .with_range(0..2)
-        .finish()
+    let addresses = secret_manager
+        .get_addresses(
+            GetAddressesOptions::from_client(&client)
+                .await?
+                .with_account_index(0)
+                .with_range(0..2),
+        )
         .await?;
 
     println!("List of generated public addresses:\n{addresses:?}\n");

@@ -9,7 +9,7 @@ use crate::client::mqtt::Topic;
 use crate::{
     client::{
         api::{
-            ClientBlockBuilderOptions as BuildBlockOptions, GetAddressesBuilderOptions as GenerateAddressesOptions,
+            ClientBlockBuilderOptions as BuildBlockOptions, GetAddressesOptions as GenerateAddressesOptions,
             PreparedTransactionDataDto,
         },
         node_api::indexer::query_parameters::QueryParameter,

@@ -6,7 +6,7 @@
 //! `cargo run --example alias --release`
 
 use iota_sdk::{
-    client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
+    client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::{
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
@@ -35,7 +35,9 @@ async fn main() -> Result<()> {
 
     let token_supply = client.get_token_supply().await?;
 
-    let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
+    let address = secret_manager
+        .get_raw_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .await?[0];
     request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?;
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 

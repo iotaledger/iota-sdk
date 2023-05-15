@@ -8,7 +8,8 @@ use std::ops::Range;
 use async_trait::async_trait;
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
-    keys::slip10::{Chain, Curve, Seed},
+    keys::slip10::{Chain, Curve, PublicKey, SecretKey, Seed},
+    signatures::secp256k1_ecdsa::EvmAddress,
 };
 
 use super::{GenerateAddressOptions, SecretManage};
@@ -40,20 +41,10 @@ impl SecretManage for MnemonicSecretManager {
         let mut addresses = Vec::new();
 
         for address_index in address_indexes {
-            let chain = Chain::from_u32_hardened(vec![
-                HD_WALLET_TYPE,
-                coin_type,
-                account_index,
-                internal as u32,
-                address_index,
-            ]);
+            let chain =
+                Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index]);
 
-            let public_key = self
-                .0
-                .derive(Curve::Ed25519, &chain)?
-                .secret_key()
-                .public_key()
-                .to_bytes();
+            let PublicKey::Ed25519(public_key) = self.0.derive(Curve::Ed25519, &chain)?.secret_key().public_key() else {unreachable!()};
 
             // Hash the public key to get the address
             let result = Blake2b256::digest(public_key).try_into().map_err(|_e| {
@@ -66,13 +57,35 @@ impl SecretManage for MnemonicSecretManager {
         Ok(addresses)
     }
 
+    async fn generate_evm_addresses(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: Option<GenerateAddressOptions>,
+    ) -> Result<Vec<EvmAddress>, Self::Error> {
+        let internal = options.map(|o| o.internal).unwrap_or_default();
+        let mut addresses = Vec::new();
+
+        for address_index in address_indexes {
+            let chain =
+                Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index]);
+
+            let PublicKey::Secp256k1Ecdsa(public_key) = self.0.derive(Curve::Secp256k1, &chain)?.secret_key().public_key() else {unreachable!()};
+
+            addresses.push(public_key.to_evm_address());
+        }
+
+        Ok(addresses)
+    }
+
     async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
         // Get the private and public key for this Ed25519 address
-        let private_key = self.0.derive(Curve::Ed25519, chain)?.secret_key();
-        let public_key = private_key.public_key().to_bytes();
+        let SecretKey::Ed25519(private_key) = &self.0.derive(Curve::Ed25519, chain)?.secret_key() else {unreachable!()};
+        let public_key = private_key.public_key();
         let signature = private_key.sign(msg).to_bytes();
 
-        Ok(Ed25519Signature::new(public_key, signature))
+        Ok(Ed25519Signature::new(public_key.to_bytes(), signature))
     }
 }
 
@@ -109,7 +122,7 @@ mod tests {
 
         assert_eq!(
             addresses[0].to_bech32("atoi"),
-            "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e".to_string()
+            "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e"
         );
     }
 
@@ -127,7 +140,7 @@ mod tests {
 
         assert_eq!(
             addresses[0].to_bech32("atoi"),
-            "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r".to_string()
+            "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r"
         );
     }
 }

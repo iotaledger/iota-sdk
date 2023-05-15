@@ -1,11 +1,9 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use super::GetAddressesOptions;
 use crate::{
-    client::{
-        api::GetAddressesBuilderOptions, node_api::indexer::query_parameters::QueryParameter, secret::SecretManager,
-        Client, Result,
-    },
+    client::{node_api::indexer::query_parameters::QueryParameter, secret::SecretManager, Client, Result},
     types::block::{
         address::Address,
         input::{UtxoInput, INPUT_COUNT_MAX},
@@ -19,18 +17,14 @@ impl Client {
     pub async fn consolidate_funds(
         &self,
         secret_manager: &SecretManager,
-        address_builder_options: GetAddressesBuilderOptions,
+        options: GetAddressesOptions,
     ) -> Result<String> {
         let token_supply = self.get_token_supply().await?;
-        let mut last_transfer_index = address_builder_options.range.as_ref().unwrap_or(&(0..1)).start;
+        let mut last_transfer_index = options.range.start;
         // use the start index as offset
         let offset = last_transfer_index;
 
-        let addresses = self
-            .get_addresses(secret_manager)
-            .set_options(address_builder_options)?
-            .finish()
-            .await?;
+        let addresses = secret_manager.get_addresses(options).await?;
 
         let consolidation_address = addresses[0].clone();
 

@@ -5,6 +5,7 @@ use std::ops::Range;
 
 use serde::{Deserialize, Serialize};
 
+use super::ADDRESS_GAP_RANGE;
 use crate::{
     client::{
         api::types::{Bech32Addresses, RawAddresses},
@@ -15,52 +16,24 @@ use crate::{
     types::block::address::Address,
 };
 
-/// Builder of get_addresses API
-#[must_use]
-pub struct GetAddressesBuilder<'a> {
-    client: Option<&'a Client>,
-    secret_manager: &'a SecretManager,
-    coin_type: u32,
-    account_index: u32,
-    range: Range<u32>,
-    bech32_hrp: Option<String>,
-    options: Option<GenerateAddressOptions>,
-}
-
-/// Get address builder from string
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct GetAddressesBuilderOptions {
+pub struct GetAddressesOptions {
     /// Coin type
-    pub coin_type: Option<u32>,
+    pub coin_type: u32,
     /// Account index
-    pub account_index: Option<u32>,
+    pub account_index: u32,
     /// Range
-    pub range: Option<Range<u32>>,
+    pub range: Range<u32>,
     /// Bech32 human readable part
-    pub bech32_hrp: Option<String>,
+    pub bech32_hrp: String,
     /// Options
     pub options: Option<GenerateAddressOptions>,
 }
 
-impl<'a> GetAddressesBuilder<'a> {
-    /// Create get_addresses builder
-    pub fn new(manager: &'a SecretManager) -> Self {
-        Self {
-            client: None,
-            secret_manager: manager,
-            coin_type: SHIMMER_COIN_TYPE,
-            account_index: 0,
-            range: 0..super::ADDRESS_GAP_RANGE,
-            bech32_hrp: None,
-            options: None,
-        }
-    }
-
-    /// Provide a client to get the bech32_hrp from the node
-    pub fn with_client(mut self, client: impl Into<Option<&'a Client>>) -> Self {
-        self.client = client.into();
-        self
+impl GetAddressesOptions {
+    pub async fn from_client(client: &Client) -> Result<Self> {
+        Ok(Self::default().with_bech32_hrp(client.get_bech32_hrp().await?))
     }
 
     /// Set the coin type
@@ -82,8 +55,8 @@ impl<'a> GetAddressesBuilder<'a> {
     }
 
     /// Set bech32 human readable part (hrp)
-    pub fn with_bech32_hrp<T: Into<String>>(mut self, bech32_hrp: impl Into<Option<T>>) -> Self {
-        self.bech32_hrp = bech32_hrp.into().map(|b| b.into());
+    pub fn with_bech32_hrp(mut self, bech32_hrp: impl Into<String>) -> Self {
+        self.bech32_hrp = bech32_hrp.into();
         self
     }
 
@@ -92,78 +65,93 @@ impl<'a> GetAddressesBuilder<'a> {
         self.options = options.into();
         self
     }
+}
 
-    /// Set multiple options from address builder options type
-    /// Useful for bindings
-    pub fn set_options(mut self, options: GetAddressesBuilderOptions) -> Result<Self> {
-        if let Some(coin_type) = options.coin_type {
-            self = self.with_coin_type(coin_type);
-        };
-
-        if let Some(account_index) = options.account_index {
-            self = self.with_account_index(account_index);
+impl Default for GetAddressesOptions {
+    fn default() -> Self {
+        Self {
+            coin_type: SHIMMER_COIN_TYPE,
+            account_index: 0,
+            range: 0..ADDRESS_GAP_RANGE,
+            bech32_hrp: SHIMMER_TESTNET_BECH32_HRP.to_string(),
+            options: Default::default(),
         }
-
-        if let Some(range) = options.range {
-            self = self.with_range(range);
-        };
-
-        if let Some(bech32_hrp) = options.bech32_hrp {
-            self = self.with_bech32_hrp(bech32_hrp);
-        };
-
-        if let Some(options) = options.options {
-            self = self.with_options(options);
-        };
-
-        Ok(self)
     }
+}
 
-    /// Consume the builder and get a vector of public addresses bech32 encoded
-    pub async fn finish(self) -> Result<Vec<String>> {
-        let bech32_hrp = match self.bech32_hrp.clone() {
-            Some(bech32_hrp) => bech32_hrp,
-            None => match self.client {
-                Some(client) => client.get_bech32_hrp().await?,
-                None => SHIMMER_TESTNET_BECH32_HRP.to_string(),
-            },
-        };
-
-        let addresses = self
-            .secret_manager
-            .generate_addresses(self.coin_type, self.account_index, self.range, self.options)
+impl SecretManager {
+    /// Get a vector of public address strings
+    pub async fn get_addresses(
+        &self,
+        GetAddressesOptions {
+            coin_type,
+            account_index,
+            range,
+            bech32_hrp,
+            options,
+        }: GetAddressesOptions,
+    ) -> Result<Vec<String>> {
+        Ok(self
+            .generate_addresses(coin_type, account_index, range, options)
             .await?
             .into_iter()
             .map(|a| a.to_bech32(&bech32_hrp))
-            .collect();
-
-        Ok(addresses)
-    }
-    /// Consume the builder and get a vector of public addresses
-    pub async fn get_raw(self) -> Result<Vec<Address>> {
-        self.secret_manager
-            .generate_addresses(
-                self.coin_type,
-                self.account_index,
-                self.range,
-                self.options.map(|mut o| {
-                    o.internal = false;
-                    o
-                }),
-            )
-            .await
+            .collect())
     }
 
-    /// Consume the builder and get the vector of public and internal addresses bech32 encoded
-    pub async fn get_all(self) -> Result<Bech32Addresses> {
-        let bech32_hrp = match self.bech32_hrp.clone() {
-            Some(bech32_hrp) => bech32_hrp,
-            None => match self.client {
-                Some(client) => client.get_bech32_hrp().await?,
-                None => SHIMMER_TESTNET_BECH32_HRP.to_string(),
-            },
-        };
-        let addresses = self.get_all_raw().await?;
+    /// Get a vector of EVM address strings
+    pub async fn get_evm_addresses(
+        &self,
+        GetAddressesOptions {
+            coin_type,
+            account_index,
+            range,
+            bech32_hrp,
+            options,
+        }: GetAddressesOptions,
+    ) -> Result<Vec<String>> {
+        Ok(self
+            .generate_evm_addresses(coin_type, account_index, range, options)
+            .await?
+            .into_iter()
+            .map(|a| {
+                bech32::encode(
+                    &bech32_hrp,
+                    bech32::ToBase32::to_base32(&a.as_ref()),
+                    bech32::Variant::Bech32,
+                )
+                .unwrap()
+            })
+            .collect())
+    }
+
+    /// Get a vector of public addresses
+    pub async fn get_raw_addresses(
+        &self,
+        GetAddressesOptions {
+            coin_type,
+            account_index,
+            range,
+            options,
+            ..
+        }: GetAddressesOptions,
+    ) -> Result<Vec<Address>> {
+        self.generate_addresses(
+            coin_type,
+            account_index,
+            range,
+            options.map(|mut o| {
+                o.internal = false;
+                o
+            }),
+        )
+        .await
+    }
+
+    /// Get the vector of public and internal addresses bech32 encoded
+    pub async fn get_all_addresses(&self, options: GetAddressesOptions) -> Result<Bech32Addresses> {
+        let bech32_hrp = options.bech32_hrp.clone();
+        let addresses = self.get_all_raw_addresses(options).await?;
 
         Ok(Bech32Addresses {
             public: addresses.public.into_iter().map(|a| a.to_bech32(&bech32_hrp)).collect(),
@@ -175,15 +163,23 @@ impl<'a> GetAddressesBuilder<'a> {
         })
     }
 
-    /// Consume the builder and get the vector of public and internal addresses
-    pub async fn get_all_raw(self) -> Result<RawAddresses> {
+    /// Get the vector of public and internal addresses
+    pub async fn get_all_raw_addresses(
+        &self,
+        GetAddressesOptions {
+            coin_type,
+            account_index,
+            range,
+            options,
+            ..
+        }: GetAddressesOptions,
+    ) -> Result<RawAddresses> {
         let public_addresses = self
-            .secret_manager
             .generate_addresses(
-                self.coin_type,
-                self.account_index,
-                self.range.clone(),
-                self.options.map(|mut o| {
+                coin_type,
+                account_index,
+                range.clone(),
+                options.map(|mut o| {
                     o.internal = false;
                     o
                 }),
@@ -191,12 +187,11 @@ impl<'a> GetAddressesBuilder<'a> {
             .await?;
 
         let internal_addresses = self
-            .secret_manager
             .generate_addresses(
-                self.coin_type,
-                self.account_index,
-                self.range,
-                self.options
+                coin_type,
+                account_index,
+                range,
+                options
                     .map(|mut o| {
                         o.internal = true;
                         o
@@ -221,11 +216,13 @@ pub async fn search_address(
     range: Range<u32>,
     address: &Address,
 ) -> Result<(u32, bool)> {
-    let addresses = GetAddressesBuilder::new(secret_manager)
-        .with_coin_type(coin_type)
-        .with_account_index(account_index)
-        .with_range(range.clone())
-        .get_all_raw()
+    let addresses = secret_manager
+        .get_all_raw_addresses(
+            GetAddressesOptions::default()
+                .with_coin_type(coin_type)
+                .with_account_index(account_index)
+                .with_range(range.clone()),
+        )
         .await?;
     for index in 0..addresses.public.len() {
         if addresses.public[index] == *address {
@@ -239,10 +236,4 @@ pub async fn search_address(
         address: address.to_bech32(bech32_hrp),
         range: format!("{range:?}"),
     })
-}
-
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
-pub struct GenerateEvmAddressOptions {
-    pub index: usize,
-    pub internal: bool,
 }

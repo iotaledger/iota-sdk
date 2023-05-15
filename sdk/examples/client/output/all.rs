@@ -7,8 +7,8 @@
 
 use iota_sdk::{
     client::{
-        node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet, secret::SecretManager, Client,
-        Result,
+        api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
+        secret::SecretManager, Client, Result,
     },
     types::block::{
         address::AliasAddress,
@@ -46,7 +46,9 @@ async fn main() -> Result<()> {
 
     let token_supply = client.get_token_supply().await?;
 
-    let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
+    let address = secret_manager
+        .get_raw_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .await?[0];
     println!(
         "{}",
         request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?),).await?

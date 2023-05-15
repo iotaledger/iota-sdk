@@ -8,7 +8,10 @@
 use std::{collections::HashMap, ops::Range};
 
 use async_trait::async_trait;
-use crypto::keys::slip10::{Chain, Segment};
+use crypto::{
+    keys::slip10::{Chain, Segment},
+    signatures::secp256k1_ecdsa::EvmAddress,
+};
 use iota_ledger_nano::{
     get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index, Packable as LedgerNanoPackable,
     TransportTypes,
@@ -164,6 +167,16 @@ impl SecretManage for LedgerSecretManager {
             ed25519_addresses.push(Address::Ed25519(Ed25519Address::new(address)));
         }
         Ok(ed25519_addresses)
+    }
+
+    async fn generate_evm_addresses(
+        &self,
+        _coin_type: u32,
+        _account_index: u32,
+        _address_indexes: Range<u32>,
+        _options: Option<GenerateAddressOptions>,
+    ) -> Result<Vec<EvmAddress>, Self::Error> {
+        todo!()
     }
 
     async fn sign_ed25519(&self, _msg: &[u8], _chain: &Chain) -> Result<Ed25519Signature, Self::Error> {

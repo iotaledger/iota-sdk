@@ -7,8 +7,8 @@
 
 use iota_sdk::{
     client::{
-        node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet, secret::SecretManager, Client,
-        Result,
+        api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
+        secret::SecretManager, Client, Result,
     },
     types::{
         api::plugins::participation::types::{Participation, ParticipationEventId, Participations, PARTICIPATION_TAG},
@@ -47,7 +47,9 @@ async fn main() -> Result<()> {
 
     let secret_manager =
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
-    let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
+    let address = secret_manager
+        .get_raw_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .await?[0];
 
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
     request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?;
@@ -97,7 +99,9 @@ async fn participate(client: &Client, event_id: ParticipationEventId) -> Result<
     let token_supply = client.get_token_supply().await?;
     let rent_structure = client.get_rent_structure().await?;
 
-    let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
+    let address = secret_manager
+        .get_raw_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .await?[0];
 
     let outputs = vec![
         BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)

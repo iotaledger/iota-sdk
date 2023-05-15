@@ -43,13 +43,7 @@ async fn single_ed25519_unlock() -> Result<()> {
         None,
         None,
         None,
-        Some(Chain::from_u32_hardened(vec![
-            HD_WALLET_TYPE,
-            SHIMMER_COIN_TYPE,
-            0,
-            0,
-            0,
-        ])),
+        Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
     )]);
 
     let outputs = build_outputs(vec![Basic(
@@ -60,13 +54,7 @@ async fn single_ed25519_unlock() -> Result<()> {
         None,
         None,
         None,
-        Some(Chain::from_u32_hardened(vec![
-            HD_WALLET_TYPE,
-            SHIMMER_COIN_TYPE,
-            0,
-            0,
-            0,
-        ])),
+        Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
     )]);
 
     let essence = TransactionEssence::Regular(
@@ -132,13 +120,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened(vec![
-                HD_WALLET_TYPE,
-                SHIMMER_COIN_TYPE,
-                0,
-                0,
-                0,
-            ])),
+            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
         ),
         Basic(
             1_000_000,
@@ -148,13 +130,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened(vec![
-                HD_WALLET_TYPE,
-                SHIMMER_COIN_TYPE,
-                0,
-                0,
-                0,
-            ])),
+            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
         ),
         Basic(
             1_000_000,
@@ -164,13 +140,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened(vec![
-                HD_WALLET_TYPE,
-                SHIMMER_COIN_TYPE,
-                0,
-                0,
-                0,
-            ])),
+            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
         ),
     ]);
 
@@ -182,13 +152,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         None,
         None,
         None,
-        Some(Chain::from_u32_hardened(vec![
-            HD_WALLET_TYPE,
-            SHIMMER_COIN_TYPE,
-            0,
-            0,
-            0,
-        ])),
+        Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
     )]);
 
     let essence = TransactionEssence::Regular(
@@ -270,13 +234,7 @@ async fn two_signature_unlocks() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened(vec![
-                HD_WALLET_TYPE,
-                SHIMMER_COIN_TYPE,
-                0,
-                0,
-                0,
-            ])),
+            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
         ),
         Basic(
             1_000_000,
@@ -286,13 +244,7 @@ async fn two_signature_unlocks() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened(vec![
-                HD_WALLET_TYPE,
-                SHIMMER_COIN_TYPE,
-                0,
-                0,
-                1,
-            ])),
+            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 1])),
         ),
     ]);
 
@@ -304,13 +256,7 @@ async fn two_signature_unlocks() -> Result<()> {
         None,
         None,
         None,
-        Some(Chain::from_u32_hardened(vec![
-            HD_WALLET_TYPE,
-            SHIMMER_COIN_TYPE,
-            0,
-            0,
-            0,
-        ])),
+        Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
     )]);
 
     let essence = TransactionEssence::Regular(

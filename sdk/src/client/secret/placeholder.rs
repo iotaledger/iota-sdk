@@ -6,7 +6,7 @@
 use std::ops::Range;
 
 use async_trait::async_trait;
-use crypto::keys::slip10::Chain;
+use crypto::{keys::slip10::Chain, signatures::secp256k1_ecdsa::EvmAddress};
 
 use super::{GenerateAddressOptions, SecretManage, SignTransactionEssence};
 use crate::{
@@ -29,6 +29,16 @@ impl SecretManage for PlaceholderSecretManager {
         _address_indexes: Range<u32>,
         _options: Option<GenerateAddressOptions>,
     ) -> Result<Vec<Address>, Self::Error> {
+        Err(Error::PlaceholderSecretManager)
+    }
+
+    async fn generate_evm_addresses(
+        &self,
+        _coin_type: u32,
+        _account_index: u32,
+        _address_indexes: Range<u32>,
+        _options: Option<GenerateAddressOptions>,
+    ) -> Result<Vec<EvmAddress>, Self::Error> {
         Err(Error::PlaceholderSecretManager)
     }
 

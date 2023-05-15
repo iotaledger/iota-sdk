@@ -4,7 +4,9 @@
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
-        request_funds_from_faucet, Client,
+        request_funds_from_faucet,
+        secret::SecretManager,
+        Client,
     },
     types::{
         api::core::response::OutputWithMetadataResponse,
@@ -174,12 +176,8 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             secret_manager,
             options,
         } => {
-            let secret_manager = (&secret_manager).try_into()?;
-            let addresses = client
-                .get_addresses(&secret_manager)
-                .set_options(options)?
-                .finish()
-                .await?;
+            let secret_manager = SecretManager::try_from(&secret_manager)?;
+            let addresses = secret_manager.get_addresses(options).await?;
             Response::GeneratedAddresses(addresses)
         }
         ClientMethod::BuildAndPostBlock {

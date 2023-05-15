@@ -11,7 +11,9 @@ use std::{
     path::Path,
 };
 
-use iota_sdk::client::{constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Client, Result};
+use iota_sdk::client::{
+    api::GetAddressesOptions, constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Result,
+};
 
 const ADDRESS_FILE_NAME: &str = "examples/client/offline_signing/address.json";
 
@@ -20,18 +22,16 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Creates a client instance.
-    let offline_client = Client::builder().finish().await?;
     let secret_manager =
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     // Generates an address offline.
-    let address = offline_client
-        .get_addresses(&secret_manager)
-        // Currently only index 0 is supported for offline signing.
-        .with_range(0..1)
-        .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
-        .finish()
+    let address = secret_manager
+        .get_addresses(
+            GetAddressesOptions::default()
+                .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
+                .with_range(0..1),
+        )
         .await?;
 
     write_address_to_file(ADDRESS_FILE_NAME, &address)

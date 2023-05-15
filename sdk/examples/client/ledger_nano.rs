@@ -8,23 +8,16 @@
 //! `cargo run --example ledger_nano --features=ledger_nano --release`
 
 use iota_sdk::client::{
+    api::GetAddressesOptions,
     constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
     secret::{ledger_nano::LedgerSecretManager, SecretManager},
-    Client, Result,
+    Result,
 };
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
-
-    let node_url = std::env::var("NODE_URL").unwrap();
-
-    // Create a client instance
-    let client = Client::builder()
-        .with_node(&node_url)? // Insert your node URL here
-        .finish()
-        .await?;
 
     let ledger_nano = LedgerSecretManager::new(false);
 
@@ -33,13 +26,14 @@ async fn main() -> Result<()> {
     let secret_manager = SecretManager::LedgerNano(ledger_nano);
 
     // Generate addresses with custom account index and range
-    let addresses = client
-        .get_addresses(&secret_manager)
-        .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_account_index(0)
-        .with_range(0..2)
-        .finish()
+    let addresses = secret_manager
+        .get_addresses(
+            GetAddressesOptions::default()
+                .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_account_index(0)
+                .with_range(0..2),
+        )
         .await?;
 
     println!("List of generated public addresses:\n{addresses:?}\n");

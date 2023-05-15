@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[cfg(feature = "message_interface")]
-use iota_sdk::client::api::GetAddressesBuilderOptions;
-#[cfg(feature = "message_interface")]
 use iota_sdk::client::message_interface;
 #[cfg(feature = "message_interface")]
 use iota_sdk::client::message_interface::{Message, Response};
@@ -15,7 +13,7 @@ use iota_sdk::client::secret::types::StrongholdDto;
 use iota_sdk::client::secret::SecretManagerDto;
 use iota_sdk::{
     client::{
-        api::GetAddressesBuilder,
+        api::GetAddressesOptions,
         constants::{IOTA_BECH32_HRP, IOTA_COIN_TYPE, IOTA_TESTNET_BECH32_HRP, SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
         secret::{GenerateAddressOptions, SecretManager},
         Client,
@@ -28,12 +26,13 @@ use serde::{Deserialize, Serialize};
 async fn addresses() {
     let secret_manager = crate::client::node_api::setup_secret_manager();
 
-    let addresses = GetAddressesBuilder::new(&secret_manager)
-        .with_coin_type(IOTA_COIN_TYPE)
-        .with_bech32_hrp(IOTA_TESTNET_BECH32_HRP)
-        .with_account_index(0)
-        .with_range(0..1)
-        .get_all()
+    let addresses = secret_manager
+        .get_all_addresses(
+            GetAddressesOptions::default()
+                .with_bech32_hrp(IOTA_TESTNET_BECH32_HRP)
+                .with_coin_type(IOTA_COIN_TYPE)
+                .with_range(0..1),
+        )
         .await
         .unwrap();
 
@@ -69,12 +68,14 @@ async fn mnemonic_address_generation_iota() {
     let secret_manager = SecretManager::try_from_mnemonic(mnemonic).unwrap();
 
     // account 0, address 0 and 1
-    let addresses = GetAddressesBuilder::new(&secret_manager)
-        .with_coin_type(IOTA_COIN_TYPE)
-        .with_bech32_hrp(IOTA_BECH32_HRP)
-        .with_account_index(0)
-        .with_range(0..2)
-        .finish()
+    let addresses = secret_manager
+        .get_addresses(
+            GetAddressesOptions::default()
+                .with_bech32_hrp(IOTA_BECH32_HRP)
+                .with_coin_type(IOTA_COIN_TYPE)
+                .with_range(0..2)
+                .with_account_index(0),
+        )
         .await
         .unwrap();
 
@@ -88,12 +89,14 @@ async fn mnemonic_address_generation_iota() {
     );
 
     // account 1
-    let addresses = GetAddressesBuilder::new(&secret_manager)
-        .with_coin_type(IOTA_COIN_TYPE)
-        .with_bech32_hrp(IOTA_BECH32_HRP)
-        .with_account_index(1)
-        .with_range(0..1)
-        .finish()
+    let addresses = secret_manager
+        .get_addresses(
+            GetAddressesOptions::default()
+                .with_bech32_hrp(IOTA_BECH32_HRP)
+                .with_coin_type(IOTA_COIN_TYPE)
+                .with_range(0..1)
+                .with_account_index(1),
+        )
         .await
         .unwrap();
 
@@ -109,12 +112,14 @@ async fn mnemonic_address_generation_shimmer() {
     let secret_manager = SecretManager::try_from_mnemonic(mnemonic).unwrap();
 
     // account 0, address 0 and 1
-    let addresses = GetAddressesBuilder::new(&secret_manager)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_bech32_hrp(SHIMMER_BECH32_HRP)
-        .with_account_index(0)
-        .with_range(0..2)
-        .finish()
+    let addresses = secret_manager
+        .get_addresses(
+            GetAddressesOptions::default()
+                .with_bech32_hrp(SHIMMER_BECH32_HRP)
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_range(0..2)
+                .with_account_index(0),
+        )
         .await
         .unwrap();
 
@@ -128,12 +133,14 @@ async fn mnemonic_address_generation_shimmer() {
     );
 
     // account 1
-    let addresses = GetAddressesBuilder::new(&secret_manager)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_bech32_hrp(SHIMMER_BECH32_HRP)
-        .with_account_index(1)
-        .with_range(0..1)
-        .finish()
+    let addresses = secret_manager
+        .get_addresses(
+            GetAddressesOptions::default()
+                .with_bech32_hrp(SHIMMER_BECH32_HRP)
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_range(0..1)
+                .with_account_index(1),
+        )
         .await
         .unwrap();
 
@@ -165,16 +172,18 @@ async fn address_generation() {
 
     for address in &addresses_data {
         let secret_manager = SecretManager::try_from_mnemonic(&address.mnemonic).unwrap();
-        let addresses = GetAddressesBuilder::new(&secret_manager)
-            .with_bech32_hrp(address.bech32_hrp.to_string())
-            .with_coin_type(address.coin_type)
-            .with_account_index(address.account_index)
-            .with_range(address.address_index..address.address_index + 1)
-            .with_options(GenerateAddressOptions {
-                internal: address.internal,
-                ..Default::default()
-            })
-            .finish()
+        let addresses = secret_manager
+            .get_addresses(
+                GetAddressesOptions::default()
+                    .with_bech32_hrp(&address.bech32_hrp)
+                    .with_coin_type(address.coin_type)
+                    .with_range(address.address_index..address.address_index + 1)
+                    .with_account_index(address.account_index)
+                    .with_options(GenerateAddressOptions {
+                        internal: address.internal,
+                        ..Default::default()
+                    }),
+            )
             .await
             .unwrap();
 
@@ -199,16 +208,18 @@ async fn address_generation() {
             .await
             .unwrap();
 
-        let addresses = GetAddressesBuilder::new(&SecretManager::Stronghold(stronghold_secret_manager))
-            .with_bech32_hrp(address.bech32_hrp.to_string())
-            .with_coin_type(address.coin_type)
-            .with_account_index(address.account_index)
-            .with_range(address.address_index..address.address_index + 1)
-            .with_options(GenerateAddressOptions {
-                internal: address.internal,
-                ..Default::default()
-            })
-            .finish()
+        let addresses = SecretManager::Stronghold(stronghold_secret_manager)
+            .get_addresses(
+                GetAddressesOptions::default()
+                    .with_bech32_hrp(&address.bech32_hrp)
+                    .with_coin_type(address.coin_type)
+                    .with_range(address.address_index..address.address_index + 1)
+                    .with_account_index(address.account_index)
+                    .with_options(GenerateAddressOptions {
+                        internal: address.internal,
+                        ..Default::default()
+                    }),
+            )
             .await
             .unwrap();
 
@@ -225,19 +236,15 @@ async fn address_generation() {
     {
         let message_handler = message_interface::create_message_handler(None).await.unwrap();
         for address in &addresses_data {
-            let options = GetAddressesBuilderOptions {
-                coin_type: Some(address.coin_type),
-                account_index: Some(address.account_index),
-                range: Some(std::ops::Range {
-                    start: address.address_index,
-                    end: address.address_index + 1,
-                }),
-                bech32_hrp: Some(address.bech32_hrp.to_string()),
-                options: Some(GenerateAddressOptions {
+            let options = GetAddressesOptions::default()
+                .with_coin_type(address.coin_type)
+                .with_account_index(address.account_index)
+                .with_range(address.address_index..address.address_index + 1)
+                .with_bech32_hrp(&address.bech32_hrp)
+                .with_options(GenerateAddressOptions {
                     internal: address.internal,
                     ..Default::default()
-                }),
-            };
+                });
             let message = Message::GenerateAddresses {
                 secret_manager: SecretManagerDto::Mnemonic(address.mnemonic.clone()),
                 options,
@@ -274,19 +281,15 @@ async fn address_generation() {
             };
             let _response = message_handler.send_message(message).await;
 
-            let options = GetAddressesBuilderOptions {
-                coin_type: Some(address.coin_type),
-                account_index: Some(address.account_index),
-                range: Some(std::ops::Range {
-                    start: address.address_index,
-                    end: address.address_index + 1,
-                }),
-                bech32_hrp: Some(address.bech32_hrp.to_string()),
-                options: Some(GenerateAddressOptions {
+            let options = GetAddressesOptions::default()
+                .with_coin_type(address.coin_type)
+                .with_account_index(address.account_index)
+                .with_range(address.address_index..address.address_index + 1)
+                .with_bech32_hrp(&address.bech32_hrp)
+                .with_options(GenerateAddressOptions {
                     internal: address.internal,
                     ..Default::default()
-                }),
-            };
+                });
             let message = Message::GenerateAddresses {
                 secret_manager: SecretManagerDto::Stronghold(secret_manager_dto),
                 options,

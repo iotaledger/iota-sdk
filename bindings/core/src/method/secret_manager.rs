@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use derivative::Derivative;
-use iota_sdk::client::api::{GenerateEvmAddressOptions, GetAddressesBuilderOptions, PreparedTransactionDataDto};
+use iota_sdk::client::api::{GetAddressesOptions, PreparedTransactionDataDto};
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "stronghold")]
@@ -16,10 +16,10 @@ pub enum SecretManagerMethod {
     /// Generate addresses.
     GenerateAddresses {
         /// Addresses generation options
-        options: GetAddressesBuilderOptions,
+        options: GetAddressesOptions,
     },
     /// Generate EVM addresses.
-    GenerateEvmAddress { options: GenerateEvmAddressOptions },
+    GenerateEvmAddresses { options: GetAddressesOptions },
     /// Get the ledger status
     /// Expected response: [`LedgerNanoStatus`](crate::Response::LedgerNanoStatus)
     #[cfg(feature = "ledger_nano")]

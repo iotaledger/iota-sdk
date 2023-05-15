@@ -5,7 +5,7 @@
 //!
 //! `cargo run --example transaction --release`
 
-use iota_sdk::client::{secret::SecretManager, Client, Result};
+use iota_sdk::client::{api::GetAddressesOptions, secret::SecretManager, Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -27,7 +27,9 @@ async fn main() -> Result<()> {
         // Insert the output address and amount to spent. The amount cannot be zero.
         .with_output(
             // We generate an address from our own mnemonic so that we send the funds to ourselves
-            &client.get_addresses(&secret_manager).with_range(1..2).finish().await?[0],
+            &secret_manager
+                .get_addresses(GetAddressesOptions::from_client(&client).await?.with_range(1..2))
+                .await?[0],
             1_000_000,
         )
         .await?

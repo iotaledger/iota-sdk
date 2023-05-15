@@ -6,7 +6,7 @@
 //! `cargo run --example output --release`
 
 use iota_sdk::{
-    client::{secret::SecretManager, utils::request_funds_from_faucet, Client, Result},
+    client::{api::GetAddressesOptions, secret::SecretManager, utils::request_funds_from_faucet, Client, Result},
     types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
 };
 
@@ -27,7 +27,9 @@ async fn main() -> Result<()> {
 
     let token_supply = client.get_token_supply().await?;
 
-    let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
+    let address = secret_manager
+        .get_raw_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .await?[0];
     request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?;
 
     let outputs = vec![

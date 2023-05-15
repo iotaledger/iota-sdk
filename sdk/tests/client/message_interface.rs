@@ -7,7 +7,7 @@ use std::str::FromStr;
 
 use iota_sdk::{
     client::{
-        api::GetAddressesBuilderOptions as GenerateAddressesOptions,
+        api::GetAddressesOptions as GenerateAddressesOptions,
         message_interface::{self, Message, Response},
         secret::SecretManagerDto,
     },
@@ -30,13 +30,9 @@ async fn generate_addresses() {
         "{{\"mnemonic\":\"{}\"}}",
         "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river"
     );
-    let options = GenerateAddressesOptions {
-        coin_type: None,
-        account_index: None,
-        range: Some(0..10),
-        bech32_hrp: Some("atoi".to_string()),
-        options: None,
-    };
+    let options = GenerateAddressesOptions::default()
+        .with_range(0..10)
+        .with_bech32_hrp("atoi");
     let message = Message::GenerateAddresses {
         secret_manager: serde_json::from_str::<SecretManagerDto>(&secret_manager).unwrap(),
         options,
@@ -78,13 +74,9 @@ async fn build_and_post_block() {
         "{{\"mnemonic\":\"{}\"}}",
         &std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap()
     );
-    let options = GenerateAddressesOptions {
-        coin_type: None,
-        account_index: None,
-        range: Some(0..10),
-        bech32_hrp: Some("atoi".to_string()),
-        options: None,
-    };
+    let options = GenerateAddressesOptions::default()
+        .with_range(0..10)
+        .with_bech32_hrp("atoi");
 
     let generate_addresses_message = Message::GenerateAddresses {
         secret_manager: serde_json::from_str(&secret_manager).unwrap(),
@@ -191,13 +183,9 @@ async fn stronghold() {
     let _response = message_handler.send_message(message).await;
 
     // Generate an address with the stored mnemonic to verify that it's usable
-    let options = GenerateAddressesOptions {
-        coin_type: None,
-        account_index: None,
-        range: Some(0..1),
-        bech32_hrp: Some("rms".to_string()),
-        options: None,
-    };
+    let options = GenerateAddressesOptions::default()
+        .with_range(0..1)
+        .with_bech32_hrp("rms");
     let message = Message::GenerateAddresses {
         secret_manager: serde_json::from_str(secret_manager_dto).unwrap(),
         options,
