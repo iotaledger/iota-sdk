@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pub(crate) mod string {
-    use std::{fmt::Display, str::FromStr};
+    use alloc::string::String;
+    use core::{fmt::Display, str::FromStr};
 
     use serde::{de, Deserialize, Deserializer, Serializer};
 
