@@ -4,7 +4,7 @@
 //! In this example we sync the account and get the balance.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example get_balance --release`
+//! `cargo run --example check_balance --release`
 
 use iota_sdk::wallet::{Result, Wallet};
 
@@ -13,7 +13,7 @@ async fn main() -> Result<()> {
     // Create the wallet
     let wallet = Wallet::builder().finish().await?;
 
-    // Get the account we generated with `01_create_wallet`
+    // Get the account
     let account = wallet.get_account("Alice").await?;
 
     // Sync and get the balance

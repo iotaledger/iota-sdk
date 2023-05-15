@@ -143,6 +143,11 @@ name = "create_address"
 path = "examples/how_tos/accounts_and_addresses/create_address.rs"
 required-features = [ "wallet", "rocksdb", "stronghold" ]
 
+[[example]]
+name = "check_balance"
+path = "examples/how_tos/accounts_and_addresses/check_balance.rs"
+required-features = [ "wallet" ]
+
 # Simple Transaction Examples
 
 [[example]]
@@ -514,11 +519,6 @@ required-features = [ "wallet", "stronghold" ]
 name = "3_send_transaction"
 path = "examples/wallet/offline_signing/3_send_transaction.rs"
 required-features = [ "wallet", "storage" ]
-
-[[example]]
-name = "get_balance"
-path = "examples/wallet/04_get_balance.rs"
-required-features = [ "wallet" ]
 
 [[example]]
 name = "send_micro_transaction"
