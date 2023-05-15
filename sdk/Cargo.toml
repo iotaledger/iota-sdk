@@ -119,6 +119,11 @@ path = "examples/how_tos/accounts_and_addresses/create_account.rs"
 required-features = [ "wallet", "rocksdb", "stronghold" ]
 
 [[example]]
+name = "list_accounts"
+path = "examples/how_tos/accounts_and_addresses/list_accounts.rs"
+required-features = [ "wallet", "rocksdb", "stronghold" ]
+
+[[example]]
 name = "list_addresses"
 path = "examples/how_tos/accounts_and_addresses/list_addresses.rs"
 required-features = [ "wallet", "rocksdb", "stronghold" ]
