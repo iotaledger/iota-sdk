@@ -4,7 +4,7 @@
 //! In this example we sync the account and get the balance.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example check_balance --release`
+//! `cargo run --example check_balance --release --features="rocksdb stronghold"`
 
 use iota_sdk::wallet::{Result, Wallet};
 

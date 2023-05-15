@@ -3,7 +3,7 @@
 
 //! In this example we will list all outputs of an account.
 //!
-//! `cargo run --example list_outputs --release`
+//! `cargo run --example list_outputs --release --features="rocksdb stronghold"`
 
 use iota_sdk::wallet::{Result, Wallet};
 

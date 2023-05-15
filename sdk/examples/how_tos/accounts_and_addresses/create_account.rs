@@ -4,7 +4,7 @@
 //! In this example we will create a new wallet.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example create_account --release --features="wallet rocksdb stronghold"`
+//! `cargo run --example create_account --release --features="rocksdb stronghold"`
 
 use iota_sdk::{
     client::{

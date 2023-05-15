@@ -3,7 +3,7 @@
 
 //! In this example we will list all addresses of an account.
 //!
-//! `cargo run --example list_addresses --release`
+//! `cargo run --example list_addresses --release --features="rocksdb stronghold"`
 
 use iota_sdk::wallet::{Result, Wallet};
 

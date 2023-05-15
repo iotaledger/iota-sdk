@@ -3,7 +3,7 @@
 
 //! TODO: Example description
 //!
-//! `cargo run --example request_funds --release`
+//! `cargo run --example request_funds --release --features="rocksdb stronghold"`
 
 use iota_sdk::{
     client::utils::request_funds_from_faucet,
