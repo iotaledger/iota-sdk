@@ -199,7 +199,7 @@ pub struct TransactionInclusionEvent {
     pub inclusion_state: InclusionState,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum TransactionProgressEvent {
     /// Performing input selection.
     SelectingInputs,
@@ -215,6 +215,106 @@ pub enum TransactionProgressEvent {
     PerformingPow,
     /// Broadcasting.
     Broadcasting,
+}
+
+impl Serialize for TransactionProgressEvent {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        #[derive(Serialize)]
+        struct PreparedTransactionEssenceHash_<'a> {
+            hash: &'a str,
+        }
+
+        #[derive(Serialize)]
+        #[serde(untagged)]
+        enum TransactionProgressEvent_<'a> {
+            T0,
+            T1(&'a AddressData),
+            T2(&'a PreparedTransactionDataDto),
+            T3(PreparedTransactionEssenceHash_<'a>),
+            T4,
+            T5,
+            T6,
+        }
+        #[derive(Serialize)]
+        struct TypedTransactionProgressEvent_<'a> {
+            #[serde(rename = "type")]
+            kind: u8,
+            #[serde(flatten)]
+            event: TransactionProgressEvent_<'a>,
+        }
+        let event = match self {
+            Self::SelectingInputs => TypedTransactionProgressEvent_ {
+                kind: 0,
+                event: TransactionProgressEvent_::T0,
+            },
+            Self::GeneratingRemainderDepositAddress(e) => TypedTransactionProgressEvent_ {
+                kind: 1,
+                event: TransactionProgressEvent_::T1(e),
+            },
+            Self::PreparedTransaction(e) => TypedTransactionProgressEvent_ {
+                kind: 2,
+                event: TransactionProgressEvent_::T2(e),
+            },
+            Self::PreparedTransactionEssenceHash(e) => TypedTransactionProgressEvent_ {
+                kind: 3,
+                event: TransactionProgressEvent_::T3(PreparedTransactionEssenceHash_ { hash: e }),
+            },
+            Self::SigningTransaction => TypedTransactionProgressEvent_ {
+                kind: 4,
+                event: TransactionProgressEvent_::T4,
+            },
+            Self::PerformingPow => TypedTransactionProgressEvent_ {
+                kind: 5,
+                event: TransactionProgressEvent_::T5,
+            },
+            Self::Broadcasting => TypedTransactionProgressEvent_ {
+                kind: 6,
+                event: TransactionProgressEvent_::T6,
+            },
+        };
+        event.serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for TransactionProgressEvent {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        struct PreparedTransactionEssenceHash_ {
+            hash: String,
+        }
+
+        let value = serde_json::Value::deserialize(d)?;
+        Ok(
+            match value
+                .get("type")
+                .and_then(serde_json::Value::as_u64)
+                .ok_or_else(|| serde::de::Error::custom("invalid transaction progress event type"))?
+                as u8
+            {
+                0 => Self::SelectingInputs,
+                1 => Self::GeneratingRemainderDepositAddress(AddressData::deserialize(value).map_err(|e| {
+                    serde::de::Error::custom(format!("cannot deserialize GeneratingRemainderDepositAddress: {e}"))
+                })?),
+                2 => Self::PreparedTransaction(Box::new(PreparedTransactionDataDto::deserialize(value).map_err(
+                    |e| serde::de::Error::custom(format!("cannot deserialize PreparedTransactionDataDto: {e}")),
+                )?)),
+                3 => Self::PreparedTransactionEssenceHash(
+                    PreparedTransactionEssenceHash_::deserialize(value)
+                        .map_err(|e| {
+                            serde::de::Error::custom(format!("cannot deserialize PreparedTransactionEssenceHash: {e}"))
+                        })?
+                        .hash,
+                ),
+                4 => Self::SigningTransaction,
+                5 => Self::PerformingPow,
+                6 => Self::Broadcasting,
+                _ => return Err(serde::de::Error::custom("invalid transaction progress event type")),
+            },
+        )
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
