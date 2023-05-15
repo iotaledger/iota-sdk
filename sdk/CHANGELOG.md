@@ -64,6 +64,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `HARDENED` const;
 - `AliasIdDto`, `NftIdDto` and `TokenIdDto`;
 
+### Fixed
+
+- Storage records decryption;
+
 ## 0.3.0 - 2023-05-02
 
 ### Added
