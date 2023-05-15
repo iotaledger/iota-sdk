@@ -213,7 +213,7 @@ impl WalletBuilder {
             #[cfg(feature = "storage")]
             storage_options,
             #[cfg(feature = "storage")]
-            storage_manager: tokio::sync::Mutex::new(storage_manager),
+            storage_manager: tokio::sync::RwLock::new(storage_manager),
         });
 
         let mut accounts: Vec<Account> = try_join_all(

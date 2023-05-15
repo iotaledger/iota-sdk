@@ -17,7 +17,7 @@ use crate::{
 
 impl StorageManager {
     pub(crate) async fn insert_participation_event(
-        &mut self,
+        &self,
         account_index: u32,
         event_with_nodes: ParticipationEventWithNodes,
     ) -> crate::wallet::Result<()> {
@@ -41,7 +41,7 @@ impl StorageManager {
     }
 
     pub(crate) async fn remove_participation_event(
-        &mut self,
+        &self,
         account_index: u32,
         id: &ParticipationEventId,
     ) -> crate::wallet::Result<()> {
@@ -81,7 +81,7 @@ impl StorageManager {
     }
 
     pub(crate) async fn set_cached_participation_output_status(
-        &mut self,
+        &self,
         account_index: u32,
         outputs_participation: HashMap<OutputId, OutputStatusResponse>,
     ) -> crate::wallet::Result<()> {
@@ -118,7 +118,7 @@ mod tests {
 
     #[tokio::test]
     async fn insert_get_remove_participation_event() {
-        let mut storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
+        let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert!(storage_manager.get_participation_events(0).await.unwrap().is_empty());
 
         let event_with_nodes = ParticipationEventWithNodes::mock();
@@ -144,7 +144,7 @@ mod tests {
 
     #[tokio::test]
     async fn set_get_cached_participation_output_status() {
-        let mut storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
+        let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert!(
             storage_manager
                 .get_cached_participation_output_status(0)

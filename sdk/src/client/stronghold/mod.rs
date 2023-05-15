@@ -229,7 +229,7 @@ impl StrongholdAdapter {
     /// `password` after `timeout` (if set).
     /// It will also try to load a snapshot to check if the provided password is correct, if not it's cleared and an
     /// error will be returned.
-    pub async fn set_password(&mut self, password: &str) -> Result<(), Error> {
+    pub async fn set_password(&self, password: &str) -> Result<(), Error> {
         let mut key_provider_guard = self.key_provider.lock().await;
 
         let key_provider = self::common::key_provider_from_password(password);
@@ -279,7 +279,7 @@ impl StrongholdAdapter {
     /// data, provide a list of keys in `keys_to_re_encrypt`, as we have no way to list and iterate over every
     /// key-value in the Stronghold store - we'll attempt on the ones provided instead. Set it to `None` to skip
     /// re-encryption.
-    pub async fn change_password(&mut self, new_password: &str) -> Result<(), Error> {
+    pub async fn change_password(&self, new_password: &str) -> Result<(), Error> {
         // Stop the key clearing task to prevent the key from being abruptly cleared (largely).
         if let Some(timeout_task) = self.timeout_task.lock().await.take() {
             timeout_task.abort();
@@ -392,7 +392,7 @@ impl StrongholdAdapter {
     /// Immediately clear ([zeroize]) the stored key.
     ///
     /// If a key clearing thread has been spawned, then it'll be stopped too.
-    pub async fn clear_key(&mut self) {
+    pub async fn clear_key(&self) {
         // Stop a spawned task and setting it to None first.
         if let Some(timeout_task) = self.timeout_task.lock().await.take() {
             timeout_task.abort();
@@ -456,7 +456,7 @@ impl StrongholdAdapter {
 
     /// Load Stronghold from a snapshot at `snapshot_path`, if it hasn't been loaded yet.
     #[allow(clippy::significant_drop_tightening)]
-    pub async fn read_stronghold_snapshot(&mut self) -> Result<(), Error> {
+    pub async fn read_stronghold_snapshot(&self) -> Result<(), Error> {
         // The key needs to be supplied first.
         let locked_key_provider = self.key_provider.lock().await;
         let key_provider = if let Some(key_provider) = &*locked_key_provider {
@@ -508,7 +508,7 @@ impl StrongholdAdapter {
     /// the cached key is cleared from the memory. In other words, if a `timeout` is set and a `snapshot_path` is not
     /// set for a [`StrongholdAdapter`], then after `timeout` Stronghold will be purged. See the [module-level
     /// documentation](self) for more details.
-    pub async fn unload_stronghold_snapshot(&mut self) -> Result<(), Error> {
+    pub async fn unload_stronghold_snapshot(&self) -> Result<(), Error> {
         // Flush Stronghold.
         self.write_stronghold_snapshot(None).await?;
 
@@ -596,7 +596,7 @@ mod tests {
     #[tokio::test]
     async fn stronghold_password_already_set() {
         let stronghold_path = "stronghold_password_already_set.stronghold";
-        let mut adapter = StrongholdAdapter::builder()
+        let adapter = StrongholdAdapter::builder()
             .password("drowssap")
             .build(stronghold_path)
             .unwrap();

@@ -67,6 +67,9 @@ pub enum Error {
     /// serde_json error.
     #[error("`{0}`")]
     Json(#[from] serde_json::error::Error),
+    /// Error migrating storage or backup
+    #[error("migration failed {0}")]
+    Migration(String),
     /// Minting failed
     #[error("minting failed {0}")]
     MintingFailed(String),

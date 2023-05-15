@@ -1,7 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod account_deserialization;
 mod account_recovery;
 mod accounts;
 mod backup_restore;
