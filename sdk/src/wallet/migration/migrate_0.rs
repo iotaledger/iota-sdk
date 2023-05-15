@@ -138,9 +138,11 @@ trait Convert {
 
 #[allow(dead_code)]
 mod types {
+    use core::str::FromStr;
+
     use serde::{Deserialize, Serialize};
 
-    use crate::{impl_id, string_serde_impl};
+    use crate::{impl_id, string_serde_impl, types::block::Error};
 
     impl_id!(
         pub TransactionId,
@@ -148,7 +150,6 @@ mod types {
         "A transaction identifier, the BLAKE2b-256 hash of the transaction bytes. See <https://www.blake2.net/> for more information."
     );
 
-    #[cfg(feature = "serde")]
     string_serde_impl!(TransactionId);
 
     #[derive(Serialize, Deserialize)]
@@ -194,11 +195,47 @@ mod types {
         pub output: serde_json::Value,
     }
 
-    #[derive(Serialize, Deserialize)]
     pub struct OutputId {
         pub transaction_id: TransactionId,
-        pub index: serde_json::Value,
+        pub index: u16,
     }
+
+    impl OutputId {
+        pub const LENGTH: usize = TransactionId::LENGTH + core::mem::size_of::<u16>();
+    }
+
+    impl TryFrom<[u8; Self::LENGTH]> for OutputId {
+        type Error = Error;
+
+        fn try_from(bytes: [u8; Self::LENGTH]) -> Result<Self, Self::Error> {
+            let (transaction_id, index) = bytes.split_at(TransactionId::LENGTH);
+
+            Ok(Self {
+                transaction_id: From::<[u8; TransactionId::LENGTH]>::from(transaction_id.try_into().unwrap()),
+                index: u16::from_le_bytes(index.try_into().unwrap()),
+            })
+        }
+    }
+
+    impl FromStr for OutputId {
+        type Err = Error;
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            Self::try_from(prefix_hex::decode::<[u8; Self::LENGTH]>(s).map_err(Error::Hex)?)
+        }
+    }
+
+    impl core::fmt::Display for OutputId {
+        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            let mut buffer = [0u8; Self::LENGTH];
+            let (transaction_id, index) = buffer.split_at_mut(TransactionId::LENGTH);
+            transaction_id.copy_from_slice(self.transaction_id.as_ref());
+            index.copy_from_slice(&self.index.to_le_bytes());
+            write!(f, "{}", prefix_hex::encode(buffer))
+        }
+    }
+
+    string_serde_impl!(OutputId);
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -222,7 +259,7 @@ mod types {
     pub struct OutputMetadataDto {
         pub block_id: serde_json::Value,
         pub transaction_id: String,
-        pub output_index: serde_json::Value,
+        pub output_index: u16,
         pub is_spent: bool,
         #[serde(skip_serializing_if = "Option::is_none")]
         pub milestone_index_spent: Option<u32>,
