@@ -39,7 +39,7 @@ pub struct AccountParticipationOverview {
 }
 
 /// A participation event with the provided client nodes.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct ParticipationEventWithNodes {
     /// The event id.
     pub id: ParticipationEventId,
@@ -62,7 +62,7 @@ impl Account {
         let mut spent_cached_outputs = self
             .wallet
             .storage_manager
-            .lock()
+            .read()
             .await
             .get_cached_participation_output_status(self.details().await.index)
             .await?;
@@ -196,7 +196,7 @@ impl Account {
                                 }
                             }
                         }
-                        Err(crate::client::Error::NotFound(_)) => {}
+                        Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {}
                         Err(e) => return Err(crate::wallet::Error::Client(e.into())),
                     }
                 }
@@ -211,7 +211,7 @@ impl Account {
         if spent_cached_outputs.len() > restored_spent_cached_outputs_len {
             self.wallet
                 .storage_manager
-                .lock()
+                .read()
                 .await
                 .set_cached_participation_output_status(self.details().await.index, spent_cached_outputs)
                 .await?;
@@ -242,7 +242,7 @@ impl Account {
         let events = self
             .wallet
             .storage_manager
-            .lock()
+            .read()
             .await
             .get_participation_events(account_index)
             .await?;
@@ -272,7 +272,7 @@ impl Account {
         let events = self
             .wallet
             .storage_manager
-            .lock()
+            .read()
             .await
             .get_participation_events(account_index)
             .await?;
@@ -311,5 +311,16 @@ fn is_valid_participation_output(output: &Output) -> bool {
             .map_or(false, |tag| tag.tag() == PARTICIPATION_TAG.as_bytes())
     } else {
         false
+    }
+}
+
+#[cfg(test)]
+impl ParticipationEventWithNodes {
+    pub fn mock() -> Self {
+        Self {
+            id: ParticipationEventId::new([42; 32]),
+            data: ParticipationEventData::mock(),
+            nodes: vec![],
+        }
     }
 }

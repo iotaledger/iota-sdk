@@ -14,10 +14,7 @@ use iota_sdk::{
     },
     types::block::{
         dto::U256Dto,
-        output::{
-            dto::{AliasIdDto, NftIdDto, OutputDto, TokenIdDto},
-            FoundryId, OutputId,
-        },
+        output::{dto::OutputDto, AliasId, FoundryId, NftId, OutputId, TokenId},
         payload::transaction::TransactionId,
     },
     wallet::{
@@ -48,7 +45,7 @@ pub enum AccountMethod {
     /// Get the [`Output`](iota_sdk::types::block::output::Output) that minted a native token by its TokenId
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]
-    GetFoundryOutput { token_id: TokenIdDto },
+    GetFoundryOutput { token_id: TokenId },
     /// Get outputs with additional unlock conditions
     /// Expected response: [`OutputIds`](crate::Response::OutputIds)
     #[serde(rename_all = "camelCase")]
@@ -101,7 +98,7 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     PrepareBurnNativeToken {
         /// Native token id
-        token_id: TokenIdDto,
+        token_id: TokenId,
         /// To be burned amount
         burn_amount: U256Dto,
         options: Option<TransactionOptionsDto>,
@@ -112,7 +109,7 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareBurnNft {
-        nft_id: NftIdDto,
+        nft_id: NftId,
         options: Option<TransactionOptionsDto>,
     },
     /// Consolidate outputs.
@@ -135,7 +132,7 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     PrepareDecreaseNativeTokenSupply {
         /// Native token id
-        token_id: TokenIdDto,
+        token_id: TokenId,
         /// To be melted amount
         melt_amount: U256Dto,
         options: Option<TransactionOptionsDto>,
@@ -146,7 +143,7 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareDestroyAlias {
-        alias_id: AliasIdDto,
+        alias_id: AliasId,
         options: Option<TransactionOptionsDto>,
     },
     /// Function to destroy a foundry output with a circulating supply of 0.
@@ -162,7 +159,7 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     PrepareIncreaseNativeTokenSupply {
         /// Native token id
-        token_id: TokenIdDto,
+        token_id: TokenId,
         /// To be minted amount
         mint_amount: U256Dto,
         options: Option<TransactionOptionsDto>,

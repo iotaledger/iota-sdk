@@ -39,7 +39,7 @@ impl Account {
 
         let foundry_id = FoundryId::from(token_id);
         let alias_id = *foundry_id.alias_address().alias_id();
-        let token_supply = self.client.get_token_supply().await?;
+        let token_supply = self.client().get_token_supply().await?;
 
         let (existing_alias_output_data, existing_foundry_output) = self
             .find_alias_and_foundry_output_data(alias_id, foundry_id)

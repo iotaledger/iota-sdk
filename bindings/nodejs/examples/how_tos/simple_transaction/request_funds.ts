@@ -1,11 +1,11 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Wallet, Client, initLogger } from '@iota/sdk';
+import { Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/wallet/01_get_funds.js
+// node ./dist/how_tos/simple_transaction/request_funds.js
 
 // This example requests funds from the faucet
 async function run() {
@@ -20,13 +20,12 @@ async function run() {
 
         const account = await wallet.getAccount('Alice');
 
-        const accountAddresses = await account.addresses();
-        console.log('Account addresses:', accountAddresses);
+        const address = (await account.addresses())[0].address;
+        console.log(address);
 
-        const faucetResponse = await account.requestFundsFromFaucet(
-            process.env.FAUCET_URL,
-            accountAddresses[0].address,
-        );
+        const faucetResponse = await (
+            await wallet.getClient()
+        ).requestFundsFromFaucet(process.env.FAUCET_URL, address);
         console.log(faucetResponse);
     } catch (error) {
         console.error('Error: ', error);

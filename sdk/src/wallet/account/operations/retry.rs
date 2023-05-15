@@ -17,7 +17,7 @@ const DEFAULT_RETRY_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
 
 impl Account {
     /// Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
-    /// milestone). This function is re-exported from the client library and default interval is as defined in iota.rs.
+    /// milestone). This function is re-exported from the client library and default interval is as defined there.
     /// Returns the included block at first position and additional reattached blocks
     pub async fn retry_until_included(
         &self,
@@ -26,7 +26,7 @@ impl Account {
         max_attempts: Option<u64>,
     ) -> crate::wallet::Result<Vec<(BlockId, Block)>> {
         Ok(self
-            .client
+            .client()
             .retry_until_included(block_id, interval, max_attempts)
             .await?)
     }
@@ -63,7 +63,7 @@ impl Account {
             let block_id = match transaction.block_id {
                 Some(block_id) => block_id,
                 None => self
-                    .client
+                    .client()
                     .block()
                     .finish_block(Some(Payload::Transaction(Box::new(transaction.payload.clone()))))
                     .await?
@@ -86,7 +86,7 @@ impl Account {
                 let block_ids_len = block_ids.len();
                 let mut conflicting = false;
                 for (index, block_id_) in block_ids.clone().iter().enumerate() {
-                    let block_metadata = self.client.get_block_metadata(block_id_).await?;
+                    let block_metadata = self.client().get_block_metadata(block_id_).await?;
                     if let Some(inclusion_state) = block_metadata.ledger_inclusion_state {
                         match inclusion_state {
                             LedgerInclusionStateDto::Included | LedgerInclusionStateDto::NoTransaction => {
@@ -101,10 +101,10 @@ impl Account {
                     if index == block_ids_len - 1 {
                         if block_metadata.should_promote.unwrap_or(false) {
                             // Safe to unwrap since we iterate over it
-                            self.client.promote_unchecked(block_ids.last().unwrap()).await?;
+                            self.client().promote_unchecked(block_ids.last().unwrap()).await?;
                         } else if block_metadata.should_reattach.unwrap_or(false) {
                             let reattached_block = self
-                                .client
+                                .client()
                                 .block()
                                 .finish_block(Some(Payload::Transaction(Box::new(transaction.payload.clone()))))
                                 .await?;
@@ -115,7 +115,7 @@ impl Account {
                 // After we checked all our reattached blocks, check if the transaction got reattached in another block
                 // and confirmed
                 if conflicting {
-                    let included_block = self.client.get_included_block(transaction_id).await?;
+                    let included_block = self.client().get_included_block(transaction_id).await?;
                     return Ok(included_block.id());
                 }
             }

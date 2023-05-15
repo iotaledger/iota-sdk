@@ -84,11 +84,6 @@ impl AccountBuilder {
             }
         }
 
-        let client = match accounts.first() {
-            Some(account) => account.client.clone(),
-            None => self.wallet.client_options.read().await.clone().finish().await?,
-        };
-
         // If addresses are provided we will use them directly without the additional checks, because then we assume
         // that it's for offline signing and the secretManager can't be used
         let addresses = match &self.addresses {
@@ -128,7 +123,7 @@ impl AccountBuilder {
                 let bech32_hrp = {
                     match bech32_hrp {
                         Some(bech32_hrp) => bech32_hrp,
-                        None => client.get_bech32_hrp().await?,
+                        None => self.wallet.client().get_bech32_hrp().await?,
                     }
                 };
 
@@ -163,7 +158,7 @@ impl AccountBuilder {
             native_token_foundries: HashMap::new(),
         };
 
-        let account = Account::new(account, client, self.wallet.inner.clone()).await?;
+        let account = Account::new(account, self.wallet.inner.clone()).await?;
         #[cfg(feature = "storage")]
         account.save(None).await?;
         accounts.push(account.clone());

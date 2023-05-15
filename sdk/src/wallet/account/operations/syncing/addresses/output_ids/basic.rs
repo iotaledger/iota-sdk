@@ -21,7 +21,7 @@ impl Account {
     ) -> crate::client::Result<Vec<OutputId>> {
         // Only request basic outputs with `AddressUnlockCondition` only
         Ok(self
-            .client
+            .client()
             .basic_output_ids(vec![
                 QueryParameter::Address(bech32_address),
                 QueryParameter::HasExpiration(false),

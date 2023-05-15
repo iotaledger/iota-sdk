@@ -21,11 +21,11 @@ pub trait StorageAdapter: std::fmt::Debug {
     async fn get(&self, key: &str) -> crate::wallet::Result<Option<String>>;
 
     /// Saves or updates a record on the storage.
-    async fn set(&mut self, key: &str, record: String) -> crate::wallet::Result<()>;
+    async fn set(&self, key: &str, record: String) -> crate::wallet::Result<()>;
 
     /// Batch writes records to the storage.
-    async fn batch_set(&mut self, records: HashMap<String, String>) -> crate::wallet::Result<()>;
+    async fn batch_set(&self, records: HashMap<String, String>) -> crate::wallet::Result<()>;
 
     /// Removes a record from the storage.
-    async fn remove(&mut self, key: &str) -> crate::wallet::Result<()>;
+    async fn remove(&self, key: &str) -> crate::wallet::Result<()>;
 }

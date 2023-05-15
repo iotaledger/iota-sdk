@@ -8,8 +8,8 @@ minimum Java version >= 8
 
 ## Use in your Android project (Android Studio)
 
-1. Download the `iota-wallet-1.0.0-rc.3.jar` file from the [GitHub release](https://github.com/iotaledger/wallet.rs/releases/tag/iota-wallet-java-1.0.0-rc.3) and add it as a library to your project.
-2. Download the `iota-wallet-1.0.0-rc.3-android.zip` file from the [GitHub release](https://github.com/iotaledger/wallet.rs/releases/tag/iota-wallet-java-1.0.0-rc.3), unzip it and add the `jniLibs` folder with its contents to your Android Studio project as shown below:
+1. Download the `iota-wallet-1.0.0-rc.3.jar` file from the [GitHub release](https://github.com/iotaledger/iota-sdk/releases/tag/iota-wallet-java-1.0.0-rc.3) and add it as a library to your project.
+2. Download the `iota-wallet-1.0.0-rc.3-android.zip` file from the [GitHub release](https://github.com/iotaledger/iota-sdk/releases/tag/iota-wallet-java-1.0.0-rc.3), unzip it and add the `jniLibs` folder with its contents to your Android Studio project as shown below:
 
 ```
 project/
@@ -121,8 +121,8 @@ public class GettingStarted {
 ## What's Next?
 
 Now that you are up and running, you can get acquainted with the library using
-its [how-to guides](https://wiki.iota.org/shimmer/wallet.rs/how_tos/run_how_tos/) and the
-repository's [code examples](https://github.com/iotaledger/wallet.rs/tree/develop/bindings/java/examples/src).
+its [how-to guides](https://wiki.iota.org/shimmer/iota-sdk/how_tos/run_how_tos/) and the
+repository's [code examples](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/java/examples/src).
 
 ## Instead, build everything from scratch yourself:
 
@@ -139,8 +139,8 @@ Requirements:
 
 1. Generate the JAR:
 ```
-git clone https://github.com/iotaledger/wallet.rs
-cd wallet.rs/bindings/java
+git clone https://github.com/iotaledger/iota-sdk
+cd iota-sdk/bindings/java
 ./gradlew jarWithoutNativeLibs
 ```
 
@@ -225,8 +225,8 @@ Requirements:
 
 1. Generate the JAR:
 ```
-git clone https://github.com/iotaledger/wallet.rs
-cd wallet.rs/bindings/java
+git clone https://github.com/iotaledger/iota-sdk
+cd iota-sdk/bindings/java
 ./gradlew jar
 ```
 

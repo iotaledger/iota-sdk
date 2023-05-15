@@ -101,7 +101,7 @@ impl Account {
         token_id: TokenId,
         burn_token_amount: U256,
     ) -> crate::wallet::Result<StrippedOutputAggregate> {
-        let token_supply = self.client.get_token_supply().await?;
+        let token_supply = self.client().get_token_supply().await?;
 
         let mut basic_and_nft_selection = Vec::new();
 
@@ -203,7 +203,7 @@ impl Account {
         stripped_foundry_output: Vec<StrippedOutput>,
         stripped_alias_outputs: HashMap<AliasId, StrippedOutput>,
     ) -> crate::wallet::Result<StrippedOutputAggregate> {
-        let token_supply = self.client.get_token_supply().await?;
+        let token_supply = self.client().get_token_supply().await?;
         let mut stripped_foundry_outputs = stripped_foundry_output;
         let mut stripped_alias_outputs = stripped_alias_outputs;
         // Sort descending order based on token amount
@@ -283,7 +283,7 @@ impl Account {
         aggregate: &mut StrippedOutputAggregate,
         stripped_alias_outputs: &mut HashMap<AliasId, StrippedOutput>,
     ) -> crate::wallet::Result<bool> {
-        let token_supply = self.client.get_token_supply().await?;
+        let token_supply = self.client().get_token_supply().await?;
 
         match stripped_alias_outputs.remove(&alias_id) {
             Some(StrippedOutput {
