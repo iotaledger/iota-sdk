@@ -597,6 +597,11 @@ path = "examples/wallet/recover_accounts.rs"
 required-features = [ "wallet" ]
 
 [[example]]
+name = "spammer"
+path = "examples/wallet/spammer.rs"
+required-features = [ "wallet", "storage" ]
+
+[[example]]
 name = "split_funds"
 path = "examples/wallet/split_funds.rs"
 required-features = [ "wallet" ]
