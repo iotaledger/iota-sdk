@@ -5,7 +5,7 @@
 //!
 //! `cargo run --example threads --release`
 
-use std::env::var;
+use std::{env::var, time::Duration};
 
 use iota_sdk::{
     client::{
@@ -13,25 +13,27 @@ use iota_sdk::{
         request_funds_from_faucet,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    wallet::{Account, ClientOptions, Result, SendAmountParams, Wallet},
+    wallet::{account::types::AccountAddress, Account, ClientOptions, Result, SendAmountParams, Wallet},
 };
-use tokio::task::JoinSet;
+use tokio::{task::JoinSet, time::sleep};
 
+// The account alias used in this example.
 const ACCOUNT_ALIAS: &str = "spammer";
-const NUM_ROUNDS: usize = 4;
+// The number of spamming rounds.
+const NUM_ROUNDS: usize = 1000;
+// The amount to send in each transaction.
 const SEND_AMOUNT: u64 = 1_000_000;
-const NUM_WORKER_THREADS: usize = 6;
+// The number of concurrent transactions.
+const NUM_CONCURRENT_TXS: usize = 32;
 
-// #[tokio::main]
-#[tokio::main(flavor = "multi_thread", worker_threads = 6)]
+#[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
     println!(
-        "{} cores detected. Running spammer with {} worker threads...",
+        "{} cores detected. Running spammer with {NUM_CONCURRENT_TXS} concurrent transactions...",
         num_cpus::get(),
-        NUM_WORKER_THREADS
     );
 
     // Restore wallet from a mnemonic phrase.
@@ -48,21 +50,55 @@ async fn main() -> Result<()> {
 
     // Ensure there's some base coin balance
     let account = get_or_create_account(&wallet, ACCOUNT_ALIAS).await?;
+    let addresses = generate_max_addresses(&account, NUM_CONCURRENT_TXS).await?;
 
-    // One address gets generated during account creation
-    let recv_address = account.addresses().await?[0].address().to_string();
+    // Ensure there are enough available funds for spamming on each address
+    let amount = may_request_funds(&account, addresses[0].address().to_string().as_str()).await?;
+    account.sync(None).await?;
 
-    // Ensure there are enough available funds for spamming
-    may_request_funds(&account, recv_address.as_str()).await?;
+    let num_addresses_with_unspent_outputs = account.addresses_with_unspent_outputs().await?.len();
+    println!("Addresses with balance count (before): {num_addresses_with_unspent_outputs}",);
 
+    println!("Splitting available funds...");
+    let split_amount = amount / NUM_CONCURRENT_TXS as u64;
+
+    for address in addresses.iter().map(|addr| addr.address().to_string()) {
+        println!("Sending {split_amount} to {address}");
+        let outputs = vec![SendAmountParams::new(address, split_amount)];
+        let transaction = account.send_amount(outputs, None).await?;
+
+        println!(
+            "Transaction sent: {}/transaction/{}",
+            var("EXPLORER_URL").unwrap(),
+            transaction.transaction_id
+        );
+
+        // Wait for transaction to get included
+        let block_id = account
+            .retry_transaction_until_included(&transaction.transaction_id, None, None)
+            .await?;
+
+        println!(
+            "Transaction included: {}/block/{}",
+            var("EXPLORER_URL").unwrap(),
+            block_id
+        );
+
+        account.sync(None).await?;
+    }
+
+    let num_addresses_with_unspent_outputs = account.addresses_with_unspent_outputs().await?.len();
+    println!("Addresses with balance count (after): {num_addresses_with_unspent_outputs}",);
+
+    println!("Spamming...");
     for i in 1..=NUM_ROUNDS {
         println!("ROUND #{i}/{NUM_ROUNDS}");
 
         let mut tasks = JoinSet::<std::result::Result<(), (usize, iota_sdk::wallet::Error)>>::new();
 
-        for n in 0..NUM_WORKER_THREADS {
+        for n in 0..NUM_CONCURRENT_TXS {
             let account_clone = account.clone();
-            let recv_address_clone = recv_address.clone(); //*recv_address.as_ref();
+            let recv_address_clone = addresses[(n + 1) % NUM_CONCURRENT_TXS].address().to_string();
 
             tasks.spawn(async move {
                 println!("Thread {n}: Sending {SEND_AMOUNT} to {recv_address_clone}");
@@ -92,8 +128,13 @@ async fn main() -> Result<()> {
 
         if error_state.is_err() {
             // Sync when getting an error, because that's probably when no outputs are available anymore
-            account.sync(None).await?;
-            println!("Account synced");
+            let mut balance = account.sync(None).await?;
+            while balance.base_coin().available() == 0 {
+                println!("No funds available");
+                sleep(Duration::from_secs(2)).await;
+                balance = account.sync(None).await?;
+                println!("Account synced");
+            }
         }
     }
     Ok(())
@@ -108,17 +149,29 @@ async fn get_or_create_account(wallet: &Wallet, alias: &str) -> Result<Account> 
     })
 }
 
-async fn may_request_funds(account: &Account, bech32_address: &str) -> Result<()> {
+async fn generate_max_addresses(account: &Account, max: usize) -> Result<Vec<AccountAddress>> {
+    let alias = account.alias().await;
+    if account.addresses().await?.len() < max {
+        let num_addresses_to_generate = max - account.addresses().await?.len();
+        println!("Generating {num_addresses_to_generate} addresses for account '{alias}'...");
+        account
+            .generate_addresses(num_addresses_to_generate as u32, None)
+            .await?;
+    }
+    account.addresses().await
+}
+
+async fn may_request_funds(account: &Account, bech32_address: &str) -> Result<u64> {
     let balance = account.sync(None).await?;
     let available_funds_before = balance.base_coin().available();
     println!("Current available funds: {available_funds_before}");
 
-    if available_funds_before < NUM_WORKER_THREADS as u64 * SEND_AMOUNT {
+    if available_funds_before < NUM_CONCURRENT_TXS as u64 * SEND_AMOUNT {
         println!("Requesting funds from faucet...");
         let faucet_response = request_funds_from_faucet(&var("FAUCET_URL").unwrap(), bech32_address).await?;
         println!("Response from faucet: {}", faucet_response.trim_end());
         if faucet_response.contains("error") {
-            return Ok(());
+            panic!("Requesting funds failed (error response)");
         }
 
         println!("Waiting for funds (timeout=60s)...");
@@ -126,8 +179,7 @@ async fn may_request_funds(account: &Account, bech32_address: &str) -> Result<()
         let start = std::time::Instant::now();
         let available_funds_after = loop {
             if start.elapsed().as_secs() > 60 {
-                println!("Timeout: waiting for funds took too long");
-                return Ok(());
+                panic!("Requesting funds failed (timeout)");
             };
             let balance = account.sync(None).await?;
             let available_funds_after = balance.base_coin().available();
@@ -138,8 +190,9 @@ async fn may_request_funds(account: &Account, bech32_address: &str) -> Result<()
             }
         };
         println!("New available funds: {available_funds_after}");
+        Ok(available_funds_after)
     } else {
         println!("No faucet request necessary");
+        Ok(available_funds_before)
     }
-    Ok(())
 }
