@@ -13,7 +13,6 @@ use iota_sdk::{
         secret::GenerateAddressOptions,
     },
     types::block::{
-        dto::U256Dto,
         output::{dto::OutputDto, AliasId, FoundryId, NftId, OutputId, TokenId},
         payload::transaction::TransactionId,
     },
@@ -25,6 +24,7 @@ use iota_sdk::{
         message_interface::dtos::SendAmountParamsDto,
         SendNativeTokensParams, SendNftParams,
     },
+    U256,
 };
 use serde::{Deserialize, Serialize};
 
@@ -41,7 +41,7 @@ pub enum AccountMethod {
         /// Native token id
         token_id: TokenId,
         /// To be burned amount
-        burn_amount: U256Dto,
+        burn_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
@@ -144,7 +144,7 @@ pub enum AccountMethod {
         /// Native token id
         token_id: TokenId,
         /// To be melted amount
-        melt_amount: U256Dto,
+        melt_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Calculate the minimum required storage deposit for an output.
@@ -158,7 +158,7 @@ pub enum AccountMethod {
         /// Native token id
         token_id: TokenId,
         /// To be minted amount
-        mint_amount: U256Dto,
+        mint_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Mint native token.

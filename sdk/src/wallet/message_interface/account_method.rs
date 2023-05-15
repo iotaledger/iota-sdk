@@ -16,7 +16,6 @@ use crate::{
         secret::GenerateAddressOptions,
     },
     types::block::{
-        dto::U256Dto,
         output::{
             dto::{NativeTokenDto, OutputDto, TokenSchemeDto},
             feature::dto::FeatureDto,
@@ -44,6 +43,7 @@ use crate::{
         message_interface::dtos::SendAmountParamsDto,
         SendNativeTokensParams, SendNftParams,
     },
+    U256,
 };
 
 /// Each public account method.
@@ -113,7 +113,7 @@ pub enum AccountMethod {
         /// Native token id
         token_id: TokenId,
         /// To be burned amount
-        burn_amount: U256Dto,
+        burn_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
@@ -217,7 +217,7 @@ pub enum AccountMethod {
         /// Native token id
         token_id: TokenId,
         /// To be melted amount
-        melt_amount: U256Dto,
+        melt_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Calculate the minimum required storage deposit for an output.
@@ -231,7 +231,7 @@ pub enum AccountMethod {
         /// Native token id
         token_id: TokenId,
         /// To be minted amount
-        mint_amount: U256Dto,
+        mint_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Mint native token.

@@ -8,7 +8,6 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::types::block::{
-    dto::U256Dto,
     output::{AliasId, FoundryId, NftId, TokenId},
     Error,
 };
@@ -121,7 +120,7 @@ pub struct BurnDto {
     pub(crate) foundries: Option<HashSet<FoundryId>>,
     /// Amounts of native tokens to burn.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) native_tokens: Option<BTreeMap<TokenId, U256Dto>>,
+    pub(crate) native_tokens: Option<BTreeMap<TokenId, U256>>,
 }
 
 impl From<&Burn> for BurnDto {
@@ -134,7 +133,7 @@ impl From<&Burn> for BurnDto {
                 value
                     .native_tokens
                     .iter()
-                    .map(|(token_id, amount)| (*token_id, U256Dto::from(amount))),
+                    .map(|(token_id, amount)| (*token_id, *amount)),
             )),
         }
     }

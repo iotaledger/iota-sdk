@@ -63,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `IncreaseNativeTokenSupplyOptions`;
 - `HARDENED` const;
 - `AliasIdDto`, `NftIdDto` and `TokenIdDto`;
+- `U256Dto`;
 
 ### Fixed
 

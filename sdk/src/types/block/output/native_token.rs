@@ -249,7 +249,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{dto::U256Dto, Error};
+    use crate::types::block::Error;
 
     /// Describes a native token.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -258,7 +258,7 @@ pub mod dto {
         #[serde(rename = "id")]
         pub token_id: TokenId,
         // Amount of native tokens hex encoded.
-        pub amount: U256Dto,
+        pub amount: U256,
     }
 
     impl From<&NativeToken> for NativeTokenDto {
