@@ -18,8 +18,7 @@ async function run() {
 
         const addresses = await account.addresses();
 
-        for (const address of addresses)
-            console.log(address.address);
+        for (const address of addresses) console.log(address.address);
     } catch (error) {
         console.error('Error: ', error);
     }

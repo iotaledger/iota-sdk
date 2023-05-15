@@ -20,8 +20,7 @@ async function run() {
 
         const outputs = await account.outputs();
 
-        for (const output of outputs)
-            console.log(output.outputId);
+        for (const output of outputs) console.log(output.outputId);
     } catch (error) {
         console.error('Error: ', error);
     }

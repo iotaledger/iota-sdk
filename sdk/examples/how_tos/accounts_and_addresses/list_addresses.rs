@@ -5,7 +5,7 @@
 //!
 //! `cargo run --example list_addresses --release`
 
-use iota_sdk::{wallet::{Wallet, Result}};
+use iota_sdk::wallet::{Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {

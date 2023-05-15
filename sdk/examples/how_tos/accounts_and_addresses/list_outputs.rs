@@ -5,7 +5,7 @@
 //!
 //! `cargo run --example list_outputs --release`
 
-use iota_sdk::{wallet::{Wallet, Result}};
+use iota_sdk::wallet::{Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -14,7 +14,7 @@ async fn main() -> Result<()> {
 
     // Get the account
     let account = wallet.get_account("Alice").await?;
-    
+
     // Sync account
     account.sync(None).await?;
 

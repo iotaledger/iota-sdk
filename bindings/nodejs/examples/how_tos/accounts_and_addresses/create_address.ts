@@ -28,10 +28,7 @@ async function run() {
 
         const address = await account.generateAddresses(1);
 
-        console.log(
-            `Generated address:`,
-            address[0].address,
-        );
+        console.log(`Generated address:`, address[0].address);
     } catch (error) {
         console.error('Error: ', error);
     }
