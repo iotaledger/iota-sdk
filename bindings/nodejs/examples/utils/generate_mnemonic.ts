@@ -4,7 +4,7 @@
 import { Utils } from '@iota/sdk';
 
 // Run with command:
-// node ./dist/utils/generate_mnemonic.js
+// yarn run-example ./utils/generate_mnemonic.ts
 
 // In this example we will generate a random BIP39 mnemonic
 async function run() {

@@ -5,7 +5,7 @@ import { initLogger, SecretManager } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/secretManager/ledger_nano.js
+// yarn run-example ./secretManager/ledger_nano.ts
 
 // In this example we will get the ledger status and generate an address
 // To use the ledger nano simulator clone https://github.com/iotaledger/ledger-shimmer-app, run `git submodule init && git submodule update --recursive`,
