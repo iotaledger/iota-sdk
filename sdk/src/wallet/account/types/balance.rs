@@ -7,10 +7,7 @@ use getset::{CopyGetters, Getters};
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
-use crate::types::block::{
-    dto::U256Dto,
-    output::{feature::MetadataFeature, AliasId, FoundryId, NftId, OutputId, TokenId},
-};
+use crate::types::block::output::{feature::MetadataFeature, AliasId, FoundryId, NftId, OutputId, TokenId};
 
 /// The balance of an account, returned from [`crate::wallet::account::Account::sync()`] and
 /// [`crate::wallet::account::Account::balance()`].
@@ -237,9 +234,9 @@ pub struct NativeTokensBalanceDto {
     /// Token foundry immutable metadata
     pub metadata: Option<String>,
     /// Total amount
-    pub total: U256Dto,
+    pub total: U256,
     /// Balance that can currently be spent
-    pub available: U256Dto,
+    pub available: U256,
 }
 
 impl From<&NativeTokensBalance> for NativeTokensBalanceDto {
@@ -247,8 +244,8 @@ impl From<&NativeTokensBalance> for NativeTokensBalanceDto {
         Self {
             token_id: value.token_id,
             metadata: value.metadata.as_ref().map(|m| prefix_hex::encode(m.data())),
-            total: U256Dto::from(&value.total),
-            available: U256Dto::from(&value.available),
+            total: value.total,
+            available: value.available,
         }
     }
 }
