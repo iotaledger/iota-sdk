@@ -9,7 +9,7 @@ use iota_sdk::{
         PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
     },
     types::block::{
-        output::{dto::OutputDto, AliasId, NftId, Output, Rent, TokenId},
+        output::{dto::OutputDto, Output, Rent},
         Error,
     },
     wallet::{
@@ -34,7 +34,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         } => {
             let transaction = account
                 .burn_native_token(
-                    TokenId::try_from(&token_id)?,
+                    token_id,
                     U256::try_from(&burn_amount).map_err(|_| Error::InvalidField("burn_amount"))?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
@@ -44,7 +44,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::BurnNft { nft_id, options } => {
             let transaction = account
                 .burn_nft(
-                    NftId::try_from(&nft_id)?,
+                    nft_id,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -75,7 +75,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::DestroyAlias { alias_id, options } => {
             let transaction = account
                 .destroy_alias(
-                    AliasId::try_from(&alias_id)?,
+                    alias_id,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -105,7 +105,6 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::OutputData(output_data.as_ref().map(OutputDataDto::from).map(Box::new))
         }
         AccountMethod::GetFoundryOutput { token_id } => {
-            let token_id = TokenId::try_from(&token_id)?;
             let output = account.get_foundry_output(token_id).await?;
             Response::Output(OutputDto::from(&output))
         }
@@ -166,7 +165,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         } => {
             let transaction = account
                 .decrease_native_token_supply(
-                    TokenId::try_from(&token_id)?,
+                    token_id,
                     U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
@@ -180,7 +179,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         } => {
             let transaction = account
                 .increase_native_token_supply(
-                    TokenId::try_from(&token_id)?,
+                    token_id,
                     U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )

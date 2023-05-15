@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 use self::adapter::StorageAdapter;
 
 #[derive(Debug)]
-pub(crate) struct Storage {
+pub struct Storage {
     inner: Box<dyn StorageAdapter + Sync + Send>,
     encryption_key: Option<[u8; 32]>,
 }
@@ -30,33 +30,31 @@ impl Storage {
         self.inner.id()
     }
 
-    async fn get<T: for<'de> Deserialize<'de>>(&self, key: &str) -> crate::wallet::Result<Option<T>> {
+    pub(crate) async fn get<T: for<'de> Deserialize<'de>>(&self, key: &str) -> crate::wallet::Result<Option<T>> {
         match self.inner.get(key).await? {
             Some(record) => {
-                if let Some(key) = &self.encryption_key {
-                    if serde_json::from_str::<Vec<u8>>(&record).is_ok() {
-                        Ok(Some(serde_json::from_str(&String::from_utf8_lossy(
-                            &chacha::aead_decrypt(key, record.as_bytes())?,
-                        ))?))
-                    } else {
-                        Ok(Some(serde_json::from_str(&record)?))
+                if let Some(encryption_key) = &self.encryption_key {
+                    if let Ok(encrypted_bytes) = serde_json::from_str::<Vec<u8>>(&record) {
+                        return Ok(Some(serde_json::from_str(&String::from_utf8_lossy(
+                            &chacha::aead_decrypt(encryption_key, &encrypted_bytes)?,
+                        ))?));
                     }
-                } else {
-                    Ok(Some(serde_json::from_str(&record)?))
                 }
+
+                Ok(Some(serde_json::from_str(&record)?))
             }
             None => Ok(None),
         }
     }
 
-    async fn set<T: Serialize + Send>(&mut self, key: &str, record: T) -> crate::wallet::Result<()> {
+    pub(crate) async fn set<T: Serialize + Send>(&self, key: &str, record: T) -> crate::wallet::Result<()> {
         let record = serde_json::to_string(&record)?;
         self.inner
             .set(
                 key,
-                if let Some(key) = &self.encryption_key {
-                    let output = chacha::aead_encrypt(key, record.as_bytes())?;
-                    serde_json::to_string(&output)?
+                if let Some(encryption_key) = &self.encryption_key {
+                    let encrypted_bytes = chacha::aead_encrypt(encryption_key, record.as_bytes())?;
+                    serde_json::to_string(&encrypted_bytes)?
                 } else {
                     record
                 },
@@ -65,13 +63,13 @@ impl Storage {
     }
 
     #[allow(dead_code)]
-    async fn batch_set(&mut self, records: HashMap<String, String>) -> crate::wallet::Result<()> {
+    async fn batch_set(&self, records: HashMap<String, String>) -> crate::wallet::Result<()> {
         self.inner
             .batch_set(if let Some(key) = &self.encryption_key {
-                let mut encrypted_records = HashMap::new();
+                let mut encrypted_records = HashMap::with_capacity(records.len());
                 for (id, record) in records {
-                    let output = chacha::aead_encrypt(key, record.as_bytes())?;
-                    encrypted_records.insert(id, serde_json::to_string(&output)?);
+                    let encrypted_bytes = chacha::aead_encrypt(key, record.as_bytes())?;
+                    encrypted_records.insert(id, serde_json::to_string(&encrypted_bytes)?);
                 }
                 encrypted_records
             } else {
@@ -80,7 +78,7 @@ impl Storage {
             .await
     }
 
-    async fn remove(&mut self, key: &str) -> crate::wallet::Result<()> {
+    async fn remove(&self, key: &str) -> crate::wallet::Result<()> {
         self.inner.remove(key).await
     }
 }
@@ -102,7 +100,6 @@ mod tests {
             inner: Box::<Memory>::default(),
             encryption_key: None,
         };
-
         assert_eq!(storage.id(), STORAGE_ID);
     }
 
@@ -115,7 +112,7 @@ mod tests {
             c: i64,
         }
 
-        let mut storage = Storage {
+        let storage = Storage {
             inner: Box::<Memory>::default(),
             encryption_key: None,
         };
@@ -134,39 +131,6 @@ mod tests {
 
     #[cfg(feature = "rand")]
     #[tokio::test]
-    async fn batch_set() {
-        #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
-        struct Record {
-            a: String,
-            b: u32,
-            c: i64,
-        }
-
-        let mut storage = Storage {
-            inner: Box::<Memory>::default(),
-            encryption_key: None,
-        };
-
-        let records = std::iter::repeat_with(|| Record {
-            a: "test".to_string(),
-            b: rand::random(),
-            c: rand::random(),
-        })
-        .enumerate()
-        .map(|(key, record)| (key.to_string(), serde_json::to_string(&record).unwrap()))
-        .take(10)
-        .collect::<HashMap<_, _>>();
-
-        storage.batch_set(records).await.unwrap();
-
-        assert!(storage.get::<Record>("0").await.unwrap().is_some());
-        assert!(storage.get::<Record>("9").await.unwrap().is_some());
-    }
-
-    #[cfg(feature = "rand")]
-    // TODO: uncomment this test when the bug described in Issue #354 has been fixed.
-    // #[tokio::test]
-    #[allow(dead_code)]
     async fn get_set_encrypted() {
         #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
         struct Record {
@@ -176,8 +140,7 @@ mod tests {
         }
 
         let encryption_key = crate::types::block::rand::bytes::rand_bytes_array::<32>();
-
-        let mut storage = Storage {
+        let storage = Storage {
             inner: Box::<Memory>::default(),
             encryption_key: Some(encryption_key),
         };
@@ -190,5 +153,64 @@ mod tests {
         storage.set("key", rec.clone()).await.unwrap();
 
         assert_eq!(Some(rec), storage.get::<Record>("key").await.unwrap());
+    }
+
+    #[cfg(feature = "rand")]
+    #[tokio::test]
+    async fn batch_set() {
+        let storage = Storage {
+            inner: Box::<Memory>::default(),
+            encryption_key: None,
+        };
+        batch_set_test(storage).await;
+    }
+
+    #[cfg(feature = "rand")]
+    #[tokio::test]
+    async fn batch_set_encrypted() {
+        let encryption_key = crate::types::block::rand::bytes::rand_bytes_array::<32>();
+        let storage = Storage {
+            inner: Box::<Memory>::default(),
+            encryption_key: Some(encryption_key),
+        };
+        batch_set_test(storage).await;
+    }
+
+    #[cfg(feature = "rand")]
+    async fn batch_set_test(storage: Storage) {
+        #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+        struct Record {
+            a: String,
+            b: u32,
+            c: i64,
+        }
+        let records = std::iter::repeat_with(|| Record {
+            a: "test".to_string(),
+            b: rand::random(),
+            c: rand::random(),
+        })
+        .enumerate()
+        .map(|(key, record)| (key.to_string(), record))
+        .take(10)
+        .collect::<HashMap<_, _>>();
+
+        storage
+            .batch_set(
+                records
+                    .clone()
+                    .into_iter()
+                    .map(|(k, v)| (k, serde_json::to_string(&v).unwrap()))
+                    .collect::<_>(),
+            )
+            .await
+            .unwrap();
+
+        // we also check an index that doesn't exist
+        for index in 0..11 {
+            assert_eq!(
+                records.get(&index.to_string()),
+                storage.get::<Record>(&index.to_string()).await.unwrap().as_ref()
+            );
+        }
     }
 }
