@@ -124,8 +124,18 @@ path = "examples/how_tos/accounts_and_addresses/list_accounts.rs"
 required-features = [ "wallet", "rocksdb", "stronghold" ]
 
 [[example]]
+name = "check_balance"
+path = "examples/how_tos/accounts_and_addresses/check_balance.rs"
+required-features = [ "wallet" ]
+
+[[example]]
 name = "list_addresses"
 path = "examples/how_tos/accounts_and_addresses/list_addresses.rs"
+required-features = [ "wallet", "rocksdb", "stronghold" ]
+
+[[example]]
+name = "create_address"
+path = "examples/how_tos/accounts_and_addresses/create_address.rs"
 required-features = [ "wallet", "rocksdb", "stronghold" ]
 
 [[example]]
@@ -137,16 +147,6 @@ required-features = [ "wallet", "rocksdb", "stronghold" ]
 name = "list_outputs"
 path = "examples/how_tos/accounts_and_addresses/list_outputs.rs"
 required-features = [ "wallet", "rocksdb", "stronghold" ]
-
-[[example]]
-name = "create_address"
-path = "examples/how_tos/accounts_and_addresses/create_address.rs"
-required-features = [ "wallet", "rocksdb", "stronghold" ]
-
-[[example]]
-name = "check_balance"
-path = "examples/how_tos/accounts_and_addresses/check_balance.rs"
-required-features = [ "wallet" ]
 
 # Simple Transaction Examples
 
