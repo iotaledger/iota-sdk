@@ -165,14 +165,14 @@ pub enum AccountMethod {
     /// Expected response: [`Balance`](crate::wallet::message_interface::Response::Balance)
     GetBalance,
     /// Consolidate outputs.
-    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareConsolidateOutputs {
         force: bool,
         output_consolidation_threshold: Option<usize>,
     },
     /// Create an alias output.
-    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareCreateAliasOutput {
         params: Option<CreateAliasParamsDto>,
@@ -181,7 +181,7 @@ pub enum AccountMethod {
     /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
     /// storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
     /// sent to the governor address.
-    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareDestroyAlias {
         alias_id: AliasIdDto,
@@ -189,7 +189,7 @@ pub enum AccountMethod {
     },
     /// Function to destroy a foundry output with a circulating supply of 0.
     /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
-    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareDestroyFoundry {
         foundry_id: FoundryId,
