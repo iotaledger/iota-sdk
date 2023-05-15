@@ -7,7 +7,7 @@ pub(crate) mod string {
 
     use serde::{de, Deserialize, Deserializer, Serializer};
 
-    pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
+    pub(crate) fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
     where
         T: Display,
         S: Serializer,
@@ -15,7 +15,7 @@ pub(crate) mod string {
         serializer.collect_str(value)
     }
 
-    pub fn deserialize<'de, T, D>(deserializer: D) -> Result<T, D::Error>
+    pub(crate) fn deserialize<'de, T, D>(deserializer: D) -> Result<T, D::Error>
     where
         T: FromStr,
         T::Err: Display,
