@@ -15,8 +15,8 @@ use iota_sdk::{
     types::block::{
         dto::U256Dto,
         output::{
-            dto::{AliasIdDto, NftIdDto, OutputDto, TokenIdDto},
-            FoundryId, OutputId,
+            dto::{OutputDto, TokenIdDto},
+            AliasId, FoundryId, NftId, OutputId,
         },
         payload::transaction::TransactionId,
     },
@@ -53,7 +53,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     BurnNft {
-        nft_id: NftIdDto,
+        nft_id: NftId,
         options: Option<TransactionOptionsDto>,
     },
     /// Consolidate outputs.
@@ -76,7 +76,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     DestroyAlias {
-        alias_id: AliasIdDto,
+        alias_id: AliasId,
         options: Option<TransactionOptionsDto>,
     },
     /// Function to destroy a foundry output with a circulating supply of 0.

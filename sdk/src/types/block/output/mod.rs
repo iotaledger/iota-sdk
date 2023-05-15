@@ -510,13 +510,11 @@ pub mod dto {
     use super::*;
     pub use super::{
         alias::dto::AliasOutputDto,
-        alias_id::dto::AliasIdDto,
         basic::dto::BasicOutputDto,
         foundry::dto::FoundryOutputDto,
         metadata::dto::OutputMetadataDto,
         native_token::dto::NativeTokenDto,
         nft::dto::NftOutputDto,
-        nft_id::dto::NftIdDto,
         rent::dto::RentStructureDto,
         token_id::dto::TokenIdDto,
         token_scheme::dto::{SimpleTokenSchemeDto, TokenSchemeDto},

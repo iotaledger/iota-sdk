@@ -18,10 +18,10 @@ use crate::{
     types::block::{
         dto::U256Dto,
         output::{
-            dto::{AliasIdDto, NativeTokenDto, NftIdDto, OutputDto, TokenIdDto, TokenSchemeDto},
+            dto::{NativeTokenDto, OutputDto, TokenIdDto, TokenSchemeDto},
             feature::dto::FeatureDto,
             unlock_condition::dto::UnlockConditionDto,
-            FoundryId, OutputId,
+            AliasId, FoundryId, NftId, OutputId,
         },
         payload::transaction::TransactionId,
     },
@@ -58,7 +58,7 @@ pub enum AccountMethod {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeTokenDto>>,
-        alias_id: AliasIdDto,
+        alias_id: AliasId,
         state_index: Option<u32>,
         state_metadata: Option<Vec<u8>>,
         foundry_counter: Option<u32>,
@@ -99,7 +99,7 @@ pub enum AccountMethod {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeTokenDto>>,
-        nft_id: NftIdDto,
+        nft_id: NftId,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,
         immutable_features: Option<Vec<FeatureDto>>,
@@ -122,7 +122,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     BurnNft {
-        nft_id: NftIdDto,
+        nft_id: NftId,
         options: Option<TransactionOptionsDto>,
     },
     /// Consolidate outputs.
@@ -145,7 +145,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     DestroyAlias {
-        alias_id: AliasIdDto,
+        alias_id: AliasId,
         options: Option<TransactionOptionsDto>,
     },
     /// Function to destroy a foundry output with a circulating supply of 0.

@@ -9,7 +9,7 @@ use crate::{
         address::AliasAddress,
         dto::U256Dto,
         output::{
-            dto::AliasIdDto, feature::MetadataFeature, unlock_condition::ImmutableAliasAddressUnlockCondition, AliasId,
+            feature::MetadataFeature, unlock_condition::ImmutableAliasAddressUnlockCondition, AliasId,
             AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
         },
         Error,
@@ -39,7 +39,7 @@ pub struct MintNativeTokenParams {
 #[serde(rename_all = "camelCase")]
 pub struct MintNativeTokenParamsDto {
     /// The alias id which should be used to create the foundry.
-    pub alias_id: Option<AliasIdDto>,
+    pub alias_id: Option<AliasId>,
     /// Circulating supply
     pub circulating_supply: U256Dto,
     /// Maximum supply
@@ -53,10 +53,7 @@ impl TryFrom<&MintNativeTokenParamsDto> for MintNativeTokenParams {
 
     fn try_from(value: &MintNativeTokenParamsDto) -> crate::wallet::Result<Self> {
         Ok(Self {
-            alias_id: match &value.alias_id {
-                Some(alias_id) => Some(AliasId::try_from(alias_id)?),
-                None => None,
-            },
+            alias_id: value.alias_id.as_ref().copied(),
             circulating_supply: U256::try_from(&value.circulating_supply)
                 .map_err(|_| Error::InvalidField("circulating_supply"))?,
             maximum_supply: U256::try_from(&value.maximum_supply).map_err(|_| Error::InvalidField("maximum_supply"))?,

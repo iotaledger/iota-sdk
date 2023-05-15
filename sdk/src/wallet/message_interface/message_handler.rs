@@ -25,7 +25,7 @@ use crate::{
     types::block::{
         output::{
             dto::{OutputBuilderAmountDto, OutputDto},
-            AliasId, AliasOutput, BasicOutput, FoundryOutput, NftId, NftOutput, Output, Rent, TokenId,
+            AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, Rent, TokenId,
         },
         Error,
     },
@@ -512,7 +512,7 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let transaction = account
                         .burn_nft(
-                            NftId::try_from(&nft_id)?,
+                            nft_id,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
@@ -552,7 +552,7 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let transaction = account
                         .destroy_alias(
-                            AliasId::try_from(&alias_id)?,
+                            alias_id,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;

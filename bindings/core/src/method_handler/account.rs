@@ -9,7 +9,7 @@ use iota_sdk::{
         PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
     },
     types::block::{
-        output::{dto::OutputDto, AliasId, NftId, Output, Rent, TokenId},
+        output::{dto::OutputDto, Output, Rent, TokenId},
         Error,
     },
     wallet::{
@@ -44,7 +44,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::BurnNft { nft_id, options } => {
             let transaction = account
                 .burn_nft(
-                    NftId::try_from(&nft_id)?,
+                    nft_id,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -75,7 +75,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::DestroyAlias { alias_id, options } => {
             let transaction = account
                 .destroy_alias(
-                    AliasId::try_from(&alias_id)?,
+                    alias_id,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
