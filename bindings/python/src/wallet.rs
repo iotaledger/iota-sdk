@@ -96,7 +96,13 @@ pub fn get_client_from_wallet(wallet: &Wallet) -> Result<Client> {
             .await
             .as_ref()
             .map(|w| w.client().clone())
-            .ok_or_else(|| Error::from("wallet got destroyed"))
+            .ok_or_else(|| {
+                Error::from(
+                    serde_json::to_string(&Response::Panic("wallet got destroyed".into()))
+                        .unwrap()
+                        .as_str(),
+                )
+            })
     })?;
 
     Ok(Client { client })
