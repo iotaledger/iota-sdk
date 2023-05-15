@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[cfg(feature = "serde")]
 pub(crate) mod serde;
 
 #[cfg(feature = "instant")]
