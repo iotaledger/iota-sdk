@@ -20,16 +20,10 @@ fn balance_to_dto() {
     let balance = AccountBalance::rand_mock();
     let balance_dto = AccountBalanceDto::from(&balance);
 
-    assert_eq!(balance.base_coin().total().to_string(), balance_dto.base_coin.total);
-    assert_eq!(
-        balance.base_coin().available().to_string(),
-        balance_dto.base_coin.available
-    );
+    assert_eq!(balance.base_coin().total(), balance_dto.base_coin.total());
+    assert_eq!(balance.base_coin().available(), balance_dto.base_coin.available());
     #[cfg(feature = "participation")]
-    assert_eq!(
-        balance.base_coin().voting_power().to_string(),
-        balance_dto.base_coin.voting_power
-    );
+    assert_eq!(balance.base_coin().voting_power(), balance_dto.base_coin.voting_power());
 
     assert_eq!(
         balance.required_storage_deposit().alias(),

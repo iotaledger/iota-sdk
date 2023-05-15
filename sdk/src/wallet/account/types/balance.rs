@@ -63,7 +63,7 @@ impl std::ops::AddAssign for AccountBalance {
 #[serde(rename_all = "camelCase")]
 pub struct AccountBalanceDto {
     /// Total and available amount of the base coin
-    pub base_coin: BaseCoinBalanceDto,
+    pub base_coin: BaseCoinBalance,
     /// Current required storage deposit amount
     pub required_storage_deposit: RequiredStorageDeposit,
     /// Native tokens
@@ -84,7 +84,7 @@ pub struct AccountBalanceDto {
 impl From<&AccountBalance> for AccountBalanceDto {
     fn from(value: &AccountBalance) -> Self {
         Self {
-            base_coin: BaseCoinBalanceDto::from(&value.base_coin),
+            base_coin: value.base_coin.clone(),
             required_storage_deposit: value.required_storage_deposit.clone(),
             native_tokens: value
                 .native_tokens
@@ -105,11 +105,14 @@ impl From<&AccountBalance> for AccountBalanceDto {
 #[getset(get_copy = "pub")]
 pub struct BaseCoinBalance {
     /// Total amount
+    #[serde(with = "crate::utils::serde::string")]
     pub(crate) total: u64,
     /// Balance that can currently be spent
+    #[serde(with = "crate::utils::serde::string")]
     pub(crate) available: u64,
     /// Voting power
     #[cfg(feature = "participation")]
+    #[serde(with = "crate::utils::serde::string")]
     pub(crate) voting_power: u64,
 }
 
@@ -120,30 +123,6 @@ impl std::ops::AddAssign for BaseCoinBalance {
         #[cfg(feature = "participation")]
         {
             self.voting_power += rhs.voting_power;
-        }
-    }
-}
-
-/// Base coin fields for [`AccountBalance`]
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct BaseCoinBalanceDto {
-    /// Total amount
-    pub total: String,
-    /// Balance that can currently be spent
-    pub available: String,
-    /// Voting power
-    #[cfg(feature = "participation")]
-    pub voting_power: String,
-}
-
-impl From<&BaseCoinBalance> for BaseCoinBalanceDto {
-    fn from(value: &BaseCoinBalance) -> Self {
-        Self {
-            total: value.total.to_string(),
-            available: value.available.to_string(),
-            #[cfg(feature = "participation")]
-            voting_power: value.voting_power.to_string(),
         }
     }
 }
