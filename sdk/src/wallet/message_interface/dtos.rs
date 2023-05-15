@@ -3,10 +3,7 @@
 
 // Dtos with amount as String, to prevent overflow issues in other languages
 
-use std::{
-    collections::{HashMap, HashSet},
-    str::FromStr,
-};
+use std::collections::{HashMap, HashSet};
 
 use serde::{Deserialize, Serialize};
 
@@ -16,43 +13,11 @@ use crate::{
         output::{dto::FoundryOutputDto, FoundryId, OutputId},
         payload::transaction::TransactionId,
     },
-    wallet::{
-        account::{
-            types::{AccountAddress, AddressWithUnspentOutputs, TransactionDto},
-            AccountDetails, OutputDataDto,
-        },
-        SendAmountParams,
+    wallet::account::{
+        types::{AccountAddress, AddressWithUnspentOutputs, TransactionDto},
+        AccountDetails, OutputDataDto,
     },
 };
-
-/// Dto for address with amount for `send_amount()`
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SendAmountParamsDto {
-    /// Bech32 encoded address
-    pub address: String,
-    /// Amount
-    pub amount: String,
-    /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
-    /// first address of the account
-    pub return_address: Option<String>,
-    /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
-    /// receiver before. Default is 1 day
-    pub expiration: Option<u32>,
-}
-
-impl TryFrom<&SendAmountParamsDto> for SendAmountParams {
-    type Error = crate::wallet::Error;
-
-    fn try_from(value: &SendAmountParamsDto) -> crate::wallet::Result<Self> {
-        Ok(Self::new(
-            value.address.clone(),
-            u64::from_str(&value.amount).map_err(|_| crate::client::Error::InvalidAmount(value.amount.clone()))?,
-        )
-        .with_return_address(value.return_address.clone())
-        .with_expiration(value.expiration))
-    }
-}
 
 /// Dto for an account address with output_ids of unspent outputs.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]

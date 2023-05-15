@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+pub(crate) mod serde;
+
 #[cfg(feature = "instant")]
 pub fn unix_timestamp_now() -> core::time::Duration {
     instant::SystemTime::now()

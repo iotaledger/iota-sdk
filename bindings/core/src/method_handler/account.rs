@@ -18,7 +18,7 @@ use iota_sdk::{
             Account, CreateAliasParams, MintTokenTransactionDto, OutputDataDto, OutputParams, TransactionOptions,
         },
         message_interface::AddressWithUnspentOutputsDto,
-        MintNativeTokenParams, MintNftParams, SendAmountParams,
+        MintNativeTokenParams, MintNftParams,
     },
 };
 use primitive_types::U256;
@@ -234,10 +234,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::PrepareSendAmount { params, options } => {
             let data = account
                 .prepare_send_amount(
-                    params
-                        .iter()
-                        .map(SendAmountParams::try_from)
-                        .collect::<iota_sdk::wallet::Result<Vec<SendAmountParams>>>()?,
+                    params,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -270,10 +267,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::SendAmount { params, options } => {
             let transaction = account
                 .send_amount(
-                    params
-                        .iter()
-                        .map(SendAmountParams::try_from)
-                        .collect::<iota_sdk::wallet::Result<Vec<SendAmountParams>>>()?,
+                    params,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
