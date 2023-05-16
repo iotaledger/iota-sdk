@@ -9,7 +9,6 @@
 //! `cargo run --example burn_native_token --release`
 
 use iota_sdk::{
-    client::api::input_selection::Burn,
     types::block::output::NativeToken,
     wallet::{Result, Wallet},
     U256,
