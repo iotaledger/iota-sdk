@@ -15,17 +15,17 @@ async fn check_existing_db() -> Result<()> {
     // Copy db so the original doesn't get modified
     copy_folder("./tests/wallet/fixtures/check_existing_db_test", storage_path).unwrap();
 
-    let manager = Wallet::builder().with_storage_path(storage_path).finish().await?;
+    let wallet = Wallet::builder().with_storage_path(storage_path).finish().await?;
 
     // Test if setting stronghold password still works
-    manager.set_stronghold_password("STRONGHOLD_PASSWORD").await?;
+    wallet.set_stronghold_password("STRONGHOLD_PASSWORD").await?;
 
-    assert_eq!(manager.get_accounts().await?.len(), 1);
+    assert_eq!(wallet.get_accounts().await?.len(), 1);
 
-    let client_options = manager.client_options().await;
+    let client_options = wallet.client_options().await;
     assert_eq!(client_options.node_manager_builder.nodes.len(), 1);
 
-    let account = manager.get_account("Alice").await?;
+    let account = wallet.get_account("Alice").await?;
 
     let addresses = account.addresses().await?;
     // One public and one internal address
