@@ -6,12 +6,24 @@ use crate::{
         AliasId, AliasOutputBuilder, FoundryId, NativeTokensBuilder, Output, OutputId, TokenScheme,
     },
     wallet::{
-        account::{types::OutputData, Account},
+        account::{
+            types::{OutputData, Transaction},
+            Account, TransactionOptions,
+        },
         Error,
     },
 };
 
 impl Account {
+    /// Function to destroy a foundry output with a circulating supply of 0.
+    pub async fn destroy_foundry(
+        &self,
+        foundry_id: FoundryId,
+        options: impl Into<Option<TransactionOptions>> + Send,
+    ) -> crate::wallet::Result<Transaction> {
+        self.burn(foundry_id, options).await
+    }
+
     /// Function that returns the inputs and outputs for destroying a foundry.
     pub(super) async fn get_inputs_outputs_for_destroy_foundry(
         &self,

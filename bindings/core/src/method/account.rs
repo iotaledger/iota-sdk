@@ -46,6 +46,7 @@ pub enum AccountMethod {
         burn: BurnDto,
         options: Option<TransactionOptionsDto>,
     },
+
     /// Consolidate outputs.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]

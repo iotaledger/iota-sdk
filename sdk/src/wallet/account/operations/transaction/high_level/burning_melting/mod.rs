@@ -22,10 +22,15 @@ impl Account {
     /// When burn **native tokens**. This doesn't require the foundry output which minted them, but will not increase
     /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
     /// recommended to use melting, if the foundry output is available.
-    pub async fn burn(&self, burn: Burn, options: Option<TransactionOptions>) -> crate::wallet::Result<Transaction> {
+    pub async fn burn(
+        &self,
+        burn: impl Into<Burn> + Send,
+        options: impl Into<Option<TransactionOptions>> + Send,
+    ) -> crate::wallet::Result<Transaction> {
+        let burn: Burn = burn.into();
+        let mut options: TransactionOptions = options.into().unwrap_or_default();
         let mut all_outputs: Vec<Output> = Default::default();
         let mut all_inputs: Vec<OutputId> = Default::default();
-        let mut options = options.unwrap_or_default();
 
         for (token_id, burn_amount) in burn.native_tokens() {
             let (custom_inputs, outputs) = self

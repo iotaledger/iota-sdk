@@ -10,6 +10,7 @@
 
 use iota_sdk::{
     client::api::input_selection::Burn,
+    types::block::output::NativeToken,
     wallet::{Result, Wallet},
     U256,
 };
@@ -43,9 +44,7 @@ async fn main() -> Result<()> {
 
         // Burn a native token
         let burn_amount = U256::from(1);
-        let transaction = account
-            .burn(Burn::new().add_native_token(*token_id, burn_amount), None)
-            .await?;
+        let transaction = account.burn(NativeToken::new(*token_id, burn_amount)?, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         let block_id = account

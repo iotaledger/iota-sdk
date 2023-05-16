@@ -7,12 +7,23 @@ use crate::{
         output::{unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, Output, OutputId},
     },
     wallet::{
-        account::{operations::helpers::time::can_output_be_unlocked_now, Account},
+        account::{
+            operations::helpers::time::can_output_be_unlocked_now, types::Transaction, Account, TransactionOptions,
+        },
         Error,
     },
 };
 
 impl Account {
+    /// Function to destroy an alias output.
+    pub async fn destroy_alias(
+        &self,
+        alias_id: AliasId,
+        options: impl Into<Option<TransactionOptions>> + Send,
+    ) -> crate::wallet::Result<Transaction> {
+        self.burn(alias_id, options).await
+    }
+
     /// Function that returns the inputs and outputs for destroying an alias.
     pub(super) async fn get_inputs_outputs_for_destroy_alias(
         &self,

@@ -3,6 +3,7 @@
 
 from iota_sdk.wallet.common import _call_method_routine
 from iota_sdk.types.burn import Burn
+from iota_sdk.types.native_token import NativeToken
 
 
 class Account:
@@ -123,15 +124,37 @@ class Account:
     def burn(self, burn: Burn, options=None):
         """
         A generic `burn()` function that can be used to burn native tokens, nfts, foundries and aliases.
-
-        When burn **native tokens**. This doesn't require the foundry output which minted them, but will not increase
-        the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
-        recommended to use melting, if the foundry output is available.
-
         """
         return self._call_account_method(
             'burn', {
                 'burn': burn.as_dict(),
+                'options': options
+            },
+        )
+
+    def burn_native_token(self,
+                          token_id: str,
+                          burn_amount: int,
+                          options=None):
+        """Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
+        the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
+        recommended to use melting, if the foundry output is available.
+        """
+        return self._call_account_method(
+            'burn', {
+                'burn': Burn().add_native_token(NativeToken(token_id, burn_amount)).as_dict(),
+                'options': options
+            },
+        )
+
+    def burn_nft(self,
+                 nft_id: str,
+                 options=None):
+        """Burn an nft output.
+        """
+        return self._call_account_method(
+            'burn', {
+                'burn': Burn().add_nft(nft_id).as_dict(),
                 'options': options
             },
         )
@@ -159,6 +182,32 @@ class Account:
                 'options': options
             }
         )
+
+    def destroy_alias(self,
+                      alias_id: str,
+                      options=None):
+        """Destroy an alias output.
+        """
+
+        return self._call_account_method(
+            'burn', {
+                'burn': Burn().add_alias(alias_id).as_dict(),
+                'options': options
+            },
+        )
+
+    def destroy_foundry(self,
+                        foundry_id: str,
+                        options=None):
+        """Destroy a foundry output with a circulating supply of 0.
+        """
+        return self._call_account_method(
+            'burn', {
+                'burn': Burn().add_foundry(foundry_id).as_dict(),
+                'options': options
+            },
+        )
+        pass
 
     def generate_addresses(self, amount, options=None):
         """Generate new addresses.

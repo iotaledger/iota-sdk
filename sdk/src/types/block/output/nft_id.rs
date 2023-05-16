@@ -3,10 +3,10 @@
 
 use alloc::string::String;
 
-use crate::types::block::{
+use crate::{types::block::{
     address::{Address, NftAddress},
     output::OutputId,
-};
+}, client::api::input_selection::Burn};
 
 impl_id!(pub NftId, 32, "TODO.");
 
@@ -28,6 +28,12 @@ impl NftId {
     /// Returns the bech32 encoding of the nft ID.
     pub fn to_bech32(&self, bech32_hrp: &str) -> String {
         Address::Nft(NftAddress::new(*self)).to_bech32(bech32_hrp)
+    }
+}
+
+impl From<NftId> for Burn {
+    fn from(id: NftId) -> Self {
+        Self::new().add_nft(id)
     }
 }
 

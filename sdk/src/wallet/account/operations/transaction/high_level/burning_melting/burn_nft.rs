@@ -7,7 +7,9 @@ use crate::{
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NftId, Output, OutputId},
     },
     wallet::{
-        account::{operations::helpers::time::can_output_be_unlocked_now, Account},
+        account::{
+            operations::helpers::time::can_output_be_unlocked_now, Account,
+        },
         Error,
     },
 };

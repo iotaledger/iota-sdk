@@ -1,4 +1,3 @@
-from bindings.python.iota_sdk.types.burn import Burn
 from iota_sdk import Wallet
 from dotenv import load_dotenv
 import os
@@ -23,9 +22,6 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-to_burn = Burn().add_alias(ALIAS_ID)
-
 # Send transaction.
-transaction = account.burn(to_burn)
-print(
-    f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
+transaction = account.destroy_alias(ALIAS_ID)
+print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
