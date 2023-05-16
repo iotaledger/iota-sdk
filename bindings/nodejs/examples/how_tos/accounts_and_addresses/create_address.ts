@@ -5,7 +5,7 @@ import { Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/how_tos/accounts_and_addresses/create_address.js
+// yarn run-example ./how_tos/accounts_and_addresses/create_address.ts
 
 // This example creates an address
 async function run() {
