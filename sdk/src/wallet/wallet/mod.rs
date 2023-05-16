@@ -68,7 +68,7 @@ pub struct WalletInner {
     #[cfg(feature = "storage")]
     pub(crate) storage_options: StorageOptions,
     #[cfg(feature = "storage")]
-    pub(crate) storage_manager: tokio::sync::Mutex<StorageManager>,
+    pub(crate) storage_manager: tokio::sync::RwLock<StorageManager>,
 }
 
 impl Wallet {
@@ -111,7 +111,7 @@ impl Wallet {
 
                         #[cfg(feature = "storage")]
                         self.storage_manager
-                            .lock()
+                            .write()
                             .await
                             .remove_account(largest_account_index)
                             .await?;

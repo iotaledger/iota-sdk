@@ -557,7 +557,7 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let transaction = account
                         .burn(
-                            Burn::new().add_alias(AliasId::try_from(&alias_id)?),
+                            alias_id,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
@@ -594,7 +594,6 @@ impl WalletMessageHandler {
                 ))
             }
             AccountMethod::GetFoundryOutput { token_id } => {
-                let token_id = TokenId::try_from(&token_id)?;
                 let output = account.get_foundry_output(token_id).await?;
                 Ok(Response::Output(OutputDto::from(&output)))
             }
@@ -664,7 +663,7 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let transaction = account
                         .decrease_native_token_supply(
-                            TokenId::try_from(&token_id)?,
+                            token_id,
                             U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
@@ -681,7 +680,7 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let transaction = account
                         .increase_native_token_supply(
-                            TokenId::try_from(&token_id)?,
+                            token_id,
                             U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )

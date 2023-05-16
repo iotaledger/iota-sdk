@@ -7,10 +7,7 @@ use getset::{CopyGetters, Getters};
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
-use crate::types::block::{
-    dto::U256Dto,
-    output::{dto::TokenIdDto, feature::MetadataFeature, AliasId, FoundryId, NftId, OutputId, TokenId},
-};
+use crate::types::block::output::{feature::MetadataFeature, AliasId, FoundryId, NftId, OutputId, TokenId};
 
 /// The balance of an account, returned from [`crate::wallet::account::Account::sync()`] and
 /// [`crate::wallet::account::Account::balance()`].
@@ -233,22 +230,22 @@ impl std::ops::AddAssign for NativeTokensBalance {
 #[serde(rename_all = "camelCase")]
 pub struct NativeTokensBalanceDto {
     /// Token id
-    pub token_id: TokenIdDto,
+    pub token_id: TokenId,
     /// Token foundry immutable metadata
     pub metadata: Option<String>,
     /// Total amount
-    pub total: U256Dto,
+    pub total: U256,
     /// Balance that can currently be spent
-    pub available: U256Dto,
+    pub available: U256,
 }
 
 impl From<&NativeTokensBalance> for NativeTokensBalanceDto {
     fn from(value: &NativeTokensBalance) -> Self {
         Self {
-            token_id: TokenIdDto::from(&value.token_id),
+            token_id: value.token_id,
             metadata: value.metadata.as_ref().map(|m| prefix_hex::encode(m.data())),
-            total: U256Dto::from(&value.total),
-            available: U256Dto::from(&value.available),
+            total: value.total,
+            available: value.available,
         }
     }
 }

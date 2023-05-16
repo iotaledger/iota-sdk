@@ -3,10 +3,13 @@
 
 use alloc::string::String;
 
-use crate::{types::block::{
-    address::{Address, NftAddress},
-    output::OutputId,
-}, client::api::input_selection::Burn};
+use crate::{
+    client::api::input_selection::Burn,
+    types::block::{
+        address::{Address, NftAddress},
+        output::OutputId,
+    },
+};
 
 impl_id!(pub NftId, 32, "TODO.");
 

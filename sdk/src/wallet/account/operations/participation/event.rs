@@ -60,7 +60,7 @@ impl Account {
             let account_index = self.details().await.index;
             self.wallet
                 .storage_manager
-                .lock()
+                .read()
                 .await
                 .insert_participation_event(account_index, event_with_node.clone())
                 .await?;
@@ -75,7 +75,7 @@ impl Account {
         let account_index = self.details().await.index;
         self.wallet
             .storage_manager
-            .lock()
+            .read()
             .await
             .remove_participation_event(account_index, id)
             .await?;
@@ -91,7 +91,7 @@ impl Account {
         Ok(self
             .wallet
             .storage_manager
-            .lock()
+            .read()
             .await
             .get_participation_events(account_index)
             .await?
@@ -106,7 +106,7 @@ impl Account {
         let account_index = self.details().await.index;
         self.wallet
             .storage_manager
-            .lock()
+            .read()
             .await
             .get_participation_events(account_index)
             .await

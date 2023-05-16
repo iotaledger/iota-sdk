@@ -139,7 +139,7 @@ impl Wallet {
         #[cfg(feature = "storage")]
         {
             self.storage_manager
-                .lock()
+                .read()
                 .await
                 .save_wallet_data(&WalletBuilder::from_wallet(self).await)
                 .await?;
