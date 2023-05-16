@@ -16,7 +16,6 @@ use crate::{
         secret::GenerateAddressOptions,
     },
     types::block::{
-        dto::U256Dto,
         output::{
             dto::{NativeTokenDto, OutputDto, TokenSchemeDto},
             feature::dto::FeatureDto,
@@ -41,9 +40,9 @@ use crate::{
             },
             FilterOptions,
         },
-        message_interface::dtos::SendAmountParamsDto,
-        SendNativeTokensParams, SendNftParams,
+        SendAmountParams, SendNativeTokensParams, SendNftParams,
     },
+    U256,
 };
 
 /// Each public account method.
@@ -113,7 +112,7 @@ pub enum AccountMethod {
         /// Native token id
         token_id: TokenId,
         /// To be burned amount
-        burn_amount: U256Dto,
+        burn_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
@@ -217,7 +216,7 @@ pub enum AccountMethod {
         /// Native token id
         token_id: TokenId,
         /// To be melted amount
-        melt_amount: U256Dto,
+        melt_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Calculate the minimum required storage deposit for an output.
@@ -231,7 +230,7 @@ pub enum AccountMethod {
         /// Native token id
         token_id: TokenId,
         /// To be minted amount
-        mint_amount: U256Dto,
+        mint_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Mint native token.
@@ -268,7 +267,7 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareSendAmount {
-        params: Vec<SendAmountParamsDto>,
+        params: Vec<SendAmountParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
@@ -294,7 +293,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendAmount {
-        params: Vec<SendAmountParamsDto>,
+        params: Vec<SendAmountParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send native tokens.

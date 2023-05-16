@@ -7,7 +7,6 @@ use serde::{Deserialize, Serialize};
 use crate::{
     types::block::{
         address::AliasAddress,
-        dto::U256Dto,
         output::{
             feature::MetadataFeature, unlock_condition::ImmutableAliasAddressUnlockCondition, AliasId,
             AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
@@ -41,9 +40,9 @@ pub struct MintNativeTokenParamsDto {
     /// The alias id which should be used to create the foundry.
     pub alias_id: Option<AliasId>,
     /// Circulating supply
-    pub circulating_supply: U256Dto,
+    pub circulating_supply: U256,
     /// Maximum supply
-    pub maximum_supply: U256Dto,
+    pub maximum_supply: U256,
     /// Foundry metadata, hex encoded bytes
     pub foundry_metadata: Option<String>,
 }
