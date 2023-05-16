@@ -43,10 +43,10 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            types::{AccountAddress, AccountBalanceDto, TransactionDto},
-            OutputDataDto, PreparedMintTokenTransactionDto,
+            types::{AccountAddress, AccountBalanceDto, OutputDataDto, TransactionDto, AddressWithUnspentOutputs},
+            PreparedMintTokenTransactionDto,
         },
-        message_interface::dtos::{AccountDetailsDto, AddressWithUnspentOutputsDto},
+        message_interface::dtos::AccountDetailsDto,
     },
 };
 use serde::Serialize;
@@ -295,7 +295,7 @@ pub enum Response {
     Addresses(Vec<AccountAddress>),
     /// Response for
     /// - [`AddressesWithUnspentOutputs`](crate::method::AccountMethod::AddressesWithUnspentOutputs)
-    AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputsDto>),
+    AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputs>),
     /// Response for
     /// - [`MinimumRequiredStorageDeposit`](crate::method::AccountMethod::MinimumRequiredStorageDeposit)
     MinimumRequiredStorageDeposit(String),

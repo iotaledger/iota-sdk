@@ -26,10 +26,10 @@ use crate::{
     wallet::{
         account::{
             operations::transaction::high_level::minting::mint_native_token::PreparedMintTokenTransactionDto,
-            types::{address::AccountAddress, AccountBalanceDto, TransactionDto},
+            types::{address::AccountAddress, AccountBalanceDto, TransactionDto, AddressWithUnspentOutputs},
             OutputDataDto,
         },
-        message_interface::dtos::{AccountDetailsDto, AddressWithUnspentOutputsDto},
+        message_interface::dtos::AccountDetailsDto,
         Error,
     },
 };
@@ -50,7 +50,7 @@ pub enum Response {
     Addresses(Vec<AccountAddress>),
     /// Response for
     /// [`AddressesWithUnspentOutputs`](crate::wallet::message_interface::AccountMethod::AddressesWithUnspentOutputs)
-    AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputsDto>),
+    AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputs>),
     /// Response for
     /// [`RetryTransactionUntilIncluded`](crate::wallet::message_interface::AccountMethod::RetryTransactionUntilIncluded)
     BlockId(BlockId),

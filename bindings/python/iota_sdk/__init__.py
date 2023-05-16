@@ -2,9 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from .iota_sdk import *
-from .client.client import Client, NodeIndexerAPI
+from .client.client import Client, NodeIndexerAPI, ClientError
 from .utils import Utils
 from .wallet.wallet import Wallet, Account
+from .wallet.common import WalletError
 from .secret_manager.secret_manager import *
 from .prefix_hex import *
 from .types.address import *

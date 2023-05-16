@@ -5,7 +5,7 @@ import { Client, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/client/09_transaction.js
+// yarn run-example ./client/09_transaction.ts
 
 // In this example we will send a transaction
 async function run() {

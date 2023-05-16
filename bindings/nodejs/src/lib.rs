@@ -20,8 +20,12 @@ pub static RUNTIME: Lazy<Runtime> = Lazy::new(|| Runtime::new().unwrap());
 
 pub fn init_logger(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let config = cx.argument::<JsString>(0)?.value(&mut cx);
-    rust_init_logger(config).expect("failed to init logger");
-    Ok(cx.undefined())
+    match rust_init_logger(config) {
+        Ok(_) => Ok(cx.undefined()),
+        Err(err) => {
+            cx.throw_error(serde_json::to_string(&Response::Panic(err.to_string())).expect("json to string error"))
+        }
+    }
 }
 
 pub fn call_utils_method(mut cx: FunctionContext) -> JsResult<JsString> {
