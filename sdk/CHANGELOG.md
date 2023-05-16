@@ -64,6 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `HARDENED` const;
 - `AliasIdDto`, `NftIdDto` and `TokenIdDto`;
 - `U256Dto`, `SendAmountParamsDto`, `AddressWithUnspentOutputsDto`, `RequiredStorageDepositDto` and `BaseCoinBalanceDto`;
+- `NativeTokenDto`, which required a migration;
 
 ### Fixed
 
