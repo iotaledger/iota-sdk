@@ -34,7 +34,7 @@ pub(crate) fn block_on<C: futures::Future>(cb: C) -> C::Output {
 /// Init the Rust logger.
 #[pyfunction]
 pub fn init_logger(config: String) -> Result<()> {
-    rust_init_logger(config).map_err(|err| Error::from(format!("{:?}", err).as_str()))?;
+    rust_init_logger(config).map_err(|err| Error::from(format!("{:?}", err)))?;
     Ok(())
 }
 

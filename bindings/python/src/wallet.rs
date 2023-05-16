@@ -99,7 +99,7 @@ pub fn get_client_from_wallet(wallet: &Wallet) -> Result<Client> {
             .ok_or_else(|| {
                 Error::from(
                     serde_json::to_string(&Response::Panic("wallet got destroyed".into()))
-                        .unwrap()
+                        .expect("json to string error")
                         .as_str(),
                 )
             })

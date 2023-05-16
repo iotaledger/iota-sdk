@@ -78,12 +78,7 @@ export class WalletMethodHandler {
         return new Promise((resolve, reject) => {
             getClientFromWallet(this.methodHandler).then((result: any) => {
                 if (result.message !== undefined) {
-                    if (result.message !== undefined) {
-                        result = JSON.parse(result.message).payload;
-                    } else {
-                        result = JSON.parse(result.toString()).payload;
-                    }
-                    reject(result);
+                    reject(JSON.parse(result.message).payload);
                 } else {
                     resolve(new Client(result));
                 }

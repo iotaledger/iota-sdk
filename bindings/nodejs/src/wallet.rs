@@ -123,13 +123,16 @@ pub fn call_wallet_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
                 Ok(())
             });
         } else {
-            sender.send("Wallet got destroyed").unwrap();
+            // Notify that the wallet got destroyed
+            // Safe to unwrap because the receiver is waiting on it
+            sender.send(()).unwrap();
         }
     });
 
-    if let Ok(error) = receiver.recv() {
-        return cx
-            .throw_error(serde_json::to_string(&Response::Panic(error.to_string())).expect("json to string error"));
+    if receiver.recv().is_ok() {
+        return cx.throw_error(
+            serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string())).expect("json to string error"),
+        );
     }
 
     Ok(cx.undefined())
@@ -189,12 +192,10 @@ pub fn get_client(mut cx: FunctionContext) -> JsResult<JsPromise> {
             deferred.settle_with(&channel, move |mut cx| Ok(cx.boxed(client_method_handler)));
         } else {
             deferred.settle_with(&channel, move |mut cx| {
-                Ok(cx
-                    .error(
-                        serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string()))
-                            .expect("json to string error"),
-                    )
-                    .unwrap())
+                cx.error(
+                    serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string()))
+                        .expect("json to string error"),
+                )
             });
         }
     });
