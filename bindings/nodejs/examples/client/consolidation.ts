@@ -5,7 +5,7 @@ import { Client, CoinType, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./client/consolidate.ts
+// yarn run-example ./client/consolidation.ts
 
 // In this example we will consolidate all funds in a range of addresses
 async function run() {
