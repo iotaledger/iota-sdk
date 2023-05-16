@@ -5,7 +5,7 @@ import { SecretManager, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/secretManager/stronghold.js
+// yarn run-example ./secretManager/stronghold.ts
 
 // In this example we will store a mnemonic in the Stronghold vault and generate an address
 async function run() {
