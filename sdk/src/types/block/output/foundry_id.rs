@@ -3,12 +3,9 @@
 
 use packable::{packer::SlicePacker, Packable};
 
-use crate::{
-    client::api::input_selection::Burn,
-    types::block::{
-        address::{Address, AliasAddress},
-        output::{AliasId, TokenId},
-    },
+use crate::types::block::{
+    address::{Address, AliasAddress},
+    output::{AliasId, TokenId},
 };
 
 impl_id!(pub FoundryId, 38, "Defines the unique identifier of a foundry.");
@@ -19,12 +16,6 @@ string_serde_impl!(FoundryId);
 impl From<TokenId> for FoundryId {
     fn from(token_id: TokenId) -> Self {
         Self::new(*token_id)
-    }
-}
-
-impl From<FoundryId> for Burn {
-    fn from(id: FoundryId) -> Self {
-        Self::new().add_foundry(id)
     }
 }
 

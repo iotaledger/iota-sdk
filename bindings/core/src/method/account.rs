@@ -13,7 +13,7 @@ use iota_sdk::{
         secret::GenerateAddressOptions,
     },
     types::block::{
-        output::{dto::OutputDto, AliasId, FoundryId, NftId, OutputId, TokenId},
+        output::{dto::OutputDto, OutputId, TokenId},
         payload::transaction::TransactionId,
     },
     wallet::{

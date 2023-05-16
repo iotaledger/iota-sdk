@@ -4,7 +4,6 @@
 use alloc::string::String;
 
 use crate::{
-    client::api::input_selection::Burn,
     types::block::{
         address::{Address, AliasAddress},
         output::OutputId,
@@ -19,12 +18,6 @@ string_serde_impl!(AliasId);
 impl From<&OutputId> for AliasId {
     fn from(output_id: &OutputId) -> Self {
         Self::from(output_id.hash())
-    }
-}
-
-impl From<AliasId> for Burn {
-    fn from(id: AliasId) -> Self {
-        Self::new().add_alias(id)
     }
 }
 

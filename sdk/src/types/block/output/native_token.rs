@@ -12,10 +12,7 @@ use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 use primitive_types::U256;
 
-use crate::{
-    client::api::input_selection::Burn,
-    types::block::{output::TokenId, Error},
-};
+use crate::types::block::{output::TokenId, Error};
 
 ///
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Packable)]
@@ -23,16 +20,10 @@ use crate::{
 #[packable(unpack_error = Error)]
 pub struct NativeToken {
     // Identifier of the native token.
-    token_id: TokenId,
+    pub token_id: TokenId,
     // Amount of native tokens.
     #[packable(verify_with = verify_amount)]
     amount: U256,
-}
-
-impl From<NativeToken> for Burn {
-    fn from(native_token: NativeToken) -> Self {
-        Self::new().add_native_token(native_token.token_id, native_token.amount)
-    }
 }
 
 impl NativeToken {
