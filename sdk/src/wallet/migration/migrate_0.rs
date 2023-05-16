@@ -136,19 +136,72 @@ trait Convert {
     fn convert(old: Self::Old) -> crate::wallet::Result<Self::New>;
 }
 
-#[allow(dead_code)]
 mod types {
     use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
 
-    use crate::{impl_id, string_serde_impl, types::block::Error};
+    use crate::types::block::Error;
 
-    impl_id!(
-        pub TransactionId,
-        32,
-        "A transaction identifier, the BLAKE2b-256 hash of the transaction bytes. See <https://www.blake2.net/> for more information."
-    );
+    macro_rules! string_serde_impl {
+        ($type:ty) => {
+            impl serde::Serialize for $type {
+                fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+                    use alloc::string::ToString;
+
+                    s.serialize_str(&self.to_string())
+                }
+            }
+
+            impl<'de> serde::Deserialize<'de> for $type {
+                fn deserialize<D>(deserializer: D) -> Result<$type, D::Error>
+                where
+                    D: serde::Deserializer<'de>,
+                {
+                    struct StringVisitor;
+
+                    impl<'de> serde::de::Visitor<'de> for StringVisitor {
+                        type Value = $type;
+
+                        fn expecting(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                            formatter.write_str("a string representing the value")
+                        }
+
+                        fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+                        where
+                            E: serde::de::Error,
+                        {
+                            let value = core::str::FromStr::from_str(v).map_err(serde::de::Error::custom)?;
+                            Ok(value)
+                        }
+                    }
+
+                    deserializer.deserialize_str(StringVisitor)
+                }
+            }
+        };
+    }
+
+    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
+    pub struct TransactionId([u8; Self::LENGTH]);
+
+    impl TransactionId {
+        pub const LENGTH: usize = 32;
+    }
+
+    impl core::str::FromStr for TransactionId {
+        type Err = Error;
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            Ok(Self(prefix_hex::decode(s).map_err(Error::Hex)?))
+        }
+    }
+
+    impl core::fmt::Display for TransactionId {
+        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(f, "{}", prefix_hex::encode(self.0))
+        }
+    }
 
     string_serde_impl!(TransactionId);
 
@@ -211,7 +264,7 @@ mod types {
             let (transaction_id, index) = bytes.split_at(TransactionId::LENGTH);
 
             Ok(Self {
-                transaction_id: From::<[u8; TransactionId::LENGTH]>::from(transaction_id.try_into().unwrap()),
+                transaction_id: TransactionId(transaction_id.try_into().unwrap()),
                 index: u16::from_le_bytes(index.try_into().unwrap()),
             })
         }
@@ -229,7 +282,7 @@ mod types {
         fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
             let mut buffer = [0u8; Self::LENGTH];
             let (transaction_id, index) = buffer.split_at_mut(TransactionId::LENGTH);
-            transaction_id.copy_from_slice(self.transaction_id.as_ref());
+            transaction_id.copy_from_slice(&self.transaction_id.0);
             index.copy_from_slice(&self.index.to_le_bytes());
             write!(f, "{}", prefix_hex::encode(buffer))
         }
