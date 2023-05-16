@@ -489,10 +489,7 @@ impl TryFrom<&AssetsDto> for Assets {
 
     fn try_from(value: &AssetsDto) -> crate::wallet::Result<Self> {
         Ok(Self {
-            native_tokens: match &value.native_tokens {
-                Some(r) => Some(r.iter().copied().collect()),
-                None => None,
-            },
+            native_tokens: value.native_tokens.clone(),
             nft_id: match &value.nft_id {
                 Some(r) => Some(NftId::from_str(r)?),
                 None => None,
