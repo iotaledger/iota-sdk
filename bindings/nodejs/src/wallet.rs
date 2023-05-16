@@ -101,6 +101,7 @@ pub fn call_wallet_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let method_handler = Arc::clone(&&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(1)?.0);
     let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
 
+    let (sender, receiver) = std::sync::mpsc::channel();
     crate::RUNTIME.spawn(async move {
         if let Some(method_handler) = &*method_handler.read().await {
             let (response, is_error) = method_handler.call_method(method).await;
@@ -122,9 +123,17 @@ pub fn call_wallet_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
                 Ok(())
             });
         } else {
-            panic!("Wallet got destroyed")
+            // Notify that the wallet got destroyed
+            // Safe to unwrap because the receiver is waiting on it
+            sender.send(()).unwrap();
         }
     });
+
+    if receiver.recv().is_ok() {
+        return cx.throw_error(
+            serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string())).expect("json to string error"),
+        );
+    }
 
     Ok(cx.undefined())
 }
@@ -182,7 +191,12 @@ pub fn get_client(mut cx: FunctionContext) -> JsResult<JsPromise> {
                 ClientMethodHandler::new_with_client(channel.clone(), method_handler.wallet.client().clone());
             deferred.settle_with(&channel, move |mut cx| Ok(cx.boxed(client_method_handler)));
         } else {
-            panic!("Wallet got destroyed")
+            deferred.settle_with(&channel, move |mut cx| {
+                cx.error(
+                    serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string()))
+                        .expect("json to string error"),
+                )
+            });
         }
     });
 

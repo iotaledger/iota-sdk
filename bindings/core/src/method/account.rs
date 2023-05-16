@@ -13,11 +13,7 @@ use iota_sdk::{
         secret::GenerateAddressOptions,
     },
     types::block::{
-        dto::U256Dto,
-        output::{
-            dto::{AliasIdDto, NftIdDto, OutputDto, TokenIdDto},
-            FoundryId, OutputId,
-        },
+        output::{dto::OutputDto, AliasId, FoundryId, NftId, OutputId, TokenId},
         payload::transaction::TransactionId,
     },
     wallet::{
@@ -25,9 +21,9 @@ use iota_sdk::{
             CreateAliasParamsDto, FilterOptions, MintNativeTokenParamsDto, MintNftParamsDto, OutputParamsDto,
             OutputsToClaim, SyncOptions, TransactionOptionsDto,
         },
-        message_interface::dtos::SendAmountParamsDto,
-        SendNativeTokensParams, SendNftParams,
+        SendAmountParams, SendNativeTokensParams, SendNftParams,
     },
+    U256,
 };
 use serde::{Deserialize, Serialize};
 
@@ -42,9 +38,9 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     BurnNativeToken {
         /// Native token id
-        token_id: TokenIdDto,
+        token_id: TokenId,
         /// To be burned amount
-        burn_amount: U256Dto,
+        burn_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
@@ -53,7 +49,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     BurnNft {
-        nft_id: NftIdDto,
+        nft_id: NftId,
         options: Option<TransactionOptionsDto>,
     },
     /// Consolidate outputs.
@@ -76,7 +72,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     DestroyAlias {
-        alias_id: AliasIdDto,
+        alias_id: AliasId,
         options: Option<TransactionOptionsDto>,
     },
     /// Function to destroy a foundry output with a circulating supply of 0.
@@ -100,7 +96,7 @@ pub enum AccountMethod {
     /// Get the [`Output`](iota_sdk::types::block::output::Output) that minted a native token by its TokenId
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]
-    GetFoundryOutput { token_id: TokenIdDto },
+    GetFoundryOutput { token_id: TokenId },
     /// Get outputs with additional unlock conditions
     /// Expected response: [`OutputIds`](crate::Response::OutputIds)
     #[serde(rename_all = "camelCase")]
@@ -145,9 +141,9 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     DecreaseNativeTokenSupply {
         /// Native token id
-        token_id: TokenIdDto,
+        token_id: TokenId,
         /// To be melted amount
-        melt_amount: U256Dto,
+        melt_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Calculate the minimum required storage deposit for an output.
@@ -159,9 +155,9 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     IncreaseNativeTokenSupply {
         /// Native token id
-        token_id: TokenIdDto,
+        token_id: TokenId,
         /// To be minted amount
-        mint_amount: U256Dto,
+        mint_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Mint native token.
@@ -198,7 +194,7 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareSendAmount {
-        params: Vec<SendAmountParamsDto>,
+        params: Vec<SendAmountParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
@@ -224,7 +220,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendAmount {
-        params: Vec<SendAmountParamsDto>,
+        params: Vec<SendAmountParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send native tokens.

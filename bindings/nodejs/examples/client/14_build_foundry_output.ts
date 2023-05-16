@@ -11,7 +11,7 @@ import {
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/client/14_build_foundry_output.js
+// yarn run-example ./client/14_build_foundry_output.ts
 
 // Build a foundry output
 async function run() {

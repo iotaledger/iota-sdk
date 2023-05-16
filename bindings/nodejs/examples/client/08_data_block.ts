@@ -5,7 +5,7 @@ import { Client, hexToUtf8, initLogger, utf8ToHex, Utils } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/client/08_data_block.js
+// yarn run-example ./client/08_data_block.ts
 
 // In this example we will send a block with a tagged data payload
 async function run() {

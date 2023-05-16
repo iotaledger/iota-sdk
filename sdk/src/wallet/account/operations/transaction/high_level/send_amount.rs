@@ -1,6 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use serde::{Deserialize, Serialize};
+
 use crate::{
     client::api::PreparedTransactionData,
     types::block::{
@@ -25,11 +27,12 @@ use crate::{
 };
 
 /// Parameters for `send_amount()`
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SendAmountParams {
     /// Bech32 encoded address
     address: String,
     /// Amount
+    #[serde(with = "crate::utils::serde::string")]
     amount: u64,
     /// Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
     /// given the provided amount. If a storage deposit is needed and a return address is not provided, it will

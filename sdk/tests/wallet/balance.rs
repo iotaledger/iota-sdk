@@ -20,32 +20,26 @@ fn balance_to_dto() {
     let balance = AccountBalance::rand_mock();
     let balance_dto = AccountBalanceDto::from(&balance);
 
-    assert_eq!(balance.base_coin().total().to_string(), balance_dto.base_coin.total);
-    assert_eq!(
-        balance.base_coin().available().to_string(),
-        balance_dto.base_coin.available
-    );
+    assert_eq!(balance.base_coin().total(), balance_dto.base_coin.total());
+    assert_eq!(balance.base_coin().available(), balance_dto.base_coin.available());
     #[cfg(feature = "participation")]
-    assert_eq!(
-        balance.base_coin().voting_power().to_string(),
-        balance_dto.base_coin.voting_power
-    );
+    assert_eq!(balance.base_coin().voting_power(), balance_dto.base_coin.voting_power());
 
     assert_eq!(
-        balance.required_storage_deposit().alias().to_string(),
-        balance_dto.required_storage_deposit.alias
+        balance.required_storage_deposit().alias(),
+        balance_dto.required_storage_deposit.alias()
     );
     assert_eq!(
-        balance.required_storage_deposit().basic().to_string(),
-        balance_dto.required_storage_deposit.basic
+        balance.required_storage_deposit().basic(),
+        balance_dto.required_storage_deposit.basic()
     );
     assert_eq!(
-        balance.required_storage_deposit().foundry().to_string(),
-        balance_dto.required_storage_deposit.foundry
+        balance.required_storage_deposit().foundry(),
+        balance_dto.required_storage_deposit.foundry()
     );
     assert_eq!(
-        balance.required_storage_deposit().nft().to_string(),
-        balance_dto.required_storage_deposit.nft
+        balance.required_storage_deposit().nft(),
+        balance_dto.required_storage_deposit.nft()
     );
 
     assert_eq!(balance.native_tokens().len(), balance_dto.native_tokens.len());

@@ -5,7 +5,7 @@ import { Client, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/client/06_simple_block.js
+// yarn run-example ./client/06_simple_block.ts
 
 // In this example we will send a block without a payload
 async function run() {
