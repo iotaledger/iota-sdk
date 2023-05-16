@@ -186,7 +186,7 @@ impl WalletBuilder {
         let event_emitter = tokio::sync::Mutex::new(EventEmitter::new());
 
         #[cfg(feature = "storage")]
-        let mut accounts = storage_manager.get_accounts().await.unwrap_or_default();
+        let mut accounts = storage_manager.get_accounts().await?;
 
         // It happened that inputs got locked, the transaction failed, but they weren't unlocked again, so we do this
         // here
