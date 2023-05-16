@@ -43,7 +43,7 @@ impl Wallet {
                     .search_addresses_with_outputs(address_gap_limit, sync_options.clone())
                     .await?;
             }
-            let account_index = *account.read().await.index();
+            let account_index = *account.details().await.index();
             match max_account_index_to_keep {
                 Some(max_account_index) => {
                     if account_index > max_account_index {
@@ -76,7 +76,7 @@ impl Wallet {
         let mut accounts = self.accounts.write().await;
 
         for account in accounts.iter() {
-            let account_index = *account.read().await.index();
+            let account_index = *account.details().await.index();
             let mut keep_account = false;
 
             if let Some(max_account_index_to_keep) = max_account_index_to_keep {
@@ -91,7 +91,7 @@ impl Wallet {
                 #[cfg(feature = "storage")]
                 {
                     log::debug!("[recover_accounts] delete empty account {}", account_index);
-                    self.storage_manager.lock().await.remove_account(account_index).await?;
+                    self.storage_manager.write().await.remove_account(account_index).await?;
                 }
             }
         }
@@ -129,7 +129,7 @@ impl Wallet {
                         let account_outputs_count = new_account
                             .search_addresses_with_outputs(address_gap_limit, sync_options_)
                             .await?;
-                        let account_index = *new_account.read().await.index();
+                        let account_index = *new_account.details().await.index();
                         Ok((account_index, account_outputs_count))
                     })
                     .await

@@ -65,6 +65,8 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                 let wallet = unlock_wallet(storage_path, snapshot_path, &password).await?;
                 if wallet.get_accounts().await?.is_empty() {
                     create_initial_account(wallet).await?
+                } else if let Some(alias) = cli.account {
+                    (Some(wallet), Some(alias))
                 } else if let Some(account) = pick_account(&wallet).await? {
                     let alias = account.alias().await;
                     (Some(wallet), Some(alias))

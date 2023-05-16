@@ -297,7 +297,7 @@ mod tests {
         let mnemonic = String::from(
             "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally",
         );
-        let mut stronghold_adapter = StrongholdAdapter::builder()
+        let stronghold_adapter = StrongholdAdapter::builder()
             .password("drowssap")
             .build(stronghold_path)
             .unwrap();

@@ -42,9 +42,9 @@ impl Account {
         outputs_to_claim: OutputsToClaim,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[OUTPUT_CLAIMING] get_unlockable_outputs_with_additional_unlock_conditions");
-        let account_details = self.read().await;
+        let account_details = self.details().await;
 
-        let local_time = self.client.get_time_checked().await?;
+        let local_time = self.client().get_time_checked().await?;
 
         // Get outputs for the claim
         let mut output_ids_to_claim: HashSet<OutputId> = HashSet::new();
@@ -128,7 +128,7 @@ impl Account {
         log::debug!("[OUTPUT_CLAIMING] get_basic_outputs_for_additional_inputs");
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
-        let account_details = self.read().await;
+        let account_details = self.details().await;
 
         // Get basic outputs only with AddressUnlockCondition and no other unlock condition
         let mut basic_outputs: Vec<OutputData> = Vec::new();
@@ -173,11 +173,11 @@ impl Account {
     ) -> crate::wallet::Result<Transaction> {
         log::debug!("[OUTPUT_CLAIMING] claim_outputs_internal");
 
-        let current_time = self.client.get_time_checked().await?;
-        let rent_structure = self.client.get_rent_structure().await?;
-        let token_supply = self.client.get_token_supply().await?;
+        let current_time = self.client().get_time_checked().await?;
+        let rent_structure = self.client().get_rent_structure().await?;
+        let token_supply = self.client().get_token_supply().await?;
 
-        let account_details = self.read().await;
+        let account_details = self.details().await;
 
         let mut outputs_to_claim = Vec::new();
         for output_id in output_ids_to_claim {

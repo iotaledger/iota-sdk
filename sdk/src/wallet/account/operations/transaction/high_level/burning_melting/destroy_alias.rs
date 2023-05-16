@@ -21,7 +21,7 @@ impl Account {
     pub async fn destroy_alias(
         &self,
         alias_id: AliasId,
-        options: Option<TransactionOptions>,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!("[TRANSACTION] destroy_alias");
 
@@ -58,7 +58,7 @@ impl Account {
             (custom_inputs, outputs)
         };
 
-        let options = match options {
+        let options = match options.into() {
             Some(mut options) => {
                 options.custom_inputs.replace(custom_inputs);
                 options.burn = Some(Burn::new().add_alias(alias_id));
@@ -80,8 +80,8 @@ impl Account {
         &self,
         alias_id: AliasId,
     ) -> crate::wallet::Result<(OutputId, Output)> {
-        let account_details = self.read().await;
-        let token_supply = self.client.get_token_supply().await?;
+        let account_details = self.details().await;
+        let token_supply = self.client().get_token_supply().await?;
 
         let (output_id, output_data) = account_details
             .unspent_outputs()

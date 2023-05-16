@@ -11,10 +11,10 @@ import type {
     INetworkInfo,
     INode,
     IAuth,
-    BasicOutputBuilderOptions,
-    AliasOutputBuilderOptions,
-    FoundryOutputBuilderOptions,
-    NftOutputBuilderOptions,
+    BasicOutputBuilderParams,
+    AliasOutputBuilderParams,
+    FoundryOutputBuilderParams,
+    NftOutputBuilderParams,
     FoundryQueryParameter,
     NftQueryParameter,
     AliasQueryParameter,
@@ -35,6 +35,7 @@ import type {
     ITreasury,
     INodeInfoProtocol,
     UnlockTypes,
+    HexEncodedString,
 } from '@iota/types';
 import type { INodeInfoWrapper } from '../../types/client/nodeInfo';
 import { SecretManagerType } from '../../types/secretManager/secretManager';
@@ -273,9 +274,7 @@ export class Client {
      */
     async signatureUnlock(
         secretManager: SecretManagerType,
-        // Uses `Array<number>` instead of `Uint8Array` because the latter serializes
-        // as an object rather than an array, which results in errors with serde.
-        transactionEssenceHash: Array<number>,
+        transactionEssenceHash: HexEncodedString,
         chain: IBip32Chain,
     ): Promise<UnlockTypes> {
         const response = await this.methodHandler.callMethod({
@@ -907,11 +906,11 @@ export class Client {
      * Build a Basic Output.
      */
     async buildBasicOutput(
-        options: BasicOutputBuilderOptions,
+        params: BasicOutputBuilderParams,
     ): Promise<BasicOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildBasicOutput',
-            data: options,
+            data: params,
         });
 
         return JSON.parse(response).payload;
@@ -921,11 +920,11 @@ export class Client {
      * Build an Alias Output.
      */
     async buildAliasOutput(
-        options: AliasOutputBuilderOptions,
+        params: AliasOutputBuilderParams,
     ): Promise<AliasOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildAliasOutput',
-            data: options,
+            data: params,
         });
 
         return JSON.parse(response).payload;
@@ -935,11 +934,11 @@ export class Client {
      * Build a Foundry Output.
      */
     async buildFoundryOutput(
-        options: FoundryOutputBuilderOptions,
+        params: FoundryOutputBuilderParams,
     ): Promise<FoundryOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildFoundryOutput',
-            data: options,
+            data: params,
         });
 
         return JSON.parse(response).payload;
@@ -948,10 +947,10 @@ export class Client {
     /**
      * Build an Nft Output.
      */
-    async buildNftOutput(options: NftOutputBuilderOptions): Promise<NftOutput> {
+    async buildNftOutput(params: NftOutputBuilderParams): Promise<NftOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'buildNftOutput',
-            data: options,
+            data: params,
         });
 
         return JSON.parse(response).payload;

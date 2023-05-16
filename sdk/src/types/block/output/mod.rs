@@ -103,9 +103,19 @@ impl OutputWithMetadata {
         &self.output
     }
 
+    /// Consumes self and returns the [`Output`].
+    pub fn into_output(self) -> Output {
+        self.output
+    }
+
     /// Returns the [`OutputMetadata`].
     pub fn metadata(&self) -> &OutputMetadata {
         &self.metadata
+    }
+
+    /// Consumes self and returns the [`OutputMetadata`].
+    pub fn into_metadata(self) -> OutputMetadata {
+        self.metadata
     }
 }
 
@@ -500,15 +510,12 @@ pub mod dto {
     use super::*;
     pub use super::{
         alias::dto::AliasOutputDto,
-        alias_id::dto::AliasIdDto,
         basic::dto::BasicOutputDto,
         foundry::dto::FoundryOutputDto,
         metadata::dto::OutputMetadataDto,
         native_token::dto::NativeTokenDto,
         nft::dto::NftOutputDto,
-        nft_id::dto::NftIdDto,
         rent::dto::RentStructureDto,
-        token_id::dto::TokenIdDto,
         token_scheme::dto::{SimpleTokenSchemeDto, TokenSchemeDto},
         treasury::dto::TreasuryOutputDto,
     };

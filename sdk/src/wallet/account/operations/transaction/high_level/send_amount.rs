@@ -1,6 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use serde::{Deserialize, Serialize};
+
 use crate::{
     client::api::PreparedTransactionData,
     types::block::{
@@ -24,12 +26,13 @@ use crate::{
     },
 };
 
-/// address with amount for `send_amount()`
-#[derive(Debug, Clone)]
-pub struct AddressWithAmount {
+/// Parameters for `send_amount()`
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SendAmountParams {
     /// Bech32 encoded address
     address: String,
     /// Amount
+    #[serde(with = "crate::utils::serde::string")]
     amount: u64,
     /// Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
     /// given the provided amount. If a storage deposit is needed and a return address is not provided, it will
@@ -41,7 +44,7 @@ pub struct AddressWithAmount {
     expiration: Option<u32>,
 }
 
-impl AddressWithAmount {
+impl SendAmountParams {
     pub fn new(address: String, amount: u64) -> Self {
         Self {
             address,
@@ -68,7 +71,7 @@ impl Account {
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
-    /// let outputs = vec![AddressWithAmount{
+    /// let outputs = vec![SendAmountParams{
     ///     address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
     ///     amount: 1_000_000,
     /// }];
@@ -81,10 +84,10 @@ impl Account {
     /// ```
     pub async fn send_amount(
         &self,
-        addresses_with_amount: Vec<AddressWithAmount>,
+        params: Vec<SendAmountParams>,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
-        let prepared_transaction = self.prepare_send_amount(addresses_with_amount, options).await?;
+        let prepared_transaction = self.prepare_send_amount(params, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
 
@@ -92,29 +95,29 @@ impl Account {
     /// [Account.send_amount()](crate::account::Account.send_amount)
     pub async fn prepare_send_amount(
         &self,
-        addresses_with_amount: Vec<AddressWithAmount>,
+        params: Vec<SendAmountParams>,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_send_amount");
         let options = options.into();
-        let rent_structure = self.client.get_rent_structure().await?;
-        let token_supply = self.client.get_token_supply().await?;
+        let rent_structure = self.client().get_rent_structure().await?;
+        let token_supply = self.client().get_token_supply().await?;
 
         let account_addresses = self.addresses().await?;
         let default_return_address = account_addresses.first().ok_or(Error::FailedToGetRemainder)?;
 
-        let local_time = self.client.get_time_checked().await?;
+        let local_time = self.client().get_time_checked().await?;
 
         let mut outputs = Vec::new();
-        for AddressWithAmount {
+        for SendAmountParams {
             address,
             amount,
             return_address,
             expiration,
-        } in addresses_with_amount
+        } in params
         {
             let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
-            self.client.bech32_hrp_matches(&bech32_hrp).await?;
+            self.client().bech32_hrp_matches(&bech32_hrp).await?;
             let return_address = return_address
                 .map(|address| {
                     let (hrp, address) = Address::try_from_bech32_with_hrp(address)?;

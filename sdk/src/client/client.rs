@@ -3,11 +3,9 @@
 
 //! The Client module to connect through HORNET or Bee with API usages
 
-use std::{
-    sync::{Arc, RwLock},
-    time::Duration,
-};
+use std::{sync::Arc, time::Duration};
 
+use tokio::sync::RwLock;
 #[cfg(feature = "mqtt")]
 use {
     crate::client::node_api::mqtt::{BrokerOptions, MqttEvent, TopicHandlerMap},
@@ -20,7 +18,6 @@ use crate::client::constants::CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS;
 use crate::{
     client::{
         builder::{ClientBuilder, NetworkInfo},
-        constants::DEFAULT_TIPS_INTERVAL,
         error::Result,
         node_manager::NodeManager,
         Error,
@@ -33,20 +30,28 @@ use crate::{
 pub struct Client {
     pub(crate) inner: Arc<ClientInner>,
     #[cfg(not(target_family = "wasm"))]
-    pub(crate) _sync_handle: Arc<SyncHandle>,
+    pub(crate) _sync_handle: Arc<RwLock<SyncHandle>>,
 }
 
-pub(crate) struct ClientInner {
+impl core::ops::Deref for Client {
+    type Target = ClientInner;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+pub struct ClientInner {
     /// Node manager
-    pub(crate) node_manager: NodeManager,
+    pub(crate) node_manager: RwLock<NodeManager>,
     pub(crate) network_info: RwLock<NetworkInfo>,
     /// HTTP request timeout.
-    pub(crate) api_timeout: Duration,
+    pub(crate) api_timeout: RwLock<Duration>,
     /// HTTP request timeout for remote PoW API call.
-    pub(crate) remote_pow_timeout: Duration,
+    pub(crate) remote_pow_timeout: RwLock<Duration>,
     /// pow_worker_count for local PoW.
     #[cfg(not(target_family = "wasm"))]
-    pub(crate) pow_worker_count: Option<usize>,
+    pub(crate) pow_worker_count: RwLock<Option<usize>>,
     #[cfg(feature = "mqtt")]
     pub(crate) mqtt: MqttInner,
 }
@@ -66,11 +71,11 @@ impl Drop for SyncHandle {
 #[cfg(feature = "mqtt")]
 pub(crate) struct MqttInner {
     /// A MQTT client to subscribe/unsubscribe to topics.
-    pub(crate) client: tokio::sync::RwLock<Option<MqttClient>>,
-    pub(crate) topic_handlers: tokio::sync::RwLock<TopicHandlerMap>,
-    pub(crate) broker_options: BrokerOptions,
-    pub(crate) sender: WatchSender<MqttEvent>,
-    pub(crate) receiver: WatchReceiver<MqttEvent>,
+    pub(crate) client: RwLock<Option<MqttClient>>,
+    pub(crate) topic_handlers: RwLock<TopicHandlerMap>,
+    pub(crate) broker_options: RwLock<BrokerOptions>,
+    pub(crate) sender: RwLock<WatchSender<MqttEvent>>,
+    pub(crate) receiver: RwLock<WatchReceiver<MqttEvent>>,
 }
 
 impl std::fmt::Debug for Client {
@@ -88,7 +93,9 @@ impl Client {
     pub fn builder() -> ClientBuilder {
         ClientBuilder::new()
     }
+}
 
+impl ClientInner {
     /// Gets the network related information such as network_id and min_pow_score
     /// and if it's the default one, sync it first and set the NetworkInfo.
     pub async fn get_network_info(&self) -> Result<NetworkInfo> {
@@ -103,31 +110,17 @@ impl Client {
             let current_time = crate::utils::unix_timestamp_now().as_secs() as u32;
             if let Some(last_sync) = *LAST_SYNC.lock().unwrap() {
                 if current_time < last_sync {
-                    return Ok(self
-                        .inner
-                        .network_info
-                        .read()
-                        .map_err(|_| crate::client::Error::PoisonError)?
-                        .clone());
+                    return Ok(self.network_info.read().await.clone());
                 }
             }
             let info = self.get_info().await?.node_info;
-            let mut client_network_info = self
-                .inner
-                .network_info
-                .write()
-                .map_err(|_| crate::client::Error::PoisonError)?;
+            let mut client_network_info = self.network_info.write().await;
             client_network_info.protocol_parameters = info.protocol.try_into()?;
 
             *LAST_SYNC.lock().unwrap() = Some(current_time + CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS);
         }
 
-        Ok(self
-            .inner
-            .network_info
-            .read()
-            .map_err(|_| crate::client::Error::PoisonError)?
-            .clone())
+        Ok(self.network_info.read().await.clone())
     }
 
     /// Gets the protocol parameters of the node we're connecting to.
@@ -176,37 +169,26 @@ impl Client {
     }
 
     /// returns the tips interval
-    pub fn get_tips_interval(&self) -> u64 {
-        self.inner
-            .network_info
-            .read()
-            .map_or(DEFAULT_TIPS_INTERVAL, |info| info.tips_interval)
+    pub async fn get_tips_interval(&self) -> u64 {
+        self.network_info.read().await.tips_interval
     }
 
     /// returns if local pow should be used or not
-    pub fn get_local_pow(&self) -> bool {
-        self.inner
-            .network_info
-            .read()
-            .map_or(NetworkInfo::default().local_pow, |info| info.local_pow)
+    pub async fn get_local_pow(&self) -> bool {
+        self.network_info.read().await.local_pow
     }
 
-    pub(crate) fn get_timeout(&self) -> Duration {
-        self.inner.api_timeout
+    pub(crate) async fn get_timeout(&self) -> Duration {
+        *self.api_timeout.read().await
     }
 
-    pub(crate) fn get_remote_pow_timeout(&self) -> Duration {
-        self.inner.remote_pow_timeout
+    pub(crate) async fn get_remote_pow_timeout(&self) -> Duration {
+        *self.remote_pow_timeout.read().await
     }
 
     /// returns the fallback_to_local_pow
-    pub fn get_fallback_to_local_pow(&self) -> bool {
-        self.inner
-            .network_info
-            .read()
-            .map_or(NetworkInfo::default().fallback_to_local_pow, |info| {
-                info.fallback_to_local_pow
-            })
+    pub async fn get_fallback_to_local_pow(&self) -> bool {
+        self.network_info.read().await.fallback_to_local_pow
     }
 
     /// Validates if a bech32 HRP matches the one from the connected network.

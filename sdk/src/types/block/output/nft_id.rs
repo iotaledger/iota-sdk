@@ -30,30 +30,3 @@ impl NftId {
         Address::Nft(NftAddress::new(*self)).to_bech32(bech32_hrp)
     }
 }
-
-#[allow(missing_docs)]
-pub mod dto {
-    use alloc::string::ToString;
-
-    use serde::{Deserialize, Serialize};
-
-    use super::*;
-    use crate::types::block::Error;
-
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct NftIdDto(pub String);
-
-    impl From<&NftId> for NftIdDto {
-        fn from(value: &NftId) -> Self {
-            Self(value.to_string())
-        }
-    }
-
-    impl TryFrom<&NftIdDto> for NftId {
-        type Error = Error;
-
-        fn try_from(value: &NftIdDto) -> Result<Self, Self::Error> {
-            value.0.parse::<Self>().map_err(|_| Error::InvalidField("NFT id"))
-        }
-    }
-}

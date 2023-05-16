@@ -171,7 +171,7 @@ async fn stronghold_snapshot_v2_v3_migration_with_backup() {
     )
     .unwrap();
 
-    let mut stronghold_secret_manager = StrongholdSecretManager::builder()
+    let stronghold_secret_manager = StrongholdSecretManager::builder()
         .password("new_password")
         .build("./tests/wallet/fixtures/v3_with_backup.stronghold")
         .unwrap();

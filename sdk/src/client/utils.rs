@@ -12,7 +12,7 @@ use crypto::{
 };
 use zeroize::Zeroize;
 
-use super::Client;
+use super::{Client, ClientInner};
 use crate::{
     client::{Error, Result},
     types::block::{
@@ -95,16 +95,19 @@ pub async fn request_funds_from_faucet(url: &str, bech32_address: &str) -> Resul
     map.insert("address", bech32_address);
 
     let client = reqwest::Client::new();
-    let faucet_response = client.post(url).json(&map).send().await?.text().await?;
+    let faucet_response = client
+        .post(url)
+        .json(&map)
+        .send()
+        .await
+        .map_err(|err| Error::Node(err.into()))?
+        .text()
+        .await
+        .map_err(|err| Error::Node(err.into()))?;
     Ok(faucet_response)
 }
 
-impl Client {
-    /// Transforms bech32 to hex
-    pub fn bech32_to_hex(bech32: &str) -> crate::client::Result<String> {
-        bech32_to_hex(bech32)
-    }
-
+impl ClientInner {
     /// Transforms a hex encoded address to a bech32 encoded address
     pub async fn hex_to_bech32(&self, hex: &str, bech32_hrp: Option<&str>) -> crate::client::Result<String> {
         match bech32_hrp {
@@ -143,6 +146,13 @@ impl Client {
             Some(hrp) => Ok(hex_public_key_to_bech32_address(hex, hrp)?),
             None => Ok(hex_public_key_to_bech32_address(hex, &self.get_bech32_hrp().await?)?),
         }
+    }
+}
+
+impl Client {
+    /// Transforms bech32 to hex
+    pub fn bech32_to_hex(bech32: &str) -> crate::client::Result<String> {
+        bech32_to_hex(bech32)
     }
 
     /// Generates a new mnemonic.

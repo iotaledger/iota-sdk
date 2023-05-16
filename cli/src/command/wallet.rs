@@ -253,7 +253,7 @@ pub async fn unlock_wallet(storage_path: &Path, snapshot_path: &Path, password: 
 
 pub async fn add_account(wallet: &Wallet, alias: Option<String>) -> Result<String, Error> {
     let account = wallet.create_account().with_alias(alias).finish().await?;
-    let alias = account.read().await.alias().to_string();
+    let alias = account.details().await.alias().to_string();
 
     println_log_info!("Created account \"{alias}\"");
 

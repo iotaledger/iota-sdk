@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import org.iota.types.Account;
-import org.iota.types.OutputOptions;
+import org.iota.types.OutputParams;
 import org.iota.types.Transaction;
 import org.iota.types.account_methods.PrepareOutput;
 import org.iota.types.account_methods.SendOutputs;
@@ -22,14 +22,12 @@ public class ExampleUtils {
     }
 
     public static void setUpOutputToClaim(Account a) throws WalletException, InterruptedException {
-        Transaction t = a.sendOutputs(new SendOutputs().withOutputs(new Output[]{
-                a.prepareOutput(new PrepareOutput().withOptions(new OutputOptions()
+        Transaction t = a.sendOutputs(new SendOutputs().withOutputs(new Output[] {
+                a.prepareOutput(new PrepareOutput().withParams(new OutputParams()
                         .withAmount("1000000")
                         .withRecipientAddress(a.getPublicAddresses()[0].getAddress())
-                        .withUnlocks(new OutputOptions.Unlocks()
-                                .withExpirationUnixTime(Math.round(new Date().getTime() / 1000) + 1)
-                        )
-                ))
+                        .withUnlocks(new OutputParams.Unlocks()
+                                .withExpirationUnixTime(Math.round(new Date().getTime() / 1000) + 1))))
         }));
         Thread.sleep(5);
         System.out.println(t);

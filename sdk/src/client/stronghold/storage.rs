@@ -22,7 +22,7 @@ impl StorageProvider for StrongholdAdapter {
     type Error = Error;
 
     #[allow(clippy::significant_drop_tightening)]
-    async fn get(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
+    async fn get(&self, k: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
         let stronghold_client = self.stronghold.lock().await.get_client(PRIVATE_DATA_CLIENT_PATH)?;
 
         let mut data = match stronghold_client.store().get(k)? {
@@ -44,7 +44,7 @@ impl StorageProvider for StrongholdAdapter {
         Ok(Some(decrypted_value))
     }
 
-    async fn insert(&mut self, k: &[u8], v: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
+    async fn insert(&self, k: &[u8], v: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
         let store_key_location = Location::generic(SECRET_VAULT_PATH, USERDATA_STORE_KEY_RECORD_PATH);
 
         let stronghold_client = self.stronghold.lock().await.get_client(PRIVATE_DATA_CLIENT_PATH)?;
@@ -68,7 +68,7 @@ impl StorageProvider for StrongholdAdapter {
         Ok(decrypted_previous_data)
     }
 
-    async fn delete(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
+    async fn delete(&self, k: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
         Ok(self
             .stronghold
             .lock()
@@ -120,7 +120,7 @@ mod tests {
 
         fs::remove_file(snapshot_path).unwrap_or(());
 
-        let mut stronghold = StrongholdAdapter::builder()
+        let stronghold = StrongholdAdapter::builder()
             .password("drowssap")
             .build(snapshot_path)
             .unwrap();

@@ -10,6 +10,7 @@ use crate::{
     client::secret::{SecretManager, SecretManagerDto},
     wallet::{
         account::{AccountDetails, SyncOptions},
+        migration::migrate_storage,
         storage::{constants::*, Storage, StorageAdapter},
         WalletBuilder,
     },
@@ -52,10 +53,12 @@ impl StorageManager {
         storage: impl StorageAdapter + Send + Sync + 'static,
         encryption_key: impl Into<Option<[u8; 32]>> + Send,
     ) -> crate::wallet::Result<Self> {
-        let mut storage = Storage {
+        let storage = Storage {
             inner: Box::new(storage) as _,
             encryption_key: encryption_key.into(),
         };
+        migrate_storage(&storage).await?;
+
         // Get the db version or set it
         if let Some(db_schema_version) = storage.get::<u8>(DATABASE_SCHEMA_VERSION_KEY).await? {
             if db_schema_version != DATABASE_SCHEMA_VERSION {
@@ -92,7 +95,7 @@ impl StorageManager {
         self.storage.get(key).await
     }
 
-    pub async fn save_wallet_data(&mut self, wallet_builder: &WalletBuilder) -> crate::wallet::Result<()> {
+    pub async fn save_wallet_data(&self, wallet_builder: &WalletBuilder) -> crate::wallet::Result<()> {
         log::debug!("save_wallet_data");
         self.storage.set(WALLET_INDEXATION_KEY, wallet_builder).await?;
 
@@ -183,7 +186,7 @@ impl StorageManager {
     }
 
     pub async fn set_default_sync_options(
-        &mut self,
+        &self,
         account_index: u32,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<()> {
@@ -194,5 +197,66 @@ impl StorageManager {
     pub async fn get_default_sync_options(&self, account_index: u32) -> crate::wallet::Result<Option<SyncOptions>> {
         let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}-{ACCOUNT_SYNC_OPTIONS}");
         self.storage.get(&key).await
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::wallet::storage::adapter::memory::{Memory, STORAGE_ID};
+
+    #[tokio::test]
+    async fn id() {
+        let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
+        assert_eq!(storage_manager.id(), STORAGE_ID);
+        assert!(!storage_manager.is_encrypted());
+    }
+
+    #[tokio::test]
+    async fn get() {
+        #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+        struct Record {
+            a: String,
+            b: u32,
+            c: i64,
+        }
+
+        let rec = Record {
+            a: "test".to_string(),
+            b: 42,
+            c: -420,
+        };
+        let storage = Memory::default();
+        storage.set("key", serde_json::to_string(&rec).unwrap()).await.unwrap();
+
+        let storage_manager = StorageManager::new(storage, None).await.unwrap();
+        assert_eq!(Some(rec), storage_manager.get::<Record>("key").await.unwrap());
+    }
+
+    #[tokio::test]
+    async fn save_remove_account() {
+        let mut storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
+        assert!(storage_manager.get_accounts().await.unwrap().is_empty());
+
+        let account_details = AccountDetails::mock();
+
+        storage_manager.save_account(&account_details).await.unwrap();
+        let accounts = storage_manager.get_accounts().await.unwrap();
+        assert_eq!(accounts.len(), 1);
+        assert_eq!(accounts[0].alias(), "Alice");
+
+        storage_manager.remove_account(0).await.unwrap();
+        assert!(storage_manager.get_accounts().await.unwrap().is_empty());
+    }
+
+    #[tokio::test]
+    async fn save_get_wallet_data() {
+        let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
+        assert!(storage_manager.get_wallet_data().await.unwrap().is_none());
+
+        let wallet_builder = WalletBuilder::new();
+        storage_manager.save_wallet_data(&wallet_builder).await.unwrap();
+
+        assert!(storage_manager.get_wallet_data().await.unwrap().is_some());
     }
 }

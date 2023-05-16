@@ -90,10 +90,13 @@ pub fn listen_wallet(wallet: &Wallet, events: Vec<String>, handler: PyObject) {
 #[pyfunction]
 pub fn get_client_from_wallet(wallet: &Wallet) -> Result<Client> {
     let client = crate::block_on(async {
-        match wallet.wallet.read().await.as_ref() {
-            Some(wallet) => wallet.get_client().await.map_err(Error::from),
-            None => Err("wallet got destroyed".into()),
-        }
+        wallet
+            .wallet
+            .read()
+            .await
+            .as_ref()
+            .map(|w| w.client().clone())
+            .ok_or_else(|| Error::from("wallet got destroyed"))
     })?;
 
     Ok(Client { client })

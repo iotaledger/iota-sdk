@@ -1,9 +1,9 @@
 import type { OutputTypes, HexEncodedAmount } from '@iota/types';
 import type { SyncOptions, FilterOptions } from '../account';
 import type {
-    AddressWithAmount,
-    AddressNativeTokens,
-    AddressNftId,
+    SendAmountParams,
+    SendNativeTokensParams,
+    SendNftParams,
     GenerateAddressOptions,
 } from '../address';
 import type {
@@ -13,16 +13,15 @@ import type {
     BuildNftOutputData,
 } from '../buildOutputData';
 import type { INode } from '../../client';
-import type { OutputOptions } from '../outputOptions';
+import type { OutputParams } from '../outputParams';
 import type { OutputsToClaim } from '../output';
 import type { SignedTransactionEssence } from '../signedTransactionEssence';
 import type { PreparedTransactionData } from '../preparedTransactionData';
 import type {
-    AliasOutputOptions,
-    IncreaseNativeTokenSupplyOptions,
-    NativeTokenOptions,
+    AliasOutputParams,
+    MintNativeTokenParams,
     TransactionOptions,
-    NftOptions,
+    MintNftParams,
 } from '../transactionOptions';
 import type {
     ParticipationEventId,
@@ -85,7 +84,7 @@ export type __ConsolidateOutputsMethod__ = {
 export type __CreateAliasOutputMethod__ = {
     name: 'createAliasOutput';
     data: {
-        aliasOutputOptions?: AliasOutputOptions;
+        params?: AliasOutputParams;
         options?: TransactionOptions;
     };
 };
@@ -215,7 +214,6 @@ export type __IncreaseNativeTokenSupplyMethod__ = {
     data: {
         tokenId: string;
         mintAmount: HexEncodedAmount;
-        increaseNativeTokenSupplyOptions?: IncreaseNativeTokenSupplyOptions;
         options?: TransactionOptions;
     };
 };
@@ -223,7 +221,7 @@ export type __IncreaseNativeTokenSupplyMethod__ = {
 export type __MintNativeTokenMethod__ = {
     name: 'mintNativeToken';
     data: {
-        nativeTokenOptions: NativeTokenOptions;
+        params: MintNativeTokenParams;
         options?: TransactionOptions;
     };
 };
@@ -231,7 +229,7 @@ export type __MintNativeTokenMethod__ = {
 export type __MintNftsMethod__ = {
     name: 'mintNfts';
     data: {
-        nftsOptions: NftOptions[];
+        params: MintNftParams[];
         options?: TransactionOptions;
     };
 };
@@ -239,7 +237,7 @@ export type __MintNftsMethod__ = {
 export type __PrepareOutputMethod__ = {
     name: 'prepareOutput';
     data: {
-        options: OutputOptions;
+        params: OutputParams;
         transactionOptions?: TransactionOptions;
     };
 };
@@ -247,7 +245,7 @@ export type __PrepareOutputMethod__ = {
 export type __PrepareSendAmountMethod__ = {
     name: 'prepareSendAmount';
     data: {
-        addressesWithAmount: AddressWithAmount[];
+        params: SendAmountParams[];
         options?: TransactionOptions;
     };
 };
@@ -279,7 +277,7 @@ export type __RetryTransactionUntilIncludedMethod__ = {
 export type __SendAmountMethod__ = {
     name: 'sendAmount';
     data: {
-        addressesWithAmount: AddressWithAmount[];
+        params: SendAmountParams[];
         options?: TransactionOptions;
     };
 };
@@ -287,7 +285,7 @@ export type __SendAmountMethod__ = {
 export type __SendNativeTokensMethod__ = {
     name: 'sendNativeTokens';
     data: {
-        addressesAndNativeTokens: AddressNativeTokens[];
+        params: SendNativeTokensParams[];
         options?: TransactionOptions;
     };
 };
@@ -295,7 +293,7 @@ export type __SendNativeTokensMethod__ = {
 export type __SendNftMethod__ = {
     name: 'sendNft';
     data: {
-        addressesAndNftIds: AddressNftId[];
+        params: SendNftParams[];
         options?: TransactionOptions;
     };
 };

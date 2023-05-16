@@ -11,10 +11,7 @@ public class IncreaseNativeTokenSupply implements AccountMethod {
 
     private TokenId tokenId;
     private String mintAmount;
-    private IncreaseNativeTokenSupplyOptions increaseNativeTokenSupplyOptions;
     private TransactionOptions transactionOptions;
-
-    public static class IncreaseNativeTokenSupplyOptions {}
 
     public IncreaseNativeTokenSupply withTokenId(TokenId tokenId) {
         this.tokenId = tokenId;
@@ -23,11 +20,6 @@ public class IncreaseNativeTokenSupply implements AccountMethod {
 
     public IncreaseNativeTokenSupply withMintAmount(String mintAmount) {
         this.mintAmount = mintAmount;
-        return this;
-    }
-
-    public IncreaseNativeTokenSupply withIncreaseNativeTokenSupplyOptions(IncreaseNativeTokenSupplyOptions increaseNativeTokenSupplyOptions) {
-        this.increaseNativeTokenSupplyOptions = increaseNativeTokenSupplyOptions;
         return this;
     }
 
