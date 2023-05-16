@@ -90,3 +90,11 @@ impl From<&str> for Error {
         }
     }
 }
+
+impl From<String> for Error {
+    fn from(err: String) -> Self {
+        Self {
+            error: PyErr::new::<exceptions::PyValueError, _>(err),
+        }
+    }
+}
