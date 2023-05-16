@@ -9,9 +9,9 @@ async function run() {
         const account = await manager.getAccount('0');
 
         await account.sync();
-
+        
         const address =
-            'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0';
+        'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0';
         const amount = '1000000';
 
         const preparedTransaction = await account.prepareSendAmount([
@@ -21,13 +21,9 @@ async function run() {
             },
         ]);
 
-        const signedTransactionEssence = await account.signTransactionEssence(
-            preparedTransaction,
-        );
-        const response = await account.submitAndStoreTransaction(
-            signedTransactionEssence,
-        );
-
+        const signedTransactionEssence = await account.signTransactionEssence(preparedTransaction)
+        const response = await account.submitAndStoreTransaction(signedTransactionEssence)
+        
         console.log(
             `Check block on ${process.env.EXPLORER_URL}/block/${response.blockId}`,
         );

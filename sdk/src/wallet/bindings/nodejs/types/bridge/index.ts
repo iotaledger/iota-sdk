@@ -4,12 +4,14 @@ import type {
     __BuildBasicOutputMethod__,
     __BuildFoundryOutputMethod__,
     __BuildNftOutputMethod__,
+    __BurnNativeTokenMethod__,
+    __BurnNftMethod__,
     __ClaimOutputsMethod__,
-    __PrepareConsolidateOutputsMethod__,
-    __PrepareCreateAliasOutputMethod__,
-    __PrepareDecreaseNativeTokenSupplyMethod__,
-    __PrepareDestroyAliasMethod__,
-    __PrepareDestroyFoundryMethod__,
+    __ConsolidateOutputsMethod__,
+    __CreateAliasOutputMethod__,
+    __DecreaseNativeTokenSupplyMethod__,
+    __DestroyAliasMethod__,
+    __DestroyFoundryMethod__,
     __DeregisterParticipationEventMethod__,
     __GenerateAddressesMethod__,
     __GetBalanceMethod__,
@@ -21,15 +23,13 @@ import type {
     __AddressesWithUnspentOutputsMethod__,
     __OutputsMethod__,
     __PendingTransactionsMethod__,
-    __PrepareBurnNativeTokenMethod__,
-    __PrepareBurnNftMethod__,
     __IncomingTransactionsMethod__,
     __TransactionsMethod__,
     __UnspentOutputsMethod__,
     __MinimumRequiredStorageDepositMethod__,
-    __PrepareIncreaseNativeTokenSupplyMethod__,
-    __PrepareMintNativeTokenMethod__,
-    __PrepareMintNftsMethod__,
+    __IncreaseNativeTokenSupplyMethod__,
+    __MintNativeTokenMethod__,
+    __MintNftsMethod__,
     __PrepareOutputMethod__,
     __PrepareSendAmountMethod__,
     __PrepareTransactionMethod__,
@@ -37,25 +37,24 @@ import type {
     __RequestFundsFromFaucetMethod__,
     __RetryTransactionUntilIncludedMethod__,
     __SendAmountMethod__,
-    __PrepareSendNativeTokensMethod__,
-    __PrepareSendNftMethod__,
+    __SendNativeTokensMethod__,
+    __SendNftMethod__,
     __SendOutputsMethod__,
     __SetAliasMethod__,
     __SetDefaultSyncOptionsMethod__,
-    __SignAndSubmitTransaction__,
     __SignTransactionEssenceMethod__,
     __SubmitAndStoreTransactionMethod__,
     __SyncAccountMethod__,
     __GetIncomingTransactionDataMethod__,
-    __PrepareVoteMethod__,
+    __VoteMethod__,
     __GetParticipationOverviewMethod__,
     __GetParticipationEventMethod__,
     __GetParticipationEventsMethod__,
     __GetParticipationEventStatusMethod__,
     __GetParticipationEventIdsMethod__,
-    __PrepareIncreaseVotingPowerMethod__,
-    __PrepareDecreaseVotingPowerMethod__,
-    __PrepareStopParticipatingMethod__,
+    __IncreaseVotingPowerMethod__,
+    __DecreaseVotingPowerMethod__,
+    __StopParticipatingMethod__,
 } from './account';
 import type {
     __BackupMessage__,
@@ -92,12 +91,14 @@ export type __AccountMethod__ =
     | __BuildBasicOutputMethod__
     | __BuildFoundryOutputMethod__
     | __BuildNftOutputMethod__
+    | __BurnNativeTokenMethod__
+    | __BurnNftMethod__
     | __ClaimOutputsMethod__
-    | __PrepareConsolidateOutputsMethod__
-    | __PrepareCreateAliasOutputMethod__
+    | __ConsolidateOutputsMethod__
+    | __CreateAliasOutputMethod__
     | __DeregisterParticipationEventMethod__
-    | __PrepareDestroyAliasMethod__
-    | __PrepareDestroyFoundryMethod__
+    | __DestroyAliasMethod__
+    | __DestroyFoundryMethod__
     | __GenerateAddressesMethod__
     | __GetBalanceMethod__
     | __GetOutputMethod__
@@ -113,16 +114,14 @@ export type __AccountMethod__ =
     | __AddressesWithUnspentOutputsMethod__
     | __OutputsMethod__
     | __PendingTransactionsMethod__
-    | __PrepareBurnNativeTokenMethod__
-    | __PrepareBurnNftMethod__
     | __IncomingTransactionsMethod__
     | __TransactionsMethod__
     | __UnspentOutputsMethod__
-    | __PrepareDecreaseNativeTokenSupplyMethod__
+    | __DecreaseNativeTokenSupplyMethod__
     | __MinimumRequiredStorageDepositMethod__
-    | __PrepareIncreaseNativeTokenSupplyMethod__
-    | __PrepareMintNativeTokenMethod__
-    | __PrepareMintNftsMethod__
+    | __IncreaseNativeTokenSupplyMethod__
+    | __MintNativeTokenMethod__
+    | __MintNftsMethod__
     | __PrepareOutputMethod__
     | __PrepareSendAmountMethod__
     | __PrepareTransactionMethod__
@@ -130,20 +129,19 @@ export type __AccountMethod__ =
     | __RequestFundsFromFaucetMethod__
     | __RetryTransactionUntilIncludedMethod__
     | __SendAmountMethod__
-    | __PrepareSendNativeTokensMethod__
-    | __PrepareSendNftMethod__
+    | __SendNativeTokensMethod__
+    | __SendNftMethod__
     | __SendOutputsMethod__
     | __SetAliasMethod__
     | __SetDefaultSyncOptionsMethod__
     | __SignTransactionEssenceMethod__
-    | __SignAndSubmitTransaction__
     | __SubmitAndStoreTransactionMethod__
     | __SyncAccountMethod__
-    | __PrepareVoteMethod__
-    | __PrepareStopParticipatingMethod__
+    | __VoteMethod__
+    | __StopParticipatingMethod__
     | __GetParticipationOverviewMethod__
-    | __PrepareIncreaseVotingPowerMethod__
-    | __PrepareDecreaseVotingPowerMethod__;
+    | __IncreaseVotingPowerMethod__
+    | __DecreaseVotingPowerMethod__;
 
 export type __CallAccountMethodMessage__ = {
     cmd: 'callAccountMethod';

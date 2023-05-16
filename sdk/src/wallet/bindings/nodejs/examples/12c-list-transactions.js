@@ -7,9 +7,9 @@ async function run() {
     try {
         const manager = await getUnlockedManager();
         const account = await manager.getAccount('Alice');
-
+        
         await account.sync();
-        const transactions = await account.transactions();
+        const transactions = await account.transactions()
         console.log('Listing Transactions:', transactions);
     } catch (error) {
         console.log('Error: ', error);

@@ -11,9 +11,7 @@ async function run() {
             storagePath: './alice-database',
         });
 
-        await manager.setStrongholdPassword(
-            `${process.env.STRONGHOLD_PASSWORD}`,
-        );
+        await manager.setStrongholdPassword(`${process.env.STRONGHOLD_PASSWORD}`)
 
         const account = await manager.getAccount('Alice');
         console.log('Account:', account);
@@ -21,8 +19,7 @@ async function run() {
         const response = await account.sendAmount([
             {
                 //TODO: Replace with the address of your choice!
-                address:
-                    'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0',
+                address: 'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0',
                 amount: '1000000',
             },
         ]);

@@ -45,7 +45,7 @@ async function main() {
     });
 
     // Get the first address and print it.
-    const address = await account.addresses().then((addresses) => addresses[0]);
+    const address = await account.addresses().then(addresses => addresses[0]);
     console.log(`Address:\n${address.address}\n`);
 
     process.exit(0);

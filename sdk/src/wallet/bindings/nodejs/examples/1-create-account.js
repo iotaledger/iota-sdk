@@ -1,7 +1,7 @@
 /**
  * This example creates a new database and account
  */
-const path = require('path');
+const path = require('path')
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const { AccountManager, CoinType } = require('@iota/wallet');
 

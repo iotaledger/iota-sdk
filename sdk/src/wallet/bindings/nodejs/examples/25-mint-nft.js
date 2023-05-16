@@ -11,15 +11,13 @@ async function run() {
 
         await account.sync();
 
-        const response = await account
-            .prepareMintNfts([
-                {
-                    // Hello in bytes
-                    immutableMetadata: '0x48656c6c6f',
-                    metadata: '0x48656c6c6f',
-                },
-            ])
-            .then((prepared) => prepared.finish());
+        const response = await account.mintNfts([
+            {
+                // Hello in bytes
+                immutableMetadata: '0x48656c6c6f',
+                metadata: '0x48656c6c6f',
+            }
+        ]);
 
         console.log(response);
 

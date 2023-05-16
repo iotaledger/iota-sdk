@@ -17,15 +17,13 @@ async function run() {
         const amount = '1';
 
         const response = await account.sendAmount(
-            [
-                {
-                    address,
-                    amount,
-                },
-            ],
+            [{
+                address,
+                amount,
+            }],
             {
                 allowMicroAmount: true,
-            },
+            }
         );
 
         console.log(

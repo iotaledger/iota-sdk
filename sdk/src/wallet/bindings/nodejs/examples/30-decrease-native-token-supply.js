@@ -16,11 +16,9 @@ async function run() {
         let tokenId =
             '0x08e6210d29881310db2afde095e594f6f006fcdbd06e7a83b74bd2bdf3b5190d0e0200000000';
         // `100` hex encoded
-        let meltAmount = '0xc8';
+        let meltAmount = "0xc8"
 
-        const response = await account
-            .prepareDecreaseNativeTokenSupply(tokenId, meltAmount)
-            .then((prepared) => prepared.finish());
+        const response = await account.decreaseNativeTokenSupply(tokenId, meltAmount);
 
         console.log(response);
 

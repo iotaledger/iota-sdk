@@ -15,7 +15,7 @@ async function run() {
         const addressObject = await account.addresses();
         console.log('Addresses before:', addressObject);
 
-        // syncOnlyMostBasicOutputs if not interested in outputs that are timelocked,
+        // syncOnlyMostBasicOutputs if not interested in outputs that are timelocked, 
         // have a storage deposit return, expiration or are nft/alias/foundry outputs
         const synced = await account.sync({ syncOnlyMostBasicOutputs: true });
         console.log('Syncing... - ', synced);
@@ -23,9 +23,7 @@ async function run() {
         console.log('Available balance', await account.getBalance());
 
         // Use the Faucet to send testnet tokens to your address:
-        console.log(
-            'Fill your address with the Faucet: https://faucet.testnet.shimmer.network/',
-        );
+        console.log("Fill your address with the Faucet: https://faucet.testnet.shimmer.network/")
     } catch (error) {
         console.log('Error: ', error);
     }
