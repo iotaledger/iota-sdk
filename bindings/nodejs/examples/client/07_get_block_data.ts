@@ -5,7 +5,7 @@ import { Client, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/client/07_get_block_data.js
+// yarn run-example ./client/07_get_block_data.ts
 
 // In this example we will send a block and get the data and metadata for it
 async function run() {

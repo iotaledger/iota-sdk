@@ -10,7 +10,7 @@ import {
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/secretManager/generate_addresses.js
+// yarn run-example ./secretManager/generate_addresses.ts
 
 // In this example we will create addresses from a mnemonic defined in .env
 async function run() {
