@@ -31,7 +31,8 @@ async fn main() -> Result<()> {
     let address = Bech32Address::try_from_str(
         std::env::args()
             .nth(2)
-            .unwrap_or_else(|| String::from("rms1qrrdjmdkadtcnuw0ue5n9g4fmkelrj3dl26eyeshkha3w3uu0wheu5z5qqz")),
+            .as_deref()
+            .unwrap_or("rms1qrrdjmdkadtcnuw0ue5n9g4fmkelrj3dl26eyeshkha3w3uu0wheu5z5qqz"),
     )?;
 
     // Get output IDs of alias outputs that can be controlled by this address.

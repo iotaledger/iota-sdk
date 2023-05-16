@@ -65,7 +65,7 @@ async fn main() -> Result<()> {
 
     // send transaction
     let outputs = vec![SendAmountParams::new(
-        Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu").unwrap(),
+        Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
         1_000_000,
     )];
     let transaction = account.send_amount(outputs, None).await?;

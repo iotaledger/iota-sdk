@@ -31,7 +31,8 @@ async fn main() -> Result<()> {
     let alias_address = Bech32Address::try_from_str(
         std::env::args()
             .nth(2)
-            .unwrap_or_else(|| String::from("rms1prd5mdmy84mgzwwklzkrl8ym02p2y3dkr8af7lqclnv0pan7274uyjrmwx5")),
+            .as_deref()
+            .unwrap_or("rms1prd5mdmy84mgzwwklzkrl8ym02p2y3dkr8af7lqclnv0pan7274uyjrmwx5"),
     )?;
 
     // Get output IDs of foundry outputs that can be controlled by this address.

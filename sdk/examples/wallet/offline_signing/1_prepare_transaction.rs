@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
 
     let outputs = vec![SendAmountParams::new(
         // Address to which we want to send the amount.
-        Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu").unwrap(),
+        Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
         // The amount to send.
         1_000_000,
     )];

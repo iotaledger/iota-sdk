@@ -35,17 +35,17 @@ async fn main() -> Result<()> {
         .await?;
 
     let nft_options = vec![MintNftParams {
-        address: Some(
-            Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu").unwrap(),
-        ),
-        sender: Some(
-            Bech32Address::try_from_str("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy").unwrap(),
-        ),
+        address: Some(Bech32Address::try_from_str(
+            "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
+        )?),
+        sender: Some(Bech32Address::try_from_str(
+            "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
+        )?),
         metadata: Some(b"some NFT metadata".to_vec()),
         tag: Some(b"some NFT tag".to_vec()),
-        issuer: Some(
-            Bech32Address::try_from_str("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy").unwrap(),
-        ),
+        issuer: Some(Bech32Address::try_from_str(
+            "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
+        )?),
         immutable_metadata: Some(b"some NFT immutable metadata".to_vec()),
     }];
 

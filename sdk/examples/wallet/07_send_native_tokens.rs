@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
             .await?;
 
         let bech32_address =
-            Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu").unwrap();
+            Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?;
 
         let outputs = vec![SendNativeTokensParams {
             address: bech32_address,

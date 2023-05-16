@@ -8,12 +8,12 @@ use iota_sdk_bindings_core::{call_utils_method, Response, Result, UtilsMethod};
 async fn utils() -> Result<()> {
     let response = call_utils_method(UtilsMethod::GenerateMnemonic);
     match response {
-        Response::GeneratedMnemonic(mnemonic) => println!("{:?}", serde_json::to_string(&mnemonic).unwrap()),
+        Response::GeneratedMnemonic(mnemonic) => println!("{:?}", serde_json::to_string(&mnemonic)?),
         _ => panic!("Unexpected response type"),
     };
 
     let bech32_address =
-        Bech32Address::try_from_str("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy").unwrap();
+        Bech32Address::try_from_str("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
     let method = UtilsMethod::Bech32ToHex { bech32: bech32_address };
 
     let response = call_utils_method(method);

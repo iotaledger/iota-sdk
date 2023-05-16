@@ -32,8 +32,7 @@ async fn main() -> Result<()> {
             .await?;
 
         let outputs = vec![SendNftParams {
-            address: Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")
-                .unwrap(),
+            address: Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
             nft_id: *nft_id,
         }];
 
