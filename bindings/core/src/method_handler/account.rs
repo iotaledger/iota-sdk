@@ -30,9 +30,8 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
     let response = match method {
         AccountMethod::Burn { burn, options } => {
             let transaction = account
-                .burn_native_token(
-                    token_id,
-                    U256::try_from(&burn_amount).map_err(|_| Error::InvalidField("burn_amount"))?,
+                .burn(
+                    Burn::try_from(&burn)?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
