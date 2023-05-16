@@ -5,8 +5,7 @@
 //!
 //! `cargo run --example verify_ed25519_signature --release`
 
-use crypto::signatures::ed25519;
-use iota_sdk::wallet::Result;
+use iota_sdk::{crypto::signatures::ed25519, wallet::Result};
 
 const FOUNDRY_METADATA: &str = r#"{"standard":"IRC30","name":"NativeToken","description":"A native token","symbol":"NT","decimals":6,"logoUrl":"https://my.website/nativeToken.png"}"#;
 const PUBLIC_KEY: &str = "0x67b7fc3f78763c9394fc4fcdb52cf3a973b6e064bdc3defb40a6cb2c880e6f5c";
