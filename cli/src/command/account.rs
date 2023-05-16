@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 use clap::{Parser, Subcommand};
 use iota_sdk::{
-    client::{api::input_selection::Burn, request_funds_from_faucet},
+    client::request_funds_from_faucet,
     types::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
@@ -259,10 +259,10 @@ pub async fn burn_native_token_command(account: &Account, token_id: String, amou
 
     let transaction = account
         .burn(
-            Burn::new().add_native_token(
+            NativeToken::new(
                 TokenId::from_str(&token_id)?,
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-            ),
+            )?,
             None,
         )
         .await?;
@@ -280,9 +280,7 @@ pub async fn burn_native_token_command(account: &Account, token_id: String, amou
 pub async fn burn_nft_command(account: &Account, nft_id: String) -> Result<(), Error> {
     println_log_info!("Burning nft {nft_id}.");
 
-    let transaction = account
-        .burn(Burn::new().add_nft(NftId::from_str(&nft_id)?), None)
-        .await?;
+    let transaction = account.burn(NftId::from_str(&nft_id)?, None).await?;
 
     println_log_info!(
         "Burning transaction sent:\n{:?}\n{:?}",
@@ -437,9 +435,7 @@ pub async fn decrease_native_token_command(account: &Account, token_id: String, 
 pub async fn destroy_alias_command(account: &Account, alias_id: String) -> Result<(), Error> {
     println_log_info!("Destroying alias {alias_id}.");
 
-    let transaction = account
-        .burn(Burn::new().add_alias(AliasId::from_str(&alias_id)?), None)
-        .await?;
+    let transaction = account.burn(AliasId::from_str(&alias_id)?, None).await?;
 
     println_log_info!(
         "Destroying alias transaction sent:\n{:?}\n{:?}",
@@ -454,9 +450,7 @@ pub async fn destroy_alias_command(account: &Account, alias_id: String) -> Resul
 pub async fn destroy_foundry_command(account: &Account, foundry_id: String) -> Result<(), Error> {
     println_log_info!("Destroying foundry {foundry_id}.");
 
-    let transaction = account
-        .burn(Burn::new().add_foundry(FoundryId::from_str(&foundry_id)?), None)
-        .await?;
+    let transaction = account.burn(FoundryId::from_str(&foundry_id)?, None).await?;
 
     println_log_info!(
         "Destroying foundry transaction sent:\n{:?}\n{:?}",
