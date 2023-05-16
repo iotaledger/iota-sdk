@@ -3,11 +3,9 @@
 
 use alloc::string::String;
 
-use crate::{
-    types::block::{
-        address::{Address, AliasAddress},
-        output::OutputId,
-    },
+use crate::types::block::{
+    address::{Address, AliasAddress},
+    output::OutputId,
 };
 
 impl_id!(pub AliasId, 32, "TODO.");
