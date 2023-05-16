@@ -11,6 +11,14 @@ use crate::wallet::Error;
 
 pub struct Migrate;
 
+fn migrate_native_token(output: &mut serde_json::Value) {
+    let native_tokens = output["native_tokens"]["inner"].as_array_mut().unwrap();
+
+    for native_token in native_tokens.iter_mut() {
+        *native_token = serde_json::json!({ "amount": native_token["amount"], "id": native_token["token_id"]});
+    }
+}
+
 #[async_trait]
 impl Migration for Migrate {
     const ID: usize = 0;
@@ -27,11 +35,25 @@ impl Migration for Migrate {
                     .get::<serde_json::Value>(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"))
                     .await?
                 {
+                    let transactions = account
+                        .get_mut("transactions")
+                        .ok_or(Error::Storage("missing incoming transactions".to_owned()))?;
+
+                    for (_key, transaction) in transactions.as_object_mut().unwrap() {
+                        let outputs = transaction["payload"]["essence"]["data"]["outputs"]["inner"]
+                            .as_array_mut()
+                            .unwrap();
+                        for output in outputs {
+                            migrate_native_token(&mut output["data"]);
+                        }
+                    }
+
                     ConvertIncomingTransactions::check(
                         account
                             .get_mut("incomingTransactions")
                             .ok_or(Error::Storage("missing incoming transactions".to_owned()))?,
                     )?;
+
                     for output_data in account
                         .get_mut("outputs")
                         .ok_or(Error::Storage("missing outputs".to_owned()))?
@@ -45,6 +67,7 @@ impl Migration for Migrate {
                                 .ok_or(Error::Storage("missing metadata".to_owned()))?,
                         )?;
                     }
+
                     for output_data in account
                         .get_mut("unspentOutputs")
                         .ok_or(Error::Storage("missing unspent outputs".to_owned()))?
@@ -182,7 +205,7 @@ mod types {
         };
     }
 
-    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
+    #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
     pub struct TransactionId([u8; Self::LENGTH]);
 
     impl TransactionId {
@@ -205,7 +228,7 @@ mod types {
 
     string_serde_impl!(TransactionId);
 
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Debug)]
     #[serde(rename_all = "camelCase")]
     pub struct Transaction {
         pub payload: TransactionPayload,
@@ -220,19 +243,19 @@ mod types {
         pub inputs: Vec<OutputWithMetadataResponse>,
     }
 
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Debug)]
     pub struct TransactionPayload {
         pub essence: TransactionEssence,
         pub unlocks: serde_json::Value,
     }
 
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Debug)]
     #[serde(tag = "type", content = "data")]
     pub enum TransactionEssence {
         Regular(RegularTransactionEssence),
     }
 
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Debug)]
     pub struct RegularTransactionEssence {
         pub network_id: u64,
         pub inputs: serde_json::Value,
@@ -241,7 +264,7 @@ mod types {
         pub payload: serde_json::Value,
     }
 
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Debug)]
     #[serde(rename_all = "camelCase")]
     pub struct OutputWithMetadataResponse {
         pub metadata: OutputMetadataDto,
@@ -307,7 +330,7 @@ mod types {
         pub ledger_index: u32,
     }
 
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Debug)]
     #[serde(rename_all = "camelCase")]
     pub struct OutputMetadataDto {
         pub block_id: serde_json::Value,
@@ -325,7 +348,7 @@ mod types {
         pub ledger_index: u32,
     }
 
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Debug)]
     pub enum InclusionState {
         Pending,
         Confirmed,
