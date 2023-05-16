@@ -63,9 +63,9 @@ impl std::ops::AddAssign for AccountBalance {
 #[serde(rename_all = "camelCase")]
 pub struct AccountBalanceDto {
     /// Total and available amount of the base coin
-    pub base_coin: BaseCoinBalanceDto,
+    pub base_coin: BaseCoinBalance,
     /// Current required storage deposit amount
-    pub required_storage_deposit: RequiredStorageDepositDto,
+    pub required_storage_deposit: RequiredStorageDeposit,
     /// Native tokens
     pub native_tokens: Vec<NativeTokensBalanceDto>,
     /// Nfts
@@ -84,8 +84,8 @@ pub struct AccountBalanceDto {
 impl From<&AccountBalance> for AccountBalanceDto {
     fn from(value: &AccountBalance) -> Self {
         Self {
-            base_coin: BaseCoinBalanceDto::from(&value.base_coin),
-            required_storage_deposit: RequiredStorageDepositDto::from(&value.required_storage_deposit),
+            base_coin: value.base_coin.clone(),
+            required_storage_deposit: value.required_storage_deposit.clone(),
             native_tokens: value
                 .native_tokens
                 .iter()
@@ -105,11 +105,14 @@ impl From<&AccountBalance> for AccountBalanceDto {
 #[getset(get_copy = "pub")]
 pub struct BaseCoinBalance {
     /// Total amount
+    #[serde(with = "crate::utils::serde::string")]
     pub(crate) total: u64,
     /// Balance that can currently be spent
+    #[serde(with = "crate::utils::serde::string")]
     pub(crate) available: u64,
     /// Voting power
     #[cfg(feature = "participation")]
+    #[serde(with = "crate::utils::serde::string")]
     pub(crate) voting_power: u64,
 }
 
@@ -124,36 +127,16 @@ impl std::ops::AddAssign for BaseCoinBalance {
     }
 }
 
-/// Base coin fields for [`AccountBalance`]
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct BaseCoinBalanceDto {
-    /// Total amount
-    pub total: String,
-    /// Balance that can currently be spent
-    pub available: String,
-    /// Voting power
-    #[cfg(feature = "participation")]
-    pub voting_power: String,
-}
-
-impl From<&BaseCoinBalance> for BaseCoinBalanceDto {
-    fn from(value: &BaseCoinBalance) -> Self {
-        Self {
-            total: value.total.to_string(),
-            available: value.available.to_string(),
-            #[cfg(feature = "participation")]
-            voting_power: value.voting_power.to_string(),
-        }
-    }
-}
-
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters)]
 #[getset(get_copy = "pub")]
 pub struct RequiredStorageDeposit {
+    #[serde(with = "crate::utils::serde::string")]
     pub(crate) alias: u64,
+    #[serde(with = "crate::utils::serde::string")]
     pub(crate) basic: u64,
+    #[serde(with = "crate::utils::serde::string")]
     pub(crate) foundry: u64,
+    #[serde(with = "crate::utils::serde::string")]
     pub(crate) nft: u64,
 }
 
@@ -163,26 +146,6 @@ impl std::ops::AddAssign for RequiredStorageDeposit {
         self.basic += rhs.basic;
         self.foundry += rhs.foundry;
         self.nft += rhs.nft;
-    }
-}
-
-/// DTO for [`RequiredStorageDeposit`].
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub struct RequiredStorageDepositDto {
-    pub alias: String,
-    pub basic: String,
-    pub foundry: String,
-    pub nft: String,
-}
-
-impl From<&RequiredStorageDeposit> for RequiredStorageDepositDto {
-    fn from(value: &RequiredStorageDeposit) -> Self {
-        Self {
-            alias: value.alias.to_string(),
-            basic: value.basic.to_string(),
-            foundry: value.foundry.to_string(),
-            nft: value.nft.to_string(),
-        }
     }
 }
 

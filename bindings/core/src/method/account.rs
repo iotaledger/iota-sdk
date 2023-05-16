@@ -21,8 +21,7 @@ use iota_sdk::{
             CreateAliasParamsDto, FilterOptions, MintNativeTokenParamsDto, MintNftParamsDto, OutputParamsDto,
             OutputsToClaim, SyncOptions, TransactionOptionsDto,
         },
-        message_interface::dtos::SendAmountParamsDto,
-        SendNativeTokensParams, SendNftParams,
+        SendAmountParams, SendNativeTokensParams, SendNftParams,
     },
     U256,
 };
@@ -195,7 +194,7 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareSendAmount {
-        params: Vec<SendAmountParamsDto>,
+        params: Vec<SendAmountParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
@@ -221,7 +220,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendAmount {
-        params: Vec<SendAmountParamsDto>,
+        params: Vec<SendAmountParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send native tokens.
