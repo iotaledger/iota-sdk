@@ -2,7 +2,7 @@ from iota_sdk import Wallet
 
 import json
 
-# In this example we will list the sent transactions
+# In this example we will list transactions
 
 wallet = Wallet('./alice-database')
 
