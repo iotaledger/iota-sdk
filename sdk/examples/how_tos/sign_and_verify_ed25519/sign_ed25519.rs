@@ -6,13 +6,13 @@
 //!
 //! `cargo run --example sign_ed25519 --release --features=stronghold`
 
-use crypto::keys::slip10::Chain;
 use iota_sdk::{
     client::{
         constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE},
         hex_public_key_to_bech32_address,
         secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManager},
     },
+    crypto::keys::slip10::Chain,
     wallet::Result,
 };
 

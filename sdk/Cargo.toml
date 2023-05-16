@@ -95,7 +95,7 @@ tls = [ "reqwest?/rustls-tls", "rumqttc?/use-rustls" ]
 client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10" ]
 wallet = [ "client" ]
 
-# Sign Ed25519 Examples
+# Ed25519 Examples
 
 [[example]]
 name = "sign_and_verify_ed25519"
