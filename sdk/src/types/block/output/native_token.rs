@@ -20,7 +20,7 @@ use crate::types::block::{output::TokenId, Error};
 #[packable(unpack_error = Error)]
 pub struct NativeToken {
     // Identifier of the native token.
-    pub token_id: TokenId,
+    token_id: TokenId,
     // Amount of native tokens.
     #[packable(verify_with = verify_amount)]
     amount: U256,
