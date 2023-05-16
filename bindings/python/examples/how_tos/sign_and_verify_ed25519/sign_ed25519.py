@@ -30,7 +30,7 @@ secret_manager.store_mnemonic(
 
 bip32_chain = [
     HD_WALLET_TYPE,
-    int(CoinType.SHIMMER),
+    CoinType.SHIMMER,
     ACCOUNT_INDEX,
     1 if INTERNAL_ADDRESS else 0,
     ADDRESS_INDEX,

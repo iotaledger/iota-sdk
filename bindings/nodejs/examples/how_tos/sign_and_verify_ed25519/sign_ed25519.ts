@@ -13,7 +13,7 @@ require('dotenv').config({ path: '.env' });
 
 // In this example we will sign with Ed25519.
 // Run with command:
-// node ./dist/how_tos/sign_and_verify_ed25519/sign_ed25519.js
+// yarn run-example ./how_tos/sign_and_verify_ed25519/sign_ed25519.ts
 
 const FOUNDRY_METADATA = {
     standard: 'IRC30',
