@@ -19,10 +19,8 @@ use crate::{
     types::block::{
         address::{dto::Ed25519AddressDto, AliasAddress},
         output::{
-            dto::{NativeTokenDto, TokenSchemeDto},
-            feature::dto::FeatureDto,
-            unlock_condition::dto::UnlockConditionDto,
-            AliasId, FoundryId, NftId, OutputId,
+            dto::TokenSchemeDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto, AliasId,
+            FoundryId, NativeToken, NftId, OutputId,
         },
         payload::{
             dto::PayloadDto,
@@ -48,7 +46,7 @@ pub enum Message {
     BuildAliasOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        native_tokens: Option<Vec<NativeTokenDto>>,
+        native_tokens: Option<Vec<NativeToken>>,
         alias_id: AliasId,
         state_index: Option<u32>,
         state_metadata: Option<String>,
@@ -64,7 +62,7 @@ pub enum Message {
     BuildBasicOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        native_tokens: Option<Vec<NativeTokenDto>>,
+        native_tokens: Option<Vec<NativeToken>>,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,
     },
@@ -75,7 +73,7 @@ pub enum Message {
     BuildFoundryOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        native_tokens: Option<Vec<NativeTokenDto>>,
+        native_tokens: Option<Vec<NativeToken>>,
         serial_number: u32,
         token_scheme: TokenSchemeDto,
         unlock_conditions: Vec<UnlockConditionDto>,
@@ -89,7 +87,7 @@ pub enum Message {
     BuildNftOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        native_tokens: Option<Vec<NativeTokenDto>>,
+        native_tokens: Option<Vec<NativeToken>>,
         nft_id: NftId,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,

@@ -16,10 +16,8 @@ use iota_sdk::{
     },
     types::block::{
         output::{
-            dto::{NativeTokenDto, TokenSchemeDto},
-            feature::dto::FeatureDto,
-            unlock_condition::dto::UnlockConditionDto,
-            AliasId, FoundryId, NftId, OutputId,
+            dto::TokenSchemeDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto, AliasId,
+            FoundryId, NativeToken, NftId, OutputId,
         },
         payload::{dto::PayloadDto, milestone::MilestoneId, transaction::TransactionId},
         BlockDto, BlockId,
@@ -41,7 +39,7 @@ pub enum ClientMethod {
     BuildAliasOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        native_tokens: Option<Vec<NativeTokenDto>>,
+        native_tokens: Option<Vec<NativeToken>>,
         alias_id: AliasId,
         state_index: Option<u32>,
         state_metadata: Option<String>,
@@ -57,7 +55,7 @@ pub enum ClientMethod {
     BuildBasicOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        native_tokens: Option<Vec<NativeTokenDto>>,
+        native_tokens: Option<Vec<NativeToken>>,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,
     },
@@ -68,7 +66,7 @@ pub enum ClientMethod {
     BuildFoundryOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        native_tokens: Option<Vec<NativeTokenDto>>,
+        native_tokens: Option<Vec<NativeToken>>,
         serial_number: u32,
         token_scheme: TokenSchemeDto,
         unlock_conditions: Vec<UnlockConditionDto>,
@@ -82,7 +80,7 @@ pub enum ClientMethod {
     BuildNftOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        native_tokens: Option<Vec<NativeTokenDto>>,
+        native_tokens: Option<Vec<NativeToken>>,
         nft_id: NftId,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,

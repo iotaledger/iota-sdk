@@ -589,8 +589,8 @@ pub mod dto {
     use super::*;
     use crate::types::block::{
         output::{
-            dto::OutputBuilderAmountDto, feature::dto::FeatureDto, native_token::dto::NativeTokenDto,
-            token_scheme::dto::TokenSchemeDto, unlock_condition::dto::UnlockConditionDto,
+            dto::OutputBuilderAmountDto, feature::dto::FeatureDto, token_scheme::dto::TokenSchemeDto,
+            unlock_condition::dto::UnlockConditionDto,
         },
         Error,
     };
@@ -605,7 +605,7 @@ pub mod dto {
         pub amount: String,
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeTokenDto>,
+        pub native_tokens: Vec<NativeToken>,
         // The serial number of the foundry with respect to the controlling alias.
         pub serial_number: u32,
         pub token_scheme: TokenSchemeDto,
@@ -621,7 +621,7 @@ pub mod dto {
             Self {
                 kind: FoundryOutput::KIND,
                 amount: value.amount().to_string(),
-                native_tokens: value.native_tokens().iter().map(Into::into).collect::<_>(),
+                native_tokens: value.native_tokens().iter().copied().collect(),
                 serial_number: value.serial_number(),
                 token_scheme: value.token_scheme().into(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
@@ -640,7 +640,7 @@ pub mod dto {
             );
 
             for t in &value.native_tokens {
-                builder = builder.add_native_token(t.try_into()?);
+                builder = builder.add_native_token(*t);
             }
 
             for b in &value.features {
@@ -677,7 +677,7 @@ pub mod dto {
         #[allow(clippy::too_many_arguments)]
         pub fn try_from_dtos(
             amount: OutputBuilderAmountDto,
-            native_tokens: Option<Vec<NativeTokenDto>>,
+            native_tokens: Option<Vec<NativeToken>>,
             serial_number: u32,
             token_scheme: &TokenSchemeDto,
             unlock_conditions: Vec<UnlockConditionDto>,
@@ -699,10 +699,6 @@ pub mod dto {
             };
 
             if let Some(native_tokens) = native_tokens {
-                let native_tokens = native_tokens
-                    .iter()
-                    .map(NativeToken::try_from)
-                    .collect::<Result<Vec<NativeToken>, Error>>()?;
                 builder = builder.with_native_tokens(native_tokens);
             }
 
@@ -823,7 +819,7 @@ mod tests {
         let test_split_dto = |builder: FoundryOutputBuilder| {
             let output_split = FoundryOutput::try_from_dtos(
                 (&builder.amount).into(),
-                Some(builder.native_tokens.iter().map(Into::into).collect()),
+                Some(builder.native_tokens.iter().copied().collect()),
                 builder.serial_number,
                 &(&builder.token_scheme).into(),
                 builder.unlock_conditions.iter().map(Into::into).collect(),

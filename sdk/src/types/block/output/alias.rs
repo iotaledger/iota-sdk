@@ -691,10 +691,7 @@ pub mod dto {
 
     use super::*;
     use crate::types::block::{
-        output::{
-            dto::OutputBuilderAmountDto, feature::dto::FeatureDto, native_token::dto::NativeTokenDto,
-            unlock_condition::dto::UnlockConditionDto,
-        },
+        output::{dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto},
         Error,
     };
 
@@ -708,7 +705,7 @@ pub mod dto {
         pub amount: String,
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeTokenDto>,
+        pub native_tokens: Vec<NativeToken>,
         // Unique identifier of the alias.
         pub alias_id: AliasId,
         // A counter that must increase by 1 every time the alias is state transitioned.
@@ -733,7 +730,7 @@ pub mod dto {
             Self {
                 kind: AliasOutput::KIND,
                 amount: value.amount().to_string(),
-                native_tokens: value.native_tokens().iter().map(Into::into).collect::<_>(),
+                native_tokens: value.native_tokens().iter().copied().collect(),
                 alias_id: *value.alias_id(),
                 state_index: value.state_index(),
                 state_metadata: prefix_hex::encode(value.state_metadata()),
@@ -763,7 +760,7 @@ pub mod dto {
             builder = builder.with_foundry_counter(value.foundry_counter);
 
             for t in &value.native_tokens {
-                builder = builder.add_native_token(t.try_into()?);
+                builder = builder.add_native_token(*t);
             }
 
             for b in &value.features {
@@ -800,7 +797,7 @@ pub mod dto {
         #[allow(clippy::too_many_arguments)]
         pub fn try_from_dtos(
             amount: OutputBuilderAmountDto,
-            native_tokens: Option<Vec<NativeTokenDto>>,
+            native_tokens: Option<Vec<NativeToken>>,
             alias_id: &AliasId,
             state_index: Option<u32>,
             state_metadata: Option<Vec<u8>>,
@@ -821,10 +818,6 @@ pub mod dto {
             };
 
             if let Some(native_tokens) = native_tokens {
-                let native_tokens = native_tokens
-                    .iter()
-                    .map(NativeToken::try_from)
-                    .collect::<Result<Vec<NativeToken>, Error>>()?;
                 builder = builder.with_native_tokens(native_tokens);
             }
 
@@ -981,7 +974,7 @@ mod tests {
 
         let output_split = AliasOutput::try_from_dtos(
             OutputBuilderAmountDto::Amount(output.amount().to_string()),
-            Some(output.native_tokens().iter().map(Into::into).collect()),
+            Some(output.native_tokens().iter().copied().collect()),
             output.alias_id(),
             output.state_index().into(),
             output.state_metadata().to_owned().into(),
@@ -1002,7 +995,7 @@ mod tests {
         let test_split_dto = |builder: AliasOutputBuilder| {
             let output_split = AliasOutput::try_from_dtos(
                 (&builder.amount).into(),
-                Some(builder.native_tokens.iter().map(Into::into).collect()),
+                Some(builder.native_tokens.iter().copied().collect()),
                 &builder.alias_id,
                 builder.state_index,
                 builder.state_metadata.to_owned().into(),
