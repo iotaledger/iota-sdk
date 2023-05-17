@@ -33,16 +33,16 @@ use serde::{Deserialize, Serialize};
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 pub enum AccountMethod {
     /// Burn outputs.
+    ///
     /// Note that burning **native tokens** doesn't require the foundry output which minted them, but will not
     /// increase the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output.
     /// Therefore it's recommended to use melting, if the foundry output is available.
-
+    ///
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     Burn {
         burn: BurnDto,
         options: Option<TransactionOptionsDto>,
     },
-
     /// Consolidate outputs.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]

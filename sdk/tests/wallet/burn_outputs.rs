@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    client::api::input_selection::Burn,
     types::block::output::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         NativeToken, NftId, NftOutputBuilder, OutputId, UnlockCondition,
@@ -44,7 +43,7 @@ async fn mint_and_burn_nft() -> Result<()> {
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
     assert!(search.is_some());
 
-    let transaction = account.burn(Burn::new().add_nft(nft_id), None).await.unwrap();
+    let transaction = account.burn(nft_id, None).await.unwrap();
     account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
@@ -196,7 +195,7 @@ async fn destroy_foundry(account: &Account) -> Result<()> {
     // idea
     let foundry_id = *balance.foundries().first().unwrap();
 
-    let transaction = account.burn(Burn::new().add_foundry(foundry_id), None).await.unwrap();
+    let transaction = account.burn(foundry_id, None).await.unwrap();
     account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
@@ -218,7 +217,7 @@ async fn destroy_alias(account: &Account) -> Result<()> {
     // Let's destroy the first alias we can find
     let alias_id = *balance.aliases().first().unwrap();
     println!("alias_id -> {alias_id}");
-    let transaction = account.burn(Burn::new().add_alias(alias_id), None).await.unwrap();
+    let transaction = account.burn(alias_id, None).await.unwrap();
     account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;

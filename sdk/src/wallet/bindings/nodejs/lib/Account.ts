@@ -158,6 +158,62 @@ export class Account {
 
 
     /**
+     * Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
+     * the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
+     * recommended to use melting, if the foundry output is available.
+     * @param tokenId The native token id.
+     * @param burnAmount The to be burned amount.
+     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * or custom inputs.
+     * @returns The transaction.
+     */
+    async burnNativeToken(
+        tokenId: string,
+        burnAmount: HexEncodedAmount,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        const resp = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'burn',
+                data: {
+                    burn: {
+                        nativeTokens: [{ amount: burnAmount, id: tokenId, }]
+                    },
+                    options: transactionOptions,
+                },
+            },
+        );
+        return JSON.parse(resp).payload;
+    }
+
+    /**
+     * Burn an nft output
+     * @param nftId The NftId.
+     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * or custom inputs.
+     * @returns The transaction.
+     */
+    async burnNft(
+        nftId: string,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        const resp = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'burn',
+                data: {
+                    burn: {
+                        nfts: [nftId],
+                    },
+                    options: transactionOptions,
+                },
+            },
+        );
+        return JSON.parse(resp).payload;
+    }
+
+    /**
      * Claim basic or nft outputs that have additional unlock conditions
      * to their `AddressUnlockCondition` from the account.
      * @param outputIds The outputs to claim.
@@ -262,6 +318,59 @@ export class Account {
                 name: 'deregisterParticipationEvent',
                 data: {
                     eventId,
+                },
+            },
+        );
+        return JSON.parse(resp).payload;
+    }
+
+    /**
+     * Destroy an alias output.
+     * @param aliasId The AliasId.
+     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * or custom inputs.
+     * @returns The transaction.
+     */
+    async destroyAlias(
+        aliasId: string,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        const resp = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'burn',
+                data: {
+                    burn: {
+                        aliases: [aliasId],
+                    },
+                    options: transactionOptions,
+                },
+            },
+        );
+        return JSON.parse(resp).payload;
+    }
+
+    /**
+     * Function to destroy a foundry output with a circulating supply of 0.
+     * Native tokens in the foundry (minted by other foundries) will be transactioned to the controlling alias.
+     * @param foundryId The FoundryId.
+     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * or custom inputs.
+     * @returns The transaction.
+     */
+    async destroyFoundry(
+        foundryId: string,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        const resp = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'burn',
+                data: {
+                    burn: {
+                        foundries: [foundryId],
+                    },
+                    options: transactionOptions,
                 },
             },
         );

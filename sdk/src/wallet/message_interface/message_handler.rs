@@ -18,10 +18,7 @@ use zeroize::Zeroize;
 use crate::wallet::events::types::{Event, WalletEventType};
 use crate::{
     client::{
-        api::{
-            input_selection::Burn, PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData,
-            SignedTransactionDataDto,
-        },
+        api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
         constants::SHIMMER_TESTNET_BECH32_HRP,
         request_funds_from_faucet, utils, Client, NodeInfoWrapper,
     },
@@ -566,7 +563,7 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let transaction = account
                         .burn(
-                            Burn::new().add_foundry(foundry_id),
+                            foundry_id,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
