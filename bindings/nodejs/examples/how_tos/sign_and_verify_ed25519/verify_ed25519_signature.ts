@@ -20,7 +20,7 @@ const PUBLIC_KEY =
 const ED25519_SIGNATURE =
     '0x5437ee671f182507103c6ae2f6649083475019f2cc372e674be164577dd123edd7a76291ba88732bbe1fae39688b50a3678bce05c9ef32c9494b3968f4f07a01';
 
-async function run() {
+function run() {
     try {
         const bech32Address = Utils.hexPublicKeyToBech32Address(
             PUBLIC_KEY,
@@ -42,4 +42,4 @@ async function run() {
     }
 }
 
-run().then(() => process.exit());
+run();
