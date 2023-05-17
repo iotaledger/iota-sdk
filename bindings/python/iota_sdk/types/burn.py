@@ -14,11 +14,11 @@ class Burn:
     Parameters:
     -----------
     aliases: Optional[List[str]]
-        The aliases to burn (hex encoded)
+        The aliases (hex encoded) to burn
     nfts: Optional[List[str]]
-        The NFTs to burn (hex encoded)
+        The NFTs (hex encoded) to burn
     foundries: Optional[List[str]]
-        The foundries to burn (hex encoded)
+        The foundries (hex encoded) to burn
     nativeTokens: Optional[List[NativeToken]]
         The native tokens to burn
     """
