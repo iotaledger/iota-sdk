@@ -3,15 +3,14 @@
 
 import type { BlockId } from '../../types/client/';
 import type {
-    AddressTypes,
     IBlock,
     ITransactionEssence,
     HexEncodedString,
     IEd25519Signature,
-    IEd25519Address,
 } from '@iota/types';
 
 import { callUtilsMethod } from '../bindings';
+import { Address, Ed25519Address } from '../types';
 
 /** Utils class for utils. */
 export class Utils {
@@ -81,7 +80,7 @@ export class Utils {
     /**
      * Returns a valid Address parsed from a String.
      */
-    static parseBech32Address(address: string): AddressTypes {
+    static parseBech32Address(address: string): Address {
         return callUtilsMethod({
             name: 'parseBech32Address',
             data: {
@@ -196,7 +195,7 @@ export class Utils {
     static verifyEd25519Signature(
         signature: IEd25519Signature,
         message: HexEncodedString,
-        address: IEd25519Address,
+        address: Ed25519Address,
     ): boolean {
         return callUtilsMethod({
             name: 'verifyEd25519Signature',
