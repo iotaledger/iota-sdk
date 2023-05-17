@@ -10,10 +10,15 @@ use futures::FutureExt;
 #[cfg(not(target_family = "wasm"))]
 use crate::types::api::plugins::indexer::OutputIdsResponse;
 use crate::{
-    client::node_api::indexer::query_parameters::QueryParameter, types::block::output::OutputId, wallet::Account,
+    client::{node_api::indexer::query_parameters::QueryParameter, secret::SecretManage},
+    types::block::output::OutputId,
+    wallet::Account,
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Returns output ids of nft outputs that have the address in any unlock condition
     pub(crate) async fn get_nft_output_ids_with_any_unlock_condition(
         &self,

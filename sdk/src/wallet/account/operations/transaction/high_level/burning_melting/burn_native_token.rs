@@ -9,7 +9,7 @@ use std::{
 use primitive_types::U256;
 
 use crate::{
-    client::api::input_selection::Burn,
+    client::{api::input_selection::Burn, secret::SecretManage},
     types::block::{
         input::INPUT_COUNT_MAX,
         output::{
@@ -44,7 +44,10 @@ struct StrippedOutputAggregate {
     outputs: Vec<Output>,
 }
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Function to burn native tokens. This doesn't require the foundry output which minted them, but will not increase
     /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
     /// recommended to use `decrease_native_token_supply()`, if the foundry output is available.

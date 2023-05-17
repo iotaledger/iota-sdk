@@ -6,7 +6,7 @@
 //!
 //! `cargo run --example burn_nft --release`
 
-use iota_sdk::wallet::{Result, Wallet};
+use iota_sdk::{wallet::Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {

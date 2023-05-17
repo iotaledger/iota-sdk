@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::api::PreparedTransactionData,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::Address,
         output::{
@@ -84,7 +84,10 @@ impl TryFrom<&MintNftParamsDto> for MintNftParams {
     }
 }
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Function to mint nfts.
     /// Calls [Account.send()](crate::account::Account.send) internally, the options can define the
     /// RemainderValueStrategy or custom inputs.

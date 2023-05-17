@@ -8,6 +8,8 @@ pub(crate) mod client;
 pub(crate) mod get_account;
 #[cfg(feature = "ledger_nano")]
 pub(crate) mod ledger_nano;
+
+pub(crate) mod storage;
 #[cfg(feature = "stronghold")]
 pub(crate) mod stronghold;
 #[cfg(feature = "stronghold")]

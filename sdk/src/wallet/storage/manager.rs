@@ -1,19 +1,12 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::sync::Arc;
-
 use serde::{Deserialize, Serialize};
-use tokio::sync::RwLock;
 
-use crate::{
-    client::secret::{SecretManager, SecretManagerDto},
-    wallet::{
-        account::{AccountDetails, SyncOptions},
-        migration::migrate_storage,
-        storage::{constants::*, Storage, StorageAdapter},
-        WalletBuilder,
-    },
+use crate::wallet::{
+    account::{AccountDetails, SyncOptions},
+    migration::migrate_storage,
+    storage::{constants::*, Storage, StorageAdapter},
 };
 
 /// The storage used by the manager.
@@ -95,49 +88,6 @@ impl StorageManager {
         self.storage.get(key).await
     }
 
-    pub async fn save_wallet_data(&self, wallet_builder: &WalletBuilder) -> crate::wallet::Result<()> {
-        log::debug!("save_wallet_data");
-        self.storage.set(WALLET_INDEXATION_KEY, wallet_builder).await?;
-
-        if let Some(secret_manager) = &wallet_builder.secret_manager {
-            let secret_manager = secret_manager.read().await;
-            let secret_manager_dto = SecretManagerDto::from(&*secret_manager);
-            // Only store secret_managers that aren't SecretManagerDto::Mnemonic, because there the Seed can't be
-            // serialized, so we can't create the SecretManager again
-            match secret_manager_dto {
-                SecretManagerDto::Mnemonic(_) => {}
-                _ => {
-                    self.storage.set(SECRET_MANAGER_KEY, secret_manager_dto).await?;
-                }
-            }
-        }
-        Ok(())
-    }
-
-    pub async fn get_wallet_data(&self) -> crate::wallet::Result<Option<WalletBuilder>> {
-        log::debug!("get_wallet_data");
-        if let Some(mut builder) = self.storage.get::<WalletBuilder>(WALLET_INDEXATION_KEY).await? {
-            log::debug!("get_wallet_data {builder:?}");
-
-            if let Some(secret_manager_dto) = self.storage.get::<SecretManagerDto>(SECRET_MANAGER_KEY).await? {
-                log::debug!("get_secret_manager {secret_manager_dto:?}");
-
-                // Only secret_managers that aren't SecretManagerDto::Mnemonic can be restored, because there the Seed
-                // can't be serialized, so we can't create the SecretManager again
-                match secret_manager_dto {
-                    SecretManagerDto::Mnemonic(_) => {}
-                    _ => {
-                        let secret_manager = SecretManager::try_from(&secret_manager_dto)?;
-                        builder.secret_manager = Some(Arc::new(RwLock::new(secret_manager)));
-                    }
-                }
-            }
-            Ok(Some(builder))
-        } else {
-            Ok(None)
-        }
-    }
-
     pub async fn get_accounts(&mut self) -> crate::wallet::Result<Vec<AccountDetails>> {
         if let Some(account_indexes) = self.storage.get(ACCOUNTS_INDEXATION_KEY).await? {
             if self.account_indexes.is_empty() {
@@ -203,7 +153,14 @@ impl StorageManager {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::wallet::storage::adapter::memory::{Memory, STORAGE_ID};
+    use crate::{
+        client::secret::SecretManager,
+        wallet::{
+            storage::adapter::memory::{Memory, STORAGE_ID},
+            wallet::operations::storage::SaveLoadWallet,
+            WalletBuilder,
+        },
+    };
 
     #[tokio::test]
     async fn id() {
@@ -252,11 +209,21 @@ mod tests {
     #[tokio::test]
     async fn save_get_wallet_data() {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert!(storage_manager.get_wallet_data().await.unwrap().is_none());
+        assert!(
+            WalletBuilder::<SecretManager>::get_data(&storage_manager)
+                .await
+                .unwrap()
+                .is_none()
+        );
 
-        let wallet_builder = WalletBuilder::new();
-        storage_manager.save_wallet_data(&wallet_builder).await.unwrap();
+        let wallet_builder = WalletBuilder::<SecretManager>::new();
+        wallet_builder.save_data(&storage_manager).await.unwrap();
 
-        assert!(storage_manager.get_wallet_data().await.unwrap().is_some());
+        assert!(
+            WalletBuilder::<SecretManager>::get_data(&storage_manager)
+                .await
+                .unwrap()
+                .is_some()
+        );
     }
 }

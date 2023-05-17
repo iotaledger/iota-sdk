@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::api::input_selection::Burn,
+    client::{api::input_selection::Burn, secret::SecretManage},
     types::block::{
         address::{Address, NftAddress},
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NftId, Output, OutputId},
@@ -16,7 +16,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Function to burn an nft output.
     pub async fn burn_nft(
         &self,

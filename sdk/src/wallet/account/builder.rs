@@ -15,16 +15,19 @@ use crate::{
 };
 
 /// The AccountBuilder
-pub struct AccountBuilder {
+pub struct AccountBuilder<S: SecretManage = SecretManager> {
     addresses: Option<Vec<AccountAddress>>,
     alias: Option<String>,
     bech32_hrp: Option<String>,
-    wallet: Wallet,
+    wallet: Wallet<S>,
 }
 
-impl AccountBuilder {
+impl<S: 'static + SecretManage> AccountBuilder<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Create an IOTA client builder
-    pub fn new(wallet: Wallet) -> Self {
+    pub fn new(wallet: Wallet<S>) -> Self {
         Self {
             addresses: None,
             alias: None,
@@ -55,7 +58,7 @@ impl AccountBuilder {
     /// Build the Account and add it to the accounts from Wallet
     /// Also generates the first address of the account and if it's not the first account, the address for the first
     /// account will also be generated and compared, so no accounts get generated with different seeds
-    pub async fn finish(&mut self) -> crate::wallet::Result<Account> {
+    pub async fn finish(&mut self) -> crate::wallet::Result<Account<S>> {
         let mut accounts = self.wallet.accounts.write().await;
         let account_index = accounts.len() as u32;
         // If no alias is provided, the account index will be set as alias
@@ -168,11 +171,14 @@ impl AccountBuilder {
 }
 
 /// Generate the first public address of an account
-pub(crate) async fn get_first_public_address(
-    secret_manager: &RwLock<SecretManager>,
+pub(crate) async fn get_first_public_address<S: SecretManage>(
+    secret_manager: &RwLock<S>,
     coin_type: u32,
     account_index: u32,
-) -> crate::wallet::Result<Address> {
+) -> crate::wallet::Result<Address>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     Ok(secret_manager
         .read()
         .await

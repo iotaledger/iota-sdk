@@ -5,10 +5,7 @@
 //!
 //! `cargo run --example request_funds --release`
 
-use iota_sdk::{
-    client::utils::request_funds_from_faucet,
-    wallet::{Result, Wallet},
-};
+use iota_sdk::{client::utils::request_funds_from_faucet, wallet::Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {

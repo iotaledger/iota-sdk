@@ -7,6 +7,7 @@ use std::ops::Range;
 
 use async_trait::async_trait;
 use crypto::hashes::{blake2b::Blake2b256, Digest};
+use instant::Duration;
 use iota_stronghold::{
     procedures::{self, Chain, KeyType, Slip10DeriveInput},
     Location,
@@ -19,19 +20,22 @@ use super::{
 };
 use crate::{
     client::{
+        api::PreparedTransactionData,
         constants::HD_WALLET_TYPE,
-        secret::{GenerateAddressOptions, SecretManage},
+        secret::{types::StrongholdDto, GenerateAddressOptions, SecretManage, SecretManagerConfig},
         stronghold::Error,
     },
     types::block::{
         address::{Address, Ed25519Address},
+        payload::Payload,
         signature::Ed25519Signature,
+        unlock::Unlocks,
     },
 };
 
 #[async_trait]
 impl SecretManage for StrongholdAdapter {
-    type Error = Error;
+    type Error = crate::client::Error;
 
     async fn generate_addresses(
         &self,
@@ -46,7 +50,7 @@ impl SecretManage for StrongholdAdapter {
         // Thus, we put an extra guard here to prevent this methods from being invoked when our cached key has
         // been cleared.
         if !self.is_key_available().await {
-            return Err(Error::KeyCleared);
+            return Err(Error::KeyCleared.into());
         }
 
         // Stronghold arguments.
@@ -80,9 +84,11 @@ impl SecretManage for StrongholdAdapter {
             self.stronghold
                 .lock()
                 .await
-                .get_client(PRIVATE_DATA_CLIENT_PATH)?
+                .get_client(PRIVATE_DATA_CLIENT_PATH)
+                .map_err(Error::from)?
                 .vault(SECRET_VAULT_PATH)
-                .delete_secret(derive_location.record_path())?;
+                .delete_secret(derive_location.record_path())
+                .map_err(Error::from)?;
 
             // Hash the public key to get the address.
             let hash = Blake2b256::digest(public_key);
@@ -104,7 +110,7 @@ impl SecretManage for StrongholdAdapter {
         // Thus, we put an extra guard here to prevent this methods from being invoked when our cached key has
         // been cleared.
         if !self.is_key_available().await {
-            return Err(Error::KeyCleared);
+            return Err(Error::KeyCleared.into());
         }
 
         // Stronghold arguments.
@@ -131,11 +137,54 @@ impl SecretManage for StrongholdAdapter {
         self.stronghold
             .lock()
             .await
-            .get_client(PRIVATE_DATA_CLIENT_PATH)?
+            .get_client(PRIVATE_DATA_CLIENT_PATH)
+            .map_err(Error::from)?
             .vault(SECRET_VAULT_PATH)
-            .delete_secret(derive_location.record_path())?;
+            .delete_secret(derive_location.record_path())
+            .map_err(Error::from)?;
 
         Ok(Ed25519Signature::new(public_key, signature))
+    }
+
+    async fn sign_transaction_essence(
+        &self,
+        prepared_transaction_data: &PreparedTransactionData,
+        time: Option<u32>,
+    ) -> Result<Unlocks, Self::Error> {
+        crate::client::secret::default_sign_transaction_essence(self, prepared_transaction_data, time).await
+    }
+
+    async fn sign_transaction(
+        &self,
+        prepared_transaction_data: PreparedTransactionData,
+    ) -> Result<Payload, Self::Error> {
+        crate::client::secret::default_sign_transaction(self, prepared_transaction_data).await
+    }
+}
+
+impl SecretManagerConfig for StrongholdAdapter {
+    type Config = StrongholdDto;
+
+    fn to_config(&self) -> Self::Config {
+        Self::Config {
+            password: None,
+            timeout: self.get_timeout().map(|duration| duration.as_secs()),
+            snapshot_path: self.snapshot_path.clone().into_os_string().to_string_lossy().into(),
+        }
+    }
+
+    fn from_config(config: &Self::Config) -> Result<Self, Self::Error> {
+        let mut builder = Self::builder();
+
+        if let Some(password) = &config.password {
+            builder = builder.password(password);
+        }
+
+        if let Some(timeout) = &config.timeout {
+            builder = builder.timeout(Duration::from_secs(*timeout));
+        }
+
+        Ok(builder.build(&config.snapshot_path)?)
     }
 }
 

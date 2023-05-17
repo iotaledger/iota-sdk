@@ -5,7 +5,7 @@ use crypto::keys::slip10::Chain;
 use instant::Instant;
 
 use crate::{
-    client::{constants::HD_WALLET_TYPE, Client},
+    client::{constants::HD_WALLET_TYPE, secret::SecretManage, Client},
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
@@ -23,7 +23,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Convert OutputWithMetadataResponse to OutputData with the network_id added
     pub(crate) async fn output_response_to_output_data(
         &self,

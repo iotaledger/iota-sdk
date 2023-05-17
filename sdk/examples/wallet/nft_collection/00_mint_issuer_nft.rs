@@ -11,7 +11,8 @@ use iota_sdk::{
         output::{NftId, Output, OutputId},
         payload::transaction::TransactionEssence,
     },
-    wallet::{MintNftParams, Result, Wallet},
+    wallet::{MintNftParams, Result},
+    Wallet,
 };
 
 #[tokio::main]

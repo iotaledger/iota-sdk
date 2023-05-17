@@ -13,7 +13,8 @@ use iota_sdk::{
         address::{Address, NftAddress},
         output::NftId,
     },
-    wallet::{MintNftParams, Result, Wallet},
+    wallet::{MintNftParams, Result},
+    Wallet,
 };
 
 #[tokio::main]

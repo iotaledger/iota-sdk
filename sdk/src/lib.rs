@@ -33,3 +33,5 @@ pub use packable;
 pub use primitive_types::U256;
 #[cfg(feature = "url")]
 pub use url::Url;
+
+pub type Wallet = self::wallet::Wallet<crate::client::secret::SecretManager>;

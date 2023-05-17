@@ -6,7 +6,10 @@
 //!
 //! `cargo run --example simple_transaction --release`
 
-use iota_sdk::wallet::{Result, SendAmountParams, Wallet};
+use iota_sdk::{
+    wallet::{Result, SendAmountParams},
+    Wallet,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {

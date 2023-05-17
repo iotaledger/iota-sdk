@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
+    client::secret::SecretManage,
     types::{
         api::core::dto::LedgerInclusionStateDto,
         block::{
@@ -15,7 +16,10 @@ use crate::{
 const DEFAULT_RETRY_UNTIL_INCLUDED_INTERVAL: u64 = 1;
 const DEFAULT_RETRY_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
     /// milestone). This function is re-exported from the client library and default interval is as defined there.
     /// Returns the included block at first position and additional reattached blocks

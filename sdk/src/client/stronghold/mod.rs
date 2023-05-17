@@ -73,7 +73,7 @@ use crate::client::storage::StorageProvider;
 /// A wrapper on [Stronghold].
 ///
 /// See the [module-level documentation](self) for more details.
-#[derive(Builder)]
+#[derive(Builder, Debug)]
 #[builder(pattern = "owned", build_fn(skip))]
 pub struct StrongholdAdapter {
     /// A stronghold instance.

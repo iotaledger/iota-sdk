@@ -9,7 +9,7 @@ use packable::bounded::TryIntoBoundedU16Error;
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{AddressData, TransactionProgressEvent, WalletEvent};
 use crate::{
-    client::api::PreparedTransactionData,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         input::INPUT_COUNT_RANGE,
         output::{Output, OUTPUT_COUNT_RANGE},
@@ -20,7 +20,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Get inputs and build the transaction essence
     pub async fn prepare_transaction(
         &self,

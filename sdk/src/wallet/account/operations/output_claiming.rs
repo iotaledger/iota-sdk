@@ -6,7 +6,7 @@ use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::api::input_selection::minimum_storage_deposit_basic_output,
+    client::{api::input_selection::minimum_storage_deposit_basic_output, secret::SecretManage},
     types::block::{
         address::Address,
         output::{
@@ -30,7 +30,10 @@ pub enum OutputsToClaim {
     All,
 }
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Get basic and nft outputs that have
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
     /// [`StorageDepositReturnUnlockCondition`] or

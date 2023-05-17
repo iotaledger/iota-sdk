@@ -1,11 +1,14 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "ledger_nano")]
-use crate::client::secret::SecretManager;
-use crate::types::block::{
-    input::INPUT_COUNT_MAX,
-    output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokens, NativeTokensBuilder, Output},
+use crate::{
+    client::secret::SecretManage,
+    types::block::{
+        input::INPUT_COUNT_MAX,
+        output::{
+            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokens, NativeTokensBuilder, Output,
+        },
+    },
 };
 
 // Constants for the calculation of the amount of inputs we can use with a ledger nano
@@ -29,7 +32,10 @@ use crate::wallet::{
     Result,
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     fn should_consolidate_output(
         &self,
         output_data: &OutputData,
@@ -94,13 +100,22 @@ impl Account {
 
         drop(account_details);
 
-        let output_consolidation_threshold = output_consolidation_threshold.unwrap_or({
-            match &*self.wallet.secret_manager.read().await {
+        let output_consolidation_threshold = match output_consolidation_threshold {
+            Some(t) => t,
+            None => {
                 #[cfg(feature = "ledger_nano")]
-                SecretManager::LedgerNano(_) => DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD,
-                _ => DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
+                if ((&*self.wallet.secret_manager.read().await) as &(dyn std::any::Any + Send + Sync))
+                    .downcast_ref::<crate::client::secret::ledger_nano::LedgerSecretManager>()
+                    .is_some()
+                {
+                    DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD
+                } else {
+                    DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD
+                }
+                #[cfg(not(feature = "ledger_nano"))]
+                DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD
             }
-        });
+        };
 
         // only consolidate if the unlocked outputs are >= output_consolidation_threshold
         if outputs_to_consolidate.is_empty()
@@ -117,28 +132,32 @@ impl Account {
             });
         }
 
-        let max_inputs = match &*self.wallet.secret_manager.read().await {
-            #[cfg(feature = "ledger_nano")]
-            SecretManager::LedgerNano(ledger) => {
-                let ledger_nano_status = ledger.get_ledger_nano_status().await;
-                // With blind signing we are only limited by the protocol
-                if ledger_nano_status.blind_signing_enabled() {
-                    INPUT_COUNT_MAX
-                } else {
-                    ledger_nano_status
-                        .buffer_size()
-                        .map(|buffer_size| {
-                            // Calculate how many inputs we can have with this ledger, buffer size is different for
-                            // different ledger types
-                            let available_buffer_size_for_inputs =
-                                buffer_size - ESSENCE_SIZE_WITHOUT_IN_AND_OUTPUTS - MIN_OUTPUT_SIZE_IN_ESSENCE;
-                            (available_buffer_size_for_inputs / INPUT_SIZE) as u16
-                        })
-                        .unwrap_or(INPUT_COUNT_MAX)
-                }
+        #[cfg(feature = "ledger_nano")]
+        let max_inputs = if let Some(ledger) = ((&*self.wallet.secret_manager.read().await)
+            as &(dyn std::any::Any + Send + Sync))
+            .downcast_ref::<crate::client::secret::ledger_nano::LedgerSecretManager>()
+        {
+            let ledger_nano_status = ledger.get_ledger_nano_status().await;
+            // With blind signing we are only limited by the protocol
+            if ledger_nano_status.blind_signing_enabled() {
+                INPUT_COUNT_MAX
+            } else {
+                ledger_nano_status
+                    .buffer_size()
+                    .map(|buffer_size| {
+                        // Calculate how many inputs we can have with this ledger, buffer size is different for
+                        // different ledger types
+                        let available_buffer_size_for_inputs =
+                            buffer_size - ESSENCE_SIZE_WITHOUT_IN_AND_OUTPUTS - MIN_OUTPUT_SIZE_IN_ESSENCE;
+                        (available_buffer_size_for_inputs / INPUT_SIZE) as u16
+                    })
+                    .unwrap_or(INPUT_COUNT_MAX)
             }
-            _ => INPUT_COUNT_MAX,
+        } else {
+            INPUT_COUNT_MAX
         };
+        #[cfg(not(feature = "ledger_nano"))]
+        let max_inputs = INPUT_COUNT_MAX;
 
         let mut total_amount = 0;
         let mut custom_inputs = Vec::with_capacity(max_inputs.into());

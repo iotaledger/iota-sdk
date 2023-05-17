@@ -3,6 +3,7 @@
 
 use std::collections::{HashMap, HashSet};
 
+use super::storage::SaveLoadWallet;
 #[cfg(feature = "storage")]
 use crate::wallet::WalletBuilder;
 use crate::{
@@ -11,13 +12,17 @@ use crate::{
             builder::NodeManagerBuilder,
             node::{Node, NodeAuth, NodeDto},
         },
+        secret::SecretManage,
         Client, ClientBuilder, NodeInfoWrapper,
     },
     wallet::Wallet,
     Url,
 };
 
-impl Wallet {
+impl<S: 'static + SecretManage> Wallet<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     pub fn client(&self) -> &Client {
         &self.client
     }
@@ -60,7 +65,13 @@ impl Wallet {
 
         Ok(node_info_wrapper)
     }
+}
 
+impl<S: 'static + SecretManage> Wallet<S>
+where
+    crate::wallet::Error: From<S::Error>,
+    WalletBuilder<S>: SaveLoadWallet,
+{
     /// Update the authentication for a node.
     pub async fn update_node_auth(&self, url: Url, auth: Option<NodeAuth>) -> crate::wallet::Result<()> {
         log::debug!("[update_node_auth]");
@@ -138,10 +149,9 @@ impl Wallet {
 
         #[cfg(feature = "storage")]
         {
-            self.storage_manager
-                .read()
+            WalletBuilder::from_wallet(self)
                 .await
-                .save_wallet_data(&WalletBuilder::from_wallet(self).await)
+                .save_data(&*self.storage_manager.read().await)
                 .await?;
         }
 

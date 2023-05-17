@@ -4,6 +4,7 @@
 use primitive_types::U256;
 
 use crate::{
+    client::secret::SecretManage,
     types::block::output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
     wallet::account::{
         operations::helpers::time::can_output_be_unlocked_forever_from_now_on,
@@ -12,7 +13,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Get the AccountBalance
     pub async fn balance(&self) -> crate::wallet::Result<AccountBalance> {
         log::debug!("[BALANCE] get balance");

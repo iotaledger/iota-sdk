@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::api::input_selection::Burn,
+    client::{api::input_selection::Burn, secret::SecretManage},
     types::block::output::{AliasId, AliasOutputBuilder, FoundryId, NativeTokensBuilder, Output, TokenScheme},
     wallet::{
         account::{operations::transaction::Transaction, types::OutputData, Account, TransactionOptions},
@@ -10,7 +10,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Function to destroy a foundry output with a circulating supply of 0.
     /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
     pub async fn destroy_foundry(

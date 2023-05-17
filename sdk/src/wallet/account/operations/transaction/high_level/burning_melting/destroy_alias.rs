@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::api::input_selection::Burn,
+    client::{api::input_selection::Burn, secret::SecretManage},
     types::block::{
         address::{Address, AliasAddress},
         output::{unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, Output, OutputId},
@@ -16,7 +16,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Function to destroy an alias output.
     pub async fn destroy_alias(
         &self,

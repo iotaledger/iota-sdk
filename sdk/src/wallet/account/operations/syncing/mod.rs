@@ -11,6 +11,7 @@ use std::collections::{HashMap, HashSet};
 
 pub use self::options::SyncOptions;
 use crate::{
+    client::secret::SecretManage,
     types::block::{
         address::{Address, AliasAddress, NftAddress},
         output::{dto::OutputMetadataDto, FoundryId, Output, OutputId},
@@ -22,7 +23,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Set the fallback SyncOptions for account syncing.
     /// If storage is enabled, will persist during restarts.
     pub async fn set_default_sync_options(&self, options: SyncOptions) -> crate::wallet::Result<()> {

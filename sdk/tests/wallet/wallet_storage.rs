@@ -3,7 +3,7 @@
 
 use std::{fs, io, path::Path};
 
-use iota_sdk::wallet::{Result, Wallet};
+use iota_sdk::{wallet::Result, Wallet};
 
 use crate::wallet::common::{setup, tear_down};
 

@@ -5,7 +5,7 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::api::PreparedTransactionData,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::Address,
         output::{
@@ -43,7 +43,10 @@ pub struct SendNativeTokensParams {
     pub expiration: Option<u32>,
 }
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Function to send native tokens in basic outputs with a [StorageDepositReturnUnlockCondition] and
     /// [ExpirationUnlockCondition], so the storage deposit gets back to the sender and also that the sender gets access
     /// to the output again after a defined time (default 1 day),

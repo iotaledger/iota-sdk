@@ -6,7 +6,10 @@
 //!
 //! `cargo run --example send_nft --release`
 
-use iota_sdk::wallet::{Result, SendNftParams, Wallet};
+use iota_sdk::{
+    wallet::{Result, SendNftParams},
+    Wallet,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {

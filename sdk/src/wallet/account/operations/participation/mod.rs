@@ -17,7 +17,7 @@ use std::collections::{hash_map::Entry, HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{node_manager::node::Node, Client},
+    client::{node_manager::node::Node, secret::SecretManage, Client},
     types::{
         api::plugins::participation::{
             responses::TrackedParticipation,
@@ -49,7 +49,10 @@ pub struct ParticipationEventWithNodes {
     pub nodes: Vec<Node>,
 }
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Calculates the voting overview of an account. If event_ids are provided, only return outputs and tracked
     /// participations for them.
     pub async fn get_participation_overview(

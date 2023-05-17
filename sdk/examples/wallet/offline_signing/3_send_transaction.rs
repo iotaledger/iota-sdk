@@ -12,7 +12,8 @@ use iota_sdk::{
         api::{SignedTransactionData, SignedTransactionDataDto},
         Client,
     },
-    wallet::{Result, Wallet},
+    wallet::Result,
+    Wallet,
 };
 
 const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/wallet/offline_signing/signed_transaction.json";

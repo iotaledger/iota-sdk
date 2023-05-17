@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::api::PreparedTransactionData,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::Address,
         output::{
@@ -73,7 +73,10 @@ impl TryFrom<&CreateAliasParamsDto> for CreateAliasParams {
     }
 }
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Function to create an alias output.
     /// ```ignore
     /// let params = CreateAliasParams {
