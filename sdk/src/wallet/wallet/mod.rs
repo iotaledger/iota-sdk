@@ -79,7 +79,7 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
     pub(crate) coin_type: AtomicU32,
     pub(crate) secret_manager: Arc<RwLock<S>>,
     #[cfg(feature = "events")]
-    pub(crate) event_emitter: tokio::sync::Mutex<EventEmitter>,
+    pub(crate) event_emitter: tokio::sync::RwLock<EventEmitter>,
     #[cfg(feature = "storage")]
     pub(crate) storage_options: StorageOptions,
     #[cfg(feature = "storage")]
@@ -180,7 +180,7 @@ impl<S: SecretManage> WalletInner<S> {
     where
         F: Fn(&Event) + 'static + Clone + Send + Sync,
     {
-        let mut emitter = self.event_emitter.lock().await;
+        let mut emitter = self.event_emitter.write().await;
         emitter.on(events, handler);
     }
 
@@ -188,7 +188,7 @@ impl<S: SecretManage> WalletInner<S> {
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
     pub async fn clear_listeners(&self, events: Vec<WalletEventType>) {
-        let mut emitter = self.event_emitter.lock().await;
+        let mut emitter = self.event_emitter.write().await;
         emitter.clear(events);
     }
 
@@ -205,7 +205,7 @@ impl<S: SecretManage> WalletInner<S> {
 
     #[cfg(feature = "events")]
     pub(crate) async fn emit(&self, account_index: u32, event: crate::wallet::events::types::WalletEvent) {
-        self.event_emitter.lock().await.emit(account_index, event);
+        self.event_emitter.read().await.emit(account_index, event);
     }
 
     /// Helper function to test events. Emits a provided event with account index 0.

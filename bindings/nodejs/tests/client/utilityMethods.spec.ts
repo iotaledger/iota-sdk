@@ -1,4 +1,4 @@
-import { Client, SecretManager, Utils } from '../../lib';
+import { Client, Ed25519Address, SecretManager, Utils } from '../../lib';
 import '../customMatchers';
 import 'dotenv/config';
 
@@ -130,7 +130,7 @@ describe('Client utility methods', () => {
         const validSignature = Utils.verifyEd25519Signature(
             signature,
             message,
-            { type: 0, pubKeyHash },
+            new Ed25519Address(pubKeyHash),
         );
         expect(validSignature).toBeTruthy();
     });
