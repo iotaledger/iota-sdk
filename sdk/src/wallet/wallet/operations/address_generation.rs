@@ -6,10 +6,7 @@ use std::sync::atomic::Ordering;
 #[cfg(all(feature = "events", feature = "ledger_nano"))]
 use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
-    client::secret::{
-        mnemonic::MnemonicSecretManager, stronghold::StrongholdSecretManager, GenerateAddressOptions, SecretManage,
-        SecretManager,
-    },
+    client::secret::{mnemonic::MnemonicSecretManager, GenerateAddressOptions, SecretManage, SecretManager},
     types::block::address::Address,
     wallet::Wallet,
 };
@@ -202,7 +199,7 @@ impl Wallet<crate::client::secret::ledger_nano::LedgerSecretManager> {
 }
 
 #[cfg(feature = "stronghold")]
-impl Wallet<StrongholdSecretManager> {
+impl Wallet<crate::client::secret::stronghold::StrongholdSecretManager> {
     /// Generate an address without storing it
     /// ```ignore
     /// let public_addresses = wallet
