@@ -1,10 +1,12 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::{
+    collections::{BTreeMap, BTreeSet},
+    vec::Vec,
+};
 use core::cmp::Ordering;
 
-use hashbrown::HashMap;
 use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
@@ -391,8 +393,8 @@ impl FoundryOutput {
     pub(crate) fn transition_inner(
         current_state: &Self,
         next_state: &Self,
-        input_native_tokens: &HashMap<TokenId, U256>,
-        output_native_tokens: &HashMap<TokenId, U256>,
+        input_native_tokens: &BTreeMap<TokenId, U256>,
+        output_native_tokens: &BTreeMap<TokenId, U256>,
     ) -> Result<(), StateTransitionError> {
         if current_state.alias_address() != next_state.alias_address()
             || current_state.serial_number != next_state.serial_number

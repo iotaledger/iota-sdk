@@ -441,24 +441,11 @@ impl InputSelection {
             }
         }
 
-        let input_native_tokens = hashbrown::HashMap::from_iter(
-            input_native_tokens_builder
-                .finish_vec()?
-                .into_iter()
-                .map(|n| (*n.token_id(), n.amount())),
-        );
         for output in self.outputs.iter() {
             if let Some(native_token) = output.native_tokens() {
                 output_native_tokens_builder.add_native_tokens(native_token.clone())?;
             }
         }
-
-        let output_native_tokens = hashbrown::HashMap::from_iter(
-            output_native_tokens_builder
-                .finish_vec()?
-                .into_iter()
-                .map(|n| (*n.token_id(), n.amount())),
-        );
 
         // Validate utxo chain transitions
         for output in self.outputs.iter() {
@@ -511,8 +498,8 @@ impl InputSelection {
                         if let Err(err) = FoundryOutput::transition_inner(
                             foundry_input.output.as_foundry(),
                             foundry_output,
-                            &input_native_tokens,
-                            &output_native_tokens,
+                            &input_native_tokens_builder.0,
+                            &output_native_tokens_builder.0,
                         ) {
                             log::debug!("validate_transitions error {err:?}");
                             return Err(Error::UnfulfillableRequirement(Requirement::Foundry(
