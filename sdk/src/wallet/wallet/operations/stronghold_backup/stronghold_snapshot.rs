@@ -4,7 +4,11 @@
 use std::sync::atomic::Ordering;
 
 use crate::{
-    client::{secret::SecretManagerConfig, storage::StorageProvider, stronghold::StrongholdAdapter},
+    client::{
+        secret::{types::StrongholdDto, SecretManagerConfig},
+        storage::StorageProvider,
+        stronghold::StrongholdAdapter,
+    },
     wallet::{
         account::AccountDetails,
         migration::{latest_migration_version, migrate_backup, MIGRATION_VERSION_KEY},
@@ -24,7 +28,7 @@ where
     pub(crate) async fn store_data_to_stronghold(
         &self,
         stronghold: &StrongholdAdapter,
-        secret_manager_dto: S::Config,
+        secret_manager_dto: StrongholdDto,
     ) -> crate::wallet::Result<()>
     where
         crate::wallet::Error: From<S::Error>,
@@ -70,12 +74,12 @@ where
     }
 }
 
-pub(crate) async fn read_data_from_stronghold_snapshot<S: SecretManagerConfig>(
+pub(crate) async fn read_data_from_stronghold_snapshot(
     stronghold: &StrongholdAdapter,
 ) -> crate::wallet::Result<(
     Option<ClientOptions>,
     Option<u32>,
-    Option<S::Config>,
+    Option<StrongholdDto>,
     Option<Vec<AccountDetails>>,
 )> {
     migrate_backup(stronghold).await?;
@@ -115,7 +119,7 @@ pub(crate) async fn read_data_from_stronghold_snapshot<S: SecretManagerConfig>(
 
         log::debug!("[restore_backup] restored secret_manager: {}", secret_manager_string);
 
-        let secret_manager_dto: S::Config = serde_json::from_str(&secret_manager_string)?;
+        let secret_manager_dto: StrongholdDto = serde_json::from_str(&secret_manager_string)?;
 
         Some(secret_manager_dto)
     } else {

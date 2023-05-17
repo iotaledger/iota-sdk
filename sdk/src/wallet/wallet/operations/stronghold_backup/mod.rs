@@ -12,7 +12,7 @@ use self::stronghold_snapshot::read_data_from_stronghold_snapshot;
 #[cfg(feature = "storage")]
 use crate::wallet::WalletBuilder;
 use crate::{
-    client::secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerConfig, SecretManagerDto},
+    client::secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerConfig},
     wallet::{Account, Wallet},
 };
 
@@ -23,11 +23,10 @@ impl Wallet {
         log::debug!("[backup] creating a stronghold backup");
         let secret_manager = self.secret_manager.read().await;
 
-        let secret_manager_dto = secret_manager.to_config();
-
         match &*secret_manager {
             // Backup with existing stronghold
             SecretManager::Stronghold(stronghold) => {
+                let secret_manager_dto = stronghold.to_config();
                 stronghold.set_password(&stronghold_password).await?;
 
                 self.store_data_to_stronghold(stronghold, secret_manager_dto).await?;
@@ -41,6 +40,8 @@ impl Wallet {
                 let backup_stronghold = StrongholdSecretManager::builder()
                     .password(&stronghold_password)
                     .build(backup_path)?;
+
+                let secret_manager_dto = backup_stronghold.to_config();
 
                 self.store_data_to_stronghold(&backup_stronghold, secret_manager_dto)
                     .await?;
@@ -99,7 +100,7 @@ impl Wallet {
             .build(backup_path.clone())?;
 
         let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =
-            read_data_from_stronghold_snapshot::<SecretManager>(&new_stronghold).await?;
+            read_data_from_stronghold_snapshot(&new_stronghold).await?;
 
         // If the coin type is not matching the current one, then the addresses in the accounts will also not be
         // correct, so we will not restore them
@@ -128,22 +129,17 @@ impl Wallet {
         }
 
         if let Some(mut read_secret_manager) = read_secret_manager {
-            // We have to replace the snapshot path with the current one, when building stronghold
-            if let SecretManagerDto::Stronghold(stronghold_dto) = &mut read_secret_manager {
-                stronghold_dto.snapshot_path = new_snapshot_path.clone().into_os_string().to_string_lossy().into();
-            }
+            read_secret_manager.snapshot_path = new_snapshot_path.clone().into_os_string().to_string_lossy().into();
 
-            let mut restored_secret_manager = SecretManager::try_from(&read_secret_manager)
+            let restored_secret_manager = StrongholdSecretManager::from_config(&read_secret_manager)
                 .map_err(|_| crate::wallet::Error::Backup("invalid secret_manager"))?;
 
-            if let SecretManager::Stronghold(stronghold) = &mut restored_secret_manager {
-                // Copy Stronghold file so the seed is available in the new location
-                fs::copy(backup_path, new_snapshot_path)?;
+            // Copy Stronghold file so the seed is available in the new location
+            fs::copy(backup_path, new_snapshot_path)?;
 
-                // Set password to restored secret manager
-                stronghold.set_password(&stronghold_password).await?;
-            }
-            *secret_manager = restored_secret_manager;
+            // Set password to restored secret manager
+            restored_secret_manager.set_password(&stronghold_password).await?;
+            *secret_manager = SecretManager::Stronghold(restored_secret_manager);
         }
 
         stronghold_password.zeroize();
@@ -267,7 +263,7 @@ impl Wallet<StrongholdSecretManager> {
             .build(backup_path.clone())?;
 
         let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =
-            read_data_from_stronghold_snapshot::<StrongholdSecretManager>(&new_stronghold).await?;
+            read_data_from_stronghold_snapshot(&new_stronghold).await?;
 
         // If the coin type is not matching the current one, then the addresses in the accounts will also not be
         // correct, so we will not restore them
