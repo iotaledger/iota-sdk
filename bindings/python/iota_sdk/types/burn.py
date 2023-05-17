@@ -18,7 +18,7 @@ class Burn:
     nfts: Optional[List[str]]
         The NFTs to burn (hex encoded)
     foundries: Optional[List[str]]
-        The foundries the burn (hex encoded)
+        The foundries to burn (hex encoded)
     nativeTokens: Optional[List[NativeToken]]
         The native tokens of the burn
     """
