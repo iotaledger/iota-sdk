@@ -5,7 +5,7 @@ use iota_sdk::{
     client::api::input_selection::Burn,
     types::block::output::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-        NftId, NftOutputBuilder, OutputId, UnlockCondition,
+        NativeToken, NftId, NftOutputBuilder, OutputId, UnlockCondition,
     },
     wallet::{Account, MintNativeTokenParams, MintNftParams, Result},
     U256,
@@ -93,7 +93,7 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
     let nft_id = NftId::from(&output_id);
 
     account_1.sync(None).await?;
-    let transaction = account_1.burn(Burn::new().add_nft(nft_id), None).await?;
+    let transaction = account_1.burn(nft_id, None).await?;
     account_1
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
@@ -270,10 +270,7 @@ async fn mint_and_burn_native_tokens() -> Result<()> {
     account.sync(None).await?;
 
     let tx = account
-        .burn(
-            Burn::new().add_native_token(mint_tx.token_id, native_token_amount),
-            None,
-        )
+        .burn(NativeToken::new(mint_tx.token_id, native_token_amount)?, None)
         .await?;
     account
         .retry_transaction_until_included(&tx.transaction_id, None, None)

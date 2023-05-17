@@ -1,7 +1,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from __future__ import annotations  # For Burn reference in Burn
+from __future__ import annotations  # Allow reference to Burn in Burn class
 from dataclasses import dataclass
 from typing import List, Optional, Dict, Any
 from iota_sdk.types.native_token import NativeToken
@@ -20,7 +20,7 @@ class Burn:
     foundries: Optional[List[str]]
         The foundries to burn (hex encoded)
     nativeTokens: Optional[List[NativeToken]]
-        The native tokens of the burn
+        The native tokens to burn
     """
 
     aliases: Optional[List[str]]
