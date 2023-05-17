@@ -5,7 +5,7 @@ import { Wallet, CoinType, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/wallet/00_create_account.js
+// yarn run-example ./wallet/00_create_account.ts
 
 // This example creates a new database and account
 async function run() {

@@ -5,7 +5,7 @@ import { Client, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/client/00_get_info.js
+// yarn run-example ./client/00_get_info.ts
 
 // In this example we will get information about the node
 async function run() {
