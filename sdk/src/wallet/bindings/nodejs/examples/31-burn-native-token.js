@@ -18,12 +18,7 @@ async function run() {
         // `100` hex encoded
         let burnAmount = "0x64"
 
-        const response = await account.burn({
-            nativeTokens: [{
-                id: tokenId,
-                amount: burnAmount,
-            }]
-        });
+        const response = await account.burnNativeToken(tokenId, burnAmount);
 
         console.log(response);
 

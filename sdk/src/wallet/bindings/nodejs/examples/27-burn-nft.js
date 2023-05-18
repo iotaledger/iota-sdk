@@ -18,10 +18,7 @@ async function run() {
         await account.sync();
 
         //TODO: Replace with an NFT id from your account, you can mint one with `25-mint-nft.js`.
-        const nftId = '0xeb7a7f6b4b8f932ed0d60d5a6018cb51dfa53af1173f9ca8944d1ab49772dd2b';
-        const response = await account.burn({
-            nfts: [nftId],
-        });
+        const response = await account.burnNft('0xeb7a7f6b4b8f932ed0d60d5a6018cb51dfa53af1173f9ca8944d1ab49772dd2b');
 
         console.log(response);
 
