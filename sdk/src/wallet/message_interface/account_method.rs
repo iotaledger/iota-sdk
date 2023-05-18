@@ -103,6 +103,58 @@ pub enum AccountMethod {
         features: Option<Vec<FeatureDto>>,
         immutable_features: Option<Vec<FeatureDto>>,
     },
+    /// Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
+    /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
+    /// recommended to use melting, if the foundry output is available.
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    #[serde(rename_all = "camelCase")]
+    BurnNativeToken {
+        /// Native token id
+        token_id: TokenId,
+        /// To be burned amount
+        burn_amount: U256,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
+    /// deposit return, timelock or expiration unlock condition. This should be preferred over burning, because after
+    /// burning, the foundry can never be destroyed anymore.
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    #[serde(rename_all = "camelCase")]
+    BurnNft {
+        nft_id: NftId,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Consolidate outputs.
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    #[serde(rename_all = "camelCase")]
+    ConsolidateOutputs {
+        force: bool,
+        output_consolidation_threshold: Option<usize>,
+    },
+    /// Create an alias output.
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    #[serde(rename_all = "camelCase")]
+    CreateAliasOutput {
+        params: Option<CreateAliasParamsDto>,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
+    /// storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
+    /// sent to the governor address.
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    #[serde(rename_all = "camelCase")]
+    DestroyAlias {
+        alias_id: AliasId,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Function to destroy a foundry output with a circulating supply of 0.
+    /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    #[serde(rename_all = "camelCase")]
+    DestroyFoundry {
+        foundry_id: FoundryId,
+        options: Option<TransactionOptionsDto>,
+    },
     /// Generate new unused addresses.
     /// Expected response: [`GeneratedAddress`](crate::wallet::message_interface::Response::GeneratedAddress)
     GenerateAddresses {
@@ -156,65 +208,48 @@ pub enum AccountMethod {
     /// Returns all pending transactions of the account
     /// Expected response: [`Transactions`](crate::wallet::message_interface::Response::Transactions)
     PendingTransactions,
-    /// Calculate the minimum required storage deposit for an output.
-    /// Expected response:
-    /// [`MinimumRequiredStorageDeposit`](crate::wallet::message_interface::Response::MinimumRequiredStorageDeposit)
-    MinimumRequiredStorageDeposit { output: OutputDto },
-    /// Get account balance information.
-    /// Expected response: [`Balance`](crate::wallet::message_interface::Response::Balance)
-    GetBalance,
-    /// Consolidate outputs.
-    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
-    PrepareConsolidateOutputs {
-        force: bool,
-        output_consolidation_threshold: Option<usize>,
-    },
-    /// Create an alias output.
-    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
-    PrepareCreateAliasOutput {
-        params: Option<CreateAliasParamsDto>,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
-    /// storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
-    /// sent to the governor address.
-    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
-    PrepareDestroyAlias {
-        alias_id: AliasId,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Function to destroy a foundry output with a circulating supply of 0.
-    /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
-    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
-    PrepareDestroyFoundry {
-        foundry_id: FoundryId,
-        options: Option<TransactionOptionsDto>,
-    },
     /// Melt native tokens. This happens with the foundry output which minted them, by increasing it's
     /// `melted_tokens` field.
-    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
-    PrepareDecreaseNativeTokenSupply {
+    DecreaseNativeTokenSupply {
         /// Native token id
         token_id: TokenId,
         /// To be melted amount
         melt_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
+    /// Calculate the minimum required storage deposit for an output.
+    /// Expected response:
+    /// [`MinimumRequiredStorageDeposit`](crate::wallet::message_interface::Response::MinimumRequiredStorageDeposit)
+    MinimumRequiredStorageDeposit { output: OutputDto },
     /// Mint more native token.
-    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
+    /// Expected response: [`MintTokenTransaction`](crate::wallet::message_interface::Response::MintTokenTransaction)
     #[serde(rename_all = "camelCase")]
-    PrepareIncreaseNativeTokenSupply {
+    IncreaseNativeTokenSupply {
         /// Native token id
         token_id: TokenId,
         /// To be minted amount
         mint_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
+    /// Mint native token.
+    /// Expected response: [`MintTokenTransaction`](crate::wallet::message_interface::Response::MintTokenTransaction)
+    #[serde(rename_all = "camelCase")]
+    MintNativeToken {
+        params: MintNativeTokenParamsDto,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Mint nft.
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    #[serde(rename_all = "camelCase")]
+    MintNfts {
+        params: Vec<MintNftParamsDto>,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Get account balance information.
+    /// Expected response: [`Balance`](crate::wallet::message_interface::Response::Balance)
+    GetBalance,
     /// Prepare an output.
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[serde(rename_all = "camelCase")]
@@ -233,56 +268,6 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     PrepareSendAmount {
         params: Vec<SendAmountParams>,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
-    /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
-    /// recommended to use melting, if the foundry output is available.
-    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
-    PrepareBurnNativeToken {
-        /// Native token id
-        token_id: TokenId,
-        /// To be burned amount
-        burn_amount: U256,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
-    /// deposit return, timelock or expiration unlock condition. This should be preferred over burning, because after
-    /// burning, the foundry can never be destroyed anymore.
-    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
-    PrepareBurnNft {
-        nft_id: NftId,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Mint native token.
-    /// Expected response:
-    /// [`PrepareMintTokenTransaction`](crate::wallet::message_interface::Response::PrepareMintTokenTransaction)
-    #[serde(rename_all = "camelCase")]
-    PrepareMintNativeToken {
-        params: MintNativeTokenParamsDto,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Mint nft.
-    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
-    PrepareMintNfts {
-        params: Vec<MintNftParamsDto>,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Send native tokens.
-    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
-    PrepareSendNativeTokens {
-        params: Vec<SendNativeTokensParams>,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Send nft.
-    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
-    PrepareSendNft {
-        params: Vec<SendNftParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
@@ -304,6 +289,27 @@ pub enum AccountMethod {
         /// Sync options
         options: Option<SyncOptions>,
     },
+    /// Send amount.
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    #[serde(rename_all = "camelCase")]
+    SendAmount {
+        params: Vec<SendAmountParams>,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Send native tokens.
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    #[serde(rename_all = "camelCase")]
+    SendNativeTokens {
+        params: Vec<SendNativeTokensParams>,
+        options: Option<TransactionOptionsDto>,
+    },
+    /// Send nft.
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
+    #[serde(rename_all = "camelCase")]
+    SendNft {
+        params: Vec<SendNftParams>,
+        options: Option<TransactionOptionsDto>,
+    },
     /// Set the alias of the account.
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
     SetAlias { alias: String },
@@ -323,12 +329,6 @@ pub enum AccountMethod {
     SignTransactionEssence {
         prepared_transaction_data: PreparedTransactionDataDto,
     },
-    /// Validate the transaction, sign it, submit it to a node and store it in the account.
-    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    SignAndSubmitTransaction {
-        prepared_transaction_data: PreparedTransactionDataDto,
-    },
     /// Validate the transaction, submit it to a node and store it in the account.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
@@ -340,20 +340,20 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     ClaimOutputs { output_ids_to_claim: Vec<OutputId> },
     /// Vote for a participation event.
-    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[serde(rename_all = "camelCase")]
-    PrepareVote {
+    Vote {
         event_id: Option<ParticipationEventId>,
         answers: Option<Vec<u8>>,
     },
     /// Stop participating for an event.
-    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[serde(rename_all = "camelCase")]
-    PrepareStopParticipating { event_id: ParticipationEventId },
+    StopParticipating { event_id: ParticipationEventId },
     /// Calculates a participation overview for an account. If event_ids are provided, only return outputs and tracked
     /// participations for them.
     /// Expected response:
@@ -368,16 +368,16 @@ pub enum AccountMethod {
     /// special output, which is really a basic one with some metadata.
     /// This will stop voting in most cases (if there is a remainder output), but the voting data isn't lost and
     /// calling `Vote` without parameters will revote. Expected response:
-    /// [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
+    /// [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    PrepareIncreaseVotingPower { amount: String },
+    IncreaseVotingPower { amount: String },
     /// Reduces an account's "voting power" by a given amount.
     /// This will stop voting, but the voting data isn't lost and calling `Vote` without parameters will revote.
-    /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
+    /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    PrepareDecreaseVotingPower { amount: String },
+    DecreaseVotingPower { amount: String },
     /// Stores participation information locally and returns the event.
     ///
     /// This will NOT store the node url and auth inside the client options.
