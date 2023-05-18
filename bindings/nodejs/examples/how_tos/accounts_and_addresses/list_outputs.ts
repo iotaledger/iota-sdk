@@ -19,8 +19,14 @@ async function run() {
         await account.sync();
 
         const outputs = await account.outputs();
-
+        
+        console.log('Output ids:');
         for (const output of outputs) console.log(output.outputId);
+
+        const unspentOutputs = await account.unspentOutputs();
+
+        console.log('Unspent output ids:');
+        for (const output of unspentOutputs) console.log(output.outputId);
     } catch (error) {
         console.error('Error: ', error);
     }

@@ -5,6 +5,8 @@
 //!
 //! `cargo run --example list_outputs --release --features="rocksdb stronghold"`
 
+use std::println;
+
 use iota_sdk::wallet::{Result, Wallet};
 
 #[tokio::main]
@@ -19,7 +21,14 @@ async fn main() -> Result<()> {
     account.sync(None).await?;
 
     // Print output ids
+    println!("Output ids:");
     for output in account.outputs(None).await? {
+        println!("{}", output.output_id);
+    }
+
+    // Print unspent output ids
+    println!("Unspent output ids:");
+    for output in account.unspent_outputs(None).await? {
         println!("{}", output.output_id);
     }
 
