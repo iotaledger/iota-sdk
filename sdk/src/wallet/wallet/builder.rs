@@ -50,6 +50,7 @@ impl<S: SecretManage> Default for WalletBuilder<S> {
         Self {
             client_options: Default::default(),
             coin_type: Default::default(),
+            #[cfg(feature = "storage")]
             storage_options: Default::default(),
             secret_manager: Default::default(),
         }
@@ -136,9 +137,11 @@ where
     pub async fn finish(mut self) -> crate::wallet::Result<Wallet<S>> {
         log::debug!("[WalletBuilder]");
 
+        #[cfg(feature = "storage")]
         let storage_options = self.storage_options.clone().unwrap_or_default();
         // Check if the db exists and if not, return an error if one parameter is missing, because otherwise the db
         // would be created with an empty parameter which just leads to errors later
+        #[cfg(feature = "storage")]
         if !storage_options.storage_path.is_dir() {
             if self.client_options.is_none() {
                 return Err(crate::wallet::Error::MissingParameter("client_options"));

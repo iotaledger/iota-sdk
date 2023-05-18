@@ -4,8 +4,6 @@
 use std::collections::{HashMap, HashSet};
 
 use super::storage::SaveLoadWallet;
-#[cfg(feature = "storage")]
-use crate::wallet::WalletBuilder;
 use crate::{
     client::{
         node_manager::{
@@ -15,7 +13,7 @@ use crate::{
         secret::SecretManage,
         Client, ClientBuilder, NodeInfoWrapper,
     },
-    wallet::Wallet,
+    wallet::{Wallet, WalletBuilder},
     Url,
 };
 
