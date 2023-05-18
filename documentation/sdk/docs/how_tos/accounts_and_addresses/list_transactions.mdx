@@ -19,6 +19,14 @@ import PythonCode from "!!raw-loader!../../../../../bindings/python/examples/how
 
 This How-To will show you how to list all transactions of an account.
 
+:::tip Sync Options
+
+If you want to list incomming or pending transactions you need to specify that in your `sync` call. 
+Transactions for outputs that you synced before with other sync options, will not be requested later.
+Also one Transactions that aren't pruned on the point of syncing will be listed.
+
+:::tip
+
 ## Code Example
 
 <Tabs groupId="language">
