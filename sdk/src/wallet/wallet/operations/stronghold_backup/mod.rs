@@ -12,7 +12,7 @@ use self::stronghold_snapshot::read_data_from_stronghold_snapshot;
 #[cfg(feature = "storage")]
 use crate::wallet::WalletBuilder;
 use crate::{
-    client::secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerConfig},
+    client::secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerConfig, SecretManagerDto},
     wallet::{Account, Wallet},
 };
 
@@ -26,11 +26,8 @@ impl Wallet {
         match &*secret_manager {
             // Backup with existing stronghold
             SecretManager::Stronghold(stronghold) => {
-                let secret_manager_dto = stronghold.to_config();
                 stronghold.set_password(&stronghold_password).await?;
-
-                self.store_data_to_stronghold(stronghold, secret_manager_dto).await?;
-
+                self.store_data_to_stronghold(stronghold).await?;
                 // Write snapshot to backup path
                 stronghold.write_stronghold_snapshot(Some(&backup_path)).await?;
             }
@@ -41,10 +38,7 @@ impl Wallet {
                     .password(&stronghold_password)
                     .build(backup_path)?;
 
-                let secret_manager_dto = backup_stronghold.to_config();
-
-                self.store_data_to_stronghold(&backup_stronghold, secret_manager_dto)
-                    .await?;
+                self.store_data_to_stronghold(&backup_stronghold).await?;
 
                 // Write snapshot to backup path
                 backup_stronghold.write_stronghold_snapshot(None).await?;
@@ -99,8 +93,8 @@ impl Wallet {
             .password(&stronghold_password)
             .build(backup_path.clone())?;
 
-        let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =
-            read_data_from_stronghold_snapshot(&new_stronghold).await?;
+        let (read_client_options, read_coin_type, mut read_secret_manager, read_accounts) =
+            read_data_from_stronghold_snapshot::<SecretManager>(&new_stronghold).await?;
 
         // If the coin type is not matching the current one, then the addresses in the accounts will also not be
         // correct, so we will not restore them
@@ -128,18 +122,22 @@ impl Wallet {
             }
         }
 
-        if let Some(mut read_secret_manager) = read_secret_manager {
-            read_secret_manager.snapshot_path = new_snapshot_path.clone().into_os_string().to_string_lossy().into();
+        if let Some(read_secret_manager) = &mut read_secret_manager {
+            if let SecretManagerDto::Stronghold(stronghold) = read_secret_manager {
+                stronghold.snapshot_path = new_snapshot_path.clone().into_os_string().to_string_lossy().into();
+            }
 
-            let restored_secret_manager = StrongholdSecretManager::from_config(&read_secret_manager)
+            let restored_secret_manager = SecretManager::from_config(&read_secret_manager)
                 .map_err(|_| crate::wallet::Error::Backup("invalid secret_manager"))?;
 
             // Copy Stronghold file so the seed is available in the new location
             fs::copy(backup_path, new_snapshot_path)?;
 
-            // Set password to restored secret manager
-            restored_secret_manager.set_password(&stronghold_password).await?;
-            *secret_manager = SecretManager::Stronghold(restored_secret_manager);
+            if let SecretManager::Stronghold(stronghold) = &restored_secret_manager {
+                // Set password to restored secret manager
+                stronghold.set_password(&stronghold_password).await?;
+            }
+            *secret_manager = restored_secret_manager;
         }
 
         stronghold_password.zeroize();
@@ -208,12 +206,9 @@ impl Wallet<StrongholdSecretManager> {
         log::debug!("[backup] creating a stronghold backup");
         let secret_manager = self.secret_manager.read().await;
 
-        let secret_manager_dto = secret_manager.to_config();
-
         secret_manager.set_password(&stronghold_password).await?;
 
-        self.store_data_to_stronghold(&secret_manager, secret_manager_dto)
-            .await?;
+        self.store_data_to_stronghold(&secret_manager).await?;
 
         // Write snapshot to backup path
         secret_manager.write_stronghold_snapshot(Some(&backup_path)).await?;
@@ -263,7 +258,7 @@ impl Wallet<StrongholdSecretManager> {
             .build(backup_path.clone())?;
 
         let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =
-            read_data_from_stronghold_snapshot(&new_stronghold).await?;
+            read_data_from_stronghold_snapshot::<StrongholdSecretManager>(&new_stronghold).await?;
 
         // If the coin type is not matching the current one, then the addresses in the accounts will also not be
         // correct, so we will not restore them

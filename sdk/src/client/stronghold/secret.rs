@@ -165,12 +165,12 @@ impl SecretManage for StrongholdAdapter {
 impl SecretManagerConfig for StrongholdAdapter {
     type Config = StrongholdDto;
 
-    fn to_config(&self) -> Self::Config {
-        Self::Config {
+    fn to_config(&self) -> Option<Self::Config> {
+        Some(Self::Config {
             password: None,
             timeout: self.get_timeout().map(|duration| duration.as_secs()),
             snapshot_path: self.snapshot_path.clone().into_os_string().to_string_lossy().into(),
-        }
+        })
     }
 
     fn from_config(config: &Self::Config) -> Result<Self, Self::Error> {

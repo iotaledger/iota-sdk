@@ -369,8 +369,8 @@ impl SecretManage for LedgerSecretManager {
 impl SecretManagerConfig for LedgerSecretManager {
     type Config = bool;
 
-    fn to_config(&self) -> Self::Config {
-        self.is_simulator
+    fn to_config(&self) -> Option<Self::Config> {
+        Some(self.is_simulator)
     }
 
     fn from_config(config: &Self::Config) -> Result<Self, Self::Error> {

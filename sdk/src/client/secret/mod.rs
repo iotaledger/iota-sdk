@@ -96,7 +96,7 @@ pub trait SecretManage: Debug + Send + Sync {
 pub trait SecretManagerConfig: SecretManage {
     type Config: Serialize + DeserializeOwned + Debug + Send + Sync;
 
-    fn to_config(&self) -> Self::Config;
+    fn to_config(&self) -> Option<Self::Config>;
 
     fn from_config(config: &Self::Config) -> Result<Self, Self::Error>
     where
@@ -311,14 +311,14 @@ impl SecretManage for SecretManager {
 impl SecretManagerConfig for SecretManager {
     type Config = SecretManagerDto;
 
-    fn to_config(&self) -> Self::Config {
+    fn to_config(&self) -> Option<Self::Config> {
         match self {
             #[cfg(feature = "stronghold")]
-            Self::Stronghold(s) => Self::Config::Stronghold(s.to_config()),
+            Self::Stronghold(s) => s.to_config().map(Self::Config::Stronghold),
             #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(s) => Self::Config::LedgerNano(s.to_config()),
-            Self::Mnemonic(_) => Self::Config::Mnemonic("...".to_string()),
-            Self::Placeholder(_) => Self::Config::Placeholder,
+            Self::LedgerNano(s) => s.to_config().map(Self::Config::LedgerNano),
+            Self::Mnemonic(_) => return None,
+            Self::Placeholder(_) => return None,
         }
     }
 

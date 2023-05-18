@@ -38,8 +38,10 @@ mod storage_stub {
 
             if let Some(secret_manager) = &self.secret_manager {
                 let secret_manager = secret_manager.read().await;
-                let config = secret_manager.to_config();
-                storage.storage.set(SECRET_MANAGER_KEY, config).await?;
+                if let Some(config) = secret_manager.to_config() {
+                    log::debug!("save_secret_manager: {config:?}");
+                    storage.storage.set(SECRET_MANAGER_KEY, config).await?;
+                }
             }
             Ok(())
         }
