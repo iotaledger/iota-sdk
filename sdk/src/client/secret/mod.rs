@@ -317,8 +317,8 @@ impl SecretManagerConfig for SecretManager {
             Self::Stronghold(s) => s.to_config().map(Self::Config::Stronghold),
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(s) => s.to_config().map(Self::Config::LedgerNano),
-            Self::Mnemonic(_) => return None,
-            Self::Placeholder(_) => return None,
+            Self::Mnemonic(_) => None,
+            Self::Placeholder(_) => None,
         }
     }
 

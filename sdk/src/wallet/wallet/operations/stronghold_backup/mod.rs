@@ -127,7 +127,7 @@ impl Wallet {
                 stronghold.snapshot_path = new_snapshot_path.clone().into_os_string().to_string_lossy().into();
             }
 
-            let restored_secret_manager = SecretManager::from_config(&read_secret_manager)
+            let restored_secret_manager = SecretManager::from_config(read_secret_manager)
                 .map_err(|_| crate::wallet::Error::Backup("invalid secret_manager"))?;
 
             // Copy Stronghold file so the seed is available in the new location
