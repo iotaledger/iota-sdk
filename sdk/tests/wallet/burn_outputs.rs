@@ -14,6 +14,54 @@ use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear
 
 #[ignore]
 #[tokio::test]
+async fn mint_and_burn_multiple_output_types() -> Result<()> {
+    let storage_path = "test-storage/mint_and_burn_multiple_outputs";
+    setup(storage_path)?;
+
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
+
+    let native_token_amount = U256::from(100);
+
+    let nft_params = MintNftParams {
+        address: Some(account.addresses().await?[0].address().to_string()),
+        sender: None,
+        metadata: Some(b"some nft metadata".to_vec()),
+        tag: None,
+        issuer: None,
+        immutable_metadata: Some(b"some immutable nft metadata".to_vec()),
+    };
+    let nft_options = vec![nft_params.clone(), nft_params];
+
+    let transaction = account.mint_nfts(nft_options, None).await.unwrap();
+    account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
+    let balance = account.sync(None).await.unwrap();
+
+    // let transaction = account.create_alias_outpu(None, None).await?;
+
+    let output_id = OutputId::new(transaction.transaction_id, 0u16).unwrap();
+    let nft_id = NftId::from(&output_id);
+
+    let search = balance.nfts().iter().find(|&balance_nft_id| *balance_nft_id == nft_id);
+    println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
+    assert!(search.is_some());
+
+    let transaction = account.burn(nft_id, None).await.unwrap();
+    account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
+    let balance = account.sync(None).await.unwrap();
+    let search = balance.nfts().iter().find(|&balance_nft_id| *balance_nft_id == nft_id);
+    println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
+    assert!(search.is_none());
+
+    tear_down(storage_path)
+}
+
+#[ignore]
+#[tokio::test]
 async fn mint_and_burn_nft() -> Result<()> {
     let storage_path = "test-storage/mint_and_burn_outputs";
     setup(storage_path)?;
