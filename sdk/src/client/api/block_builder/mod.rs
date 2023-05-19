@@ -17,7 +17,7 @@ use crate::{
         Result,
     },
     types::block::{
-        address::{Address, Bech32Address, Bech32AddressLike, Ed25519Address},
+        address::{Address, Bech32AddressLike, Ed25519Address},
         input::{dto::UtxoInputDto, UtxoInput, INPUT_COUNT_MAX},
         output::{
             dto::OutputDto, unlock_condition::AddressUnlockCondition, BasicOutputBuilder, Output, OUTPUT_COUNT_RANGE,
@@ -256,7 +256,7 @@ impl<'a> ClientBlockBuilder<'a> {
         if let Some(output) = options.output {
             self = self
                 .with_output(
-                    Bech32Address::try_from_str(&output.address)?,
+                    &output.address,
                     output
                         .amount
                         .parse::<u64>()
