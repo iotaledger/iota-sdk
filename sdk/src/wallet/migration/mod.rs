@@ -75,23 +75,18 @@ impl<T: Migration + Send + Sync> DynMigration for T {
         let version = self.version();
         log::info!("Migrating to version {}", version);
         T::migrate_storage(storage).await?;
-        storage.set(MIGRATION_VERSION_KEY, version).await?;
+        storage.set(MIGRATION_VERSION_KEY, &version).await?;
         Ok(())
     }
 
     #[cfg(feature = "stronghold")]
     async fn migrate_backup(&self, storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
-        use crate::client::storage::StorageProvider;
+        use crate::client::storage::StorageAdapter;
 
         let version = self.version();
         log::info!("Migrating backup to version {}", version);
         T::migrate_backup(storage).await?;
-        storage
-            .insert(
-                MIGRATION_VERSION_KEY.as_bytes(),
-                serde_json::to_string(&version)?.as_bytes(),
-            )
-            .await?;
+        storage.set(MIGRATION_VERSION_KEY, &version).await?;
         Ok(())
     }
 }
@@ -107,13 +102,9 @@ pub async fn migrate_storage(storage: &super::storage::Storage) -> Result<()> {
 
 #[cfg(feature = "stronghold")]
 pub async fn migrate_backup(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
-    use crate::client::storage::StorageProvider;
+    use crate::client::storage::StorageAdapter;
 
-    let last_migration = storage
-        .get(MIGRATION_VERSION_KEY.as_bytes())
-        .await?
-        .map(|bytes| serde_json::from_slice::<MigrationVersion>(&bytes))
-        .transpose()?;
+    let last_migration = storage.get::<MigrationVersion>(MIGRATION_VERSION_KEY).await?;
     for migration in migrations(last_migration)? {
         migration.migrate_backup(storage).await?;
     }

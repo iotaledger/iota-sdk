@@ -83,7 +83,7 @@ impl StorageManager {
     pub(crate) async fn set_cached_participation_output_status(
         &self,
         account_index: u32,
-        outputs_participation: HashMap<OutputId, OutputStatusResponse>,
+        outputs_participation: &HashMap<OutputId, OutputStatusResponse>,
     ) -> crate::wallet::Result<()> {
         log::debug!("set_cached_participation");
 
@@ -160,7 +160,7 @@ mod tests {
         .collect::<HashMap<_, _>>();
 
         storage_manager
-            .set_cached_participation_output_status(0, outputs_participation.clone())
+            .set_cached_participation_output_status(0, &outputs_participation)
             .await
             .unwrap();
 

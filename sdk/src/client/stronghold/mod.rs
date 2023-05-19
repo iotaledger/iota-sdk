@@ -68,12 +68,12 @@ use zeroize::Zeroizing;
 
 use self::common::PRIVATE_DATA_CLIENT_PATH;
 pub use self::error::Error;
-use crate::client::storage::StorageProvider;
+use super::storage::StorageAdapter;
 
 /// A wrapper on [Stronghold].
 ///
 /// See the [module-level documentation](self) for more details.
-#[derive(Builder)]
+#[derive(Builder, Debug)]
 #[builder(pattern = "owned", build_fn(skip))]
 pub struct StrongholdAdapter {
     /// A stronghold instance.
@@ -301,10 +301,13 @@ impl StrongholdAdapter {
             .await
             .get_client(PRIVATE_DATA_CLIENT_PATH)?
             .store()
-            .keys()?;
+            .keys()?
+            .into_iter()
+            .map(|k| unsafe { String::from_utf8_unchecked(k) })
+            .collect::<Vec<_>>();
 
         for key in keys_to_re_encrypt {
-            let value = match self.get(&key).await {
+            let value = match self.get_bytes(&key).await {
                 Err(err) => {
                     error!("an error occurred during the re-encryption of Stronghold Store: {err}");
 
@@ -342,7 +345,7 @@ impl StrongholdAdapter {
         };
 
         for (key, value) in values {
-            if let Err(err) = self.insert(&key, &value).await {
+            if let Err(err) = self.set_bytes(&key, value.as_ref()).await {
                 error!("an error occurred during the re-encryption of Stronghold store: {err}");
 
                 // Recover: put the old key back

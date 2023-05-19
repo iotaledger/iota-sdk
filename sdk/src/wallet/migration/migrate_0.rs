@@ -27,39 +27,23 @@ impl Migration for Migrate {
                     .get::<serde_json::Value>(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"))
                     .await?
                 {
-                    ConvertIncomingTransactions::check(
-                        account
-                            .get_mut("incomingTransactions")
-                            .ok_or(Error::Storage("missing incoming transactions".to_owned()))?,
-                    )?;
-                    for output_data in account
-                        .get_mut("outputs")
-                        .ok_or(Error::Storage("missing outputs".to_owned()))?
+                    ConvertIncomingTransactions::check(&mut account["incomingTransactions"])?;
+                    for output_data in account["outputs"]
                         .as_object_mut()
                         .ok_or(Error::Storage("malformatted outputs".to_owned()))?
                         .values_mut()
                     {
-                        ConvertOutputMetadata::check(
-                            output_data
-                                .get_mut("metadata")
-                                .ok_or(Error::Storage("missing metadata".to_owned()))?,
-                        )?;
+                        ConvertOutputMetadata::check(&mut output_data["metadata"])?;
                     }
-                    for output_data in account
-                        .get_mut("unspentOutputs")
-                        .ok_or(Error::Storage("missing unspent outputs".to_owned()))?
+                    for output_data in account["unspentOutputs"]
                         .as_object_mut()
                         .ok_or(Error::Storage("malformatted unspent outputs".to_owned()))?
                         .values_mut()
                     {
-                        ConvertOutputMetadata::check(
-                            output_data
-                                .get_mut("metadata")
-                                .ok_or(Error::Storage("missing metadata".to_owned()))?,
-                        )?;
+                        ConvertOutputMetadata::check(&mut output_data["metadata"])?;
                     }
                     storage
-                        .set(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"), account)
+                        .set(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"), &account)
                         .await?;
                 }
             }
@@ -70,54 +54,31 @@ impl Migration for Migrate {
     #[cfg(feature = "stronghold")]
     async fn migrate_backup(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
         use crate::{
-            client::storage::StorageProvider,
+            client::storage::StorageAdapter,
             wallet::wallet::operations::stronghold_backup::stronghold_snapshot::ACCOUNTS_KEY,
         };
 
-        if let Some(mut accounts) = storage
-            .get(ACCOUNTS_KEY.as_bytes())
-            .await?
-            .map(|bytes| serde_json::from_slice::<Vec<serde_json::Value>>(&bytes))
-            .transpose()?
-        {
+        if let Some(mut accounts) = storage.get::<Vec<serde_json::Value>>(ACCOUNTS_KEY).await? {
             for account in &mut accounts {
-                ConvertIncomingTransactions::check(
-                    account
-                        .get_mut("incomingTransactions")
-                        .ok_or(Error::Storage("missing incoming transactions".to_owned()))?,
-                )?;
-                for output_data in account
-                    .get_mut("outputs")
-                    .ok_or(Error::Storage("missing outputs".to_owned()))?
+                ConvertIncomingTransactions::check(&mut account["incomingTransactions"])?;
+                for output_data in account["outputs"]
                     .as_object_mut()
                     .ok_or(Error::Storage("malformatted outputs".to_owned()))?
                     .values_mut()
                 {
-                    ConvertOutputMetadata::check(
-                        output_data
-                            .get_mut("metadata")
-                            .ok_or(Error::Storage("missing metadata".to_owned()))?,
-                    )?;
+                    ConvertOutputMetadata::check(&mut output_data["metadata"])?;
                 }
-                for output_data in account
-                    .get_mut("unspentOutputs")
-                    .ok_or(Error::Storage("missing unspent outputs".to_owned()))?
+                for output_data in account["unspentOutputs"]
                     .as_object_mut()
                     .ok_or(Error::Storage("malformatted unspent outputs".to_owned()))?
                     .values_mut()
                 {
-                    ConvertOutputMetadata::check(
-                        output_data
-                            .get_mut("metadata")
-                            .ok_or(Error::Storage("missing metadata".to_owned()))?,
-                    )?;
+                    ConvertOutputMetadata::check(&mut output_data["metadata"])?;
                 }
             }
-            storage
-                .insert(ACCOUNTS_KEY.as_bytes(), serde_json::to_string(&accounts)?.as_bytes())
-                .await?;
+            storage.set(ACCOUNTS_KEY, &accounts).await?;
         }
-        storage.delete(b"backup_schema_version").await.ok();
+        storage.delete("backup_schema_version").await.ok();
         Ok(())
     }
 }
