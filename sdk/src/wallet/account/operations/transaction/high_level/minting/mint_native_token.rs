@@ -120,6 +120,7 @@ impl Account {
         let token_supply = self.client().get_token_supply().await?;
 
         let (alias_id, alias_output) = self
+            // TODO shouldn't be find_alias_output
             .get_alias_output(params.alias_id)
             .await
             .ok_or_else(|| crate::wallet::Error::MintingFailed("Missing alias output".to_string()))?;
