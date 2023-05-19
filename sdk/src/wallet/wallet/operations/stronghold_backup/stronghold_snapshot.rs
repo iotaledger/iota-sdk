@@ -7,7 +7,7 @@ use crate::{
     client::{secret::SecretManagerDto, storage::StorageAdapter, stronghold::StrongholdAdapter},
     wallet::{
         account::AccountDetails,
-        migration::{latest_migration_version, migrate_backup, MIGRATION_VERSION_KEY},
+        migration::{latest_backup_migration_version, migrate, MIGRATION_VERSION_KEY},
         ClientOptions, Wallet,
     },
 };
@@ -24,7 +24,7 @@ pub(crate) async fn store_data_to_stronghold(
 ) -> crate::wallet::Result<()> {
     // Set migration version
     stronghold
-        .set(MIGRATION_VERSION_KEY, &latest_migration_version())
+        .set(MIGRATION_VERSION_KEY, &latest_backup_migration_version())
         .await?;
 
     let client_options = wallet.client_options().await;
@@ -60,7 +60,7 @@ pub(crate) async fn read_data_from_stronghold_snapshot(
     Option<SecretManagerDto>,
     Option<Vec<AccountDetails>>,
 )> {
-    migrate_backup(stronghold).await?;
+    migrate(stronghold).await?;
 
     // Get client_options
     let client_options = stronghold.get::<ClientOptions>(CLIENT_OPTIONS_KEY).await?;

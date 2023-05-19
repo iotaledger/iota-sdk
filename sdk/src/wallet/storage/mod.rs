@@ -12,8 +12,8 @@ pub mod manager;
 #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
 mod participation;
 
+use async_trait::async_trait;
 use crypto::ciphers::chacha;
-use serde::{Deserialize, Serialize};
 
 use self::adapter::StorageAdapter;
 use crate::client::storage::StorageAdapter as ClientStorageAdapter;
@@ -24,38 +24,40 @@ pub struct Storage {
     encryption_key: Option<[u8; 32]>,
 }
 
-impl Storage {
-    fn id(&self) -> &'static str {
-        self.inner.id()
-    }
+#[async_trait]
+impl ClientStorageAdapter for Storage {
+    type Error = crate::wallet::Error;
 
-    pub(crate) async fn get<T: for<'de> Deserialize<'de>>(&self, key: &str) -> crate::wallet::Result<Option<T>> {
+    async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, Self::Error> {
         match self.inner.as_ref().get_bytes(key).await? {
             Some(record) => {
                 if let Some(encryption_key) = &self.encryption_key {
-                    return Ok(Some(serde_json::from_slice(&chacha::aead_decrypt(
-                        encryption_key,
-                        &record,
-                    )?)?));
+                    return Ok(Some(chacha::aead_decrypt(encryption_key, &record)?));
                 }
 
-                Ok(Some(serde_json::from_slice(&record)?))
+                Ok(Some(record))
             }
             None => Ok(None),
         }
     }
 
-    pub(crate) async fn set<T: Serialize + Send + Sync>(&self, key: &str, record: &T) -> crate::wallet::Result<()> {
+    async fn set_bytes(&self, key: &str, record: &[u8]) -> Result<(), Self::Error> {
         Ok(if let Some(encryption_key) = &self.encryption_key {
-            let encrypted_bytes = chacha::aead_encrypt(encryption_key, &serde_json::to_vec(record)?)?;
+            let encrypted_bytes = chacha::aead_encrypt(encryption_key, record)?;
             self.inner.as_ref().set_bytes(key, &encrypted_bytes).await?
         } else {
-            self.inner.as_ref().set(key, record).await?
+            self.inner.as_ref().set_bytes(key, record).await?
         })
     }
 
-    async fn delete(&self, key: &str) -> crate::wallet::Result<()> {
+    async fn delete(&self, key: &str) -> Result<(), Self::Error> {
         self.inner.as_ref().delete(key).await
+    }
+}
+
+impl Storage {
+    fn id(&self) -> &'static str {
+        self.inner.id()
     }
 }
 
@@ -67,6 +69,8 @@ impl Drop for Storage {
 
 #[cfg(test)]
 mod tests {
+    use serde::{Deserialize, Serialize};
+
     use super::*;
     use crate::{client::storage::StorageAdapterId, wallet::storage::adapter::memory::Memory};
 

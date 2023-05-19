@@ -11,14 +11,16 @@ use crate::wallet::Error;
 
 pub struct Migrate;
 
-#[async_trait]
-impl Migration for Migrate {
+impl MigrationData for Migrate {
     const ID: usize = 0;
     const SDK_VERSION: &'static str = "0.4.0";
     const DATE: time::Date = time::macros::date!(2023 - 05 - 15);
+}
 
-    #[cfg(feature = "storage")]
-    async fn migrate_storage(storage: &crate::wallet::storage::Storage) -> Result<()> {
+#[async_trait]
+#[cfg(feature = "storage")]
+impl Migration<crate::wallet::storage::Storage> for Migrate {
+    async fn migrate(storage: &crate::wallet::storage::Storage) -> Result<()> {
         use crate::wallet::storage::constants::{ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY};
 
         if let Some(account_indexes) = storage.get::<Vec<u32>>(ACCOUNTS_INDEXATION_KEY).await? {
@@ -50,9 +52,12 @@ impl Migration for Migrate {
         }
         Ok(())
     }
+}
 
-    #[cfg(feature = "stronghold")]
-    async fn migrate_backup(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
+#[async_trait]
+#[cfg(feature = "stronghold")]
+impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
+    async fn migrate(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
         use crate::{
             client::storage::StorageAdapter,
             wallet::wallet::operations::stronghold_backup::stronghold_snapshot::ACCOUNTS_KEY,

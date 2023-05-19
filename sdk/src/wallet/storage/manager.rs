@@ -7,10 +7,13 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::RwLock;
 
 use crate::{
-    client::secret::{SecretManager, SecretManagerDto},
+    client::{
+        secret::{SecretManager, SecretManagerDto},
+        storage::StorageAdapter as ClientStorageAdapter,
+    },
     wallet::{
         account::{AccountDetails, SyncOptions},
-        migration::migrate_storage,
+        migration::migrate,
         storage::{constants::*, Storage, StorageAdapter},
         WalletBuilder,
     },
@@ -57,7 +60,7 @@ impl StorageManager {
             inner: Box::new(storage) as _,
             encryption_key: encryption_key.into(),
         };
-        migrate_storage(&storage).await?;
+        migrate(&storage).await?;
 
         // Get the db version or set it
         if let Some(db_schema_version) = storage.get::<u8>(DATABASE_SCHEMA_VERSION_KEY).await? {

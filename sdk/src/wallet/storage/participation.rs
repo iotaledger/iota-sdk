@@ -5,6 +5,7 @@ use std::collections::HashMap;
 
 use super::manager::StorageManager;
 use crate::{
+    client::storage::StorageAdapter,
     types::{
         api::plugins::participation::{responses::OutputStatusResponse, types::ParticipationEventId},
         block::output::OutputId,
