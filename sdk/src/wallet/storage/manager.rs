@@ -202,10 +202,7 @@ impl StorageManager {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        client::storage::{StorageAdapter, StorageAdapterId},
-        wallet::storage::adapter::memory::Memory,
-    };
+    use crate::{client::storage::StorageAdapterId, wallet::storage::adapter::memory::Memory};
 
     #[tokio::test]
     async fn id() {

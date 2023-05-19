@@ -121,7 +121,7 @@ where
 }
 
 fn migrations<S: 'static + StorageAdapter>(
-    last_migration: Option<MigrationVersion>,
+    mut last_migration: Option<MigrationVersion>,
 ) -> Result<Vec<&'static dyn DynMigration<S>>> {
     let lock = MIGRATIONS.lock().unwrap();
     let migrations = lock
@@ -134,6 +134,7 @@ fn migrations<S: 'static + StorageAdapter>(
         })?;
     let mut res = Vec::new();
     while let Some(next) = migrations.get(&last_migration.as_ref().map(|m| m.id)) {
+        last_migration = Some(next.version());
         res.push(*next);
     }
     Ok(res)

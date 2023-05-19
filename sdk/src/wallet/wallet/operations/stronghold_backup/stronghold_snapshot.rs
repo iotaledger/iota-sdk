@@ -44,7 +44,7 @@ pub(crate) async fn store_data_to_stronghold(
 
     let mut serialized_accounts = Vec::new();
     for account in wallet.accounts.read().await.iter() {
-        serialized_accounts.push(serde_json::to_string(&*account.details().await)?);
+        serialized_accounts.push(serde_json::to_value(&*account.details().await)?);
     }
 
     stronghold.set(ACCOUNTS_KEY, &serialized_accounts).await?;

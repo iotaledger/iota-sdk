@@ -42,12 +42,13 @@ impl ClientStorageAdapter for Storage {
     }
 
     async fn set_bytes(&self, key: &str, record: &[u8]) -> Result<(), Self::Error> {
-        Ok(if let Some(encryption_key) = &self.encryption_key {
+        if let Some(encryption_key) = &self.encryption_key {
             let encrypted_bytes = chacha::aead_encrypt(encryption_key, record)?;
             self.inner.as_ref().set_bytes(key, &encrypted_bytes).await?
         } else {
             self.inner.as_ref().set_bytes(key, record).await?
-        })
+        }
+        Ok(())
     }
 
     async fn delete(&self, key: &str) -> Result<(), Self::Error> {

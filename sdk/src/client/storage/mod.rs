@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "stronghold")]
 pub use self::stronghold::StrongholdStorageProvider;
 
-pub trait StorageAdapterId {
+pub trait StorageAdapterId: StorageAdapter {
     const ID: &'static str;
 }
 
