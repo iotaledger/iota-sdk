@@ -1,9 +1,10 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import call_utils_method, OutputId
+from iota_sdk import call_utils_method
+from iota_sdk.types.output_id import OutputId
 from json import dumps, loads
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class Utils():
@@ -44,7 +45,7 @@ class Utils():
         })
 
     @staticmethod
-    def hex_public_key_to_bech32_address(hex: str, bech32_hrp=None) -> str:
+    def hex_public_key_to_bech32_address(hex: str, bech32_hrp: str) -> str:
         """Transforms a hex encoded public key to a bech32 encoded address.
         """
         return _call_method('hexPublicKeyToBech32Address', {
