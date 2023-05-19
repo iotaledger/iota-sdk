@@ -15,50 +15,6 @@ use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear
 
 #[ignore]
 #[tokio::test]
-async fn mint_and_burn_nft_with_alias() -> Result<()> {
-    let storage_path = "test-storage/mint_and_burn_nft_with_alias";
-    setup(storage_path)?;
-
-    let wallet = make_wallet(storage_path, None, None).await?;
-    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
-
-    let tx = account.create_alias_output(None, None).await?;
-    account
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
-        .await?;
-    account.sync(None).await?;
-
-    let nft_options = vec![MintNftParams {
-        metadata: Some(b"some nft metadata".to_vec()),
-        immutable_metadata: Some(b"some immutable nft metadata".to_vec()),
-        ..Default::default()
-    }];
-    let nft_tx = account.mint_nfts(nft_options, None).await.unwrap();
-    account
-        .retry_transaction_until_included(&nft_tx.transaction_id, None, None)
-        .await?;
-    let output_id = OutputId::new(nft_tx.transaction_id, 0u16).unwrap();
-    let nft_id = NftId::from(&output_id);
-
-    let balance = account.sync(None).await?;
-    let alias_id = balance.aliases().first().unwrap();
-
-    let burn_tx = account
-        .burn(Burn::new().add_nft(nft_id).add_alias(*alias_id), None)
-        .await?;
-    account
-        .retry_transaction_until_included(&burn_tx.transaction_id, None, None)
-        .await?;
-    let balance = account.sync(None).await?;
-
-    assert!(balance.native_tokens().is_empty());
-    assert!(balance.nfts().is_empty());
-
-    tear_down(storage_path)
-}
-
-#[ignore]
-#[tokio::test]
 async fn mint_and_burn_nft() -> Result<()> {
     let storage_path = "test-storage/mint_and_burn_outputs";
     setup(storage_path)?;
@@ -321,6 +277,50 @@ async fn mint_and_burn_native_tokens() -> Result<()> {
     let balance = account.sync(None).await?;
 
     assert!(balance.native_tokens().is_empty());
+
+    tear_down(storage_path)
+}
+
+#[ignore]
+#[tokio::test]
+async fn mint_and_burn_nft_with_alias() -> Result<()> {
+    let storage_path = "test-storage/mint_and_burn_nft_with_alias";
+    setup(storage_path)?;
+
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
+
+    let tx = account.create_alias_output(None, None).await?;
+    account
+        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .await?;
+    account.sync(None).await?;
+
+    let nft_options = vec![MintNftParams {
+        metadata: Some(b"some nft metadata".to_vec()),
+        immutable_metadata: Some(b"some immutable nft metadata".to_vec()),
+        ..Default::default()
+    }];
+    let nft_tx = account.mint_nfts(nft_options, None).await.unwrap();
+    account
+        .retry_transaction_until_included(&nft_tx.transaction_id, None, None)
+        .await?;
+    let output_id = OutputId::new(nft_tx.transaction_id, 0u16).unwrap();
+    let nft_id = NftId::from(&output_id);
+
+    let balance = account.sync(None).await?;
+    let alias_id = balance.aliases().first().unwrap();
+
+    let burn_tx = account
+        .burn(Burn::new().add_nft(nft_id).add_alias(*alias_id), None)
+        .await?;
+    account
+        .retry_transaction_until_included(&burn_tx.transaction_id, None, None)
+        .await?;
+    let balance = account.sync(None).await?;
+
+    assert!(balance.native_tokens().is_empty());
+    assert!(balance.nfts().is_empty());
 
     tear_down(storage_path)
 }
