@@ -38,7 +38,7 @@ where
     }
 
     async fn dyn_set_bytes(&self, key: &str, record: &[u8]) -> crate::wallet::Result<()> {
-        Ok(self.set_bytes(key, &record).await?)
+        Ok(self.set_bytes(key, record).await?)
     }
 
     async fn dyn_delete(&self, key: &str) -> crate::wallet::Result<()> {
