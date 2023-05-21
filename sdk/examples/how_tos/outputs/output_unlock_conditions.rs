@@ -15,7 +15,7 @@ use iota_sdk::{
                 ImmutableAliasAddressUnlockCondition, StateControllerAddressUnlockCondition,
                 StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
             },
-            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, SimpleTokenScheme, TokenScheme,
+            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, SimpleTokenScheme, TokenScheme, dto::OutputDto,
         },
     },
 };
@@ -32,6 +32,7 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let token_supply = client.get_token_supply().await?;
+    let rent_structure = client.get_rent_structure().await?;
 
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
     let alias_address = Address::try_from_bech32("rms1pr59qm43mjtvhcajfmupqf23x29llam88yecn6pyul80rx099krmv2fnnux")?;
@@ -39,9 +40,9 @@ async fn main() -> Result<()> {
     let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(U256::from(50), U256::from(0), U256::from(100))?);
 
     let basic_output_builder =
-        BasicOutputBuilder::new_with_amount(1_000_000).add_unlock_condition(AddressUnlockCondition::new(address));
-    let alias_output_builder = AliasOutputBuilder::new_with_amount(1_000_000, AliasId::null());
-    let foundry_output_builder = FoundryOutputBuilder::new_with_amount(1_000_000, 1, token_scheme);
+        BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure).add_unlock_condition(AddressUnlockCondition::new(address));
+    let alias_output_builder = AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null());
+    let foundry_output_builder = FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, 1, token_scheme);
 
     let outputs = vec![
         //// most simple output
@@ -77,7 +78,14 @@ async fn main() -> Result<()> {
             .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(*alias_address.as_alias()))
             .finish_output(token_supply)?,
     ];
-    println!("{outputs:#?}");
+    
+    // Convert ouput array to json array
+    let mut output_dtos: Vec<OutputDto> = Vec::new();
+    for output in outputs {
+        output_dtos.push(OutputDto::from(&output));
+    }
+    let json_outputs = serde_json::to_string_pretty(&output_dtos)?;
+    println!("{json_outputs}");
 
     Ok(())
 }

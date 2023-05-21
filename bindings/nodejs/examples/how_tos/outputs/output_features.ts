@@ -75,7 +75,7 @@ async function run() {
         });
 
         console.log(JSON.stringify(
-            [nftOutputWithSender, nftOutputWithIssuer, nftOutputWithMetadata, nftOutputWithImmutableMetadata, nftOutputWithTag], null, 4));
+            [nftOutputWithSender, nftOutputWithIssuer, nftOutputWithMetadata, nftOutputWithImmutableMetadata, nftOutputWithTag], null, 2));
     } catch (error) {
         console.error('Error: ', error);
     }

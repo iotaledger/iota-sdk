@@ -21,14 +21,12 @@ token_scheme = TokenScheme(0, 50, 100)
 
 # Most simple output
 basic_output = client.build_basic_output(
-    amount=1000000,
     unlock_conditions=[address_unlock_condition],
 )
 outputs = [basic_output]
 
 # Output with storage deposit return
 basic_output = client.build_basic_output(
-    amount=1000000,
     unlock_conditions=[
         address_unlock_condition,
         StorageDepositReturnUnlockCondition(
@@ -41,7 +39,6 @@ outputs.append(basic_output)
 
 # Output with timelock
 basic_output = client.build_basic_output(
-    amount=1000000,
     unlock_conditions=[
         address_unlock_condition,
         TimelockUnlockCondition(1),
@@ -51,7 +48,6 @@ outputs.append(basic_output)
 
 # Output with expiration
 basic_output = client.build_basic_output(
-    amount=1000000,
     unlock_conditions=[
         address_unlock_condition,
         ExpirationUnlockCondition(
@@ -74,10 +70,10 @@ alias_output = client.build_alias_output(
         ),
     ],
 )
+outputs.append(alias_output)
 
 # Output with immutable alias unlock condition
 foundry_output = client.build_foundry_output(
-    amount=1000000,
     serial_number=1,
     token_scheme=token_scheme,
     unlock_conditions=[
@@ -88,4 +84,4 @@ foundry_output = client.build_foundry_output(
 )
 outputs.append(foundry_output)
 
-print(json.dumps(outputs, indent=4))
+print(json.dumps(outputs, indent=2))

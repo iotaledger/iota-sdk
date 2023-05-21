@@ -23,7 +23,6 @@ nft_output = client.build_nft_output(
     features=[
         SenderFeature(Ed25519Address(hex_address))
     ],
-    amount=1000000,
 )
 outputs = [nft_output]
 
@@ -36,7 +35,6 @@ nft_output = client.build_nft_output(
     immutable_features=[
         IssuerFeature(Ed25519Address(hex_address))
     ],
-    amount=1000000,
 )
 outputs.append(nft_output)
 
@@ -49,7 +47,6 @@ nft_output = client.build_nft_output(
     features=[
         MetadataFeature(utf8_to_hex('Hello, World!'))
     ],
-    amount=1000000,
 )
 outputs.append(nft_output)
 
@@ -62,7 +59,6 @@ nft_output = client.build_nft_output(
     immutable_features=[
         MetadataFeature(utf8_to_hex('Hello, World!'))
     ],
-    amount=1000000,
 )
 outputs.append(nft_output)
 
@@ -75,8 +71,7 @@ nft_output = client.build_nft_output(
     features=[
         TagFeature(utf8_to_hex('Hello, World!'))
     ],
-    amount=1000000,
 )
 outputs.append(nft_output)
 
-print(json.dumps(outputs, indent=4))
+print(json.dumps(outputs, indent=2))

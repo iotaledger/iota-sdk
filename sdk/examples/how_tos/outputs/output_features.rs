@@ -12,10 +12,12 @@ use iota_sdk::{
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::AddressUnlockCondition,
-            NftId, NftOutputBuilder,
+            NftId, NftOutputBuilder, dto::OutputDto,
         },
     },
 };
+
+use serde_json;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -28,10 +30,11 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let token_supply = client.get_token_supply().await?;
+    let rent_structure = client.get_rent_structure().await?;
 
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
 
-    let nft_output_builder = NftOutputBuilder::new_with_amount(1_000_000, NftId::null()).add_unlock_condition(AddressUnlockCondition::new(address));
+    let nft_output_builder = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null()).add_unlock_condition(AddressUnlockCondition::new(address));
 
     let outputs = vec![
         // with sender feature
@@ -61,7 +64,13 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
     ];
 
-    println!("{outputs:#?}");
+    // Convert ouput array to json array
+    let mut output_dtos: Vec<OutputDto> = Vec::new();
+    for output in outputs {
+        output_dtos.push(OutputDto::from(&output));
+    }
+    let json_outputs = serde_json::to_string_pretty(&output_dtos)?;
+    println!("{json_outputs}");
 
     Ok(())
 }

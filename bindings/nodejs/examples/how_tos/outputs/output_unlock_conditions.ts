@@ -44,13 +44,11 @@ async function run() {
 
         // Most simple output
         const basicOutput = await client.buildBasicOutput({
-            amount: '1000000',
             unlockConditions: [addressUnlockCondition],
         });
 
         // Output with storage deposit return
         const basicOutputWithStorageReturn = await client.buildBasicOutput({
-            amount: '1000000',
             unlockConditions: [
                 addressUnlockCondition,
                 new StorageDepositReturnUnlockCondition(
@@ -62,7 +60,6 @@ async function run() {
 
         // Output with timelock
         const basicOutputWithTimelock = await client.buildBasicOutput({
-            amount: '1000000',
             unlockConditions: [
                 addressUnlockCondition,
                 new TimelockUnlockCondition(1),
@@ -71,7 +68,6 @@ async function run() {
 
         // Output with expiration
         const basicOutputWithExpiration = await client.buildBasicOutput({
-            amount: '1000000',
             unlockConditions: [
                 addressUnlockCondition,
                 new ExpirationUnlockCondition(
@@ -97,7 +93,6 @@ async function run() {
 
         // Output with immutable alias unlock condition
         const foundryOutput = await client.buildFoundryOutput({
-            amount: '1000000',
             serialNumber: 1,
             tokenScheme: tokenSchema,
             unlockConditions: [
@@ -108,7 +103,7 @@ async function run() {
         });
 
         console.log(JSON.stringify(
-            [basicOutput, basicOutputWithStorageReturn, basicOutputWithTimelock, basicOutputWithExpiration, aliasOutput, foundryOutput], null, 4));
+            [basicOutput, basicOutputWithStorageReturn, basicOutputWithTimelock, basicOutputWithExpiration, aliasOutput, foundryOutput], null, 2));
     } catch (error) {
         console.error('Error: ', error);
     }
