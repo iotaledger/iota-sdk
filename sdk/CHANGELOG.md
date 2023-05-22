@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ignore_if_bech32_mismatch` parameter to `Wallet::restore_backup()`;
 - `OutputWithMetadata::{into_output, into_metadata}` methods;
 - Storage and Backup migration;
+- `Password` type that derives `ZeroizeOnDrop`;
 
 ### Changed
 
