@@ -3,6 +3,8 @@
 
 use std::time::Duration;
 
+use zeroize::Zeroize;
+
 use crate::{
     client::secret::{types::Password, SecretManager},
     wallet::Wallet,
@@ -24,7 +26,10 @@ impl Wallet {
         new_password: impl Into<Password> + Send,
     ) -> crate::wallet::Result<()> {
         if let SecretManager::Stronghold(stronghold) = &mut *self.secret_manager.write().await {
-            stronghold.set_password(current_password.into()).await?;
+            if let Err(err) = stronghold.set_password(current_password.into()).await {
+                new_password.into().zeroize();
+                return Err(err.into());
+            }
             stronghold.change_password(new_password.into()).await?;
         }
         Ok(())

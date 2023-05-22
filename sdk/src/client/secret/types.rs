@@ -5,6 +5,7 @@
 
 use crypto::keys::slip10::{Chain, Segment};
 use serde::{Deserialize, Serialize};
+use zeroize::Zeroize;
 #[cfg(feature = "stronghold")]
 use zeroize::ZeroizeOnDrop;
 
@@ -34,7 +35,7 @@ pub struct StrongholdDto {
 }
 
 /// Represents the Stronghold password.
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, ZeroizeOnDrop, derive_more::From)]
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Zeroize, ZeroizeOnDrop, derive_more::From)]
 #[cfg(feature = "stronghold")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
 pub struct Password(String);
