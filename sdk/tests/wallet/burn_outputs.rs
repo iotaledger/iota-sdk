@@ -319,7 +319,7 @@ async fn mint_and_burn_nft_with_alias() -> Result<()> {
         .await?;
     let balance = account.sync(None).await?;
 
-    assert!(balance.native_tokens().is_empty());
+    assert!(balance.aliases().is_empty());
     assert!(balance.nfts().is_empty());
 
     tear_down(storage_path)
