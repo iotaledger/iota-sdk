@@ -5,7 +5,7 @@ use chrono::{DateTime, NaiveDateTime, Utc};
 use clap::Parser;
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Password, Select};
 use iota_sdk::{
-    client::verify_mnemonic,
+    client::secret::types::Mnemonic,
     wallet::{Account, Wallet},
 };
 use tokio::{
@@ -107,7 +107,7 @@ pub async fn bytes_from_hex_or_file(hex: Option<String>, file: Option<String>) -
     })
 }
 
-pub async fn enter_or_generate_mnemonic() -> Result<String, Error> {
+pub async fn enter_or_generate_mnemonic() -> Result<Mnemonic, Error> {
     let choices = ["Generate a new mnemonic", "Enter a mnemonic"];
     let selected_choice = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Select how to provide a mnemonic")
@@ -124,7 +124,7 @@ pub async fn enter_or_generate_mnemonic() -> Result<String, Error> {
     Ok(mnemnonic)
 }
 
-pub async fn generate_mnemonic() -> Result<String, Error> {
+pub async fn generate_mnemonic() -> Result<Mnemonic, Error> {
     let mnemonic = iota_sdk::client::generate_mnemonic()?;
     println_log_info!("Mnemonic has been generated.");
     let choices = [
@@ -141,7 +141,7 @@ pub async fn generate_mnemonic() -> Result<String, Error> {
 
     if [0, 2].contains(&selected_choice) {
         println!("YOUR MNEMONIC:");
-        println!("{}", mnemonic);
+        println!("{}", mnemonic.as_str());
     }
     if [1, 2].contains(&selected_choice) {
         write_mnemonic_to_file(DEFAULT_MNEMONIC_FILE_PATH, &mnemonic).await?;
@@ -157,20 +157,19 @@ pub async fn generate_mnemonic() -> Result<String, Error> {
     Ok(mnemonic)
 }
 
-pub fn enter_mnemonic() -> Result<String, Error> {
-    loop {
-        let input = Input::<String>::new()
-            .with_prompt("Enter your mnemonic")
-            .interact_text()?;
-        if verify_mnemonic(&input).is_err() {
-            println_log_error!("Invalid mnemonic. Please enter a bip-39 conform mnemonic.");
-        } else {
-            return Ok(input);
-        }
-    }
+pub fn enter_mnemonic() -> Result<Mnemonic, Error> {
+    // loop {
+    let input = Input::<String>::new()
+        .with_prompt("Enter your mnemonic")
+        .interact_text()?;
+
+    Ok(Mnemonic::from(input))
+    // TODO: hande `try_from`
+    // println_log_error!("Invalid mnemonic. Please enter a bip-39 conform mnemonic.");
+    // }
 }
 
-pub async fn import_mnemonic(path: &str) -> Result<String, Error> {
+pub async fn import_mnemonic(path: &str) -> Result<Mnemonic, Error> {
     let mut mnemonics = read_mnemonics_from_file(path).await?;
     if mnemonics.is_empty() {
         println_log_error!("No valid mnemonics found in '{path}'.");
@@ -194,29 +193,29 @@ pub async fn import_mnemonic(path: &str) -> Result<String, Error> {
     }
 }
 
-async fn write_mnemonic_to_file(path: &str, mnemonic: &str) -> Result<(), Error> {
+async fn write_mnemonic_to_file(path: &str, mnemonic: &Mnemonic) -> Result<(), Error> {
     let mut file = OpenOptions::new().create(true).append(true).open(path).await?;
-    file.write_all(format!("{mnemonic}\n").as_bytes()).await?;
+    file.write_all(format!("{}\n", mnemonic.as_str()).as_bytes()).await?;
 
     Ok(())
 }
 
-async fn read_mnemonics_from_file(path: &str) -> Result<Vec<String>, Error> {
+async fn read_mnemonics_from_file(path: &str) -> Result<Vec<Mnemonic>, Error> {
     let file = OpenOptions::new().read(true).open(path).await?;
     let mut lines = BufReader::new(file).lines();
     let mut mnemonics = Vec::new();
-    let mut line_index = 1;
+    // let mut line_index = 1;
     while let Some(line) = lines.next_line().await? {
-        // we allow surrounding whitespace in the file
-        let trimmed = line.trim();
-        if verify_mnemonic(trimmed).is_ok() {
-            mnemonics.push(trimmed.to_string());
-        } else {
-            return Err(Error::Miscellaneous(format!(
-                "Invalid mnemonic in file '{path}' at line '{line_index}'."
-            )));
-        }
-        line_index += 1;
+        // TODO: hande `try_from`
+        // if let Ok(mnemonic) = Mnemonic::from(line) {
+        //     mnemonics.push(mnemonic);
+        // } else {
+        //     return Err(Error::Miscellaneous(format!(
+        //         "Invalid mnemonic in file '{path}' at line '{line_index}'."
+        //     )));
+        // }
+        mnemonics.push(Mnemonic::from(line));
+        // line_index += 1;
     }
 
     Ok(mnemonics)

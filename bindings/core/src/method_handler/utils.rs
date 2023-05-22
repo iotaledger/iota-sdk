@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
+    client::{hex_public_key_to_bech32_address, hex_to_bech32, Client, secret::types::Mnemonic},
     types::block::{
         address::{dto::AddressDto, Address, Ed25519Address},
         output::{AliasId, FoundryId, NftId},
@@ -11,7 +11,6 @@ use iota_sdk::{
         Block,
     },
 };
-use zeroize::Zeroize;
 
 use crate::{method::UtilsMethod, response::Response, Result};
 
@@ -31,11 +30,9 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             Response::ParsedBech32Address(AddressDto::from(&Address::try_from_bech32(address)?))
         }
         UtilsMethod::IsAddressValid { address } => Response::Bool(Address::is_valid_bech32(&address)),
-        UtilsMethod::GenerateMnemonic => Response::GeneratedMnemonic(Client::generate_mnemonic()?),
-        UtilsMethod::MnemonicToHexSeed { mut mnemonic } => {
-            let response = Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(&mnemonic)?);
-            mnemonic.zeroize();
-            response
+        UtilsMethod::GenerateMnemonic => Response::GeneratedMnemonic(Client::generate_mnemonic()?.as_str().to_owned()),
+        UtilsMethod::MnemonicToHexSeed { mnemonic } => {
+            Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(&mnemonic.into()))
         }
         UtilsMethod::BlockId { block } => {
             let block = Block::try_from_dto_unverified(&block)?;
@@ -65,9 +62,9 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let address = Ed25519Address::try_from(&address)?;
             Response::Bool(signature.is_valid(&msg, &address).is_ok())
         }
-        UtilsMethod::VerifyMnemonic { mut mnemonic } => {
-            verify_mnemonic(&mnemonic)?;
-            mnemonic.zeroize();
+        UtilsMethod::VerifyMnemonic { mnemonic } => {
+            // TODO: handle `try_from`
+            let _ = Mnemonic::from(mnemonic);
             Response::Ok
         }
     };

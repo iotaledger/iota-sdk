@@ -22,7 +22,10 @@ use crate::wallet::events::{
 #[cfg(feature = "storage")]
 use crate::wallet::storage::manager::StorageManager;
 use crate::{
-    client::{secret::SecretManager, verify_mnemonic, Client},
+    client::{
+        secret::{types::Mnemonic, SecretManager},
+        Client,
+    },
     wallet::account::{builder::AccountBuilder, operations::syncing::SyncOptions, types::AccountBalance, Account},
 };
 
@@ -175,14 +178,8 @@ impl WalletInner {
     }
 
     /// Generates a new random mnemonic.
-    pub fn generate_mnemonic(&self) -> crate::wallet::Result<String> {
-        Ok(Client::generate_mnemonic()?)
-    }
-
-    /// Verify that a &str is a valid mnemonic.
-    pub fn verify_mnemonic(&self, mnemonic: &str) -> crate::wallet::Result<()> {
-        verify_mnemonic(mnemonic)?;
-        Ok(())
+    pub fn generate_mnemonic(&self) -> crate::wallet::Result<Mnemonic> {
+        Client::generate_mnemonic().map_err(Into::into)
     }
 
     #[cfg(feature = "events")]

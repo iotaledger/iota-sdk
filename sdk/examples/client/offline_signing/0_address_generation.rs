@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
     // Creates a client instance.
     let offline_client = Client::builder().finish().await?;
     let secret_manager =
-        SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     // Generates an address offline.
     let address = offline_client

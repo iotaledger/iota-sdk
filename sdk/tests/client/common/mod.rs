@@ -22,7 +22,7 @@ pub async fn setup_client_with_node_health_ignored() -> Client {
 pub async fn create_client_and_secret_manager_with_funds(mnemonic: Option<&str>) -> Result<(Client, SecretManager)> {
     let client = Client::builder().with_node(NODE_LOCAL)?.finish().await?;
 
-    let secret_manager = SecretManager::try_from_mnemonic(mnemonic.unwrap_or(&Client::generate_mnemonic().unwrap()))?;
+    let secret_manager = SecretManager::try_from_mnemonic(mnemonic.unwrap_or(Client::generate_mnemonic().unwrap().as_str()).to_owned())?;
 
     let address = &client
         .get_addresses(&secret_manager)

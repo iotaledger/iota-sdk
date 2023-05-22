@@ -6,7 +6,7 @@
 use crypto::keys::slip10::{Chain, Segment};
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "stronghold")]
-use zeroize::ZeroizeOnDrop;
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use crate::{
     client::Result,
@@ -32,6 +32,44 @@ pub struct StrongholdDto {
     /// The path for the Stronghold file
     pub snapshot_path: String,
 }
+
+/// Stronghold DTO to allow the creation of a Stronghold secret manager from bindings
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
+#[cfg(feature = "stronghold")]
+#[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
+pub struct Mnemonic(String);
+
+impl Mnemonic {
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+}
+
+// TEMP
+#[allow(clippy::fallible_impl_from)]
+impl From<String> for Mnemonic {
+    fn from(mut value: String) -> Self {
+        // trim because empty spaces could create a different seed https://github.com/iotaledger/crypto.rs/issues/125
+        let trimmed = value.trim();
+        // first we check if the mnemonic is valid to give meaningful errors
+        if let Err(err) = crypto::keys::bip39::wordlist::verify(trimmed, &crypto::keys::bip39::wordlist::ENGLISH)
+            .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))
+        {
+            value.zeroize();
+            panic!("invalid mnemonic: {err}");
+        }
+        let mnemonic = trimmed.to_string();
+        value.zeroize();
+        Self(mnemonic)
+    }
+}
+
+impl core::fmt::Debug for Mnemonic {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "<mnemonic>")
+    } 
+}
+
 /// An account address.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

@@ -11,7 +11,7 @@ use crypto::{
     keys::slip10::{Chain, Curve, Seed},
 };
 
-use super::{GenerateAddressOptions, SecretManage};
+use super::{types::Mnemonic, GenerateAddressOptions, SecretManage};
 use crate::{
     client::{constants::HD_WALLET_TYPE, Client, Error},
     types::block::{
@@ -80,8 +80,8 @@ impl MnemonicSecretManager {
     /// Create a new [`MnemonicSecretManager`] from a BIP-39 mnemonic in English.
     ///
     /// For more information, see <https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki>.
-    pub fn try_from_mnemonic(mnemonic: &str) -> Result<Self, Error> {
-        Ok(Self(Client::mnemonic_to_seed(mnemonic)?))
+    pub fn try_from_mnemonic(mnemonic: impl Into<Mnemonic>) -> Result<Self, Error> {
+        Ok(Self(Client::mnemonic_to_seed(&mnemonic.into())))
     }
 
     /// Create a new [`MnemonicSecretManager`] from a hex-encoded raw seed string.
@@ -99,7 +99,7 @@ mod tests {
     async fn address() {
         use crate::client::constants::IOTA_COIN_TYPE;
 
-        let mnemonic = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally";
+        let mnemonic = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally".to_owned();
         let secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic).unwrap();
 
         let addresses = secret_manager

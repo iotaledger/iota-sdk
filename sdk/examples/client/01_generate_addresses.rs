@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
         .await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     // Generate addresses with default account index and range
     let addresses = client.get_addresses(&secret_manager).finish().await?;

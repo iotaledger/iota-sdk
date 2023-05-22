@@ -12,7 +12,7 @@ use crypto::{
 };
 use zeroize::Zeroize;
 
-use super::{Client, ClientInner};
+use super::{secret::types::Mnemonic, Client, ClientInner};
 use crate::{
     client::{Error, Result},
     types::block::{
@@ -51,42 +51,27 @@ pub fn hex_public_key_to_bech32_address(hex: &str, bech32_hrp: &str) -> Result<S
 }
 
 /// Generates a new mnemonic.
-pub fn generate_mnemonic() -> Result<String> {
+pub fn generate_mnemonic() -> Result<Mnemonic> {
     let mut entropy = [0u8; 32];
     utils::rand::fill(&mut entropy)?;
     let mnemonic = wordlist::encode(&entropy, &crypto::keys::bip39::wordlist::ENGLISH)
         .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
     entropy.zeroize();
-    Ok(mnemonic)
+    Ok(mnemonic.into())
 }
 
 /// Returns a hex encoded seed for a mnemonic.
-pub fn mnemonic_to_hex_seed(mnemonic: &str) -> Result<String> {
-    // trim because empty spaces could create a different seed https://github.com/iotaledger/crypto.rs/issues/125
-    let mnemonic = mnemonic.trim();
-    // first we check if the mnemonic is valid to give meaningful errors
-    verify_mnemonic(mnemonic)?;
+pub fn mnemonic_to_hex_seed(mnemonic: &Mnemonic) -> String {
     let mut mnemonic_seed = [0u8; 64];
-    crypto::keys::bip39::mnemonic_to_seed(mnemonic, "", &mut mnemonic_seed);
-    Ok(prefix_hex::encode(mnemonic_seed))
+    crypto::keys::bip39::mnemonic_to_seed(mnemonic.as_str(), "", &mut mnemonic_seed);
+    prefix_hex::encode(mnemonic_seed)
 }
 
 /// Returns a seed for a mnemonic.
-pub fn mnemonic_to_seed(mnemonic: &str) -> Result<Seed> {
-    // trim because empty spaces could create a different seed https://github.com/iotaledger/crypto.rs/issues/125
-    let mnemonic = mnemonic.trim();
-    // first we check if the mnemonic is valid to give meaningful errors
-    verify_mnemonic(mnemonic)?;
+pub fn mnemonic_to_seed(mnemonic: &Mnemonic) -> Seed {
     let mut mnemonic_seed = [0u8; 64];
-    crypto::keys::bip39::mnemonic_to_seed(mnemonic, "", &mut mnemonic_seed);
-    Ok(Seed::from_bytes(&mnemonic_seed))
-}
-
-/// Verifies that a &str is a valid mnemonic.
-pub fn verify_mnemonic(mnemonic: &str) -> Result<()> {
-    crypto::keys::bip39::wordlist::verify(mnemonic, &crypto::keys::bip39::wordlist::ENGLISH)
-        .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
-    Ok(())
+    crypto::keys::bip39::mnemonic_to_seed(mnemonic.as_str(), "", &mut mnemonic_seed);
+    Seed::from_bytes(&mnemonic_seed)
 }
 
 /// Requests funds from a faucet
@@ -156,17 +141,17 @@ impl Client {
     }
 
     /// Generates a new mnemonic.
-    pub fn generate_mnemonic() -> Result<String> {
+    pub fn generate_mnemonic() -> Result<Mnemonic> {
         generate_mnemonic()
     }
 
     /// Returns a seed for a mnemonic.
-    pub fn mnemonic_to_seed(mnemonic: &str) -> Result<Seed> {
+    pub fn mnemonic_to_seed(mnemonic: &Mnemonic) -> Seed {
         mnemonic_to_seed(mnemonic)
     }
 
     /// Returns a hex encoded seed for a mnemonic.
-    pub fn mnemonic_to_hex_seed(mnemonic: &str) -> Result<String> {
+    pub fn mnemonic_to_hex_seed(mnemonic: &Mnemonic) -> String {
         mnemonic_to_hex_seed(mnemonic)
     }
 

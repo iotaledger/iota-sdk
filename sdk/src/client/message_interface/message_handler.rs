@@ -5,7 +5,6 @@ use std::{any::Any, panic::AssertUnwindSafe};
 
 use backtrace::Backtrace;
 use futures::{Future, FutureExt};
-use zeroize::Zeroize;
 #[cfg(feature = "mqtt")]
 use {
     crate::client::mqtt::{MqttPayload, Topic},
@@ -675,14 +674,12 @@ impl ClientMessageHandler {
                 &Address::try_from_bech32(address)?,
             ))),
             Message::IsAddressValid { address } => Ok(Response::Bool(Address::is_valid_bech32(&address))),
-            Message::GenerateMnemonic => Ok(Response::GeneratedMnemonic(Client::generate_mnemonic()?)),
-            Message::MnemonicToHexSeed { mut mnemonic } => {
-                let response = Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(&mnemonic)?);
-
-                mnemonic.zeroize();
-
-                Ok(response)
-            }
+            Message::GenerateMnemonic => Ok(Response::GeneratedMnemonic(
+                Client::generate_mnemonic()?.as_str().to_owned(),
+            )),
+            Message::MnemonicToHexSeed { mnemonic } => Ok(Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(
+                &mnemonic.into(),
+            ))),
             Message::BlockId { block } => {
                 let block = Block::try_from_dto_unverified(&block)?;
                 Ok(Response::BlockId(block.id()))

@@ -20,7 +20,9 @@ use crate::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
         constants::SHIMMER_TESTNET_BECH32_HRP,
-        request_funds_from_faucet, utils, Client, NodeInfoWrapper,
+        request_funds_from_faucet,
+        secret::types::Mnemonic,
+        utils, Client, NodeInfoWrapper,
     },
     types::block::{
         output::{
@@ -232,12 +234,14 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            Message::GenerateMnemonic => {
-                convert_panics(|| self.wallet.generate_mnemonic().map(Response::GeneratedMnemonic))
-            }
-            Message::VerifyMnemonic { mut mnemonic } => convert_panics(|| {
-                self.wallet.verify_mnemonic(&mnemonic)?;
-                mnemonic.zeroize();
+            Message::GenerateMnemonic => convert_panics(|| {
+                self.wallet
+                    .generate_mnemonic()
+                    .map(|m| Response::GeneratedMnemonic(m.as_str().to_owned()))
+            }),
+            Message::VerifyMnemonic { mnemonic } => convert_panics(|| {
+                // TODO: how do we ensure that this line actually runs? Probably when we turned this into `try_from`
+                let _ = Mnemonic::from(mnemonic);
                 Ok(Response::Ok(()))
             }),
             Message::SetClientOptions { client_options } => {

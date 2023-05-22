@@ -11,7 +11,6 @@ use iota_stronghold::{
     procedures::{self, Chain, KeyType, Slip10DeriveInput},
     Location,
 };
-use zeroize::Zeroize;
 
 use super::{
     common::{DERIVE_OUTPUT_RECORD_PATH, PRIVATE_DATA_CLIENT_PATH, SECRET_VAULT_PATH, SEED_RECORD_PATH},
@@ -20,7 +19,7 @@ use super::{
 use crate::{
     client::{
         constants::HD_WALLET_TYPE,
-        secret::{GenerateAddressOptions, SecretManage},
+        secret::{GenerateAddressOptions, SecretManage, types::Mnemonic},
         stronghold::Error,
     },
     types::block::{
@@ -142,13 +141,13 @@ impl SecretManage for StrongholdAdapter {
 /// Private methods for the secret manager implementation.
 impl StrongholdAdapter {
     /// Execute [Procedure::BIP39Recover] in Stronghold to put a mnemonic into the Stronghold vault.
-    async fn bip39_recover(&self, mnemonic: String, passphrase: Option<String>, output: Location) -> Result<(), Error> {
+    async fn bip39_recover(&self, mnemonic: &Mnemonic, passphrase: Option<String>, output: Location) -> Result<(), Error> {
         self.stronghold
             .lock()
             .await
             .get_client(PRIVATE_DATA_CLIENT_PATH)?
             .execute_procedure(procedures::BIP39Recover {
-                mnemonic,
+                mnemonic: mnemonic.as_str().to_owned(),
                 passphrase,
                 output,
             })?;
@@ -212,7 +211,7 @@ impl StrongholdAdapter {
     }
 
     /// Store a mnemonic into the Stronghold vault.
-    pub async fn store_mnemonic(&self, mut mnemonic: String) -> Result<(), Error> {
+    pub async fn store_mnemonic(&self, mnemonic: impl Into<Mnemonic> + Send) -> Result<(), Error> {
         // The key needs to be supplied first.
         if self.key_provider.lock().await.is_none() {
             return Err(Error::KeyCleared);
@@ -220,14 +219,6 @@ impl StrongholdAdapter {
 
         // Stronghold arguments.
         let output = Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH);
-
-        // Trim the mnemonic, in case it hasn't been, as otherwise the restored seed would be wrong.
-        let trimmed_mnemonic = mnemonic.trim().to_string();
-        mnemonic.zeroize();
-
-        // Check if the mnemonic is valid.
-        crypto::keys::bip39::wordlist::verify(&trimmed_mnemonic, &crypto::keys::bip39::wordlist::ENGLISH)
-            .map_err(|e| Error::InvalidMnemonic(format!("{e:?}")))?;
 
         // We need to check if there has been a mnemonic stored in Stronghold or not to prevent overwriting it.
         if self
@@ -241,7 +232,7 @@ impl StrongholdAdapter {
         }
 
         // Execute the BIP-39 recovery procedure to put it into the vault (in memory).
-        self.bip39_recover(trimmed_mnemonic, None, output).await?;
+        self.bip39_recover(&mnemonic.into(), None, output).await?;
 
         // Persist Stronghold to the disk
         self.write_stronghold_snapshot(None).await?;

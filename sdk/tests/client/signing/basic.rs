@@ -26,7 +26,7 @@ use crate::client::{build_inputs, build_outputs, Build::Basic};
 
 #[tokio::test]
 async fn single_ed25519_unlock() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..1, None)
@@ -114,7 +114,7 @@ async fn single_ed25519_unlock() -> Result<()> {
 
 #[tokio::test]
 async fn ed25519_reference_unlocks() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..1, None)
@@ -248,7 +248,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
 
 #[tokio::test]
 async fn two_signature_unlocks() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..1, None)
