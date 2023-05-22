@@ -39,7 +39,7 @@ async fn generate_evm_addresses() -> Result<()> {
     let response = secret_manager.call_method(method).await;
     match response {
         Response::GeneratedAddresses(addresses) => {
-            assert_eq!(addresses[0], "rms1hlrfh4gs4x5ngjwnrwvay0du2hk0raye2qxxsw")
+            assert_eq!(addresses[0], "0xbfc69bd510a9a93449d31b99d23dbc55ecf1f499")
         }
         _ => panic!("Unexpected response type"),
     };
