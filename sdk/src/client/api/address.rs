@@ -18,6 +18,7 @@ use crate::{
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[serde(default)]
 pub struct GetAddressesOptions {
     /// Coin type
     pub coin_type: u32,
