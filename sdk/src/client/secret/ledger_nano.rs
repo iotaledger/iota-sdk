@@ -176,7 +176,7 @@ impl SecretManage for LedgerSecretManager {
         _address_indexes: Range<u32>,
         _options: Option<GenerateAddressOptions>,
     ) -> Result<Vec<EvmAddress>, Self::Error> {
-        todo!()
+        Err(Error::UnsupportedOperation)
     }
 
     async fn sign_ed25519(&self, _msg: &[u8], _chain: &Chain) -> Result<Ed25519Signature, Self::Error> {

@@ -106,22 +106,15 @@ impl SecretManager {
             coin_type,
             account_index,
             range,
-            bech32_hrp,
             options,
+            ..
         }: GetAddressesOptions,
     ) -> Result<Vec<String>> {
         Ok(self
             .generate_evm_addresses(coin_type, account_index, range, options)
             .await?
             .into_iter()
-            .map(|a| {
-                bech32::encode(
-                    &bech32_hrp,
-                    bech32::ToBase32::to_base32(&a.as_ref()),
-                    bech32::Variant::Bech32,
-                )
-                .unwrap()
-            })
+            .map(|a| prefix_hex::encode(a.as_ref()))
             .collect())
     }
 
