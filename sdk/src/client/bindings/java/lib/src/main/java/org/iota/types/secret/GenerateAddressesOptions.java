@@ -39,11 +39,16 @@ public class GenerateAddressesOptions {
 
     public JsonObject getJson() {
         JsonObject o = new JsonObject();
-        o.addProperty("coinType", coinType);
-        o.addProperty("accountIndex", accountIndex);
-        o.add("range", range != null ? range.getAsJson() : null);
-        o.addProperty("bech32Hrp", bech32Hrp);
-        o.add("options", options != null ? options.getAsJson() : null);
+        if (coinType != null)
+            o.addProperty("coinType", coinType);
+        if (accountIndex != null)
+            o.addProperty("accountIndex", accountIndex);
+        if (range != null)
+            o.add("range", range.getAsJson());
+        if (bech32Hrp != null)
+            o.addProperty("bech32Hrp", bech32Hrp);
+        if (options != null)
+            o.add("options", options.getAsJson());
 
         return o;
     }
