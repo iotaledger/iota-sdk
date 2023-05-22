@@ -18,7 +18,7 @@ async function run() {
         const account = await wallet.getAccount('Alice');
 
         // Sync new outputs from the node.
-        // eslint-disable-next-line no-unused-vars
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const syncBalance = await account.sync();
 
         // After syncing the balance can also be computed with the local data
