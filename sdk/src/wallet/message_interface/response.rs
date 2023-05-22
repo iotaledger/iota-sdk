@@ -20,7 +20,6 @@ use crate::{
     },
     types::block::{
         output::{dto::OutputDto, OutputId},
-        payload::transaction::TransactionId,
         BlockId,
     },
     wallet::{
@@ -103,10 +102,10 @@ pub enum Response {
     LedgerNanoStatus(LedgerNanoStatus),
     /// Response for
     /// [`GetIncomingTransaction`](crate::wallet::message_interface::AccountMethod::GetIncomingTransaction),
-    IncomingTransactionData(Option<Box<(TransactionId, TransactionDto)>>),
+    IncomingTransaction(Option<Box<TransactionDto>>),
     /// Response for
     /// [`IncomingTransactions`](crate::wallet::message_interface::AccountMethod::IncomingTransactions),
-    IncomingTransactionsData(Vec<(TransactionId, TransactionDto)>),
+    IncomingTransactions(Vec<TransactionDto>),
     /// Response for
     /// [`ConsolidateOutputs`](crate::wallet::message_interface::AccountMethod::ConsolidateOutputs)
     /// [`ClaimOutputs`](crate::wallet::message_interface::AccountMethod::ClaimOutputs)
@@ -214,11 +213,11 @@ impl Debug for Response {
             }
             Self::GeneratedAddress(addresses) => write!(f, "GeneratedAddress({addresses:?})"),
             Self::Balance(balance) => write!(f, "Balance({balance:?})"),
-            Self::IncomingTransactionData(transaction_data) => {
-                write!(f, "IncomingTransactionData({transaction_data:?})")
+            Self::IncomingTransaction(transaction) => {
+                write!(f, "IncomingTransaction({transaction:?})")
             }
-            Self::IncomingTransactionsData(transactions_data) => {
-                write!(f, "IncomingTransactionsData({transactions_data:?})")
+            Self::IncomingTransactions(transactions_data) => {
+                write!(f, "IncomingTransactions({transactions_data:?})")
             }
             Self::SentTransaction(transaction) => write!(f, "SentTransaction({transaction:?})"),
             Self::MintTokenTransaction(mint_transaction) => {

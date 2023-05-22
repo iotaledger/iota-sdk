@@ -600,11 +600,10 @@ impl WalletMessageHandler {
                 let transaction = account.get_incoming_transaction(&transaction_id).await;
 
                 transaction.map_or_else(
-                    || Ok(Response::IncomingTransactionData(None)),
+                    || Ok(Response::IncomingTransaction(None)),
                     |transaction| {
-                        Ok(Response::IncomingTransactionData(Some(Box::new((
-                            transaction_id,
-                            TransactionDto::from(&transaction),
+                        Ok(Response::IncomingTransaction(Some(Box::new(TransactionDto::from(
+                            &transaction,
                         )))))
                     },
                 )
@@ -627,11 +626,8 @@ impl WalletMessageHandler {
             }
             AccountMethod::IncomingTransactions => {
                 let transactions = account.incoming_transactions().await;
-                Ok(Response::IncomingTransactionsData(
-                    transactions
-                        .into_iter()
-                        .map(|d| (d.0, TransactionDto::from(&d.1)))
-                        .collect(),
+                Ok(Response::IncomingTransactions(
+                    transactions.iter().map(TransactionDto::from).collect(),
                 ))
             }
             AccountMethod::Transactions => {

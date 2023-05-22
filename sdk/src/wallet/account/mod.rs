@@ -399,8 +399,8 @@ impl AccountInner {
     }
 
     /// Returns all incoming transactions of the account
-    pub async fn incoming_transactions(&self) -> HashMap<TransactionId, Transaction> {
-        self.details().await.incoming_transactions.clone()
+    pub async fn incoming_transactions(&self) -> Vec<Transaction> {
+        self.details().await.incoming_transactions.values().cloned().collect()
     }
 
     /// Returns all transactions of the account

@@ -332,10 +332,10 @@ pub enum Response {
     Balance(AccountBalanceDto),
     /// Response for
     /// - [`GetIncomingTransaction`](crate::method::AccountMethod::GetIncomingTransaction),
-    IncomingTransactionData(Option<Box<(TransactionId, TransactionDto)>>),
+    IncomingTransaction(Option<Box<TransactionDto>>),
     /// Response for
     /// - [`IncomingTransactions`](crate::method::AccountMethod::IncomingTransactions),
-    IncomingTransactionsData(Vec<(TransactionId, TransactionDto)>),
+    IncomingTransactions(TransactionDto),
     /// Response for
     /// - [`ConsolidateOutputs`](crate::method::AccountMethod::ConsolidateOutputs)
     /// - [`ClaimOutputs`](crate::method::AccountMethod::ClaimOutputs)
