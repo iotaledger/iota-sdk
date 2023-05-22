@@ -3,7 +3,7 @@
 
 mod migrate_0;
 
-use std::{collections::HashMap, sync::Mutex};
+use std::collections::HashMap;
 
 use anymap::Map;
 use async_trait::async_trait;
@@ -20,7 +20,7 @@ pub(crate) const MIGRATION_VERSION_KEY: &str = "migration-version";
 #[cfg(feature = "stronghold")]
 struct LatestBackupMigration(MigrationVersion);
 
-static MIGRATIONS: Lazy<Mutex<Map<dyn anymap::any::Any + Send + Sync>>> = Lazy::new(|| {
+static MIGRATIONS: Lazy<Map<dyn anymap::any::Any + Send + Sync>> = Lazy::new(|| {
     let mut migrations = Map::new();
     #[cfg(feature = "storage")]
     {
@@ -47,7 +47,7 @@ static MIGRATIONS: Lazy<Mutex<Map<dyn anymap::any::Any + Send + Sync>>> = Lazy::
         migrations.insert(LatestBackupMigration(BACKUP_MIGRATIONS.last().unwrap().1.version()));
         migrations.insert(std::collections::HashMap::from(BACKUP_MIGRATIONS));
     }
-    Mutex::new(migrations)
+    migrations
 });
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -123,8 +123,7 @@ where
 fn migrations<S: 'static + StorageAdapter>(
     mut last_migration: Option<MigrationVersion>,
 ) -> Result<Vec<&'static dyn DynMigration<S>>> {
-    let lock = MIGRATIONS.lock().unwrap();
-    let migrations = lock
+    let migrations = MIGRATIONS
         .get::<HashMap<Option<usize>, &'static dyn DynMigration<S>>>()
         .ok_or_else(|| {
             Error::Migration(format!(
@@ -142,11 +141,5 @@ fn migrations<S: 'static + StorageAdapter>(
 
 #[cfg(feature = "stronghold")]
 pub fn latest_backup_migration_version() -> MigrationVersion {
-    MIGRATIONS
-        .lock()
-        .unwrap()
-        .get::<LatestBackupMigration>()
-        .unwrap()
-        .0
-        .clone()
+    MIGRATIONS.get::<LatestBackupMigration>().unwrap().0.clone()
 }
