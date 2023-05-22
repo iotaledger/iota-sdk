@@ -8,7 +8,7 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::types::block::{
-    output::{AliasId, FoundryId, NftId, TokenId},
+    output::{AliasId, FoundryId, NativeToken, NftId, TokenId},
     Error,
 };
 
@@ -102,6 +102,30 @@ impl Burn {
     /// Returns the native tokens to [`Burn`].
     pub fn native_tokens(&self) -> &BTreeMap<TokenId, U256> {
         &self.native_tokens
+    }
+}
+
+impl From<FoundryId> for Burn {
+    fn from(id: FoundryId) -> Self {
+        Self::new().add_foundry(id)
+    }
+}
+
+impl From<AliasId> for Burn {
+    fn from(id: AliasId) -> Self {
+        Self::new().add_alias(id)
+    }
+}
+
+impl From<NftId> for Burn {
+    fn from(id: NftId) -> Self {
+        Self::new().add_nft(id)
+    }
+}
+
+impl From<NativeToken> for Burn {
+    fn from(native_token: NativeToken) -> Self {
+        Self::new().add_native_token(*native_token.token_id(), native_token.amount())
     }
 }
 
