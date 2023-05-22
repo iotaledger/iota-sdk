@@ -16,7 +16,7 @@ for output in outputs:
     print(output['outputId'])
 
 # All unspent outputs stored in the account
-outputs = account.outputs()
+outputs = account.unspent_outputs()
 
 # Print all unspent output ids
 print('Unspent output ids:')

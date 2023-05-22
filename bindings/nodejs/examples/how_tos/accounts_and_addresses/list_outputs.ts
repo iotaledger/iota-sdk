@@ -4,7 +4,7 @@
 import { Wallet, initLogger } from '@iota/sdk';
 
 // Run with command:
-// yarn run-example ./how_tos/accounts_and_addresses/list_addresses.ts
+// yarn run-example ./how_tos/accounts_and_addresses/list_outputs.ts
 
 // This example lists all addresses in the account
 async function run() {
