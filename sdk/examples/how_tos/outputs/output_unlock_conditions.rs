@@ -63,18 +63,15 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
         // with expiration unlock condition
         basic_output_builder
-            .clone()
             .add_unlock_condition(ExpirationUnlockCondition::new(address, 1)?)
             .finish_output(token_supply)?,
         // with governor and state controller unlock condition
         alias_output_builder
-            .clone()
             .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
             .finish_output(token_supply)?,
         // with immutable alias unlock condition
         foundry_output_builder
-            .clone()
             .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(*alias_address.as_alias()))
             .finish_output(token_supply)?,
     ];

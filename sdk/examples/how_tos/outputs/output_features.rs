@@ -17,8 +17,6 @@ use iota_sdk::{
     },
 };
 
-use serde_json;
-
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
@@ -59,7 +57,6 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
         // with tag feature
         nft_output_builder
-            .clone()
             .add_feature(TagFeature::new("Hello, World!".as_bytes().to_owned())?)
             .finish_output(token_supply)?,
     ];
