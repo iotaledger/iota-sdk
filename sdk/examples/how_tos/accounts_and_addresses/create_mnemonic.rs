@@ -1,9 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! TODO: Example description
+//! In this example we will create a random mnemonic.
 //!
-//! `cargo run --example generate_mnemonic --release`
+//! `cargo run --release --all-features --example create_mnemonic`
 
 use iota_sdk::client::{Client, Result};
 

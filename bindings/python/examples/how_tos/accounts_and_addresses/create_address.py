@@ -2,6 +2,7 @@ from iota_sdk import Wallet
 from dotenv import load_dotenv
 import json
 import os
+import sys
 
 load_dotenv()
 
@@ -17,6 +18,4 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 account = wallet.get_account('Alice')
 
 address = account.generate_addresses(1)
-# address = account.generate_addresses(
-#     1, {'internal': True, 'metadata': {'syncing': True, 'network': 'Testnet'}})
-print(f'Address: {json.dumps(address, indent=4)}')
+print(f'Generated address:', address[0]['address'])

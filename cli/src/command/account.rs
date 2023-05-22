@@ -728,7 +728,7 @@ pub async fn transaction_command(account: &Account, transaction_id_str: &str) ->
     let transaction_id = TransactionId::from_str(transaction_id_str)?;
     let maybe_transaction = account
         .transactions()
-        .await?
+        .await
         .into_iter()
         .find(|tx| tx.transaction_id == transaction_id);
 
@@ -743,7 +743,7 @@ pub async fn transaction_command(account: &Account, transaction_id_str: &str) ->
 
 /// `transactions` command
 pub async fn transactions_command(account: &Account, show_details: bool) -> Result<(), Error> {
-    let mut transactions = account.transactions().await?;
+    let mut transactions = account.transactions().await;
     transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
 
     if transactions.is_empty() {
