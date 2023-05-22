@@ -4,7 +4,7 @@
 //! In this example we sync the account and get the balance.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example get_balance --release`
+//! `cargo run --release --all-features --example check_balance`
 
 use iota_sdk::wallet::{Result, Wallet};
 
@@ -13,7 +13,7 @@ async fn main() -> Result<()> {
     // Create the wallet
     let wallet = Wallet::builder().finish().await?;
 
-    // Get the account we generated with `01_create_wallet`
+    // Get the account
     let account = wallet.get_account("Alice").await?;
 
     // Sync and get the balance
@@ -22,14 +22,6 @@ async fn main() -> Result<()> {
     let account_balance = account.balance().await?;
 
     println!("{account_balance:#?}");
-
-    let explorer_url = std::env::var("EXPLORER_URL").ok();
-    let prepended = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
-
-    println!("Addresses:");
-    for address in account.addresses().await? {
-        println!(" - {prepended}{}", address.address());
-    }
 
     Ok(())
 }
