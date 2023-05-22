@@ -48,13 +48,13 @@ async fn check_existing_db() -> Result<()> {
         "rms1qzjclfjq0azmq2yzkkk7ugfhdf55nzvs57r8twk2h36wuqv950dxv00tzfx"
     );
 
-    let transactions = account.transactions().await?;
+    let transactions = account.transactions().await;
     assert_eq!(transactions.len(), 2);
 
-    let pending_transactions = account.pending_transactions().await?;
+    let pending_transactions = account.pending_transactions().await;
     assert_eq!(pending_transactions.len(), 1);
 
-    let incoming_transactions = account.incoming_transactions().await?;
+    let incoming_transactions = account.incoming_transactions().await;
     assert_eq!(incoming_transactions.len(), 1);
 
     let unspent_outputs = account.unspent_outputs(None).await?;
