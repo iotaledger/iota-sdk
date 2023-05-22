@@ -106,7 +106,7 @@ required-features = [ "stronghold" ]
 name = "verify_ed25519_signature"
 path = "examples/how_tos/sign_and_verify_ed25519/verify_ed25519_signature.rs"
 
-# Account and Addresses Examples
+# Accounts and Addresses Examples
 
 [[example]]
 name = "create_mnemonic"
