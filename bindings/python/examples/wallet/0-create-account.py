@@ -2,6 +2,7 @@ from iota_sdk import Wallet, StrongholdSecretManager, CoinType
 from dotenv import load_dotenv
 import json
 import os
+import sys
 
 load_dotenv()
 
@@ -29,7 +30,8 @@ if 'NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1' not in os.environ:
     sys.exit(1)
 
 # Store the mnemonic in the Stronghold snapshot, this only needs to be done once
-account = wallet.store_mnemonic(os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1'])
+account = wallet.store_mnemonic(
+    os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1'])
 
 account = wallet.create_account('Alice')
 print(json.dumps(account, indent=4))

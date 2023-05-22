@@ -1,6 +1,7 @@
 from iota_sdk import Wallet
 from dotenv import load_dotenv
 import os
+import sys
 
 load_dotenv()
 
@@ -24,5 +25,6 @@ outputs = [{
     "amount": "1",
 }]
 
-transaction = account.send_amount(outputs, { "allowMicroAmount": True })
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
+transaction = account.send_amount(outputs, {"allowMicroAmount": True})
+print(
+    f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')

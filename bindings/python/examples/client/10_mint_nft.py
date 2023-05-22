@@ -1,6 +1,7 @@
 from iota_sdk import *
 from dotenv import load_dotenv
 import os
+import sys
 
 load_dotenv()
 

@@ -1,6 +1,7 @@
 from iota_sdk import Client, StrongholdSecretManager, SecretManager
 from dotenv import load_dotenv
 import os
+import sys
 
 load_dotenv()
 
@@ -22,7 +23,8 @@ secret_manager = StrongholdSecretManager(
 
 # Store the mnemonic in the Stronghold snapshot, this needs to be done only the first time.
 # The mnemonic can't be retrieved from the Stronghold file, so make a backup in a secure place!
-result = SecretManager(secret_manager).store_mnemonic(os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1'])
+result = SecretManager(secret_manager).store_mnemonic(
+    os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1'])
 
 # Generate public address with custom account index and range.
 address = client.generate_addresses(

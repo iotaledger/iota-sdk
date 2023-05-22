@@ -1,6 +1,7 @@
 from iota_sdk import Wallet, StrongholdSecretManager, CoinType
 from dotenv import load_dotenv
 import os
+import sys
 
 load_dotenv()
 

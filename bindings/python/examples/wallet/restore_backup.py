@@ -2,6 +2,7 @@ from iota_sdk import Wallet, CoinType
 from dotenv import load_dotenv
 import json
 import os
+import sys
 
 load_dotenv()
 

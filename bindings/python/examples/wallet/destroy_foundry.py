@@ -1,6 +1,7 @@
 from iota_sdk import Wallet
 from dotenv import load_dotenv
 import os
+import sys
 
 load_dotenv()
 
@@ -24,4 +25,5 @@ foundry_id = "0x08429fe5864378ce70699fc2d22bb144cb86a3c4833d136e3b95c5dadfd6ba0c
 
 # Send transaction.
 transaction = account.destroy_foundry(foundry_id)
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
+print(
+    f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')

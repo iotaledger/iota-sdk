@@ -2,6 +2,7 @@ from iota_sdk import Wallet
 from dotenv import load_dotenv
 import time
 import os
+import sys
 
 load_dotenv()
 
