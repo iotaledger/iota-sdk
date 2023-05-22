@@ -32,7 +32,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 pub enum AccountMethod {
-    /// Burn outputs.
+    /// A generic `burn()` function that can be used to burn native tokens, nfts, foundries and aliases.
     ///
     /// Note that burning **native tokens** doesn't require the foundry output which minted them, but will not
     /// increase the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output.
