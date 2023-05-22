@@ -102,7 +102,7 @@ pub enum Response {
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
     LedgerNanoStatus(LedgerNanoStatus),
     /// Response for
-    /// [`GetIncomingTransactionData`](crate::wallet::message_interface::AccountMethod::GetIncomingTransactionData),
+    /// [`GetIncomingTransaction`](crate::wallet::message_interface::AccountMethod::GetIncomingTransaction),
     IncomingTransactionData(Option<Box<(TransactionId, TransactionDto)>>),
     /// Response for
     /// [`IncomingTransactions`](crate::wallet::message_interface::AccountMethod::IncomingTransactions),

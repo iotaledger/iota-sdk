@@ -82,7 +82,7 @@ pub enum AccountMethod {
     /// List might not be complete, if the node pruned the data already
     /// Expected response: [`IncomingTransactionData`](crate::Response::IncomingTransactionData)
     #[serde(rename_all = "camelCase")]
-    GetIncomingTransactionData { transaction_id: TransactionId },
+    GetIncomingTransaction { transaction_id: TransactionId },
     /// Expected response: [`Addresses`](crate::Response::Addresses)
     /// List addresses.
     Addresses,

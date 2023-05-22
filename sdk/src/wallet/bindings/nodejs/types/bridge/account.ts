@@ -109,8 +109,8 @@ export type __GetBalanceMethod__ = {
     name: 'getBalance';
 };
 
-export type __GetIncomingTransactionDataMethod__ = {
-    name: 'getIncomingTransactionData';
+export type __GetIncomingTransactionMethod__ = {
+    name: 'getIncomingTransaction';
     data: {
         transactionId: string;
     };

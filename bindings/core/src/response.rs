@@ -331,7 +331,7 @@ pub enum Response {
     /// - [`Sync`](crate::method::AccountMethod::Sync)
     Balance(AccountBalanceDto),
     /// Response for
-    /// - [`GetIncomingTransactionData`](crate::method::AccountMethod::GetIncomingTransactionData),
+    /// - [`GetIncomingTransaction`](crate::method::AccountMethod::GetIncomingTransaction),
     IncomingTransactionData(Option<Box<(TransactionId, TransactionDto)>>),
     /// Response for
     /// - [`IncomingTransactions`](crate::method::AccountMethod::IncomingTransactions),

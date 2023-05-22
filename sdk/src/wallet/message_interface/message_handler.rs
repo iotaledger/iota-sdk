@@ -596,8 +596,8 @@ impl WalletMessageHandler {
                     transaction.as_ref().map(TransactionDto::from).map(Box::new),
                 ))
             }
-            AccountMethod::GetIncomingTransactionData { transaction_id } => {
-                let transaction = account.get_incoming_transaction_data(&transaction_id).await;
+            AccountMethod::GetIncomingTransaction { transaction_id } => {
+                let transaction = account.get_incoming_transaction(&transaction_id).await;
 
                 transaction.map_or_else(
                     || Ok(Response::IncomingTransactionData(None)),
@@ -626,7 +626,7 @@ impl WalletMessageHandler {
                 Ok(Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect()))
             }
             AccountMethod::IncomingTransactions => {
-                let transactions = account.incoming_transactions().await?;
+                let transactions = account.incoming_transactions().await;
                 Ok(Response::IncomingTransactionsData(
                     transactions
                         .into_iter()
@@ -635,13 +635,13 @@ impl WalletMessageHandler {
                 ))
             }
             AccountMethod::Transactions => {
-                let transactions = account.transactions().await?;
+                let transactions = account.transactions().await;
                 Ok(Response::Transactions(
                     transactions.iter().map(TransactionDto::from).collect(),
                 ))
             }
             AccountMethod::PendingTransactions => {
-                let transactions = account.pending_transactions().await?;
+                let transactions = account.pending_transactions().await;
                 Ok(Response::Transactions(
                     transactions.iter().map(TransactionDto::from).collect(),
                 ))

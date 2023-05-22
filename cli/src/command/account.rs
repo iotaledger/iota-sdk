@@ -618,11 +618,9 @@ pub async fn send_command(
     expiration: Option<u32>,
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
-    let outputs = vec![
-        SendAmountParams::new(address, amount)
-            .with_return_address(return_address)
-            .with_expiration(expiration),
-    ];
+    let outputs = vec![SendAmountParams::new(address, amount)
+        .with_return_address(return_address)
+        .with_expiration(expiration)];
     let transaction = account
         .send_amount(
             outputs,
@@ -658,15 +656,13 @@ pub async fn send_native_token_command(
         let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
         account.client().bech32_hrp_matches(&bech32_hrp).await?;
 
-        let outputs = vec![
-            BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                .add_unlock_condition(AddressUnlockCondition::new(address))
-                .with_native_tokens(vec![NativeToken::new(
-                    TokenId::from_str(&token_id)?,
-                    U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-                )?])
-                .finish_output(token_supply)?,
-        ];
+        let outputs = vec![BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+            .add_unlock_condition(AddressUnlockCondition::new(address))
+            .with_native_tokens(vec![NativeToken::new(
+                TokenId::from_str(&token_id)?,
+                U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+            )?])
+            .finish_output(token_supply)?];
 
         account.send(outputs, None).await?
     } else {
@@ -722,7 +718,7 @@ pub async fn transaction_command(account: &Account, transaction_id_str: &str) ->
     let transaction_id = TransactionId::from_str(transaction_id_str)?;
     let maybe_transaction = account
         .transactions()
-        .await?
+        .await
         .into_iter()
         .find(|tx| tx.transaction_id == transaction_id);
 
@@ -737,7 +733,7 @@ pub async fn transaction_command(account: &Account, transaction_id_str: &str) ->
 
 /// `transactions` command
 pub async fn transactions_command(account: &Account, show_details: bool) -> Result<(), Error> {
-    let mut transactions = account.transactions().await?;
+    let mut transactions = account.transactions().await;
     transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
 
     if transactions.is_empty() {

@@ -182,7 +182,7 @@ pub enum AccountMethod {
     /// Expected response:
     /// [`IncomingTransactionData`](crate::wallet::message_interface::Response::IncomingTransactionData)
     #[serde(rename_all = "camelCase")]
-    GetIncomingTransactionData { transaction_id: TransactionId },
+    GetIncomingTransaction { transaction_id: TransactionId },
     /// Expected response: [`Addresses`](crate::wallet::message_interface::Response::Addresses)
     /// List addresses.
     Addresses,

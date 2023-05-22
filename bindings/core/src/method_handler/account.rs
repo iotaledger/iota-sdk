@@ -80,8 +80,8 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let transaction = account.get_transaction(&transaction_id).await;
             Response::Transaction(transaction.as_ref().map(TransactionDto::from).map(Box::new))
         }
-        AccountMethod::GetIncomingTransactionData { transaction_id } => {
-            let transaction = account.get_incoming_transaction_data(&transaction_id).await;
+        AccountMethod::GetIncomingTransaction { transaction_id } => {
+            let transaction = account.get_incoming_transaction(&transaction_id).await;
 
             transaction.map_or_else(
                 || Response::IncomingTransactionData(None),
@@ -110,7 +110,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect())
         }
         AccountMethod::IncomingTransactions => {
-            let transactions = account.incoming_transactions().await?;
+            let transactions = account.incoming_transactions().await;
             Response::IncomingTransactionsData(
                 transactions
                     .into_iter()
@@ -119,11 +119,11 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             )
         }
         AccountMethod::Transactions => {
-            let transactions = account.transactions().await?;
+            let transactions = account.transactions().await;
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
         }
         AccountMethod::PendingTransactions => {
-            let transactions = account.pending_transactions().await?;
+            let transactions = account.pending_transactions().await;
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
         }
         AccountMethod::DecreaseNativeTokenSupply {
