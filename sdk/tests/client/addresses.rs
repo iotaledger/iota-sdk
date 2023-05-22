@@ -53,7 +53,7 @@ async fn public_key_to_address() {
     let hex_public_key = "0x2baaf3bca8ace9f862e60184bd3e79df25ff230f7eaaa4c7f03daa9833ba854a";
 
     let public_key_address = client
-        .hex_public_key_to_bech32_address(hex_public_key, Some(Hrp::from_str_unchecked("atoi")))
+        .hex_public_key_to_bech32_address(hex_public_key, Some("atoi"))
         .await
         .unwrap();
 

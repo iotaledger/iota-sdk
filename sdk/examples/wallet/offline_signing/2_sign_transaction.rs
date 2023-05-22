@@ -19,9 +19,7 @@ use iota_sdk::{
         },
         secret::{stronghold::StrongholdSecretManager, SecretManager, SignTransactionEssence},
     },
-    types::block::{
-        address::Hrp, output::RentStructureBuilder, payload::TransactionPayload, protocol::ProtocolParameters,
-    },
+    types::block::{output::RentStructureBuilder, payload::TransactionPayload, protocol::ProtocolParameters},
     wallet::Result,
 };
 
@@ -46,7 +44,7 @@ async fn main() -> Result<()> {
     let protocol_parameters = ProtocolParameters::new(
         2,
         String::from("testnet"),
-        Hrp::from_str_unchecked("smr"),
+        "smr",
         1500,
         15,
         RentStructureBuilder::new()

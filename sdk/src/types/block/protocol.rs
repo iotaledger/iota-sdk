@@ -51,7 +51,7 @@ impl Default for ProtocolParameters {
         Self::new(
             PROTOCOL_VERSION,
             String::from("shimmer"),
-            Hrp::from_str_unchecked("smr"),
+            "smr",
             1500,
             15,
             RentStructure::default(),
@@ -131,7 +131,7 @@ pub fn protocol_parameters() -> ProtocolParameters {
     ProtocolParameters::new(
         2,
         String::from("testnet"),
-        Hrp::from_str_unchecked("rms"),
+        "rms",
         1500,
         15,
         crate::types::block::output::RentStructure::new(500, 10, 1),
