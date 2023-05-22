@@ -79,7 +79,7 @@ async fn main() -> Result<()> {
     ];
 
     // Convert ouput array to json array
-let json_outputs = serde_json::to_string_pretty(&outputs.iter().map(OutputDto::from).collect::<Vec<OutputDto>>())?;
+    let json_outputs = serde_json::to_string_pretty(&outputs.iter().map(OutputDto::from).collect::<Vec<OutputDto>>())?;
     println!("{json_outputs}");
 
     Ok(())

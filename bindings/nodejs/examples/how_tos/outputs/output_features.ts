@@ -53,9 +53,7 @@ async function run() {
         const nftOutputWithMetadata = await client.buildNftOutput({
             nftId: '0x0000000000000000000000000000000000000000000000000000000000000000',
             unlockConditions: [addressUnlockCondition],
-            features: [
-                new MetadataFeature(utf8ToHex('Hello, World!')),
-            ],
+            features: [new MetadataFeature(utf8ToHex('Hello, World!'))],
         });
 
         // Output with immutable metadata feature
