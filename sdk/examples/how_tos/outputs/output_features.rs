@@ -10,9 +10,10 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{
+            dto::OutputDto,
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::AddressUnlockCondition,
-            NftId, NftOutputBuilder, dto::OutputDto,
+            NftId, NftOutputBuilder,
         },
     },
 };
@@ -32,7 +33,8 @@ async fn main() -> Result<()> {
 
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
 
-    let nft_output_builder = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null()).add_unlock_condition(AddressUnlockCondition::new(address));
+    let nft_output_builder = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())
+        .add_unlock_condition(AddressUnlockCondition::new(address));
 
     let outputs = vec![
         // with sender feature

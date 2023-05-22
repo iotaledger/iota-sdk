@@ -10,12 +10,13 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{
+            dto::OutputDto,
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
                 ImmutableAliasAddressUnlockCondition, StateControllerAddressUnlockCondition,
                 StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
             },
-            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, SimpleTokenScheme, TokenScheme, dto::OutputDto,
+            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, SimpleTokenScheme, TokenScheme,
         },
     },
 };
@@ -39,10 +40,11 @@ async fn main() -> Result<()> {
 
     let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(U256::from(50), U256::from(0), U256::from(100))?);
 
-    let basic_output_builder =
-        BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure).add_unlock_condition(AddressUnlockCondition::new(address));
+    let basic_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+        .add_unlock_condition(AddressUnlockCondition::new(address));
     let alias_output_builder = AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null());
-    let foundry_output_builder = FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, 1, token_scheme);
+    let foundry_output_builder =
+        FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, 1, token_scheme);
 
     let outputs = vec![
         //// most simple output
@@ -75,7 +77,7 @@ async fn main() -> Result<()> {
             .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(*alias_address.as_alias()))
             .finish_output(token_supply)?,
     ];
-    
+
     // Convert ouput array to json array
     let mut output_dtos: Vec<OutputDto> = Vec::new();
     for output in outputs {
