@@ -55,7 +55,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `InputSigningDataDto::chain` is now `Vec<u32>` instead of `Chain`;
 - Most `StrongholdAdapter` fns no longer require a mutable reference;
 - `StorageProvider` fns no longer require a mutable reference;
-- `Account::burn_native_tokens()`, `Account::burn_nft()`, `Account::destroy_foundry()`, `Account::destroy_alias()` merged into `Account::burn()`
+- `Account::burn_native_tokens()`, `Account::burn_nft()`, `Account::destroy_foundry()`, `Account::destroy_alias()` merged into `Account::burn()`;
+- Rename `AccountInner::get_incoming_transaction_data` to `get_incoming_transaction`;
+- `AccountInner::{incoming_transactions, transactions, pending_transactions}` don't return a `Result` anymore;
+- `AccountInner::incoming_transactions` returns a `Vec` instead of a `HashMap`;
 
 ### Removed
 
