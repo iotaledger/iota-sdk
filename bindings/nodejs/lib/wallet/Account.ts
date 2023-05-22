@@ -557,9 +557,7 @@ export class Account {
      * @param transactionId The ID of the transaction to get.
      * @returns The transaction.
      */
-    async getIncomingTransaction(
-        transactionId: string,
-    ): Promise<Transaction> {
+    async getIncomingTransaction(transactionId: string): Promise<Transaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
