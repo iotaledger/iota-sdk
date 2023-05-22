@@ -53,7 +53,7 @@ export type __BuildNftOutputMethod__ = {
 export type __BurnMethod__ = {
     name: 'burn';
     data: {
-        burn: Burn,
+        burn: Burn;
         options?: TransactionOptions;
     };
 };
