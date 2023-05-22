@@ -4,7 +4,6 @@ import json
 
 load_dotenv()
 
-# Create a Client instance
 client = Client()
 
 hex_address = Utils.bech32_to_hex(
