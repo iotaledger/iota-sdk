@@ -20,4 +20,4 @@ for transaction in transactions:
 incoming_transactions = account.incoming_transactions()
 print('Received transactions:')
 for transaction in incoming_transactions:
-    print(transaction[0])
+    print(transaction['transactionId'])

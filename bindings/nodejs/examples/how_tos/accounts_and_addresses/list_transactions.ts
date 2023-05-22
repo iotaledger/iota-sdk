@@ -24,8 +24,9 @@ async function run() {
 
         const incomingTransactions = await account.incomingTransactions();
         console.log('Incoming transactions:');
-        for (const transaction of incomingTransactions)
-            console.log(transaction[0]);
+        for (const transaction of incomingTransactions) {
+            console.log(transaction.transactionId);
+        }
     } catch (error) {
         console.error('Error: ', error);
     }

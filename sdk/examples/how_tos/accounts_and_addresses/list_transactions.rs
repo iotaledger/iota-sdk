@@ -25,14 +25,14 @@ async fn main() -> Result<()> {
 
     // Print transaction ids
     println!("Sent transactions:");
-    for transaction in account.transactions().await? {
+    for transaction in account.transactions().await {
         println!("{}", transaction.transaction_id);
     }
 
     // Print received transaction ids
     println!("Received transactions:");
-    for transaction_id in account.incoming_transactions().await?.keys() {
-        println!("{}", transaction_id);
+    for transaction in account.incoming_transactions().await {
+        println!("{}", transaction.transaction_id);
     }
 
     Ok(())
