@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 class OutputId():
-    def __init__(self, transaction_id, output_index):
+    def __init__(self, transaction_id: str, output_index: int):
         """Initialize OutputId
 
         Parameters
@@ -25,7 +25,7 @@ class OutputId():
         self.output_index = output_index
 
     @classmethod
-    def from_string(cls, output_id):
+    def from_string(cls, output_id: str):
         obj = cls.__new__(cls)
         super(OutputId, obj).__init__()
         if len(output_id) != 70:

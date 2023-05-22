@@ -47,7 +47,7 @@ import type {
     INftOutput,
     OutputTypes,
 } from '@iota/types';
-import { INode } from '../client';
+import { Burn, INode } from '../client';
 
 /** The Account class. */
 export class Account {
@@ -127,6 +127,30 @@ export class Account {
     }
 
     /**
+     * A generic `burn()` function that can be used to burn native tokens, nfts, foundries and aliases.
+     * @param burn The outputs to burn
+     * @param transactionOptions The options to define a `RemainderValueStrategy`
+     * or custom inputs.
+     * @returns The resulting transaction.
+     */
+    async burn(
+        burn: Burn,
+        transactionOptions?: TransactionOptions,
+    ): Promise<Transaction> {
+        const resp = await this.methodHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'burn',
+                data: {
+                    burn,
+                    options: transactionOptions,
+                },
+            },
+        );
+        return JSON.parse(resp).payload;
+    }
+
+    /**
      * Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
      * the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
      * recommended to use melting, if the foundry output is available.
@@ -144,21 +168,19 @@ export class Account {
         const resp = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'burnNativeToken',
+                name: 'burn',
                 data: {
-                    tokenId,
-                    burnAmount,
+                    burn: {
+                        nativeTokens: [{ id: tokenId, amount: burnAmount }],
+                    },
                     options: transactionOptions,
                 },
             },
         );
         return JSON.parse(resp).payload;
     }
-
     /**
-     * Burn an nft output. Outputs controlled by it will be sweeped before if they don't have a storage
-     * deposit return, timelock or expiration unlock condition. This should be preferred over burning, because after
-     * burning, the foundry can never be destroyed anymore.
+     * Burn an nft output.
      * @param nftId The NftId.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
@@ -171,9 +193,11 @@ export class Account {
         const resp = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'burnNft',
+                name: 'burn',
                 data: {
-                    nftId,
+                    burn: {
+                        nfts: [nftId],
+                    },
                     options: transactionOptions,
                 },
             },
@@ -293,9 +317,7 @@ export class Account {
     }
 
     /**
-     * Destroy an alias output. Outputs controlled by it will be sweeped before if they don't have a
-     * storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
-     * sent to the governor address.
+     * Destroy an alias output.
      * @param aliasId The AliasId.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
@@ -308,9 +330,11 @@ export class Account {
         const resp = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'destroyAlias',
+                name: 'burn',
                 data: {
-                    aliasId,
+                    burn: {
+                        aliases: [aliasId],
+                    },
                     options: transactionOptions,
                 },
             },
@@ -333,9 +357,11 @@ export class Account {
         const resp = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'destroyFoundry',
+                name: 'burn',
                 data: {
-                    foundryId,
+                    burn: {
+                        foundries: [foundryId],
+                    },
                     options: transactionOptions,
                 },
             },

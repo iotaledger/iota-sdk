@@ -1,7 +1,10 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::{
+    collections::{BTreeMap, BTreeSet},
+    vec::Vec,
+};
 use core::cmp::Ordering;
 
 use packable::{
@@ -10,6 +13,7 @@ use packable::{
     unpacker::Unpacker,
     Packable,
 };
+use primitive_types::U256;
 
 use crate::types::block::{
     address::{Address, AliasAddress},
@@ -198,6 +202,10 @@ impl FoundryOutputBuilder {
 
     ///
     pub fn finish_unverified(self) -> Result<FoundryOutput, Error> {
+        if self.serial_number == 0 {
+            return Err(Error::InvalidFoundryZeroSerialNumber);
+        }
+
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions(&unlock_conditions)?;
@@ -380,45 +388,13 @@ impl FoundryOutput {
     ) -> Result<(), ConflictReason> {
         Address::from(*self.alias_address()).unlock(unlock, inputs, context)
     }
-}
 
-impl StateTransitionVerifier for FoundryOutput {
-    fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
-        let alias_chain_id = ChainId::from(*next_state.alias_address().alias_id());
-
-        if let (Some(Output::Alias(input_alias)), Some(Output::Alias(output_alias))) = (
-            context.input_chains.get(&alias_chain_id),
-            context.output_chains.get(&alias_chain_id),
-        ) {
-            if input_alias.foundry_counter() >= next_state.serial_number()
-                || next_state.serial_number() > output_alias.foundry_counter()
-            {
-                return Err(StateTransitionError::InconsistentFoundrySerialNumber);
-            }
-        } else {
-            return Err(StateTransitionError::MissingAliasForFoundry);
-        }
-
-        let token_id = next_state.token_id();
-        let output_tokens = context.output_native_tokens.get(&token_id).copied().unwrap_or_default();
-        let TokenScheme::Simple(ref next_token_scheme) = next_state.token_scheme;
-
-        // No native tokens should be referenced prior to the foundry creation.
-        if context.input_native_tokens.contains_key(&token_id) {
-            return Err(StateTransitionError::InconsistentNativeTokensFoundryCreation);
-        }
-
-        if output_tokens != next_token_scheme.minted_tokens() || !next_token_scheme.melted_tokens().is_zero() {
-            return Err(StateTransitionError::InconsistentNativeTokensFoundryCreation);
-        }
-
-        Ok(())
-    }
-
-    fn transition(
+    // Transition, just without full ValidationContext
+    pub(crate) fn transition_inner(
         current_state: &Self,
         next_state: &Self,
-        context: &ValidationContext<'_>,
+        input_native_tokens: &BTreeMap<TokenId, U256>,
+        output_native_tokens: &BTreeMap<TokenId, U256>,
     ) -> Result<(), StateTransitionError> {
         if current_state.alias_address() != next_state.alias_address()
             || current_state.serial_number != next_state.serial_number
@@ -428,8 +404,8 @@ impl StateTransitionVerifier for FoundryOutput {
         }
 
         let token_id = next_state.token_id();
-        let input_tokens = context.input_native_tokens.get(&token_id).copied().unwrap_or_default();
-        let output_tokens = context.output_native_tokens.get(&token_id).copied().unwrap_or_default();
+        let input_tokens = input_native_tokens.get(&token_id).copied().unwrap_or_default();
+        let output_tokens = output_native_tokens.get(&token_id).copied().unwrap_or_default();
         let TokenScheme::Simple(ref current_token_scheme) = current_state.token_scheme;
         let TokenScheme::Simple(ref next_token_scheme) = next_state.token_scheme;
 
@@ -490,6 +466,53 @@ impl StateTransitionVerifier for FoundryOutput {
         }
 
         Ok(())
+    }
+}
+
+impl StateTransitionVerifier for FoundryOutput {
+    fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+        let alias_chain_id = ChainId::from(*next_state.alias_address().alias_id());
+
+        if let (Some(Output::Alias(input_alias)), Some(Output::Alias(output_alias))) = (
+            context.input_chains.get(&alias_chain_id),
+            context.output_chains.get(&alias_chain_id),
+        ) {
+            if input_alias.foundry_counter() >= next_state.serial_number()
+                || next_state.serial_number() > output_alias.foundry_counter()
+            {
+                return Err(StateTransitionError::InconsistentFoundrySerialNumber);
+            }
+        } else {
+            return Err(StateTransitionError::MissingAliasForFoundry);
+        }
+
+        let token_id = next_state.token_id();
+        let output_tokens = context.output_native_tokens.get(&token_id).copied().unwrap_or_default();
+        let TokenScheme::Simple(ref next_token_scheme) = next_state.token_scheme;
+
+        // No native tokens should be referenced prior to the foundry creation.
+        if context.input_native_tokens.contains_key(&token_id) {
+            return Err(StateTransitionError::InconsistentNativeTokensFoundryCreation);
+        }
+
+        if output_tokens != next_token_scheme.minted_tokens() || !next_token_scheme.melted_tokens().is_zero() {
+            return Err(StateTransitionError::InconsistentNativeTokensFoundryCreation);
+        }
+
+        Ok(())
+    }
+
+    fn transition(
+        current_state: &Self,
+        next_state: &Self,
+        context: &ValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
+        Self::transition_inner(
+            current_state,
+            next_state,
+            &context.input_native_tokens,
+            &context.output_native_tokens,
+        )
     }
 
     fn destruction(current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
