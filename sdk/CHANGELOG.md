@@ -30,7 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ignore_if_bech32_mismatch` parameter to `Wallet::restore_backup()`;
 - `OutputWithMetadata::{into_output, into_metadata}` methods;
 - Storage and Backup migration;
-- `Password` type that derives `ZeroizeOnDrop`;
+- `types::block::Error::InvalidFoundryZeroSerialNumber` variant;
+- `Password` type that is `Zeroize` and `ZeroizeOnDrop`;
 
 ### Changed
 
@@ -57,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Most `StrongholdAdapter` fns no longer require a mutable reference;
 - `StorageProvider` fns no longer require a mutable reference;
 - `Account::burn_native_tokens()`, `Account::burn_nft()`, `Account::destroy_foundry()`, `Account::destroy_alias()` merged into `Account::burn()`
+- `ValidationContext::{input_native_tokens, output_native_tokens}` from HashMap to BTreeMap;
 
 ### Removed
 
@@ -70,6 +72,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Storage records decryption;
+
+### Fixed
+
+- Validation for transitions in the input selection;
+- Automatically increase foundry counter of alias outputs;
+- Validate that foundry outputs can't have serial number `0`;
 
 ## 0.3.0 - 2023-05-02
 
