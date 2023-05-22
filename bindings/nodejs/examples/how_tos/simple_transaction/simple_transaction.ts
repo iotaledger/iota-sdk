@@ -5,7 +5,7 @@ import { Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/how_tos/simple_transaction/simple_transaction.js
+// yarn run-example ./how_tos/simple_transaction/simple_transaction.ts
 
 // This example syncs the account and prints the balance
 async function run() {

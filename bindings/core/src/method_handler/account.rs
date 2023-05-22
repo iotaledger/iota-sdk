@@ -6,7 +6,8 @@ use std::str::FromStr;
 
 use iota_sdk::{
     client::api::{
-        PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
+        input_selection::Burn, PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData,
+        SignedTransactionDataDto,
     },
     types::block::{
         output::{dto::OutputDto, Output, Rent},
@@ -17,8 +18,7 @@ use iota_sdk::{
             types::{AccountBalanceDto, TransactionDto},
             Account, CreateAliasParams, MintTokenTransactionDto, OutputDataDto, OutputParams, TransactionOptions,
         },
-        message_interface::AddressWithUnspentOutputsDto,
-        MintNativeTokenParams, MintNftParams, SendAmountParams,
+        MintNativeTokenParams, MintNftParams,
     },
 };
 use primitive_types::U256;
@@ -27,24 +27,10 @@ use crate::{method::AccountMethod, Response, Result};
 
 pub(crate) async fn call_account_method_internal(account: &Account, method: AccountMethod) -> Result<Response> {
     let response = match method {
-        AccountMethod::BurnNativeToken {
-            token_id,
-            burn_amount,
-            options,
-        } => {
+        AccountMethod::Burn { burn, options } => {
             let transaction = account
-                .burn_native_token(
-                    token_id,
-                    U256::try_from(&burn_amount).map_err(|_| Error::InvalidField("burn_amount"))?,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
-        }
-        AccountMethod::BurnNft { nft_id, options } => {
-            let transaction = account
-                .burn_nft(
-                    nft_id,
+                .burn(
+                    Burn::try_from(&burn)?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -67,24 +53,6 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let transaction = account
                 .create_alias_output(
                     params,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
-        }
-        AccountMethod::DestroyAlias { alias_id, options } => {
-            let transaction = account
-                .destroy_alias(
-                    alias_id,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
-        }
-        AccountMethod::DestroyFoundry { foundry_id, options } => {
-            let transaction = account
-                .destroy_foundry(
-                    foundry_id,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -131,7 +99,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::AddressesWithUnspentOutputs => {
             let addresses = account.addresses_with_unspent_outputs().await?;
-            Response::AddressesWithUnspentOutputs(addresses.iter().map(AddressWithUnspentOutputsDto::from).collect())
+            Response::AddressesWithUnspentOutputs(addresses)
         }
         AccountMethod::Outputs { filter_options } => {
             let outputs = account.outputs(filter_options).await?;
@@ -234,10 +202,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::PrepareSendAmount { params, options } => {
             let data = account
                 .prepare_send_amount(
-                    params
-                        .iter()
-                        .map(SendAmountParams::try_from)
-                        .collect::<iota_sdk::wallet::Result<Vec<SendAmountParams>>>()?,
+                    params,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -270,10 +235,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::SendAmount { params, options } => {
             let transaction = account
                 .send_amount(
-                    params
-                        .iter()
-                        .map(SendAmountParams::try_from)
-                        .collect::<iota_sdk::wallet::Result<Vec<SendAmountParams>>>()?,
+                    params,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;

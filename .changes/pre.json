@@ -100,6 +100,7 @@
     ".changes/revoting.md",
     ".changes/rocksdb-19.md",
     ".changes/sdr-prepare-output.md",
+    ".changes/send-params.md",
     ".changes/sign-verify-ed25519.md",
     ".changes/signature-unlock.md",
     ".changes/signatureUnlock.md",

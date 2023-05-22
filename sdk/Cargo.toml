@@ -95,6 +95,17 @@ tls = [ "reqwest?/rustls-tls", "rumqttc?/use-rustls" ]
 client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10" ]
 wallet = [ "client" ]
 
+# Ed25519 Examples
+
+[[example]]
+name = "sign_and_verify_ed25519"
+path = "examples/how_tos/sign_and_verify_ed25519/sign_ed25519.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "verify_ed25519_signature"
+path = "examples/how_tos/sign_and_verify_ed25519/verify_ed25519_signature.rs"
+
 # Simple Transaction Examples
 
 [[example]]

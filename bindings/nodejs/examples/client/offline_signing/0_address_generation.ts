@@ -12,7 +12,7 @@ import { writeFile } from 'fs/promises';
 require('dotenv').config({ path: '.env' });
 
 // From examples directory, run with:
-// node ./dist/client/offline_signing/0_address_generation.js
+// yarn run-example ./client/offline_signing/0_address_generation.ts
 
 const ADDRESS_FILE_NAME = 'offline_signing_address.json';
 

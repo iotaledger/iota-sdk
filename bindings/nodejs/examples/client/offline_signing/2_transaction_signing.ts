@@ -7,7 +7,7 @@ import { writeFile, readFile } from 'fs/promises';
 require('dotenv').config({ path: '.env' });
 
 // From examples directory, run with:
-// node ./dist/client/offline_signing/2_transaction_signing.js
+// yarn run-example ./client/offline_signing/2_transaction_signing.ts
 
 const PREPARED_TRANSACTION_FILE_NAME =
     'offline_signing_prepared_transaction.json';

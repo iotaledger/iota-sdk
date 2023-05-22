@@ -8,8 +8,7 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::types::block::{
-    dto::U256Dto,
-    output::{AliasId, FoundryId, NftId, TokenId},
+    output::{AliasId, FoundryId, NativeToken, NftId, TokenId},
     Error,
 };
 
@@ -106,6 +105,30 @@ impl Burn {
     }
 }
 
+impl From<FoundryId> for Burn {
+    fn from(id: FoundryId) -> Self {
+        Self::new().add_foundry(id)
+    }
+}
+
+impl From<AliasId> for Burn {
+    fn from(id: AliasId) -> Self {
+        Self::new().add_alias(id)
+    }
+}
+
+impl From<NftId> for Burn {
+    fn from(id: NftId) -> Self {
+        Self::new().add_nft(id)
+    }
+}
+
+impl From<NativeToken> for Burn {
+    fn from(native_token: NativeToken) -> Self {
+        Self::new().add_native_token(*native_token.token_id(), native_token.amount())
+    }
+}
+
 /// A DTO for [`Burn`].
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -121,7 +144,7 @@ pub struct BurnDto {
     pub(crate) foundries: Option<HashSet<FoundryId>>,
     /// Amounts of native tokens to burn.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub(crate) native_tokens: Option<BTreeMap<TokenId, U256Dto>>,
+    pub(crate) native_tokens: Option<BTreeMap<TokenId, U256>>,
 }
 
 impl From<&Burn> for BurnDto {
@@ -134,7 +157,7 @@ impl From<&Burn> for BurnDto {
                 value
                     .native_tokens
                     .iter()
-                    .map(|(token_id, amount)| (*token_id, U256Dto::from(amount))),
+                    .map(|(token_id, amount)| (*token_id, *amount)),
             )),
         }
     }

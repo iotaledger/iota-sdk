@@ -19,7 +19,7 @@ def _call_method_routine(func):
         json_response = json.loads(response)
 
         if "type" in json_response:
-            if json_response["type"] == "error":
+            if json_response["type"] == "error" or json_response["type"] == "panic":
                 raise WalletError(json_response['payload'])
 
         if "payload" in json_response:
@@ -27,6 +27,7 @@ def _call_method_routine(func):
         else:
             return response
     return wrapper
+
 
 class WalletError(Exception):
     """wallet error"""
