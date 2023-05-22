@@ -14,18 +14,22 @@ async function run() {
         throw new Error('.env FAUCET_URL is undefined, see .env.example');
     }
     try {
+        let faucetUrl = process.env.FAUCET_URL!;
+
+        // Create the wallet
         const wallet = new Wallet({
             storagePath: './alice-database',
         });
 
+        // Get the account we generated with `01_create_wallet`
         const account = await wallet.getAccount('Alice');
 
-        const address = (await account.addresses())[0].address;
+        const address = (await account.addresses())[0];
         console.log(address);
 
         const faucetResponse = await (
             await wallet.getClient()
-        ).requestFundsFromFaucet(process.env.FAUCET_URL, address);
+        ).requestFundsFromFaucet(faucetUrl, address.toString());
         console.log(faucetResponse);
     } catch (error) {
         console.error('Error: ', error);

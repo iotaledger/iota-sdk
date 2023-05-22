@@ -572,6 +572,7 @@ pub mod dto {
             immutable_features: Option<Vec<FeatureDto>>,
             token_supply: u64,
         ) -> Result<Self, Error> {
+            log::debug!("0");
             let mut builder = match amount {
                 OutputBuilderAmountDto::Amount(amount) => NftOutputBuilder::new_with_amount(
                     amount.parse().map_err(|_| Error::InvalidField("amount"))?,
@@ -581,6 +582,7 @@ pub mod dto {
                     NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *nft_id)
                 }
             };
+            log::debug!("1");
 
             if let Some(native_tokens) = native_tokens {
                 let native_tokens = native_tokens
@@ -589,13 +591,18 @@ pub mod dto {
                     .collect::<Result<Vec<NativeToken>, Error>>()?;
                 builder = builder.with_native_tokens(native_tokens);
             }
+            log::debug!("2");
 
             let unlock_conditions = unlock_conditions
                 .iter()
-                .map(|u| UnlockCondition::try_from_dto(u, token_supply))
+                .map(|u| {
+                    log::debug!("{:?}", &u);
+                    UnlockCondition::try_from_dto(u, token_supply)})
                 .collect::<Result<Vec<UnlockCondition>, Error>>()?;
+            log::debug!("2.1");
             builder = builder.with_unlock_conditions(unlock_conditions);
 
+            log::debug!("3");
             if let Some(features) = features {
                 let features = features
                     .iter()
@@ -603,6 +610,7 @@ pub mod dto {
                     .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_features(features);
             }
+            log::debug!("4");
 
             if let Some(immutable_features) = immutable_features {
                 let immutable_features = immutable_features
@@ -612,6 +620,7 @@ pub mod dto {
                 builder = builder.with_immutable_features(immutable_features);
             }
 
+            log::debug!("5");
             builder.finish(token_supply)
         }
     }

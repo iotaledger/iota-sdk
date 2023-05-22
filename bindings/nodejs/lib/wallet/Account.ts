@@ -20,7 +20,6 @@ import {
     OutputData,
     OutputParams,
     OutputsToClaim,
-    PreparedMintTokenTransaction,
     PreparedTransactionData,
     Transaction,
     TransactionOptions,
@@ -45,11 +44,9 @@ import type {
     IAliasOutput,
     IBasicOutput,
     IFoundryOutput,
-    INftOutput,
-    OutputTypes,
 } from '@iota/types';
 import { INode, IPreparedTransactionData } from '../client';
-import { Address } from '../types';
+import { NftOutput, Output } from '../types';
 
 /** The Account class. */
 export class Account {
@@ -117,7 +114,7 @@ export class Account {
      * @param data Options for building an `NftOutput`.
      * @returns The built `NftOutput`.
      */
-    async buildNftOutput(data: BuildNftOutputData): Promise<INftOutput> {
+    async buildNftOutput(data: BuildNftOutputData): Promise<NftOutput> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -350,7 +347,9 @@ export class Account {
      * @param options Options for address generation.
      * @returns The address.
      */
-    async generateAddress(options?: GenerateAddressOptions): Promise<Address> {
+    async generateAddress(
+        options?: GenerateAddressOptions,
+    ): Promise<AccountAddress> {
         const addresses = await this.generateAddresses(1, options);
         return addresses[0];
     }
@@ -364,7 +363,7 @@ export class Account {
     async generateAddresses(
         amount: number,
         options?: GenerateAddressOptions,
-    ): Promise<Address[]> {
+    ): Promise<AccountAddress[]> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -550,7 +549,7 @@ export class Account {
      * List all the addresses of the account.
      * @returns The addresses.
      */
-    async addresses(): Promise<Address[]> {
+    async addresses(): Promise<AccountAddress[]> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -671,7 +670,7 @@ export class Account {
      * @param output output to calculate the deposit amount for.
      * @returns The amount.
      */
-    async minimumRequiredStorageDeposit(output: OutputTypes): Promise<string> {
+    async minimumRequiredStorageDeposit(output: Output): Promise<string> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -783,7 +782,7 @@ export class Account {
     async prepareOutput(
         params: OutputParams,
         transactionOptions?: TransactionOptions,
-    ): Promise<OutputTypes> {
+    ): Promise<Output> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -794,7 +793,8 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(response).payload;
+
+        return Output.parse(JSON.parse(response).payload);
     }
 
     /**
@@ -829,7 +829,7 @@ export class Account {
      * @returns The prepared transaction data.
      */
     async prepareTransaction(
-        outputs: OutputTypes[],
+        outputs: Output[],
         options?: TransactionOptions,
     ): Promise<PreparedTransactionData> {
         const response = await this.messageHandler.callAccountMethod(
@@ -981,7 +981,7 @@ export class Account {
      * @returns The sent transaction.
      */
     async sendOutputs(
-        outputs: OutputTypes[],
+        outputs: Output[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const response = await this.messageHandler.callAccountMethod(

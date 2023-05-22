@@ -1,9 +1,33 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { UnlockCondition } from './unlock_condition';
-import { Feature } from './feature';
+import {
+    UnlockCondition,
+    UnlockConditionDiscriminator,
+} from './unlock_condition';
+import { Feature, FeatureDiscriminator } from './feature';
 import { HexEncodedString, INativeToken, TokenSchemeTypes } from '@iota/types';
+
+import {
+    ClassConstructor,
+    DiscriminatorDescriptor,
+    Type,
+} from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
+import {
+    JSON,
+    JsonObject,
+    JsonProperty,
+    JsonDiscriminatorProperty,
+    JsonDiscriminatorValue,
+} from 'ta-json';
+
+declare type OutputTypes =
+    | TreasuryOutput
+    | BasicOutput
+    | AliasOutput
+    | FoundryOutput
+    | NftOutput;
 
 /**
  * All of the output types.
@@ -16,14 +40,24 @@ enum OutputType {
     Nft = 6,
 }
 
-abstract class Output /*implements ICommonOutput*/ {
+@JsonObject()
+@JsonDiscriminatorProperty('type')
+abstract class Output /*implements ICommonOutput*/
+    implements DiscriminatorDescriptor
+{
     private amount: string;
+
+    @JsonProperty()
     private type: OutputType;
 
     constructor(type: OutputType, amount: string) {
         this.type = type;
         this.amount = amount;
     }
+
+    property = OutputDiscriminator.property;
+    subTypes = OutputDiscriminator.subTypes;
+
     /**
      * The type of output.
      */
@@ -37,13 +71,40 @@ abstract class Output /*implements ICommonOutput*/ {
     getAmount(): string {
         return this.amount;
     }
+
+    public static parse(data: any): Output {
+        if (data.type == OutputType.Treasury) {
+            return plainToInstance(
+                TreasuryOutput,
+                data,
+            ) as any as TreasuryOutput;
+        } else if (data.type == OutputType.Basic) {
+            return plainToInstance(BasicOutput, data) as any as BasicOutput;
+        } else if (data.type == OutputType.Alias) {
+            return plainToInstance(AliasOutput, data) as any as AliasOutput;
+        } else if (data.type == OutputType.Foundry) {
+            return plainToInstance(FoundryOutput, data) as any as FoundryOutput;
+        } else if (data.type == OutputType.Nft) {
+            return plainToInstance(NftOutput, data) as any as NftOutput;
+        }
+        throw new Error('Invalid JSON');
+    }
 }
+
 /**
  * Common output properties.
  */
-class CommonOutput extends Output /*implements ICommonOutput*/ {
+abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
+    @Type(() => UnlockCondition, {
+        discriminator: UnlockConditionDiscriminator,
+    })
     private unlockConditions: UnlockCondition[];
+
     private nativeTokens?: INativeToken[];
+
+    @Type(() => Feature, {
+        discriminator: FeatureDiscriminator,
+    })
     private features?: Feature[];
 
     constructor(
@@ -84,6 +145,8 @@ class CommonOutput extends Output /*implements ICommonOutput*/ {
 /**
  * Treasury Output.
  */
+@JsonObject()
+@JsonDiscriminatorValue(OutputType.Treasury)
 class TreasuryOutput extends Output /*implements ITreasuryOutput */ {
     constructor(amount: string) {
         super(OutputType.Treasury, amount);
@@ -92,6 +155,8 @@ class TreasuryOutput extends Output /*implements ITreasuryOutput */ {
 /**
  * Basic output.
  */
+@JsonObject()
+@JsonDiscriminatorValue(OutputType.Basic)
 class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
     constructor(amount: string, unlockConditions: UnlockCondition[]) {
         super(OutputType.Basic, amount, unlockConditions);
@@ -99,6 +164,7 @@ class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
 }
 
 abstract class ImmutableFeaturesOutput extends CommonOutput {
+    @Type(() => Feature)
     private immutableFeatures?: Feature[];
 
     constructor(
@@ -142,6 +208,8 @@ abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements 
     }
 }
 
+@JsonObject()
+@JsonDiscriminatorValue(OutputType.Alias)
 class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
     private aliasId: HexEncodedString;
     private stateIndex: number;
@@ -182,6 +250,8 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
 /**
  * NFT output.
  */
+@JsonObject()
+@JsonDiscriminatorValue(OutputType.Nft)
 class NftOutput extends StateMetadataOutput /*implements INftOutput*/ {
     private nftId: HexEncodedString;
 
@@ -204,6 +274,8 @@ class NftOutput extends StateMetadataOutput /*implements INftOutput*/ {
 /**
  * Foundry output.
  */
+@JsonObject()
+@JsonDiscriminatorValue(OutputType.Foundry)
 class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*/ {
     private serialNumber: number;
     private tokenScheme: TokenSchemeTypes;
@@ -232,9 +304,22 @@ class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*
     }
 }
 
+const OutputDiscriminator = {
+    property: 'type',
+    subTypes: [
+        { value: TreasuryOutput, name: OutputType.Treasury as any },
+        { value: BasicOutput, name: OutputType.Basic as any },
+        { value: AliasOutput, name: OutputType.Alias as any },
+        { value: NftOutput, name: OutputType.Alias as any },
+        { value: FoundryOutput, name: OutputType.Foundry as any },
+    ],
+};
+
 export {
     OutputType,
+    OutputDiscriminator,
     Output,
+    CommonOutput,
     TreasuryOutput,
     BasicOutput,
     AliasOutput,

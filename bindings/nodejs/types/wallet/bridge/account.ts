@@ -1,4 +1,4 @@
-import type { OutputTypes, HexEncodedAmount } from '@iota/types';
+import type { HexEncodedAmount } from '@iota/types';
 import type { SyncOptions, FilterOptions } from '../account';
 import type {
     SendAmountParams,
@@ -28,6 +28,7 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventType,
 } from '../participation';
+import { Output } from '../../../lib';
 
 export type __BuildAliasOutputMethod__ = {
     name: 'buildAliasOutput';
@@ -205,7 +206,7 @@ export type __UnspentOutputsMethod__ = {
 export type __MinimumRequiredStorageDepositMethod__ = {
     name: 'minimumRequiredStorageDeposit';
     data: {
-        output: OutputTypes;
+        output: Output;
     };
 };
 
@@ -253,7 +254,7 @@ export type __PrepareSendAmountMethod__ = {
 export type __PrepareTransactionMethod__ = {
     name: 'prepareTransaction';
     data: {
-        outputs: OutputTypes[];
+        outputs: Output[];
         options?: TransactionOptions;
     };
 };
@@ -309,7 +310,7 @@ export type __PrepareSendNftMethod__ = {
 export type __SendOutputsMethod__ = {
     name: 'sendOutputs';
     data: {
-        outputs: OutputTypes[];
+        outputs: Output[];
         options?: TransactionOptions;
     };
 };

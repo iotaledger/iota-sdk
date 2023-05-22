@@ -1,13 +1,17 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Wallet, CoinType, initLogger } from '@iota/sdk';
+import { Wallet, CoinType, initLogger, WalletOptions } from '@iota/sdk';
+
+// This example uses secrets in environment variables for simplicity which should not be done in production.
 require('dotenv').config({ path: '.env' });
 
-// Run with command:
+// In this example we will create a new wallet.
+//
+// Make sure there's no `example.stronghold` file and no `example.walletdb` folder yet!
+//
+// Rename `.env.example` to `.env` first, then run the command:
 // yarn run-example ./wallet/00_create_account.ts
-
-// This example creates a new database and account
 async function run() {
     initLogger();
     if (!process.env.NODE_URL) {
@@ -18,26 +22,35 @@ async function run() {
             '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
         );
     }
+    if (!process.env.STRONGHOLD_SNAPSHOT_PATH) {
+        throw new Error(
+            '.env STRONGHOLD_SNAPSHOT_PATH is undefined, see .env.example',
+        );
+    }
     if (!process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1) {
         throw new Error(
             '.env NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1 is undefined, see .env.example',
         );
     }
+    if (!process.env.WALLET_DB_PATH) {
+        throw new Error('.env WALLET_DB_PATH is undefined, see .env.example');
+    }
     try {
-        const walletOptions = {
-            storagePath: './alice-database',
+        const walletOptions: WalletOptions = {
+            storagePath: `${process.env.WALLET_DB_PATH}`,
             clientOptions: {
                 nodes: [process.env.NODE_URL],
             },
             coinType: CoinType.Shimmer,
             secretManager: {
                 stronghold: {
-                    snapshotPath: `./wallet.stronghold`,
+                    snapshotPath: `${process.env.STRONGHOLD_SNAPSHOT_PATH}`,
                     password: `${process.env.STRONGHOLD_PASSWORD}`,
                 },
             },
         };
 
+        // Create the wallet
         const wallet = new Wallet(walletOptions);
 
         // A mnemonic can be generated with `Utils.generateMnemonic()`.
@@ -47,10 +60,11 @@ async function run() {
             process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1,
         );
 
+        // Create a new account
         const account = await wallet.createAccount({
-            alias: 'Alice',
+            alias: `${process.env.ACCOUNT_ALIAS_1}`,
         });
-        console.log('Account created:', account.getMetadata());
+        console.log('Generated new account:', account.getMetadata().alias);
     } catch (error) {
         console.error('Error: ', error);
     }
