@@ -19,7 +19,7 @@ async function run() {
         await account.sync();
 
         const outputs = await account.outputs();
-        
+
         console.log('Output ids:');
         for (const output of outputs) console.log(output.outputId);
 
