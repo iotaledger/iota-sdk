@@ -26,7 +26,7 @@ use crate::{
         address::HrpLike,
         output::{
             dto::{OutputBuilderAmountDto, OutputDto},
-            AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, Rent,
+            AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
         },
         Error,
     },
@@ -498,9 +498,8 @@ impl WalletMessageHandler {
             } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .burn_native_token(
-                            token_id,
-                            U256::try_from(&burn_amount).map_err(|_| Error::InvalidField("burn_amount"))?,
+                        .burn(
+                            NativeToken::new(token_id, burn_amount)?,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
@@ -511,7 +510,7 @@ impl WalletMessageHandler {
             AccountMethod::BurnNft { nft_id, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .burn_nft(
+                        .burn(
                             nft_id,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
@@ -551,7 +550,7 @@ impl WalletMessageHandler {
             AccountMethod::DestroyAlias { alias_id, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .destroy_alias(
+                        .burn(
                             alias_id,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
@@ -563,7 +562,7 @@ impl WalletMessageHandler {
             AccountMethod::DestroyFoundry { foundry_id, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .destroy_foundry(
+                        .burn(
                             foundry_id,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )

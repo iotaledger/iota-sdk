@@ -8,3 +8,5 @@ export enum CoinType {
     IOTA = 4218,
     Shimmer = 4219,
 }
+
+export const HD_WALLET_TYPE = 44;

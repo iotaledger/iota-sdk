@@ -3,6 +3,7 @@
 
 use alloc::{collections::BTreeSet, vec::Vec};
 
+use hashbrown::HashMap;
 use packable::{
     bounded::BoundedU16,
     error::{UnpackError, UnpackErrorExt},
@@ -493,27 +494,13 @@ impl AliasOutput {
 
         Ok(())
     }
-}
 
-impl StateTransitionVerifier for AliasOutput {
-    fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !next_state.alias_id.is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
-        }
-
-        if let Some(issuer) = next_state.immutable_features().issuer() {
-            if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(StateTransitionError::IssuerNotUnlocked);
-            }
-        }
-
-        Ok(())
-    }
-
-    fn transition(
+    // Transition, just without full ValidationContext
+    pub(crate) fn transition_inner(
         current_state: &Self,
         next_state: &Self,
-        context: &ValidationContext<'_>,
+        input_chains: &HashMap<ChainId, &Output>,
+        outputs: &[Output],
     ) -> Result<(), StateTransitionError> {
         if current_state.immutable_features != next_state.immutable_features {
             return Err(StateTransitionError::MutatedImmutableField);
@@ -528,10 +515,10 @@ impl StateTransitionVerifier for AliasOutput {
                 return Err(StateTransitionError::MutatedFieldWithoutRights);
             }
 
-            let created_foundries = context.essence.outputs().iter().filter_map(|output| {
+            let created_foundries = outputs.iter().filter_map(|output| {
                 if let Output::Foundry(foundry) = output {
                     if foundry.alias_address().alias_id() == &next_state.alias_id
-                        && !context.input_chains.contains_key(&foundry.chain_id())
+                        && !input_chains.contains_key(&foundry.chain_id())
                     {
                         Some(foundry)
                     } else {
@@ -572,6 +559,35 @@ impl StateTransitionVerifier for AliasOutput {
         }
 
         Ok(())
+    }
+}
+
+impl StateTransitionVerifier for AliasOutput {
+    fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+        if !next_state.alias_id.is_null() {
+            return Err(StateTransitionError::NonZeroCreatedId);
+        }
+
+        if let Some(issuer) = next_state.immutable_features().issuer() {
+            if !context.unlocked_addresses.contains(issuer.address()) {
+                return Err(StateTransitionError::IssuerNotUnlocked);
+            }
+        }
+
+        Ok(())
+    }
+
+    fn transition(
+        current_state: &Self,
+        next_state: &Self,
+        context: &ValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
+        Self::transition_inner(
+            current_state,
+            next_state,
+            &context.input_chains,
+            context.essence.outputs(),
+        )
     }
 
     fn destruction(_current_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
