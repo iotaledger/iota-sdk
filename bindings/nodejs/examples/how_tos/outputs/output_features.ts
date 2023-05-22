@@ -54,7 +54,6 @@ async function run() {
             nftId: '0x0000000000000000000000000000000000000000000000000000000000000000',
             unlockConditions: [addressUnlockCondition],
             features: [
-                // "Hello, World!" hex encoded
                 new MetadataFeature(utf8ToHex('Hello, World!')),
             ],
         });
