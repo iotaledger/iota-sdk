@@ -100,7 +100,7 @@ async fn participate(client: &Client, event_id: ParticipationEventId) -> Result<
     let rent_structure = client.get_rent_structure().await?;
 
     let address = secret_manager
-        .get_raw_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .get_raw_addresses(GetAddressesOptions::from_client(client).await?.with_range(0..1))
         .await?[0];
 
     let outputs = vec![
