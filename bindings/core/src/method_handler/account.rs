@@ -84,8 +84,8 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let transaction = account.get_incoming_transaction(&transaction_id).await;
 
             transaction.map_or_else(
-                || Response::IncomingTransaction(None),
-                |transaction| Response::IncomingTransaction(Some(Box::new(TransactionDto::from(&transaction)))),
+                || Response::Transaction(None),
+                |transaction| Response::Transaction(Some(Box::new(TransactionDto::from(&transaction)))),
             )
         }
         AccountMethod::Addresses => {

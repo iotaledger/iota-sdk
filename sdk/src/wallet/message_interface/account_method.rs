@@ -180,7 +180,7 @@ pub enum AccountMethod {
     /// Get the transaction with inputs of an incoming transaction stored in the account
     /// List might not be complete, if the node pruned the data already
     /// Expected response:
-    /// [`IncomingTransaction`](crate::wallet::message_interface::Response::IncomingTransaction)
+    /// [`Transaction`](crate::wallet::message_interface::Response::Transaction)
     #[serde(rename_all = "camelCase")]
     GetIncomingTransaction { transaction_id: TransactionId },
     /// Expected response: [`Addresses`](crate::wallet::message_interface::Response::Addresses)
@@ -200,7 +200,7 @@ pub enum AccountMethod {
     UnspentOutputs { filter_options: Option<FilterOptions> },
     /// Returns all incoming transactions of the account
     /// Expected response:
-    /// [`IncomingTransactions`](crate::wallet::message_interface::Response::IncomingTransactions)
+    /// [`Transactions`](crate::wallet::message_interface::Response::Transactions)
     IncomingTransactions,
     /// Returns all transaction of the account
     /// Expected response: [`Transactions`](crate::wallet::message_interface::Response::Transactions)

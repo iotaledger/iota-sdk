@@ -314,10 +314,12 @@ pub enum Response {
     PreparedTransaction(PreparedTransactionDataDto),
     /// Response for
     /// - [`GetTransaction`](crate::method::AccountMethod::GetTransaction),
+    /// - [`GetIncomingTransaction`](crate::method::AccountMethod::GetIncomingTransaction)
     Transaction(Option<Box<TransactionDto>>),
     /// Response for
     /// - [`Transactions`](crate::method::AccountMethod::Transactions),
-    /// - [`PendingTransactions`](crate::method::AccountMethod::PendingTransactions)
+    /// - [`PendingTransactions`](crate::method::AccountMethod::PendingTransactions),
+    /// - [`IncomingTransactions`](crate::method::AccountMethod::IncomingTransactions)
     Transactions(Vec<TransactionDto>),
     /// Response for
     /// - [`SignTransactionEssence`](crate::method::AccountMethod::SignTransactionEssence)
@@ -330,12 +332,6 @@ pub enum Response {
     /// - [`GetBalance`](crate::method::AccountMethod::GetBalance),
     /// - [`Sync`](crate::method::AccountMethod::Sync)
     Balance(AccountBalanceDto),
-    /// Response for
-    /// - [`GetIncomingTransaction`](crate::method::AccountMethod::GetIncomingTransaction),
-    IncomingTransaction(Option<Box<TransactionDto>>),
-    /// Response for
-    /// - [`IncomingTransactions`](crate::method::AccountMethod::IncomingTransactions),
-    IncomingTransactions(TransactionDto),
     /// Response for
     /// - [`ConsolidateOutputs`](crate::method::AccountMethod::ConsolidateOutputs)
     /// - [`ClaimOutputs`](crate::method::AccountMethod::ClaimOutputs)

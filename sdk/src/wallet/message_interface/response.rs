@@ -79,10 +79,12 @@ pub enum Response {
     PreparedTransaction(PreparedTransactionDataDto),
     /// Response for
     /// [`GetTransaction`](crate::wallet::message_interface::AccountMethod::GetTransaction),
+    /// [`GetIncomingTransaction`](crate::wallet::message_interface::AccountMethod::GetIncomingTransaction)
     Transaction(Option<Box<TransactionDto>>),
     /// Response for
     /// [`Transactions`](crate::wallet::message_interface::AccountMethod::Transactions),
-    /// [`PendingTransactions`](crate::wallet::message_interface::AccountMethod::PendingTransactions)
+    /// [`PendingTransactions`](crate::wallet::message_interface::AccountMethod::PendingTransactions),
+    /// [`IncomingTransactions`](crate::wallet::message_interface::AccountMethod::IncomingTransactions)
     Transactions(Vec<TransactionDto>),
     /// Response for
     /// [`SignTransactionEssence`](crate::wallet::message_interface::AccountMethod::SignTransactionEssence)
@@ -100,12 +102,6 @@ pub enum Response {
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
     LedgerNanoStatus(LedgerNanoStatus),
-    /// Response for
-    /// [`GetIncomingTransaction`](crate::wallet::message_interface::AccountMethod::GetIncomingTransaction),
-    IncomingTransaction(Option<Box<TransactionDto>>),
-    /// Response for
-    /// [`IncomingTransactions`](crate::wallet::message_interface::AccountMethod::IncomingTransactions),
-    IncomingTransactions(Vec<TransactionDto>),
     /// Response for
     /// [`ConsolidateOutputs`](crate::wallet::message_interface::AccountMethod::ConsolidateOutputs)
     /// [`ClaimOutputs`](crate::wallet::message_interface::AccountMethod::ClaimOutputs)
@@ -213,12 +209,6 @@ impl Debug for Response {
             }
             Self::GeneratedAddress(addresses) => write!(f, "GeneratedAddress({addresses:?})"),
             Self::Balance(balance) => write!(f, "Balance({balance:?})"),
-            Self::IncomingTransaction(transaction) => {
-                write!(f, "IncomingTransaction({transaction:?})")
-            }
-            Self::IncomingTransactions(transactions_data) => {
-                write!(f, "IncomingTransactions({transactions_data:?})")
-            }
             Self::SentTransaction(transaction) => write!(f, "SentTransaction({transaction:?})"),
             Self::MintTokenTransaction(mint_transaction) => {
                 write!(f, "MintTokenTransaction({mint_transaction:?})")
