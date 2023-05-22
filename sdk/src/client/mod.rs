@@ -12,7 +12,8 @@
 //! # async fn main() -> Result<()> {
 //! let client = Client::builder()
 //!    .with_node("http://localhost:14265")?
-//!    .finish()?;
+//!    .finish()
+//!    .await?;
 //!
 //! let block = client
 //!    .block()

@@ -6,11 +6,11 @@ const getUnlockedManager = require('./account-manager');
 async function run() {
     try {
         const { initLogger } = require('@iota/wallet');
-    initLogger({
-        name: './wallet.log',
-        levelFilter: 'debug',
-        targetExclusions: ["h2", "hyper", "rustls"]
-    });
+        initLogger({
+            name: './wallet.log',
+            levelFilter: 'debug',
+            targetExclusions: ["h2", "hyper", "rustls"]
+        });
         const manager = await getUnlockedManager();
 
         const account = await manager.getAccount('0');

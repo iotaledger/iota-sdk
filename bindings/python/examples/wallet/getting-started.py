@@ -3,7 +3,6 @@
 
 from iota_sdk import Wallet, StrongholdSecretManager, CoinType, Utils
 from dotenv import load_dotenv
-import json
 import os
 
 load_dotenv()
