@@ -12,6 +12,7 @@ import {
     TagFeature,
     Ed25519Address,
     IssuerFeature,
+    utf8ToHex,
 } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
@@ -54,7 +55,7 @@ async function run() {
             unlockConditions: [addressUnlockCondition],
             features: [
                 // "Hello, World!" hex encoded
-                new MetadataFeature('0x48656c6c6f2c20576f726c6421'),
+                new MetadataFeature(utf8ToHex('Hello, World!')),
             ],
         });
 
@@ -63,8 +64,7 @@ async function run() {
             nftId: '0x0000000000000000000000000000000000000000000000000000000000000000',
             unlockConditions: [addressUnlockCondition],
             immutableFeatures: [
-                // "Hello, World!" hex encoded
-                new MetadataFeature('0x48656c6c6f2c20576f726c6421'),
+                new MetadataFeature(utf8ToHex('Hello, World!')),
             ],
         });
 
@@ -72,8 +72,7 @@ async function run() {
         const nftOutputWithTag = await client.buildNftOutput({
             nftId: '0x0000000000000000000000000000000000000000000000000000000000000000',
             unlockConditions: [addressUnlockCondition],
-            // "Hello, World!" hex encoded
-            features: [new TagFeature('0x48656c6c6f2c20576f726c6421')],
+            features: [new TagFeature(utf8ToHex('Hello, World!'))],
         });
 
         console.log(
