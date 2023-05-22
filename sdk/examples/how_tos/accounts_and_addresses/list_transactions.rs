@@ -3,7 +3,7 @@
 
 //! In this example we will list all transaction of an account.
 //!
-//! `cargo run --example list_transactions --release --features="rocksdb stronghold"`
+//! `cargo run --release --all-features --example list_transactions`
 
 use iota_sdk::wallet::{account::SyncOptions, Result, Wallet};
 

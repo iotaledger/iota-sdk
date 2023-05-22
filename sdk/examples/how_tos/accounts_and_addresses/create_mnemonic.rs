@@ -3,7 +3,7 @@
 
 //! In this example we will create a random mnemonic.
 //!
-//! `cargo run --example create_mnemonic --release`
+//! `cargo run --release --all-features --example create_mnemonic`
 
 use iota_sdk::client::{Client, Result};
 

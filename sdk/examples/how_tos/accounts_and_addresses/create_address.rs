@@ -4,7 +4,7 @@
 //! In this example we will generate an address.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example create_address --release --features="rocksdb stronghold"`
+//! `cargo run --release --all-features --example create_address`
 
 use iota_sdk::wallet::{Result, Wallet};
 

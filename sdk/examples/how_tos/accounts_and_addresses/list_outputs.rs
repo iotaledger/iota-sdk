@@ -3,7 +3,7 @@
 
 //! In this example we will list all outputs of an account.
 //!
-//! `cargo run --example list_outputs --release --features="rocksdb stronghold"`
+//! `cargo run --release --all-features --example list_outputs`
 
 use std::println;
 
