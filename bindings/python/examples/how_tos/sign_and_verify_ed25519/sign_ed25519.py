@@ -1,7 +1,6 @@
 from iota_sdk import Client, StrongholdSecretManager, SecretManager, HD_WALLET_TYPE, CoinType, Utils, utf8_to_hex
 from dotenv import load_dotenv
 import os
-import sys
 
 load_dotenv()
 
@@ -13,12 +12,10 @@ INTERNAL_ADDRESS = False
 ADDRESS_INDEX = 0
 
 if 'NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1' not in os.environ:
-    print(".env mnemonic is undefined, see .env.example")
-    sys.exit(1)
+    raise Exception(".env mnemonic is undefined, see .env.example")
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
-    print(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
-    sys.exit(1)
+    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 secret_manager = SecretManager(StrongholdSecretManager(
     "sign_ed25519.stronghold", os.environ['STRONGHOLD_PASSWORD']))

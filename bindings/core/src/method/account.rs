@@ -9,11 +9,11 @@ use iota_sdk::{
 };
 use iota_sdk::{
     client::{
-        api::{PreparedTransactionDataDto, SignedTransactionDataDto},
+        api::{input_selection::BurnDto, PreparedTransactionDataDto, SignedTransactionDataDto},
         secret::GenerateAddressOptions,
     },
     types::block::{
-        output::{dto::OutputDto, AliasId, FoundryId, NftId, OutputId, TokenId},
+        output::{dto::OutputDto, OutputId, TokenId},
         payload::transaction::TransactionId,
     },
     wallet::{
@@ -31,25 +31,15 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 pub enum AccountMethod {
-    /// Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
-    /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
-    /// recommended to use melting, if the foundry output is available.
+    /// A generic `burn()` function that can be used to burn native tokens, nfts, foundries and aliases.
+    ///
+    /// Note that burning **native tokens** doesn't require the foundry output which minted them, but will not
+    /// increase the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output.
+    /// Therefore it's recommended to use melting, if the foundry output is available.
+    ///
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    BurnNativeToken {
-        /// Native token id
-        token_id: TokenId,
-        /// To be burned amount
-        burn_amount: U256,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
-    /// deposit return, timelock or expiration unlock condition. This should be preferred over burning, because after
-    /// burning, the foundry can never be destroyed anymore.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    BurnNft {
-        nft_id: NftId,
+    Burn {
+        burn: BurnDto,
         options: Option<TransactionOptionsDto>,
     },
     /// Consolidate outputs.
@@ -64,23 +54,6 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     CreateAliasOutput {
         params: Option<CreateAliasParamsDto>,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
-    /// storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
-    /// sent to the governor address.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    DestroyAlias {
-        alias_id: AliasId,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Function to destroy a foundry output with a circulating supply of 0.
-    /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    DestroyFoundry {
-        foundry_id: FoundryId,
         options: Option<TransactionOptionsDto>,
     },
     /// Generate new unused addresses.
