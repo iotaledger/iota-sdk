@@ -6,6 +6,8 @@
 use iota_stronghold::KeyProvider;
 use zeroize::Zeroize;
 
+use crate::client::secret::types::Password;
+
 /// Stronghold vault path to secrets.
 ///
 /// The value has been hard-coded historically.
@@ -30,7 +32,7 @@ const PBKDF_SALT: &[u8] = b"wallet.rs";
 const PBKDF_ITER: core::num::NonZeroU32 = unsafe { core::num::NonZeroU32::new_unchecked(100) };
 
 /// Hash a password, deriving a key, for accessing Stronghold.
-pub(super) fn key_provider_from_password(password: &str) -> KeyProvider {
+pub(super) fn key_provider_from_password(password: Password) -> KeyProvider {
     let mut buffer = [0u8; 64];
 
     crypto::keys::pbkdf::PBKDF2_HMAC_SHA512(password.as_bytes(), PBKDF_SALT, PBKDF_ITER, buffer.as_mut());

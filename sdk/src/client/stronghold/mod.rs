@@ -68,6 +68,7 @@ use zeroize::Zeroizing;
 
 use self::common::PRIVATE_DATA_CLIENT_PATH;
 pub use self::error::Error;
+use super::secret::types::Password;
 use crate::client::storage::StorageProvider;
 
 /// A wrapper on [Stronghold].
@@ -142,9 +143,9 @@ fn check_or_create_snapshot(
 /// Extra / custom builder method implementations.
 impl StrongholdAdapterBuilder {
     /// Use an user-input password string to derive a key to use Stronghold.
-    pub fn password(mut self, password: &str) -> Self {
+    pub fn password(mut self, password: impl Into<Password>) -> Self {
         // Note that derive_builder always adds another layer of Option<T>.
-        self.key_provider = Some(self::common::key_provider_from_password(password));
+        self.key_provider = Some(self::common::key_provider_from_password(password.into()));
 
         self
     }
@@ -229,10 +230,10 @@ impl StrongholdAdapter {
     /// `password` after `timeout` (if set).
     /// It will also try to load a snapshot to check if the provided password is correct, if not it's cleared and an
     /// error will be returned.
-    pub async fn set_password(&self, password: &str) -> Result<(), Error> {
+    pub async fn set_password(&self, password: impl Into<Password> + Send) -> Result<(), Error> {
         let mut key_provider_guard = self.key_provider.lock().await;
 
-        let key_provider = self::common::key_provider_from_password(password);
+        let key_provider = self::common::key_provider_from_password(password.into());
 
         if let Some(old_key_provider) = &*key_provider_guard {
             if old_key_provider.try_unlock()? != key_provider.try_unlock()? {
@@ -279,7 +280,7 @@ impl StrongholdAdapter {
     /// data, provide a list of keys in `keys_to_re_encrypt`, as we have no way to list and iterate over every
     /// key-value in the Stronghold store - we'll attempt on the ones provided instead. Set it to `None` to skip
     /// re-encryption.
-    pub async fn change_password(&self, new_password: &str) -> Result<(), Error> {
+    pub async fn change_password(&self, new_password: Password) -> Result<(), Error> {
         // Stop the key clearing task to prevent the key from being abruptly cleared (largely).
         if let Some(timeout_task) = self.timeout_task.lock().await.take() {
             timeout_task.abort();

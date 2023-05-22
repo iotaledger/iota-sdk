@@ -32,6 +32,25 @@ pub struct StrongholdDto {
     /// The path for the Stronghold file
     pub snapshot_path: String,
 }
+
+///
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, ZeroizeOnDrop)]
+#[cfg(feature = "stronghold")]
+#[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
+pub struct Password(String);
+
+impl Password {
+    pub fn as_bytes(&self) -> &[u8] {
+        self.0.as_bytes()
+    }
+}
+
+impl<T: AsRef<str>> From<T> for Password {
+    fn from(value: T) -> Self {
+        Self(value.as_ref().to_owned())
+    }
+}
+
 /// An account address.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
