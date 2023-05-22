@@ -635,7 +635,7 @@ export class Account {
      * List all incoming transactions of the account.
      * @returns The incoming transactions with their inputs.
      */
-    async incomingTransactions(): Promise<[string, Transaction][]> {
+    async incomingTransactions(): Promise<Transaction[]> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
