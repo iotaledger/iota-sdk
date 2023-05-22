@@ -266,7 +266,7 @@ mod tests {
             "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally",
         );
         let stronghold_adapter = StrongholdAdapter::builder()
-            .password("drowssap")
+            .password("drowssap".to_owned())
             .build(stronghold_path)
             .unwrap();
 
@@ -298,7 +298,7 @@ mod tests {
             "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally",
         );
         let stronghold_adapter = StrongholdAdapter::builder()
-            .password("drowssap")
+            .password("drowssap".to_owned())
             .build(stronghold_path)
             .unwrap();
 
@@ -317,7 +317,7 @@ mod tests {
                 .is_err()
         );
 
-        stronghold_adapter.set_password("drowssap").await.unwrap();
+        stronghold_adapter.set_password("drowssap".to_owned()).await.unwrap();
 
         // After setting the correct password it works again.
         let addresses = stronghold_adapter

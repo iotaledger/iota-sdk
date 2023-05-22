@@ -85,7 +85,7 @@ mod tests {
 
         let snapshot_path = "test_stronghold_db.stronghold";
         let stronghold = StrongholdAdapter::builder()
-            .password("drowssap")
+            .password("drowssap".to_owned())
             .build(snapshot_path)
             .unwrap();
 

@@ -33,8 +33,8 @@ pub struct StrongholdDto {
     pub snapshot_path: String,
 }
 
-///
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, ZeroizeOnDrop)]
+/// Represents the Stronghold password.
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, ZeroizeOnDrop, derive_more::From)]
 #[cfg(feature = "stronghold")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
 pub struct Password(String);
@@ -42,12 +42,6 @@ pub struct Password(String);
 impl Password {
     pub fn as_bytes(&self) -> &[u8] {
         self.0.as_bytes()
-    }
-}
-
-impl<T: AsRef<str>> From<T> for Password {
-    fn from(value: T) -> Self {
-        Self(value.as_ref().to_owned())
     }
 }
 

@@ -18,7 +18,7 @@ async fn check_existing_db() -> Result<()> {
     let wallet = Wallet::builder().with_storage_path(storage_path).finish().await?;
 
     // Test if setting stronghold password still works
-    wallet.set_stronghold_password("STRONGHOLD_PASSWORD").await?;
+    wallet.set_stronghold_password("STRONGHOLD_PASSWORD".to_owned()).await?;
 
     assert_eq!(wallet.get_accounts().await?.len(), 1);
 

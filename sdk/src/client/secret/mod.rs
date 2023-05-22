@@ -174,7 +174,7 @@ impl TryFrom<&SecretManagerDto> for SecretManager {
                 let mut builder = StrongholdSecretManager::builder();
 
                 if let Some(password) = &stronghold_dto.password {
-                    builder = builder.password(password);
+                    builder = builder.password(password.clone());
                 }
 
                 if let Some(timeout) = &stronghold_dto.timeout {
