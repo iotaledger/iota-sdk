@@ -203,7 +203,7 @@ impl FoundryOutputBuilder {
     ///
     pub fn finish_unverified(self) -> Result<FoundryOutput, Error> {
         if self.serial_number == 0 {
-            return Err(Error::InvalidZeroSerialNumber);
+            return Err(Error::InvalidFoundryZeroSerialNumber);
         }
 
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;

@@ -92,7 +92,7 @@ pub enum Error {
     InvalidUnlockNft(u16),
     InvalidUnlockConditionCount(<UnlockConditionCount as TryFrom<usize>>::Error),
     InvalidUnlockConditionKind(u8),
-    InvalidZeroSerialNumber,
+    InvalidFoundryZeroSerialNumber,
     MigratedFundsNotSorted,
     MilestoneInvalidSignatureCount(<SignatureCount as TryFrom<usize>>::Error),
     MilestonePublicKeysSignaturesCountMismatch { key_count: usize, sig_count: usize },
@@ -257,7 +257,7 @@ impl fmt::Display for Error {
             }
             Self::InvalidUnlockConditionCount(count) => write!(f, "invalid unlock condition count: {count}"),
             Self::InvalidUnlockConditionKind(k) => write!(f, "invalid unlock condition kind: {k}"),
-            Self::InvalidZeroSerialNumber => write!(f, "invalid zero serial number"),
+            Self::InvalidFoundryZeroSerialNumber => write!(f, "invalid foundry zero serial number"),
             Self::MigratedFundsNotSorted => {
                 write!(f, "migrated funds are not sorted")
             }

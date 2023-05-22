@@ -71,7 +71,7 @@ fn verify_amount<const VERIFY: bool>(amount: &U256, _: &()) -> Result<(), Error>
 /// A builder for [`NativeTokens`].
 #[derive(Clone, Default, Debug, Deref, DerefMut, From)]
 #[must_use]
-pub struct NativeTokensBuilder(pub(crate) BTreeMap<TokenId, U256>);
+pub struct NativeTokensBuilder(BTreeMap<TokenId, U256>);
 
 impl NativeTokensBuilder {
     /// Creates a new [`NativeTokensBuilder`].

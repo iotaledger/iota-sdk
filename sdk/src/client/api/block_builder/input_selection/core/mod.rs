@@ -7,6 +7,7 @@ pub(crate) mod remainder;
 pub(crate) mod requirement;
 pub(crate) mod transition;
 
+use core::ops::Deref;
 use std::collections::{HashMap, HashSet};
 
 use packable::PackableExt;
@@ -498,8 +499,8 @@ impl InputSelection {
                         if let Err(err) = FoundryOutput::transition_inner(
                             foundry_input.output.as_foundry(),
                             foundry_output,
-                            &input_native_tokens_builder.0,
-                            &output_native_tokens_builder.0,
+                            input_native_tokens_builder.deref(),
+                            output_native_tokens_builder.deref(),
                         ) {
                             log::debug!("validate_transitions error {err:?}");
                             return Err(Error::UnfulfillableRequirement(Requirement::Foundry(
