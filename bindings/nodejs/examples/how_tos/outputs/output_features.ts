@@ -43,7 +43,9 @@ async function run() {
         const nftOutputWithIssuer = await client.buildNftOutput({
             nftId: '0x0000000000000000000000000000000000000000000000000000000000000000',
             unlockConditions: [addressUnlockCondition],
-            immutableFeatures: [new IssuerFeature(new Ed25519Address(hexAddress))],
+            immutableFeatures: [
+                new IssuerFeature(new Ed25519Address(hexAddress)),
+            ],
         });
 
         // Output with metadata feature
@@ -74,8 +76,19 @@ async function run() {
             features: [new TagFeature('0x48656c6c6f2c20576f726c6421')],
         });
 
-        console.log(JSON.stringify(
-            [nftOutputWithSender, nftOutputWithIssuer, nftOutputWithMetadata, nftOutputWithImmutableMetadata, nftOutputWithTag], null, 2));
+        console.log(
+            JSON.stringify(
+                [
+                    nftOutputWithSender,
+                    nftOutputWithIssuer,
+                    nftOutputWithMetadata,
+                    nftOutputWithImmutableMetadata,
+                    nftOutputWithTag,
+                ],
+                null,
+                2,
+            ),
+        );
     } catch (error) {
         console.error('Error: ', error);
     }

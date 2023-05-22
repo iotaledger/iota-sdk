@@ -75,7 +75,7 @@ async function run() {
                     1,
                 ),
             ],
-        })
+        });
 
         // Output with governor and state controller unlock condition
         const aliasOutput = await client.buildAliasOutput({
@@ -102,8 +102,20 @@ async function run() {
             ],
         });
 
-        console.log(JSON.stringify(
-            [basicOutput, basicOutputWithStorageReturn, basicOutputWithTimelock, basicOutputWithExpiration, aliasOutput, foundryOutput], null, 2));
+        console.log(
+            JSON.stringify(
+                [
+                    basicOutput,
+                    basicOutputWithStorageReturn,
+                    basicOutputWithTimelock,
+                    basicOutputWithExpiration,
+                    aliasOutput,
+                    foundryOutput,
+                ],
+                null,
+                2,
+            ),
+        );
     } catch (error) {
         console.error('Error: ', error);
     }
