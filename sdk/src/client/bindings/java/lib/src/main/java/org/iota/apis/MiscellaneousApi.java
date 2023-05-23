@@ -8,7 +8,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.*;
 
 import org.iota.types.*;
-import org.iota.types.Segment;
 import org.iota.types.addresses.Ed25519Address;
 import org.iota.types.exceptions.ClientException;
 import org.iota.types.exceptions.InitializeClientException;
@@ -203,11 +202,17 @@ public class MiscellaneousApi {
         return new ProtocolParametersResponse(responsePayload);
     }
 
-    public Ed25519Signature signEd25519(SecretManager secretManager, String message, Segment[] chain) throws ClientException {
+    public Ed25519Signature signEd25519(SecretManager secretManager, String message, Long[] chain)
+            throws ClientException {
+        JsonArray arr = new JsonArray();
+        for (Long s : chain) {
+            arr.add(s + Integer.MAX_VALUE + 1); // hardened chain flag
+        }
+
         JsonObject o = new JsonObject();
         o.add("secretManager", secretManager.getJson());
         o.addProperty("message", message);
-        o.add("chain", new Gson().toJsonTree(chain));
+        o.add("chain", arr);
 
         JsonObject responsePayload = (JsonObject) nativeApi.sendCommand(new ClientCommand("signEd25519", o));
 
