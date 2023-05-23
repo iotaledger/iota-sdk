@@ -1,8 +1,8 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from iota_sdk.types.common import HexStr
 from enum import Enum
-
 
 class FeatureType(Enum):
     Sender = 0
@@ -73,24 +73,24 @@ class IssuerFeature(Feature):
 
 
 class MetadataFeature(Feature):
-    def __init__(self, data):
+    def __init__(self, data: HexStr):
         """Initialize a MetadataFeature
 
         Parameters
         ----------
-        data : string
+        data : HexStr
             Hex encoded metadata
         """
         super().__init__(FeatureType.Metadata, data=data)
 
 
 class TagFeature(Feature):
-    def __init__(self, tag):
+    def __init__(self, tag: HexStr):
         """Initialize a TagFeature
 
         Parameters
         ----------
-        tag : string
+        tag : HexStr
             Hex encoded tag used to index the output
         """
         super().__init__(FeatureType.Tag, tag=tag)

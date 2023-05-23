@@ -1,14 +1,12 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-class OutputId():
-    def __init__(self, transaction_id: str, output_index: int):
-        """Initialize OutputId
+from iota_sdk.types.common import HexStr
 
-        Parameters
-        ----------
-        transaction_id : string
-        output_index : int
+
+class OutputId():
+    def __init__(self, transaction_id: HexStr, output_index: int):
+        """Initialize OutputId
         """
         if len(transaction_id) != 66:
             raise ValueError(
@@ -25,7 +23,7 @@ class OutputId():
         self.output_index = output_index
 
     @classmethod
-    def from_string(cls, output_id: str):
+    def from_string(cls, output_id: HexStr):
         obj = cls.__new__(cls)
         super(OutputId, obj).__init__()
         if len(output_id) != 70:
@@ -36,7 +34,7 @@ class OutputId():
         # Validate that it has only valid hex characters
         int(output_id[2:], 16)
         obj.output_id = output_id
-        obj.transaction_id = output_id[:66]
+        obj.transaction_id = HexStr(output_id[:66])
         obj.output_index = int.from_bytes(
             bytes.fromhex(output_id[66:]), 'little')
         return obj
