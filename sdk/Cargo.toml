@@ -73,6 +73,7 @@ iota-sdk = { path = ".", default-features = false, features = [ "rand" ] }
 
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
+tokio = { version = "1.27.0", default-features = false, features = [ "macros", "rt-multi-thread", "time", "sync", "fs" ] }
 
 [features]
 default = [ "client", "wallet", "tls" ]
