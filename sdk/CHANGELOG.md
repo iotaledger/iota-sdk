@@ -68,6 +68,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `AccountInner::incoming_transactions` returns a `Vec` instead of a `HashMap`;
 - `Address::try_from_bech32_with_hrp` refactored to `try_from_bech32`;
 - `{MetadataFeature, TagFeature}::new` take an `impl Into<Vec<u8>>` param;
+- `GetAddressesBuilderOptions` renamed to `GetAddressesOptions` and fields no longer nullable;
+- Methods on `GetAddressesBuilder` moved to `SecretManager`;
 
 ### Removed
 
@@ -77,6 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `HARDENED` const;
 - `AliasIdDto`, `NftIdDto` and `TokenIdDto`;
 - `U256Dto`, `SendAmountParamsDto`, `AddressWithUnspentOutputsDto`, `RequiredStorageDepositDto` and `BaseCoinBalanceDto`;
+- `GetAddressesBuilder`;
 
 ### Fixed
 
