@@ -11,7 +11,7 @@ use iota_sdk::{
     },
     types::block::{
         output::{dto::OutputDto, Output, Rent},
-        Error,
+        Error, address::Bech32Address,
     },
     wallet::{
         account::{
@@ -46,7 +46,8 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::Ok
         }
         AccountMethod::GenerateAddresses { amount, options } => {
-            let address: Vec<iota_sdk::wallet::account::types::AccountAddress> = account.generate_addresses(amount, options).await?;
+            let address: Vec<iota_sdk::wallet::account::types::AccountAddress> =
+                account.generate_addresses(amount, options).await?;
             Response::GeneratedAddress(address)
         }
         AccountMethod::GetBalance => Response::Balance(AccountBalanceDto::from(&account.balance().await?)),
@@ -295,7 +296,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::ParticipationEvents(events)
         }
         AccountMethod::RequestFundsFromFaucet { url, address } => {
-            Response::Faucet(iota_sdk::client::request_funds_from_faucet(&url, &address).await?)
+            Response::Faucet(iota_sdk::client::request_funds_from_faucet(&url, &Bech32Address::try_from_str(address)?).await?)
         }
         AccountMethod::RetryTransactionUntilIncluded {
             transaction_id,

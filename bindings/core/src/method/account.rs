@@ -167,21 +167,28 @@ pub enum AccountMethod {
         melt_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
-    /// Mint more native token.
+    /// Reduces an account's "voting power" by a given amount.
+    /// This will stop voting, but the voting data isn't lost and calling `Vote` without parameters will revote.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[cfg(feature = "participation")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    PrepareDecreaseVotingPower { amount: String },
+    /// Designates a given amount of tokens towards an account's "voting power" by creating a
+    /// special output, which is really a basic one with some metadata.
+    /// This will stop voting in most cases (if there is a remainder output), but the voting data isn't lost and
+    /// calling `Vote` without parameters will revote. Expected response:
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[cfg(feature = "participation")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    PrepareIncreaseVotingPower { amount: String },
+    /// Mint more native token.
+    /// Expected response: [`PreparedMintTokenTransaction`](crate::Response::PreparedMintTokenTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareIncreaseNativeTokenSupply {
         /// Native token id
         token_id: TokenId,
         /// To be minted amount
         mint_amount: U256,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Prepare to Mint native token.
-    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
-    PrepareMintNativeToken {
-        params: MintNativeTokenParamsDto,
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare to Mint nft.
@@ -191,12 +198,26 @@ pub enum AccountMethod {
         params: Vec<MintNftParamsDto>,
         options: Option<TransactionOptionsDto>,
     },
+    /// Prepare to Mint native token.
+    /// Expected response: [`PreparedMintTokenTransaction`](crate::Response::PreparedMintTokenTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareMintNativeToken {
+        params: MintNativeTokenParamsDto,
+        options: Option<TransactionOptionsDto>,
+    },
     /// Prepare an output.
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
         params: Box<OutputParamsDto>,
         transaction_options: Option<TransactionOptionsDto>,
+    },
+    /// Prepare send amount.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareSendAmount {
+        params: Vec<SendAmountParams>,
+        options: Option<TransactionOptionsDto>,
     },
     /// Prepare to Send native tokens.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
@@ -212,17 +233,16 @@ pub enum AccountMethod {
         params: Vec<SendNftParams>,
         options: Option<TransactionOptionsDto>,
     },
+    /// Stop participating for an event.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[cfg(feature = "participation")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    #[serde(rename_all = "camelCase")]
+    PrepareStopParticipating { event_id: ParticipationEventId },
     /// Prepare transaction.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareTransaction {
         outputs: Vec<OutputDto>,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Prepare send amount.
-    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
-    PrepareSendAmount {
-        params: Vec<SendAmountParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Vote for a participation event.
@@ -234,26 +254,6 @@ pub enum AccountMethod {
         event_id: Option<ParticipationEventId>,
         answers: Option<Vec<u8>>,
     },
-    /// Stop participating for an event.
-    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    #[serde(rename_all = "camelCase")]
-    PrepareStopParticipating { event_id: ParticipationEventId },
-    /// Designates a given amount of tokens towards an account's "voting power" by creating a
-    /// special output, which is really a basic one with some metadata.
-    /// This will stop voting in most cases (if there is a remainder output), but the voting data isn't lost and
-    /// calling `Vote` without parameters will revote. Expected response:
-    /// [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    PrepareIncreaseVotingPower { amount: String },
-    /// Reduces an account's "voting power" by a given amount.
-    /// This will stop voting, but the voting data isn't lost and calling `Vote` without parameters will revote.
-    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    PrepareDecreaseVotingPower { amount: String },
     /// Stores participation information locally and returns the event.
     ///
     /// This will NOT store the node url and auth inside the client options.

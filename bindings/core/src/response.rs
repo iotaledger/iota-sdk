@@ -43,7 +43,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            types::{AccountAddress, AccountBalanceDto, OutputDataDto, TransactionDto, AddressWithUnspentOutputs},
+            types::{AccountAddress, AccountBalanceDto, AddressWithUnspentOutputs, OutputDataDto, TransactionDto},
             PreparedMintTokenTransactionDto,
         },
         message_interface::dtos::AccountDetailsDto,
@@ -266,6 +266,8 @@ pub enum Response {
     /// - [`Backup`](crate::method::WalletMethod::Backup),
     /// - [`ClearStrongholdPassword`](crate::method::WalletMethod::ClearStrongholdPassword),
     /// - [`DeregisterParticipationEvent`](crate::method::AccountMethod::DeregisterParticipationEvent),
+    /// - [`SetAlias`](crate::method::AccountMethod::SetAlias),
+    /// - [`SetDefaultSyncOptions`](crate::method::AccountMethod::SetDefaultSyncOptions),
     /// - [`RestoreBackup`](crate::method::WalletMethod::RestoreBackup),
     /// - [`SetClientOptions`](crate::method::WalletMethod::SetClientOptions),
     /// - [`SetStrongholdPassword`](crate::method::WalletMethod::SetStrongholdPassword),
@@ -309,20 +311,22 @@ pub enum Response {
     /// - [`UnspentOutputs`](crate::method::AccountMethod::UnspentOutputs)
     OutputsData(Vec<OutputDataDto>),
     /// Response for    
-    /// [`PrepareSendAmount`](crate::method::AccountMethod::PrepareSendAmount),
-    /// [`PrepareTransaction`](crate::method::AccountMethod::PrepareTransaction)
-    /// [`PrepareCreateAliasOutput`](crate::method::AccountMethod::PrepareCreateAliasOutput)
+    /// [`PrepareBurn`](crate::method::AccountMethod::PrepareBurn),
     /// [`PrepareConsolidateOutputs`](crate::method::AccountMethod::PrepareConsolidateOutputs)
+    /// [`PrepareCreateAliasOutput`](crate::method::AccountMethod::PrepareCreateAliasOutput)
+    /// [`PrepareDecreaseNativeTokenSupply`](crate::method::AccountMethod::PrepareDecreaseNativeTokenSupply)
+    /// [`PrepareDecreaseVotingPower`](crate::method::AccountMethod::PrepareDecreaseVotingPower)
+    /// [`PrepareIncreaseVotingPower`](crate::method::AccountMethod::PrepareIncreaseVotingPower)
     /// [`PrepareMintNfts`](crate::method::AccountMethod::PrepareMintNfts),
+    /// [`PrepareSendAmount`](crate::method::AccountMethod::PrepareSendAmount),
     /// [`PrepareSendNativeTokens`](crate::method::AccountMethod::PrepareSendNativeTokens),
     /// [`PrepareSendNft`](crate::method::AccountMethod::PrepareSendNft),
-    /// [`PrepareSendAmount`](crate::method::AccountMethod::PrepareSendAmount),
-    /// [`PrepareVote`](crate::method::AccountMethod::PrepareVote)
     /// [`PrepareStopParticipating`](crate::method::AccountMethod::PrepareStopParticipating)
-    /// [`PrepareIncreaseVotingPower`](crate::method::AccountMethod::PrepareIncreaseVotingPower)
-    /// [`PrepareDecreaseVotingPower`](crate::method::AccountMethod::PrepareDecreaseVotingPower)
+    /// [`PrepareTransaction`](crate::method::AccountMethod::PrepareTransaction)
+    /// [`PrepareVote`](crate::method::AccountMethod::PrepareVote)
     PreparedTransaction(PreparedTransactionDataDto),
     /// Response for
+    /// - [`PrepareIncreaseNativeTokenSupply`](crate::method::AccountMethod::PrepareIncreaseNativeTokenSupply),
     /// - [`PrepareMintNativeToken`](crate::method::AccountMethod::PrepareMintNativeToken),
     PreparedMintTokenTransaction(PreparedMintTokenTransactionDto),
     /// Response for
@@ -336,7 +340,6 @@ pub enum Response {
     Transactions(Vec<TransactionDto>),
     /// Response for
     /// - [`SignTransactionEssence`](crate::method::AccountMethod::SignTransactionEssence)
-    /// - [`SubmitAndStoreTransaction`](crate::method::AccountMethod::SubmitAndStoreTransaction)
     SignedTransactionData(SignedTransactionDataDto),
     /// GenerateAddress response.
     /// Response for [`GenerateAddresses`](crate::method::AccountMethod::GenerateAddresses)
@@ -347,12 +350,13 @@ pub enum Response {
     Balance(AccountBalanceDto),
     /// Response for
     /// - [`ClaimOutputs`](crate::method::AccountMethod::ClaimOutputs)
-    /// - [`SendAmount`](crate::method::AccountMethod::SendAmount),
+    /// - [`SendAmount`](crate::method::AccountMethod::SendAmount)
+    /// - [`SendOutputs`](crate::method::AccountMethod::SendOutputs)
+    /// - [`SignAndSubmitTransaction`](crate::method::AccountMethod::SignAndSubmitTransaction)
     /// - [`SubmitAndStoreTransaction`](crate::method::AccountMethod::SubmitAndStoreTransaction)
     SentTransaction(TransactionDto),
     /// Response for
     /// - [`GetParticipationEvent`](crate::method::AccountMethod::GetParticipationEvent)
-    /// - [`RegisterParticipationEvents`](crate::method::AccountMethod::RegisterParticipationEvents)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     ParticipationEvent(Option<ParticipationEventWithNodes>),
@@ -368,6 +372,7 @@ pub enum Response {
     ParticipationEventStatus(ParticipationEventStatus),
     /// Response for
     /// - [`GetParticipationEvents`](crate::method::AccountMethod::GetParticipationEvents)
+    /// - [`RegisterParticipationEvents`](crate::method::AccountMethod::RegisterParticipationEvents)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     ParticipationEvents(HashMap<ParticipationEventId, ParticipationEventWithNodes>),
