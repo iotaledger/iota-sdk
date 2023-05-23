@@ -2,6 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from enum import IntEnum
+from typing import NewType
+
+HexStr = NewType("HexStr", str)
 
 HD_WALLET_TYPE = 44
 

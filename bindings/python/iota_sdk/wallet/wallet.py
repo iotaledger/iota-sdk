@@ -2,33 +2,35 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk import destroy_wallet, create_wallet, listen_wallet, get_client_from_wallet, Client
+from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager
 from iota_sdk.wallet.account import Account, _call_method_routine
 from json import dumps
+from typing import Any, Dict, List, Optional, Union
 
 
 class Wallet():
-    def __init__(self, storage_path='./walletdb', client_options=None, coin_type=None, secret_manager=None):
+    def __init__(self, storage_path: Optional[str] = None, client_options: Optional[Dict[str, Any]] = None, coin_type: Optional[int] = None, secret_manager: Optional[LedgerNanoSecretManager | MnemonicSecretManager | StrongholdSecretManager] = None):
         """Initialize the IOTA Wallet.
         """
 
         # Setup the options
-        options = {'storagePath': storage_path}
+        options: Dict[str, Any] = {'storagePath': storage_path}
         if client_options:
             options['clientOptions'] = client_options
         if coin_type:
-            options['coinType'] = int(coin_type)
+            options['coinType'] = coin_type
         if secret_manager:
             options['secretManager'] = secret_manager
 
-        options = dumps(options)
+        options_str: str = dumps(options)
 
         # Create the message handler
-        self.handle = create_wallet(options)
+        self.handle = create_wallet(options_str)
 
     def get_handle(self):
         return self.handle
 
-    def create_account(self, alias=None, bech32_hrp=None):
+    def create_account(self, alias: Optional[str] = None, bech32_hrp: Optional[str] = None):
         """Create a new account
         """
         return self._call_method(
@@ -38,7 +40,7 @@ class Wallet():
             }
         )
 
-    def get_account(self, account_id):
+    def get_account(self, account_id: Union[str, int]) -> Account:
         """Get the account instance
         """
         return Account(account_id, self.handle)
@@ -49,7 +51,7 @@ class Wallet():
         return Client(client_handle=get_client_from_wallet(self.handle))
 
     @_call_method_routine
-    def _call_method(self, name, data=None):
+    def _call_method(self, name: str, data=None) -> Dict[str, str]:
         message = {
             'name': name
         }
@@ -57,7 +59,7 @@ class Wallet():
             message['data'] = data
         return message
 
-    def get_account_data(self, account_id):
+    def get_account_data(self, account_id: Union[str, int]):
         """Get account data
         """
         return self._call_method(
@@ -73,7 +75,7 @@ class Wallet():
             'getAccounts',
         )
 
-    def backup(self, destination, password):
+    def backup(self, destination: str, password: str):
         """Backup storage.
         """
         return self._call_method(
@@ -83,16 +85,7 @@ class Wallet():
             }
         )
 
-    def bech32_to_hex(self, bech32_address):
-        """Transforms a bech32 encoded address to hex
-        """
-        return self._call_method(
-            'bech32ToHex', {
-                'bech32Address': bech32_address,
-            }
-        )
-
-    def change_stronghold_password(self, password):
+    def change_stronghold_password(self, password: str):
         """Change stronghold password.
         """
         return self._call_method(
@@ -116,7 +109,7 @@ class Wallet():
             'isStrongholdPasswordAvailable'
         )
 
-    def recover_accounts(self, account_start_index, account_gap_limit, address_gap_limit, sync_options):
+    def recover_accounts(self, account_start_index: int, account_gap_limit: int, address_gap_limit: int, sync_options: Optional[Any] = None):
         """Recover accounts.
         """
         return self._call_method(
@@ -135,7 +128,7 @@ class Wallet():
             'removeLatestAccount'
         )
 
-    def restore_backup(self, source, password):
+    def restore_backup(self, source: str, password: str):
         """Restore a backup from a Stronghold file
            Replaces client_options, coin_type, secret_manager and accounts. Returns an error if accounts were already created
            If Stronghold is used as secret_manager, the existing Stronghold file will be overwritten. If a mnemonic was
@@ -148,14 +141,14 @@ class Wallet():
             }
         )
 
-    def generate_mnemonic(self):
+    def generate_mnemonic(self) -> str:
         """Generates a new mnemonic.
         """
         return self._call_method(
             'generateMnemonic'
         )
 
-    def verify_mnemonic(self, mnemonic):
+    def verify_mnemonic(self, mnemonic: str):
         """Checks if the given mnemonic is valid.
         """
         return self._call_method(
@@ -174,7 +167,7 @@ class Wallet():
             }
         )
 
-    def generate_address(self, account_index, internal, address_index, options=None, bech32_hrp=None):
+    def generate_address(self, account_index: int, internal: bool, address_index: int, options=None, bech32_hrp: Optional[str] = None):
         """Generate an address without storing it.
         """
         return self._call_method(
@@ -187,7 +180,7 @@ class Wallet():
             }
         )
 
-    def get_node_info(self, url, auth):
+    def get_node_info(self, url: str, auth):
         """Get node info.
         """
         return self._call_method(
@@ -197,7 +190,7 @@ class Wallet():
             }
         )
 
-    def set_stronghold_password(self, password):
+    def set_stronghold_password(self, password: str):
         """Set stronghold password.
         """
         return self._call_method(
@@ -207,7 +200,7 @@ class Wallet():
 
         )
 
-    def set_stronghold_password_clear_interval(self, interval_in_milliseconds):
+    def set_stronghold_password_clear_interval(self, interval_in_milliseconds: int):
         """Set stronghold password clear interval.
         """
         return self._call_method(
@@ -216,7 +209,7 @@ class Wallet():
             }
         )
 
-    def store_mnemonic(self, mnemonic):
+    def store_mnemonic(self, mnemonic: str):
         """Store mnemonic.
         """
         return self._call_method(
@@ -226,7 +219,7 @@ class Wallet():
 
         )
 
-    def start_background_sync(self, options, interval_in_milliseconds):
+    def start_background_sync(self, options, interval_in_milliseconds: int):
         """Start background sync.
         """
         return self._call_method(
@@ -243,14 +236,14 @@ class Wallet():
             'stopBackgroundSync',
         )
 
-    def listen(self, handler, events=None):
+    def listen(self, handler, events: Optional[List[str]] = None):
         """Listen to wallet events, empty array or None will listen to all events
            The default value for events is None
         """
         events_array = [] if events is None else events
         listen_wallet(self.handle, events_array, handler)
 
-    def clear_listeners(self, events=None):
+    def clear_listeners(self, events: Optional[List[str]] = None):
         """Remove wallet event listeners, empty array or None will remove all listeners
            The default value for events is None
         """
