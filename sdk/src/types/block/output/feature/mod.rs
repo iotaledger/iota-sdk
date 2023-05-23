@@ -431,10 +431,10 @@ pub mod dto {
                 FeatureDto::Sender(v) => Self::Sender(SenderFeature::new((&v.address).try_into()?)),
                 FeatureDto::Issuer(v) => Self::Issuer(IssuerFeature::new((&v.address).try_into()?)),
                 FeatureDto::Metadata(v) => Self::Metadata(MetadataFeature::new(
-                    prefix_hex::decode(&v.data).map_err(|_e| Error::InvalidField("MetadataFeature"))?,
+                    prefix_hex::decode::<Vec<u8>>(&v.data).map_err(|_e| Error::InvalidField("MetadataFeature"))?,
                 )?),
                 FeatureDto::Tag(v) => Self::Tag(TagFeature::new(
-                    prefix_hex::decode(&v.tag).map_err(|_e| Error::InvalidField("TagFeature"))?,
+                    prefix_hex::decode::<Vec<u8>>(&v.tag).map_err(|_e| Error::InvalidField("TagFeature"))?,
                 )?),
             })
         }
