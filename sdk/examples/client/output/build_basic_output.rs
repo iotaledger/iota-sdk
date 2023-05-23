@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
         // with metadata feature block
         basic_output_builder
             .clone()
-            .add_feature(MetadataFeature::new("Hello, World!".as_bytes().to_owned())?)
+            .add_feature(MetadataFeature::new("Hello, World!")?)
             .finish_output(token_supply)?,
         // with storage deposit return
         basic_output_builder
