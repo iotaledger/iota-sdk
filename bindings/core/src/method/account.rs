@@ -80,9 +80,9 @@ pub enum AccountMethod {
     GetTransaction { transaction_id: TransactionId },
     /// Get the transaction with inputs of an incoming transaction stored in the account
     /// List might not be complete, if the node pruned the data already
-    /// Expected response: [`IncomingTransactionData`](crate::Response::IncomingTransactionData)
+    /// Expected response: [`Transaction`](crate::Response::Transaction)
     #[serde(rename_all = "camelCase")]
-    GetIncomingTransactionData { transaction_id: TransactionId },
+    GetIncomingTransaction { transaction_id: TransactionId },
     /// Expected response: [`Addresses`](crate::Response::Addresses)
     /// List addresses.
     Addresses,
@@ -100,7 +100,7 @@ pub enum AccountMethod {
     UnspentOutputs { filter_options: Option<FilterOptions> },
     /// Returns all incoming transactions of the account
     /// Expected response:
-    /// [`IncomingTransactionsData`](crate::Response::IncomingTransactionsData)
+    /// [`Transactions`](crate::Response::Transactions)
     IncomingTransactions,
     /// Returns all transaction of the account
     /// Expected response: [`Transactions`](crate::Response::Transactions)
@@ -154,7 +154,7 @@ pub enum AccountMethod {
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
-        params: OutputParamsDto,
+        params: Box<OutputParamsDto>,
         transaction_options: Option<TransactionOptionsDto>,
     },
     /// Prepare transaction.

@@ -21,7 +21,9 @@ impl MigrationData for Migrate {
 #[cfg(feature = "storage")]
 impl Migration<crate::wallet::storage::Storage> for Migrate {
     async fn migrate(storage: &crate::wallet::storage::Storage) -> Result<()> {
-        use crate::wallet::storage::constants::{ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY};
+        use crate::wallet::storage::constants::{
+            ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, WALLET_INDEXATION_KEY,
+        };
 
         if let Some(account_indexes) = storage.get::<Vec<u32>>(ACCOUNTS_INDEXATION_KEY).await? {
             for account_index in account_indexes {
@@ -50,6 +52,11 @@ impl Migration<crate::wallet::storage::Storage> for Migrate {
                 }
             }
         }
+
+        if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
+            ConvertHrp::check(&mut wallet["client_options"]["protocolParameters"]["bech32_hrp"])?;
+            storage.set(WALLET_INDEXATION_KEY, &wallet).await?;
+        }
         Ok(())
     }
 }
@@ -60,7 +67,7 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
     async fn migrate(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
         use crate::{
             client::storage::StorageAdapter,
-            wallet::wallet::operations::stronghold_backup::stronghold_snapshot::ACCOUNTS_KEY,
+            wallet::wallet::operations::stronghold_backup::stronghold_snapshot::{ACCOUNTS_KEY, CLIENT_OPTIONS_KEY},
         };
 
         if let Some(mut accounts) = storage.get::<Vec<serde_json::Value>>(ACCOUNTS_KEY).await? {
@@ -83,6 +90,10 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
             }
             storage.set(ACCOUNTS_KEY, &accounts).await?;
         }
+        if let Some(mut client_options) = storage.get::<serde_json::Value>(CLIENT_OPTIONS_KEY).await? {
+            ConvertHrp::check(&mut client_options["protocolParameters"]["bech32_hrp"])?;
+            storage.set(CLIENT_OPTIONS_KEY, &client_options).await?;
+        }
         storage.delete("backup_schema_version").await.ok();
         Ok(())
     }
@@ -103,7 +114,7 @@ trait Convert {
 }
 
 mod types {
-    use core::str::FromStr;
+    use core::{marker::PhantomData, str::FromStr};
 
     use serde::{Deserialize, Serialize};
 
@@ -298,6 +309,66 @@ mod types {
         Conflicting,
         UnknownPruned,
     }
+
+    pub struct Hrp {
+        inner: [u8; 83],
+        len: u8,
+    }
+
+    impl Hrp {
+        /// Convert a string to an Hrp without checking validity.
+        pub const fn from_str_unchecked(hrp: &str) -> Self {
+            let len = hrp.len();
+            let mut bytes = [0; 83];
+            let hrp = hrp.as_bytes();
+            let mut i = 0;
+            while i < len {
+                bytes[i] = hrp[i];
+                i += 1;
+            }
+            Self {
+                inner: bytes,
+                len: len as _,
+            }
+        }
+    }
+
+    impl FromStr for Hrp {
+        type Err = Error;
+
+        fn from_str(hrp: &str) -> Result<Self, Self::Err> {
+            let len = hrp.len();
+            if hrp.is_ascii() && len <= 83 {
+                let mut bytes = [0; 83];
+                bytes[..len].copy_from_slice(hrp.as_bytes());
+                Ok(Self {
+                    inner: bytes,
+                    len: len as _,
+                })
+            } else {
+                Err(Error::InvalidBech32Hrp(hrp.to_string()))
+            }
+        }
+    }
+
+    impl core::fmt::Display for Hrp {
+        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            let hrp_str = self.inner[..self.len as usize]
+                .iter()
+                .map(|b| *b as char)
+                .collect::<String>();
+            f.write_str(&hrp_str)
+        }
+    }
+
+    string_serde_impl!(Hrp);
+
+    #[derive(Serialize, Deserialize)]
+    #[repr(transparent)]
+    pub struct StringPrefix<B> {
+        pub inner: String,
+        bounded: PhantomData<B>,
+    }
 }
 
 struct ConvertIncomingTransactions;
@@ -355,5 +426,15 @@ impl Convert for ConvertOutputMetadata {
             milestone_timestamp_booked: old.milestone_timestamp_booked,
             ledger_index: old.ledger_index,
         })
+    }
+}
+
+struct ConvertHrp;
+impl Convert for ConvertHrp {
+    type New = types::Hrp;
+    type Old = types::StringPrefix<u8>;
+
+    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
+        Ok(Self::New::from_str_unchecked(&old.inner))
     }
 }

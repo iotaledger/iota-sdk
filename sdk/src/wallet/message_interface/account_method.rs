@@ -16,6 +16,7 @@ use crate::{
         secret::GenerateAddressOptions,
     },
     types::block::{
+        address::Bech32Address,
         output::{
             dto::{NativeTokenDto, OutputDto, TokenSchemeDto},
             feature::dto::FeatureDto,
@@ -180,9 +181,9 @@ pub enum AccountMethod {
     /// Get the transaction with inputs of an incoming transaction stored in the account
     /// List might not be complete, if the node pruned the data already
     /// Expected response:
-    /// [`IncomingTransactionData`](crate::wallet::message_interface::Response::IncomingTransactionData)
+    /// [`Transaction`](crate::wallet::message_interface::Response::Transaction)
     #[serde(rename_all = "camelCase")]
-    GetIncomingTransactionData { transaction_id: TransactionId },
+    GetIncomingTransaction { transaction_id: TransactionId },
     /// Expected response: [`Addresses`](crate::wallet::message_interface::Response::Addresses)
     /// List addresses.
     Addresses,
@@ -200,7 +201,7 @@ pub enum AccountMethod {
     UnspentOutputs { filter_options: Option<FilterOptions> },
     /// Returns all incoming transactions of the account
     /// Expected response:
-    /// [`IncomingTransactionsData`](crate::wallet::message_interface::Response::IncomingTransactionsData)
+    /// [`Transactions`](crate::wallet::message_interface::Response::Transactions)
     IncomingTransactions,
     /// Returns all transaction of the account
     /// Expected response: [`Transactions`](crate::wallet::message_interface::Response::Transactions)
@@ -254,7 +255,7 @@ pub enum AccountMethod {
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
-        params: OutputParamsDto,
+        params: Box<OutputParamsDto>,
         transaction_options: Option<TransactionOptionsDto>,
     },
     /// Prepare transaction.
@@ -417,5 +418,5 @@ pub enum AccountMethod {
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     GetParticipationEvents,
     /// Expected response: [`Faucet`](crate::wallet::message_interface::Response::Faucet)
-    RequestFundsFromFaucet { url: String, address: String },
+    RequestFundsFromFaucet { url: String, address: Bech32Address },
 }

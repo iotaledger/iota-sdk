@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 use iota_sdk::{
     types::block::{
-        address::Address,
+        address::{Address, Bech32Address},
         output::{NativeToken, NftId, TokenId},
     },
     wallet::{
@@ -33,7 +33,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500,
                 assets: None,
                 features: None,
@@ -52,7 +52,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500000,
                 assets: None,
                 features: None,
@@ -73,7 +73,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500000,
                 assets: Some(Assets {
                     native_tokens: Some(vec![native_token]),
@@ -94,7 +94,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 300000,
                 assets: None,
                 features: Some(Features {
@@ -119,7 +119,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 1,
                 assets: None,
                 features: Some(Features {
@@ -147,7 +147,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 12000,
                 assets: None,
                 features: Some(Features {
@@ -172,7 +172,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 1,
                 assets: None,
                 features: Some(Features {
@@ -201,7 +201,7 @@ async fn output_preparation() -> Result<()> {
     let error = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500000,
                 assets: Some(Assets {
                     native_tokens: None,
@@ -225,7 +225,7 @@ async fn output_preparation() -> Result<()> {
     if let Ok(output) = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500000,
                 assets: Some(Assets {
                     native_tokens: None,
@@ -248,17 +248,18 @@ async fn output_preparation() -> Result<()> {
     }
 
     let issuer_and_sender_address_bech32 =
-        String::from("rms1qq724zgvdujt3jdcd3xzsuqq7wl9pwq3dvsa5zvx49rj9tme8cat6qptyfm");
+        Bech32Address::try_from_str("rms1qq724zgvdujt3jdcd3xzsuqq7wl9pwq3dvsa5zvx49rj9tme8cat6qptyfm")?;
     // Roundtrip to get the correct bech32 HRP
-    let issuer_and_sender_address = Address::try_from_bech32(&issuer_and_sender_address_bech32)?
+    let issuer_and_sender_address = issuer_and_sender_address_bech32
+        .inner()
         .to_bech32(account.client().get_bech32_hrp().await?);
-    let expected_address = Address::try_from_bech32(&issuer_and_sender_address)?;
+    let expected_address = issuer_and_sender_address.inner();
 
     // sender address present when building basic output
     let output = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500000,
                 assets: Some(Assets {
                     native_tokens: Some(vec![native_token]),
@@ -268,7 +269,7 @@ async fn output_preparation() -> Result<()> {
                     metadata: None,
                     tag: None,
                     issuer: None,
-                    sender: Some(issuer_and_sender_address.clone()),
+                    sender: Some(issuer_and_sender_address),
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -282,19 +283,19 @@ async fn output_preparation() -> Result<()> {
     assert_eq!(output.unlock_conditions().unwrap().len(), 1);
     let features = output.features().unwrap();
     assert_eq!(features.len(), 1);
-    assert_eq!(features.sender().unwrap().address(), &expected_address);
+    assert_eq!(features.sender().unwrap().address(), expected_address);
 
     // error when adding issuer when building basic output
     let error = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500000,
                 assets: None,
                 features: Some(Features {
                     metadata: None,
                     tag: None,
-                    issuer: Some(issuer_and_sender_address.clone()),
+                    issuer: Some(issuer_and_sender_address),
                     sender: None,
                 }),
                 unlocks: None,
@@ -313,7 +314,7 @@ async fn output_preparation() -> Result<()> {
     let output = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500000,
                 assets: Some(Assets {
                     native_tokens: None,
@@ -324,8 +325,8 @@ async fn output_preparation() -> Result<()> {
                 features: Some(Features {
                     metadata: None,
                     tag: None,
-                    issuer: Some(issuer_and_sender_address.clone()),
-                    sender: Some(issuer_and_sender_address.clone()),
+                    issuer: Some(issuer_and_sender_address),
+                    sender: Some(issuer_and_sender_address),
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -341,17 +342,16 @@ async fn output_preparation() -> Result<()> {
     let immutable_features = output.immutable_features().unwrap();
     // issuer feature
     assert_eq!(immutable_features.len(), 1);
-    let issuer_and_sender_address = Address::try_from_bech32(&issuer_and_sender_address)?;
     let issuer_feature = immutable_features.issuer().unwrap();
-    assert_eq!(issuer_feature.address(), &issuer_and_sender_address);
+    assert_eq!(issuer_feature.address(), issuer_and_sender_address.inner());
     let sender_feature = features.sender().unwrap();
-    assert_eq!(sender_feature.address(), &issuer_and_sender_address);
+    assert_eq!(sender_feature.address(), issuer_and_sender_address.inner());
 
     // nft with expiration
     let output = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 500,
                 assets: Some(Assets {
                     native_tokens: None,
@@ -401,7 +401,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let output = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 8001,
                 assets: None,
                 features: None,
@@ -422,7 +422,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let output = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 42599,
                 assets: None,
                 features: None,
@@ -444,7 +444,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let output = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 42599,
                 assets: None,
                 features: None,
@@ -469,7 +469,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let output = account
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address.clone(),
+                recipient_address,
                 amount: 42599,
                 assets: None,
                 features: None,
@@ -500,14 +500,15 @@ async fn prepare_nft_output_features_update() -> Result<()> {
 
     let wallet = make_wallet(storage_path, None, None).await?;
     let accounts = &create_accounts_with_funds(&wallet, 1).await?;
-    let address = accounts[0].addresses().await?[0].address().to_string();
+    let addresses = accounts[0].addresses().await?;
+    let address = addresses[0].address();
 
     let nft_options = vec![MintNftParams {
-        address: Some(address.clone()),
-        sender: Some(address.clone()),
+        address: Some(*address),
+        sender: Some(*address),
         metadata: Some(b"some nft metadata".to_vec()),
         tag: Some(b"some nft tag".to_vec()),
-        issuer: Some(address.clone()),
+        issuer: Some(*address),
         immutable_metadata: Some(b"some immutable nft metadata".to_vec()),
     }];
 
@@ -521,7 +522,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     let nft = accounts[0]
         .prepare_output(
             OutputParams {
-                recipient_address: address,
+                recipient_address: *address,
                 amount: 1_000_000,
                 assets: Some(Assets {
                     native_tokens: None,

@@ -80,17 +80,12 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let transaction = account.get_transaction(&transaction_id).await;
             Response::Transaction(transaction.as_ref().map(TransactionDto::from).map(Box::new))
         }
-        AccountMethod::GetIncomingTransactionData { transaction_id } => {
-            let transaction = account.get_incoming_transaction_data(&transaction_id).await;
+        AccountMethod::GetIncomingTransaction { transaction_id } => {
+            let transaction = account.get_incoming_transaction(&transaction_id).await;
 
             transaction.map_or_else(
-                || Response::IncomingTransactionData(None),
-                |transaction| {
-                    Response::IncomingTransactionData(Some(Box::new((
-                        transaction_id,
-                        TransactionDto::from(&transaction),
-                    ))))
-                },
+                || Response::Transaction(None),
+                |transaction| Response::Transaction(Some(Box::new(TransactionDto::from(&transaction)))),
             )
         }
         AccountMethod::Addresses => {
@@ -110,20 +105,15 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect())
         }
         AccountMethod::IncomingTransactions => {
-            let transactions = account.incoming_transactions().await?;
-            Response::IncomingTransactionsData(
-                transactions
-                    .into_iter()
-                    .map(|d| (d.0, TransactionDto::from(&d.1)))
-                    .collect(),
-            )
+            let transactions = account.incoming_transactions().await;
+            Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
         }
         AccountMethod::Transactions => {
-            let transactions = account.transactions().await?;
+            let transactions = account.transactions().await;
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
         }
         AccountMethod::PendingTransactions => {
-            let transactions = account.pending_transactions().await?;
+            let transactions = account.pending_transactions().await;
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
         }
         AccountMethod::DecreaseNativeTokenSupply {
@@ -190,7 +180,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         } => {
             let output = account
                 .prepare_output(
-                    OutputParams::try_from(&options)?,
+                    OutputParams::try_from(options.as_ref())?,
                     transaction_options
                         .as_ref()
                         .map(TransactionOptions::try_from_dto)
