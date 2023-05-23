@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 class TokenScheme():
-    def __init__(self, minted_tokens=None, melted_tokens=None, , maximum_supply=None):
+    def __init__(self, minted_tokens=None, melted_tokens=None, maximum_supply=None):
         """Initialize TokenScheme
         
         Parameters
