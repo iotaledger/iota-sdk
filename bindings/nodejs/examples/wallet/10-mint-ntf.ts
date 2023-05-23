@@ -1,4 +1,4 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 import {
@@ -10,7 +10,7 @@ import {
     Utils,
 } from '@iota/sdk';
 
-import { getUnlockedManager } from './accounts';
+import { getUnlockedManager } from './account-manager';
 
 // The owner address of the first NFT we'll mint
 const NFT1_OWNER_ADDRESS =

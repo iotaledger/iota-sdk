@@ -1,7 +1,7 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { getUnlockedManager } from './accounts';
+import { getUnlockedManager } from './account-manager';
 
 // In this example we will burn an existing nft output.
 //

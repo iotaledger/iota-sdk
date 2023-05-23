@@ -1,7 +1,7 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { getUnlockedManager } from './accounts';
+import { getUnlockedManager } from './account-manager';
 
 // In this example we will try to destroy the first alias there is in the account. This is only possible if possible
 // foundry outputs have circulating supply of 0.

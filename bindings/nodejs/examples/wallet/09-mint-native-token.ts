@@ -1,9 +1,9 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 import { MintNativeTokenParams } from '@iota/sdk';
 
-import { getUnlockedManager } from './accounts';
+import { getUnlockedManager } from './account-manager';
 
 // The circulating supply of the native token. `100` hex encoded
 const CIRCULATING_SUPPLY = '0x64';

@@ -1,9 +1,9 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 import { SendNftParams } from '@iota/sdk';
 
-import { getUnlockedManager } from './accounts';
+import { getUnlockedManager } from './account-manager';
 
 // The address to send the tokens to
 const RECV_ADDRESS =
