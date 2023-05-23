@@ -425,6 +425,6 @@ impl Convert for ConvertSegment {
     type Old = types::Crypto_0_18_0_Segment;
 
     fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
-        Ok(u32::from_le_bytes(old.bs))
+        Ok(u32::from_be_bytes(old.bs))
     }
 }
