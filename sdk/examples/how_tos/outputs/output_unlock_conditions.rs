@@ -3,7 +3,7 @@
 
 //! In this example we will build outputs with all possible unlock conditions.
 //!
-//! `cargo run --example output_unlock_conditions --release`
+//! `cargo run --release --example output_unlock_conditions`
 
 use iota_sdk::{
     client::{Client, Result},

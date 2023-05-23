@@ -3,7 +3,7 @@
 
 //! In this example we will build NFT outputs with all possible features.
 //!
-//! `cargo run --example output_features --release`
+//! `cargo run --release --example output_features`
 
 use iota_sdk::{
     client::{Client, Result},
