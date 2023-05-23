@@ -19,6 +19,7 @@ use crate::{
         NodeInfoWrapper,
     },
     types::block::{
+        address::Bech32Address,
         output::{dto::OutputDto, OutputId},
         BlockId,
     },
@@ -162,7 +163,7 @@ pub enum Response {
     HexAddress(String),
     /// Response for [`HexToBech32`](crate::wallet::message_interface::Message::HexToBech32)
     /// Response for [`GenerateAddress`](crate::wallet::message_interface::Message::GenerateAddress)
-    Bech32Address(String),
+    Bech32Address(Bech32Address),
     /// Response for
     /// [`RequestFundsFromFaucet`](crate::wallet::message_interface::AccountMethod::RequestFundsFromFaucet)
     Faucet(String),

@@ -48,7 +48,7 @@ async fn nft_reference_unlocks() -> Result<()> {
         Nft(
             1_000_000,
             nft_id,
-            bech32_address_0,
+            &bech32_address_0.to_string(),
             None,
             None,
             None,
@@ -62,13 +62,50 @@ async fn nft_reference_unlocks() -> Result<()> {
                 0,
             ])),
         ),
-        Basic(1_000_000, nft_bech32_address, None, None, None, None, None, None),
-        Basic(1_000_000, nft_bech32_address, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            &nft_bech32_address.to_string(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            1_000_000,
+            &nft_bech32_address.to_string(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
 
     let outputs = build_outputs(vec![
-        Nft(1_000_000, nft_id, bech32_address_0, None, None, None, None, None, None),
-        Basic(2_000_000, nft_bech32_address, None, None, None, None, None, None),
+        Nft(
+            1_000_000,
+            nft_id,
+            &bech32_address_0.to_string(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            &nft_bech32_address.to_string(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
 
     let essence = TransactionEssence::Regular(

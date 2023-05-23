@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
         // Insert the output address and amount to spent. The amount cannot be zero.
         .with_output(
             // We generate an address from our own mnemonic so that we send the funds to ourselves
-            &client.get_addresses(&secret_manager).with_range(1..2).finish().await?[0],
+            client.get_addresses(&secret_manager).with_range(1..2).finish().await?[0],
             1_000_000,
         )
         .await?
