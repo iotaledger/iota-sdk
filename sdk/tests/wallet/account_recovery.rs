@@ -6,11 +6,7 @@
 use std::time::Duration;
 
 use iota_sdk::{
-    client::{
-        constants::SHIMMER_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        Client,
-    },
+    client::{constants::SHIMMER_COIN_TYPE, secret::SecretManager, Client},
     wallet::Result,
 };
 
@@ -65,7 +61,7 @@ async fn account_recovery_with_balance_and_empty_addresses() -> Result<()> {
         .finish()
         .await?;
 
-    let secret_manager = SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.clone())?);
+    let secret_manager = SecretManager::from(mnemonic.clone());
 
     let address = client
         .get_addresses(&secret_manager)

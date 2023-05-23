@@ -678,7 +678,7 @@ impl ClientMessageHandler {
                 Client::generate_mnemonic()?.as_str().to_owned(),
             )),
             Message::MnemonicToHexSeed { mnemonic } => Ok(Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(
-                &mnemonic.into(),
+                &mnemonic.try_into()?,
             ))),
             Message::BlockId { block } => {
                 let block = Block::try_from_dto_unverified(&block)?;

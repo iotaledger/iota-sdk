@@ -19,7 +19,7 @@ use super::{
 use crate::{
     client::{
         constants::HD_WALLET_TYPE,
-        secret::{GenerateAddressOptions, SecretManage, types::Mnemonic},
+        secret::{types::Mnemonic, GenerateAddressOptions, SecretManage},
         stronghold::Error,
     },
     types::block::{
@@ -141,7 +141,12 @@ impl SecretManage for StrongholdAdapter {
 /// Private methods for the secret manager implementation.
 impl StrongholdAdapter {
     /// Execute [Procedure::BIP39Recover] in Stronghold to put a mnemonic into the Stronghold vault.
-    async fn bip39_recover(&self, mnemonic: &Mnemonic, passphrase: Option<String>, output: Location) -> Result<(), Error> {
+    async fn bip39_recover(
+        &self,
+        mnemonic: &Mnemonic,
+        passphrase: Option<String>,
+        output: Location,
+    ) -> Result<(), Error> {
         self.stronghold
             .lock()
             .await
@@ -211,7 +216,16 @@ impl StrongholdAdapter {
     }
 
     /// Store a mnemonic into the Stronghold vault.
-    pub async fn store_mnemonic(&self, mnemonic: impl Into<Mnemonic> + Send) -> Result<(), Error> {
+    pub async fn store_mnemonic<T>(&self, mnemonic: T) -> Result<(), Error>
+    where
+        T: TryInto<Mnemonic, Error = crate::client::stronghold::Error> + Send,
+    {
+        self.store_mnemonic_t(mnemonic.try_into()?).await?;
+        Ok(())
+    }
+
+    /// Store a mnemonic into the Stronghold vault.
+    pub async fn store_mnemonic_t(&self, mnemonic: Mnemonic) -> Result<(), Error> {
         // The key needs to be supplied first.
         if self.key_provider.lock().await.is_none() {
             return Err(Error::KeyCleared);
@@ -232,7 +246,7 @@ impl StrongholdAdapter {
         }
 
         // Execute the BIP-39 recovery procedure to put it into the vault (in memory).
-        self.bip39_recover(&mnemonic.into(), None, output).await?;
+        self.bip39_recover(&mnemonic, None, output).await?;
 
         // Persist Stronghold to the disk
         self.write_stronghold_snapshot(None).await?;

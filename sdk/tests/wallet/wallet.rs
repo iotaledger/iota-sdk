@@ -11,7 +11,7 @@ use iota_sdk::{
 use iota_sdk::{
     client::{
         constants::IOTA_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager, types::Mnemonic},
+        secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     wallet::{ClientOptions, Result, Wallet},
 };
@@ -75,19 +75,17 @@ async fn different_seed() -> Result<()> {
 #[cfg(feature = "storage")]
 #[tokio::test]
 async fn changed_coin_type() -> Result<()> {
-    use iota_sdk::client::secret::types::Mnemonic;
-
     let storage_path = "test-storage/changed_coin_type";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, Some(Mnemonic::from(DEFAULT_MNEMONIC.to_owned())), None).await?;
+    let wallet = make_wallet(storage_path, Some(DEFAULT_MNEMONIC.to_owned().try_into()?), None).await?;
     let _account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
 
     drop(_account);
     drop(wallet);
 
     // Recreate Wallet with same mnemonic
-    let secret_manager2 = MnemonicSecretManager::try_from_mnemonic(Mnemonic::from(DEFAULT_MNEMONIC.to_owned()))?;
+    let secret_manager2 = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC.to_owned())?;
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager2))
         .with_coin_type(IOTA_COIN_TYPE)
@@ -114,7 +112,7 @@ async fn shimmer_coin_type() -> Result<()> {
     let storage_path = "test-storage/shimmer_coin_type";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, Some(Mnemonic::from(DEFAULT_MNEMONIC.to_owned())), None).await?;
+    let wallet = make_wallet(storage_path, Some(DEFAULT_MNEMONIC.to_owned().try_into()?), None).await?;
     let account = wallet.create_account().finish().await?;
 
     // Creating a new account with providing a coin type will use the Shimmer coin type with shimmer testnet bech32 hrp
@@ -133,7 +131,7 @@ async fn iota_coin_type() -> Result<()> {
     setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
-    let secret_manager = MnemonicSecretManager::try_from_mnemonic(Mnemonic::from(DEFAULT_MNEMONIC.to_owned()))?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC.to_owned())?;
 
     #[allow(unused_mut)]
     let mut wallet_builder = Wallet::builder()
@@ -165,7 +163,7 @@ async fn wallet_address_generation() -> Result<()> {
     setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
-    let secret_manager = MnemonicSecretManager::try_from_mnemonic(Mnemonic::from(DEFAULT_MNEMONIC.to_owned()))?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC.to_owned())?;
 
     #[allow(unused_mut)]
     let mut wallet_builder = Wallet::builder()

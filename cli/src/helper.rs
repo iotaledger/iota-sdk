@@ -158,15 +158,18 @@ pub async fn generate_mnemonic() -> Result<Mnemonic, Error> {
 }
 
 pub fn enter_mnemonic() -> Result<Mnemonic, Error> {
-    // loop {
-    let input = Input::<String>::new()
-        .with_prompt("Enter your mnemonic")
-        .interact_text()?;
+    loop {
+        let input = Input::<String>::new()
+            .with_prompt("Enter your mnemonic")
+            .interact_text()?;
 
-    Ok(Mnemonic::from(input))
-    // TODO: hande `try_from`
-    // println_log_error!("Invalid mnemonic. Please enter a bip-39 conform mnemonic.");
-    // }
+        match Mnemonic::try_from(input) {
+            Err(e) => {
+                println_log_error!("Invalid mnemonic: {e:?}\nPlease enter a bip-39 conform mnemonic.");
+            }
+            Ok(mnemonic) => return Ok(mnemonic),
+        }
+    }
 }
 
 pub async fn import_mnemonic(path: &str) -> Result<Mnemonic, Error> {
@@ -204,18 +207,17 @@ async fn read_mnemonics_from_file(path: &str) -> Result<Vec<Mnemonic>, Error> {
     let file = OpenOptions::new().read(true).open(path).await?;
     let mut lines = BufReader::new(file).lines();
     let mut mnemonics = Vec::new();
-    // let mut line_index = 1;
+    let mut line_index = 1;
     while let Some(line) = lines.next_line().await? {
-        // TODO: hande `try_from`
-        // if let Ok(mnemonic) = Mnemonic::from(line) {
-        //     mnemonics.push(mnemonic);
-        // } else {
-        //     return Err(Error::Miscellaneous(format!(
-        //         "Invalid mnemonic in file '{path}' at line '{line_index}'."
-        //     )));
-        // }
-        mnemonics.push(Mnemonic::from(line));
-        // line_index += 1;
+        match Mnemonic::try_from(line) {
+            Ok(mnemonic) => mnemonics.push(mnemonic),
+            Err(err) => {
+                return Err(Error::Miscellaneous(format!(
+                    "Invalid mnemonic in file '{path}' at line '{line_index}':\n{err:?}"
+                )));
+            }
+        }
+        line_index += 1;
     }
 
     Ok(mnemonics)

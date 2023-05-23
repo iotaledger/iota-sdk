@@ -45,29 +45,29 @@ impl Mnemonic {
     }
 }
 
-// TEMP
-#[allow(clippy::fallible_impl_from)]
-impl From<String> for Mnemonic {
-    fn from(mut value: String) -> Self {
+impl TryFrom<String> for Mnemonic {
+    type Error = crate::client::stronghold::Error;
+
+    fn try_from(mut value: String) -> std::result::Result<Self, Self::Error> {
         // trim because empty spaces could create a different seed https://github.com/iotaledger/crypto.rs/issues/125
         let trimmed = value.trim();
         // first we check if the mnemonic is valid to give meaningful errors
-        if let Err(err) = crypto::keys::bip39::wordlist::verify(trimmed, &crypto::keys::bip39::wordlist::ENGLISH)
-            .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))
-        {
+        if let Err(err) = crypto::keys::bip39::wordlist::verify(trimmed, &crypto::keys::bip39::wordlist::ENGLISH) {
             value.zeroize();
-            panic!("invalid mnemonic: {err}");
+            Err(crate::client::stronghold::Error::InvalidMnemonic(format!("{err:?}")))
+        } else {
+            let mnemonic = trimmed.to_string();
+            value.zeroize();
+            Ok(Self(mnemonic))
         }
-        let mnemonic = trimmed.to_string();
-        value.zeroize();
-        Self(mnemonic)
     }
 }
 
+// that's only necessary to use it in `assert!` macros
 impl core::fmt::Debug for Mnemonic {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "<mnemonic>")
-    } 
+    }
 }
 
 /// An account address.

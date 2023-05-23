@@ -57,7 +57,7 @@ pub fn generate_mnemonic() -> Result<Mnemonic> {
     let mnemonic = wordlist::encode(&entropy, &crypto::keys::bip39::wordlist::ENGLISH)
         .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
     entropy.zeroize();
-    Ok(mnemonic.into())
+    Ok(mnemonic.try_into()?)
 }
 
 /// Returns a hex encoded seed for a mnemonic.

@@ -188,6 +188,7 @@ impl TryFrom<&SecretManagerDto> for SecretManager {
             SecretManagerDto::LedgerNano(is_simulator) => Self::LedgerNano(LedgerSecretManager::new(*is_simulator)),
 
             SecretManagerDto::Mnemonic(mnemonic) => {
+                // `SecretManagerDto` is `SeroizeOnDrop` so it will take care of the original.
                 Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.clone())?)
             }
 
@@ -300,9 +301,15 @@ impl SignTransactionEssence for SecretManager {
     }
 }
 
+impl From<Mnemonic> for SecretManager {
+    fn from(m: Mnemonic) -> Self {
+        Self::Mnemonic(MnemonicSecretManager::from(m))
+    }
+}
+
 impl SecretManager {
     /// Tries to create a [`SecretManager`] from a mnemonic string.
-    pub fn try_from_mnemonic(mnemonic: impl Into<Mnemonic>) -> crate::client::Result<Self> {
+    pub fn try_from_mnemonic(mnemonic: String) -> crate::client::Result<Self> {
         Ok(Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?))
     }
 

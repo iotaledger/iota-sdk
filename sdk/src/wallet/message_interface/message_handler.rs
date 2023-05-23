@@ -240,8 +240,7 @@ impl WalletMessageHandler {
                     .map(|m| Response::GeneratedMnemonic(m.as_str().to_owned()))
             }),
             Message::VerifyMnemonic { mnemonic } => convert_panics(|| {
-                // TODO: how do we ensure that this line actually runs? Probably when we turned this into `try_from`
-                let _ = Mnemonic::from(mnemonic);
+                let _ = Mnemonic::try_from(mnemonic)?;
                 Ok(Response::Ok(()))
             }),
             Message::SetClientOptions { client_options } => {

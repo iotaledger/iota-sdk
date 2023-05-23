@@ -80,14 +80,21 @@ impl MnemonicSecretManager {
     /// Create a new [`MnemonicSecretManager`] from a BIP-39 mnemonic in English.
     ///
     /// For more information, see <https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki>.
-    pub fn try_from_mnemonic(mnemonic: impl Into<Mnemonic>) -> Result<Self, Error> {
-        Ok(Self(Client::mnemonic_to_seed(&mnemonic.into())))
+    pub fn try_from_mnemonic(mnemonic: String) -> Result<Self, Error> {
+        let mnemonic = Mnemonic::try_from(mnemonic)?;
+        Ok(Self(Client::mnemonic_to_seed(&mnemonic)))
     }
 
     /// Create a new [`MnemonicSecretManager`] from a hex-encoded raw seed string.
     pub fn try_from_hex_seed(hex: &str) -> Result<Self, Error> {
         let bytes: Vec<u8> = prefix_hex::decode(hex)?;
         Ok(Self(Seed::from_bytes(&bytes)))
+    }
+}
+
+impl From<Mnemonic> for MnemonicSecretManager {
+    fn from(m: Mnemonic) -> Self {
+        Self(Client::mnemonic_to_seed(&m))
     }
 }
 
