@@ -19,7 +19,9 @@ impl Migration for Migrate {
 
     #[cfg(feature = "storage")]
     async fn migrate_storage(storage: &crate::wallet::storage::Storage) -> Result<()> {
-        use crate::wallet::storage::constants::{ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY};
+        use crate::wallet::storage::constants::{
+            ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, WALLET_INDEXATION_KEY,
+        };
 
         if let Some(account_indexes) = storage.get::<Vec<u32>>(ACCOUNTS_INDEXATION_KEY).await? {
             for account_index in account_indexes {
@@ -74,6 +76,19 @@ impl Migration for Migrate {
                 }
             }
         }
+
+        if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
+            ConvertHrp::check(
+                wallet
+                    .get_mut("client_options")
+                    .ok_or(Error::Storage("missing client options".to_owned()))?
+                    .get_mut("protocolParameters")
+                    .ok_or(Error::Storage("missing protocol params".to_owned()))?
+                    .get_mut("bech32_hrp")
+                    .ok_or(Error::Storage("missing bech32 hrp".to_owned()))?,
+            )?;
+            storage.set(WALLET_INDEXATION_KEY, wallet).await?;
+        }
         Ok(())
     }
 
@@ -81,7 +96,7 @@ impl Migration for Migrate {
     async fn migrate_backup(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
         use crate::{
             client::storage::StorageProvider,
-            wallet::wallet::operations::stronghold_backup::stronghold_snapshot::ACCOUNTS_KEY,
+            wallet::wallet::operations::stronghold_backup::stronghold_snapshot::{ACCOUNTS_KEY, CLIENT_OPTIONS_KEY},
         };
 
         if let Some(mut accounts) = storage
@@ -137,6 +152,26 @@ impl Migration for Migrate {
                 .insert(ACCOUNTS_KEY.as_bytes(), serde_json::to_string(&accounts)?.as_bytes())
                 .await?;
         }
+        if let Some(mut client_options) = storage
+            .get(CLIENT_OPTIONS_KEY.as_bytes())
+            .await?
+            .map(|bytes| serde_json::from_slice::<serde_json::Value>(&bytes))
+            .transpose()?
+        {
+            ConvertHrp::check(
+                client_options
+                    .get_mut("protocolParameters")
+                    .ok_or(Error::Storage("missing protocol params".to_owned()))?
+                    .get_mut("bech32_hrp")
+                    .ok_or(Error::Storage("missing bech32 hrp".to_owned()))?,
+            )?;
+            storage
+                .insert(
+                    CLIENT_OPTIONS_KEY.as_bytes(),
+                    serde_json::to_string(&client_options)?.as_bytes(),
+                )
+                .await?;
+        }
         storage.delete(b"backup_schema_version").await.ok();
         Ok(())
     }
@@ -157,7 +192,7 @@ trait Convert {
 }
 
 mod types {
-    use core::str::FromStr;
+    use core::{marker::PhantomData, str::FromStr};
 
     use serde::{Deserialize, Serialize};
 
@@ -359,6 +394,66 @@ mod types {
         pub bs: [u8; 4],
         pub hardened: bool,
     }
+
+    pub struct Hrp {
+        inner: [u8; 83],
+        len: u8,
+    }
+
+    impl Hrp {
+        /// Convert a string to an Hrp without checking validity.
+        pub const fn from_str_unchecked(hrp: &str) -> Self {
+            let len = hrp.len();
+            let mut bytes = [0; 83];
+            let hrp = hrp.as_bytes();
+            let mut i = 0;
+            while i < len {
+                bytes[i] = hrp[i];
+                i += 1;
+            }
+            Self {
+                inner: bytes,
+                len: len as _,
+            }
+        }
+    }
+
+    impl FromStr for Hrp {
+        type Err = Error;
+
+        fn from_str(hrp: &str) -> Result<Self, Self::Err> {
+            let len = hrp.len();
+            if hrp.is_ascii() && len <= 83 {
+                let mut bytes = [0; 83];
+                bytes[..len].copy_from_slice(hrp.as_bytes());
+                Ok(Self {
+                    inner: bytes,
+                    len: len as _,
+                })
+            } else {
+                Err(Error::InvalidBech32Hrp(hrp.to_string()))
+            }
+        }
+    }
+
+    impl core::fmt::Display for Hrp {
+        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            let hrp_str = self.inner[..self.len as usize]
+                .iter()
+                .map(|b| *b as char)
+                .collect::<String>();
+            f.write_str(&hrp_str)
+        }
+    }
+
+    string_serde_impl!(Hrp);
+
+    #[derive(Serialize, Deserialize)]
+    #[repr(transparent)]
+    pub struct StringPrefix<B> {
+        pub inner: String,
+        bounded: PhantomData<B>,
+    }
 }
 
 struct ConvertIncomingTransactions;
@@ -426,5 +521,15 @@ impl Convert for ConvertSegment {
 
     fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
         Ok(u32::from_be_bytes(old.bs))
+    }
+}
+
+struct ConvertHrp;
+impl Convert for ConvertHrp {
+    type New = types::Hrp;
+    type Old = types::StringPrefix<u8>;
+
+    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
+        Ok(Self::New::from_str_unchecked(&old.inner))
     }
 }

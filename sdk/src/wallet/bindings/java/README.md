@@ -113,7 +113,7 @@ public class GettingStarted {
 
         // Get the first address and print it.
         AccountAddress address = account.getAddresses()[0];
-        System.out.println("Address:\n" + address.getAddress() + "\n");
+        System.out.println("Address:\n" + address.getBech32Address() + "\n");
     }
 }
 ```

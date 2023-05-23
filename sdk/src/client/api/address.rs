@@ -13,7 +13,7 @@ use crate::{
         secret::{GenerateAddressOptions, SecretManage, SecretManager},
         Client, Result,
     },
-    types::block::address::Address,
+    types::block::address::{Address, Bech32Address, Hrp, HrpLike},
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -27,7 +27,7 @@ pub struct GetAddressesOptions {
     /// Range
     pub range: Range<u32>,
     /// Bech32 human readable part
-    pub bech32_hrp: String,
+    pub bech32_hrp: Hrp,
     /// Options
     pub options: Option<GenerateAddressOptions>,
 }
@@ -56,8 +56,8 @@ impl GetAddressesOptions {
     }
 
     /// Set bech32 human readable part (hrp)
-    pub fn with_bech32_hrp(mut self, bech32_hrp: impl Into<String>) -> Self {
-        self.bech32_hrp = bech32_hrp.into();
+    pub fn with_bech32_hrp(mut self, bech32_hrp: impl HrpLike) -> Self {
+        self.bech32_hrp = bech32_hrp.to_hrp_unchecked();
         self
     }
 
@@ -74,14 +74,14 @@ impl Default for GetAddressesOptions {
             coin_type: SHIMMER_COIN_TYPE,
             account_index: 0,
             range: 0..ADDRESS_GAP_RANGE,
-            bech32_hrp: SHIMMER_TESTNET_BECH32_HRP.to_string(),
+            bech32_hrp: SHIMMER_TESTNET_BECH32_HRP,
             options: Default::default(),
         }
     }
 }
 
 impl SecretManager {
-    /// Get a vector of public address strings
+    /// Get a vector of public bech32 addresses
     pub async fn get_addresses(
         &self,
         GetAddressesOptions {
@@ -91,12 +91,12 @@ impl SecretManager {
             bech32_hrp,
             options,
         }: GetAddressesOptions,
-    ) -> Result<Vec<String>> {
+    ) -> Result<Vec<Bech32Address>> {
         Ok(self
             .generate_addresses(coin_type, account_index, range, options)
             .await?
             .into_iter()
-            .map(|a| a.to_bech32(&bech32_hrp))
+            .map(|a| a.to_bech32(bech32_hrp))
             .collect())
     }
 
@@ -144,15 +144,19 @@ impl SecretManager {
 
     /// Get the vector of public and internal addresses bech32 encoded
     pub async fn get_all_addresses(&self, options: GetAddressesOptions) -> Result<Bech32Addresses> {
-        let bech32_hrp = options.bech32_hrp.clone();
+        let bech32_hrp = options.bech32_hrp;
         let addresses = self.get_all_raw_addresses(options).await?;
 
         Ok(Bech32Addresses {
-            public: addresses.public.into_iter().map(|a| a.to_bech32(&bech32_hrp)).collect(),
+            public: addresses
+                .public
+                .into_iter()
+                .map(|a| Bech32Address::new(bech32_hrp, a))
+                .collect(),
             internal: addresses
                 .internal
                 .into_iter()
-                .map(|a| a.to_bech32(&bech32_hrp))
+                .map(|a| Bech32Address::new(bech32_hrp, a))
                 .collect(),
         })
     }
@@ -204,7 +208,7 @@ impl SecretManager {
 /// Function to find the index and public (false) or internal (true) type of an Bech32 encoded address
 pub async fn search_address(
     secret_manager: &SecretManager,
-    bech32_hrp: &str,
+    bech32_hrp: Hrp,
     coin_type: u32,
     account_index: u32,
     range: Range<u32>,
@@ -227,7 +231,7 @@ pub async fn search_address(
         }
     }
     Err(crate::client::Error::InputAddressNotFound {
-        address: address.to_bech32(bech32_hrp),
+        address: address.to_bech32(bech32_hrp).to_string(),
         range: format!("{range:?}"),
     })
 }

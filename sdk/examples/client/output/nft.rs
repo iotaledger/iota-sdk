@@ -11,7 +11,7 @@ use iota_sdk::{
         secret::SecretManager, Client, Result,
     },
     types::block::{
-        address::{Address, NftAddress},
+        address::{Bech32Address, NftAddress},
         output::{
             unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NftId, NftOutputBuilder, Output, OutputId,
         },
@@ -39,9 +39,9 @@ async fn main() -> Result<()> {
     let token_supply = client.get_token_supply().await?;
 
     let address = secret_manager
-        .get_raw_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .get_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
         .await?[0];
-    request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?;
+    request_funds_from_faucet(&faucet_url, &address).await?;
     tokio::time::sleep(std::time::Duration::from_secs(20)).await;
 
     //////////////////////////////////
@@ -75,7 +75,7 @@ async fn main() -> Result<()> {
     let nft_id = NftId::from(&nft_output_id);
 
     let nft_address = NftAddress::new(nft_id);
-    let bech32_nft_address = Address::Nft(nft_address).to_bech32(client.get_bech32_hrp().await?);
+    let bech32_nft_address = Bech32Address::new(client.get_bech32_hrp().await?, nft_address);
     println!("bech32_nft_address {bech32_nft_address}");
     println!(
         "Faucet request {:?}",
@@ -95,7 +95,7 @@ async fn main() -> Result<()> {
         .with_input(output_ids_response.items[0].into())?
         .with_outputs(vec![
             NftOutputBuilder::new_with_amount(1_000_000 + output_with_meta.output().amount(), nft_id)
-                .add_unlock_condition(AddressUnlockCondition::new(address))
+                .add_unlock_condition(AddressUnlockCondition::new(bech32_nft_address))
                 .finish_output(token_supply)?,
         ])?
         .finish()
@@ -116,7 +116,7 @@ async fn main() -> Result<()> {
     let output_with_meta = client.get_output(&nft_output_id).await?;
     let outputs = vec![
         BasicOutputBuilder::new_with_amount(output_with_meta.output().amount())
-            .add_unlock_condition(AddressUnlockCondition::new(address))
+            .add_unlock_condition(AddressUnlockCondition::new(bech32_nft_address))
             .finish_output(token_supply)?,
     ];
 

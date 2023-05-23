@@ -36,14 +36,14 @@ async fn main() -> Result<()> {
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let addresses = secret_manager
-        .get_raw_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..2))
+        .get_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..2))
         .await?;
     let sender_address = addresses[0];
     let receiver_address = addresses[1];
 
     let token_supply = client.get_token_supply().await?;
 
-    request_funds_from_faucet(&faucet_url, &sender_address.to_bech32(client.get_bech32_hrp().await?)).await?;
+    request_funds_from_faucet(&faucet_url, &sender_address).await?;
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
     let tomorrow = (SystemTime::now() + Duration::from_secs(24 * 3600))

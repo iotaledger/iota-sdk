@@ -44,7 +44,7 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
     let secret_manager = setup_secret_manager();
 
     let addresses = secret_manager
-        .get_raw_addresses(
+        .get_addresses(
             GetAddressesOptions::from_client(&client)
                 .await
                 .unwrap()
@@ -52,15 +52,17 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
         )
         .await
         .unwrap();
-    let address = addresses[0].to_bech32(client.get_bech32_hrp().await.unwrap());
-    println!("{}", request_funds_from_faucet(FAUCET_URL, &address,).await.unwrap());
+    println!(
+        "{}",
+        request_funds_from_faucet(FAUCET_URL, &addresses[0]).await.unwrap()
+    );
 
     // Continue only after funds are received
     for _ in 0..30 {
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let output_ids_response = client
             .basic_output_ids(vec![
-                QueryParameter::Address(address.to_string()),
+                QueryParameter::Address(addresses[0]),
                 QueryParameter::HasExpiration(false),
                 QueryParameter::HasTimelock(false),
                 QueryParameter::HasStorageDepositReturn(false),
@@ -78,7 +80,7 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
         .with_secret_manager(&secret_manager)
         .with_output_hex(
             // Send funds back to the sender.
-            &bech32_to_hex(&addresses[1].to_bech32(client.get_bech32_hrp().await.unwrap())).unwrap(),
+            &bech32_to_hex(addresses[1].to_bech32(client.get_bech32_hrp().await.unwrap())).unwrap(),
             // The amount to spend, cannot be zero.
             1_000_000,
         )
@@ -190,19 +192,20 @@ async fn test_get_address_outputs() {
     let secret_manager = setup_secret_manager();
 
     let address = secret_manager
-        .get_raw_addresses(
+        .get_addresses(
             GetAddressesOptions::from_client(&client)
                 .await
                 .unwrap()
                 .with_range(0..1),
         )
         .await
-        .unwrap()[0];
+        .unwrap()
+        .into_iter()
+        .next()
+        .unwrap();
 
     let output_ids_response = client
-        .basic_output_ids(vec![QueryParameter::Address(
-            address.to_bech32(&client.get_bech32_hrp().await.unwrap()),
-        )])
+        .basic_output_ids(vec![QueryParameter::Address(address)])
         .await
         .unwrap();
 

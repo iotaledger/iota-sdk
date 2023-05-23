@@ -10,7 +10,7 @@ const ED25519_BECH32: &str = "rms1qr47gz3xxjqpjrwd0yu5glhqrth6w0t08npney8000ust2
 fn ctors() {
     let ed25519_address = ED25519_ADDRESS.parse::<Ed25519Address>().unwrap();
     let address = Address::Ed25519(ed25519_address);
-    let bech32_address = Bech32Address::new("rms".to_string(), address).unwrap();
+    let bech32_address = Bech32Address::try_new("rms", address).unwrap();
     assert_eq!(bech32_address.inner(), &address);
     assert_eq!(bech32_address.hrp(), "rms");
 

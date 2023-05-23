@@ -26,6 +26,12 @@ pub struct AccountAddress {
     pub(crate) used: bool,
 }
 
+impl AccountAddress {
+    pub fn into_bech32(self) -> Bech32Address {
+        self.address
+    }
+}
+
 /// An account address with unspent output_ids for unspent outputs.
 #[derive(Debug, Getters, Setters, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -41,4 +47,10 @@ pub struct AddressWithUnspentOutputs {
     pub(crate) internal: bool,
     /// Output ids
     pub(crate) output_ids: Vec<OutputId>,
+}
+
+impl AddressWithUnspentOutputs {
+    pub fn into_bech32(self) -> Bech32Address {
+        self.address
+    }
 }

@@ -37,7 +37,7 @@ async fn single_ed25519_unlock() -> Result<()> {
 
     let inputs = build_inputs(vec![Basic(
         1_000_000,
-        bech32_address_0,
+        &bech32_address_0.to_string(),
         None,
         None,
         None,
@@ -48,7 +48,7 @@ async fn single_ed25519_unlock() -> Result<()> {
 
     let outputs = build_outputs(vec![Basic(
         1_000_000,
-        bech32_address_0,
+        &bech32_address_0.to_string(),
         None,
         None,
         None,
@@ -114,7 +114,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
     let inputs = build_inputs(vec![
         Basic(
             1_000_000,
-            bech32_address_0,
+            &bech32_address_0.to_string(),
             None,
             None,
             None,
@@ -124,7 +124,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            bech32_address_0,
+            &bech32_address_0.to_string(),
             None,
             None,
             None,
@@ -134,7 +134,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            bech32_address_0,
+            &bech32_address_0.to_string(),
             None,
             None,
             None,
@@ -146,7 +146,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
 
     let outputs = build_outputs(vec![Basic(
         3_000_000,
-        bech32_address_0,
+        &bech32_address_0.to_string(),
         None,
         None,
         None,
@@ -228,7 +228,7 @@ async fn two_signature_unlocks() -> Result<()> {
     let inputs = build_inputs(vec![
         Basic(
             1_000_000,
-            bech32_address_0,
+            &bech32_address_0.to_string(),
             None,
             None,
             None,
@@ -238,7 +238,7 @@ async fn two_signature_unlocks() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            bech32_address_1,
+            &bech32_address_1.to_string(),
             None,
             None,
             None,
@@ -250,7 +250,7 @@ async fn two_signature_unlocks() -> Result<()> {
 
     let outputs = build_outputs(vec![Basic(
         2_000_000,
-        bech32_address_0,
+        &bech32_address_0.to_string(),
         None,
         None,
         None,

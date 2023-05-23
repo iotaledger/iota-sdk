@@ -6,7 +6,7 @@ use std::str::FromStr;
 use iota_sdk::types::block::{
     address::{
         dto::{AddressDto, NftAddressDto},
-        Address, NftAddress,
+        Address, Bech32Address, NftAddress,
     },
     output::NftId,
     Error,
@@ -87,17 +87,17 @@ fn debug() {
 fn bech32() {
     let address = Address::from(NftAddress::from_str(NFT_ID).unwrap());
 
-    assert_eq!(address.to_bech32("rms"), NFT_BECH32);
+    assert_eq!(address.to_bech32_unchecked("rms"), NFT_BECH32);
 }
 
 #[test]
 fn bech32_roundtrip() {
     let address = Address::from(NftAddress::from_str(NFT_ID).unwrap());
-    let bech32 = address.to_bech32("rms");
+    let bech32 = address.to_bech32_unchecked("rms").to_string();
 
     assert_eq!(
-        Address::try_from_bech32_with_hrp(bech32).unwrap(),
-        (String::from("rms"), address)
+        Bech32Address::try_from_str(bech32),
+        Bech32Address::try_new("rms", address)
     );
 }
 

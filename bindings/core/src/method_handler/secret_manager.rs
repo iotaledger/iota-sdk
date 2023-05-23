@@ -24,7 +24,7 @@ pub(crate) async fn call_secret_manager_method_internal(
         }
         SecretManagerMethod::GenerateEvmAddresses { options } => {
             let addresses = secret_manager.get_evm_addresses(options).await?;
-            Response::GeneratedAddresses(addresses)
+            Response::GeneratedEvmAddresses(addresses)
         }
         #[cfg(feature = "ledger_nano")]
         SecretManagerMethod::GetLedgerNanoStatus => {

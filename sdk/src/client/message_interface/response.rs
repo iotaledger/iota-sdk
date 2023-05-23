@@ -22,7 +22,7 @@ use crate::{
             plugins::indexer::OutputIdsResponse,
         },
         block::{
-            address::dto::AddressDto,
+            address::{dto::AddressDto, Bech32Address, Hrp},
             input::dto::UtxoInputDto,
             output::{
                 dto::{OutputDto, OutputMetadataDto},
@@ -59,7 +59,7 @@ pub enum Response {
     Bool(bool),
     /// Response for:
     /// - [`GenerateAddresses`](crate::client::message_interface::Message::GenerateAddresses)
-    GeneratedAddresses(Vec<String>),
+    GeneratedAddresses(Vec<Bech32Address>),
     /// Response for:
     /// - [`GetNode`](crate::client::message_interface::Message::GetNode)
     Node(Node),
@@ -71,7 +71,7 @@ pub enum Response {
     NetworkId(u64),
     /// Response for:
     /// - [`GetBech32Hrp`](crate::client::message_interface::Message::GetBech32Hrp)
-    Bech32Hrp(String),
+    Bech32Hrp(Hrp),
     /// Response for:
     /// - [`GetMinPowScore`](crate::client::message_interface::Message::GetMinPowScore)
     MinPowScore(u32),
@@ -178,7 +178,7 @@ pub enum Response {
     RetryUntilIncludedSuccessful(Vec<(BlockId, BlockDto)>),
     /// Response for:
     /// - [`ConsolidateFunds`](crate::client::message_interface::Message::ConsolidateFunds)
-    ConsolidatedFunds(String),
+    ConsolidatedFunds(Bech32Address),
     /// Response for:
     /// - [`FindInputs`](crate::client::message_interface::Message::FindInputs)
     Inputs(Vec<UtxoInputDto>),
@@ -198,7 +198,7 @@ pub enum Response {
     /// - [`HexPublicKeyToBech32Address`](crate::client::message_interface::Message::HexPublicKeyToBech32Address)
     /// - [`HexToBech32`](crate::client::message_interface::Message::HexToBech32)
     /// - [`NftIdToBech32`](crate::client::message_interface::Message::NftIdToBech32)
-    Bech32Address(String),
+    Bech32Address(Bech32Address),
     /// Response for:
     /// - [`ParseBech32Address`](crate::client::message_interface::Message::ParseBech32Address)
     ParsedBech32Address(AddressDto),

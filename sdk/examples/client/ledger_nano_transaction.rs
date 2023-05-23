@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
         // Insert the output address and amount to spent. The amount cannot be zero.
         .with_output(
             // We generate an address from our seed so that we send the funds to ourselves
-            &addresses[1],
+            addresses[1],
             1_000_000,
         )
         .await?

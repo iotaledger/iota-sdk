@@ -5,7 +5,7 @@ use super::GetAddressesOptions;
 use crate::{
     client::{node_api::indexer::query_parameters::QueryParameter, secret::SecretManager, Client, Result},
     types::block::{
-        address::Address,
+        address::Bech32Address,
         input::{UtxoInput, INPUT_COUNT_MAX},
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder},
     },
@@ -18,7 +18,7 @@ impl Client {
         &self,
         secret_manager: &SecretManager,
         options: GetAddressesOptions,
-    ) -> Result<String> {
+    ) -> Result<Bech32Address> {
         let token_supply = self.get_token_supply().await?;
         let mut last_transfer_index = options.range.start;
         // use the start index as offset
@@ -26,7 +26,7 @@ impl Client {
 
         let addresses = secret_manager.get_addresses(options).await?;
 
-        let consolidation_address = addresses[0].clone();
+        let consolidation_address = addresses[0];
 
         'consolidation: loop {
             let mut block_ids = Vec::new();
@@ -39,7 +39,7 @@ impl Client {
                 // Get output ids of outputs that can be controlled by this address without further unlock constraints
                 let output_ids_response = self
                     .basic_output_ids(vec![
-                        QueryParameter::Address(address.to_string()),
+                        QueryParameter::Address(*address),
                         QueryParameter::HasExpiration(false),
                         QueryParameter::HasTimelock(false),
                         QueryParameter::HasStorageDepositReturn(false),
@@ -61,8 +61,7 @@ impl Client {
 
                 let outputs_chunks = basic_outputs_responses.chunks(INPUT_COUNT_MAX.into());
 
-                let (bech32_hrp, consolidation_address) = Address::try_from_bech32_with_hrp(&consolidation_address)?;
-                self.bech32_hrp_matches(&bech32_hrp).await?;
+                self.bech32_hrp_matches(consolidation_address.hrp()).await?;
 
                 for chunk in outputs_chunks {
                     let mut block_builder = self.block().with_secret_manager(secret_manager);

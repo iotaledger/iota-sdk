@@ -25,6 +25,14 @@ pub enum Error {
     /// Block dtos error
     #[error("{0}")]
     ApiTypes(#[from] crate::types::api::core::error::Error),
+    /// Invalid bech32 HRP, should match the one from the used network
+    #[error("invalid bech32 hrp for the connected network: {provided}, expected: {expected}")]
+    Bech32HrpMismatch {
+        /// The bech32 human readable part from the provided address.
+        provided: String,
+        /// The expected bech32 human readable part.
+        expected: String,
+    },
     /// Blake2b256 Error
     #[error("{0}")]
     Blake2b256(&'static str),
@@ -51,14 +59,6 @@ pub enum Error {
     /// Invalid BIP32 chain data
     #[error("invalid BIP32 chain data")]
     InvalidBIP32ChainData,
-    /// Invalid bech32 HRP, should match the one from the used network
-    #[error("invalid bech32 hrp for the connected network: {provided}, expected: {expected}")]
-    InvalidBech32Hrp {
-        /// The bech32 human readable part from the provided address.
-        provided: String,
-        /// The expected bech32 human readable part.
-        expected: String,
-    },
     /// Invalid mnemonic error
     #[error("invalid mnemonic {0}")]
     InvalidMnemonic(String),
