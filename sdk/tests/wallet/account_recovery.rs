@@ -70,10 +70,10 @@ async fn account_recovery_with_balance_and_empty_addresses() -> Result<()> {
         .with_account_index(2)
         .with_range(2..3)
         .finish()
-        .await?;
+        .await?[0];
 
     // Add funds to the address with account index 2 and address key_index 2, so recover works
-    iota_sdk::client::request_funds_from_faucet(crate::wallet::common::FAUCET_URL, &address[0]).await?;
+    iota_sdk::client::request_funds_from_faucet(crate::wallet::common::FAUCET_URL, &address).await?;
 
     // Wait for faucet transaction
     tokio::time::sleep(Duration::new(10, 0)).await;

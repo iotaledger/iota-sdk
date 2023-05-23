@@ -290,7 +290,7 @@ public class Account extends AbstractObject {
      * @param options The options.
      * @return A JsonElement object.
      */
-    public JsonElement getIncomingTransactionData(GetIncomingTransactionData options) throws WalletException {
+    public JsonElement getIncomingTransaction(GetIncomingTransaction options) throws WalletException {
         return callAccountMethod(options);
     }
 

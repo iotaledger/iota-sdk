@@ -39,7 +39,8 @@ impl TagFeature {
 
     /// Creates a new [`TagFeature`].
     #[inline(always)]
-    pub fn new(tag: Vec<u8>) -> Result<Self, Error> {
+    pub fn new(tag: impl Into<Vec<u8>>) -> Result<Self, Error> {
+        let tag = tag.into();
         Self::try_from(tag)
     }
 

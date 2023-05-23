@@ -20,7 +20,7 @@ use iota_sdk::{
         secret::{GenerateAddressOptions, SecretManager},
         Client,
     },
-    types::block::address::Address,
+    types::block::address::{Address, Hrp},
 };
 use serde::{Deserialize, Serialize};
 
@@ -38,12 +38,12 @@ async fn addresses() {
         .unwrap();
 
     assert_eq!(
-        *addresses.public[0],
-        "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r".to_string()
+        addresses.public[0],
+        "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r"
     );
     assert_eq!(
-        *addresses.internal[0],
-        "atoi1qprxpfvaz2peggq6f8k9cj8zfsxuw69e4nszjyv5kuf8yt70t2847shpjak".to_string()
+        addresses.internal[0],
+        "atoi1qprxpfvaz2peggq6f8k9cj8zfsxuw69e4nszjyv5kuf8yt70t2847shpjak"
     );
 }
 
@@ -59,7 +59,7 @@ async fn public_key_to_address() {
 
     assert_eq!(
         public_key_address,
-        "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r".to_string()
+        "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r"
     );
 }
 
@@ -80,11 +80,11 @@ async fn mnemonic_address_generation_iota() {
 
     assert_eq!(
         addresses[0],
-        "iota1qpg2xkj66wwgn8p2ggnp7p582gj8g6p79us5hve2tsudzpsr2ap4skprwjg".to_string()
+        "iota1qpg2xkj66wwgn8p2ggnp7p582gj8g6p79us5hve2tsudzpsr2ap4skprwjg"
     );
     assert_eq!(
         addresses[1],
-        "iota1qpswqe4v8z2cdtgc7sfj0hfneqh37lhmjgnth36mfndwcxkjrakcvpmm727".to_string()
+        "iota1qpswqe4v8z2cdtgc7sfj0hfneqh37lhmjgnth36mfndwcxkjrakcvpmm727"
     );
 
     // account 1
@@ -99,7 +99,7 @@ async fn mnemonic_address_generation_iota() {
 
     assert_eq!(
         addresses[0],
-        "iota1qr43g007shcd7zx3xe7s4lu2c9fr33w7tfjppyy0swlhrxx247szqhuaeaa".to_string()
+        "iota1qr43g007shcd7zx3xe7s4lu2c9fr33w7tfjppyy0swlhrxx247szqhuaeaa"
     );
 }
 
@@ -120,11 +120,11 @@ async fn mnemonic_address_generation_shimmer() {
 
     assert_eq!(
         addresses[0],
-        "smr1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6ckj80y".to_string()
+        "smr1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6ckj80y"
     );
     assert_eq!(
         addresses[1],
-        "smr1qznujl7m240za4pf6p0p8rdtqdca6tq7z44heqec8e57xsf429tvz0wt4w3".to_string()
+        "smr1qznujl7m240za4pf6p0p8rdtqdca6tq7z44heqec8e57xsf429tvz0wt4w3"
     );
 
     // account 1
@@ -139,7 +139,7 @@ async fn mnemonic_address_generation_shimmer() {
 
     assert_eq!(
         addresses[0],
-        "smr1qrexl2g0m74v57y4kl6kfwqz7zrlrkvjt8m30av0cxgxlu92kyzc5npslm8".to_string()
+        "smr1qrexl2g0m74v57y4kl6kfwqz7zrlrkvjt8m30av0cxgxlu92kyzc5npslm8"
     );
 }
 
@@ -148,7 +148,7 @@ async fn address_generation() {
     #[derive(Serialize, Deserialize)]
     struct AddressData {
         mnemonic: String,
-        bech32_hrp: String,
+        bech32_hrp: Hrp,
         coin_type: u32,
         account_index: u32,
         internal: bool,
@@ -166,7 +166,7 @@ async fn address_generation() {
     for address in &addresses_data {
         let secret_manager = SecretManager::try_from_mnemonic(address.mnemonic.clone()).unwrap();
         let addresses = GetAddressesBuilder::new(&secret_manager)
-            .with_bech32_hrp(address.bech32_hrp.to_string())
+            .with_bech32_hrp(address.bech32_hrp)
             .with_coin_type(address.coin_type)
             .with_account_index(address.account_index)
             .with_range(address.address_index..address.address_index + 1)
@@ -179,7 +179,7 @@ async fn address_generation() {
             .unwrap();
 
         assert_eq!(addresses[0], address.bech32_address);
-        if let Address::Ed25519(ed25519_address) = Address::try_from_bech32(&addresses[0]).unwrap() {
+        if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
             assert_eq!(ed25519_address.to_string(), address.ed25519_address);
         } else {
             panic!("Invalid address type")
@@ -195,12 +195,12 @@ async fn address_generation() {
             .unwrap();
 
         stronghold_secret_manager
-            .store_mnemonic(address.mnemonic.to_string())
+            .store_mnemonic(address.mnemonic.clone())
             .await
             .unwrap();
 
         let addresses = GetAddressesBuilder::new(&SecretManager::Stronghold(stronghold_secret_manager))
-            .with_bech32_hrp(address.bech32_hrp.to_string())
+            .with_bech32_hrp(address.bech32_hrp)
             .with_coin_type(address.coin_type)
             .with_account_index(address.account_index)
             .with_range(address.address_index..address.address_index + 1)
@@ -213,7 +213,7 @@ async fn address_generation() {
             .unwrap();
 
         assert_eq!(addresses[0], address.bech32_address);
-        if let Address::Ed25519(ed25519_address) = Address::try_from_bech32(&addresses[0]).unwrap() {
+        if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
             assert_eq!(ed25519_address.to_string(), address.ed25519_address);
         } else {
             panic!("Invalid address type")
@@ -232,7 +232,7 @@ async fn address_generation() {
                     start: address.address_index,
                     end: address.address_index + 1,
                 }),
-                bech32_hrp: Some(address.bech32_hrp.to_string()),
+                bech32_hrp: Some(address.bech32_hrp),
                 options: Some(GenerateAddressOptions {
                     internal: address.internal,
                     ..Default::default()
@@ -247,7 +247,7 @@ async fn address_generation() {
             match response {
                 Response::GeneratedAddresses(addresses) => {
                     assert_eq!(addresses[0], address.bech32_address);
-                    if let Address::Ed25519(ed25519_address) = Address::try_from_bech32(&addresses[0]).unwrap() {
+                    if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
                         assert_eq!(ed25519_address.to_string(), address.ed25519_address);
                     } else {
                         panic!("Invalid address type")
@@ -281,7 +281,7 @@ async fn address_generation() {
                     start: address.address_index,
                     end: address.address_index + 1,
                 }),
-                bech32_hrp: Some(address.bech32_hrp.to_string()),
+                bech32_hrp: Some(address.bech32_hrp),
                 options: Some(GenerateAddressOptions {
                     internal: address.internal,
                     ..Default::default()
@@ -296,7 +296,7 @@ async fn address_generation() {
             match response {
                 Response::GeneratedAddresses(addresses) => {
                     assert_eq!(addresses[0], address.bech32_address);
-                    if let Address::Ed25519(ed25519_address) = Address::try_from_bech32(&addresses[0]).unwrap() {
+                    if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
                         assert_eq!(ed25519_address.to_string(), address.ed25519_address);
                     } else {
                         panic!("Invalid address type")

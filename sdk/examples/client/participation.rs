@@ -47,17 +47,15 @@ async fn main() -> Result<()> {
 
     let secret_manager =
         SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
-    let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
+    let bech32_address = client.get_addresses(&secret_manager).with_range(0..1).finish().await?[0];
 
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
-    request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?;
+    request_funds_from_faucet(&faucet_url, &bech32_address).await?;
 
-    let bech32_address = address.to_bech32(client.get_bech32_hrp().await?);
-
-    let address_participation = client.address_staking_status(&bech32_address).await?;
+    let address_participation = client.address_staking_status(bech32_address).await?;
     println!("{address_participation:#?}");
 
-    let address_output_ids = client.address_participation_output_ids(&bech32_address).await?;
+    let address_output_ids = client.address_participation_output_ids(bech32_address).await?;
     println!("{address_output_ids:#?}");
 
     for (output_id, _) in address_output_ids.outputs.into_iter() {

@@ -25,6 +25,7 @@ use crate::{
         utils, Client, NodeInfoWrapper,
     },
     types::block::{
+        address::HrpLike,
         output::{
             dto::{OutputBuilderAmountDto, OutputDto},
             AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
@@ -227,7 +228,7 @@ impl WalletMessageHandler {
                             source.to_path_buf(),
                             password,
                             ignore_if_coin_type_mismatch,
-                            ignore_if_bech32_mismatch.as_deref(),
+                            ignore_if_bech32_mismatch,
                         )
                         .await?;
                     Ok(Response::Ok(()))
@@ -346,7 +347,7 @@ impl WalletMessageHandler {
                 .await
             }
             Message::Bech32ToHex { bech32_address } => {
-                convert_panics(|| Ok(Response::HexAddress(utils::bech32_to_hex(&bech32_address)?)))
+                convert_panics(|| Ok(Response::HexAddress(utils::bech32_to_hex(bech32_address)?)))
             }
             Message::HexToBech32 { hex, bech32_hrp } => {
                 convert_async_panics(|| async {
@@ -354,11 +355,11 @@ impl WalletMessageHandler {
                         Some(bech32_hrp) => bech32_hrp,
                         None => match self.wallet.get_node_info().await {
                             Ok(node_info_wrapper) => node_info_wrapper.node_info.protocol.bech32_hrp,
-                            Err(_) => SHIMMER_TESTNET_BECH32_HRP.into(),
+                            Err(_) => SHIMMER_TESTNET_BECH32_HRP,
                         },
                     };
 
-                    Ok(Response::Bech32Address(utils::hex_to_bech32(&hex, &bech32_hrp)?))
+                    Ok(Response::Bech32Address(utils::hex_to_bech32(&hex, bech32_hrp)?))
                 })
                 .await
             }
@@ -599,15 +600,14 @@ impl WalletMessageHandler {
                     transaction.as_ref().map(TransactionDto::from).map(Box::new),
                 ))
             }
-            AccountMethod::GetIncomingTransactionData { transaction_id } => {
-                let transaction = account.get_incoming_transaction_data(&transaction_id).await;
+            AccountMethod::GetIncomingTransaction { transaction_id } => {
+                let transaction = account.get_incoming_transaction(&transaction_id).await;
 
                 transaction.map_or_else(
-                    || Ok(Response::IncomingTransactionData(None)),
+                    || Ok(Response::Transaction(None)),
                     |transaction| {
-                        Ok(Response::IncomingTransactionData(Some(Box::new((
-                            transaction_id,
-                            TransactionDto::from(&transaction),
+                        Ok(Response::Transaction(Some(Box::new(TransactionDto::from(
+                            &transaction,
                         )))))
                     },
                 )
@@ -629,22 +629,19 @@ impl WalletMessageHandler {
                 Ok(Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect()))
             }
             AccountMethod::IncomingTransactions => {
-                let transactions = account.incoming_transactions().await?;
-                Ok(Response::IncomingTransactionsData(
-                    transactions
-                        .into_iter()
-                        .map(|d| (d.0, TransactionDto::from(&d.1)))
-                        .collect(),
+                let transactions = account.incoming_transactions().await;
+                Ok(Response::Transactions(
+                    transactions.iter().map(TransactionDto::from).collect(),
                 ))
             }
             AccountMethod::Transactions => {
-                let transactions = account.transactions().await?;
+                let transactions = account.transactions().await;
                 Ok(Response::Transactions(
                     transactions.iter().map(TransactionDto::from).collect(),
                 ))
             }
             AccountMethod::PendingTransactions => {
-                let transactions = account.pending_transactions().await?;
+                let transactions = account.pending_transactions().await;
                 Ok(Response::Transactions(
                     transactions.iter().map(TransactionDto::from).collect(),
                 ))
@@ -735,7 +732,7 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let output = account
                         .prepare_output(
-                            OutputParams::try_from(&options)?,
+                            OutputParams::try_from(options.as_ref())?,
                             transaction_options
                                 .as_ref()
                                 .map(TransactionOptions::try_from_dto)
@@ -998,7 +995,7 @@ impl WalletMessageHandler {
     }
 
     /// The create account message handler.
-    async fn create_account(&self, alias: Option<String>, bech32_hrp: Option<String>) -> Result<Response> {
+    async fn create_account(&self, alias: Option<String>, bech32_hrp: Option<impl HrpLike>) -> Result<Response> {
         let mut builder = self.wallet.create_account();
 
         if let Some(alias) = alias {
@@ -1006,7 +1003,7 @@ impl WalletMessageHandler {
         }
 
         if let Some(bech32_hrp) = bech32_hrp {
-            builder = builder.with_bech32_hrp(bech32_hrp);
+            builder = builder.with_bech32_hrp(bech32_hrp.to_hrp()?);
         }
 
         match builder.finish().await {
