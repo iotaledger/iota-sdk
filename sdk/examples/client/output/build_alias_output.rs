@@ -37,9 +37,9 @@ async fn main() -> Result<()> {
         // `hello` in bytes
         .with_state_metadata(vec![104, 101, 108, 108, 111])
         .add_feature(SenderFeature::new(address))
-        .add_feature(MetadataFeature::new(vec![104, 101, 108, 108, 111])?)
+        .add_feature(MetadataFeature::new([104, 101, 108, 108, 111])?)
         .add_immutable_feature(IssuerFeature::new(address))
-        .add_immutable_feature(MetadataFeature::new(vec![104, 101, 108, 108, 111])?)
+        .add_immutable_feature(MetadataFeature::new([104, 101, 108, 108, 111])?)
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
         .finish_output(token_supply)?;

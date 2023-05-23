@@ -82,7 +82,7 @@ impl Account {
                                 account_index,
                                 WalletEvent::TransactionProgress(
                                     TransactionProgressEvent::GeneratingRemainderDepositAddress(AddressData {
-                                        address: remainder_address.address.to_string(),
+                                        address: remainder_address.address,
                                     }),
                                 ),
                             )

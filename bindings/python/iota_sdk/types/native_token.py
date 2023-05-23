@@ -1,8 +1,11 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from iota_sdk.types.common import HexStr
+
+
 class NativeToken():
-    def __init__(self, id, amount):
+    def __init__(self, id: HexStr, amount: int):
         """Initialize NativeToken
 
         Parameters

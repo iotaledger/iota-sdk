@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::api::PreparedTransactionData,
     types::block::{
-        address::Address,
+        address::Bech32Address,
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::AddressUnlockCondition,
@@ -26,15 +26,15 @@ use crate::{
 pub struct MintNftParams {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
     /// first address of the account.
-    pub address: Option<String>,
+    pub address: Option<Bech32Address>,
     /// NFT sender feature.
-    pub sender: Option<String>,
+    pub sender: Option<Bech32Address>,
     /// NFT metadata feature.
     pub metadata: Option<Vec<u8>>,
     /// NFT tag feature.
     pub tag: Option<Vec<u8>>,
     /// NFT issuer feature.
-    pub issuer: Option<String>,
+    pub issuer: Option<Bech32Address>,
     /// NFT immutable metadata feature.
     pub immutable_metadata: Option<Vec<u8>>,
 }
@@ -45,15 +45,15 @@ pub struct MintNftParams {
 pub struct MintNftParamsDto {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
     /// first address of the account.
-    pub address: Option<String>,
+    pub address: Option<Bech32Address>,
     /// NFT sender feature, bech32 encoded address.
-    pub sender: Option<String>,
+    pub sender: Option<Bech32Address>,
     /// NFT metadata feature, hex encoded bytes.
     pub metadata: Option<String>,
     /// NFT tag feature, hex encoded bytes.
     pub tag: Option<String>,
     /// NFT issuer feature, bech32 encoded address.
-    pub issuer: Option<String>,
+    pub issuer: Option<Bech32Address>,
     /// Immutable NFT metadata, hex encoded bytes.
     pub immutable_metadata: Option<String>,
 }
@@ -63,8 +63,8 @@ impl TryFrom<&MintNftParamsDto> for MintNftParams {
 
     fn try_from(value: &MintNftParamsDto) -> crate::wallet::Result<Self> {
         Ok(Self {
-            address: value.address.clone(),
-            sender: value.sender.clone(),
+            address: value.address,
+            sender: value.sender,
             metadata: match &value.metadata {
                 Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("metadata"))?),
                 None => None,
@@ -73,7 +73,7 @@ impl TryFrom<&MintNftParamsDto> for MintNftParams {
                 Some(tag) => Some(prefix_hex::decode(tag).map_err(|_| BlockError::InvalidField("tag"))?),
                 None => None,
             },
-            issuer: value.issuer.clone(),
+            issuer: value.issuer,
             immutable_metadata: match &value.immutable_metadata {
                 Some(metadata) => {
                     Some(prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("immutable_metadata"))?)
@@ -143,8 +143,7 @@ impl Account {
         {
             let address = match address {
                 Some(address) => {
-                    let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
-                    self.client().bech32_hrp_matches(&bech32_hrp).await?;
+                    self.client().bech32_hrp_matches(address.hrp()).await?;
                     address
                 }
                 // todo other error message
@@ -153,7 +152,6 @@ impl Account {
                         .first()
                         .ok_or(WalletError::FailedToGetRemainder)?
                         .address
-                        .inner
                 }
             };
 
@@ -163,7 +161,7 @@ impl Account {
                 .add_unlock_condition(AddressUnlockCondition::new(address));
 
             if let Some(sender) = sender {
-                nft_builder = nft_builder.add_feature(SenderFeature::new(Address::try_from_bech32(sender)?));
+                nft_builder = nft_builder.add_feature(SenderFeature::new(sender));
             }
 
             if let Some(metadata) = metadata {
@@ -175,7 +173,7 @@ impl Account {
             }
 
             if let Some(issuer) = issuer {
-                nft_builder = nft_builder.add_immutable_feature(IssuerFeature::new(Address::try_from_bech32(issuer)?));
+                nft_builder = nft_builder.add_immutable_feature(IssuerFeature::new(issuer));
             }
 
             if let Some(immutable_metadata) = immutable_metadata {

@@ -16,6 +16,7 @@ use crate::{
         secret::GenerateAddressOptions,
     },
     types::block::{
+        address::Bech32Address,
         output::{
             dto::{NativeTokenDto, OutputDto, TokenSchemeDto},
             feature::dto::FeatureDto,
@@ -254,7 +255,7 @@ pub enum AccountMethod {
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
-        params: OutputParamsDto,
+        params: Box<OutputParamsDto>,
         transaction_options: Option<TransactionOptionsDto>,
     },
     /// Prepare transaction.
@@ -417,5 +418,5 @@ pub enum AccountMethod {
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     GetParticipationEvents,
     /// Expected response: [`Faucet`](crate::wallet::message_interface::Response::Faucet)
-    RequestFundsFromFaucet { url: String, address: String },
+    RequestFundsFromFaucet { url: String, address: Bech32Address },
 }

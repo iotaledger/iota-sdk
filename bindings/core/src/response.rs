@@ -25,7 +25,7 @@ use iota_sdk::{
             plugins::indexer::OutputIdsResponse,
         },
         block::{
-            address::dto::AddressDto,
+            address::{dto::AddressDto, Bech32Address, Hrp},
             input::dto::UtxoInputDto,
             output::{
                 dto::{OutputDto, OutputMetadataDto},
@@ -67,7 +67,7 @@ pub enum Response {
     // Client responses
     /// Response for:
     /// - [`GenerateAddresses`](crate::method::ClientMethod::GenerateAddresses)
-    GeneratedAddresses(Vec<String>),
+    GeneratedAddresses(Vec<Bech32Address>),
     /// Response for:
     /// - [`GetNode`](crate::method::ClientMethod::GetNode)
     Node(Node),
@@ -79,7 +79,7 @@ pub enum Response {
     NetworkId(u64),
     /// Response for:
     /// - [`GetBech32Hrp`](crate::method::ClientMethod::GetBech32Hrp)
-    Bech32Hrp(String),
+    Bech32Hrp(Hrp),
     /// Response for:
     /// - [`GetMinPowScore`](crate::method::ClientMethod::GetMinPowScore)
     MinPowScore(u32),
@@ -181,7 +181,7 @@ pub enum Response {
     RetryUntilIncludedSuccessful(Vec<(BlockId, BlockDto)>),
     /// Response for:
     /// - [`ConsolidateFunds`](crate::method::ClientMethod::ConsolidateFunds)
-    ConsolidatedFunds(String),
+    ConsolidatedFunds(Bech32Address),
     /// Response for:
     /// - [`FindInputs`](crate::method::ClientMethod::FindInputs)
     Inputs(Vec<UtxoInputDto>),
@@ -238,7 +238,7 @@ pub enum Response {
     /// - [`HexPublicKeyToBech32Address`](crate::method::ClientMethod::HexPublicKeyToBech32Address)
     /// - [`HexToBech32`](crate::method::ClientMethod::HexToBech32)
     /// - [`NftIdToBech32`](crate::method::ClientMethod::NftIdToBech32)
-    Bech32Address(String),
+    Bech32Address(Bech32Address),
     /// - [`Faucet`](crate::method::ClientMethod::RequestFundsFromFaucet)
     Faucet(String),
     /// Response for:
