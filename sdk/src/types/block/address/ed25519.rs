@@ -83,9 +83,7 @@ pub mod dto {
             value
                 .pub_key_hash
                 .parse::<Self>()
-                .map_err(|e| {
-                    log::debug!("{:?}", e);
-                    Error::InvalidField("pubKeyHash")})
+                .map_err(|_| Error::InvalidField("pubKeyHash"))
         }
     }
 }
