@@ -51,7 +51,7 @@ async fn main() -> Result<()> {
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .add_feature(SenderFeature::new(address))
         .add_feature(MetadataFeature::new("mutable metadata".as_bytes().to_vec())?)
-        .add_feature(TagFeature::new("my tag".as_bytes().to_vec())?)
+        .add_feature(TagFeature::new("my tag")?)
         .add_immutable_feature(IssuerFeature::new(address))
         .add_immutable_feature(MetadataFeature::new(tip_27_immutable_metadata)?)
         .finish_output(token_supply)?;

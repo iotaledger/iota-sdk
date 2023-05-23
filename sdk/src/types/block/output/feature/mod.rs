@@ -434,7 +434,7 @@ pub mod dto {
                     prefix_hex::decode(&v.data).map_err(|_e| Error::InvalidField("MetadataFeature"))?,
                 )?),
                 FeatureDto::Tag(v) => Self::Tag(TagFeature::new(
-                    prefix_hex::decode(&v.tag).map_err(|_e| Error::InvalidField("TagFeature"))?,
+                    prefix_hex::decode::<Vec<u8>>(&v.tag).map_err(|_e| Error::InvalidField("TagFeature"))?,
                 )?),
             })
         }
