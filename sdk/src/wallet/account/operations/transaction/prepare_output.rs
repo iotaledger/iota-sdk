@@ -66,13 +66,13 @@ impl Account {
 
             if let Some(tag) = features.tag {
                 first_output_builder = first_output_builder.add_feature(TagFeature::new(
-                    prefix_hex::decode(tag).map_err(|_| Error::InvalidField("tag"))?,
+                    prefix_hex::decode::<Vec<u8>>(tag).map_err(|_| Error::InvalidField("tag"))?,
                 )?);
             }
 
             if let Some(metadata) = features.metadata {
                 first_output_builder = first_output_builder.add_feature(MetadataFeature::new(
-                    prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("metadata"))?,
+                    prefix_hex::decode::<Vec<u8>>(metadata).map_err(|_| Error::InvalidField("metadata"))?,
                 )?);
             }
 
@@ -233,13 +233,13 @@ impl Account {
         if let Some(features) = params.features {
             if let Some(tag) = features.tag {
                 first_output_builder = first_output_builder.add_feature(TagFeature::new(
-                    prefix_hex::decode(tag).map_err(|_| Error::InvalidField("tag"))?,
+                    prefix_hex::decode::<Vec<u8>>(tag).map_err(|_| Error::InvalidField("tag"))?,
                 )?);
             }
 
             if let Some(metadata) = features.metadata {
                 first_output_builder = first_output_builder.add_feature(MetadataFeature::new(
-                    prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("metadata"))?,
+                    prefix_hex::decode::<Vec<u8>>(metadata).map_err(|_| Error::InvalidField("metadata"))?,
                 )?);
             }
 
