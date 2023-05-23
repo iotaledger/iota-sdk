@@ -12,6 +12,7 @@ use super::account_method::AccountMethod;
 use crate::wallet::events::types::{WalletEvent, WalletEventType};
 use crate::{
     client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions},
+    types::block::address::{Bech32Address, Hrp},
     wallet::{
         account::{operations::syncing::SyncOptions, types::AccountIdentifier},
         ClientOptions,
@@ -30,7 +31,7 @@ pub enum Message {
         /// The account alias.
         alias: Option<String>,
         /// The bech32 HRP.
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Read account.
     /// Expected response: [`Account`](crate::wallet::message_interface::Response::Account)
@@ -120,7 +121,7 @@ pub enum Message {
         ignore_if_coin_type_mismatch: Option<bool>,
         /// If ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", no
         /// accounts will be restored.
-        ignore_if_bech32_mismatch: Option<String>,
+        ignore_if_bech32_mismatch: Option<Hrp>,
     },
     /// Removes the latest account (account with the largest account index).
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)
@@ -146,7 +147,7 @@ pub enum Message {
         /// Options
         options: Option<GenerateAddressOptions>,
         /// Bech32 HRP
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Get the ledger nano status
     /// Expected response: [`LedgerNanoStatus`](crate::wallet::message_interface::Response::LedgerNanoStatus)
@@ -197,7 +198,7 @@ pub enum Message {
     /// Transforms a bech32 encoded address to hex
     /// Expected response: [`HexAddress`](crate::wallet::message_interface::Response::HexAddress)
     #[serde(rename_all = "camelCase")]
-    Bech32ToHex { bech32_address: String },
+    Bech32ToHex { bech32_address: Bech32Address },
     /// Transforms a hex encoded address to a bech32 encoded address
     /// Expected response: [`Bech32Address`](crate::wallet::message_interface::Response::Bech32Address)
     #[serde(rename_all = "camelCase")]
@@ -205,7 +206,7 @@ pub enum Message {
         /// Hex encoded bech32 address
         hex: String,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     // Remove all listeners of this type. Empty vec clears all listeners
     /// Expected response: [`Ok`](crate::wallet::message_interface::Response::Ok)

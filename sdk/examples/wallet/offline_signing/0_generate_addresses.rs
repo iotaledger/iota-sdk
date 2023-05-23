@@ -51,7 +51,7 @@ async fn main() -> Result<()> {
     let account = wallet
         .create_account()
         .with_alias("Alice".to_string())
-        .with_bech32_hrp(SHIMMER_BECH32_HRP.to_string())
+        .with_bech32_hrp(SHIMMER_BECH32_HRP)
         .finish()
         .await?;
 

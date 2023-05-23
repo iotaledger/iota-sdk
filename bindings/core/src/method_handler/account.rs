@@ -199,7 +199,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         } => {
             let output = account
                 .prepare_output(
-                    OutputParams::try_from(&options)?,
+                    OutputParams::try_from(options.as_ref())?,
                     transaction_options
                         .as_ref()
                         .map(TransactionOptions::try_from_dto)

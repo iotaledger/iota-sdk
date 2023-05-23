@@ -16,8 +16,8 @@ impl AddressUnlockCondition {
 
     /// Creates a new [`AddressUnlockCondition`].
     #[inline(always)]
-    pub fn new(address: Address) -> Self {
-        Self(address)
+    pub fn new(address: impl Into<Address>) -> Self {
+        Self(address.into())
     }
 
     /// Returns the address of a [`AddressUnlockCondition`].
@@ -56,11 +56,7 @@ pub mod dto {
         fn try_from(value: &AddressUnlockConditionDto) -> Result<Self, Error> {
             log::debug!("{:?}", &value.address);
             Ok(Self::new(
-                (&value.address)
-                    .try_into()
-                    .map_err(|_e| {
-                        log::debug!("{:?}", _e);
-                        Error::InvalidField("addressUnlockCondition")})?,
+                Address::try_from(&value.address).map_err(|_e| Error::InvalidField("addressUnlockCondition"))?,
             ))
         }
     }

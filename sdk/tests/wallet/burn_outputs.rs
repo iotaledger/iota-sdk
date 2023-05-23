@@ -23,7 +23,7 @@ async fn mint_and_burn_nft() -> Result<()> {
     let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
     let nft_options = vec![MintNftParams {
-        address: Some(account.addresses().await?[0].address().to_string()),
+        address: Some(*account.addresses().await?[0].address()),
         sender: None,
         metadata: Some(b"some nft metadata".to_vec()),
         tag: None,

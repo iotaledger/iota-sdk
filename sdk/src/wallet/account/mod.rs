@@ -473,7 +473,7 @@ fn serialize() {
     let protocol_parameters = ProtocolParameters::new(
         2,
         String::from("testnet"),
-        String::from("rms"),
+        "rms",
         1500,
         15,
         crate::types::block::output::RentStructure::new(500, 10, 1),

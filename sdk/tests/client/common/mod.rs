@@ -24,7 +24,7 @@ pub async fn create_client_and_secret_manager_with_funds(mnemonic: Option<&str>)
 
     let secret_manager = SecretManager::try_from_mnemonic(mnemonic.unwrap_or(&Client::generate_mnemonic().unwrap()))?;
 
-    let address = &client
+    let address = client
         .get_addresses(&secret_manager)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .with_account_index(0)
@@ -32,14 +32,14 @@ pub async fn create_client_and_secret_manager_with_funds(mnemonic: Option<&str>)
         .finish()
         .await?[0];
 
-    request_funds_from_faucet(FAUCET_URL, address).await?;
+    request_funds_from_faucet(FAUCET_URL, &address).await?;
 
     // Continue only after funds are received
     for _ in 0..30 {
         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
         let output_ids_response = client
             .basic_output_ids(vec![
-                QueryParameter::Address(address.clone()),
+                QueryParameter::Address(address),
                 QueryParameter::HasExpiration(false),
                 QueryParameter::HasTimelock(false),
                 QueryParameter::HasStorageDepositReturn(false),

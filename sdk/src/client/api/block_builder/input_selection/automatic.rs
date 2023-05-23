@@ -19,20 +19,28 @@ use crate::{
         secret::types::InputSigningData,
         Error, Result,
     },
-    types::block::{address::Address, output::OutputWithMetadata, protocol::ProtocolParameters},
+    types::block::{
+        address::{Address, Bech32AddressLike},
+        output::OutputWithMetadata,
+        protocol::ProtocolParameters,
+    },
     utils::unix_timestamp_now,
 };
 
 impl<'a> ClientBlockBuilder<'a> {
     // Get basic outputs for an address without storage deposit return unlock condition
-    pub(crate) async fn basic_address_outputs(&self, address: String) -> Result<Vec<OutputWithMetadata>> {
+    pub(crate) async fn basic_address_outputs(
+        &self,
+        address: impl Bech32AddressLike,
+    ) -> Result<Vec<OutputWithMetadata>> {
+        let address = address.to_bech32()?;
         let mut output_ids = Vec::new();
 
         // First request to get all basic outputs that can directly be unlocked by the address.
         output_ids.extend(
             self.client
                 .basic_output_ids(vec![
-                    QueryParameter::Address(address.clone()),
+                    QueryParameter::Address(address),
                     QueryParameter::HasStorageDepositReturn(false),
                 ])
                 .await?
@@ -135,30 +143,30 @@ impl<'a> ClientBlockBuilder<'a> {
                 addresses
                     .public
                     .iter()
-                    .map(|bech32_address| Ok(Address::try_from_bech32(bech32_address)?))
-                    .collect::<Result<Vec<Address>>>()?,
+                    .map(|bech32_address| *bech32_address.inner())
+                    .collect::<Vec<Address>>(),
             );
             available_input_addresses.extend(
                 addresses
                     .internal
                     .iter()
-                    .map(|bech32_address| Ok(Address::try_from_bech32(bech32_address)?))
-                    .collect::<Result<Vec<Address>>>()?,
+                    .map(|bech32_address| *bech32_address.inner())
+                    .collect::<Vec<Address>>(),
             );
 
             // Have public and internal addresses with the index ascending ordered.
             let mut public_and_internal_addresses = Vec::new();
 
             for index in 0..addresses.public.len() {
-                public_and_internal_addresses.push((addresses.public[index].clone(), false));
-                public_and_internal_addresses.push((addresses.internal[index].clone(), true));
+                public_and_internal_addresses.push((addresses.public[index], false));
+                public_and_internal_addresses.push((addresses.internal[index], true));
             }
 
             // For each address, get the address outputs.
             let mut address_index = gap_index;
 
-            for (index, (str_address, internal)) in public_and_internal_addresses.iter().enumerate() {
-                let address_outputs = self.basic_address_outputs(str_address.to_string()).await?;
+            for (index, (bech32_address, internal)) in public_and_internal_addresses.iter().enumerate() {
+                let address_outputs = self.basic_address_outputs(*bech32_address).await?;
 
                 // If there are more than 20 (ADDRESS_GAP_RANGE) consecutive empty addresses, then we stop
                 // looking up the addresses belonging to the seed. Note that we don't
@@ -174,8 +182,6 @@ impl<'a> ClientBlockBuilder<'a> {
                     empty_address_count = 0;
 
                     for output_with_meta in address_outputs {
-                        let address = Address::try_from_bech32(str_address)?;
-
                         // We can ignore the unlocked_alias_or_nft_address, since we only requested basic outputs
                         let (required_unlock_address, _unlocked_alias_or_nft_address) =
                             output_with_meta.output().required_and_unlocked_address(
@@ -183,7 +189,7 @@ impl<'a> ClientBlockBuilder<'a> {
                                 output_with_meta.metadata().output_id(),
                                 None,
                             )?;
-                        if required_unlock_address == address {
+                        if &required_unlock_address == bech32_address.inner() {
                             available_inputs.push(InputSigningData {
                                 output: output_with_meta.output,
                                 output_metadata: output_with_meta.metadata,
