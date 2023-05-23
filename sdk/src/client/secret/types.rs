@@ -19,7 +19,7 @@ use crate::{
     },
 };
 
-/// Stronghold DTO to allow the creation of a Stronghold secret manager from bindings
+/// Stronghold DTO to allow the creation of a Stronghold secret manager from bindings.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, ZeroizeOnDrop)]
 #[cfg(feature = "stronghold")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
@@ -33,7 +33,7 @@ pub struct StrongholdDto {
     pub snapshot_path: String,
 }
 
-/// Stronghold DTO to allow the creation of a Stronghold secret manager from bindings
+/// A mnemonic (space separated list of words) that allows to create a seed from.
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
 #[cfg(feature = "stronghold")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
