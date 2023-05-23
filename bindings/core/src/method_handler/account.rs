@@ -10,7 +10,6 @@ use iota_sdk::{
         SignedTransactionDataDto,
     },
     types::block::{
-        address::Bech32Address,
         output::{dto::OutputDto, Output, Rent},
         Error,
     },
@@ -296,9 +295,6 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let events = account.register_participation_events(&options).await?;
             Response::ParticipationEvents(events)
         }
-        AccountMethod::RequestFundsFromFaucet { url, address } => Response::Faucet(
-            iota_sdk::client::request_funds_from_faucet(&url, &Bech32Address::try_from_str(address)?).await?,
-        ),
         AccountMethod::RetryTransactionUntilIncluded {
             transaction_id,
             interval,

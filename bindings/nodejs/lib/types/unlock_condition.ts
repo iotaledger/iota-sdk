@@ -17,15 +17,6 @@ enum UnlockConditionType {
     ImmutableAliasAddress = 6,
 }
 
-export type UnlockConditionTypes =
-    | AddressUnlockCondition
-    | StorageDepositReturnUnlockCondition
-    | TimelockUnlockCondition
-    | ExpirationUnlockCondition
-    | StateControllerAddressUnlockCondition
-    | GovernorAddressUnlockCondition
-    | ImmutableAliasAddressUnlockCondition;
-
 abstract class UnlockCondition {
     private type: UnlockConditionType;
 

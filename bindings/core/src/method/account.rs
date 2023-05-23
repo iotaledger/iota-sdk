@@ -263,8 +263,6 @@ pub enum AccountMethod {
     RegisterParticipationEvents {
         options: ParticipationEventRegistrationOptions,
     },
-    /// Expected response: [`Faucet`](crate::Response::Faucet)
-    RequestFundsFromFaucet { url: String, address: String },
     /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
     /// included (referenced by a milestone). Returns the included block id.
     /// Expected response: [`BlockId`](crate::Response::BlockId)
