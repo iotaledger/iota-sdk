@@ -72,7 +72,7 @@ impl Packable for Hrp {
     #[inline]
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.len.pack(packer)?;
-        packer.pack_bytes(self.inner)?;
+        packer.pack_bytes(&self.inner[..self.len as usize])?;
 
         Ok(())
     }

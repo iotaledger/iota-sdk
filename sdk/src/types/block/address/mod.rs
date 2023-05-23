@@ -114,7 +114,7 @@ impl Address {
     }
 
     /// Try to encode this address to a bech32 string with the given Human Readable Part as prefix.
-    pub fn try_to_bech32<T: HrpLike>(&self, hrp: T) -> Result<Bech32Address, Error> {
+    pub fn try_to_bech32(&self, hrp: impl HrpLike) -> Result<Bech32Address, Error> {
         Bech32Address::try_new(hrp, self)
     }
 
@@ -125,7 +125,7 @@ impl Address {
 
     /// Encodes this address to a bech32 string with the given Human Readable Part as prefix without checking
     /// validity.
-    pub fn to_bech32_unchecked<T: HrpLike>(&self, hrp: T) -> Bech32Address {
+    pub fn to_bech32_unchecked(&self, hrp: impl HrpLike) -> Bech32Address {
         Bech32Address::new(hrp.to_hrp_unchecked(), self)
     }
 

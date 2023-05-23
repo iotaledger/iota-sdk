@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `OutputWithMetadata::{into_output, into_metadata}` methods;
 - Storage and Backup migration;
 - `types::block::Error::InvalidFoundryZeroSerialNumber` variant;
+- Added `Hrp` type to represent a valid bech32 human-readable part;
 
 ### Changed
 
@@ -65,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename `AccountInner::get_incoming_transaction_data` to `get_incoming_transaction`;
 - `AccountInner::{incoming_transactions, transactions, pending_transactions}` don't return a `Result` anymore;
 - `AccountInner::incoming_transactions` returns a `Vec` instead of a `HashMap`;
+- `Address::try_from_bech32_with_hrp` refactored to `try_from_bech32`;
 
 ### Removed
 
