@@ -50,16 +50,16 @@ async fn main() -> Result<()> {
         // with metadata feature block
         nft_output_builder
             .clone()
-            .add_feature(MetadataFeature::new("Hello, World!".as_bytes().to_owned())?)
+            .add_feature(MetadataFeature::new("Hello, World!")?)
             .finish_output(token_supply)?,
         // with immutable metadata feature block
         nft_output_builder
             .clone()
-            .add_immutable_feature(MetadataFeature::new("Hello, World!".as_bytes().to_owned())?)
+            .add_immutable_feature(MetadataFeature::new("Hello, World!")?)
             .finish_output(token_supply)?,
         // with tag feature
         nft_output_builder
-            .add_feature(TagFeature::new("Hello, World!".as_bytes().to_owned())?)
+            .add_feature(TagFeature::new("Hello, World!")?)
             .finish_output(token_supply)?,
     ];
 
