@@ -20,7 +20,7 @@ import {
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/outputs/output_unlock_conditions.ts
+// yarn run-example ./how_tos/outputs/unlock_conditions.ts
 
 // Build ouputs with all unlock conditions
 async function run() {

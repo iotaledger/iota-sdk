@@ -163,11 +163,11 @@ required-features = [ "rocksdb", "stronghold" ]
 
 [[example]]
 name = "output_unlock_conditions"
-path = "examples/how_tos/outputs/output_unlock_conditions.rs"
+path = "examples/how_tos/outputs/unlock_conditions.rs"
 
 [[example]]
 name = "output_features"
-path = "examples/how_tos/outputs/output_features.rs"
+path = "examples/how_tos/outputs/features.rs"
 
 # Block examples
 
