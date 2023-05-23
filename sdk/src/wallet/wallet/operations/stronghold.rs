@@ -4,7 +4,7 @@
 use std::time::Duration;
 
 use crate::{
-    client::secret::{types::Mnemonic, SecretManager},
+    client::secret::{mnemonic::MnemonicLike, SecretManager},
     wallet::Wallet,
 };
 
@@ -39,23 +39,10 @@ impl Wallet {
     }
 
     /// Stores a mnemonic into the Stronghold vault
-    pub async fn store_mnemonic<T>(&self, mnemonic: T) -> crate::wallet::Result<()>
-    where
-        T: TryInto<Mnemonic, Error = crate::client::stronghold::Error> + Send,
-    {
+    pub async fn store_mnemonic(&self, mnemonic: impl MnemonicLike) -> crate::wallet::Result<()> {
         if let SecretManager::Stronghold(stronghold) = &mut *self.secret_manager.write().await {
             stronghold.store_mnemonic(mnemonic).await?;
         }
-
-        Ok(())
-    }
-
-    /// Stores a mnemonic into the Stronghold vault
-    pub async fn store_mnemonic_t(&self, mnemonic: Mnemonic) -> crate::wallet::Result<()> {
-        if let SecretManager::Stronghold(stronghold) = &mut *self.secret_manager.write().await {
-            stronghold.store_mnemonic_t(mnemonic).await?;
-        }
-
         Ok(())
     }
 

@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::client::{secret::types::Mnemonic, Client, Result};
+use iota_sdk::client::{secret::mnemonic::Mnemonic, Client, Result};
 
 #[tokio::test]
 async fn mnemonic() -> Result<()> {

@@ -21,7 +21,7 @@ use crate::{
         api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
         constants::SHIMMER_TESTNET_BECH32_HRP,
         request_funds_from_faucet,
-        secret::types::Mnemonic,
+        secret::mnemonic::Mnemonic,
         utils, Client, NodeInfoWrapper,
     },
     types::block::{

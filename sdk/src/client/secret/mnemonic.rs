@@ -10,8 +10,10 @@ use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
     keys::slip10::{Chain, Curve, Seed},
 };
+use serde::{Deserialize, Serialize};
+use zeroize::{ZeroizeOnDrop, Zeroize};
 
-use super::{types::Mnemonic, GenerateAddressOptions, SecretManage};
+use super::{GenerateAddressOptions, SecretManage};
 use crate::{
     client::{constants::HD_WALLET_TYPE, Client, Error},
     types::block::{
@@ -95,6 +97,66 @@ impl MnemonicSecretManager {
 impl From<Mnemonic> for MnemonicSecretManager {
     fn from(m: Mnemonic) -> Self {
         Self(Client::mnemonic_to_seed(&m))
+    }
+}
+
+/// A mnemonic (space separated list of words) that allows to create a seed from.
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
+pub struct Mnemonic(String);
+
+impl Mnemonic {
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+}
+
+impl TryFrom<String> for Mnemonic {
+    type Error = Error;
+
+    fn try_from(mut value: String) -> Result<Self, Self::Error> {
+        // trim because empty spaces could create a different seed https://github.com/iotaledger/crypto.rs/issues/125
+        let trimmed = value.trim();
+        // first we check if the mnemonic is valid to give meaningful errors
+        if let Err(err) = crypto::keys::bip39::wordlist::verify(trimmed, &crypto::keys::bip39::wordlist::ENGLISH) {
+            value.zeroize();
+            Err(crate::client::Error::InvalidMnemonic(format!("{err:?}")))
+        } else {
+            let mnemonic = trimmed.to_string();
+            value.zeroize();
+            Ok(Self(mnemonic))
+        }
+    }
+}
+
+pub trait MnemonicLike: Send {
+    fn to_mnemonic(self) -> Result<Mnemonic, Error>;
+    fn as_str(&self) -> &str;
+}
+
+impl MnemonicLike for Mnemonic {
+    fn to_mnemonic(self) -> Result<Mnemonic, Error> {
+        Ok(self)
+    }
+
+    fn as_str(&self) -> &str {
+        self.as_str()
+    }
+}
+
+impl MnemonicLike for String {
+    fn to_mnemonic(self) -> Result<Mnemonic, Error> {
+        Mnemonic::try_from(self)
+    }
+
+    fn as_str(&self) -> &str {
+        self.as_str()
+    }
+}
+
+// that's only necessary to use it in `assert!` macros
+impl core::fmt::Debug for Mnemonic {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "<mnemonic>")
     }
 }
 

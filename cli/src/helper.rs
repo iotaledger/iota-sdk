@@ -5,7 +5,7 @@ use chrono::{DateTime, NaiveDateTime, Utc};
 use clap::Parser;
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Password, Select};
 use iota_sdk::{
-    client::secret::types::Mnemonic,
+    client::secret::mnemonic::Mnemonic,
     wallet::{Account, Wallet},
 };
 use tokio::{

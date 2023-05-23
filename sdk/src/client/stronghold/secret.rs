@@ -19,7 +19,7 @@ use super::{
 use crate::{
     client::{
         constants::HD_WALLET_TYPE,
-        secret::{types::Mnemonic, GenerateAddressOptions, SecretManage},
+        secret::{mnemonic::{Mnemonic, MnemonicLike}, GenerateAddressOptions, SecretManage},
         stronghold::Error,
     },
     types::block::{
@@ -216,16 +216,19 @@ impl StrongholdAdapter {
     }
 
     /// Store a mnemonic into the Stronghold vault.
-    pub async fn store_mnemonic<T>(&self, mnemonic: T) -> Result<(), Error>
-    where
-        T: TryInto<Mnemonic, Error = crate::client::stronghold::Error> + Send,
-    {
-        self.store_mnemonic_t(mnemonic.try_into()?).await?;
-        Ok(())
-    }
+    pub async fn store_mnemonic(&self, mnemonic: impl MnemonicLike) -> Result<(), Error> {
+        let mnemonic = match mnemonic.to_mnemonic() {
+            Err(err) => {
+                // FIXME (dedicated PR): make errors consistent and compatible
+                if let crate::client::error::Error::InvalidMnemonic(s) = err {
+                    return Err(Error::InvalidMnemonic(s));
+                } else {
+                    unreachable!()
+                }
+            }
+            Ok(mnemonic) => mnemonic,
+        };
 
-    /// Store a mnemonic into the Stronghold vault.
-    pub async fn store_mnemonic_t(&self, mnemonic: Mnemonic) -> Result<(), Error> {
         // The key needs to be supplied first.
         if self.key_provider.lock().await.is_none() {
             return Err(Error::KeyCleared);

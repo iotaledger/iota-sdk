@@ -23,7 +23,7 @@ use crate::wallet::events::{
 use crate::wallet::storage::manager::StorageManager;
 use crate::{
     client::{
-        secret::{types::Mnemonic, SecretManager},
+        secret::{mnemonic::Mnemonic, SecretManager},
         Client,
     },
     wallet::account::{builder::AccountBuilder, operations::syncing::SyncOptions, types::AccountBalance, Account},

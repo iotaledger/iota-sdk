@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    client::{hex_public_key_to_bech32_address, hex_to_bech32, secret::types::Mnemonic, Client},
+    client::{hex_public_key_to_bech32_address, hex_to_bech32, secret::mnemonic::Mnemonic, Client},
     types::block::{
         address::{dto::AddressDto, Address, Ed25519Address},
         output::{AliasId, FoundryId, NftId},

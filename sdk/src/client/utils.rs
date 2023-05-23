@@ -12,7 +12,7 @@ use crypto::{
 };
 use zeroize::Zeroize;
 
-use super::{secret::types::Mnemonic, Client, ClientInner};
+use super::{secret::mnemonic::Mnemonic, Client, ClientInner};
 use crate::{
     client::{Error, Result},
     types::block::{
@@ -55,7 +55,7 @@ pub fn generate_mnemonic() -> Result<Mnemonic> {
     let mnemonic = wordlist::encode(&entropy, &crypto::keys::bip39::wordlist::ENGLISH)
         .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
     entropy.zeroize();
-    Ok(mnemonic.try_into()?)
+    mnemonic.try_into()
 }
 
 /// Returns a hex encoded seed for a mnemonic.

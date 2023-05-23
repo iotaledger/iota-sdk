@@ -142,7 +142,7 @@ pub async fn init_command(
     };
 
     if let SecretManager::Stronghold(secret_manager) = &mut *wallet.get_secret_manager().write().await {
-        secret_manager.store_mnemonic_t(mnemonic).await?;
+        secret_manager.store_mnemonic(mnemonic).await?;
     } else {
         panic!("cli-wallet only supports Stronghold-backed secret managers at the moment.");
     }
