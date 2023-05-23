@@ -5,7 +5,7 @@ import { Wallet, CoinType, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./wallet/00_create_account.ts
+// yarn run-example ./how_tos/accounts_and_addresses/create_account.ts
 
 // This example creates a new database and account
 async function run() {
@@ -50,7 +50,7 @@ async function run() {
         const account = await wallet.createAccount({
             alias: 'Alice',
         });
-        console.log('Account created:', account.getMetadata());
+        console.log('Account created:', account.getMetadata().alias);
     } catch (error) {
         console.error('Error: ', error);
     }

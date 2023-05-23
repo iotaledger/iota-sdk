@@ -1,16 +1,21 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from iota_sdk.types.common import HexStr
+from iota_sdk.types.output_id import OutputId
+from typing import List, Optional
+
+
 class HighLevelAPI():
 
-    def get_outputs(self, output_ids):
+    def get_outputs(self, output_ids: List[OutputId]):
         """Fetch OutputResponse from provided OutputIds (requests are sent in parallel).
         """
         return self._call_method('getOutputs', {
             'outputIds': output_ids
         })
 
-    def get_outputs_ignore_errors(self, output_ids):
+    def get_outputs_ignore_errors(self, output_ids: List[OutputId]):
         """Try to get OutputResponse from provided OutputIds.
            Requests are sent in parallel and errors are ignored, can be useful for spent outputs.
         """
@@ -18,20 +23,20 @@ class HighLevelAPI():
             'outputIds': output_ids
         })
 
-    def find_blocks(self, block_ids):
+    def find_blocks(self, block_ids: List[HexStr]):
         """Find all blocks by provided block IDs.
         """
         return self._call_method('findBlocks', {
             'blockIds': block_ids
         })
 
-    def retry(self, block_id):
+    def retry(self, block_id: HexStr):
         """Retries (promotes or reattaches) a block for provided block id. Block should only be
            retried only if they are valid and haven't been confirmed for a while.
         """
         return self._call_method('retry', {'blockId': block_id})
 
-    def retry_until_included(self, block_id, interval=None, max_attempts=None):
+    def retry_until_included(self, block_id: HexStr, interval: Optional[int] = None, max_attempts: Optional[int] = None):
         """Retries (promotes or reattaches) a block for provided block id until it's included (referenced by a
            milestone). Default interval is 5 seconds and max attempts is 40. Returns the included block at first
            position and additional reattached blocks.
@@ -51,7 +56,7 @@ class HighLevelAPI():
             'generateAddressesOptions': generate_addresses_options,
         })
 
-    def find_inputs(self, addresses, amount):
+    def find_inputs(self, addresses: List[str], amount: int):
         """Function to find inputs from addresses for a provided amount (useful for offline signing)
         """
         return self._call_method('findInputs', {
@@ -59,7 +64,7 @@ class HighLevelAPI():
             'amount': amount
         })
 
-    def find_outputs(self, output_ids, addresses):
+    def find_outputs(self, output_ids: List[OutputId], addresses: List[str]):
         """Find all outputs based on the requests criteria. This method will try to query multiple nodes if
            the request amount exceeds individual node limit.
         """
@@ -68,7 +73,7 @@ class HighLevelAPI():
             'addresses': addresses
         })
 
-    def reattach(self, block_id):
+    def reattach(self, block_id: HexStr):
         """Reattaches blocks for provided block id. Blocks can be reattached only if they are valid and haven't been
            confirmed for a while.
         """
@@ -76,14 +81,14 @@ class HighLevelAPI():
             'blockId': block_id
         })
 
-    def reattach_unchecked(self, block_id):
+    def reattach_unchecked(self, block_id: HexStr):
         """Reattach a block without checking if it should be reattached.
         """
         return self._call_method('reattachUnchecked', {
             'blockId': block_id
         })
 
-    def promote(self, block_id):
+    def promote(self, block_id: HexStr):
         """Promotes a block. The method should validate if a promotion is necessary through get_block. If not, the
            method should error out and should not allow unnecessary promotions.
         """
@@ -91,7 +96,7 @@ class HighLevelAPI():
             'blockId': block_id
         })
 
-    def promote_unchecked(self, block_id):
+    def promote_unchecked(self, block_id: HexStr):
         """Promote a block without checking if it should be promoted.
         """
         return self._call_method('promoteUnchecked', {

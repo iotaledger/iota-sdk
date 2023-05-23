@@ -39,7 +39,8 @@ impl MetadataFeature {
 
     /// Creates a new [`MetadataFeature`].
     #[inline(always)]
-    pub fn new(data: Vec<u8>) -> Result<Self, Error> {
+    pub fn new(data: impl Into<Vec<u8>>) -> Result<Self, Error> {
+        let data = data.into();
         Self::try_from(data)
     }
 

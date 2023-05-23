@@ -561,13 +561,13 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          * @param transactionId The ID of the transaction to get.
          * @returns The transaction.
          */
-        async getIncomingTransactionData(
+        async getIncomingTransaction(
             transactionId: string,
         ): Promise<Transaction> {
             const response = await messageHandler.callAccountMethod(
                 accountMeta.index,
                 {
-                    name: 'getIncomingTransactionData',
+                    name: 'getIncomingTransaction',
                     data: {
                         transactionId,
                     },

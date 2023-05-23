@@ -18,8 +18,8 @@ impl GovernorAddressUnlockCondition {
 
     /// Creates a new [`GovernorAddressUnlockCondition`].
     #[inline(always)]
-    pub fn new(address: Address) -> Self {
-        Self(address)
+    pub fn new(address: impl Into<Address>) -> Self {
+        Self(address.into())
     }
 
     /// Returns the address of a [`GovernorAddressUnlockCondition`].
@@ -57,8 +57,7 @@ pub mod dto {
 
         fn try_from(value: &GovernorAddressUnlockConditionDto) -> Result<Self, Error> {
             Ok(Self::new(
-                (&value.address)
-                    .try_into()
+                Address::try_from(&value.address)
                     .map_err(|_e| Error::InvalidField("governorAddressUnlockCondition"))?,
             ))
         }

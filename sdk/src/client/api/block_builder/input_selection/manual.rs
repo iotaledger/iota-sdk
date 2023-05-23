@@ -57,7 +57,7 @@ impl<'a> ClientBlockBuilder<'a> {
                                 Address::Ed25519(_) => Some(
                                     search_address(
                                         secret_manager,
-                                        &bech32_hrp,
+                                        bech32_hrp,
                                         self.coin_type,
                                         self.account_index,
                                         self.input_range.clone(),

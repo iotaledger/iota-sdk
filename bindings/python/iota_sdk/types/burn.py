@@ -5,6 +5,7 @@ from __future__ import annotations  # Allow reference to Burn in Burn class
 from dataclasses import dataclass
 from typing import List, Optional, Dict, Any
 from iota_sdk.types.native_token import NativeToken
+from iota_sdk.types.common import HexStr
 
 
 @dataclass
@@ -23,33 +24,34 @@ class Burn:
         The native tokens to burn
     """
 
-    aliases: Optional[List[str]]
-    nfts: Optional[List[str]]
-    foundries: Optional[List[str]]
+    aliases: Optional[List[HexStr]]
+    nfts: Optional[List[HexStr]]
+    foundries: Optional[List[HexStr]]
     nativeTokens: Optional[List[NativeToken]]
 
-    def add_alias(self, alias: str) -> Burn:
+    def add_alias(self, alias: HexStr) -> Burn:
         if self.aliases is None:
             self.aliases = []
         self.aliases.append(alias)
         return self
 
-    def add_nft(self, nft: str) -> Burn:
+    def add_nft(self, nft: HexStr) -> Burn:
         if self.nfts is None:
             self.nfts = []
         self.nfts.append(nft)
         return self
 
-    def add_foundry(self, foundry: str) -> Burn:
+    def add_foundry(self, foundry: HexStr) -> Burn:
         if self.foundries is None:
             self.foundries = []
         self.foundries.append(foundry)
         return self
 
     def add_native_token(self, native_token: NativeToken) -> Burn:
-        if self.native_tokens is None:
-            self.native_tokens = []
-        self.nativeTokens.append(native_token)
+        if self.nativeTokens is None:
+            self.nativeTokens = [native_token]
+        else:
+            self.nativeTokens.append(native_token)
         return self
 
     def as_dict(self) -> Dict[str, Any]:
