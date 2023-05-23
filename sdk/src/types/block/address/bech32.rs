@@ -9,7 +9,12 @@ use core::str::FromStr;
 
 use bech32::{FromBase32, ToBase32, Variant};
 use derive_more::{AsRef, Deref};
-use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable, PackableExt};
+use packable::{
+    error::{UnpackError, UnpackErrorExt},
+    packer::Packer,
+    unpacker::Unpacker,
+    Packable, PackableExt,
+};
 
 use crate::types::block::{address::Address, Error};
 
@@ -82,7 +87,7 @@ impl Packable for Hrp {
         unpacker: &mut U,
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let Ok(len) = u8::unpack::<_, VERIFY>(unpacker, visitor) else { unreachable!() };
+        let len = u8::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
 
         if len > 83 {
             return Err(UnpackError::Packable(Error::InvalidBech32Hrp(
