@@ -4,7 +4,7 @@
 //! In this example we will send a transaction.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example simple_transaction --release`
+//! `cargo run --release --all-features --example simple_transaction`
 
 use iota_sdk::wallet::{Result, SendAmountParams, Wallet};
 

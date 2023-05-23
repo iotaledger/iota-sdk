@@ -369,6 +369,14 @@ impl NftOutput {
 
         Ok(())
     }
+
+    // Transition, just without full ValidationContext
+    pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
+        if current_state.immutable_features != next_state.immutable_features {
+            return Err(StateTransitionError::MutatedImmutableField);
+        }
+        Ok(())
+    }
 }
 
 impl StateTransitionVerifier for NftOutput {
@@ -391,11 +399,7 @@ impl StateTransitionVerifier for NftOutput {
         next_state: &Self,
         _context: &ValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
-        if current_state.immutable_features != next_state.immutable_features {
-            return Err(StateTransitionError::MutatedImmutableField);
-        }
-
-        Ok(())
+        Self::transition_inner(current_state, next_state)
     }
 
     fn destruction(_current_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {

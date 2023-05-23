@@ -15,6 +15,7 @@ use iota_sdk::{
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
 #[tokio::test]
+#[cfg(feature = "rocksdb")]
 async fn updated_default_sync_options() -> Result<()> {
     let storage_path = "test-storage/updated_default_sync_options";
     setup(storage_path)?;

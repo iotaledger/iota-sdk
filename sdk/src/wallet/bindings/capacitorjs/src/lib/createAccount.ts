@@ -39,6 +39,7 @@ import type {
     BuildNftOutputData,
 } from '../types/buildOutputData'
 import type {
+    Burn,
     HexEncodedAmount,
     IAliasOutput,
     IBasicOutput,
@@ -118,6 +119,37 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             return JSON.parse(resp).payload;
         },
 
+
+        /**
+         * A generic `burn()` function that can be used to burn native tokens, nfts, foundries and aliases.
+         *
+         * Note that burning **native tokens** doesn't require the foundry output which minted them, but will not increase
+         * the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
+         * recommended to use melting, if the foundry output is available.
+         *
+         * @param burn The outputs to claim
+         * @param transactionOptions The options to define a `RemainderValueStrategy`
+         * or custom inputs.
+         * @returns The transaction.
+         */
+        async burn(
+            burn: Burn,
+            transactionOptions?: TransactionOptions,
+        ): Promise<Transaction> {
+            const resp = await messageHandler.callAccountMethod(
+                accountMeta.index,
+                {
+                    name: 'burn',
+                    data: {
+                        burn,
+                        options: transactionOptions,
+                    },
+                },
+            );
+            return JSON.parse(resp).payload;
+        },
+
+
         /**
          * Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
          * the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
@@ -136,17 +168,18 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             const resp = await messageHandler.callAccountMethod(
                 accountMeta.index,
                 {
-                    name: 'burnNativeToken',
+                    name: 'burn',
                     data: {
-                        tokenId,
-                        burnAmount,
+                        burn: {
+                            nativeTokens: [{ id: tokenId, amount: burnAmount }],
+                        },
                         options: transactionOptions,
                     },
                 },
             );
             return JSON.parse(resp).payload;
-        },
 
+        },
         /**
          * Burn an nft output. Outputs controlled by it will be sweeped before if they don't have a storage
          * deposit return, timelock or expiration unlock condition. This should be preferred over burning, because after
@@ -163,9 +196,11 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             const resp = await messageHandler.callAccountMethod(
                 accountMeta.index,
                 {
-                    name: 'burnNft',
+                    name: 'burn',
                     data: {
-                        nftId,
+                        burn: {
+                            nfts: [nftId],
+                        },
                         options: transactionOptions,
                     },
                 },
@@ -285,8 +320,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
         },
 
         /**
-         * Destroy an alias output. Outputs controlled by it will be sweeped before if they don't have a
-         * storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
+         * Destroy an alias output. The amount and possible native tokens will be
          * sent to the governor address.
          * @param aliasId The AliasId.
          * @param transactionOptions The options to define a `RemainderValueStrategy`
@@ -300,9 +334,11 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             const resp = await messageHandler.callAccountMethod(
                 accountMeta.index,
                 {
-                    name: 'destroyAlias',
+                    name: 'burn',
                     data: {
-                        aliasId,
+                        burn: {
+                            aliases: [aliasId],
+                        },
                         options: transactionOptions,
                     },
                 },
@@ -325,9 +361,11 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
             const resp = await messageHandler.callAccountMethod(
                 accountMeta.index,
                 {
-                    name: 'destroyFoundry',
+                    name: 'burn',
                     data: {
-                        foundryId,
+                        burn: {
+                            foundries: [foundryId],
+                        },
                         options: transactionOptions,
                     },
                 },
@@ -523,13 +561,13 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          * @param transactionId The ID of the transaction to get.
          * @returns The transaction.
          */
-        async getIncomingTransactionData(
+        async getIncomingTransaction(
             transactionId: string,
         ): Promise<Transaction> {
             const response = await messageHandler.callAccountMethod(
                 accountMeta.index,
                 {
-                    name: 'getIncomingTransactionData',
+                    name: 'getIncomingTransaction',
                     data: {
                         transactionId,
                     },
@@ -1044,7 +1082,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          * Sync the account by fetching new information from the nodes.
          * Will also retry pending transactions if necessary.
          * A custom default can be set using setDefaultSyncOptions.
-         * 
+         *
          * @param options Optional synchronization options.
          * @returns The account balance.
          */

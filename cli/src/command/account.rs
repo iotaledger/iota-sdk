@@ -258,9 +258,11 @@ pub async fn burn_native_token_command(account: &Account, token_id: String, amou
     println_log_info!("Burning native token {token_id} {amount}.");
 
     let transaction = account
-        .burn_native_token(
-            TokenId::from_str(&token_id)?,
-            U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+        .burn(
+            NativeToken::new(
+                TokenId::from_str(&token_id)?,
+                U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+            )?,
             None,
         )
         .await?;
@@ -278,7 +280,7 @@ pub async fn burn_native_token_command(account: &Account, token_id: String, amou
 pub async fn burn_nft_command(account: &Account, nft_id: String) -> Result<(), Error> {
     println_log_info!("Burning nft {nft_id}.");
 
-    let transaction = account.burn_nft(NftId::from_str(&nft_id)?, None).await?;
+    let transaction = account.burn(NftId::from_str(&nft_id)?, None).await?;
 
     println_log_info!(
         "Burning transaction sent:\n{:?}\n{:?}",
@@ -433,7 +435,7 @@ pub async fn decrease_native_token_command(account: &Account, token_id: String, 
 pub async fn destroy_alias_command(account: &Account, alias_id: String) -> Result<(), Error> {
     println_log_info!("Destroying alias {alias_id}.");
 
-    let transaction = account.destroy_alias(AliasId::from_str(&alias_id)?, None).await?;
+    let transaction = account.burn(AliasId::from_str(&alias_id)?, None).await?;
 
     println_log_info!(
         "Destroying alias transaction sent:\n{:?}\n{:?}",
@@ -448,7 +450,7 @@ pub async fn destroy_alias_command(account: &Account, alias_id: String) -> Resul
 pub async fn destroy_foundry_command(account: &Account, foundry_id: String) -> Result<(), Error> {
     println_log_info!("Destroying foundry {foundry_id}.");
 
-    let transaction = account.destroy_foundry(FoundryId::from_str(&foundry_id)?, None).await?;
+    let transaction = account.burn(FoundryId::from_str(&foundry_id)?, None).await?;
 
     println_log_info!(
         "Destroying foundry transaction sent:\n{:?}\n{:?}",
@@ -720,7 +722,7 @@ pub async fn transaction_command(account: &Account, transaction_id_str: &str) ->
     let transaction_id = TransactionId::from_str(transaction_id_str)?;
     let maybe_transaction = account
         .transactions()
-        .await?
+        .await
         .into_iter()
         .find(|tx| tx.transaction_id == transaction_id);
 
@@ -735,7 +737,7 @@ pub async fn transaction_command(account: &Account, transaction_id_str: &str) ->
 
 /// `transactions` command
 pub async fn transactions_command(account: &Account, show_details: bool) -> Result<(), Error> {
-    let mut transactions = account.transactions().await?;
+    let mut transactions = account.transactions().await;
     transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
 
     if transactions.is_empty() {

@@ -9,6 +9,7 @@
 //! `cargo run --example burn_native_token --release`
 
 use iota_sdk::{
+    types::block::output::NativeToken,
     wallet::{Result, Wallet},
     U256,
 };
@@ -42,7 +43,7 @@ async fn main() -> Result<()> {
 
         // Burn a native token
         let burn_amount = U256::from(1);
-        let transaction = account.burn_native_token(*token_id, burn_amount, None).await?;
+        let transaction = account.burn(NativeToken::new(*token_id, burn_amount)?, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         let block_id = account
