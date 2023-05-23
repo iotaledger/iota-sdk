@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk import call_utils_method
+from iota_sdk.types.address import Ed25519Address
+from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from json import dumps, loads
 from typing import Any, Dict
@@ -18,7 +20,7 @@ class Utils():
         })
 
     @staticmethod
-    def hex_to_bech32(hex: str, bech32_hrp: str) -> str:
+    def hex_to_bech32(hex: HexStr, bech32_hrp: str) -> str:
         """Transforms a hex encoded address to a bech32 encoded address.
         """
         return _call_method('hexToBech32', {
@@ -27,7 +29,7 @@ class Utils():
         })
 
     @staticmethod
-    def alias_id_to_bech32(alias_id: str, bech32_hrp: str) -> str:
+    def alias_id_to_bech32(alias_id: HexStr, bech32_hrp: str) -> str:
         """Transforms an alias id to a bech32 encoded address.
         """
         return _call_method('aliasIdToBech32', {
@@ -36,7 +38,7 @@ class Utils():
         })
 
     @staticmethod
-    def nft_id_to_bech32(nft_id: str, bech32_hrp: str) -> str:
+    def nft_id_to_bech32(nft_id: HexStr, bech32_hrp: str) -> str:
         """Transforms an nft id to a bech32 encoded address.
         """
         return _call_method('nftIdToBech32', {
@@ -45,7 +47,7 @@ class Utils():
         })
 
     @staticmethod
-    def hex_public_key_to_bech32_address(hex: str, bech32_hrp: str) -> str:
+    def hex_public_key_to_bech32_address(hex: HexStr, bech32_hrp: str) -> str:
         """Transforms a hex encoded public key to a bech32 encoded address.
         """
         return _call_method('hexPublicKeyToBech32Address', {
@@ -76,7 +78,7 @@ class Utils():
         return _call_method('generateMnemonic')
 
     @staticmethod
-    def mnemonic_to_hex_seed(mnemonic: str) -> str:
+    def mnemonic_to_hex_seed(mnemonic: HexStr) -> str:
         """Returns a hex encoded seed for a mnemonic.
         """
         return _call_method('mnemonicToHexSeed', {
@@ -110,7 +112,7 @@ class Utils():
         })
 
     @staticmethod
-    def block_id(block: str) -> str:
+    def block_id(block) -> HexStr:
         """ Returns a block ID (Blake2b256 hash of block bytes) from a block.
         """
         return _call_method('blockId', {
@@ -118,7 +120,7 @@ class Utils():
         })
 
     @staticmethod
-    def hash_transaction_essence(essence) -> str:
+    def hash_transaction_essence(essence) -> HexStr:
         """ Compute the hash of a transaction essence.
         """
         return _call_method('hashTransactionEssence', {
@@ -126,7 +128,7 @@ class Utils():
         })
 
     @staticmethod
-    def verify_ed25519_signature(signature: str, message: str, address: str) -> str:
+    def verify_ed25519_signature(signature: HexStr, message: HexStr, address: Ed25519Address) -> bool:
         """Verifies the Ed25519Signature for a message against an Ed25519Address.
         """
         return _call_method('verifyEd25519Signature', {

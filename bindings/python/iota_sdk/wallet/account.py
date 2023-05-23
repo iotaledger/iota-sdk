@@ -3,6 +3,7 @@
 
 from iota_sdk.wallet.common import _call_method_routine
 from iota_sdk.types.burn import Burn
+from iota_sdk.types.common import HexStr
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.unlock_condition import UnlockCondition
@@ -46,9 +47,9 @@ class Account:
     def build_alias_output(self,
                            amount: int,
                            native_tokens: List[NativeToken],
-                           alias_id: str,
+                           alias_id: HexStr,
                            state_index: int,
-                           state_metadata: str,
+                           state_metadata: HexStr,
                            foundry_counter: int,
                            unlock_conditions: List[UnlockCondition],
                            features: List[Feature],
@@ -70,7 +71,7 @@ class Account:
         )
 
     def build_basic_output(self,
-                           amount,
+                           amount: int,
                            native_tokens: List[NativeToken],
                            unlock_conditions: List[UnlockCondition],
                            features: List[Feature]):
@@ -110,7 +111,7 @@ class Account:
     def build_nft_output(self,
                          amount: int,
                          native_tokens: List[NativeToken],
-                         nft_id: str,
+                         nft_id: HexStr,
                          unlock_conditions: List[UnlockCondition],
                          features: List[Feature],
                          immutable_features: List[Feature]):
@@ -139,7 +140,7 @@ class Account:
         )
 
     def burn_native_token(self,
-                          token_id: str,
+                          token_id: HexStr,
                           burn_amount: int,
                           options=None):
         """Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
@@ -154,7 +155,7 @@ class Account:
         )
 
     def burn_nft(self,
-                 nft_id: str,
+                 nft_id: HexStr,
                  options=None):
         """Burn an nft output.
         """
@@ -190,7 +191,7 @@ class Account:
         )
 
     def destroy_alias(self,
-                      alias_id: str,
+                      alias_id: HexStr,
                       options=None):
         """Destroy an alias output.
         """
@@ -203,7 +204,7 @@ class Account:
         )
 
     def destroy_foundry(self,
-                        foundry_id: str,
+                        foundry_id: HexStr,
                         options=None):
         """Destroy a foundry output with a circulating supply of 0.
         """
@@ -243,7 +244,7 @@ class Account:
             }
         )
 
-    def get_transaction(self, transaction_id: str):
+    def get_transaction(self, transaction_id: HexStr):
         """Get transaction.
         """
         return self._call_account_method(
@@ -306,7 +307,7 @@ class Account:
         )
 
     def decrease_native_token_supply(self,
-                                     token_id: str,
+                                     token_id: HexStr,
                                      melt_amount: int,
                                      options=None):
         """Melt native tokens. This happens with the foundry output which minted them, by increasing it's
@@ -320,7 +321,7 @@ class Account:
             }
         )
 
-    def increase_native_token_supply(self, token_id: str, mint_amount: int, options=None):
+    def increase_native_token_supply(self, token_id: HexStr, mint_amount: int, options=None):
         """Mint more native token.
         """
         return self._call_account_method(
@@ -402,7 +403,7 @@ class Account:
             }
         )
 
-    def retry_transaction_until_included(self, transaction_id: str, interval=None, max_attempts=None):
+    def retry_transaction_until_included(self, transaction_id: HexStr, interval=None, max_attempts=None):
         """Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
         included (referenced by a milestone). Returns the included block id.
         """
