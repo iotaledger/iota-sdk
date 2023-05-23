@@ -7,7 +7,7 @@
 
 use std::println;
 
-use iota_sdk::wallet::{Result, Wallet};
+use iota_sdk::{wallet::Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
