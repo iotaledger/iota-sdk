@@ -76,7 +76,7 @@ where
                             .address
                             .inner,
                     ))
-                    .add_feature(TagFeature::new(PARTICIPATION_TAG.as_bytes().to_vec())?)
+                    .add_feature(TagFeature::new(PARTICIPATION_TAG)?)
                     .finish_output(token_supply)?,
                 None,
             ),

@@ -7,10 +7,13 @@
 //! `cargo run --example mint_nft --release`
 
 use iota_sdk::{
-    types::block::output::{
-        feature::{IssuerFeature, SenderFeature},
-        unlock_condition::AddressUnlockCondition,
-        NftId, NftOutputBuilder,
+    types::block::{
+        address::Bech32Address,
+        output::{
+            feature::{IssuerFeature, SenderFeature},
+            unlock_condition::AddressUnlockCondition,
+            NftId, NftOutputBuilder,
+        },
     },
     wallet::{MintNftParams, Result},
     Wallet,
@@ -33,11 +36,17 @@ async fn main() -> Result<()> {
         .await?;
 
     let nft_options = vec![MintNftParams {
-        address: Some("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string()),
-        sender: Some("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string()),
+        address: Some(Bech32Address::try_from_str(
+            "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
+        )?),
+        sender: Some(Bech32Address::try_from_str(
+            "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
+        )?),
         metadata: Some(b"some NFT metadata".to_vec()),
         tag: Some(b"some NFT tag".to_vec()),
-        issuer: Some("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string()),
+        issuer: Some(Bech32Address::try_from_str(
+            "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
+        )?),
         immutable_metadata: Some(b"some NFT immutable metadata".to_vec()),
     }];
 
@@ -56,14 +65,14 @@ async fn main() -> Result<()> {
     );
 
     // Build nft output manually
-    let sender_address = account.addresses().await?[0].address().clone();
+    let account_address = &account.addresses().await?[0];
+    let sender_address = account_address.address();
     let token_supply = account.client().get_token_supply().await?;
     let outputs = vec![
-        // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
-            .add_unlock_condition(AddressUnlockCondition::new(*sender_address.as_ref()))
-            .add_feature(SenderFeature::new(*sender_address.as_ref()))
-            .add_immutable_feature(IssuerFeature::new(*sender_address.as_ref()))
+            .add_unlock_condition(AddressUnlockCondition::new(sender_address))
+            .add_feature(SenderFeature::new(sender_address))
+            .add_immutable_feature(IssuerFeature::new(sender_address))
             .finish_output(token_supply)?,
     ];
 

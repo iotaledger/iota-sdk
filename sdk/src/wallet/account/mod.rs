@@ -279,7 +279,7 @@ impl AccountInner {
 
     /// Get the transaction with inputs of an incoming transaction stored in the account
     /// List might not be complete, if the node pruned the data already
-    pub async fn get_incoming_transaction_data(&self, transaction_id: &TransactionId) -> Option<Transaction> {
+    pub async fn get_incoming_transaction(&self, transaction_id: &TransactionId) -> Option<Transaction> {
         self.details()
             .await
             .incoming_transactions()
@@ -414,17 +414,17 @@ impl AccountInner {
     }
 
     /// Returns all incoming transactions of the account
-    pub async fn incoming_transactions(&self) -> Result<HashMap<TransactionId, Transaction>> {
-        Ok(self.details().await.incoming_transactions.clone())
+    pub async fn incoming_transactions(&self) -> Vec<Transaction> {
+        self.details().await.incoming_transactions.values().cloned().collect()
     }
 
     /// Returns all transactions of the account
-    pub async fn transactions(&self) -> Result<Vec<Transaction>> {
-        Ok(self.details().await.transactions.values().cloned().collect())
+    pub async fn transactions(&self) -> Vec<Transaction> {
+        self.details().await.transactions.values().cloned().collect()
     }
 
     /// Returns all pending transactions of the account
-    pub async fn pending_transactions(&self) -> Result<Vec<Transaction>> {
+    pub async fn pending_transactions(&self) -> Vec<Transaction> {
         let mut transactions = Vec::new();
         let account_details = self.details().await;
 
@@ -434,7 +434,7 @@ impl AccountInner {
             }
         }
 
-        Ok(transactions)
+        transactions
     }
 }
 
@@ -485,7 +485,7 @@ fn serialize() {
     let protocol_parameters = ProtocolParameters::new(
         2,
         String::from("testnet"),
-        String::from("rms"),
+        "rms",
         1500,
         15,
         crate::types::block::output::RentStructure::new(500, 10, 1),

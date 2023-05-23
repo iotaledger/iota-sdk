@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
-        address::Address,
+        address::Bech32Address,
         output::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
@@ -28,16 +28,16 @@ use crate::{
 };
 
 /// Params for `send_native_tokens()`
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SendNativeTokensParams {
     /// Bech32 encoded address
-    pub address: String,
+    pub address: Bech32Address,
     /// Native tokens
     pub native_tokens: Vec<(TokenId, U256)>,
     /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
     /// first address of the account
-    pub return_address: Option<String>,
+    pub return_address: Option<Bech32Address>,
     /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
     /// receiver before. Default is 1 day
     pub expiration: Option<u32>,
@@ -102,29 +102,27 @@ where
             expiration,
         } in params
         {
-            let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
-            self.client().bech32_hrp_matches(&bech32_hrp).await?;
+            self.client().bech32_hrp_matches(address.hrp()).await?;
             let return_address = return_address
-                .map(|address| {
-                    let (hrp, address) = Address::try_from_bech32_with_hrp(address)?;
-                    if bech32_hrp != hrp {
-                        Err(crate::client::Error::InvalidBech32Hrp {
-                            provided: hrp,
-                            expected: bech32_hrp,
+                .map(|addr| {
+                    if address.hrp() != addr.hrp() {
+                        Err(crate::client::Error::Bech32HrpMismatch {
+                            provided: addr.hrp().to_string(),
+                            expected: address.hrp().to_string(),
                         })?;
                     }
-                    Ok::<_, Error>(address)
+                    Ok::<_, Error>(addr)
                 })
                 .transpose()?
-                .unwrap_or(default_return_address.address.inner);
+                .unwrap_or(default_return_address.address);
 
             // get minimum required amount for such an output, so we don't lock more than required
             // We have to check it for every output individually, because different address types and amount of
             // different native tokens require a different storage deposit
             let storage_deposit_amount = minimum_storage_deposit_basic_native_tokens(
                 &rent_structure,
-                &address,
-                &return_address,
+                address.inner(),
+                return_address.inner(),
                 Some(native_tokens.clone()),
                 token_supply,
             )?;

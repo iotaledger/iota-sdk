@@ -7,7 +7,7 @@ use tokio::sync::RwLock;
 
 use crate::{
     client::secret::{SecretManage, SecretManager},
-    types::block::address::{Address, Bech32Address},
+    types::block::address::{Address, Bech32Address, Hrp},
     wallet::{
         account::{types::AccountAddress, Account, AccountDetails},
         Error, Wallet,
@@ -18,7 +18,7 @@ use crate::{
 pub struct AccountBuilder<S: SecretManage = SecretManager> {
     addresses: Option<Vec<AccountAddress>>,
     alias: Option<String>,
-    bech32_hrp: Option<String>,
+    bech32_hrp: Option<Hrp>,
     wallet: Wallet<S>,
 }
 
@@ -50,7 +50,7 @@ where
     }
 
     /// Set the bech32 HRP
-    pub fn with_bech32_hrp(mut self, bech32_hrp: impl Into<Option<String>>) -> Self {
+    pub fn with_bech32_hrp(mut self, bech32_hrp: impl Into<Option<Hrp>>) -> Self {
         self.bech32_hrp = bech32_hrp.into();
         self
     }
@@ -92,7 +92,7 @@ where
         let addresses = match &self.addresses {
             Some(addresses) => addresses.clone(),
             None => {
-                let mut bech32_hrp = self.bech32_hrp.clone();
+                let mut bech32_hrp = self.bech32_hrp;
                 if let Some(first_account) = accounts.first() {
                     let first_account_coin_type = *first_account.details().await.coin_type();
                     // Generate the first address of the first account and compare it to the stored address from the
@@ -117,7 +117,7 @@ where
                     // Get bech32_hrp from address
                     if let Some(address) = first_account_addresses.first() {
                         if bech32_hrp.is_none() {
-                            bech32_hrp = Some(address.address.hrp.clone());
+                            bech32_hrp = Some(address.address.hrp);
                         }
                     }
                 }
@@ -134,7 +134,7 @@ where
                     get_first_public_address(&self.wallet.secret_manager, coin_type, account_index).await?;
 
                 let first_public_account_address = AccountAddress {
-                    address: Bech32Address::new(bech32_hrp, first_public_address)?,
+                    address: Bech32Address::new(bech32_hrp, first_public_address),
                     key_index: 0,
                     internal: false,
                     used: false,

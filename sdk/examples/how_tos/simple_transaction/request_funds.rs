@@ -3,7 +3,7 @@
 
 //! TODO: Example description
 //!
-//! `cargo run --example request_funds --release`
+//! `cargo run --release --all-features --example request_funds`
 
 use iota_sdk::{client::utils::request_funds_from_faucet, wallet::Result, Wallet};
 
@@ -20,7 +20,7 @@ async fn main() -> Result<()> {
     // Get the account we generated with `01_create_wallet`
     let account = wallet.get_account("Alice").await?;
 
-    let address = account.addresses().await?[0].address().to_string();
+    let address = *account.addresses().await?[0].address();
     println!("{address}");
 
     let faucet_response = request_funds_from_faucet(&faucet_url, &address).await?;

@@ -1,17 +1,20 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from iota_sdk.types.common import HexStr
 from enum import Enum
+
 
 class AddressType(Enum):
     ED25519 = 0
     ALIAS = 8
     NFT = 16
 
+
 class Address():
-    def __init__(self, type, address_or_id):
+    def __init__(self, type: AddressType, address_or_id: HexStr):
         """Initialize an Address
-        
+
         Parameters
         ----------
         type : AddressType
@@ -26,7 +29,7 @@ class Address():
         config = dict(self.__dict__)
 
         config['type'] = config['type'].value
-        
+
         if self.type == AddressType.ED25519:
             config['pubKeyHash'] = config.pop('address_or_id')
         elif self.type == AddressType.ALIAS:
@@ -36,10 +39,11 @@ class Address():
 
         return config
 
+
 class Ed25519Address(Address):
-    def __init__(self, address):
+    def __init__(self, address: HexStr):
         """Initialize an Ed25519Address
-        
+
         Parameters
         ----------
         address : string
@@ -47,10 +51,11 @@ class Ed25519Address(Address):
         """
         super().__init__(AddressType.ED25519, address)
 
+
 class AliasAddress(Address):
-    def __init__(self, address_or_id):
+    def __init__(self, address_or_id: HexStr):
         """Initialize an AliasAddress
-        
+
         Parameters
         ----------
         address_or_id : string
@@ -58,10 +63,11 @@ class AliasAddress(Address):
         """
         super().__init__(AddressType.ALIAS, address_or_id)
 
+
 class NFTAddress(Address):
-    def __init__(self, address_or_id):
+    def __init__(self, address_or_id: HexStr):
         """Initialize an NFTokenAddress
-        
+
         Parameters
         ----------
         address_or_id : string

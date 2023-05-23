@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
-        address::Address,
+        address::Bech32Address,
         output::{unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
     },
     wallet::account::{operations::transaction::Transaction, Account, TransactionOptions},
@@ -18,7 +18,7 @@ use crate::{
 #[serde(rename_all = "camelCase")]
 pub struct SendNftParams {
     /// Bech32 encoded address
-    pub address: String,
+    pub address: Bech32Address,
     /// Nft id
     pub nft_id: NftId,
 }
@@ -72,8 +72,7 @@ where
         let mut outputs = Vec::new();
 
         for SendNftParams { address, nft_id } in params {
-            let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
-            self.client().bech32_hrp_matches(&bech32_hrp).await?;
+            self.client().bech32_hrp_matches(address.hrp()).await?;
 
             // Find nft output from the inputs
             if let Some(nft_output_data) = unspent_outputs.iter().find(|o| {

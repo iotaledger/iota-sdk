@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::{api::input_selection::minimum_storage_deposit_basic_output, secret::SecretManage},
     types::block::{
-        address::Address,
+        address::{Address, Bech32Address},
         output::{
             dto::NativeTokenDto,
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
@@ -42,8 +42,7 @@ where
         let transaction_options = transaction_options.into();
         let token_supply = self.client().get_token_supply().await?;
 
-        let (bech32_hrp, recipient_address) = Address::try_from_bech32_with_hrp(&params.recipient_address)?;
-        self.client().bech32_hrp_matches(&bech32_hrp).await?;
+        self.client().bech32_hrp_matches(params.recipient_address.hrp()).await?;
 
         if let Some(assets) = &params.assets {
             if let Some(nft_id) = assets.nft_id {
@@ -55,7 +54,7 @@ where
         // We start building with minimum storage deposit, so we know the minimum required amount and can later replace
         // it, if needed
         let mut first_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-            .add_unlock_condition(AddressUnlockCondition::new(recipient_address));
+            .add_unlock_condition(AddressUnlockCondition::new(params.recipient_address));
 
         if let Some(assets) = params.assets {
             if let Some(native_tokens) = assets.native_tokens {
@@ -70,19 +69,18 @@ where
 
             if let Some(tag) = features.tag {
                 first_output_builder = first_output_builder.add_feature(TagFeature::new(
-                    prefix_hex::decode(tag).map_err(|_| Error::InvalidField("tag"))?,
+                    prefix_hex::decode::<Vec<u8>>(tag).map_err(|_| Error::InvalidField("tag"))?,
                 )?);
             }
 
             if let Some(metadata) = features.metadata {
                 first_output_builder = first_output_builder.add_feature(MetadataFeature::new(
-                    prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("metadata"))?,
+                    prefix_hex::decode::<Vec<u8>>(metadata).map_err(|_| Error::InvalidField("metadata"))?,
                 )?);
             }
 
             if let Some(sender) = features.sender {
-                first_output_builder =
-                    first_output_builder.add_feature(SenderFeature::new(Address::try_from_bech32(sender)?))
+                first_output_builder = first_output_builder.add_feature(SenderFeature::new(sender))
             }
         }
 
@@ -226,9 +224,8 @@ where
         first_output_builder = first_output_builder.clear_features();
 
         // Set new address unlock condition
-        first_output_builder = first_output_builder.with_unlock_conditions(vec![AddressUnlockCondition::new(
-            Address::try_from_bech32(params.recipient_address.clone())?,
-        )]);
+        first_output_builder =
+            first_output_builder.with_unlock_conditions(vec![AddressUnlockCondition::new(params.recipient_address)]);
 
         if let Some(assets) = params.assets {
             if let Some(native_tokens) = assets.native_tokens {
@@ -239,24 +236,22 @@ where
         if let Some(features) = params.features {
             if let Some(tag) = features.tag {
                 first_output_builder = first_output_builder.add_feature(TagFeature::new(
-                    prefix_hex::decode(tag).map_err(|_| Error::InvalidField("tag"))?,
+                    prefix_hex::decode::<Vec<u8>>(tag).map_err(|_| Error::InvalidField("tag"))?,
                 )?);
             }
 
             if let Some(metadata) = features.metadata {
                 first_output_builder = first_output_builder.add_feature(MetadataFeature::new(
-                    prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("metadata"))?,
+                    prefix_hex::decode::<Vec<u8>>(metadata).map_err(|_| Error::InvalidField("metadata"))?,
                 )?);
             }
 
             if let Some(sender) = features.sender {
-                first_output_builder =
-                    first_output_builder.add_feature(SenderFeature::new(Address::try_from_bech32(sender)?))
+                first_output_builder = first_output_builder.add_feature(SenderFeature::new(sender))
             }
 
             if let Some(issuer) = features.issuer {
-                first_output_builder =
-                    first_output_builder.add_immutable_feature(IssuerFeature::new(Address::try_from_bech32(issuer)?));
+                first_output_builder = first_output_builder.add_immutable_feature(IssuerFeature::new(issuer));
             }
         }
 
@@ -399,7 +394,7 @@ where
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct OutputParams {
-    pub recipient_address: String,
+    pub recipient_address: Bech32Address,
     pub amount: u64,
     pub assets: Option<Assets>,
     pub features: Option<Features>,
@@ -418,8 +413,8 @@ pub struct Assets {
 pub struct Features {
     pub tag: Option<String>,
     pub metadata: Option<String>,
-    pub issuer: Option<String>,
-    pub sender: Option<String>,
+    pub issuer: Option<Bech32Address>,
+    pub sender: Option<Bech32Address>,
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
@@ -450,7 +445,7 @@ pub enum ReturnStrategy {
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OutputParamsDto {
-    recipient_address: String,
+    recipient_address: Bech32Address,
     amount: String,
     #[serde(default)]
     assets: Option<AssetsDto>,
@@ -467,7 +462,7 @@ impl TryFrom<&OutputParamsDto> for OutputParams {
 
     fn try_from(value: &OutputParamsDto) -> crate::wallet::Result<Self> {
         Ok(Self {
-            recipient_address: value.recipient_address.clone(),
+            recipient_address: value.recipient_address,
             amount: u64::from_str(&value.amount)
                 .map_err(|_| crate::client::Error::InvalidAmount(value.amount.clone()))?,
             assets: match &value.assets {

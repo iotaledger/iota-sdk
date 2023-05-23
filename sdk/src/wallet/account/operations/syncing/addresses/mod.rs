@@ -8,7 +8,6 @@ use std::collections::HashSet;
 
 use crate::{
     client::secret::SecretManage,
-    types::block::address::Address,
     wallet::account::{operations::syncing::SyncOptions, types::address::AddressWithUnspentOutputs, Account},
 };
 
@@ -31,15 +30,12 @@ where
         if !options.addresses.is_empty() {
             let mut specific_addresses_to_sync = HashSet::new();
             for bech32_address in &options.addresses {
-                let address = Address::try_from_bech32(bech32_address)?;
-                match addresses_before_syncing.iter().find(|a| a.address.inner == address) {
+                match addresses_before_syncing.iter().find(|a| &a.address == bech32_address) {
                     Some(address) => {
                         specific_addresses_to_sync.insert(address.clone());
                     }
                     None => {
-                        return Err(crate::wallet::Error::AddressNotFoundInAccount(
-                            bech32_address.to_string(),
-                        ));
+                        return Err(crate::wallet::Error::AddressNotFoundInAccount(*bech32_address));
                     }
                 }
             }

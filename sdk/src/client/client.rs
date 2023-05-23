@@ -22,7 +22,7 @@ use crate::{
         node_manager::NodeManager,
         Error,
     },
-    types::block::{output::RentStructure, protocol::ProtocolParameters},
+    types::block::{address::Hrp, output::RentStructure, protocol::ProtocolParameters},
 };
 
 /// An instance of the client using HORNET or Bee URI
@@ -144,8 +144,8 @@ impl ClientInner {
     }
 
     /// Gets the bech32 HRP of the node we're connecting to.
-    pub async fn get_bech32_hrp(&self) -> Result<String> {
-        Ok(self.get_network_info().await?.protocol_parameters.bech32_hrp().into())
+    pub async fn get_bech32_hrp(&self) -> Result<Hrp> {
+        Ok(*self.get_network_info().await?.protocol_parameters.bech32_hrp())
     }
 
     /// Gets the minimum pow score of the node we're connecting to.
@@ -192,12 +192,12 @@ impl ClientInner {
     }
 
     /// Validates if a bech32 HRP matches the one from the connected network.
-    pub async fn bech32_hrp_matches(&self, bech32_hrp: &str) -> Result<()> {
+    pub async fn bech32_hrp_matches(&self, bech32_hrp: &Hrp) -> Result<()> {
         let expected = self.get_bech32_hrp().await?;
-        if bech32_hrp != expected {
-            return Err(Error::InvalidBech32Hrp {
+        if bech32_hrp != &expected {
+            return Err(Error::Bech32HrpMismatch {
                 provided: bech32_hrp.to_string(),
-                expected,
+                expected: expected.to_string(),
             });
         };
         Ok(())

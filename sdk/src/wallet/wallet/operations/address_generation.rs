@@ -7,7 +7,7 @@ use std::sync::atomic::Ordering;
 use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{mnemonic::MnemonicSecretManager, GenerateAddressOptions, SecretManage, SecretManager},
-    types::block::address::Address,
+    types::block::address::{Address, Hrp},
     wallet::Wallet,
 };
 
@@ -276,16 +276,17 @@ where
     crate::wallet::Error: From<S::Error>,
 {
     /// Get the bech32 hrp from the first account address or if not existent, from the client
-    pub async fn get_bech32_hrp(&self) -> crate::wallet::Result<String> {
+    pub async fn get_bech32_hrp(&self) -> crate::wallet::Result<Hrp> {
         Ok(match self.get_accounts().await?.first() {
-            Some(account) => account
-                .public_addresses()
-                .await
-                .first()
-                .expect("missing first public address")
-                .address
-                .hrp
-                .clone(),
+            Some(account) => {
+                account
+                    .public_addresses()
+                    .await
+                    .first()
+                    .expect("missing first public address")
+                    .address
+                    .hrp
+            }
             None => self.client().get_bech32_hrp().await?,
         })
     }

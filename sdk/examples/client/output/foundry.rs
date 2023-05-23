@@ -45,11 +45,8 @@ async fn main() -> Result<()> {
 
     let token_supply = client.get_token_supply().await?;
 
-    let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
-    println!(
-        "{}",
-        request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?
-    );
+    let address = client.get_addresses(&secret_manager).with_range(0..1).finish().await?[0];
+    println!("{}", request_funds_from_faucet(&faucet_url, &address).await?);
     tokio::time::sleep(std::time::Duration::from_secs(20)).await;
 
     //////////////////////////////////
@@ -58,7 +55,7 @@ async fn main() -> Result<()> {
 
     let alias_output_builder = AliasOutputBuilder::new_with_amount(2_000_000, AliasId::null())
         .add_feature(SenderFeature::new(address))
-        .add_feature(MetadataFeature::new(vec![1, 2, 3])?)
+        .add_feature(MetadataFeature::new([1, 2, 3])?)
         .add_immutable_feature(IssuerFeature::new(address))
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address));

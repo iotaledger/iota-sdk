@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
     let protocol_parameters = ProtocolParameters::new(
         2,
         String::from("testnet"),
-        String::from("smr"),
+        "smr",
         1500,
         15,
         RentStructureBuilder::new()

@@ -11,7 +11,7 @@ use crate::{
     types::{
         api::plugins::indexer::OutputIdsResponse,
         block::{
-            address::{Address, AliasAddress},
+            address::{Address, AliasAddress, Bech32AddressLike},
             output::{Output, OutputId},
         },
     },
@@ -28,11 +28,12 @@ where
     /// Returns output ids of alias outputs
     pub(crate) async fn get_alias_and_foundry_output_ids(
         &self,
-        bech32_address: &str,
+        bech32_address: impl Bech32AddressLike,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[SYNC] get_alias_and_foundry_output_ids");
         let client = self.client();
+        let bech32_address = bech32_address.to_bech32()?;
 
         let mut output_ids = HashSet::new();
 
@@ -40,13 +41,13 @@ where
         {
             output_ids.extend(
                 client
-                    .alias_output_ids(vec![QueryParameter::Governor(bech32_address.to_string())])
+                    .alias_output_ids(vec![QueryParameter::Governor(bech32_address)])
                     .await?
                     .items,
             );
             output_ids.extend(
                 client
-                    .alias_output_ids(vec![QueryParameter::StateController(bech32_address.to_string())])
+                    .alias_output_ids(vec![QueryParameter::StateController(bech32_address)])
                     .await?
                     .items,
             );
@@ -57,11 +58,10 @@ where
             let tasks = vec![
                 // Get outputs where the address is in the governor address unlock condition
                 async move {
-                    let bech32_address_ = bech32_address.to_string();
                     let client = client.clone();
                     task::spawn(async move {
                         client
-                            .alias_output_ids(vec![QueryParameter::Governor(bech32_address_)])
+                            .alias_output_ids(vec![QueryParameter::Governor(bech32_address)])
                             .await
                             .map_err(From::from)
                     })
@@ -70,11 +70,10 @@ where
                 .boxed(),
                 // Get outputs where the address is in the state controller unlock condition
                 async move {
-                    let bech32_address_ = bech32_address.to_string();
                     let client = client.clone();
                     task::spawn(async move {
                         client
-                            .alias_output_ids(vec![QueryParameter::StateController(bech32_address_)])
+                            .alias_output_ids(vec![QueryParameter::StateController(bech32_address)])
                             .await
                             .map_err(From::from)
                     })
@@ -117,7 +116,7 @@ where
             if let Output::Alias(alias_output) = alias_output_with_meta.output() {
                 let alias_address =
                     AliasAddress::from(alias_output.alias_id_non_null(alias_output_with_meta.metadata().output_id()));
-                let alias_bech32_address = Address::Alias(alias_address).to_bech32(bech32_hrp.clone());
+                let alias_bech32_address = Address::Alias(alias_address).to_bech32(bech32_hrp);
                 let client = self.client().clone();
                 tasks.push(Box::pin(task::spawn(async move {
                     client

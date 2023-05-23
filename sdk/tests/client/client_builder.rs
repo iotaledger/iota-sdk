@@ -43,10 +43,7 @@ async fn client_builder() {
                 "inner":"shimmer",
                 "bounded":null
             },
-            "bech32Hrp":{
-                "inner":"smr",
-                "bounded":null
-            },
+            "bech32Hrp":"smr",
             "minPowScore":1500,
             "belowMaxDepth":15,
             "rentStructure":{
@@ -101,10 +98,7 @@ async fn client_builder() {
                 "inner":"shimmer",
                 "bounded":null
             },
-            "bech32Hrp":{
-                "inner":"smr",
-                "bounded":null
-            },
+            "bech32Hrp":"smr",
             "minPowScore":1500,
             "belowMaxDepth":15,
             "rentStructure":{

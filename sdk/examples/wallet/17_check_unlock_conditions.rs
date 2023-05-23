@@ -22,12 +22,7 @@ async fn main() -> Result<()> {
     // Get the account we generated with `01_create_wallet`
     let account = wallet.get_account("Alice").await?;
 
-    let account_addresses: Vec<Bech32Address> = account
-        .addresses()
-        .await?
-        .into_iter()
-        .map(|a| a.address().clone())
-        .collect();
+    let account_addresses: Vec<Bech32Address> = account.addresses().await?.into_iter().map(|a| *a.address()).collect();
 
     let output = BasicOutputBuilder::new_with_amount(1_000_000)
         .add_unlock_condition(AddressUnlockCondition::new(*account_addresses[0].as_ref()))
