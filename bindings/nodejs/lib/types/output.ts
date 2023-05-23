@@ -11,15 +11,8 @@ import { HexEncodedString, INativeToken, TokenSchemeTypes } from '@iota/types';
 // Temp solution for not double parsing JSON
 import {
     plainToInstance,
-    DiscriminatorDescriptor,
     Type,
 } from 'class-transformer';
-import {
-    JsonObject,
-    JsonProperty,
-    JsonDiscriminatorProperty,
-    JsonDiscriminatorValue,
-} from 'ta-json';
 
 /**
  * All of the output types.
@@ -32,23 +25,15 @@ enum OutputType {
     Nft = 6,
 }
 
-@JsonObject()
-@JsonDiscriminatorProperty('type')
-abstract class Output /*implements ICommonOutput*/
-    implements DiscriminatorDescriptor
-{
+abstract class Output /*implements ICommonOutput*/ {
     private amount: string;
 
-    @JsonProperty()
     private type: OutputType;
 
     constructor(type: OutputType, amount: string) {
         this.type = type;
         this.amount = amount;
     }
-
-    property = OutputDiscriminator.property;
-    subTypes = OutputDiscriminator.subTypes;
 
     /**
      * The type of output.
@@ -137,8 +122,6 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
 /**
  * Treasury Output.
  */
-@JsonObject()
-@JsonDiscriminatorValue(OutputType.Treasury)
 class TreasuryOutput extends Output /*implements ITreasuryOutput */ {
     constructor(amount: string) {
         super(OutputType.Treasury, amount);
@@ -147,8 +130,6 @@ class TreasuryOutput extends Output /*implements ITreasuryOutput */ {
 /**
  * Basic output.
  */
-@JsonObject()
-@JsonDiscriminatorValue(OutputType.Basic)
 class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
     constructor(amount: string, unlockConditions: UnlockCondition[]) {
         super(OutputType.Basic, amount, unlockConditions);
@@ -200,8 +181,6 @@ abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements 
     }
 }
 
-@JsonObject()
-@JsonDiscriminatorValue(OutputType.Alias)
 class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
     private aliasId: HexEncodedString;
     private stateIndex: number;
@@ -242,8 +221,6 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
 /**
  * NFT output.
  */
-@JsonObject()
-@JsonDiscriminatorValue(OutputType.Nft)
 class NftOutput extends StateMetadataOutput /*implements INftOutput*/ {
     private nftId: HexEncodedString;
 
@@ -266,8 +243,6 @@ class NftOutput extends StateMetadataOutput /*implements INftOutput*/ {
 /**
  * Foundry output.
  */
-@JsonObject()
-@JsonDiscriminatorValue(OutputType.Foundry)
 class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*/ {
     private serialNumber: number;
     private tokenScheme: TokenSchemeTypes;
@@ -296,20 +271,8 @@ class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*
     }
 }
 
-const OutputDiscriminator = {
-    property: 'type',
-    subTypes: [
-        { value: TreasuryOutput, name: OutputType.Treasury as any },
-        { value: BasicOutput, name: OutputType.Basic as any },
-        { value: AliasOutput, name: OutputType.Alias as any },
-        { value: NftOutput, name: OutputType.Alias as any },
-        { value: FoundryOutput, name: OutputType.Foundry as any },
-    ],
-};
-
 export {
     OutputType,
-    OutputDiscriminator,
     Output,
     CommonOutput,
     TreasuryOutput,
