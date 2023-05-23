@@ -2,13 +2,15 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk import call_utils_method
+from iota_sdk.types.output_id import OutputId
 from json import dumps, loads
+from typing import Any, Dict
 
 
 class Utils():
 
     @staticmethod
-    def bech32_to_hex(bech32):
+    def bech32_to_hex(bech32: str) -> str:
         """Transforms bech32 to hex.
         """
         return _call_method('bech32ToHex', {
@@ -16,7 +18,7 @@ class Utils():
         })
 
     @staticmethod
-    def hex_to_bech32(hex, bech32_hrp):
+    def hex_to_bech32(hex: str, bech32_hrp: str) -> str:
         """Transforms a hex encoded address to a bech32 encoded address.
         """
         return _call_method('hexToBech32', {
@@ -25,7 +27,7 @@ class Utils():
         })
 
     @staticmethod
-    def alias_id_to_bech32(alias_id, bech32_hrp):
+    def alias_id_to_bech32(alias_id: str, bech32_hrp: str) -> str:
         """Transforms an alias id to a bech32 encoded address.
         """
         return _call_method('aliasIdToBech32', {
@@ -34,7 +36,7 @@ class Utils():
         })
 
     @staticmethod
-    def nft_id_to_bech32(nft_id, bech32_hrp):
+    def nft_id_to_bech32(nft_id: str, bech32_hrp: str) -> str:
         """Transforms an nft id to a bech32 encoded address.
         """
         return _call_method('nftIdToBech32', {
@@ -43,7 +45,7 @@ class Utils():
         })
 
     @staticmethod
-    def hex_public_key_to_bech32_address(hex, bech32_hrp=None):
+    def hex_public_key_to_bech32_address(hex: str, bech32_hrp: str) -> str:
         """Transforms a hex encoded public key to a bech32 encoded address.
         """
         return _call_method('hexPublicKeyToBech32Address', {
@@ -52,7 +54,7 @@ class Utils():
         })
 
     @staticmethod
-    def parse_bech32_address(address):
+    def parse_bech32_address(address: str) -> Dict[str, Any]:
         """Returns a valid Address parsed from a String.
         """
         return _call_method('parseBech32Address', {
@@ -60,7 +62,7 @@ class Utils():
         })
 
     @staticmethod
-    def is_address_valid(address):
+    def is_address_valid(address: str) -> bool:
         """Checks if a String is a valid bech32 encoded address.
         """
         return _call_method('isAddressValid', {
@@ -68,13 +70,13 @@ class Utils():
         })
 
     @staticmethod
-    def generate_mnemonic():
+    def generate_mnemonic() -> str:
         """Generates a new mnemonic.
         """
         return _call_method('generateMnemonic')
 
     @staticmethod
-    def mnemonic_to_hex_seed(mnemonic):
+    def mnemonic_to_hex_seed(mnemonic: str) -> str:
         """Returns a hex encoded seed for a mnemonic.
         """
         return _call_method('mnemonicToHexSeed', {
@@ -82,7 +84,7 @@ class Utils():
         })
 
     @staticmethod
-    def compute_alias_id(output_id):
+    def compute_alias_id(output_id: OutputId) -> str:
         """Computes the alias id for the given alias output id.
         """
         return _call_method('computeAliasId', {
@@ -90,7 +92,7 @@ class Utils():
         })
 
     @staticmethod
-    def compute_nft_id(output_id):
+    def compute_nft_id(output_id: OutputId) -> str:
         """Computes the NFT id for the given NFT output id.
         """
         return _call_method('computeNftId', {
@@ -98,7 +100,7 @@ class Utils():
         })
 
     @staticmethod
-    def compute_foundry_id(alias_address, serial_number, token_scheme_kind):
+    def compute_foundry_id(alias_address: str, serial_number: int, token_scheme_kind: int) -> str:
         """Computes the foundry id.
         """
         return _call_method('computeNftId', {
@@ -108,7 +110,7 @@ class Utils():
         })
 
     @staticmethod
-    def block_id(block):
+    def block_id(block: str) -> str:
         """ Returns a block ID (Blake2b256 hash of block bytes) from a block.
         """
         return _call_method('blockId', {
@@ -116,7 +118,7 @@ class Utils():
         })
 
     @staticmethod
-    def hash_transaction_essence(essence):
+    def hash_transaction_essence(essence) -> str:
         """ Compute the hash of a transaction essence.
         """
         return _call_method('hashTransactionEssence', {
@@ -124,7 +126,7 @@ class Utils():
         })
 
     @staticmethod
-    def verify_ed25519_signature(signature, message, address):
+    def verify_ed25519_signature(signature: str, message: str, address: str) -> str:
         """Verifies the Ed25519Signature for a message against an Ed25519Address.
         """
         return _call_method('verifyEd25519Signature', {
@@ -139,7 +141,7 @@ class UtilsError(Exception):
     pass
 
 
-def _call_method(name, data=None):
+def _call_method(name: str, data=None):
     """Dumps json string and call call_utils_method()
     """
     message = {
@@ -147,10 +149,10 @@ def _call_method(name, data=None):
     }
     if data:
         message['data'] = data
-    message = dumps(message)
+    message_str: str = dumps(message)
 
     # Send message to the Rust library
-    response = call_utils_method(message)
+    response = call_utils_method(message_str)
 
     json_response = loads(response)
 

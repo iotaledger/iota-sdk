@@ -6,9 +6,12 @@ use primitive_types::U256;
 use crate::{
     client::api::PreparedTransactionData,
     types::block::output::{
-        AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
+        AliasId, AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
-    wallet::account::{operations::transaction::Transaction, Account, TransactionOptions},
+    wallet::{
+        account::{operations::transaction::Transaction, types::OutputData, Account, TransactionOptions},
+        Error,
+    },
 };
 
 impl Account {
@@ -72,5 +75,44 @@ impl Account {
         } else {
             unreachable!("We checked if it's an alias output before")
         }
+    }
+
+    /// Find and return unspent `OutputData` for given `alias_id` and `foundry_id`
+    async fn find_alias_and_foundry_output_data(
+        &self,
+        alias_id: AliasId,
+        foundry_id: FoundryId,
+    ) -> crate::wallet::Result<(OutputData, OutputData)> {
+        let mut existing_alias_output_data = None;
+        let mut existing_foundry_output = None;
+
+        for (output_id, output_data) in self.details().await.unspent_outputs().iter() {
+            match &output_data.output {
+                Output::Alias(output) => {
+                    if output.alias_id_non_null(output_id) == alias_id {
+                        existing_alias_output_data = Some(output_data.clone());
+                    }
+                }
+                Output::Foundry(output) => {
+                    if output.id() == foundry_id {
+                        existing_foundry_output = Some(output_data.clone());
+                    }
+                }
+                // Not interested in these outputs here
+                Output::Treasury(_) | Output::Basic(_) | Output::Nft(_) => {}
+            }
+
+            if existing_alias_output_data.is_some() && existing_foundry_output.is_some() {
+                break;
+            }
+        }
+
+        let existing_alias_output_data = existing_alias_output_data
+            .ok_or_else(|| Error::BurningOrMeltingFailed("required alias output for foundry not found".to_string()))?;
+
+        let existing_foundry_output_data = existing_foundry_output
+            .ok_or_else(|| Error::BurningOrMeltingFailed("required foundry output not found".to_string()))?;
+
+        Ok((existing_alias_output_data, existing_foundry_output_data))
     }
 }

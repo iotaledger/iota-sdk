@@ -1,10 +1,12 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from enum import Enum
+from enum import IntEnum
+
+HD_WALLET_TYPE = 44
 
 
-class CoinType(Enum):
+class CoinType(IntEnum):
     IOTA = 4218
     SHIMMER = 4219
 

@@ -4,14 +4,11 @@ import type {
     __BuildBasicOutputMethod__,
     __BuildFoundryOutputMethod__,
     __BuildNftOutputMethod__,
-    __PrepareBurnNativeTokenMethod__,
-    __PrepareBurnNftMethod__,
+    __PrepareBurnMethod__,
     __ClaimOutputsMethod__,
     __PrepareConsolidateOutputsMethod__,
     __PrepareCreateAliasOutputMethod__,
     __PrepareDecreaseNativeTokenSupplyMethod__,
-    __PrepareDestroyAliasMethod__,
-    __PrepareDestroyFoundryMethod__,
     __DeregisterParticipationEventMethod__,
     __GenerateAddressesMethod__,
     __GetBalanceMethod__,
@@ -46,8 +43,8 @@ import type {
     __SignAndSubmitTransaction__,
     __SubmitAndStoreTransactionMethod__,
     __SyncAccountMethod__,
-    __GetIncomingTransactionDataMethod__,
     __PrepareVoteMethod__,
+    __GetIncomingTransactionMethod__,
     __GetParticipationOverviewMethod__,
     __GetParticipationEventMethod__,
     __GetParticipationEventsMethod__,
@@ -88,18 +85,15 @@ export type __AccountMethod__ =
     | __BuildBasicOutputMethod__
     | __BuildFoundryOutputMethod__
     | __BuildNftOutputMethod__
-    | __PrepareBurnNativeTokenMethod__
-    | __PrepareBurnNftMethod__
+    | __PrepareBurnMethod__
     | __ClaimOutputsMethod__
     | __PrepareConsolidateOutputsMethod__
     | __PrepareCreateAliasOutputMethod__
     | __DeregisterParticipationEventMethod__
-    | __PrepareDestroyAliasMethod__
-    | __PrepareDestroyFoundryMethod__
     | __GenerateAddressesMethod__
     | __GetBalanceMethod__
     | __GetOutputMethod__
-    | __GetIncomingTransactionDataMethod__
+    | __GetIncomingTransactionMethod__
     | __GetFoundryOutputMethod__
     | __GetOutputsWithAdditionalUnlockConditionsMethod__
     | __GetParticipationEventMethod__

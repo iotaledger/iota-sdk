@@ -327,10 +327,12 @@ pub enum Response {
     PreparedMintTokenTransaction(PreparedMintTokenTransactionDto),
     /// Response for
     /// - [`GetTransaction`](crate::method::AccountMethod::GetTransaction),
+    /// - [`GetIncomingTransaction`](crate::method::AccountMethod::GetIncomingTransaction)
     Transaction(Option<Box<TransactionDto>>),
     /// Response for
     /// - [`Transactions`](crate::method::AccountMethod::Transactions),
-    /// - [`PendingTransactions`](crate::method::AccountMethod::PendingTransactions)
+    /// - [`PendingTransactions`](crate::method::AccountMethod::PendingTransactions),
+    /// - [`IncomingTransactions`](crate::method::AccountMethod::IncomingTransactions)
     Transactions(Vec<TransactionDto>),
     /// Response for
     /// - [`SignTransactionEssence`](crate::method::AccountMethod::SignTransactionEssence)
@@ -343,12 +345,6 @@ pub enum Response {
     /// - [`GetBalance`](crate::method::AccountMethod::GetBalance),
     /// - [`Sync`](crate::method::AccountMethod::Sync)
     Balance(AccountBalanceDto),
-    /// Response for
-    /// - [`GetIncomingTransactionData`](crate::method::AccountMethod::GetIncomingTransactionData),
-    IncomingTransactionData(Option<Box<(TransactionId, TransactionDto)>>),
-    /// Response for
-    /// - [`IncomingTransactions`](crate::method::AccountMethod::IncomingTransactions),
-    IncomingTransactionsData(Vec<(TransactionId, TransactionDto)>),
     /// Response for
     /// - [`ClaimOutputs`](crate::method::AccountMethod::ClaimOutputs)
     /// - [`SendAmount`](crate::method::AccountMethod::SendAmount),

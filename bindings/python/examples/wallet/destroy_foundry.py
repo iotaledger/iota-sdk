@@ -14,8 +14,7 @@ account = wallet.get_account('Alice')
 response = account.sync()
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
-    print(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
-    sys.exit(1)
+    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
@@ -24,4 +23,5 @@ foundry_id = "0x08429fe5864378ce70699fc2d22bb144cb86a3c4833d136e3b95c5dadfd6ba0c
 
 # Send transaction.
 transaction = account.prepare_destroy_foundry(foundry_id).finish()
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
+print(
+    f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')

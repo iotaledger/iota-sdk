@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
             .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        let transaction = account.burn_nft(*nft_id, None).await?;
+        let transaction = account.burn(*nft_id, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         let block_id = account

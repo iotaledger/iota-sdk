@@ -24,8 +24,7 @@ account = wallet.get_account('Alice')
 account.sync()
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
-    print(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
-    sys.exit(1)
+    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")    
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 

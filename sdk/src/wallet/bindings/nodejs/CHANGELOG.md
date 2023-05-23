@@ -1,5 +1,18 @@
 # Changelog
 
+## \[2.0.3-rc.35]
+
+- [`6df8879f`](https://github.com/iotaledger/iota-sdk/commit/6df8879f70fe58b2445deb65e7d2aa83284d3d36)([#385](https://github.com/iotaledger/iota-sdk/pull/385)) Remove `IncreaseNativeTokenSupplyOptions`.
+  Rename `SendAmount::addressesWithAmount`, `SendNft::addressesAndNftIds`, `SendNativeTokens::addressesAndNativeTokens`, `CreateAliasOutput::aliasOutputOptions`, `MintNfts::nftsOptions`, `MintNativeToken::nativeTokenOptions`, `PrepareOutput::options` to `params`.
+  Rename `AddressesWithAmount` to `SendAmountParams`.
+  Rename `AddressesAndNftIds` to `SendNftParams`.
+  Rename `AddressesAndNativeTokens` to `SendNativeTokensParams`.
+  Rename `AliasOutputOptions` to `CreateAliasParams`.
+  Rename `NftOptions` to `MintNftParams`.
+  Rename `NativeTokenOptions` to `MintNativeTokenParams`.
+  Rename `OutputOptions` to `OutputParams`.
+  Rename various `BuilderOptions` to `BuilderParams`.
+
 ## \[2.0.3-rc.34]
 
 - Added `OutputsToClaim::Amount` and removed `OutputsToClaim::None`.

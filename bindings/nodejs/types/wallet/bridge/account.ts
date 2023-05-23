@@ -29,6 +29,7 @@ import type {
     ParticipationEventType,
 } from '../participation';
 import { Output } from '../../../lib';
+import { Burn } from '../burn';
 
 export type __BuildAliasOutputMethod__ = {
     name: 'buildAliasOutput';
@@ -50,19 +51,10 @@ export type __BuildNftOutputMethod__ = {
     data: BuildNftOutputData;
 };
 
-export type __PrepareBurnNativeTokenMethod__ = {
-    name: 'prepareBurnNativeToken';
+export type __PrepareBurnMethod__ = {
+    name: 'prepareBurn';
     data: {
-        tokenId: string;
-        burnAmount: HexEncodedAmount;
-        options?: TransactionOptions;
-    };
-};
-
-export type __PrepareBurnNftMethod__ = {
-    name: 'prepareBurnNft';
-    data: {
-        nftId: string;
+        burn: Burn;
         options?: TransactionOptions;
     };
 };
@@ -106,22 +98,6 @@ export type __DeregisterParticipationEventMethod__ = {
     };
 };
 
-export type __PrepareDestroyAliasMethod__ = {
-    name: 'prepareDestroyAlias';
-    data: {
-        aliasId: string;
-        options?: TransactionOptions;
-    };
-};
-
-export type __PrepareDestroyFoundryMethod__ = {
-    name: 'prepareDestroyFoundry';
-    data: {
-        foundryId: string;
-        options?: TransactionOptions;
-    };
-};
-
 export type __GenerateAddressesMethod__ = {
     name: 'generateAddresses';
     data: {
@@ -134,8 +110,8 @@ export type __GetBalanceMethod__ = {
     name: 'getBalance';
 };
 
-export type __GetIncomingTransactionDataMethod__ = {
-    name: 'getIncomingTransactionData';
+export type __GetIncomingTransactionMethod__ = {
+    name: 'getIncomingTransaction';
     data: {
         transactionId: string;
     };

@@ -3,9 +3,18 @@
 
 from iota_sdk.wallet.common import _call_method_routine
 from iota_sdk.wallet.prepared_transaction_data import PreparedTransactionData, PreparedMintTokenTransaction
+from iota_sdk.types.burn import Burn
+from iota_sdk.types.native_token import NativeToken
+from iota_sdk.types.native_token import NativeToken
+from iota_sdk.types.unlock_condition import UnlockCondition
+from iota_sdk.types.feature import Feature
+from iota_sdk.types.output_id import OutputId
+from iota_sdk.types.token_scheme import TokenScheme
+from typing import List, Optional, Union
+
 
 class Account:
-    def __init__(self, account_id, handle):
+    def __init__(self, account_id: Union[str, int], handle):
         self.account_id = account_id
         self.handle = handle
 
@@ -36,15 +45,15 @@ class Account:
         return message
 
     def build_alias_output(self,
-                           amount,
-                           native_tokens,
-                           alias_id,
-                           state_index,
-                           state_metadata,
-                           foundry_counter,
-                           unlock_conditions,
-                           features,
-                           immutable_features):
+                           amount: int,
+                           native_tokens: List[NativeToken],
+                           alias_id: str,
+                           state_index: int,
+                           state_metadata: str,
+                           foundry_counter: int,
+                           unlock_conditions: List[UnlockCondition],
+                           features: List[Feature],
+                           immutable_features: List[Feature]):
         """Build alias output.
         """
         return self._call_account_method(
@@ -63,9 +72,9 @@ class Account:
 
     def build_basic_output(self,
                            amount,
-                           native_tokens,
-                           unlock_conditions,
-                           features):
+                           native_tokens: List[NativeToken],
+                           unlock_conditions: List[UnlockCondition],
+                           features: List[Feature]):
         """Build basic output.
         """
         return self._call_account_method(
@@ -78,13 +87,13 @@ class Account:
         )
 
     def build_foundry_output(self,
-                             amount,
-                             native_tokens,
-                             serial_number,
-                             token_scheme,
-                             unlock_conditions,
-                             features,
-                             immutable_features):
+                             amount: int,
+                             native_tokens: List[NativeToken],
+                             serial_number: int,
+                             token_scheme: TokenScheme,
+                             unlock_conditions: List[UnlockCondition],
+                             features: List[Feature],
+                             immutable_features: List[Feature]):
         """Build foundry output.
         """
         return self._call_account_method(
@@ -100,12 +109,12 @@ class Account:
         )
 
     def build_nft_output(self,
-                         amount,
-                         native_tokens,
-                         nft_id,
-                         unlock_conditions,
-                         features,
-                         immutable_features):
+                         amount: int,
+                         native_tokens: List[NativeToken],
+                         nft_id: str,
+                         unlock_conditions: List[UnlockCondition],
+                         features: List[Feature],
+                         immutable_features: List[Feature]):
         """BuildNftOutput.
         """
         return self._call_account_method(
@@ -119,41 +128,50 @@ class Account:
             }
         )
 
+    def prepare_burn(self, burn: Burn, options=None):
+        """
+        A generic `prepare_burn()` function that can be used to prepare the burn of native tokens, nfts, foundries and aliases.
+        """
+        prepared = self._call_account_method(
+            'prepareBurn', {
+                'burn': burn.as_dict(),
+                'options': options
+            },
+        )
+        return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
+
     def prepare_burn_native_token(self,
-                          token_id,
-                          burn_amount,
+                          token_id: str,
+                          burn_amount: int,
                           options=None):
         """Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
         the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
         recommended to use melting, if the foundry output is available.
         """
         prepared = self._call_account_method(
-            'prepareBurnNativeToken', {
-                'tokenId': token_id,
-                'burnAmount': burn_amount,
+            'prepareBurn', {
+                'burn': Burn().add_native_token(NativeToken(token_id, burn_amount)).as_dict(),
                 'options': options
-            }
+            },
         )
         return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
 
     def prepare_burn_nft(self,
-                 nft_id,
+                 nft_id: str,
                  options=None):
-        """Burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
-        deposit return, timelock or expiration unlock condition. This should be preferred over burning, because after
-        burning, the foundry can never be destroyed anymore.
+        """Burn an nft output.
         """
         prepared = self._call_account_method(
-            'prepareBurnNft', {
-                'nftId': nft_id,
+            'prepareBurn', {
+                'burn': Burn().add_nft(nft_id).as_dict(),
                 'options': options
-            }
+            },
         )
         return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
 
     def prepare_consolidate_outputs(self,
-                            force,
-                            output_consolidation_threshold):
+                            force: bool,
+                            output_consolidation_threshold: Optional[int] = None):
         """Consolidate outputs.
         """
         prepared = self._call_account_method(
@@ -178,35 +196,33 @@ class Account:
         return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
 
     def prepare_destroy_alias(self,
-                      alias_id,
+                      alias_id: str,
                       options=None):
-        """Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
-        storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
-        sent to the governor address.
+        """Destroy an alias output.
         """
+
         prepared = self._call_account_method(
-            'prepareDestroyAlias', {
-                'aliasId': alias_id,
+            'prepareBurn', {
+                'burn': Burn().add_alias(alias_id).as_dict(),
                 'options': options
-            }
+            },
         )
         return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
 
     def prepare_destroy_foundry(self,
-                        foundry_id,
+                        foundry_id: str,
                         options=None):
         """Destroy a foundry output with a circulating supply of 0.
-        Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
         """
         prepared = self._call_account_method(
-            'prepareDestroyFoundry', {
-                'foundryId': foundry_id,
+            'prepareBurn', {
+                'burn': Burn().add_foundry(foundry_id).as_dict(),
                 'options': options
-            }
+            },
         )
         return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
 
-    def generate_addresses(self, amount, options=None):
+    def generate_addresses(self, amount: int, options=None):
         """Generate new addresses.
         """
         return self._call_account_method(
@@ -216,7 +232,7 @@ class Account:
             }
         )
 
-    def get_outputs_with_additional_unlock_conditions(self, outputs_to_claim):
+    def get_outputs_with_additional_unlock_conditions(self, outputs_to_claim: List[OutputId]):
         """Get outputs with additional unlock conditions.
         """
         return self._call_account_method(
@@ -225,7 +241,7 @@ class Account:
             }
         )
 
-    def get_output(self, output_id):
+    def get_output(self, output_id: OutputId):
         """Get output.
         """
         return self._call_account_method(
@@ -234,7 +250,7 @@ class Account:
             }
         )
 
-    def get_transaction(self, transaction_id):
+    def get_transaction(self, transaction_id: str):
         """Get transaction.
         """
         return self._call_account_method(
@@ -297,8 +313,8 @@ class Account:
         )
 
     def prepare_decrease_native_token_supply(self,
-                                     token_id,
-                                     melt_amount,
+                                     token_id: str,
+                                     melt_amount: int,
                                      options=None):
         """Melt native tokens. This happens with the foundry output which minted them, by increasing it's
         `melted_tokens` field.
@@ -312,7 +328,7 @@ class Account:
         )
         return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
 
-    def prepare_increase_native_token_supply(self, token_id, mint_amount, increase_native_token_supply_options=None, options=None):
+    def prepare_increase_native_token_supply(self, token_id: str, mint_amount: int, options=None):
         """Mint more native token.
         """
         prepared = self._call_account_method(
@@ -399,7 +415,7 @@ class Account:
         )
         return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
 
-    def retry_transaction_until_included(self, transaction_id, interval=None, max_attempts=None):
+    def retry_transaction_until_included(self, transaction_id: str, interval=None, max_attempts=None):
         """Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
         included (referenced by a milestone). Returns the included block id.
         """
@@ -454,7 +470,7 @@ class Account:
         )
         return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
 
-    def set_alias(self, alias):
+    def set_alias(self, alias: str):
         """Set alias.
         """
         return self._call_account_method(
@@ -500,7 +516,7 @@ class Account:
             }
         )
 
-    def claim_outputs(self, output_ids_to_claim):
+    def claim_outputs(self, output_ids_to_claim: List[OutputId]):
         """Claim outputs.
         """
         return self._call_account_method(
