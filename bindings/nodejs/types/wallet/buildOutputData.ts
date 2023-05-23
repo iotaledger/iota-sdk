@@ -1,7 +1,4 @@
-import type {
-    INativeToken,
-    TokenSchemeTypes,
-} from '@iota/types';
+import type { INativeToken, TokenSchemeTypes } from '@iota/types';
 import { Feature, UnlockCondition } from '../../lib';
 
 /** An alias output */

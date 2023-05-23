@@ -9,10 +9,7 @@ import { Feature, FeatureDiscriminator } from './feature';
 import { HexEncodedString, INativeToken, TokenSchemeTypes } from '@iota/types';
 
 // Temp solution for not double parsing JSON
-import {
-    plainToInstance,
-    Type,
-} from 'class-transformer';
+import { plainToInstance, Type } from 'class-transformer';
 
 /**
  * All of the output types.
