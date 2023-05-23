@@ -83,7 +83,6 @@ impl Account {
         .to_bytes()?;
 
         let new_output = BasicOutputBuilder::from(output)
-            // TODO maybe replace ?
             .with_features(vec![
                 Feature::Tag(TagFeature::new(PARTICIPATION_TAG)?),
                 Feature::Metadata(MetadataFeature::new(participation_bytes.clone())?),
@@ -153,7 +152,6 @@ impl Account {
         .to_bytes()?;
 
         let new_output = BasicOutputBuilder::from(output)
-            // TODO maybe replace ?
             .with_features(vec![
                 Feature::Tag(TagFeature::new(PARTICIPATION_TAG)?),
                 Feature::Metadata(MetadataFeature::new(participation_bytes.clone())?),
