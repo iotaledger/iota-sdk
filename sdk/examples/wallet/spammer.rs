@@ -15,10 +15,16 @@ use iota_sdk::{
         request_funds_from_faucet,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::{output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder}, payload::transaction::TransactionId},
+    types::block::{
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
+        payload::transaction::TransactionId,
+    },
     wallet::{account::types::AccountAddress, Account, ClientOptions, Result, SendAmountParams, Wallet},
 };
-use tokio::{task::JoinSet, time::{sleep, Instant}};
+use tokio::{
+    task::JoinSet,
+    time::{sleep, Instant},
+};
 
 // The account alias used in this example.
 const ACCOUNT_ALIAS: &str = "spammer";
@@ -66,18 +72,26 @@ async fn main() -> Result<()> {
         println!("Splitting available funds among addresses...");
         let split_amount = available_funds / 2 / num_simultaneous_txs as u64;
         let token_supply = account.client().get_token_supply().await?;
-        let outputs = addresses.iter().take(num_simultaneous_txs).map(|addr| {
-            BasicOutputBuilder::new_with_amount(split_amount)
-                .add_unlock_condition(AddressUnlockCondition::new(*addr.address().as_ref()))
-                .finish_output(token_supply).unwrap()
-        }).collect::<Vec<_>>();
+        let outputs = addresses
+            .iter()
+            .take(num_simultaneous_txs)
+            .map(|addr| {
+                BasicOutputBuilder::new_with_amount(split_amount)
+                    .add_unlock_condition(AddressUnlockCondition::new(*addr.address().as_ref()))
+                    .finish_output(token_supply)
+                    .unwrap()
+            })
+            .collect::<Vec<_>>();
 
         let transaction = account.send(outputs, None).await?;
         wait_for_inclusion(&transaction.transaction_id, &account).await?;
     }
 
     account.sync(None).await?;
-    println!("Address count (with balance): {}", account.addresses_with_unspent_outputs().await?.len());
+    println!(
+        "Address count (with balance): {}",
+        account.addresses_with_unspent_outputs().await?.len()
+    );
 
     println!("Spamming...");
     for i in 1..=NUM_ROUNDS {

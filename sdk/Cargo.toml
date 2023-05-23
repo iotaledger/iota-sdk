@@ -599,7 +599,7 @@ required-features = [ "wallet" ]
 [[example]]
 name = "spammer"
 path = "examples/wallet/spammer.rs"
-required-features = [ "wallet", "storage" ]
+required-features = [ "wallet" ]
 
 [[example]]
 name = "split_funds"

@@ -30,7 +30,7 @@ const BASE_AMOUNT: u64 = 1_000_000;
 // The maximum number of CPU cores to use
 const MAX_CPUS_TO_USE: usize = 4;
 
-#[tokio::main]
+#[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
