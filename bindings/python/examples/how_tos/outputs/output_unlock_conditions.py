@@ -16,7 +16,7 @@ address_unlock_condition = AddressUnlockCondition(
     Ed25519Address(hex_address)
 )
 
-token_scheme = TokenScheme(0, 50, 100)
+token_scheme = TokenScheme(50, 0, 100)
 
 # Most simple output
 basic_output = client.build_basic_output(
