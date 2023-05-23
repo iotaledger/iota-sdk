@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crypto::keys::slip10::Chain;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "mqtt")]
 use crate::client::mqtt::Topic;
@@ -19,7 +19,7 @@ use crate::{
     types::block::{
         address::{dto::Ed25519AddressDto, AliasAddress},
         output::{
-            dto::{AliasIdDto, NativeTokenDto, NftIdDto, TokenSchemeDto},
+            dto::{NativeTokenDto, TokenSchemeDto},
             feature::dto::FeatureDto,
             unlock_condition::dto::UnlockConditionDto,
             AliasId, FoundryId, NftId, OutputId,
@@ -49,7 +49,7 @@ pub enum Message {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeTokenDto>>,
-        alias_id: AliasIdDto,
+        alias_id: AliasId,
         state_index: Option<u32>,
         state_metadata: Option<String>,
         foundry_counter: Option<u32>,
@@ -90,7 +90,7 @@ pub enum Message {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeTokenDto>>,
-        nft_id: NftIdDto,
+        nft_id: NftId,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,
         immutable_features: Option<Vec<FeatureDto>>,
@@ -385,7 +385,7 @@ pub enum Message {
     /// Try to get OutputWithMetadataResponse from provided OutputIds (requests are sent in parallel and errors are
     /// ignored, can be useful for spent outputs)
     #[serde(rename_all = "camelCase")]
-    TryGetOutputs {
+    GetOutputsIgnoreErrors {
         /// Output IDs
         output_ids: Vec<OutputId>,
     },

@@ -1,5 +1,25 @@
 # Changelog
 
+## \[2.0.3-rc.35]
+
+- [`6df8879f`](https://github.com/iotaledger/iota-sdk/commit/6df8879f70fe58b2445deb65e7d2aa83284d3d36)([#385](https://github.com/iotaledger/iota-sdk/pull/385)) Remove `IncreaseNativeTokenSupplyOptions`.
+  Rename `SendAmount::addressesWithAmount`, `SendNft::addressesAndNftIds`, `SendNativeTokens::addressesAndNativeTokens`, `CreateAliasOutput::aliasOutputOptions`, `MintNfts::nftsOptions`, `MintNativeToken::nativeTokenOptions`, `PrepareOutput::options` to `params`.
+  Rename `AddressesWithAmount` to `SendAmountParams`.
+  Rename `AddressesAndNftIds` to `SendNftParams`.
+  Rename `AddressesAndNativeTokens` to `SendNativeTokensParams`.
+  Rename `AliasOutputOptions` to `CreateAliasParams`.
+  Rename `NftOptions` to `MintNftParams`.
+  Rename `NativeTokenOptions` to `MintNativeTokenParams`.
+  Rename `OutputOptions` to `OutputParams`.
+  Rename various `BuilderOptions` to `BuilderParams`.
+
+## \[2.0.3-rc.34]
+
+- Added `OutputsToClaim::Amount` and removed `OutputsToClaim::None`.
+  - [824298d0](https://github.com/iotaledger/iota-sdk/commit/824298d0c725bde2769401fd2eaab4218fb225d3) Add amount claim ([#335](https://github.com/iotaledger/iota-sdk/pull/335)) on 2023-04-27
+- Add an optional ignoreIfBech32Mismatch field to `restoreBackup()`.
+  - [8dd3b6cf](https://github.com/iotaledger/iota-sdk/commit/8dd3b6cf3264541ad0567660ab6d4b8268b5cc1c) Add ignore_if_bech32\_mismatch to restore_backup() ([#382](https://github.com/iotaledger/iota-sdk/pull/382)) on 2023-05-04
+
 ## \[2.0.3-rc.33]
 
 - Rename `SendNativeTokens::addresses_native_tokens` to `addresses_and_native_tokens`.

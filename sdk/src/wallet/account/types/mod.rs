@@ -15,12 +15,12 @@ use serde::{Deserialize, Deserializer, Serialize};
 pub use self::{
     address::{AccountAddress, AddressWithUnspentOutputs},
     balance::{
-        AccountBalance, AccountBalanceDto, BaseCoinBalance, BaseCoinBalanceDto, NativeTokensBalance,
-        NativeTokensBalanceDto, RequiredStorageDeposit,
+        AccountBalance, AccountBalanceDto, BaseCoinBalance, NativeTokensBalance, NativeTokensBalanceDto,
+        RequiredStorageDeposit,
     },
 };
 use crate::{
-    client::secret::types::InputSigningData,
+    client::{constants::HD_WALLET_TYPE, secret::types::InputSigningData},
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
@@ -42,7 +42,7 @@ use crate::{
 pub struct OutputData {
     /// The output id
     pub output_id: OutputId,
-    pub metadata: OutputMetadataDto,
+    pub metadata: OutputMetadata,
     /// The actual Output
     pub output: Output,
     /// If an output is spent
@@ -76,7 +76,7 @@ impl OutputData {
                 .find(|a| a.address.inner == unlock_address)
             {
                 Some(Chain::from_u32_hardened(vec![
-                    44,
+                    HD_WALLET_TYPE,
                     account.coin_type,
                     account.index,
                     address.internal as u32,
@@ -92,7 +92,7 @@ impl OutputData {
 
         Ok(Some(InputSigningData {
             output: self.output.clone(),
-            output_metadata: OutputMetadata::try_from(&self.metadata)?,
+            output_metadata: self.metadata.clone(),
             chain,
         }))
     }
@@ -124,7 +124,7 @@ impl From<&OutputData> for OutputDataDto {
     fn from(value: &OutputData) -> Self {
         Self {
             output_id: value.output_id,
-            metadata: value.metadata.clone(),
+            metadata: OutputMetadataDto::from(&value.metadata),
             output: OutputDto::from(&value.output),
             is_spent: value.is_spent,
             address: AddressDto::from(&value.address),

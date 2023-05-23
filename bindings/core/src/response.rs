@@ -43,10 +43,10 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            types::{AccountAddress, AccountBalanceDto, TransactionDto},
+            types::{AccountAddress, AccountBalanceDto, AddressWithUnspentOutputs, TransactionDto},
             MintTokenTransactionDto, OutputDataDto,
         },
-        message_interface::dtos::{AccountDetailsDto, AddressWithUnspentOutputsDto},
+        message_interface::dtos::AccountDetailsDto,
     },
 };
 use serde::Serialize;
@@ -140,7 +140,7 @@ pub enum Response {
     OutputMetadata(OutputMetadataDto),
     /// Response for:
     /// - [`GetOutputs`](crate::method::ClientMethod::GetOutputs)
-    /// - [`TryGetOutputs`](crate::method::ClientMethod::TryGetOutputs)
+    /// - [`GetOutputsIgnoreErrors`](crate::method::ClientMethod::GetOutputsIgnoreErrors)
     /// - [`FindOutputs`](crate::method::ClientMethod::FindOutputs)
     Outputs(Vec<OutputWithMetadataResponse>),
     /// Response for:
@@ -295,7 +295,7 @@ pub enum Response {
     Addresses(Vec<AccountAddress>),
     /// Response for
     /// - [`AddressesWithUnspentOutputs`](crate::method::AccountMethod::AddressesWithUnspentOutputs)
-    AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputsDto>),
+    AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputs>),
     /// Response for
     /// - [`MinimumRequiredStorageDeposit`](crate::method::AccountMethod::MinimumRequiredStorageDeposit)
     MinimumRequiredStorageDeposit(String),
@@ -314,10 +314,12 @@ pub enum Response {
     PreparedTransaction(PreparedTransactionDataDto),
     /// Response for
     /// - [`GetTransaction`](crate::method::AccountMethod::GetTransaction),
+    /// - [`GetIncomingTransaction`](crate::method::AccountMethod::GetIncomingTransaction)
     Transaction(Option<Box<TransactionDto>>),
     /// Response for
     /// - [`Transactions`](crate::method::AccountMethod::Transactions),
-    /// - [`PendingTransactions`](crate::method::AccountMethod::PendingTransactions)
+    /// - [`PendingTransactions`](crate::method::AccountMethod::PendingTransactions),
+    /// - [`IncomingTransactions`](crate::method::AccountMethod::IncomingTransactions)
     Transactions(Vec<TransactionDto>),
     /// Response for
     /// - [`SignTransactionEssence`](crate::method::AccountMethod::SignTransactionEssence)
@@ -330,12 +332,6 @@ pub enum Response {
     /// - [`GetBalance`](crate::method::AccountMethod::GetBalance),
     /// - [`Sync`](crate::method::AccountMethod::Sync)
     Balance(AccountBalanceDto),
-    /// Response for
-    /// - [`GetIncomingTransactionData`](crate::method::AccountMethod::GetIncomingTransactionData),
-    IncomingTransactionData(Option<Box<(TransactionId, TransactionDto)>>),
-    /// Response for
-    /// - [`IncomingTransactions`](crate::method::AccountMethod::IncomingTransactions),
-    IncomingTransactionsData(Vec<(TransactionId, TransactionDto)>),
     /// Response for
     /// - [`ConsolidateOutputs`](crate::method::AccountMethod::ConsolidateOutputs)
     /// - [`ClaimOutputs`](crate::method::AccountMethod::ClaimOutputs)

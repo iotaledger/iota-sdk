@@ -4,7 +4,6 @@
 use std::str::FromStr;
 
 use crate::{
-    client::Error as ClientError,
     types::{
         api::core::dto::LedgerInclusionStateDto,
         block::{input::Input, output::OutputId, payload::transaction::TransactionEssence, BlockId},
@@ -28,7 +27,7 @@ impl Account {
     /// be synced again
     pub(crate) async fn sync_pending_transactions(&self) -> crate::wallet::Result<bool> {
         log::debug!("[SYNC] sync pending transactions");
-        let account_details = self.read().await;
+        let account_details = self.details().await;
 
         // only set to true if a transaction got confirmed for which we don't have an output
         // (transaction_output.is_none())
@@ -38,7 +37,7 @@ impl Account {
             return Ok(confirmed_unknown_output);
         }
 
-        let network_id = self.client.get_network_id().await?;
+        let network_id = self.client().get_network_id().await?;
 
         let mut updated_transactions = Vec::new();
         let mut spent_output_ids = Vec::new();
@@ -73,11 +72,11 @@ impl Account {
                 let confirmed_output_data = account_details.outputs.get(transaction_output).expect("output exists");
                 log::debug!(
                     "[SYNC] confirmed transaction {transaction_id} in block {}",
-                    confirmed_output_data.metadata.block_id
+                    confirmed_output_data.metadata.block_id()
                 );
                 updated_transaction_and_outputs(
                     transaction,
-                    Some(BlockId::from_str(&confirmed_output_data.metadata.block_id)?),
+                    Some(*confirmed_output_data.metadata.block_id()),
                     InclusionState::Confirmed,
                     &mut updated_transactions,
                     &mut spent_output_ids,
@@ -99,7 +98,7 @@ impl Account {
             }
 
             if let Some(block_id) = transaction.block_id {
-                match self.client.get_block_metadata(&block_id).await {
+                match self.client().get_block_metadata(&block_id).await {
                     Ok(metadata) => {
                         if let Some(inclusion_state) = metadata.ledger_inclusion_state {
                             match inclusion_state {
@@ -121,7 +120,7 @@ impl Account {
                                     // try to get the included block, because maybe only this attachment is
                                     // conflicting because it got confirmed in another block
                                     if let Ok(included_block) =
-                                        self.client.get_included_block(&transaction.payload.id()).await
+                                        self.client().get_included_block(&transaction.payload.id()).await
                                     {
                                         confirmed_unknown_output = true;
                                         updated_transaction_and_outputs(
@@ -168,7 +167,7 @@ impl Account {
                             }
                         }
                     }
-                    Err(ClientError::NotFound(_)) => {
+                    Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {
                         // no need to reattach if one input got spent
                         if input_got_spent {
                             process_transaction_with_unknown_state(
@@ -248,7 +247,7 @@ fn process_transaction_with_unknown_state(
     for input in essence.inputs() {
         if let Input::Utxo(input) = input {
             if let Some(output_data) = account.outputs.get(input.output_id()) {
-                if !output_data.metadata.is_spent {
+                if !output_data.metadata.is_spent() {
                     // unspent output needs to be made available again
                     output_ids_to_unlock.push(*input.output_id());
                     all_inputs_spent = false;

@@ -20,16 +20,15 @@ use crate::{
     },
     types::block::{
         output::{dto::OutputDto, OutputId},
-        payload::transaction::TransactionId,
         BlockId,
     },
     wallet::{
         account::{
             operations::transaction::high_level::minting::mint_native_token::MintTokenTransactionDto,
-            types::{address::AccountAddress, AccountBalanceDto, TransactionDto},
+            types::{address::AccountAddress, AccountBalanceDto, AddressWithUnspentOutputs, TransactionDto},
             OutputDataDto,
         },
-        message_interface::dtos::{AccountDetailsDto, AddressWithUnspentOutputsDto},
+        message_interface::dtos::AccountDetailsDto,
         Error,
     },
 };
@@ -50,7 +49,7 @@ pub enum Response {
     Addresses(Vec<AccountAddress>),
     /// Response for
     /// [`AddressesWithUnspentOutputs`](crate::wallet::message_interface::AccountMethod::AddressesWithUnspentOutputs)
-    AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputsDto>),
+    AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputs>),
     /// Response for
     /// [`RetryTransactionUntilIncluded`](crate::wallet::message_interface::AccountMethod::RetryTransactionUntilIncluded)
     BlockId(BlockId),
@@ -80,10 +79,12 @@ pub enum Response {
     PreparedTransaction(PreparedTransactionDataDto),
     /// Response for
     /// [`GetTransaction`](crate::wallet::message_interface::AccountMethod::GetTransaction),
+    /// [`GetIncomingTransaction`](crate::wallet::message_interface::AccountMethod::GetIncomingTransaction)
     Transaction(Option<Box<TransactionDto>>),
     /// Response for
     /// [`Transactions`](crate::wallet::message_interface::AccountMethod::Transactions),
-    /// [`PendingTransactions`](crate::wallet::message_interface::AccountMethod::PendingTransactions)
+    /// [`PendingTransactions`](crate::wallet::message_interface::AccountMethod::PendingTransactions),
+    /// [`IncomingTransactions`](crate::wallet::message_interface::AccountMethod::IncomingTransactions)
     Transactions(Vec<TransactionDto>),
     /// Response for
     /// [`SignTransactionEssence`](crate::wallet::message_interface::AccountMethod::SignTransactionEssence)
@@ -101,12 +102,6 @@ pub enum Response {
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
     LedgerNanoStatus(LedgerNanoStatus),
-    /// Response for
-    /// [`GetIncomingTransactionData`](crate::wallet::message_interface::AccountMethod::GetIncomingTransactionData),
-    IncomingTransactionData(Option<Box<(TransactionId, TransactionDto)>>),
-    /// Response for
-    /// [`IncomingTransactions`](crate::wallet::message_interface::AccountMethod::IncomingTransactions),
-    IncomingTransactionsData(Vec<(TransactionId, TransactionDto)>),
     /// Response for
     /// [`ConsolidateOutputs`](crate::wallet::message_interface::AccountMethod::ConsolidateOutputs)
     /// [`ClaimOutputs`](crate::wallet::message_interface::AccountMethod::ClaimOutputs)
@@ -214,12 +209,6 @@ impl Debug for Response {
             }
             Self::GeneratedAddress(addresses) => write!(f, "GeneratedAddress({addresses:?})"),
             Self::Balance(balance) => write!(f, "Balance({balance:?})"),
-            Self::IncomingTransactionData(transaction_data) => {
-                write!(f, "IncomingTransactionData({transaction_data:?})")
-            }
-            Self::IncomingTransactionsData(transactions_data) => {
-                write!(f, "IncomingTransactionsData({transactions_data:?})")
-            }
             Self::SentTransaction(transaction) => write!(f, "SentTransaction({transaction:?})"),
             Self::MintTokenTransaction(mint_transaction) => {
                 write!(f, "MintTokenTransaction({mint_transaction:?})")

@@ -2,15 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! Builder of the Client Instance
-use std::{
-    collections::HashMap,
-    sync::{Arc, RwLock},
-    time::Duration,
-};
+use std::{collections::HashMap, sync::Arc, time::Duration};
 
-#[cfg(not(target_family = "wasm"))]
-use tokio::runtime::Runtime;
+use serde::{Deserialize, Serialize};
 
+use super::{node_manager::builder::NodeManagerBuilder, ClientInner};
 #[cfg(feature = "mqtt")]
 use crate::client::node_api::mqtt::{BrokerOptions, MqttEvent};
 use crate::{
@@ -130,6 +126,7 @@ pub struct ClientBuilder {
     pub remote_pow_timeout: Duration,
     /// The amount of threads to be used for proof of work
     #[serde(default)]
+    #[cfg(not(target_family = "wasm"))]
     pub pow_worker_count: Option<usize>,
 }
 
@@ -163,6 +160,7 @@ impl Default for ClientBuilder {
             network_info: NetworkInfo::default(),
             api_timeout: DEFAULT_API_TIMEOUT,
             remote_pow_timeout: DEFAULT_REMOTE_POW_API_TIMEOUT,
+            #[cfg(not(target_family = "wasm"))]
             pow_worker_count: None,
         }
     }
@@ -289,6 +287,7 @@ impl ClientBuilder {
     }
 
     /// Sets the amount of workers that should be used for PoW, default is num_cpus::get().
+    #[cfg(not(target_family = "wasm"))]
     pub fn with_pow_worker_count(mut self, worker_count: impl Into<Option<usize>>) -> Self {
         self.pow_worker_count = worker_count.into();
         self
@@ -326,69 +325,94 @@ impl ClientBuilder {
     }
 
     /// Build the Client instance.
-    pub fn finish(self) -> Result<Client> {
-        let network_info = Arc::new(RwLock::new(self.network_info));
-        let healthy_nodes = Arc::new(RwLock::new(HashMap::new()));
+    #[cfg(not(target_family = "wasm"))]
+    pub async fn finish(self) -> Result<Client> {
+        use tokio::sync::RwLock;
 
-        #[cfg(not(target_family = "wasm"))]
-        let (runtime, sync_handle) = {
-            let nodes = self
-                .node_manager_builder
-                .primary_node
-                .iter()
-                .chain(self.node_manager_builder.nodes.iter())
-                .map(|node| node.clone().into())
-                .collect();
-
-            let healthy_nodes_ = healthy_nodes.clone();
-            let network_info_ = network_info.clone();
-
-            let (runtime, sync_handle) = std::thread::spawn(move || {
-                let runtime = Runtime::new().expect("failed to create Tokio runtime");
-                if let Err(e) = runtime.block_on(Client::sync_nodes(
-                    &healthy_nodes_,
-                    &nodes,
-                    &network_info_,
-                    self.node_manager_builder.ignore_node_health,
-                )) {
-                    panic!("failed to sync nodes: {e:?}");
-                }
-                let sync_handle = Client::start_sync_process(
-                    &runtime,
-                    healthy_nodes_,
-                    nodes,
-                    self.node_manager_builder.node_sync_interval,
-                    network_info_,
-                    self.node_manager_builder.ignore_node_health,
-                );
-                (runtime, sync_handle)
-            })
-            .join()
-            .expect("failed to init node syncing process");
-            (Some(Arc::new(runtime)), Some(sync_handle))
-        };
+        let node_sync_interval = self.node_manager_builder.node_sync_interval;
+        let ignore_node_health = self.node_manager_builder.ignore_node_health;
+        let nodes = self
+            .node_manager_builder
+            .primary_node
+            .iter()
+            .chain(self.node_manager_builder.nodes.iter())
+            .map(|node| node.clone().into())
+            .collect();
 
         #[cfg(feature = "mqtt")]
         let (mqtt_event_tx, mqtt_event_rx) = tokio::sync::watch::channel(MqttEvent::Connected);
+
+        let client_inner = Arc::new(ClientInner {
+            node_manager: RwLock::new(self.node_manager_builder.build(HashMap::new())),
+            network_info: RwLock::new(self.network_info),
+            api_timeout: RwLock::new(self.api_timeout),
+            remote_pow_timeout: RwLock::new(self.remote_pow_timeout),
+            pow_worker_count: RwLock::new(self.pow_worker_count),
+            #[cfg(feature = "mqtt")]
+            mqtt: super::MqttInner {
+                client: Default::default(),
+                topic_handlers: Default::default(),
+                broker_options: RwLock::new(self.broker_options),
+                sender: RwLock::new(mqtt_event_tx),
+                receiver: RwLock::new(mqtt_event_rx),
+            },
+        });
+
+        client_inner.sync_nodes(&nodes, ignore_node_health).await?;
+        let client_clone = client_inner.clone();
+
+        let sync_handle = tokio::spawn(async move {
+            client_clone
+                .start_sync_process(nodes, node_sync_interval, ignore_node_health)
+                .await
+        });
+
         let client = Client {
-            node_manager: self.node_manager_builder.build(healthy_nodes),
-            #[cfg(not(target_family = "wasm"))]
-            runtime,
-            #[cfg(not(target_family = "wasm"))]
-            sync_handle: sync_handle.map(Arc::new),
-            #[cfg(feature = "mqtt")]
-            mqtt_client: Arc::new(tokio::sync::RwLock::new(None)),
-            #[cfg(feature = "mqtt")]
-            mqtt_topic_handlers: Default::default(),
-            #[cfg(feature = "mqtt")]
-            broker_options: self.broker_options,
-            #[cfg(feature = "mqtt")]
-            mqtt_event_channel: (Arc::new(mqtt_event_tx), mqtt_event_rx),
-            network_info,
-            api_timeout: self.api_timeout,
-            remote_pow_timeout: self.remote_pow_timeout,
-            pow_worker_count: self.pow_worker_count,
+            inner: client_inner,
+            _sync_handle: Arc::new(RwLock::new(super::SyncHandle(Some(sync_handle)))),
         };
+
         Ok(client)
+    }
+
+    /// Build the Client instance.
+    #[cfg(target_family = "wasm")]
+    pub async fn finish(self) -> Result<Client> {
+        use tokio::sync::RwLock;
+
+        #[cfg(feature = "mqtt")]
+        let (mqtt_event_tx, mqtt_event_rx) = tokio::sync::watch::channel(MqttEvent::Connected);
+
+        let client = Client {
+            inner: Arc::new(ClientInner {
+                node_manager: RwLock::new(self.node_manager_builder.build(HashMap::new())),
+                network_info: RwLock::new(self.network_info),
+                api_timeout: RwLock::new(self.api_timeout),
+                remote_pow_timeout: RwLock::new(self.remote_pow_timeout),
+                #[cfg(feature = "mqtt")]
+                mqtt: super::MqttInner {
+                    client: Default::default(),
+                    topic_handlers: Default::default(),
+                    broker_options: RwLock::new(self.broker_options),
+                    sender: RwLock::new(mqtt_event_tx),
+                    receiver: RwLock::new(mqtt_event_rx),
+                },
+            }),
+        };
+
+        Ok(client)
+    }
+
+    pub async fn from_client(client: &Client) -> Self {
+        Self {
+            node_manager_builder: NodeManagerBuilder::from(&*client.node_manager.read().await),
+            #[cfg(feature = "mqtt")]
+            broker_options: *client.mqtt.broker_options.read().await,
+            network_info: client.network_info.read().await.clone(),
+            api_timeout: client.get_timeout().await,
+            remote_pow_timeout: client.get_remote_pow_timeout().await,
+            #[cfg(not(target_family = "wasm"))]
+            pow_worker_count: *client.pow_worker_count.read().await,
+        }
     }
 }

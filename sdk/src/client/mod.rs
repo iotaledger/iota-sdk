@@ -12,7 +12,8 @@
 //! # async fn main() -> Result<()> {
 //! let client = Client::builder()
 //!    .with_node("http://localhost:14265")?
-//!    .finish()?;
+//!    .finish()
+//!    .await?;
 //!
 //! let block = client
 //!    .block()
@@ -52,10 +53,6 @@ pub mod storage;
 pub mod stronghold;
 pub mod utils;
 
-pub use crypto::{self, keys::slip10::Seed};
-pub use packable;
-pub use url::Url;
-
 #[cfg(feature = "mqtt")]
 pub use self::node_api::mqtt;
 pub use self::{
@@ -74,11 +71,6 @@ mod async_runtime {
     use tokio::runtime::Runtime;
 
     static RUNTIME: OnceCell<Mutex<Runtime>> = OnceCell::new();
-
-    pub(crate) fn block_on<C: futures::Future>(cb: C) -> C::Output {
-        let runtime = RUNTIME.get_or_init(|| Mutex::new(Runtime::new().expect("failed to create Tokio runtime")));
-        runtime.lock().expect("failed to lock the runtime.").block_on(cb)
-    }
 
     pub(crate) fn spawn<F>(future: F)
     where

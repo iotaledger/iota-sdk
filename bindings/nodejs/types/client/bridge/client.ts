@@ -1,4 +1,4 @@
-import type { IBlock, PayloadTypes } from '@iota/types';
+import type { HexEncodedString, IBlock, PayloadTypes } from '@iota/types';
 import type { SecretManagerType } from '../../secretManager/secretManager';
 import type { IGenerateAddressesOptions } from '../generateAddressesOptions';
 import type { IBuildBlockOptions } from '../buildBlockOptions';
@@ -14,10 +14,10 @@ import type {
     QueryParameter,
 } from '../queryParameters';
 import type { IAuth } from '../network';
-import type { IBasicOutputBuilderOptions } from '../outputBuilderOptions/basicOutputOptions';
-import type { IAliasOutputBuilderOptions } from '../outputBuilderOptions/aliasOutputOptions';
-import type { IFoundryOutputBuilderOptions } from '../outputBuilderOptions/foundryOutputOptions';
-import type { INftOutputBuilderOptions } from '../outputBuilderOptions/nftOutputOptions';
+import type { BasicOutputBuilderParams } from '../outputBuilderParams/basicOutputParams';
+import type { AliasOutputBuilderParams } from '../outputBuilderParams/aliasOutputParams';
+import type { FoundryOutputBuilderParams } from '../outputBuilderParams/foundryOutputParams';
+import type { NftOutputBuilderParams } from '../outputBuilderParams/nftOutputParams';
 
 export interface __GetInfoMethod__ {
     name: 'getInfo';
@@ -125,7 +125,7 @@ export interface __SignatureUnlockMethod__ {
     name: 'signatureUnlock';
     data: {
         secretManager: SecretManagerType;
-        transactionEssenceHash: Array<number>;
+        transactionEssenceHash: HexEncodedString;
         chain: IBip32Chain;
     };
 }
@@ -332,8 +332,8 @@ export interface __FoundryOutputIdMethod__ {
     };
 }
 
-export interface __TryGetOutputsMethod__ {
-    name: 'tryGetOutputs';
+export interface __GetOutputsIgnoreErrorsMethod__ {
+    name: 'getOutputsIgnoreErrors';
     data: {
         outputIds: string[];
     };
@@ -404,22 +404,22 @@ export interface __UnhealthyNodesMethod__ {
 
 export interface __BuildBasicOutputMethod__ {
     name: 'buildBasicOutput';
-    data: IBasicOutputBuilderOptions;
+    data: BasicOutputBuilderParams;
 }
 
 export interface __BuildAliasOutputMethod__ {
     name: 'buildAliasOutput';
-    data: IAliasOutputBuilderOptions;
+    data: AliasOutputBuilderParams;
 }
 
 export interface __BuildFoundryOutputMethod__ {
     name: 'buildFoundryOutput';
-    data: IFoundryOutputBuilderOptions;
+    data: FoundryOutputBuilderParams;
 }
 
 export interface __BuildNftOutputMethod__ {
     name: 'buildNftOutput';
-    data: INftOutputBuilderOptions;
+    data: NftOutputBuilderParams;
 }
 
 export interface __ClearListenersMethod__ {
@@ -428,3 +428,11 @@ export interface __ClearListenersMethod__ {
         topics: string[];
     };
 }
+
+export type __RequestFundsFromFaucetMethod__ = {
+    name: 'requestFundsFromFaucet';
+    data: {
+        url: string;
+        address: string;
+    };
+};

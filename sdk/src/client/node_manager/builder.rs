@@ -5,7 +5,7 @@
 
 use std::{
     collections::{HashMap, HashSet},
-    sync::{Arc, RwLock},
+    sync::RwLock,
     time::Duration,
 };
 
@@ -218,7 +218,7 @@ impl NodeManagerBuilder {
         self
     }
 
-    pub(crate) fn build(self, healthy_nodes: Arc<RwLock<HashMap<Node, InfoResponse>>>) -> NodeManager {
+    pub(crate) fn build(self, healthy_nodes: HashMap<Node, InfoResponse>) -> NodeManager {
         NodeManager {
             primary_node: self.primary_node.map(|node| node.into()),
             primary_pow_node: self.primary_pow_node.map(|node| node.into()),
@@ -228,7 +228,7 @@ impl NodeManagerBuilder {
                 .map(|nodes| nodes.into_iter().map(|node| node.into()).collect()),
             ignore_node_health: self.ignore_node_health,
             node_sync_interval: self.node_sync_interval,
-            healthy_nodes,
+            healthy_nodes: RwLock::new(healthy_nodes),
             quorum: self.quorum,
             min_quorum_size: self.min_quorum_size,
             quorum_threshold: self.quorum_threshold,
@@ -260,4 +260,24 @@ pub fn validate_url(url: Url) -> Result<Url> {
         return Err(Error::UrlValidation(format!("invalid scheme: {}", url.scheme())));
     }
     Ok(url)
+}
+
+impl From<&NodeManager> for NodeManagerBuilder {
+    fn from(value: &NodeManager) -> Self {
+        Self {
+            primary_node: value.primary_node.clone().map(NodeDto::Node),
+            primary_pow_node: value.primary_pow_node.clone().map(NodeDto::Node),
+            nodes: value.nodes.iter().cloned().map(NodeDto::Node).collect(),
+            permanodes: value
+                .permanodes
+                .as_ref()
+                .map(|p| p.iter().cloned().map(NodeDto::Node).collect()),
+            ignore_node_health: value.ignore_node_health,
+            node_sync_interval: value.node_sync_interval,
+            quorum: value.quorum,
+            min_quorum_size: value.min_quorum_size,
+            quorum_threshold: value.quorum_threshold,
+            user_agent: value.http_client.user_agent.clone(),
+        }
+    }
 }

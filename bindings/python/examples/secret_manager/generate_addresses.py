@@ -1,8 +1,15 @@
 from iota_sdk import MnemonicSecretManager, CoinType, SecretManager
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+if 'NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1' not in os.environ:
+    raise Exception(".env mnemonic is undefined, see .env.example")
 
 # In this example we will create addresses from a mnemonic
 
-secret_manager = SecretManager(MnemonicSecretManager("endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river"))
+secret_manager = SecretManager(MnemonicSecretManager(os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1']))
 
 # Generate public address with default account index and range.
 addresses = secret_manager.generate_addresses()

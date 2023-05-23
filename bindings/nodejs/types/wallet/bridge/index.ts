@@ -4,14 +4,11 @@ import type {
     __BuildBasicOutputMethod__,
     __BuildFoundryOutputMethod__,
     __BuildNftOutputMethod__,
-    __BurnNativeTokenMethod__,
-    __BurnNftMethod__,
+    __BurnMethod__,
     __ClaimOutputsMethod__,
     __ConsolidateOutputsMethod__,
     __CreateAliasOutputMethod__,
     __DecreaseNativeTokenSupplyMethod__,
-    __DestroyAliasMethod__,
-    __DestroyFoundryMethod__,
     __DeregisterParticipationEventMethod__,
     __GenerateAddressesMethod__,
     __GetBalanceMethod__,
@@ -34,7 +31,6 @@ import type {
     __PrepareSendAmountMethod__,
     __PrepareTransactionMethod__,
     __RegisterParticipationEventsMethod__,
-    __RequestFundsFromFaucetMethod__,
     __RetryTransactionUntilIncludedMethod__,
     __SendAmountMethod__,
     __SendNativeTokensMethod__,
@@ -45,7 +41,7 @@ import type {
     __SignTransactionEssenceMethod__,
     __SubmitAndStoreTransactionMethod__,
     __SyncAccountMethod__,
-    __GetIncomingTransactionDataMethod__,
+    __GetIncomingTransactionMethod__,
     __VoteMethod__,
     __GetParticipationOverviewMethod__,
     __GetParticipationEventMethod__,
@@ -87,18 +83,15 @@ export type __AccountMethod__ =
     | __BuildBasicOutputMethod__
     | __BuildFoundryOutputMethod__
     | __BuildNftOutputMethod__
-    | __BurnNativeTokenMethod__
-    | __BurnNftMethod__
+    | __BurnMethod__
     | __ClaimOutputsMethod__
     | __ConsolidateOutputsMethod__
     | __CreateAliasOutputMethod__
     | __DeregisterParticipationEventMethod__
-    | __DestroyAliasMethod__
-    | __DestroyFoundryMethod__
     | __GenerateAddressesMethod__
     | __GetBalanceMethod__
     | __GetOutputMethod__
-    | __GetIncomingTransactionDataMethod__
+    | __GetIncomingTransactionMethod__
     | __GetFoundryOutputMethod__
     | __GetOutputsWithAdditionalUnlockConditionsMethod__
     | __GetParticipationEventMethod__
@@ -122,7 +115,6 @@ export type __AccountMethod__ =
     | __PrepareSendAmountMethod__
     | __PrepareTransactionMethod__
     | __RegisterParticipationEventsMethod__
-    | __RequestFundsFromFaucetMethod__
     | __RetryTransactionUntilIncludedMethod__
     | __SendAmountMethod__
     | __SendNativeTokensMethod__

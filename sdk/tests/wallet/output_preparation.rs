@@ -9,9 +9,10 @@ use iota_sdk::{
         output::{NativeToken, NftId, TokenId},
     },
     wallet::{
-        account::{Assets, Features, OutputOptions, ReturnStrategy, StorageDeposit, Unlocks},
-        NftOptions, Result, U256,
+        account::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
+        MintNftParams, Result,
     },
+    U256,
 };
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
@@ -31,7 +32,7 @@ async fn output_preparation() -> Result<()> {
 
     let output = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 500,
                 assets: None,
@@ -50,7 +51,7 @@ async fn output_preparation() -> Result<()> {
 
     let output = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: None,
@@ -71,7 +72,7 @@ async fn output_preparation() -> Result<()> {
     )?;
     let output = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
@@ -92,7 +93,7 @@ async fn output_preparation() -> Result<()> {
 
     let output = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 300000,
                 assets: None,
@@ -117,7 +118,7 @@ async fn output_preparation() -> Result<()> {
     // only send 1 with metadata feature
     let output = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 1,
                 assets: None,
@@ -145,7 +146,7 @@ async fn output_preparation() -> Result<()> {
 
     let output = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 12000,
                 assets: None,
@@ -170,7 +171,7 @@ async fn output_preparation() -> Result<()> {
 
     let output = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 1,
                 assets: None,
@@ -199,7 +200,7 @@ async fn output_preparation() -> Result<()> {
     // Error if this NftId is not in the account
     let error = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
@@ -223,7 +224,7 @@ async fn output_preparation() -> Result<()> {
 
     if let Ok(output) = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
@@ -256,7 +257,7 @@ async fn output_preparation() -> Result<()> {
     // sender address present when building basic output
     let output = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
@@ -286,7 +287,7 @@ async fn output_preparation() -> Result<()> {
     // error when adding issuer when building basic output
     let error = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: None,
@@ -311,7 +312,7 @@ async fn output_preparation() -> Result<()> {
     // issuer and sender address present when building nft output
     let output = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
@@ -349,7 +350,7 @@ async fn output_preparation() -> Result<()> {
     // nft with expiration
     let output = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 500,
                 assets: Some(Assets {
@@ -399,7 +400,7 @@ async fn output_preparation_sdr() -> Result<()> {
 
     let output = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 8001,
                 assets: None,
@@ -420,7 +421,7 @@ async fn output_preparation_sdr() -> Result<()> {
 
     let output = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 42599,
                 assets: None,
@@ -442,7 +443,7 @@ async fn output_preparation_sdr() -> Result<()> {
     // ReturnStrategy::Return provided
     let output = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 42599,
                 assets: None,
@@ -467,7 +468,7 @@ async fn output_preparation_sdr() -> Result<()> {
     // ReturnStrategy::Gift provided
     let output = account
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 42599,
                 assets: None,
@@ -501,7 +502,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     let accounts = &create_accounts_with_funds(&wallet, 1).await?;
     let address = accounts[0].addresses().await?[0].address().to_string();
 
-    let nft_options = vec![NftOptions {
+    let nft_options = vec![MintNftParams {
         address: Some(address.clone()),
         sender: Some(address.clone()),
         metadata: Some(b"some nft metadata".to_vec()),
@@ -519,7 +520,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
 
     let nft = accounts[0]
         .prepare_output(
-            OutputOptions {
+            OutputParams {
                 recipient_address: address,
                 amount: 1_000_000,
                 assets: Some(Assets {

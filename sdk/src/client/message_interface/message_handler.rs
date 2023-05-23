@@ -22,22 +22,25 @@ use crate::{
         secret::{SecretManage, SecretManager},
         Client, Result,
     },
-    types::block::{
-        address::{dto::AddressDto, Address, Ed25519Address},
-        input::dto::UtxoInputDto,
-        output::{
-            dto::{OutputBuilderAmountDto, OutputDto, RentStructureDto},
-            AliasId, AliasOutput, BasicOutput, FoundryId, FoundryOutput, NftId, NftOutput, Output,
+    types::{
+        api::core::response::OutputWithMetadataResponse,
+        block::{
+            address::{dto::AddressDto, Address, Ed25519Address},
+            input::dto::UtxoInputDto,
+            output::{
+                dto::{OutputBuilderAmountDto, OutputDto, RentStructureDto},
+                AliasId, AliasOutput, BasicOutput, FoundryId, FoundryOutput, NftId, NftOutput, Output,
+            },
+            payload::{
+                dto::{MilestonePayloadDto, PayloadDto},
+                transaction::TransactionEssence,
+                Payload, TransactionPayload,
+            },
+            protocol::dto::ProtocolParametersDto,
+            signature::{dto::Ed25519SignatureDto, Ed25519Signature},
+            unlock::Unlock,
+            Block, BlockDto, Error,
         },
-        payload::{
-            dto::{MilestonePayloadDto, PayloadDto},
-            transaction::TransactionEssence,
-            Payload, TransactionPayload,
-        },
-        protocol::dto::ProtocolParametersDto,
-        signature::{dto::Ed25519SignatureDto, Ed25519Signature},
-        unlock::Unlock,
-        Block, BlockDto, Error,
     },
 };
 
@@ -86,11 +89,10 @@ pub struct ClientMessageHandler {
 
 impl ClientMessageHandler {
     /// Creates a new instance of the message handler with the default client manager.
-    pub fn new() -> Result<Self> {
-        let instance = Self {
-            client: Client::builder().finish()?,
-        };
-        Ok(instance)
+    pub async fn init() -> Result<Self> {
+        Ok(Self {
+            client: Client::builder().finish().await?,
+        })
     }
 
     /// Creates a new instance of the message handler with the specified client.
@@ -107,7 +109,7 @@ impl ClientMessageHandler {
     {
         self.client
             .subscribe(topics, move |topic_event| {
-                #[derive(Serialize)]
+                #[derive(serde::Serialize)]
                 struct MqttResponse {
                     topic: String,
                     payload: String,
@@ -353,12 +355,12 @@ impl ClientMessageHandler {
                 self.client.unsubscribe(topics).await?;
                 Ok(Response::Ok)
             }
-            Message::GetNode => Ok(Response::Node(self.client.get_node()?)),
+            Message::GetNode => Ok(Response::Node(self.client.get_node().await?)),
             Message::GetNetworkInfo => Ok(Response::NetworkInfo(self.client.get_network_info().await?.into())),
             Message::GetNetworkId => Ok(Response::NetworkId(self.client.get_network_id().await?)),
             Message::GetBech32Hrp => Ok(Response::Bech32Hrp(self.client.get_bech32_hrp().await?)),
             Message::GetMinPowScore => Ok(Response::MinPowScore(self.client.get_min_pow_score().await?)),
-            Message::GetTipsInterval => Ok(Response::TipsInterval(self.client.get_tips_interval())),
+            Message::GetTipsInterval => Ok(Response::TipsInterval(self.client.get_tips_interval().await)),
             Message::GetProtocolParameters => {
                 let params = self.client.get_protocol_parameters().await?;
                 let protocol_response = ProtocolParametersDto {
@@ -376,8 +378,8 @@ impl ClientMessageHandler {
                 };
                 Ok(Response::ProtocolParameters(protocol_response))
             }
-            Message::GetLocalPow => Ok(Response::Bool(self.client.get_local_pow())),
-            Message::GetFallbackToLocalPow => Ok(Response::Bool(self.client.get_fallback_to_local_pow())),
+            Message::GetLocalPow => Ok(Response::Bool(self.client.get_local_pow().await)),
+            Message::GetFallbackToLocalPow => Ok(Response::Bool(self.client.get_fallback_to_local_pow().await)),
             #[cfg(feature = "ledger_nano")]
             Message::GetLedgerNanoStatus { is_simulator } => {
                 let ledger_nano = LedgerSecretManager::new(is_simulator);
@@ -491,7 +493,7 @@ impl ClientMessageHandler {
             }
             #[cfg(not(target_family = "wasm"))]
             Message::UnhealthyNodes => Ok(Response::UnhealthyNodes(
-                self.client.unhealthy_nodes().into_iter().cloned().collect(),
+                self.client.unhealthy_nodes().await.into_iter().collect(),
             )),
             Message::GetHealth { url } => Ok(Response::Bool(self.client.get_health(&url).await?)),
             Message::GetNodeInfo { url, auth } => Ok(Response::NodeInfo(Client::get_node_info(&url, auth).await?)),
@@ -521,7 +523,10 @@ impl ClientMessageHandler {
                 self.client.get_block_metadata(&block_id).await?,
             )),
             Message::GetBlockRaw { block_id } => Ok(Response::BlockRaw(self.client.get_block_raw(&block_id).await?)),
-            Message::GetOutput { output_id } => Ok(Response::Output(self.client.get_output(&output_id).await?)),
+            Message::GetOutput { output_id } => {
+                let output_with_meta = self.client.get_output(&output_id).await?;
+                Ok(Response::Output(OutputWithMetadataResponse::from(&output_with_meta)))
+            }
             Message::GetOutputMetadata { output_id } => Ok(Response::OutputMetadata(
                 self.client.get_output_metadata(&output_id).await?,
             )),
@@ -571,9 +576,17 @@ impl ClientMessageHandler {
             Message::FoundryOutputId { foundry_id } => {
                 Ok(Response::OutputId(self.client.foundry_output_id(foundry_id).await?))
             }
-            Message::GetOutputs { output_ids } => Ok(Response::Outputs(self.client.get_outputs(output_ids).await?)),
-            Message::TryGetOutputs { output_ids } => {
-                Ok(Response::Outputs(self.client.try_get_outputs(output_ids).await?))
+            Message::GetOutputs { output_ids } => {
+                let outputs_with_meta = self.client.get_outputs(output_ids).await?;
+                Ok(Response::Outputs(
+                    outputs_with_meta.iter().map(OutputWithMetadataResponse::from).collect(),
+                ))
+            }
+            Message::GetOutputsIgnoreErrors { output_ids } => {
+                let outputs_with_meta = self.client.get_outputs_ignore_errors(output_ids).await?;
+                Ok(Response::Outputs(
+                    outputs_with_meta.iter().map(OutputWithMetadataResponse::from).collect(),
+                ))
             }
             Message::FindBlocks { block_ids } => Ok(Response::Blocks(
                 self.client
@@ -621,9 +634,12 @@ impl ClientMessageHandler {
                     .map(UtxoInputDto::from)
                     .collect(),
             )),
-            Message::FindOutputs { output_ids, addresses } => Ok(Response::Outputs(
-                self.client.find_outputs(&output_ids, &addresses).await?,
-            )),
+            Message::FindOutputs { output_ids, addresses } => {
+                let outputs_with_meta = self.client.find_outputs(&output_ids, &addresses).await?;
+                Ok(Response::Outputs(
+                    outputs_with_meta.iter().map(OutputWithMetadataResponse::from).collect(),
+                ))
+            }
             Message::Reattach { block_id } => {
                 let (block_id, block) = self.client.reattach(&block_id).await?;
                 Ok(Response::Reattached((block_id, BlockDto::from(&block))))

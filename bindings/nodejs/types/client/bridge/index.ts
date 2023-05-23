@@ -43,7 +43,7 @@ import type {
     __NftOutputIdMethod__,
     __FoundryOutputIdsMethod__,
     __FoundryOutputIdMethod__,
-    __TryGetOutputsMethod__,
+    __GetOutputsIgnoreErrorsMethod__,
     __FindBlocksMethod__,
     __RetryMethod__,
     __RetryUntilIncludedMethod__,
@@ -63,6 +63,7 @@ import type {
     __BuildNftOutputMethod__,
     __ClearListenersMethod__,
     __SignatureUnlockMethod__,
+    __RequestFundsFromFaucetMethod__,
 } from './client';
 
 export type __ClientMethods__ =
@@ -115,7 +116,7 @@ export type __ClientMethods__ =
     | __NftOutputIdMethod__
     | __FoundryOutputIdsMethod__
     | __FoundryOutputIdMethod__
-    | __TryGetOutputsMethod__
+    | __GetOutputsIgnoreErrorsMethod__
     | __FindBlocksMethod__
     | __RetryMethod__
     | __RetryUntilIncludedMethod__
@@ -129,4 +130,5 @@ export type __ClientMethods__ =
     | __BuildAliasOutputMethod__
     | __BuildFoundryOutputMethod__
     | __BuildNftOutputMethod__
-    | __ClearListenersMethod__;
+    | __ClearListenersMethod__
+    | __RequestFundsFromFaucetMethod__;

@@ -5,7 +5,7 @@ import { Client, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/client/12_get_raw_block.js
+// yarn run-example ./client/12_get_raw_block.ts
 
 // In this example we will get the raw bytes of a block.
 async function run() {

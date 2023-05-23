@@ -1,4 +1,4 @@
-import { Client, SecretManager, Utils } from '../../lib';
+import { Client, Ed25519Address, SecretManager, Utils } from '../../lib';
 import '../customMatchers';
 import 'dotenv/config';
 
@@ -18,6 +18,15 @@ describe('Client utility methods', () => {
         await expect(
             new SecretManager(strongholdSecretManager).storeMnemonic(mnemonic),
         ).resolves.toBe(null);
+    });
+
+    it('invalid mnemonic error', () => {
+        try {
+            Utils.verifyMnemonic('invalid mnemonic '.repeat(12));
+            throw 'should error';
+        } catch (e: any) {
+            expect(e.payload.error).toContain('NoSuchWord');
+        }
     });
 
     it('converts address to hex and bech32', async () => {
@@ -107,14 +116,8 @@ describe('Client utility methods', () => {
         const message = '0x494f5441';
         const signature = await new SecretManager(secretManager).signEd25519(
             message,
-            // [44, 4218, 0, 0, 0] IOTA coin type, first account, first public address
-            [
-                { hardened: true, bs: [128, 0, 0, 44] },
-                { hardened: true, bs: [128, 0, 16, 123] },
-                { hardened: true, bs: [128, 0, 0, 0] },
-                { hardened: true, bs: [128, 0, 0, 0] },
-                { hardened: true, bs: [128, 0, 0, 0] },
-            ],
+            // HD-Wallet type, IOTA coin type, first account, public, first address
+            [44, 4218, 0, 0, 0],
         );
 
         const bech32Address = Utils.hexPublicKeyToBech32Address(
@@ -127,7 +130,7 @@ describe('Client utility methods', () => {
         const validSignature = Utils.verifyEd25519Signature(
             signature,
             message,
-            { type: 0, pubKeyHash },
+            new Ed25519Address(pubKeyHash),
         );
         expect(validSignature).toBeTruthy();
     });

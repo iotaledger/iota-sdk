@@ -17,7 +17,12 @@ use once_cell::sync::OnceCell;
 use pyo3::{prelude::*, wrap_pyfunction};
 use tokio::runtime::Runtime;
 
-use self::{client::*, error::Result, secret_manager::*, wallet::*};
+use self::{
+    client::*,
+    error::{Error, Result},
+    secret_manager::*,
+    wallet::*,
+};
 
 /// Use one runtime.
 pub(crate) fn block_on<C: futures::Future>(cb: C) -> C::Output {
@@ -26,17 +31,17 @@ pub(crate) fn block_on<C: futures::Future>(cb: C) -> C::Output {
     runtime.lock().unwrap().block_on(cb)
 }
 
-/// Init the logger of wallet library.
+/// Init the Rust logger.
 #[pyfunction]
-pub fn init_logger(config: String) -> PyResult<()> {
-    rust_init_logger(config).expect("failed to init logger");
+pub fn init_logger(config: String) -> Result<()> {
+    rust_init_logger(config).map_err(|err| Error::from(format!("{:?}", err)))?;
     Ok(())
 }
 
 #[pyfunction]
 pub fn call_utils_method(method: String) -> Result<String> {
     let method = serde_json::from_str::<UtilsMethod>(&method)?;
-    let response = crate::block_on(async { rust_call_utils_method(method).await });
+    let response = rust_call_utils_method(method);
     Ok(serde_json::to_string(&response)?)
 }
 
@@ -57,6 +62,7 @@ fn iota_sdk(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(create_wallet, m)?).unwrap();
     m.add_function(wrap_pyfunction!(call_wallet_method, m)?).unwrap();
     m.add_function(wrap_pyfunction!(destroy_wallet, m)?).unwrap();
+    m.add_function(wrap_pyfunction!(get_client_from_wallet, m)?).unwrap();
     m.add_function(wrap_pyfunction!(listen_wallet, m)?).unwrap();
 
     Ok(())

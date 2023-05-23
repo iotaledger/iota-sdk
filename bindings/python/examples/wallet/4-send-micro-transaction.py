@@ -1,9 +1,10 @@
 from iota_sdk import Wallet
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # In this example we will send an amount below the minimum storage deposit
-
-# Explorer url
-EXPLORER = "https://explorer.shimmer.network/testnet"
 
 wallet = Wallet('./alice-database')
 
@@ -11,16 +12,17 @@ account = wallet.get_account('Alice')
 
 # Sync account with the node
 response = account.sync()
-print(f'Synced: {response}')
 
-wallet.set_stronghold_password("some_hopefully_secure_password")
+if 'STRONGHOLD_PASSWORD' not in os.environ:
+    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+
+wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 outputs = [{
     "address": "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
     "amount": "1",
 }]
 
-transaction = account.send_amount(outputs, { "allowMicroAmount": True })
-
-print(f'Transaction: {transaction["transactionId"]}')
-print(f'Block sent: {EXPLORER}/block/" + {transaction["blockId"]}');
+transaction = account.send_amount(outputs, {"allowMicroAmount": True})
+print(
+    f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')

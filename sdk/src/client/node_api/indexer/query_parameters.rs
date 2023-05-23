@@ -5,6 +5,8 @@
 
 use std::fmt;
 
+use serde::{Deserialize, Serialize};
+
 use crate::client::{Error, Result};
 
 // https://github.com/gohornet/hornet/blob/bb1271be9f3a638f6acdeb6de74eab64515f27f1/plugins/indexer/v1/routes.go#L54

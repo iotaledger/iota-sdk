@@ -16,12 +16,11 @@ use crate::{
         secret::GenerateAddressOptions,
     },
     types::block::{
-        dto::U256Dto,
         output::{
-            dto::{AliasIdDto, NativeTokenDto, NftIdDto, OutputDto, TokenIdDto, TokenSchemeDto},
+            dto::{NativeTokenDto, OutputDto, TokenSchemeDto},
             feature::dto::FeatureDto,
             unlock_condition::dto::UnlockConditionDto,
-            FoundryId, OutputId,
+            AliasId, FoundryId, NftId, OutputId, TokenId,
         },
         payload::transaction::TransactionId,
     },
@@ -32,21 +31,18 @@ use crate::{
                 syncing::SyncOptions,
                 transaction::{
                     high_level::{
-                        create_alias::AliasOutputOptionsDto,
-                        minting::{
-                            increase_native_token_supply::IncreaseNativeTokenSupplyOptionsDto,
-                            mint_native_token::NativeTokenOptionsDto, mint_nfts::NftOptionsDto,
-                        },
+                        create_alias::CreateAliasParamsDto,
+                        minting::{mint_native_token::MintNativeTokenParamsDto, mint_nfts::MintNftParamsDto},
                     },
-                    prepare_output::OutputOptionsDto,
+                    prepare_output::OutputParamsDto,
                     TransactionOptionsDto,
                 },
             },
             FilterOptions,
         },
-        message_interface::dtos::AddressWithAmountDto,
-        AddressAndNftId, AddressNativeTokens,
+        SendAmountParams, SendNativeTokensParams, SendNftParams,
     },
+    U256,
 };
 
 /// Each public account method.
@@ -61,7 +57,7 @@ pub enum AccountMethod {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeTokenDto>>,
-        alias_id: AliasIdDto,
+        alias_id: AliasId,
         state_index: Option<u32>,
         state_metadata: Option<Vec<u8>>,
         foundry_counter: Option<u32>,
@@ -102,7 +98,7 @@ pub enum AccountMethod {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeTokenDto>>,
-        nft_id: NftIdDto,
+        nft_id: NftId,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,
         immutable_features: Option<Vec<FeatureDto>>,
@@ -114,9 +110,9 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     BurnNativeToken {
         /// Native token id
-        token_id: TokenIdDto,
+        token_id: TokenId,
         /// To be burned amount
-        burn_amount: U256Dto,
+        burn_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
@@ -125,7 +121,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     BurnNft {
-        nft_id: NftIdDto,
+        nft_id: NftId,
         options: Option<TransactionOptionsDto>,
     },
     /// Consolidate outputs.
@@ -139,7 +135,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     CreateAliasOutput {
-        alias_output_options: Option<AliasOutputOptionsDto>,
+        params: Option<CreateAliasParamsDto>,
         options: Option<TransactionOptionsDto>,
     },
     /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
@@ -148,7 +144,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     DestroyAlias {
-        alias_id: AliasIdDto,
+        alias_id: AliasId,
         options: Option<TransactionOptionsDto>,
     },
     /// Function to destroy a foundry output with a circulating supply of 0.
@@ -172,7 +168,7 @@ pub enum AccountMethod {
     /// Get the [`Output`](crate::types::block::output::Output) that minted a native token by its TokenId
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[serde(rename_all = "camelCase")]
-    GetFoundryOutput { token_id: TokenIdDto },
+    GetFoundryOutput { token_id: TokenId },
     /// Get outputs with additional unlock conditions
     /// Expected response: [`OutputIds`](crate::wallet::message_interface::Response::OutputIds)
     #[serde(rename_all = "camelCase")]
@@ -184,9 +180,9 @@ pub enum AccountMethod {
     /// Get the transaction with inputs of an incoming transaction stored in the account
     /// List might not be complete, if the node pruned the data already
     /// Expected response:
-    /// [`IncomingTransactionData`](crate::wallet::message_interface::Response::IncomingTransactionData)
+    /// [`Transaction`](crate::wallet::message_interface::Response::Transaction)
     #[serde(rename_all = "camelCase")]
-    GetIncomingTransactionData { transaction_id: TransactionId },
+    GetIncomingTransaction { transaction_id: TransactionId },
     /// Expected response: [`Addresses`](crate::wallet::message_interface::Response::Addresses)
     /// List addresses.
     Addresses,
@@ -204,7 +200,7 @@ pub enum AccountMethod {
     UnspentOutputs { filter_options: Option<FilterOptions> },
     /// Returns all incoming transactions of the account
     /// Expected response:
-    /// [`IncomingTransactionsData`](crate::wallet::message_interface::Response::IncomingTransactionsData)
+    /// [`Transactions`](crate::wallet::message_interface::Response::Transactions)
     IncomingTransactions,
     /// Returns all transaction of the account
     /// Expected response: [`Transactions`](crate::wallet::message_interface::Response::Transactions)
@@ -218,9 +214,9 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     DecreaseNativeTokenSupply {
         /// Native token id
-        token_id: TokenIdDto,
+        token_id: TokenId,
         /// To be melted amount
-        melt_amount: U256Dto,
+        melt_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Calculate the minimum required storage deposit for an output.
@@ -232,24 +228,23 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     IncreaseNativeTokenSupply {
         /// Native token id
-        token_id: TokenIdDto,
+        token_id: TokenId,
         /// To be minted amount
-        mint_amount: U256Dto,
-        increase_native_token_supply_options: Option<IncreaseNativeTokenSupplyOptionsDto>,
+        mint_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Mint native token.
     /// Expected response: [`MintTokenTransaction`](crate::wallet::message_interface::Response::MintTokenTransaction)
     #[serde(rename_all = "camelCase")]
     MintNativeToken {
-        native_token_options: NativeTokenOptionsDto,
+        params: MintNativeTokenParamsDto,
         options: Option<TransactionOptionsDto>,
     },
     /// Mint nft.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     MintNfts {
-        nfts_options: Vec<NftOptionsDto>,
+        params: Vec<MintNftParamsDto>,
         options: Option<TransactionOptionsDto>,
     },
     /// Get account balance information.
@@ -259,7 +254,7 @@ pub enum AccountMethod {
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
-        options: OutputOptionsDto,
+        params: OutputParamsDto,
         transaction_options: Option<TransactionOptionsDto>,
     },
     /// Prepare transaction.
@@ -272,7 +267,7 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareSendAmount {
-        addresses_with_amount: Vec<AddressWithAmountDto>,
+        params: Vec<SendAmountParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
@@ -298,21 +293,21 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendAmount {
-        addresses_with_amount: Vec<AddressWithAmountDto>,
+        params: Vec<SendAmountParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send native tokens.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendNativeTokens {
-        addresses_and_native_tokens: Vec<AddressNativeTokens>,
+        params: Vec<SendNativeTokensParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send nft.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendNft {
-        addresses_and_nft_ids: Vec<AddressAndNftId>,
+        params: Vec<SendNftParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Set the alias of the account.

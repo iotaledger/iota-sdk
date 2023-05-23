@@ -35,7 +35,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         user_agent=None,
         local_pow=None,
         fallback_to_local_pow=None,
-        pow_worker_count=None
+        pow_worker_count=None,
+        client_handle=None
     ):
         """Initialize the IOTA Client.
 
@@ -77,6 +78,9 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """
         client_config = dict(locals())
         del client_config['self']
+        # Delete client_handle, because it's not needed here and can't be serialized
+        if "client_handle" in client_config:
+            del client_config["client_handle"]
 
         if isinstance(nodes, list):
             nodes = [node.as_dict() if isinstance(node, Node)
@@ -107,7 +111,10 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         client_config = dumps(client_config)
 
         # Create the message handler
-        self.handle = iota_sdk.create_client(client_config)
+        if client_handle is None:
+            self.handle = iota_sdk.create_client(client_config)
+        else:
+            self.handle = client_handle
 
     def _call_method(self, name, data=None):
         """Dumps json string and call call_client_method()
@@ -445,7 +452,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             End of the input range
         inputs : Array of Inputs
             Inputs to use
-        output : AddressWithAmount
+        output : SendAmountParams
             Address and amount to send to
         outputs : Array of Outputs
             Outputs to use

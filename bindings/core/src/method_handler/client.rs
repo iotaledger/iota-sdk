@@ -4,20 +4,23 @@
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
-        Client,
+        request_funds_from_faucet, Client,
     },
-    types::block::{
-        input::dto::UtxoInputDto,
-        output::{
-            dto::{OutputBuilderAmountDto, OutputDto, RentStructureDto},
-            AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output,
+    types::{
+        api::core::response::OutputWithMetadataResponse,
+        block::{
+            input::dto::UtxoInputDto,
+            output::{
+                dto::{OutputBuilderAmountDto, OutputDto, RentStructureDto},
+                AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output,
+            },
+            payload::{
+                dto::{MilestonePayloadDto, PayloadDto},
+                Payload,
+            },
+            protocol::dto::ProtocolParametersDto,
+            Block, BlockDto,
         },
-        payload::{
-            dto::{MilestonePayloadDto, PayloadDto},
-            Payload,
-        },
-        protocol::dto::ProtocolParametersDto,
-        Block, BlockDto,
     },
 };
 #[cfg(feature = "mqtt")]
@@ -209,12 +212,12 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             client.unsubscribe(topics).await?;
             Response::Ok
         }
-        ClientMethod::GetNode => Response::Node(client.get_node()?),
+        ClientMethod::GetNode => Response::Node(client.get_node().await?),
         ClientMethod::GetNetworkInfo => Response::NetworkInfo(client.get_network_info().await?.into()),
         ClientMethod::GetNetworkId => Response::NetworkId(client.get_network_id().await?),
         ClientMethod::GetBech32Hrp => Response::Bech32Hrp(client.get_bech32_hrp().await?),
         ClientMethod::GetMinPowScore => Response::MinPowScore(client.get_min_pow_score().await?),
-        ClientMethod::GetTipsInterval => Response::TipsInterval(client.get_tips_interval()),
+        ClientMethod::GetTipsInterval => Response::TipsInterval(client.get_tips_interval().await),
         ClientMethod::GetProtocolParameters => {
             let params = client.get_protocol_parameters().await?;
             let protocol_response = ProtocolParametersDto {
@@ -232,8 +235,8 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             };
             Response::ProtocolParameters(protocol_response)
         }
-        ClientMethod::GetLocalPow => Response::Bool(client.get_local_pow()),
-        ClientMethod::GetFallbackToLocalPow => Response::Bool(client.get_fallback_to_local_pow()),
+        ClientMethod::GetLocalPow => Response::Bool(client.get_local_pow().await),
+        ClientMethod::GetFallbackToLocalPow => Response::Bool(client.get_fallback_to_local_pow().await),
         ClientMethod::PrepareTransaction {
             secret_manager,
             options,
@@ -290,9 +293,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::BlockIdWithBlock(block_id, BlockDto::from(&block))
         }
         #[cfg(not(target_family = "wasm"))]
-        ClientMethod::UnhealthyNodes => {
-            Response::UnhealthyNodes(client.unhealthy_nodes().into_iter().cloned().collect())
-        }
+        ClientMethod::UnhealthyNodes => Response::UnhealthyNodes(client.unhealthy_nodes().await.into_iter().collect()),
         ClientMethod::GetHealth { url } => Response::Bool(client.get_health(&url).await?),
         ClientMethod::GetNodeInfo { url, auth } => Response::NodeInfo(Client::get_node_info(&url, auth).await?),
         ClientMethod::GetInfo => Response::Info(client.get_info().await?),
@@ -316,9 +317,12 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::BlockMetadata(client.get_block_metadata(&block_id).await?)
         }
         ClientMethod::GetBlockRaw { block_id } => Response::BlockRaw(client.get_block_raw(&block_id).await?),
-        ClientMethod::GetOutput { output_id } => {
-            Response::OutputWithMetadataResponse(client.get_output(&output_id).await?)
-        }
+        ClientMethod::GetOutput { output_id } => Response::OutputWithMetadataResponse(
+            client
+                .get_output(&output_id)
+                .await
+                .map(OutputWithMetadataResponse::from)?,
+        ),
         ClientMethod::GetOutputMetadata { output_id } => {
             Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
         }
@@ -366,8 +370,24 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::OutputIdsResponse(client.foundry_output_ids(query_parameters).await?)
         }
         ClientMethod::FoundryOutputId { foundry_id } => Response::OutputId(client.foundry_output_id(foundry_id).await?),
-        ClientMethod::GetOutputs { output_ids } => Response::Outputs(client.get_outputs(output_ids).await?),
-        ClientMethod::TryGetOutputs { output_ids } => Response::Outputs(client.try_get_outputs(output_ids).await?),
+        ClientMethod::GetOutputs { output_ids } => {
+            let outputs_response = client
+                .get_outputs(output_ids)
+                .await?
+                .iter()
+                .map(OutputWithMetadataResponse::from)
+                .collect();
+            Response::Outputs(outputs_response)
+        }
+        ClientMethod::GetOutputsIgnoreErrors { output_ids } => {
+            let outputs_response = client
+                .get_outputs_ignore_errors(output_ids)
+                .await?
+                .iter()
+                .map(OutputWithMetadataResponse::from)
+                .collect();
+            Response::Outputs(outputs_response)
+        }
         ClientMethod::FindBlocks { block_ids } => Response::Blocks(
             client
                 .find_blocks(&block_ids)
@@ -412,7 +432,13 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .collect(),
         ),
         ClientMethod::FindOutputs { output_ids, addresses } => {
-            Response::Outputs(client.find_outputs(&output_ids, &addresses).await?)
+            let outputs_response = client
+                .find_outputs(&output_ids, &addresses)
+                .await?
+                .iter()
+                .map(OutputWithMetadataResponse::from)
+                .collect();
+            Response::Outputs(outputs_response)
         }
         ClientMethod::Reattach { block_id } => {
             let (block_id, block) = client.reattach(&block_id).await?;
@@ -444,6 +470,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .hex_public_key_to_bech32_address(&hex, bech32_hrp.as_deref())
                 .await?,
         ),
+        ClientMethod::RequestFundsFromFaucet { url, address } => {
+            Response::Faucet(request_funds_from_faucet(&url, &address).await?)
+        }
     };
     Ok(response)
 }

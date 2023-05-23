@@ -15,7 +15,7 @@ use crate::{
         client::call_client_method_internal, secret_manager::call_secret_manager_method_internal,
         utils::call_utils_method_internal, wallet::call_wallet_method_internal,
     },
-    panic::convert_async_panics,
+    panic::{convert_async_panics, convert_panics},
     response::Response,
     UtilsMethod,
 };
@@ -24,13 +24,13 @@ pub trait CallMethod {
     type Method;
 
     // This uses a manual async_trait-like impl because it's not worth it to import the lib for one trait
-    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + Send + 'a>>;
+    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + 'a>>;
 }
 
 impl CallMethod for Client {
     type Method = ClientMethod;
 
-    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + Send + 'a>> {
+    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + 'a>> {
         Box::pin(call_client_method(self, method))
     }
 }
@@ -38,7 +38,7 @@ impl CallMethod for Client {
 impl CallMethod for Wallet {
     type Method = WalletMethod;
 
-    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + Send + 'a>> {
+    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + 'a>> {
         Box::pin(call_wallet_method(self, method))
     }
 }
@@ -46,7 +46,7 @@ impl CallMethod for Wallet {
 impl CallMethod for SecretManager {
     type Method = SecretManagerMethod;
 
-    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + Send + 'a>> {
+    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + 'a>> {
         Box::pin(call_secret_manager_method(self, method))
     }
 }
@@ -74,9 +74,9 @@ pub async fn call_wallet_method(wallet: &Wallet, method: WalletMethod) -> Respon
 }
 
 /// Call a utils method.
-pub async fn call_utils_method(method: UtilsMethod) -> Response {
+pub fn call_utils_method(method: UtilsMethod) -> Response {
     log::debug!("Utils method: {method:?}");
-    let result = convert_async_panics(|| async { call_utils_method_internal(method).await }).await;
+    let result = convert_panics(|| call_utils_method_internal(method));
 
     let response = result.unwrap_or_else(Response::Error);
 

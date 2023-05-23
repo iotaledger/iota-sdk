@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::string::String;
 use core::str::FromStr;
 
 use derive_more::{AsRef, Deref};

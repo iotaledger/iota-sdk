@@ -5,7 +5,7 @@ import { Client, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/client/05_get_address_balance.js
+// yarn run-example ./client/05_get_address_balance.ts
 
 // In this example we will get the outputs of an address that has no additional unlock
 // conditions and sum the amounts and native tokens

@@ -10,7 +10,8 @@ use std::str::FromStr;
 
 use iota_sdk::{
     types::block::output::TokenId,
-    wallet::{Result, Wallet, U256},
+    wallet::{Result, Wallet},
+    U256,
 };
 
 #[tokio::main]
@@ -39,7 +40,7 @@ async fn main() -> Result<()> {
     // Mint some more native tokens
     let mint_amount = U256::from(10);
     let transaction = account
-        .increase_native_token_supply(token_id, mint_amount, None, None)
+        .increase_native_token_supply(token_id, mint_amount, None)
         .await?;
     println!("Transaction sent: {}", transaction.transaction.transaction_id);
 

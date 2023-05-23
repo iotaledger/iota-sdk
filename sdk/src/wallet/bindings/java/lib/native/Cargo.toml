@@ -4,9 +4,9 @@ version = "0.1.0"
 authors = [ "IOTA Stiftung" ]
 edition = "2021"
 description = "Java bindings for the IOTA client library"
-documentation = "https://wiki.iota.org/iota.rs/welcome"
+documentation = "https://wiki.iota.org/iota-sdk/welcome"
 homepage = "https://www.iota.org/"
-repository = "https://github.com/iotaledger/iota.rs"
+repository = "https://github.com/iotaledger/iota-sdk"
 license = "Apache-2.0"
 keywords = [ "iota", "tangle", "client", "java" ]
 publish = false
@@ -17,7 +17,7 @@ crate-type = [ "cdylib" ]
 doc = false
 
 [dependencies]
-iota-sdk = { path = "../../../../../..", features = [ "wallet", "message_interface", "events", "rocksdb", "stronghold", "storage", "participation"] }
+iota-sdk = { path = "../../../../../..", features = [ "wallet", "tls", "message_interface", "events", "rocksdb", "stronghold", "storage", "participation"] }
 
 futures = { version = "0.3.26", default-features = false }
 jni = { version = "0.21.1", default-features = false }

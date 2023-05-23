@@ -1,10 +1,15 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from enum import Enum
+from enum import IntEnum
+from typing import NewType
+
+HexStr = NewType("HexStr", str)
+
+HD_WALLET_TYPE = 44
 
 
-class CoinType(Enum):
+class CoinType(IntEnum):
     IOTA = 4218
     SHIMMER = 4219
 
@@ -52,9 +57,9 @@ class Node():
         return config
 
 
-class AddressWithAmount():
+class SendAmountParams():
     def __init__(self, address, amount):
-        """Initialise an AddressWithAmount
+        """Initialise SendAmountParams
 
         Parameters
         ----------

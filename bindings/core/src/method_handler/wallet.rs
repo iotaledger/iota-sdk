@@ -26,7 +26,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
 
             match builder.finish().await {
                 Ok(account) => {
-                    let account = account.read().await;
+                    let account = account.details().await;
                     Response::Account(AccountDetailsDto::from(&*account))
                 }
                 Err(e) => return Err(e.into()),
@@ -34,14 +34,14 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         WalletMethod::GetAccount { account_id } => {
             let account = wallet.get_account(account_id.clone()).await?;
-            let account = account.read().await;
+            let account = account.details().await;
             Response::Account(AccountDetailsDto::from(&*account))
         }
         WalletMethod::GetAccountIndexes => {
             let accounts = wallet.get_accounts().await?;
             let mut account_indexes = Vec::new();
             for account in accounts.iter() {
-                account_indexes.push(*account.read().await.index());
+                account_indexes.push(*account.details().await.index());
             }
             Response::AccountIndexes(account_indexes)
         }
@@ -49,7 +49,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let accounts = wallet.get_accounts().await?;
             let mut account_dtos = Vec::new();
             for account in accounts {
-                let account = account.read().await;
+                let account = account.details().await;
                 account_dtos.push(AccountDetailsDto::from(&*account));
             }
             Response::Accounts(account_dtos)
@@ -96,7 +96,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 .await?;
             let mut account_dtos = Vec::new();
             for account in accounts {
-                let account = account.read().await;
+                let account = account.details().await;
                 account_dtos.push(AccountDetailsDto::from(&*account));
             }
             Response::Accounts(account_dtos)
@@ -110,9 +110,15 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             source,
             password,
             ignore_if_coin_type_mismatch,
+            ignore_if_bech32_mismatch,
         } => {
             wallet
-                .restore_backup(source, password, ignore_if_coin_type_mismatch)
+                .restore_backup(
+                    source,
+                    password,
+                    ignore_if_coin_type_mismatch,
+                    ignore_if_bech32_mismatch.as_deref(),
+                )
                 .await?;
             Response::Ok
         }
@@ -173,7 +179,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         #[cfg(feature = "events")]
         WalletMethod::EmitTestEvent { event } => {
-            wallet.emit_test_event(event.clone()).await?;
+            wallet.emit_test_event(event.clone()).await;
             Response::Ok
         }
         #[cfg(feature = "events")]

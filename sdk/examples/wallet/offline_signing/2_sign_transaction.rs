@@ -17,7 +17,7 @@ use iota_sdk::{
             transaction::validate_transaction_payload_length, PreparedTransactionData, PreparedTransactionDataDto,
             SignedTransactionData, SignedTransactionDataDto,
         },
-        secret::{stronghold::StrongholdSecretManager, SecretManageExt, SecretManager},
+        secret::{stronghold::StrongholdSecretManager, SecretManager, SignTransactionEssence},
     },
     types::block::{output::RentStructureBuilder, payload::TransactionPayload, protocol::ProtocolParameters},
     wallet::Result,
@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Setup Stronghold secret_manager
-    let mut secret_manager = StrongholdSecretManager::builder()
+    let secret_manager = StrongholdSecretManager::builder()
         .password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .build("examples/wallet/offline_signing/offline_signing.stronghold")?;
 

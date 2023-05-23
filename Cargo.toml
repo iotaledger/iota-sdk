@@ -4,14 +4,13 @@ members = [
 	"bindings/core",
 	"bindings/nodejs",
 	"bindings/python",
+	"bindings/wasm",
 	"cli",
 	"sdk",
 	"sdk/src/client/bindings/java/lib/native",
-	"sdk/src/client/bindings/wasm",
 	"sdk/src/wallet/bindings/java/lib/native",
 	"sdk/src/wallet/bindings/nodejs",
-	"sdk/src/wallet/bindings/swift",
-	"sdk/src/wallet/bindings/wasm"
+	"sdk/src/wallet/bindings/swift"
 ]
 
 [profile.dev]

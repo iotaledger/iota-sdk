@@ -13,10 +13,10 @@ use iota_sdk::{
         node_manager::node::Node,
         request_funds_from_faucet,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        Url,
     },
     types::api::plugins::participation::types::ParticipationEventId,
     wallet::{account::types::participation::ParticipationEventRegistrationOptions, ClientOptions, Result, Wallet},
+    Url,
 };
 
 #[tokio::main]

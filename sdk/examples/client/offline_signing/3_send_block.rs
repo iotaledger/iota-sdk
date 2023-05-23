@@ -28,7 +28,8 @@ async fn main() -> Result<()> {
     let online_client = Client::builder()
         // Insert your node URL in the .env.
         .with_node(&node_url)?
-        .finish()?;
+        .finish()
+        .await?;
 
     let signed_transaction_payload = read_signed_transaction_from_file(SIGNED_TRANSACTION_FILE_NAME)?;
 

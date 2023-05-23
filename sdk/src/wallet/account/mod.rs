@@ -20,7 +20,7 @@ use std::{
 };
 
 use getset::{Getters, Setters};
-use serde::{de, Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Serialize};
 use tokio::sync::{Mutex, RwLock};
 
 #[cfg(feature = "participation")]
@@ -38,33 +38,27 @@ pub use self::{
         },
         transaction::{
             high_level::{
-                create_alias::{AliasOutputOptions, AliasOutputOptionsDto},
+                create_alias::{CreateAliasParams, CreateAliasParamsDto},
                 minting::{
-                    increase_native_token_supply::{
-                        IncreaseNativeTokenSupplyOptions, IncreaseNativeTokenSupplyOptionsDto,
-                    },
-                    mint_native_token::{MintTokenTransactionDto, NativeTokenOptions, NativeTokenOptionsDto},
-                    mint_nfts::{NftOptions, NftOptionsDto},
+                    mint_native_token::{MintNativeTokenParams, MintNativeTokenParamsDto, MintTokenTransactionDto},
+                    mint_nfts::{MintNftParams, MintNftParamsDto},
                 },
             },
             prepare_output::{
-                Assets, Features, OutputOptions, OutputOptionsDto, ReturnStrategy, StorageDeposit, Unlocks,
+                Assets, Features, OutputParams, OutputParamsDto, ReturnStrategy, StorageDeposit, Unlocks,
             },
             RemainderValueStrategy, TransactionOptions, TransactionOptionsDto,
         },
     },
     types::OutputDataDto,
 };
-#[cfg(feature = "events")]
-use crate::wallet::events::EventEmitter;
-#[cfg(feature = "storage")]
-use crate::wallet::storage::manager::StorageManager;
+use super::wallet::WalletInner;
 use crate::{
-    client::{secret::SecretManager, Client},
+    client::Client,
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
-            output::{FoundryId, FoundryOutput, Output, OutputId, TokenId},
+            output::{AliasId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
             payload::{
                 transaction::{TransactionEssence, TransactionId},
                 TransactionPayload,
@@ -76,7 +70,7 @@ use crate::{
 };
 
 /// Options to filter outputs
-#[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq, Hash)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct FilterOptions {
     /// Filter all outputs where the booked milestone index is below the specified timestamp
@@ -85,6 +79,12 @@ pub struct FilterOptions {
     pub upper_bound_booked_timestamp: Option<u32>,
     /// Filter all outputs for the provided types (Basic = 3, Alias = 4, Foundry = 5, NFT = 6).
     pub output_types: Option<Vec<u8>>,
+    /// Return all alias outputs matching these IDs.
+    pub alias_ids: Option<HashSet<AliasId>>,
+    /// Return all foundry outputs matching these IDs.
+    pub foundry_ids: Option<HashSet<FoundryId>>,
+    /// Return all nft outputs matching these IDs.
+    pub nft_ids: Option<HashSet<NftId>>,
 }
 
 /// Details of an account.
@@ -124,8 +124,7 @@ pub struct AccountDetails {
     // Maybe pending transactions even additionally separated?
     pending_transactions: HashSet<TransactionId>,
     /// Transaction payloads for received outputs with inputs when not pruned before syncing, can be used to determine
-    /// the sender address/es
-    #[serde(deserialize_with = "deserialize_or_convert")]
+    /// the sender address(es)
     incoming_transactions: HashMap<TransactionId, Transaction>,
     /// Some incoming transactions can be pruned by the node before we requested them, then this node can never return
     /// it. To avoid useless requests, these transaction ids are stored here and cleared when new client options are
@@ -140,41 +139,36 @@ pub struct AccountDetails {
 /// A thread guard over an account, so we can lock the account during operations.
 #[derive(Debug, Clone)]
 pub struct Account {
-    details: Arc<RwLock<AccountDetails>>,
-    pub(crate) client: Client,
-    pub(crate) secret_manager: Arc<RwLock<SecretManager>>,
+    inner: Arc<AccountInner>,
+    pub(crate) wallet: Arc<WalletInner>,
+}
+
+#[derive(Debug)]
+pub struct AccountInner {
+    details: RwLock<AccountDetails>,
     // mutex to prevent multiple sync calls at the same or almost the same time, the u128 is a timestamp
     // if the last synced time was < `MIN_SYNC_INTERVAL` second ago, we don't sync, but only calculate the balance
     // again, because sending transactions can change that
-    pub(crate) last_synced: Arc<Mutex<u128>>,
-    pub(crate) default_sync_options: Arc<Mutex<SyncOptions>>,
-    #[cfg(feature = "events")]
-    pub(crate) event_emitter: Arc<Mutex<EventEmitter>>,
-    #[cfg(feature = "storage")]
-    pub(crate) storage_manager: Arc<Mutex<StorageManager>>,
+    pub(crate) last_synced: Mutex<u128>,
+    pub(crate) default_sync_options: Mutex<SyncOptions>,
 }
 
-// impl Deref so we can use `account.read()` instead of `account.details.read()`
+// impl Deref so we can use `account.details()` instead of `account.details.read()`
 impl Deref for Account {
-    type Target = RwLock<AccountDetails>;
+    type Target = AccountInner;
 
     fn deref(&self) -> &Self::Target {
-        self.details.deref()
+        &self.inner
     }
 }
 
 impl Account {
     /// Create a new Account with an AccountDetails
-    pub(crate) async fn new(
-        details: AccountDetails,
-        client: Client,
-        secret_manager: Arc<RwLock<SecretManager>>,
-        #[cfg(feature = "events")] event_emitter: Arc<Mutex<EventEmitter>>,
-        #[cfg(feature = "storage")] storage_manager: Arc<Mutex<StorageManager>>,
-    ) -> Result<Self> {
+    pub(crate) async fn new(details: AccountDetails, wallet: Arc<WalletInner>) -> Result<Self> {
         #[cfg(feature = "storage")]
-        let default_sync_options = storage_manager
-            .lock()
+        let default_sync_options = wallet
+            .storage_manager
+            .read()
             .await
             .get_default_sync_options(*details.index())
             .await?
@@ -183,30 +177,18 @@ impl Account {
         let default_sync_options = Default::default();
 
         Ok(Self {
-            details: Arc::new(RwLock::new(details)),
-            client,
-            secret_manager,
-            last_synced: Default::default(),
-            default_sync_options: Arc::new(Mutex::new(default_sync_options)),
-            #[cfg(feature = "events")]
-            event_emitter,
-            #[cfg(feature = "storage")]
-            storage_manager,
+            wallet,
+            inner: Arc::new(AccountInner {
+                details: RwLock::new(details),
+                last_synced: Default::default(),
+                default_sync_options: Mutex::new(default_sync_options),
+            }),
         })
-    }
-
-    pub async fn alias(&self) -> String {
-        self.read().await.alias.clone()
     }
 
     // Get the Client
     pub fn client(&self) -> &Client {
-        &self.client
-    }
-
-    /// Get the [`OutputData`] of an output stored in the account
-    pub async fn get_output(&self, output_id: &OutputId) -> Option<OutputData> {
-        self.read().await.outputs().get(output_id).cloned()
+        &self.wallet.client
     }
 
     /// Get the [`Output`] that minted a native token by the token ID. First try to get it
@@ -214,7 +196,7 @@ impl Account {
     pub async fn get_foundry_output(&self, native_token_id: TokenId) -> Result<Output> {
         let foundry_id = FoundryId::from(native_token_id);
 
-        for output_data in self.read().await.outputs().values() {
+        for output_data in self.details().await.outputs().values() {
             if let Output::Foundry(foundry_output) = &output_data.output {
                 if foundry_output.id() == foundry_id {
                     return Ok(output_data.output.clone());
@@ -223,107 +205,10 @@ impl Account {
         }
 
         // Foundry was not found in the account, try to get it from the node
-        let foundry_output_id = self.client.foundry_output_id(foundry_id).await?;
-        let output_response = self.client.get_output(&foundry_output_id).await?;
+        let foundry_output_id = self.client().foundry_output_id(foundry_id).await?;
+        let output_response = self.client().get_output(&foundry_output_id).await?;
 
-        Ok(Output::try_from_dto(
-            &output_response.output,
-            self.client.get_token_supply().await?,
-        )?)
-    }
-
-    /// Get the [`Transaction`] of a transaction stored in the account
-    pub async fn get_transaction(&self, transaction_id: &TransactionId) -> Option<Transaction> {
-        self.read().await.transactions().get(transaction_id).cloned()
-    }
-
-    /// Get the transaction with inputs of an incoming transaction stored in the account
-    /// List might not be complete, if the node pruned the data already
-    pub async fn get_incoming_transaction_data(&self, transaction_id: &TransactionId) -> Option<Transaction> {
-        self.read().await.incoming_transactions().get(transaction_id).cloned()
-    }
-
-    /// Returns all addresses of the account
-    pub async fn addresses(&self) -> Result<Vec<AccountAddress>> {
-        let account_details = self.read().await;
-        let mut all_addresses = account_details.public_addresses().clone();
-        all_addresses.extend(account_details.internal_addresses().clone());
-        Ok(all_addresses.to_vec())
-    }
-
-    /// Returns all public addresses of the account
-    pub(crate) async fn public_addresses(&self) -> Vec<AccountAddress> {
-        self.read().await.public_addresses().to_vec()
-    }
-
-    /// Returns only addresses of the account with balance
-    pub async fn addresses_with_unspent_outputs(&self) -> Result<Vec<AddressWithUnspentOutputs>> {
-        Ok(self.read().await.addresses_with_unspent_outputs().to_vec())
-    }
-
-    fn filter_outputs<'a>(
-        &self,
-        outputs: impl Iterator<Item = &'a OutputData>,
-        filter: Option<FilterOptions>,
-    ) -> Result<Vec<OutputData>> {
-        let mut filtered_outputs = Vec::new();
-
-        for output in outputs {
-            if let Some(filter_options) = &filter {
-                if let Some(lower_bound_booked_timestamp) = filter_options.lower_bound_booked_timestamp {
-                    if output.metadata.milestone_timestamp_booked < lower_bound_booked_timestamp {
-                        continue;
-                    }
-                }
-                if let Some(upper_bound_booked_timestamp) = filter_options.upper_bound_booked_timestamp {
-                    if output.metadata.milestone_timestamp_booked > upper_bound_booked_timestamp {
-                        continue;
-                    }
-                }
-                if let Some(output_types) = &filter_options.output_types {
-                    if !output_types.contains(&output.output.kind()) {
-                        continue;
-                    }
-                }
-            }
-            filtered_outputs.push(output.clone());
-        }
-
-        Ok(filtered_outputs)
-    }
-
-    /// Returns outputs of the account
-    pub async fn outputs(&self, filter: Option<FilterOptions>) -> Result<Vec<OutputData>> {
-        self.filter_outputs(self.read().await.outputs.values(), filter)
-    }
-
-    /// Returns unspent outputs of the account
-    pub async fn unspent_outputs(&self, filter: Option<FilterOptions>) -> Result<Vec<OutputData>> {
-        self.filter_outputs(self.read().await.unspent_outputs.values(), filter)
-    }
-
-    /// Returns all incoming transactions of the account
-    pub async fn incoming_transactions(&self) -> Result<HashMap<TransactionId, Transaction>> {
-        Ok(self.read().await.incoming_transactions.clone())
-    }
-
-    /// Returns all transactions of the account
-    pub async fn transactions(&self) -> Result<Vec<Transaction>> {
-        Ok(self.read().await.transactions.values().cloned().collect())
-    }
-
-    /// Returns all pending transactions of the account
-    pub async fn pending_transactions(&self) -> Result<Vec<Transaction>> {
-        let mut transactions = Vec::new();
-        let account_details = self.read().await;
-
-        for transaction_id in &account_details.pending_transactions {
-            if let Some(transaction) = account_details.transactions.get(transaction_id) {
-                transactions.push(transaction.clone());
-            }
-        }
-
-        Ok(transactions)
+        Ok(output_response.output().to_owned())
     }
 
     /// Save the account to the database, accepts the updated_account as option so we don't need to drop it before
@@ -333,13 +218,13 @@ impl Account {
         log::debug!("[save] saving account to database");
         match updated_account {
             Some(account) => {
-                let mut storage_manager = self.storage_manager.lock().await;
+                let mut storage_manager = self.wallet.storage_manager.write().await;
                 storage_manager.save_account(account).await?;
                 drop(storage_manager);
             }
             None => {
-                let account_details = self.read().await;
-                let mut storage_manager = self.storage_manager.lock().await;
+                let account_details = self.details().await;
+                let mut storage_manager = self.wallet.storage_manager.write().await;
                 storage_manager.save_account(&account_details).await?;
                 drop(storage_manager);
                 drop(account_details);
@@ -347,32 +232,195 @@ impl Account {
         }
         Ok(())
     }
+
+    #[cfg(feature = "events")]
+    pub(crate) async fn emit(&self, account_index: u32, wallet_event: super::events::types::WalletEvent) {
+        self.wallet.emit(account_index, wallet_event).await
+    }
 }
 
-// Custom deserialization to stay backwards compatible
-fn deserialize_or_convert<'de, D>(deserializer: D) -> std::result::Result<HashMap<TransactionId, Transaction>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let value = serde_json::Value::deserialize(deserializer)?;
+impl AccountInner {
+    pub async fn details(&self) -> tokio::sync::RwLockReadGuard<'_, AccountDetails> {
+        self.details.read().await
+    }
 
-    type NewType = HashMap<TransactionId, Transaction>;
-    type OldType = HashMap<TransactionId, (TransactionPayload, Vec<OutputWithMetadataResponse>)>;
+    pub async fn details_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, AccountDetails> {
+        self.details.write().await
+    }
 
-    Ok(match serde_json::from_value::<NewType>(value.clone()) {
-        Ok(r) => r,
-        Err(_) => {
-            let v = serde_json::from_value::<OldType>(value).map_err(de::Error::custom)?;
-            let mut new = HashMap::new();
-            for (tx_id, (tx_payload, inputs)) in v {
-                new.insert(
-                    tx_id,
-                    build_transaction_from_payload_and_inputs(tx_id, tx_payload, inputs).map_err(de::Error::custom)?,
-                );
+    pub async fn alias(&self) -> String {
+        self.details().await.alias.clone()
+    }
+
+    /// Get the [`OutputData`] of an output stored in the account
+    pub async fn get_output(&self, output_id: &OutputId) -> Option<OutputData> {
+        self.details().await.outputs().get(output_id).cloned()
+    }
+
+    /// Get the [`Transaction`] of a transaction stored in the account
+    pub async fn get_transaction(&self, transaction_id: &TransactionId) -> Option<Transaction> {
+        self.details().await.transactions().get(transaction_id).cloned()
+    }
+
+    /// Get the transaction with inputs of an incoming transaction stored in the account
+    /// List might not be complete, if the node pruned the data already
+    pub async fn get_incoming_transaction(&self, transaction_id: &TransactionId) -> Option<Transaction> {
+        self.details()
+            .await
+            .incoming_transactions()
+            .get(transaction_id)
+            .cloned()
+    }
+
+    /// Returns all addresses of the account
+    pub async fn addresses(&self) -> Result<Vec<AccountAddress>> {
+        let account_details = self.details().await;
+        let mut all_addresses = account_details.public_addresses().clone();
+        all_addresses.extend(account_details.internal_addresses().clone());
+        Ok(all_addresses.to_vec())
+    }
+
+    /// Returns all public addresses of the account
+    pub(crate) async fn public_addresses(&self) -> Vec<AccountAddress> {
+        self.details().await.public_addresses().to_vec()
+    }
+
+    /// Returns only addresses of the account with balance
+    pub async fn addresses_with_unspent_outputs(&self) -> Result<Vec<AddressWithUnspentOutputs>> {
+        Ok(self.details().await.addresses_with_unspent_outputs().to_vec())
+    }
+
+    fn filter_outputs<'a>(
+        &self,
+        outputs: impl Iterator<Item = &'a OutputData>,
+        filter: impl Into<Option<FilterOptions>>,
+    ) -> Result<Vec<OutputData>> {
+        let filter = filter.into();
+
+        if let Some(filter) = filter {
+            let mut filtered_outputs = Vec::new();
+
+            for output in outputs {
+                match &output.output {
+                    Output::Alias(alias) => {
+                        if let Some(alias_ids) = &filter.alias_ids {
+                            let alias_id = alias.alias_id_non_null(&output.output_id);
+                            if alias_ids.contains(&alias_id) {
+                                filtered_outputs.push(output.clone());
+                                continue;
+                            }
+                        }
+                    }
+                    Output::Foundry(foundry) => {
+                        if let Some(foundry_ids) = &filter.foundry_ids {
+                            let foundry_id = foundry.id();
+                            if foundry_ids.contains(&foundry_id) {
+                                filtered_outputs.push(output.clone());
+                                continue;
+                            }
+                        }
+                    }
+                    Output::Nft(nft) => {
+                        if let Some(nft_ids) = &filter.nft_ids {
+                            let nft_id = nft.nft_id_non_null(&output.output_id);
+                            if nft_ids.contains(&nft_id) {
+                                filtered_outputs.push(output.clone());
+                                continue;
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+
+                if let Some(lower_bound_booked_timestamp) = filter.lower_bound_booked_timestamp {
+                    if output.metadata.milestone_timestamp_booked() < lower_bound_booked_timestamp {
+                        continue;
+                    }
+                }
+                if let Some(upper_bound_booked_timestamp) = filter.upper_bound_booked_timestamp {
+                    if output.metadata.milestone_timestamp_booked() > upper_bound_booked_timestamp {
+                        continue;
+                    }
+                }
+
+                if let Some(output_types) = &filter.output_types {
+                    if !output_types.contains(&output.output.kind()) {
+                        continue;
+                    }
+                }
+
+                filtered_outputs.push(output.clone());
             }
-            new
+
+            Ok(filtered_outputs)
+        } else {
+            Ok(outputs.cloned().collect())
         }
-    })
+    }
+
+    /// Returns outputs of the account
+    pub async fn outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Result<Vec<OutputData>> {
+        self.filter_outputs(self.details().await.outputs.values(), filter)
+    }
+
+    /// Returns unspent outputs of the account
+    pub async fn unspent_outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Result<Vec<OutputData>> {
+        self.filter_outputs(self.details().await.unspent_outputs.values(), filter)
+    }
+
+    /// Gets the unspent alias output matching the given ID.
+    pub async fn unspent_alias_output(&self, alias_id: &AliasId) -> Result<Option<OutputData>> {
+        self.unspent_outputs(FilterOptions {
+            alias_ids: Some([*alias_id].into()),
+            ..Default::default()
+        })
+        .await
+        .map(|res| res.get(0).cloned())
+    }
+
+    /// Gets the unspent foundry output matching the given ID.
+    pub async fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Result<Option<OutputData>> {
+        self.unspent_outputs(FilterOptions {
+            foundry_ids: Some([*foundry_id].into()),
+            ..Default::default()
+        })
+        .await
+        .map(|res| res.get(0).cloned())
+    }
+
+    /// Gets the unspent nft output matching the given ID.
+    pub async fn unspent_nft_output(&self, nft_id: &NftId) -> Result<Option<OutputData>> {
+        self.unspent_outputs(FilterOptions {
+            nft_ids: Some([*nft_id].into()),
+            ..Default::default()
+        })
+        .await
+        .map(|res| res.get(0).cloned())
+    }
+
+    /// Returns all incoming transactions of the account
+    pub async fn incoming_transactions(&self) -> Vec<Transaction> {
+        self.details().await.incoming_transactions.values().cloned().collect()
+    }
+
+    /// Returns all transactions of the account
+    pub async fn transactions(&self) -> Vec<Transaction> {
+        self.details().await.transactions.values().cloned().collect()
+    }
+
+    /// Returns all pending transactions of the account
+    pub async fn pending_transactions(&self) -> Vec<Transaction> {
+        let mut transactions = Vec::new();
+        let account_details = self.details().await;
+
+        for transaction_id in &account_details.pending_transactions {
+            if let Some(transaction) = account_details.transactions.get(transaction_id) {
+                transactions.push(transaction.clone());
+            }
+        }
+
+        transactions
+    }
 }
 
 pub(crate) fn build_transaction_from_payload_and_inputs(
@@ -496,4 +544,38 @@ fn serialize() {
     };
 
     serde_json::from_str::<AccountDetails>(&serde_json::to_string(&account).unwrap()).unwrap();
+}
+
+#[cfg(test)]
+impl AccountDetails {
+    /// Returns a mock of this type with the following values:
+    /// index: 0, coin_type: 4218, alias: "Alice", public_addresses: contains a single public account address
+    /// (rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy), all other fields are set to their Rust
+    /// defaults.
+    pub(crate) fn mock() -> Self {
+        Self {
+            index: 0,
+            coin_type: 4218,
+            alias: "Alice".to_string(),
+            public_addresses: vec![AccountAddress {
+                address: crate::types::block::address::Bech32Address::from_str(
+                    "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
+                )
+                .unwrap(),
+                key_index: 0,
+                internal: false,
+                used: false,
+            }],
+            internal_addresses: Vec::new(),
+            addresses_with_unspent_outputs: Vec::new(),
+            outputs: HashMap::new(),
+            locked_outputs: HashSet::new(),
+            unspent_outputs: HashMap::new(),
+            transactions: HashMap::new(),
+            pending_transactions: HashSet::new(),
+            incoming_transactions: HashMap::new(),
+            inaccessible_incoming_transactions: HashSet::new(),
+            native_token_foundries: HashMap::new(),
+        }
+    }
 }

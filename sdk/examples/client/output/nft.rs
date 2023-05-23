@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance.
-    let client = Client::builder().with_node(&node_url)?.finish()?;
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
@@ -84,8 +84,7 @@ async fn main() -> Result<()> {
     let output_ids_response = client
         .basic_output_ids(vec![QueryParameter::Address(bech32_nft_address)])
         .await?;
-    let output_response = client.get_output(&output_ids_response.items[0]).await?;
-    let output = Output::try_from_dto(&output_response.output, token_supply)?;
+    let output_with_meta = client.get_output(&output_ids_response.items[0]).await?;
 
     let block = client
         .block()
@@ -93,7 +92,7 @@ async fn main() -> Result<()> {
         .with_input(nft_output_id.into())?
         .with_input(output_ids_response.items[0].into())?
         .with_outputs(vec![
-            NftOutputBuilder::new_with_amount(1_000_000 + output.amount(), nft_id)
+            NftOutputBuilder::new_with_amount(1_000_000 + output_with_meta.output().amount(), nft_id)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
                 .finish_output(token_supply)?,
         ])?
@@ -112,10 +111,9 @@ async fn main() -> Result<()> {
     //////////////////////////////////
 
     let nft_output_id = get_nft_output_id(block.payload().unwrap())?;
-    let output_response = client.get_output(&nft_output_id).await?;
-    let output = Output::try_from_dto(&output_response.output, token_supply)?;
+    let output_with_meta = client.get_output(&nft_output_id).await?;
     let outputs = vec![
-        BasicOutputBuilder::new_with_amount(output.amount())
+        BasicOutputBuilder::new_with_amount(output_with_meta.output().amount())
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish_output(token_supply)?,
     ];

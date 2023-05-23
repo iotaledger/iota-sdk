@@ -12,7 +12,7 @@ use crate::{
             },
             QueryParameters,
         },
-        Client, Result,
+        ClientInner, Error, Result,
     },
     types::{
         api::plugins::indexer::OutputIdsResponse,
@@ -22,7 +22,7 @@ use crate::{
 
 // hornet: https://github.com/gohornet/hornet/blob/develop/plugins/indexer/routes.go
 
-impl Client {
+impl ClientInner {
     /// Get basic outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
     /// Query parameters: "address", "hasStorageDepositReturn", "storageDepositReturnAddress",
@@ -59,7 +59,7 @@ impl Client {
             .get_output_ids(&route, QueryParameters::empty(), true, false)
             .await?
             .first()
-            .ok_or_else(|| crate::client::Error::Node("no output id for alias".to_string()))?))
+            .ok_or_else(|| Error::NoOutput(format!("{alias_id:?}")))?))
     }
 
     /// Get foundry outputs filtered by the given parameters.
@@ -84,7 +84,7 @@ impl Client {
             .get_output_ids(&route, QueryParameters::empty(), true, false)
             .await?
             .first()
-            .ok_or_else(|| crate::client::Error::Node("no output id for foundry".to_string()))?))
+            .ok_or_else(|| Error::NoOutput(format!("{foundry_id:?}")))?))
     }
 
     /// Get NFT outputs filtered by the given parameters.
@@ -110,6 +110,6 @@ impl Client {
             .get_output_ids(&route, QueryParameters::empty(), true, false)
             .await?
             .first()
-            .ok_or_else(|| crate::client::Error::Node("no output id for nft".to_string()))?))
+            .ok_or_else(|| Error::NoOutput(format!("{nft_id:?}")))?))
     }
 }

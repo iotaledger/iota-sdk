@@ -1,6 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::collections::BTreeMap;
 use core::{convert::Infallible, fmt};
 
 use hashbrown::{HashMap, HashSet};
@@ -120,13 +121,13 @@ pub struct ValidationContext<'a> {
     ///
     pub input_amount: u64,
     ///
-    pub input_native_tokens: HashMap<TokenId, U256>,
+    pub input_native_tokens: BTreeMap<TokenId, U256>,
     ///
     pub input_chains: HashMap<ChainId, &'a Output>,
     ///
     pub output_amount: u64,
     ///
-    pub output_native_tokens: HashMap<TokenId, U256>,
+    pub output_native_tokens: BTreeMap<TokenId, U256>,
     ///
     pub output_chains: HashMap<ChainId, &'a Output>,
     ///
@@ -153,7 +154,7 @@ impl<'a> ValidationContext<'a> {
             inputs_commitment: InputsCommitment::new(inputs.clone().map(|(_, output)| output)),
             milestone_timestamp,
             input_amount: 0,
-            input_native_tokens: HashMap::<TokenId, U256>::new(),
+            input_native_tokens: BTreeMap::<TokenId, U256>::new(),
             input_chains: inputs
                 .filter_map(|(output_id, input)| {
                     input
@@ -162,7 +163,7 @@ impl<'a> ValidationContext<'a> {
                 })
                 .collect(),
             output_amount: 0,
-            output_native_tokens: HashMap::<TokenId, U256>::new(),
+            output_native_tokens: BTreeMap::<TokenId, U256>::new(),
             output_chains: essence
                 .outputs()
                 .iter()

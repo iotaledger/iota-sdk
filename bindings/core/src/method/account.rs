@@ -9,25 +9,21 @@ use iota_sdk::{
 };
 use iota_sdk::{
     client::{
-        api::{PreparedTransactionDataDto, SignedTransactionDataDto},
+        api::{input_selection::BurnDto, PreparedTransactionDataDto, SignedTransactionDataDto},
         secret::GenerateAddressOptions,
     },
     types::block::{
-        dto::U256Dto,
-        output::{
-            dto::{AliasIdDto, NftIdDto, OutputDto, TokenIdDto},
-            FoundryId, OutputId,
-        },
+        output::{dto::OutputDto, OutputId, TokenId},
         payload::transaction::TransactionId,
     },
     wallet::{
         account::{
-            AliasOutputOptionsDto, FilterOptions, IncreaseNativeTokenSupplyOptionsDto, NativeTokenOptionsDto,
-            NftOptionsDto, OutputOptionsDto, OutputsToClaim, SyncOptions, TransactionOptionsDto,
+            CreateAliasParamsDto, FilterOptions, MintNativeTokenParamsDto, MintNftParamsDto, OutputParamsDto,
+            OutputsToClaim, SyncOptions, TransactionOptionsDto,
         },
-        message_interface::dtos::AddressWithAmountDto,
-        AddressAndNftId, AddressNativeTokens,
+        SendAmountParams, SendNativeTokensParams, SendNftParams,
     },
+    U256,
 };
 use serde::{Deserialize, Serialize};
 
@@ -35,25 +31,15 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 pub enum AccountMethod {
-    /// Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
-    /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
-    /// recommended to use melting, if the foundry output is available.
+    /// A generic `burn()` function that can be used to burn native tokens, nfts, foundries and aliases.
+    ///
+    /// Note that burning **native tokens** doesn't require the foundry output which minted them, but will not
+    /// increase the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output.
+    /// Therefore it's recommended to use melting, if the foundry output is available.
+    ///
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    BurnNativeToken {
-        /// Native token id
-        token_id: TokenIdDto,
-        /// To be burned amount
-        burn_amount: U256Dto,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
-    /// deposit return, timelock or expiration unlock condition. This should be preferred over burning, because after
-    /// burning, the foundry can never be destroyed anymore.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    BurnNft {
-        nft_id: NftIdDto,
+    Burn {
+        burn: BurnDto,
         options: Option<TransactionOptionsDto>,
     },
     /// Consolidate outputs.
@@ -67,24 +53,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     CreateAliasOutput {
-        alias_output_options: Option<AliasOutputOptionsDto>,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
-    /// storage deposit return, timelock or expiration unlock condition. The amount and possible native tokens will be
-    /// sent to the governor address.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    DestroyAlias {
-        alias_id: AliasIdDto,
-        options: Option<TransactionOptionsDto>,
-    },
-    /// Function to destroy a foundry output with a circulating supply of 0.
-    /// Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    DestroyFoundry {
-        foundry_id: FoundryId,
+        params: Option<CreateAliasParamsDto>,
         options: Option<TransactionOptionsDto>,
     },
     /// Generate new unused addresses.
@@ -100,7 +69,7 @@ pub enum AccountMethod {
     /// Get the [`Output`](iota_sdk::types::block::output::Output) that minted a native token by its TokenId
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]
-    GetFoundryOutput { token_id: TokenIdDto },
+    GetFoundryOutput { token_id: TokenId },
     /// Get outputs with additional unlock conditions
     /// Expected response: [`OutputIds`](crate::Response::OutputIds)
     #[serde(rename_all = "camelCase")]
@@ -111,9 +80,9 @@ pub enum AccountMethod {
     GetTransaction { transaction_id: TransactionId },
     /// Get the transaction with inputs of an incoming transaction stored in the account
     /// List might not be complete, if the node pruned the data already
-    /// Expected response: [`IncomingTransactionData`](crate::Response::IncomingTransactionData)
+    /// Expected response: [`Transaction`](crate::Response::Transaction)
     #[serde(rename_all = "camelCase")]
-    GetIncomingTransactionData { transaction_id: TransactionId },
+    GetIncomingTransaction { transaction_id: TransactionId },
     /// Expected response: [`Addresses`](crate::Response::Addresses)
     /// List addresses.
     Addresses,
@@ -131,7 +100,7 @@ pub enum AccountMethod {
     UnspentOutputs { filter_options: Option<FilterOptions> },
     /// Returns all incoming transactions of the account
     /// Expected response:
-    /// [`IncomingTransactionsData`](crate::Response::IncomingTransactionsData)
+    /// [`Transactions`](crate::Response::Transactions)
     IncomingTransactions,
     /// Returns all transaction of the account
     /// Expected response: [`Transactions`](crate::Response::Transactions)
@@ -145,9 +114,9 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     DecreaseNativeTokenSupply {
         /// Native token id
-        token_id: TokenIdDto,
+        token_id: TokenId,
         /// To be melted amount
-        melt_amount: U256Dto,
+        melt_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Calculate the minimum required storage deposit for an output.
@@ -159,24 +128,23 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     IncreaseNativeTokenSupply {
         /// Native token id
-        token_id: TokenIdDto,
+        token_id: TokenId,
         /// To be minted amount
-        mint_amount: U256Dto,
-        increase_native_token_supply_options: Option<IncreaseNativeTokenSupplyOptionsDto>,
+        mint_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Mint native token.
     /// Expected response: [`MintTokenTransaction`](crate::Response::MintTokenTransaction)
     #[serde(rename_all = "camelCase")]
     MintNativeToken {
-        native_token_options: NativeTokenOptionsDto,
+        params: MintNativeTokenParamsDto,
         options: Option<TransactionOptionsDto>,
     },
     /// Mint nft.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     MintNfts {
-        nfts_options: Vec<NftOptionsDto>,
+        params: Vec<MintNftParamsDto>,
         options: Option<TransactionOptionsDto>,
     },
     /// Get account balance information.
@@ -186,7 +154,7 @@ pub enum AccountMethod {
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
-        options: OutputOptionsDto,
+        params: OutputParamsDto,
         transaction_options: Option<TransactionOptionsDto>,
     },
     /// Prepare transaction.
@@ -199,7 +167,7 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareSendAmount {
-        addresses_with_amount: Vec<AddressWithAmountDto>,
+        params: Vec<SendAmountParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
@@ -225,21 +193,21 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendAmount {
-        addresses_with_amount: Vec<AddressWithAmountDto>,
+        params: Vec<SendAmountParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send native tokens.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendNativeTokens {
-        addresses_and_native_tokens: Vec<AddressNativeTokens>,
+        params: Vec<SendNativeTokensParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send nft.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendNft {
-        addresses_and_nft_ids: Vec<AddressAndNftId>,
+        params: Vec<SendNftParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Set the alias of the account.

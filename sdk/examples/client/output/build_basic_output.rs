@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
     let node_url = std::env::var("NODE_URL").unwrap();
 
     // Create a client instance.
-    let client = Client::builder().with_node(&node_url)?.finish()?;
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let token_supply = client.get_token_supply().await?;
 
@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
         // with metadata feature block
         basic_output_builder
             .clone()
-            .add_feature(MetadataFeature::new("Hello, World!".as_bytes().to_owned())?)
+            .add_feature(MetadataFeature::new("Hello, World!")?)
             .finish_output(token_supply)?,
         // with storage deposit return
         basic_output_builder
@@ -67,7 +67,7 @@ async fn main() -> Result<()> {
         // with tag feature
         basic_output_builder
             .clone()
-            .add_feature(TagFeature::new("Hello, World!".as_bytes().to_owned())?)
+            .add_feature(TagFeature::new("Hello, World!")?)
             .finish_output(token_supply)?,
         // with sender feature
         basic_output_builder

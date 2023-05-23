@@ -76,3 +76,25 @@ impl From<Infallible> for Error {
         }
     }
 }
+
+impl From<PyErr> for Error {
+    fn from(err: PyErr) -> Self {
+        Self { error: err }
+    }
+}
+
+impl From<&str> for Error {
+    fn from(err: &str) -> Self {
+        Self {
+            error: PyErr::new::<exceptions::PyValueError, _>(err.to_string()),
+        }
+    }
+}
+
+impl From<String> for Error {
+    fn from(err: String) -> Self {
+        Self {
+            error: PyErr::new::<exceptions::PyValueError, _>(err),
+        }
+    }
+}

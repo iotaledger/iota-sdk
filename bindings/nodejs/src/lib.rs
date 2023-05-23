@@ -20,8 +20,12 @@ pub static RUNTIME: Lazy<Runtime> = Lazy::new(|| Runtime::new().unwrap());
 
 pub fn init_logger(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let config = cx.argument::<JsString>(0)?.value(&mut cx);
-    rust_init_logger(config).expect("failed to init logger");
-    Ok(cx.undefined())
+    match rust_init_logger(config) {
+        Ok(_) => Ok(cx.undefined()),
+        Err(err) => {
+            cx.throw_error(serde_json::to_string(&Response::Panic(err.to_string())).expect("json to string error"))
+        }
+    }
 }
 
 pub fn call_utils_method(mut cx: FunctionContext) -> JsResult<JsString> {
@@ -32,7 +36,7 @@ pub fn call_utils_method(mut cx: FunctionContext) -> JsResult<JsString> {
             return Ok(cx.string(serde_json::to_string(&Response::Error(err.into())).expect("json to string error")));
         }
     };
-    let response = crate::RUNTIME.block_on(async move { rust_call_utils_method(method).await });
+    let response = rust_call_utils_method(method);
 
     Ok(cx.string(serde_json::to_string(&response).unwrap()))
 }
@@ -41,7 +45,7 @@ pub fn call_utils_method(mut cx: FunctionContext) -> JsResult<JsString> {
 fn main(mut cx: ModuleContext) -> NeonResult<()> {
     cx.export_function("initLogger", init_logger)?;
 
-    cx.export_function("callUtilsMethod", call_utils_method)?;
+    cx.export_function("callUtilsMethodRust", call_utils_method)?;
 
     // Client
     cx.export_function("callClientMethod", client::call_client_method)?;
@@ -56,7 +60,7 @@ fn main(mut cx: ModuleContext) -> NeonResult<()> {
     cx.export_function("callWalletMethod", wallet::call_wallet_method)?;
     cx.export_function("createWallet", wallet::create_wallet)?;
     cx.export_function("destroyWallet", wallet::destroy_wallet)?;
-    cx.export_function("getClient", wallet::get_client)?;
+    cx.export_function("getClientFromWallet", wallet::get_client)?;
     cx.export_function("listenWallet", wallet::listen_wallet)?;
 
     Ok(())

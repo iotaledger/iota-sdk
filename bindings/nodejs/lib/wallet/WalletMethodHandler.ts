@@ -4,10 +4,10 @@
 import {
     callWalletMethodAsync,
     createWallet,
-    listenTo,
+    listenWalletAsync,
     destroyWallet,
-    getClient,
-} from './bindings';
+    getClientFromWallet,
+} from '../bindings';
 import type {
     EventType,
     WalletOptions,
@@ -38,7 +38,11 @@ export class WalletMethodHandler {
             this.methodHandler,
         ).catch((error: Error) => {
             try {
-                error = JSON.parse(error.toString()).payload;
+                if (error.message !== undefined) {
+                    error = JSON.parse(error.message).payload;
+                } else {
+                    error = JSON.parse(error.toString()).payload;
+                }
             } catch (e) {
                 console.error(e);
             }
@@ -63,7 +67,7 @@ export class WalletMethodHandler {
         eventTypes: EventType[],
         callback: (error: Error, result: string) => void,
     ): Promise<void> {
-        return listenTo(eventTypes, callback, this.methodHandler);
+        return listenWalletAsync(eventTypes, callback, this.methodHandler);
     }
 
     async destroy(): Promise<void> {
@@ -71,6 +75,14 @@ export class WalletMethodHandler {
     }
 
     async getClient(): Promise<Client> {
-        return new Client(await getClient(this.methodHandler));
+        return new Promise((resolve, reject) => {
+            getClientFromWallet(this.methodHandler).then((result: any) => {
+                if (result.message !== undefined) {
+                    reject(JSON.parse(result.message).payload);
+                } else {
+                    resolve(new Client(result));
+                }
+            });
+        });
     }
 }

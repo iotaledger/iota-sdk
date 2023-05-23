@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crypto::keys::slip10::Chain;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     client::secret::types::{InputSigningData, InputSigningDataDto},

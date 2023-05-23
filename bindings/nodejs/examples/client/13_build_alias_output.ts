@@ -1,11 +1,21 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Client, initLogger, Utils } from '@iota/sdk';
+import {
+    Client,
+    initLogger,
+    Utils,
+    StateControllerAddressUnlockCondition,
+    MetadataFeature,
+    SenderFeature,
+    Ed25519Address,
+    IssuerFeature,
+    GovernorAddressUnlockCondition,
+} from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/client/13_build_alias_output.js
+// yarn run-example ./client/13_build_alias_output.ts
 
 // Build a basic output
 async function run() {
@@ -29,54 +39,22 @@ async function run() {
             // `hello` hex encoded
             stateMetadata: '0x68656c6c6f',
             unlockConditions: [
-                {
-                    // StateControllerAddressUnlockCondition
-                    type: 4,
-                    address: {
-                        type: 0,
-                        pubKeyHash: hexAddress,
-                    },
-                },
-                {
-                    // GovernorAddressUnlockCondition
-                    type: 5,
-                    address: {
-                        type: 0,
-                        pubKeyHash: hexAddress,
-                    },
-                },
+                new StateControllerAddressUnlockCondition(
+                    new Ed25519Address(hexAddress),
+                ),
+                new GovernorAddressUnlockCondition(
+                    new Ed25519Address(hexAddress),
+                ),
             ],
             features: [
-                {
-                    // sender feature
-                    type: 0,
-                    address: {
-                        type: 0,
-                        pubKeyHash: hexAddress,
-                    },
-                },
-                {
-                    // MetadataFeature
-                    type: 2,
-                    // `hello` hex encoded
-                    data: '0x68656c6c6f',
-                },
+                new SenderFeature(new Ed25519Address(hexAddress)),
+                // `hello` hex encoded
+                new MetadataFeature('0x68656c6c6f'),
             ],
             immutableFeatures: [
-                {
-                    // issuer feature
-                    type: 1,
-                    address: {
-                        type: 0,
-                        pubKeyHash: hexAddress,
-                    },
-                },
-                {
-                    // MetadataFeature
-                    type: 2,
-                    // `hello` hex encoded
-                    data: '0x68656c6c6f',
-                },
+                new IssuerFeature(new Ed25519Address(hexAddress)),
+                // `hello` hex encoded
+                new MetadataFeature('0x68656c6c6f'),
             ],
         });
 

@@ -28,8 +28,8 @@ impl Account {
     pub async fn set_default_sync_options(&self, options: SyncOptions) -> crate::wallet::Result<()> {
         #[cfg(feature = "storage")]
         {
-            let index = *self.read().await.index();
-            let mut storage_manager = self.storage_manager.lock().await;
+            let index = *self.details().await.index();
+            let storage_manager = self.wallet.storage_manager.read().await;
             storage_manager.set_default_sync_options(index, &options).await?;
         }
 
@@ -103,8 +103,8 @@ impl Account {
         // Request possible spent outputs
         log::debug!("[SYNC] spent_or_not_synced_outputs: {spent_or_not_synced_output_ids:?}");
         let spent_or_unsynced_output_metadata_responses = self
-            .client
-            .try_get_outputs_metadata(spent_or_not_synced_output_ids.clone())
+            .client()
+            .get_outputs_metadata_ignore_errors(spent_or_not_synced_output_ids.clone())
             .await?;
 
         // Add the output response to the output ids, the output response is optional, because an output could be

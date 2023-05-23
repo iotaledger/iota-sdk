@@ -369,6 +369,14 @@ impl NftOutput {
 
         Ok(())
     }
+
+    // Transition, just without full ValidationContext
+    pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
+        if current_state.immutable_features != next_state.immutable_features {
+            return Err(StateTransitionError::MutatedImmutableField);
+        }
+        Ok(())
+    }
 }
 
 impl StateTransitionVerifier for NftOutput {
@@ -391,11 +399,7 @@ impl StateTransitionVerifier for NftOutput {
         next_state: &Self,
         _context: &ValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
-        if current_state.immutable_features != next_state.immutable_features {
-            return Err(StateTransitionError::MutatedImmutableField);
-        }
-
-        Ok(())
+        Self::transition_inner(current_state, next_state)
     }
 
     fn destruction(_current_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
@@ -482,7 +486,7 @@ pub mod dto {
     use crate::types::block::{
         output::{
             dto::OutputBuilderAmountDto, feature::dto::FeatureDto, native_token::dto::NativeTokenDto,
-            nft_id::dto::NftIdDto, unlock_condition::dto::UnlockConditionDto,
+            unlock_condition::dto::UnlockConditionDto,
         },
         Error,
     };
@@ -499,7 +503,7 @@ pub mod dto {
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeTokenDto>,
         // Unique identifier of the NFT.
-        pub nft_id: NftIdDto,
+        pub nft_id: NftId,
         pub unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<FeatureDto>,
@@ -513,7 +517,7 @@ pub mod dto {
                 kind: NftOutput::KIND,
                 amount: value.amount().to_string(),
                 native_tokens: value.native_tokens().iter().map(Into::into).collect::<_>(),
-                nft_id: NftIdDto(value.nft_id().to_string()),
+                nft_id: *value.nft_id(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
                 features: value.features().iter().map(Into::into).collect::<_>(),
                 immutable_features: value.immutable_features().iter().map(Into::into).collect::<_>(),
@@ -525,7 +529,7 @@ pub mod dto {
         fn _try_from_dto(value: &NftOutputDto) -> Result<NftOutputBuilder, Error> {
             let mut builder = NftOutputBuilder::new_with_amount(
                 value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                (&value.nft_id).try_into()?,
+                value.nft_id,
             );
 
             for t in &value.native_tokens {
@@ -566,21 +570,19 @@ pub mod dto {
         pub fn try_from_dtos(
             amount: OutputBuilderAmountDto,
             native_tokens: Option<Vec<NativeTokenDto>>,
-            nft_id: &NftIdDto,
+            nft_id: &NftId,
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<FeatureDto>>,
             immutable_features: Option<Vec<FeatureDto>>,
             token_supply: u64,
         ) -> Result<Self, Error> {
-            let nft_id = NftId::try_from(nft_id)?;
-
             let mut builder = match amount {
                 OutputBuilderAmountDto::Amount(amount) => NftOutputBuilder::new_with_amount(
                     amount.parse().map_err(|_| Error::InvalidField("amount"))?,
-                    nft_id,
+                    *nft_id,
                 ),
                 OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
-                    NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, nft_id)
+                    NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *nft_id)
                 }
             };
 
@@ -710,7 +712,7 @@ mod tests {
         let output_split = NftOutput::try_from_dtos(
             OutputBuilderAmountDto::Amount(output.amount().to_string()),
             Some(output.native_tokens().iter().map(Into::into).collect()),
-            &output.nft_id().into(),
+            output.nft_id(),
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().iter().map(Into::into).collect()),
             Some(output.immutable_features().iter().map(Into::into).collect()),
@@ -723,7 +725,7 @@ mod tests {
             let output_split = NftOutput::try_from_dtos(
                 (&builder.amount).into(),
                 Some(builder.native_tokens.iter().map(Into::into).collect()),
-                &(&builder.nft_id).into(),
+                &builder.nft_id,
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().map(Into::into).collect()),
                 Some(builder.immutable_features.iter().map(Into::into).collect()),

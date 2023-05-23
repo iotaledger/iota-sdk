@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
 
     // Create a client instance.
-    let client = Client::builder().with_node(&node_url)?.finish()?;
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     let alias_output_builder = AliasOutputBuilder::new_with_amount(1_000_000, AliasId::null())
         .add_feature(SenderFeature::new(address))
-        .add_feature(MetadataFeature::new(vec![1, 2, 3])?)
+        .add_feature(MetadataFeature::new([1, 2, 3])?)
         .add_immutable_feature(IssuerFeature::new(address))
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
