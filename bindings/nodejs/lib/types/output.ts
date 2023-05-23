@@ -8,26 +8,18 @@ import {
 import { Feature, FeatureDiscriminator } from './feature';
 import { HexEncodedString, INativeToken, TokenSchemeTypes } from '@iota/types';
 
+// Temp solution for not double parsing JSON
 import {
-    ClassConstructor,
+    plainToInstance,
     DiscriminatorDescriptor,
     Type,
 } from 'class-transformer';
-import { plainToInstance } from 'class-transformer';
 import {
-    JSON,
     JsonObject,
     JsonProperty,
     JsonDiscriminatorProperty,
     JsonDiscriminatorValue,
 } from 'ta-json';
-
-declare type OutputTypes =
-    | TreasuryOutput
-    | BasicOutput
-    | AliasOutput
-    | FoundryOutput
-    | NftOutput;
 
 /**
  * All of the output types.

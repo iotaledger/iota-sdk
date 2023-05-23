@@ -1,5 +1,4 @@
 import type { IOutputResponse, ITransactionPayload } from '@iota/types';
-import { PreparedTransactionData } from './preparedTransactionData';
 
 /** Possible InclusionStates of transactions sent with the wallet */
 export enum InclusionState {

@@ -1,16 +1,9 @@
-import type {
-    AddressTypes,
-    IOutputMetadataResponse,
-    ITransactionEssence,
-    OutputTypes,
-} from '@iota/types';
 import {
     Account,
     IPreparedTransactionData,
     SignedTransactionEssence,
     Transaction,
 } from '../../lib';
-import type { Segment } from './output';
 
 /**
  * PreparedTransactionData` is a class that represents prepared transaction data, which

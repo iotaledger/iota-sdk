@@ -14,7 +14,7 @@ async function run() {
         throw new Error('.env FAUCET_URL is undefined, see .env.example');
     }
     try {
-        let faucetUrl = process.env.FAUCET_URL!;
+        const faucetUrl = process.env.FAUCET_URL!;
 
         // Create the wallet
         const wallet = new Wallet({

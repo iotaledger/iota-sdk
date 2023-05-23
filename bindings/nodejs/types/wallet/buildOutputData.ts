@@ -1,8 +1,6 @@
 import type {
-    FeatureTypes,
     INativeToken,
     TokenSchemeTypes,
-    UnlockConditionTypes,
 } from '@iota/types';
 import { Feature, UnlockCondition } from '../../lib';
 
