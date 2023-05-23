@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     let alias_output_builder = AliasOutputBuilder::new_with_amount(2_000_000, AliasId::null())
         .add_feature(SenderFeature::new(address))
-        .add_feature(MetadataFeature::new(vec![1, 2, 3])?)
+        .add_feature(MetadataFeature::new([1, 2, 3])?)
         .add_immutable_feature(IssuerFeature::new(address))
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
@@ -161,7 +161,7 @@ async fn main() -> Result<()> {
         // with metadata feature block
         basic_output_builder
             .clone()
-            .add_feature(MetadataFeature::new(vec![13, 37])?)
+            .add_feature(MetadataFeature::new([13, 37])?)
             .finish_output(token_supply)?,
         // with storage deposit return
         basic_output_builder

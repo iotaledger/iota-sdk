@@ -58,7 +58,7 @@ async fn main() -> Result<()> {
 
     let alias_output_builder = AliasOutputBuilder::new_with_amount(2_000_000, AliasId::null())
         .add_feature(SenderFeature::new(address))
-        .add_feature(MetadataFeature::new(vec![1, 2, 3])?)
+        .add_feature(MetadataFeature::new([1, 2, 3])?)
         .add_immutable_feature(IssuerFeature::new(address))
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
