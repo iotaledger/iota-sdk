@@ -1,10 +1,12 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will spam transactions from multiple threads simultaneously to our own address.
+//! In this example we will spam transactions from multiple threads simultaneously to our own addresses.
 //!
-//! `cargo run --example threads --release`
-
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example spammer
+//! ```
 use std::{env::var, time::Duration};
 
 use iota_sdk::{
@@ -13,28 +15,28 @@ use iota_sdk::{
         request_funds_from_faucet,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
+    types::block::{output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder}, payload::transaction::TransactionId},
     wallet::{account::types::AccountAddress, Account, ClientOptions, Result, SendAmountParams, Wallet},
 };
-use tokio::{task::JoinSet, time::sleep};
+use tokio::{task::JoinSet, time::{sleep, Instant}};
 
 // The account alias used in this example.
 const ACCOUNT_ALIAS: &str = "spammer";
 // The number of spamming rounds.
 const NUM_ROUNDS: usize = 1000;
-// The amount to send in each transaction.
+// The amount to send in each transaction
 const SEND_AMOUNT: u64 = 1_000_000;
-// The number of concurrent transactions.
-const NUM_CONCURRENT_TXS: usize = 32;
+// The number of simultaneous transactions
+const NUM_SIMULTANEOUS_TXS: usize = 4;
 
 #[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    println!(
-        "{} cores detected. Running spammer with {NUM_CONCURRENT_TXS} concurrent transactions...",
-        num_cpus::get(),
-    );
+    let num_simultaneous_txs = NUM_SIMULTANEOUS_TXS.min(num_cpus::get());
+
+    println!("Spammer set up to issue {num_simultaneous_txs} transactions simultaneously.");
 
     // Restore wallet from a mnemonic phrase.
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
@@ -50,63 +52,52 @@ async fn main() -> Result<()> {
 
     // Ensure there's some base coin balance
     let account = get_or_create_account(&wallet, ACCOUNT_ALIAS).await?;
-    let addresses = generate_max_addresses(&account, NUM_CONCURRENT_TXS).await?;
+    let addresses = ensure_enough_addresses(&account, num_simultaneous_txs).await?;
+    println!("Address count: {}", addresses.len());
 
     // Ensure there are enough available funds for spamming on each address
-    let amount = may_request_funds(&account, addresses[0].address().to_string().as_str()).await?;
+    let available_funds = ensure_enough_funds(&account, addresses[0].address().to_string().as_str()).await?;
     account.sync(None).await?;
 
-    let num_addresses_with_unspent_outputs = account.addresses_with_unspent_outputs().await?.len();
-    println!("Addresses with balance count (before): {num_addresses_with_unspent_outputs}",);
+    let num_addresses_with_balance = account.addresses_with_unspent_outputs().await?.len();
+    println!("Address count (with balance): {num_addresses_with_balance}");
 
-    println!("Splitting available funds...");
-    let split_amount = amount / NUM_CONCURRENT_TXS as u64;
+    if num_addresses_with_balance < num_simultaneous_txs {
+        println!("Splitting available funds among addresses...");
+        let split_amount = available_funds / 2 / num_simultaneous_txs as u64;
+        let token_supply = account.client().get_token_supply().await?;
+        let outputs = addresses.iter().take(num_simultaneous_txs).map(|addr| {
+            BasicOutputBuilder::new_with_amount(split_amount)
+                .add_unlock_condition(AddressUnlockCondition::new(*addr.address().as_ref()))
+                .finish_output(token_supply).unwrap()
+        }).collect::<Vec<_>>();
 
-    for address in addresses.iter().map(|addr| addr.address().to_string()) {
-        println!("Sending {split_amount} to {address}");
-        let outputs = vec![SendAmountParams::new(address, split_amount)];
-        let transaction = account.send_amount(outputs, None).await?;
-
-        println!(
-            "Transaction sent: {}/transaction/{}",
-            var("EXPLORER_URL").unwrap(),
-            transaction.transaction_id
-        );
-
-        // Wait for transaction to get included
-        let block_id = account
-            .retry_transaction_until_included(&transaction.transaction_id, None, None)
-            .await?;
-
-        println!(
-            "Transaction included: {}/block/{}",
-            var("EXPLORER_URL").unwrap(),
-            block_id
-        );
-
-        account.sync(None).await?;
+        let transaction = account.send(outputs, None).await?;
+        wait_for_inclusion(&transaction.transaction_id, &account).await?;
     }
 
-    let num_addresses_with_unspent_outputs = account.addresses_with_unspent_outputs().await?.len();
-    println!("Addresses with balance count (after): {num_addresses_with_unspent_outputs}",);
+    account.sync(None).await?;
+    println!("Address count (with balance): {}", account.addresses_with_unspent_outputs().await?.len());
 
     println!("Spamming...");
     for i in 1..=NUM_ROUNDS {
-        println!("ROUND #{i}/{NUM_ROUNDS}");
+        println!("ROUND {i}/{NUM_ROUNDS}");
 
         let mut tasks = JoinSet::<std::result::Result<(), (usize, iota_sdk::wallet::Error)>>::new();
 
-        for n in 0..NUM_CONCURRENT_TXS {
+        for n in 0..num_simultaneous_txs {
             let account_clone = account.clone();
-            let recv_address_clone = addresses[(n + 1) % NUM_CONCURRENT_TXS].address().to_string();
+            let recv_address_clone = addresses[(n + 1) % num_simultaneous_txs].address().to_string();
 
             tasks.spawn(async move {
-                println!("Thread {n}: Sending {SEND_AMOUNT} to {recv_address_clone}");
+                println!("Thread {n}: Sending {SEND_AMOUNT} coins to {recv_address_clone}");
+                let now = Instant::now();
                 let outputs = vec![SendAmountParams::new(recv_address_clone, SEND_AMOUNT)];
                 let transaction = account_clone.send_amount(outputs, None).await.map_err(|err| (n, err))?;
 
                 println!(
-                    "Thread {n}: Transaction sent: {}/transaction/{}",
+                    "Thread {n}: Transaction sent in {:.2?}: {}/transaction/{}",
+                    now.elapsed(),
                     var("EXPLORER_URL").unwrap(),
                     transaction.transaction_id
                 );
@@ -120,7 +111,7 @@ async fn main() -> Result<()> {
             match res {
                 Ok(()) => {}
                 Err((n, err)) => {
-                    println!("Thread {n}: Failure: {err}");
+                    println!("Thread {n}: {err}");
                     error_state = Err(());
                 }
             }
@@ -149,7 +140,7 @@ async fn get_or_create_account(wallet: &Wallet, alias: &str) -> Result<Account> 
     })
 }
 
-async fn generate_max_addresses(account: &Account, max: usize) -> Result<Vec<AccountAddress>> {
+async fn ensure_enough_addresses(account: &Account, max: usize) -> Result<Vec<AccountAddress>> {
     let alias = account.alias().await;
     if account.addresses().await?.len() < max {
         let num_addresses_to_generate = max - account.addresses().await?.len();
@@ -161,12 +152,12 @@ async fn generate_max_addresses(account: &Account, max: usize) -> Result<Vec<Acc
     account.addresses().await
 }
 
-async fn may_request_funds(account: &Account, bech32_address: &str) -> Result<u64> {
+async fn ensure_enough_funds(account: &Account, bech32_address: &str) -> Result<u64> {
     let balance = account.sync(None).await?;
     let available_funds_before = balance.base_coin().available();
     println!("Current available funds: {available_funds_before}");
 
-    if available_funds_before < NUM_CONCURRENT_TXS as u64 * SEND_AMOUNT {
+    if available_funds_before < num_cpus::get() as u64 * SEND_AMOUNT {
         println!("Requesting funds from faucet...");
         let faucet_response = request_funds_from_faucet(&var("FAUCET_URL").unwrap(), bech32_address).await?;
         println!("Response from faucet: {}", faucet_response.trim_end());
@@ -195,4 +186,22 @@ async fn may_request_funds(account: &Account, bech32_address: &str) -> Result<u6
         println!("No faucet request necessary");
         Ok(available_funds_before)
     }
+}
+
+async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
+    println!(
+        "Transaction sent: {}/transaction/{}",
+        var("EXPLORER_URL").unwrap(),
+        transaction_id
+    );
+    // Wait for transaction to get included
+    let block_id = account
+        .retry_transaction_until_included(transaction_id, None, None)
+        .await?;
+    println!(
+        "Transaction included: {}/block/{}",
+        var("EXPLORER_URL").unwrap(),
+        block_id
+    );
+    Ok(())
 }
