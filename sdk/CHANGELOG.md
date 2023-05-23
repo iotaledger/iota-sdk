@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Storage and Backup migration;
 - `types::block::Error::InvalidFoundryZeroSerialNumber` variant;
 - Added `Hrp` type to represent a valid bech32 human-readable part;
+- Added `Mnemonic` type to handle mnemonic data more securely by implementing `ZeroizeOnDrop`;
 
 ### Changed
 
