@@ -5,16 +5,12 @@ from iota_sdk.wallet.common import _call_method_routine
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.native_token import NativeToken
-from iota_sdk.types.native_token import NativeToken
-from iota_sdk.types.unlock_condition import UnlockCondition
-from iota_sdk.types.feature import Feature
 from iota_sdk.types.output_id import OutputId
-from iota_sdk.types.token_scheme import TokenScheme
-from typing import List, Optional, Union
+from typing import List, Optional
 
 
 class Account:
-    def __init__(self, account_id: Union[str, int], handle):
+    def __init__(self, account_id: str|int, handle):
         self.account_id = account_id
         self.handle = handle
 
@@ -43,90 +39,6 @@ class Account:
             message['data']['method']['data'] = data
 
         return message
-
-    def build_alias_output(self,
-                           amount: int,
-                           native_tokens: List[NativeToken],
-                           alias_id: HexStr,
-                           state_index: int,
-                           state_metadata: HexStr,
-                           foundry_counter: int,
-                           unlock_conditions: List[UnlockCondition],
-                           features: List[Feature],
-                           immutable_features: List[Feature]):
-        """Build alias output.
-        """
-        return self._call_account_method(
-            'buildAliasOutput', {
-                'amount': amount,
-                'nativeTokens': native_tokens,
-                'aliasId': alias_id,
-                'stateIndex': state_index,
-                'stateMetadata': state_metadata,
-                'foundryCounter': foundry_counter,
-                'unlockConditions': unlock_conditions,
-                'features': features,
-                'immutableFeatures': immutable_features
-            }
-        )
-
-    def build_basic_output(self,
-                           amount: int,
-                           native_tokens: List[NativeToken],
-                           unlock_conditions: List[UnlockCondition],
-                           features: List[Feature]):
-        """Build basic output.
-        """
-        return self._call_account_method(
-            'buildBasicOutput', {
-                'amount': amount,
-                'nativeTokens': native_tokens,
-                'unlockConditions': unlock_conditions,
-                'features': features
-            }
-        )
-
-    def build_foundry_output(self,
-                             amount: int,
-                             native_tokens: List[NativeToken],
-                             serial_number: int,
-                             token_scheme: TokenScheme,
-                             unlock_conditions: List[UnlockCondition],
-                             features: List[Feature],
-                             immutable_features: List[Feature]):
-        """Build foundry output.
-        """
-        return self._call_account_method(
-            'buildFoundryOutput', {
-                'amount': amount,
-                'nativeTokens': native_tokens,
-                'serialNumber': serial_number,
-                'tokenScheme': token_scheme,
-                'unlockConditions': unlock_conditions,
-                'features': features,
-                'immutableFeatures': immutable_features
-            }
-        )
-
-    def build_nft_output(self,
-                         amount: int,
-                         native_tokens: List[NativeToken],
-                         nft_id: HexStr,
-                         unlock_conditions: List[UnlockCondition],
-                         features: List[Feature],
-                         immutable_features: List[Feature]):
-        """BuildNftOutput.
-        """
-        return self._call_account_method(
-            'buildNftOutput', {
-                'amount': amount,
-                'nativeTokens': native_tokens,
-                'nftId': nft_id,
-                'unlockConditions': unlock_conditions,
-                'features': features,
-                'immutableFeatures': immutable_features
-            }
-        )
 
     def burn(self, burn: Burn, options=None):
         """
