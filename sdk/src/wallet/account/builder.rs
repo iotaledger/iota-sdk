@@ -99,11 +99,12 @@ impl AccountBuilder {
                         get_first_public_address(&self.wallet.secret_manager, first_account_coin_type, 0).await?;
                     let first_account_addresses = first_account.public_addresses().await;
 
-                    if first_account_public_address
+                    if first_account_public_address.inner
                         != first_account_addresses
                             .first()
                             .ok_or(Error::FailedToGetRemainder)?
                             .address
+                            .inner
                     {
                         return Err(Error::InvalidMnemonic(
                             "first account address used another seed".to_string(),
