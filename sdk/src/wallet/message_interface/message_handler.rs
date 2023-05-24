@@ -12,7 +12,6 @@ use std::{
 use backtrace::Backtrace;
 use futures::{Future, FutureExt};
 use primitive_types::U256;
-use zeroize::Zeroize;
 
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{Event, WalletEventType};
@@ -162,6 +161,7 @@ impl WalletMessageHandler {
                 mut current_password,
                 mut new_password,
             } => {
+                use zeroize::Zeroize;
                 convert_async_panics(|| async {
                     self.wallet
                         .change_stronghold_password(&current_password, &new_password)
@@ -294,6 +294,7 @@ impl WalletMessageHandler {
             }
             #[cfg(feature = "stronghold")]
             Message::SetStrongholdPassword { mut password } => {
+                use zeroize::Zeroize;
                 convert_async_panics(|| async {
                     self.wallet.set_stronghold_password(&password).await?;
                     password.zeroize();
