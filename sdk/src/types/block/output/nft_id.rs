@@ -26,6 +26,6 @@ impl NftId {
 
 impl From<NftId> for Address {
     fn from(value: NftId) -> Self {
-        Address::Nft(NftAddress::new(value))
+        Self::Nft(NftAddress::new(value))
     }
 }
