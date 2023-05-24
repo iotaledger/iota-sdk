@@ -98,7 +98,7 @@ async fn main() -> Result<()> {
     for i in 1..=NUM_ROUNDS {
         println!("ROUND {i}/{NUM_ROUNDS}");
 
-        let mut tasks = JoinSet::<std::result::Result<(), (usize, iota_sdk::wallet::Error)>>::new();
+        let mut tasks = JoinSet::<std::result::Result<Duration, (usize, iota_sdk::wallet::Error)>>::new();
 
         for n in 0..num_simultaneous_txs {
             let account_clone = account.clone();
@@ -110,27 +110,33 @@ async fn main() -> Result<()> {
                 let outputs = vec![SendAmountParams::new(recv_address_clone, SEND_AMOUNT)];
                 let transaction = account_clone.send_amount(outputs, None).await.map_err(|err| (n, err))?;
 
+                let elapsed = now.elapsed();
                 println!(
-                    "Thread {n}: Transaction sent in {:.2?}: {}/transaction/{}",
-                    now.elapsed(),
+                    "Thread {n}: Transaction sent in {elapsed:.2?}: {}/transaction/{}",
                     var("EXPLORER_URL").unwrap(),
                     transaction.transaction_id
                 );
 
-                Ok(())
+                Ok(elapsed)
             });
         }
 
         let mut error_state: std::result::Result<(), ()> = Ok(());
+        let mut max_duration = Duration::from_secs(0);
         while let Some(Ok(res)) = tasks.join_next().await {
             match res {
-                Ok(()) => {}
+                Ok(elapsed) => max_duration = max_duration.max(elapsed),
                 Err((n, err)) => {
                     println!("Thread {n}: {err}");
                     error_state = Err(());
                 }
             }
         }
+
+        println!(
+            "==> BPS: {:.2}",
+            NUM_SIMULTANEOUS_TXS as f64 / max_duration.as_secs_f64()
+        );
 
         if error_state.is_err() {
             // Sync when getting an error, because that's probably when no outputs are available anymore
