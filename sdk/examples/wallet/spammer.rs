@@ -57,22 +57,23 @@ async fn main() -> Result<()> {
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
         .await?;
-
-    // Ensure there's some base coin balance
     let account = get_or_create_account(&wallet, ACCOUNT_ALIAS).await?;
+
+    // Ensure there are enough addresses in the account.
     let addresses = ensure_enough_addresses(&account, num_simultaneous_txs).await?;
     println!("Address count: {}", addresses.len());
 
-    // Ensure there are enough available funds for spamming on each address
-    let available_funds = ensure_enough_funds(&account, addresses[0].address()).await?;
+    // Ensure there are enough available funds for spamming on each address.
+    let available_funds = ensure_enough_funds(&account, addresses[0].address(), num_simultaneous_txs).await?;
     account.sync(None).await?;
 
     let num_addresses_with_balance = account.addresses_with_unspent_outputs().await?.len();
     println!("Address count (with balance): {num_addresses_with_balance}");
 
     if num_addresses_with_balance < num_simultaneous_txs {
-        println!("Splitting available funds among addresses...");
         let split_amount = available_funds / 2 / num_simultaneous_txs as u64;
+
+        println!("Funding addresses...");
         let token_supply = account.client().get_token_supply().await?;
         let outputs = addresses
             .iter()
@@ -174,12 +175,17 @@ async fn ensure_enough_addresses(account: &Account, max: usize) -> Result<Vec<Ac
     account.addresses().await
 }
 
-async fn ensure_enough_funds(account: &Account, bech32_address: &Bech32Address) -> Result<u64> {
+async fn ensure_enough_funds(
+    account: &Account,
+    bech32_address: &Bech32Address,
+    num_simultaneous_txs: usize,
+) -> Result<u64> {
     let balance = account.sync(None).await?;
     let available_funds_before = balance.base_coin().available();
     println!("Current available funds: {available_funds_before}");
 
-    if available_funds_before < num_cpus::get() as u64 * SEND_AMOUNT {
+    let min_required_funds = available_funds_before / 2 / num_simultaneous_txs as u64;
+    if min_required_funds < SEND_AMOUNT {
         println!("Requesting funds from faucet...");
         let faucet_response = request_funds_from_faucet(&var("FAUCET_URL").unwrap(), bech32_address).await?;
         println!("Response from faucet: {}", faucet_response.trim_end());
