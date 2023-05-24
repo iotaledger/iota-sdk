@@ -69,7 +69,7 @@ async fn account_recovery_with_balance_and_empty_addresses() -> Result<()> {
     let secret_manager = SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(&mnemonic)?);
 
     let addresses = secret_manager
-        .get_addresses(
+        .generate_ed25519_addresses(
             GetAddressesOptions::from_client(&client)
                 .await?
                 .with_coin_type(SHIMMER_COIN_TYPE)

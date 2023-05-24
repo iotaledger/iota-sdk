@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
 
     // Generate addresses with custom account index and range
     let addresses = secret_manager
-        .get_addresses(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
                 .with_coin_type(SHIMMER_COIN_TYPE)

@@ -6,8 +6,8 @@ use std::collections::{HashMap, HashSet};
 use tokio::sync::RwLock;
 
 use crate::{
-    client::secret::{SecretManage, SecretManager},
-    types::block::address::{Address, Bech32Address, Hrp},
+    client::{api::GetAddressesOptions, secret::SecretManager},
+    types::block::address::{Bech32Address, Hrp},
     wallet::{
         account::{types::AccountAddress, Account, AccountDetails},
         Error, Wallet,
@@ -104,7 +104,6 @@ impl AccountBuilder {
                             .first()
                             .ok_or(Error::FailedToGetRemainder)?
                             .address
-                            .inner
                     {
                         return Err(Error::InvalidMnemonic(
                             "first account address used another seed".to_string(),
@@ -172,10 +171,15 @@ pub(crate) async fn get_first_public_address(
     secret_manager: &RwLock<SecretManager>,
     coin_type: u32,
     account_index: u32,
-) -> crate::wallet::Result<Address> {
+) -> crate::wallet::Result<Bech32Address> {
     Ok(secret_manager
         .read()
         .await
-        .generate_addresses(coin_type, account_index, 0..1, None)
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_coin_type(coin_type)
+                .with_account_index(account_index)
+                .with_range(0..1),
+        )
         .await?[0])
 }

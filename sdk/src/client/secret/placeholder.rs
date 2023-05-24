@@ -22,7 +22,7 @@ pub struct PlaceholderSecretManager;
 impl SecretManage for PlaceholderSecretManager {
     type Error = Error;
 
-    async fn generate_addresses(
+    async fn generate_ed25519_addresses(
         &self,
         _coin_type: u32,
         _account_index: u32,

@@ -128,28 +128,25 @@ impl<'a> ClientBlockBuilder<'a> {
         // Then select inputs with outputs from addresses.
         let selected_transaction_data = 'input_selection: loop {
             // Get the addresses in the BIP path/index ~ path/index+20.
-            let addresses = self
+            let opts = GetAddressesOptions::from_client(self.client)
+                .await?
+                .with_coin_type(self.coin_type)
+                .with_account_index(account_index)
+                .with_range(gap_index..gap_index + ADDRESS_GAP_RANGE);
+            let secret_manager = self
                 .secret_manager
-                .ok_or(crate::client::Error::MissingParameter("secret manager"))?
-                .get_all_addresses(
-                    GetAddressesOptions::default()
-                        .with_coin_type(self.coin_type)
-                        .with_account_index(account_index)
-                        .with_range(gap_index..gap_index + ADDRESS_GAP_RANGE)
-                        .with_bech32_hrp(self.client.get_bech32_hrp().await?),
-                )
-                .await?;
+                .ok_or(crate::client::Error::MissingParameter("secret manager"))?;
+            let public = secret_manager.generate_ed25519_addresses(opts.clone()).await?;
+            let internal = secret_manager.generate_ed25519_addresses(opts.internal()).await?;
 
             available_input_addresses.extend(
-                addresses
-                    .public
+                public
                     .iter()
                     .map(|bech32_address| *bech32_address.inner())
                     .collect::<Vec<Address>>(),
             );
             available_input_addresses.extend(
-                addresses
-                    .internal
+                internal
                     .iter()
                     .map(|bech32_address| *bech32_address.inner())
                     .collect::<Vec<Address>>(),
@@ -158,9 +155,9 @@ impl<'a> ClientBlockBuilder<'a> {
             // Have public and internal addresses with the index ascending ordered.
             let mut public_and_internal_addresses = Vec::new();
 
-            for index in 0..addresses.public.len() {
-                public_and_internal_addresses.push((addresses.public[index], false));
-                public_and_internal_addresses.push((addresses.internal[index], true));
+            for index in 0..public.len() {
+                public_and_internal_addresses.push((public[index], false));
+                public_and_internal_addresses.push((internal[index], true));
             }
 
             // For each address, get the address outputs.

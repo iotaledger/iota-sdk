@@ -12,10 +12,10 @@ use iota_sdk::{
     client::{
         api::{
             input_selection::InputSelection, transaction::validate_transaction_payload_length, verify_semantic,
-            PreparedTransactionData,
+            GetAddressesOptions, PreparedTransactionData,
         },
         constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-        secret::{SecretManage, SecretManager, SignTransactionEssence},
+        secret::{SecretManager, SignTransactionEssence},
         Result,
     },
     types::block::{
@@ -48,7 +48,11 @@ async fn all_combined() -> Result<()> {
     let protocol_parameters = protocol_parameters();
 
     let ed25519_bech32_addresses = secret_manager
-        .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..3, None)
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_range(0..3),
+        )
         .await?;
     let ed25519_bech32_address_0 = &ed25519_bech32_addresses[0].to_bech32(SHIMMER_TESTNET_BECH32_HRP);
     let ed25519_bech32_address_1 = &ed25519_bech32_addresses[1].to_bech32(SHIMMER_TESTNET_BECH32_HRP);

@@ -45,7 +45,7 @@ impl Wallet {
                         });
                         // Generate without prompt to be able to display it
                         let address = ledger_nano
-                            .generate_addresses(
+                            .generate_ed25519_addresses(
                                 self.coin_type.load(Ordering::Relaxed),
                                 account_index,
                                 address_index..address_index + 1,
@@ -66,7 +66,7 @@ impl Wallet {
 
                     // Generate with prompt so the user can verify
                     ledger_nano
-                        .generate_addresses(
+                        .generate_ed25519_addresses(
                             self.coin_type.load(Ordering::Relaxed),
                             account_index,
                             address_index..address_index + 1,
@@ -75,7 +75,7 @@ impl Wallet {
                         .await?
                 } else {
                     ledger_nano
-                        .generate_addresses(
+                        .generate_ed25519_addresses(
                             self.coin_type.load(Ordering::Relaxed),
                             account_index,
                             address_index..address_index + 1,
@@ -87,7 +87,7 @@ impl Wallet {
             #[cfg(feature = "stronghold")]
             SecretManager::Stronghold(stronghold) => {
                 stronghold
-                    .generate_addresses(
+                    .generate_ed25519_addresses(
                         self.coin_type.load(Ordering::Relaxed),
                         account_index,
                         address_index..address_index + 1,
@@ -97,7 +97,7 @@ impl Wallet {
             }
             SecretManager::Mnemonic(mnemonic) => {
                 mnemonic
-                    .generate_addresses(
+                    .generate_ed25519_addresses(
                         self.coin_type.load(Ordering::Relaxed),
                         account_index,
                         address_index..address_index + 1,

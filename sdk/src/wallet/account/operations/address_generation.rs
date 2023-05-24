@@ -78,7 +78,7 @@ impl Account {
                         {
                             // Generate without prompt to be able to display it
                             let address = ledger_nano
-                                .generate_addresses(
+                                .generate_ed25519_addresses(
                                     account_details.coin_type,
                                     account_details.index,
                                     address_index..address_index + 1,
@@ -95,7 +95,7 @@ impl Account {
                         }
                         // Generate with prompt so the user can verify
                         let address = ledger_nano
-                            .generate_addresses(
+                            .generate_ed25519_addresses(
                                 account_details.coin_type,
                                 account_details.index,
                                 address_index..address_index + 1,
@@ -107,7 +107,7 @@ impl Account {
                     addresses
                 } else {
                     ledger_nano
-                        .generate_addresses(
+                        .generate_ed25519_addresses(
                             account_details.coin_type,
                             account_details.index,
                             address_range.clone(),
@@ -119,7 +119,7 @@ impl Account {
             #[cfg(feature = "stronghold")]
             SecretManager::Stronghold(stronghold) => {
                 stronghold
-                    .generate_addresses(
+                    .generate_ed25519_addresses(
                         account_details.coin_type,
                         account_details.index,
                         address_range,
@@ -129,7 +129,7 @@ impl Account {
             }
             SecretManager::Mnemonic(mnemonic) => {
                 mnemonic
-                    .generate_addresses(
+                    .generate_ed25519_addresses(
                         account_details.coin_type,
                         account_details.index,
                         address_range,

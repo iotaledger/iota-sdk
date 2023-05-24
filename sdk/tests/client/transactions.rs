@@ -21,7 +21,7 @@ async fn send_basic_output() -> Result<()> {
     let token_supply = client.get_token_supply().await?;
 
     let second_address = secret_manager
-        .get_raw_addresses(GetAddressesOptions::from_client(&client).await?.with_range(1..2))
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(1..2))
         .await?[0];
 
     let output = BasicOutputBuilder::new_with_amount(1_000_000)

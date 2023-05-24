@@ -44,7 +44,7 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
     let secret_manager = setup_secret_manager();
 
     let addresses = secret_manager
-        .get_addresses(
+        .generate_ed25519_addresses(
             GetAddressesOptions::from_client(&client)
                 .await
                 .unwrap()
@@ -192,7 +192,7 @@ async fn test_get_address_outputs() {
     let secret_manager = setup_secret_manager();
 
     let address = secret_manager
-        .get_addresses(
+        .generate_ed25519_addresses(
             GetAddressesOptions::from_client(&client)
                 .await
                 .unwrap()

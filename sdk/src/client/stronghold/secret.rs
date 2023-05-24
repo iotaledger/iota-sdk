@@ -36,7 +36,7 @@ use crate::{
 impl SecretManage for StrongholdAdapter {
     type Error = Error;
 
-    async fn generate_addresses(
+    async fn generate_ed25519_addresses(
         &self,
         coin_type: u32,
         account_index: u32,
@@ -368,7 +368,7 @@ mod tests {
         assert!(Path::new(stronghold_path).exists());
 
         let addresses = stronghold_adapter
-            .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
+            .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
             .await
             .unwrap();
 
@@ -404,7 +404,7 @@ mod tests {
         // Address generation returns an error when the key is cleared.
         assert!(
             stronghold_adapter
-                .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, None,)
+                .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None,)
                 .await
                 .is_err()
         );
@@ -413,7 +413,7 @@ mod tests {
 
         // After setting the correct password it works again.
         let addresses = stronghold_adapter
-            .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
+            .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
             .await
             .unwrap();
 

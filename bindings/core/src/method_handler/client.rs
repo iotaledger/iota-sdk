@@ -177,7 +177,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             options,
         } => {
             let secret_manager = SecretManager::try_from(&secret_manager)?;
-            let addresses = secret_manager.get_addresses(options).await?;
+            let addresses = secret_manager.generate_ed25519_addresses(options).await?;
             Response::GeneratedAddresses(addresses)
         }
         ClientMethod::BuildAndPostBlock {

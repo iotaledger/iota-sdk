@@ -19,11 +19,11 @@ pub(crate) async fn call_secret_manager_method_internal(
 ) -> Result<Response> {
     let response = match method {
         SecretManagerMethod::GenerateAddresses { options } => {
-            let addresses = secret_manager.get_addresses(options).await?;
+            let addresses = secret_manager.generate_ed25519_addresses(options).await?;
             Response::GeneratedAddresses(addresses)
         }
         SecretManagerMethod::GenerateEvmAddresses { options } => {
-            let addresses = secret_manager.get_evm_addresses(options).await?;
+            let addresses = secret_manager.generate_evm_addresses(options).await?;
             Response::GeneratedEvmAddresses(addresses)
         }
         #[cfg(feature = "ledger_nano")]

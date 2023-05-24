@@ -25,7 +25,7 @@ pub async fn create_client_and_secret_manager_with_funds(mnemonic: Option<&str>)
     let secret_manager = SecretManager::try_from_mnemonic(mnemonic.unwrap_or(&Client::generate_mnemonic().unwrap()))?;
 
     let address = secret_manager
-        .get_addresses(
+        .generate_ed25519_addresses(
             GetAddressesOptions::from_client(&client)
                 .await?
                 .with_coin_type(SHIMMER_COIN_TYPE)

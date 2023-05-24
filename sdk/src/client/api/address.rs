@@ -8,7 +8,6 @@ use serde::{Deserialize, Serialize};
 use super::ADDRESS_GAP_RANGE;
 use crate::{
     client::{
-        api::types::{Bech32Addresses, RawAddresses},
         constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
         secret::{GenerateAddressOptions, SecretManage, SecretManager},
         Client, Result,
@@ -61,6 +60,16 @@ impl GetAddressesOptions {
         self
     }
 
+    pub fn internal(mut self) -> Self {
+        match &mut self.options {
+            Some(o) => {
+                o.internal = true;
+                self
+            }
+            None => self.with_options(GenerateAddressOptions::internal()),
+        }
+    }
+
     /// Set the metadata for the address generation (used for ledger to display addresses or not)
     pub fn with_options(mut self, options: impl Into<Option<GenerateAddressOptions>>) -> Self {
         self.options = options.into();
@@ -82,7 +91,7 @@ impl Default for GetAddressesOptions {
 
 impl SecretManager {
     /// Get a vector of public bech32 addresses
-    pub async fn get_addresses(
+    pub async fn generate_ed25519_addresses(
         &self,
         GetAddressesOptions {
             coin_type,
@@ -92,16 +101,17 @@ impl SecretManager {
             options,
         }: GetAddressesOptions,
     ) -> Result<Vec<Bech32Address>> {
-        Ok(self
-            .generate_addresses(coin_type, account_index, range, options)
-            .await?
-            .into_iter()
-            .map(|a| a.to_bech32(bech32_hrp))
-            .collect())
+        Ok(
+            SecretManage::generate_ed25519_addresses(self, coin_type, account_index, range, options)
+                .await?
+                .into_iter()
+                .map(|a| a.to_bech32(bech32_hrp))
+                .collect(),
+        )
     }
 
     /// Get a vector of EVM address strings
-    pub async fn get_evm_addresses(
+    pub async fn generate_evm_addresses(
         &self,
         GetAddressesOptions {
             coin_type,
@@ -111,97 +121,13 @@ impl SecretManager {
             ..
         }: GetAddressesOptions,
     ) -> Result<Vec<String>> {
-        Ok(self
-            .generate_evm_addresses(coin_type, account_index, range, options)
-            .await?
-            .into_iter()
-            .map(|a| prefix_hex::encode(a.as_ref()))
-            .collect())
-    }
-
-    /// Get a vector of public addresses
-    pub async fn get_raw_addresses(
-        &self,
-        GetAddressesOptions {
-            coin_type,
-            account_index,
-            range,
-            options,
-            ..
-        }: GetAddressesOptions,
-    ) -> Result<Vec<Address>> {
-        self.generate_addresses(
-            coin_type,
-            account_index,
-            range,
-            options.map(|mut o| {
-                o.internal = false;
-                o
-            }),
+        Ok(
+            SecretManage::generate_evm_addresses(self, coin_type, account_index, range, options)
+                .await?
+                .into_iter()
+                .map(|a| prefix_hex::encode(a.as_ref()))
+                .collect(),
         )
-        .await
-    }
-
-    /// Get the vector of public and internal addresses bech32 encoded
-    pub async fn get_all_addresses(&self, options: GetAddressesOptions) -> Result<Bech32Addresses> {
-        let bech32_hrp = options.bech32_hrp;
-        let addresses = self.get_all_raw_addresses(options).await?;
-
-        Ok(Bech32Addresses {
-            public: addresses
-                .public
-                .into_iter()
-                .map(|a| Bech32Address::new(bech32_hrp, a))
-                .collect(),
-            internal: addresses
-                .internal
-                .into_iter()
-                .map(|a| Bech32Address::new(bech32_hrp, a))
-                .collect(),
-        })
-    }
-
-    /// Get the vector of public and internal addresses
-    pub async fn get_all_raw_addresses(
-        &self,
-        GetAddressesOptions {
-            coin_type,
-            account_index,
-            range,
-            options,
-            ..
-        }: GetAddressesOptions,
-    ) -> Result<RawAddresses> {
-        let public_addresses = self
-            .generate_addresses(
-                coin_type,
-                account_index,
-                range.clone(),
-                options.map(|mut o| {
-                    o.internal = false;
-                    o
-                }),
-            )
-            .await?;
-
-        let internal_addresses = self
-            .generate_addresses(
-                coin_type,
-                account_index,
-                range,
-                options
-                    .map(|mut o| {
-                        o.internal = true;
-                        o
-                    })
-                    .or_else(|| Some(GenerateAddressOptions::internal())),
-            )
-            .await?;
-
-        Ok(RawAddresses {
-            public: public_addresses,
-            internal: internal_addresses,
-        })
     }
 }
 
@@ -214,19 +140,17 @@ pub async fn search_address(
     range: Range<u32>,
     address: &Address,
 ) -> Result<(u32, bool)> {
-    let addresses = secret_manager
-        .get_all_raw_addresses(
-            GetAddressesOptions::default()
-                .with_coin_type(coin_type)
-                .with_account_index(account_index)
-                .with_range(range.clone()),
-        )
-        .await?;
-    for index in 0..addresses.public.len() {
-        if addresses.public[index] == *address {
+    let opts = GetAddressesOptions::default()
+        .with_coin_type(coin_type)
+        .with_account_index(account_index)
+        .with_range(range.clone());
+    let public = secret_manager.generate_ed25519_addresses(opts.clone()).await?;
+    let internal = secret_manager.generate_ed25519_addresses(opts.internal()).await?;
+    for index in 0..public.len() {
+        if public[index].inner == *address {
             return Ok((range.start + index as u32, false));
         }
-        if addresses.internal[index] == *address {
+        if internal[index].inner == *address {
             return Ok((range.start + index as u32, true));
         }
     }

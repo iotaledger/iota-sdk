@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
 
     // Generate addresses with default account index and range
     let addresses = secret_manager
-        .get_addresses(GetAddressesOptions::from_client(&client).await?)
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?)
         .await?;
 
     println!("List of generated public addresses:");
@@ -40,7 +40,7 @@ async fn main() -> Result<()> {
 
     // Generate addresses with custom account index and range
     let addresses = secret_manager
-        .get_addresses(
+        .generate_ed25519_addresses(
             GetAddressesOptions::from_client(&client)
                 .await?
                 .with_account_index(0)
@@ -53,7 +53,7 @@ async fn main() -> Result<()> {
 
     // Generate internal addresses with custom account index and range
     let addresses = secret_manager
-        .get_addresses(
+        .generate_ed25519_addresses(
             GetAddressesOptions::from_client(&client)
                 .await?
                 .with_account_index(0)
@@ -69,7 +69,7 @@ async fn main() -> Result<()> {
     // human readable part) from the node info, generating it "offline" requires setting it with
     // `with_bech32_hrp(bech32_hrp)`
     let addresses = secret_manager
-        .get_addresses(
+        .generate_ed25519_addresses(
             GetAddressesOptions::from_client(&client)
                 .await?
                 .with_account_index(0)

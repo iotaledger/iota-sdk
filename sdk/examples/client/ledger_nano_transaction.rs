@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
 
     // Generate addresses with custom account index and range
     let addresses = secret_manager
-        .get_addresses(
+        .generate_ed25519_addresses(
             GetAddressesOptions::from_client(&client)
                 .await?
                 .with_account_index(0)

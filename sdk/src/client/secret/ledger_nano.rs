@@ -130,7 +130,7 @@ impl TryFrom<u8> for LedgerDeviceType {
 impl SecretManage for LedgerSecretManager {
     type Error = Error;
 
-    async fn generate_addresses(
+    async fn generate_ed25519_addresses(
         &self,
         // https://github.com/satoshilabs/slips/blob/master/slip-0044.md
         // current ledger app only supports IOTA_COIN_TYPE, SHIMMER_COIN_TYPE and TESTNET_COIN_TYPE

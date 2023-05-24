@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
     let secret_manager =
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
     let address = secret_manager
-        .get_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
         .await?[0];
 
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
@@ -98,7 +98,7 @@ async fn participate(client: &Client, event_id: ParticipationEventId) -> Result<
     let rent_structure = client.get_rent_structure().await?;
 
     let address = secret_manager
-        .get_raw_addresses(GetAddressesOptions::from_client(client).await?.with_range(0..1))
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(client).await?.with_range(0..1))
         .await?[0];
 
     let outputs = vec![

@@ -62,7 +62,7 @@ pub trait SecretManage: Send + Sync {
     /// Generates addresses.
     ///
     /// For `coin_type`, see also <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>.
-    async fn generate_addresses(
+    async fn generate_ed25519_addresses(
         &self,
         coin_type: u32,
         account_index: u32,
@@ -235,7 +235,7 @@ impl From<&SecretManager> for SecretManagerDto {
 impl SecretManage for SecretManager {
     type Error = Error;
 
-    async fn generate_addresses(
+    async fn generate_ed25519_addresses(
         &self,
         coin_type: u32,
         account_index: u32,
@@ -245,20 +245,20 @@ impl SecretManage for SecretManager {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager
-                .generate_addresses(coin_type, account_index, address_indexes, options)
+                .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
                 .await?),
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => Ok(secret_manager
-                .generate_addresses(coin_type, account_index, address_indexes, options)
+                .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
                 .await?),
             Self::Mnemonic(secret_manager) => {
                 secret_manager
-                    .generate_addresses(coin_type, account_index, address_indexes, options)
+                    .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
             Self::Placeholder(secret_manager) => {
                 secret_manager
-                    .generate_addresses(coin_type, account_index, address_indexes, options)
+                    .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
         }

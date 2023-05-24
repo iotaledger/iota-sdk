@@ -4,9 +4,12 @@
 use crypto::keys::slip10::Chain;
 use iota_sdk::{
     client::{
-        api::{transaction::validate_transaction_payload_length, verify_semantic, PreparedTransactionData},
+        api::{
+            transaction::validate_transaction_payload_length, verify_semantic, GetAddressesOptions,
+            PreparedTransactionData,
+        },
         constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-        secret::{SecretManage, SecretManager, SignTransactionEssence},
+        secret::{SecretManager, SignTransactionEssence},
         Client, Result,
     },
     types::block::{
@@ -29,7 +32,11 @@ async fn single_ed25519_unlock() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
-        .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..1, None)
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_range(0..1),
+        )
         .await?[0]
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
@@ -105,7 +112,11 @@ async fn ed25519_reference_unlocks() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
-        .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..1, None)
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_range(0..1),
+        )
         .await?[0]
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
@@ -215,11 +226,19 @@ async fn two_signature_unlocks() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
-        .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..1, None)
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_range(0..1),
+        )
         .await?[0]
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
     let bech32_address_1 = &secret_manager
-        .generate_addresses(SHIMMER_COIN_TYPE, 0, 1..2, None)
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_range(1..2),
+        )
         .await?[0]
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 

@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
         SecretManager::try_from_hex_seed(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_SEED_1").unwrap())?;
 
     let addresses = secret_manager
-        .get_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
         .await?;
     println!("{:?}", addresses[0]);
 

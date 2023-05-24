@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
         .with_output(
             // We generate an address from our own mnemonic so that we send the funds to ourselves
             &secret_manager
-                .get_addresses(GetAddressesOptions::from_client(&client).await?.with_range(1..2))
+                .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(1..2))
                 .await?[0],
             1_000_000,
         )

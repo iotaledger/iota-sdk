@@ -30,7 +30,7 @@ pub struct MnemonicSecretManager(Seed);
 impl SecretManage for MnemonicSecretManager {
     type Error = Error;
 
-    async fn generate_addresses(
+    async fn generate_ed25519_addresses(
         &self,
         coin_type: u32,
         account_index: u32,
@@ -116,7 +116,7 @@ mod tests {
         let secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic).unwrap();
 
         let addresses = secret_manager
-            .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
+            .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
             .await
             .unwrap();
 
@@ -134,7 +134,7 @@ mod tests {
         let secret_manager = MnemonicSecretManager::try_from_hex_seed(seed).unwrap();
 
         let addresses = secret_manager
-            .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
+            .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
             .await
             .unwrap();
 

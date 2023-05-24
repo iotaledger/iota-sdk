@@ -11,7 +11,7 @@ async fn mnemonic_secret_manager_dto() -> Result<()> {
     let secret_manager: SecretManager = dto.parse()?;
 
     let addresses = secret_manager
-        .get_addresses(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
                 .with_account_index(0)
@@ -46,7 +46,7 @@ async fn stronghold_secret_manager_dto() -> Result<()> {
     }
 
     let addresses = secret_manager
-        .get_addresses(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
                 .with_account_index(0)
@@ -84,7 +84,7 @@ async fn stronghold_mnemonic_missing() -> Result<()> {
 
     // Generating addresses will fail because no mnemonic has been stored
     let error = SecretManager::Stronghold(stronghold_secret_manager)
-        .get_addresses(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default(),
             // .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
             // .with_coin_type(iota_sdk::client::constants::SHIMMER_COIN_TYPE)

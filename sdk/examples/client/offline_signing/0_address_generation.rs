@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
 
     // Generates an address offline.
     let address = secret_manager
-        .get_addresses(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
                 .with_range(0..1),

@@ -24,7 +24,7 @@ impl Client {
         // use the start index as offset
         let offset = last_transfer_index;
 
-        let addresses = secret_manager.get_addresses(options).await?;
+        let addresses = secret_manager.generate_ed25519_addresses(options).await?;
 
         let consolidation_address = addresses[0];
 

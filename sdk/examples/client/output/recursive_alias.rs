@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let address = secret_manager
-        .get_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
         .await?[0];
     println!("{}", request_funds_from_faucet(&faucet_url, &address).await?);
     // Wait some time for the faucet transaction
