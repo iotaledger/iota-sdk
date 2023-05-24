@@ -6,6 +6,7 @@ import { getUnlockedManager } from './account-manager';
 // The native token id. Replace it with a TokenId that is available in the account, the foundry output which minted it,
 // also needs to be available. You can check this by running the `get_balance` example. You can mint a new native token
 // by running the `mint_native_token` example.
+// eslint-disable-next-line prefer-const
 let TOKEN_ID =
     '0x08dc44610c24f32f26330440f3f0d4afb562a8dfd81afe7c2f79024f8f1b9e21940100000000';
 // The minimum available native token amount to search for in the account, 11 hex encoded.
@@ -62,14 +63,14 @@ async function run() {
         console.log(`Sending the burning transaction...`);
 
         // Burn a native token
-        let transaction = await account
+        const transaction = await account
             .prepareBurnNativeToken(token.tokenId, BURN_AMOUNT)
             .then((prepared) => prepared.finish());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         // Wait for transaction to get included
-        let blockId = await account.retryTransactionUntilIncluded(
+        const blockId = await account.retryTransactionUntilIncluded(
             transaction.transactionId,
         );
 

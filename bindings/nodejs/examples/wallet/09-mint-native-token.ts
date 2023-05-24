@@ -50,12 +50,12 @@ async function run() {
         console.log('Sending the minting transaction...');
 
         // If we omit the AccountAddress field the first address of the account is used by default
-        let params: MintNativeTokenParams = {
+        const params: MintNativeTokenParams = {
             circulatingSupply: CIRCULATING_SUPPLY,
             maximumSupply: MAXIMUM_SUPPLY,
         };
 
-        let prepared = await account.prepareMintNativeToken(params);
+        const prepared = await account.prepareMintNativeToken(params);
 
         // TODO: Override finish to contain tokenId
         transaction = await prepared.finish();

@@ -6,6 +6,7 @@ import { getUnlockedManager } from './account-manager';
 // The native token id. Replace it with a TokenId that is available in the account, the foundry output which minted it,
 // also needs to be available. You can check this by running the `get-balance` example. You can mint a new native token
 // by running the `mint-native-token` example.
+// eslint-disable-next-line prefer-const
 let TOKEN_ID =
     '0x086a62922fd743b541c987020d2cb2942cf789bcefe41572854119180cb8e037a90100000000';
 // The amount of native tokens to mint, 10 hex encoded.
@@ -55,14 +56,14 @@ async function run() {
         console.log('Sending the minting transaction...');
 
         // Mint some more native tokens
-        let transaction = await account
+        const transaction = await account
             .prepareIncreaseNativeTokenSupply(token.tokenId, MINT_AMOUNT)
             .then((prepared) => prepared.finish());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         // Wait for transaction to get included
-        let blockId = await account.retryTransactionUntilIncluded(
+        const blockId = await account.retryTransactionUntilIncluded(
             transaction.transactionId,
         );
 

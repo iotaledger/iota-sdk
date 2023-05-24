@@ -27,15 +27,15 @@ async function run() {
         );
 
         // May want to ensure the account is synced before sending a transaction.
-        let balance = await account.sync();
+        const balance = await account.sync();
 
         if (balance.nfts.length == 0) {
             throw new Error('No available NFTs');
         }
 
-        let nftId = balance.nfts[0];
+        const nftId = balance.nfts[0];
 
-        let outputs: SendNftParams[] = [
+        const outputs: SendNftParams[] = [
             {
                 address: RECV_ADDRESS,
                 nftId,
@@ -52,7 +52,7 @@ async function run() {
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         // Wait for transaction to get included
-        let blockId = await account.retryTransactionUntilIncluded(
+        const blockId = await account.retryTransactionUntilIncluded(
             transaction.transactionId,
         );
 

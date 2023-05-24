@@ -34,16 +34,16 @@ async function run() {
         );
 
         // May want to ensure the account is synced before sending a transaction.
-        let balance = await account.sync();
+        const balance = await account.sync();
 
         // Get a token with sufficient balance
         // TODO: use BigNumber library
-        let tokenId = balance.nativeTokens.find(
+        const tokenId = balance.nativeTokens.find(
             (t) => Number(t.available) >= Number(SEND_NATIVE_TOKEN_AMOUNT),
         )?.tokenId;
 
         if (tokenId != null) {
-            let outputs: SendNativeTokensParams[] = [
+            const outputs: SendNativeTokensParams[] = [
                 {
                     address: RECV_ADDRESS,
                     nativeTokens: [[tokenId, SEND_NATIVE_TOKEN_AMOUNT]],
@@ -77,13 +77,10 @@ async function run() {
             console.log('Sending basic output transaction...');
 
             // Send native tokens together with the required storage deposit
-            let client = await manager.getClient();
-            let rentStructure = await client
-                .getInfo()
-                .then((info) => info.nodeInfo.protocol.rentStructure);
+            const client = await manager.getClient();
 
             // TODO: build from rent structure
-            let basicOutput: BasicOutputBuilderParams = {
+            const basicOutput: BasicOutputBuilderParams = {
                 amount: '1',
                 unlockConditions: [
                     new AddressUnlockCondition(
@@ -98,7 +95,7 @@ async function run() {
                 ],
             };
 
-            let output = await client.buildBasicOutput(basicOutput);
+            const output = await client.buildBasicOutput(basicOutput);
             transaction = await account.sendOutputs([output]);
 
             console.log(`Transaction sent: ${transaction.transactionId}`);

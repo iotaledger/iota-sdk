@@ -43,14 +43,14 @@ async function run() {
 
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
-        let nftsBefore = balance.nfts;
+        const nftsBefore = balance.nfts;
 
         // We send from the first address in the account.
-        let senderAddress = (await account.addresses())[0].address;
+        const senderAddress = (await account.addresses())[0].address;
 
         console.log('Sending the minting transaction for NFT 1...');
 
-        let params: MintNftParams = {
+        const params: MintNftParams = {
             address: NFT1_OWNER_ADDRESS, // Remove or change to senderAddress to send to self
             sender: senderAddress,
             metadata: NFT1_METADATA,
@@ -76,10 +76,10 @@ async function run() {
         console.log('Minted NFT 1');
 
         // Build an NFT manually by using the `NftOutputBuilder`
-        let client = await manager.getClient();
+        const client = await manager.getClient();
 
-        let hexAddress = Utils.bech32ToHex(senderAddress);
-        let output = await client.buildNftOutput({
+        const hexAddress = Utils.bech32ToHex(senderAddress);
+        const output = await client.buildNftOutput({
             amount: NFT2_AMOUNT,
             nftId: '0x0000000000000000000000000000000000000000000000000000000000000000',
             unlockConditions: [
@@ -109,10 +109,10 @@ async function run() {
 
         // Ensure the account is synced after minting.
         balance = await account.sync();
-        let nftsAfter = balance.nfts;
+        const nftsAfter = balance.nfts;
 
         console.log('New owned NFTs:', nftsBefore.length, nftsAfter.length);
-        for (let nftId of nftsAfter) {
+        for (const nftId of nftsAfter) {
             if (!nftsBefore.includes(nftId)) {
                 console.log(`- ${nftId}`);
             }

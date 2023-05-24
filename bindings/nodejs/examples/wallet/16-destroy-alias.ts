@@ -37,14 +37,14 @@ async function run() {
         console.log('Sending the destroy-alias transaction...');
 
         // Burn a native token
-        let transaction = await account
+        const transaction = await account
             .prepareDestroyAlias(aliasId)
             .then((prepared) => prepared.finish());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         // Wait for transaction to get included
-        let blockId = await account.retryTransactionUntilIncluded(
+        const blockId = await account.retryTransactionUntilIncluded(
             transaction.transactionId,
         );
         console.log(

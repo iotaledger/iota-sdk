@@ -25,20 +25,20 @@ async function run() {
             `${process.env.ACCOUNT_ALIAS_1}`,
         );
 
-        let accountAddresses = await account.addresses();
+        const accountAddresses = await account.addresses();
         // console.log("Account addresses: ", accountAddresses);
 
-        let output: Output = await account.prepareOutput({
+        const output: Output = await account.prepareOutput({
             recipientAddress: accountAddresses[0].address,
             amount: AMOUNT,
         });
 
-        let hexEncodedAccountAddresses = accountAddresses.map((a) =>
+        const hexEncodedAccountAddresses = accountAddresses.map((a) =>
             Utils.bech32ToHex(a.address),
         );
 
         if (output instanceof BasicOutput) {
-            let basicOutput = output as BasicOutput;
+            const basicOutput = output as BasicOutput;
             let controlledByAccount = false;
             if (
                 basicOutput.getUnlockConditions().length === 1 &&
