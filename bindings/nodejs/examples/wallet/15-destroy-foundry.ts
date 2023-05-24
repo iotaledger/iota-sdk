@@ -35,7 +35,7 @@ async function run() {
         console.log(`Foundries BEFORE destroying:\n`, balance.foundries);
         console.log('Sending the destroy-foundry transaction...');
 
-        // Burn a native token
+        // Burn a foundry
         const transaction = await account
             .prepareDestroyFoundry(foundry)
             .then((prepared) => prepared.finish());

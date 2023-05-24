@@ -36,7 +36,7 @@ async function run() {
         console.log(`Aliases BEFORE destroying:\n`, balance.aliases);
         console.log('Sending the destroy-alias transaction...');
 
-        // Burn a native token
+        // Destroy an alias
         const transaction = await account
             .prepareDestroyAlias(aliasId)
             .then((prepared) => prepared.finish());

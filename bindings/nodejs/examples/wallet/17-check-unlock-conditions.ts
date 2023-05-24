@@ -26,7 +26,6 @@ async function run() {
         );
 
         const accountAddresses = await account.addresses();
-        // console.log("Account addresses: ", accountAddresses);
 
         const output: Output = await account.prepareOutput({
             recipientAddress: accountAddresses[0].address,

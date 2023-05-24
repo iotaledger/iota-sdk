@@ -29,10 +29,9 @@ async function run() {
             TOKEN_ID ==
             '0x086f7011adb53642e8ed7db230c2307fe980f4aff2685c22f7c84a61ec558f691b0200000000'
         ) {
-            console.log(
+            throw new Error(
                 'You need to change the TOKEN_ID constant before you can run this example successfully!',
             );
-            return;
         }
 
         // Create the wallet
