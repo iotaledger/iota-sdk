@@ -21,7 +21,7 @@ use iota_sdk::{
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
         payload::transaction::TransactionId,
     },
-    wallet::{Account, ClientOptions, Result, SendAmountParams, Wallet},
+    wallet::{account::FilterOptions, Account, ClientOptions, Result, SendAmountParams, Wallet},
 };
 use tokio::{
     task::JoinSet,
@@ -35,9 +35,9 @@ const NUM_ROUNDS: usize = 1000;
 // The amount to send in each transaction
 const SEND_AMOUNT: u64 = 1_000_000;
 // The number of simultaneous transactions
-const NUM_SIMULTANEOUS_TXS: usize = 4;
+const NUM_SIMULTANEOUS_TXS: usize = 64;
 
-#[tokio::main(flavor = "multi_thread")]
+#[tokio::main(flavor = "multi_thread", worker_threads = 32)]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
@@ -52,7 +52,7 @@ async fn main() -> Result<()> {
         MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        // .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
@@ -68,53 +68,77 @@ async fn main() -> Result<()> {
     let split_amount = available_funds / 2;
     let output_amount = split_amount / 127u64;
 
-    println!("Splitting funds...");
-    let token_supply = account.client().get_token_supply().await?;
-    let outputs = std::iter::repeat_with(|| {
-        BasicOutputBuilder::new_with_amount(output_amount)
-            .add_unlock_condition(AddressUnlockCondition::new(recv_address))
-            .finish_output(token_supply)
-            .unwrap()
-    })
-    .take(127)
-    .collect::<Vec<_>>();
+    println!("Consolidating outputs...");
+    if let Ok(transaction) = account.consolidate_outputs(false, Some(127)).await {
+        wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
-    let transaction = account.send(outputs, None).await?;
-    wait_for_inclusion(&transaction.transaction_id, &account).await?;
+        account.sync(None).await?;
+    } else {
+        println!("not necessary");
+    }
 
-    account.sync(None).await?;
+    let num_unspent_basic_outputs = account
+        .unspent_outputs(FilterOptions {
+            output_types: Some(vec![3]),
+            ..Default::default()
+        })
+        .await?
+        .len();
+
+    if num_unspent_basic_outputs < 127 {
+        println!("Splitting funds...");
+
+        let token_supply = account.client().get_token_supply().await?;
+        let outputs = std::iter::repeat_with(|| {
+            BasicOutputBuilder::new_with_amount(output_amount)
+                .add_unlock_condition(AddressUnlockCondition::new(recv_address))
+                .finish_output(token_supply)
+                .unwrap()
+        })
+        .take(127)
+        .collect::<Vec<_>>();
+
+        let transaction = account.send(outputs, None).await?;
+        wait_for_inclusion(&transaction.transaction_id, &account).await?;
+
+        account.sync(None).await?;
+    } else {
+        println!("Splitting funds not necessary");
+    }
 
     println!("Spamming transactions...");
     for i in 1..=NUM_ROUNDS {
         println!("ROUND {i}/{NUM_ROUNDS}");
+        let round_timer = Instant::now();
 
-        let mut tasks = JoinSet::<std::result::Result<Duration, (usize, iota_sdk::wallet::Error)>>::new();
+        let mut tasks = JoinSet::<std::result::Result<(), (usize, iota_sdk::wallet::Error)>>::new();
 
         for n in 0..num_simultaneous_txs {
             let account_clone = account.clone();
 
             tasks.spawn(async move {
                 println!("Thread {n}: Sending {SEND_AMOUNT} coins to {recv_address}");
-                let now = Instant::now();
+
+                let thread_timer = Instant::now();
                 let outputs = vec![SendAmountParams::new(recv_address, SEND_AMOUNT)];
                 let transaction = account_clone.send_amount(outputs, None).await.map_err(|err| (n, err))?;
+                let elapsed = thread_timer.elapsed();
 
-                let elapsed = now.elapsed();
                 println!(
                     "Thread {n}: Transaction sent in {elapsed:.2?}: {}/transaction/{}",
                     var("EXPLORER_URL").unwrap(),
                     transaction.transaction_id
                 );
 
-                Ok(elapsed)
+                Ok(())
             });
         }
 
         let mut error_state: std::result::Result<(), ()> = Ok(());
-        let mut max_duration = Duration::from_secs(0);
+        let mut sent_transactions = 0;
         while let Some(Ok(res)) = tasks.join_next().await {
             match res {
-                Ok(elapsed) => max_duration = max_duration.max(elapsed),
+                Ok(()) => sent_transactions += 1,
                 Err((n, err)) => {
                     println!("Thread {n}: {err}");
                     error_state = Err(());
@@ -123,13 +147,15 @@ async fn main() -> Result<()> {
         }
 
         println!(
-            "==> BPS: {:.2}",
-            NUM_SIMULTANEOUS_TXS as f64 / max_duration.as_secs_f64()
+            "==> BPS (issued): {:.2}",
+            sent_transactions as f64 / round_timer.elapsed().as_secs_f64()
         );
 
         if error_state.is_err() {
             // Sync when getting an error, because that's probably when no outputs are available anymore
             let mut balance = account.sync(None).await?;
+            println!("Account synced");
+
             while balance.base_coin().available() == 0 {
                 println!("No funds available");
                 sleep(Duration::from_secs(2)).await;
@@ -137,6 +163,11 @@ async fn main() -> Result<()> {
                 println!("Account synced");
             }
         }
+
+        println!(
+            "==> BPS (actual): {:.2}",
+            sent_transactions as f64 / round_timer.elapsed().as_secs_f64()
+        );
     }
     Ok(())
 }
