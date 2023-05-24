@@ -21,7 +21,7 @@ use iota_sdk::{
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
         payload::transaction::TransactionId,
     },
-    wallet::{account::types::AccountAddress, Account, ClientOptions, Result, SendAmountParams, Wallet},
+    wallet::{Account, ClientOptions, Result, SendAmountParams, Wallet},
 };
 use tokio::{
     task::JoinSet,
@@ -59,44 +59,32 @@ async fn main() -> Result<()> {
         .await?;
     let account = get_or_create_account(&wallet, ACCOUNT_ALIAS).await?;
 
-    // Ensure there are enough addresses in the account.
-    let addresses = ensure_enough_addresses(&account, num_simultaneous_txs).await?;
-    println!("Address count: {}", addresses.len());
+    let recv_address = *account.addresses().await?[0].address();
 
     // Ensure there are enough available funds for spamming on each address.
-    let available_funds = ensure_enough_funds(&account, addresses[0].address(), num_simultaneous_txs).await?;
+    let available_funds = ensure_enough_funds(&account, &recv_address, num_simultaneous_txs).await?;
     account.sync(None).await?;
 
-    let num_addresses_with_balance = account.addresses_with_unspent_outputs().await?.len();
-    println!("Address count (with balance): {num_addresses_with_balance}");
+    let split_amount = available_funds / 2;
+    let output_amount = split_amount / 127u64;
 
-    if num_addresses_with_balance < num_simultaneous_txs {
-        let split_amount = available_funds / 2 / num_simultaneous_txs as u64;
+    println!("Splitting funds...");
+    let token_supply = account.client().get_token_supply().await?;
+    let outputs = std::iter::repeat_with(|| {
+        BasicOutputBuilder::new_with_amount(output_amount)
+            .add_unlock_condition(AddressUnlockCondition::new(recv_address))
+            .finish_output(token_supply)
+            .unwrap()
+    })
+    .take(127)
+    .collect::<Vec<_>>();
 
-        println!("Funding addresses...");
-        let token_supply = account.client().get_token_supply().await?;
-        let outputs = addresses
-            .iter()
-            .take(num_simultaneous_txs)
-            .map(|addr| {
-                BasicOutputBuilder::new_with_amount(split_amount)
-                    .add_unlock_condition(AddressUnlockCondition::new(*addr.address().as_ref()))
-                    .finish_output(token_supply)
-                    .unwrap()
-            })
-            .collect::<Vec<_>>();
-
-        let transaction = account.send(outputs, None).await?;
-        wait_for_inclusion(&transaction.transaction_id, &account).await?;
-    }
+    let transaction = account.send(outputs, None).await?;
+    wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
     account.sync(None).await?;
-    println!(
-        "Address count (with balance): {}",
-        account.addresses_with_unspent_outputs().await?.len()
-    );
 
-    println!("Spamming...");
+    println!("Spamming transactions...");
     for i in 1..=NUM_ROUNDS {
         println!("ROUND {i}/{NUM_ROUNDS}");
 
@@ -104,12 +92,11 @@ async fn main() -> Result<()> {
 
         for n in 0..num_simultaneous_txs {
             let account_clone = account.clone();
-            let recv_address_clone = *addresses[(n + 1) % num_simultaneous_txs].address();
 
             tasks.spawn(async move {
-                println!("Thread {n}: Sending {SEND_AMOUNT} coins to {recv_address_clone}");
+                println!("Thread {n}: Sending {SEND_AMOUNT} coins to {recv_address}");
                 let now = Instant::now();
-                let outputs = vec![SendAmountParams::new(recv_address_clone, SEND_AMOUNT)];
+                let outputs = vec![SendAmountParams::new(recv_address, SEND_AMOUNT)];
                 let transaction = account_clone.send_amount(outputs, None).await.map_err(|err| (n, err))?;
 
                 let elapsed = now.elapsed();
@@ -161,18 +148,6 @@ async fn get_or_create_account(wallet: &Wallet, alias: &str) -> Result<Account> 
         println!("Creating account '{alias}'");
         wallet.create_account().with_alias(alias.to_string()).finish().await?
     })
-}
-
-async fn ensure_enough_addresses(account: &Account, max: usize) -> Result<Vec<AccountAddress>> {
-    let alias = account.alias().await;
-    if account.addresses().await?.len() < max {
-        let num_addresses_to_generate = max - account.addresses().await?.len();
-        println!("Generating {num_addresses_to_generate} addresses for account '{alias}'...");
-        account
-            .generate_addresses(num_addresses_to_generate as u32, None)
-            .await?;
-    }
-    account.addresses().await
 }
 
 async fn ensure_enough_funds(
