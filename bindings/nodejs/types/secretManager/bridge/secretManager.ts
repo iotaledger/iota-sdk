@@ -12,6 +12,13 @@ export interface __GenerateEd25519AddressesMethod__ {
     };
 }
 
+export interface __GenerateEvmAddressesMethod__ {
+    name: 'generateEvmAddresses';
+    data: {
+        options: IGenerateAddressesOptions;
+    };
+}
+
 export interface __SignTransactionMethod__ {
     name: 'signTransaction';
     data: {

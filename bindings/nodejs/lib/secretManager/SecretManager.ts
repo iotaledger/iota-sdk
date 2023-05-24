@@ -38,6 +38,20 @@ export class SecretManager {
         return JSON.parse(response).payload;
     }
 
+    /** Generate EVM addresses */
+    async generateEvmAddresses(
+        generateAddressesOptions: IGenerateAddressesOptions,
+    ): Promise<string[]> {
+        const response = await this.methodHandler.callMethod({
+            name: 'generateEvmAddresses',
+            data: {
+                options: generateAddressesOptions,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
     /**
      * Store a mnemonic in the Stronghold vault
      */
