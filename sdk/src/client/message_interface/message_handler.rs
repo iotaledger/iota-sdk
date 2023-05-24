@@ -318,7 +318,7 @@ impl ClientMessageHandler {
             } => {
                 let secret_manager = SecretManager::try_from(&secret_manager)?;
                 let addresses = secret_manager.generate_ed25519_addresses(options).await?;
-                Ok(Response::GeneratedEd25519Addresseses(addresses))
+                Ok(Response::GeneratedEd25519Addresses(addresses))
             }
             Message::BuildAndPostBlock {
                 secret_manager,

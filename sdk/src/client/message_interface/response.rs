@@ -59,7 +59,7 @@ pub enum Response {
     Bool(bool),
     /// Response for:
     /// - [`GenerateEd25519Addresses`](crate::client::message_interface::Message::GenerateEd25519Addresses)
-    GeneratedEd25519Addresseses(Vec<Bech32Address>),
+    GeneratedEd25519Addresses(Vec<Bech32Address>),
     /// Response for:
     /// - [`GetNode`](crate::client::message_interface::Message::GetNode)
     Node(Node),

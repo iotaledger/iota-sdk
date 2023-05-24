@@ -252,7 +252,7 @@ async fn address_generation() {
 
             let response = message_handler.send_message(message).await;
             match response {
-                Response::GeneratedEd25519Addresseses(addresses) => {
+                Response::GeneratedEd25519Addresses(addresses) => {
                     assert_eq!(addresses[0], address.bech32_address);
                     if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
                         assert_eq!(ed25519_address.to_string(), address.ed25519_address);
@@ -297,7 +297,7 @@ async fn address_generation() {
 
             let response = message_handler.send_message(message).await;
             match response {
-                Response::GeneratedEd25519Addresseses(addresses) => {
+                Response::GeneratedEd25519Addresses(addresses) => {
                     assert_eq!(addresses[0], address.bech32_address);
                     if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
                         assert_eq!(ed25519_address.to_string(), address.ed25519_address);

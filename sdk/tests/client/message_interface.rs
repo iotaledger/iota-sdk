@@ -40,7 +40,7 @@ async fn generate_addresses() {
 
     let response = message_handler.send_message(message).await;
     match response {
-        Response::GeneratedEd25519Addresseses(addresses) => {
+        Response::GeneratedEd25519Addresses(addresses) => {
             println!("{:?}", serde_json::to_string(&addresses).unwrap())
         }
         _ => panic!("Unexpected response type"),
@@ -87,7 +87,7 @@ async fn build_and_post_block() {
 
     let response = message_handler.send_message(generate_addresses_message).await;
     let addresses = match response {
-        Response::GeneratedEd25519Addresseses(addresses) => addresses,
+        Response::GeneratedEd25519Addresses(addresses) => addresses,
         _ => panic!("Unexpected response type"),
     };
 
@@ -195,7 +195,7 @@ async fn stronghold() {
     let response = message_handler.send_message(message).await;
 
     match response {
-        Response::GeneratedEd25519Addresseses(addresses) => {
+        Response::GeneratedEd25519Addresses(addresses) => {
             assert_eq!(
                 addresses[0],
                 "rms1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6v3ea5a",
