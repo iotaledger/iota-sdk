@@ -27,7 +27,9 @@ async function run() {
         const secretManager = new SecretManager(mnemonicSecretManager);
 
         // Generate public address with default account index and range.
-        const default_addresses = await secretManager.generateEd25519Addresses({});
+        const default_addresses = await secretManager.generateEd25519Addresses(
+            {},
+        );
         console.log(
             'List of generated public addresses: ',
             default_addresses,
@@ -60,8 +62,8 @@ async function run() {
         );
 
         // Generate addresses with providing all inputs, that way it can also be done offline without a node.
-        const offlineGeneratedAddresses = await secretManager.generateEd25519Addresses(
-            {
+        const offlineGeneratedAddresses =
+            await secretManager.generateEd25519Addresses({
                 coinType: CoinType.Shimmer,
                 accountIndex: 0,
                 range: {
@@ -72,8 +74,7 @@ async function run() {
                 // Generating addresses with client.generateEd25519Addresses(secretManager, {}), will by default get the bech32_hrp (Bech32
                 // human readable part) from the node info, generating it "offline" requires setting it in the generateAddressesOptions
                 bech32Hrp: SHIMMER_TESTNET_BECH32_HRP,
-            },
-        );
+            });
         console.log(
             'List of offline generated public addresses:',
             offlineGeneratedAddresses,
