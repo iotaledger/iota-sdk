@@ -144,29 +144,30 @@ impl<'de> Deserialize<'de> for WalletEvent {
 }
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[repr(u8)]
 pub enum WalletEventType {
-    ConsolidationRequired,
+    ConsolidationRequired = 0,
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
-    LedgerAddressGeneration,
-    NewOutput,
-    SpentOutput,
-    TransactionInclusion,
-    TransactionProgress,
+    LedgerAddressGeneration = 1,
+    NewOutput = 2,
+    SpentOutput = 3,
+    TransactionInclusion = 4,
+    TransactionProgress = 5,
 }
 
-impl TryFrom<&str> for WalletEventType {
+impl TryFrom<u8> for WalletEventType {
     type Error = String;
 
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
         let event_type = match value {
-            "ConsolidationRequired" => Self::ConsolidationRequired,
+            0 => Self::ConsolidationRequired,
             #[cfg(feature = "ledger_nano")]
-            "LedgerAddressGeneration" => Self::LedgerAddressGeneration,
-            "NewOutput" => Self::NewOutput,
-            "SpentOutput" => Self::SpentOutput,
-            "TransactionInclusion" => Self::TransactionInclusion,
-            "TransactionProgress" => Self::TransactionProgress,
+            1 => Self::LedgerAddressGeneration,
+            2 => Self::NewOutput,
+            3 => Self::SpentOutput,
+            4 => Self::TransactionInclusion,
+            5 => Self::TransactionProgress,
             _ => return Err(format!("invalid event type {value}")),
         };
         Ok(event_type)
