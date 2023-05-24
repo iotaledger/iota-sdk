@@ -546,7 +546,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """
         return self._call_method('getLocalPow')
 
-    def get_fall_back_to_local_pow(self) -> bool:
+    def get_fallback_to_local_pow(self) -> bool:
         """Get fallback to local proof of work timeout.
         """
         return self._call_method('getFallbackToLocalPow')

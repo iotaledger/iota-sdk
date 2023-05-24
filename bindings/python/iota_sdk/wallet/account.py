@@ -10,7 +10,7 @@ from typing import List, Optional
 
 
 class Account:
-    def __init__(self, account_id: str|int, handle):
+    def __init__(self, account_id: str | int, handle):
         self.account_id = account_id
         self.handle = handle
 
