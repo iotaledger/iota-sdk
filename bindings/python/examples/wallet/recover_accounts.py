@@ -16,8 +16,7 @@ client_options = {
 coin_type = CoinType.SHIMMER
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
-    print(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
-    sys.exit(1)
+    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 secret_manager = StrongholdSecretManager(
     "wallet.stronghold", os.environ['STRONGHOLD_PASSWORD'])
@@ -25,8 +24,7 @@ secret_manager = StrongholdSecretManager(
 wallet = Wallet('./alice-database', client_options, coin_type, secret_manager)
 
 if 'NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1' not in os.environ:
-    print(".env mnemonic is undefined, see .env.example")
-    sys.exit(1)
+    raise Exception(".env mnemonic is undefined, see .env.example")
 
 # Store the mnemonic in the Stronghold snapshot, this only needs to be done once
 account = wallet.store_mnemonic(os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1'])

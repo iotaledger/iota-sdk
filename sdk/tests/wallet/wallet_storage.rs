@@ -30,8 +30,8 @@ async fn check_existing_db() -> Result<()> {
     let addresses = account.addresses().await?;
     // One public and one internal address
     assert_eq!(addresses.len(), 2);
-    // Wallet was created with mnemonic: "grain act vast fold someone kind section pet immune matter exit stock dirt
-    // erode only fitness gym chalk cruel tree aerobic cake tool gloom"
+    // Wallet was created with mnemonic: "rapid help true please need desk oppose seminar busy large tree speed pepper
+    // adult hair duty mad chief boil pass coin biology survey fish"
     assert_eq!(
         addresses[0].address().to_string(),
         "rms1qzsw70tha0y4n78s0x0p99ayvz7nl7mzcye7yk8l3s8m6zrfg7slud2ve9f"
@@ -48,13 +48,13 @@ async fn check_existing_db() -> Result<()> {
         "rms1qzjclfjq0azmq2yzkkk7ugfhdf55nzvs57r8twk2h36wuqv950dxv00tzfx"
     );
 
-    let transactions = account.transactions().await?;
+    let transactions = account.transactions().await;
     assert_eq!(transactions.len(), 2);
 
-    let pending_transactions = account.pending_transactions().await?;
+    let pending_transactions = account.pending_transactions().await;
     assert_eq!(pending_transactions.len(), 1);
 
-    let incoming_transactions = account.incoming_transactions().await?;
+    let incoming_transactions = account.incoming_transactions().await;
     assert_eq!(incoming_transactions.len(), 1);
 
     let unspent_outputs = account.unspent_outputs(None).await?;
