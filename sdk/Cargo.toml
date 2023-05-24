@@ -621,11 +621,6 @@ path = "examples/wallet/output_consolidation.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
-name = "multithread"
-path = "examples/wallet/multithread.rs"
-required-features = [ "wallet", "storage" ]
-
-[[example]]
 name = "recover_accounts"
 path = "examples/wallet/recover_accounts.rs"
 required-features = [ "wallet" ]
