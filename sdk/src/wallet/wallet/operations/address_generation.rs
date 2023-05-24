@@ -7,7 +7,7 @@ use std::sync::atomic::Ordering;
 use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
-    types::block::address::{Address, Hrp, ToBech32Ext},
+    types::block::address::{Address, Hrp},
     wallet::Wallet,
 };
 
@@ -58,7 +58,7 @@ impl Wallet {
                         self.emit(
                             account_index,
                             WalletEvent::LedgerAddressGeneration(AddressData {
-                                address: address[0].to_bech32(bech32_hrp),
+                                address: crate::types::block::address::ToBech32Ext::to_bech32(address[0], bech32_hrp),
                             }),
                         )
                         .await;
