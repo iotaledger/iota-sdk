@@ -4,7 +4,7 @@
 //! In this example we will generate an address.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example generate_address --release`
+//! `cargo run --release --all-features --example create_address`
 
 use iota_sdk::wallet::{Result, Wallet};
 

@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
     outputs.iter().for_each(|output_data| {
         println!(
             "address: {:?}\n amount: {:?}\n native tokens: {:?}\n",
-            output_data.address.to_bech32("rms"),
+            output_data.address.to_bech32_unchecked("rms"),
             output_data.output.amount(),
             output_data.output.native_tokens()
         )
@@ -80,7 +80,7 @@ async fn main() -> Result<()> {
     outputs.iter().for_each(|output_data| {
         println!(
             "address: {:?}\n amount: {:?}\n native tokens: {:?}\n",
-            output_data.address.to_bech32("rms"),
+            output_data.address.to_bech32_unchecked("rms"),
             output_data.output.amount(),
             output_data.output.native_tokens()
         )

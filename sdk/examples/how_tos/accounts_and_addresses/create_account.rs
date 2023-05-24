@@ -4,7 +4,7 @@
 //! In this example we will create a new wallet.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example create_wallet --release`
+//! `cargo run --release --all-features --example create_account`
 
 use iota_sdk::{
     client::{
@@ -41,9 +41,9 @@ async fn main() -> Result<()> {
         .await?;
 
     // Create a new account
-    let _account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
 
-    println!("Generated a new account");
+    println!("Account created: {}", account.alias().await);
 
     Ok(())
 }

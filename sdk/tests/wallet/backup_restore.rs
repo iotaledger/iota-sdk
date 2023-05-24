@@ -263,7 +263,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
     assert_eq!(new_account.details().await.coin_type(), &IOTA_COIN_TYPE);
     // secret manager is the same
     assert_eq!(
-        new_account.addresses().await?[0].address().to_string(),
+        new_account.addresses().await?[0].address(),
         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
     );
 
@@ -422,8 +422,8 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     // No accounts restored, because the coin type was different
     let restored_account = restore_wallet.get_account("Alice").await?;
     assert_eq!(
-        account.addresses().await?[0].address().to_string(),
-        restored_account.addresses().await?[0].address().to_string(),
+        account.addresses().await?[0].address(),
+        restored_account.addresses().await?[0].address(),
     );
 
     // Restored coin type is used
@@ -431,7 +431,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     assert_eq!(new_account.details().await.coin_type(), &SHIMMER_COIN_TYPE);
     // secret manager is restored
     assert_eq!(
-        new_account.addresses().await?[0].address().to_string(),
+        new_account.addresses().await?[0].address(),
         "smr1qzvjvjyqxgfx4f0m3xhn2rj24e03dwsmjz082735y3wx88v2gudu2afedhu"
     );
 
@@ -497,7 +497,7 @@ async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
             PathBuf::from("test-storage/backup_and_restore_bech32_hrp_mismatch/backup.stronghold"),
             stronghold_password,
             None,
-            Some("otherhrp"),
+            Some(iota_sdk::types::block::address::Hrp::from_str_unchecked("otherhrp")),
         )
         .await?;
 

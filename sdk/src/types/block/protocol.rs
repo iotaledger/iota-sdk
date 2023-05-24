@@ -6,6 +6,7 @@ use core::borrow::Borrow;
 
 use packable::{prefix::StringPrefix, Packable};
 
+use super::address::{Hrp, HrpLike};
 use crate::types::block::{helper::network_name_to_id, output::RentStructure, Error, PROTOCOL_VERSION};
 
 /// Defines the parameters of the protocol.
@@ -21,9 +22,8 @@ pub struct ProtocolParameters {
     #[cfg_attr(feature = "serde", serde(alias = "networkName"))]
     network_name: StringPrefix<u8>,
     // The HRP prefix used for Bech32 addresses in the network.
-    #[packable(unpack_error_with = |err| Error::InvalidBech32Hrp(err.into_item_err()))]
     #[cfg_attr(feature = "serde", serde(alias = "bech32Hrp"))]
-    bech32_hrp: StringPrefix<u8>,
+    bech32_hrp: Hrp,
     // The minimum pow score of the network.
     #[cfg_attr(feature = "serde", serde(alias = "minPowScore"))]
     min_pow_score: u32,
@@ -51,7 +51,7 @@ impl Default for ProtocolParameters {
         Self::new(
             PROTOCOL_VERSION,
             String::from("shimmer"),
-            String::from("smr"),
+            "smr",
             1500,
             15,
             RentStructure::default(),
@@ -66,7 +66,7 @@ impl ProtocolParameters {
     pub fn new(
         protocol_version: u8,
         network_name: String,
-        bech32_hrp: String,
+        bech32_hrp: impl HrpLike,
         min_pow_score: u32,
         below_max_depth: u8,
         rent_structure: RentStructure,
@@ -75,7 +75,7 @@ impl ProtocolParameters {
         Ok(Self {
             protocol_version,
             network_name: <StringPrefix<u8>>::try_from(network_name).map_err(Error::InvalidStringPrefix)?,
-            bech32_hrp: <StringPrefix<u8>>::try_from(bech32_hrp).map_err(Error::InvalidStringPrefix)?,
+            bech32_hrp: bech32_hrp.to_hrp()?,
             min_pow_score,
             below_max_depth,
             rent_structure,
@@ -99,7 +99,7 @@ impl ProtocolParameters {
     }
 
     /// Returns the bech32 HRP of the [`ProtocolParameters`].
-    pub fn bech32_hrp(&self) -> &str {
+    pub fn bech32_hrp(&self) -> &Hrp {
         &self.bech32_hrp
     }
 
@@ -131,7 +131,7 @@ pub fn protocol_parameters() -> ProtocolParameters {
     ProtocolParameters::new(
         2,
         String::from("testnet"),
-        String::from("rms"),
+        "rms",
         1500,
         15,
         crate::types::block::output::RentStructure::new(500, 10, 1),
@@ -156,7 +156,7 @@ pub mod dto {
         #[cfg_attr(feature = "serde", serde(rename = "version"))]
         pub protocol_version: u8,
         pub network_name: String,
-        pub bech32_hrp: String,
+        pub bech32_hrp: Hrp,
         pub min_pow_score: u32,
         pub below_max_depth: u8,
         pub rent_structure: RentStructureDto,

@@ -12,6 +12,7 @@ use self::stronghold_snapshot::{read_data_from_stronghold_snapshot, store_data_t
 use crate::wallet::WalletBuilder;
 use crate::{
     client::secret::{stronghold::StrongholdSecretManager, types::Password, SecretManager, SecretManagerDto},
+    types::block::address::Hrp,
     wallet::{Account, Wallet},
 };
 
@@ -69,7 +70,7 @@ impl Wallet {
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
         ignore_if_coin_type_mismatch: Option<bool>,
-        ignore_if_bech32_hrp_mismatch: Option<&str>,
+        ignore_if_bech32_hrp_mismatch: Option<Hrp>,
     ) -> crate::wallet::Result<()> {
         log::debug!("[restore_backup] loading stronghold backup");
 
@@ -159,7 +160,7 @@ impl Wallet {
                             .expect("account needs to have a public address")
                             .address()
                             .hrp()
-                            == expected_bech32_hrp
+                            == &expected_bech32_hrp
                     })
                 });
 

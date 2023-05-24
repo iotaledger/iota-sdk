@@ -3,11 +3,18 @@
 
 from iota_sdk.wallet.common import _call_method_routine
 from iota_sdk.types.burn import Burn
+from iota_sdk.types.common import HexStr
 from iota_sdk.types.native_token import NativeToken
+from iota_sdk.types.native_token import NativeToken
+from iota_sdk.types.unlock_condition import UnlockCondition
+from iota_sdk.types.feature import Feature
+from iota_sdk.types.output_id import OutputId
+from iota_sdk.types.token_scheme import TokenScheme
+from typing import List, Optional, Union
 
 
 class Account:
-    def __init__(self, account_id, handle):
+    def __init__(self, account_id: Union[str, int], handle):
         self.account_id = account_id
         self.handle = handle
 
@@ -38,15 +45,15 @@ class Account:
         return message
 
     def build_alias_output(self,
-                           amount,
-                           native_tokens,
-                           alias_id,
-                           state_index,
-                           state_metadata,
-                           foundry_counter,
-                           unlock_conditions,
-                           features,
-                           immutable_features):
+                           amount: int,
+                           native_tokens: List[NativeToken],
+                           alias_id: HexStr,
+                           state_index: int,
+                           state_metadata: HexStr,
+                           foundry_counter: int,
+                           unlock_conditions: List[UnlockCondition],
+                           features: List[Feature],
+                           immutable_features: List[Feature]):
         """Build alias output.
         """
         return self._call_account_method(
@@ -64,10 +71,10 @@ class Account:
         )
 
     def build_basic_output(self,
-                           amount,
-                           native_tokens,
-                           unlock_conditions,
-                           features):
+                           amount: int,
+                           native_tokens: List[NativeToken],
+                           unlock_conditions: List[UnlockCondition],
+                           features: List[Feature]):
         """Build basic output.
         """
         return self._call_account_method(
@@ -80,13 +87,13 @@ class Account:
         )
 
     def build_foundry_output(self,
-                             amount,
-                             native_tokens,
-                             serial_number,
-                             token_scheme,
-                             unlock_conditions,
-                             features,
-                             immutable_features):
+                             amount: int,
+                             native_tokens: List[NativeToken],
+                             serial_number: int,
+                             token_scheme: TokenScheme,
+                             unlock_conditions: List[UnlockCondition],
+                             features: List[Feature],
+                             immutable_features: List[Feature]):
         """Build foundry output.
         """
         return self._call_account_method(
@@ -102,12 +109,12 @@ class Account:
         )
 
     def build_nft_output(self,
-                         amount,
-                         native_tokens,
-                         nft_id,
-                         unlock_conditions,
-                         features,
-                         immutable_features):
+                         amount: int,
+                         native_tokens: List[NativeToken],
+                         nft_id: HexStr,
+                         unlock_conditions: List[UnlockCondition],
+                         features: List[Feature],
+                         immutable_features: List[Feature]):
         """BuildNftOutput.
         """
         return self._call_account_method(
@@ -133,7 +140,7 @@ class Account:
         )
 
     def burn_native_token(self,
-                          token_id: str,
+                          token_id: HexStr,
                           burn_amount: int,
                           options=None):
         """Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
@@ -148,7 +155,7 @@ class Account:
         )
 
     def burn_nft(self,
-                 nft_id: str,
+                 nft_id: HexStr,
                  options=None):
         """Burn an nft output.
         """
@@ -160,8 +167,8 @@ class Account:
         )
 
     def consolidate_outputs(self,
-                            force,
-                            output_consolidation_threshold):
+                            force: bool,
+                            output_consolidation_threshold: Optional[int] = None):
         """Consolidate outputs.
         """
         return self._call_account_method(
@@ -184,7 +191,7 @@ class Account:
         )
 
     def destroy_alias(self,
-                      alias_id: str,
+                      alias_id: HexStr,
                       options=None):
         """Destroy an alias output.
         """
@@ -197,7 +204,7 @@ class Account:
         )
 
     def destroy_foundry(self,
-                        foundry_id: str,
+                        foundry_id: HexStr,
                         options=None):
         """Destroy a foundry output with a circulating supply of 0.
         """
@@ -209,7 +216,7 @@ class Account:
         )
         pass
 
-    def generate_addresses(self, amount, options=None):
+    def generate_addresses(self, amount: int, options=None):
         """Generate new addresses.
         """
         return self._call_account_method(
@@ -219,7 +226,7 @@ class Account:
             }
         )
 
-    def get_outputs_with_additional_unlock_conditions(self, outputs_to_claim):
+    def get_outputs_with_additional_unlock_conditions(self, outputs_to_claim: List[OutputId]):
         """Get outputs with additional unlock conditions.
         """
         return self._call_account_method(
@@ -228,7 +235,7 @@ class Account:
             }
         )
 
-    def get_output(self, output_id):
+    def get_output(self, output_id: OutputId):
         """Get output.
         """
         return self._call_account_method(
@@ -237,7 +244,7 @@ class Account:
             }
         )
 
-    def get_transaction(self, transaction_id):
+    def get_transaction(self, transaction_id: HexStr):
         """Get transaction.
         """
         return self._call_account_method(
@@ -300,8 +307,8 @@ class Account:
         )
 
     def decrease_native_token_supply(self,
-                                     token_id,
-                                     melt_amount,
+                                     token_id: HexStr,
+                                     melt_amount: int,
                                      options=None):
         """Melt native tokens. This happens with the foundry output which minted them, by increasing it's
         `melted_tokens` field.
@@ -314,7 +321,7 @@ class Account:
             }
         )
 
-    def increase_native_token_supply(self, token_id, mint_amount, increase_native_token_supply_options=None, options=None):
+    def increase_native_token_supply(self, token_id: HexStr, mint_amount: int, options=None):
         """Mint more native token.
         """
         return self._call_account_method(
@@ -396,7 +403,7 @@ class Account:
             }
         )
 
-    def retry_transaction_until_included(self, transaction_id, interval=None, max_attempts=None):
+    def retry_transaction_until_included(self, transaction_id: HexStr, interval=None, max_attempts=None):
         """Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
         included (referenced by a milestone). Returns the included block id.
         """
@@ -449,7 +456,7 @@ class Account:
             }
         )
 
-    def set_alias(self, alias):
+    def set_alias(self, alias: str):
         """Set alias.
         """
         return self._call_account_method(
@@ -486,7 +493,7 @@ class Account:
             }
         )
 
-    def claim_outputs(self, output_ids_to_claim):
+    def claim_outputs(self, output_ids_to_claim: List[OutputId]):
         """Claim outputs.
         """
         return self._call_account_method(

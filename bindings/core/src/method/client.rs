@@ -15,6 +15,7 @@ use iota_sdk::{
         secret::SecretManagerDto,
     },
     types::block::{
+        address::{Bech32Address, Hrp},
         output::{
             dto::{NativeTokenDto, TokenSchemeDto},
             feature::dto::FeatureDto,
@@ -376,7 +377,7 @@ pub enum ClientMethod {
     /// Function to find inputs from addresses for a provided amount (useful for offline signing)
     FindInputs {
         /// Addresses
-        addresses: Vec<String>,
+        addresses: Vec<Bech32Address>,
         /// Amount
         amount: u64,
     },
@@ -387,7 +388,7 @@ pub enum ClientMethod {
         /// Output IDs
         output_ids: Vec<OutputId>,
         /// Addresses
-        addresses: Vec<String>,
+        addresses: Vec<Bech32Address>,
     },
     /// Reattaches blocks for provided block id. Blocks can be reattached only if they are valid and haven't been
     /// confirmed for a while.
@@ -425,7 +426,7 @@ pub enum ClientMethod {
         /// Hex encoded bech32 address
         hex: String,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Transforms an alias id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -433,7 +434,7 @@ pub enum ClientMethod {
         /// Alias ID
         alias_id: AliasId,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Transforms an nft id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -441,7 +442,7 @@ pub enum ClientMethod {
         /// Nft ID
         nft_id: NftId,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Transforms a hex encoded public key to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -449,13 +450,13 @@ pub enum ClientMethod {
         /// Hex encoded public key
         hex: String,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Requests funds for a given address from the faucet, for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.
     RequestFundsFromFaucet {
         /// Faucet URL
         url: String,
         /// The address for request funds
-        address: String,
+        address: Bech32Address,
     },
 }
