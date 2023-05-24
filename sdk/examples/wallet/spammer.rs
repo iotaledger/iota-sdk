@@ -7,6 +7,7 @@
 //! ```sh
 //! cargo run --release --all-features --example spammer
 //! ```
+
 use std::{env::var, time::Duration};
 
 use iota_sdk::{
