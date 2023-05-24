@@ -159,6 +159,16 @@ name = "simple_transaction"
 path = "examples/how_tos/simple_transaction/simple_transaction.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
+# Outputs
+
+[[example]]
+name = "output_unlock_conditions"
+path = "examples/how_tos/outputs/unlock_conditions.rs"
+
+[[example]]
+name = "output_features"
+path = "examples/how_tos/outputs/features.rs"
+
 # Block examples
 
 [[example]]
