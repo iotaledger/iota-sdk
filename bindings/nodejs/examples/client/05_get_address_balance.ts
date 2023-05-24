@@ -29,7 +29,7 @@ async function run() {
         };
 
         // Generate the first address
-        const addresses = await client.generateAddresses(secretManager, {
+        const addresses = await client.generateEd25519Addresses(secretManager, {
             accountIndex: 0,
             range: {
                 start: 0,
@@ -57,9 +57,9 @@ async function run() {
             if ('nativeTokens' in output) {
                 output.nativeTokens?.forEach(
                     (token) =>
-                        (totalNativeTokens[token.id] =
-                            (totalNativeTokens[token.id] || 0) +
-                            parseInt(token.amount)),
+                    (totalNativeTokens[token.id] =
+                        (totalNativeTokens[token.id] || 0) +
+                        parseInt(token.amount)),
                 );
             }
 

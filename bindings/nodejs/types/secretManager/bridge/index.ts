@@ -1,5 +1,5 @@
 import type {
-    __GenerateAddressesMethod__,
+    __GenerateEd25519AddressesMethod__,
     __GetLedgerNanoStatusMethod__,
     __SignTransactionMethod__,
     __StoreMnemonicMethod__,
@@ -8,7 +8,7 @@ import type {
 } from './secretManager';
 
 export type __SecretManagerMethods__ =
-    | __GenerateAddressesMethod__
+    | __GenerateEd25519AddressesMethod__
     | __GetLedgerNanoStatusMethod__
     | __SignTransactionMethod__
     | __SignatureUnlockMethod__

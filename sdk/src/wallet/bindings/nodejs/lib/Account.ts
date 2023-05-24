@@ -383,7 +383,7 @@ export class Account {
      * @returns The address.
      */
     async generateAddress(options?: GenerateAddressOptions): Promise<Address> {
-        const addresses = await this.generateAddresses(1, options);
+        const addresses = await this.generateEd25519Addresses(1, options);
         return addresses[0];
     }
 
@@ -393,14 +393,14 @@ export class Account {
      * @param options Options for address generation.
      * @returns The addresses.
      */
-    async generateAddresses(
+    async generateEd25519Addresses(
         amount: number,
         options?: GenerateAddressOptions,
     ): Promise<Address[]> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'generateAddresses',
+                name: 'generateEd25519Addresses',
                 data: {
                     amount,
                     options,

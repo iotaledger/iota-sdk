@@ -5,7 +5,7 @@ package org.iota;
 import org.iota.types.AccountAddress;
 import org.iota.types.Account;
 import org.iota.types.addresses.Address;
-import org.iota.types.account_methods.GenerateAddresses;
+import org.iota.types.account_methods.GenerateEd25519Addresses;
 import org.iota.types.account_methods.GenerateAddressOptions;
 import org.iota.types.account_methods.SetAlias;
 import org.iota.types.exceptions.WalletException;
@@ -81,7 +81,7 @@ public class WalletTests extends TestSettings {
 
                 Account account = wallet.createAccount("Alice");
                 AccountAddress[] addresses = account
-                                .generateAddresses(new GenerateAddresses().withAmount(1)
+                                .generateEd25519Addresses(new GenerateEd25519Addresses().withAmount(1)
                                                 .withGenerateAddressOptions(options));
 
                 assertEquals(1, addresses.length);
@@ -91,7 +91,7 @@ public class WalletTests extends TestSettings {
 
                 account = wallet.getAccounts()[0];
                 addresses = account
-                                .generateAddresses(new GenerateAddresses().withAmount(1)
+                                .generateEd25519Addresses(new GenerateEd25519Addresses().withAmount(1)
                                                 .withGenerateAddressOptions(options));
                 addrHex = wallet.bech32ToHex(addresses[0].getAddress());
                 assertEquals(address, wallet.hexToBech32(addrHex, "rms"));

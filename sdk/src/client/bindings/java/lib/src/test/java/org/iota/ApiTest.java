@@ -24,7 +24,8 @@ public abstract class ApiTest {
 
     protected static final String DEFAULT_TESTNET_NODE_URL = "http://localhost:14265";
     protected Client client;
-    protected ClientConfig config = new ClientConfig().withNodes(new String[] { DEFAULT_TESTNET_NODE_URL }).withIgnoreNodeHealth(false);
+    protected ClientConfig config = new ClientConfig().withNodes(new String[] { DEFAULT_TESTNET_NODE_URL })
+            .withIgnoreNodeHealth(false);
 
     @BeforeEach
     protected void setUp() throws InitializeClientException {
@@ -37,23 +38,28 @@ public abstract class ApiTest {
     }
 
     protected Block setUpTaggedDataBlock() throws ClientException {
-        return client.postBlockPayload(new TaggedDataPayload("{ \"type\": 5, \"tag\": \"0x68656c6c6f20776f726c64\", \"data\": \"0x5370616d6d696e6720646174612e0a436f756e743a203037323935320a54696d657374616d703a20323032312d30322d31315431303a32333a34392b30313a30300a54697073656c656374696f6e3a203934c2b573\" }")).getValue();
+        return client.postBlockPayload(new TaggedDataPayload(
+                "{ \"type\": 5, \"tag\": \"0x68656c6c6f20776f726c64\", \"data\": \"0x5370616d6d696e6720646174612e0a436f756e743a203037323935320a54696d657374616d703a20323032312d30322d31315431303a32333a34392b30313a30300a54697073656c656374696f6e3a203934c2b573\" }"))
+                .getValue();
     }
 
-    protected TransactionId setUpTransactionId(String address) throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
+    protected TransactionId setUpTransactionId(String address)
+            throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
         OutputMetadata metadata = client.getOutputMetadata(setupBasicOutput(address));
         TransactionId ret = new TransactionId(metadata.toJson().get("transactionId").getAsString());
         return ret;
     }
 
-    protected OutputId setupBasicOutput(String address) throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
+    protected OutputId setupBasicOutput(String address)
+            throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
         client.requestTestFundsFromFaucet(address);
         return client.getBasicOutputIds(new NodeIndexerApi.QueryParams().withParam("address", address)).getItems()[0];
     }
 
     protected String generateAddress(String mnemonic) throws ClientException {
         SecretManager secretManager = new MnemonicSecretManager(mnemonic);
-        String[] addresses = client.generateAddresses(secretManager, new GenerateAddressesOptions().withRange(new Range(0, 1)));
+        String[] addresses = client.generateEd25519Addresses(secretManager,
+                new GenerateAddressesOptions().withRange(new Range(0, 1)));
         return addresses[0];
     }
 

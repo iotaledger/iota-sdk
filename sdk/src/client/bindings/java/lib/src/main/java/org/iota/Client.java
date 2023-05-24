@@ -173,7 +173,8 @@ public class Client extends NativeApi {
     }
 
     /**
-     * Returns the list of all the receipts that were migrated at the given milestone index
+     * Returns the list of all the receipts that were migrated at the given
+     * milestone index
      *
      * @param milestoneIndex The index of the milestone to get the receipts for.
      * @return Receipts
@@ -204,7 +205,8 @@ public class Client extends NativeApi {
     }
 
     /**
-     * Returns the block that contains the transaction that was included in the ledger.
+     * Returns the block that contains the transaction that was included in the
+     * ledger.
      *
      * @param transactionId The transaction that was included in the ledger.
      * @return A block that contains the transaction.
@@ -215,7 +217,8 @@ public class Client extends NativeApi {
     }
 
     /**
-     * Returns the metadata of the block that contains the transaction that was included in the ledger.
+     * Returns the metadata of the block that contains the transaction that was
+     * included in the ledger.
      *
      * @param transactionId The transaction that was included in the ledger.
      * @return The metadata of the block that contains the transaction.
@@ -272,7 +275,8 @@ public class Client extends NativeApi {
     /**
      * Returns the UTXO changes for the given milestone id
      *
-     * @param milestoneId The milestone id of the milestone to get the UTXO changes for.
+     * @param milestoneId The milestone id of the milestone to get the UTXO changes
+     *                    for.
      * @return The UTXO changes for the given milestone index.
      * @throws ClientException on error.
      */
@@ -348,7 +352,8 @@ public class Client extends NativeApi {
     }
 
     /**
-     * The aliasId of the alias you want to get the outputId for.eturns the output id of an alias by its alias id
+     * The aliasId of the alias you want to get the outputId for.eturns the output
+     * id of an alias by its alias id
      *
      * @param aliasId The aliasId of the alias you want to get the outputId for.
      * @return OutputId
@@ -386,7 +391,8 @@ public class Client extends NativeApi {
      * Get the outputs for the given output IDs
      *
      * @param outputIds An array of OutputId objects.
-     * @return A list of entries, where each entry is a pair of an Output and its OutputMetadata.
+     * @return A list of entries, where each entry is a pair of an Output and its
+     *         OutputMetadata.
      * @throws ClientException on error.
      */
     public List<Map.Entry<Output, OutputMetadata>> getOutputs(OutputId[] outputIds) throws ClientException {
@@ -397,7 +403,8 @@ public class Client extends NativeApi {
      * Try get the outputs for the given output IDs
      *
      * @param outputIds An array of OutputId objects.
-     * @return A list of entries, where each entry is a pair of an output and its metadata.
+     * @return A list of entries, where each entry is a pair of an output and its
+     *         metadata.
      * @throws ClientException on error.
      */
     public List<Map.Entry<Output, OutputMetadata>> getOutputsIgnoreErrors(OutputId[] outputIds) throws ClientException {
@@ -429,33 +436,40 @@ public class Client extends NativeApi {
     /**
      * Retry until the block is included in the blockchain
      *
-     * @param blockId The block ID to retry.
-     * @param interval The interval in seconds between each attempt to retrieve the block.
+     * @param blockId     The block ID to retry.
+     * @param interval    The interval in seconds between each attempt to retrieve
+     *                    the block.
      * @param maxAttempts The maximum number of attempts to make before giving up.
      * @return A LinkedHashMap of BlockId and Block.
      * @throws ClientException on error.
      */
-    public LinkedHashMap<BlockId, Block> retryUntilIncluded(BlockId blockId, int interval, int maxAttempts) throws ClientException {
+    public LinkedHashMap<BlockId, Block> retryUntilIncluded(BlockId blockId, int interval, int maxAttempts)
+            throws ClientException {
         return highLevelApi.retryUntilIncluded(blockId, interval, maxAttempts);
     }
 
     /**
      * This function will consolidate all funds of the wallet
      *
-     * @param secretManager The secret manager that holds the secret for the account you want to consolidate funds for.
-     * @param generateAddressesOptions This is an object that contains the following parameters:
+     * @param secretManager            The secret manager that holds the secret for
+     *                                 the account you want to consolidate funds
+     *                                 for.
+     * @param generateAddressesOptions This is an object that contains the following
+     *                                 parameters:
      * @return A String containing the transaction hash.
      * @throws ClientException on error.
      */
-    public String consolidateFunds(SecretManager secretManager, GenerateAddressesOptions generateAddressesOptions) throws ClientException {
+    public String consolidateFunds(SecretManager secretManager, GenerateAddressesOptions generateAddressesOptions)
+            throws ClientException {
         return highLevelApi.consolidateFunds(secretManager, generateAddressesOptions);
     }
 
     /**
-     * Finds the inputs that are needed to create a transaction with the given amount
+     * Finds the inputs that are needed to create a transaction with the given
+     * amount
      *
      * @param addresses An array of addresses to search for inputs.
-     * @param amount The amount you want to spend.
+     * @param amount    The amount you want to spend.
      * @return An array of UtxoInput objects.
      * @throws ClientException on error.
      */
@@ -471,7 +485,8 @@ public class Client extends NativeApi {
      * @return A list of outputs and their metadata.
      * @throws ClientException on error.
      */
-    public List<Map.Entry<Output, OutputMetadata>> findOutputs(OutputId[] outputIds, String[] addresses) throws ClientException {
+    public List<Map.Entry<Output, OutputMetadata>> findOutputs(OutputId[] outputIds, String[] addresses)
+            throws ClientException {
         return highLevelApi.findOutputs(outputIds, addresses);
     }
 
@@ -487,7 +502,8 @@ public class Client extends NativeApi {
     }
 
     /**
-     * ReattachUnchecked() reattaches a block to the tangle, without checking if it's necessary to.
+     * ReattachUnchecked() reattaches a block to the tangle, without checking if
+     * it's necessary to.
      *
      * @param blockId The block id of the block to reattach.
      * @return A map entry with the block id and the block.
@@ -535,7 +551,7 @@ public class Client extends NativeApi {
     /**
      * Converts a hex string to a bech32 string
      *
-     * @param hex The hexadecimal string to be converted.
+     * @param hex    The hexadecimal string to be converted.
      * @param bech32 The bech32 to use.
      * @return The bech32 address.
      * @throws ClientException on error.
@@ -547,7 +563,7 @@ public class Client extends NativeApi {
     /**
      * Converts an alias id to a bech32 address.
      *
-     * @param aliasId The alias id to be converted.
+     * @param aliasId   The alias id to be converted.
      * @param bech32Hrp The bech 32 human readable part to use.
      * @return The bech32 address.
      * @throws ClientException on error.
@@ -559,7 +575,7 @@ public class Client extends NativeApi {
     /**
      * Converts an nft id to a bech32 address.
      *
-     * @param nftId The nft id to be converted.
+     * @param nftId     The nft id to be converted.
      * @param bech32Hrp The bech 32 human readable part to use.
      * @return The bech32 address.
      * @throws ClientException on error.
@@ -571,7 +587,7 @@ public class Client extends NativeApi {
     /**
      * Converts a hex public key to a bech32 address
      *
-     * @param hex The public key in hexadecimal format.
+     * @param hex    The public key in hexadecimal format.
      * @param bech32 The bech32 prefix
      * @return The bech32 address.
      * @throws ClientException on error.
@@ -668,11 +684,13 @@ public class Client extends NativeApi {
     }
 
     /**
-     * Computes the Foundry ID for a given alias address, serial number, and token scheme
+     * Computes the Foundry ID for a given alias address, serial number, and token
+     * scheme
      *
      * @param aliasAddress The alias address of the device.
      * @param serialNumber The serial number of the token.
-     * @param tokenScheme The token scheme to use. This is a value from the TokenScheme enum.
+     * @param tokenScheme  The token scheme to use. This is a value from the
+     *                     TokenScheme enum.
      * @return A FoundryId object.
      * @throws ClientException on error.
      */
@@ -690,8 +708,7 @@ public class Client extends NativeApi {
      * @throws ClientException on error.
      */
     public Output buildAliasOutput(
-            AliasOutputBuilderParams params
-    ) throws ClientException {
+            AliasOutputBuilderParams params) throws ClientException {
         return miscellaneousApi.buildAliasOutput(params);
     }
 
@@ -703,8 +720,7 @@ public class Client extends NativeApi {
      * @throws ClientException on error.
      */
     public Output buildBasicOutput(
-            BasicOutputBuilderParams params
-    ) throws ClientException {
+            BasicOutputBuilderParams params) throws ClientException {
         return miscellaneousApi.buildBasicOutput(params);
     }
 
@@ -716,8 +732,7 @@ public class Client extends NativeApi {
      * @throws ClientException on error.
      */
     public Output buildFoundryOutput(
-            FoundryOutputBuilderParams params
-    ) throws ClientException {
+            FoundryOutputBuilderParams params) throws ClientException {
         return miscellaneousApi.buildFoundryOutput(params);
     }
 
@@ -729,32 +744,34 @@ public class Client extends NativeApi {
      * @throws ClientException on error.
      */
     public Output buildNftOutput(
-            NftOutputBuilderParams params
-    ) throws ClientException {
+            NftOutputBuilderParams params) throws ClientException {
         return miscellaneousApi.buildNftOutput(params);
     }
 
     /**
      * Generate addresses for a given secret manager
      *
-     * @param secretManager The secret manager to use for generating the addresses.
+     * @param secretManager            The secret manager to use for generating the
+     *                                 addresses.
      * @param generateAddressesOptions The options for generating addresses.
      * @return A list of addresses
      * @throws ClientException on error.
      */
-    public String[] generateAddresses(SecretManager secretManager, GenerateAddressesOptions generateAddressesOptions) throws ClientException {
-        return miscellaneousApi.generateAddresses(secretManager, generateAddressesOptions);
+    public String[] generateEd25519Addresses(SecretManager secretManager,
+            GenerateAddressesOptions generateAddressesOptions) throws ClientException {
+        return miscellaneousApi.generateEd25519Addresses(secretManager, generateAddressesOptions);
     }
 
     /**
      * Builds a block and posts it to the network
      *
      * @param secretManager The secret manager to use for signing the block.
-     * @param options The options for building the block.
+     * @param options       The options for building the block.
      * @return A map entry with the block id and the block itself.
      * @throws ClientException on error.
      */
-    public Map.Entry<BlockId, Block> buildAndPostBlock(SecretManager secretManager, BuildBlockOptions options) throws ClientException {
+    public Map.Entry<BlockId, Block> buildAndPostBlock(SecretManager secretManager, BuildBlockOptions options)
+            throws ClientException {
         return miscellaneousApi.buildAndPostBlock(secretManager, options);
     }
 
@@ -829,10 +846,12 @@ public class Client extends NativeApi {
     }
 
     /**
-     * Returns true if the client is configured to fallback to local proof of work if the remote proof of work service is
+     * Returns true if the client is configured to fallback to local proof of work
+     * if the remote proof of work service is
      * unavailable
      *
-     * @return true if the client is configured to fallback to local proof of work, else returns false.
+     * @return true if the client is configured to fallback to local proof of work,
+     *         else returns false.
      * @throws ClientException on error.
      */
     public boolean getFallbackToLocalPow() throws ClientException {
@@ -852,7 +871,8 @@ public class Client extends NativeApi {
     /**
      * Get the status of the Ledger Nano device
      *
-     * @param isSimulator true if you want to use the simulator, false if you want to use the real device.
+     * @param isSimulator true if you want to use the simulator, false if you want
+     *                    to use the real device.
      * @return LedgerNanoStatus
      * @throws ClientException on error.
      */
@@ -863,37 +883,46 @@ public class Client extends NativeApi {
     /**
      * Prepares a transaction for signing
      *
-     * @param secretManager The secret manager that holds the secret for the account.
-     * @param buildBlockOptions This is the object that contains the transaction details.
+     * @param secretManager     The secret manager that holds the secret for the
+     *                          account.
+     * @param buildBlockOptions This is the object that contains the transaction
+     *                          details.
      * @return The prepared transaction.
      * @throws ClientException on error.
      */
-    public PreparedTransactionData prepareTransaction(SecretManager secretManager, BuildBlockOptions buildBlockOptions) throws ClientException {
+    public PreparedTransactionData prepareTransaction(SecretManager secretManager, BuildBlockOptions buildBlockOptions)
+            throws ClientException {
         return miscellaneousApi.prepareTransaction(secretManager, buildBlockOptions);
     }
 
     /**
      * Signs the given prepared transaction using the secret manager
      *
-     * @param secretManager The secret manager that holds the secret key for the account that will sign the transaction.
-     * @param preparedTransactionData The transaction data that was prepared by the prepareTransaction method.
+     * @param secretManager           The secret manager that holds the secret key
+     *                                for the account that will sign the
+     *                                transaction.
+     * @param preparedTransactionData The transaction data that was prepared by the
+     *                                prepareTransaction method.
      * @return The signed transaction.
      * @throws ClientException on error.
      */
-    public TransactionPayload signTransaction(SecretManager secretManager, PreparedTransactionData preparedTransactionData) throws ClientException {
+    public TransactionPayload signTransaction(SecretManager secretManager,
+            PreparedTransactionData preparedTransactionData) throws ClientException {
         return miscellaneousApi.signTransaction(secretManager, preparedTransactionData);
     }
 
     /**
      * Signs a message with an Ed25519 private key.
      *
-     * @param secretManager The secret manager that holds the secret key for the account that will sign the message.
-     * @param message The message to sign.
-     * @param chain The Bip32Path for signing.
+     * @param secretManager The secret manager that holds the secret key for the
+     *                      account that will sign the message.
+     * @param message       The message to sign.
+     * @param chain         The Bip32Path for signing.
      * @return The Ed25519Signature.
      * @throws ClientException on error.
      */
-    public Ed25519Signature signEd25519(SecretManager secretManager, String message, Long[] chain) throws ClientException {
+    public Ed25519Signature signEd25519(SecretManager secretManager, String message, Long[] chain)
+            throws ClientException {
         return miscellaneousApi.signEd25519(secretManager, message, chain);
     }
 
@@ -901,12 +930,14 @@ public class Client extends NativeApi {
      * Verifies the Ed25519Signature for a message against an Ed25519Address.
      *
      * @param signature The Ed25519Signature.
-     * @param message The signed message.
-     * @param address The Ed25519Address to validate the signature against.
-     * @return If the signature is valid for the provided message and address or not.
+     * @param message   The signed message.
+     * @param address   The Ed25519Address to validate the signature against.
+     * @return If the signature is valid for the provided message and address or
+     *         not.
      * @throws ClientException on error.
      */
-    public Boolean verifyEd25519Signature(Ed25519Signature signature, String message, Ed25519Address address) throws ClientException {
+    public Boolean verifyEd25519Signature(Ed25519Signature signature, String message, Ed25519Address address)
+            throws ClientException {
         return miscellaneousApi.verifyEd25519Signature(signature, message, address);
     }
 
@@ -914,7 +945,7 @@ public class Client extends NativeApi {
      * Stores the mnemonic in the secret manager
      *
      * @param secretManager The secret manager to use.
-     * @param mnemonic The mnemonic to store.
+     * @param mnemonic      The mnemonic to store.
      * @throws ClientException on error.
      */
     public void storeMnemonic(SecretManager secretManager, String mnemonic) throws ClientException {
@@ -922,7 +953,8 @@ public class Client extends NativeApi {
     }
 
     /**
-     * Automatically builds a block containing the given block payload and broadcasts it to the network.
+     * Automatically builds a block containing the given block payload and
+     * broadcasts it to the network.
      *
      * @param payload The payload to be posted.
      * @return A map entry of the posted block id and the block.
@@ -955,17 +987,19 @@ public class Client extends NativeApi {
     /**
      * Asks the faucet for the testnet funds.
      *
-     * @throws NoFundsReceivedFromFaucetException when the faucet didn't fund the address.
+     * @throws NoFundsReceivedFromFaucetException when the faucet didn't fund the
+     *                                            address.
      */
     public void requestTestFundsFromFaucet(String address) throws ClientException, NoFundsReceivedFromFaucetException {
         int maxAttempts = 120;
-        for(int i = 0; i < maxAttempts; i++) {
+        for (int i = 0; i < maxAttempts; i++) {
             // Request every 30 seconds
-            if (i%30 == 0){
+            if (i % 30 == 0) {
                 String response2 = utilsApi.requestFundsFromFaucet(TESTNET_FAUCET_URL, address);
                 System.out.println(response2);
             }
-            if(getBasicOutputIds(new NodeIndexerApi.QueryParams().withParam("address", address)).getItems().length == 0) {
+            if (getBasicOutputIds(new NodeIndexerApi.QueryParams().withParam("address", address))
+                    .getItems().length == 0) {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
@@ -975,7 +1009,7 @@ public class Client extends NativeApi {
                 return;
         }
 
-        if(getBasicOutputIds(new NodeIndexerApi.QueryParams().withParam("address", address)).getItems().length == 0)
+        if (getBasicOutputIds(new NodeIndexerApi.QueryParams().withParam("address", address)).getItems().length == 0)
             throw new NoFundsReceivedFromFaucetException();
     }
 

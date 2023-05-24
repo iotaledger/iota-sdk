@@ -70,6 +70,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `{MetadataFeature, TagFeature}::new` take an `impl Into<Vec<u8>>` param;
 - `GetAddressesBuilderOptions` renamed to `GetAddressesOptions` and fields no longer nullable;
 - Methods on `GetAddressesBuilder` moved to `SecretManager`;
+- Rename `GenerateAddresses` method to `GenerateEd25519Addresses` for Account and SecretManager, and their respective responses;
+- Rename `SecretManager` and `SecretManage` ed25519 address generation methods;
 
 ### Removed
 
@@ -80,6 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `AliasIdDto`, `NftIdDto` and `TokenIdDto`;
 - `U256Dto`, `SendAmountParamsDto`, `AddressWithUnspentOutputsDto`, `RequiredStorageDepositDto` and `BaseCoinBalanceDto`;
 - `GetAddressesBuilder`;
+- Excess `SecretManager` address generation methods;
 
 ### Fixed
 

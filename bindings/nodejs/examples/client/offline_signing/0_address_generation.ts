@@ -31,7 +31,7 @@ async function run() {
         };
 
         // Generates an address offline.
-        const offlineGeneratedAddress = await offlineClient.generateAddresses(
+        const offlineGeneratedAddress = await offlineClient.generateEd25519Addresses(
             secretManager,
             {
                 coinType: CoinType.Shimmer,

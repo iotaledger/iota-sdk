@@ -414,7 +414,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         options = humps.camelize(options)
 
-        return self._call_method('generateAddresses', {
+        return self._call_method('generateEd25519Addresses', {
             'secretManager': secret_manager,
             'options': options
         })

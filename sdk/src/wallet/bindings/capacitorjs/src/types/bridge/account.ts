@@ -97,8 +97,8 @@ export type __DeregisterParticipationEventMethod__ = {
     };
 };
 
-export type __GenerateAddressesMethod__ = {
-    name: 'generateAddresses';
+export type __GenerateEd25519AddressesMethod__ = {
+    name: 'generateEd25519Addresses';
     data: {
         amount: number;
         options?: GenerateAddressOptions;

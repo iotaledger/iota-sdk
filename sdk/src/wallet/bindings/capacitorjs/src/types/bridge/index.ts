@@ -10,7 +10,7 @@ import type {
     __CreateAliasOutputMethod__,
     __DecreaseNativeTokenSupplyMethod__,
     __DeregisterParticipationEventMethod__,
-    __GenerateAddressesMethod__,
+    __GenerateEd25519AddressesMethod__,
     __GetBalanceMethod__,
     __GetOutputMethod__,
     __GetFoundryOutputMethod__,
@@ -92,7 +92,7 @@ export type __AccountMethod__ =
     | __ConsolidateOutputsMethod__
     | __CreateAliasOutputMethod__
     | __DeregisterParticipationEventMethod__
-    | __GenerateAddressesMethod__
+    | __GenerateEd25519AddressesMethod__
     | __GetBalanceMethod__
     | __GetOutputMethod__
     | __GetIncomingTransactionMethod__

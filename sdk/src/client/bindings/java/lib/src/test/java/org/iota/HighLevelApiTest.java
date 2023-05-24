@@ -29,7 +29,8 @@ public class HighLevelApiTest extends ApiTest {
     }
 
     @Test
-    public void getOutputsIgnoreErrors() throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
+    public void getOutputsIgnoreErrors()
+            throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
         OutputId[] outputs = new OutputId[] { setupBasicOutput(generateAddress(client.generateMnemonic())) };
         for (Map.Entry e : client.getOutputsIgnoreErrors(outputs)) {
             System.out.println(e.getKey());
@@ -52,35 +53,42 @@ public class HighLevelApiTest extends ApiTest {
                     Map.Entry<BlockId, Block> ret = client.retry(client.getTips()[0]);
                     System.out.println(ret.getKey());
                     System.out.println(ret.getValue());
-                }
-        );
+                });
     }
 
     @Test
-    public void testRetryUntilIncludedBlock() throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
+    public void testRetryUntilIncludedBlock()
+            throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
         SecretManager secretManager = new MnemonicSecretManager(client.generateMnemonic());
-        String[] addresses = client.generateAddresses(secretManager, new GenerateAddressesOptions().withRange(new Range(0, 2)));
+        String[] addresses = client.generateEd25519Addresses(secretManager,
+                new GenerateAddressesOptions().withRange(new Range(0, 2)));
         client.requestTestFundsFromFaucet(addresses[0]);
-        BuildBlockOptions.ClientBlockBuilderOutputAddress output = new BuildBlockOptions.ClientBlockBuilderOutputAddress(addresses[1], Integer.toString(1000000));
-        Map.Entry<BlockId, Block> entry = client.buildAndPostBlock(secretManager, new BuildBlockOptions().withOutput(output));
+        BuildBlockOptions.ClientBlockBuilderOutputAddress output = new BuildBlockOptions.ClientBlockBuilderOutputAddress(
+                addresses[1], Integer.toString(1000000));
+        Map.Entry<BlockId, Block> entry = client.buildAndPostBlock(secretManager,
+                new BuildBlockOptions().withOutput(output));
         LinkedHashMap<BlockId, Block> ret = client.retryUntilIncluded(entry.getKey(), 2, 15);
-        for(BlockId i : ret.keySet())
+        for (BlockId i : ret.keySet())
             System.out.println(i);
     }
 
     @Test
-    public void testConsolidateFunds() throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
+    public void testConsolidateFunds()
+            throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
         SecretManager secretManager = new MnemonicSecretManager(client.generateMnemonic());
-        String address = client.generateAddresses(secretManager, new GenerateAddressesOptions().withRange(new Range(0, 1)))[0];
+        String address = client.generateEd25519Addresses(secretManager,
+                new GenerateAddressesOptions().withRange(new Range(0, 1)))[0];
         client.requestTestFundsFromFaucet(address);
-        String consolidatedAddress = client.consolidateFunds(secretManager, new GenerateAddressesOptions().withRange(new Range(0, 1)));
+        String consolidatedAddress = client.consolidateFunds(secretManager,
+                new GenerateAddressesOptions().withRange(new Range(0, 1)));
         System.out.println(consolidatedAddress);
     }
 
     @Test
     public void testFindInputs() throws ClientException, NoFundsReceivedFromFaucetException {
         SecretManager secretManager = new MnemonicSecretManager(client.generateMnemonic());
-        String[] addresses = client.generateAddresses(secretManager, new GenerateAddressesOptions().withRange(new Range(0, 5)));
+        String[] addresses = client.generateEd25519Addresses(secretManager,
+                new GenerateAddressesOptions().withRange(new Range(0, 5)));
         client.requestTestFundsFromFaucet(addresses[0]);
         UtxoInput[] inputs = client.findInputs(addresses, 1000);
         for (UtxoInput id : inputs)
@@ -90,9 +98,10 @@ public class HighLevelApiTest extends ApiTest {
     @Test
     public void testFindOutputs() throws ClientException, NoFundsReceivedFromFaucetException {
         SecretManager secretManager = new MnemonicSecretManager(client.generateMnemonic());
-        String[] addresses = client.generateAddresses(secretManager, new GenerateAddressesOptions().withRange(new Range(0, 5)));
+        String[] addresses = client.generateEd25519Addresses(secretManager,
+                new GenerateAddressesOptions().withRange(new Range(0, 5)));
         client.requestTestFundsFromFaucet(addresses[0]);
-        for (Map.Entry e : client.findOutputs(new OutputId[]{}, addresses)) {
+        for (Map.Entry e : client.findOutputs(new OutputId[] {}, addresses)) {
             System.out.println(e.getKey());
         }
     }
@@ -105,8 +114,7 @@ public class HighLevelApiTest extends ApiTest {
                     Map.Entry<BlockId, Block> entry = client.reattach(client.getTips()[0]);
                     System.out.println(entry.getKey());
                     System.out.println(entry.getValue());
-                }
-        );
+                });
     }
 
     @Test
@@ -124,8 +132,7 @@ public class HighLevelApiTest extends ApiTest {
                     Map.Entry<BlockId, Block> entry = client.promote(client.getTips()[0]);
                     System.out.println(entry.getKey());
                     System.out.println(entry.getValue());
-                }
-        );
+                });
     }
 
     @Test

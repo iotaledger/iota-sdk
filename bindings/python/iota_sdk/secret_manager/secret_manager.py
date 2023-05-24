@@ -139,7 +139,7 @@ class SecretManager():
 
         options = humps.camelize(options)
 
-        return self._call_method('generateAddresses', {
+        return self._call_method('generateEd25519Addresses', {
             'options': options
         })
 

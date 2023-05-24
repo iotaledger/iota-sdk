@@ -35,43 +35,44 @@ public class MiscellaneousApi {
     }
 
     public Output buildAliasOutput(
-            AliasOutputBuilderParams params
-    ) throws ClientException {
-        JsonObject responsePayload = (JsonObject) nativeApi.sendCommand(new ClientCommand("buildAliasOutput", params.getJson()));
+            AliasOutputBuilderParams params) throws ClientException {
+        JsonObject responsePayload = (JsonObject) nativeApi
+                .sendCommand(new ClientCommand("buildAliasOutput", params.getJson()));
 
         return new Output(responsePayload);
     }
 
     public Output buildBasicOutput(
-            BasicOutputBuilderParams params
-    ) throws ClientException {
-        JsonObject responsePayload = (JsonObject) nativeApi.sendCommand(new ClientCommand("buildBasicOutput", params.getJson()));
+            BasicOutputBuilderParams params) throws ClientException {
+        JsonObject responsePayload = (JsonObject) nativeApi
+                .sendCommand(new ClientCommand("buildBasicOutput", params.getJson()));
 
         return new Output(responsePayload);
     }
 
     public Output buildFoundryOutput(
-            FoundryOutputBuilderParams params
-    ) throws ClientException {
-        JsonObject responsePayload = (JsonObject) nativeApi.sendCommand(new ClientCommand("buildFoundryOutput", params.getJson()));
+            FoundryOutputBuilderParams params) throws ClientException {
+        JsonObject responsePayload = (JsonObject) nativeApi
+                .sendCommand(new ClientCommand("buildFoundryOutput", params.getJson()));
 
         return new Output(responsePayload);
     }
 
     public Output buildNftOutput(
-            NftOutputBuilderParams params
-    ) throws ClientException {
-        JsonObject responsePayload = (JsonObject) nativeApi.sendCommand(new ClientCommand("buildNftOutput", params.getJson()));
+            NftOutputBuilderParams params) throws ClientException {
+        JsonObject responsePayload = (JsonObject) nativeApi
+                .sendCommand(new ClientCommand("buildNftOutput", params.getJson()));
 
         return new Output(responsePayload);
     }
 
-    public String[] generateAddresses(SecretManager secretManager, GenerateAddressesOptions generateAddressesOptions) throws ClientException {
+    public String[] generateEd25519Addresses(SecretManager secretManager,
+            GenerateAddressesOptions generateAddressesOptions) throws ClientException {
         JsonObject o = new JsonObject();
         o.add("secretManager", secretManager.getJson());
         o.add("options", generateAddressesOptions.getJson());
 
-        JsonArray responsePayload = (JsonArray) nativeApi.sendCommand(new ClientCommand("generateAddresses", o));
+        JsonArray responsePayload = (JsonArray) nativeApi.sendCommand(new ClientCommand("generateEd25519Addresses", o));
 
         String[] addresses = new String[responsePayload.size()];
         for (int i = 0; i < responsePayload.size(); i++) {
@@ -81,7 +82,8 @@ public class MiscellaneousApi {
         return addresses;
     }
 
-    public Map.Entry<BlockId, Block> buildAndPostBlock(SecretManager secretManager, BuildBlockOptions options) throws ClientException {
+    public Map.Entry<BlockId, Block> buildAndPostBlock(SecretManager secretManager, BuildBlockOptions options)
+            throws ClientException {
         JsonObject o = new JsonObject();
         o.add("secretManager", secretManager != null ? secretManager.getJson() : null);
         o.add("options", options != null ? options.getJson() : null);
@@ -154,7 +156,8 @@ public class MiscellaneousApi {
         return new LedgerNanoStatus(responsePayload);
     }
 
-    public PreparedTransactionData prepareTransaction(SecretManager secretManager, BuildBlockOptions buildBlockOptions) throws ClientException {
+    public PreparedTransactionData prepareTransaction(SecretManager secretManager, BuildBlockOptions buildBlockOptions)
+            throws ClientException {
         JsonObject o = new JsonObject();
         o.add("secretManager", secretManager.getJson());
         o.add("buildBlockOptions", buildBlockOptions.getJson());
@@ -164,7 +167,8 @@ public class MiscellaneousApi {
         return new PreparedTransactionData(responsePayload);
     }
 
-    public TransactionPayload signTransaction(SecretManager secretManager, PreparedTransactionData preparedTransactionData) throws ClientException {
+    public TransactionPayload signTransaction(SecretManager secretManager,
+            PreparedTransactionData preparedTransactionData) throws ClientException {
         JsonObject o = new JsonObject();
         o.add("secretManager", secretManager.getJson());
         o.add("preparedTransactionData", preparedTransactionData.toJson());
@@ -216,10 +220,12 @@ public class MiscellaneousApi {
 
         JsonObject responsePayload = (JsonObject) nativeApi.sendCommand(new ClientCommand("signEd25519", o));
 
-        return new Ed25519Signature(responsePayload.get("publicKey").getAsString(), responsePayload.get("signature").getAsString());
+        return new Ed25519Signature(responsePayload.get("publicKey").getAsString(),
+                responsePayload.get("signature").getAsString());
     }
 
-    public Boolean verifyEd25519Signature(Ed25519Signature signature, String message, Ed25519Address address) throws ClientException {
+    public Boolean verifyEd25519Signature(Ed25519Signature signature, String message, Ed25519Address address)
+            throws ClientException {
         JsonObject o = new JsonObject();
         o.add("signature", new Gson().toJsonTree(signature));
         o.addProperty("message", message);
@@ -230,4 +236,3 @@ public class MiscellaneousApi {
         return responsePayload;
     }
 }
-

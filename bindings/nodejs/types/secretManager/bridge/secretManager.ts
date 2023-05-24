@@ -5,8 +5,8 @@ import type {
     IBip32Chain,
 } from '../../client/preparedTransactionData';
 
-export interface __GenerateAddressesMethod__ {
-    name: 'generateAddresses';
+export interface __GenerateEd25519AddressesMethod__ {
+    name: 'generateEd25519Addresses';
     data: {
         options: IGenerateAddressesOptions;
     };

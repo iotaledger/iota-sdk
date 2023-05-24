@@ -24,20 +24,24 @@ This example will try to migrate funds from the first 50 addresses of the seed.
 public class WrongSeedConversionSecretManager {
     public static void main(String[] args) throws ClientException, InitializeClientException {
         // Build the client.
-        Client client = new Client(new ClientConfig().withNodes(new String[]{"https://api.testnet.shimmer.network"}));
+        Client client = new Client(
+                new ClientConfig().withNodes(new String[] { "https://api.testnet.shimmer.network" }));
 
         // The hex seed that is affected by the seed conversion bug.
         String hexSeed = "";
-        org.iota.types.secret.WrongSeedConversionSecretManager wrongSecretManager = new org.iota.types.secret.WrongSeedConversionSecretManager(hexSeed);
+        org.iota.types.secret.WrongSeedConversionSecretManager wrongSecretManager = new org.iota.types.secret.WrongSeedConversionSecretManager(
+                hexSeed);
 
         // Generate the first 50 affected addresses of account index 0.
-        GenerateAddressesOptions addressesOptions = new GenerateAddressesOptions().withAccountIndex(0).withRange(new Range(1, 50));
-        String[] affectedAddresses = client.generateAddresses(wrongSecretManager, addressesOptions);
+        GenerateAddressesOptions addressesOptions = new GenerateAddressesOptions().withAccountIndex(0)
+                .withRange(new Range(1, 50));
+        String[] affectedAddresses = client.generateEd25519Addresses(wrongSecretManager, addressesOptions);
 
         // Get the affected outputs.
         List<OutputId> affectedOutputIds = new ArrayList<>();
         for (String address : affectedAddresses) {
-            OutputId[] outputIds = client.getBasicOutputIds(new NodeIndexerApi.QueryParams().withParam("address", address)).getItems();
+            OutputId[] outputIds = client
+                    .getBasicOutputIds(new NodeIndexerApi.QueryParams().withParam("address", address)).getItems();
             affectedOutputIds.addAll(List.of(outputIds));
         }
 
@@ -48,7 +52,8 @@ public class WrongSeedConversionSecretManager {
         // Prepare the inputs for the transaction.
         List<UtxoInput> inputs = new ArrayList<>();
         int amountToMigrate = 0;
-        for (Map.Entry<Output, OutputMetadata> e : client.getOutputs(affectedOutputIds.toArray(new OutputId[affectedOutputIds.size()]))) {
+        for (Map.Entry<Output, OutputMetadata> e : client
+                .getOutputs(affectedOutputIds.toArray(new OutputId[affectedOutputIds.size()]))) {
             Output output = e.getKey();
             OutputMetadata metadata = e.getValue();
 
@@ -62,11 +67,14 @@ public class WrongSeedConversionSecretManager {
         }
 
         // Build the output for the transaction.
-        String receiverAddress = client.generateAddresses(new SeedSecretManager(hexSeed), new GenerateAddressesOptions().withRange(new Range(0, 1)))[0];
-        BuildBlockOptions.ClientBlockBuilderOutputAddress output = new BuildBlockOptions.ClientBlockBuilderOutputAddress(receiverAddress, Integer.toString(amountToMigrate));
+        String receiverAddress = client.generateEd25519Addresses(new SeedSecretManager(hexSeed),
+                new GenerateAddressesOptions().withRange(new Range(0, 1)))[0];
+        BuildBlockOptions.ClientBlockBuilderOutputAddress output = new BuildBlockOptions.ClientBlockBuilderOutputAddress(
+                receiverAddress, Integer.toString(amountToMigrate));
 
         // Build block.
-        Map.Entry<BlockId, Block> b = client.buildAndPostBlock(wrongSecretManager, new BuildBlockOptions().withInputs(inputs.stream().toArray(UtxoInput[]::new)).withOutput(output));
+        Map.Entry<BlockId, Block> b = client.buildAndPostBlock(wrongSecretManager,
+                new BuildBlockOptions().withInputs(inputs.stream().toArray(UtxoInput[]::new)).withOutput(output));
 
         // Post the block.
         BlockId blockId = client.postBlock(b.getValue());

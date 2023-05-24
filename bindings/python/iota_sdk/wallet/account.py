@@ -220,7 +220,7 @@ class Account:
         """Generate new addresses.
         """
         return self._call_account_method(
-            'generateAddresses', {
+            'generateEd25519Addresses', {
                 'amount': amount,
                 'options': options
             }

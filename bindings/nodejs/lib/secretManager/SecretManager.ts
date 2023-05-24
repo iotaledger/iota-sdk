@@ -25,11 +25,11 @@ export class SecretManager {
     }
 
     /** Generate addresses */
-    async generateAddresses(
+    async generateEd25519Addresses(
         generateAddressesOptions: IGenerateAddressesOptions,
     ): Promise<string[]> {
         const response = await this.methodHandler.callMethod({
-            name: 'generateAddresses',
+            name: 'generateEd25519Addresses',
             data: {
                 options: generateAddressesOptions,
             },

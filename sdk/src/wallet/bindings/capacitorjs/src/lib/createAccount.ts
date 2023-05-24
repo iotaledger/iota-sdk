@@ -381,7 +381,7 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
         async generateAddress(
             options?: GenerateAddressOptions,
         ): Promise<Address> {
-            const addresses = await this.generateAddresses(1, options);
+            const addresses = await this.generateEd25519Addresses(1, options);
             return addresses[0];
         },
 
@@ -391,14 +391,14 @@ export function createAccount(accountMeta: AccountMeta, messageHandler: MessageH
          * @param options Options for address generation.
          * @returns The addresses.
          */
-        async generateAddresses(
+        async generateEd25519Addresses(
             amount: number,
             options?: GenerateAddressOptions,
         ): Promise<Address[]> {
             const response = await messageHandler.callAccountMethod(
                 accountMeta.index,
                 {
-                    name: 'generateAddresses',
+                    name: 'generateEd25519Addresses',
                     data: {
                         amount,
                         options,

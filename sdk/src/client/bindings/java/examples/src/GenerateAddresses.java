@@ -16,7 +16,7 @@ public class GenerateAddresses {
                 "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river");
 
         // Generate public address with default account index and range.
-        String[] defaultAddresses = client.generateAddresses(secretManager, new GenerateAddressesOptions());
+        String[] defaultAddresses = client.generateEd25519Addresses(secretManager, new GenerateAddressesOptions());
 
         // Print the addresses.
         System.out.println("List of generated public addresses:");
@@ -26,7 +26,7 @@ public class GenerateAddresses {
         System.out.println();
 
         // Generate public address with custom account index and range.
-        String[] addresses = client.generateAddresses(secretManager,
+        String[] addresses = client.generateEd25519Addresses(secretManager,
                 new GenerateAddressesOptions().withAccountIndex(0).withRange(new Range(0, 4)));
 
         // Print the addresses.
@@ -37,7 +37,7 @@ public class GenerateAddresses {
         System.out.println();
 
         // Generate internal addresses with custom account index and range.
-        String[] internalAddresses = client.generateAddresses(secretManager,
+        String[] internalAddresses = client.generateEd25519Addresses(secretManager,
                 new GenerateAddressesOptions().withAccountIndex(0).withRange(new Range(0, 4))
                         .withOptions(new GenerateAddressesOptions.GenerateAddressOptions().withInternal(true)));
 
@@ -50,13 +50,13 @@ public class GenerateAddresses {
 
         // Generate addresses with providing all inputs, that way it can also be done
         // offline without a node.
-        String[] offlineGeneratedAddresses = client.generateAddresses(secretManager,
+        String[] offlineGeneratedAddresses = client.generateEd25519Addresses(secretManager,
                 new GenerateAddressesOptions()
                         .withCoinType(4219)
                         .withAccountIndex(0)
                         .withRange(new Range(0, 4))
                         .withOptions(new GenerateAddressesOptions.GenerateAddressOptions().withInternal(false))
-                        // Generating addresses with client.generateAddresses(secretManager, new
+                        // Generating addresses with client.generateEd25519Addresses(secretManager, new
                         // GenerateAddressesOptions()), will by default get the bech32_hrp (Bech32
                         // human readable part) from the node info, generating it "offline" requires
                         // setting it in the generateAddressesOptions

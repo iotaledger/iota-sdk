@@ -14,7 +14,7 @@ async function run() {
         console.log('New address:', address);
 
         // It's also possible to generate multiple addresses
-        // const addresses = await account.generateAddresses(2);
+        // const addresses = await account.generateEd25519Addresses(2);
         // console.log('New addresses:', addresses);
 
         // Use the Faucet to send testnet tokens to your address:
