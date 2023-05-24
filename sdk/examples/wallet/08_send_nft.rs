@@ -4,7 +4,7 @@
 //! In this example we will send an NFT (Non-fungible token).
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_wallet` example!
+//! running the `create_account` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -23,7 +23,6 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Access the wallet we generated with `--example create_wallet`
     let wallet = Wallet::builder()
         .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .finish()

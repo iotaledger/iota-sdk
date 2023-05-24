@@ -4,7 +4,7 @@
 //! In this example we will mint some collection NFTs with issuer feature.
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_wallet` example and  that you have created an Issuer NFT ID
+//! running the `create_account` example and  that you have created an Issuer NFT ID
 //! by running the `mint_issuer_nft` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
@@ -24,8 +24,7 @@ use iota_sdk::{
 };
 
 // !!! Replace with the NFT address from the NFT we minted in `mint_issuer_nft` example !!!
-// const ISSUER_NFT_ID: &str = "0x13c490ac052e575cffd40e170c2d46c6029b8b68cdf0e899b34cde93d2a7b28a";
-const ISSUER_NFT_ID: &str = "0xe009d73b326b5e3c3430734695421d34fc0f820005181c987962d31daf25db82";
+const ISSUER_NFT_ID: &str = "0x13c490ac052e575cffd40e170c2d46c6029b8b68cdf0e899b34cde93d2a7b28a";
 // The NFT collection size
 const NFT_COLLECTION_SIZE: usize = 150;
 // Mint NFTs in chunks since the transaction size is limited
@@ -52,7 +51,6 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Access the wallet we generated with `--example create_wallet`
     let wallet = Wallet::builder()
         .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .finish()

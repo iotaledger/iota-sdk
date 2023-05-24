@@ -8,7 +8,7 @@
 //! * if a voting occurred, stops the voting and destroys the voting output
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_wallet` example and there are funds on the first address
+//! running the `create_account` example and there are funds on the first address
 //! by running the `get_funds` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
@@ -44,7 +44,6 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Access the wallet we generated with `--example create_wallet`
     let wallet = Wallet::builder()
         // TODO: is this needed?
         // .with_client_options(ClientOptions::new().with_ignore_node_health())

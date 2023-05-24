@@ -23,7 +23,6 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Access the wallet we generated with `--example create_wallet`
     let wallet = Wallet::builder()
         .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .finish()
