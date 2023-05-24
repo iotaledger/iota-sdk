@@ -1,11 +1,11 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Wallet, CoinType, initLogger, ConsolidationRequiredWalletEvent } from '@iota/sdk';
+import { Wallet, CoinType, initLogger, ConsolidationRequiredWalletEvent, TransactionProgressWalletEvent, SelectingInputsProgress } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/wallet/00_create_account.js
+// yarn run-example ./how_tos/accounts_and_addresses/events.ts
 
 // This example creates a new database and account
 async function run() {
@@ -45,7 +45,7 @@ async function run() {
         await wallet.listen([], callback);
 
         await wallet.emitTestEvent(new ConsolidationRequiredWalletEvent);
-        await wallet.emitTestEvent({ type: 5, progress: "SelectingInputs" });
+        await wallet.emitTestEvent(new TransactionProgressWalletEvent(new SelectingInputsProgress()));
 
         await wallet.destroy()
     } catch (error) {

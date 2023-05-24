@@ -1,6 +1,6 @@
 import type { AccountId, CreateAccountPayload, SyncOptions } from '../account';
 import type { GenerateAddressOptions } from '../address';
-import type { EventType, WalletEvent } from '../event';
+import type { WalletEventType, WalletEvent } from '../event';
 import type { IAuth, IClientOptions } from '../../client';
 
 export type __BackupMethod__ = {
@@ -25,7 +25,7 @@ export type __ClearStrongholdPasswordMethod__ = {
 
 export type __ClearListenersMethod__ = {
     name: 'clearListeners';
-    data: { eventTypes: EventType[] };
+    data: { eventTypes: WalletEventType[] };
 };
 
 export type __CreateAccountMethod__ = {

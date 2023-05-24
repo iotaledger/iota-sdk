@@ -32,8 +32,6 @@ abstract class WalletEvent {
     }
 }
 
-// TransactionProgress = 5
-
 class ConsolidationRequiredWalletEvent extends WalletEvent {
     constructor() {
         super(WalletEventType.ConsolidationRequired);
@@ -134,13 +132,87 @@ class TransactionInclusionWalletEvent extends WalletEvent {
     }
 }
 
+/**
+ * All of the transaction progress types.
+ */
+enum TransactionProgressType {
+    SelectingInputs = 0,
+    GeneratingRemainderDepositAddress = 1,
+    PreparedTransaction = 2,
+    PreparedTransactionEssenceHash = 3,
+    SigningTransaction = 4,
+    PerformingPow = 5,
+    Broadcasting = 6
+}
+
 class TransactionProgressWalletEvent extends WalletEvent {
-    constructor() {
+    private progress: TransactionProgress;
+
+    constructor(progress: TransactionProgress) {
         super(WalletEventType.TransactionProgress);
+        this.progress = progress;
+    }
+}
+
+abstract class TransactionProgress {
+    private type: TransactionProgressType;
+
+    constructor(type: TransactionProgressType) {
+        this.type = type;
+    }
+
+    /**
+     * The type of the transaction progress.
+     */
+    getProgressType(): TransactionProgressType {
+        return this.type;
+    }
+}
+
+class SelectingInputsProgress extends TransactionProgress {
+    constructor() {
+        super(TransactionProgressType.SelectingInputs);
+    }
+}
+
+class GeneratingRemainderDepositAddressProgress extends TransactionProgress {
+    constructor() {
+        super(TransactionProgressType.GeneratingRemainderDepositAddress);
+    }
+}
+
+class PreparedTransactionProgress extends TransactionProgress {
+    constructor() {
+        super(TransactionProgressType.PreparedTransaction);
+    }
+}
+
+class PreparedTransactionEssenceHashProgress extends TransactionProgress {
+    constructor() {
+        super(TransactionProgressType.PreparedTransactionEssenceHash);
+    }
+}
+
+class SigningTransactionProgress extends TransactionProgress {
+    constructor() {
+        super(TransactionProgressType.SigningTransaction);
+    }
+}
+
+class PerformingPowProgress extends TransactionProgress {
+    constructor() {
+        super(TransactionProgressType.PerformingPow);
+    }
+}
+
+class BroadcastingProgress extends TransactionProgress {
+    constructor() {
+        super(TransactionProgressType.Broadcasting);
     }
 }
 
 export {
+    WalletEventType,
     WalletEvent,
     ConsolidationRequiredWalletEvent,
     LedgerAddressGenerationWalletEvent,
@@ -148,4 +220,12 @@ export {
     SpentOutputWalletEvent,
     TransactionInclusionWalletEvent,
     TransactionProgressWalletEvent,
+    TransactionProgress,
+    SelectingInputsProgress,
+    GeneratingRemainderDepositAddressProgress,
+    PreparedTransactionProgress,
+    PreparedTransactionEssenceHashProgress,
+    SigningTransactionProgress,
+    PerformingPowProgress,
+    BroadcastingProgress
 };

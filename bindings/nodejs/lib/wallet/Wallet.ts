@@ -8,7 +8,7 @@ import type {
     AccountId,
     WalletOptions,
     CreateAccountPayload,
-    EventType,
+    WalletEventType,
     GenerateAddressOptions,
     SyncOptions,
     WalletEvent,
@@ -188,7 +188,7 @@ export class Wallet {
      * Listen to wallet events with a callback. An empty array will listen to all possible events.
      */
     async listen(
-        eventTypes: EventType[],
+        eventTypes: WalletEventType[],
         callback: (error: Error, result: string) => void,
     ): Promise<void> {
         return this.methodHandler.listen(eventTypes, callback);
@@ -197,7 +197,7 @@ export class Wallet {
     /**
      * Clear the callbacks for provided events. An empty array will clear all listeners.
      */
-    async clearListeners(eventTypes: EventType[]): Promise<void> {
+    async clearListeners(eventTypes: WalletEventType[]): Promise<void> {
         const response = await this.methodHandler.callMethod({
             name: 'clearListeners',
             data: { eventTypes },
