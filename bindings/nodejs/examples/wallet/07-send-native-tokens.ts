@@ -16,10 +16,10 @@ const SEND_NATIVE_TOKEN_AMOUNT = '0xA';
 const RECV_ADDRESS =
     'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu';
 
-// In this example we will send an amount below the minimum storage deposit.
+// In this example we will send native tokens.
 //
 // Make sure that `example.stronghold` and `example.walletdb` already exist by
-// running the `01-create-wallet` example!
+// running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
 // yarn run-example ./wallet/07-send-native-tokens.ts

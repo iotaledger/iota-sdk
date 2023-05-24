@@ -6,7 +6,7 @@ import { getUnlockedManager } from './account-manager';
 // In this example we will burn an existing nft output.
 //
 // Make sure that `example.stronghold` and `example.walletdb` already exist by
-// running the `01-create-wallet` example!
+// running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
 // yarn run-example ./wallet/14-burn-nft.ts
