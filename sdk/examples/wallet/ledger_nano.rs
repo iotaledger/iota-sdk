@@ -27,7 +27,7 @@ use iota_sdk::{
 // The account alias used in this example
 const ACCOUNT_ALIAS: &str = "ledger";
 // The wallet database folder created in this example
-const WALLET_DB_PATH: &str = "./example.ledger_nano.walletdb";
+const WALLET_DB_PATH: &str = "./example-ledger_nano-walletdb";
 // The number of addresses to generate
 const NUM_ADDRESSES_TO_GENERATE: u32 = 1;
 // The address to send coins to
