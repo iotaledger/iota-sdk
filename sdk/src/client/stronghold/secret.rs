@@ -124,8 +124,8 @@ impl SecretManage for StrongholdAdapter {
         let internal = options.map(|o| o.internal).unwrap_or_default();
 
         for address_index in address_indexes {
-            let bip_path = [HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index];
-            let chain = Chain::from_u32_hardened(bip_path);
+            let chain = Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index])
+                .join(Chain::from_u32([internal as u32, address_index]));
 
             let derive_location = Location::generic(
                 SECRET_VAULT_PATH,

@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::client::{api::GetAddressesOptions, secret::SecretManager};
+use iota_sdk::client::{api::GetAddressesOptions, constants::ETHER_COIN_TYPE, secret::SecretManager};
 use iota_sdk_bindings_core::{CallMethod, Response, Result, SecretManagerMethod};
 
 #[tokio::test]
@@ -11,7 +11,7 @@ async fn generate_addresses() -> Result<()> {
     )?;
 
     let method = SecretManagerMethod::GenerateAddresses {
-        options: GetAddressesOptions::default(),
+        options: GetAddressesOptions::default().with_range(0..1),
     };
 
     let response = secret_manager.call_method(method).await;
@@ -33,13 +33,15 @@ async fn generate_evm_addresses() -> Result<()> {
     )?;
 
     let method = SecretManagerMethod::GenerateEvmAddresses {
-        options: GetAddressesOptions::default(),
+        options: GetAddressesOptions::default()
+            .with_range(0..1)
+            .with_coin_type(ETHER_COIN_TYPE),
     };
 
     let response = secret_manager.call_method(method).await;
     match response {
         Response::GeneratedEvmAddresses(addresses) => {
-            assert_eq!(addresses[0], "0xbfc69bd510a9a93449d31b99d23dbc55ecf1f499")
+            assert_eq!(addresses[0], "0xcaefde2b487ded55688765964320ff390cd87828")
         }
         _ => panic!("Unexpected response type"),
     };

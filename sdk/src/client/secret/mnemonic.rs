@@ -68,8 +68,8 @@ impl SecretManage for MnemonicSecretManager {
         let mut addresses = Vec::new();
 
         for address_index in address_indexes {
-            let chain =
-                Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index]);
+            let chain = Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index])
+                .join(Chain::from_u32([internal as u32, address_index]));
 
             let PublicKey::Secp256k1Ecdsa(public_key) = self.0.derive(Curve::Secp256k1, &chain)?.secret_key().public_key() else {unreachable!()};
 
