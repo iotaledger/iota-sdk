@@ -331,7 +331,9 @@ impl SecretManagerConfig for SecretManager {
             SecretManagerDto::Stronghold(config) => Self::Stronghold(StrongholdSecretManager::from_config(config)?),
             #[cfg(feature = "ledger_nano")]
             SecretManagerDto::LedgerNano(config) => Self::LedgerNano(LedgerSecretManager::from_config(config)?),
-            SecretManagerDto::HexSeed(hex_seed) => Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed)?),
+            SecretManagerDto::HexSeed(hex_seed) => {
+                Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed.clone())?)
+            }
             SecretManagerDto::Mnemonic(mnemonic) => Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?),
             SecretManagerDto::Placeholder => Self::Placeholder(PlaceholderSecretManager),
         })
