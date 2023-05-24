@@ -19,7 +19,10 @@ use super::{
 use crate::{
     client::{
         constants::HD_WALLET_TYPE,
-        secret::{mnemonic::{Mnemonic, MnemonicLike}, GenerateAddressOptions, SecretManage},
+        secret::{
+            mnemonic::{Mnemonic, MnemonicLike},
+            GenerateAddressOptions, SecretManage,
+        },
         stronghold::Error,
     },
     types::block::{

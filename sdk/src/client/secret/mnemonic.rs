@@ -11,7 +11,7 @@ use crypto::{
     keys::slip10::{Chain, Curve, Seed},
 };
 use serde::{Deserialize, Serialize};
-use zeroize::{ZeroizeOnDrop, Zeroize};
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
