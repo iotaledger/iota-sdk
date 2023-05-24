@@ -5,9 +5,7 @@
 
 use crypto::keys::slip10::{Chain, Segment};
 use serde::{Deserialize, Serialize};
-use zeroize::Zeroize;
-#[cfg(feature = "stronghold")]
-use zeroize::ZeroizeOnDrop;
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use crate::{
     client::Result,
@@ -34,10 +32,8 @@ pub struct StrongholdDto {
     pub snapshot_path: String,
 }
 
-/// Represents the Stronghold password.
+/// A password wrapper that takes care of zeroing the memory when being dropped.
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Zeroize, ZeroizeOnDrop, derive_more::From)]
-#[cfg(feature = "stronghold")]
-#[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
 pub struct Password(String);
 
 impl Password {
