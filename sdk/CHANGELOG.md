@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `OutputMetadata::set_spent` method;
 - `ignore_if_bech32_mismatch` parameter to `Wallet::restore_backup()`;
 - `OutputWithMetadata::{into_output, into_metadata}` methods;
+- Storage and Backup migration;
+- `types::block::Error::InvalidFoundryZeroSerialNumber` variant;
+- Added `Hrp` type to represent a valid bech32 human-readable part;
 
 ### Changed
 
@@ -47,11 +50,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All `Node` related errors have been moved from the client error to a newly created `client::node_api::Error`;
 - MQTT connections to a node using https will now use wss/tls with native certificates;
 - `ClientBuilder::finish` is now async;
+- Features and UnlockConditions that take an `Address` now take `impl Into<Address>`;
+- Functions that accepted a string bech32 address now accept a `Bech32Address`;
+- Functions that accepted a string bech32 HRP now accept an `Hrp`;
 - `Account::read` and `write` now accessible via `details` and `details_mut`;
 - `Wallet::emit_test_event` no longer returns a `Result`;
 - `Client`, `Wallet`, and `Account` fns updated to reflect internal reorganization;
 - `AccountBuilder::new` now takes a wallet;
 - `InputSigningDataDto::chain` is now `Vec<u32>` instead of `Chain`;
+- Most `StrongholdAdapter` fns no longer require a mutable reference;
+- `StorageProvider` fns no longer require a mutable reference;
+- `Account::burn_native_tokens()`, `Account::burn_nft()`, `Account::destroy_foundry()`, `Account::destroy_alias()` merged into `Account::burn()`;
+- `Account::burn_native_tokens()`, `Account::burn_nft()`, `Account::destroy_foundry()`, `Account::destroy_alias()` merged into `Account::burn()`
+- `ValidationContext::{input_native_tokens, output_native_tokens}` from HashMap to BTreeMap;
+- Rename `AccountInner::get_incoming_transaction_data` to `get_incoming_transaction`;
+- `AccountInner::{incoming_transactions, transactions, pending_transactions}` don't return a `Result` anymore;
+- `AccountInner::incoming_transactions` returns a `Vec` instead of a `HashMap`;
+- `Address::try_from_bech32_with_hrp` refactored to `try_from_bech32`;
+- `{MetadataFeature, TagFeature}::new` take an `impl Into<Vec<u8>>` param;
 
 ### Removed
 
@@ -59,6 +75,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `client_without_tls` feature in favor of separate `client` and `tls` features;
 - `IncreaseNativeTokenSupplyOptions`;
 - `HARDENED` const;
+- `AliasIdDto`, `NftIdDto` and `TokenIdDto`;
+- `U256Dto`, `SendAmountParamsDto`, `AddressWithUnspentOutputsDto`, `RequiredStorageDepositDto` and `BaseCoinBalanceDto`;
+
+### Fixed
+
+- Storage records decryption;
+
+### Fixed
+
+- Validation for transitions in the input selection;
+- Automatically increase foundry counter of alias outputs;
+- Validate that foundry outputs can't have serial number `0`;
 
 ## 0.3.0 - 2023-05-02
 

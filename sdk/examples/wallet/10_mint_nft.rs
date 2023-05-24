@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
     let nfts_before = balance.nfts();
 
     // We send from the first address in the account.
-    let sender_address = account.addresses().await?[0].address().clone();
+    let sender_address = *account.addresses().await?[0].address();
 
     // Set the stronghold password
     wallet
@@ -59,11 +59,11 @@ async fn main() -> Result<()> {
 
     // Build an NFT using `MintNftParams` and use the `mint_nfts` API
     let nft_params = vec![MintNftParams {
-        address: Some(NFT1_OWNER_ADDRESS.to_string()),
-        sender: Some(sender_address.to_string()),
+        address: Some(NFT1_OWNER_ADDRESS.parse()?),
+        sender: Some(sender_address),
         metadata: Some(NFT1_METADATA.as_bytes().to_vec()),
         tag: Some(NFT1_TAG.as_bytes().to_vec()),
-        issuer: Some(sender_address.to_string()),
+        issuer: Some(sender_address),
         immutable_metadata: Some(NFT1_IMMUTABLE_METADATA.as_bytes().to_vec()),
     }];
 

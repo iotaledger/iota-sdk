@@ -83,9 +83,8 @@ impl Account {
         .to_bytes()?;
 
         let new_output = BasicOutputBuilder::from(output)
-            // TODO maybe replace ?
             .with_features(vec![
-                Feature::Tag(TagFeature::new(PARTICIPATION_TAG.as_bytes().to_vec())?),
+                Feature::Tag(TagFeature::new(PARTICIPATION_TAG)?),
                 Feature::Metadata(MetadataFeature::new(participation_bytes.clone())?),
             ])
             .finish_output(self.client().get_token_supply().await?)?;
@@ -153,9 +152,8 @@ impl Account {
         .to_bytes()?;
 
         let new_output = BasicOutputBuilder::from(output)
-            // TODO maybe replace ?
             .with_features(vec![
-                Feature::Tag(TagFeature::new(PARTICIPATION_TAG.as_bytes().to_vec())?),
+                Feature::Tag(TagFeature::new(PARTICIPATION_TAG)?),
                 Feature::Metadata(MetadataFeature::new(participation_bytes.clone())?),
             ])
             .finish_output(self.client().get_token_supply().await?)?;

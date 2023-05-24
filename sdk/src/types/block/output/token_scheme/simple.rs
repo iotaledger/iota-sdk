@@ -114,7 +114,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{dto::U256Dto, Error};
+    use crate::types::block::Error;
 
     /// Describes a foundry output that is controlled by an alias.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -123,11 +123,11 @@ pub mod dto {
         #[serde(rename = "type")]
         pub kind: u8,
         // Amount of tokens minted by a foundry.
-        pub minted_tokens: U256Dto,
+        pub minted_tokens: U256,
         // Amount of tokens melted by a foundry.
-        pub melted_tokens: U256Dto,
+        pub melted_tokens: U256,
         // Maximum supply of tokens controlled by a foundry.
-        pub maximum_supply: U256Dto,
+        pub maximum_supply: U256,
     }
 
     impl From<&SimpleTokenScheme> for SimpleTokenSchemeDto {

@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Setup Stronghold secret_manager
-    let mut secret_manager = StrongholdSecretManager::builder()
+    let secret_manager = StrongholdSecretManager::builder()
         .password(&var("STRONGHOLD_PASSWORD").unwrap())
         .build(STRONGHOLD_SNAPSHOT_PATH)?;
 
@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
     let protocol_parameters = ProtocolParameters::new(
         2,
         String::from("testnet"),
-        String::from("smr"),
+        "smr",
         1500,
         15,
         RentStructureBuilder::new()

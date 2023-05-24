@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
     println!("Sending '{}' coin(s) to '{}'...", SEND_MICRO_AMOUNT, RECV_ADDRESS);
 
     // Send a micro transaction
-    let outputs = vec![SendAmountParams::new(RECV_ADDRESS.to_string(), SEND_MICRO_AMOUNT)];
+    let outputs = vec![SendAmountParams::new(RECV_ADDRESS.parse()?, SEND_MICRO_AMOUNT)];
 
     let transaction = account
         .send_amount(

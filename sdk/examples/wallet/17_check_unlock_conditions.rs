@@ -35,14 +35,14 @@ async fn main() -> Result<()> {
         .await?;
     let account = wallet.get_account(&var("ACCOUNT_ALIAS_1").unwrap()).await?;
 
-    let account_addresses: Vec<Bech32Address> = account
+    let account_addresses = account
         .addresses()
         .await?
         .into_iter()
-        .map(|address| address.address().clone())
-        .collect();
+        .map(|a| *a.address())
+        .collect::<Vec<Bech32Address>>();
 
-    println!("Account addresses: {:#?}", account_addresses);
+    println!("ADDRESSES:\n{:#?}", account_addresses);
 
     let output = BasicOutputBuilder::new_with_amount(AMOUNT)
         .add_unlock_condition(AddressUnlockCondition::new(*account_addresses[0].as_ref()))

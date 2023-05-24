@@ -19,6 +19,7 @@ use iota_sdk::{
         request_funds_from_faucet,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
+    types::block::address::Bech32Address,
     wallet::{account::types::AccountAddress, Account, ClientOptions, Result, Wallet},
 };
 use tokio::task::JoinSet;
@@ -59,7 +60,7 @@ async fn main() -> Result<()> {
     sync_and_print_balance(&account1).await?;
     sync_and_print_balance(&account2).await?;
 
-    may_request_funds(&account1, &account1_send_address.address().to_string()).await?;
+    may_request_funds(&account1, account1_send_address.address()).await?;
 
     let mut tasks: JoinSet<Result<(usize, usize)>> = JoinSet::new();
     let num_threads_per_address = num_cpus::get().min(MAX_CPUS_TO_USE);
@@ -76,10 +77,7 @@ async fn main() -> Result<()> {
 
                 let transaction = if (address_index + thread_index) % 2 == 0 {
                     // ALTERNATIVE 1: using `account.send_amount``
-                    let outputs = vec![iota_sdk::wallet::SendAmountParams::new(
-                        recv_address.to_string(),
-                        amount,
-                    )];
+                    let outputs = vec![iota_sdk::wallet::SendAmountParams::new(*recv_address, amount)];
                     account1_clone.send_amount(outputs, None).await?
                 } else {
                     // ALTERNATIVE 2: using `account.send`
@@ -87,7 +85,7 @@ async fn main() -> Result<()> {
                         iota_sdk::types::block::output::BasicOutputBuilder::new_with_amount(amount)
                             .add_unlock_condition(
                                 iota_sdk::types::block::output::unlock_condition::AddressUnlockCondition::new(
-                                    *recv_address.as_ref(),
+                                    recv_address,
                                 ),
                             )
                             .finish_output(account1_clone.client().get_token_supply().await?)?,
@@ -160,7 +158,7 @@ async fn generate_addresses(account: &Account) -> Result<Vec<AccountAddress>> {
     account.addresses().await
 }
 
-async fn may_request_funds(account: &Account, address: &str) -> Result<()> {
+async fn may_request_funds(account: &Account, address: &Bech32Address) -> Result<()> {
     let balance = account.sync(None).await?;
     let funds_before = balance.base_coin().available();
     println!("Current available funds: {funds_before}");

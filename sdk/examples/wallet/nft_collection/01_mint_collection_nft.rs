@@ -16,7 +16,7 @@ use std::{env::var, str::FromStr};
 
 use iota_sdk::{
     types::block::{
-        address::{Address, NftAddress},
+        address::{Bech32Address, NftAddress},
         output::NftId,
         payload::transaction::TransactionId,
     },
@@ -73,9 +73,9 @@ async fn main() -> Result<()> {
     let nft_mint_params = std::iter::repeat_with(|| {
         let params = MintNftParams {
             address: None,
-            // immutable_metadata: Some(get_immutable_metadata(index, issuer_nft_id).as_bytes().to_vec()),
             immutable_metadata: Some(get_immutable_metadata(index, issuer_nft_id).as_bytes().to_vec()),
-            issuer: Some(Address::Nft(NftAddress::new(issuer_nft_id)).to_bech32(bech32_hrp.clone())),
+            // The NFT address from the NFT we minted in mint_issuer_nft example
+            issuer: Some(Bech32Address::new(bech32_hrp, NftAddress::new(issuer_nft_id))),
             metadata: None,
             sender: None,
             tag: None,

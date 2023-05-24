@@ -3,8 +3,8 @@ import type {
     ITransactionEssence,
     HexEncodedString,
     IEd25519Signature,
-    IEd25519Address,
 } from '@iota/types';
+import { Ed25519Address } from '../../../lib/types';
 
 export interface __GenerateMnemonicMethod__ {
     name: 'generateMnemonic';
@@ -112,7 +112,7 @@ export interface __VerifyEd25519SignatureMethod__ {
     data: {
         signature: IEd25519Signature;
         message: HexEncodedString;
-        address: IEd25519Address;
+        address: Ed25519Address;
     };
 }
 

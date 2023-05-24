@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let outputs = vec![SendAmountParams::new(RECV_ADDRESS.to_string(), SEND_AMOUNT)];
+    let outputs = vec![SendAmountParams::new(RECV_ADDRESS.parse()?, SEND_AMOUNT)];
 
     // Recovers addresses from example `0_address_generation`.
     let addresses = read_addresses_from_file().await?;

@@ -8,7 +8,7 @@ use serde::{
     Serialize,
 };
 
-use crate::types::block::payload::transaction::TransactionId;
+use crate::types::block::{address::Bech32Address, payload::transaction::TransactionId};
 
 /// The wallet error type.
 #[derive(Debug, thiserror::Error)]
@@ -21,7 +21,7 @@ pub enum Error {
     AccountNotFound(String),
     /// Address not found in account
     #[error("address {0} not found in account")]
-    AddressNotFoundInAccount(String),
+    AddressNotFoundInAccount(Bech32Address),
     /// Errors during backup creation or restoring
     #[error("backup failed {0}")]
     Backup(&'static str),
@@ -67,6 +67,9 @@ pub enum Error {
     /// serde_json error.
     #[error("`{0}`")]
     Json(#[from] serde_json::error::Error),
+    /// Error migrating storage or backup
+    #[error("migration failed {0}")]
+    Migration(String),
     /// Minting failed
     #[error("minting failed {0}")]
     MintingFailed(String),

@@ -68,9 +68,9 @@ async fn main() -> Result<()> {
     for addresses_chunk in addresses.chunks(2).map(|chunk| chunk.to_vec()) {
         let outputs_per_transaction = addresses_chunk
             .into_iter()
-            .map(|address| {
+            .map(|a| {
                 BasicOutputBuilder::new_with_amount(SEND_AMOUNT)
-                    .add_unlock_condition(AddressUnlockCondition::new(*address.address().as_ref()))
+                    .add_unlock_condition(AddressUnlockCondition::new(a.address()))
                     .finish_output(token_supply)
                     .unwrap()
             })

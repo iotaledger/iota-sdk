@@ -9,7 +9,7 @@ use iota_sdk::{
     types::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
-            address::Address,
+            address::{Bech32Address, Bech32AddressLike},
             output::{
                 unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken, NftId,
                 Output, OutputId, TokenId,
@@ -34,6 +34,7 @@ pub struct AccountCli {
 }
 
 #[derive(Debug, Subcommand)]
+#[allow(clippy::large_enum_variant)]
 pub enum AccountCommand {
     /// List the account addresses.
     Addresses,
@@ -85,7 +86,7 @@ pub enum AccountCommand {
     /// Request funds from the faucet.
     Faucet {
         /// Address the faucet sends the funds to, defaults to the latest address.
-        address: Option<String>,
+        address: Option<Bech32Address>,
         /// URL of the faucet, default to <https://faucet.testnet.shimmer.network/api/enqueue>.
         url: Option<String>,
     },
@@ -113,7 +114,7 @@ pub enum AccountCommand {
     /// IOTA NFT Standard - TIP27: <https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md>.
     MintNft {
         /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
-        address: Option<String>,
+        address: Option<Bech32Address>,
         #[arg(long, group = "immutable_metadata")]
         /// Immutable metadata to attach to the NFT, e.g. --immutable-metadata-hex 0xdeadbeef.
         immutable_metadata_hex: Option<String>,
@@ -131,10 +132,10 @@ pub enum AccountCommand {
         tag: Option<String>,
         /// Sender feature to attach to the NFT, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         #[arg(long)]
-        sender: Option<String>,
+        sender: Option<Bech32Address>,
         /// Issuer feature to attach to the NFT, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         #[arg(long)]
-        issuer: Option<String>,
+        issuer: Option<Bech32Address>,
     },
     /// Generate a new address.
     NewAddress,
@@ -148,14 +149,14 @@ pub enum AccountCommand {
     /// Send an amount.
     Send {
         /// Address to send funds to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
-        address: String,
+        address: Bech32Address,
         /// Amount to send, e.g. 1000000.
         amount: u64,
         /// Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
         /// given the provided amount. If a storage deposit is needed and a return address is not provided, it will
         /// default to the first address of the account.
         #[arg(long)]
-        return_address: Option<String>,
+        return_address: Option<Bech32Address>,
         /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
         /// receiver already. The expiration will only be used if one is necessary given the provided amount. If an
         /// expiration is needed but not provided, it will default to one day.
@@ -170,7 +171,7 @@ pub enum AccountCommand {
     /// This will create an output with an expiration and storage deposit return unlock condition.
     SendNativeToken {
         /// Address to send the native tokens to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
-        address: String,
+        address: Bech32Address,
         /// Token ID to be sent, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
         token_id: String,
         /// Amount to send, e.g. 1000000.
@@ -181,7 +182,7 @@ pub enum AccountCommand {
     /// Send an NFT.
     SendNft {
         /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
-        address: String,
+        address: Bech32Address,
         /// NFT ID to be sent, e.g. 0xecadf10e6545aa82da4df2dfd2a496b457c8850d2cab49b7464cb273d3dffb07.
         nft_id: String,
     },
@@ -258,9 +259,11 @@ pub async fn burn_native_token_command(account: &Account, token_id: String, amou
     println_log_info!("Burning native token {token_id} {amount}.");
 
     let transaction = account
-        .burn_native_token(
-            TokenId::from_str(&token_id)?,
-            U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+        .burn(
+            NativeToken::new(
+                TokenId::from_str(&token_id)?,
+                U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+            )?,
             None,
         )
         .await?;
@@ -278,7 +281,7 @@ pub async fn burn_native_token_command(account: &Account, token_id: String, amou
 pub async fn burn_nft_command(account: &Account, nft_id: String) -> Result<(), Error> {
     println_log_info!("Burning nft {nft_id}.");
 
-    let transaction = account.burn_nft(NftId::from_str(&nft_id)?, None).await?;
+    let transaction = account.burn(NftId::from_str(&nft_id)?, None).await?;
 
     println_log_info!(
         "Burning transaction sent:\n{:?}\n{:?}",
@@ -433,7 +436,7 @@ pub async fn decrease_native_token_command(account: &Account, token_id: String, 
 pub async fn destroy_alias_command(account: &Account, alias_id: String) -> Result<(), Error> {
     println_log_info!("Destroying alias {alias_id}.");
 
-    let transaction = account.destroy_alias(AliasId::from_str(&alias_id)?, None).await?;
+    let transaction = account.burn(AliasId::from_str(&alias_id)?, None).await?;
 
     println_log_info!(
         "Destroying alias transaction sent:\n{:?}\n{:?}",
@@ -448,7 +451,7 @@ pub async fn destroy_alias_command(account: &Account, alias_id: String) -> Resul
 pub async fn destroy_foundry_command(account: &Account, foundry_id: String) -> Result<(), Error> {
     println_log_info!("Destroying foundry {foundry_id}.");
 
-    let transaction = account.destroy_foundry(FoundryId::from_str(&foundry_id)?, None).await?;
+    let transaction = account.burn(FoundryId::from_str(&foundry_id)?, None).await?;
 
     println_log_info!(
         "Destroying foundry transaction sent:\n{:?}\n{:?}",
@@ -460,12 +463,16 @@ pub async fn destroy_foundry_command(account: &Account, foundry_id: String) -> R
 }
 
 // `faucet` command
-pub async fn faucet_command(account: &Account, address: Option<String>, url: Option<String>) -> Result<(), Error> {
+pub async fn faucet_command(
+    account: &Account,
+    address: Option<Bech32Address>,
+    url: Option<String>,
+) -> Result<(), Error> {
     let address = if let Some(address) = address {
         address
     } else {
         match account.addresses().await?.last() {
-            Some(address) => address.address().to_string(),
+            Some(address) => *address.address(),
             None => return Err(Error::NoAddressForFaucet),
         }
     };
@@ -540,12 +547,12 @@ pub async fn mint_native_token_command(
 // `mint-nft` command
 pub async fn mint_nft_command(
     account: &Account,
-    address: Option<String>,
+    address: Option<Bech32Address>,
     immutable_metadata: Option<Vec<u8>>,
     metadata: Option<Vec<u8>>,
     tag: Option<String>,
-    sender: Option<String>,
-    issuer: Option<String>,
+    sender: Option<Bech32Address>,
+    issuer: Option<Bech32Address>,
 ) -> Result<(), Error> {
     let tag = if let Some(hex) = tag {
         Some(prefix_hex::decode(hex).map_err(|e| Error::Miscellaneous(e.to_string()))?)
@@ -610,15 +617,15 @@ pub async fn outputs_command(account: &Account) -> Result<(), Error> {
 // `send` command
 pub async fn send_command(
     account: &Account,
-    address: String,
+    address: impl Bech32AddressLike,
     amount: u64,
-    return_address: Option<String>,
+    return_address: Option<impl Bech32AddressLike>,
     expiration: Option<u32>,
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
     let outputs = vec![
-        SendAmountParams::new(address, amount)
-            .with_return_address(return_address)
+        SendAmountParams::new(address.to_bech32()?, amount)
+            .with_return_address(return_address.map(Bech32AddressLike::to_bech32).transpose()?)
             .with_expiration(expiration),
     ];
     let transaction = account
@@ -643,18 +650,18 @@ pub async fn send_command(
 // `send-native-token` command
 pub async fn send_native_token_command(
     account: &Account,
-    address: String,
+    address: impl Bech32AddressLike,
     token_id: String,
     amount: String,
     gift_storage_deposit: Option<bool>,
 ) -> Result<(), Error> {
+    let address = address.to_bech32()?;
     let transaction = if gift_storage_deposit.unwrap_or(false) {
         // Send native tokens together with the required storage deposit
         let rent_structure = account.client().get_rent_structure().await?;
         let token_supply = account.client().get_token_supply().await?;
 
-        let (bech32_hrp, address) = Address::try_from_bech32_with_hrp(address)?;
-        account.client().bech32_hrp_matches(&bech32_hrp).await?;
+        account.client().bech32_hrp_matches(address.hrp()).await?;
 
         let outputs = vec![
             BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
@@ -675,7 +682,8 @@ pub async fn send_native_token_command(
                 TokenId::from_str(&token_id)?,
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
             )],
-            ..Default::default()
+            return_address: Default::default(),
+            expiration: Default::default(),
         }];
         account.send_native_tokens(outputs, None).await?
     };
@@ -690,9 +698,9 @@ pub async fn send_native_token_command(
 }
 
 // `send-nft` command
-pub async fn send_nft_command(account: &Account, address: String, nft_id: String) -> Result<(), Error> {
+pub async fn send_nft_command(account: &Account, address: impl Bech32AddressLike, nft_id: String) -> Result<(), Error> {
     let outputs = vec![SendNftParams {
-        address,
+        address: address.to_bech32()?,
         nft_id: NftId::from_str(&nft_id)?,
     }];
     let transaction = account.send_nft(outputs, None).await?;
@@ -720,7 +728,7 @@ pub async fn transaction_command(account: &Account, transaction_id_str: &str) ->
     let transaction_id = TransactionId::from_str(transaction_id_str)?;
     let maybe_transaction = account
         .transactions()
-        .await?
+        .await
         .into_iter()
         .find(|tx| tx.transaction_id == transaction_id);
 
@@ -735,7 +743,7 @@ pub async fn transaction_command(account: &Account, transaction_id_str: &str) ->
 
 /// `transactions` command
 pub async fn transactions_command(account: &Account, show_details: bool) -> Result<(), Error> {
-    let mut transactions = account.transactions().await?;
+    let mut transactions = account.transactions().await;
     transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
 
     if transactions.is_empty() {

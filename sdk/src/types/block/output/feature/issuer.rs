@@ -16,8 +16,8 @@ impl IssuerFeature {
 
     /// Creates a new [`IssuerFeature`].
     #[inline(always)]
-    pub fn new(address: Address) -> Self {
-        Self(address)
+    pub fn new(address: impl Into<Address>) -> Self {
+        Self(address.into())
     }
 
     /// Returns the issuer [`Address`].

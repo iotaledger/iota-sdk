@@ -11,7 +11,7 @@ use iota_sdk::{
         message_interface::{self, Message, Response},
         secret::SecretManagerDto,
     },
-    types::block::{block::dto::BlockDto, payload::transaction::dto::TransactionEssenceDto, BlockId},
+    types::block::{address::Hrp, block::dto::BlockDto, payload::transaction::dto::TransactionEssenceDto, BlockId},
 };
 
 #[tokio::test]
@@ -34,7 +34,7 @@ async fn generate_addresses() {
         coin_type: None,
         account_index: None,
         range: Some(0..10),
-        bech32_hrp: Some("atoi".to_string()),
+        bech32_hrp: Some(Hrp::from_str_unchecked("atoi")),
         options: None,
     };
     let message = Message::GenerateAddresses {
@@ -82,7 +82,7 @@ async fn build_and_post_block() {
         coin_type: None,
         account_index: None,
         range: Some(0..10),
-        bech32_hrp: Some("atoi".to_string()),
+        bech32_hrp: Some(Hrp::from_str_unchecked("atoi")),
         options: None,
     };
 
@@ -195,7 +195,7 @@ async fn stronghold() {
         coin_type: None,
         account_index: None,
         range: Some(0..1),
-        bech32_hrp: Some("rms".to_string()),
+        bech32_hrp: Some(Hrp::from_str_unchecked("rms")),
         options: None,
     };
     let message = Message::GenerateAddresses {
@@ -208,7 +208,7 @@ async fn stronghold() {
         Response::GeneratedAddresses(addresses) => {
             assert_eq!(
                 addresses[0],
-                "rms1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6v3ea5a".to_string(),
+                "rms1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6v3ea5a",
             );
         }
         response_type => panic!("Unexpected response type: {response_type:?}"),

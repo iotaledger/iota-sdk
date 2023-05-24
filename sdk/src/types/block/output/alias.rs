@@ -3,6 +3,7 @@
 
 use alloc::{collections::BTreeSet, vec::Vec};
 
+use hashbrown::HashMap;
 use packable::{
     bounded::BoundedU16,
     error::{UnpackError, UnpackErrorExt},
@@ -493,27 +494,13 @@ impl AliasOutput {
 
         Ok(())
     }
-}
 
-impl StateTransitionVerifier for AliasOutput {
-    fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !next_state.alias_id.is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
-        }
-
-        if let Some(issuer) = next_state.immutable_features().issuer() {
-            if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(StateTransitionError::IssuerNotUnlocked);
-            }
-        }
-
-        Ok(())
-    }
-
-    fn transition(
+    // Transition, just without full ValidationContext
+    pub(crate) fn transition_inner(
         current_state: &Self,
         next_state: &Self,
-        context: &ValidationContext<'_>,
+        input_chains: &HashMap<ChainId, &Output>,
+        outputs: &[Output],
     ) -> Result<(), StateTransitionError> {
         if current_state.immutable_features != next_state.immutable_features {
             return Err(StateTransitionError::MutatedImmutableField);
@@ -528,10 +515,10 @@ impl StateTransitionVerifier for AliasOutput {
                 return Err(StateTransitionError::MutatedFieldWithoutRights);
             }
 
-            let created_foundries = context.essence.outputs().iter().filter_map(|output| {
+            let created_foundries = outputs.iter().filter_map(|output| {
                 if let Output::Foundry(foundry) = output {
                     if foundry.alias_address().alias_id() == &next_state.alias_id
-                        && !context.input_chains.contains_key(&foundry.chain_id())
+                        && !input_chains.contains_key(&foundry.chain_id())
                     {
                         Some(foundry)
                     } else {
@@ -572,6 +559,35 @@ impl StateTransitionVerifier for AliasOutput {
         }
 
         Ok(())
+    }
+}
+
+impl StateTransitionVerifier for AliasOutput {
+    fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+        if !next_state.alias_id.is_null() {
+            return Err(StateTransitionError::NonZeroCreatedId);
+        }
+
+        if let Some(issuer) = next_state.immutable_features().issuer() {
+            if !context.unlocked_addresses.contains(issuer.address()) {
+                return Err(StateTransitionError::IssuerNotUnlocked);
+            }
+        }
+
+        Ok(())
+    }
+
+    fn transition(
+        current_state: &Self,
+        next_state: &Self,
+        context: &ValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
+        Self::transition_inner(
+            current_state,
+            next_state,
+            &context.input_chains,
+            context.essence.outputs(),
+        )
     }
 
     fn destruction(_current_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
@@ -692,8 +708,8 @@ pub mod dto {
     use super::*;
     use crate::types::block::{
         output::{
-            alias_id::dto::AliasIdDto, dto::OutputBuilderAmountDto, feature::dto::FeatureDto,
-            native_token::dto::NativeTokenDto, unlock_condition::dto::UnlockConditionDto,
+            dto::OutputBuilderAmountDto, feature::dto::FeatureDto, native_token::dto::NativeTokenDto,
+            unlock_condition::dto::UnlockConditionDto,
         },
         Error,
     };
@@ -710,7 +726,7 @@ pub mod dto {
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeTokenDto>,
         // Unique identifier of the alias.
-        pub alias_id: AliasIdDto,
+        pub alias_id: AliasId,
         // A counter that must increase by 1 every time the alias is state transitioned.
         pub state_index: u32,
         // Metadata that can only be changed by the state controller.
@@ -734,7 +750,7 @@ pub mod dto {
                 kind: AliasOutput::KIND,
                 amount: value.amount().to_string(),
                 native_tokens: value.native_tokens().iter().map(Into::into).collect::<_>(),
-                alias_id: AliasIdDto(value.alias_id().to_string()),
+                alias_id: *value.alias_id(),
                 state_index: value.state_index(),
                 state_metadata: prefix_hex::encode(value.state_metadata()),
                 foundry_counter: value.foundry_counter(),
@@ -749,7 +765,7 @@ pub mod dto {
         fn _try_from_dto(value: &AliasOutputDto) -> Result<AliasOutputBuilder, Error> {
             let mut builder = AliasOutputBuilder::new_with_amount(
                 value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                (&value.alias_id).try_into()?,
+                value.alias_id,
             );
 
             builder = builder.with_state_index(value.state_index);
@@ -801,7 +817,7 @@ pub mod dto {
         pub fn try_from_dtos(
             amount: OutputBuilderAmountDto,
             native_tokens: Option<Vec<NativeTokenDto>>,
-            alias_id: &AliasIdDto,
+            alias_id: &AliasId,
             state_index: Option<u32>,
             state_metadata: Option<Vec<u8>>,
             foundry_counter: Option<u32>,
@@ -810,15 +826,13 @@ pub mod dto {
             immutable_features: Option<Vec<FeatureDto>>,
             token_supply: u64,
         ) -> Result<Self, Error> {
-            let alias_id = AliasId::try_from(alias_id)?;
-
             let mut builder = match amount {
                 OutputBuilderAmountDto::Amount(amount) => AliasOutputBuilder::new_with_amount(
                     amount.parse().map_err(|_| Error::InvalidField("amount"))?,
-                    alias_id,
+                    *alias_id,
                 ),
                 OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
-                    AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, alias_id)
+                    AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *alias_id)
                 }
             };
 
@@ -984,7 +998,7 @@ mod tests {
         let output_split = AliasOutput::try_from_dtos(
             OutputBuilderAmountDto::Amount(output.amount().to_string()),
             Some(output.native_tokens().iter().map(Into::into).collect()),
-            &output.alias_id().into(),
+            output.alias_id(),
             output.state_index().into(),
             output.state_metadata().to_owned().into(),
             output.foundry_counter().into(),
@@ -1005,7 +1019,7 @@ mod tests {
             let output_split = AliasOutput::try_from_dtos(
                 (&builder.amount).into(),
                 Some(builder.native_tokens.iter().map(Into::into).collect()),
-                &(&builder.alias_id).into(),
+                &builder.alias_id,
                 builder.state_index,
                 builder.state_metadata.to_owned().into(),
                 builder.foundry_counter,

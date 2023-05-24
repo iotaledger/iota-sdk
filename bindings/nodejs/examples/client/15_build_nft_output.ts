@@ -16,7 +16,7 @@ import {
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/client/15_build_nft_output.js
+// yarn run-example ./client/15_build_nft_output.ts
 
 // Build an nft output
 async function run() {

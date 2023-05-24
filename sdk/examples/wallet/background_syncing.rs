@@ -55,8 +55,7 @@ async fn main() -> Result<()> {
     println!("Started background syncing");
 
     println!("Requesting funds from faucet...");
-    let faucet_response =
-        request_funds_from_faucet(&var("FAUCET_URL").unwrap(), &addresses[0].address().to_string()).await?;
+    let faucet_response = request_funds_from_faucet(&var("FAUCET_URL").unwrap(), addresses[0].address()).await?;
     println!("Response from faucet: {}", faucet_response.trim_end());
 
     println!("Waiting for funds (timeout=60s)...");

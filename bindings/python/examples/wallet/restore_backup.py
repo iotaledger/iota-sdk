@@ -19,8 +19,7 @@ wallet = Wallet('./restore-backup-database', client_options,
                     coin_type, 'Placeholder')
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
-    print(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
-    sys.exit(1)
+    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 wallet.restore_backup("backup.stronghold", os.environ['STRONGHOLD_PASSWORD'])
 

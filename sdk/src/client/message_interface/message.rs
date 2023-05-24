@@ -17,9 +17,9 @@ use crate::{
         secret::SecretManagerDto,
     },
     types::block::{
-        address::{dto::Ed25519AddressDto, AliasAddress},
+        address::{dto::Ed25519AddressDto, AliasAddress, Bech32Address, Hrp},
         output::{
-            dto::{AliasIdDto, NativeTokenDto, NftIdDto, TokenSchemeDto},
+            dto::{NativeTokenDto, TokenSchemeDto},
             feature::dto::FeatureDto,
             unlock_condition::dto::UnlockConditionDto,
             AliasId, FoundryId, NftId, OutputId,
@@ -49,7 +49,7 @@ pub enum Message {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeTokenDto>>,
-        alias_id: AliasIdDto,
+        alias_id: AliasId,
         state_index: Option<u32>,
         state_metadata: Option<String>,
         foundry_counter: Option<u32>,
@@ -90,7 +90,7 @@ pub enum Message {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeTokenDto>>,
-        nft_id: NftIdDto,
+        nft_id: NftId,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,
         immutable_features: Option<Vec<FeatureDto>>,
@@ -426,7 +426,7 @@ pub enum Message {
     /// Function to find inputs from addresses for a provided amount (useful for offline signing)
     FindInputs {
         /// Addresses
-        addresses: Vec<String>,
+        addresses: Vec<Bech32Address>,
         /// Amount
         amount: u64,
     },
@@ -437,7 +437,7 @@ pub enum Message {
         /// Output IDs
         output_ids: Vec<OutputId>,
         /// Addresses
-        addresses: Vec<String>,
+        addresses: Vec<Bech32Address>,
     },
     /// Reattaches blocks for provided block id. Blocks can be reattached only if they are valid and haven't been
     /// confirmed for a while.
@@ -472,7 +472,7 @@ pub enum Message {
     /// Transforms bech32 to hex
     Bech32ToHex {
         /// Bech32 encoded address
-        bech32: String,
+        bech32: Bech32Address,
     },
     /// Transforms a hex encoded address to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -480,7 +480,7 @@ pub enum Message {
         /// Hex encoded bech32 address
         hex: String,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Transforms an alias id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -488,7 +488,7 @@ pub enum Message {
         /// Alias ID
         alias_id: AliasId,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Transforms an nft id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -496,7 +496,7 @@ pub enum Message {
         /// Nft ID
         nft_id: NftId,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Transforms a hex encoded public key to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -504,12 +504,12 @@ pub enum Message {
         /// Hex encoded public key
         hex: String,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Returns a valid Address parsed from a String.
     ParseBech32Address {
         /// Address
-        address: String,
+        address: Bech32Address,
     },
     /// Checks if a String is a valid bech32 encoded address.
     IsAddressValid {
@@ -560,7 +560,7 @@ pub enum Message {
         /// Faucet URL
         url: String,
         /// The address for request funds
-        address: String,
+        address: Bech32Address,
     },
     /// Compute the hash of a transaction essence.
     HashTransactionEssence {

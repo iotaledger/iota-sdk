@@ -6,10 +6,11 @@ use std::str::FromStr;
 
 use iota_sdk::{
     client::api::{
-        PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
+        input_selection::Burn, PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData,
+        SignedTransactionDataDto,
     },
     types::block::{
-        output::{dto::OutputDto, AliasId, NftId, Output, Rent, TokenId},
+        output::{dto::OutputDto, Output, Rent},
         Error,
     },
     wallet::{
@@ -17,8 +18,7 @@ use iota_sdk::{
             types::{AccountBalanceDto, TransactionDto},
             Account, CreateAliasParams, MintTokenTransactionDto, OutputDataDto, OutputParams, TransactionOptions,
         },
-        message_interface::AddressWithUnspentOutputsDto,
-        MintNativeTokenParams, MintNftParams, SendAmountParams,
+        MintNativeTokenParams, MintNftParams,
     },
 };
 use primitive_types::U256;
@@ -27,24 +27,10 @@ use crate::{method::AccountMethod, Response, Result};
 
 pub(crate) async fn call_account_method_internal(account: &Account, method: AccountMethod) -> Result<Response> {
     let response = match method {
-        AccountMethod::BurnNativeToken {
-            token_id,
-            burn_amount,
-            options,
-        } => {
+        AccountMethod::Burn { burn, options } => {
             let transaction = account
-                .burn_native_token(
-                    TokenId::try_from(&token_id)?,
-                    U256::try_from(&burn_amount).map_err(|_| Error::InvalidField("burn_amount"))?,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
-        }
-        AccountMethod::BurnNft { nft_id, options } => {
-            let transaction = account
-                .burn_nft(
-                    NftId::try_from(&nft_id)?,
+                .burn(
+                    Burn::try_from(&burn)?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -72,24 +58,6 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
-        AccountMethod::DestroyAlias { alias_id, options } => {
-            let transaction = account
-                .destroy_alias(
-                    AliasId::try_from(&alias_id)?,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
-        }
-        AccountMethod::DestroyFoundry { foundry_id, options } => {
-            let transaction = account
-                .destroy_foundry(
-                    foundry_id,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
-                .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
-        }
         AccountMethod::GenerateAddresses { amount, options } => {
             let address = account.generate_addresses(amount, options).await?;
             Response::GeneratedAddress(address)
@@ -105,7 +73,6 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::OutputData(output_data.as_ref().map(OutputDataDto::from).map(Box::new))
         }
         AccountMethod::GetFoundryOutput { token_id } => {
-            let token_id = TokenId::try_from(&token_id)?;
             let output = account.get_foundry_output(token_id).await?;
             Response::Output(OutputDto::from(&output))
         }
@@ -113,17 +80,12 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let transaction = account.get_transaction(&transaction_id).await;
             Response::Transaction(transaction.as_ref().map(TransactionDto::from).map(Box::new))
         }
-        AccountMethod::GetIncomingTransactionData { transaction_id } => {
-            let transaction = account.get_incoming_transaction_data(&transaction_id).await;
+        AccountMethod::GetIncomingTransaction { transaction_id } => {
+            let transaction = account.get_incoming_transaction(&transaction_id).await;
 
             transaction.map_or_else(
-                || Response::IncomingTransactionData(None),
-                |transaction| {
-                    Response::IncomingTransactionData(Some(Box::new((
-                        transaction_id,
-                        TransactionDto::from(&transaction),
-                    ))))
-                },
+                || Response::Transaction(None),
+                |transaction| Response::Transaction(Some(Box::new(TransactionDto::from(&transaction)))),
             )
         }
         AccountMethod::Addresses => {
@@ -132,7 +94,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::AddressesWithUnspentOutputs => {
             let addresses = account.addresses_with_unspent_outputs().await?;
-            Response::AddressesWithUnspentOutputs(addresses.iter().map(AddressWithUnspentOutputsDto::from).collect())
+            Response::AddressesWithUnspentOutputs(addresses)
         }
         AccountMethod::Outputs { filter_options } => {
             let outputs = account.outputs(filter_options).await?;
@@ -143,20 +105,15 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect())
         }
         AccountMethod::IncomingTransactions => {
-            let transactions = account.incoming_transactions().await?;
-            Response::IncomingTransactionsData(
-                transactions
-                    .into_iter()
-                    .map(|d| (d.0, TransactionDto::from(&d.1)))
-                    .collect(),
-            )
+            let transactions = account.incoming_transactions().await;
+            Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
         }
         AccountMethod::Transactions => {
-            let transactions = account.transactions().await?;
+            let transactions = account.transactions().await;
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
         }
         AccountMethod::PendingTransactions => {
-            let transactions = account.pending_transactions().await?;
+            let transactions = account.pending_transactions().await;
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
         }
         AccountMethod::DecreaseNativeTokenSupply {
@@ -166,7 +123,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         } => {
             let transaction = account
                 .decrease_native_token_supply(
-                    TokenId::try_from(&token_id)?,
+                    token_id,
                     U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
@@ -180,7 +137,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         } => {
             let transaction = account
                 .increase_native_token_supply(
-                    TokenId::try_from(&token_id)?,
+                    token_id,
                     U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
@@ -223,7 +180,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         } => {
             let output = account
                 .prepare_output(
-                    OutputParams::try_from(&options)?,
+                    OutputParams::try_from(options.as_ref())?,
                     transaction_options
                         .as_ref()
                         .map(TransactionOptions::try_from_dto)
@@ -235,10 +192,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::PrepareSendAmount { params, options } => {
             let data = account
                 .prepare_send_amount(
-                    params
-                        .iter()
-                        .map(SendAmountParams::try_from)
-                        .collect::<iota_sdk::wallet::Result<Vec<SendAmountParams>>>()?,
+                    params,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
@@ -271,10 +225,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::SendAmount { params, options } => {
             let transaction = account
                 .send_amount(
-                    params
-                        .iter()
-                        .map(SendAmountParams::try_from)
-                        .collect::<iota_sdk::wallet::Result<Vec<SendAmountParams>>>()?,
+                    params,
                     options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;

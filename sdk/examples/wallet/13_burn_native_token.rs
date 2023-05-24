@@ -16,7 +16,7 @@
 use std::{env::var, str::FromStr};
 
 use iota_sdk::{
-    types::block::output::TokenId,
+    types::block::output::{NativeToken, TokenId},
     wallet::{Result, Wallet},
     U256,
 };
@@ -67,9 +67,7 @@ async fn main() -> Result<()> {
 
         // Burn a native token
         let burn_amount = U256::from(BURN_AMOUNT);
-        let transaction = account
-            .burn_native_token(*native_token_balance.token_id(), burn_amount, None)
-            .await?;
+        let transaction = account.burn(NativeToken::new(token_id, burn_amount)?, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         let block_id = account

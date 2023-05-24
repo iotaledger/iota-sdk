@@ -10,6 +10,7 @@ use crate::{
     client::secret::{SecretManager, SecretManagerDto},
     wallet::{
         account::{AccountDetails, SyncOptions},
+        migration::migrate_storage,
         storage::{constants::*, Storage, StorageAdapter},
         WalletBuilder,
     },
@@ -52,10 +53,12 @@ impl StorageManager {
         storage: impl StorageAdapter + Send + Sync + 'static,
         encryption_key: impl Into<Option<[u8; 32]>> + Send,
     ) -> crate::wallet::Result<Self> {
-        let mut storage = Storage {
+        let storage = Storage {
             inner: Box::new(storage) as _,
             encryption_key: encryption_key.into(),
         };
+        migrate_storage(&storage).await?;
+
         // Get the db version or set it
         if let Some(db_schema_version) = storage.get::<u8>(DATABASE_SCHEMA_VERSION_KEY).await? {
             if db_schema_version != DATABASE_SCHEMA_VERSION {
@@ -92,7 +95,7 @@ impl StorageManager {
         self.storage.get(key).await
     }
 
-    pub async fn save_wallet_data(&mut self, wallet_builder: &WalletBuilder) -> crate::wallet::Result<()> {
+    pub async fn save_wallet_data(&self, wallet_builder: &WalletBuilder) -> crate::wallet::Result<()> {
         log::debug!("save_wallet_data");
         self.storage.set(WALLET_INDEXATION_KEY, wallet_builder).await?;
 
@@ -183,7 +186,7 @@ impl StorageManager {
     }
 
     pub async fn set_default_sync_options(
-        &mut self,
+        &self,
         account_index: u32,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<()> {
@@ -223,7 +226,7 @@ mod tests {
             b: 42,
             c: -420,
         };
-        let mut storage = Memory::default();
+        let storage = Memory::default();
         storage.set("key", serde_json::to_string(&rec).unwrap()).await.unwrap();
 
         let storage_manager = StorageManager::new(storage, None).await.unwrap();
@@ -248,7 +251,7 @@ mod tests {
 
     #[tokio::test]
     async fn save_get_wallet_data() {
-        let mut storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
+        let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert!(storage_manager.get_wallet_data().await.unwrap().is_none());
 
         let wallet_builder = WalletBuilder::new();

@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will send a transaction.
+//! In this example we will issue a simple base coin transaction.
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
 //! running the `create_wallet` example!
@@ -41,9 +41,10 @@ async fn main() -> Result<()> {
             .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
+        let recv_address = RECV_ADDRESS.parse()?;
+        println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, recv_address);
         // Send a transaction
-        let outputs = vec![SendAmountParams::new(RECV_ADDRESS.to_string(), SEND_AMOUNT)];
+        let outputs = vec![SendAmountParams::new(recv_address, SEND_AMOUNT)];
         let transaction = account.send_amount(outputs, None).await?;
 
         // Wait for transaction to get included

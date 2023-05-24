@@ -45,8 +45,8 @@ async fn main() -> Result<()> {
 
     let addresses = generate_max_addresses(&account, MAX_ADDRESSES_TO_GENERATE).await?;
     let bech32_addresses = addresses
-        .iter()
-        .map(|address| address.address().to_string())
+        .into_iter()
+        .map(|address| address.into_bech32())
         .collect::<Vec<_>>();
 
     println!("Total address count:\n{:?}", account.addresses().await?.len());

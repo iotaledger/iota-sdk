@@ -1,10 +1,8 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::string::String;
-
 use crate::types::block::{
-    address::{Address, AliasAddress},
+    address::{Address, AliasAddress, Bech32Address, Hrp},
     output::OutputId,
 };
 
@@ -26,34 +24,7 @@ impl AliasId {
     }
 
     /// Returns the bech32 encoding of the alias ID.
-    pub fn to_bech32(&self, bech32_hrp: &str) -> String {
+    pub fn to_bech32(&self, bech32_hrp: Hrp) -> Bech32Address {
         Address::Alias(AliasAddress::new(*self)).to_bech32(bech32_hrp)
-    }
-}
-
-#[allow(missing_docs)]
-pub mod dto {
-    use alloc::string::ToString;
-
-    use serde::{Deserialize, Serialize};
-
-    use super::*;
-    use crate::types::block::Error;
-
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct AliasIdDto(pub String);
-
-    impl From<&AliasId> for AliasIdDto {
-        fn from(value: &AliasId) -> Self {
-            Self(value.to_string())
-        }
-    }
-
-    impl TryFrom<&AliasIdDto> for AliasId {
-        type Error = Error;
-
-        fn try_from(value: &AliasIdDto) -> Result<Self, Self::Error> {
-            value.0.parse::<Self>().map_err(|_| Error::InvalidField("alias id"))
-        }
     }
 }

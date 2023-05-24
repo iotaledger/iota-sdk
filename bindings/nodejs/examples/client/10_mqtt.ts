@@ -5,7 +5,7 @@ import { Client, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/client/10_mqtt.js
+// yarn run-example ./client/10_mqtt.ts
 
 // Initialize MQTT listener
 async function run() {

@@ -29,7 +29,7 @@ impl Account {
         #[cfg(feature = "storage")]
         {
             let index = *self.details().await.index();
-            let mut storage_manager = self.wallet.storage_manager.lock().await;
+            let storage_manager = self.wallet.storage_manager.read().await;
             storage_manager.set_default_sync_options(index, &options).await?;
         }
 
@@ -189,9 +189,7 @@ impl Account {
                         .iter_mut()
                         .find(|a| a.address.inner == ed25519_address)
                         .ok_or_else(|| {
-                            crate::wallet::Error::AddressNotFoundInAccount(
-                                ed25519_address.to_bech32(bech32_hrp.clone()),
-                            )
+                            crate::wallet::Error::AddressNotFoundInAccount(ed25519_address.to_bech32(bech32_hrp))
                         })?;
                     address_with_unspent_outputs.output_ids.extend(output_ids.clone());
 

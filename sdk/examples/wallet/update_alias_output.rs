@@ -20,10 +20,8 @@ use iota_sdk::{
 
 // Replace with an alias id held in an unspent output of the account
 const ALIAS_ID: &str = "0xc94fc4d280d63c7de09c8cc49ecefba6192e104d200ab7472db9e943e0feef7c";
-// Replace with the correct increment of the current state index of your alias
-const NEW_STATE_INDEX: u32 = 2;
 // The metadata for the next state
-const NEW_STATE_METADATA: &str = "new state metadata";
+const NEW_STATE_METADATA: &str = "updated state metadata 1";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -46,7 +44,7 @@ async fn main() -> Result<()> {
 
     // Get the alias output by its alias id
     let alias_id = AliasId::from_str(ALIAS_ID)?;
-    if let Some(unspent_alias_output) = account
+    if let Some(alias_output_data) = account
         .unspent_outputs(Some(FilterOptions {
             output_types: Some(vec![AliasOutput::KIND]),
             ..Default::default()
@@ -63,18 +61,21 @@ async fn main() -> Result<()> {
     {
         println!(
             "Alias '{ALIAS_ID}' found in unspent output: '{}'",
-            unspent_alias_output.output_id
+            alias_output_data.output_id
         );
 
         let token_supply = account.client().get_token_supply().await?;
         let rent_structure = account.client().get_rent_structure().await?;
 
-        let updated_alias_output = AliasOutputBuilder::from(unspent_alias_output.output.as_alias())
+        let alias_output = alias_output_data.output.as_alias();
+        let updated_alias_output = AliasOutputBuilder::from(alias_output)
+            // Update the alias id, as it might still be null
+            .with_alias_id(alias_output.alias_id_non_null(&alias_output_data.output_id))
             // Minimum required storage deposit will change if the new metadata has a different size, so we will update
             // the amount
             .with_minimum_storage_deposit(rent_structure)
-            .with_state_index(NEW_STATE_INDEX)
             .with_state_metadata(NEW_STATE_METADATA.as_bytes().to_vec())
+            .with_state_index(alias_output.state_index() + 1)
             .finish_output(token_supply)?;
 
         println!("Sending transaction...",);

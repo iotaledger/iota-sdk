@@ -8,7 +8,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example get_funds
+//! cargo run --release --all-features --example request_funds
 //! ```
 
 use std::env::var;

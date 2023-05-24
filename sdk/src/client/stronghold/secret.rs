@@ -281,8 +281,8 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            addresses[0].to_bech32("atoi"),
-            "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e".to_string()
+            addresses[0].to_bech32_unchecked("atoi"),
+            "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e"
         );
 
         // Remove garbage after test, but don't care about the result
@@ -297,7 +297,7 @@ mod tests {
         let mnemonic = String::from(
             "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally",
         );
-        let mut stronghold_adapter = StrongholdAdapter::builder()
+        let stronghold_adapter = StrongholdAdapter::builder()
             .password("drowssap")
             .build(stronghold_path)
             .unwrap();
@@ -326,8 +326,8 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            addresses[0].to_bech32("atoi"),
-            "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e".to_string()
+            addresses[0].to_bech32_unchecked("atoi"),
+            "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e"
         );
 
         // Remove garbage after test, but don't care about the result

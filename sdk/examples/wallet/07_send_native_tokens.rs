@@ -15,7 +15,7 @@ use std::env::var;
 
 use iota_sdk::{
     types::block::{
-        address::Address,
+        address::Bech32Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken},
     },
     wallet::{Result, SendNativeTokensParams, Wallet},
@@ -54,12 +54,13 @@ async fn main() -> Result<()> {
             .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        let bech32_address = RECV_ADDRESS.to_string();
+        let bech32_address = RECV_ADDRESS.parse::<Bech32Address>()?;
 
         let outputs = vec![SendNativeTokensParams {
-            address: bech32_address.clone(),
+            address: bech32_address,
             native_tokens: vec![(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))],
-            ..Default::default()
+            return_address: None,
+            expiration: None,
         }];
 
         println!(
@@ -90,7 +91,7 @@ async fn main() -> Result<()> {
 
         let outputs = vec![
             BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(bech32_address)?))
+                .add_unlock_condition(AddressUnlockCondition::new(bech32_address))
                 .with_native_tokens(vec![NativeToken::new(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))?])
                 .finish_output(account.client().get_token_supply().await?)?,
         ];

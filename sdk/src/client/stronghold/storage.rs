@@ -16,7 +16,7 @@ impl StorageProvider for StrongholdAdapter {
     type Error = Error;
 
     #[allow(clippy::significant_drop_tightening)]
-    async fn get(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
+    async fn get(&self, k: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
         let data = match self
             .stronghold
             .lock()
@@ -41,7 +41,7 @@ impl StorageProvider for StrongholdAdapter {
         Ok(Some(chacha::aead_decrypt(buffer_ref.deref(), &data)?))
     }
 
-    async fn insert(&mut self, k: &[u8], v: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
+    async fn insert(&self, k: &[u8], v: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
         let encrypted_value = {
             let locked_key_provider = self.key_provider.lock().await;
             let key_provider = if let Some(key_provider) = &*locked_key_provider {
@@ -64,7 +64,7 @@ impl StorageProvider for StrongholdAdapter {
             .insert(k.to_vec(), encrypted_value, None)?)
     }
 
-    async fn delete(&mut self, k: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
+    async fn delete(&self, k: &[u8]) -> Result<Option<Vec<u8>>, Self::Error> {
         Ok(self
             .stronghold
             .lock()
@@ -84,7 +84,7 @@ mod tests {
         use crate::client::storage::StorageProvider;
 
         let snapshot_path = "test_stronghold_db.stronghold";
-        let mut stronghold = StrongholdAdapter::builder()
+        let stronghold = StrongholdAdapter::builder()
             .password("drowssap")
             .build(snapshot_path)
             .unwrap();

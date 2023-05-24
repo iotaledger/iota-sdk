@@ -16,6 +16,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::{
+        address::Bech32Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
         payload::transaction::TransactionId,
     },
@@ -62,7 +63,7 @@ async fn main() -> Result<()> {
     println!("Address count: {}", addresses.len());
 
     // Ensure there are enough available funds for spamming on each address
-    let available_funds = ensure_enough_funds(&account, addresses[0].address().to_string().as_str()).await?;
+    let available_funds = ensure_enough_funds(&account, addresses[0].address()).await?;
     account.sync(None).await?;
 
     let num_addresses_with_balance = account.addresses_with_unspent_outputs().await?.len();
@@ -101,7 +102,7 @@ async fn main() -> Result<()> {
 
         for n in 0..num_simultaneous_txs {
             let account_clone = account.clone();
-            let recv_address_clone = addresses[(n + 1) % num_simultaneous_txs].address().to_string();
+            let recv_address_clone = *addresses[(n + 1) % num_simultaneous_txs].address();
 
             tasks.spawn(async move {
                 println!("Thread {n}: Sending {SEND_AMOUNT} coins to {recv_address_clone}");
@@ -166,7 +167,7 @@ async fn ensure_enough_addresses(account: &Account, max: usize) -> Result<Vec<Ac
     account.addresses().await
 }
 
-async fn ensure_enough_funds(account: &Account, bech32_address: &str) -> Result<u64> {
+async fn ensure_enough_funds(account: &Account, bech32_address: &Bech32Address) -> Result<u64> {
     let balance = account.sync(None).await?;
     let available_funds_before = balance.base_coin().available();
     println!("Current available funds: {available_funds_before}");
