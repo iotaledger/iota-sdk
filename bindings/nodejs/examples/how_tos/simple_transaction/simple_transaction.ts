@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Wallet, initLogger } from '@iota/sdk';
+
+// This example uses secrets in environment variables for simplicity which should not be done in production.
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -18,10 +20,10 @@ async function run() {
         }
 
         const wallet = new Wallet({
-            storagePath: './alice-database',
+            storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount('Alice');
+        const account = await wallet.getAccount(`${process.env.ACCOUNT_ALIAS_1}`);
 
         await account.sync();
 

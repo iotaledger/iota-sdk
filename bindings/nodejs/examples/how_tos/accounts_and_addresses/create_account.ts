@@ -35,15 +35,15 @@ async function run() {
     }
     try {
         const walletOptions: WalletOptions = {
-            storagePath: `${process.env.WALLET_DB_PATH}`,
+            storagePath: process.env.WALLET_DB_PATH,
             clientOptions: {
                 nodes: [process.env.NODE_URL],
             },
             coinType: CoinType.Shimmer,
             secretManager: {
                 stronghold: {
-                    snapshotPath: `${process.env.STRONGHOLD_SNAPSHOT_PATH}`,
-                    password: `${process.env.STRONGHOLD_PASSWORD}`,
+                    snapshotPath: process.env.STRONGHOLD_SNAPSHOT_PATH,
+                    password: process.env.STRONGHOLD_PASSWORD,
                 },
             },
         };

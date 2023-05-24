@@ -151,7 +151,6 @@ pub enum AccountMethod {
     },
     /// Create an alias output.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
     PrepareCreateAliasOutput {
         params: Option<CreateAliasParamsDto>,
         options: Option<TransactionOptionsDto>,
@@ -193,14 +192,12 @@ pub enum AccountMethod {
     },
     /// Prepare to Mint nft.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
     PrepareMintNfts {
         params: Vec<MintNftParamsDto>,
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare to Mint native token.
     /// Expected response: [`PreparedMintTokenTransaction`](crate::Response::PreparedMintTokenTransaction)
-    #[serde(rename_all = "camelCase")]
     PrepareMintNativeToken {
         params: MintNativeTokenParamsDto,
         options: Option<TransactionOptionsDto>,
@@ -214,21 +211,18 @@ pub enum AccountMethod {
     },
     /// Prepare send amount.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
     PrepareSendAmount {
         params: Vec<SendAmountParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare to Send native tokens.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
     PrepareSendNativeTokens {
         params: Vec<SendNativeTokensParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare to Send nft.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[serde(rename_all = "camelCase")]
     PrepareSendNft {
         params: Vec<SendNftParams>,
         options: Option<TransactionOptionsDto>,
@@ -277,7 +271,6 @@ pub enum AccountMethod {
     },
     /// Send amount.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
     SendAmount {
         params: Vec<SendAmountParams>,
         options: Option<TransactionOptionsDto>,

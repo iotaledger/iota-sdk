@@ -7,7 +7,7 @@ class PreparedTransactionData:
         account,
         prepared_transaction_data
     ):
-        """Initialize the IOTA Client.
+        """Helper struct for offline signing
 
         Parameters
         ----------
@@ -19,20 +19,53 @@ class PreparedTransactionData:
         self.account = account
         self.prepared_transaction_data_dto = prepared_transaction_data
 
+    
+    """
+    The function returns the prepared transaction data.
+
+    :returns: The method prepared_transaction_data() is returning an object of type PreparedTransaction
+    """
     def prepared_transaction_data(self):
         return self.prepared_transaction_data_dto
 
+
+    """
+    The finish function returns a promise that resolves to a Transaction object after signing
+    and submitting the transaction. Internally just calls sign_and_submit_transaction.
+
+    :returns: The finish() method is returning a Transaction object after it has been signed and submitted.
+    """
     def finish(self):
         return self.sign_and_submit_transaction()
 
+
+    """
+    This function signs a prepared transaction essence using the account's private key and returns
+    the signed transaction essence.
+
+    :returns: A SignedTransactionEssence object.
+    """
     def sign(self):
         return self.account.sign_transaction_essence(self.prepared_transaction_data())
 
+    
+    """
+    This function signs and submits a transaction using prepared transaction data.
+
+    Returns:
+
+    :returns: A Transaction object.
+    """
     def sign_and_submit_transaction(self):
         return self.account.sign_and_submit_transaction(self.prepared_transaction_data())
 
 class PreparedMintTokenTransaction(PreparedTransactionData):
 
+    """
+    The function returns the token_id as a string.
+
+    :returns: The token id of the PreparedMintTokenTransaction.
+    """
     def token_id(self):
         return self.prepared_transaction_data_dto["tokenId"]
 

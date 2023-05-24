@@ -139,7 +139,7 @@ class Account:
                 'options': options
             },
         )
-        return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
+        return PreparedTransactionData(self, prepared)
 
     def prepare_burn_native_token(self,
                           token_id: HexStr,
@@ -155,7 +155,7 @@ class Account:
                 'options': options
             },
         )
-        return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
+        return PreparedTransactionData(self, prepared)
 
     def prepare_burn_nft(self,
                  nft_id: HexStr,
@@ -168,7 +168,7 @@ class Account:
                 'options': options
             },
         )
-        return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
+        return PreparedTransactionData(self, prepared)
 
     def prepare_consolidate_outputs(self,
                             force: bool,
@@ -181,7 +181,7 @@ class Account:
                 'outputConsolidationThreshold': output_consolidation_threshold
             }
         )
-        return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
+        return PreparedTransactionData(self, prepared)
 
     def prepare_create_alias_output(self,
                             params,
@@ -194,7 +194,7 @@ class Account:
                 'options': options
             }
         )
-        return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
+        return PreparedTransactionData(self, prepared)
 
     def prepare_destroy_alias(self,
                       alias_id: HexStr,
@@ -208,7 +208,7 @@ class Account:
                 'options': options
             },
         )
-        return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
+        return PreparedTransactionData(self, prepared)
 
     def prepare_destroy_foundry(self,
                         foundry_id: HexStr,
@@ -221,7 +221,7 @@ class Account:
                 'options': options
             },
         )
-        return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
+        return PreparedTransactionData(self, prepared)
 
     def generate_addresses(self, amount: int, options=None):
         """Generate new addresses.
@@ -327,7 +327,7 @@ class Account:
                 'options': options
             }
         )
-        return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
+        return PreparedTransactionData(self, prepared)
 
     def prepare_increase_native_token_supply(self, token_id: HexStr, mint_amount: int, options=None):
         """Mint more native token.
@@ -370,7 +370,7 @@ class Account:
                 'options': options
             }
         )
-        return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
+        return PreparedTransactionData(self, prepared)
 
     def get_balance(self):
         """Get account balance information.
@@ -403,7 +403,7 @@ class Account:
                 'options': options
             }
         )
-        return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
+        return PreparedTransactionData(self, prepared)
 
     def prepare_transaction(self, outputs, options=None):
         """Prepare transaction.
@@ -414,7 +414,7 @@ class Account:
                 'options': options
             }
         )
-        return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
+        return PreparedTransactionData(self, prepared)
 
     def retry_transaction_until_included(self, transaction_id: HexStr, interval=None, max_attempts=None):
         """Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
@@ -458,7 +458,7 @@ class Account:
                 'options': options
             }
         )
-        return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
+        return PreparedTransactionData(self, prepared)
 
     def prepare_send_nft(self, params, options=None):
         """Send nft.
@@ -469,7 +469,7 @@ class Account:
                 'options': options
             }
         )
-        return PreparedTransactionData(account=self, prepared_transaction_data=prepared)
+        return PreparedTransactionData(self, prepared)
 
     def set_alias(self, alias: str):
         """Set alias.

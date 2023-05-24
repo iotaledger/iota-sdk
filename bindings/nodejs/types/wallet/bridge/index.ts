@@ -39,7 +39,7 @@ import type {
     __SetAliasMethod__,
     __SetDefaultSyncOptionsMethod__,
     __SignTransactionEssenceMethod__,
-    __SignAndSubmitTransaction__,
+    __SignAndSubmitTransactionMethod__,
     __SubmitAndStoreTransactionMethod__,
     __SyncAccountMethod__,
     __PrepareVoteMethod__,
@@ -124,7 +124,7 @@ export type __AccountMethod__ =
     | __SetAliasMethod__
     | __SetDefaultSyncOptionsMethod__
     | __SignTransactionEssenceMethod__
-    | __SignAndSubmitTransaction__
+    | __SignAndSubmitTransactionMethod__
     | __SubmitAndStoreTransactionMethod__
     | __SyncAccountMethod__
     | __PrepareVoteMethod__

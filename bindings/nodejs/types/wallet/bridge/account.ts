@@ -303,7 +303,7 @@ export type __SignTransactionEssenceMethod__ = {
     };
 };
 
-export type __SignAndSubmitTransaction__ = {
+export type __SignAndSubmitTransactionMethod__ = {
     name: 'signAndSubmitTransaction';
     data: {
         preparedTransactionData: IPreparedTransactionData;
