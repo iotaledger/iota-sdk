@@ -15,10 +15,7 @@ use crypto::{
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
     client::{constants::HD_WALLET_TYPE, Client, Error},
-    types::block::{
-        address::{Address, Ed25519Address},
-        signature::Ed25519Signature,
-    },
+    types::block::{address::Ed25519Address, signature::Ed25519Signature},
 };
 
 /// Secret manager that uses only a mnemonic.
@@ -36,7 +33,7 @@ impl SecretManage for MnemonicSecretManager {
         account_index: u32,
         address_indexes: Range<u32>,
         options: Option<GenerateAddressOptions>,
-    ) -> Result<Vec<Address>, Self::Error> {
+    ) -> Result<Vec<Ed25519Address>, Self::Error> {
         let internal = options.map(|o| o.internal).unwrap_or_default();
         let mut addresses = Vec::new();
 
@@ -51,7 +48,7 @@ impl SecretManage for MnemonicSecretManager {
                 crate::client::Error::Blake2b256("hashing the public key while generating the address failed.")
             });
 
-            addresses.push(Address::Ed25519(Ed25519Address::new(result?)));
+            addresses.push(Ed25519Address::new(result?));
         }
 
         Ok(addresses)
@@ -107,6 +104,7 @@ impl MnemonicSecretManager {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::types::block::address::ToBech32Ext;
 
     #[tokio::test]
     async fn address() {

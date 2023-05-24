@@ -14,7 +14,7 @@ use crate::OmittedDebug;
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 pub enum SecretManagerMethod {
     /// Generate addresses.
-    GenerateAddresses {
+    GenerateEd25519Addresses {
         /// Addresses generation options
         options: GetAddressesOptions,
     },

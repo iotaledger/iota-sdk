@@ -11,7 +11,7 @@ use iota_sdk::{
         secret::SecretManager, Client, Result,
     },
     types::block::{
-        address::AliasAddress,
+        address::{AliasAddress, ToBech32Ext},
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
             unlock_condition::{

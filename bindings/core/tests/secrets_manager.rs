@@ -10,13 +10,13 @@ async fn generate_addresses() -> Result<()> {
         "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river",
     )?;
 
-    let method = SecretManagerMethod::GenerateAddresses {
+    let method = SecretManagerMethod::GenerateEd25519Addresses {
         options: GetAddressesOptions::default().with_range(0..1),
     };
 
     let response = secret_manager.call_method(method).await;
     match response {
-        Response::GeneratedAddresses(addresses) => assert_eq!(
+        Response::GeneratedEd25519Addresses(addresses) => assert_eq!(
             addresses[0],
             "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy"
         ),

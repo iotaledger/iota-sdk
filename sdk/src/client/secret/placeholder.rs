@@ -11,7 +11,7 @@ use crypto::{keys::slip10::Chain, signatures::secp256k1_ecdsa::EvmAddress};
 use super::{GenerateAddressOptions, SecretManage, SignTransactionEssence};
 use crate::{
     client::{secret::PreparedTransactionData, Error},
-    types::block::{address::Address, signature::Ed25519Signature, unlock::Unlocks},
+    types::block::{address::Ed25519Address, signature::Ed25519Signature, unlock::Unlocks},
 };
 
 /// Secret manager that is only useful to prevent accidental address generation in a wallet
@@ -28,7 +28,7 @@ impl SecretManage for PlaceholderSecretManager {
         _account_index: u32,
         _address_indexes: Range<u32>,
         _options: Option<GenerateAddressOptions>,
-    ) -> Result<Vec<Address>, Self::Error> {
+    ) -> Result<Vec<Ed25519Address>, Self::Error> {
         Err(Error::PlaceholderSecretManager)
     }
 

@@ -23,7 +23,7 @@ use crate::{
         request_funds_from_faucet, utils, Client, NodeInfoWrapper,
     },
     types::block::{
-        address::HrpLike,
+        address::{HrpLike, ToBech32Ext},
         output::{
             dto::{OutputBuilderAmountDto, OutputDto},
             AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
@@ -571,9 +571,9 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::GenerateAddresses { amount, options } => {
+            AccountMethod::GenerateEd25519Addresses { amount, options } => {
                 let address = account.generate_addresses(amount, options).await?;
-                Ok(Response::GeneratedAddress(address))
+                Ok(Response::GeneratedEd25519Addresses(address))
             }
             AccountMethod::GetOutputsWithAdditionalUnlockConditions { outputs_to_claim } => {
                 let output_ids = account

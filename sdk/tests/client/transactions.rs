@@ -6,6 +6,7 @@
 use iota_sdk::{
     client::{api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, Result},
     types::block::{
+        address::ToBech32Ext,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, OutputId},
         payload::{transaction::TransactionEssence, Payload},
     },

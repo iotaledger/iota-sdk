@@ -26,10 +26,7 @@ use crate::{
         secret::{GenerateAddressOptions, SecretManage},
         stronghold::Error,
     },
-    types::block::{
-        address::{Address, Ed25519Address},
-        signature::Ed25519Signature,
-    },
+    types::block::{address::Ed25519Address, signature::Ed25519Signature},
 };
 
 #[async_trait]
@@ -42,7 +39,7 @@ impl SecretManage for StrongholdAdapter {
         account_index: u32,
         address_indexes: Range<u32>,
         options: Option<GenerateAddressOptions>,
-    ) -> Result<Vec<Address>, Self::Error> {
+    ) -> Result<Vec<Ed25519Address>, Self::Error> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
         // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
@@ -91,7 +88,7 @@ impl SecretManage for StrongholdAdapter {
             let hash = Blake2b256::digest(public_key);
 
             // Convert the hash into [Address].
-            let address = Address::Ed25519(Ed25519Address::new(hash.into()));
+            let address = Ed25519Address::new(hash.into());
 
             // Collect it.
             addresses.push(address);
@@ -347,7 +344,7 @@ mod tests {
     use std::path::Path;
 
     use super::*;
-    use crate::client::constants::IOTA_COIN_TYPE;
+    use crate::{client::constants::IOTA_COIN_TYPE, types::block::address::ToBech32Ext};
 
     #[tokio::test]
     async fn test_address_generation() {

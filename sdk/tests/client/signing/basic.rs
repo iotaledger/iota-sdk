@@ -13,6 +13,7 @@ use iota_sdk::{
         Client, Result,
     },
     types::block::{
+        address::ToBech32Ext,
         input::{Input, UtxoInput},
         output::InputsCommitment,
         payload::{

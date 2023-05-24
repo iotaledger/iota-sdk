@@ -58,8 +58,8 @@ pub enum Response {
     /// - [`IsAddressValid`](crate::client::message_interface::Message::IsAddressValid)
     Bool(bool),
     /// Response for:
-    /// - [`GenerateAddresses`](crate::client::message_interface::Message::GenerateAddresses)
-    GeneratedAddresses(Vec<Bech32Address>),
+    /// - [`GenerateEd25519Addresses`](crate::client::message_interface::Message::GenerateEd25519Addresses)
+    GeneratedEd25519Addresseses(Vec<Bech32Address>),
     /// Response for:
     /// - [`GetNode`](crate::client::message_interface::Message::GetNode)
     Node(Node),

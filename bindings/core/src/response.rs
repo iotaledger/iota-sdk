@@ -66,8 +66,8 @@ use crate::{error::Error, OmittedDebug};
 pub enum Response {
     // Client responses
     /// Response for:
-    /// - [`GenerateAddresses`](crate::method::ClientMethod::GenerateAddresses)
-    GeneratedAddresses(Vec<Bech32Address>),
+    /// - [`GenerateEd25519Addresses`](crate::method::ClientMethod::GenerateEd25519Addresses)
+    GeneratedEd25519Addresses(Vec<Bech32Address>),
     /// Response for:
     /// - [`GenerateEvmAddresses`](crate::method::SecretManagerMethod::GenerateEvmAddresses)
     GeneratedEvmAddresses(Vec<String>),
@@ -236,7 +236,7 @@ pub enum Response {
     Output(OutputDto),
     /// Response for:
     /// - [`HexToBech32`](crate::method::ClientMethod::HexToBech32)
-    /// - [`GenerateAddresses`](crate::method::ClientMethod::GenerateAddresses)
+    /// - [`GenerateEd25519Addresses`](crate::method::ClientMethod::GenerateEd25519Addresses)
     /// - [`AliasIdToBech32`](crate::method::ClientMethod::AliasIdToBech32)
     /// - [`HexPublicKeyToBech32Address`](crate::method::ClientMethod::HexPublicKeyToBech32Address)
     /// - [`HexToBech32`](crate::method::ClientMethod::HexToBech32)
@@ -329,8 +329,8 @@ pub enum Response {
     /// - [`SubmitAndStoreTransaction`](crate::method::AccountMethod::SubmitAndStoreTransaction)
     SignedTransactionData(SignedTransactionDataDto),
     /// GenerateAddress response.
-    /// Response for [`GenerateAddresses`](crate::method::AccountMethod::GenerateAddresses)
-    GeneratedAddress(Vec<AccountAddress>),
+    /// Response for [`GenerateEd25519Addresses`](crate::method::AccountMethod::GenerateEd25519Addresses)
+    GeneratedAccountAddresses(Vec<AccountAddress>),
     /// Response for
     /// - [`GetBalance`](crate::method::AccountMethod::GetBalance),
     /// - [`Sync`](crate::method::AccountMethod::Sync)

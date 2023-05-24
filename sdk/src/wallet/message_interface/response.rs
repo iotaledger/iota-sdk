@@ -92,8 +92,9 @@ pub enum Response {
     /// [`SubmitAndStoreTransaction`](crate::wallet::message_interface::AccountMethod::SubmitAndStoreTransaction)
     SignedTransactionData(SignedTransactionDataDto),
     /// GenerateAddress response.
-    /// Response for [`GenerateAddresses`](crate::wallet::message_interface::AccountMethod::GenerateAddresses)
-    GeneratedAddress(Vec<AccountAddress>),
+    /// Response for
+    /// [`GenerateEd25519Addresses`](crate::wallet::message_interface::AccountMethod::GenerateEd25519Addresses)
+    GeneratedEd25519Addresses(Vec<AccountAddress>),
     /// Response for
     /// [`GetBalance`](crate::wallet::message_interface::AccountMethod::GetBalance),
     /// [`SyncAccount`](crate::wallet::message_interface::AccountMethod::SyncAccount)
@@ -208,7 +209,7 @@ impl Debug for Response {
             Self::SignedTransactionData(signed_transaction_data) => {
                 write!(f, "SignedTransactionData({signed_transaction_data:?})")
             }
-            Self::GeneratedAddress(addresses) => write!(f, "GeneratedAddress({addresses:?})"),
+            Self::GeneratedEd25519Addresses(addresses) => write!(f, "GeneratedEd25519Addresses({addresses:?})"),
             Self::Balance(balance) => write!(f, "Balance({balance:?})"),
             Self::SentTransaction(transaction) => write!(f, "SentTransaction({transaction:?})"),
             Self::MintTokenTransaction(mint_transaction) => {

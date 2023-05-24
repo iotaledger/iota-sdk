@@ -7,7 +7,7 @@ use std::sync::atomic::Ordering;
 use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
-    types::block::address::{Address, Hrp},
+    types::block::address::{Address, Hrp, ToBech32Ext},
     wallet::Wallet,
 };
 
@@ -108,9 +108,11 @@ impl Wallet {
             SecretManager::Placeholder(_) => return Err(crate::client::Error::PlaceholderSecretManager.into()),
         };
 
-        Ok(*address
-            .first()
-            .ok_or(crate::wallet::Error::MissingParameter("address"))?)
+        Ok(Address::from(
+            *address
+                .first()
+                .ok_or(crate::wallet::Error::MissingParameter("address"))?,
+        ))
     }
 
     /// Get the bech32 hrp from the first account address or if not existent, from the client

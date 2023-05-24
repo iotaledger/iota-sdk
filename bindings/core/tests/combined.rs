@@ -25,14 +25,14 @@ async fn generate_addresses() -> Result<()> {
         "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river"
     );
     let options = GetAddressesOptions::default().with_range(0..10).with_bech32_hrp("atoi");
-    let method = ClientMethod::GenerateAddresses {
+    let method = ClientMethod::GenerateEd25519Addresses {
         secret_manager: serde_json::from_str::<SecretManagerDto>(&secret_manager).unwrap(),
         options,
     };
 
     let response = client.call_method(method).await;
     match response {
-        Response::GeneratedAddresses(addresses) => assert_eq!(
+        Response::GeneratedEd25519Addresses(addresses) => assert_eq!(
             addresses[0],
             "atoi1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxxja54p"
         ),

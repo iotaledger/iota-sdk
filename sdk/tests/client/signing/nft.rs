@@ -15,7 +15,7 @@ use iota_sdk::{
         Client, Result,
     },
     types::block::{
-        address::{Address, NftAddress},
+        address::{Address, NftAddress, ToBech32Ext},
         input::{Input, UtxoInput},
         output::{InputsCommitment, NftId},
         payload::{

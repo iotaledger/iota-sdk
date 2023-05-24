@@ -105,7 +105,7 @@ pub enum Message {
     },
     /// Generate addresses.
     #[serde(rename_all = "camelCase")]
-    GenerateAddresses {
+    GenerateEd25519Addresses {
         /// Create secret manager from json
         secret_manager: SecretManagerDto,
         /// Addresses generation options

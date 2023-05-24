@@ -5,7 +5,7 @@
 use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
-    types::block::address::Bech32Address,
+    types::block::address::{Bech32Address, ToBech32Ext},
     wallet::account::{types::address::AccountAddress, Account},
 };
 

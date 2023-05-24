@@ -245,14 +245,14 @@ async fn address_generation() {
                     internal: address.internal,
                     ..Default::default()
                 });
-            let message = Message::GenerateAddresses {
+            let message = Message::GenerateEd25519Addresses {
                 secret_manager: SecretManagerDto::Mnemonic(address.mnemonic.clone()),
                 options,
             };
 
             let response = message_handler.send_message(message).await;
             match response {
-                Response::GeneratedAddresses(addresses) => {
+                Response::GeneratedEd25519Addresseses(addresses) => {
                     assert_eq!(addresses[0], address.bech32_address);
                     if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
                         assert_eq!(ed25519_address.to_string(), address.ed25519_address);
@@ -290,14 +290,14 @@ async fn address_generation() {
                     internal: address.internal,
                     ..Default::default()
                 });
-            let message = Message::GenerateAddresses {
+            let message = Message::GenerateEd25519Addresses {
                 secret_manager: SecretManagerDto::Stronghold(secret_manager_dto),
                 options,
             };
 
             let response = message_handler.send_message(message).await;
             match response {
-                Response::GeneratedAddresses(addresses) => {
+                Response::GeneratedEd25519Addresseses(addresses) => {
                     assert_eq!(addresses[0], address.bech32_address);
                     if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
                         assert_eq!(ed25519_address.to_string(), address.ed25519_address);

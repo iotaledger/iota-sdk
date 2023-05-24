@@ -13,7 +13,7 @@ use iota_sdk::{
         constants::IOTA_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::address::Bech32Address,
+    types::block::address::{Bech32Address, ToBech32Ext},
     wallet::{ClientOptions, Result, Wallet},
 };
 

@@ -18,9 +18,9 @@ pub(crate) async fn call_secret_manager_method_internal(
     method: SecretManagerMethod,
 ) -> Result<Response> {
     let response = match method {
-        SecretManagerMethod::GenerateAddresses { options } => {
+        SecretManagerMethod::GenerateEd25519Addresses { options } => {
             let addresses = secret_manager.generate_ed25519_addresses(options).await?;
-            Response::GeneratedAddresses(addresses)
+            Response::GeneratedEd25519Addresses(addresses)
         }
         SecretManagerMethod::GenerateEvmAddresses { options } => {
             let addresses = secret_manager.generate_evm_addresses(options).await?;

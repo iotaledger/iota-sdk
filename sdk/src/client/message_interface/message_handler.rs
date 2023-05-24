@@ -142,11 +142,11 @@ impl ClientMessageHandler {
     pub async fn send_message(&self, message: Message) -> Response {
         match &message {
             // Don't log secrets
-            Message::GenerateAddresses {
+            Message::GenerateEd25519Addresses {
                 secret_manager: _,
                 options,
             } => {
-                log::debug!("Response: GenerateAddresses{{ secret_manager: <omitted>, options: {options:?} }}")
+                log::debug!("Response: GenerateEd25519Addresses{{ secret_manager: <omitted>, options: {options:?} }}")
             }
             Message::BuildAndPostBlock {
                 secret_manager: _,
@@ -312,13 +312,13 @@ impl ClientMessageHandler {
 
                 Ok(Response::BuiltOutput(OutputDto::from(&output)))
             }
-            Message::GenerateAddresses {
+            Message::GenerateEd25519Addresses {
                 secret_manager,
                 options,
             } => {
                 let secret_manager = SecretManager::try_from(&secret_manager)?;
                 let addresses = secret_manager.generate_ed25519_addresses(options).await?;
-                Ok(Response::GeneratedAddresses(addresses))
+                Ok(Response::GeneratedEd25519Addresseses(addresses))
             }
             Message::BuildAndPostBlock {
                 secret_manager,

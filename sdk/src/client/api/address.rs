@@ -12,7 +12,7 @@ use crate::{
         secret::{GenerateAddressOptions, SecretManage, SecretManager},
         Client, Result,
     },
-    types::block::address::{Address, Bech32Address, Hrp, HrpLike},
+    types::block::address::{Address, Bech32Address, Hrp, HrpLike, ToBech32Ext},
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

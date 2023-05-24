@@ -99,7 +99,7 @@ pub enum ClientMethod {
     },
     /// Generate addresses.
     #[serde(rename_all = "camelCase")]
-    GenerateAddresses {
+    GenerateEd25519Addresses {
         /// Create secret manager from json
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         secret_manager: SecretManagerDto,

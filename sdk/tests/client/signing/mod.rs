@@ -19,7 +19,7 @@ use iota_sdk::{
         Result,
     },
     types::block::{
-        address::{Address, AliasAddress, NftAddress},
+        address::{Address, AliasAddress, NftAddress, ToBech32Ext},
         input::{Input, UtxoInput},
         output::{AliasId, InputsCommitment, NftId},
         payload::{

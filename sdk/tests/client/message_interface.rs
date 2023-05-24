@@ -33,14 +33,16 @@ async fn generate_addresses() {
     let options = GenerateAddressesOptions::default()
         .with_range(0..10)
         .with_bech32_hrp("atoi");
-    let message = Message::GenerateAddresses {
+    let message = Message::GenerateEd25519Addresses {
         secret_manager: serde_json::from_str::<SecretManagerDto>(&secret_manager).unwrap(),
         options,
     };
 
     let response = message_handler.send_message(message).await;
     match response {
-        Response::GeneratedAddresses(addresses) => println!("{:?}", serde_json::to_string(&addresses).unwrap()),
+        Response::GeneratedEd25519Addresseses(addresses) => {
+            println!("{:?}", serde_json::to_string(&addresses).unwrap())
+        }
         _ => panic!("Unexpected response type"),
     };
 }
@@ -78,14 +80,14 @@ async fn build_and_post_block() {
         .with_range(0..10)
         .with_bech32_hrp("atoi");
 
-    let generate_addresses_message = Message::GenerateAddresses {
+    let generate_addresses_message = Message::GenerateEd25519Addresses {
         secret_manager: serde_json::from_str(&secret_manager).unwrap(),
         options,
     };
 
     let response = message_handler.send_message(generate_addresses_message).await;
     let addresses = match response {
-        Response::GeneratedAddresses(addresses) => addresses,
+        Response::GeneratedEd25519Addresseses(addresses) => addresses,
         _ => panic!("Unexpected response type"),
     };
 
@@ -186,14 +188,14 @@ async fn stronghold() {
     let options = GenerateAddressesOptions::default()
         .with_range(0..1)
         .with_bech32_hrp("rms");
-    let message = Message::GenerateAddresses {
+    let message = Message::GenerateEd25519Addresses {
         secret_manager: serde_json::from_str(secret_manager_dto).unwrap(),
         options,
     };
     let response = message_handler.send_message(message).await;
 
     match response {
-        Response::GeneratedAddresses(addresses) => {
+        Response::GeneratedEd25519Addresseses(addresses) => {
             assert_eq!(
                 addresses[0],
                 "rms1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6v3ea5a",

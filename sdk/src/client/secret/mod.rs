@@ -44,7 +44,7 @@ use crate::{
         Error,
     },
     types::block::{
-        address::Address,
+        address::{Address, Ed25519Address},
         output::Output,
         payload::{transaction::TransactionEssence, Payload, TransactionPayload},
         semantic::ConflictReason,
@@ -68,7 +68,7 @@ pub trait SecretManage: Send + Sync {
         account_index: u32,
         address_indexes: Range<u32>,
         options: Option<GenerateAddressOptions>,
-    ) -> Result<Vec<Address>, Self::Error>;
+    ) -> Result<Vec<Ed25519Address>, Self::Error>;
 
     async fn generate_evm_addresses(
         &self,
@@ -241,7 +241,7 @@ impl SecretManage for SecretManager {
         account_index: u32,
         address_indexes: Range<u32>,
         options: Option<GenerateAddressOptions>,
-    ) -> crate::client::Result<Vec<Address>> {
+    ) -> crate::client::Result<Vec<Ed25519Address>> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager

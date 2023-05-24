@@ -21,7 +21,7 @@ use crate::{
         Error, Result,
     },
     types::block::{
-        address::Address,
+        address::{Address, ToBech32Ext},
         output::{feature::Features, Output},
     },
 };

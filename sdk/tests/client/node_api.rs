@@ -9,6 +9,7 @@ use iota_sdk::{
         request_funds_from_faucet, secret::SecretManager, Client,
     },
     types::block::{
+        address::ToBech32Ext,
         output::OutputId,
         payload::{transaction::TransactionId, Payload},
         BlockId,

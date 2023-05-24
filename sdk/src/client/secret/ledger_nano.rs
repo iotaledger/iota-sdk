@@ -138,7 +138,7 @@ impl SecretManage for LedgerSecretManager {
         account_index: u32,
         address_indexes: Range<u32>,
         options: Option<GenerateAddressOptions>,
-    ) -> Result<Vec<Address>, Self::Error> {
+    ) -> Result<Vec<Ed25519Address>, Self::Error> {
         let options = options.unwrap_or_default();
         let bip32_account = account_index | Segment::HARDEN_MASK;
 
@@ -164,7 +164,7 @@ impl SecretManage for LedgerSecretManager {
 
         let mut ed25519_addresses = Vec::new();
         for address in addresses {
-            ed25519_addresses.push(Address::Ed25519(Ed25519Address::new(address)));
+            ed25519_addresses.push(Ed25519Address::new(address));
         }
         Ok(ed25519_addresses)
     }

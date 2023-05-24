@@ -15,7 +15,7 @@ use iota_sdk::{
         Client, Result,
     },
     types::block::{
-        address::{Address, AliasAddress},
+        address::{Address, AliasAddress, ToBech32Ext},
         input::{Input, UtxoInput},
         output::{AliasId, InputsCommitment},
         payload::{

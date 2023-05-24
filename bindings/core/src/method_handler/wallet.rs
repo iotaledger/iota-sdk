@@ -3,7 +3,10 @@
 
 use std::time::Duration;
 
-use iota_sdk::wallet::{message_interface::dtos::AccountDetailsDto, wallet::Wallet};
+use iota_sdk::{
+    types::block::address::ToBech32Ext,
+    wallet::{message_interface::dtos::AccountDetailsDto, wallet::Wallet},
+};
 #[cfg(feature = "stronghold")]
 use zeroize::Zeroize;
 

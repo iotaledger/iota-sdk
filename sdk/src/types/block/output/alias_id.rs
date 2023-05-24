@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
-    address::{Address, AliasAddress, Bech32Address, Hrp},
+    address::{Address, AliasAddress, Bech32Address, Hrp, ToBech32Ext},
     output::OutputId,
 };
 

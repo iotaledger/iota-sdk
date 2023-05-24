@@ -157,8 +157,9 @@ pub enum AccountMethod {
         options: Option<TransactionOptionsDto>,
     },
     /// Generate new unused addresses.
-    /// Expected response: [`GeneratedAddress`](crate::wallet::message_interface::Response::GeneratedAddress)
-    GenerateAddresses {
+    /// Expected response:
+    /// [`GeneratedEd25519Addresses`](crate::wallet::message_interface::Response::GeneratedEd25519Addresses)
+    GenerateEd25519Addresses {
         amount: u32,
         options: Option<GenerateAddressOptions>,
     },
