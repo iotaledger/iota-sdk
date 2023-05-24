@@ -4,7 +4,7 @@
 use iota_sdk::{
     client::api::PreparedTransactionDataDto,
     types::block::{
-        address::{Address, Ed25519Address},
+        address::{Address, Bech32Address, Ed25519Address},
         input::{Input, UtxoInput},
         output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output, OutputId},
         payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionId},
@@ -37,7 +37,8 @@ fn wallet_events_serde() {
 
     #[cfg(feature = "ledger_nano")]
     assert_serde_eq(WalletEvent::LedgerAddressGeneration(AddressData {
-        address: "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string(),
+        address: Bech32Address::try_from_str("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")
+            .unwrap(),
     }));
 
     let output_data_dto = OutputDataDto::from(&OutputData {
@@ -72,7 +73,8 @@ fn wallet_events_serde() {
 
     assert_serde_eq(WalletEvent::TransactionProgress(
         TransactionProgressEvent::GeneratingRemainderDepositAddress(AddressData {
-            address: "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string(),
+            address: Bech32Address::try_from_str("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")
+                .unwrap(),
         }),
     ));
 
