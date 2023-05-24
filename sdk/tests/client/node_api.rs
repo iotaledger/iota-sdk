@@ -36,7 +36,7 @@ async fn setup_tagged_data_block() -> BlockId {
 }
 
 pub fn setup_secret_manager() -> SecretManager {
-    SecretManager::try_from_hex_seed(DEFAULT_DEVELOPMENT_SEED).unwrap()
+    SecretManager::try_from_hex_seed(DEFAULT_DEVELOPMENT_SEED.to_owned()).unwrap()
 }
 
 // Sends a transaction block to the node to test against it.
