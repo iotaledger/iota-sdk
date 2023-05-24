@@ -5,7 +5,7 @@
 use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
-    types::block::address::{Bech32Address, ToBech32Ext},
+    types::block::address::Bech32Address,
     wallet::account::{types::address::AccountAddress, Account},
 };
 
@@ -88,7 +88,9 @@ impl Account {
                             self.emit(
                                 account_details.index,
                                 WalletEvent::LedgerAddressGeneration(AddressData {
-                                    address: address[0].to_bech32(bech32_hrp),
+                                    address: crate::types::block::address::ToBech32Ext::to_bech32(
+                                        address[0], bech32_hrp,
+                                    ),
                                 }),
                             )
                             .await;
