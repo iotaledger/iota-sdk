@@ -67,28 +67,28 @@ impl Serialize for WalletEvent {
         }
         let event = match self {
             Self::ConsolidationRequired => TypedWalletEvent_ {
-                kind: 0,
+                kind: WalletEventType::ConsolidationRequired as u8,
                 event: WalletEvent_::T0,
             },
             #[cfg(feature = "ledger_nano")]
             Self::LedgerAddressGeneration(e) => TypedWalletEvent_ {
-                kind: 1,
+                kind: WalletEventType::LedgerAddressGeneration as u8,
                 event: WalletEvent_::T1(e),
             },
             Self::NewOutput(e) => TypedWalletEvent_ {
-                kind: 2,
+                kind: WalletEventType::NewOutput as u8,
                 event: WalletEvent_::T2(e),
             },
             Self::SpentOutput(e) => TypedWalletEvent_ {
-                kind: 3,
+                kind: WalletEventType::SpentOutput as u8,
                 event: WalletEvent_::T3(e),
             },
             Self::TransactionInclusion(e) => TypedWalletEvent_ {
-                kind: 4,
+                kind: WalletEventType::TransactionInclusion as u8,
                 event: WalletEvent_::T4(e),
             },
             Self::TransactionProgress(e) => TypedWalletEvent_ {
-                kind: 5,
+                kind: WalletEventType::TransactionProgress as u8,
                 event: WalletEvent_::T5(TransactionProgressEvent_ { progress: e }),
             },
         };
@@ -105,39 +105,43 @@ impl<'de> Deserialize<'de> for WalletEvent {
 
         let value = serde_json::Value::deserialize(d)?;
         Ok(
-            match value
-                .get("type")
-                .and_then(serde_json::Value::as_u64)
-                .ok_or_else(|| serde::de::Error::custom("invalid event type"))? as u8
+            match WalletEventType::try_from(
+                value
+                    .get("type")
+                    .and_then(serde_json::Value::as_u64)
+                    .ok_or_else(|| serde::de::Error::custom("invalid event type"))? as u8,
+            )
+            .map_err(serde::de::Error::custom)?
             {
-                0 => Self::ConsolidationRequired,
+                WalletEventType::ConsolidationRequired => Self::ConsolidationRequired,
                 #[cfg(feature = "ledger_nano")]
-                1 => Self::LedgerAddressGeneration(AddressData::deserialize(value).map_err(|e| {
-                    serde::de::Error::custom(format!("cannot deserialize LedgerAddressGeneration: {e}"))
-                })?),
-                2 => {
+                WalletEventType::LedgerAddressGeneration => {
+                    Self::LedgerAddressGeneration(AddressData::deserialize(value).map_err(|e| {
+                        serde::de::Error::custom(format!("cannot deserialize LedgerAddressGeneration: {e}"))
+                    })?)
+                }
+                WalletEventType::NewOutput => {
                     Self::NewOutput(Box::new(NewOutputEvent::deserialize(value).map_err(|e| {
                         serde::de::Error::custom(format!("cannot deserialize NewOutput: {e}"))
                     })?))
                 }
-                3 => {
+                WalletEventType::SpentOutput => {
                     Self::SpentOutput(Box::new(SpentOutputEvent::deserialize(value).map_err(|e| {
                         serde::de::Error::custom(format!("cannot deserialize SpentOutput: {e}"))
                     })?))
                 }
-                4 => {
+                WalletEventType::TransactionInclusion => {
                     Self::TransactionInclusion(TransactionInclusionEvent::deserialize(value).map_err(|e| {
                         serde::de::Error::custom(format!("cannot deserialize TransactionInclusion: {e}"))
                     })?)
                 }
-                5 => Self::TransactionProgress(
+                WalletEventType::TransactionProgress => Self::TransactionProgress(
                     TransactionProgressEvent_::deserialize(value)
                         .map_err(|e| {
                             serde::de::Error::custom(format!("cannot deserialize TransactionProgressEvent: {e}"))
                         })?
                         .progress,
                 ),
-                _ => return Err(serde::de::Error::custom("invalid event type")),
             },
         )
     }
