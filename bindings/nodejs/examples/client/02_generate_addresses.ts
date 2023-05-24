@@ -10,7 +10,7 @@ import {
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/client/02_generate_addresses.js
+// yarn run-example ./client/02_generate_addresses.ts
 
 // In this example we will create addresses from a mnemonic defined in .env
 async function run() {

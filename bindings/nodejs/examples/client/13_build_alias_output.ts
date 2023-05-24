@@ -15,7 +15,7 @@ import {
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// node ./dist/client/13_build_alias_output.js
+// yarn run-example ./client/13_build_alias_output.ts
 
 // Build a basic output
 async function run() {

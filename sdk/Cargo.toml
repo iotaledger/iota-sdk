@@ -95,17 +95,79 @@ tls = [ "reqwest?/rustls-tls", "rumqttc?/use-rustls" ]
 client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10" ]
 wallet = [ "client" ]
 
+# Ed25519 Examples
+
+[[example]]
+name = "sign_and_verify_ed25519"
+path = "examples/how_tos/sign_and_verify_ed25519/sign_ed25519.rs"
+required-features = [ "stronghold" ]
+
+[[example]]
+name = "verify_ed25519_signature"
+path = "examples/how_tos/sign_and_verify_ed25519/verify_ed25519_signature.rs"
+
+# Accounts and Addresses Examples
+
+[[example]]
+name = "create_mnemonic"
+path = "examples/how_tos/accounts_and_addresses/create_mnemonic.rs"
+
+[[example]]
+name = "create_account"
+path = "examples/how_tos/accounts_and_addresses/create_account.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "list_accounts"
+path = "examples/how_tos/accounts_and_addresses/list_accounts.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "check_balance"
+path = "examples/how_tos/accounts_and_addresses/check_balance.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "list_addresses"
+path = "examples/how_tos/accounts_and_addresses/list_addresses.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "create_address"
+path = "examples/how_tos/accounts_and_addresses/create_address.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "list_transactions"
+path = "examples/how_tos/accounts_and_addresses/list_transactions.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "list_outputs"
+path = "examples/how_tos/accounts_and_addresses/list_outputs.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
 # Simple Transaction Examples
 
 [[example]]
 name = "request_funds"
 path = "examples/how_tos/simple_transaction/request_funds.rs"
-required-features = [ "wallet" ]
+required-features = [ "rocksdb", "stronghold" ]
 
 [[example]]
 name = "simple_transaction"
 path = "examples/how_tos/simple_transaction/simple_transaction.rs"
-required-features = [ "wallet", "stronghold" ]
+required-features = [ "rocksdb", "stronghold" ]
+
+# Outputs
+
+[[example]]
+name = "output_unlock_conditions"
+path = "examples/how_tos/outputs/unlock_conditions.rs"
+
+[[example]]
+name = "output_features"
+path = "examples/how_tos/outputs/features.rs"
 
 # Block examples
 
@@ -311,11 +373,6 @@ required-features = [ "client" ]
 #######
 
 [[example]]
-name = "generate_mnemonic"
-path = "examples/client/00_generate_mnemonic.rs"
-required-features = [ "client" ]
-
-[[example]]
 name = "generate_addresses"
 path = "examples/client/01_generate_addresses.rs"
 required-features = [ "client" ]
@@ -471,21 +528,6 @@ required-features = [ "wallet", "stronghold" ]
 name = "3_send_transaction"
 path = "examples/wallet/offline_signing/3_send_transaction.rs"
 required-features = [ "wallet", "storage" ]
-
-[[example]]
-name = "create_wallet"
-path = "examples/wallet/01_create_wallet.rs"
-required-features = [ "wallet", "storage", "stronghold" ]
-
-[[example]]
-name = "generate_address"
-path = "examples/wallet/02_generate_address.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "get_balance"
-path = "examples/wallet/04_get_balance.rs"
-required-features = [ "wallet" ]
 
 [[example]]
 name = "send_micro_transaction"

@@ -3,81 +3,20 @@
 
 // Dtos with amount as String, to prevent overflow issues in other languages
 
-use std::{
-    collections::{HashMap, HashSet},
-    str::FromStr,
-};
+use std::collections::{HashMap, HashSet};
 
 use serde::{Deserialize, Serialize};
 
 use crate::{
     types::block::{
-        address::Bech32Address,
         output::{dto::FoundryOutputDto, FoundryId, OutputId},
         payload::transaction::TransactionId,
     },
-    wallet::{
-        account::{
-            types::{AccountAddress, AddressWithUnspentOutputs, TransactionDto},
-            AccountDetails, OutputDataDto,
-        },
-        SendAmountParams,
+    wallet::account::{
+        types::{AccountAddress, AddressWithUnspentOutputs, TransactionDto},
+        AccountDetails, OutputDataDto,
     },
 };
-
-/// Dto for address with amount for `send_amount()`
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SendAmountParamsDto {
-    /// Bech32 encoded address
-    pub address: String,
-    /// Amount
-    pub amount: String,
-    /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
-    /// first address of the account
-    pub return_address: Option<String>,
-    /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
-    /// receiver before. Default is 1 day
-    pub expiration: Option<u32>,
-}
-
-impl TryFrom<&SendAmountParamsDto> for SendAmountParams {
-    type Error = crate::wallet::Error;
-
-    fn try_from(value: &SendAmountParamsDto) -> crate::wallet::Result<Self> {
-        Ok(Self::new(
-            value.address.clone(),
-            u64::from_str(&value.amount).map_err(|_| crate::client::Error::InvalidAmount(value.amount.clone()))?,
-        )
-        .with_return_address(value.return_address.clone())
-        .with_expiration(value.expiration))
-    }
-}
-
-/// Dto for an account address with output_ids of unspent outputs.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct AddressWithUnspentOutputsDto {
-    /// The address.
-    pub address: Bech32Address,
-    /// The address key index.
-    pub key_index: u32,
-    /// Determines if an address is a public or an internal (change) address.
-    pub internal: bool,
-    /// Output ids
-    pub output_ids: Vec<OutputId>,
-}
-
-impl From<&AddressWithUnspentOutputs> for AddressWithUnspentOutputsDto {
-    fn from(value: &AddressWithUnspentOutputs) -> Self {
-        Self {
-            address: value.address.clone(),
-            key_index: value.key_index,
-            internal: value.internal,
-            output_ids: value.output_ids.clone(),
-        }
-    }
-}
 
 /// Dto for an Account.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -94,7 +33,7 @@ pub struct AccountDetailsDto {
     /// Internal addresses
     pub internal_addresses: Vec<AccountAddress>,
     /// Addresses with unspent outputs
-    pub addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputsDto>,
+    pub addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
     /// Outputs
     pub outputs: HashMap<OutputId, OutputDataDto>,
     /// Unspent outputs that are currently used as input for transactions
@@ -120,11 +59,7 @@ impl From<&AccountDetails> for AccountDetailsDto {
             alias: value.alias().clone(),
             public_addresses: value.public_addresses.clone(),
             internal_addresses: value.internal_addresses.clone(),
-            addresses_with_unspent_outputs: value
-                .addresses_with_unspent_outputs()
-                .iter()
-                .map(AddressWithUnspentOutputsDto::from)
-                .collect(),
+            addresses_with_unspent_outputs: value.addresses_with_unspent_outputs().clone(),
             outputs: value
                 .outputs()
                 .iter()

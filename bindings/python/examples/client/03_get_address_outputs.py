@@ -9,7 +9,7 @@ node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 # Create a Client instance
 client = Client(nodes=[node_url])
 
-query_parameters = NodeIndexerAPI.QueryParameter(
+query_parameters = NodeIndexerAPI.QueryParameters(
     address='rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
     has_expiration=False,
     has_timelock=False,
@@ -21,5 +21,5 @@ output_ids_response = client.basic_output_ids(query_parameters)
 print(f'{output_ids_response}')
 
 # Get the outputs by their id
-outputs = client.get_outputs(output_ids_response['items'])
+outputs = client.get_outputs(output_ids_response.items)
 print(f'{outputs}')

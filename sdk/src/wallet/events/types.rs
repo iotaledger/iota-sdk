@@ -329,5 +329,5 @@ pub struct AddressConsolidationNeeded {
 pub struct AddressData {
     /// The address.
     #[getset(get = "pub")]
-    pub address: String,
+    pub address: Bech32Address,
 }

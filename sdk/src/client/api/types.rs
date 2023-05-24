@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::secret::types::{InputSigningData, InputSigningDataDto},
     types::block::{
-        address::{dto::AddressDto, Address},
+        address::{dto::AddressDto, Address, Bech32Address},
         output::{dto::OutputDto, Output},
         payload::{
             transaction::{
@@ -226,7 +226,7 @@ pub struct RawAddresses {
 #[derive(Debug, Clone)]
 pub struct Bech32Addresses {
     /// Public addresses
-    pub public: Vec<String>,
+    pub public: Vec<Bech32Address>,
     /// Internal/change addresses <https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#change>
-    pub internal: Vec<String>,
+    pub internal: Vec<Bech32Address>,
 }

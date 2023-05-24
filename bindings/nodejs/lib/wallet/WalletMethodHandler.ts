@@ -38,7 +38,11 @@ export class WalletMethodHandler {
             this.methodHandler,
         ).catch((error: Error) => {
             try {
-                error = JSON.parse(error.toString()).payload;
+                if (error.message !== undefined) {
+                    error = JSON.parse(error.message).payload;
+                } else {
+                    error = JSON.parse(error.toString()).payload;
+                }
             } catch (e) {
                 console.error(e);
             }
@@ -71,6 +75,14 @@ export class WalletMethodHandler {
     }
 
     async getClient(): Promise<Client> {
-        return new Client(await getClientFromWallet(this.methodHandler));
+        return new Promise((resolve, reject) => {
+            getClientFromWallet(this.methodHandler).then((result: any) => {
+                if (result.message !== undefined) {
+                    reject(JSON.parse(result.message).payload);
+                } else {
+                    resolve(new Client(result));
+                }
+            });
+        });
     }
 }

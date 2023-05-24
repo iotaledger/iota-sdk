@@ -16,7 +16,7 @@ use crate::{
         secret::GenerateAddressOptions,
     },
     types::block::{
-        dto::U256Dto,
+        address::Bech32Address,
         output::{
             dto::{NativeTokenDto, OutputDto, TokenSchemeDto},
             feature::dto::FeatureDto,
@@ -41,9 +41,9 @@ use crate::{
             },
             FilterOptions,
         },
-        message_interface::dtos::SendAmountParamsDto,
-        SendNativeTokensParams, SendNftParams,
+        SendAmountParams, SendNativeTokensParams, SendNftParams,
     },
+    U256,
 };
 
 /// Each public account method.
@@ -113,7 +113,7 @@ pub enum AccountMethod {
         /// Native token id
         token_id: TokenId,
         /// To be burned amount
-        burn_amount: U256Dto,
+        burn_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Burn an nft output. Outputs controlled by it will be swept before if they don't have a storage
@@ -181,9 +181,9 @@ pub enum AccountMethod {
     /// Get the transaction with inputs of an incoming transaction stored in the account
     /// List might not be complete, if the node pruned the data already
     /// Expected response:
-    /// [`IncomingTransactionData`](crate::wallet::message_interface::Response::IncomingTransactionData)
+    /// [`Transaction`](crate::wallet::message_interface::Response::Transaction)
     #[serde(rename_all = "camelCase")]
-    GetIncomingTransactionData { transaction_id: TransactionId },
+    GetIncomingTransaction { transaction_id: TransactionId },
     /// Expected response: [`Addresses`](crate::wallet::message_interface::Response::Addresses)
     /// List addresses.
     Addresses,
@@ -201,7 +201,7 @@ pub enum AccountMethod {
     UnspentOutputs { filter_options: Option<FilterOptions> },
     /// Returns all incoming transactions of the account
     /// Expected response:
-    /// [`IncomingTransactionsData`](crate::wallet::message_interface::Response::IncomingTransactionsData)
+    /// [`Transactions`](crate::wallet::message_interface::Response::Transactions)
     IncomingTransactions,
     /// Returns all transaction of the account
     /// Expected response: [`Transactions`](crate::wallet::message_interface::Response::Transactions)
@@ -217,7 +217,7 @@ pub enum AccountMethod {
         /// Native token id
         token_id: TokenId,
         /// To be melted amount
-        melt_amount: U256Dto,
+        melt_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Calculate the minimum required storage deposit for an output.
@@ -231,7 +231,7 @@ pub enum AccountMethod {
         /// Native token id
         token_id: TokenId,
         /// To be minted amount
-        mint_amount: U256Dto,
+        mint_amount: U256,
         options: Option<TransactionOptionsDto>,
     },
     /// Mint native token.
@@ -255,7 +255,7 @@ pub enum AccountMethod {
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
-        params: OutputParamsDto,
+        params: Box<OutputParamsDto>,
         transaction_options: Option<TransactionOptionsDto>,
     },
     /// Prepare transaction.
@@ -268,7 +268,7 @@ pub enum AccountMethod {
     /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareSendAmount {
-        params: Vec<SendAmountParamsDto>,
+        params: Vec<SendAmountParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
@@ -294,7 +294,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SendAmount {
-        params: Vec<SendAmountParamsDto>,
+        params: Vec<SendAmountParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Send native tokens.
@@ -418,5 +418,5 @@ pub enum AccountMethod {
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     GetParticipationEvents,
     /// Expected response: [`Faucet`](crate::wallet::message_interface::Response::Faucet)
-    RequestFundsFromFaucet { url: String, address: String },
+    RequestFundsFromFaucet { url: String, address: Bech32Address },
 }

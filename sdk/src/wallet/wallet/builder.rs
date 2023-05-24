@@ -36,7 +36,7 @@ pub struct WalletBuilder {
     coin_type: Option<u32>,
     #[cfg(feature = "storage")]
     storage_options: Option<StorageOptions>,
-    #[serde(default, skip_serializing, skip_deserializing)]
+    #[serde(default, skip)]
     pub(crate) secret_manager: Option<Arc<RwLock<SecretManager>>>,
 }
 
@@ -183,10 +183,10 @@ impl WalletBuilder {
         storage_manager.save_wallet_data(&self).await?;
 
         #[cfg(feature = "events")]
-        let event_emitter = tokio::sync::Mutex::new(EventEmitter::new());
+        let event_emitter = tokio::sync::RwLock::new(EventEmitter::new());
 
         #[cfg(feature = "storage")]
-        let mut accounts = storage_manager.get_accounts().await.unwrap_or_default();
+        let mut accounts = storage_manager.get_accounts().await?;
 
         // It happened that inputs got locked, the transaction failed, but they weren't unlocked again, so we do this
         // here

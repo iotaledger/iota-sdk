@@ -17,7 +17,12 @@ use once_cell::sync::OnceCell;
 use pyo3::{prelude::*, wrap_pyfunction};
 use tokio::runtime::Runtime;
 
-use self::{client::*, error::Result, secret_manager::*, wallet::*};
+use self::{
+    client::*,
+    error::{Error, Result},
+    secret_manager::*,
+    wallet::*,
+};
 
 /// Use one runtime.
 pub(crate) fn block_on<C: futures::Future>(cb: C) -> C::Output {
@@ -26,10 +31,10 @@ pub(crate) fn block_on<C: futures::Future>(cb: C) -> C::Output {
     runtime.lock().unwrap().block_on(cb)
 }
 
-/// Init the logger of wallet library.
+/// Init the Rust logger.
 #[pyfunction]
-pub fn init_logger(config: String) -> PyResult<()> {
-    rust_init_logger(config).expect("failed to init logger");
+pub fn init_logger(config: String) -> Result<()> {
+    rust_init_logger(config).map_err(|err| Error::from(format!("{:?}", err)))?;
     Ok(())
 }
 
