@@ -190,7 +190,7 @@ impl TryFrom<&SecretManagerDto> for SecretManager {
             SecretManagerDto::Mnemonic(mnemonic) => Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?),
 
             SecretManagerDto::HexSeed(hex_seed) => {
-                // `SecretManagerDto` is `SeroizeOnDrop` so it will take care of the original.
+                // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
                 Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed.clone())?)
             }
 
