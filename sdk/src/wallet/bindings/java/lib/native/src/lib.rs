@@ -241,6 +241,7 @@ pub unsafe extern "system" fn Java_org_iota_api_NativeApi_listen(
 
 // This keeps rust from "mangling" the name and making it unique for this crate.
 #[no_mangle]
+#[allow(clippy::missing_safety_doc)]
 pub unsafe extern "system" fn Java_org_iota_api_NativeApi_migrateStrongholdSnapshotV2ToV3(
     mut env: JNIEnv,
     _class: JClass,
