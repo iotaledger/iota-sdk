@@ -26,14 +26,14 @@ pub enum Error {
     #[error("no mnemonic has been stored into the Stronghold vault")]
     MnemonicMissing,
     /// Procedure execution error from Stronghold
-    #[error("Stronghold reported a procedure error: {0}")]
+    #[error("stronghold reported a procedure error: {0}")]
     Procedure(#[from] iota_stronghold::procedures::ProcedureError),
     // TODO remove later
     /// Invalid mnemonic error
     #[error("invalid mnemonic {0}")]
     InvalidMnemonic(String),
     /// Unsupported snapshot version
-    #[error("Unsupported snapshot version, migration required")]
+    #[error("unsupported snapshot version, migration required")]
     UnsupportedSnapshotVersion {
         /// Found version
         found: u16,
@@ -41,6 +41,9 @@ pub enum Error {
         expected: u16,
     },
     /// Migration error
-    #[error("Stronghold migration error: {0}")]
+    #[error("stronghold migration error: {0}")]
     Migration(#[from] iota_stronghold::engine::snapshot::migration::Error),
+    /// Invalid rounds error
+    #[error("invalid rounds error: {0}")]
+    InvalidRounds(u32),
 }

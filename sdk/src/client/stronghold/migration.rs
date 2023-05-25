@@ -12,7 +12,7 @@ use iota_stronghold::{Client, SnapshotPath, Stronghold};
 use zeroize::Zeroize;
 
 use super::{common::PRIVATE_DATA_CLIENT_PATH, Error, StrongholdAdapter};
-use crate::client::stronghold::{check_or_create_snapshot, storage::insert as v3_insert};
+use crate::client::stronghold::{check_or_create_snapshot, storage::insert as v3_insert, Error as StrongholdError};
 
 impl StrongholdAdapter {
     /// Migrates a snapshot from version 2 to version 3.
@@ -33,8 +33,7 @@ impl StrongholdAdapter {
         crypto::keys::pbkdf::PBKDF2_HMAC_SHA512(
             current_password.as_bytes(),
             salt.as_bytes(),
-            // TODO
-            NonZeroU32::try_from(rounds).unwrap(),
+            NonZeroU32::try_from(rounds).map_err(|_| StrongholdError::InvalidRounds(rounds))?,
             buffer.as_mut(),
         );
 
