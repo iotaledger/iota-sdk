@@ -116,12 +116,10 @@ pub async fn backup_command(storage_path: &Path, snapshot_path: &Path, backup_pa
 }
 
 pub async fn change_password_command(storage_path: &Path, snapshot_path: &Path) -> Result<Wallet, Error> {
-    let mut password = get_password("Stronghold password", !snapshot_path.exists())?;
+    let password = get_password("Stronghold password", !snapshot_path.exists())?;
     let wallet = unlock_wallet(storage_path, snapshot_path, &password).await?;
-    let mut new_password = get_password("Stronghold new password", true)?;
+    let new_password = get_password("Stronghold new password", true)?;
     wallet.change_stronghold_password(&password, &new_password).await?;
-    password.zeroize();
-    new_password.zeroize();
 
     Ok(wallet)
 }
@@ -211,9 +209,7 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
         .finish()
         .await?;
 
-    wallet
-        .restore_backup(backup_path.into(), password.to_string(), None, None)
-        .await?;
+    wallet.restore_backup(backup_path.into(), password, None, None).await?;
 
     Ok(wallet)
 }
