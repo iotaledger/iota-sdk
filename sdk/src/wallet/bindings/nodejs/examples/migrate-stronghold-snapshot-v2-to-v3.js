@@ -57,7 +57,7 @@ async function run() {
     };
 
     // This shouldn't fail anymore as snapshot has been migrated.
-    const manager = new AccountManager(accountManagerOptions);
+    new AccountManager(accountManagerOptions);
 
     process.exit(0);
 }
