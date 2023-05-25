@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! cargo run --example migrate_stronghold_snapshot_v2_to_v3 --features=stronghold --release
+//! cargo run --release --all-features --example migrate_stronghold_snapshot_v2_to_v3
 
 use iota_sdk::client::{
     api::GetAddressesBuilder,
