@@ -6,6 +6,7 @@
 #[cfg(feature = "stronghold")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
 mod stronghold;
+
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
