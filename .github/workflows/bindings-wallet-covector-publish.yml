@@ -150,8 +150,8 @@ jobs:
         if: ${{ startsWith(matrix.os, 'macos') }}
         run: |
           cargo install cargo-patch
-          cp ${{ github.workspace }}/patches/rocksdb_faligned_allocation.patch .
-          git apply --ignore-space-change --ignore-whitespace ${{ github.workspace }}/patches/macos_cargo_toml.patch
+          cp ${{ github.workspace }}/.patches/rocksdb_faligned_allocation.patch .
+          git apply --ignore-space-change --ignore-whitespace ${{ github.workspace }}/.patches/macos_cargo_toml.patch
           cat Cargo.toml
           cargo patch
 
