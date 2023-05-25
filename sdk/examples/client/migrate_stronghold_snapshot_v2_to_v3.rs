@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
     println!("Creating a stronghold failed with error: {error:?}");
 
     println!("Migrating snapshot from v2 to v3");
-    StrongholdAdapter::migrate_v2_to_v3(
+    StrongholdAdapter::migrate_snapshot_v2_to_v3(
         "test.stronghold",
         "current_password",
         "wallet.rs",

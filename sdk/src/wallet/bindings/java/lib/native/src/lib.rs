@@ -260,7 +260,7 @@ pub unsafe extern "system" fn Java_org_iota_api_NativeApi_migrateStrongholdSnaps
     let new_path = env.get_string(&new_path).map(String::from).ok();
     let new_password = env.get_string(&new_password).map(String::from).ok();
 
-    let ret = StrongholdAdapter::migrate_v2_to_v3(
+    let ret = StrongholdAdapter::migrate_snapshot_v2_to_v3(
         &current_path,
         &current_password,
         &salt,

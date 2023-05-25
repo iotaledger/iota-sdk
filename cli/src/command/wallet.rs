@@ -161,7 +161,7 @@ pub async fn init_command(
 
 pub async fn migrate_command(path: Option<String>) -> Result<(), Error> {
     let mut password = get_password("Stronghold password", false)?;
-    StrongholdAdapter::migrate_v2_to_v3(
+    StrongholdAdapter::migrate_snapshot_v2_to_v3(
         path.as_deref().unwrap_or(DEFAULT_STRONGHOLD_SNAPSHOT_PATH),
         &password,
         "wallet.rs",

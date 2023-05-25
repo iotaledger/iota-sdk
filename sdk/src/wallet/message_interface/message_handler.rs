@@ -321,7 +321,7 @@ impl WalletMessageHandler {
                 new_password,
             } => {
                 convert_async_panics(|| async {
-                    StrongholdAdapter::migrate_v2_to_v3(
+                    StrongholdAdapter::migrate_snapshot_v2_to_v3(
                         &current_path,
                         &current_password,
                         &salt,

@@ -201,7 +201,7 @@ pub fn migrate_stronghold_snapshot_v2_to_v3(mut cx: FunctionContext) -> JsResult
         .transpose()?
         .map(|opt| opt.value(&mut cx));
 
-    StrongholdAdapter::migrate_v2_to_v3(
+    StrongholdAdapter::migrate_snapshot_v2_to_v3(
         &current_path,
         &current_password,
         &salt,

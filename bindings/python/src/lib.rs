@@ -56,7 +56,7 @@ pub fn migrate_stronghold_snapshot_v2_to_v3(
     new_path: Option<String>,
     new_password: Option<String>,
 ) -> Result<()> {
-    Ok(StrongholdAdapter::migrate_v2_to_v3(
+    Ok(StrongholdAdapter::migrate_snapshot_v2_to_v3(
         &current_path,
         &current_password,
         &salt,

@@ -16,7 +16,7 @@ use crate::client::stronghold::{check_or_create_snapshot, storage::insert as v3_
 
 impl StrongholdAdapter {
     /// Migrates a snapshot from version 2 to version 3.
-    pub fn migrate_v2_to_v3<P: AsRef<Path>>(
+    pub fn migrate_snapshot_v2_to_v3<P: AsRef<Path>>(
         current_path: P,
         current_password: &str,
         salt: &str,
@@ -24,7 +24,7 @@ impl StrongholdAdapter {
         new_path: Option<P>,
         new_password: Option<&str>,
     ) -> Result<(), Error> {
-        log::debug!("migrate_v2_to_v3");
+        log::debug!("migrate_snapshot_v2_to_v3");
         use iota_stronghold::engine::snapshot::migration::{migrate, Version};
 
         let mut buffer = [0u8; 32];

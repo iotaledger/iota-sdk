@@ -35,7 +35,7 @@ async fn stronghold_snapshot_v2_v3_migration() {
         Err(StrongholdError::UnsupportedSnapshotVersion { found, expected }) if found == 2 && expected == 3
     ));
 
-    StrongholdAdapter::migrate_v2_to_v3(
+    StrongholdAdapter::migrate_snapshot_v2_to_v3(
         "./tests/wallet/fixtures/v2.stronghold",
         "current_password",
         PBKDF_SALT,
@@ -131,7 +131,7 @@ async fn stronghold_snapshot_v2_v3_migration_same_path() {
         Err(StrongholdError::UnsupportedSnapshotVersion { found, expected }) if found == 2 && expected == 3
     ));
 
-    StrongholdAdapter::migrate_v2_to_v3(
+    StrongholdAdapter::migrate_snapshot_v2_to_v3(
         "./tests/wallet/fixtures/v2-copy.stronghold",
         "current_password",
         PBKDF_SALT,
@@ -161,7 +161,7 @@ async fn stronghold_snapshot_v2_v3_migration_with_backup() {
         Err(StrongholdError::UnsupportedSnapshotVersion { found, expected }) if found == 2 && expected == 3
     ));
 
-    StrongholdAdapter::migrate_v2_to_v3(
+    StrongholdAdapter::migrate_snapshot_v2_to_v3(
         "./tests/wallet/fixtures/v2_with_backup.stronghold",
         "current_password",
         PBKDF_SALT,
