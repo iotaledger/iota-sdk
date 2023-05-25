@@ -56,7 +56,7 @@ pub fn migrate_stronghold_snapshot_v2_to_v3(
     new_path: Option<String>,
     new_password: Option<String>,
 ) -> Result<()> {
-    StrongholdAdapter::migrate_v2_to_v3(
+    Ok(StrongholdAdapter::migrate_v2_to_v3(
         &current_path,
         &current_password,
         &salt,
@@ -64,9 +64,7 @@ pub fn migrate_stronghold_snapshot_v2_to_v3(
         new_path.as_ref(),
         new_password.as_deref(),
     )
-    .map_err(iota_sdk_bindings_core::iota_sdk::client::Error::Stronghold)?;
-
-    Ok(())
+    .map_err(iota_sdk_bindings_core::iota_sdk::client::Error::Stronghold)?)
 }
 
 /// IOTA SDK implemented in Rust for Python binding.
