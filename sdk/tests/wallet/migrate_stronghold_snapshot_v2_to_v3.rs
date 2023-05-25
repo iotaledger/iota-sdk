@@ -61,21 +61,20 @@ async fn stronghold_snapshot_v2_v3_migration() {
         .await
         .unwrap();
 
-    // These addresses have been generated with the same snapshot file but with a branch supporting v2 as the current
-    // branch only supports v3.
+    // mnemonic: winter spend artefact viable cigar pink easy charge ranch license coyote cage brass mushroom repair game attack peanut glad rather cart obey famous chat
     assert_eq!(
         addresses,
         [
-            "rms1qrut5ajyfrtgjs325kd9chwfwyyy2z3fewy4vgy0vvdtf2pr8prg5u3zwjn",
-            "rms1qqhvvur9xfj6yhgsxfa4f8xst7vz9zxeu3vcxds8mh4a6jlpteq9xrajhtf",
-            "rms1qr47gz3xxjqpjrwd0yu5glhqrth6w0t08npney8000ust2lcw2r92j5a8rt",
-            "rms1qz0dzxdax3g0fkz8sz5newd8ctc40ge3lj9ascj7wp7as52n2pjl64capk2",
-            "rms1qryrtqe4y3secxy2vuj6fqmwzmxu7uwxed57h2k4ll469j6jtsw2y3wup6s",
-            "rms1qz0v4tgthfnrx7u9tvqrt4za94a4s6uvg9yp46fg8musjk467fd0xvleq0a",
-            "rms1qqs75c7mumdzjl3fhg6pg60daec95f3frfysx46hh87vud7xcr9xjhzlcxe",
-            "rms1qpz3s73aus2m9sv9pxjxqskg2l5fq9v2ye4ed5xuyageq5kgpg6qkz6dllz",
-            "rms1qz805rfsr0sc7aa3kvlv2z5pa5xyp3jla63p06tkqlx39dzctf6awf78c3m",
-            "rms1qz8vuyjn0w05jragnca7k3eazxtqhjz4yg8q52ghcrpvr6k3xfn6grfrn2l",
+            "rms1qrzyp87nqvcdctwrc7yzxjnwwetagffslhuknmey8t4fdf6552dnjxuaj3u",
+            "rms1qpsvxm4q9p3xe4tkqjr04a64j0gxvhe0prt06vxwp0spkxfc8nr5gs28u0l",
+            "rms1qqrt84z3dlhfy9wxa9whpn3xz9ugtspy80xwpu84p0cdszjc9vwr6d50m6k",
+            "rms1qr57qle3rtj2kh5dtq8f00ys79cwa9dc3hq0hacd63aw0ngrx620vcctcza",
+            "rms1qqkyhtt2lrqqpufcvydf6s7h8netyw0utuf0h458nafz26298wrespmrnyj",
+            "rms1qz683r2zpl0qz355c3xlsrskke3563y9tn0s8u498zaxssr8ves0xq5p6c0",
+            "rms1qrj4hszlpj6dnh3tpam5lwp0whgquj995ujsjvw0rxa5rt0sacrxxh4j9t7",
+            "rms1qra52h296s4ty3x5np748xtruw52we63ardlp96v25yl9gzml7f7z8cvp9k",
+            "rms1qqch88nnarx0czrdjee6v74ym08ruccr5w3wwxpk7nwjh3ll0dynxlnjtrw",
+            "rms1qqrsl203x9wq29a2amcdszsps2lz7q20mqkh8t8vch0rz86pss9fwa8pjgx",
         ]
     );
 
