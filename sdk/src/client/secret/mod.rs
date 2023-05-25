@@ -195,7 +195,10 @@ impl TryFrom<&SecretManagerDto> for SecretManager {
                 Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.clone())?)
             }
 
-            SecretManagerDto::HexSeed(hex_seed) => Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed)?),
+            SecretManagerDto::HexSeed(hex_seed) => {
+                // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
+                Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed.clone())?)
+            }
 
             SecretManagerDto::Placeholder => Self::Placeholder(PlaceholderSecretManager),
         })
@@ -317,7 +320,7 @@ impl SecretManager {
     }
 
     /// Tries to create a [`SecretManager`] from a seed hex string.
-    pub fn try_from_hex_seed(seed: &str) -> crate::client::Result<Self> {
+    pub fn try_from_hex_seed(seed: String) -> crate::client::Result<Self> {
         Ok(Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(seed)?))
     }
 
