@@ -8,8 +8,8 @@
 //! - Smart-card-like secret vault
 //! - Generic key-value, encrypted database
 //!
-//! [`StrongholdAdapter`] respectively implements [`StorageProvider`] and [`SecretManage`] for the above purposes
-//! using Stronghold. Type aliases `StrongholdStorageProvider` and `StrongholdSecretManager` are also provided if one
+//! [`StrongholdAdapter`] respectively implements [`StorageAdapter`] and [`SecretManage`] for the above purposes
+//! using Stronghold. Type aliases `StrongholdStorageAdapter` and `StrongholdSecretManager` are also provided if one
 //! wants to have a more consistent naming when using any of the feature sets.
 //!
 //! Use [`builder()`] to construct a [`StrongholdAdapter`] with customized parameters; see documentation of methods of
@@ -38,7 +38,7 @@
 //! after creating a [`StrongholdAdapter`] with a non-existent snapshot path.
 //!
 //! [Stronghold]: iota_stronghold
-//! [`StorageProvider`]: crate::client::storage::StorageProvider
+//! [`StorageAdapter`]: crate::client::storage::StorageAdapter
 //! [`SecretManage`]: crate::client::secret::SecretManage
 //! [`builder()`]: self::StrongholdAdapter::builder()
 //! [`set_password()`]: self::StrongholdAdapter::set_password()
@@ -275,7 +275,7 @@ impl StrongholdAdapter {
     /// If a snapshot path has been set, then it'll be rewritten with the newly set password.
     ///
     /// The secrets (e.g. mnemonic) stored in the Stronghold vault will be preserved, but the data saved via the
-    /// [`StorageProvider`] interface won't - they'll stay encrypted with the old password. To re-encrypt these
+    /// [`StorageAdapter`] interface won't - they'll stay encrypted with the old password. To re-encrypt these
     /// data, provide a list of keys in `keys_to_re_encrypt`, as we have no way to list and iterate over every
     /// key-value in the Stronghold store - we'll attempt on the ones provided instead. Set it to `None` to skip
     /// re-encryption.
@@ -291,7 +291,7 @@ impl StrongholdAdapter {
         // If there are keys to re-encrypt, we iterate over the requested keys and attempt to re-encrypt the
         // corresponding values.
         //
-        // Note that [`StorageProvider`] methods will do encryption / decryption automatically, so we collect values
+        // Note that [`StorageAdapter`] methods will do encryption / decryption automatically, so we collect values
         // to the memory first (decrypted with the old key), then change `self.key`, then store them back (encrypted
         // with the new key).
         let mut values = Vec::new();

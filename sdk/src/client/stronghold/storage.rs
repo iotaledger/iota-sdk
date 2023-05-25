@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! The `StorageProvider` implementation for `StrongholdAdapter`.
+//! The `StorageAdapter` implementation for `StrongholdAdapter`.
 
 use std::ops::Deref;
 

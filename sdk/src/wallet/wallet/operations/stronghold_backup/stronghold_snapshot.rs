@@ -63,7 +63,7 @@ pub(crate) async fn read_data_from_stronghold_snapshot(
     migrate(stronghold).await?;
 
     // Get client_options
-    let client_options = stronghold.get::<ClientOptions>(CLIENT_OPTIONS_KEY).await?;
+    let client_options = stronghold.get(CLIENT_OPTIONS_KEY).await?;
 
     // Get coin_type
     let coin_type_bytes = stronghold.get_bytes(COIN_TYPE_KEY).await?;
@@ -83,7 +83,7 @@ pub(crate) async fn read_data_from_stronghold_snapshot(
     let restored_secret_manager = stronghold.get(SECRET_MANAGER_KEY).await?;
 
     // Get accounts
-    let restored_accounts = stronghold.get::<Vec<AccountDetails>>(ACCOUNTS_KEY).await?;
+    let restored_accounts = stronghold.get(ACCOUNTS_KEY).await?;
 
     Ok((client_options, coin_type, restored_secret_manager, restored_accounts))
 }

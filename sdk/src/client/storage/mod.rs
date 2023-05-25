@@ -10,7 +10,7 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "stronghold")]
-pub use self::stronghold::StrongholdStorageProvider;
+pub use self::stronghold::StrongholdStorageAdapter;
 
 pub trait StorageAdapterId: StorageAdapter {
     const ID: &'static str;

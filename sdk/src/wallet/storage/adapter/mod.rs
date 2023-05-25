@@ -1,15 +1,15 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use async_trait::async_trait;
-
-use crate::client::storage::{StorageAdapter as ClientStorageAdapter, StorageAdapterId};
-
 pub mod memory;
 /// RocksDB storage adapter.
 #[cfg(feature = "rocksdb")]
 #[cfg_attr(docsrs, doc(cfg(feature = "rocksdb")))]
 pub mod rocksdb;
+
+use async_trait::async_trait;
+
+use crate::client::storage::{StorageAdapter as ClientStorageAdapter, StorageAdapterId};
 
 #[async_trait]
 pub trait StorageAdapter: std::fmt::Debug + Send + Sync {
