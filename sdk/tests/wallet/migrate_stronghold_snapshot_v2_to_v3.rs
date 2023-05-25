@@ -192,21 +192,20 @@ async fn stronghold_snapshot_v2_v3_migration_with_backup() {
         .await
         .unwrap();
 
-    // mnemonic: endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because
-    // joke dream slender leisure group reason prepare broken river
+    // mnemonic: brisk egg allow van merge process chest type dove bomb proud purity monitor snap load verb utility hungry cube coast fetch pioneer gadget credit
     assert_eq!(
         addresses,
         [
-            "rms1qr6n2qn5ps6l9r23l875suc0zzn9ztms5jkfhmst238exc3zl0vd5vkzhpy",
-            "rms1qq0pqye5wy99lmu3lny9vus7zr8gn3sptstkd0wq66aed5st94g5clekuw4",
-            "rms1qrj7c2rn4ac5kp2nqzyqssgqlsn9vz6hlyduuy7qgn9q4cw8gdrxc03mn0z",
-            "rms1qrfycvex0h666r3h5nqm3vq3jcvvfgj3nlsq0nwzss4zn5rxcrv9kxdwuh0",
-            "rms1qp24knzulhemnxhj9yvwryaya88e47x3kfatkrjcwsw9vuta3tu2vm9ve33",
-            "rms1qzmeyc8tq6uff73pca98t7e7esaxflhmw5ml7ecqw7qsahp0knu2sfgrrhl",
-            "rms1qpt29vjuj26wu5xdkq5ywclsh5jjrt8rtd354u2j9xyhjkslh7ngksye5zv",
-            "rms1qqmm5ngpxkwcg2fc25c5xe8k8l5txknndmm44ygj6fg2sjhrtrjwz6rkx2g",
-            "rms1qq6fjt9kgtu5lpetmmv9j7j7m9zwps8vm8y49ju5e3v3gtm974cgzsv2408",
-            "rms1qry8euv504maz2a7mvqlzfv2uy5v6f3r6n6rt3tap8tfan96exgpupgn0cy"
+            "rms1qza3rek2ffhxtfjpaswfsc9hkekj7j5lrmzkp5fmr2wzlnz56hhvskcs4mz",
+            "rms1qqjpevw6d7spdzsmfrrzdna64fpdqh89jme8q4g47ek4l0kz3m5eqersz6g",
+            "rms1qqgc7rpa4u0uf4e085yap8ksz7jsrdqhy6saqszyt8etxleyph02spcdtsf",
+            "rms1qqv0pspup06eszwf9ne7xccxkx2eks6x5h8528cgxmnu382qnay7u8mkdfh",
+            "rms1qpqts58s8z6a0t3rs7z2q7qzr38h847rj3urc7esyqa0sdescg2sx553dct",
+            "rms1qrquh2afd0sx0sg26hamuksdm5sntzs0c903aptrv0lsfhehc0etg58j9wq",
+            "rms1qzzkwr6edw0pr25jzey7zmh5hkka4q4cqvvk5yhlgcg2ga7k8hzk2t0va50",
+            "rms1qp9mt8elk7x32npvvdtxnmdtt5n4wxe28zrwhc9hnyrr6jpsgp7dx4zp2nn",
+            "rms1qpt9gpycwmqy5ywrup8tmgpvrvxspqz7c9u9erk9qrwq72rk95y567p7j5z",
+            "rms1qqee8vjh3pqehpm5p53s45y4e7f5kusxnadt35hqyp5vvkrf8e3z2rrd3t9"
         ]
     );
 
