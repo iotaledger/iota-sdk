@@ -370,11 +370,6 @@ name = "node_api_indexer_get_random_basic_outputs"
 path = "examples/client/node_api_indexer/07_get_random_basic_outputs.rs"
 required-features = [ "client" ]
 
-[[example]]
-name = "migrate_stronghold_snapshot_v2_to_v3"
-path = "examples/client/migrate_stronghold_snapshot_v2_to_v3.rs"
-required-features = [ "stronghold" ]
-
 #######
 
 [[example]]
@@ -673,3 +668,8 @@ required-features = [ "wallet", "stronghold" ]
 name = "wallet"
 path = "examples/wallet/wallet.rs"
 required-features = [ "wallet" ]
+
+[[example]]
+name = "migrate_stronghold_snapshot_v2_to_v3"
+path = "examples/wallet/migrate_stronghold_snapshot_v2_to_v3.rs"
+required-features = [ "stronghold" ]
