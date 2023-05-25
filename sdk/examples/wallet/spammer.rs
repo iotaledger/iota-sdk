@@ -37,7 +37,7 @@ const SEND_AMOUNT: u64 = 1_000_000;
 // The number of simultaneous transactions
 const NUM_SIMULTANEOUS_TXS: usize = 64;
 
-#[tokio::main(flavor = "multi_thread", worker_threads = 32)]
+#[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
@@ -61,7 +61,7 @@ async fn main() -> Result<()> {
 
     let recv_address = *account.addresses().await?[0].address();
 
-    // Ensure there are enough available funds for spamming on each address.
+    // Ensure there are enough available funds for spamming.
     let available_funds = ensure_enough_funds(&account, &recv_address, num_simultaneous_txs).await?;
     account.sync(None).await?;
 
@@ -117,7 +117,7 @@ async fn main() -> Result<()> {
             let account_clone = account.clone();
 
             tasks.spawn(async move {
-                println!("Thread {n}: Sending {SEND_AMOUNT} coins to {recv_address}");
+                println!("Thread {n}: sending {SEND_AMOUNT} coins to own address");
 
                 let thread_timer = Instant::now();
                 let outputs = vec![SendAmountParams::new(recv_address, SEND_AMOUNT)];
@@ -125,7 +125,7 @@ async fn main() -> Result<()> {
                 let elapsed = thread_timer.elapsed();
 
                 println!(
-                    "Thread {n}: Transaction sent in {elapsed:.2?}: {}/transaction/{}",
+                    "Thread {n}: sent in {elapsed:.2?}: {}/transaction/{}",
                     var("EXPLORER_URL").unwrap(),
                     transaction.transaction_id
                 );
