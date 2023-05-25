@@ -55,8 +55,8 @@ pub enum WalletCommand {
     ChangePassword,
     /// Initialize the wallet.
     Init(InitParameters),
-    /// Migrate a stronghold v2 snapshot to v3.
-    MigrateStronghold {
+    /// Migrate a stronghold snapshot v2 to v3.
+    MigrateStrongholdSnapshotV2ToV3 {
         /// Path of the to be migrated stronghold file. "./stardust-cli-wallet.stronghold" if nothing provided.
         path: Option<String>,
     },
@@ -159,7 +159,7 @@ pub async fn init_command(
     Ok(wallet)
 }
 
-pub async fn migrate_command(path: Option<String>) -> Result<(), Error> {
+pub async fn migrate_stronghold_snapshot_v2_to_v3_command(path: Option<String>) -> Result<(), Error> {
     let mut password = get_password("Stronghold password", false)?;
     StrongholdAdapter::migrate_snapshot_v2_to_v3(
         path.as_deref().unwrap_or(DEFAULT_STRONGHOLD_SNAPSHOT_PATH),
