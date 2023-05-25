@@ -166,6 +166,11 @@ name = "send_micro_transaction"
 path = "examples/how_tos/advanced_transactions/send_micro_transaction.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
+[[example]]
+name = "advanced_transaction"
+path = "examples/how_tos/advanced_transactions/advanced_transaction.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
 # Outputs
 
 [[example]]
