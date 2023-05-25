@@ -16,5 +16,5 @@
         "esModuleInterop": true,
         "experimentalDecorators": true
     },
-    "include": ["lib/**/*", "types/**/*", "test"]
+    "include": ["lib/**/*", "test"]
 }

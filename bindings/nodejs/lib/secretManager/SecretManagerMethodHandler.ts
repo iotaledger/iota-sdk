@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { callSecretManagerMethodAsync, createSecretManager } from '../bindings';
-import type {
+import {
     SecretManagerType,
     __SecretManagerMethods__,
-} from '../../types/secretManager/';
+} from '../types/secretManager';
 
 /** The MethodHandler which sends the commands to the Rust side. */
 export class SecretManagerMethodHandler {

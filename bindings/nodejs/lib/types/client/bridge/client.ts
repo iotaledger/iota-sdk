@@ -2,7 +2,7 @@ import type { HexEncodedString, IBlock, PayloadTypes } from '@iota/types';
 import type { SecretManagerType } from '../../secretManager/secretManager';
 import type { IGenerateAddressesOptions } from '../generateAddressesOptions';
 import type { IBuildBlockOptions } from '../buildBlockOptions';
-import type { BlockId } from '../../core/blockId';
+import type { BlockId } from '../../block';
 import type {
     IPreparedTransactionData,
     IBip32Chain,

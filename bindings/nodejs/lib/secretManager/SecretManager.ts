@@ -7,14 +7,14 @@ import type {
     IPreparedTransactionData,
     LedgerNanoStatus,
     IBip32Chain,
-} from '../../types/client/';
+} from '../types/client/';
 import type {
     PayloadTypes,
     UnlockTypes,
     HexEncodedString,
     IEd25519Signature,
 } from '@iota/types';
-import { SecretManagerType } from '../../types/secretManager/';
+import { SecretManagerType } from '../types/secretManager/';
 
 /** The SecretManager to interact with nodes. */
 export class SecretManager {

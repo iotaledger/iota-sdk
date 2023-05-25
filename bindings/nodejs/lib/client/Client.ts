@@ -7,7 +7,6 @@ import type {
     IBuildBlockOptions,
     QueryParameter,
     IPreparedTransactionData,
-    BlockId,
     INetworkInfo,
     INode,
     IAuth,
@@ -20,7 +19,7 @@ import type {
     AliasQueryParameter,
     OutputIdsResponse,
     IBip32Chain,
-} from '../../types/client';
+} from '../types/client';
 import type {
     IUTXOInput,
     IOutputResponse,
@@ -37,9 +36,9 @@ import type {
     UnlockTypes,
     HexEncodedString,
 } from '@iota/types';
-import type { INodeInfoWrapper } from '../../types/client/nodeInfo';
-import { SecretManagerType } from '../../types/secretManager/secretManager';
-import { AliasOutput, BasicOutput, FoundryOutput, NftOutput } from '../types';
+import type { INodeInfoWrapper } from '../types/client/nodeInfo';
+import { SecretManagerType } from '../types/secretManager/secretManager';
+import { AliasOutput, BasicOutput, FoundryOutput, NftOutput, BlockId } from '../types/block';
 
 /** The Client to interact with nodes. */
 export class Client {

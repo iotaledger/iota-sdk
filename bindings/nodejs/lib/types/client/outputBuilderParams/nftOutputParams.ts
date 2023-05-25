@@ -1,5 +1,5 @@
 import type { HexEncodedString } from '@iota/types';
-import { Feature } from '../../../lib';
+import { Feature } from '../../';
 import type { BasicOutputBuilderParams } from './basicOutputParams';
 
 /**
