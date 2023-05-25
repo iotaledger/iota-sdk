@@ -133,16 +133,11 @@ impl TryFrom<String> for Mnemonic {
 
 pub trait MnemonicLike: Send {
     fn to_mnemonic(self) -> Result<Mnemonic, Error>;
-    fn as_str(&self) -> &str;
 }
 
 impl MnemonicLike for Mnemonic {
     fn to_mnemonic(self) -> Result<Mnemonic, Error> {
         Ok(self)
-    }
-
-    fn as_str(&self) -> &str {
-        self.as_str()
     }
 }
 
@@ -150,9 +145,13 @@ impl MnemonicLike for String {
     fn to_mnemonic(self) -> Result<Mnemonic, Error> {
         Mnemonic::try_from(self)
     }
+}
 
-    fn as_str(&self) -> &str {
-        self.as_str()
+impl MnemonicLike for Vec<String> {
+    fn to_mnemonic(mut self) -> Result<Mnemonic, Error> {
+        let m = self.join(" ");
+        self.zeroize();
+        Mnemonic::try_from(m)
     }
 }
 
