@@ -10,6 +10,7 @@ use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
     keys::slip10::{Chain, Curve, Seed},
 };
+use zeroize::Zeroize;
 
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
@@ -85,9 +86,12 @@ impl MnemonicSecretManager {
     }
 
     /// Create a new [`MnemonicSecretManager`] from a hex-encoded raw seed string.
-    pub fn try_from_hex_seed(hex: &str) -> Result<Self, Error> {
-        let bytes: Vec<u8> = prefix_hex::decode(hex)?;
-        Ok(Self(Seed::from_bytes(&bytes)))
+    pub fn try_from_hex_seed(mut hex: String) -> Result<Self, Error> {
+        let mut bytes: Vec<u8> = prefix_hex::decode(hex.as_str())?;
+        let seed = Seed::from_bytes(&bytes);
+        hex.zeroize();
+        bytes.zeroize();
+        Ok(Self(seed))
     }
 }
 
@@ -117,7 +121,7 @@ mod tests {
     async fn seed_address() {
         use crate::client::constants::IOTA_COIN_TYPE;
 
-        let seed = "0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2";
+        let seed = "0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2".to_owned();
         let secret_manager = MnemonicSecretManager::try_from_hex_seed(seed).unwrap();
 
         let addresses = secret_manager
