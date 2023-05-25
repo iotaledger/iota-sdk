@@ -13,7 +13,6 @@ use iota_sdk::{
     wallet::{ClientOptions, Wallet},
 };
 use log::LevelFilter;
-use zeroize::Zeroize;
 
 use crate::{
     error::Error,
@@ -158,7 +157,7 @@ pub async fn init_command(
 }
 
 pub async fn migrate_stronghold_snapshot_v2_to_v3_command(path: Option<String>) -> Result<(), Error> {
-    let mut password = get_password("Stronghold password", false)?;
+    let password = get_password("Stronghold password", false)?;
     StrongholdAdapter::migrate_snapshot_v2_to_v3(
         path.as_deref().unwrap_or(DEFAULT_STRONGHOLD_SNAPSHOT_PATH),
         &password,
@@ -167,8 +166,7 @@ pub async fn migrate_stronghold_snapshot_v2_to_v3_command(path: Option<String>) 
         None,
         None,
     )?;
-    password.zeroize();
-    println_log_info!("Stronghold successfully migrated from v2 to v3.");
+    println_log_info!("Stronghold snapshot successfully migrated from v2 to v3.");
 
     Ok(())
 }
