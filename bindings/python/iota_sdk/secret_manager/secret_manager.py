@@ -97,8 +97,6 @@ class SecretManager():
 
         Parameters
         ----------
-        secret_manager : Any type of SecretManager.
-            The secret manager to use. Can be (MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager or LedgerNanoSecretManager.
         account_index : int
             Account index.
         start : int
@@ -154,8 +152,6 @@ class SecretManager():
 
         Parameters
         ----------
-        secret_manager : Any type of SecretManager.
-            The secret manager to use. Can be (MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager or LedgerNanoSecretManager.
         account_index : int
             Account index.
         start : int
