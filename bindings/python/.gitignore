@@ -3,4 +3,3 @@ dist
 iota_sdk.egg-info
 .tox
 iota_sdk_venv
-!examples/fixtures/v2.stronghold
