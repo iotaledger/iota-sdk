@@ -344,11 +344,14 @@ mod tests {
     use std::path::Path;
 
     use super::*;
-    use crate::{client::constants::IOTA_COIN_TYPE, types::block::address::ToBech32Ext};
+    use crate::{
+        client::constants::{ETHER_COIN_TYPE, IOTA_COIN_TYPE},
+        types::block::address::ToBech32Ext,
+    };
 
     #[tokio::test]
-    async fn test_address_generation() {
-        let stronghold_path = "test_address_generation.stronghold";
+    async fn test_ed25519_address_generation() {
+        let stronghold_path = "test_ed25519_address_generation.stronghold";
         // Remove potential old stronghold file
         std::fs::remove_file(stronghold_path).ok();
         let mnemonic = String::from(
@@ -372,6 +375,38 @@ mod tests {
         assert_eq!(
             addresses[0].to_bech32_unchecked("atoi"),
             "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e"
+        );
+
+        // Remove garbage after test, but don't care about the result
+        std::fs::remove_file(stronghold_path).ok();
+    }
+
+    #[tokio::test]
+    async fn test_evm_address_generation() {
+        let stronghold_path = "test_evm_address_generation.stronghold";
+        // Remove potential old stronghold file
+        std::fs::remove_file(stronghold_path).ok();
+        let mnemonic = String::from(
+            "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river",
+        );
+        let stronghold_adapter = StrongholdAdapter::builder()
+            .password("drowssap")
+            .build(stronghold_path)
+            .unwrap();
+
+        stronghold_adapter.store_mnemonic(mnemonic).await.unwrap();
+
+        // The snapshot should have been on the disk now.
+        assert!(Path::new(stronghold_path).exists());
+
+        let addresses = stronghold_adapter
+            .generate_evm_addresses(ETHER_COIN_TYPE, 0, 0..1, None)
+            .await
+            .unwrap();
+
+        assert_eq!(
+            prefix_hex::encode(addresses[0].as_ref()),
+            "0xcaefde2b487ded55688765964320ff390cd87828"
         );
 
         // Remove garbage after test, but don't care about the result
