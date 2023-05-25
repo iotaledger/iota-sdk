@@ -306,7 +306,6 @@ impl Debug for Message {
                 )
             }
             #[cfg(feature = "stronghold")]
-            #[cfg(feature = "stronghold")]
             Self::StoreMnemonic { mnemonic: _ } => write!(f, "StoreMnemonic{{ mnemonic: <omitted> }}"),
             Self::StartBackgroundSync {
                 options,
