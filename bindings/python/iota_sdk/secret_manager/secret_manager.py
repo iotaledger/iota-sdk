@@ -166,8 +166,6 @@ class SecretManager():
             Internal addresses
         coin_type : int
             Coin type. The CoinType enum can be used
-        bech32_hrp : string
-            Bech32 human readable part.
         ledger_nano_prompt : bool
             Display the address on ledger devices.
 

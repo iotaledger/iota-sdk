@@ -31,6 +31,7 @@ async fn main() -> Result<()> {
         .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
+                // Currently only index 0 is supported for offline signing.
                 .with_range(0..1),
         )
         .await?;
