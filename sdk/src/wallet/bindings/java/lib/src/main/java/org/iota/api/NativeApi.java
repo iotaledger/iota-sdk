@@ -77,15 +77,14 @@ public class NativeApi {
 
     // Destroys account handle
     // For Firefly mobile, we sent clearListeners event by sendMessage
-    // so we need to call destroyHandle mannualy from Capacitor binding plugin.
+    // so we need to call destroyHandle manually from Capacitor binding plugin.
     public static native void destroyHandle();
 
     private static native String sendMessage(String command);
 
     private static native String listen(String[] events, EventListener listener);
 
-    // TODO public ?
-    public static native String migrateStrongholdSnapshotV2ToV3(String currentPath, String currentPassword, String newPath, String newPassword);
+    public static native String migrateStrongholdSnapshotV2ToV3(String currentPath, String currentPassword, String salt, int rounds, String newPath, String newPassword);
 
     private static JsonElement handleClientResponse(String methodName, String jsonResponse) throws WalletException {
         WalletResponse response = CustomGson.get().fromJson(jsonResponse, WalletResponse.class);
