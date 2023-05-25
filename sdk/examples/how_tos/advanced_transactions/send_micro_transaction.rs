@@ -4,7 +4,7 @@
 //! In this example we will send an amount below the minimum storage deposit.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example send_micro_transaction --release`
+//! `cargo run --release --all-features --example send_micro_transaction`
 
 use iota_sdk::{
     types::block::address::Bech32Address,
