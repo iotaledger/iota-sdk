@@ -5,6 +5,7 @@ import type {
     SendNativeTokensParams,
     SendNftParams,
     GenerateAddressOptions,
+    GenerateAddressesOptions,
 } from '../address';
 import type {
     BuildAliasOutputData,
@@ -104,6 +105,13 @@ export type __GenerateEd25519AddressesMethod__ = {
         options?: GenerateAddressOptions;
     };
 };
+
+export type __GenerateEvmAddressesMethod__ = {
+    name: 'generateEvmAddresses';
+    data: {
+        options: GenerateAddressesOptions;
+    };
+}
 
 export type __GetBalanceMethod__ = {
     name: 'getBalance';

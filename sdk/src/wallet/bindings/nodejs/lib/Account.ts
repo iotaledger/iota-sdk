@@ -32,6 +32,7 @@ import type {
     ParticipationEventWithNodes,
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
+    GenerateAddressesOptions,
 } from '../types';
 import type { SignedTransactionEssence } from '../types/signedTransactionEssence';
 import type {
@@ -156,7 +157,6 @@ export class Account {
         return JSON.parse(resp).payload;
     }
 
-
     /**
      * Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
      * the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
@@ -178,7 +178,7 @@ export class Account {
                 name: 'burn',
                 data: {
                     burn: {
-                        nativeTokens: [{ amount: burnAmount, id: tokenId, }]
+                        nativeTokens: [{ amount: burnAmount, id: tokenId }],
                     },
                     options: transactionOptions,
                 },
@@ -410,6 +410,23 @@ export class Account {
         return JSON.parse(response).payload;
     }
 
+    /** Generate EVM addresses */
+    async generateEvmAddresses(
+        generateAddressesOptions: GenerateAddressesOptions,
+    ): Promise<string[]> {
+        const response = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'generateEvmAddresses',
+                data: {
+                    options: generateAddressesOptions,
+                },
+            },
+        );
+
+        return JSON.parse(response).payload;
+    }
+
     /**
      * Get the account balance.
      * @returns The account balance.
@@ -563,9 +580,7 @@ export class Account {
      * @param transactionId The ID of the transaction to get.
      * @returns The transaction.
      */
-    async getIncomingTransaction(
-        transactionId: string,
-    ): Promise<Transaction> {
+    async getIncomingTransaction(transactionId: string): Promise<Transaction> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {

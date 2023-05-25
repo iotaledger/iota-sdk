@@ -52,6 +52,7 @@ import type {
     __IncreaseVotingPowerMethod__,
     __DecreaseVotingPowerMethod__,
     __StopParticipatingMethod__,
+    __GenerateEvmAddressesMethod__,
 } from './account';
 import type {
     __BackupMessage__,
@@ -94,6 +95,7 @@ export type __AccountMethod__ =
     | __CreateAliasOutputMethod__
     | __DeregisterParticipationEventMethod__
     | __GenerateEd25519AddressesMethod__
+    | __GenerateEvmAddressesMethod__
     | __GetBalanceMethod__
     | __GetOutputMethod__
     | __GetIncomingTransactionMethod__

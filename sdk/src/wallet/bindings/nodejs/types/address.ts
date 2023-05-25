@@ -1,5 +1,6 @@
 import type { Network } from './network';
 import type { HexEncodedAmount } from '@iota/types';
+import type { CoinType } from './account';
 
 /** Address Types */
 export enum AddressType {
@@ -50,4 +51,24 @@ export interface SendNftParams {
 export interface GenerateAddressOptions {
     internal: boolean;
     ledgerNanoPrompt: boolean;
+}
+
+export interface GenerateAddressesOptions {
+    coinType?: CoinType;
+    accountIndex?: number;
+    range?: IRange;
+    /**
+     * Internal addresses
+     */
+    internal?: boolean;
+    /**
+     * Bech32 human readable part
+     */
+    bech32Hrp?: string;
+    options?: GenerateAddressOptions;
+}
+
+export interface IRange {
+    start: number;
+    end: number;
 }
