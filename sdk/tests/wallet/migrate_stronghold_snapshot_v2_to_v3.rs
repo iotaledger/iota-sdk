@@ -61,7 +61,8 @@ async fn stronghold_snapshot_v2_v3_migration() {
         .await
         .unwrap();
 
-    // mnemonic: winter spend artefact viable cigar pink easy charge ranch license coyote cage brass mushroom repair game attack peanut glad rather cart obey famous chat
+    // mnemonic: winter spend artefact viable cigar pink easy charge ranch license coyote cage brass mushroom repair
+    // game attack peanut glad rather cart obey famous chat
     assert_eq!(
         addresses,
         [
@@ -192,7 +193,8 @@ async fn stronghold_snapshot_v2_v3_migration_with_backup() {
         .await
         .unwrap();
 
-    // mnemonic: brisk egg allow van merge process chest type dove bomb proud purity monitor snap load verb utility hungry cube coast fetch pioneer gadget credit
+    // mnemonic: brisk egg allow van merge process chest type dove bomb proud purity monitor snap load verb utility
+    // hungry cube coast fetch pioneer gadget credit
     assert_eq!(
         addresses,
         [
