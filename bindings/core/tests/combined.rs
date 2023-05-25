@@ -10,7 +10,7 @@ use iota_sdk::{
 use iota_sdk_bindings_core::{AccountMethod, CallMethod, ClientMethod, Response, Result, WalletMethod, WalletOptions};
 
 #[tokio::test]
-async fn generate_addresses() -> Result<()> {
+async fn generate_ed25519_addresses() -> Result<()> {
     let client_config = r#"{
             "nodes":[],
             "localPow":true,

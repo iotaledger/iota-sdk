@@ -59,7 +59,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
         AccountMethod::GenerateEd25519Addresses { amount, options } => {
-            let address = account.generate_addresses(amount, options).await?;
+            let address = account.generate_ed25519_addresses(amount, options).await?;
             Response::GeneratedAccountAddresses(address)
         }
         AccountMethod::GetOutputsWithAdditionalUnlockConditions { outputs_to_claim } => {

@@ -12,10 +12,10 @@ use crate::{
 impl Account {
     /// Generate addresses and stores them in the account
     /// ```ignore
-    /// let public_addresses = account.generate_addresses(2, None).await?;
+    /// let public_addresses = account.generate_ed25519_addresses(2, None).await?;
     /// // internal addresses are used for remainder outputs, if the RemainderValueStrategy for transactions is set to ChangeAddress
     /// let internal_addresses = account
-    ///     .generate_addresses(
+    ///     .generate_ed25519_addresses(
     ///         1,
     ///         Some(GenerateAddressOptions {
     ///             internal: true,
@@ -24,7 +24,7 @@ impl Account {
     ///     )
     ///     .await?;
     /// ```
-    pub async fn generate_addresses(
+    pub async fn generate_ed25519_addresses(
         &self,
         amount: u32,
         options: Option<GenerateAddressOptions>,
@@ -164,7 +164,7 @@ impl Account {
     /// Generate an internal address and store in the account, internal addresses are used for remainder outputs
     pub(crate) async fn generate_remainder_address(&self) -> crate::wallet::Result<AccountAddress> {
         let result = self
-            .generate_addresses(1, Some(GenerateAddressOptions::internal()))
+            .generate_ed25519_addresses(1, Some(GenerateAddressOptions::internal()))
             .await?
             .first()
             .ok_or(crate::wallet::Error::FailedToGetRemainder)?

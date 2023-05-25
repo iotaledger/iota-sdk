@@ -5,7 +5,7 @@ use iota_sdk::client::{api::GetAddressesOptions, constants::ETHER_COIN_TYPE, sec
 use iota_sdk_bindings_core::{CallMethod, Response, Result, SecretManagerMethod};
 
 #[tokio::test]
-async fn generate_addresses() -> Result<()> {
+async fn generate_ed25519_addresses() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(
         "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river",
     )?;

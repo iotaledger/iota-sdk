@@ -44,7 +44,9 @@ async fn check_existing_db() -> Result<()> {
     assert!(addresses[1].internal());
 
     assert_eq!(
-        account.generate_addresses(1, None).await?[0].address().to_string(),
+        account.generate_ed25519_addresses(1, None).await?[0]
+            .address()
+            .to_string(),
         "rms1qzjclfjq0azmq2yzkkk7ugfhdf55nzvs57r8twk2h36wuqv950dxv00tzfx"
     );
 

@@ -15,7 +15,7 @@ use iota_sdk::{
 };
 
 #[tokio::test]
-async fn generate_addresses() {
+async fn generate_ed25519_addresses() {
     let client_config = r#"{
             "nodes":[],
             "localPow":true,
