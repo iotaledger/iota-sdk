@@ -171,6 +171,11 @@ name = "advanced_transaction"
 path = "examples/how_tos/advanced_transactions/advanced_transaction.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
+[[example]]
+name = "claim_transaction"
+path = "examples/how_tos/advanced_transactions/claim_transaction.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
 # Outputs
 
 [[example]]
