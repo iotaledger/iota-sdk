@@ -56,8 +56,7 @@ impl StrongholdAdapter {
         migrate(current_version, new_version)?;
 
         let new_path = new_path.unwrap_or(current_path);
-        // TODO handle unwrap
-        std::fs::rename(tmp_path, new_path.as_ref()).unwrap();
+        std::fs::rename(tmp_path, new_path.as_ref())?;
 
         Self::reencrypt_data_v2_to_v3(new_path, &buffer, new_password)?;
         buffer.zeroize();

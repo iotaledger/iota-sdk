@@ -49,4 +49,7 @@ pub enum Error {
     /// Path already exists
     #[error("path already exists: {0}")]
     PathAlreadyExists(std::path::PathBuf),
+    /// Io error
+    #[error("io error: {0}")]
+    Io(#[from] std::io::Error),
 }
