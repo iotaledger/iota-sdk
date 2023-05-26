@@ -30,12 +30,12 @@ class PreparedTransactionData:
 
 
     """
-    The finish function returns a promise that resolves to a Transaction object after signing
+    The send function returns a promise that resolves to a Transaction object after signing
     and submitting the transaction. Internally just calls sign_and_submit_transaction.
 
-    :returns: The finish() method is returning a Transaction object after it has been signed and submitted.
+    :returns: The send() method is returning a Transaction object after it has been signed and submitted.
     """
-    def finish(self):
+    def send(self):
         return self.sign_and_submit_transaction()
 
 

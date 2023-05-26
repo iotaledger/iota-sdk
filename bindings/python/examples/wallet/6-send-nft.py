@@ -23,6 +23,6 @@ outputs = [{
     "nftId": "0x17f97185f80fa56eab974de6b7bbb80fa812d4e8e37090d166a0a41da129cebc",
 }]
 
-transaction = account.prepare_send_nft(outputs).finish()
+transaction = account.prepare_send_nft(outputs).send()
 
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')

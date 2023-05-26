@@ -9,7 +9,7 @@ import {
  * PreparedTransactionData` is a class that represents prepared transaction data, which
  * is useful for offline signing. It contains the prepared transaction data and an
  * `Account` object. It provides methods to retrieve the prepared transaction data, sign
- * the transaction and sign+submit/finish the transaction.
+ * the transaction and sign+submit/send the transaction.
  */
 export class PreparedTransactionData {
     private _preparedData: IPreparedTransactionData;
@@ -33,15 +33,15 @@ export class PreparedTransactionData {
     }
 
     /**
-     * The `finish` function returns a promise that resolves to a `Transaction` object after signing
+     * The `send` function returns a promise that resolves to a `Transaction` object after signing
      * and submitting the transaction. Internally just calls `signAndSubmitTransaction`.
      *
      * Returns:
      *
-     * The `finish()` method is returning a `Promise` that resolves to a `Transaction` object after it
+     * The `send()` method is returning a `Promise` that resolves to a `Transaction` object after it
      * has been signed and submitted.
      */
-    public async finish(): Promise<Transaction> {
+    public async send(): Promise<Transaction> {
         return this.signAndSubmitTransaction();
     }
 
