@@ -2,8 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk import create_secret_manager, call_secret_manager_method
+from iota_sdk.types.common import HexStr
 from json import dumps, loads
 import humps
+from typing import List, Optional
 
 
 class LedgerNanoSecretManager(dict):
@@ -58,7 +60,7 @@ class SecretManagerError(Exception):
 
 
 class SecretManager():
-    def __init__(self, secret_manager):
+    def __init__(self, secret_manager: MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager | LedgerNanoSecretManager):
         self.handle = create_secret_manager(dumps(secret_manager))
 
     def _call_method(self, name, data=None):
@@ -86,13 +88,13 @@ class SecretManager():
             return response
 
     def generate_ed25519_addresses(self,
-                           account_index=None,
-                           start=None,
-                           end=None,
-                           internal=None,
-                           coin_type=None,
-                           bech32_hrp=None,
-                           ledger_nano_prompt=None):
+                           account_index: Optional[int] = None,
+                           start: Optional[int] = None,
+                           end: Optional[int] = None,
+                           internal: Optional[bool] = None,
+                           coin_type: Optional[int] = None,
+                           bech32_hrp: Optional[str] = None,
+                           ledger_nano_prompt: Optional[bool] = None):
         """Generate ed25519 addresses.
 
         Parameters
@@ -199,14 +201,14 @@ class SecretManager():
         """
         return self._call_method('getLedgerNanoStatus')
 
-    def store_mnemonic(self, mnemonic):
+    def store_mnemonic(self, mnemonic: str):
         """Store a mnemonic in the Stronghold vault.
         """
         return self._call_method('storeMnemonic', {
             'mnemonic': mnemonic
         })
 
-    def sign_ed25519(self, message, chain):
+    def sign_ed25519(self, message: HexStr, chain: List[int]):
         """Signs a message with an Ed25519 private key.
         """
         return self._call_method('signEd25519', {
@@ -221,7 +223,7 @@ class SecretManager():
             'preparedTransactionData': prepared_transaction_data
         })
 
-    def signature_unlock(self, transaction_essence_hash, chain):
+    def signature_unlock(self, transaction_essence_hash: HexStr, chain: List[int]):
         """Sign a transaction essence hash.
         """
         return self._call_method('signatureUnlock', {

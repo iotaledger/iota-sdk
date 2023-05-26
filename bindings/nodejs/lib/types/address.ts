@@ -21,12 +21,15 @@ abstract class Address {
     getType(): AddressType {
         return this.type;
     }
+
+    abstract toString(): string;
 }
 /**
  * Ed25519 Address.
  */
 class Ed25519Address extends Address {
     private pubKeyHash: HexEncodedString;
+
     constructor(address: HexEncodedString) {
         super(AddressType.Ed25519);
         this.pubKeyHash = address;
@@ -36,6 +39,10 @@ class Ed25519Address extends Address {
      */
     getPubKeyHash(): HexEncodedString {
         return this.pubKeyHash;
+    }
+
+    toString(): string {
+        return this.getPubKeyHash();
     }
 }
 
@@ -50,6 +57,10 @@ class AliasAddress extends Address {
      */
     getAliasId(): HexEncodedString {
         return this.aliasId;
+    }
+
+    toString(): string {
+        return this.getAliasId();
     }
 }
 /**
@@ -67,6 +78,25 @@ class NftAddress extends Address {
     getNftId(): HexEncodedString {
         return this.nftId;
     }
+
+    toString(): string {
+        return this.getNftId();
+    }
 }
 
-export { Address, Ed25519Address, AliasAddress, NftAddress };
+const AddressDiscriminator = {
+    property: 'type',
+    subTypes: [
+        { value: Ed25519Address, name: AddressType.Ed25519 as any },
+        { value: AliasAddress, name: AddressType.Alias as any },
+        { value: NftAddress, name: AddressType.Nft as any },
+    ],
+};
+
+export {
+    AddressDiscriminator,
+    Address,
+    Ed25519Address,
+    AliasAddress,
+    NftAddress,
+};

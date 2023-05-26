@@ -1,4 +1,4 @@
-import type { OutputTypes, HexEncodedAmount } from '@iota/types';
+import type { HexEncodedAmount } from '@iota/types';
 import type { SyncOptions, FilterOptions } from '../account';
 import type {
     SendAmountParams,
@@ -12,11 +12,10 @@ import type {
     BuildFoundryOutputData,
     BuildNftOutputData,
 } from '../buildOutputData';
-import type { INode } from '../../client';
+import type { INode, IPreparedTransactionData } from '../../client';
 import type { OutputParams } from '../outputParams';
 import type { OutputsToClaim } from '../output';
 import type { SignedTransactionEssence } from '../signedTransactionEssence';
-import type { PreparedTransactionData } from '../preparedTransactionData';
 import type {
     AliasOutputParams,
     MintNativeTokenParams,
@@ -28,6 +27,7 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventType,
 } from '../participation';
+import { Output } from '../../../lib';
 import { Burn } from '../burn';
 
 export type __BuildAliasOutputMethod__ = {
@@ -50,8 +50,8 @@ export type __BuildNftOutputMethod__ = {
     data: BuildNftOutputData;
 };
 
-export type __BurnMethod__ = {
-    name: 'burn';
+export type __PrepareBurnMethod__ = {
+    name: 'prepareBurn';
     data: {
         burn: Burn;
         options?: TransactionOptions;
@@ -65,24 +65,24 @@ export type __ClaimOutputsMethod__ = {
     };
 };
 
-export type __ConsolidateOutputsMethod__ = {
-    name: 'consolidateOutputs';
+export type __PrepareConsolidateOutputsMethod__ = {
+    name: 'prepareConsolidateOutputs';
     data: {
         force: boolean;
         outputConsolidationThreshold?: number;
     };
 };
 
-export type __CreateAliasOutputMethod__ = {
-    name: 'createAliasOutput';
+export type __PrepareCreateAliasOutputMethod__ = {
+    name: 'prepareCreateAliasOutput';
     data: {
         params?: AliasOutputParams;
         options?: TransactionOptions;
     };
 };
 
-export type __DecreaseNativeTokenSupplyMethod__ = {
-    name: 'decreaseNativeTokenSupply';
+export type __PrepareDecreaseNativeTokenSupplyMethod__ = {
+    name: 'prepareDecreaseNativeTokenSupply';
     data: {
         tokenId: string;
         meltAmount: HexEncodedAmount;
@@ -181,12 +181,12 @@ export type __UnspentOutputsMethod__ = {
 export type __MinimumRequiredStorageDepositMethod__ = {
     name: 'minimumRequiredStorageDeposit';
     data: {
-        output: OutputTypes;
+        output: Output;
     };
 };
 
-export type __IncreaseNativeTokenSupplyMethod__ = {
-    name: 'increaseNativeTokenSupply';
+export type __PrepareIncreaseNativeTokenSupplyMethod__ = {
+    name: 'prepareIncreaseNativeTokenSupply';
     data: {
         tokenId: string;
         mintAmount: HexEncodedAmount;
@@ -194,16 +194,16 @@ export type __IncreaseNativeTokenSupplyMethod__ = {
     };
 };
 
-export type __MintNativeTokenMethod__ = {
-    name: 'mintNativeToken';
+export type __PrepareMintNativeTokenMethod__ = {
+    name: 'prepareMintNativeToken';
     data: {
         params: MintNativeTokenParams;
         options?: TransactionOptions;
     };
 };
 
-export type __MintNftsMethod__ = {
-    name: 'mintNfts';
+export type __PrepareMintNftsMethod__ = {
+    name: 'prepareMintNfts';
     data: {
         params: MintNftParams[];
         options?: TransactionOptions;
@@ -229,7 +229,7 @@ export type __PrepareSendAmountMethod__ = {
 export type __PrepareTransactionMethod__ = {
     name: 'prepareTransaction';
     data: {
-        outputs: OutputTypes[];
+        outputs: Output[];
         options?: TransactionOptions;
     };
 };
@@ -258,16 +258,16 @@ export type __SendAmountMethod__ = {
     };
 };
 
-export type __SendNativeTokensMethod__ = {
-    name: 'sendNativeTokens';
+export type __PrepareSendNativeTokensMethod__ = {
+    name: 'prepareSendNativeTokens';
     data: {
         params: SendNativeTokensParams[];
         options?: TransactionOptions;
     };
 };
 
-export type __SendNftMethod__ = {
-    name: 'sendNft';
+export type __PrepareSendNftMethod__ = {
+    name: 'prepareSendNft';
     data: {
         params: SendNftParams[];
         options?: TransactionOptions;
@@ -277,7 +277,7 @@ export type __SendNftMethod__ = {
 export type __SendOutputsMethod__ = {
     name: 'sendOutputs';
     data: {
-        outputs: OutputTypes[];
+        outputs: Output[];
         options?: TransactionOptions;
     };
 };
@@ -299,7 +299,14 @@ export type __SetDefaultSyncOptionsMethod__ = {
 export type __SignTransactionEssenceMethod__ = {
     name: 'signTransactionEssence';
     data: {
-        preparedTransactionData: PreparedTransactionData;
+        preparedTransactionData: IPreparedTransactionData;
+    };
+};
+
+export type __SignAndSubmitTransactionMethod__ = {
+    name: 'signAndSubmitTransaction';
+    data: {
+        preparedTransactionData: IPreparedTransactionData;
     };
 };
 
@@ -317,16 +324,16 @@ export type __SyncAccountMethod__ = {
     };
 };
 
-export type __VoteMethod__ = {
-    name: 'vote';
+export type __PrepareVoteMethod__ = {
+    name: 'prepareVote';
     data: {
         eventId?: ParticipationEventId;
         answers?: number[];
     };
 };
 
-export type __StopParticipatingMethod__ = {
-    name: 'stopParticipating';
+export type __PrepareStopParticipatingMethod__ = {
+    name: 'prepareStopParticipating';
     data: {
         eventId: ParticipationEventId;
     };
@@ -339,8 +346,8 @@ export type __GetParticipationOverviewMethod__ = {
     };
 };
 
-export type __IncreaseVotingPowerMethod__ = {
-    name: 'increaseVotingPower';
+export type __PrepareIncreaseVotingPowerMethod__ = {
+    name: 'prepareIncreaseVotingPower';
     data: {
         amount: string;
     };
@@ -372,8 +379,8 @@ export type __GetParticipationEventStatusMethod__ = {
     };
 };
 
-export type __DecreaseVotingPowerMethod__ = {
-    name: 'decreaseVotingPower';
+export type __PrepareDecreaseVotingPowerMethod__ = {
+    name: 'prepareDecreaseVotingPower';
     data: {
         amount: string;
     };
