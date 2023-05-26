@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use std::{
+    ffi::OsStr,
     num::NonZeroU32,
     ops::Deref,
     path::{Path, PathBuf},
@@ -28,7 +29,9 @@ impl StrongholdAdapter {
         use iota_stronghold::engine::snapshot::migration::{migrate, Version};
 
         let mut buffer = [0u8; 32];
-        let tmp_path = PathBuf::from(current_path.as_ref().to_string_lossy().to_string() + "-tmp");
+        let mut tmp_path = current_path.as_ref().as_os_str().to_os_string();
+        tmp_path.push(OsStr::new("-tmp"));
+        let tmp_path = PathBuf::from(tmp_path);
 
         if tmp_path.exists() {
             return Err(Error::PathAlreadyExists(tmp_path));
