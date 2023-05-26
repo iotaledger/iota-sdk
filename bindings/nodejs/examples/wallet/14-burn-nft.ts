@@ -36,7 +36,7 @@ async function run() {
         // Burn a native token
         const transaction = await account
             .prepareBurnNft(nftId)
-            .then((prepared) => prepared.finish());
+            .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 

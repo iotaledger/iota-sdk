@@ -39,7 +39,7 @@ async function run() {
         // Destroy an alias
         const transaction = await account
             .prepareDestroyAlias(aliasId)
-            .then((prepared) => prepared.finish());
+            .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 

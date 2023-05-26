@@ -32,7 +32,7 @@ async function run() {
         // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs
         let transaction = await account
             .prepareCreateAliasOutput()
-            .then((prepared) => prepared.finish());
+            .then((prepared) => prepared.send());
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         // Wait for transaction to get included
@@ -58,7 +58,7 @@ async function run() {
         const prepared = await account.prepareMintNativeToken(params);
 
         // TODO: Override finish to contain tokenId
-        transaction = await prepared.finish();
+        transaction = await prepared.send();
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 

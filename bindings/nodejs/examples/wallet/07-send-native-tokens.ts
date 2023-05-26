@@ -58,7 +58,7 @@ async function run() {
 
             let transaction = await account
                 .prepareSendNativeTokens(outputs)
-                .then((prepared) => prepared.finish());
+                .then((prepared) => prepared.send());
 
             console.log(`Transaction sent: ${transaction.transactionId}`);
 

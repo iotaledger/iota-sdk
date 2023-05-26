@@ -47,7 +47,7 @@ async function run() {
         // Send the full NFT output to the specified address
         const transaction = await account
             .prepareSendNft(outputs)
-            .then((prepared) => prepared.finish());
+            .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 

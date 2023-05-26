@@ -61,7 +61,7 @@ async function run() {
         const prepared = await account.prepareMintNfts([params]);
 
         // TODO: Override finish to contain tokenId
-        let transaction = await prepared.finish();
+        let transaction = await prepared.send();
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 

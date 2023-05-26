@@ -64,7 +64,7 @@ async function run() {
         // Burn a native token
         const transaction = await account
             .prepareBurnNativeToken(token.tokenId, BURN_AMOUNT)
-            .then((prepared) => prepared.finish());
+            .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 

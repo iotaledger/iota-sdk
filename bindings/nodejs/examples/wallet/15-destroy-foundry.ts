@@ -38,7 +38,7 @@ async function run() {
         // Burn a foundry
         const transaction = await account
             .prepareDestroyFoundry(foundry)
-            .then((prepared) => prepared.finish());
+            .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
