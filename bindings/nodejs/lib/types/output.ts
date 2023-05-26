@@ -1,9 +1,15 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { UnlockCondition } from './unlock_condition';
-import { Feature } from './feature';
+import {
+    UnlockCondition,
+    UnlockConditionDiscriminator,
+} from './unlock_condition';
+import { Feature, FeatureDiscriminator } from './feature';
 import { HexEncodedString, INativeToken, TokenSchemeTypes } from '@iota/types';
+
+// Temp solution for not double parsing JSON
+import { plainToInstance, Type } from 'class-transformer';
 
 /**
  * All of the output types.
@@ -18,12 +24,14 @@ enum OutputType {
 
 abstract class Output /*implements ICommonOutput*/ {
     private amount: string;
+
     private type: OutputType;
 
     constructor(type: OutputType, amount: string) {
         this.type = type;
         this.amount = amount;
     }
+
     /**
      * The type of output.
      */
@@ -37,13 +45,40 @@ abstract class Output /*implements ICommonOutput*/ {
     getAmount(): string {
         return this.amount;
     }
+
+    public static parse(data: any): Output {
+        if (data.type == OutputType.Treasury) {
+            return plainToInstance(
+                TreasuryOutput,
+                data,
+            ) as any as TreasuryOutput;
+        } else if (data.type == OutputType.Basic) {
+            return plainToInstance(BasicOutput, data) as any as BasicOutput;
+        } else if (data.type == OutputType.Alias) {
+            return plainToInstance(AliasOutput, data) as any as AliasOutput;
+        } else if (data.type == OutputType.Foundry) {
+            return plainToInstance(FoundryOutput, data) as any as FoundryOutput;
+        } else if (data.type == OutputType.Nft) {
+            return plainToInstance(NftOutput, data) as any as NftOutput;
+        }
+        throw new Error('Invalid JSON');
+    }
 }
+
 /**
  * Common output properties.
  */
-class CommonOutput extends Output /*implements ICommonOutput*/ {
+abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
+    @Type(() => UnlockCondition, {
+        discriminator: UnlockConditionDiscriminator,
+    })
     private unlockConditions: UnlockCondition[];
+
     private nativeTokens?: INativeToken[];
+
+    @Type(() => Feature, {
+        discriminator: FeatureDiscriminator,
+    })
     private features?: Feature[];
 
     constructor(
@@ -99,6 +134,7 @@ class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
 }
 
 abstract class ImmutableFeaturesOutput extends CommonOutput {
+    @Type(() => Feature)
     private immutableFeatures?: Feature[];
 
     constructor(
@@ -235,6 +271,7 @@ class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*
 export {
     OutputType,
     Output,
+    CommonOutput,
     TreasuryOutput,
     BasicOutput,
     AliasOutput,
