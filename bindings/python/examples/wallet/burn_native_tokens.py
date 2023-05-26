@@ -23,5 +23,5 @@ token_id = "0x08429fe5864378ce70699fc2d22bb144cb86a3c4833d136e3b95c5dadfd6ba0cef
 burn_amount = "0x5"
 
 # Send transaction.
-transaction = account.burn_native_token(token_id, burn_amount)
+transaction = account.prepare_burn_native_token(token_id, burn_amount).send()
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')

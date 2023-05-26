@@ -360,8 +360,7 @@ impl<'a> MqttTopicManager<'a> {
             .subscribe_many(
                 self.topics
                     .iter()
-                    .map(|t| SubscribeFilter::new(t.topic().to_string(), QoS::AtLeastOnce))
-                    .collect::<Vec<SubscribeFilter>>(),
+                    .map(|t| SubscribeFilter::new(t.topic().to_string(), QoS::AtLeastOnce)),
             )
             .await?;
         {
