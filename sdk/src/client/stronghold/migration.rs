@@ -4,7 +4,6 @@
 use std::{
     ffi::OsStr,
     num::NonZeroU32,
-    ops::Deref,
     path::{Path, PathBuf},
 };
 
@@ -105,5 +104,5 @@ fn v2_get(stronghold_client: &Client, k: &[u8], encryption_key: &[u8; 32]) -> Re
         Some(data) => data,
         None => return Ok(None),
     };
-    Ok(Some(chacha::aead_decrypt(encryption_key.deref(), &data)?))
+    Ok(Some(chacha::aead_decrypt(encryption_key, &data)?))
 }
