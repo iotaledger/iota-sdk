@@ -4,6 +4,3 @@
 export * from './Client';
 export * from './ClientMethodHandler';
 export * from '../types/client';
-// export * from '../utils/utf8';
-// export * from '../logger';
-// export * from '../types/client';
