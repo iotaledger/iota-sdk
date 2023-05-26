@@ -42,7 +42,6 @@ impl Account {
     /// increases voting power then increases again immediately after).
     pub async fn increase_voting_power(&self, amount: u64) -> Result<Transaction> {
         let prepared = self.prepare_increase_voting_power(amount).await?;
-
         self.sign_and_submit_transaction(prepared).await
     }
 
@@ -101,7 +100,6 @@ impl Account {
     /// increases voting power then decreases immediately after).
     pub async fn decrease_voting_power(&self, amount: u64) -> Result<Transaction> {
         let prepared = self.prepare_decrease_voting_power(amount).await?;
-
         self.sign_and_submit_transaction(prepared).await
     }
 
