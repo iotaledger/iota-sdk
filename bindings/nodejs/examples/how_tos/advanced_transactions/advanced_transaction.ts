@@ -5,7 +5,7 @@ import { AddressUnlockCondition, Client, Ed25519Address, TimelockUnlockCondition
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/simple_transaction/simple_transaction.ts
+// yarn run-example ./how_tos/advanced_transactions/advanced_transaction.ts
 
 // This example syncs the account and prints the balance
 async function run() {
