@@ -9,10 +9,12 @@ use futures::{future::try_join_all, FutureExt};
 use zeroize::Zeroize;
 
 use self::stronghold_snapshot::{read_data_from_stronghold_snapshot, store_data_to_stronghold};
+#[cfg(feature = "storage")]
+use crate::wallet::WalletBuilder;
 use crate::{
     client::secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerDto},
     types::block::address::Hrp,
-    wallet::{Account, Wallet, WalletBuilder},
+    wallet::{Account, Wallet},
 };
 
 impl Wallet {
