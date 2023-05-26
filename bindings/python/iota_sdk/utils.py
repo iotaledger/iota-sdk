@@ -12,7 +12,7 @@ from typing import Any, Dict
 class Utils():
 
     @staticmethod
-    def bech32_to_hex(bech32: str) -> str:
+    def bech32_to_hex(bech32: str) -> HexStr:
         """Transforms bech32 to hex.
         """
         return _call_method('bech32ToHex', {
@@ -78,7 +78,7 @@ class Utils():
         return _call_method('generateMnemonic')
 
     @staticmethod
-    def mnemonic_to_hex_seed(mnemonic: HexStr) -> str:
+    def mnemonic_to_hex_seed(mnemonic: HexStr) -> HexStr:
         """Returns a hex encoded seed for a mnemonic.
         """
         return _call_method('mnemonicToHexSeed', {
@@ -86,7 +86,7 @@ class Utils():
         })
 
     @staticmethod
-    def compute_alias_id(output_id: OutputId) -> str:
+    def compute_alias_id(output_id: OutputId) -> HexStr:
         """Computes the alias id for the given alias output id.
         """
         return _call_method('computeAliasId', {
@@ -94,7 +94,7 @@ class Utils():
         })
 
     @staticmethod
-    def compute_nft_id(output_id: OutputId) -> str:
+    def compute_nft_id(output_id: OutputId) -> HexStr:
         """Computes the NFT id for the given NFT output id.
         """
         return _call_method('computeNftId', {
@@ -102,7 +102,7 @@ class Utils():
         })
 
     @staticmethod
-    def compute_foundry_id(alias_address: str, serial_number: int, token_scheme_kind: int) -> str:
+    def compute_foundry_id(alias_address: str, serial_number: int, token_scheme_kind: int) -> HexStr:
         """Computes the foundry id.
         """
         return _call_method('computeNftId', {
