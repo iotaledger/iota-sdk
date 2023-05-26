@@ -1,5 +1,5 @@
 import { INativeToken } from '@iota/types';
-import { UnlockCondition, Feature } from '../../../lib';
+import { UnlockCondition, Feature } from '../../';
 
 /**
  * Options for building a Basic Output

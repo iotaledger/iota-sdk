@@ -4,7 +4,7 @@ import type {
     HexEncodedString,
     IEd25519Signature,
 } from '@iota/types';
-import { Ed25519Address } from '../../../lib/types';
+import { Ed25519Address } from '../../';
 
 export interface __GenerateMnemonicMethod__ {
     name: 'generateMnemonic';

@@ -2,8 +2,8 @@
     "name": "@iota/sdk",
     "version": "0.1.0",
     "description": "Node.js binding to the IOTA SDK library",
-    "main": "out/lib/index.js",
-    "types": "out/lib/index.d.ts",
+    "main": "out/index.js",
+    "types": "out/index.d.ts",
     "scripts": {
         "lint": "eslint --ignore-path .eslintignore --ext .js,.ts .",
         "format": "prettier --ignore-path .eslintignore -w {,*/**/}*.{ts,js,json}",

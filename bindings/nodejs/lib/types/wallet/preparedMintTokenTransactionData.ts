@@ -1,4 +1,4 @@
-import { Account, IPreparedTransactionData, Transaction } from '../../lib';
+import { Account, IPreparedTransactionData, Transaction } from '../..';
 
 import { PreparedTransactionData } from './preparedTransactionData';
 
