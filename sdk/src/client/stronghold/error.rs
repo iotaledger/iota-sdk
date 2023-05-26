@@ -44,7 +44,7 @@ pub enum Error {
     #[error("stronghold migration error: {0}")]
     Migration(#[from] iota_stronghold::engine::snapshot::migration::Error),
     /// Invalid rounds error
-    #[error("invalid number of hash rounds : {0}")]
+    #[error("invalid number of hash rounds: {0}")]
     InvalidRounds(u32),
     /// Path already exists
     #[error("path already exists: {0}")]
