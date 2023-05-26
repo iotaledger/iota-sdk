@@ -46,4 +46,7 @@ pub enum Error {
     /// Invalid rounds error
     #[error("invalid rounds error: {0}")]
     InvalidRounds(u32),
+    /// Path already exists
+    #[error("path already exists: {0}")]
+    PathAlreadyExists(std::path::PathBuf),
 }

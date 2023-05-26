@@ -30,6 +30,10 @@ impl StrongholdAdapter {
         let mut buffer = [0u8; 32];
         let tmp_path = PathBuf::from(current_path.as_ref().to_string_lossy().to_string() + "-tmp");
 
+        if tmp_path.exists() {
+            return Err(Error::PathAlreadyExists(tmp_path));
+        }
+
         crypto::keys::pbkdf::PBKDF2_HMAC_SHA512(
             current_password.as_bytes(),
             salt.as_bytes(),
