@@ -1583,9 +1583,9 @@ dependencies = [
 
 [[package]]
 name = "iota-crypto"
-version = "0.20.0"
+version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0180a2a7939b4b0ae68e651bbec130b27fd5882ef552df5bb55e0320e78bacbc"
+checksum = "7eb2df6763689b6e2b95787941eb9a58b29d16d17c2055392f550b3daf40bdce"
 dependencies = [
  "aead",
  "aes",
@@ -1790,7 +1790,7 @@ dependencies = [
 [[package]]
 name = "iota_stronghold"
 version = "1.1.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=fix/slip10-derive#ffae7cf8ee41449fe7d840d33c794eb0494f104c"
+source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#7a2e9dd55fad90c320cb4fc291b4ee1fd24d499f"
 dependencies = [
  "bincode",
  "hkdf",
@@ -1965,6 +1965,8 @@ dependencies = [
 [[package]]
 name = "librocksdb-sys"
 version = "0.11.0+8.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d3386f101bcb4bd252d8e9d2fb41ec3b0862a15a62b478c355b2982efa469e3e"
 dependencies = [
  "bindgen",
  "bzip2-sys",
@@ -3175,7 +3177,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stronghold-derive"
 version = "1.0.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=fix/slip10-derive#ffae7cf8ee41449fe7d840d33c794eb0494f104c"
+source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#7a2e9dd55fad90c320cb4fc291b4ee1fd24d499f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3185,7 +3187,7 @@ dependencies = [
 [[package]]
 name = "stronghold-runtime"
 version = "1.1.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=fix/slip10-derive#ffae7cf8ee41449fe7d840d33c794eb0494f104c"
+source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#7a2e9dd55fad90c320cb4fc291b4ee1fd24d499f"
 dependencies = [
  "dirs",
  "iota-crypto",
@@ -3203,7 +3205,7 @@ dependencies = [
 [[package]]
 name = "stronghold-utils"
 version = "1.0.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=fix/slip10-derive#ffae7cf8ee41449fe7d840d33c794eb0494f104c"
+source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#7a2e9dd55fad90c320cb4fc291b4ee1fd24d499f"
 dependencies = [
  "rand",
  "stronghold-derive",
@@ -3212,7 +3214,7 @@ dependencies = [
 [[package]]
 name = "stronghold_engine"
 version = "1.1.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=fix/slip10-derive#ffae7cf8ee41449fe7d840d33c794eb0494f104c"
+source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#7a2e9dd55fad90c320cb4fc291b4ee1fd24d499f"
 dependencies = [
  "anyhow",
  "dirs-next",
