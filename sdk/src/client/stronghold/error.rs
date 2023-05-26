@@ -33,7 +33,7 @@ pub enum Error {
     #[error("invalid mnemonic {0}")]
     InvalidMnemonic(String),
     /// Unsupported snapshot version
-    #[error("unsupported snapshot version, migration required")]
+    #[error("unsupported snapshot version, expected {expected}, found {found}, migration required")]
     UnsupportedSnapshotVersion {
         /// Found version
         found: u16,
@@ -44,7 +44,7 @@ pub enum Error {
     #[error("stronghold migration error: {0}")]
     Migration(#[from] iota_stronghold::engine::snapshot::migration::Error),
     /// Invalid rounds error
-    #[error("invalid rounds error: {0}")]
+    #[error("invalid number of hash rounds : {0}")]
     InvalidRounds(u32),
     /// Path already exists
     #[error("path already exists: {0}")]
