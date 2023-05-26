@@ -132,7 +132,7 @@ fn check_or_create_snapshot(
             // Matching the error string is not ideal but stronghold doesn't wrap the error types at the moment.
             if err_msg.contains("XCHACHA20-POLY1305") || err_msg.contains("BadFileKey") {
                 return Err(Error::InvalidPassword);
-            } else if err_msg.contains("Unsupported version") {
+            } else if err_msg.contains("unsupported version") {
                 if err_msg.contains("expected [3, 0], found [2, 0]") {
                     return Err(Error::UnsupportedSnapshotVersion { found: 2, expected: 3 });
                 } else {
