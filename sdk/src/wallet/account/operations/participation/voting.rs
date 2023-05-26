@@ -35,7 +35,6 @@ impl Account {
     /// This should use regular client options, NOT specific node for the event.
     pub async fn vote(&self, event_id: Option<ParticipationEventId>, answers: Option<Vec<u8>>) -> Result<Transaction> {
         let prepared = self.prepare_vote(event_id, answers).await?;
-
         self.sign_and_submit_transaction(prepared).await
     }
 
@@ -128,7 +127,6 @@ impl Account {
     /// If NOT already voting for this event, throws an error (e.g. output with this event ID not found).
     pub async fn stop_participating(&self, event_id: ParticipationEventId) -> Result<Transaction> {
         let prepared = self.prepare_stop_participating(event_id).await?;
-
         self.sign_and_submit_transaction(prepared).await
     }
 

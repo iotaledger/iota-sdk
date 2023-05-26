@@ -23,7 +23,6 @@ impl Account {
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         let prepared = self.prepare_burn(burn, options).await?;
-
         self.sign_and_submit_transaction(prepared).await
     }
 

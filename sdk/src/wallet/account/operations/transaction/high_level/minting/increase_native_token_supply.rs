@@ -39,8 +39,8 @@ impl Account {
         let prepared = self
             .prepare_increase_native_token_supply(token_id, mint_amount, options)
             .await?;
-
         let transaction = self.sign_and_submit_transaction(prepared.transaction).await?;
+
         Ok(MintTokenTransaction {
             token_id: prepared.token_id,
             transaction,
