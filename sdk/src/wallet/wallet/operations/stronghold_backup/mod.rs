@@ -9,12 +9,10 @@ use futures::{future::try_join_all, FutureExt};
 use zeroize::Zeroize;
 
 use self::stronghold_snapshot::{read_data_from_stronghold_snapshot, store_data_to_stronghold};
-#[cfg(feature = "storage")]
-use crate::wallet::WalletBuilder;
 use crate::{
     client::secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerDto},
     types::block::address::Hrp,
-    wallet::{Account, Wallet},
+    wallet::{Account, Wallet, WalletBuilder},
 };
 
 impl Wallet {
@@ -113,14 +111,6 @@ impl Wallet {
             }
         });
 
-        // Update Wallet with read data
-        if ignore_if_coin_type_mismatch.is_none() {
-            if let Some(read_client_options) = read_client_options {
-                // If the nodes are from the same network as the current client options, then extend it
-                self.set_client_options(read_client_options).await?;
-            }
-        }
-
         if !ignore_backup_values {
             if let Some(read_coin_type) = read_coin_type {
                 self.coin_type.store(read_coin_type, Ordering::Relaxed);
@@ -147,6 +137,15 @@ impl Wallet {
         }
 
         stronghold_password.zeroize();
+
+        // drop secret manager, otherwise we get a deadlock in set_client_options() (there inside of save_wallet_data())
+        drop(secret_manager);
+
+        if ignore_if_coin_type_mismatch.is_none() {
+            if let Some(read_client_options) = read_client_options {
+                self.set_client_options(read_client_options).await?;
+            }
+        }
 
         if !ignore_backup_values {
             if let Some(read_accounts) = read_accounts {
@@ -191,8 +190,6 @@ impl Wallet {
                 )
                 .with_client_options(self.client_options().await)
                 .with_coin_type(self.coin_type.load(Ordering::Relaxed));
-            // drop secret manager, otherwise we get a deadlock in save_wallet_data
-            drop(secret_manager);
             self.storage_manager
                 .read()
                 .await
