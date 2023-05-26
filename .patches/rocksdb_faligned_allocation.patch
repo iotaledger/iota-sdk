@@ -1,0 +1,12 @@
+diff --git a/build.rs b/build.rs
+index dccaf29..582aa32 100644
+--- a/build.rs
++++ b/build.rs
+@@ -155,6 +155,7 @@ fn build_rocksdb() {
+         config.define("OS_MACOSX", None);
+         config.define("ROCKSDB_PLATFORM_POSIX", None);
+         config.define("ROCKSDB_LIB_IO_POSIX", None);
++        config.flag_if_supported("-faligned-allocation");
+     } else if target.contains("android") {
+         config.define("OS_ANDROID", None);
+         config.define("ROCKSDB_PLATFORM_POSIX", None);

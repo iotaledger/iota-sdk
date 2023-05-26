@@ -64,7 +64,7 @@ jobs:
         # The GitHub hosted Windows 2022 image comes with Visual Studio 2022, but node-gyp
         # (which is used by neon-sys) sadly fails to recognize it. As a mitigation, we still run the
         # tests on Windows 2019, until we can figure out a way to fix the problem.
-        os: [ubuntu-20.04, macos-11, windows-2019]
+        os: [ubuntu-20.04, macos-13, windows-2019]
         node-version: ["18.x"]
 
     steps:
@@ -74,6 +74,12 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        if: matrix.os == 'macos-13'
+        with:
+          xcode-version: '14.3'
 
         # Temporary fix for "ValueError: invalid mode: 'rU' while trying to load binding.gyp"
         # See <PR link>
@@ -101,12 +107,12 @@ jobs:
         if: matrix.os == 'windows-2019'
 
       - name: Set deployment target (macOS)
-        run: echo "MACOSX_DEPLOYMENT_TARGET=10.14" >> $GITHUB_ENV # 10.12 should be supported, but waiting for new rocksDB/XCode 14.3 to test this
-        if: matrix.os == 'macos-11'
+        run: echo "MACOSX_DEPLOYMENT_TARGET=10.13" >> $GITHUB_ENV
+        if: matrix.os == 'macos-13'
 
       - name: Get current date
         run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-        if: matrix.os == 'macos-11' || ${{ startsWith(matrix.os, 'ubuntu') }}
+        if: matrix.os == 'macos-13' || ${{ startsWith(matrix.os, 'ubuntu') }}
 
       - name: Get current date
         if: matrix.os == 'windows-2019'
@@ -138,6 +144,16 @@ jobs:
           restore-keys: |
             ${{ matrix.os }}-stable-cargo-index-${{ hashFiles('**/Cargo.lock') }}
             ${{ matrix.os }}-stable-cargo-index-
+
+      # This step is required to support macOS 10.13
+      - name: Patch librocksdb-sys (macOS)
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        run: |
+          cargo install cargo-patch
+          cp ${{ github.workspace }}/.patches/rocksdb_faligned_allocation.patch .
+          git apply --ignore-space-change --ignore-whitespace ${{ github.workspace }}/.patches/macos_cargo_toml.patch
+          cat Cargo.toml
+          cargo patch
 
       - name: Install dependencies
         run: npm install typescript && npm ci

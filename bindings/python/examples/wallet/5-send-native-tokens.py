@@ -27,5 +27,5 @@ outputs = [{
     )],
 }];
 
-transaction = account.send_native_tokens(outputs, None)
+transaction = account.prepare_send_native_tokens(outputs, None).send()
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')

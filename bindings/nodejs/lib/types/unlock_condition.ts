@@ -1,7 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Address, AliasAddress } from './address';
+import { Type } from 'class-transformer';
+import { Address, AddressDiscriminator, AliasAddress } from './address';
 
 /**
  * All of the unlock condition types.
@@ -31,6 +32,9 @@ abstract class UnlockCondition {
 }
 
 class AddressUnlockCondition extends UnlockCondition /*implements IAddressUnlockCondition*/ {
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
     private address: Address;
     constructor(address: Address) {
         super(UnlockConditionType.Address);
@@ -49,6 +53,10 @@ class AddressUnlockCondition extends UnlockCondition /*implements IAddressUnlock
  */
 class StorageDepositReturnUnlockCondition extends UnlockCondition /*implements IStorageDepositReturnUnlockCondition*/ {
     private amount: string;
+
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
     private returnAddress: Address;
 
     constructor(returnAddress: Address, amount: string) {
@@ -89,6 +97,9 @@ class TimelockUnlockCondition extends UnlockCondition /*implements ITimelockUnlo
 }
 
 class ExpirationUnlockCondition extends UnlockCondition /*implements IExpirationUnlockCondition*/ {
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
     private returnAddress: Address;
     private unixTime: number;
 
@@ -116,6 +127,9 @@ class ExpirationUnlockCondition extends UnlockCondition /*implements IExpiration
  * State Controller Address Unlock Condition.
  */
 class StateControllerAddressUnlockCondition extends UnlockCondition /*implements IStateControllerAddressUnlockCondition*/ {
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
     private address: Address;
     constructor(address: Address) {
         super(UnlockConditionType.StateControllerAddress);
@@ -133,6 +147,9 @@ class StateControllerAddressUnlockCondition extends UnlockCondition /*implements
  * Governor Unlock Condition.
  */
 class GovernorAddressUnlockCondition extends UnlockCondition /*implements IGovernorAddressUnlockCondition*/ {
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
     private address: Address;
     constructor(address: Address) {
         super(UnlockConditionType.GovernorAddress);
@@ -150,6 +167,9 @@ class GovernorAddressUnlockCondition extends UnlockCondition /*implements IGover
  * Immutable Alias Unlock Condition.
  */
 class ImmutableAliasAddressUnlockCondition extends UnlockCondition /*implements IImmutableAliasAddressUnlockCondition*/ {
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
     private address: Address;
     constructor(address: AliasAddress) {
         super(UnlockConditionType.ImmutableAliasAddress);
@@ -164,7 +184,42 @@ class ImmutableAliasAddressUnlockCondition extends UnlockCondition /*implements 
     }
 }
 
+const UnlockConditionDiscriminator = {
+    property: 'type',
+    subTypes: [
+        {
+            value: AddressUnlockCondition,
+            name: UnlockConditionType.Address as any,
+        },
+        {
+            value: StorageDepositReturnUnlockCondition,
+            name: UnlockConditionType.StorageDepositReturn as any,
+        },
+        {
+            value: TimelockUnlockCondition,
+            name: UnlockConditionType.Timelock as any,
+        },
+        {
+            value: ExpirationUnlockCondition,
+            name: UnlockConditionType.Expiration as any,
+        },
+        {
+            value: StateControllerAddressUnlockCondition,
+            name: UnlockConditionType.StateControllerAddress as any,
+        },
+        {
+            value: GovernorAddressUnlockCondition,
+            name: UnlockConditionType.GovernorAddress as any,
+        },
+        {
+            value: ImmutableAliasAddressUnlockCondition,
+            name: UnlockConditionType.ImmutableAliasAddress as any,
+        },
+    ],
+};
+
 export {
+    UnlockConditionDiscriminator,
     UnlockCondition,
     AddressUnlockCondition,
     StorageDepositReturnUnlockCondition,

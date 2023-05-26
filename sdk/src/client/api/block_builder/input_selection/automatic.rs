@@ -19,11 +19,7 @@ use crate::{
         secret::types::InputSigningData,
         Error, Result,
     },
-    types::block::{
-        address::{Address, Bech32AddressLike},
-        output::OutputWithMetadata,
-        protocol::ProtocolParameters,
-    },
+    types::block::{address::Bech32AddressLike, output::OutputWithMetadata, protocol::ProtocolParameters},
     utils::unix_timestamp_now,
 };
 
@@ -139,20 +135,8 @@ impl<'a> ClientBlockBuilder<'a> {
                 .get_all()
                 .await?;
 
-            available_input_addresses.extend(
-                addresses
-                    .public
-                    .iter()
-                    .map(|bech32_address| *bech32_address.inner())
-                    .collect::<Vec<Address>>(),
-            );
-            available_input_addresses.extend(
-                addresses
-                    .internal
-                    .iter()
-                    .map(|bech32_address| *bech32_address.inner())
-                    .collect::<Vec<Address>>(),
-            );
+            available_input_addresses.extend(addresses.public.iter().map(|bech32_address| *bech32_address.inner()));
+            available_input_addresses.extend(addresses.internal.iter().map(|bech32_address| *bech32_address.inner()));
 
             // Have public and internal addresses with the index ascending ordered.
             let mut public_and_internal_addresses = Vec::new();
