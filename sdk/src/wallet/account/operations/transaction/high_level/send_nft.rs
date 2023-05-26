@@ -59,7 +59,7 @@ where
 
     /// Function to prepare the transaction for
     /// [Account.send_nft()](crate::account::Account.send_nft)
-    async fn prepare_send_nft(
+    pub async fn prepare_send_nft(
         &self,
         params: Vec<SendNftParams>,
         options: impl Into<Option<TransactionOptions>> + Send,

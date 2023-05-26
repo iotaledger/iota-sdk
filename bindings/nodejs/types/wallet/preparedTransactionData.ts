@@ -1,66 +1,74 @@
-import type {
-    AddressTypes,
-    IOutputMetadataResponse,
-    ITransactionEssence,
-    OutputTypes,
-} from '@iota/types';
-import type { Segment } from './output';
+import {
+    Account,
+    IPreparedTransactionData,
+    SignedTransactionEssence,
+    Transaction,
+} from '../../lib';
 
 /**
- * Prepared transaction data, useful for offline signing.
+ * PreparedTransactionData` is a class that represents prepared transaction data, which
+ * is useful for offline signing. It contains the prepared transaction data and an
+ * `Account` object. It provides methods to retrieve the prepared transaction data, sign
+ * the transaction and sign+submit/send the transaction.
  */
-export interface PreparedTransactionData {
-    /**
-     * Transaction essence
-     */
-    essence: ITransactionEssence;
-    /**
-     * Required address information for signing
-     */
-    inputsData: InputSigningData[];
-    /**
-     * Optional remainder output information
-     */
-    remainder?: RemainderData;
-}
+export class PreparedTransactionData {
+    private _preparedData: IPreparedTransactionData;
+    private _account: Account;
 
-/**
- * Data for transaction inputs for signing and ordering of unlock blocks
- */
-export interface InputSigningData {
-    /**
-     * The output
-     */
-    output: OutputTypes;
-    /**
-     * The output metadata
-     */
-    outputMetaData: IOutputMetadataResponse;
-    /**
-     * The chain derived from seed, only for ed25519 addresses
-     */
-    chain?: Segment[];
-    /**
-     * The bech32 encoded address, required because of alias outputs where we have multiple possible unlock
-     * conditions, because we otherwise don't know which one we need
-     */
-    bech32Address: string;
-}
+    constructor(preparedData: IPreparedTransactionData, account: Account) {
+        this._preparedData = preparedData;
+        this._account = account;
+    }
 
-/**
- * Data for a remainder output, used for ledger nano
- */
-export interface RemainderData {
     /**
-     * The remainder output
+     * The function returns the prepared transaction data.
+     *
+     * Returns:
+     *
+     * The method `preparedTransactionData()` is returning an object of type
+     * `IPreparedTransactionData`.
      */
-    output: OutputTypes;
+    public preparedTransactionData(): IPreparedTransactionData {
+        return this._preparedData;
+    }
+
     /**
-     * The chain derived from seed, for the remainder addresses
+     * The `send` function returns a promise that resolves to a `Transaction` object after signing
+     * and submitting the transaction. Internally just calls `signAndSubmitTransaction`.
+     *
+     * Returns:
+     *
+     * The `send()` method is returning a `Promise` that resolves to a `Transaction` object after it
+     * has been signed and submitted.
      */
-    chain?: Segment[];
+    public async send(): Promise<Transaction> {
+        return this.signAndSubmitTransaction();
+    }
+
     /**
-     * The remainder address
+     * This function signs a prepared transaction essence using the account's private key and returns
+     * the signed transaction essence.
+     *
+     * Returns:
+     *
+     * A `Promise` that resolves to a `SignedTransactionEssence` object.
      */
-    address: AddressTypes;
+    public async sign(): Promise<SignedTransactionEssence> {
+        return this._account.signTransactionEssence(
+            this.preparedTransactionData(),
+        );
+    }
+
+    /**
+     * This function signs and submits a transaction using prepared transaction data.
+     *
+     * Returns:
+     *
+     * A Promise that resolves to a Transaction object.
+     */
+    public async signAndSubmitTransaction(): Promise<Transaction> {
+        return this._account.signAndSubmitTransaction(
+            this.preparedTransactionData(),
+        );
+    }
 }

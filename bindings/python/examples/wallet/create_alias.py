@@ -19,5 +19,5 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # Send transaction.
-transaction = account.create_alias_output(None, None)
+transaction = account.prepare_create_alias_output(None, None).send()
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')

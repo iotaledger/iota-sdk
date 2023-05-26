@@ -29,6 +29,19 @@ where
         ClientBuilder::from_client(self.client()).await
     }
 
+    /// Get the node info.
+    pub async fn get_node_info(&self) -> crate::wallet::Result<NodeInfoWrapper> {
+        let node_info_wrapper = self.client().get_info().await?;
+
+        Ok(node_info_wrapper)
+    }
+}
+
+impl<S: 'static + SecretManage> Wallet<S>
+where
+    crate::wallet::Error: From<S::Error>,
+    WalletBuilder<S>: SaveLoadWallet,
+{
     pub async fn set_client_options(&self, client_options: ClientBuilder) -> crate::wallet::Result<()> {
         let ClientBuilder {
             node_manager_builder,
@@ -54,22 +67,16 @@ where
         {
             *self.client.mqtt.broker_options.write().await = broker_options;
         }
+        #[cfg(feature = "storage")]
+        {
+            WalletBuilder::from_wallet(self)
+                .await
+                .save_data(&*self.storage_manager.read().await)
+                .await?;
+        }
         Ok(())
     }
 
-    /// Get the node info.
-    pub async fn get_node_info(&self) -> crate::wallet::Result<NodeInfoWrapper> {
-        let node_info_wrapper = self.client().get_info().await?;
-
-        Ok(node_info_wrapper)
-    }
-}
-
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    WalletBuilder<S>: SaveLoadWallet,
-{
     /// Update the authentication for a node.
     pub async fn update_node_auth(&self, url: Url, auth: Option<NodeAuth>) -> crate::wallet::Result<()> {
         log::debug!("[update_node_auth]");

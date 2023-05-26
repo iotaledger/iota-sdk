@@ -109,14 +109,6 @@ impl Wallet {
             }
         });
 
-        // Update Wallet with read data
-        if ignore_if_coin_type_mismatch.is_none() {
-            if let Some(read_client_options) = read_client_options {
-                // If the nodes are from the same network as the current client options, then extend it
-                self.set_client_options(read_client_options).await?;
-            }
-        }
-
         if !ignore_backup_values {
             if let Some(read_coin_type) = read_coin_type {
                 self.coin_type.store(read_coin_type, Ordering::Relaxed);
@@ -142,6 +134,15 @@ impl Wallet {
         }
 
         stronghold_password.zeroize();
+
+        // drop secret manager, otherwise we get a deadlock in set_client_options()
+        drop(secret_manager);
+
+        if ignore_if_coin_type_mismatch.is_none() {
+            if let Some(read_client_options) = read_client_options {
+                self.set_client_options(read_client_options).await?;
+            }
+        }
 
         if !ignore_backup_values {
             if let Some(read_accounts) = read_accounts {
@@ -188,7 +189,6 @@ impl Wallet {
                 .with_client_options(self.client_options().await)
                 .with_coin_type(self.coin_type.load(Ordering::Relaxed));
             // drop secret manager, otherwise we get a deadlock in save_wallet_data
-            drop(secret_manager);
             wallet_builder.save_data(&*self.storage_manager.read().await).await?;
             // also save account to db
             for account in accounts.iter() {
@@ -303,6 +303,9 @@ impl Wallet<StrongholdSecretManager> {
 
         stronghold_password.zeroize();
 
+        // drop secret manager, otherwise we get a deadlock in set_client_options()
+        drop(secret_manager);
+
         if !ignore_backup_values {
             if let Some(read_accounts) = read_accounts {
                 let restore_accounts = ignore_if_bech32_hrp_mismatch.map_or(true, |expected_bech32_hrp| {
@@ -348,7 +351,6 @@ impl Wallet<StrongholdSecretManager> {
                 .with_client_options(self.client_options().await)
                 .with_coin_type(self.coin_type.load(Ordering::Relaxed));
             // drop secret manager, otherwise we get a deadlock in save_wallet_data
-            drop(secret_manager);
             wallet_builder.save_data(&*self.storage_manager.read().await).await?;
             // also save account to db
             for account in accounts.iter() {

@@ -80,7 +80,7 @@ where
 
     /// Function to prepare the transaction for
     /// [Account.send_native_tokens()](crate::account::Account.send_native_tokens)
-    async fn prepare_send_native_tokens(
+    pub async fn prepare_send_native_tokens(
         &self,
         params: Vec<SendNativeTokensParams>,
         options: impl Into<Option<TransactionOptions>> + Send,

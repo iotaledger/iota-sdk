@@ -124,7 +124,7 @@ where
 
     /// Function to prepare the transaction for
     /// [Account.mint_nfts()](crate::account::Account.mint_nfts)
-    async fn prepare_mint_nfts(
+    pub async fn prepare_mint_nfts(
         &self,
         params: Vec<MintNftParams>,
         options: impl Into<Option<TransactionOptions>> + Send,

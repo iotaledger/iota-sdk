@@ -40,7 +40,10 @@ pub use self::{
             high_level::{
                 create_alias::{CreateAliasParams, CreateAliasParamsDto},
                 minting::{
-                    mint_native_token::{MintNativeTokenParams, MintNativeTokenParamsDto, MintTokenTransactionDto},
+                    mint_native_token::{
+                        MintNativeTokenParams, MintNativeTokenParamsDto, MintTokenTransactionDto,
+                        PreparedMintTokenTransactionDto,
+                    },
                     mint_nfts::{MintNftParams, MintNftParamsDto},
                 },
             },

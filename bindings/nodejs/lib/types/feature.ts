@@ -89,5 +89,20 @@ class TagFeature extends Feature {
         return this.tag;
     }
 }
-
-export { Feature, SenderFeature, IssuerFeature, MetadataFeature, TagFeature };
+const FeatureDiscriminator = {
+    property: 'type',
+    subTypes: [
+        { value: SenderFeature, name: FeatureType.Sender as any },
+        { value: IssuerFeature, name: FeatureType.Issuer as any },
+        { value: MetadataFeature, name: FeatureType.Metadata as any },
+        { value: TagFeature, name: FeatureType.Tag as any },
+    ],
+};
+export {
+    FeatureDiscriminator,
+    Feature,
+    SenderFeature,
+    IssuerFeature,
+    MetadataFeature,
+    TagFeature,
+};

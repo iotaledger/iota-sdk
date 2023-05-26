@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::secret::SecretManage,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::{
         api::plugins::participation::types::{Participations, PARTICIPATION_TAG},
         block::{
@@ -44,6 +44,13 @@ where
     /// Prioritizes consuming outputs that are designated for voting but don't have any metadata (only possible if user
     /// increases voting power then increases again immediately after).
     pub async fn increase_voting_power(&self, amount: u64) -> Result<Transaction> {
+        let prepared = self.prepare_increase_voting_power(amount).await?;
+        self.sign_and_submit_transaction(prepared).await
+    }
+
+    /// Function to prepare the transaction for
+    /// [Account.increase_voting_power()](crate::account::Account.increase_voting_power)
+    pub async fn prepare_increase_voting_power(&self, amount: u64) -> Result<PreparedTransactionData> {
         let token_supply = self.client().get_token_supply().await?;
 
         let (new_output, tx_options) = match self.get_voting_output().await? {
@@ -82,7 +89,7 @@ where
             ),
         };
 
-        self.send(vec![new_output], tx_options).await
+        self.prepare_transaction(vec![new_output], tx_options).await
     }
 
     /// Reduces an account's "voting power" by a given amount.
@@ -95,6 +102,13 @@ where
     /// Prioritizes consuming outputs that are designated for voting but don't have any metadata (only possible if user
     /// increases voting power then decreases immediately after).
     pub async fn decrease_voting_power(&self, amount: u64) -> Result<Transaction> {
+        let prepared = self.prepare_decrease_voting_power(amount).await?;
+        self.sign_and_submit_transaction(prepared).await
+    }
+
+    /// Function to prepare the transaction for
+    /// [Account.decrease_voting_power()](crate::account::Account.decrease_voting_power)
+    pub async fn prepare_decrease_voting_power(&self, amount: u64) -> Result<PreparedTransactionData> {
         let token_supply = self.client().get_token_supply().await?;
         let current_output_data = self
             .get_voting_output()
@@ -120,7 +134,7 @@ where
             (new_output, Some(tagged_data_payload))
         };
 
-        self.send(
+        self.prepare_transaction(
             vec![new_output],
             Some(TransactionOptions {
                 // Use the previous voting output and additionally others for possible additional required amount for
