@@ -38,7 +38,13 @@ import type {
 } from '@iota/types';
 import type { INodeInfoWrapper } from '../types/client/nodeInfo';
 import { SecretManagerType } from '../types/secretManager/secretManager';
-import { AliasOutput, BasicOutput, FoundryOutput, NftOutput, BlockId } from '../types/block';
+import {
+    AliasOutput,
+    BasicOutput,
+    FoundryOutput,
+    NftOutput,
+    BlockId,
+} from '../types/block';
 
 /** The Client to interact with nodes. */
 export class Client {
