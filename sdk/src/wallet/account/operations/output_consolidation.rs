@@ -3,9 +3,14 @@
 
 #[cfg(feature = "ledger_nano")]
 use crate::client::secret::SecretManager;
-use crate::types::block::{
-    input::INPUT_COUNT_MAX,
-    output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokens, NativeTokensBuilder, Output},
+use crate::{
+    client::api::PreparedTransactionData,
+    types::block::{
+        input::INPUT_COUNT_MAX,
+        output::{
+            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokens, NativeTokensBuilder, Output,
+        },
+    },
 };
 
 // Constants for the calculation of the amount of inputs we can use with a ledger nano
@@ -67,7 +72,28 @@ impl Account {
         force: bool,
         output_consolidation_threshold: Option<usize>,
     ) -> Result<Transaction> {
-        log::debug!("[OUTPUT_CONSOLIDATION] consolidating outputs if needed");
+        let prepared_transaction = self
+            .prepare_consolidate_outputs(force, output_consolidation_threshold)
+            .await?;
+        let consolidation_tx = self.sign_and_submit_transaction(prepared_transaction).await?;
+
+        log::debug!(
+            "[OUTPUT_CONSOLIDATION] consolidation transaction created: block_id: {:?} tx_id: {:?}",
+            consolidation_tx.block_id,
+            consolidation_tx.transaction_id
+        );
+
+        Ok(consolidation_tx)
+    }
+
+    /// Function to prepare the transaction for
+    /// [Account.consolidate_outputs()](crate::account::Account.consolidate_outputs)
+    pub async fn prepare_consolidate_outputs(
+        &self,
+        force: bool,
+        output_consolidation_threshold: Option<usize>,
+    ) -> Result<PreparedTransactionData> {
+        log::debug!("[OUTPUT_CONSOLIDATION] prepare consolidating outputs if needed");
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
         let current_time = self.client().get_time_checked().await?;
@@ -165,22 +191,11 @@ impl Account {
                 .finish_output(token_supply)?,
         ];
 
-        let consolidation_tx = self
-            .finish_transaction(
-                consolidation_output,
-                Some(TransactionOptions {
-                    custom_inputs: Some(custom_inputs),
-                    ..Default::default()
-                }),
-            )
-            .await?;
+        let options = Some(TransactionOptions {
+            custom_inputs: Some(custom_inputs),
+            ..Default::default()
+        });
 
-        log::debug!(
-            "[OUTPUT_CONSOLIDATION] consolidation transaction created: block_id: {:?} tx_id: {:?}",
-            consolidation_tx.block_id,
-            consolidation_tx.transaction_id
-        );
-
-        Ok(consolidation_tx)
+        self.prepare_transaction(consolidation_output, options).await
     }
 }
