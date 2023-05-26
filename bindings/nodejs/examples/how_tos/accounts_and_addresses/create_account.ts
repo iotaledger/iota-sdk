@@ -48,7 +48,6 @@ async function run() {
             },
         };
 
-        // Create the wallet
         const wallet = new Wallet(walletOptions);
 
         // A mnemonic can be generated with `Utils.generateMnemonic()`.
