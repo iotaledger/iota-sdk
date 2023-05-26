@@ -49,7 +49,7 @@ pub enum AccountMethod {
     #[serde(rename_all = "camelCase")]
     DeregisterParticipationEvent { event_id: ParticipationEventId },
     /// Generate new unused addresses.
-    /// Expected response: [`GeneratedAddress`](crate::Response::GeneratedAddress)
+    /// Expected response: [`GeneratedEd25519Addresses`](crate::Response::GeneratedEd25519Addresses)
     GenerateEd25519Addresses {
         amount: u32,
         options: Option<GenerateAddressOptions>,
