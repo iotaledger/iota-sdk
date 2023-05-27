@@ -79,9 +79,7 @@ async function run() {
             // Send native tokens together with the required storage deposit
             const client = await manager.getClient();
 
-            // TODO: build from rent structure
             const basicOutput: BasicOutputBuilderParams = {
-                amount: '1',
                 unlockConditions: [
                     new AddressUnlockCondition(
                         new Ed25519Address(RECV_ADDRESS),

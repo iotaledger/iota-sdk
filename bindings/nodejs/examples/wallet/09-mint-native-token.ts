@@ -56,8 +56,6 @@ async function run() {
         };
 
         const prepared = await account.prepareMintNativeToken(params);
-
-        // TODO: Override finish to contain tokenId
         transaction = await prepared.send();
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
