@@ -125,7 +125,7 @@ Migrates a stronghold snapshot from v2 to v3.
 
 Migrate a stronghold snapshot from v2 to v3 with the default path: "./stardust-cli-wallet.stronghold".
 ```sh
-./wallet mmigrate-stronghold-snapshot-v2-to-v3
+./wallet migrate-stronghold-snapshot-v2-to-v3
 ```
 
 Migrate a stronghold snapshot from v2 to v3 with a custom path.
