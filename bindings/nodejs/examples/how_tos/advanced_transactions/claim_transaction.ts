@@ -1,7 +1,11 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { AddressUnlockCondition, Client, Ed25519Address, OutputsToClaim, TimelockUnlockCondition, Utils, Wallet, initLogger } from '@iota/sdk';
+import {
+    OutputsToClaim,
+    Wallet,
+    initLogger,
+} from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -29,13 +33,16 @@ async function run() {
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
         // Only the unspent outputs in the account
-        const output_ids = await account.getOutputsWithAdditionalUnlockConditions(OutputsToClaim.All);
+        const output_ids =
+            await account.getOutputsWithAdditionalUnlockConditions(
+                OutputsToClaim.All,
+            );
         console.log(`Available outputs to claim:`);
         for (const output_id of output_ids) {
             console.log(output_id);
         }
 
-        const transaction = await account.claimOutputs(output_ids)
+        const transaction = await account.claimOutputs(output_ids);
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 

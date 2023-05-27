@@ -1,7 +1,15 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { AddressUnlockCondition, Client, Ed25519Address, TimelockUnlockCondition, Utils, Wallet, initLogger } from '@iota/sdk';
+import {
+    AddressUnlockCondition,
+    Client,
+    Ed25519Address,
+    TimelockUnlockCondition,
+    Utils,
+    Wallet,
+    initLogger,
+} from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -37,9 +45,13 @@ async function run() {
         const in_an_hour = Math.floor(Date.now() / 1000) + 3600;
         const basicOutput = await new Client({}).buildBasicOutput({
             unlockConditions: [
-                new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(
-                    'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
-                ))),
+                new AddressUnlockCondition(
+                    new Ed25519Address(
+                        Utils.bech32ToHex(
+                            'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
+                        ),
+                    ),
+                ),
                 new TimelockUnlockCondition(in_an_hour),
             ],
         });
