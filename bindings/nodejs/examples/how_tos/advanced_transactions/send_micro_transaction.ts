@@ -18,7 +18,7 @@ async function run() {
         }
 
         const wallet = new Wallet({
-            storagePath: './alice-database',
+            storagePath: process.env.WALLET_DB_PATH,
         });
 
         const account = await wallet.getAccount('Alice');
