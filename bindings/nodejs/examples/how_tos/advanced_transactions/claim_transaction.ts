@@ -11,7 +11,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/advanced_transactions/claim_transaction.ts
 
-// This example syncs the account and prints the balance
+// This example claims all claimable outputs in the account.
 async function run() {
     initLogger();
     try {
