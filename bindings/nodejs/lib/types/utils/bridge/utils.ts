@@ -1,10 +1,10 @@
-import type {
-    IBlock,
-    ITransactionEssence,
+import {
+    Ed25519Address,
+    Ed25519Signature,
     HexEncodedString,
-    IEd25519Signature,
-} from '@iota/types';
-import { Ed25519Address } from '../../';
+    IBlock,
+    TransactionEssence,
+} from '../../';
 
 export interface __GenerateMnemonicMethod__ {
     name: 'generateMnemonic';
@@ -103,14 +103,14 @@ export interface __IsAddressValidMethod__ {
 export interface __HashTransactionEssenceMethod__ {
     name: 'hashTransactionEssence';
     data: {
-        essence: ITransactionEssence;
+        essence: TransactionEssence;
     };
 }
 
 export interface __VerifyEd25519SignatureMethod__ {
     name: 'verifyEd25519Signature';
     data: {
-        signature: IEd25519Signature;
+        signature: Ed25519Signature;
         message: HexEncodedString;
         address: Ed25519Address;
     };

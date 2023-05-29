@@ -1,5 +1,6 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
 import { ClientMethodHandler } from './ClientMethodHandler';
 import type {
     IClientOptions,
@@ -20,22 +21,6 @@ import type {
     OutputIdsResponse,
     IBip32Chain,
 } from '../types/client';
-import type {
-    IUTXOInput,
-    IOutputResponse,
-    IBlock,
-    IBlockMetadata,
-    PayloadTypes,
-    IPeer,
-    IMilestonePayload,
-    IMilestoneUtxoChangesResponse,
-    INodeInfo,
-    IReceiptsResponse,
-    ITreasury,
-    INodeInfoProtocol,
-    UnlockTypes,
-    HexEncodedString,
-} from '@iota/types';
 import type { INodeInfoWrapper } from '../types/client/nodeInfo';
 import { SecretManagerType } from '../types/secretManager/secretManager';
 import {
@@ -44,7 +29,26 @@ import {
     FoundryOutput,
     NftOutput,
     BlockId,
+    UnlockCondition,
+    Payload,
+    MilestonePayload,
+    TreasuryOutput,
+    Output,
 } from '../types/block';
+import { IBlock } from '../types/block/IBlock';
+import { HexEncodedString } from '../utils';
+import {
+    IBlockMetadata,
+    INodeInfo,
+    INodeInfoProtocol,
+    IPeer,
+    UTXOInput,
+} from '../types';
+import {
+    IMilestoneUtxoChangesResponse,
+    IOutputResponse,
+    IReceiptsResponse,
+} from '../types/models/api';
 
 /** The Client to interact with nodes. */
 export class Client {
@@ -207,7 +211,7 @@ export class Client {
     async findInputs(
         addresses: string[],
         amount: number,
-    ): Promise<IUTXOInput[]> {
+    ): Promise<UTXOInput[]> {
         const response = await this.methodHandler.callMethod({
             name: 'findInputs',
             data: {
@@ -262,7 +266,7 @@ export class Client {
     async signTransaction(
         secretManager: SecretManagerType,
         preparedTransactionData: IPreparedTransactionData,
-    ): Promise<PayloadTypes> {
+    ): Promise<Payload> {
         const response = await this.methodHandler.callMethod({
             name: 'signTransaction',
             data: {
@@ -281,7 +285,7 @@ export class Client {
         secretManager: SecretManagerType,
         transactionEssenceHash: HexEncodedString,
         chain: IBip32Chain,
-    ): Promise<UnlockTypes> {
+    ): Promise<UnlockCondition> {
         const response = await this.methodHandler.callMethod({
             name: 'signatureUnlock',
             data: {
@@ -297,7 +301,7 @@ export class Client {
     /**
      * Submit a payload in a block
      */
-    async postBlockPayload(payload: PayloadTypes): Promise<[BlockId, IBlock]> {
+    async postBlockPayload(payload: Payload): Promise<[BlockId, IBlock]> {
         const response = await this.methodHandler.callMethod({
             name: 'postBlockPayload',
             data: {
@@ -474,7 +478,7 @@ export class Client {
     /**
      * Look up a milestone by a given milestone index.
      */
-    async getMilestoneById(milestoneId: string): Promise<IMilestonePayload> {
+    async getMilestoneById(milestoneId: string): Promise<MilestonePayload> {
         const response = await this.methodHandler.callMethod({
             name: 'getMilestoneById',
             data: {
@@ -503,7 +507,7 @@ export class Client {
     /**
      * Look up a milestone by a given milestone index.
      */
-    async getMilestoneByIndex(index: number): Promise<IMilestonePayload> {
+    async getMilestoneByIndex(index: number): Promise<MilestonePayload> {
         const response = await this.methodHandler.callMethod({
             name: 'getMilestoneByIndex',
             data: {
@@ -560,12 +564,12 @@ export class Client {
     /**
      * Get the treasury output.
      */
-    async getTreasury(): Promise<ITreasury> {
+    async getTreasury(): Promise<TreasuryOutput> {
         const response = await this.methodHandler.callMethod({
             name: 'getTreasury',
         });
 
-        return JSON.parse(response).payload;
+        return Output.parse(JSON.parse(response).payload) as TreasuryOutput;
     }
 
     /**

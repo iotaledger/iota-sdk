@@ -1,8 +1,9 @@
-import type {
-    AddressTypes,
-    OutputTypes,
-    IOutputMetadataResponse,
-} from '@iota/types';
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import { Address } from '../block/address';
+import { Output } from '../block/output';
+import { IOutputMetadataResponse } from '../models/api';
 
 /** Output to claim */
 export enum OutputsToClaim {
@@ -20,11 +21,11 @@ export interface OutputData {
     /** The metadata of the output */
     metadata: IOutputMetadataResponse;
     /** The actual Output */
-    output: OutputTypes;
+    output: Output;
     /** If an output is spent */
     isSpent: boolean;
     /** Associated account address */
-    address: AddressTypes;
+    address: Address;
     /** Network ID */
     networkId: string;
     /** Remainder */

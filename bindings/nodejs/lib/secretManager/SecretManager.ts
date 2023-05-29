@@ -8,13 +8,8 @@ import type {
     LedgerNanoStatus,
     IBip32Chain,
 } from '../types/client/';
-import type {
-    PayloadTypes,
-    UnlockTypes,
-    HexEncodedString,
-    IEd25519Signature,
-} from '@iota/types';
 import { SecretManagerType } from '../types/secretManager/';
+import { Ed25519Signature, HexEncodedString, Payload, Unlock } from '../types';
 
 /** The SecretManager to interact with nodes. */
 export class SecretManager {
@@ -57,7 +52,7 @@ export class SecretManager {
      */
     async signTransaction(
         preparedTransactionData: IPreparedTransactionData,
-    ): Promise<PayloadTypes> {
+    ): Promise<Payload> {
         const response = await this.methodHandler.callMethod({
             name: 'signTransaction',
             data: {
@@ -74,7 +69,7 @@ export class SecretManager {
     async signatureUnlock(
         transactionEssenceHash: HexEncodedString,
         chain: IBip32Chain,
-    ): Promise<UnlockTypes> {
+    ): Promise<Unlock> {
         const response = await this.methodHandler.callMethod({
             name: 'signatureUnlock',
             data: {
@@ -92,7 +87,7 @@ export class SecretManager {
     async signEd25519(
         message: HexEncodedString,
         chain: IBip32Chain,
-    ): Promise<IEd25519Signature> {
+    ): Promise<Ed25519Signature> {
         const response = await this.methodHandler.callMethod({
             name: 'signEd25519',
             data: {

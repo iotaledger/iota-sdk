@@ -1,4 +1,8 @@
-import type { IOutputResponse, ITransactionPayload } from '@iota/types';
+// Copyright 2021-2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import { TransactionPayload } from '../block/payload/transaction';
+import { IOutputResponse } from '../models/api';
 
 /** Possible InclusionStates of transactions sent with the wallet */
 export enum InclusionState {
@@ -15,7 +19,7 @@ export enum InclusionState {
 /** A Transaction with metadata */
 export interface Transaction {
     /** The transaction payload */
-    payload: ITransactionPayload;
+    payload: TransactionPayload;
     /** The block id in which the transaction payload was included */
     blockId?: string;
     /** The inclusion state of the transaction */

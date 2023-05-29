@@ -1,4 +1,6 @@
-import type { HexEncodedAmount } from '@iota/types';
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 import type { SyncOptions, FilterOptions } from '../account';
 import type {
     SendAmountParams,
@@ -27,7 +29,7 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventType,
 } from '../participation';
-import { Output } from '../../';
+import { HexEncodedAmount, Output } from '../../';
 import { Burn } from '../burn';
 
 export type __BuildAliasOutputMethod__ = {

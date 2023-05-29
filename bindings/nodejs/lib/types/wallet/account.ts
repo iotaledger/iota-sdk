@@ -1,12 +1,13 @@
+// Copyright 2021-2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 import type { AccountAddress, AddressWithUnspentOutputs } from './address';
 import type { OutputData } from './output';
 import type { Transaction } from './transaction';
-import type {
-    HexEncodedAmount,
-    IOutputResponse,
-    ITransactionPayload,
-} from '@iota/types';
 import { CoinType } from '../../client';
+import { TransactionPayload } from '../block/payload/transaction';
+import { HexEncodedAmount } from '../utils';
+import { IOutputResponse } from '../models/api';
 
 /**
  * Account identifier
@@ -140,7 +141,7 @@ export interface AccountMeta {
     pendingTransactions: Set<string>;
     /** Incoming transactions with their inputs if available and not already pruned */
     incomingTransactions: {
-        [transactionId: string]: [ITransactionPayload, IOutputResponse[]];
+        [transactionId: string]: [TransactionPayload, IOutputResponse[]];
     };
 }
 

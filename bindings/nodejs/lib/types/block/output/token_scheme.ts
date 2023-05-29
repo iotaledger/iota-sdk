@@ -1,4 +1,7 @@
-import { HexEncodedAmount } from '@iota/types';
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import { HexEncodedAmount } from '../../utils';
 
 enum TokenSchemeType {
     Simple = 0,
@@ -60,4 +63,4 @@ class SimpleTokenScheme extends TokenScheme {
     }
 }
 
-export { TokenSchemeType, SimpleTokenScheme };
+export { TokenSchemeType, TokenScheme, SimpleTokenScheme };

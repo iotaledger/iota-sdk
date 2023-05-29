@@ -1,12 +1,10 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type {
-    AddressTypes,
-    IOutputMetadataResponse,
-    ITransactionEssence,
-    OutputTypes,
-} from '@iota/types';
+import { Address } from '../block/address';
+import { Output } from '../block/output/output';
+import { TransactionEssence } from '../block/payload/transaction/essence';
+import { IOutputMetadataResponse } from '../models/api';
 
 /**
  * Helper struct for offline signing
@@ -15,7 +13,7 @@ export interface IPreparedTransactionData {
     /**
      * Transaction essence
      */
-    essence: ITransactionEssence;
+    essence: TransactionEssence;
     /**
      * Required address information for signing
      */
@@ -33,7 +31,7 @@ export interface IInputSigningData {
     /**
      * The output
      */
-    output: OutputTypes;
+    output: Output;
     /**
      * The output metadata
      */
@@ -48,7 +46,7 @@ export interface IRemainder {
     /**
      * The remainder output
      */
-    output: OutputTypes;
+    output: Output;
     /**
      * The chain derived from seed, for the remainder addresses
      */
@@ -56,7 +54,7 @@ export interface IRemainder {
     /**
      * The remainder address
      */
-    address: AddressTypes;
+    address: Address;
 }
 
 /**

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { Address, AddressDiscriminator, AliasAddress } from './address';
+import { Address, AddressDiscriminator, AliasAddress } from '../address';
 
 /**
  * All of the unlock condition types.

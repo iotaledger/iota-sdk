@@ -1,8 +1,7 @@
-import type { HexEncodedString, IBlock, PayloadTypes } from '@iota/types';
 import type { SecretManagerType } from '../../secretManager/secretManager';
 import type { IGenerateAddressesOptions } from '../generateAddressesOptions';
 import type { IBuildBlockOptions } from '../buildBlockOptions';
-import type { BlockId } from '../../block';
+import type { BlockId, Payload } from '../../block';
 import type {
     IPreparedTransactionData,
     IBip32Chain,
@@ -18,6 +17,8 @@ import type { BasicOutputBuilderParams } from '../outputBuilderParams/basicOutpu
 import type { AliasOutputBuilderParams } from '../outputBuilderParams/aliasOutputParams';
 import type { FoundryOutputBuilderParams } from '../outputBuilderParams/foundryOutputParams';
 import type { NftOutputBuilderParams } from '../outputBuilderParams/nftOutputParams';
+import { IBlock } from '../../block/IBlock';
+import { HexEncodedString } from '../../utils';
 
 export interface __GetInfoMethod__ {
     name: 'getInfo';
@@ -133,7 +134,7 @@ export interface __SignatureUnlockMethod__ {
 export interface __PostBlockPayloadMethod__ {
     name: 'postBlockPayload';
     data: {
-        payload: PayloadTypes;
+        payload: Payload;
     };
 }
 

@@ -1,5 +1,7 @@
-import type { INativeToken, TokenSchemeTypes } from '@iota/types';
-import { Feature, UnlockCondition } from '../';
+// Copyright 2021-2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import { Feature, INativeToken, TokenScheme, UnlockCondition } from '../';
 
 /** An alias output */
 export interface BuildAliasOutputData extends BuildBasicOutputData {
@@ -22,7 +24,7 @@ export interface BuildBasicOutputData {
 /** A foundry output */
 export interface BuildFoundryOutputData extends BuildBasicOutputData {
     serialNumber: number;
-    tokenScheme: TokenSchemeTypes;
+    tokenScheme: TokenScheme;
     immutableFeatures?: Feature[];
 }
 

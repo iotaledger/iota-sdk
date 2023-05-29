@@ -1,10 +1,14 @@
-import type { ITaggedDataPayload, HexEncodedAmount } from '@iota/types';
+// Copyright 2021-2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import { TaggedDataPayload } from '../block/payload/tagged';
+import { HexEncodedAmount } from '../utils/hexEncodedTypes';
 import type { Burn } from './burn';
 
 /** Options for the transaction creation */
 export interface TransactionOptions {
     remainderValueStrategy?: RemainderValueStrategy;
-    taggedDataPayload?: ITaggedDataPayload;
+    taggedDataPayload?: TaggedDataPayload;
     /** Custom inputs that should be used for the transaction */
     customInputs?: string[];
     mandatoryInputs?: string[];

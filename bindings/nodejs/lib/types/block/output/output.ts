@@ -6,10 +6,12 @@ import {
     UnlockConditionDiscriminator,
 } from './unlock_condition';
 import { Feature, FeatureDiscriminator } from './feature';
-import { HexEncodedString, INativeToken, TokenSchemeTypes } from '@iota/types';
 
 // Temp solution for not double parsing JSON
 import { plainToInstance, Type } from 'class-transformer';
+import { HexEncodedString } from '../../utils';
+import { TokenScheme } from './token_scheme';
+import { INativeToken } from '../../models';
 
 /**
  * All of the output types.
@@ -242,13 +244,13 @@ class NftOutput extends StateMetadataOutput /*implements INftOutput*/ {
  */
 class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*/ {
     private serialNumber: number;
-    private tokenScheme: TokenSchemeTypes;
+    private tokenScheme: TokenScheme;
 
     constructor(
         amount: string,
         serialNumber: number,
         unlockConditions: UnlockCondition[],
-        tokenScheme: TokenSchemeTypes,
+        tokenScheme: TokenScheme,
     ) {
         super(OutputType.Foundry, amount, unlockConditions);
         this.serialNumber = serialNumber;
@@ -263,7 +265,7 @@ class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*
     /**
      * The token scheme for the foundry.
      */
-    getTokenScheme(): TokenSchemeTypes {
+    getTokenScheme(): TokenScheme {
         return this.tokenScheme;
     }
 }

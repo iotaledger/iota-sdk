@@ -1,9 +1,12 @@
-import type { HexEncodedString } from '@iota/types';
+// Copyright 2021-2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 import type { IGenerateAddressesOptions } from '../../client/generateAddressesOptions';
 import type {
     IPreparedTransactionData,
     IBip32Chain,
 } from '../../client/preparedTransactionData';
+import { HexEncodedString } from '../../utils';
 
 export interface __GenerateAddressesMethod__ {
     name: 'generateAddresses';

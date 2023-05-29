@@ -1,5 +1,7 @@
-import type { HexEncodedString } from '@iota/types';
-import { Feature } from '../../';
+// Copyright 2021-2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import { Feature, HexEncodedString } from '../../';
 import type { BasicOutputBuilderParams } from './basicOutputParams';
 
 /**

@@ -3,6 +3,7 @@
 
 export * from './block';
 export * from './client';
+export * from './models';
 export * from './secretManager';
 export * from './utils';
 export * from './wallet';

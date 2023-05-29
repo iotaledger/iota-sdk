@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { INativeToken } from '@iota/types';
+import { INativeToken } from '../models/INativeToken';
 
 /** A DTO for [`Burn`] */
 export interface Burn {

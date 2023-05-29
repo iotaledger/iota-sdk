@@ -1,15 +1,16 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type {
-    IBlock,
-    ITransactionEssence,
-    HexEncodedString,
-    IEd25519Signature,
-} from '@iota/types';
-
 import { callUtilsMethod } from '../bindings';
-import { Address, Ed25519Address, BlockId } from '../types';
+import {
+    Address,
+    Ed25519Address,
+    BlockId,
+    HexEncodedString,
+    IBlock,
+    Ed25519Signature,
+    TransactionEssence,
+} from '../types';
 
 /** Utils class for utils. */
 export class Utils {
@@ -179,7 +180,7 @@ export class Utils {
     /**
      * Compute the hash of a transaction essence.
      */
-    static hashTransactionEssence(essence: ITransactionEssence): string {
+    static hashTransactionEssence(essence: TransactionEssence): string {
         return callUtilsMethod({
             name: 'hashTransactionEssence',
             data: {
@@ -192,7 +193,7 @@ export class Utils {
      * Verifies the Ed25519Signature for a message against an Ed25519Address.
      */
     static verifyEd25519Signature(
-        signature: IEd25519Signature,
+        signature: Ed25519Signature,
         message: HexEncodedString,
         address: Ed25519Address,
     ): boolean {

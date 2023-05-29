@@ -37,14 +37,15 @@ import {
     BuildNftOutputData,
     SignedTransactionEssence,
 } from '../types/wallet';
-import type {
-    HexEncodedAmount,
-    IAliasOutput,
-    IBasicOutput,
-    IFoundryOutput,
-} from '@iota/types';
 import { INode, Burn, IPreparedTransactionData } from '../client';
-import { NftOutput, Output } from '../types';
+import {
+    AliasOutput,
+    NftOutput,
+    Output,
+    HexEncodedAmount,
+    BasicOutput,
+    FoundryOutput,
+} from '../types';
 
 /** The Account class. */
 export class Account {
@@ -62,7 +63,7 @@ export class Account {
      * @param data Options for building an `AliasOutput`.
      * @returns The built `AliasOutput`.
      */
-    async buildAliasOutput(data: BuildAliasOutputData): Promise<IAliasOutput> {
+    async buildAliasOutput(data: BuildAliasOutputData): Promise<AliasOutput> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -78,7 +79,7 @@ export class Account {
      * @param data Options for building a `BasicOutput`.
      * @returns The built `BasicOutput`.
      */
-    async buildBasicOutput(data: BuildBasicOutputData): Promise<IBasicOutput> {
+    async buildBasicOutput(data: BuildBasicOutputData): Promise<BasicOutput> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -86,7 +87,7 @@ export class Account {
                 data,
             },
         );
-        return JSON.parse(response).payload;
+        return Output.parse(JSON.parse(response).payload) as BasicOutput;
     }
 
     /**
@@ -96,7 +97,7 @@ export class Account {
      */
     async buildFoundryOutput(
         data: BuildFoundryOutputData,
-    ): Promise<IFoundryOutput> {
+    ): Promise<FoundryOutput> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -104,7 +105,7 @@ export class Account {
                 data,
             },
         );
-        return JSON.parse(response).payload;
+        return Output.parse(JSON.parse(response).payload) as FoundryOutput;
     }
 
     /**
@@ -134,7 +135,7 @@ export class Account {
         burn: Burn,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
-        const resp = await this.methodHandler.callAccountMethod(
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'prepareBurn',
@@ -144,7 +145,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -497,7 +498,7 @@ export class Account {
      * @param tokenId The native token ID to get the foundry for.
      * @returns The `FoundryOutput` that minted the token.
      */
-    async getFoundryOutput(tokenId: string): Promise<IFoundryOutput> {
+    async getFoundryOutput(tokenId: string): Promise<FoundryOutput> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
