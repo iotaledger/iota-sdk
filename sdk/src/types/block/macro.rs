@@ -49,6 +49,22 @@ macro_rules! impl_id {
             }
         }
 
+        impl TryFrom<&String> for $name {
+            type Error = $crate::types::block::Error;
+
+            fn try_from(s: &String) -> Result<Self, Self::Error> {
+                core::str::FromStr::from_str(s.as_str())
+            }
+        }
+
+        impl TryFrom<&str> for $name {
+            type Error = $crate::types::block::Error;
+
+            fn try_from(s: &str) -> Result<Self, Self::Error> {
+                core::str::FromStr::from_str(s)
+            }
+        }
+
         impl core::fmt::Display for $name {
             fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                 write!(f, "{}", prefix_hex::encode(self.0))
@@ -70,6 +86,7 @@ macro_rules! impl_id {
         }
     };
 }
+
 pub(crate) use impl_id;
 
 /// Helper macro to serialize types to string via serde.
@@ -141,4 +158,5 @@ macro_rules! create_bitflags {
         }
     };
 }
+
 pub(crate) use create_bitflags;

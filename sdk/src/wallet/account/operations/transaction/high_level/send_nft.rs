@@ -23,6 +23,19 @@ pub struct SendNftParams {
     pub nft_id: NftId,
 }
 
+impl SendNftParams {
+    /// Creates a  new instance of [`SendNftParams`]
+    pub fn new(
+        address: impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>,
+        nft_id: impl TryInto<NftId, Error = impl Into<crate::wallet::Error>>,
+    ) -> Result<Self, crate::wallet::Error> {
+        Ok(Self {
+            address: address.try_into().map_err(Into::into)?,
+            nft_id: nft_id.try_into().map_err(Into::into)?,
+        })
+    }
+}
+
 impl Account {
     /// Function to send native tokens in basic outputs with a
     /// [`StorageDepositReturnUnlockCondition`](crate::types::block::output::unlock_condition::StorageDepositReturnUnlockCondition) and
@@ -32,10 +45,10 @@ impl Account {
     /// internally, the options can define the RemainderValueStrategy. Custom inputs will be replaced with the
     /// required nft inputs. Address needs to be Bech32 encoded
     /// ```ignore
-    /// let outputs = vec![SendNftParams {
-    ///     address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
-    ///     nft_id: NftId::from_str("04f9b54d488d2e83a6c90db08ae4b39651bbba8a")?,
-    /// }];
+    /// let outputs = vec![SendNftParams::new(
+    ///     "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
+    ///     "0xe645042a8a082957cb4bec4927936699ee8e56048834b090379da64213ce231b",
+    /// )?];
     ///
     /// let transaction = account.send_nft(outputs, None).await?;
     ///

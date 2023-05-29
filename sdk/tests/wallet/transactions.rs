@@ -148,10 +148,10 @@ async fn send_nft() -> Result<()> {
     // Send to account 1
     let transaction = accounts[0]
         .send_nft(
-            vec![SendNftParams {
-                address: *accounts[1].addresses().await?[0].address(),
+            vec![SendNftParams::new(
+                *accounts[1].addresses().await?[0].address(),
                 nft_id,
-            }],
+            )?],
             None,
         )
         .await

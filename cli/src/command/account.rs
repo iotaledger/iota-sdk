@@ -699,10 +699,7 @@ pub async fn send_native_token_command(
 
 // `send-nft` command
 pub async fn send_nft_command(account: &Account, address: impl Bech32AddressLike, nft_id: String) -> Result<(), Error> {
-    let outputs = vec![SendNftParams {
-        address: address.to_bech32()?,
-        nft_id: NftId::from_str(&nft_id)?,
-    }];
+    let outputs = vec![SendNftParams::new(address.to_bech32()?, &nft_id)?];
     let transaction = account.send_nft(outputs, None).await?;
 
     println_log_info!(
