@@ -116,12 +116,6 @@ impl Account {
         let network_id = self.client().get_network_id().await?;
         let mut context = BalanceContext::new(&account_details, network_id);
         let rent_structure = self.client().get_rent_structure().await?;
-        // let relevant_unspent_outputs = account_details
-        //     .unspent_outputs
-        //     .values()
-        //     // Check if output is from the network we're currently connected to
-        //     .filter(|data| data.network_id == network_id)
-        //     .map(|data| (&data.output_id, &data.output));
 
         #[cfg(feature = "participation")]
         {
@@ -130,7 +124,13 @@ impl Account {
 
         for address_with_unspent_outputs in &account_details.addresses_with_unspent_outputs {
             for output_id in &address_with_unspent_outputs.output_ids {
-                if let Some(output) = account_details.unspent_outputs.get(output_id).map(|data| &data.output) {
+                if let Some(data) = account_details.unspent_outputs.get(output_id) {
+                    // Check if output is from the network we're currently connected to
+                    if data.network_id != network_id {
+                        continue;
+                    }
+
+                    let output = &data.output;
                     let rent = output.rent_cost(&rent_structure);
 
                     // Add alias and foundry outputs here because they can't have a
