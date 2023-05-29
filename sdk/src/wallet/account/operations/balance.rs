@@ -115,9 +115,7 @@ impl Account {
         let account_details = self.details().await;
         let network_id = self.client().get_network_id().await?;
         let mut context = BalanceContext::new(&account_details, network_id);
-        let account_addresses = self.addresses().await?;
         let rent_structure = self.client().get_rent_structure().await?;
-        let local_time = self.client().get_time_checked().await?;
         let relevant_unspent_outputs = account_details
             .unspent_outputs
             .values()
@@ -212,6 +210,8 @@ impl Account {
                         // if we have multiple unlock conditions for basic or nft outputs, then we might can't spend the
                         // balance at the moment or in the future
 
+                        let account_addresses = self.addresses().await?;
+                        let local_time = self.client().get_time_checked().await?;
                         let output_can_be_unlocked_now = self
                             .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::All)
                             .await?
