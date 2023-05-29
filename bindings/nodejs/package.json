@@ -19,7 +19,6 @@
     "author": "IOTA Foundation <contact@iota.org>",
     "license": "Apache-2.0",
     "dependencies": {
-        "@iota/types": "^1.0.0-beta.15",
         "@types/node": "^18.15.12",
         "cargo-cp-artifact": "^0.1.6",
         "class-transformer": "^0.5.1",
