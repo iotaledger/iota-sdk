@@ -32,7 +32,7 @@ async function run() {
         // To sign a transaction we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
-        // Only the unspent outputs in the account
+        // Get all claimable outputs
         const output_ids =
             await account.getOutputsWithAdditionalUnlockConditions(
                 OutputsToClaim.All,
@@ -43,13 +43,11 @@ async function run() {
         }
 
         const transaction = await account.claimOutputs(output_ids);
-
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         const blockId = await account.retryTransactionUntilIncluded(
             transaction.transactionId,
         );
-
         console.log(`Block sent: ${process.env.EXPLORER_URL}/block/${blockId}`);
     } catch (error) {
         console.error('Error: ', error);

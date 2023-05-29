@@ -15,7 +15,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/advanced_transactions/advanced_transaction.ts
 
-// This example syncs the account and prints the balance
+// This example syncs the account sends outputs with custom features/unlock conditions
 async function run() {
     initLogger();
     try {
@@ -57,7 +57,6 @@ async function run() {
         const blockId = await account.retryTransactionUntilIncluded(
             transaction.transactionId,
         );
-
         console.log(`Block sent: ${process.env.EXPLORER_URL}/block/${blockId}`);
     } catch (error) {
         console.error('Error: ', error);

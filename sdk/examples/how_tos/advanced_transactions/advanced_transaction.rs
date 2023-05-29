@@ -59,7 +59,6 @@ async fn main() -> Result<()> {
         let block_id = account
             .retry_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
-
         println!(
             "Block sent: {}/block/{}",
             std::env::var("EXPLORER_URL").unwrap(),
