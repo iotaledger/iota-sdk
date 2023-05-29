@@ -8,12 +8,13 @@ use crate::{
     wallet::account::{
         operations::helpers::time::can_output_be_unlocked_forever_from_now_on,
         types::{AccountBalance, NativeTokensBalance},
-        Account, OutputsToClaim,
+        Account, AccountDetails, OutputsToClaim,
     },
 };
 
-#[derive(Default)]
-struct BalanceContext {
+struct BalanceContext<'a> {
+    account_details: &'a AccountDetails,
+    network_id: u64,
     balance: AccountBalance,
     total_rent_amount: u64,
     total_native_tokens: NativeTokensBuilder,
@@ -21,11 +22,98 @@ struct BalanceContext {
     locked_native_tokens: NativeTokensBuilder,
 }
 
+impl<'a> BalanceContext<'a> {
+    fn new(account_details: &'a AccountDetails, network_id: u64) -> Self {
+        Self {
+            account_details,
+            network_id,
+            balance: AccountBalance::default(),
+            total_rent_amount: 0,
+            total_native_tokens: NativeTokensBuilder::default(),
+            locked_amount: 0,
+            locked_native_tokens: NativeTokensBuilder::default(),
+        }
+    }
+
+    fn finish(mut self) -> crate::wallet::Result<AccountBalance> {
+        // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
+        log::debug!("[BALANCE] locked outputs: {:#?}", self.account_details.locked_outputs);
+
+        for locked_output in &self.account_details.locked_outputs {
+            // Skip potentially_locked_outputs, as their amounts aren't added to the balance
+            if self.balance.potentially_locked_outputs.contains_key(locked_output) {
+                continue;
+            }
+            if let Some(output_data) = self.account_details.unspent_outputs.get(locked_output) {
+                // Only check outputs that are in this network
+                if output_data.network_id == self.network_id {
+                    self.locked_amount += output_data.output.amount();
+                    if let Some(native_tokens) = output_data.output.native_tokens() {
+                        self.locked_native_tokens.add_native_tokens(native_tokens.clone())?;
+                    }
+                }
+            }
+        }
+
+        log::debug!(
+            "[BALANCE] total_amount: {}, locked_amount: {}, total_rent_amount: {}",
+            self.balance.base_coin.total,
+            self.locked_amount,
+            self.total_rent_amount,
+        );
+
+        self.locked_amount += self.total_rent_amount;
+
+        for native_token in self.total_native_tokens.finish_set()? {
+            // Check if some amount is currently locked
+            let locked_native_token_amount = self.locked_native_tokens.iter().find_map(|(id, amount)| {
+                if id == native_token.token_id() {
+                    Some(amount)
+                } else {
+                    None
+                }
+            });
+
+            let metadata = self
+                .account_details
+                .native_token_foundries
+                .get(&FoundryId::from(*native_token.token_id()))
+                .and_then(|foundry| foundry.immutable_features().metadata())
+                .cloned();
+
+            self.balance.native_tokens.push(NativeTokensBalance {
+                token_id: *native_token.token_id(),
+                metadata,
+                total: native_token.amount(),
+                available: native_token.amount() - *locked_native_token_amount.unwrap_or(&U256::from(0u8)),
+            })
+        }
+
+        #[cfg(not(feature = "participation"))]
+        {
+            context.balance.base_coin.available = context.balance.base_coin.total.saturating_sub(locked_amount);
+        }
+        #[cfg(feature = "participation")]
+        {
+            self.balance.base_coin.available = self
+                .balance
+                .base_coin
+                .total
+                .saturating_sub(self.locked_amount)
+                .saturating_sub(self.balance.base_coin.voting_power);
+        }
+
+        Ok(self.balance)
+    }
+}
+
 impl Account {
     /// Get the AccountBalance
     pub async fn balance(&self) -> crate::wallet::Result<AccountBalance> {
         log::debug!("[BALANCE] get balance");
-        let mut context = BalanceContext::default();
+        let account_details = self.details().await;
+        let network_id = self.client().get_network_id().await?;
+        let mut context = BalanceContext::new(&account_details, network_id);
 
         #[cfg(feature = "participation")]
         {
@@ -38,12 +126,9 @@ impl Account {
 
         let account_addresses = self.addresses().await?;
 
-        let network_id = self.client().get_network_id().await?;
         let rent_structure = self.client().get_rent_structure().await?;
 
         let local_time = self.client().get_time_checked().await?;
-
-        let account_details = self.details().await;
 
         let relevant_unspent_outputs = account_details
             .unspent_outputs
@@ -230,72 +315,6 @@ impl Account {
             }
         }
 
-        // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
-        log::debug!("[BALANCE] locked outputs: {:#?}", account_details.locked_outputs);
-
-        for locked_output in &account_details.locked_outputs {
-            // Skip potentially_locked_outputs, as their amounts aren't added to the balance
-            if context.balance.potentially_locked_outputs.contains_key(locked_output) {
-                continue;
-            }
-            if let Some(output_data) = account_details.unspent_outputs.get(locked_output) {
-                // Only check outputs that are in this network
-                if output_data.network_id == network_id {
-                    context.locked_amount += output_data.output.amount();
-                    if let Some(native_tokens) = output_data.output.native_tokens() {
-                        context.locked_native_tokens.add_native_tokens(native_tokens.clone())?;
-                    }
-                }
-            }
-        }
-
-        log::debug!(
-            "[BALANCE] total_amount: {}, locked_amount: {}, total_rent_amount: {}",
-            context.balance.base_coin.total,
-            context.locked_amount,
-            context.total_rent_amount,
-        );
-
-        context.locked_amount += context.total_rent_amount;
-
-        for native_token in context.total_native_tokens.finish_set()? {
-            // Check if some amount is currently locked
-            let locked_native_token_amount = context.locked_native_tokens.iter().find_map(|(id, amount)| {
-                if id == native_token.token_id() {
-                    Some(amount)
-                } else {
-                    None
-                }
-            });
-
-            let metadata = account_details
-                .native_token_foundries
-                .get(&FoundryId::from(*native_token.token_id()))
-                .and_then(|foundry| foundry.immutable_features().metadata())
-                .cloned();
-
-            context.balance.native_tokens.push(NativeTokensBalance {
-                token_id: *native_token.token_id(),
-                metadata,
-                total: native_token.amount(),
-                available: native_token.amount() - *locked_native_token_amount.unwrap_or(&U256::from(0u8)),
-            })
-        }
-
-        #[cfg(not(feature = "participation"))]
-        {
-            context.balance.base_coin.available = context.balance.base_coin.total.saturating_sub(locked_amount);
-        }
-        #[cfg(feature = "participation")]
-        {
-            context.balance.base_coin.available = context
-                .balance
-                .base_coin
-                .total
-                .saturating_sub(context.locked_amount)
-                .saturating_sub(context.balance.base_coin.voting_power);
-        }
-
-        Ok(context.balance)
+        context.finish()
     }
 }
