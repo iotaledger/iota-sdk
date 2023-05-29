@@ -18,9 +18,9 @@ use crate::{
 #[serde(rename_all = "camelCase")]
 pub struct SendNftParams {
     /// Bech32 encoded address
-    pub address: Bech32Address,
+    pub(crate) address: Bech32Address,
     /// Nft id
-    pub nft_id: NftId,
+    pub(crate) nft_id: NftId,
 }
 
 impl SendNftParams {
@@ -33,6 +33,30 @@ impl SendNftParams {
             address: address.try_into().map_err(Into::into)?,
             nft_id: nft_id.try_into().map_err(Into::into)?,
         })
+    }
+
+    pub fn address(&self) -> Bech32Address {
+        self.address
+    }
+
+    pub fn nft_id(&self) -> NftId {
+        self.nft_id
+    }
+
+    pub fn set_address(
+        &mut self,
+        address: impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>,
+    ) -> Result<(), crate::wallet::Error> {
+        self.address = address.try_into().map_err(Into::into)?;
+        Ok(())
+    }
+
+    pub fn set_nft_id(
+        &mut self,
+        nft_id: impl TryInto<NftId, Error = impl Into<crate::wallet::Error>>,
+    ) -> Result<(), crate::wallet::Error> {
+        self.nft_id = nft_id.try_into().map_err(Into::into)?;
+        Ok(())
     }
 }
 
