@@ -1,4 +1,4 @@
-from iota_sdk import Wallet
+from iota_sdk import Wallet, HexStr
 from dotenv import load_dotenv
 import os
 
@@ -19,8 +19,8 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # TODO: replace with your own values.
-token_id = "0x08429fe5864378ce70699fc2d22bb144cb86a3c4833d136e3b95c5dadfd6ba0cef0300000000"
-burn_amount = "0x5"
+token_id = HexStr("0x08429fe5864378ce70699fc2d22bb144cb86a3c4833d136e3b95c5dadfd6ba0cef0300000000")
+burn_amount = 5
 
 # Send transaction.
 transaction = account.prepare_burn_native_token(token_id, burn_amount).send()
