@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
 
     // Replace with a TokenId that is available in the account, the foundry output which minted it, also needs to be
     // available.
-    let token_id = TokenId::from_str("0x08847bd287c912fadedb6bf38900bda9f2d377b75b2a0bece8738699f56ebca4130100000000")?;
+    let token_id = TokenId::from_str("0x089dc1b964591b15819ef1912fab48c001fed4558b37766dfa5daa512495d5b25a0100000000")?;
 
     // Mint some more native tokens
     let mint_amount = U256::from(10);

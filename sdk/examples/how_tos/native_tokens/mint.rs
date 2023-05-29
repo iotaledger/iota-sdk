@@ -21,6 +21,7 @@ async fn main() -> Result<()> {
 
     // Get the account we generated with `01_create_wallet`
     let account = wallet.get_account("Alice").await?;
+    account.sync(None).await?;
 
     // Set the stronghold password
     wallet

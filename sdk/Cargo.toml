@@ -163,32 +163,32 @@ required-features = [ "rocksdb", "stronghold" ]
 
 [[example]]
 name = "mint_native_token"
-path = "examples/how_tos/native_tokens/09_mint_native_token.rs"
+path = "examples/how_tos/native_tokens/mint.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 [[example]]
 name = "destroy_foundry"
-path = "examples/how_tos/native_tokens/15_destroy_foundry.rs"
+path = "examples/how_tos/native_tokens/destroy_foundry.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 [[example]]
 name = "burn_native_token"
-path = "examples/how_tos/native_tokens/13_burn_native_token.rs"
+path = "examples/how_tos/native_tokens/burn.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 [[example]]
 name = "decrease_native_token_supply"
-path = "examples/how_tos/native_tokens/11_decrease_native_token_supply.rs"
+path = "examples/how_tos/native_tokens/decrease_supply.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 [[example]]
 name = "increase_native_token_supply"
-path = "examples/how_tos/native_tokens/12_increase_native_token_supply.rs"
+path = "examples/how_tos/native_tokens/increase_supply.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 [[example]]
 name = "send_native_tokens"
-path = "examples/how_tos/native_tokens/07_send_native_tokens.rs"
+path = "examples/how_tos/native_tokens/send.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 # Outputs
