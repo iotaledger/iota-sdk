@@ -120,10 +120,6 @@ impl Account {
             context.balance.base_coin.voting_power = self.get_voting_power().await?;
         }
 
-        let unlockable_outputs_with_multiple_unlock_conditions = self
-            .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::All)
-            .await?;
-
         let account_addresses = self.addresses().await?;
 
         let rent_structure = self.client().get_rent_structure().await?;
@@ -219,8 +215,10 @@ impl Account {
                         // if we have multiple unlock conditions for basic or nft outputs, then we might can't spend the
                         // balance at the moment or in the future
 
-                        let output_can_be_unlocked_now =
-                            unlockable_outputs_with_multiple_unlock_conditions.contains(output_id);
+                        let output_can_be_unlocked_now = self
+                            .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::All)
+                            .await?
+                            .contains(output_id);
 
                         // For outputs that are expired or have a timelock unlock condition, but no expiration unlock
                         // condition and we then can unlock them, then they can never be not available for us anymore
