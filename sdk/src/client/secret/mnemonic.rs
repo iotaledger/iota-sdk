@@ -8,8 +8,10 @@ use std::ops::Range;
 use async_trait::async_trait;
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
-    keys::slip10::{Chain, Curve, Seed},
+    keys::slip10::{Chain, Seed},
+    signatures::ed25519,
 };
+use zeroize::Zeroize;
 
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
@@ -50,7 +52,7 @@ impl SecretManage for MnemonicSecretManager {
 
             let public_key = self
                 .0
-                .derive(Curve::Ed25519, &chain)?
+                .derive::<ed25519::SecretKey>(&chain)?
                 .secret_key()
                 .public_key()
                 .to_bytes();
@@ -68,7 +70,7 @@ impl SecretManage for MnemonicSecretManager {
 
     async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
         // Get the private and public key for this Ed25519 address
-        let private_key = self.0.derive(Curve::Ed25519, chain)?.secret_key();
+        let private_key = self.0.derive::<ed25519::SecretKey>(chain)?.secret_key();
         let public_key = private_key.public_key().to_bytes();
         let signature = private_key.sign(msg).to_bytes();
 
@@ -85,9 +87,12 @@ impl MnemonicSecretManager {
     }
 
     /// Create a new [`MnemonicSecretManager`] from a hex-encoded raw seed string.
-    pub fn try_from_hex_seed(hex: &str) -> Result<Self, Error> {
-        let bytes: Vec<u8> = prefix_hex::decode(hex)?;
-        Ok(Self(Seed::from_bytes(&bytes)))
+    pub fn try_from_hex_seed(mut hex: String) -> Result<Self, Error> {
+        let mut bytes: Vec<u8> = prefix_hex::decode(hex.as_str())?;
+        let seed = Seed::from_bytes(&bytes);
+        hex.zeroize();
+        bytes.zeroize();
+        Ok(Self(seed))
     }
 }
 
@@ -117,7 +122,7 @@ mod tests {
     async fn seed_address() {
         use crate::client::constants::IOTA_COIN_TYPE;
 
-        let seed = "0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2";
+        let seed = "0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2".to_owned();
         let secret_manager = MnemonicSecretManager::try_from_hex_seed(seed).unwrap();
 
         let addresses = secret_manager

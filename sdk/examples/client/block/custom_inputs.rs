@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
 
     // First address from the seed below is atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r
     let secret_manager =
-        SecretManager::try_from_hex_seed(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_SEED_1").unwrap())?;
+        SecretManager::try_from_hex_seed(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_SEED_1").unwrap())?;
 
     let addresses = client.get_addresses(&secret_manager).with_range(0..1).finish().await?;
     println!("{:?}", addresses[0]);
