@@ -12,8 +12,8 @@ import type {
     GenerateAddressOptions,
     SyncOptions,
     WalletEvent,
-} from '../../types/wallet';
-import { IAuth, IClientOptions, LedgerNanoStatus } from '../../types/client';
+} from '../types/wallet';
+import { IAuth, IClientOptions, LedgerNanoStatus } from '../types/client';
 import { Client } from '../client';
 
 /** The Wallet class. */

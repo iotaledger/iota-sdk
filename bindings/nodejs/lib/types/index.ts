@@ -1,8 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-export * from './address';
-export * from './feature';
-export * from './unlock_condition';
-export * from './output';
-export * from './token_scheme';
+export * from './block';
+export * from './client';
+export * from './secretManager';
+export * from './utils';
+export * from './wallet';

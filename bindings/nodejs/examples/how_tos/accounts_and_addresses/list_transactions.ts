@@ -11,10 +11,12 @@ async function run() {
     initLogger();
     try {
         const wallet = new Wallet({
-            storagePath: './alice-database',
+            storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount('Alice');
+        const account = await wallet.getAccount(
+            `${process.env.ACCOUNT_ALIAS_1}`,
+        );
         await account.sync({ syncIncomingTransactions: true });
 
         const transactions = await account.transactions();

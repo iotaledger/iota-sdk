@@ -14,7 +14,7 @@ import type {
     __Method__,
     __AccountMethod__,
     AccountId,
-} from '../../types/wallet';
+} from '../types/wallet';
 import { Client } from '../client';
 
 // The WalletMethodHandler class interacts with methods with the rust bindings.
