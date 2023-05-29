@@ -49,6 +49,7 @@ macro_rules! impl_id {
             }
         }
 
+        #[cfg(feature="std")]
         impl TryFrom<&String> for $name {
             type Error = $crate::types::block::Error;
 
