@@ -25,7 +25,7 @@ outputs = [{
         # 10 hex encoded
         "0xA"
     )],
-}];
+}]
 
 transaction = account.prepare_send_native_tokens(outputs, None).send()
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
