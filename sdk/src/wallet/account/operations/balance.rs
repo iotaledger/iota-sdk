@@ -111,27 +111,24 @@ impl Account {
     /// Get the AccountBalance
     pub async fn balance(&self) -> crate::wallet::Result<AccountBalance> {
         log::debug!("[BALANCE] get balance");
+
         let account_details = self.details().await;
         let network_id = self.client().get_network_id().await?;
         let mut context = BalanceContext::new(&account_details, network_id);
-
-        #[cfg(feature = "participation")]
-        {
-            context.balance.base_coin.voting_power = self.get_voting_power().await?;
-        }
-
         let account_addresses = self.addresses().await?;
-
         let rent_structure = self.client().get_rent_structure().await?;
-
         let local_time = self.client().get_time_checked().await?;
-
         let relevant_unspent_outputs = account_details
             .unspent_outputs
             .values()
             // Check if output is from the network we're currently connected to
             .filter(|data| data.network_id == network_id)
             .map(|data| (&data.output_id, &data.output));
+
+        #[cfg(feature = "participation")]
+        {
+            context.balance.base_coin.voting_power = self.get_voting_power().await?;
+        }
 
         for (output_id, output) in relevant_unspent_outputs {
             let rent = output.rent_cost(&rent_structure);
