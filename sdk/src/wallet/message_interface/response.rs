@@ -26,7 +26,7 @@ use crate::{
     wallet::{
         account::{
             operations::transaction::high_level::minting::mint_native_token::MintTokenTransactionDto,
-            types::{address::AccountAddress, AccountBalanceDto, AddressWithUnspentOutputs, TransactionDto},
+            types::{address::AccountAddress, AddressWithUnspentOutputs, BalanceDto, TransactionDto},
             OutputDataDto,
         },
         message_interface::dtos::AccountDetailsDto,
@@ -97,7 +97,7 @@ pub enum Response {
     /// Response for
     /// [`GetBalance`](crate::wallet::message_interface::AccountMethod::GetBalance),
     /// [`SyncAccount`](crate::wallet::message_interface::AccountMethod::SyncAccount)
-    Balance(AccountBalanceDto),
+    Balance(BalanceDto),
     /// Response for
     /// [`GetLedgerNanoStatus`](crate::wallet::message_interface::Message::GetLedgerNanoStatus),
     #[cfg(feature = "ledger_nano")]

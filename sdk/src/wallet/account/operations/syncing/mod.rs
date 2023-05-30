@@ -18,7 +18,7 @@ use crate::{
     wallet::account::{
         constants::MIN_SYNC_INTERVAL,
         types::{AddressWithUnspentOutputs, OutputData},
-        Account, AccountBalance,
+        Account, Balance,
     },
 };
 
@@ -44,7 +44,7 @@ impl Account {
 
     /// Sync the account by fetching new information from the nodes. Will also retry pending transactions
     /// if necessary. A custom default can be set using set_default_sync_options.
-    pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<AccountBalance> {
+    pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<Balance> {
         let options = match options {
             Some(opt) => opt,
             None => self.default_sync_options().await,

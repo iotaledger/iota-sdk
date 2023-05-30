@@ -37,7 +37,7 @@ use crate::{
                 prepare_output::OutputParams,
                 TransactionOptions,
             },
-            types::{AccountBalanceDto, AccountIdentifier, TransactionDto},
+            types::{AccountIdentifier, BalanceDto, TransactionDto},
             OutputDataDto,
         },
         message_interface::{
@@ -721,7 +721,7 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::GetBalance => Ok(Response::Balance(AccountBalanceDto::from(&account.balance().await?))),
+            AccountMethod::GetBalance => Ok(Response::Balance(BalanceDto::from(&account.balance().await?))),
             AccountMethod::PrepareOutput {
                 params: options,
                 transaction_options,
@@ -781,9 +781,9 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::SyncAccount { options } => Ok(Response::Balance(AccountBalanceDto::from(
-                &account.sync(options).await?,
-            ))),
+            AccountMethod::SyncAccount { options } => {
+                Ok(Response::Balance(BalanceDto::from(&account.sync(options).await?)))
+            }
             AccountMethod::SendAmount { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account

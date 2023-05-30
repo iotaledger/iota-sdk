@@ -43,7 +43,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            types::{AccountAddress, AccountBalanceDto, AddressWithUnspentOutputs, OutputDataDto, TransactionDto},
+            types::{AccountAddress, AddressWithUnspentOutputs, BalanceDto, OutputDataDto, TransactionDto},
             PreparedMintTokenTransactionDto,
         },
         message_interface::dtos::AccountDetailsDto,
@@ -347,7 +347,7 @@ pub enum Response {
     /// Response for
     /// - [`GetBalance`](crate::method::AccountMethod::GetBalance),
     /// - [`Sync`](crate::method::AccountMethod::Sync)
-    Balance(AccountBalanceDto),
+    Balance(BalanceDto),
     /// Response for
     /// - [`ClaimOutputs`](crate::method::AccountMethod::ClaimOutputs)
     /// - [`SendAmount`](crate::method::AccountMethod::SendAmount)

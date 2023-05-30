@@ -8,7 +8,7 @@ use iota_sdk::{
         BasicOutputBuilder, UnlockCondition,
     },
     wallet::{
-        account::types::{AccountBalance, AccountBalanceDto},
+        account::types::{Balance, BalanceDto},
         Result,
     },
 };
@@ -17,8 +17,8 @@ use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear
 
 #[test]
 fn balance_to_dto() {
-    let balance = AccountBalance::rand_mock();
-    let balance_dto = AccountBalanceDto::from(&balance);
+    let balance = Balance::rand_mock();
+    let balance_dto = BalanceDto::from(&balance);
 
     assert_eq!(balance.base_coin().total(), balance_dto.base_coin.total());
     assert_eq!(balance.base_coin().available(), balance_dto.base_coin.available());
@@ -56,7 +56,7 @@ fn balance_to_dto() {
 fn balance_add_assign() {
     use iota_sdk::U256;
 
-    let mut balance1 = AccountBalance::rand_mock();
+    let mut balance1 = Balance::rand_mock();
     let total1 = balance1.base_coin().total();
     let available1 = balance1.base_coin().available();
     #[cfg(feature = "participation")]
@@ -72,7 +72,7 @@ fn balance_add_assign() {
     let num_foundries1 = balance1.foundries().len();
     let num_nfts1 = balance1.nfts().len();
 
-    let balance2 = AccountBalance::rand_mock();
+    let balance2 = Balance::rand_mock();
     let total2 = balance2.base_coin().total();
     let available2 = balance2.base_coin().available();
     #[cfg(feature = "participation")]

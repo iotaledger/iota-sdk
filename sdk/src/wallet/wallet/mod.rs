@@ -23,7 +23,7 @@ use crate::wallet::events::{
 use crate::wallet::storage::manager::StorageManager;
 use crate::{
     client::{secret::SecretManager, verify_mnemonic, Client},
-    wallet::account::{builder::AccountBuilder, operations::syncing::SyncOptions, types::AccountBalance, Account},
+    wallet::account::{builder::AccountBuilder, operations::syncing::SyncOptions, types::Balance, Account},
 };
 
 /// The wallet, used to create and get accounts. One wallet can hold many accounts, but they should
@@ -126,8 +126,8 @@ impl Wallet {
     }
 
     /// Get the balance of all accounts added together
-    pub async fn balance(&self) -> crate::wallet::Result<AccountBalance> {
-        let mut balance = AccountBalance::default();
+    pub async fn balance(&self) -> crate::wallet::Result<Balance> {
+        let mut balance = Balance::default();
         let accounts = self.accounts.read().await;
 
         for account in accounts.iter() {
@@ -138,8 +138,8 @@ impl Wallet {
     }
 
     /// Sync all accounts
-    pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<AccountBalance> {
-        let mut balance = AccountBalance::default();
+    pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<Balance> {
+        let mut balance = Balance::default();
 
         for account in self.accounts.read().await.iter() {
             balance += account.sync(options.clone()).await?;

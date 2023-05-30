@@ -11,7 +11,7 @@ use crate::{
     wallet::{
         account::{
             operations::helpers::time::can_output_be_unlocked_forever_from_now_on,
-            types::{AccountBalance, AddressWithUnspentOutputs, NativeTokensBalance},
+            types::{AddressWithUnspentOutputs, Balance, NativeTokensBalance},
             Account, AccountDetails, OutputsToClaim,
         },
         Error, Result,
@@ -22,7 +22,7 @@ struct BalanceContext<'a> {
     account_details: &'a AccountDetails,
     network_id: u64,
     rent_structure: RentStructure,
-    balance: AccountBalance,
+    balance: Balance,
     total_rent_amount: u64,
     total_native_tokens: NativeTokensBuilder,
     locked_amount: u64,
@@ -35,7 +35,7 @@ impl<'a> BalanceContext<'a> {
             account_details,
             network_id,
             rent_structure,
-            balance: AccountBalance::default(),
+            balance: Balance::default(),
             total_rent_amount: 0,
             total_native_tokens: NativeTokensBuilder::default(),
             locked_amount: 0,
@@ -43,7 +43,7 @@ impl<'a> BalanceContext<'a> {
         }
     }
 
-    fn finish(mut self) -> Result<AccountBalance> {
+    fn finish(mut self) -> Result<Balance> {
         // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
         log::debug!("[BALANCE] locked outputs: {:#?}", self.account_details.locked_outputs);
 
@@ -320,7 +320,7 @@ impl Account {
     }
 
     /// Get the balance of the given addresses.
-    pub async fn addresses_balance(&self, addresses: Vec<impl Bech32AddressLike>) -> Result<AccountBalance> {
+    pub async fn addresses_balance(&self, addresses: Vec<impl Bech32AddressLike>) -> Result<Balance> {
         log::debug!("[BALANCE] addresses_balance");
 
         let account_details = self.details().await;
@@ -357,7 +357,7 @@ impl Account {
     }
 
     /// Get the balance of the account.
-    pub async fn balance(&self) -> crate::wallet::Result<AccountBalance> {
+    pub async fn balance(&self) -> crate::wallet::Result<Balance> {
         log::debug!("[BALANCE] balance");
 
         let account_details = self.details().await;
