@@ -63,4 +63,16 @@ class SimpleTokenScheme extends TokenScheme {
     }
 }
 
-export { TokenSchemeType, TokenScheme, SimpleTokenScheme };
+const TokenSchemeDiscriminator = {
+    property: 'type',
+    subTypes: [
+        { value: SimpleTokenScheme, name: TokenSchemeType.Simple as any },
+    ],
+};
+
+export {
+    TokenSchemeType,
+    TokenScheme,
+    SimpleTokenScheme,
+    TokenSchemeDiscriminator,
+};

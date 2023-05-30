@@ -1,5 +1,9 @@
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 import type { HexEncodedString } from '../utils/hexEncodedTypes';
-import { Payload } from './payload';
+import { Payload, PayloadDiscriminator } from './payload';
+import { Type } from 'class-transformer';
 /**
  * The default protocol version.
  */
@@ -7,21 +11,24 @@ export declare const DEFAULT_PROTOCOL_VERSION: number;
 /**
  * Block layout.
  */
-export interface IBlock {
+export class IBlock {
     /**
      * The protocol version under which this block operates.
      */
-    protocolVersion: number;
+    protocolVersion!: number;
     /**
      * The parent block ids.
      */
-    parents: HexEncodedString[];
+    parents!: HexEncodedString[];
     /**
      * The payload contents.
      */
+    @Type(() => Payload, {
+        discriminator: PayloadDiscriminator,
+    })
     payload?: Payload;
     /**
      * The nonce for the block.
      */
-    nonce: string;
+    nonce!: string;
 }

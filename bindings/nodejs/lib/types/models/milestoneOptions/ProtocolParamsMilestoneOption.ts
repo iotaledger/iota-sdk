@@ -6,7 +6,7 @@ import { MilestoneOption, MilestoneOptionType } from './milestoneOptions';
 /**
  * Protocol Parameters Milestone Option.
  */
-export class IProtocolParamsMilestoneOption extends MilestoneOption {
+export class ProtocolParamsMilestoneOption extends MilestoneOption {
     /**
      * The milestone index at which these protocol parameters become active.
      */

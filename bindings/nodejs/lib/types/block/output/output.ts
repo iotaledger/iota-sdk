@@ -10,7 +10,7 @@ import { Feature, FeatureDiscriminator } from './feature';
 // Temp solution for not double parsing JSON
 import { plainToInstance, Type } from 'class-transformer';
 import { HexEncodedString } from '../../utils';
-import { TokenScheme } from './token_scheme';
+import { TokenScheme, TokenSchemeDiscriminator } from './token_scheme';
 import { INativeToken } from '../../models';
 
 /**
@@ -136,7 +136,9 @@ class BasicOutput extends CommonOutput /*implements IBasicOutput*/ {
 }
 
 abstract class ImmutableFeaturesOutput extends CommonOutput {
-    @Type(() => Feature)
+    @Type(() => Feature, {
+        discriminator: FeatureDiscriminator,
+    })
     private immutableFeatures?: Feature[];
 
     constructor(
@@ -244,6 +246,10 @@ class NftOutput extends StateMetadataOutput /*implements INftOutput*/ {
  */
 class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*/ {
     private serialNumber: number;
+
+    @Type(() => TokenScheme, {
+        discriminator: TokenSchemeDiscriminator,
+    })
     private tokenScheme: TokenScheme;
 
     constructor(
@@ -270,8 +276,20 @@ class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*
     }
 }
 
+const OutputDiscriminator = {
+    property: 'type',
+    subTypes: [
+        { value: TreasuryOutput, name: OutputType.Treasury as any },
+        { value: BasicOutput, name: OutputType.Basic as any },
+        { value: AliasOutput, name: OutputType.Alias as any },
+        { value: NftOutput, name: OutputType.Alias as any },
+        { value: FoundryOutput, name: OutputType.Foundry as any },
+    ],
+};
+
 export {
     OutputType,
+    OutputDiscriminator,
     Output,
     CommonOutput,
     TreasuryOutput,

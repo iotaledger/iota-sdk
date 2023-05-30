@@ -48,7 +48,7 @@ class MilestonePayload extends Payload {
      */
     signatures!: Ed25519Signature[];
 
-    private constructor() {
+    constructor() {
         super(PayloadType.Milestone);
     }
 }

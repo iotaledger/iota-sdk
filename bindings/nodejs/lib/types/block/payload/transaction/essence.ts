@@ -49,8 +49,19 @@ class RegularTransactionEssence extends TransactionEssence {
     }
 }
 
+const TransactionEssenceDiscriminator = {
+    property: 'type',
+    subTypes: [
+        {
+            value: RegularTransactionEssence,
+            name: TransactionEssenceType.Regular as any,
+        },
+    ],
+};
+
 export {
     TransactionEssenceType,
     RegularTransactionEssence,
     TransactionEssence,
+    TransactionEssenceDiscriminator,
 };

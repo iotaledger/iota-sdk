@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ClientMethodHandler } from './ClientMethodHandler';
-import type {
+import {
     IClientOptions,
     IGenerateAddressesOptions,
     IBuildBlockOptions,
     QueryParameter,
-    IPreparedTransactionData,
+    PreparedTransactionData,
     INetworkInfo,
     INode,
     IAuth,
@@ -46,9 +46,20 @@ import {
 } from '../types';
 import {
     IMilestoneUtxoChangesResponse,
-    IOutputResponse,
-    IReceiptsResponse,
+    OutputResponse,
+    ReceiptsResponse,
 } from '../types/models/api';
+
+import {
+    plainToClassFromExist,
+    plainToInstance,
+    Type,
+} from 'class-transformer';
+
+interface Response<T> {
+    type: string;
+    payload: T;
+}
 
 /** The Client to interact with nodes. */
 export class Client {
@@ -96,7 +107,7 @@ export class Client {
     }
 
     /** Get output from a known outputID */
-    async getOutput(outputId: string): Promise<IOutputResponse> {
+    async getOutput(outputId: string): Promise<OutputResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getOutput',
             data: {
@@ -104,11 +115,12 @@ export class Client {
             },
         });
 
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<OutputResponse>;
+        return plainToInstance(OutputResponse, p.payload);
     }
 
     /** Fetch OutputResponse from provided OutputIds (requests are sent in parallel) */
-    async getOutputs(outputIds: string[]): Promise<IOutputResponse[]> {
+    async getOutputs(outputIds: string[]): Promise<OutputResponse[]> {
         const response = await this.methodHandler.callMethod({
             name: 'getOutputs',
             data: {
@@ -116,7 +128,8 @@ export class Client {
             },
         });
 
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<OutputResponse[]>;
+        return plainToInstance(OutputResponse, p.payload);
     }
 
     /** Generate addresses */
@@ -188,7 +201,8 @@ export class Client {
             },
         });
 
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<IBlock>;
+        return plainToInstance(IBlock, p.payload);
     }
 
     /**
@@ -220,7 +234,8 @@ export class Client {
             },
         });
 
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<UTXOInput[]>;
+        return plainToInstance(UTXOInput, p.payload);
     }
 
     /**
@@ -230,7 +245,7 @@ export class Client {
     async findOutputs(
         outputIds: string[],
         addresses: string[],
-    ): Promise<IOutputResponse[]> {
+    ): Promise<OutputResponse[]> {
         const response = await this.methodHandler.callMethod({
             name: 'findOutputs',
             data: {
@@ -239,7 +254,8 @@ export class Client {
             },
         });
 
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<OutputResponse[]>;
+        return plainToInstance(OutputResponse, p.payload);
     }
 
     /**
@@ -248,7 +264,7 @@ export class Client {
     async prepareTransaction(
         secretManager?: SecretManagerType,
         options?: IBuildBlockOptions,
-    ): Promise<IPreparedTransactionData> {
+    ): Promise<PreparedTransactionData> {
         const response = await this.methodHandler.callMethod({
             name: 'prepareTransaction',
             data: {
@@ -257,7 +273,8 @@ export class Client {
             },
         });
 
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return plainToInstance(PreparedTransactionData, p.payload);
     }
 
     /**
@@ -265,7 +282,7 @@ export class Client {
      */
     async signTransaction(
         secretManager: SecretManagerType,
-        preparedTransactionData: IPreparedTransactionData,
+        preparedTransactionData: PreparedTransactionData,
     ): Promise<Payload> {
         const response = await this.methodHandler.callMethod({
             name: 'signTransaction',
@@ -275,7 +292,7 @@ export class Client {
             },
         });
 
-        return JSON.parse(response).payload;
+        return Payload.parse(JSON.parse(response).payload);
     }
 
     /**
@@ -295,7 +312,7 @@ export class Client {
             },
         });
 
-        return JSON.parse(response).payload;
+        return UnlockCondition.parse(JSON.parse(response).payload);
     }
 
     /**
@@ -485,8 +502,8 @@ export class Client {
                 milestoneId,
             },
         });
-
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<MilestonePayload>;
+        return plainToInstance(MilestonePayload, p.payload);
     }
 
     /**
@@ -514,8 +531,8 @@ export class Client {
                 index,
             },
         });
-
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<MilestonePayload>;
+        return plainToInstance(MilestonePayload, p.payload);
     }
 
     /**
@@ -537,12 +554,12 @@ export class Client {
     /**
      * Get receipts.
      */
-    async getReceipts(): Promise<IReceiptsResponse> {
+    async getReceipts(): Promise<ReceiptsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getReceipts',
         });
-
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<ReceiptsResponse>;
+        return plainToInstance(ReceiptsResponse, p.payload);
     }
 
     /**
@@ -550,15 +567,15 @@ export class Client {
      */
     async getReceiptsMigratedAt(
         milestoneIndex: number,
-    ): Promise<IReceiptsResponse[]> {
+    ): Promise<ReceiptsResponse[]> {
         const response = await this.methodHandler.callMethod({
             name: 'getReceiptsMigratedAt',
             data: {
                 milestoneIndex,
             },
         });
-
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<ReceiptsResponse[]>;
+        return plainToInstance(ReceiptsResponse, p.payload);
     }
 
     /**
@@ -582,8 +599,8 @@ export class Client {
                 transactionId,
             },
         });
-
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<IBlock>;
+        return plainToInstance(IBlock, p.payload);
     }
 
     /**
@@ -596,8 +613,8 @@ export class Client {
                 transactionId,
             },
         });
-
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<IBlock>;
+        return plainToInstance(IBlock, p.payload);
     }
 
     /**
@@ -762,15 +779,15 @@ export class Client {
      */
     async getOutputsIgnoreErrors(
         outputIds: string[],
-    ): Promise<IOutputResponse[]> {
+    ): Promise<OutputResponse[]> {
         const response = await this.methodHandler.callMethod({
             name: 'getOutputsIgnoreErrors',
             data: {
                 outputIds,
             },
         });
-
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<OutputResponse[]>;
+        return plainToInstance(OutputResponse, p.payload);
     }
 
     /**
@@ -783,8 +800,8 @@ export class Client {
                 blockIds,
             },
         });
-
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<IBlock[]>;
+        return plainToInstance(IBlock, p.payload);
     }
 
     /**
@@ -922,7 +939,8 @@ export class Client {
             data: params,
         });
 
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<BasicOutput>;
+        return plainToInstance(BasicOutput, p.payload);
     }
 
     /**
@@ -936,7 +954,8 @@ export class Client {
             data: params,
         });
 
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<AliasOutput>;
+        return plainToInstance(AliasOutput, p.payload);
     }
 
     /**
@@ -950,7 +969,8 @@ export class Client {
             data: params,
         });
 
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<FoundryOutput>;
+        return plainToInstance(FoundryOutput, p.payload);
     }
 
     /**
@@ -962,7 +982,8 @@ export class Client {
             data: params,
         });
 
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<NftOutput>;
+        return plainToInstance(NftOutput, p.payload);
     }
 
     /**

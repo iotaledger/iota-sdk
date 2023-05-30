@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Type } from 'class-transformer';
+import { plainToInstance, Type } from 'class-transformer';
 import { Address, AddressDiscriminator, AliasAddress } from '../address';
 
 /**
@@ -28,6 +28,46 @@ abstract class UnlockCondition {
      */
     getType(): UnlockConditionType {
         return this.type;
+    }
+
+    public static parse(data: any): UnlockCondition {
+        if (data.type == UnlockConditionType.Address) {
+            return plainToInstance(
+                AddressUnlockCondition,
+                data,
+            ) as any as AddressUnlockCondition;
+        } else if (data.type == UnlockConditionType.StorageDepositReturn) {
+            return plainToInstance(
+                StorageDepositReturnUnlockCondition,
+                data,
+            ) as any as StorageDepositReturnUnlockCondition;
+        } else if (data.type == UnlockConditionType.Timelock) {
+            return plainToInstance(
+                TimelockUnlockCondition,
+                data,
+            ) as any as TimelockUnlockCondition;
+        } else if (data.type == UnlockConditionType.Expiration) {
+            return plainToInstance(
+                ExpirationUnlockCondition,
+                data,
+            ) as any as ExpirationUnlockCondition;
+        } else if (data.type == UnlockConditionType.StateControllerAddress) {
+            return plainToInstance(
+                StateControllerAddressUnlockCondition,
+                data,
+            ) as any as StateControllerAddressUnlockCondition;
+        } else if (data.type == UnlockConditionType.GovernorAddress) {
+            return plainToInstance(
+                GovernorAddressUnlockCondition,
+                data,
+            ) as any as GovernorAddressUnlockCondition;
+        } else if (data.type == UnlockConditionType.ImmutableAliasAddress) {
+            return plainToInstance(
+                ImmutableAliasAddressUnlockCondition,
+                data,
+            ) as any as ImmutableAliasAddressUnlockCondition;
+        }
+        throw new Error('Invalid JSON');
     }
 }
 

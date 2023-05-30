@@ -4,8 +4,8 @@
 /**
  * OutputIdsResponse.
  */
-export interface OutputIdsResponse {
-    ledgerIndex: number;
+export class OutputIdsResponse {
+    ledgerIndex!: number;
     cursor?: string;
-    items: string[];
+    items!: string[];
 }
