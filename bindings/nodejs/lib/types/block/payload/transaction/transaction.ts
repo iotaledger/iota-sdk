@@ -1,7 +1,13 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransactionEssence, Unlock } from '.';
+import { Type } from 'class-transformer';
+import {
+    TransactionEssence,
+    TransactionEssenceDiscriminator,
+    Unlock,
+    UnlockDiscriminator,
+} from '.';
 import { Payload, PayloadType } from '../payload';
 
 /**
@@ -11,10 +17,16 @@ class TransactionPayload extends Payload {
     /**
      * The index name.
      */
+    @Type(() => TransactionEssence, {
+        discriminator: TransactionEssenceDiscriminator,
+    })
     essence: TransactionEssence;
     /**
      * The unlocks.
      */
+    @Type(() => Unlock, {
+        discriminator: UnlockDiscriminator,
+    })
     unlocks: Unlock[];
 
     constructor(essence: TransactionEssence, unlocks: Unlock[]) {

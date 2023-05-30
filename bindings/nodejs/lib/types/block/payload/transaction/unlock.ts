@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { Type } from 'class-transformer';
 import { Ed25519Signature } from '../../..';
 
 /**
@@ -35,6 +36,7 @@ class SignatureUnlock extends Unlock {
     /**
      * The signature.
      */
+    @Type(() => Ed25519Signature)
     signature: Ed25519Signature;
 
     constructor(signature: Ed25519Signature) {
@@ -89,6 +91,28 @@ class NftUnlock extends Unlock {
     }
 }
 
+const UnlockDiscriminator = {
+    property: 'type',
+    subTypes: [
+        {
+            value: SignatureUnlock,
+            name: UnlockType.Signature as any,
+        },
+        {
+            value: ReferenceUnlock,
+            name: UnlockType.Reference as any,
+        },
+        {
+            value: AliasUnlock,
+            name: UnlockType.Alias as any,
+        },
+        {
+            value: NftUnlock,
+            name: UnlockType.Nft as any,
+        },
+    ],
+};
+
 export {
     UnlockType,
     Unlock,
@@ -96,4 +120,5 @@ export {
     ReferenceUnlock,
     AliasUnlock,
     NftUnlock,
+    UnlockDiscriminator,
 };

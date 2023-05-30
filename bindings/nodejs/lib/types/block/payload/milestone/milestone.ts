@@ -1,7 +1,11 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { MilestoneOption } from '../../../models/milestoneOptions';
+import { Type } from 'class-transformer';
+import {
+    MilestoneOption,
+    MilestoneOptionDiscriminator,
+} from '../../../models/milestoneOptions';
 import { HexEncodedString } from '../../../utils/hexEncodedTypes';
 import { Ed25519Signature } from '../../signature';
 import { Payload, PayloadType } from '../payload';
@@ -42,10 +46,14 @@ class MilestonePayload extends Payload {
     /**
      * The milestone options.
      */
+    @Type(() => MilestoneOption, {
+        discriminator: MilestoneOptionDiscriminator,
+    })
     options?: MilestoneOption[];
     /**
      * The signatures.
      */
+    @Type(() => Ed25519Signature)
     signatures!: Ed25519Signature[];
 
     constructor() {
