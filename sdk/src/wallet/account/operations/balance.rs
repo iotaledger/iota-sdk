@@ -329,10 +329,7 @@ impl Account {
         let mut context = BalanceContext::new(&account_details, network_id, rent_structure);
 
         #[cfg(feature = "participation")]
-        {
-            // TODO what should this do when we're asking for an address balance?
-            context.balance.base_coin.voting_power = self.get_voting_power().await?;
-        }
+        let voting_output = self.get_voting_output().await?;
 
         for address in addresses {
             let address = address.to_bech32()?;
@@ -342,6 +339,14 @@ impl Account {
                 .iter()
                 .find(|a| a.address == address)
             {
+                #[cfg(feature = "participation")]
+                {
+                    if let Some(voting_output) = &voting_output {
+                        if voting_output.output.as_basic().address() == address.inner() {
+                            context.balance.base_coin.voting_power = voting_output.output.amount();
+                        }
+                    }
+                }
                 self.balance_inner(address_with_unspent_outputs, &mut context).await?;
             } else {
                 return Err(Error::AddressNotFoundInAccount(address));
