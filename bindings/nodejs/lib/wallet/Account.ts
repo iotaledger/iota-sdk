@@ -31,14 +31,12 @@ import {
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
     PreparedMintTokenTransactionData,
-} from '../../types/wallet';
-import type { SignedTransactionEssence } from '../../types/wallet/signedTransactionEssence';
-import type {
     BuildAliasOutputData,
     BuildBasicOutputData,
     BuildFoundryOutputData,
     BuildNftOutputData,
-} from '../../types/wallet/buildOutputData';
+    SignedTransactionEssence,
+} from '../types/wallet';
 import type {
     HexEncodedAmount,
     IAliasOutput,
@@ -170,7 +168,7 @@ export class Account {
                 name: 'prepareBurn',
                 data: {
                     burn: {
-                        nativeTokens: [{ id: tokenId, amount: burnAmount }],
+                        nativeTokens: new Map([[tokenId, burnAmount]]),
                     },
                     options: transactionOptions,
                 },

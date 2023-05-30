@@ -38,6 +38,11 @@ impl Migration<crate::wallet::storage::Storage> for Migrate {
                         .values_mut()
                     {
                         ConvertOutputMetadata::check(&mut output_data["metadata"])?;
+                        if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
+                            for segment in chain {
+                                ConvertSegment::check(segment)?;
+                            }
+                        }
                     }
                     for output_data in account["unspentOutputs"]
                         .as_object_mut()
@@ -45,6 +50,11 @@ impl Migration<crate::wallet::storage::Storage> for Migrate {
                         .values_mut()
                     {
                         ConvertOutputMetadata::check(&mut output_data["metadata"])?;
+                        if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
+                            for segment in chain {
+                                ConvertSegment::check(segment)?;
+                            }
+                        }
                     }
                     storage
                         .set(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"), &account)
@@ -79,6 +89,11 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
                     .values_mut()
                 {
                     ConvertOutputMetadata::check(&mut output_data["metadata"])?;
+                    if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
+                        for segment in chain {
+                            ConvertSegment::check(segment)?;
+                        }
+                    }
                 }
                 for output_data in account["unspentOutputs"]
                     .as_object_mut()
@@ -86,6 +101,11 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
                     .values_mut()
                 {
                     ConvertOutputMetadata::check(&mut output_data["metadata"])?;
+                    if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
+                        for segment in chain {
+                            ConvertSegment::check(segment)?;
+                        }
+                    }
                 }
             }
             storage.set(ACCOUNTS_KEY, &accounts).await?;
@@ -310,6 +330,13 @@ mod types {
         UnknownPruned,
     }
 
+    #[derive(Deserialize)]
+    #[allow(non_camel_case_types)]
+    pub struct Crypto_0_18_0_Segment {
+        pub bs: [u8; 4],
+        pub hardened: bool,
+    }
+
     pub struct Hrp {
         inner: [u8; 83],
         len: u8,
@@ -426,6 +453,16 @@ impl Convert for ConvertOutputMetadata {
             milestone_timestamp_booked: old.milestone_timestamp_booked,
             ledger_index: old.ledger_index,
         })
+    }
+}
+
+struct ConvertSegment;
+impl Convert for ConvertSegment {
+    type New = u32;
+    type Old = types::Crypto_0_18_0_Segment;
+
+    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
+        Ok(u32::from_be_bytes(old.bs))
     }
 }
 
