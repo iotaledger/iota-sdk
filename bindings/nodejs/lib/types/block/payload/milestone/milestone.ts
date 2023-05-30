@@ -1,7 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { IMilestonePayload } from '@iota/types';
 import { MilestoneOption } from '../../../models/milestoneOptions';
 import { HexEncodedString } from '../../../utils/hexEncodedTypes';
 import { Ed25519Signature } from '../../signature';

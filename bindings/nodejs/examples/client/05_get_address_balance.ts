@@ -1,7 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Client, initLogger } from '@iota/sdk';
+import { Client, CommonOutput, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -52,10 +52,14 @@ async function run() {
         let totalAmount = 0;
         const totalNativeTokens: { [id: string]: number } = {};
         for (const outputResponse of addressOutputs) {
+            console.log(outputResponse);
+            console.log(outputResponse.output);
+            
             const output = outputResponse['output'];
 
-            if ('nativeTokens' in output) {
-                output.nativeTokens?.forEach(
+            if (output instanceof CommonOutput) {
+                
+                (output as CommonOutput).getNativeTokens()?.forEach(
                     (token) =>
                         (totalNativeTokens[token.id] =
                             (totalNativeTokens[token.id] || 0) +
@@ -63,7 +67,7 @@ async function run() {
                 );
             }
 
-            totalAmount += parseInt(output.amount);
+            totalAmount += parseInt(output.getAmount());
         }
 
         console.log(
