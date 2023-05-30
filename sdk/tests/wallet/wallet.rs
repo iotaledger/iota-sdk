@@ -92,24 +92,35 @@ async fn changed_coin_type() -> Result<()> {
     drop(_account);
     drop(wallet);
 
-    // Recreate Wallet with same mnemonic
-    let secret_manager2 = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC)?;
+    // Building the wallet with another coin type needs to return an error, because a different coin type was used in
+    // the existing account
+    assert!(
+        Wallet::builder()
+            .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
+                DEFAULT_MNEMONIC
+            )?))
+            .with_coin_type(IOTA_COIN_TYPE)
+            .with_storage_path(storage_path)
+            .finish()
+            .await
+            .is_err()
+    );
+    // Building the wallet with the same coin type still works
     let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::Mnemonic(secret_manager2))
-        .with_coin_type(IOTA_COIN_TYPE)
+        .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
+            DEFAULT_MNEMONIC,
+        )?))
         .with_storage_path(storage_path)
         .finish()
         .await?;
-
-    // Generating a new account needs to return an error, because a different coin type was set and we require all
-    // accounts to have the same coin type
+    // Also still possible to create a new account
     assert!(
         wallet
             .create_account()
             .with_alias("Bob".to_string())
             .finish()
             .await
-            .is_err()
+            .is_ok()
     );
 
     tear_down(storage_path)

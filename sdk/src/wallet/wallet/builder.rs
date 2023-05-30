@@ -178,15 +178,26 @@ impl WalletBuilder {
             self.coin_type.replace(coin_type);
         }
 
+        #[cfg(feature = "storage")]
+        let mut accounts = storage_manager.get_accounts().await?;
+        // Check against potential account coin type before saving the wallet data
+        #[cfg(feature = "storage")]
+        if let Some(account) = accounts.first() {
+            // Safe to unwrap, because we made sure that it's Some
+            if *account.coin_type() != self.coin_type.expect("missing coin type") {
+                return Err(crate::wallet::Error::InvalidCoinType {
+                    new_coin_type: self.coin_type.expect("missing coin type"),
+                    existing_coin_type: *account.coin_type(),
+                });
+            }
+        }
+
         // Store wallet data in storage
         #[cfg(feature = "storage")]
         storage_manager.save_wallet_data(&self).await?;
 
         #[cfg(feature = "events")]
         let event_emitter = tokio::sync::RwLock::new(EventEmitter::new());
-
-        #[cfg(feature = "storage")]
-        let mut accounts = storage_manager.get_accounts().await?;
 
         // It happened that inputs got locked, the transaction failed, but they weren't unlocked again, so we do this
         // here
