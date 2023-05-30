@@ -23,7 +23,7 @@ impl Wallet {
     ///     )
     ///     .await?;
     /// ```
-    pub async fn generate_address(
+    pub async fn generate_ed25519_address(
         &self,
         account_index: u32,
         address_index: u32,

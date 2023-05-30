@@ -65,7 +65,7 @@ import type {
     __GetAccountIndexesMethod__,
     __GetAccountsMethod__,
     __GetLedgerNanoStatusMethod__,
-    __GenerateAddressMethod__,
+    __GenerateEd25519AddressMethod__,
     __IsStrongholdPasswordAvailableMethod__,
     __RecoverAccountsMethod__,
     __RemoveLatestAccountMethod__,
@@ -154,7 +154,7 @@ export type __Method__ =
     | __GetAccountIndexesMethod__
     | __GetAccountsMethod__
     | __GetLedgerNanoStatusMethod__
-    | __GenerateAddressMethod__
+    | __GenerateEd25519AddressMethod__
     | __IsStrongholdPasswordAvailableMethod__
     | __RecoverAccountsMethod__
     | __RemoveLatestAccountMethod__

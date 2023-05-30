@@ -56,7 +56,7 @@ public abstract class ApiTest {
         return client.getBasicOutputIds(new NodeIndexerApi.QueryParams().withParam("address", address)).getItems()[0];
     }
 
-    protected String generateAddress(String mnemonic) throws ClientException {
+    protected String generateEd25519Address(String mnemonic) throws ClientException {
         SecretManager secretManager = new MnemonicSecretManager(mnemonic);
         String[] addresses = client.generateEd25519Addresses(secretManager,
                 new GenerateAddressesOptions().withRange(new Range(0, 1)));

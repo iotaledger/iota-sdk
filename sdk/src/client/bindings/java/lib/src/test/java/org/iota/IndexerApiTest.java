@@ -24,7 +24,7 @@ public class IndexerApiTest extends ApiTest {
 
         @Test
         public void testGetBasicOutputIds() throws ClientException, NoFundsReceivedFromFaucetException {
-                String address = generateAddress(client.generateMnemonic());
+                String address = generateEd25519Address(client.generateMnemonic());
                 client.requestTestFundsFromFaucet(address);
                 for (OutputId outputId : client
                                 .getBasicOutputIds(new NodeIndexerApi.QueryParams().withParam("address", address))

@@ -22,7 +22,7 @@ public class HighLevelApiTest extends ApiTest {
 
     @Test
     public void testGetOutputs() throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
-        OutputId[] outputs = new OutputId[] { setupBasicOutput(generateAddress(client.generateMnemonic())) };
+        OutputId[] outputs = new OutputId[] { setupBasicOutput(generateEd25519Address(client.generateMnemonic())) };
         for (Map.Entry e : client.getOutputs(outputs)) {
             System.out.println(e.getKey());
         }
@@ -31,7 +31,7 @@ public class HighLevelApiTest extends ApiTest {
     @Test
     public void getOutputsIgnoreErrors()
             throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
-        OutputId[] outputs = new OutputId[] { setupBasicOutput(generateAddress(client.generateMnemonic())) };
+        OutputId[] outputs = new OutputId[] { setupBasicOutput(generateEd25519Address(client.generateMnemonic())) };
         for (Map.Entry e : client.getOutputsIgnoreErrors(outputs)) {
             System.out.println(e.getKey());
         }

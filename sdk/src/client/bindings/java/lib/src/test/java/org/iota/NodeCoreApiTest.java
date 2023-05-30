@@ -64,14 +64,14 @@ public class NodeCoreApiTest extends ApiTest {
 
     @Test
     public void testGetOutput() throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
-        Map.Entry<Output, OutputMetadata> r = client.getOutput(setupBasicOutput(generateAddress(client.generateMnemonic())));
+        Map.Entry<Output, OutputMetadata> r = client.getOutput(setupBasicOutput(generateEd25519Address(client.generateMnemonic())));
         System.out.println(r.getKey());
         System.out.println(r.getValue());
     }
 
     @Test
     public void testGetOutputMetadata() throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
-        OutputMetadata r = client.getOutputMetadata(setupBasicOutput(generateAddress(client.generateMnemonic())));
+        OutputMetadata r = client.getOutputMetadata(setupBasicOutput(generateEd25519Address(client.generateMnemonic())));
         System.out.println(r);
     }
 
@@ -97,7 +97,7 @@ public class NodeCoreApiTest extends ApiTest {
 
     @Test
     public void testGetIncludedBlock() throws ClientException, InitializeClientException, NoFundsReceivedFromFaucetException {
-        System.out.println(client.getIncludedBlock(setUpTransactionId(generateAddress(client.generateMnemonic()))));
+        System.out.println(client.getIncludedBlock(setUpTransactionId(generateEd25519Address(client.generateMnemonic()))));
     }
 
     @Test
