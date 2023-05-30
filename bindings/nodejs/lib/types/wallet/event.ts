@@ -3,7 +3,6 @@ import type { OutputData } from './output';
 import type { InclusionState } from './transaction';
 import { IInputSigningData, IRemainder } from '../client';
 
-// TODO where?
 export type TransactionId = string;
 
 /**
@@ -126,7 +125,7 @@ class TransactionInclusionWalletEvent extends WalletEvent {
     }
 
     /**
-    * The transaction ID.
+    * The transaction inclusion state
     */
     getInclusionState(): InclusionState {
         return this.inclusionState;

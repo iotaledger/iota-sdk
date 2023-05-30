@@ -86,12 +86,15 @@ pub async fn call_wallet_method_async(method: String, method_handler: &WalletMet
 #[wasm_bindgen(js_name = listenWalletAsync)]
 #[allow(clippy::await_holding_refcell_ref)]
 pub async fn listen_wallet(
-    vec: Vec<u8>,
+    vec: js_sys::Array,
     callback: js_sys::Function,
     method_handler: &WalletMethodHandler,
 ) -> Result<JsValue, JsValue> {
     let mut event_types = vec![];
-    for event_type in vec {
+    for event_type in vec.keys() {
+        // We know the built-in iterator for set elements won't throw
+        // exceptions, so just unwrap the element.
+        let event_type = event_type.unwrap().as_f64().unwrap() as u8;
         let wallet_event_type = WalletEventType::try_from(event_type).map_err(JsValue::from)?;
         event_types.push(wallet_event_type);
     }
