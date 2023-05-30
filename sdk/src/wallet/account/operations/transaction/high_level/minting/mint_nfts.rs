@@ -63,7 +63,7 @@ impl MintNftParams {
         mut self,
         sender: Option<impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>>,
     ) -> Result<Self, crate::wallet::error::Error> {
-        self.address = sender.map(|v| v.try_into().map_err(Into::into)).transpose()?;
+        self.sender = sender.map(|v| v.try_into().map_err(Into::into)).transpose()?;
         Ok(self)
     }
 
@@ -81,7 +81,7 @@ impl MintNftParams {
         mut self,
         issuer: Option<impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>>,
     ) -> Result<Self, crate::wallet::error::Error> {
-        self.address = issuer.map(|v| v.try_into().map_err(Into::into)).transpose()?;
+        self.issuer = issuer.map(|v| v.try_into().map_err(Into::into)).transpose()?;
         Ok(self)
     }
 
