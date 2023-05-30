@@ -5,7 +5,7 @@ import { Wallet, CoinType, initLogger, ConsolidationRequiredWalletEvent, Transac
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/accounts_and_addresses/events.ts
+// yarn run-example ./how_tos/events.ts
 
 // This example creates a new database and account
 async function run() {
