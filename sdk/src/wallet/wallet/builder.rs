@@ -166,27 +166,25 @@ impl WalletBuilder {
             self.secret_manager.replace(secret_manager);
         }
 
-        if self.coin_type.is_none() {
-            let coin_type =
-                read_manager_builder
-                    .and_then(|data| data.coin_type)
-                    .ok_or(crate::wallet::Error::MissingParameter(
-                        "coin_type (IOTA: 4218, Shimmer: 4219)",
-                    ))?;
+        let coin_type =
+            self.coin_type.map(Ok::<u32, crate::wallet::Error>).unwrap_or_else(|| {
+                let coin_type = read_manager_builder.and_then(|data| data.coin_type).ok_or(
+                    crate::wallet::Error::MissingParameter("coin_type (IOTA: 4218, Shimmer: 4219)"),
+                )?;
 
-            // Update self so it gets used and stored again
-            self.coin_type.replace(coin_type);
-        }
+                // Update self so it gets stored
+                self.coin_type.replace(coin_type);
+                Ok(coin_type)
+            })?;
 
         #[cfg(feature = "storage")]
         let mut accounts = storage_manager.get_accounts().await?;
         // Check against potential account coin type before saving the wallet data
         #[cfg(feature = "storage")]
         if let Some(account) = accounts.first() {
-            // Safe to unwrap, because we made sure that it's Some
-            if *account.coin_type() != self.coin_type.expect("missing coin type") {
+            if *account.coin_type() != coin_type {
                 return Err(crate::wallet::Error::InvalidCoinType {
-                    new_coin_type: self.coin_type.expect("missing coin type"),
+                    new_coin_type: coin_type,
                     existing_coin_type: *account.coin_type(),
                 });
             }
@@ -213,9 +211,7 @@ impl WalletBuilder {
                 .ok_or(crate::wallet::Error::MissingParameter("client_options"))?
                 .finish()
                 .await?,
-            coin_type: AtomicU32::new(self.coin_type.ok_or(crate::wallet::Error::MissingParameter(
-                "coin_type (IOTA: 4218, Shimmer: 4219)",
-            ))?),
+            coin_type: AtomicU32::new(coin_type),
             secret_manager: self
                 .secret_manager
                 .ok_or(crate::wallet::Error::MissingParameter("secret_manager"))?,
