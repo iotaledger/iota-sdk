@@ -75,9 +75,9 @@ async fn check_existing_db() -> Result<()> {
 
     // balance depends on the network
     if &account.client().get_network_name().await? == "private_tangle1" {
-        let account_balance = account.balance().await?;
-        assert_eq!(account_balance.base_coin().total(), 100000000000);
-        assert_eq!(account_balance.base_coin().available(), 99996954100);
+        let balance = account.balance().await?;
+        assert_eq!(balance.base_coin().total(), 100000000000);
+        assert_eq!(balance.base_coin().available(), 99996954100);
     }
 
     tear_down(storage_path)

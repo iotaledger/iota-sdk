@@ -80,12 +80,12 @@ impl Account {
             }
         };
 
-        let account_balance = self.balance().await?;
+        let balance = self.balance().await?;
         // Update last_synced mutex
         let time_now = crate::utils::unix_timestamp_now().as_millis();
         *last_synced = time_now;
         log::debug!("[SYNC] finished syncing in {:.2?}", syc_start_time.elapsed());
-        Ok(account_balance)
+        Ok(balance)
     }
 
     async fn sync_internal(&self, options: &SyncOptions) -> crate::wallet::Result<()> {
