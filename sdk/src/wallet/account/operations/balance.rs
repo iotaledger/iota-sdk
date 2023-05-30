@@ -5,7 +5,7 @@ use primitive_types::U256;
 
 use crate::{
     types::block::{
-        address::Bech32Address,
+        address::Bech32AddressLike,
         output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent, RentStructure},
     },
     wallet::account::{
@@ -113,7 +113,7 @@ impl<'a> BalanceContext<'a> {
 }
 
 impl Account {
-    async fn address_balance<'a>(
+    async fn balance_inner<'a>(
         &self,
         address_with_unspent_outputs: &AddressWithUnspentOutputs,
         context: &mut BalanceContext<'a>,
@@ -316,10 +316,12 @@ impl Account {
         Ok(())
     }
 
-    // TODO address param or another method?
-    /// Get the AccountBalance
-    pub async fn balance(&self, address: Option<Bech32Address>) -> crate::wallet::Result<AccountBalance> {
-        log::debug!("[BALANCE] get balance");
+    /// Get the balance of the given addresses.
+    pub async fn addresses_balance(
+        &self,
+        addresses: Vec<impl Bech32AddressLike>,
+    ) -> crate::wallet::Result<AccountBalance> {
+        log::debug!("[BALANCE] addresses_balance");
 
         let account_details = self.details().await;
         let network_id = self.client().get_network_id().await?;
@@ -332,20 +334,39 @@ impl Account {
             context.balance.base_coin.voting_power = self.get_voting_power().await?;
         }
 
-        if let Some(address) = address {
+        for address in addresses {
+            let address = address.to_bech32()?;
+
             if let Some(address_with_unspent_outputs) = account_details
                 .addresses_with_unspent_outputs
                 .iter()
                 .find(|a| a.address == address)
             {
-                self.address_balance(address_with_unspent_outputs, &mut context).await?;
+                self.balance_inner(address_with_unspent_outputs, &mut context).await?;
             } else {
                 // TODO error or 0 balance ?
             }
-        } else {
-            for address_with_unspent_outputs in &account_details.addresses_with_unspent_outputs {
-                self.address_balance(address_with_unspent_outputs, &mut context).await?;
-            }
+        }
+
+        context.finish()
+    }
+
+    /// Get the balance of the account.
+    pub async fn balance(&self) -> crate::wallet::Result<AccountBalance> {
+        log::debug!("[BALANCE] balance");
+
+        let account_details = self.details().await;
+        let network_id = self.client().get_network_id().await?;
+        let rent_structure = self.client().get_rent_structure().await?;
+        let mut context = BalanceContext::new(&account_details, network_id, rent_structure);
+
+        #[cfg(feature = "participation")]
+        {
+            context.balance.base_coin.voting_power = self.get_voting_power().await?;
+        }
+
+        for address_with_unspent_outputs in &account_details.addresses_with_unspent_outputs {
+            self.balance_inner(address_with_unspent_outputs, &mut context).await?;
         }
 
         context.finish()

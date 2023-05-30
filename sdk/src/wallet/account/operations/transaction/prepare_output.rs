@@ -128,7 +128,7 @@ impl Account {
                 // output. If that's the case, this remaining amount will be added to the output, to still allow sending
                 // it.
                 if storage_deposit.use_excess_if_low.unwrap_or_default() {
-                    let balance = self.balance(None).await?;
+                    let balance = self.balance().await?;
                     if balance.base_coin.available.cmp(&first_output.amount()) == Ordering::Greater {
                         let balance_minus_output = balance.base_coin.available - first_output.amount();
                         // Calculate the amount for a basic output
@@ -301,7 +301,7 @@ impl Account {
                 // output. If that's the case, this remaining amount will be added to the output, to still allow sending
                 // it.
                 if storage_deposit.use_excess_if_low.unwrap_or_default() {
-                    let balance = self.balance(None).await?;
+                    let balance = self.balance().await?;
                     if balance.base_coin.available.cmp(&first_output.amount()) == Ordering::Greater {
                         let balance_minus_output = balance.base_coin.available - first_output.amount();
                         // Calculate the amount for a basic output

@@ -50,7 +50,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 account.generate_addresses(amount, options).await?;
             Response::GeneratedAddress(address)
         }
-        AccountMethod::GetBalance => Response::Balance(AccountBalanceDto::from(&account.balance(None).await?)),
+        AccountMethod::GetBalance => Response::Balance(AccountBalanceDto::from(&account.balance().await?)),
         AccountMethod::GetFoundryOutput { token_id } => {
             let output = account.get_foundry_output(token_id).await?;
             Response::Output(OutputDto::from(&output))
