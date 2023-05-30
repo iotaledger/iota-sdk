@@ -12,4 +12,4 @@ _balance = account.sync()
 
 # Just calculate the balance with the known state
 balance = account.get_balance()
-print(f'AccountBalance {json.dumps(balance, indent=4)}')
+print(f'Balance {json.dumps(balance, indent=4)}')
