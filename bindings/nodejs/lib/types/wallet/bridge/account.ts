@@ -14,7 +14,7 @@ import type {
     BuildFoundryOutputData,
     BuildNftOutputData,
 } from '../buildOutputData';
-import type { INode, PreparedTransactionData } from '../../client';
+import type { Burn, INode, PreparedTransactionData } from '../../client';
 import type { OutputParams } from '../outputParams';
 import type { OutputsToClaim } from '../output';
 import type { SignedTransactionEssence } from '../signedTransactionEssence';
@@ -30,7 +30,6 @@ import type {
     ParticipationEventType,
 } from '../participation';
 import { HexEncodedAmount, Output } from '../../';
-import { Burn } from '../burn';
 
 export type __BuildAliasOutputMethod__ = {
     name: 'buildAliasOutput';

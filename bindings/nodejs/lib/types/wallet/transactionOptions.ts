@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TaggedDataPayload } from '../block/payload/tagged';
+import { Burn } from '../client';
 import { HexEncodedAmount } from '../utils/hexEncodedTypes';
-import type { Burn } from './burn';
 
 /** Options for the transaction creation */
 export interface TransactionOptions {

@@ -34,6 +34,7 @@ import {
     MilestonePayload,
     TreasuryOutput,
     Output,
+    parsePayload,
 } from '../types/block';
 import { IBlock } from '../types/block/IBlock';
 import { HexEncodedString } from '../utils';
@@ -152,7 +153,6 @@ export class Client {
                 options,
             },
         });
-
         return JSON.parse(response).payload;
     }
 
@@ -284,7 +284,7 @@ export class Client {
             },
         });
 
-        return Payload.parse(JSON.parse(response).payload);
+        return parsePayload(JSON.parse(response).payload);
     }
 
     /**
