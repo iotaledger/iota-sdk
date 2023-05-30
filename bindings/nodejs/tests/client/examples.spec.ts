@@ -1,5 +1,5 @@
 import type { IBlock, IOutputResponse, ITaggedDataPayload } from '@iota/types';
-import { Client, utf8ToHex, Utils } from '../../lib';
+import { Client, utf8ToHex, Utils } from '../../';
 import '../customMatchers';
 import 'dotenv/config';
 import * as addressOutputs from '../fixtures/addressOutputs.json';

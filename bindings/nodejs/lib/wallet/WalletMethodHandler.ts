@@ -14,7 +14,7 @@ import type {
     __Method__,
     __AccountMethod__,
     AccountId,
-} from '../../types/wallet';
+} from '../types/wallet';
 import { Client } from '../client';
 
 // The WalletMethodHandler class interacts with methods with the rust bindings.
@@ -34,7 +34,14 @@ export class WalletMethodHandler {
 
     async callMethod(method: __Method__): Promise<string> {
         return callWalletMethodAsync(
-            JSON.stringify(method),
+            // mapToObject is required to convert maps to array since they otherwise get serialized as `[{}]` even if not empty
+            JSON.stringify(method, function mapToObject(_key, value) {
+                if (value instanceof Map) {
+                    return Object.fromEntries(value);
+                } else {
+                    return value;
+                }
+            }),
             this.methodHandler,
         ).catch((error: Error) => {
             try {

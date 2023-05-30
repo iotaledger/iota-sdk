@@ -111,6 +111,28 @@ See [SLIP-0044](https://github.com/satoshilabs/slips/blob/master/slip-0044.md) f
 ./wallet init --coin-type 4219
 ```
 
+### `./wallet migrate-stronghold-snapshot-v2-to-v3`
+
+Migrates a stronghold snapshot from v2 to v3.
+
+#### Parameters
+
+| Name   | Optional | Default                            | Example           |
+| ------ | -------- | ---------------------------------- | ----------------- |
+| `path` | ✓        | "./stardust-cli-wallet.stronghold" | backup.stronghold |
+
+#### Example
+
+Migrate a stronghold snapshot from v2 to v3 with the default path: "./stardust-cli-wallet.stronghold".
+```sh
+./wallet migrate-stronghold-snapshot-v2-to-v3
+```
+
+Migrate a stronghold snapshot from v2 to v3 with a custom path.
+```sh
+./wallet migrate-stronghold-snapshot-v2-to-v3 some-other-path.stronghold
+```
+
 ### `./wallet mnemonic`
 
 Generates a new random mnemonic.
