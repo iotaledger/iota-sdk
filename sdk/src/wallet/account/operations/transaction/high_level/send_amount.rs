@@ -73,7 +73,6 @@ impl SendAmountParams {
     }
 }
 
-// TODO fix examples
 impl Account {
     /// Function to create basic outputs with which we then will call
     /// [Account.send()](crate::account::Account.send), the options can define the

@@ -233,14 +233,6 @@ async fn claim_2_native_tokens() -> Result<()> {
         .await?;
     accounts[1].sync(None).await?;
 
-    // let params = SendNativeTokensParams::new(
-    //     *accounts[0].addresses().await?[0].address(),
-    //     [
-    //         (mint_tx_0.token_id, native_token_amount),
-    //         (mint_tx_1.token_id, native_token_amount),
-    //     ],
-    // )?;
-
     let tx = accounts[1]
         .send_native_tokens(
             vec![

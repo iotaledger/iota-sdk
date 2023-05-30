@@ -87,7 +87,6 @@ macro_rules! impl_id {
         }
     };
 }
-
 pub(crate) use impl_id;
 
 /// Helper macro to serialize types to string via serde.
@@ -159,5 +158,4 @@ macro_rules! create_bitflags {
         }
     };
 }
-
 pub(crate) use create_bitflags;
