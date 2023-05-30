@@ -3,7 +3,7 @@ import type { IGenerateAddressesOptions } from '../generateAddressesOptions';
 import type { IBuildBlockOptions } from '../buildBlockOptions';
 import type { BlockId, Payload } from '../../block';
 import type {
-    IPreparedTransactionData,
+    PreparedTransactionData,
     IBip32Chain,
 } from '../preparedTransactionData';
 import type {
@@ -118,7 +118,7 @@ export interface __SignTransactionMethod__ {
     name: 'signTransaction';
     data: {
         secretManager: SecretManagerType;
-        preparedTransactionData: IPreparedTransactionData;
+        preparedTransactionData: PreparedTransactionData;
     };
 }
 

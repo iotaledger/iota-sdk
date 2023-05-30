@@ -1,8 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Address } from '../block/address';
-import { Output } from '../block/output';
+import { Type } from 'class-transformer';
+import { Address, AddressDiscriminator } from '../block/address';
+import { Output, OutputDiscriminator } from '../block/output';
 import { IOutputMetadataResponse } from '../models/api';
 
 /** Output to claim */
@@ -15,21 +16,27 @@ export enum OutputsToClaim {
 }
 
 /** An output with metadata */
-export interface OutputData {
+export class OutputData {
     /** The identifier of an Output */
-    outputId: OutputId;
+    outputId!: OutputId;
     /** The metadata of the output */
-    metadata: IOutputMetadataResponse;
+    metadata!: IOutputMetadataResponse;
     /** The actual Output */
-    output: Output;
+    @Type(() => Output, {
+        discriminator: OutputDiscriminator,
+    })
+    output!: Output;
     /** If an output is spent */
-    isSpent: boolean;
+    isSpent!: boolean;
     /** Associated account address */
-    address: Address;
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
+    address!: Address;
     /** Network ID */
-    networkId: string;
+    networkId!: string;
     /** Remainder */
-    remainder: boolean;
+    remainder!: boolean;
     /** BIP32 path */
     chain?: Segment[];
 }

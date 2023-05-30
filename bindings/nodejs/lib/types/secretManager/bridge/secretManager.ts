@@ -3,7 +3,7 @@
 
 import type { IGenerateAddressesOptions } from '../../client/generateAddressesOptions';
 import type {
-    IPreparedTransactionData,
+    PreparedTransactionData,
     IBip32Chain,
 } from '../../client/preparedTransactionData';
 import { HexEncodedString } from '../../utils';
@@ -18,7 +18,7 @@ export interface __GenerateAddressesMethod__ {
 export interface __SignTransactionMethod__ {
     name: 'signTransaction';
     data: {
-        preparedTransactionData: IPreparedTransactionData;
+        preparedTransactionData: PreparedTransactionData;
     };
 }
 

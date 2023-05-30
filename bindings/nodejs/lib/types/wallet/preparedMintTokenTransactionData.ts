@@ -1,14 +1,20 @@
-import { Account, IPreparedTransactionData, Transaction } from '../..';
+// Copyright 2021-2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
 
-import { PreparedTransactionData } from './preparedTransactionData';
+import { Account, PreparedMintTokenTransactionData } from '../..';
+
+import { PreparedTransaction } from './preparedTransaction';
 
 /*
- * The class PreparedMintTokenTransactionData represents prepared data for minting a token transaction.
+ * The class PreparedMintTokenTransaction represents prepared data for minting a token transaction.
  */
-export class PreparedMintTokenTransactionData extends PreparedTransactionData {
+export class PreparedMintTokenTransaction extends PreparedTransaction {
     private _tokenId: string;
 
-    constructor(preparedData: PreparedMintTokenTransaction, account: Account) {
+    constructor(
+        preparedData: PreparedMintTokenTransactionData,
+        account: Account,
+    ) {
         super(preparedData.transaction, account);
         this._tokenId = preparedData.tokenId;
     }
@@ -23,20 +29,4 @@ export class PreparedMintTokenTransactionData extends PreparedTransactionData {
     public tokenId(): string {
         return this._tokenId;
     }
-}
-
-/** The result of preparing a minting operation */
-export interface PreparedMintTokenTransaction {
-    /** The token id of the minted token */
-    tokenId: string;
-    /** The prepared transaction which will mint the token */
-    transaction: IPreparedTransactionData;
-}
-
-/** The result of a minting operation */
-export interface MintTokenTransaction {
-    /** The token id of the minted token */
-    tokenId: string;
-    /** The transaction which minted the token */
-    transaction: Transaction;
 }

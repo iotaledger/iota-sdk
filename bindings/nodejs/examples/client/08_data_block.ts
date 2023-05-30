@@ -1,7 +1,14 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Client, hexToUtf8, initLogger, utf8ToHex, Utils } from '@iota/sdk';
+import {
+    Client,
+    hexToUtf8,
+    initLogger,
+    TaggedDataPayload,
+    utf8ToHex,
+    Utils,
+} from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -40,8 +47,8 @@ async function run() {
         const fetchedBlock = await client.getBlock(blockIdAndBlock[0]);
         console.log('Block data: ', fetchedBlock);
 
-        const payload = fetchedBlock.payload;
-        if (payload && 'data' in payload && payload.data) {
+        if (fetchedBlock.payload! instanceof TaggedDataPayload) {
+            const payload = fetchedBlock.payload as TaggedDataPayload;
             console.log('Decoded data:', hexToUtf8(payload.data));
         }
     } catch (error) {

@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { plainToInstance } from 'class-transformer';
 import { callUtilsMethod } from '../bindings';
 import {
     Address,
@@ -10,6 +11,7 @@ import {
     IBlock,
     Ed25519Signature,
     TransactionEssence,
+    Response,
 } from '../types';
 
 /** Utils class for utils. */
@@ -81,12 +83,15 @@ export class Utils {
      * Returns a valid Address parsed from a String.
      */
     static parseBech32Address(address: string): Address {
-        return callUtilsMethod({
+        let addr = callUtilsMethod({
             name: 'parseBech32Address',
             data: {
                 address,
             },
         });
+
+        let p = JSON.parse(addr) as Response<Ed25519Address>;
+        return plainToInstance(Ed25519Address, p.payload);
     }
 
     /**

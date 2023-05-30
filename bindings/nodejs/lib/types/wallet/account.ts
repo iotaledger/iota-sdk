@@ -7,7 +7,7 @@ import type { Transaction } from './transaction';
 import { CoinType } from '../../client';
 import { TransactionPayload } from '../block/payload/transaction';
 import { HexEncodedAmount } from '../utils';
-import { IOutputResponse } from '../models/api';
+import { OutputResponse } from '../models/api';
 
 /**
  * Account identifier
@@ -141,7 +141,7 @@ export interface AccountMeta {
     pendingTransactions: Set<string>;
     /** Incoming transactions with their inputs if available and not already pruned */
     incomingTransactions: {
-        [transactionId: string]: [TransactionPayload, IOutputResponse[]];
+        [transactionId: string]: [TransactionPayload, OutputResponse[]];
     };
 }
 

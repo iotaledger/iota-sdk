@@ -7,3 +7,8 @@ export * from './models';
 export * from './secretManager';
 export * from './utils';
 export * from './wallet';
+
+export interface Response<T> {
+    type: string;
+    payload: T;
+}

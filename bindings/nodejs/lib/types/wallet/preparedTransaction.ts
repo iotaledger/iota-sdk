@@ -1,21 +1,24 @@
+// Copyright 2021-2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 import {
     Account,
-    IPreparedTransactionData,
+    PreparedTransactionData,
     SignedTransactionEssence,
     Transaction,
-} from '../../';
+} from '../..';
 
 /**
- * PreparedTransactionData` is a class that represents prepared transaction data, which
+ * PreparedTransaction` is a class that represents prepared transaction data, which
  * is useful for offline signing. It contains the prepared transaction data and an
  * `Account` object. It provides methods to retrieve the prepared transaction data, sign
  * the transaction and sign+submit/send the transaction.
  */
-export class PreparedTransactionData {
-    private _preparedData: IPreparedTransactionData;
+export class PreparedTransaction {
+    private _preparedData: PreparedTransactionData;
     private _account: Account;
 
-    constructor(preparedData: IPreparedTransactionData, account: Account) {
+    constructor(preparedData: PreparedTransactionData, account: Account) {
         this._preparedData = preparedData;
         this._account = account;
     }
@@ -26,9 +29,9 @@ export class PreparedTransactionData {
      * Returns:
      *
      * The method `preparedTransactionData()` is returning an object of type
-     * `IPreparedTransactionData`.
+     * `PreparedTransactionData`.
      */
-    public preparedTransactionData(): IPreparedTransactionData {
+    public preparedTransactionData(): PreparedTransactionData {
         return this._preparedData;
     }
 

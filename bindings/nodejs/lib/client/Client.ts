@@ -43,6 +43,7 @@ import {
     INodeInfoProtocol,
     IPeer,
     UTXOInput,
+    Response,
 } from '../types';
 import {
     IMilestoneUtxoChangesResponse,
@@ -50,16 +51,7 @@ import {
     ReceiptsResponse,
 } from '../types/models/api';
 
-import {
-    plainToClassFromExist,
-    plainToInstance,
-    Type,
-} from 'class-transformer';
-
-interface Response<T> {
-    type: string;
-    payload: T;
-}
+import { plainToInstance } from 'class-transformer';
 
 /** The Client to interact with nodes. */
 export class Client {

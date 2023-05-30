@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionPayload } from '../block/payload/transaction';
-import { IOutputResponse } from '../models/api';
+import { OutputResponse } from '../models/api';
 import type { OutputData } from './output';
 
 /** Wallet event types */
@@ -18,7 +18,7 @@ export type EventType =
 export type NewOutputEvent = {
     output: OutputData;
     transaction?: TransactionPayload;
-    transactionInputs?: IOutputResponse;
+    transactionInputs?: OutputResponse;
 };
 
 /** Wallet events */

@@ -4,7 +4,7 @@
 import { SecretManagerMethodHandler } from './SecretManagerMethodHandler';
 import type {
     IGenerateAddressesOptions,
-    IPreparedTransactionData,
+    PreparedTransactionData,
     LedgerNanoStatus,
     IBip32Chain,
 } from '../types/client/';
@@ -51,7 +51,7 @@ export class SecretManager {
      * Sign a transaction
      */
     async signTransaction(
-        preparedTransactionData: IPreparedTransactionData,
+        preparedTransactionData: PreparedTransactionData,
     ): Promise<Payload> {
         const response = await this.methodHandler.callMethod({
             name: 'signTransaction',

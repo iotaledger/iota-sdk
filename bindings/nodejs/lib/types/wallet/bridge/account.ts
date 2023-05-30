@@ -14,7 +14,7 @@ import type {
     BuildFoundryOutputData,
     BuildNftOutputData,
 } from '../buildOutputData';
-import type { INode, IPreparedTransactionData } from '../../client';
+import type { INode, PreparedTransactionData } from '../../client';
 import type { OutputParams } from '../outputParams';
 import type { OutputsToClaim } from '../output';
 import type { SignedTransactionEssence } from '../signedTransactionEssence';
@@ -301,14 +301,14 @@ export type __SetDefaultSyncOptionsMethod__ = {
 export type __SignTransactionEssenceMethod__ = {
     name: 'signTransactionEssence';
     data: {
-        preparedTransactionData: IPreparedTransactionData;
+        preparedTransactionData: PreparedTransactionData;
     };
 };
 
 export type __SignAndSubmitTransactionMethod__ = {
     name: 'signAndSubmitTransaction';
     data: {
-        preparedTransactionData: IPreparedTransactionData;
+        preparedTransactionData: PreparedTransactionData;
     };
 };
 

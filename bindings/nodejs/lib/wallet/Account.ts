@@ -20,7 +20,6 @@ import {
     OutputData,
     OutputParams,
     OutputsToClaim,
-    PreparedTransactionData,
     Transaction,
     TransactionOptions,
     ParticipationOverview,
@@ -30,14 +29,19 @@ import {
     ParticipationEventWithNodes,
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
-    PreparedMintTokenTransactionData,
     BuildAliasOutputData,
     BuildBasicOutputData,
     BuildFoundryOutputData,
     BuildNftOutputData,
     SignedTransactionEssence,
+    PreparedTransaction,
 } from '../types/wallet';
-import { INode, Burn, IPreparedTransactionData } from '../client';
+import {
+    INode,
+    Burn,
+    PreparedTransactionData,
+    PreparedMintTokenTransactionData,
+} from '../client';
 import {
     AliasOutput,
     NftOutput,
@@ -45,7 +49,10 @@ import {
     HexEncodedAmount,
     BasicOutput,
     FoundryOutput,
+    Response,
+    PreparedMintTokenTransaction,
 } from '../types';
+import { plainToInstance } from 'class-transformer';
 
 /** The Account class. */
 export class Account {
@@ -121,7 +128,7 @@ export class Account {
                 data,
             },
         );
-        return JSON.parse(response).payload;
+        return Output.parse(JSON.parse(response).payload) as NftOutput;
     }
 
     /**
@@ -145,7 +152,8 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, p.payload);
     }
 
     /**
@@ -162,7 +170,7 @@ export class Account {
         tokenId: string,
         burnAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -175,7 +183,11 @@ export class Account {
                 },
             },
         );
-        return new PreparedTransactionData(JSON.parse(response).payload, this);
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, p.payload),
+            this,
+        );
     }
     /**
      * Burn an nft output.
@@ -187,7 +199,7 @@ export class Account {
     async prepareBurnNft(
         nftId: string,
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -200,7 +212,11 @@ export class Account {
                 },
             },
         );
-        return new PreparedTransactionData(JSON.parse(response).payload, this);
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, p.payload),
+            this,
+        );
     }
 
     /**
@@ -219,7 +235,8 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, p.payload);
     }
 
     /**
@@ -233,7 +250,7 @@ export class Account {
     async prepareConsolidateOutputs(
         force: boolean,
         outputConsolidationThreshold?: number,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -244,7 +261,11 @@ export class Account {
                 },
             },
         );
-        return new PreparedTransactionData(JSON.parse(response).payload, this);
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, p.payload),
+            this,
+        );
     }
 
     /**
@@ -257,7 +278,7 @@ export class Account {
     async prepareCreateAliasOutput(
         params?: AliasOutputParams,
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -268,7 +289,11 @@ export class Account {
                 },
             },
         );
-        return new PreparedTransactionData(JSON.parse(response).payload, this);
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, p.payload),
+            this,
+        );
     }
 
     /**
@@ -284,7 +309,7 @@ export class Account {
         tokenId: string,
         meltAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -296,7 +321,11 @@ export class Account {
                 },
             },
         );
-        return new PreparedTransactionData(JSON.parse(response).payload, this);
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, p.payload),
+            this,
+        );
     }
 
     async deregisterParticipationEvent(
@@ -324,7 +353,7 @@ export class Account {
     async prepareDestroyAlias(
         aliasId: string,
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -337,7 +366,11 @@ export class Account {
                 },
             },
         );
-        return new PreparedTransactionData(JSON.parse(response).payload, this);
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, p.payload),
+            this,
+        );
     }
 
     /**
@@ -351,7 +384,7 @@ export class Account {
     async prepareDestroyFoundry(
         foundryId: string,
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -364,7 +397,11 @@ export class Account {
                 },
             },
         );
-        return new PreparedTransactionData(JSON.parse(response).payload, this);
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, p.payload),
+            this,
+        );
     }
 
     /**
@@ -432,7 +469,8 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<OutputData>;
+        return plainToInstance(OutputData, p.payload);
     }
 
     async getParticipationEvent(
@@ -508,7 +546,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(response).payload;
+        return Output.parse(JSON.parse(response).payload) as FoundryOutput;
     }
 
     /**
@@ -546,7 +584,8 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, p.payload);
     }
 
     /**
@@ -565,7 +604,8 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, p.payload);
     }
 
     /**
@@ -612,7 +652,8 @@ export class Account {
             },
         );
 
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<OutputData[]>;
+        return plainToInstance(OutputData, p.payload);
     }
 
     /**
@@ -626,7 +667,8 @@ export class Account {
                 name: 'pendingTransactions',
             },
         );
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<Transaction[]>;
+        return plainToInstance(Transaction, p.payload);
     }
 
     /**
@@ -640,8 +682,8 @@ export class Account {
                 name: 'incomingTransactions',
             },
         );
-
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<Transaction[]>;
+        return plainToInstance(Transaction, p.payload);
     }
 
     /**
@@ -655,8 +697,8 @@ export class Account {
                 name: 'transactions',
             },
         );
-
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<Transaction[]>;
+        return plainToInstance(Transaction, p.payload);
     }
 
     /**
@@ -672,8 +714,8 @@ export class Account {
                 data: { filterOptions },
             },
         );
-
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<OutputData[]>;
+        return plainToInstance(OutputData, p.payload);
     }
 
     /**
@@ -718,7 +760,7 @@ export class Account {
         tokenId: string,
         mintAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedMintTokenTransactionData> {
+    ): Promise<PreparedMintTokenTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -731,8 +773,11 @@ export class Account {
             },
         );
 
-        return new PreparedMintTokenTransactionData(
-            JSON.parse(response).payload,
+        let p = JSON.parse(
+            response,
+        ) as Response<PreparedMintTokenTransactionData>;
+        return new PreparedMintTokenTransaction(
+            plainToInstance(PreparedMintTokenTransactionData, p.payload),
             this,
         );
     }
@@ -747,7 +792,7 @@ export class Account {
     async prepareMintNativeToken(
         params: MintNativeTokenParams,
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedMintTokenTransactionData> {
+    ): Promise<PreparedMintTokenTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -759,8 +804,11 @@ export class Account {
             },
         );
 
-        return new PreparedMintTokenTransactionData(
-            JSON.parse(response).payload,
+        let p = JSON.parse(
+            response,
+        ) as Response<PreparedMintTokenTransactionData>;
+        return new PreparedMintTokenTransaction(
+            plainToInstance(PreparedMintTokenTransactionData, p.payload),
             this,
         );
     }
@@ -775,7 +823,7 @@ export class Account {
     async prepareMintNfts(
         params: MintNftParams[],
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -786,7 +834,12 @@ export class Account {
                 },
             },
         );
-        return new PreparedTransactionData(JSON.parse(response).payload, this);
+
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, p.payload),
+            this,
+        );
     }
 
     /**
@@ -830,7 +883,7 @@ export class Account {
     async prepareSendAmount(
         params: SendAmountParams[],
         options?: TransactionOptions,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -841,7 +894,11 @@ export class Account {
                 },
             },
         );
-        return new PreparedTransactionData(JSON.parse(response).payload, this);
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, p.payload),
+            this,
+        );
     }
 
     /**
@@ -854,7 +911,7 @@ export class Account {
     async prepareTransaction(
         outputs: Output[],
         options?: TransactionOptions,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -865,7 +922,11 @@ export class Account {
                 },
             },
         );
-        return new PreparedTransactionData(JSON.parse(response).payload, this);
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, p.payload),
+            this,
+        );
     }
 
     async registerParticipationEvents(
@@ -927,8 +988,8 @@ export class Account {
                 },
             },
         );
-
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, p.payload);
     }
 
     /**
@@ -941,7 +1002,7 @@ export class Account {
     async prepareSendNativeTokens(
         params: SendNativeTokensParams[],
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -952,7 +1013,11 @@ export class Account {
                 },
             },
         );
-        return new PreparedTransactionData(JSON.parse(response).payload, this);
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, p.payload),
+            this,
+        );
     }
 
     /**
@@ -965,7 +1030,7 @@ export class Account {
     async prepareSendNft(
         params: SendNftParams[],
         transactionOptions?: TransactionOptions,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -976,7 +1041,11 @@ export class Account {
                 },
             },
         );
-        return new PreparedTransactionData(JSON.parse(response).payload, this);
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, p.payload),
+            this,
+        );
     }
 
     /**
@@ -1001,7 +1070,8 @@ export class Account {
             },
         );
 
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, p.payload);
     }
 
     /**
@@ -1037,7 +1107,7 @@ export class Account {
      * @returns The signed transaction essence.
      */
     async signTransactionEssence(
-        preparedTransactionData: IPreparedTransactionData,
+        preparedTransactionData: PreparedTransactionData,
     ): Promise<SignedTransactionEssence> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
@@ -1048,7 +1118,8 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<SignedTransactionEssence>;
+        return plainToInstance(SignedTransactionEssence, p.payload);
     }
 
     /**
@@ -1057,7 +1128,7 @@ export class Account {
      * @returns The transaction.
      */
     async signAndSubmitTransaction(
-        preparedTransactionData: IPreparedTransactionData,
+        preparedTransactionData: PreparedTransactionData,
     ): Promise<Transaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
@@ -1068,7 +1139,8 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, p.payload);
     }
 
     /**
@@ -1088,7 +1160,8 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(response).payload;
+        let p = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, p.payload);
     }
 
     /**
@@ -1115,7 +1188,7 @@ export class Account {
     async prepareVote(
         eventId?: ParticipationEventId,
         answers?: number[],
-    ): Promise<PreparedTransactionData> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1126,12 +1199,16 @@ export class Account {
                 },
             },
         );
-        return new PreparedTransactionData(JSON.parse(response).payload, this);
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, p.payload),
+            this,
+        );
     }
 
     async prepareStopParticipating(
         eventId: ParticipationEventId,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1141,7 +1218,11 @@ export class Account {
                 },
             },
         );
-        return new PreparedTransactionData(JSON.parse(response).payload, this);
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, p.payload),
+            this,
+        );
     }
 
     /**
@@ -1164,7 +1245,7 @@ export class Account {
         return JSON.parse(response).payload;
     }
 
-    async prepareVotingPower(amount: string): Promise<PreparedTransactionData> {
+    async prepareVotingPower(amount: string): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1174,12 +1255,16 @@ export class Account {
                 },
             },
         );
-        return new PreparedTransactionData(JSON.parse(response).payload, this);
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, p.payload),
+            this,
+        );
     }
 
     async prepareDecreaseVotingPower(
         amount: string,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1189,6 +1274,10 @@ export class Account {
                 },
             },
         );
-        return new PreparedTransactionData(JSON.parse(response).payload, this);
+        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, p.payload),
+            this,
+        );
     }
 }
