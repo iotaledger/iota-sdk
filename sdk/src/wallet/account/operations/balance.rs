@@ -116,10 +116,10 @@ impl<'a> BalanceContext<'a> {
 }
 
 impl Account {
-    async fn balance_inner<'a>(
+    async fn balance_inner(
         &self,
         address_with_unspent_outputs: &AddressWithUnspentOutputs,
-        context: &mut BalanceContext<'a>,
+        context: &mut BalanceContext<'_>,
     ) -> Result<()> {
         for output_id in &address_with_unspent_outputs.output_ids {
             if let Some(data) = context.account_details.unspent_outputs.get(output_id) {
