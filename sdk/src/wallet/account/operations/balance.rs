@@ -99,7 +99,7 @@ impl<'a> BalanceContext<'a> {
 
         #[cfg(not(feature = "participation"))]
         {
-            context.balance.base_coin.available = context.balance.base_coin.total.saturating_sub(locked_amount);
+            self.balance.base_coin.available = self.balance.base_coin.total.saturating_sub(self.locked_amount);
         }
         #[cfg(feature = "participation")]
         {
