@@ -72,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Address::try_from_bech32_with_hrp` refactored to `try_from_bech32`;
 - `{MetadataFeature, TagFeature}::new` take an `impl Into<Vec<u8>>` param;
 - Made certain `prepare_` methods public: `prepare_mint_nfts`, `prepare_send_native_tokens`, `prepare_send_nft` and `prepare_create_alias_output`;
+- `Wallet`, `WalletBuilder`, `Account`, `AccountBuilder` now specify generic secret manager type;
 
 ### Removed
 
