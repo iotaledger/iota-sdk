@@ -18,154 +18,57 @@ use crate::{
     },
 };
 
-struct BalanceContext<'a> {
-    account_details: &'a AccountDetails,
-    network_id: u64,
-    rent_structure: RentStructure,
-    balance: Balance,
-    total_rent_amount: u64,
-    total_native_tokens: NativeTokensBuilder,
-    locked_amount: u64,
-    locked_native_tokens: NativeTokensBuilder,
-}
-
-impl<'a> BalanceContext<'a> {
-    fn new(account_details: &'a AccountDetails, network_id: u64, rent_structure: RentStructure) -> Self {
-        Self {
-            account_details,
-            network_id,
-            rent_structure,
-            balance: Balance::default(),
-            total_rent_amount: 0,
-            total_native_tokens: NativeTokensBuilder::default(),
-            locked_amount: 0,
-            locked_native_tokens: NativeTokensBuilder::default(),
-        }
-    }
-
-    fn finish(mut self) -> Result<Balance> {
-        // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
-        log::debug!("[BALANCE] locked outputs: {:#?}", self.account_details.locked_outputs);
-
-        for locked_output in &self.account_details.locked_outputs {
-            // Skip potentially_locked_outputs, as their amounts aren't added to the balance
-            if self.balance.potentially_locked_outputs.contains_key(locked_output) {
-                continue;
-            }
-            if let Some(output_data) = self.account_details.unspent_outputs.get(locked_output) {
-                // Only check outputs that are in this network
-                if output_data.network_id == self.network_id {
-                    self.locked_amount += output_data.output.amount();
-                    if let Some(native_tokens) = output_data.output.native_tokens() {
-                        self.locked_native_tokens.add_native_tokens(native_tokens.clone())?;
-                    }
-                }
-            }
-        }
-
-        log::debug!(
-            "[BALANCE] total_amount: {}, locked_amount: {}, total_rent_amount: {}",
-            self.balance.base_coin.total,
-            self.locked_amount,
-            self.total_rent_amount,
-        );
-
-        self.locked_amount += self.total_rent_amount;
-
-        for native_token in self.total_native_tokens.finish_set()? {
-            // Check if some amount is currently locked
-            let locked_native_token_amount = self.locked_native_tokens.iter().find_map(|(id, amount)| {
-                if id == native_token.token_id() {
-                    Some(amount)
-                } else {
-                    None
-                }
-            });
-
-            let metadata = self
-                .account_details
-                .native_token_foundries
-                .get(&FoundryId::from(*native_token.token_id()))
-                .and_then(|foundry| foundry.immutable_features().metadata())
-                .cloned();
-
-            self.balance.native_tokens.push(NativeTokensBalance {
-                token_id: *native_token.token_id(),
-                metadata,
-                total: native_token.amount(),
-                available: native_token.amount() - *locked_native_token_amount.unwrap_or(&U256::from(0u8)),
-            })
-        }
-
-        #[cfg(not(feature = "participation"))]
-        {
-            self.balance.base_coin.available = self.balance.base_coin.total.saturating_sub(self.locked_amount);
-        }
-        #[cfg(feature = "participation")]
-        {
-            self.balance.base_coin.available = self
-                .balance
-                .base_coin
-                .total
-                .saturating_sub(self.locked_amount)
-                .saturating_sub(self.balance.base_coin.voting_power);
-        }
-
-        Ok(self.balance)
-    }
-}
-
 impl Account {
+    #[allow(clippy::too_many_arguments)]
     async fn balance_inner(
         &self,
+        balance: &mut Balance,
         address_with_unspent_outputs: &AddressWithUnspentOutputs,
-        context: &mut BalanceContext<'_>,
+        account_details: &AccountDetails,
+        network_id: u64,
+        rent_structure: RentStructure,
+        total_rent_amount: &mut u64,
+        total_native_tokens: &mut NativeTokensBuilder,
     ) -> Result<()> {
         for output_id in &address_with_unspent_outputs.output_ids {
-            if let Some(data) = context.account_details.unspent_outputs.get(output_id) {
+            if let Some(data) = account_details.unspent_outputs.get(output_id) {
                 // Check if output is from the network we're currently connected to
-                if data.network_id != context.network_id {
+                if data.network_id != network_id {
                     continue;
                 }
 
                 let output = &data.output;
-                let rent = output.rent_cost(&context.rent_structure);
+                let rent = output.rent_cost(&rent_structure);
 
                 // Add alias and foundry outputs here because they can't have a
                 // [`StorageDepositReturnUnlockCondition`] or time related unlock conditions
                 match output {
                     Output::Alias(output) => {
                         // Add amount
-                        context.balance.base_coin.total += output.amount();
+                        balance.base_coin.total += output.amount();
                         // Add storage deposit
-                        context.balance.required_storage_deposit.alias += rent;
-                        if !context.account_details.locked_outputs.contains(output_id) {
-                            context.total_rent_amount += rent;
+                        balance.required_storage_deposit.alias += rent;
+                        if !account_details.locked_outputs.contains(output_id) {
+                            *total_rent_amount += rent;
                         }
-
                         // Add native tokens
-                        context
-                            .total_native_tokens
-                            .add_native_tokens(output.native_tokens().clone())?;
+                        total_native_tokens.add_native_tokens(output.native_tokens().clone())?;
 
                         let alias_id = output.alias_id_non_null(output_id);
-                        context.balance.aliases.push(alias_id);
+                        balance.aliases.push(alias_id);
                     }
                     Output::Foundry(output) => {
                         // Add amount
-                        context.balance.base_coin.total += output.amount();
+                        balance.base_coin.total += output.amount();
                         // Add storage deposit
-                        context.balance.required_storage_deposit.foundry += rent;
-                        if !context.account_details.locked_outputs.contains(output_id) {
-                            context.total_rent_amount += rent;
+                        balance.required_storage_deposit.foundry += rent;
+                        if !account_details.locked_outputs.contains(output_id) {
+                            *total_rent_amount += rent;
                         }
-
                         // Add native tokens
-                        context
-                            .total_native_tokens
-                            .add_native_tokens(output.native_tokens().clone())?;
+                        total_native_tokens.add_native_tokens(output.native_tokens().clone())?;
 
-                        context.balance.foundries.push(output.id());
+                        balance.foundries.push(output.id());
                     }
                     _ => {
                         // If there is only an [AddressUnlockCondition], then we can spend the output at any time
@@ -178,33 +81,33 @@ impl Account {
                             // add nft_id for nft outputs
                             if let Output::Nft(output) = &output {
                                 let nft_id = output.nft_id_non_null(output_id);
-                                context.balance.nfts.push(nft_id);
+                                balance.nfts.push(nft_id);
                             }
 
                             // Add amount
-                            context.balance.base_coin.total += output.amount();
+                            balance.base_coin.total += output.amount();
 
                             // Add storage deposit
                             if output.is_basic() {
-                                context.balance.required_storage_deposit.basic += rent;
+                                balance.required_storage_deposit.basic += rent;
                                 if output
                                     .native_tokens()
                                     .map(|native_tokens| !native_tokens.is_empty())
                                     .unwrap_or(false)
-                                    && !context.account_details.locked_outputs.contains(output_id)
+                                    && !account_details.locked_outputs.contains(output_id)
                                 {
-                                    context.total_rent_amount += rent;
+                                    *total_rent_amount += rent;
                                 }
                             } else if output.is_nft() {
-                                context.balance.required_storage_deposit.nft += rent;
-                                if !context.account_details.locked_outputs.contains(output_id) {
-                                    context.total_rent_amount += rent;
+                                balance.required_storage_deposit.nft += rent;
+                                if !account_details.locked_outputs.contains(output_id) {
+                                    *total_rent_amount += rent;
                                 }
                             }
 
                             // Add native tokens
                             if let Some(native_tokens) = output.native_tokens() {
-                                context.total_native_tokens.add_native_tokens(native_tokens.clone())?;
+                                total_native_tokens.add_native_tokens(native_tokens.clone())?;
                             }
                         } else {
                             // if we have multiple unlock conditions for basic or nft outputs, then we might can't
@@ -229,7 +132,7 @@ impl Account {
                                         // We use the addresses with unspent outputs, because other addresses of
                                         // the account without unspent
                                         // outputs can't be related to this output
-                                        &context.account_details.addresses_with_unspent_outputs,
+                                        &account_details.addresses_with_unspent_outputs,
                                         output,
                                         local_time,
                                     );
@@ -260,15 +163,15 @@ impl Account {
                                     // add nft_id for nft outputs
                                     if let Output::Nft(output) = &output {
                                         let nft_id = output.nft_id_non_null(output_id);
-                                        context.balance.nfts.push(nft_id);
+                                        balance.nfts.push(nft_id);
                                     }
 
                                     // Add amount
-                                    context.balance.base_coin.total += amount;
+                                    balance.base_coin.total += amount;
 
                                     // Add storage deposit
                                     if output.is_basic() {
-                                        context.balance.required_storage_deposit.basic += rent;
+                                        balance.required_storage_deposit.basic += rent;
                                         // Amount for basic outputs isn't added to total_rent_amount if there aren't
                                         // native tokens, since we can
                                         // spend it without burning.
@@ -276,24 +179,24 @@ impl Account {
                                             .native_tokens()
                                             .map(|native_tokens| !native_tokens.is_empty())
                                             .unwrap_or(false)
-                                            && !context.account_details.locked_outputs.contains(output_id)
+                                            && !account_details.locked_outputs.contains(output_id)
                                         {
-                                            context.total_rent_amount += rent;
+                                            *total_rent_amount += rent;
                                         }
                                     } else if output.is_nft() {
-                                        context.balance.required_storage_deposit.nft += rent;
-                                        if !context.account_details.locked_outputs.contains(output_id) {
-                                            context.total_rent_amount += rent;
+                                        balance.required_storage_deposit.nft += rent;
+                                        if !account_details.locked_outputs.contains(output_id) {
+                                            *total_rent_amount += rent;
                                         }
                                     }
 
                                     // Add native tokens
                                     if let Some(native_tokens) = output.native_tokens() {
-                                        context.total_native_tokens.add_native_tokens(native_tokens.clone())?;
+                                        total_native_tokens.add_native_tokens(native_tokens.clone())?;
                                     }
                                 } else {
                                     // only add outputs that can't be locked now and at any point in the future
-                                    context.balance.potentially_locked_outputs.insert(*output_id, true);
+                                    balance.potentially_locked_outputs.insert(*output_id, true);
                                 }
                             } else {
                                 // Don't add expired outputs that can't ever be unlocked by us
@@ -304,10 +207,10 @@ impl Account {
                                 {
                                     // Not expired, could get unlockable when it's expired, so we insert it
                                     if local_time < expiration.timestamp() {
-                                        context.balance.potentially_locked_outputs.insert(*output_id, false);
+                                        balance.potentially_locked_outputs.insert(*output_id, false);
                                     }
                                 } else {
-                                    context.balance.potentially_locked_outputs.insert(*output_id, false);
+                                    balance.potentially_locked_outputs.insert(*output_id, false);
                                 }
                             }
                         }
@@ -319,6 +222,85 @@ impl Account {
         Ok(())
     }
 
+    fn finish(
+        &self,
+        mut balance: Balance,
+        account_details: &AccountDetails,
+        network_id: u64,
+        total_rent_amount: u64,
+        total_native_tokens: NativeTokensBuilder,
+    ) -> Result<Balance> {
+        // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
+        log::debug!("[BALANCE] locked outputs: {:#?}", account_details.locked_outputs);
+
+        let mut locked_amount = 0;
+        let mut locked_native_tokens = NativeTokensBuilder::default();
+
+        for locked_output in &account_details.locked_outputs {
+            // Skip potentially_locked_outputs, as their amounts aren't added to the balance
+            if balance.potentially_locked_outputs.contains_key(locked_output) {
+                continue;
+            }
+            if let Some(output_data) = account_details.unspent_outputs.get(locked_output) {
+                // Only check outputs that are in this network
+                if output_data.network_id == network_id {
+                    locked_amount += output_data.output.amount();
+                    if let Some(native_tokens) = output_data.output.native_tokens() {
+                        locked_native_tokens.add_native_tokens(native_tokens.clone())?;
+                    }
+                }
+            }
+        }
+
+        log::debug!(
+            "[BALANCE] total_amount: {}, locked_amount: {}, total_rent_amount: {}",
+            balance.base_coin.total,
+            locked_amount,
+            total_rent_amount,
+        );
+
+        locked_amount += total_rent_amount;
+
+        for native_token in total_native_tokens.finish_set()? {
+            // Check if some amount is currently locked
+            let locked_native_token_amount = locked_native_tokens.iter().find_map(|(id, amount)| {
+                if id == native_token.token_id() {
+                    Some(amount)
+                } else {
+                    None
+                }
+            });
+
+            let metadata = account_details
+                .native_token_foundries
+                .get(&FoundryId::from(*native_token.token_id()))
+                .and_then(|foundry| foundry.immutable_features().metadata())
+                .cloned();
+
+            balance.native_tokens.push(NativeTokensBalance {
+                token_id: *native_token.token_id(),
+                metadata,
+                total: native_token.amount(),
+                available: native_token.amount() - *locked_native_token_amount.unwrap_or(&U256::from(0u8)),
+            })
+        }
+
+        #[cfg(not(feature = "participation"))]
+        {
+            balance.base_coin.available = balance.base_coin.total.saturating_sub(locked_amount);
+        }
+        #[cfg(feature = "participation")]
+        {
+            balance.base_coin.available = balance
+                .base_coin
+                .total
+                .saturating_sub(locked_amount)
+                .saturating_sub(balance.base_coin.voting_power);
+        }
+
+        Ok(balance)
+    }
+
     /// Get the balance of the given addresses.
     pub async fn addresses_balance(&self, addresses: Vec<impl Bech32AddressLike>) -> Result<Balance> {
         log::debug!("[BALANCE] addresses_balance");
@@ -326,7 +308,9 @@ impl Account {
         let account_details = self.details().await;
         let network_id = self.client().get_network_id().await?;
         let rent_structure = self.client().get_rent_structure().await?;
-        let mut context = BalanceContext::new(&account_details, network_id, rent_structure);
+        let mut balance = Balance::default();
+        let mut total_rent_amount = 0;
+        let mut total_native_tokens = NativeTokensBuilder::default();
 
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
@@ -343,17 +327,32 @@ impl Account {
                 {
                     if let Some(voting_output) = &voting_output {
                         if voting_output.output.as_basic().address() == address.inner() {
-                            context.balance.base_coin.voting_power = voting_output.output.amount();
+                            balance.base_coin.voting_power = voting_output.output.amount();
                         }
                     }
                 }
-                self.balance_inner(address_with_unspent_outputs, &mut context).await?;
+                self.balance_inner(
+                    &mut balance,
+                    address_with_unspent_outputs,
+                    &account_details,
+                    network_id,
+                    rent_structure,
+                    &mut total_rent_amount,
+                    &mut total_native_tokens,
+                )
+                .await?;
             } else {
                 return Err(Error::AddressNotFoundInAccount(address));
             }
         }
 
-        context.finish()
+        self.finish(
+            balance,
+            &account_details,
+            network_id,
+            total_rent_amount,
+            total_native_tokens,
+        )
     }
 
     /// Get the balance of the account.
@@ -363,17 +362,34 @@ impl Account {
         let account_details = self.details().await;
         let network_id = self.client().get_network_id().await?;
         let rent_structure = self.client().get_rent_structure().await?;
-        let mut context = BalanceContext::new(&account_details, network_id, rent_structure);
+        let mut balance = Balance::default();
+        let mut total_rent_amount = 0;
+        let mut total_native_tokens = NativeTokensBuilder::default();
 
         #[cfg(feature = "participation")]
         {
-            context.balance.base_coin.voting_power = self.get_voting_power().await?;
+            balance.base_coin.voting_power = self.get_voting_power().await?;
         }
 
         for address_with_unspent_outputs in &account_details.addresses_with_unspent_outputs {
-            self.balance_inner(address_with_unspent_outputs, &mut context).await?;
+            self.balance_inner(
+                &mut balance,
+                address_with_unspent_outputs,
+                &account_details,
+                network_id,
+                rent_structure,
+                &mut total_rent_amount,
+                &mut total_native_tokens,
+            )
+            .await?;
         }
 
-        context.finish()
+        self.finish(
+            balance,
+            &account_details,
+            network_id,
+            total_rent_amount,
+            total_native_tokens,
+        )
     }
 }
