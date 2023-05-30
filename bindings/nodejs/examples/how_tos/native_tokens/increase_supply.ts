@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { getUnlockedManager } from './account-manager';
+import { getUnlockedManager } from '../../wallet/account-manager';
 
 // The native token id. Replace it with a TokenId that is available in the account, the foundry output which minted it,
 // also needs to be available. You can check this by running the `get-balance` example. You can mint a new native token

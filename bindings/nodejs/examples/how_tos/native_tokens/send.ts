@@ -8,7 +8,7 @@ import {
     SendNativeTokensParams,
 } from '@iota/sdk';
 
-import { getUnlockedManager } from './account-manager';
+import { getUnlockedManager } from '../../wallet/account-manager';
 
 // The native token amount to send, `10` hex encoded
 const SEND_NATIVE_TOKEN_AMOUNT = '0xA';

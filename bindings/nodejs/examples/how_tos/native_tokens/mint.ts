@@ -3,7 +3,7 @@
 
 import { MintNativeTokenParams } from '@iota/sdk';
 
-import { getUnlockedManager } from './account-manager';
+import { getUnlockedManager } from '../../wallet/account-manager';
 
 // The circulating supply of the native token. `100` hex encoded
 const CIRCULATING_SUPPLY = '0x64';

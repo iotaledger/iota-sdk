@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { getUnlockedManager } from './account-manager';
+import { getUnlockedManager } from '../../wallet/account-manager';
 
 // In this example we will try to destroy the first foundry there is in the account. This is only possible if its
 // circulating supply is 0 and no native tokens were burned.
