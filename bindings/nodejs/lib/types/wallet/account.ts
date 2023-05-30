@@ -6,7 +6,7 @@ import type {
     IOutputResponse,
     ITransactionPayload,
 } from '@iota/types';
-import { CoinType } from '../../lib/client';
+import { CoinType } from '../../client';
 
 /**
  * Account identifier

@@ -1,4 +1,4 @@
-import { AddressUnlockCondition, AliasAddress, Client, Ed25519Address, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition, SimpleTokenScheme, StateControllerAddressUnlockCondition, Utils } from '../../lib';
+import { AddressUnlockCondition, AliasAddress, Client, Ed25519Address, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition, SimpleTokenScheme, StateControllerAddressUnlockCondition, Utils } from '../../';
 import '../customMatchers';
 import 'dotenv/config';
 

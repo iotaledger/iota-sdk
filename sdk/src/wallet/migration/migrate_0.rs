@@ -52,6 +52,7 @@ impl Migration for Migrate {
                             }
                         }
                     }
+
                     for output_data in account
                         .get_mut("unspentOutputs")
                         .ok_or(Error::Storage("missing unspent outputs".to_owned()))?

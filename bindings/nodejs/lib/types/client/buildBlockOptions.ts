@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { IUTXOInput, OutputTypes } from '@iota/types';
-import type { CoinType } from '../../lib/client';
+import type { CoinType } from '../../client';
 import type { IRange } from './range';
 import type { Burn } from './burn';
 

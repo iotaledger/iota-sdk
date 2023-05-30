@@ -27,7 +27,7 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventType,
 } from '../participation';
-import { Output } from '../../../lib';
+import { Output } from '../../';
 import { Burn } from '../burn';
 
 export type __BuildAliasOutputMethod__ = {

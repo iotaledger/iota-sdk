@@ -3,7 +3,7 @@ import {
     IPreparedTransactionData,
     SignedTransactionEssence,
     Transaction,
-} from '../../lib';
+} from '../../';
 
 /**
  * PreparedTransactionData` is a class that represents prepared transaction data, which

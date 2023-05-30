@@ -206,13 +206,12 @@ public class MiscellaneousApi {
         return new ProtocolParametersResponse(responsePayload);
     }
 
-    public Ed25519Signature signEd25519(SecretManager secretManager, String message, Long[] chain)
-            throws ClientException {
+    public Ed25519Signature signEd25519(SecretManager secretManager, String message, Long[] chain) throws ClientException {
         JsonArray arr = new JsonArray();
         for (Long s : chain) {
             arr.add(s + Integer.MAX_VALUE + 1); // hardened chain flag
         }
-
+        
         JsonObject o = new JsonObject();
         o.add("secretManager", secretManager.getJson());
         o.addProperty("message", message);

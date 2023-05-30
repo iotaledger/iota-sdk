@@ -1,4 +1,4 @@
-import { Feature, SimpleTokenScheme } from '../../../lib';
+import { Feature, SimpleTokenScheme } from '../../';
 import type { BasicOutputBuilderParams } from './basicOutputParams';
 
 /**

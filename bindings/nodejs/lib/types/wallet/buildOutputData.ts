@@ -1,5 +1,5 @@
 import type { INativeToken, TokenSchemeTypes } from '@iota/types';
-import { Feature, UnlockCondition } from '../../lib';
+import { Feature, UnlockCondition } from '../';
 
 /** An alias output */
 export interface BuildAliasOutputData extends BuildBasicOutputData {

@@ -29,7 +29,6 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventType,
 } from '../participation';
-import { Burn } from '../burn';
 
 export type __BuildAliasOutputMethod__ = {
     name: 'buildAliasOutput';
@@ -51,10 +50,19 @@ export type __BuildNftOutputMethod__ = {
     data: BuildNftOutputData;
 };
 
-export type __BurnMethod__ = {
-    name: 'burn';
+export type __BurnNativeTokenMethod__ = {
+    name: 'burnNativeToken';
     data: {
-        burn: Burn;
+        tokenId: string;
+        burnAmount: HexEncodedAmount;
+        options?: TransactionOptions;
+    };
+};
+
+export type __BurnNftMethod__ = {
+    name: 'burnNft';
+    data: {
+        nftId: string;
         options?: TransactionOptions;
     };
 };
@@ -98,6 +106,22 @@ export type __DeregisterParticipationEventMethod__ = {
     };
 };
 
+export type __DestroyAliasMethod__ = {
+    name: 'destroyAlias';
+    data: {
+        aliasId: string;
+        options?: TransactionOptions;
+    };
+};
+
+export type __DestroyFoundryMethod__ = {
+    name: 'destroyFoundry';
+    data: {
+        foundryId: string;
+        options?: TransactionOptions;
+    };
+};
+
 export type __GenerateEd25519AddressesMethod__ = {
     name: 'generateEd25519Addresses';
     data: {
@@ -111,7 +135,7 @@ export type __GenerateEvmAddressesMethod__ = {
     data: {
         options: GenerateAddressesOptions;
     };
-}
+};
 
 export type __GetBalanceMethod__ = {
     name: 'getBalance';

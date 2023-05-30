@@ -269,6 +269,19 @@ impl StrongholdAdapter {
             .unwrap())
     }
 
+    /// Execute [Procedure::Ed25519Sign] in Stronghold to sign `msg` with `private_key` stored in the Stronghold vault.
+    async fn ed25519_sign(&self, private_key: Location, msg: &[u8]) -> Result<[u8; 64], Error> {
+        Ok(self
+            .stronghold
+            .lock()
+            .await
+            .get_client(PRIVATE_DATA_CLIENT_PATH)?
+            .execute_procedure(procedures::Ed25519Sign {
+                private_key,
+                msg: msg.to_vec(),
+            })?)
+    }
+
     /// Execute [Procedure::PublicKey] in Stronghold to get a Secp256k1Ecdsa public key from the
     /// SLIP-10 private key located in `private_key`.
     async fn secp256k1_ecdsa_public_key(
@@ -285,19 +298,6 @@ impl StrongholdAdapter {
                 private_key,
             })?;
         Ok(crypto::signatures::secp256k1_ecdsa::PublicKey::try_from_slice(&bytes)?)
-    }
-
-    /// Execute [Procedure::Ed25519Sign] in Stronghold to sign `msg` with `private_key` stored in the Stronghold vault.
-    async fn ed25519_sign(&self, private_key: Location, msg: &[u8]) -> Result<[u8; 64], Error> {
-        Ok(self
-            .stronghold
-            .lock()
-            .await
-            .get_client(PRIVATE_DATA_CLIENT_PATH)?
-            .execute_procedure(procedures::Ed25519Sign {
-                private_key,
-                msg: msg.to_vec(),
-            })?)
     }
 
     /// Store a mnemonic into the Stronghold vault.

@@ -8,8 +8,11 @@ use std::ops::Range;
 use async_trait::async_trait;
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
-    keys::slip10::{Chain, Curve, PublicKey, SecretKey, Seed},
-    signatures::secp256k1_ecdsa::EvmAddress,
+    keys::slip10::{Chain, Seed},
+    signatures::{
+        ed25519,
+        secp256k1_ecdsa::{self, EvmAddress},
+    },
 };
 use zeroize::Zeroize;
 
@@ -42,7 +45,12 @@ impl SecretManage for MnemonicSecretManager {
             let chain =
                 Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index]);
 
-            let PublicKey::Ed25519(public_key) = self.0.derive(Curve::Ed25519, &chain)?.secret_key().public_key() else {unreachable!()};
+            let public_key = self
+                .0
+                .derive::<ed25519::SecretKey>(&chain)?
+                .secret_key()
+                .public_key()
+                .to_bytes();
 
             // Hash the public key to get the address
             let result = Blake2b256::digest(public_key).try_into().map_err(|_e| {
@@ -69,7 +77,11 @@ impl SecretManage for MnemonicSecretManager {
             let chain = Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index])
                 .join(Chain::from_u32([internal as u32, address_index]));
 
-            let PublicKey::Secp256k1Ecdsa(public_key) = self.0.derive(Curve::Secp256k1, &chain)?.secret_key().public_key() else {unreachable!()};
+            let public_key = self
+                .0
+                .derive::<secp256k1_ecdsa::SecretKey>(&chain)?
+                .secret_key()
+                .public_key();
 
             addresses.push(public_key.to_evm_address());
         }
@@ -79,11 +91,11 @@ impl SecretManage for MnemonicSecretManager {
 
     async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
         // Get the private and public key for this Ed25519 address
-        let SecretKey::Ed25519(private_key) = &self.0.derive(Curve::Ed25519, chain)?.secret_key() else {unreachable!()};
-        let public_key = private_key.public_key();
+        let private_key = self.0.derive::<ed25519::SecretKey>(chain)?.secret_key();
+        let public_key = private_key.public_key().to_bytes();
         let signature = private_key.sign(msg).to_bytes();
 
-        Ok(Ed25519Signature::new(public_key.to_bytes(), signature))
+        Ok(Ed25519Signature::new(public_key, signature))
     }
 }
 
