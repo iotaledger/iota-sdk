@@ -22,14 +22,12 @@ async fn mint_and_burn_nft() -> Result<()> {
     let wallet = make_wallet(storage_path, None, None).await?;
     let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
-    let nft_options = vec![MintNftParams {
-        address: Some(*account.addresses().await?[0].address()),
-        sender: None,
-        metadata: Some(b"some nft metadata".to_vec()),
-        tag: None,
-        issuer: None,
-        immutable_metadata: Some(b"some immutable nft metadata".to_vec()),
-    }];
+    let nft_options = vec![
+        MintNftParams::new()
+            .with_address(*account.addresses().await?[0].address())?
+            .with_metadata(b"some nft metadata".to_vec())
+            .with_immutable_metadata(b"some immutable nft metadata".to_vec()),
+    ];
 
     let transaction = account.mint_nfts(nft_options, None).await.unwrap();
     account
@@ -296,11 +294,11 @@ async fn mint_and_burn_nft_with_alias() -> Result<()> {
         .await?;
     account.sync(None).await?;
 
-    let nft_options = vec![MintNftParams {
-        metadata: Some(b"some nft metadata".to_vec()),
-        immutable_metadata: Some(b"some immutable nft metadata".to_vec()),
-        ..Default::default()
-    }];
+    let nft_options = vec![
+        MintNftParams::new()
+            .with_metadata(b"some nft metadata".to_vec())
+            .with_immutable_metadata(b"some immutable nft metadata".to_vec()),
+    ];
     let nft_tx = account.mint_nfts(nft_options, None).await.unwrap();
     account
         .retry_transaction_until_included(&nft_tx.transaction_id, None, None)

@@ -45,13 +45,16 @@ pub struct SendAmountParams {
 }
 
 impl SendAmountParams {
-    pub fn new(address: Bech32Address, amount: u64) -> Self {
-        Self {
-            address,
+    pub fn new(
+        address: impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>,
+        amount: u64,
+    ) -> Result<Self, crate::wallet::Error> {
+        Ok(Self {
+            address: address.try_into().map_err(Into::into)?,
             amount,
             return_address: None,
             expiration: None,
-        }
+        })
     }
 
     pub fn with_return_address(mut self, address: impl Into<Option<Bech32Address>>) -> Self {
@@ -65,6 +68,7 @@ impl SendAmountParams {
     }
 }
 
+// TODO fix examples
 impl Account {
     /// Function to create basic outputs with which we then will call
     /// [Account.send()](crate::account::Account.send), the options can define the

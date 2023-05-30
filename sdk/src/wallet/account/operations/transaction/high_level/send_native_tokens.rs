@@ -1,6 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use getset::{Getters, Setters};
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
@@ -28,19 +29,53 @@ use crate::{
 };
 
 /// Params for `send_native_tokens()`
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Getters, Setters)]
 #[serde(rename_all = "camelCase")]
 pub struct SendNativeTokensParams {
     /// Bech32 encoded address
-    pub address: Bech32Address,
+    #[getset(get = "pub ", set = "pub")]
+    address: Bech32Address,
     /// Native tokens
-    pub native_tokens: Vec<(TokenId, U256)>,
+    #[getset(get = "pub ", set = "pub")]
+    native_tokens: Vec<(TokenId, U256)>,
     /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
     /// first address of the account
-    pub return_address: Option<Bech32Address>,
+    #[getset(get = "pub ", set = "pub")]
+    return_address: Option<Bech32Address>,
     /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
     /// receiver before. Default is 1 day
-    pub expiration: Option<u32>,
+    #[getset(get = "pub ", set = "pub")]
+    expiration: Option<u32>,
+}
+
+impl SendNativeTokensParams {
+    /// Creates a  new instance of [`SendNativeTokensParams`]
+    pub fn new(
+        address: impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>,
+        native_tokens: impl IntoIterator<Item = (TokenId, U256)>,
+    ) -> Result<Self> {
+        Ok(Self {
+            address: address.try_into().map_err(Into::into)?,
+            native_tokens: native_tokens.into_iter().collect(),
+            return_address: None,
+            expiration: None,
+        })
+    }
+
+    /// Set the return address
+    pub fn with_return_address(
+        mut self,
+        return_address: impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>,
+    ) -> Result<Self> {
+        self.return_address = Some(return_address.try_into().map_err(Into::into)?);
+        Ok(self)
+    }
+
+    /// Set the expiration in seconds
+    pub fn with_expiration(mut self, expiration_secs: u32) -> Self {
+        self.expiration = Some(expiration_secs);
+        self
+    }
 }
 
 impl Account {

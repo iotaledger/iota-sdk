@@ -559,15 +559,15 @@ pub async fn mint_nft_command(
     } else {
         None
     };
-    let nft_options = vec![MintNftParams {
-        issuer,
-        sender,
-        tag,
-        address,
-        immutable_metadata,
-        metadata,
-    }];
-    let transaction = account.mint_nfts(nft_options, None).await?;
+    let mut nft_options = MintNftParams::new();
+    nft_options.set_issuer(issuer);
+    nft_options.set_sender(sender);
+    nft_options.set_tag(tag);
+    nft_options.set_address(address);
+    nft_options.set_immutable_metadata(immutable_metadata);
+    nft_options.set_metadata(metadata);
+
+    let transaction = account.mint_nfts(vec![nft_options], None).await?;
 
     println_log_info!(
         "NFT minting transaction sent:\n{:?}\n{:?}",
@@ -624,7 +624,7 @@ pub async fn send_command(
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
     let outputs = vec![
-        SendAmountParams::new(address.to_bech32()?, amount)
+        SendAmountParams::new(address.to_bech32()?, amount)?
             .with_return_address(return_address.map(Bech32AddressLike::to_bech32).transpose()?)
             .with_expiration(expiration),
     ];
@@ -676,15 +676,13 @@ pub async fn send_native_token_command(
         account.send(outputs, None).await?
     } else {
         // Send native tokens with storage deposit return and expiration
-        let outputs = vec![SendNativeTokensParams {
+        let outputs = vec![SendNativeTokensParams::new(
             address,
-            native_tokens: vec![(
+            [(
                 TokenId::from_str(&token_id)?,
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
             )],
-            return_address: Default::default(),
-            expiration: Default::default(),
-        }];
+        )?];
         account.send_native_tokens(outputs, None).await?
     };
 
