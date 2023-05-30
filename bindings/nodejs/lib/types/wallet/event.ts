@@ -1,6 +1,7 @@
-import type { IOutputResponse, ITransactionPayload } from '@iota/types';
+import type { IOutputResponse, ITransactionPayload, ITransactionEssence } from '@iota/types';
 import type { OutputData } from './output';
 import type { InclusionState } from './transaction';
+import { IInputSigningData, IRemainder } from '../client';
 
 // TODO where?
 export type TransactionId = string;
@@ -176,20 +177,47 @@ class SelectingInputsProgress extends TransactionProgress {
 }
 
 class GeneratingRemainderDepositAddressProgress extends TransactionProgress {
-    constructor() {
+    private address: string;
+
+    constructor(address: string) {
         super(TransactionProgressType.GeneratingRemainderDepositAddress);
+        this.address = address;
+    }
+
+    /**
+    * The address.
+    */
+    getAddress(): string {
+        return this.address;
     }
 }
 
 class PreparedTransactionProgress extends TransactionProgress {
-    constructor() {
+    essence: ITransactionEssence;
+    inputsData: IInputSigningData[];
+    remainder?: IRemainder;
+
+    constructor(essence: ITransactionEssence, inputsData: IInputSigningData[], remainder?: IRemainder) {
         super(TransactionProgressType.PreparedTransaction);
+        this.essence = essence;
+        this.inputsData = inputsData;
+        this.remainder = remainder;
     }
 }
 
 class PreparedTransactionEssenceHashProgress extends TransactionProgress {
-    constructor() {
+    private hash: string;
+
+    constructor(hash: string) {
         super(TransactionProgressType.PreparedTransactionEssenceHash);
+        this.hash = hash;
+    }
+
+    /**
+    * The address.
+    */
+    getHash(): string {
+        return this.hash;
     }
 }
 
