@@ -8,10 +8,13 @@ use crate::{
         address::Bech32AddressLike,
         output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent, RentStructure},
     },
-    wallet::account::{
-        operations::helpers::time::can_output_be_unlocked_forever_from_now_on,
-        types::{AccountBalance, AddressWithUnspentOutputs, NativeTokensBalance},
-        Account, AccountDetails, OutputsToClaim,
+    wallet::{
+        account::{
+            operations::helpers::time::can_output_be_unlocked_forever_from_now_on,
+            types::{AccountBalance, AddressWithUnspentOutputs, NativeTokensBalance},
+            Account, AccountDetails, OutputsToClaim,
+        },
+        Error, Result,
     },
 };
 
@@ -40,7 +43,7 @@ impl<'a> BalanceContext<'a> {
         }
     }
 
-    fn finish(mut self) -> crate::wallet::Result<AccountBalance> {
+    fn finish(mut self) -> Result<AccountBalance> {
         // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
         log::debug!("[BALANCE] locked outputs: {:#?}", self.account_details.locked_outputs);
 
@@ -117,7 +120,7 @@ impl Account {
         &self,
         address_with_unspent_outputs: &AddressWithUnspentOutputs,
         context: &mut BalanceContext<'a>,
-    ) -> crate::wallet::Result<()> {
+    ) -> Result<()> {
         for output_id in &address_with_unspent_outputs.output_ids {
             if let Some(data) = context.account_details.unspent_outputs.get(output_id) {
                 // Check if output is from the network we're currently connected to
@@ -317,10 +320,7 @@ impl Account {
     }
 
     /// Get the balance of the given addresses.
-    pub async fn addresses_balance(
-        &self,
-        addresses: Vec<impl Bech32AddressLike>,
-    ) -> crate::wallet::Result<AccountBalance> {
+    pub async fn addresses_balance(&self, addresses: Vec<impl Bech32AddressLike>) -> Result<AccountBalance> {
         log::debug!("[BALANCE] addresses_balance");
 
         let account_details = self.details().await;
@@ -344,7 +344,7 @@ impl Account {
             {
                 self.balance_inner(address_with_unspent_outputs, &mut context).await?;
             } else {
-                // TODO error or 0 balance ?
+                return Err(Error::AddressNotFoundInAccount(address));
             }
         }
 
