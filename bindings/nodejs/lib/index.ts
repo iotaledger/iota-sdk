@@ -5,7 +5,8 @@
 import 'reflect-metadata';
 
 export * from './client';
-export * from './wallet';
 export * from './secretManager';
-export * from './utils';
 export * from './types';
+export * from './utils';
+export * from './wallet';
+export * from './logger';

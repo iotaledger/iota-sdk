@@ -4,7 +4,7 @@ const fse = require('fs-extra');
 // Copy the TypeScript definitions from the Node.js bindings.
 const nodejsBindingsDir = path.join(__dirname, '..', '..', 'nodejs');
 const outDir = path.join(__dirname, '..', 'out');
-const folders = ['lib', 'types'];
+const folders = ['lib'];
 for (const folder of folders) {
     const sourceDir = path.join(nodejsBindingsDir, folder);
     const destDir = path.join(outDir, folder);
