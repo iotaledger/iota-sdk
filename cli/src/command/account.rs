@@ -40,7 +40,7 @@ pub enum AccountCommand {
     Addresses,
     /// Print the account balance.
     Balance {
-        /// Address to compute the balance for.
+        /// Addresses to compute the balance for.
         addresses: Option<Vec<Bech32Address>>,
     },
     /// Burn an amount of native token.
@@ -631,11 +631,9 @@ pub async fn send_command(
     expiration: Option<u32>,
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
-    let outputs = vec![
-        SendAmountParams::new(address.to_bech32()?, amount)
-            .with_return_address(return_address.map(Bech32AddressLike::to_bech32).transpose()?)
-            .with_expiration(expiration),
-    ];
+    let outputs = vec![SendAmountParams::new(address.to_bech32()?, amount)
+        .with_return_address(return_address.map(Bech32AddressLike::to_bech32).transpose()?)
+        .with_expiration(expiration)];
     let transaction = account
         .send_amount(
             outputs,
@@ -671,15 +669,13 @@ pub async fn send_native_token_command(
 
         account.client().bech32_hrp_matches(address.hrp()).await?;
 
-        let outputs = vec![
-            BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                .add_unlock_condition(AddressUnlockCondition::new(address))
-                .with_native_tokens(vec![NativeToken::new(
-                    TokenId::from_str(&token_id)?,
-                    U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-                )?])
-                .finish_output(token_supply)?,
-        ];
+        let outputs = vec![BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+            .add_unlock_condition(AddressUnlockCondition::new(address))
+            .with_native_tokens(vec![NativeToken::new(
+                TokenId::from_str(&token_id)?,
+                U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+            )?])
+            .finish_output(token_supply)?];
 
         account.send(outputs, None).await?
     } else {
