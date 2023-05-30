@@ -28,7 +28,14 @@ export async function MessageHandler(options?: AccountManagerOptions) {
     
     async function sendMessage(message: __Message__): Promise<string> {
         return await sendMessageAsync(
-            JSON.stringify(message),
+                        // mapToObject is required to convert maps to array since they otherwise get serialized as `[{}]` even if not empty
+                        JSON.stringify(message, function mapToObject(_key, value) {
+                            if (value instanceof Map) {
+                                return Object.fromEntries(value);
+                            } else {
+                                return value;
+                            }
+                        }),
             messageHandler,
         ).catch((error) => {
             try {

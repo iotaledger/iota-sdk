@@ -893,7 +893,7 @@ public class Client extends NativeApi {
      * @return The Ed25519Signature.
      * @throws ClientException on error.
      */
-    public Ed25519Signature signEd25519(SecretManager secretManager, String message, Segment[] chain) throws ClientException {
+    public Ed25519Signature signEd25519(SecretManager secretManager, String message, Long[] chain) throws ClientException {
         return miscellaneousApi.signEd25519(secretManager, message, chain);
     }
 

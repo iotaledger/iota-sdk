@@ -46,7 +46,13 @@ impl Migration for Migrate {
                                 .get_mut("metadata")
                                 .ok_or(Error::Storage("missing metadata".to_owned()))?,
                         )?;
+                        if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
+                            for segment in chain {
+                                ConvertSegment::check(segment)?;
+                            }
+                        }
                     }
+
                     for output_data in account
                         .get_mut("unspentOutputs")
                         .ok_or(Error::Storage("missing unspent outputs".to_owned()))?
@@ -59,6 +65,11 @@ impl Migration for Migrate {
                                 .get_mut("metadata")
                                 .ok_or(Error::Storage("missing metadata".to_owned()))?,
                         )?;
+                        if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
+                            for segment in chain {
+                                ConvertSegment::check(segment)?;
+                            }
+                        }
                     }
                     storage
                         .set(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"), account)
@@ -113,6 +124,11 @@ impl Migration for Migrate {
                             .get_mut("metadata")
                             .ok_or(Error::Storage("missing metadata".to_owned()))?,
                     )?;
+                    if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
+                        for segment in chain {
+                            ConvertSegment::check(segment)?;
+                        }
+                    }
                 }
                 for output_data in account
                     .get_mut("unspentOutputs")
@@ -126,6 +142,11 @@ impl Migration for Migrate {
                             .get_mut("metadata")
                             .ok_or(Error::Storage("missing metadata".to_owned()))?,
                     )?;
+                    if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
+                        for segment in chain {
+                            ConvertSegment::check(segment)?;
+                        }
+                    }
                 }
             }
             storage
@@ -368,6 +389,13 @@ mod types {
         UnknownPruned,
     }
 
+    #[derive(Deserialize)]
+    #[allow(non_camel_case_types)]
+    pub struct Crypto_0_18_0_Segment {
+        pub bs: [u8; 4],
+        pub hardened: bool,
+    }
+
     pub struct Hrp {
         inner: [u8; 83],
         len: u8,
@@ -484,6 +512,16 @@ impl Convert for ConvertOutputMetadata {
             milestone_timestamp_booked: old.milestone_timestamp_booked,
             ledger_index: old.ledger_index,
         })
+    }
+}
+
+struct ConvertSegment;
+impl Convert for ConvertSegment {
+    type New = u32;
+    type Old = types::Crypto_0_18_0_Segment;
+
+    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
+        Ok(u32::from_be_bytes(old.bs))
     }
 }
 
