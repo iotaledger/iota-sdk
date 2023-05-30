@@ -8,7 +8,7 @@ import {
     destroy,
 } from './bindings';
 import type {
-    EventType,
+    WalletEventType,
     AccountManagerOptions,
     __Message__,
     __AccountMethod__,
@@ -58,7 +58,7 @@ export class MessageHandler {
     }
 
     async listen(
-        eventTypes: EventType[],
+        eventTypes: WalletEventType[],
         callback: (error: Error, result: string) => void,
     ): Promise<void> {
         return listenWallet(eventTypes, callback, this.messageHandler);
