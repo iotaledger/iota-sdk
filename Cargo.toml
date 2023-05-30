@@ -21,7 +21,7 @@ debug = 0
 incremental = false
 
 [profile.ci]
-inherits = "dev"
+inherits = "release"
 debug = 0
 incremental = false
 
