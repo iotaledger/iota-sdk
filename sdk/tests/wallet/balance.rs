@@ -156,9 +156,9 @@ async fn balance_expiration() -> Result<()> {
             .finish_output(token_supply)?,
     ];
 
-    let balance_before_tx = account_0.balance().await?;
+    let balance_before_tx = account_0.balance(None).await?;
     let tx = account_0.send(outputs, None).await?;
-    let balance_after_tx = account_0.balance().await?;
+    let balance_after_tx = account_0.balance(None).await?;
     // Total doesn't change before syncing after tx got confirmed
     assert_eq!(
         balance_before_tx.base_coin().total(),
@@ -224,7 +224,7 @@ async fn balance_voting_power() -> Result<()> {
 
     let faucet_amount = 100_000_000_000;
 
-    let balance = account.balance().await?;
+    let balance = account.balance(None).await?;
     assert_eq!(balance.base_coin().total(), faucet_amount);
     assert_eq!(balance.base_coin().available(), faucet_amount);
 

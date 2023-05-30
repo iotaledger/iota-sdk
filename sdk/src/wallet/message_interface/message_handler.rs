@@ -721,7 +721,9 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::GetBalance => Ok(Response::Balance(AccountBalanceDto::from(&account.balance().await?))),
+            AccountMethod::GetBalance => Ok(Response::Balance(AccountBalanceDto::from(
+                &account.balance(None).await?,
+            ))),
             AccountMethod::PrepareOutput {
                 params: options,
                 transaction_options,

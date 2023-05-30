@@ -4,8 +4,9 @@
 use primitive_types::U256;
 
 use crate::{
-    types::block::output::{
-        unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent, RentStructure,
+    types::block::{
+        address::Bech32Address,
+        output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent, RentStructure},
     },
     wallet::account::{
         operations::helpers::time::can_output_be_unlocked_forever_from_now_on,
@@ -226,7 +227,7 @@ impl Account {
                                         // the account without unspent
                                         // outputs can't be related to this output
                                         &context.account_details.addresses_with_unspent_outputs,
-                                        &output,
+                                        output,
                                         local_time,
                                     );
 
@@ -315,8 +316,9 @@ impl Account {
         Ok(())
     }
 
+    // TODO address param or another method?
     /// Get the AccountBalance
-    pub async fn balance(&self) -> crate::wallet::Result<AccountBalance> {
+    pub async fn balance(&self, address: Option<Bech32Address>) -> crate::wallet::Result<AccountBalance> {
         log::debug!("[BALANCE] get balance");
 
         let account_details = self.details().await;
@@ -326,11 +328,24 @@ impl Account {
 
         #[cfg(feature = "participation")]
         {
+            // TODO what should this do when we're asking for an address balance?
             context.balance.base_coin.voting_power = self.get_voting_power().await?;
         }
 
-        for address_with_unspent_outputs in &account_details.addresses_with_unspent_outputs {
-            self.address_balance(address_with_unspent_outputs, &mut context).await?;
+        if let Some(address) = address {
+            if let Some(address_with_unspent_outputs) = account_details
+                .addresses_with_unspent_outputs
+                .iter()
+                .find(|a| a.address == address)
+            {
+                self.address_balance(address_with_unspent_outputs, &mut context).await?;
+            } else {
+                // TODO error or 0 balance ?
+            }
+        } else {
+            for address_with_unspent_outputs in &account_details.addresses_with_unspent_outputs {
+                self.address_balance(address_with_unspent_outputs, &mut context).await?;
+            }
         }
 
         context.finish()

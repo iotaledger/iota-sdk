@@ -131,7 +131,7 @@ impl Wallet {
         let accounts = self.accounts.read().await;
 
         for account in accounts.iter() {
-            balance += account.balance().await?;
+            balance += account.balance(None).await?;
         }
 
         Ok(balance)

@@ -64,7 +64,7 @@ impl Account {
             );
             // Calculate the balance because if we created a transaction in the meantime, the amount for the inputs is
             // not available anymore
-            return self.balance().await;
+            return self.balance(None).await;
         }
 
         self.sync_internal(&options).await?;
@@ -80,7 +80,7 @@ impl Account {
             }
         };
 
-        let account_balance = self.balance().await?;
+        let account_balance = self.balance(None).await?;
         // Update last_synced mutex
         let time_now = crate::utils::unix_timestamp_now().as_millis();
         *last_synced = time_now;

@@ -294,7 +294,7 @@ pub async fn burn_nft_command(account: &Account, nft_id: String) -> Result<(), E
 
 // `balance` command
 pub async fn balance_command(account: &Account) -> Result<(), Error> {
-    println_log_info!("{:#?}", account.balance().await?);
+    println_log_info!("{:#?}", account.balance(None).await?);
 
     Ok(())
 }
@@ -339,7 +339,7 @@ pub async fn claim_command(account: &Account, output_id: Option<String>) -> Resu
 
 /// `claimable-outputs` command
 pub async fn claimable_outputs_command(account: &Account) -> Result<(), Error> {
-    let balance = account.balance().await?;
+    let balance = account.balance(None).await?;
     for output_id in balance
         .potentially_locked_outputs()
         .iter()
@@ -512,7 +512,7 @@ pub async fn mint_native_token_command(
     foundry_metadata: Option<Vec<u8>>,
 ) -> Result<(), Error> {
     // If no alias output exists, create one first
-    if account.balance().await?.aliases().is_empty() {
+    if account.balance(None).await?.aliases().is_empty() {
         let transaction = account.create_alias_output(None, None).await?;
         println_log_info!(
             "Alias output minting transaction sent:\n{:?}\n{:?}",
