@@ -44,9 +44,9 @@ async fn main() -> Result<()> {
     // Create the metadata with another index for each
     for index in 0..nft_collection_size {
         nft_options.push(MintNftParams::new()
-            .with_immutable_metadata(format!("{{\"standard\":\"IRC27\",\"version\":\"v1.0\",\"type\":\"video/mp4\",\"uri\":\"ipfs://wrongcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5Ywrong\",\"name\":\"Shimmer OG NFT #{index}\",\"description\":\"The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.\",\"issuerName\":\"IOTA Foundation\",\"collectionId\":\"{issuer_nft_id}\",\"collectionName\":\"Shimmer OG\" }}").as_bytes().to_vec())
+            .with_immutable_metadata(Some(format!("{{\"standard\":\"IRC27\",\"version\":\"v1.0\",\"type\":\"video/mp4\",\"uri\":\"ipfs://wrongcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5Ywrong\",\"name\":\"Shimmer OG NFT #{index}\",\"description\":\"The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.\",\"issuerName\":\"IOTA Foundation\",\"collectionId\":\"{issuer_nft_id}\",\"collectionName\":\"Shimmer OG\" }}").as_bytes().to_vec()))
             // The NFT address from the NFT we minted in mint_issuer_nft example
-            .with_issuer(Bech32Address::new(bech32_hrp, NftAddress::new(issuer_nft_id)))?
+            .with_issuer(Some(Bech32Address::new(bech32_hrp, NftAddress::new(issuer_nft_id))))?
         );
     }
 

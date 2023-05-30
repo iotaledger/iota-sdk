@@ -1,8 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use getset::{Getters, Setters};
-// use primitive_types::U256;
+use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -15,14 +14,14 @@ use crate::{
 };
 
 /// Params for `send_nft()`
-#[derive(Debug, Clone, Serialize, Deserialize, Getters, Setters)]
+#[derive(Debug, Clone, Serialize, Deserialize, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct SendNftParams {
     /// Bech32 encoded address
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get = "pub")]
     address: Bech32Address,
     /// Nft id
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get = "pub")]
     nft_id: NftId,
 }
 

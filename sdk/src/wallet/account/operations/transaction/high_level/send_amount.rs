@@ -1,6 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -27,20 +28,24 @@ use crate::{
 };
 
 /// Parameters for `send_amount()`
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Getters)]
 pub struct SendAmountParams {
     /// Bech32 encoded address
+    #[getset(get = "pub")]
     address: Bech32Address,
     /// Amount
     #[serde(with = "crate::utils::serde::string")]
+    #[getset(get = "pub")]
     amount: u64,
     /// Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
     /// given the provided amount. If a storage deposit is needed and a return address is not provided, it will
     /// default to the first address of the account.
+    #[getset(get = "pub")]
     return_address: Option<Bech32Address>,
     /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
     /// receiver already. The expiration will only be used if one is necessary given the provided amount. If an
     /// expiration is needed but not provided, it will default to one day.
+    #[getset(get = "pub")]
     expiration: Option<u32>,
 }
 
@@ -75,10 +80,10 @@ impl Account {
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
-    /// let outputs = vec![SendAmountParams{
-    ///     address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
-    ///     amount: 1_000_000,
-    /// }];
+    /// let outputs = vec![SendAmountParams::new(
+    ///     "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
+    ///     1_000_000)?
+    /// ];
     ///
     /// let tx = account.send_amount(outputs, None ).await?;
     /// println!("Transaction created: {}", tx.transaction_id);

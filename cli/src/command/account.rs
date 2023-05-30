@@ -559,13 +559,13 @@ pub async fn mint_nft_command(
     } else {
         None
     };
-    let mut nft_options = MintNftParams::new();
-    nft_options.set_issuer(issuer);
-    nft_options.set_sender(sender);
-    nft_options.set_tag(tag);
-    nft_options.set_address(address);
-    nft_options.set_immutable_metadata(immutable_metadata);
-    nft_options.set_metadata(metadata);
+    let nft_options = MintNftParams::new()
+        .with_address(address)?
+        .with_immutable_metadata(immutable_metadata)
+        .with_metadata(metadata)
+        .with_tag(tag)
+        .with_sender(sender)?
+        .with_issuer(issuer)?;
 
     let transaction = account.mint_nfts(vec![nft_options], None).await?;
 

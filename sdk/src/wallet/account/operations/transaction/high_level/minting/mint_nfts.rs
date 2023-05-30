@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use getset::{Getters, Setters};
+use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -22,27 +22,27 @@ use crate::{
 };
 
 /// Address and NFT for `send_nft()`.
-#[derive(Debug, Clone, Serialize, Deserialize, Default, Getters, Setters)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct MintNftParams {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
     /// first address of the account.
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get = "pub")]
     address: Option<Bech32Address>,
     /// NFT sender feature.
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get = "pub")]
     sender: Option<Bech32Address>,
     /// NFT metadata feature.
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get = "pub")]
     metadata: Option<Vec<u8>>,
     /// NFT tag feature.
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get = "pub")]
     tag: Option<Vec<u8>>,
     /// NFT issuer feature.
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get = "pub")]
     issuer: Option<Bech32Address>,
     /// NFT immutable metadata feature.
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get = "pub")]
     immutable_metadata: Option<Vec<u8>>,
 }
 
@@ -53,40 +53,40 @@ impl MintNftParams {
 
     pub fn with_address(
         mut self,
-        address: impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>,
+        address: Option<impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>>,
     ) -> Result<Self, crate::wallet::error::Error> {
-        self.address = Some(address.try_into().map_err(Into::into)?);
+        self.address = address.map(|v| v.try_into().map_err(Into::into)).transpose()?;
         Ok(self)
     }
 
     pub fn with_sender(
         mut self,
-        sender: impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>,
+        sender: Option<impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>>,
     ) -> Result<Self, crate::wallet::error::Error> {
-        self.sender = Some(sender.try_into().map_err(Into::into)?);
+        self.address = sender.map(|v| v.try_into().map_err(Into::into)).transpose()?;
         Ok(self)
     }
 
-    pub fn with_metadata(mut self, metadata: Vec<u8>) -> Self {
-        self.metadata = Some(metadata);
+    pub fn with_metadata(mut self, metadata: Option<Vec<u8>>) -> Self {
+        self.metadata = metadata;
         self
     }
 
-    pub fn with_tag(mut self, tag: Vec<u8>) -> Self {
-        self.tag = Some(tag);
+    pub fn with_tag(mut self, tag: Option<Vec<u8>>) -> Self {
+        self.tag = tag;
         self
     }
 
     pub fn with_issuer(
         mut self,
-        issuer: impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>,
+        issuer: Option<impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>>,
     ) -> Result<Self, crate::wallet::error::Error> {
-        self.issuer = Some(issuer.try_into().map_err(Into::into)?);
+        self.address = issuer.map(|v| v.try_into().map_err(Into::into)).transpose()?;
         Ok(self)
     }
 
-    pub fn with_immutable_metadata(mut self, immutable_metadata: Vec<u8>) -> Self {
-        self.immutable_metadata = Some(immutable_metadata);
+    pub fn with_immutable_metadata(mut self, immutable_metadata: Option<Vec<u8>>) -> Self {
+        self.immutable_metadata = immutable_metadata;
         self
     }
 }
@@ -146,14 +146,11 @@ impl Account {
     ///     prefix_hex::decode("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?
     ///         .try_into()
     ///         .unwrap();
-    /// let params = vec![MintNftParams {
-    ///     address: Some("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string()),
-    ///     sender: None,
-    ///     metadata: Some(b"some nft metadata".to_vec()),
-    ///     tag: None,
-    ///     issuer: None,
-    ///     immutable_metadata: Some(b"some immutable nft metadata".to_vec()),
-    /// }];
+    /// let params = vec![MintNftParams::new()
+    ///     with_address(Some("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?
+    ///     with_metadata(Some(b"some nft metadata".to_vec()))
+    ///     with_immutable_metadata(Some(b"some immutable nft metadata".to_vec()))
+    /// ];
     ///
     /// let transaction = account.mint_nfts(params, None).await?;
     /// println!(

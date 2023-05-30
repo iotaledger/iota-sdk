@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use getset::{Getters, Setters};
+use getset::Getters;
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
@@ -29,22 +29,22 @@ use crate::{
 };
 
 /// Params for `send_native_tokens()`
-#[derive(Debug, Clone, Serialize, Deserialize, Getters, Setters)]
+#[derive(Debug, Clone, Serialize, Deserialize, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct SendNativeTokensParams {
     /// Bech32 encoded address
-    #[getset(get = "pub ", set = "pub")]
+    #[getset(get = "pub")]
     address: Bech32Address,
     /// Native tokens
-    #[getset(get = "pub ", set = "pub")]
+    #[getset(get = "pub")]
     native_tokens: Vec<(TokenId, U256)>,
     /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
     /// first address of the account
-    #[getset(get = "pub ", set = "pub")]
+    #[getset(get = "pub")]
     return_address: Option<Bech32Address>,
     /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
     /// receiver before. Default is 1 day
-    #[getset(get = "pub ", set = "pub")]
+    #[getset(get = "pub")]
     expiration: Option<u32>,
 }
 
@@ -65,15 +65,15 @@ impl SendNativeTokensParams {
     /// Set the return address
     pub fn with_return_address(
         mut self,
-        return_address: impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>,
+        return_address: Option<impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>>,
     ) -> Result<Self> {
-        self.return_address = Some(return_address.try_into().map_err(Into::into)?);
+        self.return_address = return_address.map(|v| v.try_into().map_err(Into::into)).transpose()?;
         Ok(self)
     }
 
     /// Set the expiration in seconds
-    pub fn with_expiration(mut self, expiration_secs: u32) -> Self {
-        self.expiration = Some(expiration_secs);
+    pub fn with_expiration(mut self, expiration_secs: Option<u32>) -> Self {
+        self.expiration = expiration_secs;
         self
     }
 }

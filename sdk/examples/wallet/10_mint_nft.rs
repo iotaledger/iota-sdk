@@ -33,12 +33,12 @@ async fn main() -> Result<()> {
 
     let nft_options = vec![
         MintNftParams::new()
-            .with_address("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?
-            .with_sender("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?
-            .with_metadata(b"some NFT metadata".to_vec())
-            .with_tag(b"some NFT tag".to_vec())
-            .with_issuer("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?
-            .with_immutable_metadata(b"some NFT immutable metadata".to_vec()),
+            .with_address(Some("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu"))?
+            .with_sender(Some("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy"))?
+            .with_metadata(Some(b"some NFT metadata".to_vec()))
+            .with_tag(Some(b"some NFT tag".to_vec()))
+            .with_issuer(Some("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy"))?
+            .with_immutable_metadata(Some(b"some NFT immutable metadata".to_vec())),
     ];
 
     let transaction = account.mint_nfts(nft_options, None).await?;
