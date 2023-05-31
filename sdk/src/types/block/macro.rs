@@ -49,8 +49,7 @@ macro_rules! impl_id {
             }
         }
 
-        #[cfg(feature="std")]
-        impl TryFrom<&String> for $name {
+        impl TryFrom<&alloc::string::String> for $name {
             type Error = $crate::types::block::Error;
 
             fn try_from(s: &String) -> Result<Self, Self::Error> {
