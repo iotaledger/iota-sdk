@@ -50,7 +50,7 @@ The `client` module is stateless. It aims to provide more flexibility and access
 This library follows the following branching strategy:
 
 | Branch       | Description                                                                                                                    |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+|--------------|--------------------------------------------------------------------------------------------------------------------------------|
 | `develop`    | Ongoing development for future releases of the networks. This branch gets merged into `staging` on releases.                   |
 | `production` | The latest releases for the IOTA network.                                                                                      |
 | `staging`    | The latest releases for the Shimmer network.                                                                                   |
