@@ -551,7 +551,7 @@ async fn claim_basic_micro_output_error() -> Result<()> {
             vec![SendAmountParams::new(
                 *account_1.addresses().await?[0].address(),
                 micro_amount,
-            )],
+            )?],
             TransactionOptions {
                 allow_micro_amount: true,
                 ..Default::default()
