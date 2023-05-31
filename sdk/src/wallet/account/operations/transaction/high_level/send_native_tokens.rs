@@ -49,7 +49,7 @@ pub struct SendNativeTokensParams {
 }
 
 impl SendNativeTokensParams {
-    /// Creates a  new instance of [`SendNativeTokensParams`]
+    /// Creates a new instance of [`SendNativeTokensParams`]
     pub fn new(
         address: impl Bech32AddressLike,
         native_tokens: impl IntoIterator<Item = (TokenId, U256)>,
@@ -62,7 +62,7 @@ impl SendNativeTokensParams {
         })
     }
 
-    /// Set the return address
+    /// Set the return address and try convert to [`Bech32Address`]
     pub fn try_with_return_address(mut self, return_address: impl Bech32AddressLike) -> Result<Self> {
         self.return_address = Some(return_address.to_bech32()?);
         Ok(self)

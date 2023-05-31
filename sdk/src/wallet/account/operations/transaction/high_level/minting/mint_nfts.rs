@@ -51,46 +51,55 @@ impl MintNftParams {
         Self::default()
     }
 
+    /// Set the address and try convert to [`Bech32Address`]
     pub fn try_with_address(mut self, address: impl Bech32AddressLike) -> crate::wallet::Result<Self> {
         self.address = Some(address.to_bech32()?);
         Ok(self)
     }
 
+    /// Set the address
     pub fn with_address(mut self, address: impl Into<Option<Bech32Address>>) -> Self {
         self.address = address.into();
         self
     }
 
+    /// Set the sender address and try convert to [`Bech32Address`]
     pub fn try_with_sender(mut self, sender: impl Bech32AddressLike) -> crate::wallet::Result<Self> {
         self.sender = Some(sender.to_bech32()?);
         Ok(self)
     }
 
+    /// Set the sender address
     pub fn with_sender(mut self, sender: impl Into<Option<Bech32Address>>) -> Self {
         self.sender = sender.into();
         self
     }
 
+    /// Set the metadata
     pub fn with_metadata(mut self, metadata: impl Into<Option<Vec<u8>>>) -> Self {
         self.metadata = metadata.into();
         self
     }
 
+    /// Set the tag
     pub fn with_tag(mut self, tag: impl Into<Option<Vec<u8>>>) -> Self {
         self.tag = tag.into();
         self
     }
 
+    /// Set the issuer address and try convert to [`Bech32Address`]
     pub fn try_with_issuer(mut self, issuer: impl Bech32AddressLike) -> crate::wallet::Result<Self> {
         self.issuer = Some(issuer.to_bech32()?);
         Ok(self)
     }
 
+    /// Set the issuer address
     pub fn with_issuer(mut self, issuer: impl Into<Option<Bech32Address>>) -> Self {
         self.issuer = issuer.into();
         self
     }
 
+    /// Set the immutable metadata
     pub fn with_immutable_metadata(mut self, immutable_metadata: impl Into<Option<Vec<u8>>>) -> Self {
         self.immutable_metadata = immutable_metadata.into();
         self
@@ -153,9 +162,9 @@ impl Account {
     ///         .try_into()
     ///         .unwrap();
     /// let params = vec![MintNftParams::new()
-    ///     with_address(Some("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?
-    ///     with_metadata(Some(b"some nft metadata".to_vec()))
-    ///     with_immutable_metadata(Some(b"some immutable nft metadata".to_vec()))
+    ///     try_with_address("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?
+    ///     with_metadata(b"some nft metadata".to_vec())
+    ///     with_immutable_metadata(b"some immutable nft metadata".to_vec())
     /// ];
     ///
     /// let transaction = account.mint_nfts(params, None).await?;

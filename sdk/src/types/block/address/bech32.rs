@@ -279,22 +279,6 @@ impl PartialEq<str> for Bech32Address {
     }
 }
 
-impl TryFrom<&str> for Bech32Address {
-    type Error = Error;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        Self::try_from_str(value)
-    }
-}
-
-impl TryFrom<&String> for Bech32Address {
-    type Error = Error;
-
-    fn try_from(value: &String) -> Result<Self, Self::Error> {
-        Self::try_from_str(value)
-    }
-}
-
 impl<T: core::borrow::Borrow<Bech32Address>> From<T> for Address {
     fn from(value: T) -> Self {
         value.borrow().inner
