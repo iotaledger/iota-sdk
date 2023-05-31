@@ -48,7 +48,7 @@ pub enum AccountMethod {
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[serde(rename_all = "camelCase")]
     DeregisterParticipationEvent { event_id: ParticipationEventId },
-    /// Generate new unused Ed25519 addresses.
+    /// Generate new Ed25519 addresses.
     /// Expected response: [`GeneratedEd25519Addresses`](crate::Response::GeneratedEd25519Addresses)
     GenerateEd25519Addresses {
         amount: u32,
