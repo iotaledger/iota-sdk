@@ -167,7 +167,7 @@ pub enum Response {
     /// Response for [`Bech32ToHex`](crate::wallet::message_interface::Message::Bech32ToHex)
     HexAddress(String),
     /// Response for [`HexToBech32`](crate::wallet::message_interface::Message::HexToBech32)
-    /// Response for [`GenerateAddress`](crate::wallet::message_interface::Message::GenerateAddress)
+    /// Response for [`GenerateEd25519Address`](crate::wallet::message_interface::Message::GenerateEd25519Address)
     Bech32Address(Bech32Address),
     /// Response for
     /// [`RequestFundsFromFaucet`](crate::wallet::message_interface::AccountMethod::RequestFundsFromFaucet)

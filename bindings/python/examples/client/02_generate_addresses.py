@@ -18,13 +18,13 @@ secret_manager = MnemonicSecretManager(
     os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1'])
 
 # Generate public address with default account index and range.
-addresses = client.generate_addresses(secret_manager)
+addresses = client.generate_ed25519_addresses(secret_manager)
 
 print('List of generated public addresses:', *addresses, sep='\n')
 print()
 
 # Generate public address with custom account index and range.
-addresses = client.generate_addresses(secret_manager,
+addresses = client.generate_ed25519_addresses(secret_manager,
                                       account_index=0,
                                       start=0,
                                       end=4)
@@ -33,7 +33,7 @@ print('List of generated public addresses:', *addresses, sep='\n')
 print()
 
 # Generate internal addresses with custom account index and range.
-addresses = client.generate_addresses(secret_manager,
+addresses = client.generate_ed25519_addresses(secret_manager,
                                       account_index=0,
                                       start=0,
                                       end=4,

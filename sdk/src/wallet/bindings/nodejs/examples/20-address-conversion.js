@@ -10,7 +10,7 @@ async function run() {
         const account = await manager.getAccount('0');
 
         // Generate an address to convert
-        const address = await account.generateAddress();
+        const address = await account.generateEd25519Address();
         console.log('New address:', address);
 
         // Convert the bech32 encoded address to hex

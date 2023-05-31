@@ -372,7 +372,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'immutableFeatures': immutable_features
         })
 
-    def generate_addresses(self,
+    def generate_ed25519_addresses(self,
                            secret_manager,
                            account_index: Optional[int] = None,
                            start: Optional[int] = None,
