@@ -7,6 +7,7 @@ import {
     IssuerFeature,
     MintNftParams,
     SenderFeature,
+    utf8ToHex,
     Utils,
 } from '@iota/sdk';
 
@@ -16,11 +17,11 @@ import { getUnlockedManager } from './account-manager';
 const NFT1_OWNER_ADDRESS =
     'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu';
 // The metadata of the first minted NFT
-const NFT1_METADATA = stringToHex('some NFT metadata');
+const NFT1_METADATA = utf8ToHex('some NFT metadata');
 // The immutable metadata of the first minted NFT
-const NFT1_IMMUTABLE_METADATA = stringToHex('some NFT immutable metadata');
+const NFT1_IMMUTABLE_METADATA = utf8ToHex('some NFT immutable metadata');
 // The tag of the first minted NFT
-const NFT1_TAG = stringToHex('some NFT tag');
+const NFT1_TAG = utf8ToHex('some NFT tag');
 // The base coin amount we sent with the second NFT
 const NFT2_AMOUNT = '1000000';
 
@@ -119,15 +120,6 @@ async function run() {
         console.log('Error: ', error);
     }
     process.exit(0);
-}
-
-function stringToHex(str: string): string {
-    let hexEncoded = '0x';
-    for (let i = 0; i < str.length; i++) {
-        const hex = str.charCodeAt(i).toString(16);
-        hexEncoded += hex.padStart(2, '0');
-    }
-    return hexEncoded;
 }
 
 run();
