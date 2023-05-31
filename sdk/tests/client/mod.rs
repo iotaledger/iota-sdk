@@ -7,7 +7,6 @@ mod common;
 mod error;
 mod input_selection;
 mod input_signing_data;
-mod message_interface;
 mod mnemonic;
 #[cfg(feature = "mqtt")]
 mod mqtt;

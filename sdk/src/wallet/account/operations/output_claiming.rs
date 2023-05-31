@@ -165,7 +165,24 @@ where
     pub async fn claim_outputs(&self, output_ids_to_claim: Vec<OutputId>) -> crate::wallet::Result<Transaction> {
         log::debug!("[OUTPUT_CLAIMING] claim_outputs");
         let basic_outputs = self.get_basic_outputs_for_additional_inputs().await?;
-        self.claim_outputs_internal(output_ids_to_claim, basic_outputs).await
+        self.claim_outputs_internal(output_ids_to_claim, basic_outputs)
+            .await
+            .map_err(|error| {
+                // Map InsufficientStorageDepositAmount error here because it's the result of InsufficientFunds in this
+                // case and then easier to handle
+                match error {
+                    crate::wallet::Error::Block(block_error) => match *block_error {
+                        crate::types::block::Error::InsufficientStorageDepositAmount { amount, required } => {
+                            crate::wallet::Error::InsufficientFunds {
+                                available: amount,
+                                required,
+                            }
+                        }
+                        _ => crate::wallet::Error::Block(block_error),
+                    },
+                    _ => error,
+                }
+            })
     }
 
     /// Try to claim basic outputs that have additional unlock conditions to their [AddressUnlockCondition].
