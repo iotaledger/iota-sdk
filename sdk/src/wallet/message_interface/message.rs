@@ -289,7 +289,7 @@ impl Debug for Message {
                 bech32_hrp,
             } => write!(
                 f,
-                "GenerateAddress{{ account_index: {account_index:?}, address_index: {address_index:?}, options: {options:?}, bech32_hrp: {bech32_hrp:?} }}"
+                "GenerateEd25519Address{{ account_index: {account_index:?}, address_index: {address_index:?}, options: {options:?}, bech32_hrp: {bech32_hrp:?} }}"
             ),
             Self::GetNodeInfo { url, auth: _ } => write!(f, "GetNodeInfo{{ url: {url:?} }}"),
             #[cfg(feature = "stronghold")]

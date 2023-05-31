@@ -55,9 +55,15 @@ impl GetAddressesOptions {
     }
 
     /// Set bech32 human readable part (hrp)
-    pub fn with_bech32_hrp(mut self, bech32_hrp: impl HrpLike) -> Self {
-        self.bech32_hrp = bech32_hrp.to_hrp_unchecked();
+    pub fn with_bech32_hrp(mut self, bech32_hrp: Hrp) -> Self {
+        self.bech32_hrp = bech32_hrp;
         self
+    }
+
+    /// Set bech32 human readable part (hrp) from something that might be valid
+    pub fn try_with_bech32_hrp(mut self, bech32_hrp: impl HrpLike) -> Result<Self> {
+        self.bech32_hrp = bech32_hrp.to_hrp()?;
+        Ok(self)
     }
 
     pub fn internal(mut self) -> Self {

@@ -15,7 +15,7 @@ impl Wallet {
     /// Generate an address without storing it
     /// ```ignore
     /// let public_addresses = wallet
-    ///     .generate_address(
+    ///     .generate_ed25519_addresses(
     ///         0,
     ///         false,
     ///         0,

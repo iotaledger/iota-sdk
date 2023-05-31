@@ -24,7 +24,10 @@ async fn generate_ed25519_addresses() -> Result<()> {
         "{{\"mnemonic\":\"{}\"}}",
         "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river"
     );
-    let options = GetAddressesOptions::default().with_range(0..10).with_bech32_hrp("atoi");
+    let options = GetAddressesOptions::default()
+        .with_range(0..10)
+        .try_with_bech32_hrp("atoi")
+        .unwrap();
     let method = ClientMethod::GenerateEd25519Addresses {
         secret_manager: serde_json::from_str::<SecretManagerDto>(&secret_manager).unwrap(),
         options,

@@ -10,7 +10,7 @@ async function run() {
         const account = await manager.getAccount('0');
         console.log('Account:', account);
 
-        const address = await account.generateAddress();
+        const address = await account.generateEd25519Address();
         console.log('New address:', address);
 
         // It's also possible to generate multiple addresses
@@ -18,7 +18,9 @@ async function run() {
         // console.log('New addresses:', addresses);
 
         // Use the Faucet to send testnet tokens to your address:
-        console.log("Fill your address with the Faucet: https://faucet.testnet.shimmer.network")
+        console.log(
+            'Fill your address with the Faucet: https://faucet.testnet.shimmer.network',
+        );
     } catch (error) {
         console.log('Error: ', error);
     }

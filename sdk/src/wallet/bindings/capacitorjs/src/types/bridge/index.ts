@@ -68,7 +68,7 @@ import type {
   __GetAccountIndexesMessage__,
   __GetAccountsMessage__,
   __GetLedgerNanoStatusMessage__,
-  __GenerateAddressMessage__,
+  __GenerateEd25519AddressMessage__,
   __GetNodeInfoMessage__,
   __HexToBech32__,
   __IsStrongholdPasswordAvailableMessage__,
@@ -163,7 +163,7 @@ export type __Message__ =
   | __GetAccountIndexesMessage__
   | __GetAccountsMessage__
   | __GetLedgerNanoStatusMessage__
-  | __GenerateAddressMessage__
+  | __GenerateEd25519AddressMessage__
   | __GetNodeInfoMessage__
   | __HexToBech32__
   | __IsStrongholdPasswordAvailableMessage__
