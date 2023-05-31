@@ -24,7 +24,7 @@ async fn mint_and_burn_nft() -> Result<()> {
 
     let nft_options = vec![
         MintNftParams::new()
-            .with_address(account.addresses().await?[0].address())?
+            .with_address(*account.addresses().await?[0].address())
             .with_metadata(b"some nft metadata".to_vec())
             .with_immutable_metadata(b"some immutable nft metadata".to_vec()),
     ];

@@ -51,33 +51,48 @@ impl MintNftParams {
         Self::default()
     }
 
-    pub fn with_address(mut self, address: impl Bech32AddressLike) -> Result<Self, crate::wallet::error::Error> {
+    pub fn try_with_address(mut self, address: impl Bech32AddressLike) -> crate::wallet::Result<Self> {
         self.address = Some(address.to_bech32()?);
         Ok(self)
     }
 
-    pub fn with_sender(mut self, sender: impl Bech32AddressLike) -> Result<Self, crate::wallet::error::Error> {
+    pub fn with_address(mut self, address: impl Into<Option<Bech32Address>>) -> Self {
+        self.address = address.into();
+        self
+    }
+
+    pub fn try_with_sender(mut self, sender: impl Bech32AddressLike) -> crate::wallet::Result<Self> {
         self.sender = Some(sender.to_bech32()?);
         Ok(self)
     }
 
-    pub fn with_metadata(mut self, metadata: Vec<u8>) -> Self {
-        self.metadata = Some(metadata);
+    pub fn with_sender(mut self, sender: impl Into<Option<Bech32Address>>) -> Self {
+        self.sender = sender.into();
         self
     }
 
-    pub fn with_tag(mut self, tag: Vec<u8>) -> Self {
-        self.tag = Some(tag);
+    pub fn with_metadata(mut self, metadata: impl Into<Option<Vec<u8>>>) -> Self {
+        self.metadata = metadata.into();
         self
     }
 
-    pub fn with_issuer(mut self, issuer: impl Bech32AddressLike) -> Result<Self, crate::wallet::error::Error> {
+    pub fn with_tag(mut self, tag: impl Into<Option<Vec<u8>>>) -> Self {
+        self.tag = tag.into();
+        self
+    }
+
+    pub fn try_with_issuer(mut self, issuer: impl Bech32AddressLike) -> crate::wallet::Result<Self> {
         self.issuer = Some(issuer.to_bech32()?);
         Ok(self)
     }
 
-    pub fn with_immutable_metadata(mut self, immutable_metadata: Vec<u8>) -> Self {
-        self.immutable_metadata = Some(immutable_metadata);
+    pub fn with_issuer(mut self, issuer: impl Into<Option<Bech32Address>>) -> Self {
+        self.issuer = issuer.into();
+        self
+    }
+
+    pub fn with_immutable_metadata(mut self, immutable_metadata: impl Into<Option<Vec<u8>>>) -> Self {
+        self.immutable_metadata = immutable_metadata.into();
         self
     }
 }

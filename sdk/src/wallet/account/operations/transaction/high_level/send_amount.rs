@@ -59,13 +59,18 @@ impl SendAmountParams {
         })
     }
 
-    pub fn with_return_address(mut self, address: impl Bech32AddressLike) -> Result<Self, crate::wallet::Error> {
+    pub fn try_with_return_address(mut self, address: impl Bech32AddressLike) -> Result<Self, crate::wallet::Error> {
         self.return_address = Some(address.to_bech32()?);
         Ok(self)
     }
 
-    pub fn with_expiration(mut self, expiration: u32) -> Self {
-        self.expiration = Some(expiration);
+    pub fn with_return_address(mut self, address: impl Into<Option<Bech32Address>>) -> Self {
+        self.return_address = address.into();
+        self
+    }
+
+    pub fn with_expiration(mut self, expiration: impl Into<Option<u32>>) -> Self {
+        self.expiration = expiration.into();
         self
     }
 }

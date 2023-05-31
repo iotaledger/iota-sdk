@@ -505,11 +505,11 @@ async fn prepare_nft_output_features_update() -> Result<()> {
 
     let nft_options = vec![
         MintNftParams::new()
-            .with_address(address)?
-            .with_sender(address)?
+            .with_address(*address)
+            .with_sender(*address)
             .with_metadata(b"some nft metadata".to_vec())
             .with_tag(b"some nft tag".to_vec())
-            .with_issuer(address)?
+            .with_issuer(*address)
             .with_immutable_metadata(b"some immutable nft metadata".to_vec()),
     ];
 

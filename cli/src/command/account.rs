@@ -559,25 +559,14 @@ pub async fn mint_nft_command(
     } else {
         None
     };
-    let mut nft_options = MintNftParams::new();
-    if let Some(address) = address {
-        nft_options = nft_options.with_address(address)?;
-    }
-    if let Some(immutable_metadata) = immutable_metadata {
-        nft_options = nft_options.with_immutable_metadata(immutable_metadata);
-    }
-    if let Some(metadata) = metadata {
-        nft_options = nft_options.with_metadata(metadata);
-    }
-    if let Some(tag) = tag {
-        nft_options = nft_options.with_tag(tag);
-    }
-    if let Some(sender) = sender {
-        nft_options = nft_options.with_sender(sender)?;
-    }
-    if let Some(issue) = issuer {
-        nft_options = nft_options.with_issuer(issue)?;
-    }
+
+    let nft_options = MintNftParams::new()
+        .with_address(address)
+        .with_immutable_metadata(immutable_metadata)
+        .with_metadata(metadata)
+        .with_tag(tag)
+        .with_sender(sender)
+        .with_issuer(issuer);
 
     let transaction = account.mint_nfts(vec![nft_options], None).await?;
 
@@ -635,16 +624,14 @@ pub async fn send_command(
     expiration: Option<u32>,
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
-    let mut send_amount_params = SendAmountParams::new(address, amount)?;
-    if let Some(return_address) = return_address {
-        send_amount_params = send_amount_params.with_return_address(return_address)?
-    }
-    if let Some(expiration) = expiration {
-        send_amount_params = send_amount_params.with_expiration(expiration);
-    }
+    let outputs = vec![
+        SendAmountParams::new(address, amount)?
+            .with_return_address(return_address.map(Bech32AddressLike::to_bech32).transpose()?)
+            .with_expiration(expiration),
+    ];
     let transaction = account
         .send_amount(
-            vec![send_amount_params],
+            outputs,
             TransactionOptions {
                 allow_micro_amount,
                 ..Default::default()
