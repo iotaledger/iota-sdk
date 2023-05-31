@@ -24,9 +24,9 @@ async fn mint_and_burn_nft() -> Result<()> {
 
     let nft_options = vec![
         MintNftParams::new()
-            .with_address(Some(*account.addresses().await?[0].address()))?
-            .with_metadata(Some(b"some nft metadata".to_vec()))
-            .with_immutable_metadata(Some(b"some immutable nft metadata".to_vec())),
+            .with_address(account.addresses().await?[0].address())?
+            .with_metadata(b"some nft metadata".to_vec())
+            .with_immutable_metadata(b"some immutable nft metadata".to_vec()),
     ];
 
     let transaction = account.mint_nfts(nft_options, None).await.unwrap();
@@ -296,8 +296,8 @@ async fn mint_and_burn_nft_with_alias() -> Result<()> {
 
     let nft_options = vec![
         MintNftParams::new()
-            .with_metadata(Some(b"some nft metadata".to_vec()))
-            .with_immutable_metadata(Some(b"some immutable nft metadata".to_vec())),
+            .with_metadata(b"some nft metadata".to_vec())
+            .with_immutable_metadata(b"some immutable nft metadata".to_vec()),
     ];
     let nft_tx = account.mint_nfts(nft_options, None).await.unwrap();
     account

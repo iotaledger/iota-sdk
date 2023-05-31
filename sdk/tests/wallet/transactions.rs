@@ -132,9 +132,9 @@ async fn send_nft() -> Result<()> {
 
     let nft_options = vec![
         MintNftParams::new()
-            .with_address(Some(*accounts[0].addresses().await?[0].address()))?
-            .with_metadata(Some(b"some nft metadata".to_vec()))
-            .with_immutable_metadata(Some(b"some immutable nft metadata".to_vec())),
+            .with_address(*accounts[0].addresses().await?[0].address())?
+            .with_metadata(b"some nft metadata".to_vec())
+            .with_immutable_metadata(b"some immutable nft metadata".to_vec()),
     ];
 
     let transaction = accounts[0].mint_nfts(nft_options, None).await.unwrap();

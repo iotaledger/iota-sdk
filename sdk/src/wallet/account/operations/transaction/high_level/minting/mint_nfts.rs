@@ -51,36 +51,33 @@ impl MintNftParams {
         Self::default()
     }
 
-    pub fn with_address(
-        mut self,
-        address: Option<impl Bech32AddressLike>,
-    ) -> Result<Self, crate::wallet::error::Error> {
-        self.address = address.map(|v| v.to_bech32()).transpose()?;
+    pub fn with_address(mut self, address: impl Bech32AddressLike) -> Result<Self, crate::wallet::error::Error> {
+        self.address = Some(address.to_bech32()?);
         Ok(self)
     }
 
-    pub fn with_sender(mut self, sender: Option<impl Bech32AddressLike>) -> Result<Self, crate::wallet::error::Error> {
-        self.sender = sender.map(|v| v.to_bech32()).transpose()?;
+    pub fn with_sender(mut self, sender: impl Bech32AddressLike) -> Result<Self, crate::wallet::error::Error> {
+        self.sender = Some(sender.to_bech32()?);
         Ok(self)
     }
 
-    pub fn with_metadata(mut self, metadata: Option<Vec<u8>>) -> Self {
-        self.metadata = metadata;
+    pub fn with_metadata(mut self, metadata: Vec<u8>) -> Self {
+        self.metadata = Some(metadata);
         self
     }
 
-    pub fn with_tag(mut self, tag: Option<Vec<u8>>) -> Self {
-        self.tag = tag;
+    pub fn with_tag(mut self, tag: Vec<u8>) -> Self {
+        self.tag = Some(tag);
         self
     }
 
-    pub fn with_issuer(mut self, issuer: Option<impl Bech32AddressLike>) -> Result<Self, crate::wallet::error::Error> {
-        self.issuer = issuer.map(|v| v.to_bech32()).transpose()?;
+    pub fn with_issuer(mut self, issuer: impl Bech32AddressLike) -> Result<Self, crate::wallet::error::Error> {
+        self.issuer = Some(issuer.to_bech32()?);
         Ok(self)
     }
 
-    pub fn with_immutable_metadata(mut self, immutable_metadata: Option<Vec<u8>>) -> Self {
-        self.immutable_metadata = immutable_metadata;
+    pub fn with_immutable_metadata(mut self, immutable_metadata: Vec<u8>) -> Self {
+        self.immutable_metadata = Some(immutable_metadata);
         self
     }
 }
