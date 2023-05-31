@@ -393,7 +393,7 @@ async fn message_interface_address_generation() -> Result<()> {
     let wallet_handle = create_message_handler(Some(options)).await.unwrap();
 
     let response = wallet_handle
-        .send_message(Message::GenerateAddress {
+        .send_message(Message::GenerateEd25519Address {
             account_index: 0,
             address_index: 0,
             options: None,
@@ -412,7 +412,7 @@ async fn message_interface_address_generation() -> Result<()> {
     }
 
     let response = wallet_handle
-        .send_message(Message::GenerateAddress {
+        .send_message(Message::GenerateEd25519Address {
             account_index: 10,
             address_index: 10,
             options: Some(GenerateAddressOptions::internal()),

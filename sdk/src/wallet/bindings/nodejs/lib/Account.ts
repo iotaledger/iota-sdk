@@ -32,6 +32,7 @@ import type {
     ParticipationEventWithNodes,
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
+    GenerateAddressesOptions,
 } from '../types';
 import type { SignedTransactionEssence } from '../types/signedTransactionEssence';
 import type {
@@ -344,8 +345,10 @@ export class Account {
      * @param options Options for address generation.
      * @returns The address.
      */
-    async generateAddress(options?: GenerateAddressOptions): Promise<Address> {
-        const addresses = await this.generateAddresses(1, options);
+    async generateEd25519Address(
+        options?: GenerateAddressOptions,
+    ): Promise<Address> {
+        const addresses = await this.generateEd25519Addresses(1, options);
         return addresses[0];
     }
 
@@ -355,20 +358,37 @@ export class Account {
      * @param options Options for address generation.
      * @returns The addresses.
      */
-    async generateAddresses(
+    async generateEd25519Addresses(
         amount: number,
         options?: GenerateAddressOptions,
     ): Promise<Address[]> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'generateAddresses',
+                name: 'generateEd25519Addresses',
                 data: {
                     amount,
                     options,
                 },
             },
         );
+        return JSON.parse(response).payload;
+    }
+
+    /** Generate EVM addresses */
+    async generateEvmAddresses(
+        generateAddressesOptions: GenerateAddressesOptions,
+    ): Promise<string[]> {
+        const response = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'generateEvmAddresses',
+                data: {
+                    options: generateAddressesOptions,
+                },
+            },
+        );
+
         return JSON.parse(response).payload;
     }
 

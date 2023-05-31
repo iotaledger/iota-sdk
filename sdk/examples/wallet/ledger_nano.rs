@@ -51,7 +51,7 @@ async fn main() -> Result<()> {
         }
     };
 
-    let address = account.generate_addresses(1, None).await?;
+    let address = account.generate_ed25519_addresses(1, None).await?;
 
     println!("{address:?}");
 
