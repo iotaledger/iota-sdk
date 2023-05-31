@@ -8,7 +8,8 @@ use std::ops::Range;
 use async_trait::async_trait;
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
-    keys::slip10::{Chain, Curve, Seed},
+    keys::slip10::{Chain, Seed},
+    signatures::ed25519,
 };
 use serde::{Deserialize, Serialize};
 use zeroize::{Zeroize, ZeroizeOnDrop};
@@ -52,7 +53,7 @@ impl SecretManage for MnemonicSecretManager {
 
             let public_key = self
                 .0
-                .derive(Curve::Ed25519, &chain)?
+                .derive::<ed25519::SecretKey>(&chain)?
                 .secret_key()
                 .public_key()
                 .to_bytes();
@@ -70,7 +71,7 @@ impl SecretManage for MnemonicSecretManager {
 
     async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
         // Get the private and public key for this Ed25519 address
-        let private_key = self.0.derive(Curve::Ed25519, chain)?.secret_key();
+        let private_key = self.0.derive::<ed25519::SecretKey>(chain)?.secret_key();
         let public_key = private_key.public_key().to_bytes();
         let signature = private_key.sign(msg).to_bytes();
 
@@ -211,21 +212,27 @@ mod tests {
 
     #[test]
     fn mnemonic_like() {
-
         assert!("giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally".to_owned().to_mnemonic().is_ok());
-        assert!([
-            "endorse", " answer", "radar", "about", "source", "reunion", "marriage", "tag", "sausage", "weekend",
-            "frost", "daring", "base", "attack", "because", "joke", "dream", "slender", "leisure", "group", "reason",
-            "prepare", "broken", "river",
-        ].collect::<Vec<String>>()
-        .to_mnemonic()
-        .is_ok());
-        assert!([
-            "endorse", " answer", "radar", "about", "source", "reunion", "marriage", "tag", "sausage", "weekend",
-            "frost", "daring", "base", "attack", "because", "joke", "dream", "slender", "leisure", "group", "reason",
-            "prepare", "broken", "river",
-        ]
-        .to_mnemonic()
-        .is_ok());
+        assert!(
+            [
+                "endorse", " answer", "radar", "about", "source", "reunion", "marriage", "tag", "sausage", "weekend",
+                "frost", "daring", "base", "attack", "because", "joke", "dream", "slender", "leisure", "group",
+                "reason", "prepare", "broken", "river",
+            ]
+            .into_iter()
+            .map(|s| s.to_owned())
+            .collect::<Vec<_>>()
+            .to_mnemonic()
+            .is_ok()
+        );
+        assert!(
+            [
+                "endorse", " answer", "radar", "about", "source", "reunion", "marriage", "tag", "sausage", "weekend",
+                "frost", "daring", "base", "attack", "because", "joke", "dream", "slender", "leisure", "group",
+                "reason", "prepare", "broken", "river",
+            ]
+            .to_mnemonic()
+            .is_ok()
+        );
     }
 }

@@ -1,4 +1,4 @@
-import { Client, Ed25519Address, SecretManager, Utils } from '../../lib';
+import { Client, Ed25519Address, SecretManager, Utils } from '../../';
 import '../customMatchers';
 import 'dotenv/config';
 

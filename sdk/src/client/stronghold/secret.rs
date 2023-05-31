@@ -8,7 +8,7 @@ use std::ops::Range;
 use async_trait::async_trait;
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use iota_stronghold::{
-    procedures::{self, Chain, KeyType, Slip10DeriveInput},
+    procedures::{self, Chain, Curve, KeyType, Slip10DeriveInput},
     Location,
 };
 
@@ -72,7 +72,7 @@ impl SecretManage for StrongholdAdapter {
             );
 
             // Derive a SLIP-10 private key in the vault.
-            self.slip10_derive(chain, seed_location.clone(), derive_location.clone())
+            self.slip10_derive(Curve::Ed25519, chain, seed_location.clone(), derive_location.clone())
                 .await?;
 
             // Get the Ed25519 public key from the derived SLIP-10 private key in the vault.
@@ -122,7 +122,7 @@ impl SecretManage for StrongholdAdapter {
         );
 
         // Derive a SLIP-10 private key in the vault.
-        self.slip10_derive(chain.clone(), seed_location, derive_location.clone())
+        self.slip10_derive(Curve::Ed25519, chain.clone(), seed_location, derive_location.clone())
             .await?;
 
         // Get the Ed25519 public key from the derived SLIP-10 private key in the vault.
@@ -164,13 +164,24 @@ impl StrongholdAdapter {
     }
 
     /// Execute [Procedure::SLIP10Derive] in Stronghold to derive a SLIP-10 private key in the Stronghold vault.
-    async fn slip10_derive(&self, chain: Chain, input: Slip10DeriveInput, output: Location) -> Result<(), Error> {
+    async fn slip10_derive(
+        &self,
+        curve: Curve,
+        chain: Chain,
+        input: Slip10DeriveInput,
+        output: Location,
+    ) -> Result<(), Error> {
         if let Err(err) = self
             .stronghold
             .lock()
             .await
             .get_client(PRIVATE_DATA_CLIENT_PATH)?
-            .execute_procedure(procedures::Slip10Derive { chain, input, output })
+            .execute_procedure(procedures::Slip10Derive {
+                curve,
+                chain,
+                input,
+                output,
+            })
         {
             match err {
                 iota_stronghold::procedures::ProcedureError::Engine(ref e) => {
@@ -202,7 +213,9 @@ impl StrongholdAdapter {
             .execute_procedure(procedures::PublicKey {
                 ty: KeyType::Ed25519,
                 private_key,
-            })?)
+            })?
+            .try_into()
+            .unwrap())
     }
 
     /// Execute [Procedure::Ed25519Sign] in Stronghold to sign `msg` with `private_key` stored in the Stronghold vault.

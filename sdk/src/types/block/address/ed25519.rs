@@ -3,7 +3,7 @@
 
 use core::str::FromStr;
 
-use crypto::signatures::ed25519::PUBLIC_KEY_LENGTH;
+use crypto::signatures::ed25519::PublicKey;
 use derive_more::{AsRef, Deref, From};
 
 use crate::types::block::Error;
@@ -17,7 +17,7 @@ impl Ed25519Address {
     /// The [`Address`](crate::types::block::address::Address) kind of an [`Ed25519Address`].
     pub const KIND: u8 = 0;
     /// The length of an [`Ed25519Address`].
-    pub const LENGTH: usize = PUBLIC_KEY_LENGTH;
+    pub const LENGTH: usize = PublicKey::LENGTH;
 
     /// Creates a new [`Ed25519Address`].
     #[inline(always)]

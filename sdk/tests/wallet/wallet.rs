@@ -42,6 +42,13 @@ async fn update_client_options() -> Result<()> {
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto_new));
     assert!(!client_options.node_manager_builder.nodes.contains(&node_dto_old));
 
+    // The client options are also updated in the database and available the next time
+    drop(wallet);
+    let wallet = make_wallet(storage_path, None, None).await?;
+    let client_options = wallet.client_options().await;
+    assert!(client_options.node_manager_builder.nodes.contains(&node_dto_new));
+    assert!(!client_options.node_manager_builder.nodes.contains(&node_dto_old));
+
     tear_down(storage_path)
 }
 

@@ -31,8 +31,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `OutputWithMetadata::{into_output, into_metadata}` methods;
 - Storage and Backup migration;
 - `types::block::Error::InvalidFoundryZeroSerialNumber` variant;
-- Added `Hrp` type to represent a valid bech32 human-readable part;
-- Added `Mnemonic` type to handle mnemonic data more securely by implementing `ZeroizeOnDrop`;
+- `Hrp` type to represent a valid bech32 human-readable part;
+- Multiple prepare methods returning `PreparedTransactionData`: `prepare_consolidate_outputs`, `prepare_vote`, `prepare_stop_participating`, `prepare_increase_voting_power`, `prepare_decrease_voting_power`, `prepare_decrease_native_token_supply` and `prepare_burn`;
+- Multiple prepare methods returning `PreparedMintTokenTransaction`: `prepare_mint_native_token` and `prepare_increase_native_token_supply`;
+- Stronghold snapshot migration from v2 to v3;
+- `Mnemonic` type which derives `Zeroize` and `ZeroizeOnDrop`;
 
 ### Changed
 
@@ -69,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `AccountInner::incoming_transactions` returns a `Vec` instead of a `HashMap`;
 - `Address::try_from_bech32_with_hrp` refactored to `try_from_bech32`;
 - `{MetadataFeature, TagFeature}::new` take an `impl Into<Vec<u8>>` param;
+- Made certain `prepare_` methods public: `prepare_mint_nfts`, `prepare_send_native_tokens`, `prepare_send_nft` and `prepare_create_alias_output`;
 - `WalletInner::generate_mnemonic` returns a `Mnemonic` instead of a `String`;
 
 ### Removed
