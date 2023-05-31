@@ -27,7 +27,7 @@ impl Wallet {
         &self,
         account_index: u32,
         address_index: u32,
-        options: Option<GenerateAddressOptions>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> crate::wallet::Result<Address> {
         let address = match &*self.secret_manager.read().await {
             #[cfg(feature = "ledger_nano")]
@@ -35,6 +35,7 @@ impl Wallet {
                 // If we don't sync, then we want to display the prompt on the ledger with the address. But the user
                 // needs to have it visible on the computer first, so we need to generate it without the
                 // prompt first
+                let options = options.into();
                 if options.as_ref().map_or(false, |o| o.ledger_nano_prompt) {
                     #[cfg(feature = "events")]
                     {

@@ -36,9 +36,9 @@ impl SecretManage for MnemonicSecretManager {
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<Ed25519Address>, Self::Error> {
-        let internal = options.map(|o| o.internal).unwrap_or_default();
+        let internal = options.into().map(|o| o.internal).unwrap_or_default();
         let mut addresses = Vec::new();
 
         for address_index in address_indexes {
@@ -68,9 +68,9 @@ impl SecretManage for MnemonicSecretManager {
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<EvmAddress>, Self::Error> {
-        let internal = options.map(|o| o.internal).unwrap_or_default();
+        let internal = options.into().map(|o| o.internal).unwrap_or_default();
         let mut addresses = Vec::new();
 
         for address_index in address_indexes {

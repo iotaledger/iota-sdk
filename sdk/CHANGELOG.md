@@ -75,6 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Methods on `GetAddressesBuilder` moved to `SecretManager`;
 - Rename `GenerateAddresses` method to `GenerateEd25519Addresses` for Account and SecretManager, and their respective responses;
 - Rename `SecretManager` and `SecretManage` ed25519 address generation methods;
+- `SecretManage::generate_ed25519_addresses` returns `Ed25519Address` type;
 - Made certain `prepare_` methods public: `prepare_mint_nfts`, `prepare_send_native_tokens`, `prepare_send_nft` and `prepare_create_alias_output`;
 - `Address`-like types now implement `ToBech32Ext` for `to_bech32` and similar fns;
 
@@ -89,6 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GetAddressesBuilder`;
 - Excess `SecretManager` address generation methods;
 - `Bech32Addresses` and `RawAddresses`;
+- `Client::get_addresses`;
 
 ### Fixed
 
