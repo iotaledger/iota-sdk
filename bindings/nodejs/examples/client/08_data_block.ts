@@ -47,7 +47,7 @@ async function run() {
         const fetchedBlock = await client.getBlock(blockIdAndBlock[0]);
         console.log('Block data: ', fetchedBlock);
 
-        if (fetchedBlock.payload! instanceof TaggedDataPayload) {
+        if (fetchedBlock.payload instanceof TaggedDataPayload) {
             const payload = fetchedBlock.payload as TaggedDataPayload;
             console.log('Decoded data:', hexToUtf8(payload.data));
         }

@@ -108,8 +108,8 @@ export class Client {
             },
         });
 
-        let p = JSON.parse(response) as Response<OutputResponse>;
-        return plainToInstance(OutputResponse, p.payload);
+        const parsed = JSON.parse(response) as Response<OutputResponse>;
+        return plainToInstance(OutputResponse, parsed.payload);
     }
 
     /** Fetch OutputResponse from provided OutputIds (requests are sent in parallel) */
@@ -121,8 +121,8 @@ export class Client {
             },
         });
 
-        let p = JSON.parse(response) as Response<OutputResponse[]>;
-        return plainToInstance(OutputResponse, p.payload);
+        const parsed = JSON.parse(response) as Response<OutputResponse[]>;
+        return plainToInstance(OutputResponse, parsed.payload);
     }
 
     /** Generate addresses */
@@ -193,8 +193,8 @@ export class Client {
             },
         });
 
-        let p = JSON.parse(response) as Response<IBlock>;
-        return plainToInstance(IBlock, p.payload);
+        const parsed = JSON.parse(response) as Response<IBlock>;
+        return plainToInstance(IBlock, parsed.payload);
     }
 
     /**
@@ -226,8 +226,8 @@ export class Client {
             },
         });
 
-        let p = JSON.parse(response) as Response<UTXOInput[]>;
-        return plainToInstance(UTXOInput, p.payload);
+        const parsed = JSON.parse(response) as Response<UTXOInput[]>;
+        return plainToInstance(UTXOInput, parsed.payload);
     }
 
     /**
@@ -246,8 +246,8 @@ export class Client {
             },
         });
 
-        let p = JSON.parse(response) as Response<OutputResponse[]>;
-        return plainToInstance(OutputResponse, p.payload);
+        const parsed = JSON.parse(response) as Response<OutputResponse[]>;
+        return plainToInstance(OutputResponse, parsed.payload);
     }
 
     /**
@@ -265,8 +265,10 @@ export class Client {
             },
         });
 
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
-        return plainToInstance(PreparedTransactionData, p.payload);
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
+        return plainToInstance(PreparedTransactionData, parsed.payload);
     }
 
     /**
@@ -494,8 +496,8 @@ export class Client {
                 milestoneId,
             },
         });
-        let p = JSON.parse(response) as Response<MilestonePayload>;
-        return plainToInstance(MilestonePayload, p.payload);
+        const parsed = JSON.parse(response) as Response<MilestonePayload>;
+        return plainToInstance(MilestonePayload, parsed.payload);
     }
 
     /**
@@ -523,8 +525,8 @@ export class Client {
                 index,
             },
         });
-        let p = JSON.parse(response) as Response<MilestonePayload>;
-        return plainToInstance(MilestonePayload, p.payload);
+        const parsed = JSON.parse(response) as Response<MilestonePayload>;
+        return plainToInstance(MilestonePayload, parsed.payload);
     }
 
     /**
@@ -550,8 +552,8 @@ export class Client {
         const response = await this.methodHandler.callMethod({
             name: 'getReceipts',
         });
-        let p = JSON.parse(response) as Response<ReceiptsResponse>;
-        return plainToInstance(ReceiptsResponse, p.payload);
+        const parsed = JSON.parse(response) as Response<ReceiptsResponse>;
+        return plainToInstance(ReceiptsResponse, parsed.payload);
     }
 
     /**
@@ -566,8 +568,8 @@ export class Client {
                 milestoneIndex,
             },
         });
-        let p = JSON.parse(response) as Response<ReceiptsResponse[]>;
-        return plainToInstance(ReceiptsResponse, p.payload);
+        const parsed = JSON.parse(response) as Response<ReceiptsResponse[]>;
+        return plainToInstance(ReceiptsResponse, parsed.payload);
     }
 
     /**
@@ -591,8 +593,8 @@ export class Client {
                 transactionId,
             },
         });
-        let p = JSON.parse(response) as Response<IBlock>;
-        return plainToInstance(IBlock, p.payload);
+        const parsed = JSON.parse(response) as Response<IBlock>;
+        return plainToInstance(IBlock, parsed.payload);
     }
 
     /**
@@ -605,8 +607,8 @@ export class Client {
                 transactionId,
             },
         });
-        let p = JSON.parse(response) as Response<IBlock>;
-        return plainToInstance(IBlock, p.payload);
+        const parsed = JSON.parse(response) as Response<IBlock>;
+        return plainToInstance(IBlock, parsed.payload);
     }
 
     /**
@@ -778,8 +780,8 @@ export class Client {
                 outputIds,
             },
         });
-        let p = JSON.parse(response) as Response<OutputResponse[]>;
-        return plainToInstance(OutputResponse, p.payload);
+        const parsed = JSON.parse(response) as Response<OutputResponse[]>;
+        return plainToInstance(OutputResponse, parsed.payload);
     }
 
     /**
@@ -792,8 +794,8 @@ export class Client {
                 blockIds,
             },
         });
-        let p = JSON.parse(response) as Response<IBlock[]>;
-        return plainToInstance(IBlock, p.payload);
+        const parsed = JSON.parse(response) as Response<IBlock[]>;
+        return plainToInstance(IBlock, parsed.payload);
     }
 
     /**
@@ -931,8 +933,8 @@ export class Client {
             data: params,
         });
 
-        let p = JSON.parse(response) as Response<BasicOutput>;
-        return plainToInstance(BasicOutput, p.payload);
+        const parsed = JSON.parse(response) as Response<BasicOutput>;
+        return plainToInstance(BasicOutput, parsed.payload);
     }
 
     /**
@@ -946,8 +948,8 @@ export class Client {
             data: params,
         });
 
-        let p = JSON.parse(response) as Response<AliasOutput>;
-        return plainToInstance(AliasOutput, p.payload);
+        const parsed = JSON.parse(response) as Response<AliasOutput>;
+        return plainToInstance(AliasOutput, parsed.payload);
     }
 
     /**
@@ -961,8 +963,8 @@ export class Client {
             data: params,
         });
 
-        let p = JSON.parse(response) as Response<FoundryOutput>;
-        return plainToInstance(FoundryOutput, p.payload);
+        const parsed = JSON.parse(response) as Response<FoundryOutput>;
+        return plainToInstance(FoundryOutput, parsed.payload);
     }
 
     /**
@@ -974,8 +976,8 @@ export class Client {
             data: params,
         });
 
-        let p = JSON.parse(response) as Response<NftOutput>;
-        return plainToInstance(NftOutput, p.payload);
+        const parsed = JSON.parse(response) as Response<NftOutput>;
+        return plainToInstance(NftOutput, parsed.payload);
     }
 
     /**

@@ -83,15 +83,15 @@ export class Utils {
      * Returns a valid Address parsed from a String.
      */
     static parseBech32Address(address: string): Address {
-        let addr = callUtilsMethod({
+        const addr = callUtilsMethod({
             name: 'parseBech32Address',
             data: {
                 address,
             },
         });
 
-        let p = JSON.parse(addr) as Response<Ed25519Address>;
-        return plainToInstance(Ed25519Address, p.payload);
+        const parsed = JSON.parse(addr) as Response<Ed25519Address>;
+        return plainToInstance(Ed25519Address, parsed.payload);
     }
 
     /**

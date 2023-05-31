@@ -152,8 +152,8 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, p.payload);
+        const parsed = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, parsed.payload);
     }
 
     /**
@@ -183,9 +183,11 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, p.payload),
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
@@ -212,9 +214,11 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, p.payload),
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
@@ -235,8 +239,8 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, p.payload);
+        const parsed = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, parsed.payload);
     }
 
     /**
@@ -261,9 +265,11 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, p.payload),
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
@@ -289,9 +295,11 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, p.payload),
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
@@ -321,9 +329,11 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, p.payload),
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
@@ -366,9 +376,11 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, p.payload),
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
@@ -397,9 +409,11 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, p.payload),
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
@@ -469,8 +483,8 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<OutputData>;
-        return plainToInstance(OutputData, p.payload);
+        const parsed = JSON.parse(response) as Response<OutputData>;
+        return plainToInstance(OutputData, parsed.payload);
     }
 
     async getParticipationEvent(
@@ -584,8 +598,8 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, p.payload);
+        const parsed = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, parsed.payload);
     }
 
     /**
@@ -604,8 +618,8 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, p.payload);
+        const parsed = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, parsed.payload);
     }
 
     /**
@@ -652,8 +666,8 @@ export class Account {
             },
         );
 
-        let p = JSON.parse(response) as Response<OutputData[]>;
-        return plainToInstance(OutputData, p.payload);
+        const parsed = JSON.parse(response) as Response<OutputData[]>;
+        return plainToInstance(OutputData, parsed.payload);
     }
 
     /**
@@ -667,8 +681,8 @@ export class Account {
                 name: 'pendingTransactions',
             },
         );
-        let p = JSON.parse(response) as Response<Transaction[]>;
-        return plainToInstance(Transaction, p.payload);
+        const parsed = JSON.parse(response) as Response<Transaction[]>;
+        return plainToInstance(Transaction, parsed.payload);
     }
 
     /**
@@ -682,8 +696,8 @@ export class Account {
                 name: 'incomingTransactions',
             },
         );
-        let p = JSON.parse(response) as Response<Transaction[]>;
-        return plainToInstance(Transaction, p.payload);
+        const parsed = JSON.parse(response) as Response<Transaction[]>;
+        return plainToInstance(Transaction, parsed.payload);
     }
 
     /**
@@ -697,8 +711,8 @@ export class Account {
                 name: 'transactions',
             },
         );
-        let p = JSON.parse(response) as Response<Transaction[]>;
-        return plainToInstance(Transaction, p.payload);
+        const parsed = JSON.parse(response) as Response<Transaction[]>;
+        return plainToInstance(Transaction, parsed.payload);
     }
 
     /**
@@ -714,8 +728,8 @@ export class Account {
                 data: { filterOptions },
             },
         );
-        let p = JSON.parse(response) as Response<OutputData[]>;
-        return plainToInstance(OutputData, p.payload);
+        const parsed = JSON.parse(response) as Response<OutputData[]>;
+        return plainToInstance(OutputData, parsed.payload);
     }
 
     /**
@@ -773,11 +787,11 @@ export class Account {
             },
         );
 
-        let p = JSON.parse(
+        const parsed = JSON.parse(
             response,
         ) as Response<PreparedMintTokenTransactionData>;
         return new PreparedMintTokenTransaction(
-            plainToInstance(PreparedMintTokenTransactionData, p.payload),
+            plainToInstance(PreparedMintTokenTransactionData, parsed.payload),
             this,
         );
     }
@@ -804,11 +818,11 @@ export class Account {
             },
         );
 
-        let p = JSON.parse(
+        const parsed = JSON.parse(
             response,
         ) as Response<PreparedMintTokenTransactionData>;
         return new PreparedMintTokenTransaction(
-            plainToInstance(PreparedMintTokenTransactionData, p.payload),
+            plainToInstance(PreparedMintTokenTransactionData, parsed.payload),
             this,
         );
     }
@@ -835,9 +849,11 @@ export class Account {
             },
         );
 
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, p.payload),
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
@@ -894,9 +910,11 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, p.payload),
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
@@ -922,9 +940,11 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, p.payload),
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
@@ -988,8 +1008,8 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, p.payload);
+        const parsed = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, parsed.payload);
     }
 
     /**
@@ -1013,9 +1033,11 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, p.payload),
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
@@ -1041,9 +1063,11 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, p.payload),
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
@@ -1070,8 +1094,8 @@ export class Account {
             },
         );
 
-        let p = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, p.payload);
+        const parsed = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, parsed.payload);
     }
 
     /**
@@ -1118,8 +1142,10 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<SignedTransactionEssence>;
-        return plainToInstance(SignedTransactionEssence, p.payload);
+        const parsed = JSON.parse(
+            response,
+        ) as Response<SignedTransactionEssence>;
+        return plainToInstance(SignedTransactionEssence, parsed.payload);
     }
 
     /**
@@ -1139,8 +1165,8 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, p.payload);
+        const parsed = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, parsed.payload);
     }
 
     /**
@@ -1160,8 +1186,8 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, p.payload);
+        const parsed = JSON.parse(response) as Response<Transaction>;
+        return plainToInstance(Transaction, parsed.payload);
     }
 
     /**
@@ -1199,9 +1225,11 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, p.payload),
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
@@ -1218,9 +1246,11 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, p.payload),
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
@@ -1255,9 +1285,11 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, p.payload),
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }
@@ -1274,9 +1306,11 @@ export class Account {
                 },
             },
         );
-        let p = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, p.payload),
+            plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
     }

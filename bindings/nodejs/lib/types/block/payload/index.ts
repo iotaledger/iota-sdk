@@ -26,8 +26,6 @@ export const PayloadDiscriminator = {
     ],
 };
 
-
-
 export function parsePayload(data: any): Payload {
     if (data.type == PayloadType.Milestone) {
         return plainToInstance(

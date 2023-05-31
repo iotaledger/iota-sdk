@@ -30,6 +30,4 @@ abstract class Payload {
     }
 }
 
-
-
 export { PayloadType, Payload };
