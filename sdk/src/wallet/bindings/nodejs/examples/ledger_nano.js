@@ -1,4 +1,4 @@
-const path = require('path')
+const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const { AccountManager, CoinType } = require('@iota/wallet');
 
@@ -12,7 +12,7 @@ async function run() {
         initLogger({
             name: './wallet.log',
             levelFilter: 'debug',
-            targetExclusions: ["h2", "hyper", "rustls"]
+            targetExclusions: ['h2', 'hyper', 'rustls'],
         });
 
         const manager = new AccountManager({
@@ -31,9 +31,8 @@ async function run() {
         });
         console.log('Account:', account);
 
-        const address = await account.generateAddress();
+        const address = await account.generateEd25519Address();
         console.log('New address:', address);
-
     } catch (error) {
         console.log('Error: ', error);
     }

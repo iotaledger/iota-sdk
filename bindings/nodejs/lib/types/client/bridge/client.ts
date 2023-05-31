@@ -44,8 +44,8 @@ export interface __GetOutputsMethod__ {
     };
 }
 
-export interface __GenerateAddressesMethod__ {
-    name: 'generateAddresses';
+export interface __GenerateEd25519AddressesMethod__ {
+    name: 'generateEd25519Addresses';
     data: {
         secretManager: SecretManagerType;
         options: IGenerateAddressesOptions;

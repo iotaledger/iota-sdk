@@ -127,12 +127,12 @@ export class Client {
     }
 
     /** Generate addresses */
-    async generateAddresses(
+    async generateEd25519Addresses(
         secretManager: SecretManagerType,
         generateAddressesOptions: IGenerateAddressesOptions,
     ): Promise<string[]> {
         const response = await this.methodHandler.callMethod({
-            name: 'generateAddresses',
+            name: 'generateEd25519Addresses',
             data: {
                 secretManager,
                 options: generateAddressesOptions,

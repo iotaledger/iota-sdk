@@ -8,8 +8,15 @@ import type {
 } from '../../client/preparedTransactionData';
 import { HexEncodedString } from '../../utils';
 
-export interface __GenerateAddressesMethod__ {
-    name: 'generateAddresses';
+export interface __GenerateEd25519AddressesMethod__ {
+    name: 'generateEd25519Addresses';
+    data: {
+        options: IGenerateAddressesOptions;
+    };
+}
+
+export interface __GenerateEvmAddressesMethod__ {
+    name: 'generateEvmAddresses';
     data: {
         options: IGenerateAddressesOptions;
     };

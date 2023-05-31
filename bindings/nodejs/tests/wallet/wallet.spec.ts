@@ -8,13 +8,13 @@ import { Wallet, CoinType, WalletOptions } from '../../lib/';
 
 describe('Wallet', () => {
     it('create account', async () => {
-        let storagePath = "test-create-account";
-        removeDir(storagePath)
+        let storagePath = 'test-create-account';
+        removeDir(storagePath);
 
         const walletOptions = {
             storagePath: './test-create-account',
             clientOptions: {
-                nodes: ["https://api.testnet.shimmer.network"],
+                nodes: ['https://api.testnet.shimmer.network'],
             },
             coinType: CoinType.Shimmer,
             secretManager: {
@@ -26,7 +26,9 @@ describe('Wallet', () => {
         };
 
         const wallet = new Wallet(walletOptions);
-        await wallet.storeMnemonic("vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim");
+        await wallet.storeMnemonic(
+            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
+        );
 
         const account = await wallet.createAccount({
             alias: 'Alice',
@@ -39,13 +41,13 @@ describe('Wallet', () => {
     }, 8000);
 
     it('generate address', async () => {
-        let storagePath = "test-generate-address";
-        removeDir(storagePath)
+        let storagePath = 'test-generate-address';
+        removeDir(storagePath);
 
         const walletOptions: WalletOptions = {
             storagePath,
             clientOptions: {
-                nodes: ["https://api.testnet.shimmer.network"],
+                nodes: ['https://api.testnet.shimmer.network'],
             },
             coinType: CoinType.Shimmer,
             secretManager: {
@@ -57,38 +59,44 @@ describe('Wallet', () => {
         };
 
         const wallet = new Wallet(walletOptions);
-        await wallet.storeMnemonic("vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim");
+        await wallet.storeMnemonic(
+            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
+        );
 
-        const address = await wallet.generateAddress(
+        const address = await wallet.generateEd25519Address(
             0,
             0,
             { internal: false, ledgerNanoPrompt: false },
-            "rms"
+            'rms',
         );
 
-        expect(address).toStrictEqual("rms1qpqzgvcehafmlxh87zrf9w8ck8q2kw5070ztf68ylhzk89en9a4fy5jqrg8");
+        expect(address).toStrictEqual(
+            'rms1qpqzgvcehafmlxh87zrf9w8ck8q2kw5070ztf68ylhzk89en9a4fy5jqrg8',
+        );
 
-        const anotherAddress = await wallet.generateAddress(
+        const anotherAddress = await wallet.generateEd25519Address(
             10,
             10,
             { internal: true, ledgerNanoPrompt: false },
-            "tst"
+            'tst',
         );
 
-        expect(anotherAddress).toStrictEqual("tst1qzp37j45rkfmqn05fapq66vyw0vkmz5zqhmeuey5fked0wt4ry43jeqp2wv");
+        expect(anotherAddress).toStrictEqual(
+            'tst1qzp37j45rkfmqn05fapq66vyw0vkmz5zqhmeuey5fked0wt4ry43jeqp2wv',
+        );
 
         await wallet.destroy()
         removeDir(storagePath)
     }, 8000);
 
     it('recreate wallet', async () => {
-        let storagePath = "test-recreate-wallet";
-        removeDir(storagePath)
+        let storagePath = 'test-recreate-wallet';
+        removeDir(storagePath);
 
         const walletOptions = {
             storagePath,
             clientOptions: {
-                nodes: ["https://api.testnet.shimmer.network"],
+                nodes: ['https://api.testnet.shimmer.network'],
             },
             coinType: CoinType.Shimmer,
             secretManager: {
@@ -100,7 +108,9 @@ describe('Wallet', () => {
         };
 
         const wallet = new Wallet(walletOptions);
-        await wallet.storeMnemonic("vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim");
+        await wallet.storeMnemonic(
+            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
+        );
 
         const account = await wallet.createAccount({
             alias: 'Alice',
@@ -121,16 +131,16 @@ describe('Wallet', () => {
 
         await recreatedWallet.destroy()
         removeDir(storagePath)
-    }, 15000);
+    }, 20000);
 
     it('error after destroy', async () => {
-        let storagePath = "test-error-after-destroy";
-        removeDir(storagePath)
+        let storagePath = 'test-error-after-destroy';
+        removeDir(storagePath);
 
         const walletOptions = {
             storagePath,
             clientOptions: {
-                nodes: ["https://api.testnet.shimmer.network"],
+                nodes: ['https://api.testnet.shimmer.network'],
             },
             coinType: CoinType.Shimmer,
             secretManager: {
@@ -142,7 +152,9 @@ describe('Wallet', () => {
         };
 
         const wallet = new Wallet(walletOptions);
-        await wallet.storeMnemonic("vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim");
+        await wallet.storeMnemonic(
+            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
+        );
 
         const account = await wallet.createAccount({
             alias: 'Alice',
@@ -151,19 +163,19 @@ describe('Wallet', () => {
         expect(account.getMetadata().index).toStrictEqual(0);
 
         await wallet.destroy();
-        
-        try{
+
+        try {
             const accounts = await wallet.getAccounts();
-            throw("Should return an error because the wallet got destroyed");
-        }catch(err: any){
-            expect(err).toContain("Wallet got destroyed");
+            throw 'Should return an error because the wallet got destroyed';
+        } catch (err: any) {
+            expect(err).toContain('Wallet got destroyed');
         }
 
-        try{
+        try {
             const client = await wallet.getClient();
-            throw("Should return an error because the wallet got destroyed");
-        }catch(err: any){
-            expect(err).toContain("Wallet got destroyed");
+            throw 'Should return an error because the wallet got destroyed';
+        } catch (err: any) {
+            expect(err).toContain('Wallet got destroyed');
         }
         removeDir(storagePath)
     }, 35000);

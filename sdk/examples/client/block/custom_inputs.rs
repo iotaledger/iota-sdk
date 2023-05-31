@@ -8,8 +8,8 @@
 
 use iota_sdk::{
     client::{
-        node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet, secret::SecretManager, Client,
-        Result,
+        api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
+        secret::SecretManager, Client, Result,
     },
     types::block::input::UtxoInput,
 };
@@ -32,7 +32,9 @@ async fn main() -> Result<()> {
     let secret_manager =
         SecretManager::try_from_hex_seed(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_SEED_1").unwrap())?;
 
-    let addresses = client.get_addresses(&secret_manager).with_range(0..1).finish().await?;
+    let addresses = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .await?;
     println!("{:?}", addresses[0]);
 
     println!("{}", request_funds_from_faucet(&faucet_url, &addresses[0]).await?);

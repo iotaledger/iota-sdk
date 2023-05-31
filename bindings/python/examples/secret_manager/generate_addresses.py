@@ -12,12 +12,12 @@ if 'NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1' not in os.environ:
 secret_manager = SecretManager(MnemonicSecretManager(os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1']))
 
 # Generate public address with default account index and range.
-addresses = secret_manager.generate_addresses()
+addresses = secret_manager.generate_ed25519_addresses()
 
 print('List of generated public addresses:', *addresses, sep='\n')
 print()
 
-addresses = secret_manager.generate_addresses( 
+addresses = secret_manager.generate_ed25519_addresses( 
     coin_type=CoinType.SHIMMER,
     account_index=0,
     start=0,
