@@ -309,7 +309,7 @@ Before contributing, please read and adhere to the [code of conduct](/.github/CO
 ## License
 
 The iota-sdk is open-source software licensed under Apache License 2.0. For more information, please read
-the [LICENSE.md](/.github/LICENSE.md)
+the [LICENSE](/.github/LICENSE.md)
 
 ## Acknowledgments
 
