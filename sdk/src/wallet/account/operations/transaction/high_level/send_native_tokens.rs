@@ -63,10 +63,7 @@ impl SendNativeTokensParams {
     }
 
     /// Set the return address
-    pub fn try_with_return_address(
-        mut self,
-        return_address: impl Bech32AddressLike,
-    ) -> Result<Self> {
+    pub fn try_with_return_address(mut self, return_address: impl Bech32AddressLike) -> Result<Self> {
         self.return_address = Some(return_address.to_bech32()?);
         Ok(self)
     }
