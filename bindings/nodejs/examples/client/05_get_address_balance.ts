@@ -52,11 +52,7 @@ async function run() {
         let totalAmount = 0;
         const totalNativeTokens: { [id: string]: number } = {};
         for (const outputResponse of addressOutputs) {
-            console.log(outputResponse);
-            console.log(outputResponse.output);
-
             const output = outputResponse['output'];
-
             if (output instanceof CommonOutput) {
                 (output as CommonOutput)
                     .getNativeTokens()
