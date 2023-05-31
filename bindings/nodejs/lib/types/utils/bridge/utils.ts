@@ -2,7 +2,7 @@ import {
     Ed25519Address,
     Ed25519Signature,
     HexEncodedString,
-    IBlock,
+    Block,
     TransactionEssence,
 } from '../../';
 
@@ -50,7 +50,7 @@ export interface __ParseBech32AddressMethod__ {
 export interface __BlockIdMethod__ {
     name: 'blockId';
     data: {
-        block: IBlock;
+        block: Block;
     };
 }
 

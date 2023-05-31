@@ -1,7 +1,7 @@
 import type { SecretManagerType } from '../../secretManager/secretManager';
 import type { IGenerateAddressesOptions } from '../generateAddressesOptions';
 import type { IBuildBlockOptions } from '../buildBlockOptions';
-import type { BlockId, Payload } from '../../block';
+import type { Block, BlockId, Payload } from '../../block';
 import type {
     PreparedTransactionData,
     IBip32Chain,
@@ -17,7 +17,6 @@ import type { BasicOutputBuilderParams } from '../outputBuilderParams/basicOutpu
 import type { AliasOutputBuilderParams } from '../outputBuilderParams/aliasOutputParams';
 import type { FoundryOutputBuilderParams } from '../outputBuilderParams/foundryOutputParams';
 import type { NftOutputBuilderParams } from '../outputBuilderParams/nftOutputParams';
-import { IBlock } from '../../block/IBlock';
 import { HexEncodedString } from '../../utils';
 
 export interface __GetInfoMethod__ {
@@ -56,7 +55,7 @@ export interface __GenerateAddressesMethod__ {
 export interface __PostBlockMethod__ {
     name: 'postBlock';
     data: {
-        block: IBlock;
+        block: Block;
     };
 }
 
@@ -192,7 +191,7 @@ export interface __GetPeersMethod__ {
 export interface __PostBlockRawMethod__ {
     name: 'postBlockRaw';
     data: {
-        block: IBlock;
+        block: Block;
     };
 }
 

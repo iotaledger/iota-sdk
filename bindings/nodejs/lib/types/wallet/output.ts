@@ -3,7 +3,7 @@
 
 import { Type } from 'class-transformer';
 import { Address, AddressDiscriminator } from '../block/address';
-import { Output, OutputDiscriminator } from '../block/output';
+import { Output, OutputDiscriminator, OutputId } from '../block/output';
 import { IOutputMetadataResponse } from '../models/api';
 
 /** Output to claim */
@@ -46,5 +46,3 @@ export interface Segment {
     hardened: boolean;
     bs: Uint8Array;
 }
-
-export type OutputId = string;

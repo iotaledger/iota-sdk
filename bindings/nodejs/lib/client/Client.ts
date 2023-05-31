@@ -18,7 +18,6 @@ import {
     FoundryQueryParameter,
     NftQueryParameter,
     AliasQueryParameter,
-    OutputIdsResponse,
     IBip32Chain,
 } from '../types/client';
 import type { INodeInfoWrapper } from '../types/client/nodeInfo';
@@ -28,6 +27,7 @@ import {
     BasicOutput,
     FoundryOutput,
     NftOutput,
+    Block,
     BlockId,
     UnlockCondition,
     Payload,
@@ -36,7 +36,6 @@ import {
     Output,
     parsePayload,
 } from '../types/block';
-import { IBlock } from '../types/block/IBlock';
 import { HexEncodedString } from '../utils';
 import {
     IBlockMetadata,
@@ -45,11 +44,13 @@ import {
     IPeer,
     UTXOInput,
     Response,
+    OutputId,
 } from '../types';
 import {
     IMilestoneUtxoChangesResponse,
     OutputResponse,
     ReceiptsResponse,
+    IOutputsResponse,
 } from '../types/models/api';
 
 import { plainToInstance } from 'class-transformer';
@@ -88,7 +89,7 @@ export class Client {
     /** Fetch basic output IDs based on query parameters */
     async basicOutputIds(
         queryParameters: QueryParameter[],
-    ): Promise<OutputIdsResponse> {
+    ): Promise<IOutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'basicOutputIds',
             data: {
@@ -100,7 +101,7 @@ export class Client {
     }
 
     /** Get output from a known outputID */
-    async getOutput(outputId: string): Promise<OutputResponse> {
+    async getOutput(outputId: OutputId): Promise<OutputResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getOutput',
             data: {
@@ -113,7 +114,7 @@ export class Client {
     }
 
     /** Fetch OutputResponse from provided OutputIds (requests are sent in parallel) */
-    async getOutputs(outputIds: string[]): Promise<OutputResponse[]> {
+    async getOutputs(outputIds: OutputId[]): Promise<OutputResponse[]> {
         const response = await this.methodHandler.callMethod({
             name: 'getOutputs',
             data: {
@@ -145,7 +146,7 @@ export class Client {
     async buildAndPostBlock(
         secretManager?: SecretManagerType,
         options?: IBuildBlockOptions,
-    ): Promise<[BlockId, IBlock]> {
+    ): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
             name: 'buildAndPostBlock',
             data: {
@@ -171,7 +172,7 @@ export class Client {
     /**
      * Post block in JSON format, returns the block ID.
      */
-    async postBlock(block: IBlock): Promise<BlockId> {
+    async postBlock(block: Block): Promise<BlockId> {
         const response = await this.methodHandler.callMethod({
             name: 'postBlock',
             data: {
@@ -185,7 +186,7 @@ export class Client {
     /**
      * Get block as JSON.
      */
-    async getBlock(blockId: BlockId): Promise<IBlock> {
+    async getBlock(blockId: BlockId): Promise<Block> {
         const response = await this.methodHandler.callMethod({
             name: 'getBlock',
             data: {
@@ -193,8 +194,8 @@ export class Client {
             },
         });
 
-        const parsed = JSON.parse(response) as Response<IBlock>;
-        return plainToInstance(IBlock, parsed.payload);
+        const parsed = JSON.parse(response) as Response<Block>;
+        return plainToInstance(Block, parsed.payload);
     }
 
     /**
@@ -312,7 +313,7 @@ export class Client {
     /**
      * Submit a payload in a block
      */
-    async postBlockPayload(payload: Payload): Promise<[BlockId, IBlock]> {
+    async postBlockPayload(payload: Payload): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
             name: 'postBlockPayload',
             data: {
@@ -461,7 +462,7 @@ export class Client {
     /**
      * Post block as raw bytes, returns the block ID.
      */
-    async postBlockRaw(block: IBlock): Promise<BlockId> {
+    async postBlockRaw(block: Block): Promise<BlockId> {
         const response = await this.methodHandler.callMethod({
             name: 'postBlockRaw',
             data: {
@@ -586,29 +587,29 @@ export class Client {
     /**
      * Returns the included block of the transaction.
      */
-    async getIncludedBlock(transactionId: string): Promise<IBlock> {
+    async getIncludedBlock(transactionId: string): Promise<Block> {
         const response = await this.methodHandler.callMethod({
             name: 'getIncludedBlock',
             data: {
                 transactionId,
             },
         });
-        const parsed = JSON.parse(response) as Response<IBlock>;
-        return plainToInstance(IBlock, parsed.payload);
+        const parsed = JSON.parse(response) as Response<Block>;
+        return plainToInstance(Block, parsed.payload);
     }
 
     /**
      * Returns the metadata of the included block of the transaction.
      */
-    async getIncludedBlockMetadata(transactionId: string): Promise<IBlock> {
+    async getIncludedBlockMetadata(transactionId: string): Promise<Block> {
         const response = await this.methodHandler.callMethod({
             name: 'getIncludedBlockMetadata',
             data: {
                 transactionId,
             },
         });
-        const parsed = JSON.parse(response) as Response<IBlock>;
-        return plainToInstance(IBlock, parsed.payload);
+        const parsed = JSON.parse(response) as Response<Block>;
+        return plainToInstance(Block, parsed.payload);
     }
 
     /**
@@ -682,7 +683,7 @@ export class Client {
      */
     async aliasOutputIds(
         queryParameters: AliasQueryParameter[],
-    ): Promise<OutputIdsResponse> {
+    ): Promise<IOutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'aliasOutputIds',
             data: {
@@ -712,7 +713,7 @@ export class Client {
      */
     async nftOutputIds(
         queryParameters: NftQueryParameter[],
-    ): Promise<OutputIdsResponse> {
+    ): Promise<IOutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'nftOutputIds',
             data: {
@@ -742,7 +743,7 @@ export class Client {
      */
     async foundryOutputIds(
         queryParameters: FoundryQueryParameter[],
-    ): Promise<OutputIdsResponse> {
+    ): Promise<IOutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'foundryOutputIds',
             data: {
@@ -787,22 +788,22 @@ export class Client {
     /**
      * Find all blocks by provided block IDs.
      */
-    async findBlocks(blockIds: BlockId[]): Promise<IBlock[]> {
+    async findBlocks(blockIds: BlockId[]): Promise<Block[]> {
         const response = await this.methodHandler.callMethod({
             name: 'findBlocks',
             data: {
                 blockIds,
             },
         });
-        const parsed = JSON.parse(response) as Response<IBlock[]>;
-        return plainToInstance(IBlock, parsed.payload);
+        const parsed = JSON.parse(response) as Response<Block[]>;
+        return plainToInstance(Block, parsed.payload);
     }
 
     /**
      * Retries (promotes or reattaches) a block for provided block id. Block should be
      * retried only if they are valid and haven't been confirmed for a while.
      */
-    async retry(blockId: BlockId): Promise<[BlockId, IBlock]> {
+    async retry(blockId: BlockId): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
             name: 'retry',
             data: {
@@ -822,7 +823,7 @@ export class Client {
         blockId: BlockId,
         interval?: number,
         maxAttempts?: number,
-    ): Promise<[BlockId, IBlock][]> {
+    ): Promise<[BlockId, Block][]> {
         const response = await this.methodHandler.callMethod({
             name: 'retryUntilIncluded',
             data: {
@@ -858,7 +859,7 @@ export class Client {
      * Reattaches blocks for provided block id. Blocks can be reattached only if they are valid and haven't been
      * confirmed for a while.
      */
-    async reattach(blockId: BlockId): Promise<[BlockId, IBlock]> {
+    async reattach(blockId: BlockId): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
             name: 'reattach',
             data: {
@@ -872,7 +873,7 @@ export class Client {
     /**
      * Reattach a block without checking if it should be reattached
      */
-    async reattachUnchecked(blockId: BlockId): Promise<[BlockId, IBlock]> {
+    async reattachUnchecked(blockId: BlockId): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
             name: 'reattachUnchecked',
             data: {
@@ -887,7 +888,7 @@ export class Client {
      * Promotes a block. The method should validate if a promotion is necessary through get_block. If not, the
      * method should error out and should not allow unnecessary promotions.
      */
-    async promote(blockId: BlockId): Promise<[BlockId, IBlock]> {
+    async promote(blockId: BlockId): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
             name: 'promote',
             data: {
@@ -900,7 +901,7 @@ export class Client {
     /**
      * Promote a block without checking if it should be promoted
      */
-    async promoteUnchecked(blockId: BlockId): Promise<[BlockId, IBlock]> {
+    async promoteUnchecked(blockId: BlockId): Promise<[BlockId, Block]> {
         const response = await this.methodHandler.callMethod({
             name: 'promoteUnchecked',
             data: {

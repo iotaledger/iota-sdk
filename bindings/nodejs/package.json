@@ -14,7 +14,7 @@
         "prebuild": "prebuild --runtime napi --target 6 --prepack scripts/neon-build.js --strip",
         "rebuild": "node scripts/neon-build && tsc && node scripts/strip.js",
         "install": "prebuild-install --runtime napi --tag-prefix='sdk-binding-v' && tsc || npm run rebuild",
-        "test": "jest --forceExit"
+        "test": "jest --forceExit --detectOpenHandles"
     },
     "author": "IOTA Foundation <contact@iota.org>",
     "license": "Apache-2.0",

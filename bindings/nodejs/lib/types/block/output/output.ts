@@ -13,6 +13,8 @@ import { HexEncodedString } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token_scheme';
 import { INativeToken } from '../../models';
 
+export type OutputId = string;
+
 /**
  * All of the output types.
  */

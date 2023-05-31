@@ -8,7 +8,7 @@ import {
     Ed25519Address,
     BlockId,
     HexEncodedString,
-    IBlock,
+    Block,
     Ed25519Signature,
     TransactionEssence,
     Response,
@@ -97,7 +97,7 @@ export class Utils {
     /**
      * Returns a block ID (Blake2b256 hash of the block bytes)
      */
-    static blockId(block: IBlock): BlockId {
+    static blockId(block: Block): BlockId {
         return callUtilsMethod({
             name: 'blockId',
             data: {

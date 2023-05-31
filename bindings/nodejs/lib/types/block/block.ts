@@ -4,14 +4,11 @@
 import type { HexEncodedString } from '../utils/hexEncodedTypes';
 import { Payload, PayloadDiscriminator } from './payload';
 import { Type } from 'class-transformer';
-/**
- * The default protocol version.
- */
-export declare const DEFAULT_PROTOCOL_VERSION: number;
+
 /**
  * Block layout.
  */
-export class IBlock {
+export class Block {
     /**
      * The protocol version under which this block operates.
      */

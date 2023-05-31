@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { Client } from '../../lib/client';
 import '../customMatchers';
 import 'dotenv/config';

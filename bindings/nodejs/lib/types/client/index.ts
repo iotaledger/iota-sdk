@@ -8,7 +8,6 @@ export * from './ledgerNanoStatus';
 export * from './network';
 export * from './nodeInfo';
 export * from './outputBuilderParams';
-export * from './outputIdsResponse';
 export * from './preparedMintTokenTransactionData';
 export * from './preparedTransactionData';
 export * from './queryParameters';

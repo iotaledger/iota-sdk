@@ -7,5 +7,5 @@ export * from './payload/index';
 
 export * from './address';
 export * from './blockId';
-export * from './IBlock';
+export * from './block';
 export * from './signature';

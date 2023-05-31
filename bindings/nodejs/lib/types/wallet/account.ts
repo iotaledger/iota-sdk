@@ -6,7 +6,7 @@ import type { OutputData } from './output';
 import type { Transaction } from './transaction';
 import { CoinType } from '../../client';
 import { TransactionPayload } from '../block/payload/transaction';
-import { HexEncodedAmount } from '../utils';
+import { HexEncodedAmount, HexEncodedString } from '../utils';
 import { OutputResponse } from '../models/api';
 
 /**
@@ -56,7 +56,7 @@ export interface RequiredStorageDeposit {
 
 /** The balance of a native token */
 export interface NativeTokenBalance {
-    tokenId: string;
+    tokenId: HexEncodedString;
     metadata?: string;
     total: HexEncodedAmount;
     available: HexEncodedAmount;
