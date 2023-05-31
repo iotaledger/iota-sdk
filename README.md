@@ -189,7 +189,7 @@ async fn main() -> Result<()> {
 
 #### Node.js
 
-```nodejs
+```javascript
 import { initLogger, Wallet, CoinType, WalletOptions } from '@iota/sdk';
 
 const walletOptions: WalletOptions = {
@@ -261,7 +261,7 @@ let client = Client::builder()
 
 #### Node.js
 
-```nodejs
+```javascript
 import { Client } from '@iota/sdk';
 
 const client = new Client({nodes: "https://api.testnet.shimmer.network/"});
