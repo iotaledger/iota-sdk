@@ -166,19 +166,12 @@ impl WalletBuilder {
             self.secret_manager.replace(secret_manager);
         }
 
-        let coin_type = self
-            .coin_type
-            .or_else(|| {
-                let coin_type = read_manager_builder.and_then(|data| data.coin_type);
-                if let Some(coin_type) = coin_type {
-                    // Update self so it gets stored
-                    self.coin_type.replace(coin_type);
-                }
-                coin_type
-            })
-            .ok_or(crate::wallet::Error::MissingParameter(
-                "coin_type (IOTA: 4218, Shimmer: 4219)",
-            ))?;
+        if self.coin_type.is_none() {
+            self.coin_type = read_manager_builder.and_then(|builder| builder.coin_type);
+        }
+        let coin_type = self.coin_type.ok_or(crate::wallet::Error::MissingParameter(
+            "coin_type (IOTA: 4218, Shimmer: 4219)",
+        ))?;
 
         #[cfg(feature = "storage")]
         let mut accounts = storage_manager.get_accounts().await?;
