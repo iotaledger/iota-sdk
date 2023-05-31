@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::api::PreparedTransactionData,
     types::block::{
-        address::Bech32Address,
+        address::{Bech32Address, Bech32AddressLike},
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::AddressUnlockCondition,
@@ -53,17 +53,14 @@ impl MintNftParams {
 
     pub fn with_address(
         mut self,
-        address: Option<impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>>,
+        address: Option<impl Bech32AddressLike>,
     ) -> Result<Self, crate::wallet::error::Error> {
-        self.address = address.map(|v| v.try_into().map_err(Into::into)).transpose()?;
+        self.address = address.map(|v| v.to_bech32()).transpose()?;
         Ok(self)
     }
 
-    pub fn with_sender(
-        mut self,
-        sender: Option<impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>>,
-    ) -> Result<Self, crate::wallet::error::Error> {
-        self.sender = sender.map(|v| v.try_into().map_err(Into::into)).transpose()?;
+    pub fn with_sender(mut self, sender: Option<impl Bech32AddressLike>) -> Result<Self, crate::wallet::error::Error> {
+        self.sender = sender.map(|v| v.to_bech32()).transpose()?;
         Ok(self)
     }
 
@@ -77,11 +74,8 @@ impl MintNftParams {
         self
     }
 
-    pub fn with_issuer(
-        mut self,
-        issuer: Option<impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>>,
-    ) -> Result<Self, crate::wallet::error::Error> {
-        self.issuer = issuer.map(|v| v.try_into().map_err(Into::into)).transpose()?;
+    pub fn with_issuer(mut self, issuer: Option<impl Bech32AddressLike>) -> Result<Self, crate::wallet::error::Error> {
+        self.issuer = issuer.map(|v| v.to_bech32()).transpose()?;
         Ok(self)
     }
 

@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::api::PreparedTransactionData,
     types::block::{
-        address::Bech32Address,
+        address::{Bech32Address, Bech32AddressLike},
         output::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
@@ -50,12 +50,9 @@ pub struct SendAmountParams {
 }
 
 impl SendAmountParams {
-    pub fn new(
-        address: impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>,
-        amount: u64,
-    ) -> Result<Self, crate::wallet::Error> {
+    pub fn new(address: impl Bech32AddressLike, amount: u64) -> Result<Self, crate::wallet::Error> {
         Ok(Self {
-            address: address.try_into().map_err(Into::into)?,
+            address: address.to_bech32()?,
             amount,
             return_address: None,
             expiration: None,

@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::api::PreparedTransactionData,
     types::block::{
-        address::Bech32Address,
+        address::{Bech32Address, Bech32AddressLike},
         output::{unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
     },
     wallet::account::{operations::transaction::Transaction, Account, TransactionOptions},
@@ -28,11 +28,11 @@ pub struct SendNftParams {
 impl SendNftParams {
     /// Creates a  new instance of [`SendNftParams`]
     pub fn new(
-        address: impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>,
+        address: impl Bech32AddressLike,
         nft_id: impl TryInto<NftId, Error = impl Into<crate::wallet::Error>>,
     ) -> Result<Self, crate::wallet::Error> {
         Ok(Self {
-            address: address.try_into().map_err(Into::into)?,
+            address: address.to_bech32()?,
             nft_id: nft_id.try_into().map_err(Into::into)?,
         })
     }

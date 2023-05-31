@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::api::PreparedTransactionData,
     types::block::{
-        address::Bech32Address,
+        address::{Bech32Address, Bech32AddressLike},
         output::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
@@ -51,11 +51,11 @@ pub struct SendNativeTokensParams {
 impl SendNativeTokensParams {
     /// Creates a  new instance of [`SendNativeTokensParams`]
     pub fn new(
-        address: impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>,
+        address: impl Bech32AddressLike,
         native_tokens: impl IntoIterator<Item = (TokenId, U256)>,
     ) -> Result<Self> {
         Ok(Self {
-            address: address.try_into().map_err(Into::into)?,
+            address: address.to_bech32()?,
             native_tokens: native_tokens.into_iter().collect(),
             return_address: None,
             expiration: None,
@@ -63,11 +63,8 @@ impl SendNativeTokensParams {
     }
 
     /// Set the return address
-    pub fn with_return_address(
-        mut self,
-        return_address: Option<impl TryInto<Bech32Address, Error = impl Into<crate::wallet::Error>>>,
-    ) -> Result<Self> {
-        self.return_address = return_address.map(|v| v.try_into().map_err(Into::into)).transpose()?;
+    pub fn with_return_address(mut self, return_address: Option<impl Bech32AddressLike>) -> Result<Self> {
+        self.return_address = return_address.map(|v| v.to_bech32()).transpose()?;
         Ok(self)
     }
 
