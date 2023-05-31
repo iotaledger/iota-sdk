@@ -10,8 +10,7 @@ use crate::{
 impl InputSelection {
     // Checks if a selected input unlocks a given ED25519 address.
     fn selected_unlocks_ed25519_address(&self, input: &InputSigningData, address: &Address) -> bool {
-        let alias_transition = is_alias_transition(&input.output, *input.output_id(), self.outputs.as_slice())
-            .map(|(alias_transition, _)| alias_transition);
+        let alias_transition = is_alias_transition(&input.output, *input.output_id(), self.outputs.as_slice(), None);
 
         // PANIC: safe to unwrap as outputs with no address have been filtered out already.
         let required_address = input

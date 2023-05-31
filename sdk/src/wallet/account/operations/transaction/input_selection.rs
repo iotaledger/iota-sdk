@@ -73,6 +73,7 @@ impl Account {
             account_details.unspent_outputs.values(),
             current_time,
             &outputs,
+            burn,
             custom_inputs.as_ref(),
             mandatory_inputs.as_ref(),
         )?;
@@ -223,6 +224,7 @@ fn filter_inputs(
     available_outputs: Values<'_, OutputId, OutputData>,
     current_time: u32,
     outputs: &[Output],
+    burn: Option<&Burn>,
     custom_inputs: Option<&HashSet<OutputId>>,
     mandatory_inputs: Option<&HashSet<OutputId>>,
 ) -> crate::wallet::Result<Vec<InputSigningData>> {
@@ -251,8 +253,7 @@ fn filter_inputs(
         }
 
         // Defaults to state transition if it is not explicitly a governance transition or a burn.
-        let alias_state_transition =
-            is_alias_transition(&output_data.output, output_data.output_id, outputs).map(|(a, _)| a);
+        let alias_state_transition = is_alias_transition(&output_data.output, output_data.output_id, outputs, burn);
 
         if let Some(available_input) = output_data.input_signing_data(account, current_time, alias_state_transition)? {
             available_outputs_signing_data.push(available_input);
