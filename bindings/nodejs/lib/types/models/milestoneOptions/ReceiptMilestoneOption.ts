@@ -3,7 +3,7 @@
 
 import { Type } from 'class-transformer';
 import { TreasuryTransactionPayload } from '../../block/payload/treasury/treasury';
-import { IMigratedFunds } from '../IMigratedFunds';
+import { MigratedFunds } from '../migratedFunds';
 import { MilestoneOption, MilestoneOptionType } from './milestoneOptions';
 
 /**
@@ -21,8 +21,8 @@ export class ReceiptMilestoneOption extends MilestoneOption {
     /**
      * The index data.
      */
-    @Type(() => IMigratedFunds)
-    funds: IMigratedFunds[];
+    @Type(() => MigratedFunds)
+    funds: MigratedFunds[];
     /**
      * The TreasuryTransaction used to fund the funds.
      */
@@ -32,7 +32,7 @@ export class ReceiptMilestoneOption extends MilestoneOption {
     constructor(
         migratedAt: number,
         final: boolean,
-        funds: IMigratedFunds[],
+        funds: MigratedFunds[],
         transaction: TreasuryTransactionPayload,
     ) {
         super(MilestoneOptionType.Receipt);

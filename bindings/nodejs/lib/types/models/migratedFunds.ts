@@ -7,7 +7,7 @@ import type { HexEncodedString } from '../utils/hexEncodedTypes';
 /**
  * The migrated funds for receipts.
  */
-export class IMigratedFunds {
+export class MigratedFunds {
     /**
      * The tail transaction hash of the migration bundle.
      */

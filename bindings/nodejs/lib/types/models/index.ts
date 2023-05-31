@@ -9,7 +9,7 @@ export * from './conflictReason';
 export * from './IBlockMetadata';
 export * from './IGossipMetrics';
 export * from './IGossipHeartbeat';
-export * from './IMigratedFunds';
+export * from './migratedFunds';
 export * from './INativeToken';
 export * from './IPeer';
 export * from './IRent';

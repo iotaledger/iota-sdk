@@ -109,7 +109,7 @@ describe.skip('Main examples', () => {
     });
 
     it('calculates the balance of an address', () => {
-        const testOutputs = addressOutputs as OutputResponse[];
+        const testOutputs = addressOutputs as unknown as OutputResponse[];
 
         // Calculate the total amount and native tokens
         let totalAmount = 0;

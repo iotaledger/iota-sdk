@@ -1,7 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-const { Wallet, CoinType } = require('../../lib/');
+import 'reflect-metadata';
+
+import { describe, it, expect } from '@jest/globals';
+import { Wallet, CoinType, WalletOptions } from '../../lib/';
 
 describe('Wallet', () => {
     it('create account', async () => {
@@ -15,8 +18,8 @@ describe('Wallet', () => {
             },
             coinType: CoinType.Shimmer,
             secretManager: {
-                Stronghold: {
-                    snapshotPath: `./test-create-account/wallet.stronghold`,
+                stronghold: {
+                    snapshotPath: `./${storagePath}/wallet.stronghold`,
                     password: `A12345678*`,
                 },
             },
@@ -33,21 +36,21 @@ describe('Wallet', () => {
 
         await wallet.destroy()
         removeDir(storagePath)
-    });
+    }, 8000);
 
     it('generate address', async () => {
         let storagePath = "test-generate-address";
         removeDir(storagePath)
 
-        const walletOptions = {
+        const walletOptions: WalletOptions = {
             storagePath,
             clientOptions: {
                 nodes: ["https://api.testnet.shimmer.network"],
             },
             coinType: CoinType.Shimmer,
             secretManager: {
-                Stronghold: {
-                    snapshotPath: `./test-generate-address/wallet.stronghold`,
+                stronghold: {
+                    snapshotPath: `./${storagePath}/wallet.stronghold`,
                     password: `A12345678*`,
                 },
             },
@@ -76,7 +79,7 @@ describe('Wallet', () => {
 
         await wallet.destroy()
         removeDir(storagePath)
-    });
+    }, 8000);
 
     it('recreate wallet', async () => {
         let storagePath = "test-recreate-wallet";
@@ -89,8 +92,8 @@ describe('Wallet', () => {
             },
             coinType: CoinType.Shimmer,
             secretManager: {
-                Stronghold: {
-                    snapshotPath: `./test-create-account/wallet.stronghold`,
+                stronghold: {
+                    snapshotPath: `./${storagePath}/wallet.stronghold`,
                     password: `A12345678*`,
                 },
             },
@@ -118,7 +121,7 @@ describe('Wallet', () => {
 
         await recreatedWallet.destroy()
         removeDir(storagePath)
-    });
+    }, 15000);
 
     it('error after destroy', async () => {
         let storagePath = "test-error-after-destroy";
@@ -131,8 +134,8 @@ describe('Wallet', () => {
             },
             coinType: CoinType.Shimmer,
             secretManager: {
-                Stronghold: {
-                    snapshotPath: `./test-error-after-destroy/wallet.stronghold`,
+                stronghold: {
+                    snapshotPath: `./${storagePath}/wallet.stronghold`,
                     password: `A12345678*`,
                 },
             },
@@ -163,7 +166,7 @@ describe('Wallet', () => {
             expect(err).toContain("Wallet got destroyed");
         }
         removeDir(storagePath)
-    });
+    }, 35000);
 })
 
 function removeDir(storagePath: string) {
