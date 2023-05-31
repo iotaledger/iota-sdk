@@ -125,7 +125,7 @@ impl InputSelection {
         // PANIC: safe to unwrap as it's been checked that both can't be None at the same time.
         let input = selected_input.unwrap_or_else(|| &self.available_inputs[available_index.unwrap()]);
 
-        if is_alias_transition(&input.output, *input.output_id(), &self.outputs, None)
+        if is_alias_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref())
             == Some(AliasTransition::Governance)
         {
             return Err(Error::UnfulfillableRequirement(Requirement::Alias(

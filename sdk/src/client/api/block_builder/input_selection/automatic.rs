@@ -89,7 +89,8 @@ impl<'a> ClientBlockBuilder<'a> {
         // Assume that we own the addresses for inputs that are required for the provided outputs
         let mut available_input_addresses = Vec::new();
         for input in &available_inputs {
-            let alias_transition = is_alias_transition(&input.output, *input.output_id(), &self.outputs, None);
+            let alias_transition =
+                is_alias_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref());
             let (required_unlock_address, unlocked_alias_or_nft_address) =
                 input
                     .output
