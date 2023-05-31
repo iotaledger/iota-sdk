@@ -155,6 +155,13 @@ impl MnemonicLike for Vec<String> {
     }
 }
 
+impl MnemonicLike for [&'static str; 24] {
+    fn to_mnemonic(self) -> Result<Mnemonic, Error> {
+        let m = self.join(" ");
+        Mnemonic::try_from(m)
+    }
+}
+
 // that's only necessary to use it in `assert!` macros
 impl core::fmt::Debug for Mnemonic {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -200,5 +207,25 @@ mod tests {
             addresses[0].to_bech32_unchecked("atoi"),
             "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r"
         );
+    }
+
+    #[test]
+    fn mnemonic_like() {
+
+        assert!("giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally".to_owned().to_mnemonic().is_ok());
+        assert!([
+            "endorse", " answer", "radar", "about", "source", "reunion", "marriage", "tag", "sausage", "weekend",
+            "frost", "daring", "base", "attack", "because", "joke", "dream", "slender", "leisure", "group", "reason",
+            "prepare", "broken", "river",
+        ].collect::<Vec<String>>()
+        .to_mnemonic()
+        .is_ok());
+        assert!([
+            "endorse", " answer", "radar", "about", "source", "reunion", "marriage", "tag", "sausage", "weekend",
+            "frost", "daring", "base", "attack", "because", "joke", "dream", "slender", "leisure", "group", "reason",
+            "prepare", "broken", "river",
+        ]
+        .to_mnemonic()
+        .is_ok());
     }
 }
