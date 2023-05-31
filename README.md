@@ -140,7 +140,7 @@ pip install iota-sdk
 
 ### Wallet
 
-To use the wallet, you need to create a `Wallet`:
+To use the Wallet module, you need to create a `Wallet`:
 
 #### Rust
 
@@ -244,7 +244,7 @@ wallet = Wallet(
 
 ### Client
 
-To use the client, you simply need to create a `Client`.
+To use the Client module, you simply need to create a `Client`.
 
 #### Rust
 
