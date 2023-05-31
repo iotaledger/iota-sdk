@@ -52,7 +52,7 @@ macro_rules! impl_id {
         impl TryFrom<&alloc::string::String> for $name {
             type Error = $crate::types::block::Error;
 
-            fn try_from(s: &String) -> Result<Self, Self::Error> {
+            fn try_from(s: &alloc::string::String) -> Result<Self, Self::Error> {
                 core::str::FromStr::from_str(s.as_str())
             }
         }
