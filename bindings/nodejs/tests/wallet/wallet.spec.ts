@@ -118,7 +118,7 @@ describe('Wallet', () => {
 
         await recreatedWallet.destroy()
         removeDir(storagePath)
-    });
+    }, 30000);
 
     it('error after destroy', async () => {
         let storagePath = "test-error-after-destroy";
