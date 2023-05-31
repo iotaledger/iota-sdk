@@ -18,7 +18,6 @@ The `client` module is stateless. It aims to provide more flexibility and access
 - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Dependencies](#dependencies)
-    - [Linux](#linux)
 - [Install the iota-sdk](#install-the-iota-sdk)
     - [Rust](#rust)
     - [Node.js](#nodejs)
@@ -106,7 +105,7 @@ You can install `cmake` and `openssl` with `Homebrew`:
 brew install cmake openssl@1.1
 ```
 
-### Linux
+#### Linux
 
 You can install `cmake`, `clang`, and `openssl` with your distro's package manager or download them from their websites. On
 Debian and Ubuntu, you will also need the `build-essential` and `libudev-dev` packages.
