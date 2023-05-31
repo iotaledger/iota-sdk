@@ -296,7 +296,7 @@ iota-sdk [Node.js API Reference in the IOTA Wiki](https://wiki.iota.org/next/iot
 You can find more usage examples in the [IOTA Wiki](https://wiki.iota.org/shimmer/iota-sdk/how_tos/run_how_tos/), and in
 the repositories example folder for each language:
 
-- [Rust](https://github.com/iotaledger/iota-sdk/tree/develop/sdk/examples).
+- [Rust](https://github.com/iotaledger/iota-sdk/tree/develop/sdk/examples)
 - [Python](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/python/examples)
 - [Node.js](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/nodejs/examples)
 
