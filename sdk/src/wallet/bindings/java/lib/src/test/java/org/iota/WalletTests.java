@@ -61,22 +61,22 @@ public class WalletTests extends TestSettings {
                 GenerateAddressOptions options = new GenerateAddressOptions()
                                 .withLedgerNanoPrompt(false);
 
-                String address = wallet.generateAddress(0, 0, options, "rms");
+                String address = wallet.generateEd25519Address(0, 0, options, "rms");
                 assertEquals("rms1qpx0mcrqq7t6up73n4na0zgsuuy4p0767ut0qq67ngctj7pg4tm2ynsuynp", address);
 
                 // generated alice account later has 2 addresses premade, so we check against
                 // the third
-                address = wallet.generateAddress(0, 2, options, "rms");
+                address = wallet.generateEd25519Address(0, 2, options, "rms");
                 assertEquals("rms1qzjq2jwzp8ddh0gawgdskvtd6awlv82c8y0a9s6g7kgszn6ts95u6r4kx2n", address);
 
                 GenerateAddressOptions internal_options = new GenerateAddressOptions()
                                 .withLedgerNanoPrompt(false)
                                 .withInternal(true);
 
-                String addressPublic = wallet.generateAddress(0, 0, internal_options, "rms");
+                String addressPublic = wallet.generateEd25519Address(0, 0, internal_options, "rms");
                 assertEquals("rms1qqtjgttzh2dp5exzru94pddle5sqf0007q4smdsaycerff2hny5764xrkgk", addressPublic);
 
-                String anotherAddress = wallet.generateAddress(10, 10, internal_options, "rms");
+                String anotherAddress = wallet.generateEd25519Address(10, 10, internal_options, "rms");
                 assertEquals("rms1qzu4a5ryj39h07z9atn2fza59wu2n5f295st5ehmjg5u8tyveaew65lw3yg", anotherAddress);
 
                 Account account = wallet.createAccount("Alice");

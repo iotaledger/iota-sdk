@@ -367,19 +367,7 @@ export class Account {
     }
 
     /**
-     * Generate a new unused address.
-     * @param options Options for address generation.
-     * @returns The address.
-     */
-    async generateAddress(
-        options?: GenerateAddressOptions,
-    ): Promise<AccountAddress> {
-        const addresses = await this.generateEd25519Addresses(1, options);
-        return addresses[0];
-    }
-
-    /**
-     * Generate new unused addresses.
+     * Generate new unused ed25519 addresses.
      * @param amount The amount of addresses to generate.
      * @param options Options for address generation.
      * @returns The addresses.

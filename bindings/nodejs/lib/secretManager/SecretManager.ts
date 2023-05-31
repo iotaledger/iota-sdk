@@ -24,7 +24,7 @@ export class SecretManager {
         this.methodHandler = new SecretManagerMethodHandler(options);
     }
 
-    /** Generate addresses */
+    /** Generate ed25519 addresses */
     async generateEd25519Addresses(
         generateAddressesOptions: IGenerateAddressesOptions,
     ): Promise<string[]> {

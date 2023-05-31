@@ -137,9 +137,9 @@ impl SecretManage for LedgerSecretManager {
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<Ed25519Address>, Self::Error> {
-        let options = options.unwrap_or_default();
+        let options = options.into().unwrap_or_default();
         let bip32_account = account_index | Segment::HARDEN_MASK;
 
         let bip32 = LedgerBIP32Index {
@@ -174,7 +174,7 @@ impl SecretManage for LedgerSecretManager {
         _coin_type: u32,
         _account_index: u32,
         _address_indexes: Range<u32>,
-        _options: Option<GenerateAddressOptions>,
+        _options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<EvmAddress>, Self::Error> {
         Err(Error::UnsupportedOperation)
     }

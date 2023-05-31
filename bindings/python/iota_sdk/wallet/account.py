@@ -135,7 +135,7 @@ class Account:
         )
         return PreparedTransactionData(self, prepared)
 
-    def generate_addresses(self, amount: int, options=None):
+    def generate_ed25519_addresses(self, amount: int, options=None):
         """Generate new addresses.
         """
         return self._call_account_method(

@@ -70,7 +70,7 @@ pub trait SecretManage: Send + Sync {
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<Ed25519Address>, Self::Error>;
 
     async fn generate_evm_addresses(
@@ -78,7 +78,7 @@ pub trait SecretManage: Send + Sync {
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<EvmAddress>, Self::Error>;
 
     /// Signs ed25519 key using the given [`Chain`].
@@ -253,7 +253,7 @@ impl SecretManage for SecretManager {
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> crate::client::Result<Vec<Ed25519Address>> {
         match self {
             #[cfg(feature = "stronghold")]
@@ -282,7 +282,7 @@ impl SecretManage for SecretManager {
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<EvmAddress>, Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]

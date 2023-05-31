@@ -156,7 +156,7 @@ pub enum AccountMethod {
         foundry_id: FoundryId,
         options: Option<TransactionOptionsDto>,
     },
-    /// Generate new unused addresses.
+    /// Generate new unused ed25519 addresses.
     /// Expected response:
     /// [`GeneratedEd25519Addresses`](crate::wallet::message_interface::Response::GeneratedEd25519Addresses)
     GenerateEd25519Addresses {
