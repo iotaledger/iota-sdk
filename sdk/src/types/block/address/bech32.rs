@@ -202,22 +202,6 @@ impl FromStr for Bech32Address {
     }
 }
 
-impl TryFrom<&str> for Bech32Address {
-    type Error = Error;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        Self::from_str(value)
-    }
-}
-
-impl TryFrom<&String> for Bech32Address {
-    type Error = Error;
-
-    fn try_from(value: &String) -> Result<Self, Self::Error> {
-        Self::from_str(value.as_ref())
-    }
-}
-
 impl Bech32Address {
     /// Creates a new address wrapper.
     pub fn new(hrp: Hrp, inner: impl Into<Address>) -> Self {
