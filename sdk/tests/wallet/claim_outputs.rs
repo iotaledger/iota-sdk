@@ -533,3 +533,48 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
 
     tear_down(storage_path)
 }
+
+#[ignore]
+#[tokio::test]
+async fn claim_basic_micro_output_error() -> Result<()> {
+    let storage_path = "test-storage/claim_basic_micro_output_error";
+    setup(storage_path)?;
+
+    let wallet = make_wallet(storage_path, None, None).await?;
+
+    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_1 = wallet.create_account().finish().await?;
+
+    let micro_amount = 1;
+    let tx = account_0
+        .send_amount(
+            vec![SendAmountParams::new(
+                *account_1.addresses().await?[0].address(),
+                micro_amount,
+            )],
+            TransactionOptions {
+                allow_micro_amount: true,
+                ..Default::default()
+            },
+        )
+        .await?;
+
+    account_0
+        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .await?;
+
+    // Try claim with account 1 will fail since it has no funds to cover the storage deposit
+    let balance = account_1.sync(None).await.unwrap();
+    assert_eq!(balance.potentially_locked_outputs().len(), 1);
+
+    let result = account_1
+        .claim_outputs(
+            account_1
+                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::MicroTransactions)
+                .await?,
+        )
+        .await;
+    assert!(matches!(result, Err(iota_sdk::wallet::Error::InsufficientFunds { .. })));
+
+    tear_down(storage_path)
+}
