@@ -1,7 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Wallet, CoinType, initLogger, ConsolidationRequiredWalletEvent, TransactionProgressWalletEvent, SelectingInputsProgress } from '@iota/sdk';
+import {
+    Wallet,
+    CoinType,
+    initLogger,
+    ConsolidationRequiredWalletEvent,
+    TransactionProgressWalletEvent,
+    SelectingInputsProgress,
+} from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -35,7 +42,6 @@ async function run() {
 
         const wallet = new Wallet(walletOptions);
 
-
         const callback = function (err: any, data: string) {
             // don't know if something like this could make sense
             // const walletEvent: typeof WalletEvent = JSON.parse(data);
@@ -44,10 +50,12 @@ async function run() {
 
         await wallet.listen([], callback);
 
-        await wallet.emitTestEvent(new ConsolidationRequiredWalletEvent);
-        await wallet.emitTestEvent(new TransactionProgressWalletEvent(new SelectingInputsProgress));
+        await wallet.emitTestEvent(new ConsolidationRequiredWalletEvent());
+        await wallet.emitTestEvent(
+            new TransactionProgressWalletEvent(new SelectingInputsProgress()),
+        );
 
-        await wallet.destroy()
+        await wallet.destroy();
     } catch (error) {
         console.error('Error: ', error);
     }
