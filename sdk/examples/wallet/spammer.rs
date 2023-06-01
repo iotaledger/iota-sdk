@@ -5,7 +5,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example spammer
+//! cargo run --release --features=wallet --example spammer
 //! ```
 
 use std::{env::var, time::Duration};
