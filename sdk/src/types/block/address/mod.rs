@@ -10,7 +10,7 @@ use derive_more::From;
 
 pub use self::{
     alias::AliasAddress,
-    bech32::{Bech32Address, Bech32AddressLike, Hrp, HrpLike},
+    bech32::{Bech32Address, Hrp, HrpLike},
     ed25519::Ed25519Address,
     nft::NftAddress,
 };

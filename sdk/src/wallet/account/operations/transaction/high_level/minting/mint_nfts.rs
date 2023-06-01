@@ -6,14 +6,17 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     client::api::PreparedTransactionData,
-    types::block::{
-        address::{Bech32Address, Bech32AddressLike},
-        output::{
-            feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
-            unlock_condition::AddressUnlockCondition,
-            NftId, NftOutputBuilder,
+    types::{
+        block::{
+            address::Bech32Address,
+            output::{
+                feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
+                unlock_condition::AddressUnlockCondition,
+                NftId, NftOutputBuilder,
+            },
+            Error as BlockError,
         },
-        Error as BlockError,
+        convert::ConvertTo,
     },
     wallet::{
         account::{operations::transaction::Transaction, Account, TransactionOptions},
@@ -52,8 +55,8 @@ impl MintNftParams {
     }
 
     /// Set the address and try convert to [`Bech32Address`]
-    pub fn try_with_address(mut self, address: impl Bech32AddressLike) -> crate::wallet::Result<Self> {
-        self.address = Some(address.to_bech32()?);
+    pub fn try_with_address(mut self, address: impl ConvertTo<Bech32Address>) -> crate::wallet::Result<Self> {
+        self.address = Some(address.convert()?);
         Ok(self)
     }
 
@@ -64,8 +67,8 @@ impl MintNftParams {
     }
 
     /// Set the sender address and try convert to [`Bech32Address`]
-    pub fn try_with_sender(mut self, sender: impl Bech32AddressLike) -> crate::wallet::Result<Self> {
-        self.sender = Some(sender.to_bech32()?);
+    pub fn try_with_sender(mut self, sender: impl ConvertTo<Bech32Address>) -> crate::wallet::Result<Self> {
+        self.sender = Some(sender.convert()?);
         Ok(self)
     }
 
@@ -88,8 +91,8 @@ impl MintNftParams {
     }
 
     /// Set the issuer address and try convert to [`Bech32Address`]
-    pub fn try_with_issuer(mut self, issuer: impl Bech32AddressLike) -> crate::wallet::Result<Self> {
-        self.issuer = Some(issuer.to_bech32()?);
+    pub fn try_with_issuer(mut self, issuer: impl ConvertTo<Bech32Address>) -> crate::wallet::Result<Self> {
+        self.issuer = Some(issuer.convert()?);
         Ok(self)
     }
 

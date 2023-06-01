@@ -16,7 +16,10 @@ use packable::{
     Packable, PackableExt,
 };
 
-use crate::types::block::{address::Address, Error};
+use crate::types::{
+    block::{address::Address, Error},
+    convert::ConvertTo,
+};
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Hrp {
@@ -288,38 +291,8 @@ impl<T: core::borrow::Borrow<Bech32Address>> From<T> for Address {
 #[cfg(feature = "serde")]
 string_serde_impl!(Bech32Address);
 
-pub trait Bech32AddressLike: Send {
-    fn to_bech32(self) -> Result<Bech32Address, Error>;
-
-    fn as_string(&self) -> String;
-}
-
-impl Bech32AddressLike for Bech32Address {
-    fn to_bech32(self) -> Result<Bech32Address, Error> {
-        Ok(self)
-    }
-
-    fn as_string(&self) -> String {
-        self.to_string()
-    }
-}
-
-impl Bech32AddressLike for &Bech32Address {
-    fn to_bech32(self) -> Result<Bech32Address, Error> {
-        Ok(*self)
-    }
-
-    fn as_string(&self) -> String {
-        self.to_string()
-    }
-}
-
-impl<T: AsRef<str> + Send> Bech32AddressLike for T {
-    fn to_bech32(self) -> Result<Bech32Address, Error> {
+impl<T: AsRef<str> + Send> ConvertTo<Bech32Address> for T {
+    fn convert(self) -> Result<Bech32Address, Error> {
         Bech32Address::try_from_str(self)
-    }
-
-    fn as_string(&self) -> String {
-        self.as_ref().to_string()
     }
 }

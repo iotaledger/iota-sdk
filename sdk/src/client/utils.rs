@@ -15,16 +15,19 @@ use zeroize::Zeroize;
 use super::{Client, ClientInner};
 use crate::{
     client::{Error, Result},
-    types::block::{
-        address::{Address, Bech32Address, Bech32AddressLike, Ed25519Address, HrpLike, ToBech32Ext},
-        output::{AliasId, NftId},
-        payload::TaggedDataPayload,
+    types::{
+        block::{
+            address::{Address, Bech32Address, Ed25519Address, HrpLike, ToBech32Ext},
+            output::{AliasId, NftId},
+            payload::TaggedDataPayload,
+        },
+        convert::ConvertTo,
     },
 };
 
 /// Transforms bech32 to hex
-pub fn bech32_to_hex(bech32: impl Bech32AddressLike) -> Result<String> {
-    Ok(match bech32.to_bech32()?.inner() {
+pub fn bech32_to_hex(bech32: impl ConvertTo<Bech32Address>) -> Result<String> {
+    Ok(match bech32.convert()?.inner() {
         Address::Ed25519(ed) => ed.to_string(),
         Address::Alias(alias) => alias.to_string(),
         Address::Nft(nft) => nft.to_string(),
@@ -157,7 +160,7 @@ impl ClientInner {
 
 impl Client {
     /// Transforms bech32 to hex
-    pub fn bech32_to_hex(bech32: impl Bech32AddressLike) -> crate::client::Result<String> {
+    pub fn bech32_to_hex(bech32: impl ConvertTo<Bech32Address>) -> crate::client::Result<String> {
         bech32_to_hex(bech32)
     }
 
