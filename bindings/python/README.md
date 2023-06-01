@@ -6,7 +6,7 @@ Python binding to the [iota-sdk library](/README.md).
 
 - [Requirements](#requirements)
 - [Getting Started](#getting-started)
-    - [Install the iota-sdk](#install-the-iota-sdk)
+    - [Install the IOTA SDK](#install-the-iota-sdk)
     - [Usage](#usage)
         - [Wallet](#wallet)
         - [Client](#client)
@@ -22,7 +22,7 @@ Python binding to the [iota-sdk library](/README.md).
 
 ## Getting Started
 
-### Install the iota-sdk
+### Install the IOTA SDK
 
 1. Move to the Python bindings directory:
 
@@ -100,7 +100,7 @@ print(f'{node_info}')
 
 #### Examples
 
-You can use the provided code [examples](examples) to acquainted with the iota-sdk. You can use the following command to run any example:
+You can use the provided code [examples](examples) to acquainted with the IOTA SDK. You can use the following command to run any example:
 
 ```bash
 python3 example/[example file]
