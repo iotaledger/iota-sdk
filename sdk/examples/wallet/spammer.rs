@@ -88,17 +88,9 @@ async fn main() -> Result<()> {
     if num_unspent_basic_outputs < 127 {
         println!("Splitting funds...");
 
-        let token_supply = account.client().get_token_supply().await?;
-        let outputs = std::iter::repeat_with(|| {
-            BasicOutputBuilder::new_with_amount(output_amount)
-                .add_unlock_condition(AddressUnlockCondition::new(recv_address))
-                .finish_output(token_supply)
-                .unwrap()
-        })
-        .take(127)
-        .collect::<Vec<_>>();
-
-        let transaction = account.send(outputs, None).await?;
+        let transaction = account
+            .send_amount(vec![SendAmountParams::new(recv_address, output_amount); 127], None)
+            .await?;
         wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
         account.sync(None).await?;
