@@ -580,7 +580,7 @@ pub async fn mint_nft_command(
 
 // `new-address` command
 pub async fn new_address_command(account: &Account) -> Result<(), Error> {
-    let address = account.generate_addresses(1, None).await?;
+    let address = account.generate_ed25519_addresses(1, None).await?;
 
     print_address(account, &address[0]).await?;
 

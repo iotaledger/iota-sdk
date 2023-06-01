@@ -6,7 +6,7 @@
 use std::time::Duration;
 
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, secret::SecretManager, Client},
+    client::{api::GetAddressesOptions, constants::SHIMMER_COIN_TYPE, secret::SecretManager, Client},
     wallet::Result,
 };
 
@@ -63,17 +63,18 @@ async fn account_recovery_with_balance_and_empty_addresses() -> Result<()> {
 
     let secret_manager = SecretManager::from(mnemonic.clone());
 
-    let address = client
-        .get_addresses(&secret_manager)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_bech32_hrp(client.get_bech32_hrp().await?)
-        .with_account_index(2)
-        .with_range(2..3)
-        .finish()
-        .await?[0];
+    let addresses = secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::from_client(&client)
+                .await?
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_account_index(2)
+                .with_range(2..3),
+        )
+        .await?;
 
     // Add funds to the address with account index 2 and address key_index 2, so recover works
-    iota_sdk::client::request_funds_from_faucet(crate::wallet::common::FAUCET_URL, &address).await?;
+    iota_sdk::client::request_funds_from_faucet(crate::wallet::common::FAUCET_URL, &addresses[0]).await?;
 
     // Wait for faucet transaction
     tokio::time::sleep(Duration::new(10, 0)).await;

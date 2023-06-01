@@ -16,7 +16,7 @@ use super::{secret::mnemonic::Mnemonic, Client, ClientInner};
 use crate::{
     client::{Error, Result},
     types::block::{
-        address::{Address, Bech32Address, Bech32AddressLike, Ed25519Address, HrpLike},
+        address::{Address, Bech32Address, Bech32AddressLike, Ed25519Address, HrpLike, ToBech32Ext},
         output::{AliasId, NftId},
         payload::TaggedDataPayload,
     },

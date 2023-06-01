@@ -6,7 +6,7 @@
 //! `cargo run --example recursive_alias --release`
 
 use iota_sdk::{
-    client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
+    client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::{
         address::{Address, AliasAddress},
         output::{
@@ -35,7 +35,9 @@ async fn main() -> Result<()> {
     let secret_manager =
         SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let address = client.get_addresses(&secret_manager).with_range(0..1).finish().await?[0];
+    let address = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .await?[0];
     println!("{}", request_funds_from_faucet(&faucet_url, &address).await?);
     // Wait some time for the faucet transaction
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;

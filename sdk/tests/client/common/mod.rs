@@ -6,8 +6,8 @@
 mod constants;
 
 use iota_sdk::client::{
-    constants::SHIMMER_COIN_TYPE, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
-    secret::SecretManager, Client, Result,
+    api::GetAddressesOptions, constants::SHIMMER_COIN_TYPE, node_api::indexer::query_parameters::QueryParameter,
+    request_funds_from_faucet, secret::SecretManager, Client, Result,
 };
 
 pub use self::constants::{FAUCET_URL, NODE_LOCAL};
@@ -28,12 +28,13 @@ pub async fn create_client_and_secret_manager_with_funds(mnemonic: Option<&str>)
             .to_owned(),
     )?;
 
-    let address = client
-        .get_addresses(&secret_manager)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_account_index(0)
-        .with_range(0..1)
-        .finish()
+    let address = secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::from_client(&client)
+                .await?
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_range(0..1),
+        )
         .await?[0];
 
     request_funds_from_faucet(FAUCET_URL, &address).await?;

@@ -9,7 +9,10 @@ use async_trait::async_trait;
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
     keys::slip10::{Chain, Seed},
-    signatures::ed25519,
+    signatures::{
+        ed25519,
+        secp256k1_ecdsa::{self, EvmAddress},
+    },
 };
 use serde::{Deserialize, Serialize};
 use zeroize::{Zeroize, ZeroizeOnDrop};
@@ -17,10 +20,7 @@ use zeroize::{Zeroize, ZeroizeOnDrop};
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
     client::{constants::HD_WALLET_TYPE, Client, Error},
-    types::block::{
-        address::{Address, Ed25519Address},
-        signature::Ed25519Signature,
-    },
+    types::block::{address::Ed25519Address, signature::Ed25519Signature},
 };
 
 /// Secret manager that uses only a mnemonic.
@@ -32,24 +32,19 @@ pub struct MnemonicSecretManager(Seed);
 impl SecretManage for MnemonicSecretManager {
     type Error = Error;
 
-    async fn generate_addresses(
+    async fn generate_ed25519_addresses(
         &self,
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
-    ) -> Result<Vec<Address>, Self::Error> {
-        let internal = options.map(|o| o.internal).unwrap_or_default();
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<Ed25519Address>, Self::Error> {
+        let internal = options.into().map(|o| o.internal).unwrap_or_default();
         let mut addresses = Vec::new();
 
         for address_index in address_indexes {
-            let chain = Chain::from_u32_hardened(vec![
-                HD_WALLET_TYPE,
-                coin_type,
-                account_index,
-                internal as u32,
-                address_index,
-            ]);
+            let chain =
+                Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index]);
 
             let public_key = self
                 .0
@@ -63,7 +58,33 @@ impl SecretManage for MnemonicSecretManager {
                 crate::client::Error::Blake2b256("hashing the public key while generating the address failed.")
             });
 
-            addresses.push(Address::Ed25519(Ed25519Address::new(result?)));
+            addresses.push(Ed25519Address::new(result?));
+        }
+
+        Ok(addresses)
+    }
+
+    async fn generate_evm_addresses(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<EvmAddress>, Self::Error> {
+        let internal = options.into().map(|o| o.internal).unwrap_or_default();
+        let mut addresses = Vec::new();
+
+        for address_index in address_indexes {
+            let chain = Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index])
+                .join(Chain::from_u32([internal as u32, address_index]));
+
+            let public_key = self
+                .0
+                .derive::<secp256k1_ecdsa::SecretKey>(&chain)?
+                .secret_key()
+                .public_key();
+
+            addresses.push(public_key.to_evm_address());
         }
 
         Ok(addresses)
@@ -173,6 +194,7 @@ impl core::fmt::Debug for Mnemonic {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::types::block::address::ToBech32Ext;
 
     #[tokio::test]
     async fn address() {
@@ -182,7 +204,7 @@ mod tests {
         let secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic).unwrap();
 
         let addresses = secret_manager
-            .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
+            .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
             .await
             .unwrap();
 
@@ -200,7 +222,7 @@ mod tests {
         let secret_manager = MnemonicSecretManager::try_from_hex_seed(seed).unwrap();
 
         let addresses = secret_manager
-            .generate_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
+            .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
             .await
             .unwrap();
 

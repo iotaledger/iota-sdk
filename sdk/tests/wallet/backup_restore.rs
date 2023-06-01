@@ -105,8 +105,8 @@ async fn backup_and_restore() -> Result<()> {
 
     // secret manager is the same
     assert_eq!(
-        account.generate_addresses(1, None).await?,
-        recovered_account.generate_addresses(1, None).await?
+        account.generate_ed25519_addresses(1, None).await?,
+        recovered_account.generate_ed25519_addresses(1, None).await?
     );
     tear_down(storage_path)
 }
@@ -186,8 +186,8 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
 
     // secret manager is the same
     assert_eq!(
-        account.generate_addresses(1, None).await?,
-        recovered_account.generate_addresses(1, None).await?
+        account.generate_ed25519_addresses(1, None).await?,
+        recovered_account.generate_ed25519_addresses(1, None).await?
     );
     tear_down(storage_path)
 }
@@ -518,8 +518,8 @@ async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
 
     // secret manager is the same
     assert_eq!(
-        account.generate_addresses(1, None).await?,
-        new_account.generate_addresses(1, None).await?
+        account.generate_ed25519_addresses(1, None).await?,
+        new_account.generate_ed25519_addresses(1, None).await?
     );
     tear_down(storage_path)
 }

@@ -6,7 +6,7 @@
 //! `cargo run --example basic --release`
 
 use iota_sdk::{
-    client::{secret::SecretManager, utils::request_funds_from_faucet, Client, Result},
+    client::{api::GetAddressesOptions, secret::SecretManager, utils::request_funds_from_faucet, Client, Result},
     types::block::output::{
         feature::MetadataFeature,
         unlock_condition::{
@@ -36,7 +36,10 @@ async fn main() -> Result<()> {
 
     let token_supply = client.get_token_supply().await?;
 
-    let address = client.get_addresses(&secret_manager).with_range(0..1).finish().await?[0];
+    let address = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .await?[0];
+
     println!("{}", request_funds_from_faucet(&faucet_url, &address).await?);
 
     let basic_output_builder =

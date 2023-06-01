@@ -6,7 +6,7 @@ use std::str::FromStr;
 use iota_sdk::types::block::{
     address::{
         dto::{AddressDto, AliasAddressDto},
-        Address, AliasAddress, Bech32Address,
+        Address, AliasAddress, Bech32Address, ToBech32Ext,
     },
     output::AliasId,
     Error,

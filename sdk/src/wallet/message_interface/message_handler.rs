@@ -24,7 +24,7 @@ use crate::{
         utils, Client, NodeInfoWrapper,
     },
     types::block::{
-        address::HrpLike,
+        address::{HrpLike, ToBech32Ext},
         output::{
             dto::{OutputBuilderAmountDto, OutputDto},
             AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
@@ -259,7 +259,7 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            Message::GenerateAddress {
+            Message::GenerateEd25519Address {
                 account_index,
                 address_index,
                 options,
@@ -268,7 +268,7 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let address = self
                         .wallet
-                        .generate_address(account_index, address_index, options)
+                        .generate_ed25519_address(account_index, address_index, options)
                         .await?;
 
                     let bech32_hrp = match bech32_hrp {
@@ -575,9 +575,19 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::GenerateAddresses { amount, options } => {
-                let address = account.generate_addresses(amount, options).await?;
-                Ok(Response::GeneratedAddress(address))
+            AccountMethod::GenerateEd25519Addresses { amount, options } => {
+                let address = account.generate_ed25519_addresses(amount, options).await?;
+                Ok(Response::GeneratedEd25519Addresses(address))
+            }
+            AccountMethod::GenerateEvmAddresses { options } => {
+                let addresses = account
+                    .wallet
+                    .secret_manager
+                    .read()
+                    .await
+                    .generate_evm_addresses(options)
+                    .await?;
+                Ok(Response::GeneratedEvmAddresses(addresses))
             }
             AccountMethod::GetOutputsWithAdditionalUnlockConditions { outputs_to_claim } => {
                 let output_ids = account

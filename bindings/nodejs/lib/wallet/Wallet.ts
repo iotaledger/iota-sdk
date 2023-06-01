@@ -146,14 +146,14 @@ export class Wallet {
     /**
      * Generate an address without storing it.
      */
-    async generateAddress(
+    async generateEd25519Address(
         accountIndex: number,
         addressIndex: number,
         options?: GenerateAddressOptions,
         bech32Hrp?: string,
     ): Promise<string> {
         const response = await this.methodHandler.callMethod({
-            name: 'generateAddress',
+            name: 'generateEd25519Address',
             data: {
                 accountIndex,
                 addressIndex,

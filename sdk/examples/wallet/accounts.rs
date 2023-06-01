@@ -68,7 +68,7 @@ async fn main() -> Result<()> {
         println!("Accounts: {a:#?}");
     }
 
-    let addresses = account.generate_addresses(5, None).await?;
+    let addresses = account.generate_ed25519_addresses(5, None).await?;
 
     println!(
         "{}",

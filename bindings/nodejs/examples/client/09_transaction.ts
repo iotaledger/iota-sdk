@@ -32,7 +32,7 @@ async function run() {
         };
 
         // We generate an address from our own mnemonic so that we send the funds to ourselves
-        const addresses = await client.generateAddresses(secretManager, {
+        const addresses = await client.generateEd25519Addresses(secretManager, {
             range: {
                 start: 1,
                 end: 2,

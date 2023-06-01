@@ -12,6 +12,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
+    types::block::address::ToBech32Ext,
     wallet::{ClientOptions, Result, Wallet},
 };
 

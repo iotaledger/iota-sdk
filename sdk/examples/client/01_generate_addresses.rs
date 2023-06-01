@@ -6,7 +6,7 @@
 //! `cargo run --example generate_addresses --release -- [NODE_URL]`
 
 use iota_sdk::client::{
-    api::GetAddressesBuilder,
+    api::GetAddressesOptions,
     secret::{GenerateAddressOptions, SecretManager},
     Client, Result,
 };
@@ -31,29 +31,35 @@ async fn main() -> Result<()> {
         SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     // Generate addresses with default account index and range
-    let addresses = client.get_addresses(&secret_manager).finish().await?;
+    let addresses = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?)
+        .await?;
 
     println!("List of generated public addresses:");
     println!("{addresses:#?}\n");
 
     // Generate addresses with custom account index and range
-    let addresses = client
-        .get_addresses(&secret_manager)
-        .with_account_index(0)
-        .with_range(0..4)
-        .finish()
+    let addresses = secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::from_client(&client)
+                .await?
+                .with_account_index(0)
+                .with_range(0..4),
+        )
         .await?;
 
     println!("List of generated public addresses:\n");
     println!("{addresses:#?}\n");
 
     // Generate internal addresses with custom account index and range
-    let addresses = client
-        .get_addresses(&secret_manager)
-        .with_account_index(0)
-        .with_range(0..4)
-        .with_options(GenerateAddressOptions::internal())
-        .finish()
+    let addresses = secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::from_client(&client)
+                .await?
+                .with_account_index(0)
+                .with_range(0..4)
+                .with_options(GenerateAddressOptions::internal()),
+        )
         .await?;
 
     println!("List of generated internal addresses:\n");
@@ -62,11 +68,13 @@ async fn main() -> Result<()> {
     // Generating addresses with `client.get_addresses(&secret_manager)`, will by default get the bech32_hrp (Bech32
     // human readable part) from the node info, generating it "offline" requires setting it with
     // `with_bech32_hrp(bech32_hrp)`
-    let addresses = GetAddressesBuilder::new(&secret_manager)
-        .with_bech32_hrp(client.get_bech32_hrp().await?)
-        .with_account_index(0)
-        .with_range(0..4)
-        .finish()
+    let addresses = secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::from_client(&client)
+                .await?
+                .with_account_index(0)
+                .with_range(0..4),
+        )
         .await?;
 
     println!("List of offline generated public addresses:\n");
