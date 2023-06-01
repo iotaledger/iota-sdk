@@ -20,7 +20,7 @@ def test_mnemonic_address_generation():
     for test in mnemonic_address_test_cases:
         secret_manager = MnemonicSecretManager(test['mnemonic'])
 
-        generated_address = client.generate_addresses(secret_manager,
+        generated_address = client.generate_ed25519_addresses(secret_manager,
                                                       coin_type=test['coin_type'],
                                                       account_index=test['account_index'],
                                                       bech32_hrp=test['bech32_hrp'],

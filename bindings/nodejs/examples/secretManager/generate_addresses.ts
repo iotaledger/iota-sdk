@@ -27,7 +27,9 @@ async function run() {
         const secretManager = new SecretManager(mnemonicSecretManager);
 
         // Generate public address with default account index and range.
-        const default_addresses = await secretManager.generateAddresses({});
+        const default_addresses = await secretManager.generateEd25519Addresses(
+            {},
+        );
         console.log(
             'List of generated public addresses: ',
             default_addresses,
@@ -35,7 +37,7 @@ async function run() {
         );
 
         // Generate public address with custom account index and range.
-        const address = await secretManager.generateAddresses({
+        const address = await secretManager.generateEd25519Addresses({
             accountIndex: 0,
             range: {
                 start: 0,
@@ -45,7 +47,7 @@ async function run() {
         console.log('List of generated public addresses:', address, '\n');
 
         // Generate internal addresses with custom account index and range.
-        const internalAddresses = await secretManager.generateAddresses({
+        const internalAddresses = await secretManager.generateEd25519Addresses({
             accountIndex: 0,
             range: {
                 start: 0,
@@ -60,8 +62,8 @@ async function run() {
         );
 
         // Generate addresses with providing all inputs, that way it can also be done offline without a node.
-        const offlineGeneratedAddresses = await secretManager.generateAddresses(
-            {
+        const offlineGeneratedAddresses =
+            await secretManager.generateEd25519Addresses({
                 coinType: CoinType.Shimmer,
                 accountIndex: 0,
                 range: {
@@ -69,11 +71,10 @@ async function run() {
                     end: 4,
                 },
                 internal: false,
-                // Generating addresses with client.generateAddresses(secretManager, {}), will by default get the bech32_hrp (Bech32
+                // Generating addresses with client.generateEd25519Addresses(secretManager, {}), will by default get the bech32_hrp (Bech32
                 // human readable part) from the node info, generating it "offline" requires setting it in the generateAddressesOptions
                 bech32Hrp: SHIMMER_TESTNET_BECH32_HRP,
-            },
-        );
+            });
         console.log(
             'List of offline generated public addresses:',
             offlineGeneratedAddresses,

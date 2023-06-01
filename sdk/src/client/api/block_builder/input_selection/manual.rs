@@ -81,7 +81,7 @@ impl<'a> ClientBlockBuilder<'a> {
                         output: output_with_meta.output,
                         output_metadata: output_with_meta.metadata,
                         chain: address_index_internal.map(|(address_index, internal)| {
-                            Chain::from_u32_hardened(vec![
+                            Chain::from_u32_hardened([
                                 HD_WALLET_TYPE,
                                 self.coin_type,
                                 self.account_index,

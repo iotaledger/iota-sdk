@@ -4,7 +4,7 @@
 use iota_sdk::{
     client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
     types::block::{
-        address::{dto::AddressDto, Address, Ed25519Address},
+        address::{dto::AddressDto, Address, Ed25519Address, ToBech32Ext},
         output::{AliasId, FoundryId, NftId},
         payload::{transaction::TransactionEssence, TransactionPayload},
         signature::Ed25519Signature,

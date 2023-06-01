@@ -6,12 +6,12 @@
 use std::ops::Range;
 
 use async_trait::async_trait;
-use crypto::keys::slip10::Chain;
+use crypto::{keys::slip10::Chain, signatures::secp256k1_ecdsa::EvmAddress};
 
 use super::{GenerateAddressOptions, SecretManage, SignTransactionEssence};
 use crate::{
     client::{secret::PreparedTransactionData, Error},
-    types::block::{address::Address, signature::Ed25519Signature, unlock::Unlocks},
+    types::block::{address::Ed25519Address, signature::Ed25519Signature, unlock::Unlocks},
 };
 
 /// Secret manager that is only useful to prevent accidental address generation in a wallet
@@ -22,13 +22,23 @@ pub struct PlaceholderSecretManager;
 impl SecretManage for PlaceholderSecretManager {
     type Error = Error;
 
-    async fn generate_addresses(
+    async fn generate_ed25519_addresses(
         &self,
         _coin_type: u32,
         _account_index: u32,
         _address_indexes: Range<u32>,
-        _options: Option<GenerateAddressOptions>,
-    ) -> Result<Vec<Address>, Self::Error> {
+        _options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<Ed25519Address>, Self::Error> {
+        Err(Error::PlaceholderSecretManager)
+    }
+
+    async fn generate_evm_addresses(
+        &self,
+        _coin_type: u32,
+        _account_index: u32,
+        _address_indexes: Range<u32>,
+        _options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<EvmAddress>, Self::Error> {
         Err(Error::PlaceholderSecretManager)
     }
 

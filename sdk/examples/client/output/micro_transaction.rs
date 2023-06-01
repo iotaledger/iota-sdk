@@ -12,7 +12,7 @@
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use iota_sdk::{
-    client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
+    client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::output::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
         BasicOutputBuilder,
@@ -36,7 +36,9 @@ async fn main() -> Result<()> {
     let secret_manager =
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let addresses = client.get_addresses(&secret_manager).with_range(0..2).finish().await?;
+    let addresses = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..2))
+        .await?;
     let sender_address = addresses[0];
     let receiver_address = addresses[1];
 

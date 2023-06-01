@@ -3,7 +3,7 @@ import type {
     __GetBasicOutputIdsMethod__,
     __GetOutputMethod__,
     __GetOutputsMethod__,
-    __GenerateAddressesMethod__,
+    __GenerateEd25519AddressesMethod__,
     __PostBlockMethod__,
     __BuildAndPostBlockMethod__,
     __GetTipsMethod__,
@@ -71,7 +71,7 @@ export type __ClientMethods__ =
     | __GetOutputMethod__
     | __GetBasicOutputIdsMethod__
     | __GetOutputsMethod__
-    | __GenerateAddressesMethod__
+    | __GenerateEd25519AddressesMethod__
     | __PostBlockMethod__
     | __BuildAndPostBlockMethod__
     | __GetTipsMethod__

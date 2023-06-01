@@ -6,10 +6,7 @@
 //!
 //! `cargo run --example send_nft --release`
 
-use iota_sdk::{
-    types::block::address::Bech32Address,
-    wallet::{Result, SendNftParams, Wallet},
-};
+use iota_sdk::wallet::{Result, SendNftParams, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -31,10 +28,10 @@ async fn main() -> Result<()> {
             .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        let outputs = vec![SendNftParams {
-            address: Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
-            nft_id: *nft_id,
-        }];
+        let outputs = vec![SendNftParams::new(
+            "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
+            *nft_id,
+        )?];
 
         let transaction = account.send_nft(outputs, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);

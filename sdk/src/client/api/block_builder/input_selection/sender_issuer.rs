@@ -21,7 +21,7 @@ use crate::{
         Error, Result,
     },
     types::block::{
-        address::Address,
+        address::{Address, ToBech32Ext},
         output::{feature::Features, Output},
     },
 };
@@ -71,7 +71,7 @@ impl<'a> ClientBlockBuilder<'a> {
                             required_inputs.push(InputSigningData {
                                 output: output_with_meta.output().to_owned(),
                                 output_metadata: output_with_meta.metadata().to_owned(),
-                                chain: Some(Chain::from_u32_hardened(vec![
+                                chain: Some(Chain::from_u32_hardened([
                                     HD_WALLET_TYPE,
                                     self.coin_type,
                                     self.account_index,
@@ -131,7 +131,7 @@ impl<'a> ClientBlockBuilder<'a> {
                                 output: output_with_meta.output().to_owned(),
                                 output_metadata: output_with_meta.metadata().to_owned(),
                                 chain: address_index_internal.map(|(address_index, internal)| {
-                                    Chain::from_u32_hardened(vec![
+                                    Chain::from_u32_hardened([
                                         HD_WALLET_TYPE,
                                         self.coin_type,
                                         self.account_index,
@@ -188,7 +188,7 @@ impl<'a> ClientBlockBuilder<'a> {
                                 output: output_with_meta.output,
                                 output_metadata: output_with_meta.metadata,
                                 chain: address_index_internal.map(|(address_index, internal)| {
-                                    Chain::from_u32_hardened(vec![
+                                    Chain::from_u32_hardened([
                                         HD_WALLET_TYPE,
                                         self.coin_type,
                                         self.account_index,
