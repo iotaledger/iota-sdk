@@ -33,7 +33,7 @@ async function run() {
         console.log('Output ids: ', outputIdsResponse, '\n');
 
         const addressOutputs = await client.getOutputs(outputIdsResponse.items);
-        //console.log('Address outputs: ', addressOutputs);
+        console.log('Address outputs: ', addressOutputs);
     } catch (error) {
         console.error('Error: ', error);
     }
