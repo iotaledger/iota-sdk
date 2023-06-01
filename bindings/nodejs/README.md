@@ -1,33 +1,49 @@
 # IOTA SDK Library - Node.js binding
 
-## Requirements (only for building the binary yourself)
+## Before You Start
 
-Ensure you have first installed the required dependencies for the library [here](https://github.com/iotaledger/iota-sdk/tree/develop/sdk#readme) and on Windows also LLVM, our workflow uses `https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.1/LLVM-11.0.1-win64.exe`. On Windows, you may also need to set an environment variable `RUSTFLAGS` to `-C target-feature=+crt-static`.
+### Requirements (only for building the binary yourself)
+
+Please ensure you have installed the [required dependencies for the library for Rust code](/README.md#requirements), as
+well as the following:
 
 - Python < 3.11
 - Yarn v1
 
-## Installation
+#### Windows
 
-- Using NPM:
+On Windows you will also need a LLVM. Our workflow uses
+`https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.1/LLVM-11.0.1-win64.exe`. You may also need to set
+an environment variable `RUSTFLAGS` to `-C target-feature=+crt-static`.
+
+## Getting Started
+
+### Install the iota-sdk
+
+#### Install With a Package Manager
+
+To install the library from your package manager of choice, you only need to run the following:
+
+##### npm
 
 ```sh
 npm i @iota/sdk
 ```
 
-- Using yarn: 
+##### Yarn:
 
 ```sh
 yarn add @iota/sdk
 ```
 
-## Installation in repository
+#### Install the Binding from Source 
 
-Installing nodejs bindings require a [supported version of Node and Rust](https://github.com/neon-bindings/neon#platform-support).
+Installing nodejs bindings requires
+a [supported version of Node and Rust](https://github.com/neon-bindings/neon#platform-support).
 
-This fully installs the project, including installing any dependencies and running the build.
+This will guide you in any dependencies and running the build.
 
-## Building nodejs bindings
+##### Build nodejs bindings
 
 If you have already installed the project and only want to run the build, run:
 
@@ -35,15 +51,41 @@ If you have already installed the project and only want to run the build, run:
 npm run build
 ```
 
-This command uses the [cargo-cp-artifact](https://github.com/neon-bindings/cargo-cp-artifact) utility to run the Rust build and copy the built library into `./build/Release/index.node`.
+This command uses the [cargo-cp-artifact](https://github.com/neon-bindings/cargo-cp-artifact) utility to run the Rust
+build and copy the built library into `./build/Release/index.node`.
 Prebuild requires that the binary is in `build/Release` as though it was built with node-gyp.
 
-## Getting Started
+### Usage
 
-After you linked the library, you can create a `Client` instance and interface with it.
+#### Wallet
+
+After you [installed the library](#install-the-iota-sdk), you can create a `Wallet` instance and interact with it.
 
 ```javascript
-const { Client, initLogger } = require('@iota/sdk');
+import {initLogger, Wallet, CoinType, WalletOptions} from '@iota/sdk';
+
+const walletOptions: WalletOptions = {
+    storagePath: `Alice`,// A name to associate with the created account.
+    clientOptions: {
+        nodes: ['https://api.testnet.shimmer.network'],// The node to connect to.
+    },
+    coinType: CoinType.Shimmer,
+    secretManager: { // Setup Stronghold secret manager
+        stronghold: {
+            snapshotPath: 'vault.stronghold',//  The path to store the account snapshot.
+            password: 'a-secure-password',// A password to encrypt the stored data. WARNING: Never hardcode passwords in production code.
+        },
+    },
+};
+const wallet = new Wallet(walletOptions);
+```
+
+#### Client
+
+After you [installed the library](#install-the-iota-sdk), you can create a `Client` instance and interface with it.
+
+```javascript
+const {Client, initLogger} = require('@iota/sdk');
 
 async function run() {
     initLogger();
@@ -64,6 +106,19 @@ async function run() {
 run().then(() => process.exit());
 ```
 
+#### Examples
+
+You can use the provided code [examples](examples) to acquainted with the iota-sdk. You can use the following command to run any example:
+
+```bash
+node example/[example file]
+```
+* Where `[example file]` is the file name from the example folder. For example:
+
+```bash
+node examples/client/00_get_info.ts
+```
+
 ## Available Scripts
 
 In the project directory, you can run:
@@ -78,7 +133,9 @@ Builds the Node addon (`index.node`) from source.
 
 ### `npm test`
 
-Runs the unit tests by calling `cargo test`. You can learn more about [adding tests to your Rust code](https://doc.rust-lang.org/book/ch11-01-writing-tests.html) from the [Rust book](https://doc.rust-lang.org/book/).
+Runs the unit tests by calling `cargo test`. You can learn more
+about [adding tests to your Rust code](https://doc.rust-lang.org/book/ch11-01-writing-tests.html) from
+the [Rust book](https://doc.rust-lang.org/book/).
 
 ### Cargo.toml
 
@@ -90,9 +147,13 @@ This file.
 
 ### index.node
 
-The Node addon—i.e., a binary Node module—generated by building the project. This is the main module for this package, as dictated by the `"main"` key in `package.json`.
+The Node addon—i.e., a binary Node module—generated by building the project. This is the main module for this package,
+as dictated by the `"main"` key in `package.json`.
 
-Under the hood, a [Node addon](https://nodejs.org/api/addons.html) is a [dynamically-linked shared object](https://en.wikipedia.org/wiki/Library_(computing)#Shared_libraries). The `"build"` script produces this file by copying it from within the `target/` directory, which is where the Rust build produces the shared object.
+Under the hood, a [Node addon](https://nodejs.org/api/addons.html) is
+a [dynamically-linked shared object](https://en.wikipedia.org/wiki/Library_(computing)#Shared_libraries). The `"build"`
+script produces this file by copying it from within the `target/` directory, which is where the Rust build produces the
+shared object.
 
 ### package.json
 

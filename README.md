@@ -56,9 +56,12 @@ This library follows the following branching strategy:
 | `staging`    | The latest releases for the Shimmer network.                                                                                   |
 | other        | Other branches that may reflect current projects. Like `develop`, they will find their way into `staging` once they are ready. |
 
-## Getting Started
+## Before You Start
 
-### Prerequisites
+This file is focused on Rust. Please refer to the [Python](bindings/python/README.md)
+and [Node.js](bindings/nodejs/README.md) instructions if you want information on installing and using them.
+
+### Requirements
 
 The iota-sdk requires `Rust` and `Cargo`. You can find installation instructions in
 the [Rust documentation](https://doc.rust-lang.org/cargo/getting-started/installation.html).
@@ -73,7 +76,8 @@ The nightly Rust compiler should be fine, but some changes might not be compatib
 
 ### Dependencies
 
-You must also install `cmake`, `clang`, and `openssl`. You may need to install additional build tools on your system to run the build process successfully using Cargo.
+You must also install `cmake`, `clang`, and `openssl`. You may need to install additional build tools on your system to
+run the build process successfully using Cargo.
 
 #### Windows
 
@@ -107,12 +111,13 @@ brew install cmake openssl@1.1
 
 #### Linux
 
-You can install `cmake`, `clang`, and `openssl` with your distro's package manager or download them from their websites. On
+You can install `cmake`, `clang`, and `openssl` with your distro's package manager or download them from their websites.
+On
 Debian and Ubuntu, you will also need the `build-essential` and `libudev-dev` packages.
 
-## Install the iota-sdk
+## Getting Started
 
-### Rust
+### Install the iota-sdk
 
 To start using the iota-sdk in your Rust project, you can include the following dependencies in your `Cargo.toml` file:
 
@@ -121,27 +126,11 @@ To start using the iota-sdk in your Rust project, you can include the following 
 iota-sdk = " { git = "https://github.com/iotaledger/iota-sdk", branch = "develop" }"
 ```
 
-### Node.js
+### Usage
 
-```bash
-npm i @iota/sdk
-```
-
-### Python
-
-For Python and Node.js projects, you can install the SDK using the respective package managers:
-
-```bash
-pip install iota-sdk
-```
-
-## Usage
-
-### Wallet
+#### Wallet
 
 To use the Wallet module, you need to create a `Wallet`:
-
-#### Rust
 
 ```rust
 use iota_sdk::{
@@ -186,66 +175,10 @@ async fn main() -> Result<()> {
 }
 ```
 
-#### Node.js
-
-```javascript
-import { initLogger, Wallet, CoinType, WalletOptions } from '@iota/sdk';
-
-const walletOptions: WalletOptions = {
-    storagePath: `Alice`,// A name to associate with the created account.
-    clientOptions: {
-        nodes: ['https://api.testnet.shimmer.network'],// The node to connect to.
-    },
-    coinType: CoinType.Shimmer,
-    secretManager: { // Setup Stronghold secret manager
-        stronghold: {
-            snapshotPath: 'vault.stronghold',//  The path to store the account snapshot.
-            password:  'a-secure-password',// A password to encrypt the stored data. WARNING: Never hardcode passwords in production code.
-        },
-    },
-};
-const wallet = new Wallet(walletOptions);
-```
-
-#### Python
-
-```python
-from iota_sdk import Wallet, StrongholdSecretManager, CoinType, Utils
-
-# A name to associate with the created account.
-ACCOUNT_ALIAS = 'Alice'
-
-# The node to connect to.
-node_url = 'https://api.testnet.shimmer.network'
-
-# A password to encrypt the stored data.
-# WARNING: Never hardcode passwords in production code.
-STRONGHOLD_PASSWORD = 'a-secure-password'
-
-# The path to store the account snapshot.
-STRONGHOLD_SNAPSHOT_PATH = 'vault.stronghold'
-
-# Setup Stronghold secret manager
-secret_manager = StrongholdSecretManager(STRONGHOLD_SNAPSHOT_PATH, STRONGHOLD_PASSWORD)
-
-# Set up the client options
-client_options = {
-    'nodes': [node_url],
-}
-
-# Set up and store the wallet.
-wallet = Wallet(
-    client_options=client_options,
-    coin_type=CoinType.SHIMMER,
-    secret_manager=secret_manager
-)
-```
-
-### Client
+#### Client
 
 To use the Client module, you simply need to create a `Client`.
 
-#### Rust
 
 ```rust
 use iota_sdk::client::{
@@ -258,20 +191,24 @@ let client = Client::builder()
     .await?;
 ```
 
-#### Node.js
 
-```javascript
-import { Client } from '@iota/sdk';
+#### Examples
 
-const client = new Client({nodes: "https://api.testnet.shimmer.network/"});
+You can use the provided code [examples](sdk/examples) to acquainted with the iota-sdk. You can use the following command to run any example:
+
+```bash
+cargo run --example example_name --release
+```
+* Where `example_name` is the example name from the [Cargo.toml](sdk/Cargo.toml) name from the example folder. For example:
+
+```bash
+cargo run --example node_api_core_get_info --release 
 ```
 
-#### Python
+You can get a list of the available code examples with the following command:
 
-```python
-from iota_sdk import Client
-
-client = Client('https://api.testnet.shimmer.network')// Insert your node URL here
+```bash
+cargo run --example
 ```
 
 ### API Reference
@@ -282,22 +219,7 @@ The iota-sdk Rust API Reference is in the [crate documentation](https://docs.rs/
 
 #### Python
 
-You can find the
-iota-sdk [Python API Reference in the IOTA Wiki](https://wiki.iota.org/next/iota-sdk/references/nodejs/api_ref/).
-
-#### Node.js
-
-You can find the
-iota-sdk [Node.js API Reference in the IOTA Wiki](https://wiki.iota.org/next/iota-sdk/references/python/iota_wallet/account/).
-
-### Usage Examples
-
-You can find more usage examples in the [IOTA Wiki](https://wiki.iota.org/shimmer/iota-sdk/how_tos/run_how_tos/), and in
-the repositories example folder for each language:
-
-- [Rust](https://github.com/iotaledger/iota-sdk/tree/develop/sdk/examples)
-- [Python](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/python/examples)
-- [Node.js](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/nodejs/examples)
+Please refer the [Python binding's wallet usage section](bindings/python/README.md#client).
 
 ## Contributing
 
@@ -309,7 +231,7 @@ Before contributing, please read and adhere to the [code of conduct](/.github/CO
 ## License
 
 The iota-sdk is open-source software licensed under Apache License 2.0. For more information, please read
-the [LICENSE](/.github/LICENSE.md)
+the [LICENSE](/LICENSE).
 
 ## Acknowledgments
 
