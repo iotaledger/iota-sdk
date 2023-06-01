@@ -1,8 +1,8 @@
-# iota-sdk
+# IOTA SDK Library
 
 [![Coverage Status](https://coveralls.io/repos/github/iotaledger/iota-sdk/badge.svg?branch=develop)](https://coveralls.io/github/iotaledger/iota-sdk?branch=develop)
 
-The iota-sdk is a Rust-based project that provides a convenient and efficient way to interact with Shimmer nodes in the
+The IOTA SDK is a Rust-based project that provides a convenient and efficient way to interact with Shimmer nodes in the
 Shimmer network. It consists of two main modules: `wallet` and `client`.
 
 The `wallet` module is stateful, with a standardized interface for developers to build applications involving value
@@ -16,7 +16,7 @@ The `client` module is stateless. It aims to provide more flexibility and access
 - [Requirements](#requirements)
   - [Dependencies](#dependencies)
 - [Getting Started](#getting-started)
-  - [Install the iota-sdk](#install-the-iota-sdk)
+  - [Install the IOTA SDK](#install-the-iota-sdk)
   - [Usage](#usage)
     - [Wallet](#wallet)
     - [Client](#client)
@@ -28,15 +28,15 @@ The `client` module is stateless. It aims to provide more flexibility and access
 
 ## Features
 
-- **Wallet module**: The `wallet` module in the iota-sdk provides high-level functions for managing accounts, generating
+- **Wallet module**: The `wallet` module in the IOTA SDK provides high-level functions for managing accounts, generating
   addresses, creating transactions, and interacting with the Shimmer network. It offers a user-friendly interface for
   developers to build applications on the Shimmer network.
 
-- **Client module**: The `client` module in the iota-sdk offers low-level functions that allow you to have
+- **Client module**: The `client` module in the IOTA SDK offers low-level functions that allow you to have
   fine-grained control over their interactions with Shimmer nodes. It provides access to the underlying API endpoints
   and enables advanced operations such as custom message construction and direct communication with the network.
 
-- **Python and Node.js Bindings**: The iota-sdk includes bindings for Python and Node.js, which allow you to use the
+- **Python and Node.js Bindings**: The IOTA SDK includes bindings for Python and Node.js, which allow you to use the
   SDK in your preferred programming language. These bindings provide seamless integration with existing Python and
   Node.js projects, enabling cross-platform compatibility and flexibility.
 
@@ -58,7 +58,7 @@ and [Node.js](bindings/nodejs/README.md) instructions if you want information on
 
 ## Requirements
 
-The iota-sdk requires `Rust` and `Cargo`. You can find installation instructions in
+The IOTA SDK requires `Rust` and `Cargo`. You can find installation instructions in
 the [Rust documentation](https://doc.rust-lang.org/cargo/getting-started/installation.html).
 
 We recommend you first update the Rust compiler to the latest stable version:
@@ -112,9 +112,9 @@ Debian and Ubuntu, you will also need the `build-essential` and `libudev-dev` pa
 
 ## Getting Started
 
-### Install the iota-sdk
+### Install the IOTA SDK
 
-To start using the iota-sdk in your Rust project, you can include the following dependencies in your `Cargo.toml` file:
+To start using the IOTA SDK in your Rust project, you can include the following dependencies in your `Cargo.toml` file:
 
 ```toml
 [dependencies]
@@ -188,7 +188,7 @@ let client = Client::builder()
 
 #### Examples
 
-You can use the provided code [examples](sdk/examples) to acquainted with the iota-sdk. You can use the following command to run any example:
+You can use the provided code [examples](sdk/examples) to acquainted with the IOTA SDK. You can use the following command to run any example:
 
 ```bash
 cargo run --example example_name --release
@@ -209,7 +209,7 @@ cargo run --example
 
 #### Rust
 
-The iota-sdk Rust API Reference is in the [crate documentation](https://docs.rs/iota-sdk/latest/iota_sdk/).
+The IOTA SDK Rust API Reference is in the [crate documentation](https://docs.rs/iota-sdk/latest/iota_sdk/).
 
 ## Contribute
 
@@ -220,12 +220,12 @@ Before contributing, please read and adhere to the [code of conduct](/.github/CO
 
 ## License
 
-The iota-sdk is open-source software licensed under Apache License 2.0. For more information, please read
+The IOTA SDK is open-source software licensed under Apache License 2.0. For more information, please read
 the [LICENSE](/LICENSE).
 
 ## Acknowledgments
 
-The iota-sdk project is built upon the contributions of many individuals and organizations. We would like to express our
+The IOTA SDK project is built upon the contributions of many individuals and organizations. We would like to express our
 gratitude to the IOTA community and all the developers who have contributed to the project.
 
 For a complete list of contributors and acknowledgments, please refer to

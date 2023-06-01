@@ -4,7 +4,7 @@
 
 - [Requirements (only for building the binary yourself)](#requirements-only-for-building-the-binary-yourself)
 - [Getting Started](#getting-started)
-    - [Install the iota-sdk](#install-the-iota-sdk)
+    - [Install the IOTA SDK](#install-the-iota-sdk)
     - [Usage](#usage)
       - [Wallet](#wallet)
       - [Client](#client)
@@ -38,7 +38,7 @@ an environment variable `RUSTFLAGS` to `-C target-feature=+crt-static`.
 
 ## Getting Started
 
-### Install the iota-sdk
+### Install the IOTA SDK
 
 #### Install With a Package Manager
 
@@ -129,7 +129,7 @@ run().then(() => process.exit());
 
 #### Examples
 
-You can use the provided code [examples](examples) to acquainted with the iota-sdk. You can use the following command to run any example:
+You can use the provided code [examples](examples) to acquainted with the IOTA SDK. You can use the following command to run any example:
 
 ```bash
 node example/[example file]
