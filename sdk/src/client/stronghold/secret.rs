@@ -149,10 +149,10 @@ impl SecretManage for StrongholdAdapter {
                 .lock()
                 .await
                 .get_client(PRIVATE_DATA_CLIENT_PATH)
-                .map_err(super::Error::from)?
+                .map_err(Error::from)?
                 .vault(SECRET_VAULT_PATH)
                 .delete_secret(derive_location.record_path())
-                .map_err(super::Error::from)?;
+                .map_err(Error::from)?;
 
             // Collect it.
             addresses.push(public_key.to_evm_address());
