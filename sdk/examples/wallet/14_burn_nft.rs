@@ -32,7 +32,8 @@ async fn main() -> Result<()> {
 
     // Get the first nft
     if let Some(nft_id) = balance.nfts().first() {
-        println!("Balance BEFORE burning:\n{balance:?}",);
+        let nfts_before = balance.nfts();
+        println!("NFTs BEFORE destroying:\n{nfts_before:#?}",);
 
         // Set the stronghold password
         wallet
@@ -57,8 +58,8 @@ async fn main() -> Result<()> {
         println!("Burned NFT '{}'", nft_id);
 
         let balance = account.sync(None).await?;
-
-        println!("Balance AFTER burning:\n{balance:?}",);
+        let nfts_after = balance.nfts();
+        println!("NFTs AFTER destroying:\n{nfts_after:#?}",);
     } else {
         println!("No NFT available in account '{alias}'");
     }
