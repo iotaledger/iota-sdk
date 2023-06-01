@@ -13,7 +13,7 @@ use iota_sdk::{
         constants::IOTA_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::address::Bech32Address,
+    types::block::address::{Bech32Address, ToBech32Ext},
     wallet::{ClientOptions, Result, Wallet},
 };
 
@@ -196,7 +196,7 @@ async fn wallet_address_generation() -> Result<()> {
     }
     let wallet = wallet_builder.finish().await?;
 
-    let address = wallet.generate_address(0, 0, None).await?;
+    let address = wallet.generate_ed25519_address(0, 0, None).await?;
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
@@ -225,7 +225,7 @@ async fn wallet_address_generation() -> Result<()> {
         }
         let wallet = wallet_builder.finish().await?;
 
-        let address = wallet.generate_address(0, 0, None).await?;
+        let address = wallet.generate_ed25519_address(0, 0, None).await?;
 
         assert_eq!(
             address.to_bech32_unchecked("smr"),

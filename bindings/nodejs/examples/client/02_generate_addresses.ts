@@ -33,7 +33,7 @@ async function run() {
         };
 
         // Generate public address with default account index and range.
-        const default_addresses = await client.generateAddresses(
+        const default_addresses = await client.generateEd25519Addresses(
             secretManager,
             {},
         );
@@ -44,7 +44,7 @@ async function run() {
         );
 
         // Generate public address with custom account index and range.
-        const address = await client.generateAddresses(secretManager, {
+        const address = await client.generateEd25519Addresses(secretManager, {
             accountIndex: 0,
             range: {
                 start: 0,
@@ -54,7 +54,7 @@ async function run() {
         console.log('List of generated public addresses:', address, '\n');
 
         // Generate internal addresses with custom account index and range.
-        const internalAddresses = await client.generateAddresses(
+        const internalAddresses = await client.generateEd25519Addresses(
             secretManager,
             {
                 accountIndex: 0,
@@ -72,7 +72,7 @@ async function run() {
         );
 
         // Generate addresses with providing all inputs, that way it can also be done offline without a node.
-        const offlineGeneratedAddresses = await client.generateAddresses(
+        const offlineGeneratedAddresses = await client.generateEd25519Addresses(
             secretManager,
             {
                 coinType: CoinType.Shimmer,
@@ -82,7 +82,7 @@ async function run() {
                     end: 4,
                 },
                 internal: false,
-                // Generating addresses with client.generateAddresses(secretManager, {}), will by default get the bech32_hrp (Bech32
+                // Generating addresses with client.generateEd25519Addresses(secretManager, {}), will by default get the bech32_hrp (Bech32
                 // human readable part) from the node info, generating it "offline" requires setting it in the generateAddressesOptions
                 bech32Hrp: SHIMMER_TESTNET_BECH32_HRP,
             },

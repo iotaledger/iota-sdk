@@ -1,0 +1,18 @@
+[alias]
+ci-check-all = "check --all-targets --all-features"
+ci-check-java-client = "check --manifest-path sdk/src/client/bindings/java/lib/native/Cargo.toml --all-targets --lib"
+ci-check-java-wallet = "check --manifest-path sdk/src/wallet/bindings/java/lib/native/Cargo.toml --all-targets --lib"
+ci-check-nodejs = "check --manifest-path bindings/nodejs/Cargo.toml --all-targets --lib"
+ci-check-python = "check --manifest-path bindings/python/Cargo.toml --all-targets --lib"
+ci-check-wasm = "check --manifest-path bindings/wasm/Cargo.toml --target wasm32-unknown-unknown --lib"
+ci-check-nostd = "check --no-default-features -F serde -p iota-sdk --target riscv64gc-unknown-none-elf"
+
+ci-test = "nextest run --all-features --no-fail-fast --cargo-profile ci --test-threads num-cpus --retries 2"
+
+ci-clippy = "clippy --all-targets --all-features -- -D warnings"
+
+ci-doctest = "test --doc --all-features"
+ci-doc = "doc --all-features --no-deps --document-private-items"
+ci-fmt = "fmt --all -- --check"
+ci-toml = "sort --grouped --check"
+ci-udeps = "udeps --all-targets --all-features --backend=depinfo"

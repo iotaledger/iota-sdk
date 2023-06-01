@@ -3,7 +3,7 @@
 
 use iota_sdk::{
     client::Error as ClientError,
-    types::block::address::Bech32Address,
+    types::block::address::{Bech32Address, ToBech32Ext},
     wallet::{account::OutputParams, Error, Result, SendAmountParams},
 };
 
