@@ -10,7 +10,7 @@ import type {
     __PrepareCreateAliasOutputMethod__,
     __PrepareDecreaseNativeTokenSupplyMethod__,
     __DeregisterParticipationEventMethod__,
-    __GenerateAddressesMethod__,
+    __GenerateEd25519AddressesMethod__,
     __GetBalanceMethod__,
     __GetOutputMethod__,
     __GetFoundryOutputMethod__,
@@ -65,7 +65,7 @@ import type {
     __GetAccountIndexesMethod__,
     __GetAccountsMethod__,
     __GetLedgerNanoStatusMethod__,
-    __GenerateAddressMethod__,
+    __GenerateEd25519AddressMethod__,
     __IsStrongholdPasswordAvailableMethod__,
     __RecoverAccountsMethod__,
     __RemoveLatestAccountMethod__,
@@ -89,7 +89,7 @@ export type __AccountMethod__ =
     | __PrepareConsolidateOutputsMethod__
     | __PrepareCreateAliasOutputMethod__
     | __DeregisterParticipationEventMethod__
-    | __GenerateAddressesMethod__
+    | __GenerateEd25519AddressesMethod__
     | __GetBalanceMethod__
     | __GetOutputMethod__
     | __GetIncomingTransactionMethod__
@@ -154,7 +154,7 @@ export type __Method__ =
     | __GetAccountIndexesMethod__
     | __GetAccountsMethod__
     | __GetLedgerNanoStatusMethod__
-    | __GenerateAddressMethod__
+    | __GenerateEd25519AddressMethod__
     | __IsStrongholdPasswordAvailableMethod__
     | __RecoverAccountsMethod__
     | __RemoveLatestAccountMethod__

@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 use iota_sdk::{
     client::{
-        api::GetAddressesBuilder,
+        api::GetAddressesOptions,
         constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
         secret::{stronghold::StrongholdSecretManager, SecretManager},
         storage::StorageAdapter,
@@ -52,12 +52,14 @@ async fn stronghold_snapshot_v2_v3_migration() {
             .unwrap(),
     );
 
-    let addresses = GetAddressesBuilder::new(&stronghold_secret_manager)
-        .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_account_index(0)
-        .with_range(0..10)
-        .finish()
+    let addresses = stronghold_secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_account_index(0)
+                .with_range(0..10),
+        )
         .await
         .unwrap();
 
@@ -184,12 +186,14 @@ async fn stronghold_snapshot_v2_v3_migration_with_backup() {
     let coin_type = u32::from_le_bytes(coin_type_bytes.try_into().expect("invalid coin_type"));
     assert_eq!(coin_type, SHIMMER_COIN_TYPE);
 
-    let addresses = GetAddressesBuilder::new(&SecretManager::Stronghold(stronghold_secret_manager))
-        .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_account_index(0)
-        .with_range(0..10)
-        .finish()
+    let addresses = SecretManager::Stronghold(stronghold_secret_manager)
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_account_index(0)
+                .with_range(0..10),
+        )
         .await
         .unwrap();
 

@@ -14,7 +14,6 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{ledger_nano::LedgerSecretManager, SecretManager},
     },
-    types::block::address::Bech32Address,
     wallet::{ClientOptions, Result, SendAmountParams, Wallet},
 };
 
@@ -51,7 +50,7 @@ async fn main() -> Result<()> {
         }
     };
 
-    let address = account.generate_addresses(1, None).await?;
+    let address = account.generate_ed25519_addresses(1, None).await?;
 
     println!("{address:?}");
 
@@ -62,9 +61,9 @@ async fn main() -> Result<()> {
 
     // send transaction
     let outputs = vec![SendAmountParams::new(
-        Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
+        "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
         1_000_000,
-    )];
+    )?];
     let transaction = account.send_amount(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 

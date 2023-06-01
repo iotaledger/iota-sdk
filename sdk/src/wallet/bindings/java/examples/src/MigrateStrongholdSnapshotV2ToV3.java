@@ -3,7 +3,7 @@
 
 import org.iota.Wallet;
 import org.iota.types.*;
-import org.iota.types.account_methods.GenerateAddresses;
+import org.iota.types.account_methods.GenerateEd25519Addresses;
 import org.iota.types.exceptions.InitializeWalletException;
 import org.iota.types.exceptions.WalletException;
 import org.iota.types.secret.StrongholdSecretManager;
@@ -37,7 +37,7 @@ public class MigrateStrongholdSnapshotV2ToV3 {
 
         Account account = wallet.createAccount(Env.ACCOUNT_NAME);
 
-        AccountAddress[] addresses = account.generateAddresses(new GenerateAddresses().withAmount(1));
+        AccountAddress[] addresses = account.generateEd25519Addresses(new GenerateEd25519Addresses().withAmount(1));
 
         System.out.println(addresses[0].getAddress());
 

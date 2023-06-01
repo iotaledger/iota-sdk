@@ -6,8 +6,8 @@ use std::collections::{HashMap, HashSet};
 use tokio::sync::RwLock;
 
 use crate::{
-    client::secret::{SecretManage, SecretManager},
-    types::block::address::{Address, Bech32Address, Hrp},
+    client::{api::GetAddressesOptions, secret::SecretManager},
+    types::block::address::{Bech32Address, Hrp},
     wallet::{
         account::{types::AccountAddress, Account, AccountDetails},
         Error, Wallet,
@@ -66,23 +66,15 @@ impl AccountBuilder {
             account_index
         );
 
-        let coin_type = self.wallet.coin_type.load(core::sync::atomic::Ordering::Relaxed);
-
-        // Check that the alias isn't already used for another account and that the coin type is the same for new and
-        // existing accounts
+        // Check that the alias isn't already used for another account
         for account in accounts.iter() {
             let account = account.details().await;
-            let existing_coin_type = account.coin_type;
-            if existing_coin_type != coin_type {
-                return Err(Error::InvalidCoinType {
-                    new_coin_type: coin_type,
-                    existing_coin_type,
-                });
-            }
             if account.alias().to_lowercase() == account_alias.to_lowercase() {
                 return Err(Error::AccountAliasAlreadyExists(account_alias));
             }
         }
+
+        let coin_type = self.wallet.coin_type.load(core::sync::atomic::Ordering::Relaxed);
 
         // If addresses are provided we will use them directly without the additional checks, because then we assume
         // that it's for offline signing and the secretManager can't be used
@@ -99,7 +91,7 @@ impl AccountBuilder {
                         get_first_public_address(&self.wallet.secret_manager, first_account_coin_type, 0).await?;
                     let first_account_addresses = first_account.public_addresses().await;
 
-                    if first_account_public_address
+                    if first_account_public_address.inner
                         != first_account_addresses
                             .first()
                             .ok_or(Error::FailedToGetRemainder)?
@@ -172,10 +164,15 @@ pub(crate) async fn get_first_public_address(
     secret_manager: &RwLock<SecretManager>,
     coin_type: u32,
     account_index: u32,
-) -> crate::wallet::Result<Address> {
+) -> crate::wallet::Result<Bech32Address> {
     Ok(secret_manager
         .read()
         .await
-        .generate_addresses(coin_type, account_index, 0..1, None)
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_coin_type(coin_type)
+                .with_account_index(account_index)
+                .with_range(0..1),
+        )
         .await?[0])
 }

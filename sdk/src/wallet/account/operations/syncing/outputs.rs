@@ -45,7 +45,7 @@ impl Account {
                 .map_or(false, |tx| !tx.incoming);
 
             // 44 is for BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
-            let chain = Chain::from_u32_hardened(vec![
+            let chain = Chain::from_u32_hardened([
                 HD_WALLET_TYPE,
                 account_details.coin_type,
                 account_details.index,
