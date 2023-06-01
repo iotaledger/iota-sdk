@@ -7,7 +7,6 @@
 //! `cargo run --release --all-features --example simple_transaction`
 
 use iota_sdk::{
-    types::block::address::Bech32Address,
     wallet::{Result, SendAmountParams},
     Wallet,
 };
@@ -33,9 +32,9 @@ async fn main() -> Result<()> {
 
         // Send a transaction with 1 Mi
         let outputs = vec![SendAmountParams::new(
-            Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
+            "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
             1_000_000,
-        )];
+        )?];
         let transaction = account.send_amount(outputs, None).await?;
 
         // Wait for transaction to get included

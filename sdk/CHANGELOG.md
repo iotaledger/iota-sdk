@@ -79,6 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Made certain `prepare_` methods public: `prepare_mint_nfts`, `prepare_send_native_tokens`, `prepare_send_nft` and `prepare_create_alias_output`;
 - `Wallet`, `WalletBuilder`, `Account`, `AccountBuilder` now specify generic secret manager type;
 - `Address`-like types now implement `ToBech32Ext` for `to_bech32` and similar fns;
+- Add constructors for `SendNftParams`, `SendAmountParams`, `SendNativeTokensParams`, `MintNftParams`;
 
 ### Removed
 
@@ -96,6 +97,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Storage records decryption;
+- CoinType check, by moving it from AccountBuilder to WalletBuilder;
 
 ### Fixed
 

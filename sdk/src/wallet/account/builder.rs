@@ -69,23 +69,15 @@ where
             account_index
         );
 
-        let coin_type = self.wallet.coin_type.load(core::sync::atomic::Ordering::Relaxed);
-
-        // Check that the alias isn't already used for another account and that the coin type is the same for new and
-        // existing accounts
+        // Check that the alias isn't already used for another account
         for account in accounts.iter() {
             let account = account.details().await;
-            let existing_coin_type = account.coin_type;
-            if existing_coin_type != coin_type {
-                return Err(Error::InvalidCoinType {
-                    new_coin_type: coin_type,
-                    existing_coin_type,
-                });
-            }
             if account.alias().to_lowercase() == account_alias.to_lowercase() {
                 return Err(Error::AccountAliasAlreadyExists(account_alias));
             }
         }
+
+        let coin_type = self.wallet.coin_type.load(core::sync::atomic::Ordering::Relaxed);
 
         // If addresses are provided we will use them directly without the additional checks, because then we assume
         // that it's for offline signing and the secretManager can't be used

@@ -1,13 +1,14 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use getset::Getters;
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
-        address::Bech32Address,
+        address::{Bech32Address, Bech32AddressLike},
         output::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
@@ -28,19 +29,56 @@ use crate::{
 };
 
 /// Params for `send_native_tokens()`
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct SendNativeTokensParams {
     /// Bech32 encoded address
-    pub address: Bech32Address,
+    #[getset(get = "pub")]
+    address: Bech32Address,
     /// Native tokens
-    pub native_tokens: Vec<(TokenId, U256)>,
+    #[getset(get = "pub")]
+    native_tokens: Vec<(TokenId, U256)>,
     /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
     /// first address of the account
-    pub return_address: Option<Bech32Address>,
+    #[getset(get = "pub")]
+    return_address: Option<Bech32Address>,
     /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
     /// receiver before. Default is 1 day
-    pub expiration: Option<u32>,
+    #[getset(get = "pub")]
+    expiration: Option<u32>,
+}
+
+impl SendNativeTokensParams {
+    /// Creates a new instance of [`SendNativeTokensParams`]
+    pub fn new(
+        address: impl Bech32AddressLike,
+        native_tokens: impl IntoIterator<Item = (TokenId, U256)>,
+    ) -> Result<Self> {
+        Ok(Self {
+            address: address.to_bech32()?,
+            native_tokens: native_tokens.into_iter().collect(),
+            return_address: None,
+            expiration: None,
+        })
+    }
+
+    /// Set the return address and try convert to [`Bech32Address`]
+    pub fn try_with_return_address(mut self, return_address: impl Bech32AddressLike) -> Result<Self> {
+        self.return_address = Some(return_address.to_bech32()?);
+        Ok(self)
+    }
+
+    /// Set the return address
+    pub fn with_return_address(mut self, return_address: impl Into<Option<Bech32Address>>) -> Self {
+        self.return_address = return_address.into();
+        self
+    }
+
+    /// Set the expiration in seconds
+    pub fn with_expiration(mut self, expiration_secs: Option<u32>) -> Self {
+        self.expiration = expiration_secs;
+        self
+    }
 }
 
 impl<S: 'static + SecretManage> Account<S>

@@ -10,11 +10,11 @@ use iota_sdk::{
 };
 use iota_sdk::{
     client::{
-        constants::IOTA_COIN_TYPE,
+        constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::address::{Bech32Address, ToBech32Ext},
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Error, Result, Wallet},
 };
 
 use crate::wallet::common::{make_wallet, setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL, NODE_OTHER};
@@ -92,24 +92,41 @@ async fn changed_coin_type() -> Result<()> {
     drop(_account);
     drop(wallet);
 
-    // Recreate Wallet with same mnemonic
-    let secret_manager2 = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC)?;
-    let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::Mnemonic(secret_manager2))
+    let err = Wallet::builder()
+        .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
+            DEFAULT_MNEMONIC,
+        )?))
         .with_coin_type(IOTA_COIN_TYPE)
         .with_storage_path(storage_path)
         .finish()
-        .await?;
+        .await;
 
-    // Generating a new account needs to return an error, because a different coin type was set and we require all
-    // accounts to have the same coin type
+    // Building the wallet with another coin type needs to return an error, because a different coin type was used in
+    // the existing account
+    assert!(matches!(
+        err,
+        Err(Error::InvalidCoinType {
+            new_coin_type: IOTA_COIN_TYPE,
+            existing_coin_type: SHIMMER_COIN_TYPE
+        })
+    ));
+
+    // Building the wallet with the same coin type still works
+    let wallet = Wallet::builder()
+        .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
+            DEFAULT_MNEMONIC,
+        )?))
+        .with_storage_path(storage_path)
+        .finish()
+        .await?;
+    // Also still possible to create a new account
     assert!(
         wallet
             .create_account()
             .with_alias("Bob".to_string())
             .finish()
             .await
-            .is_err()
+            .is_ok()
     );
 
     tear_down(storage_path)

@@ -1,6 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use core::convert::Infallible;
 use std::fmt::Debug;
 
 use serde::{
@@ -135,6 +136,13 @@ impl Serialize for Error {
         seq.serialize_entry("type", &kind)?;
         seq.serialize_entry("error", &self.to_string())?;
         seq.end()
+    }
+}
+
+// Implements conversion from Infallible. This never happens, but is required by the compiler.
+impl From<Infallible> for Error {
+    fn from(_: Infallible) -> Self {
+        unreachable!()
     }
 }
 
