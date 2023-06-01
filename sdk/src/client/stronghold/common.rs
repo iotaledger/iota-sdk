@@ -4,7 +4,6 @@
 //! Commonly used constants and utilities.
 
 use iota_stronghold::KeyProvider;
-use zeroize::Zeroize;
 
 use crate::client::secret::types::Password;
 
@@ -28,19 +27,11 @@ pub(super) const DERIVE_OUTPUT_RECORD_PATH: &[u8] = b"iota-wallet-derived";
 /// The value has been hard-coded historically.
 pub(super) const PRIVATE_DATA_CLIENT_PATH: &[u8] = b"iota_seed";
 
-const PBKDF_SALT: &[u8] = b"wallet.rs";
-const PBKDF_ITER: core::num::NonZeroU32 = unsafe { core::num::NonZeroU32::new_unchecked(100) };
+/// The path for the user-data encryption key for the Stronghold store.
+pub(super) const USERDATA_STORE_KEY_RECORD_PATH: &[u8] = b"userdata-store-key";
 
 /// Hash a password, deriving a key, for accessing Stronghold.
 pub(super) fn key_provider_from_password(password: Password) -> KeyProvider {
-    let mut buffer = [0u8; 64];
-
-    crypto::keys::pbkdf::PBKDF2_HMAC_SHA512(password.as_bytes(), PBKDF_SALT, PBKDF_ITER, buffer.as_mut());
-
-    // PANIC: the passphrase length is guaranteed to be 32.
-    let key_provider = KeyProvider::with_passphrase_truncated(buffer[..32].to_vec()).unwrap();
-
-    buffer.zeroize();
-
-    key_provider
+    // PANIC: the hashed password length is guaranteed to be 32.
+    KeyProvider::with_passphrase_hashed_blake2b(password.as_bytes().to_vec()).unwrap()
 }

@@ -48,6 +48,7 @@
 
 mod common;
 mod error;
+mod migration;
 mod secret;
 mod storage;
 
@@ -130,8 +131,14 @@ fn check_or_create_snapshot(
         }
         Err(iota_stronghold::ClientError::Inner(ref err_msg)) => {
             // Matching the error string is not ideal but stronghold doesn't wrap the error types at the moment.
-            if err_msg.to_string().contains("XCHACHA20-POLY1305") {
+            if err_msg.contains("XCHACHA20-POLY1305") || err_msg.contains("BadFileKey") {
                 return Err(Error::InvalidPassword);
+            } else if err_msg.contains("unsupported version") {
+                if err_msg.contains("expected [3, 0], found [2, 0]") {
+                    return Err(Error::UnsupportedSnapshotVersion { found: 2, expected: 3 });
+                } else {
+                    panic!("unsupported version mismatch");
+                }
             }
         }
         _ => {}

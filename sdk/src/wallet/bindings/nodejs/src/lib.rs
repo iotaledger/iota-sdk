@@ -10,6 +10,7 @@ pub use message_handler::*;
 use neon::prelude::*;
 use once_cell::sync::Lazy;
 use tokio::runtime::Runtime;
+
 pub static RUNTIME: Lazy<Runtime> = Lazy::new(|| Runtime::new().unwrap());
 
 #[neon::main]
@@ -21,5 +22,11 @@ fn main(mut cx: ModuleContext) -> NeonResult<()> {
 
     cx.export_function("listen", message_handler::listen)?;
     cx.export_function("initLogger", message_handler::init_logger)?;
+
+    cx.export_function(
+        "migrateStrongholdSnapshotV2ToV3",
+        message_handler::migrate_stronghold_snapshot_v2_to_v3,
+    )?;
+
     Ok(())
 }

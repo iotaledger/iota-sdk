@@ -4,7 +4,7 @@
 // This file overwrites the `bindings.ts` file from `bindings/nodejs/lib`, to link the Wasm `MethodHandler` interface.
 // The rest of the TypeScript definitions are copied as-is to the `out` directory before being compiled.
 
-import { __UtilsMethods__ } from '../types/utils';
+import { __UtilsMethods__ } from './utils';
 
 // Import needs to be in a single line, otherwise it breaks
 // prettier-ignore

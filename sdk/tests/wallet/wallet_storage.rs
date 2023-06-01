@@ -3,7 +3,10 @@
 
 use std::{fs, io, path::Path};
 
-use iota_sdk::wallet::{Result, Wallet};
+use iota_sdk::{
+    client::stronghold::StrongholdAdapter,
+    wallet::{Result, Wallet},
+};
 
 use crate::wallet::common::{setup, tear_down};
 
@@ -16,6 +19,16 @@ async fn check_existing_db() -> Result<()> {
     copy_folder("./tests/wallet/fixtures/check_existing_db_test", storage_path).unwrap();
 
     let wallet = Wallet::builder().with_storage_path(storage_path).finish().await?;
+
+    // Migrate old snapshots.
+    let _ = StrongholdAdapter::migrate_snapshot_v2_to_v3(
+        "check_existing_db_test/strongholdfile",
+        "STRONGHOLD_PASSWORD".to_owned(),
+        "wallet.rs".to_owned(),
+        100,
+        None,
+        None,
+    );
 
     // Test if setting stronghold password still works
     wallet.set_stronghold_password("STRONGHOLD_PASSWORD".to_owned()).await?;

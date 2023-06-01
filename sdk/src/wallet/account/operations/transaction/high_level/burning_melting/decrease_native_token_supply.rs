@@ -4,6 +4,7 @@
 use primitive_types::U256;
 
 use crate::{
+    client::api::PreparedTransactionData,
     types::block::output::{
         AliasId, AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
@@ -23,7 +24,21 @@ impl Account {
         melt_amount: U256,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
-        log::debug!("[TRANSACTION] decrease_native_token_supply");
+        let prepared_transaction = self
+            .prepare_decrease_native_token_supply(token_id, melt_amount, options)
+            .await?;
+        self.sign_and_submit_transaction(prepared_transaction).await
+    }
+
+    /// Function to prepare the transaction for
+    /// [Account.decrease_native_token_supply()](crate::account::Account.decrease_native_token_supply)
+    pub async fn prepare_decrease_native_token_supply(
+        &self,
+        token_id: TokenId,
+        melt_amount: U256,
+        options: impl Into<Option<TransactionOptions>> + Send,
+    ) -> crate::wallet::Result<PreparedTransactionData> {
+        log::debug!("[TRANSACTION] prepare_decrease_native_token_supply");
 
         let foundry_id = FoundryId::from(token_id);
         let alias_id = *foundry_id.alias_address().alias_id();
@@ -56,7 +71,7 @@ impl Account {
                     .finish_output(token_supply)?,
             ];
             // Input selection will detect that we're melting native tokens and add the required inputs if available
-            self.send(outputs, options).await
+            self.prepare_transaction(outputs, options).await
         } else {
             unreachable!("We checked if it's an alias output before")
         }

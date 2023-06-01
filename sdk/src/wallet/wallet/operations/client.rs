@@ -51,6 +51,14 @@ impl Wallet {
         {
             *self.client.mqtt.broker_options.write().await = broker_options;
         }
+        #[cfg(feature = "storage")]
+        {
+            self.storage_manager
+                .read()
+                .await
+                .save_wallet_data(&WalletBuilder::from_wallet(self).await)
+                .await?;
+        }
         Ok(())
     }
 

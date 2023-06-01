@@ -4,7 +4,7 @@ import {
     SecretManager,
     SHIMMER_TESTNET_BECH32_HRP,
     Utils
-} from '../../lib';
+} from '../../';
 import '../customMatchers';
 import 'dotenv/config';
 import { addresses } from '../fixtures/addresses';

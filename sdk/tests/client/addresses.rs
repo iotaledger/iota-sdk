@@ -1,18 +1,8 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "message_interface")]
-use iota_sdk::client::api::GetAddressesBuilderOptions;
-#[cfg(feature = "message_interface")]
-use iota_sdk::client::message_interface;
-#[cfg(feature = "message_interface")]
-use iota_sdk::client::message_interface::{Message, Response};
 #[cfg(feature = "stronghold")]
 use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
-#[cfg(all(feature = "message_interface", feature = "stronghold"))]
-use iota_sdk::client::secret::types::StrongholdDto;
-#[cfg(feature = "message_interface")]
-use iota_sdk::client::secret::SecretManagerDto;
 use iota_sdk::{
     client::{
         api::GetAddressesBuilder,
@@ -219,92 +209,5 @@ async fn address_generation() {
             panic!("Invalid address type")
         }
         std::fs::remove_file(stronghold_filename).unwrap();
-    }
-
-    #[cfg(feature = "message_interface")]
-    {
-        let message_handler = message_interface::create_message_handler(None).await.unwrap();
-        for address in &addresses_data {
-            let options = GetAddressesBuilderOptions {
-                coin_type: Some(address.coin_type),
-                account_index: Some(address.account_index),
-                range: Some(std::ops::Range {
-                    start: address.address_index,
-                    end: address.address_index + 1,
-                }),
-                bech32_hrp: Some(address.bech32_hrp),
-                options: Some(GenerateAddressOptions {
-                    internal: address.internal,
-                    ..Default::default()
-                }),
-            };
-            let message = Message::GenerateAddresses {
-                secret_manager: SecretManagerDto::Mnemonic(address.mnemonic.clone()),
-                options,
-            };
-
-            let response = message_handler.send_message(message).await;
-            match response {
-                Response::GeneratedAddresses(addresses) => {
-                    assert_eq!(addresses[0], address.bech32_address);
-                    if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
-                        assert_eq!(ed25519_address.to_string(), address.ed25519_address);
-                    } else {
-                        panic!("Invalid address type")
-                    }
-                }
-                _ => panic!("Unexpected response type"),
-            }
-        }
-    }
-
-    #[cfg(all(feature = "message_interface", feature = "stronghold"))]
-    {
-        let message_handler = message_interface::create_message_handler(None).await.unwrap();
-        for address in addresses_data {
-            let stronghold_filename = format!("{}.stronghold", address.bech32_address);
-            let secret_manager_dto = StrongholdDto {
-                password: Some("some_hopefully_secure_password".to_string()),
-                timeout: None,
-                snapshot_path: stronghold_filename.clone(),
-            };
-            let message = Message::StoreMnemonic {
-                secret_manager: SecretManagerDto::Stronghold(secret_manager_dto.clone()),
-                mnemonic: address.mnemonic,
-            };
-            let _response = message_handler.send_message(message).await;
-
-            let options = GetAddressesBuilderOptions {
-                coin_type: Some(address.coin_type),
-                account_index: Some(address.account_index),
-                range: Some(std::ops::Range {
-                    start: address.address_index,
-                    end: address.address_index + 1,
-                }),
-                bech32_hrp: Some(address.bech32_hrp),
-                options: Some(GenerateAddressOptions {
-                    internal: address.internal,
-                    ..Default::default()
-                }),
-            };
-            let message = Message::GenerateAddresses {
-                secret_manager: SecretManagerDto::Stronghold(secret_manager_dto),
-                options,
-            };
-
-            let response = message_handler.send_message(message).await;
-            match response {
-                Response::GeneratedAddresses(addresses) => {
-                    assert_eq!(addresses[0], address.bech32_address);
-                    if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
-                        assert_eq!(ed25519_address.to_string(), address.ed25519_address);
-                    } else {
-                        panic!("Invalid address type")
-                    }
-                }
-                _ => panic!("Unexpected response type"),
-            }
-            std::fs::remove_file(stronghold_filename).unwrap();
-        }
     }
 }
