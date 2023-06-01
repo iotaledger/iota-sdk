@@ -5,7 +5,7 @@
 use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
 use iota_sdk::{
     client::{
-        api::GetAddressesBuilder,
+        api::GetAddressesOptions,
         constants::{IOTA_BECH32_HRP, IOTA_COIN_TYPE, IOTA_TESTNET_BECH32_HRP, SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
         secret::{GenerateAddressOptions, SecretManager},
         Client,
@@ -18,21 +18,22 @@ use serde::{Deserialize, Serialize};
 async fn addresses() {
     let secret_manager = crate::client::node_api::setup_secret_manager();
 
-    let addresses = GetAddressesBuilder::new(&secret_manager)
-        .with_coin_type(IOTA_COIN_TYPE)
+    let opts = GetAddressesOptions::default()
         .with_bech32_hrp(IOTA_TESTNET_BECH32_HRP)
-        .with_account_index(0)
-        .with_range(0..1)
-        .get_all()
+        .with_coin_type(IOTA_COIN_TYPE)
+        .with_range(0..1);
+    let public = secret_manager.generate_ed25519_addresses(opts.clone()).await.unwrap();
+    let internal = secret_manager
+        .generate_ed25519_addresses(opts.internal())
         .await
         .unwrap();
 
     assert_eq!(
-        addresses.public[0],
+        public[0],
         "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r"
     );
     assert_eq!(
-        addresses.internal[0],
+        internal[0],
         "atoi1qprxpfvaz2peggq6f8k9cj8zfsxuw69e4nszjyv5kuf8yt70t2847shpjak"
     );
 }
@@ -59,12 +60,14 @@ async fn mnemonic_address_generation_iota() {
     let secret_manager = SecretManager::try_from_mnemonic(mnemonic).unwrap();
 
     // account 0, address 0 and 1
-    let addresses = GetAddressesBuilder::new(&secret_manager)
-        .with_coin_type(IOTA_COIN_TYPE)
-        .with_bech32_hrp(IOTA_BECH32_HRP)
-        .with_account_index(0)
-        .with_range(0..2)
-        .finish()
+    let addresses = secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_bech32_hrp(IOTA_BECH32_HRP)
+                .with_coin_type(IOTA_COIN_TYPE)
+                .with_range(0..2)
+                .with_account_index(0),
+        )
         .await
         .unwrap();
 
@@ -78,12 +81,14 @@ async fn mnemonic_address_generation_iota() {
     );
 
     // account 1
-    let addresses = GetAddressesBuilder::new(&secret_manager)
-        .with_coin_type(IOTA_COIN_TYPE)
-        .with_bech32_hrp(IOTA_BECH32_HRP)
-        .with_account_index(1)
-        .with_range(0..1)
-        .finish()
+    let addresses = secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_bech32_hrp(IOTA_BECH32_HRP)
+                .with_coin_type(IOTA_COIN_TYPE)
+                .with_range(0..1)
+                .with_account_index(1),
+        )
         .await
         .unwrap();
 
@@ -99,12 +104,14 @@ async fn mnemonic_address_generation_shimmer() {
     let secret_manager = SecretManager::try_from_mnemonic(mnemonic).unwrap();
 
     // account 0, address 0 and 1
-    let addresses = GetAddressesBuilder::new(&secret_manager)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_bech32_hrp(SHIMMER_BECH32_HRP)
-        .with_account_index(0)
-        .with_range(0..2)
-        .finish()
+    let addresses = secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_bech32_hrp(SHIMMER_BECH32_HRP)
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_range(0..2)
+                .with_account_index(0),
+        )
         .await
         .unwrap();
 
@@ -118,12 +125,14 @@ async fn mnemonic_address_generation_shimmer() {
     );
 
     // account 1
-    let addresses = GetAddressesBuilder::new(&secret_manager)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_bech32_hrp(SHIMMER_BECH32_HRP)
-        .with_account_index(1)
-        .with_range(0..1)
-        .finish()
+    let addresses = secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_bech32_hrp(SHIMMER_BECH32_HRP)
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_range(0..1)
+                .with_account_index(1),
+        )
         .await
         .unwrap();
 
@@ -155,16 +164,18 @@ async fn address_generation() {
 
     for address in &addresses_data {
         let secret_manager = SecretManager::try_from_mnemonic(&address.mnemonic).unwrap();
-        let addresses = GetAddressesBuilder::new(&secret_manager)
-            .with_bech32_hrp(address.bech32_hrp)
-            .with_coin_type(address.coin_type)
-            .with_account_index(address.account_index)
-            .with_range(address.address_index..address.address_index + 1)
-            .with_options(GenerateAddressOptions {
-                internal: address.internal,
-                ..Default::default()
-            })
-            .finish()
+        let addresses = secret_manager
+            .generate_ed25519_addresses(
+                GetAddressesOptions::default()
+                    .with_bech32_hrp(address.bech32_hrp)
+                    .with_coin_type(address.coin_type)
+                    .with_range(address.address_index..address.address_index + 1)
+                    .with_account_index(address.account_index)
+                    .with_options(GenerateAddressOptions {
+                        internal: address.internal,
+                        ..Default::default()
+                    }),
+            )
             .await
             .unwrap();
 
@@ -189,16 +200,18 @@ async fn address_generation() {
             .await
             .unwrap();
 
-        let addresses = GetAddressesBuilder::new(&SecretManager::Stronghold(stronghold_secret_manager))
-            .with_bech32_hrp(address.bech32_hrp)
-            .with_coin_type(address.coin_type)
-            .with_account_index(address.account_index)
-            .with_range(address.address_index..address.address_index + 1)
-            .with_options(GenerateAddressOptions {
-                internal: address.internal,
-                ..Default::default()
-            })
-            .finish()
+        let addresses = SecretManager::Stronghold(stronghold_secret_manager)
+            .generate_ed25519_addresses(
+                GetAddressesOptions::default()
+                    .with_bech32_hrp(address.bech32_hrp)
+                    .with_coin_type(address.coin_type)
+                    .with_range(address.address_index..address.address_index + 1)
+                    .with_account_index(address.account_index)
+                    .with_options(GenerateAddressOptions {
+                        internal: address.internal,
+                        ..Default::default()
+                    }),
+            )
             .await
             .unwrap();
 

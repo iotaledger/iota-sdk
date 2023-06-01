@@ -25,7 +25,7 @@ async function run() {
 
         console.log(ledgerNanoStatus);
 
-        const address = await ledgerNanoSecretManager.generateAddresses({
+        const address = await ledgerNanoSecretManager.generateEd25519Addresses({
             accountIndex: 0,
             range: {
                 start: 0,

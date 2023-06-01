@@ -54,7 +54,7 @@ pub struct AccountAddress {
     pub internal: bool,
 }
 
-/// Options provided to `generate_address()`.
+/// Options provided to generate addresses.
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 pub struct GenerateAddressOptions {

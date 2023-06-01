@@ -140,7 +140,7 @@ pub enum WalletMethod {
     /// Generate an address without storing it
     /// Expected response: [`Bech32Address`](crate::Response::Bech32Address)
     #[serde(rename_all = "camelCase")]
-    GenerateAddress {
+    GenerateEd25519Address {
         /// Account index
         account_index: u32,
         /// Account index

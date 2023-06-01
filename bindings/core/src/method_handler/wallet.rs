@@ -3,7 +3,10 @@
 
 use std::time::Duration;
 
-use iota_sdk::wallet::{message_interface::dtos::AccountDetailsDto, wallet::Wallet};
+use iota_sdk::{
+    types::block::address::ToBech32Ext,
+    wallet::{message_interface::dtos::AccountDetailsDto, wallet::Wallet},
+};
 
 use super::account::call_account_method_internal;
 use crate::{method::WalletMethod, response::Response, Result};
@@ -127,13 +130,15 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let ledger_nano_status = wallet.get_ledger_nano_status().await?;
             Response::LedgerNanoStatus(ledger_nano_status)
         }
-        WalletMethod::GenerateAddress {
+        WalletMethod::GenerateEd25519Address {
             account_index,
             address_index,
             options,
             bech32_hrp,
         } => {
-            let address = wallet.generate_address(account_index, address_index, options).await?;
+            let address = wallet
+                .generate_ed25519_address(account_index, address_index, options)
+                .await?;
 
             let bech32_hrp = match bech32_hrp {
                 Some(bech32_hrp) => bech32_hrp,
