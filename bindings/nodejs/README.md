@@ -2,11 +2,13 @@
 
 ## Table of contents
 
-- [Before You Start](#before-you-start)
-    - [Requirements (only for building the binary yourself)](#requirements-only-for-building-the-binary-yourself)
+- [Requirements (only for building the binary yourself)](#requirements-only-for-building-the-binary-yourself)
 - [Getting Started](#getting-started)
     - [Install the iota-sdk](#install-the-iota-sdk)
     - [Usage](#usage)
+      - [Wallet](#wallet)
+      - [Client](#client)
+      - [Examples](#examples)
 - [Available Scripts](#available-scripts)
     - [`npm install`](#npm-install)
     - [`npm build`](#npm-build)
@@ -20,9 +22,7 @@
     - [target/](#target)
 - [Learn More](#learn-more)
 
-## Before You Start
-
-### Requirements (only for building the binary yourself)
+## Requirements (only for building the binary yourself)
 
 Please ensure you have installed the [required dependencies for the library for Rust code](/README.md#requirements), as
 well as the following:
@@ -30,7 +30,7 @@ well as the following:
 - Python < 3.11
 - Yarn v1
 
-#### Windows
+### Windows
 
 On Windows, you will also need an LLVM. Our workflow uses
 `https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.1/LLVM-11.0.1-win64.exe`. You may also need to set
