@@ -59,7 +59,9 @@ async fn main() -> Result<()> {
     }
 
     println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses for account '{alias2}'...");
-    let addresses = account2.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
+    let addresses = account2
+        .generate_ed25519_addresses(NUM_ADDRESSES_TO_GENERATE, None)
+        .await?;
 
     let balance = account2.sync(None).await?;
     let funds_before = balance.base_coin().available();

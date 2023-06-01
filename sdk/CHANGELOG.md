@@ -31,7 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `OutputWithMetadata::{into_output, into_metadata}` methods;
 - Storage and Backup migration;
 - `types::block::Error::InvalidFoundryZeroSerialNumber` variant;
-- Added `Hrp` type to represent a valid bech32 human-readable part;
+- `Hrp` type to represent a valid bech32 human-readable part;
+- Multiple prepare methods returning `PreparedTransactionData`: `prepare_consolidate_outputs`, `prepare_vote`, `prepare_stop_participating`, `prepare_increase_voting_power`, `prepare_decrease_voting_power`, `prepare_decrease_native_token_supply` and `prepare_burn`;
+- Multiple prepare methods returning `PreparedMintTokenTransaction`: `prepare_mint_native_token` and `prepare_increase_native_token_supply`;
+- Stronghold snapshot migration from v2 to v3;
 
 ### Changed
 
@@ -68,6 +71,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `AccountInner::incoming_transactions` returns a `Vec` instead of a `HashMap`;
 - `Address::try_from_bech32_with_hrp` refactored to `try_from_bech32`;
 - `{MetadataFeature, TagFeature}::new` take an `impl Into<Vec<u8>>` param;
+- `GetAddressesBuilderOptions` renamed to `GetAddressesOptions` and fields no longer nullable;
+- Methods on `GetAddressesBuilder` moved to `SecretManager`;
+- Rename `GenerateAddresses` method to `GenerateEd25519Addresses` for Account and SecretManager, and their respective responses;
+- Rename `SecretManager` and `SecretManage` ed25519 address generation methods;
+- `SecretManage::generate_ed25519_addresses` returns `Ed25519Address` type;
+- Made certain `prepare_` methods public: `prepare_mint_nfts`, `prepare_send_native_tokens`, `prepare_send_nft` and `prepare_create_alias_output`;
+- `Address`-like types now implement `ToBech32Ext` for `to_bech32` and similar fns;
 
 ### Removed
 
@@ -77,6 +87,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `HARDENED` const;
 - `AliasIdDto`, `NftIdDto` and `TokenIdDto`;
 - `U256Dto`, `SendAmountParamsDto`, `AddressWithUnspentOutputsDto`, `RequiredStorageDepositDto` and `BaseCoinBalanceDto`;
+- `GetAddressesBuilder`;
+- Excess `SecretManager` address generation methods;
+- `Bech32Addresses` and `RawAddresses`;
+- `Client::get_addresses`;
 
 ### Fixed
 

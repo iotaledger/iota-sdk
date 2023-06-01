@@ -105,7 +105,7 @@ async fn generate_addresses(account: &Account, max: usize) -> Result<()> {
         println!("Generating {num_addresses_to_generate} addresses ...");
         let now = Instant::now();
         account
-            .generate_addresses(num_addresses_to_generate as u32, None)
+            .generate_ed25519_addresses(num_addresses_to_generate as u32, None)
             .await?;
         println!("Finished in: {:.2?}", now.elapsed());
     }

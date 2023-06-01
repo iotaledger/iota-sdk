@@ -13,7 +13,7 @@ use iota_sdk::{
         constants::IOTA_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::address::Bech32Address,
+    types::block::address::{Bech32Address, ToBech32Ext},
     wallet::{ClientOptions, Result, Wallet},
 };
 
@@ -38,6 +38,13 @@ async fn update_client_options() -> Result<()> {
         .set_client_options(ClientOptions::new().with_node(NODE_LOCAL)?)
         .await?;
 
+    let client_options = wallet.client_options().await;
+    assert!(client_options.node_manager_builder.nodes.contains(&node_dto_new));
+    assert!(!client_options.node_manager_builder.nodes.contains(&node_dto_old));
+
+    // The client options are also updated in the database and available the next time
+    drop(wallet);
+    let wallet = make_wallet(storage_path, None, None).await?;
     let client_options = wallet.client_options().await;
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto_new));
     assert!(!client_options.node_manager_builder.nodes.contains(&node_dto_old));
@@ -178,7 +185,7 @@ async fn wallet_address_generation() -> Result<()> {
     }
     let wallet = wallet_builder.finish().await?;
 
-    let address = wallet.generate_address(0, 0, None).await?;
+    let address = wallet.generate_ed25519_address(0, 0, None).await?;
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
@@ -207,7 +214,7 @@ async fn wallet_address_generation() -> Result<()> {
         }
         let wallet = wallet_builder.finish().await?;
 
-        let address = wallet.generate_address(0, 0, None).await?;
+        let address = wallet.generate_ed25519_address(0, 0, None).await?;
 
         assert_eq!(
             address.to_bech32_unchecked("smr"),

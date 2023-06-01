@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { WalletMethodHandler } from './WalletMethodHandler';
-import type {
+import {
     AccountBalance,
     AccountMetadata,
     SyncOptions,
@@ -15,7 +15,6 @@ import type {
     AliasOutputParams,
     FilterOptions,
     GenerateAddressOptions,
-    MintTokenTransaction,
     MintNativeTokenParams,
     MintNftParams,
     OutputData,
@@ -31,23 +30,21 @@ import type {
     ParticipationEventWithNodes,
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
-} from '../../types/wallet';
-import type { SignedTransactionEssence } from '../../types/wallet/signedTransactionEssence';
-import type {
+    PreparedMintTokenTransactionData,
     BuildAliasOutputData,
     BuildBasicOutputData,
     BuildFoundryOutputData,
     BuildNftOutputData,
-} from '../../types/wallet/buildOutputData';
+    SignedTransactionEssence,
+} from '../types/wallet';
 import type {
     HexEncodedAmount,
     IAliasOutput,
     IBasicOutput,
     IFoundryOutput,
-    INftOutput,
-    OutputTypes,
 } from '@iota/types';
-import { Burn, INode } from '../client';
+import { INode, Burn, IPreparedTransactionData } from '../client';
+import { NftOutput, Output } from '../types';
 
 /** The Account class. */
 export class Account {
@@ -66,14 +63,14 @@ export class Account {
      * @returns The built `AliasOutput`.
      */
     async buildAliasOutput(data: BuildAliasOutputData): Promise<IAliasOutput> {
-        const resp = await this.methodHandler.callAccountMethod(
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'buildAliasOutput',
                 data,
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -82,14 +79,14 @@ export class Account {
      * @returns The built `BasicOutput`.
      */
     async buildBasicOutput(data: BuildBasicOutputData): Promise<IBasicOutput> {
-        const resp = await this.methodHandler.callAccountMethod(
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'buildBasicOutput',
                 data,
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -100,14 +97,14 @@ export class Account {
     async buildFoundryOutput(
         data: BuildFoundryOutputData,
     ): Promise<IFoundryOutput> {
-        const resp = await this.methodHandler.callAccountMethod(
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'buildFoundryOutput',
                 data,
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -115,32 +112,32 @@ export class Account {
      * @param data Options for building an `NftOutput`.
      * @returns The built `NftOutput`.
      */
-    async buildNftOutput(data: BuildNftOutputData): Promise<INftOutput> {
-        const resp = await this.methodHandler.callAccountMethod(
+    async buildNftOutput(data: BuildNftOutputData): Promise<NftOutput> {
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'buildNftOutput',
                 data,
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
-     * A generic `burn()` function that can be used to burn native tokens, nfts, foundries and aliases.
+     * A generic `burn()` function that can be used to prepare to burn native tokens, nfts, foundries and aliases.
      * @param burn The outputs to burn
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
      * @returns The resulting transaction.
      */
-    async burn(
+    async prepareBurn(
         burn: Burn,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const resp = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'burn',
+                name: 'prepareBurn',
                 data: {
                     burn,
                     options: transactionOptions,
@@ -160,24 +157,24 @@ export class Account {
      * or custom inputs.
      * @returns The transaction.
      */
-    async burnNativeToken(
+    async prepareBurnNativeToken(
         tokenId: string,
         burnAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
-        const resp = await this.methodHandler.callAccountMethod(
+    ): Promise<PreparedTransactionData> {
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'burn',
+                name: 'prepareBurn',
                 data: {
                     burn: {
-                        nativeTokens: [{ id: tokenId, amount: burnAmount }],
+                        nativeTokens: new Map([[tokenId, burnAmount]]),
                     },
                     options: transactionOptions,
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return new PreparedTransactionData(JSON.parse(response).payload, this);
     }
     /**
      * Burn an nft output.
@@ -186,14 +183,14 @@ export class Account {
      * or custom inputs.
      * @returns The transaction.
      */
-    async burnNft(
+    async prepareBurnNft(
         nftId: string,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
-        const resp = await this.methodHandler.callAccountMethod(
+    ): Promise<PreparedTransactionData> {
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'burn',
+                name: 'prepareBurn',
                 data: {
                     burn: {
                         nfts: [nftId],
@@ -202,7 +199,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return new PreparedTransactionData(JSON.parse(response).payload, this);
     }
 
     /**
@@ -212,7 +209,7 @@ export class Account {
      * @returns The resulting transaction.
      */
     async claimOutputs(outputIds: string[]): Promise<Transaction> {
-        const resp = await this.methodHandler.callAccountMethod(
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'claimOutputs',
@@ -221,7 +218,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -232,21 +229,21 @@ export class Account {
      * @param outputConsolidationThreshold A default threshold is used if this is omitted.
      * @returns The consolidation transaction.
      */
-    async consolidateOutputs(
+    async prepareConsolidateOutputs(
         force: boolean,
         outputConsolidationThreshold?: number,
-    ): Promise<Transaction> {
-        const resp = await this.methodHandler.callAccountMethod(
+    ): Promise<PreparedTransactionData> {
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'consolidateOutputs',
+                name: 'prepareConsolidateOutputs',
                 data: {
                     force,
                     outputConsolidationThreshold,
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return new PreparedTransactionData(JSON.parse(response).payload, this);
     }
 
     /**
@@ -256,21 +253,21 @@ export class Account {
      * or custom inputs.
      * @returns A transaction object.
      */
-    async createAliasOutput(
+    async prepareCreateAliasOutput(
         params?: AliasOutputParams,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
-        const resp = await this.methodHandler.callAccountMethod(
+    ): Promise<PreparedTransactionData> {
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'createAliasOutput',
+                name: 'prepareCreateAliasOutput',
                 data: {
                     params,
                     options: transactionOptions,
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return new PreparedTransactionData(JSON.parse(response).payload, this);
     }
 
     /**
@@ -282,15 +279,15 @@ export class Account {
      * or custom inputs.
      * @returns The transaction.
      */
-    async decreaseNativeTokenSupply(
+    async prepareDecreaseNativeTokenSupply(
         tokenId: string,
         meltAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
-        const resp = await this.methodHandler.callAccountMethod(
+    ): Promise<PreparedTransactionData> {
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'decreaseNativeTokenSupply',
+                name: 'prepareDecreaseNativeTokenSupply',
                 data: {
                     tokenId,
                     meltAmount,
@@ -298,13 +295,13 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return new PreparedTransactionData(JSON.parse(response).payload, this);
     }
 
     async deregisterParticipationEvent(
         eventId: ParticipationEventId,
     ): Promise<void> {
-        const resp = await this.methodHandler.callAccountMethod(
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'deregisterParticipationEvent',
@@ -313,7 +310,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
     /**
@@ -323,14 +320,14 @@ export class Account {
      * or custom inputs.
      * @returns The transaction.
      */
-    async destroyAlias(
+    async prepareDestroyAlias(
         aliasId: string,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
-        const resp = await this.methodHandler.callAccountMethod(
+    ): Promise<PreparedTransactionData> {
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'burn',
+                name: 'prepareBurn',
                 data: {
                     burn: {
                         aliases: [aliasId],
@@ -339,7 +336,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return new PreparedTransactionData(JSON.parse(response).payload, this);
     }
 
     /**
@@ -350,14 +347,14 @@ export class Account {
      * or custom inputs.
      * @returns The transaction.
      */
-    async destroyFoundry(
+    async prepareDestroyFoundry(
         foundryId: string,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
-        const resp = await this.methodHandler.callAccountMethod(
+    ): Promise<PreparedTransactionData> {
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'burn',
+                name: 'prepareBurn',
                 data: {
                     burn: {
                         foundries: [foundryId],
@@ -366,35 +363,23 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return new PreparedTransactionData(JSON.parse(response).payload, this);
     }
 
     /**
-     * Generate a new unused address.
-     * @param options Options for address generation.
-     * @returns The address.
-     */
-    async generateAddress(
-        options?: GenerateAddressOptions,
-    ): Promise<AccountAddress> {
-        const addresses = await this.generateAddresses(1, options);
-        return addresses[0];
-    }
-
-    /**
-     * Generate new unused addresses.
+     * Generate new unused ed25519 addresses.
      * @param amount The amount of addresses to generate.
      * @param options Options for address generation.
      * @returns The addresses.
      */
-    async generateAddresses(
+    async generateEd25519Addresses(
         amount: number,
         options?: GenerateAddressOptions,
     ): Promise<AccountAddress[]> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'generateAddresses',
+                name: 'generateEd25519Addresses',
                 data: {
                     amount,
                     options,
@@ -695,7 +680,7 @@ export class Account {
      * @param output output to calculate the deposit amount for.
      * @returns The amount.
      */
-    async minimumRequiredStorageDeposit(output: OutputTypes): Promise<string> {
+    async minimumRequiredStorageDeposit(output: Output): Promise<string> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -716,15 +701,15 @@ export class Account {
      * or custom inputs.
      * @returns The minting transaction and the token ID.
      */
-    async increaseNativeTokenSupply(
+    async prepareIncreaseNativeTokenSupply(
         tokenId: string,
         mintAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
-    ): Promise<MintTokenTransaction> {
+    ): Promise<PreparedMintTokenTransactionData> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'increaseNativeTokenSupply',
+                name: 'prepareIncreaseNativeTokenSupply',
                 data: {
                     tokenId,
                     mintAmount,
@@ -733,7 +718,10 @@ export class Account {
             },
         );
 
-        return JSON.parse(response).payload;
+        return new PreparedMintTokenTransactionData(
+            JSON.parse(response).payload,
+            this,
+        );
     }
 
     /**
@@ -743,22 +731,25 @@ export class Account {
      * or custom inputs.
      * @returns The minting transaction and the token ID.
      */
-    async mintNativeToken(
+    async prepareMintNativeToken(
         params: MintNativeTokenParams,
         transactionOptions?: TransactionOptions,
-    ): Promise<MintTokenTransaction> {
+    ): Promise<PreparedMintTokenTransactionData> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'mintNativeToken',
+                name: 'prepareMintNativeToken',
                 data: {
-                    params,
+                    params: params,
                     options: transactionOptions,
                 },
             },
         );
 
-        return JSON.parse(response).payload;
+        return new PreparedMintTokenTransactionData(
+            JSON.parse(response).payload,
+            this,
+        );
     }
 
     /**
@@ -768,22 +759,21 @@ export class Account {
      * or custom inputs.
      * @returns The minting transaction.
      */
-    async mintNfts(
+    async prepareMintNfts(
         params: MintNftParams[],
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransactionData> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'mintNfts',
+                name: 'prepareMintNfts',
                 data: {
                     params,
                     options: transactionOptions,
                 },
             },
         );
-
-        return JSON.parse(response).payload;
+        return new PreparedTransactionData(JSON.parse(response).payload, this);
     }
 
     /**
@@ -802,7 +792,7 @@ export class Account {
     async prepareOutput(
         params: OutputParams,
         transactionOptions?: TransactionOptions,
-    ): Promise<OutputTypes> {
+    ): Promise<Output> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -813,7 +803,8 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(response).payload;
+
+        return Output.parse(JSON.parse(response).payload);
     }
 
     /**
@@ -837,7 +828,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(response).payload;
+        return new PreparedTransactionData(JSON.parse(response).payload, this);
     }
 
     /**
@@ -848,7 +839,7 @@ export class Account {
      * @returns The prepared transaction data.
      */
     async prepareTransaction(
-        outputs: OutputTypes[],
+        outputs: Output[],
         options?: TransactionOptions,
     ): Promise<PreparedTransactionData> {
         const response = await this.methodHandler.callAccountMethod(
@@ -861,7 +852,7 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(response).payload;
+        return new PreparedTransactionData(JSON.parse(response).payload, this);
     }
 
     async registerParticipationEvents(
@@ -887,7 +878,7 @@ export class Account {
         transactionId: string,
         interval?: number,
         maxAttempts?: number,
-    ): Promise<PreparedTransactionData> {
+    ): Promise<string> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -934,22 +925,21 @@ export class Account {
      * or custom inputs.
      * @returns The sent transaction.
      */
-    async sendNativeTokens(
+    async prepareSendNativeTokens(
         params: SendNativeTokensParams[],
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransactionData> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'sendNativeTokens',
+                name: 'prepareSendNativeTokens',
                 data: {
                     params,
                     options: transactionOptions,
                 },
             },
         );
-
-        return JSON.parse(response).payload;
+        return new PreparedTransactionData(JSON.parse(response).payload, this);
     }
 
     /**
@@ -959,22 +949,21 @@ export class Account {
      * or custom inputs.
      * @returns The sent transaction.
      */
-    async sendNft(
+    async prepareSendNft(
         params: SendNftParams[],
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<PreparedTransactionData> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'sendNft',
+                name: 'prepareSendNft',
                 data: {
                     params,
                     options: transactionOptions,
                 },
             },
         );
-
-        return JSON.parse(response).payload;
+        return new PreparedTransactionData(JSON.parse(response).payload, this);
     }
 
     /**
@@ -985,7 +974,7 @@ export class Account {
      * @returns The sent transaction.
      */
     async sendOutputs(
-        outputs: OutputTypes[],
+        outputs: Output[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -1035,12 +1024,32 @@ export class Account {
      * @returns The signed transaction essence.
      */
     async signTransactionEssence(
-        preparedTransactionData: PreparedTransactionData,
+        preparedTransactionData: IPreparedTransactionData,
     ): Promise<SignedTransactionEssence> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'signTransactionEssence',
+                data: {
+                    preparedTransactionData,
+                },
+            },
+        );
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Sign a prepared transaction, and send it.
+     * @param preparedTransactionData The prepared transaction data to sign and submit.
+     * @returns The transaction.
+     */
+    async signAndSubmitTransaction(
+        preparedTransactionData: IPreparedTransactionData,
+    ): Promise<Transaction> {
+        const response = await this.methodHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'signAndSubmitTransaction',
                 data: {
                     preparedTransactionData,
                 },
@@ -1078,7 +1087,7 @@ export class Account {
      * @returns The account balance.
      */
     async sync(options?: SyncOptions): Promise<AccountBalance> {
-        const resp = await this.methodHandler.callAccountMethod(
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'sync',
@@ -1087,39 +1096,39 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
-    async vote(
+    async prepareVote(
         eventId?: ParticipationEventId,
         answers?: number[],
-    ): Promise<Transaction> {
-        const resp = await this.methodHandler.callAccountMethod(
+    ): Promise<PreparedTransactionData> {
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'vote',
+                name: 'prepareVote',
                 data: {
                     eventId,
                     answers,
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return new PreparedTransactionData(JSON.parse(response).payload, this);
     }
 
-    async stopParticipating(
+    async prepareStopParticipating(
         eventId: ParticipationEventId,
-    ): Promise<Transaction> {
-        const resp = await this.methodHandler.callAccountMethod(
+    ): Promise<PreparedTransactionData> {
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'stopParticipating',
+                name: 'prepareStopParticipating',
                 data: {
                     eventId,
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return new PreparedTransactionData(JSON.parse(response).payload, this);
     }
 
     /**
@@ -1130,7 +1139,7 @@ export class Account {
     async getParticipationOverview(
         eventIds?: ParticipationEventId[],
     ): Promise<ParticipationOverview> {
-        const resp = await this.methodHandler.callAccountMethod(
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'getParticipationOverview',
@@ -1139,32 +1148,34 @@ export class Account {
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return JSON.parse(response).payload;
     }
 
-    async increaseVotingPower(amount: string): Promise<Transaction> {
-        const resp = await this.methodHandler.callAccountMethod(
+    async prepareVotingPower(amount: string): Promise<PreparedTransactionData> {
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'increaseVotingPower',
+                name: 'prepareIncreaseVotingPower',
                 data: {
                     amount,
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return new PreparedTransactionData(JSON.parse(response).payload, this);
     }
 
-    async decreaseVotingPower(amount: string): Promise<Transaction> {
-        const resp = await this.methodHandler.callAccountMethod(
+    async prepareDecreaseVotingPower(
+        amount: string,
+    ): Promise<PreparedTransactionData> {
+        const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'decreaseVotingPower',
+                name: 'prepareDecreaseVotingPower',
                 data: {
                     amount,
                 },
             },
         );
-        return JSON.parse(resp).payload;
+        return new PreparedTransactionData(JSON.parse(response).payload, this);
     }
 }

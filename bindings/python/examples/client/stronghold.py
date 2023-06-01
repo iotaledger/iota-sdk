@@ -24,7 +24,7 @@ result = SecretManager(secret_manager).store_mnemonic(
     os.environ['NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1'])
 
 # Generate public address with custom account index and range.
-address = client.generate_addresses(
+address = client.generate_ed25519_addresses(
     secret_manager, account_index=0, start=0, end=1)
 
 print(f'Address: {address[0]}')

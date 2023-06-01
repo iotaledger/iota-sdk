@@ -35,23 +35,22 @@ async fn main() -> Result<()> {
         .await?;
 
     let explorer_url = var("EXPLORER_URL").ok();
-    let prepended = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
+    let address_url = explorer_url.map(|url| format!("{url}/addr/")).unwrap_or_default();
 
     println!("Current addresses:");
     for address in account.addresses().await? {
-        println!(" - {prepended}{}", address.address());
+        println!(" - {address_url}{}", address.address());
     }
 
     // Generate some addresses
-    let addresses = account.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
-    println!("Generated {} new addresses:", addresses.len());
+    let new_addresses = account
+        .generate_ed25519_addresses(NUM_ADDRESSES_TO_GENERATE, None)
+        .await?;
+    println!("Generated {} new addresses:", new_addresses.len());
     let account_addresses = account.addresses().await?;
-    for address in addresses.iter() {
-        if account_addresses.contains(address) {
-            println!(" - {prepended}{}", address.address());
-        } else {
-            unreachable!("this should never happen");
-        }
+    for new_address in new_addresses.iter() {
+        assert!(account_addresses.contains(new_address));
+        println!(" - {address_url}{}", new_address.address());
     }
     Ok(())
 }

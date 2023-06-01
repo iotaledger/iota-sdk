@@ -18,15 +18,17 @@ async function run() {
         }
 
         const wallet = new Wallet({
-            storagePath: './alice-database',
+            storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount('Alice');
+        const account = await wallet.getAccount(
+            `${process.env.ACCOUNT_ALIAS_1}`,
+        );
 
         // To create an address we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
-        const address = (await account.generateAddresses(1))[0];
+        const address = (await account.generateEd25519Addresses(1))[0];
 
         console.log(`Generated address:`, address.address);
     } catch (error) {

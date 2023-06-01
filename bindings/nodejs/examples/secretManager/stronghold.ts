@@ -34,7 +34,7 @@ async function run() {
             process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1,
         );
 
-        const address = await strongholdSecretManager.generateAddresses({
+        const address = await strongholdSecretManager.generateEd25519Addresses({
             accountIndex: 0,
             range: {
                 start: 0,

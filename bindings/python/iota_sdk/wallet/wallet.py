@@ -5,7 +5,7 @@ from iota_sdk import destroy_wallet, create_wallet, listen_wallet, get_client_fr
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager
 from iota_sdk.wallet.account import Account, _call_method_routine
 from json import dumps
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 
 class Wallet():
@@ -40,7 +40,7 @@ class Wallet():
             }
         )
 
-    def get_account(self, account_id: Union[str, int]) -> Account:
+    def get_account(self, account_id: str | int) -> Account:
         """Get the account instance
         """
         return Account(account_id, self.handle)
@@ -51,7 +51,7 @@ class Wallet():
         return Client(client_handle=get_client_from_wallet(self.handle))
 
     @_call_method_routine
-    def _call_method(self, name: str, data=None) -> Dict[str, str]:
+    def _call_method(self, name: str, data=None):
         message = {
             'name': name
         }
@@ -59,7 +59,7 @@ class Wallet():
             message['data'] = data
         return message
 
-    def get_account_data(self, account_id: Union[str, int]):
+    def get_account_data(self, account_id: str | int):
         """Get account data
         """
         return self._call_method(
@@ -102,7 +102,7 @@ class Wallet():
             'clearStrongholdPassword'
         )
 
-    def is_stronghold_password_available(self):
+    def is_stronghold_password_available(self) -> bool:
         """Is stronghold password available.
         """
         return self._call_method(
@@ -167,11 +167,11 @@ class Wallet():
             }
         )
 
-    def generate_address(self, account_index: int, internal: bool, address_index: int, options=None, bech32_hrp: Optional[str] = None):
+    def generate_ed25519_address(self, account_index: int, internal: bool, address_index: int, options=None, bech32_hrp: Optional[str] = None) -> List[str]:
         """Generate an address without storing it.
         """
         return self._call_method(
-            'generateAddress', {
+            'generateEd25519Address', {
                 'accountIndex': account_index,
                 'internal': internal,
                 'addressIndex': address_index,

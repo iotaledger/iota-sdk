@@ -62,7 +62,9 @@ async fn main() -> Result<()> {
     };
 
     println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses...");
-    let _ = account.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
+    let _ = account
+        .generate_ed25519_addresses(NUM_ADDRESSES_TO_GENERATE, None)
+        .await?;
 
     println!("Syncing account");
     let _ = account.sync(None).await?;

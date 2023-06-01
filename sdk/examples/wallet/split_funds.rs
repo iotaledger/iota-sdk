@@ -137,7 +137,7 @@ async fn generate_max_addresses(account: &Account, max: usize) -> Result<Vec<Acc
         let num_addresses_to_generate = max - account.addresses().await?.len();
         println!("Generating {num_addresses_to_generate} addresses for account '{alias}'...");
         account
-            .generate_addresses(num_addresses_to_generate as u32, None)
+            .generate_ed25519_addresses(num_addresses_to_generate as u32, None)
             .await?;
     }
     account.addresses().await

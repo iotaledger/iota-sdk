@@ -43,3 +43,5 @@ pub const HD_WALLET_TYPE: u32 = 44;
 pub const IOTA_COIN_TYPE: u32 = 4218;
 /// Shimmer coin type <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>
 pub const SHIMMER_COIN_TYPE: u32 = 4219;
+/// Ethereum coin type <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>
+pub const ETHER_COIN_TYPE: u32 = 60;

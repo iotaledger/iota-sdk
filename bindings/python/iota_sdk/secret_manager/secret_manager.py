@@ -2,8 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk import create_secret_manager, call_secret_manager_method
+from iota_sdk.types.common import HexStr
 from json import dumps, loads
 import humps
+from typing import List, Optional
 
 
 class LedgerNanoSecretManager(dict):
@@ -58,7 +60,7 @@ class SecretManagerError(Exception):
 
 
 class SecretManager():
-    def __init__(self, secret_manager):
+    def __init__(self, secret_manager: MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager | LedgerNanoSecretManager):
         self.handle = create_secret_manager(dumps(secret_manager))
 
     def _call_method(self, name, data=None):
@@ -85,20 +87,18 @@ class SecretManager():
         else:
             return response
 
-    def generate_addresses(self,
-                           account_index=None,
-                           start=None,
-                           end=None,
-                           internal=None,
-                           coin_type=None,
-                           bech32_hrp=None,
-                           ledger_nano_prompt=None):
-        """Generate addresses.
+    def generate_ed25519_addresses(self,
+                           account_index: Optional[int] = None,
+                           start: Optional[int] = None,
+                           end: Optional[int] = None,
+                           internal: Optional[bool] = None,
+                           coin_type: Optional[int] = None,
+                           bech32_hrp: Optional[str] = None,
+                           ledger_nano_prompt: Optional[bool] = None):
+        """Generate ed25519 addresses.
 
         Parameters
         ----------
-        secret_manager : Any type of SecretManager.
-            The secret manager to use. Can be (MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager or LedgerNanoSecretManager.
         account_index : int
             Account index.
         start : int
@@ -139,7 +139,60 @@ class SecretManager():
 
         options = humps.camelize(options)
 
-        return self._call_method('generateAddresses', {
+        return self._call_method('generateEd25519Addresses', {
+            'options': options
+        })
+
+    def generate_evm_addresses(self,
+                           account_index=None,
+                           start=None,
+                           end=None,
+                           internal=None,
+                           coin_type=None,
+                           ledger_nano_prompt=None):
+        """Generate EVM addresses.
+
+        Parameters
+        ----------
+        account_index : int
+            Account index.
+        start : int
+            Start index of generated addresses
+        end : int
+            End index of generated addresses
+        internal : bool
+            Internal addresses
+        coin_type : int
+            Coin type. The CoinType enum can be used
+        ledger_nano_prompt : bool
+            Display the address on ledger devices.
+
+        Returns
+        -------
+        Addresses as array of strings.
+        """
+        options = dict(locals())
+        del options['self']
+
+        options = {k: v for k, v in options.items() if v != None}
+
+        is_start_set = 'start' in options
+        is_end_set = 'end' in options
+        if is_start_set or is_end_set:
+            options['range'] = {}
+            if is_start_set:
+                options['range']['start'] = options.pop('start')
+            if is_end_set:
+                options['range']['end'] = options.pop('end')
+        if 'coin_type' in options:
+            options['coin_type'] = int(options.pop('coin_type'))
+        if 'ledger_nano_prompt' in options:
+            options['options'] = {
+                'ledger_nano_prompt': options.pop('ledger_nano_prompt')}
+
+        options = humps.camelize(options)
+
+        return self._call_method('generateEvmAddresses', {
             'options': options
         })
 
@@ -148,14 +201,14 @@ class SecretManager():
         """
         return self._call_method('getLedgerNanoStatus')
 
-    def store_mnemonic(self, mnemonic):
+    def store_mnemonic(self, mnemonic: str):
         """Store a mnemonic in the Stronghold vault.
         """
         return self._call_method('storeMnemonic', {
             'mnemonic': mnemonic
         })
 
-    def sign_ed25519(self, message, chain):
+    def sign_ed25519(self, message: HexStr, chain: List[int]):
         """Signs a message with an Ed25519 private key.
         """
         return self._call_method('signEd25519', {
@@ -170,7 +223,7 @@ class SecretManager():
             'preparedTransactionData': prepared_transaction_data
         })
 
-    def signature_unlock(self, transaction_essence_hash, chain):
+    def signature_unlock(self, transaction_essence_hash: HexStr, chain: List[int]):
         """Sign a transaction essence hash.
         """
         return self._call_method('signatureUnlock', {

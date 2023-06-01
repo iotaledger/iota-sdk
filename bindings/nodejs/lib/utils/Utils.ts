@@ -1,7 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { BlockId } from '../../types/client/';
 import type {
     IBlock,
     ITransactionEssence,
@@ -10,7 +9,7 @@ import type {
 } from '@iota/types';
 
 import { callUtilsMethod } from '../bindings';
-import { Address, Ed25519Address } from '../types';
+import { Address, Ed25519Address, BlockId } from '../types';
 
 /** Utils class for utils. */
 export class Utils {

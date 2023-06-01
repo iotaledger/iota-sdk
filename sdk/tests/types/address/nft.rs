@@ -6,7 +6,7 @@ use std::str::FromStr;
 use iota_sdk::types::block::{
     address::{
         dto::{AddressDto, NftAddressDto},
-        Address, Bech32Address, NftAddress,
+        Address, Bech32Address, NftAddress, ToBech32Ext,
     },
     output::NftId,
     Error,

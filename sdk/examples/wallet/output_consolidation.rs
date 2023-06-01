@@ -14,7 +14,10 @@
 
 use std::env::var;
 
-use iota_sdk::wallet::{Result, Wallet};
+use iota_sdk::{
+    types::block::address::ToBech32Ext,
+    wallet::{Result, Wallet},
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {

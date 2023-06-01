@@ -7,14 +7,14 @@ import type {
     IPreparedTransactionData,
     LedgerNanoStatus,
     IBip32Chain,
-} from '../../types/client/';
+} from '../types/client/';
 import type {
     PayloadTypes,
     UnlockTypes,
     HexEncodedString,
     IEd25519Signature,
 } from '@iota/types';
-import { SecretManagerType } from '../../types/secretManager/';
+import { SecretManagerType } from '../types/secretManager/';
 
 /** The SecretManager to interact with nodes. */
 export class SecretManager {
@@ -24,12 +24,26 @@ export class SecretManager {
         this.methodHandler = new SecretManagerMethodHandler(options);
     }
 
-    /** Generate addresses */
-    async generateAddresses(
+    /** Generate ed25519 addresses */
+    async generateEd25519Addresses(
         generateAddressesOptions: IGenerateAddressesOptions,
     ): Promise<string[]> {
         const response = await this.methodHandler.callMethod({
-            name: 'generateAddresses',
+            name: 'generateEd25519Addresses',
+            data: {
+                options: generateAddressesOptions,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /** Generate EVM addresses */
+    async generateEvmAddresses(
+        generateAddressesOptions: IGenerateAddressesOptions,
+    ): Promise<string[]> {
+        const response = await this.methodHandler.callMethod({
+            name: 'generateEvmAddresses',
             data: {
                 options: generateAddressesOptions,
             },

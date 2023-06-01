@@ -66,7 +66,9 @@ async fn main() -> Result<()> {
 
     println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses...");
     let now = Instant::now();
-    let addresses = account.generate_addresses(NUM_ADDRESSES_TO_GENERATE, None).await?;
+    let addresses = account
+        .generate_ed25519_addresses(NUM_ADDRESSES_TO_GENERATE, None)
+        .await?;
     println!("took: {:.2?}", now.elapsed());
 
     println!("ADDRESSES:\n{addresses:#?}");
