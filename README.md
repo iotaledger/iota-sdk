@@ -36,7 +36,7 @@ The `client` module is stateless. It aims to provide more flexibility and access
   fine-grained control over their interactions with Shimmer nodes. It provides access to the underlying API endpoints
   and enables advanced operations such as custom message construction and direct communication with the network.
 
-- **Python and Node.js Bindings**: The IOTA SDK includes bindings for Python and Node.js, which allow you to use the
+- **Python, Node.js, and WASM Bindings**: The IOTA SDK includes bindings for Python, Node.js, and WASM, which allow you to use the
   SDK in your preferred programming language. These bindings provide seamless integration with existing Python and
   Node.js projects, enabling cross-platform compatibility and flexibility.
 
