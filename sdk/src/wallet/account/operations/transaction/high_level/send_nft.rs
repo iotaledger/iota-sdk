@@ -26,7 +26,7 @@ pub struct SendNftParams {
 }
 
 impl SendNftParams {
-    /// Creates a  new instance of [`SendNftParams`]
+    /// Creates a new instance of [`SendNftParams`]
     pub fn new(
         address: impl Bech32AddressLike,
         nft_id: impl TryInto<NftId, Error = impl Into<crate::wallet::Error>>,
