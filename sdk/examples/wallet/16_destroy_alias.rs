@@ -55,6 +55,8 @@ async fn main() -> Result<()> {
             block_id
         );
 
+        println!("Burned Alias '{}'", alias_id);
+
         let balance = account.sync(None).await?;
         let aliases_after = balance.aliases();
         println!("Aliases AFTER destroying:\n{aliases_after:#?}",);

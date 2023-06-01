@@ -54,6 +54,8 @@ async fn main() -> Result<()> {
             block_id
         );
 
+        println!("Burned NFT '{}'", nft_id);
+
         let balance = account.sync(None).await?;
 
         println!("Balance AFTER burning:\n{balance:?}",);

@@ -54,6 +54,8 @@ async fn main() -> Result<()> {
             block_id
         );
 
+        println!("Burned Foundry '{}'", foundry_id);
+
         let balance = account.sync(None).await?;
         let foundries_after = balance.foundries();
         println!("Foundries AFTER destroying:\n{foundries_after:#?}",);
