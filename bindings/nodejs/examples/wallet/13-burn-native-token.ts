@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-
 import { getUnlockedManager } from './account-manager';
+import { utf8ToHex } from '@iota/sdk';
 
 // The native token id. Replace it with a TokenId that is available in the account, the foundry output which minted it,
 // also needs to be available. You can check this by running the `get_balance` example. You can mint a new native token
@@ -9,10 +9,10 @@ import { getUnlockedManager } from './account-manager';
 // eslint-disable-next-line prefer-const
 let TOKEN_ID =
     '0x08dc44610c24f32f26330440f3f0d4afb562a8dfd81afe7c2f79024f8f1b9e21940100000000';
-// The minimum available native token amount to search for in the account, 11 hex encoded.
-const MIN_AVAILABLE_AMOUNT = '0xB';
-// The amount of the native token to burn, 1 hex encoded.
-const BURN_AMOUNT = '0x1';
+// The minimum available native token amount to search for in the account, 11.
+const MIN_AVAILABLE_AMOUNT = utf8ToHex('11');
+// The amount of the native token to burn, 1.
+const BURN_AMOUNT = utf8ToHex('1');
 
 // In this example we will burn a native token. This will not increase the melted supply in the foundry,
 // therefore the foundry output is also not required. But this will also make it impossible to destroy the foundry

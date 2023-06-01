@@ -16,6 +16,7 @@ import {
     GovernorAddressUnlockCondition,
     ImmutableAliasAddressUnlockCondition,
     AliasAddress,
+    utf8ToHex,
 } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
@@ -37,7 +38,11 @@ async function run() {
             'rms1pr59qm43mjtvhcajfmupqf23x29llam88yecn6pyul80rx099krmv2fnnux',
         );
 
-        const tokenSchema = new SimpleTokenScheme('0x32', '0x0', '0x64');
+        const tokenSchema = new SimpleTokenScheme(
+            utf8ToHex('50'),
+            utf8ToHex('0'),
+            utf8ToHex('100'),
+        );
 
         const addressUnlockCondition: UnlockCondition =
             new AddressUnlockCondition(new Ed25519Address(hexAddress));
