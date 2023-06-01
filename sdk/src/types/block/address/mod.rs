@@ -10,16 +10,19 @@ use derive_more::From;
 
 pub use self::{
     alias::AliasAddress,
-    bech32::{Bech32Address, Hrp, HrpLike},
+    bech32::{Bech32Address, Hrp},
     ed25519::Ed25519Address,
     nft::NftAddress,
 };
-use crate::types::block::{
-    output::{Output, OutputId},
-    semantic::{ConflictReason, ValidationContext},
-    signature::Signature,
-    unlock::Unlock,
-    Error,
+use crate::types::{
+    block::{
+        output::{Output, OutputId},
+        semantic::{ConflictReason, ValidationContext},
+        signature::Signature,
+        unlock::Unlock,
+        Error,
+    },
+    convert::ConvertTo,
 };
 
 /// A generic address supporting different address kinds.
@@ -181,18 +184,18 @@ impl Address {
 
 pub trait ToBech32Ext: Sized {
     /// Try to encode this address to a bech32 string with the given Human Readable Part as prefix.
-    fn try_to_bech32(self, hrp: impl HrpLike) -> Result<Bech32Address, Error>;
+    fn try_to_bech32(self, hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address, Error>;
 
     /// Encodes this address to a bech32 string with the given Human Readable Part as prefix.
     fn to_bech32(self, hrp: Hrp) -> Bech32Address;
 
     /// Encodes this address to a bech32 string with the given Human Readable Part as prefix without checking
     /// validity.
-    fn to_bech32_unchecked(self, hrp: impl HrpLike) -> Bech32Address;
+    fn to_bech32_unchecked(self, hrp: impl ConvertTo<Hrp>) -> Bech32Address;
 }
 impl<T: Into<Address>> ToBech32Ext for T {
     /// Try to encode this address to a bech32 string with the given Human Readable Part as prefix.
-    fn try_to_bech32(self, hrp: impl HrpLike) -> Result<Bech32Address, Error> {
+    fn try_to_bech32(self, hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address, Error> {
         Bech32Address::try_new(hrp, self)
     }
 
@@ -203,8 +206,8 @@ impl<T: Into<Address>> ToBech32Ext for T {
 
     /// Encodes this address to a bech32 string with the given Human Readable Part as prefix without checking
     /// validity.
-    fn to_bech32_unchecked(self, hrp: impl HrpLike) -> Bech32Address {
-        Bech32Address::new(hrp.to_hrp_unchecked(), self)
+    fn to_bech32_unchecked(self, hrp: impl ConvertTo<Hrp>) -> Bech32Address {
+        Bech32Address::new(hrp.convert_unchecked(), self)
     }
 }
 

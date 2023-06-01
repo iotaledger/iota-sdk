@@ -22,13 +22,16 @@ use crate::{
         constants::SHIMMER_TESTNET_BECH32_HRP,
         request_funds_from_faucet, utils, Client, NodeInfoWrapper,
     },
-    types::block::{
-        address::{HrpLike, ToBech32Ext},
-        output::{
-            dto::{OutputBuilderAmountDto, OutputDto},
-            AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
+    types::{
+        block::{
+            address::{Hrp, ToBech32Ext},
+            output::{
+                dto::{OutputBuilderAmountDto, OutputDto},
+                AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
+            },
+            Error,
         },
-        Error,
+        convert::ConvertTo,
     },
     wallet::{
         account::{
@@ -1002,7 +1005,7 @@ impl WalletMessageHandler {
     }
 
     /// The create account message handler.
-    async fn create_account(&self, alias: Option<String>, bech32_hrp: Option<impl HrpLike>) -> Result<Response> {
+    async fn create_account(&self, alias: Option<String>, bech32_hrp: Option<impl ConvertTo<Hrp>>) -> Result<Response> {
         let mut builder = self.wallet.create_account();
 
         if let Some(alias) = alias {
@@ -1010,7 +1013,7 @@ impl WalletMessageHandler {
         }
 
         if let Some(bech32_hrp) = bech32_hrp {
-            builder = builder.with_bech32_hrp(bech32_hrp.to_hrp()?);
+            builder = builder.with_bech32_hrp(bech32_hrp.convert()?);
         }
 
         match builder.finish().await {
