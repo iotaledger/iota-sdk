@@ -96,6 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Storage records decryption;
+- CoinType check, by moving it from AccountBuilder to WalletBuilder;
 
 ### Fixed
 
