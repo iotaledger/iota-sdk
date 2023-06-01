@@ -25,7 +25,8 @@ async fn main() -> Result<()> {
         .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let account = wallet.get_account(&var("ACCOUNT_ALIAS_1").unwrap()).await?;
+    let alias = var("ACCOUNT_ALIAS_1").unwrap();
+    let account = wallet.get_account(&alias).await?;
 
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
@@ -59,6 +60,8 @@ async fn main() -> Result<()> {
         let balance = account.sync(None).await?;
         let foundries_after = balance.foundries();
         println!("Foundries AFTER destroying:\n{foundries_after:#?}",);
+    } else {
+        println!("No Foundry available in account '{alias}'");
     }
 
     Ok(())
