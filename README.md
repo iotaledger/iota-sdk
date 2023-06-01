@@ -13,16 +13,14 @@ The `client` module is stateless. It aims to provide more flexibility and access
 
 ## Table of Contents
 
-# Table of contents
-
-- [Features](#features)
-- [Branching Structure for Development](#branching-structure-for-development)
-- [Before You Start](#before-you-start)
-  - [Requirements](#requirements)
+- [Requirements](#requirements)
   - [Dependencies](#dependencies)
 - [Getting Started](#getting-started)
   - [Install the iota-sdk](#install-the-iota-sdk)
   - [Usage](#usage)
+    - [Wallet](#wallet)
+    - [Client](#client)
+    - [Examples](#examples)
   - [API Reference](#api-reference)
 - [Contribute](#contribute)
 - [License](#license)
@@ -58,7 +56,7 @@ This library follows the following branching strategy:
 This file is focused on Rust. Please refer to the [Python](bindings/python/README.md)
 and [Node.js](bindings/nodejs/README.md) instructions if you want information on installing and using them.
 
-### Requirements
+## Requirements
 
 The iota-sdk requires `Rust` and `Cargo`. You can find installation instructions in
 the [Rust documentation](https://doc.rust-lang.org/cargo/getting-started/installation.html).
