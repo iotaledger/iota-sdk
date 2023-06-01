@@ -29,8 +29,8 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
     let tx = accounts[1]
         .send_amount(
             vec![
-                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), micro_amount),
-                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), micro_amount),
+                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), micro_amount)?,
+                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), micro_amount)?,
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -83,8 +83,8 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
     let tx = accounts[1]
         .send_amount(
             vec![
-                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), amount),
-                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), 0),
+                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), amount)?,
+                SendAmountParams::new(*accounts[0].addresses().await?[0].address(), 0)?,
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -236,18 +236,14 @@ async fn claim_2_native_tokens() -> Result<()> {
     let tx = accounts[1]
         .send_native_tokens(
             vec![
-                SendNativeTokensParams {
-                    address: *accounts[0].addresses().await?[0].address(),
-                    native_tokens: vec![(mint_tx_0.token_id, native_token_amount)],
-                    expiration: None,
-                    return_address: None,
-                },
-                SendNativeTokensParams {
-                    address: *accounts[0].addresses().await?[0].address(),
-                    native_tokens: vec![(mint_tx_1.token_id, native_token_amount)],
-                    expiration: None,
-                    return_address: None,
-                },
+                SendNativeTokensParams::new(
+                    *accounts[0].addresses().await?[0].address(),
+                    [(mint_tx_0.token_id, native_token_amount)],
+                )?,
+                SendNativeTokensParams::new(
+                    *accounts[0].addresses().await?[0].address(),
+                    [(mint_tx_1.token_id, native_token_amount)],
+                )?,
             ],
             None,
         )
@@ -555,7 +551,7 @@ async fn claim_basic_micro_output_error() -> Result<()> {
             vec![SendAmountParams::new(
                 *account_1.addresses().await?[0].address(),
                 micro_amount,
-            )],
+            )?],
             TransactionOptions {
                 allow_micro_amount: true,
                 ..Default::default()
