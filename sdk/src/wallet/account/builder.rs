@@ -7,7 +7,7 @@ use tokio::sync::RwLock;
 
 use crate::{
     client::secret::{SecretManage, SecretManager},
-    types::block::address::{Address, Bech32Address, Hrp},
+    types::block::address::{Address, Bech32Address, Ed25519Address, Hrp},
     wallet::{
         account::{types::AccountAddress, Account, AccountDetails},
         Error, Wallet,
@@ -102,7 +102,7 @@ where
                         get_first_public_address(&self.wallet.secret_manager, first_account_coin_type, 0).await?;
                     let first_account_addresses = first_account.public_addresses().await;
 
-                    if first_account_public_address
+                    if Address::Ed25519(first_account_public_address)
                         != first_account_addresses
                             .first()
                             .ok_or(Error::FailedToGetRemainder)?
@@ -175,13 +175,13 @@ pub(crate) async fn get_first_public_address<S: SecretManage>(
     secret_manager: &RwLock<S>,
     coin_type: u32,
     account_index: u32,
-) -> crate::wallet::Result<Address>
+) -> crate::wallet::Result<Ed25519Address>
 where
     crate::wallet::Error: From<S::Error>,
 {
     Ok(secret_manager
         .read()
         .await
-        .generate_addresses(coin_type, account_index, 0..1, None)
+        .generate_ed25519_addresses(coin_type, account_index, 0..1, None)
         .await?[0])
 }

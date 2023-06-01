@@ -7,7 +7,7 @@ use std::sync::atomic::Ordering;
 use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{mnemonic::MnemonicSecretManager, GenerateAddressOptions, SecretManage, SecretManager},
-    types::block::address::{Address, Hrp},
+    types::block::address::{Ed25519Address, Hrp, ToBech32Ext},
     wallet::Wallet,
 };
 
@@ -15,7 +15,7 @@ impl Wallet {
     /// Generate an address without storing it
     /// ```ignore
     /// let public_addresses = wallet
-    ///     .generate_address(
+    ///     .generate_ed25519_addresses(
     ///         0,
     ///         false,
     ///         0,
@@ -23,18 +23,19 @@ impl Wallet {
     ///     )
     ///     .await?;
     /// ```
-    pub async fn generate_address(
+    pub async fn generate_ed25519_address(
         &self,
         account_index: u32,
         address_index: u32,
-        options: Option<GenerateAddressOptions>,
-    ) -> crate::wallet::Result<Address> {
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> crate::wallet::Result<Ed25519Address> {
         let address = match &*self.secret_manager.read().await {
             #[cfg(feature = "ledger_nano")]
             SecretManager::LedgerNano(ledger_nano) => {
                 // If we don't sync, then we want to display the prompt on the ledger with the address. But the user
                 // needs to have it visible on the computer first, so we need to generate it without the
                 // prompt first
+                let options = options.into();
                 if options.as_ref().map_or(false, |o| o.ledger_nano_prompt) {
                     #[cfg(feature = "events")]
                     {
@@ -45,7 +46,7 @@ impl Wallet {
                         });
                         // Generate without prompt to be able to display it
                         let address = ledger_nano
-                            .generate_addresses(
+                            .generate_ed25519_addresses(
                                 self.coin_type.load(Ordering::Relaxed),
                                 account_index,
                                 address_index..address_index + 1,
@@ -58,7 +59,7 @@ impl Wallet {
                         self.emit(
                             account_index,
                             WalletEvent::LedgerAddressGeneration(AddressData {
-                                address: address[0].to_bech32(bech32_hrp),
+                                address: crate::types::block::address::ToBech32Ext::to_bech32(address[0], bech32_hrp),
                             }),
                         )
                         .await;
@@ -66,7 +67,7 @@ impl Wallet {
 
                     // Generate with prompt so the user can verify
                     ledger_nano
-                        .generate_addresses(
+                        .generate_ed25519_addresses(
                             self.coin_type.load(Ordering::Relaxed),
                             account_index,
                             address_index..address_index + 1,
@@ -75,7 +76,7 @@ impl Wallet {
                         .await?
                 } else {
                     ledger_nano
-                        .generate_addresses(
+                        .generate_ed25519_addresses(
                             self.coin_type.load(Ordering::Relaxed),
                             account_index,
                             address_index..address_index + 1,
@@ -87,7 +88,7 @@ impl Wallet {
             #[cfg(feature = "stronghold")]
             SecretManager::Stronghold(stronghold) => {
                 stronghold
-                    .generate_addresses(
+                    .generate_ed25519_addresses(
                         self.coin_type.load(Ordering::Relaxed),
                         account_index,
                         address_index..address_index + 1,
@@ -97,7 +98,7 @@ impl Wallet {
             }
             SecretManager::Mnemonic(mnemonic) => {
                 mnemonic
-                    .generate_addresses(
+                    .generate_ed25519_addresses(
                         self.coin_type.load(Ordering::Relaxed),
                         account_index,
                         address_index..address_index + 1,
@@ -119,7 +120,7 @@ impl Wallet<crate::client::secret::ledger_nano::LedgerSecretManager> {
     /// Generate an address without storing it
     /// ```ignore
     /// let public_addresses = wallet
-    ///     .generate_address(
+    ///     .generate_ed25519_address(
     ///         0,
     ///         false,
     ///         0,
@@ -127,12 +128,12 @@ impl Wallet<crate::client::secret::ledger_nano::LedgerSecretManager> {
     ///     )
     ///     .await?;
     /// ```
-    pub async fn generate_address(
+    pub async fn generate_ed25519_address(
         &self,
         account_index: u32,
         address_index: u32,
         options: Option<GenerateAddressOptions>,
-    ) -> crate::wallet::Result<Address> {
+    ) -> crate::wallet::Result<Ed25519Address> {
         // If we don't sync, then we want to display the prompt on the ledger with the address. But the user
         // needs to have it visible on the computer first, so we need to generate it without the
         // prompt first
@@ -149,7 +150,7 @@ impl Wallet<crate::client::secret::ledger_nano::LedgerSecretManager> {
                     .secret_manager
                     .read()
                     .await
-                    .generate_addresses(
+                    .generate_ed25519_addresses(
                         self.coin_type.load(Ordering::Relaxed),
                         account_index,
                         address_index..address_index + 1,
@@ -172,7 +173,7 @@ impl Wallet<crate::client::secret::ledger_nano::LedgerSecretManager> {
             self.secret_manager
                 .read()
                 .await
-                .generate_addresses(
+                .generate_ed25519_addresses(
                     self.coin_type.load(Ordering::Relaxed),
                     account_index,
                     address_index..address_index + 1,
@@ -183,7 +184,7 @@ impl Wallet<crate::client::secret::ledger_nano::LedgerSecretManager> {
             self.secret_manager
                 .read()
                 .await
-                .generate_addresses(
+                .generate_ed25519_addresses(
                     self.coin_type.load(Ordering::Relaxed),
                     account_index,
                     address_index..address_index + 1,
@@ -203,7 +204,7 @@ impl Wallet<crate::client::secret::stronghold::StrongholdSecretManager> {
     /// Generate an address without storing it
     /// ```ignore
     /// let public_addresses = wallet
-    ///     .generate_address(
+    ///     .generate_ed25519_address(
     ///         0,
     ///         false,
     ///         0,
@@ -211,17 +212,17 @@ impl Wallet<crate::client::secret::stronghold::StrongholdSecretManager> {
     ///     )
     ///     .await?;
     /// ```
-    pub async fn generate_address(
+    pub async fn generate_ed25519_address(
         &self,
         account_index: u32,
         address_index: u32,
         options: Option<GenerateAddressOptions>,
-    ) -> crate::wallet::Result<Address> {
+    ) -> crate::wallet::Result<Ed25519Address> {
         let address = self
             .secret_manager
             .read()
             .await
-            .generate_addresses(
+            .generate_ed25519_addresses(
                 self.coin_type.load(Ordering::Relaxed),
                 account_index,
                 address_index..address_index + 1,
@@ -239,7 +240,7 @@ impl Wallet<MnemonicSecretManager> {
     /// Generate an address without storing it
     /// ```ignore
     /// let public_addresses = wallet
-    ///     .generate_address(
+    ///     .generate_ed25519_address(
     ///         0,
     ///         false,
     ///         0,
@@ -247,17 +248,17 @@ impl Wallet<MnemonicSecretManager> {
     ///     )
     ///     .await?;
     /// ```
-    pub async fn generate_address(
+    pub async fn generate_ed25519_address(
         &self,
         account_index: u32,
         address_index: u32,
         options: Option<GenerateAddressOptions>,
-    ) -> crate::wallet::Result<Address> {
+    ) -> crate::wallet::Result<Ed25519Address> {
         let address = self
             .secret_manager
             .read()
             .await
-            .generate_addresses(
+            .generate_ed25519_addresses(
                 self.coin_type.load(Ordering::Relaxed),
                 account_index,
                 address_index..address_index + 1,

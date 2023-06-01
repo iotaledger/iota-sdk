@@ -135,11 +135,11 @@ class Account:
         )
         return PreparedTransactionData(self, prepared)
 
-    def generate_addresses(self, amount: int, options=None):
+    def generate_ed25519_addresses(self, amount: int, options=None):
         """Generate new addresses.
         """
         return self._call_account_method(
-            'generateAddresses', {
+            'generateEd25519Addresses', {
                 'amount': amount,
                 'options': options
             }

@@ -167,11 +167,11 @@ class Wallet():
             }
         )
 
-    def generate_address(self, account_index: int, internal: bool, address_index: int, options=None, bech32_hrp: Optional[str] = None) -> List[str]:
+    def generate_ed25519_address(self, account_index: int, internal: bool, address_index: int, options=None, bech32_hrp: Optional[str] = None) -> List[str]:
         """Generate an address without storing it.
         """
         return self._call_method(
-            'generateAddress', {
+            'generateEd25519Address', {
                 'accountIndex': account_index,
                 'internal': internal,
                 'addressIndex': address_index,

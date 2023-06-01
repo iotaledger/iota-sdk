@@ -87,7 +87,7 @@ class SecretManager():
         else:
             return response
 
-    def generate_addresses(self,
+    def generate_ed25519_addresses(self,
                            account_index: Optional[int] = None,
                            start: Optional[int] = None,
                            end: Optional[int] = None,
@@ -95,12 +95,10 @@ class SecretManager():
                            coin_type: Optional[int] = None,
                            bech32_hrp: Optional[str] = None,
                            ledger_nano_prompt: Optional[bool] = None):
-        """Generate addresses.
+        """Generate ed25519 addresses.
 
         Parameters
         ----------
-        secret_manager : Any type of SecretManager.
-            The secret manager to use. Can be (MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager or LedgerNanoSecretManager.
         account_index : int
             Account index.
         start : int
@@ -141,7 +139,60 @@ class SecretManager():
 
         options = humps.camelize(options)
 
-        return self._call_method('generateAddresses', {
+        return self._call_method('generateEd25519Addresses', {
+            'options': options
+        })
+
+    def generate_evm_addresses(self,
+                           account_index=None,
+                           start=None,
+                           end=None,
+                           internal=None,
+                           coin_type=None,
+                           ledger_nano_prompt=None):
+        """Generate EVM addresses.
+
+        Parameters
+        ----------
+        account_index : int
+            Account index.
+        start : int
+            Start index of generated addresses
+        end : int
+            End index of generated addresses
+        internal : bool
+            Internal addresses
+        coin_type : int
+            Coin type. The CoinType enum can be used
+        ledger_nano_prompt : bool
+            Display the address on ledger devices.
+
+        Returns
+        -------
+        Addresses as array of strings.
+        """
+        options = dict(locals())
+        del options['self']
+
+        options = {k: v for k, v in options.items() if v != None}
+
+        is_start_set = 'start' in options
+        is_end_set = 'end' in options
+        if is_start_set or is_end_set:
+            options['range'] = {}
+            if is_start_set:
+                options['range']['start'] = options.pop('start')
+            if is_end_set:
+                options['range']['end'] = options.pop('end')
+        if 'coin_type' in options:
+            options['coin_type'] = int(options.pop('coin_type'))
+        if 'ledger_nano_prompt' in options:
+            options['options'] = {
+                'ledger_nano_prompt': options.pop('ledger_nano_prompt')}
+
+        options = humps.camelize(options)
+
+        return self._call_method('generateEvmAddresses', {
             'options': options
         })
 

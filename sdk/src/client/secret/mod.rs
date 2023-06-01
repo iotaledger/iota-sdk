@@ -22,7 +22,7 @@ use std::time::Duration;
 use std::{collections::HashMap, fmt::Debug, ops::Range, str::FromStr};
 
 use async_trait::async_trait;
-use crypto::keys::slip10::Chain;
+use crypto::{keys::slip10::Chain, signatures::secp256k1_ecdsa::EvmAddress};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use zeroize::ZeroizeOnDrop;
 
@@ -44,7 +44,7 @@ use crate::{
         Error,
     },
     types::block::{
-        address::Address,
+        address::{Address, Ed25519Address},
         output::Output,
         payload::{transaction::TransactionEssence, Payload, TransactionPayload},
         semantic::ConflictReason,
@@ -62,13 +62,21 @@ pub trait SecretManage: Debug + Send + Sync {
     /// Generates addresses.
     ///
     /// For `coin_type`, see also <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>.
-    async fn generate_addresses(
+    async fn generate_ed25519_addresses(
         &self,
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
-    ) -> Result<Vec<Address>, Self::Error>;
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<Ed25519Address>, Self::Error>;
+
+    async fn generate_evm_addresses(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<EvmAddress>, Self::Error>;
 
     /// Signs `msg` using the given [`Chain`].
     async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error>;
@@ -237,25 +245,50 @@ impl From<&SecretManager> for SecretManagerDto {
 impl SecretManage for SecretManager {
     type Error = Error;
 
-    async fn generate_addresses(
+    async fn generate_ed25519_addresses(
         &self,
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
-    ) -> crate::client::Result<Vec<Address>> {
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> crate::client::Result<Vec<Ed25519Address>> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager
-                .generate_addresses(coin_type, account_index, address_indexes, options)
+                .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
                 .await?),
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => Ok(secret_manager
-                .generate_addresses(coin_type, account_index, address_indexes, options)
+                .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
                 .await?),
             Self::Mnemonic(secret_manager) => {
                 secret_manager
-                    .generate_addresses(coin_type, account_index, address_indexes, options)
+                    .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
+                    .await
+            }
+            Self::Placeholder(_) => Err(Error::PlaceholderSecretManager),
+        }
+    }
+
+    async fn generate_evm_addresses(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<EvmAddress>, Self::Error> {
+        match self {
+            #[cfg(feature = "stronghold")]
+            Self::Stronghold(secret_manager) => Ok(secret_manager
+                .generate_evm_addresses(coin_type, account_index, address_indexes, options)
+                .await?),
+            #[cfg(feature = "ledger_nano")]
+            Self::LedgerNano(secret_manager) => Ok(secret_manager
+                .generate_evm_addresses(coin_type, account_index, address_indexes, options)
+                .await?),
+            Self::Mnemonic(secret_manager) => {
+                secret_manager
+                    .generate_evm_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
             Self::Placeholder(_) => Err(Error::PlaceholderSecretManager),

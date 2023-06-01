@@ -11,14 +11,15 @@ async function run() {
             storagePath: './alice-database',
         });
 
-        await manager.setStrongholdPassword(`${process.env.STRONGHOLD_PASSWORD}`)
-        
+        await manager.setStrongholdPassword(
+            `${process.env.STRONGHOLD_PASSWORD}`,
+        );
+
         const account = await manager.getAccount('Alice');
 
-        const address = await account.generateAddress()
+        const address = await account.generateEd25519Address();
 
         console.log('Address generated:', address);
-
     } catch (error) {
         console.log('Error: ', error);
     }

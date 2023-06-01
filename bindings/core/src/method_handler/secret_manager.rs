@@ -4,7 +4,7 @@
 use crypto::keys::slip10::Chain;
 use iota_sdk::{
     client::{
-        api::{GetAddressesBuilder, PreparedTransactionData},
+        api::PreparedTransactionData,
         secret::{SecretManage, SecretManager},
     },
     types::block::{payload::dto::PayloadDto, signature::dto::Ed25519SignatureDto, unlock::Unlock},
@@ -18,12 +18,13 @@ pub(crate) async fn call_secret_manager_method_internal(
     method: SecretManagerMethod,
 ) -> Result<Response> {
     let response = match method {
-        SecretManagerMethod::GenerateAddresses { options } => {
-            let addresses = GetAddressesBuilder::new(secret_manager)
-                .set_options(options)?
-                .finish()
-                .await?;
-            Response::GeneratedAddresses(addresses)
+        SecretManagerMethod::GenerateEd25519Addresses { options } => {
+            let addresses = secret_manager.generate_ed25519_addresses(options).await?;
+            Response::GeneratedEd25519Addresses(addresses)
+        }
+        SecretManagerMethod::GenerateEvmAddresses { options } => {
+            let addresses = secret_manager.generate_evm_addresses(options).await?;
+            Response::GeneratedEvmAddresses(addresses)
         }
         #[cfg(feature = "ledger_nano")]
         SecretManagerMethod::GetLedgerNanoStatus => {

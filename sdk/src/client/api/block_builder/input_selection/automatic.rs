@@ -12,7 +12,7 @@ use crate::{
         api::{
             block_builder::input_selection::core::{Error as InputSelectionError, InputSelection, Selected},
             input_selection::is_alias_transition,
-            ClientBlockBuilder, ADDRESS_GAP_RANGE,
+            ClientBlockBuilder, GetAddressesOptions, ADDRESS_GAP_RANGE,
         },
         constants::HD_WALLET_TYPE,
         node_api::indexer::query_parameters::QueryParameter,
@@ -124,26 +124,26 @@ impl<'a> ClientBlockBuilder<'a> {
         // Then select inputs with outputs from addresses.
         let selected_transaction_data = 'input_selection: loop {
             // Get the addresses in the BIP path/index ~ path/index+20.
-            let addresses = self
-                .client
-                .get_addresses(
-                    self.secret_manager
-                        .ok_or(crate::client::Error::MissingParameter("secret manager"))?,
-                )
+            let opts = GetAddressesOptions::from_client(self.client)
+                .await?
+                .with_coin_type(self.coin_type)
                 .with_account_index(account_index)
-                .with_range(gap_index..gap_index + ADDRESS_GAP_RANGE)
-                .get_all()
-                .await?;
+                .with_range(gap_index..gap_index + ADDRESS_GAP_RANGE);
+            let secret_manager = self
+                .secret_manager
+                .ok_or(crate::client::Error::MissingParameter("secret manager"))?;
+            let public = secret_manager.generate_ed25519_addresses(opts.clone()).await?;
+            let internal = secret_manager.generate_ed25519_addresses(opts.internal()).await?;
 
-            available_input_addresses.extend(addresses.public.iter().map(|bech32_address| *bech32_address.inner()));
-            available_input_addresses.extend(addresses.internal.iter().map(|bech32_address| *bech32_address.inner()));
+            available_input_addresses.extend(public.iter().map(|bech32_address| bech32_address.inner));
+            available_input_addresses.extend(internal.iter().map(|bech32_address| bech32_address.inner));
 
             // Have public and internal addresses with the index ascending ordered.
             let mut public_and_internal_addresses = Vec::new();
 
-            for index in 0..addresses.public.len() {
-                public_and_internal_addresses.push((addresses.public[index], false));
-                public_and_internal_addresses.push((addresses.internal[index], true));
+            for index in 0..public.len() {
+                public_and_internal_addresses.push((public[index], false));
+                public_and_internal_addresses.push((internal[index], true));
             }
 
             // For each address, get the address outputs.
@@ -177,7 +177,7 @@ impl<'a> ClientBlockBuilder<'a> {
                             available_inputs.push(InputSigningData {
                                 output: output_with_meta.output,
                                 output_metadata: output_with_meta.metadata,
-                                chain: Some(Chain::from_u32_hardened(vec![
+                                chain: Some(Chain::from_u32_hardened([
                                     HD_WALLET_TYPE,
                                     self.coin_type,
                                     account_index,

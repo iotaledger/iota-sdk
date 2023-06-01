@@ -13,7 +13,8 @@ import type {
     __DestroyAliasMethod__,
     __DestroyFoundryMethod__,
     __DeregisterParticipationEventMethod__,
-    __GenerateAddressesMethod__,
+    __GenerateEd25519AddressesMethod__,
+    __GenerateEvmAddressesMethod__,
     __GetBalanceMethod__,
     __GetOutputMethod__,
     __GetFoundryOutputMethod__,
@@ -69,7 +70,7 @@ import type {
     __GetAccountIndexesMessage__,
     __GetAccountsMessage__,
     __GetLedgerNanoStatusMessage__,
-    __GenerateAddressMessage__,
+    __GenerateEd25519AddressMessage__,
     __GetNodeInfoMessage__,
     __HexToBech32__,
     __IsStrongholdPasswordAvailableMessage__,
@@ -99,7 +100,8 @@ export type __AccountMethod__ =
     | __DeregisterParticipationEventMethod__
     | __DestroyAliasMethod__
     | __DestroyFoundryMethod__
-    | __GenerateAddressesMethod__
+    | __GenerateEd25519AddressesMethod__
+    | __GenerateEvmAddressesMethod__
     | __GetBalanceMethod__
     | __GetOutputMethod__
     | __GetIncomingTransactionMethod__
@@ -165,7 +167,7 @@ export type __Message__ =
     | __GetAccountIndexesMessage__
     | __GetAccountsMessage__
     | __GetLedgerNanoStatusMessage__
-    | __GenerateAddressMessage__
+    | __GenerateEd25519AddressMessage__
     | __GetNodeInfoMessage__
     | __HexToBech32__
     | __IsStrongholdPasswordAvailableMessage__
