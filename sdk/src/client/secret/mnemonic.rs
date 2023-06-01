@@ -212,27 +212,54 @@ mod tests {
 
     #[test]
     fn mnemonic_like() {
-        assert!("giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally".to_owned().to_mnemonic().is_ok());
+        // Mnemonic from a space-separated word list stored in a `String`
+        let mnemonic1 = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally".to_owned().to_mnemonic().unwrap();
+        // Mnemonic from a word list stored in a `Vec<String>`
+        let mnemonic2 = [
+            "giant", "dynamic", "museum", "toddler", "six", "deny", "defense", "ostrich", "bomb", "access", "mercy",
+            "blood", "explain", "muscle", "shoot", "shallow", "glad", "autumn", "author", "calm", "heavy", "hawk",
+            "abuse", "rally",
+        ]
+        .into_iter()
+        .map(|s| s.to_owned())
+        .collect::<Vec<_>>()
+        .to_mnemonic()
+        .unwrap();
+        // Mnemonic from a word list stored in a `[&'static str; 24]`
+        let mnemonic3 = [
+            "giant", "dynamic", "museum", "toddler", "six", "deny", "defense", "ostrich", "bomb", "access", "mercy",
+            "blood", "explain", "muscle", "shoot", "shallow", "glad", "autumn", "author", "calm", "heavy", "hawk",
+            "abuse", "rally",
+        ]
+        .to_mnemonic()
+        .unwrap();
+
+        assert_eq!(mnemonic1, mnemonic2);
+        assert_eq!(mnemonic1, mnemonic3);
+        assert_eq!(mnemonic2, mnemonic3);
+
+        // Different mnemonic
+        let mnemonic4 = [
+            "endorse", "answer", "radar", "about", "source", "reunion", "marriage", "tag", "sausage", "weekend",
+            "frost", "daring", "base", "attack", "because", "joke", "dream", "slender", "leisure", "group", "reason",
+            "prepare", "broken", "river",
+        ]
+        .to_mnemonic()
+        .unwrap();
+
+        assert_ne!(mnemonic1, mnemonic4);
+        assert_ne!(mnemonic2, mnemonic4);
+        assert_ne!(mnemonic3, mnemonic4);
+
+        // Incorrect mnemonic
         assert!(
             [
-                "endorse", " answer", "radar", "about", "source", "reunion", "marriage", "tag", "sausage", "weekend",
-                "frost", "daring", "base", "attack", "because", "joke", "dream", "slender", "leisure", "group",
-                "reason", "prepare", "broken", "river",
-            ]
-            .into_iter()
-            .map(|s| s.to_owned())
-            .collect::<Vec<_>>()
-            .to_mnemonic()
-            .is_ok()
-        );
-        assert!(
-            [
-                "endorse", " answer", "radar", "about", "source", "reunion", "marriage", "tag", "sausage", "weekend",
-                "frost", "daring", "base", "attack", "because", "joke", "dream", "slender", "leisure", "group",
-                "reason", "prepare", "broken", "river",
+                "dynamic", "giant", "museum", "toddler", "six", "deny", "defense", "ostrich", "bomb", "access",
+                "mercy", "blood", "explain", "muscle", "shoot", "shallow", "glad", "autumn", "author", "calm", "heavy",
+                "hawk", "abuse", "rally"
             ]
             .to_mnemonic()
-            .is_ok()
+            .is_err()
         );
     }
 }
