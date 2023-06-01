@@ -4,25 +4,25 @@ Python binding to the [iota-sdk library](/README.md).
 
 ## Table of contents
 
+- [Requirements](#requirements)
 - [Getting Started](#getting-started)
-   - [Requirements](#requirements)
-- [Install the iota-sdk](#install-the-iota-sdk)
-- [Usage](#usage)
-   - [Wallet](#wallet)
-   - [Client](#client)
-   - [Examples](#examples)
-   - [API Reference](#api-reference)
+    - [Install the iota-sdk](#install-the-iota-sdk)
+    - [Usage](#usage)
+        - [Wallet](#wallet)
+        - [Client](#client)
+        - [Examples](#examples)
+    - [API Reference](#api-reference)
 - [Learn More](#learn-more)
 
-## Getting Started
-
-### Requirements
+## Requirements
 
 - [Python 3.x](https://www.python.org)
 - [pip ^21.x](https://pypi.org/project/pip)
 - `Rust` and `Cargo` to compile the binding. Install them [here](https://doc.rust-lang.org/cargo/getting-started/installation.html).
 
-## Install the iota-sdk
+## Getting Started
+
+### Install the iota-sdk
 
 1. Move to the Python bindings directory:
 
@@ -56,9 +56,9 @@ Python binding to the [iota-sdk library](/README.md).
    deactivate
    ```
 
-## Usage
+### Usage
 
-### Wallet
+#### Wallet
 
 After you [installed the library](#install-the-iota-sdk), you can create a `Wallet` instance and interact with it.
 
@@ -83,7 +83,7 @@ account = wallet.create_account('Alice')
 print(account)
 ```
 
-### Client
+#### Client
 
 After you [installed the library](#install-the-iota-sdk), you can create a `Client` instance and interface with it.
 
@@ -98,7 +98,7 @@ node_info = client.get_info()
 print(f'{node_info}')
 ```
 
-### Examples
+#### Examples
 
 You can use the provided code [examples](examples) to acquainted with the iota-sdk. You can use the following command to run any example:
 
