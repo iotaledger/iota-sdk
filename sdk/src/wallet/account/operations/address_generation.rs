@@ -1,12 +1,15 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(all(feature = "events", any(feature = "ledger_nano", feature = "ledger_nano")))]
-use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage},
-    types::block::address::{Bech32Address, ToBech32Ext},
+    types::block::address::Bech32Address,
     wallet::account::{types::address::AccountAddress, Account},
+};
+#[cfg(all(feature = "events", feature = "ledger_nano"))]
+use crate::{
+    types::block::address::ToBech32Ext,
+    wallet::events::types::{AddressData, WalletEvent},
 };
 
 impl<S: 'static + SecretManage> Account<S>
@@ -138,7 +141,7 @@ where
             .secret_manager
             .read()
             .await
-            .generate_addresses(
+            .generate_ed25519_addresses(
                 account_details.coin_type,
                 account_details.index,
                 address_range.clone(),

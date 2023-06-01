@@ -3,12 +3,15 @@
 
 use std::sync::atomic::Ordering;
 
-#[cfg(all(feature = "events", feature = "ledger_nano"))]
-use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{mnemonic::MnemonicSecretManager, GenerateAddressOptions, SecretManage, SecretManager},
-    types::block::address::{Ed25519Address, Hrp, ToBech32Ext},
+    types::block::address::{Ed25519Address, Hrp},
     wallet::Wallet,
+};
+#[cfg(all(feature = "events", feature = "ledger_nano"))]
+use crate::{
+    types::block::address::ToBech32Ext,
+    wallet::events::types::{AddressData, WalletEvent},
 };
 
 impl Wallet {
@@ -59,7 +62,7 @@ impl Wallet {
                         self.emit(
                             account_index,
                             WalletEvent::LedgerAddressGeneration(AddressData {
-                                address: crate::types::block::address::ToBech32Ext::to_bech32(address[0], bech32_hrp),
+                                address: address[0].to_bech32(bech32_hrp),
                             }),
                         )
                         .await;
