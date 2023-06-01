@@ -28,7 +28,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         }
         UtilsMethod::ParseBech32Address { address } => Response::ParsedBech32Address(AddressDto::from(address.inner())),
         UtilsMethod::IsAddressValid { address } => Response::Bool(Address::is_valid_bech32(&address)),
-        UtilsMethod::GenerateMnemonic => Response::GeneratedMnemonic(Client::generate_mnemonic()?.as_str().to_owned()),
+        UtilsMethod::GenerateMnemonic => Response::GeneratedMnemonic(Client::generate_mnemonic()?),
         UtilsMethod::MnemonicToHexSeed { mnemonic } => {
             Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(&mnemonic.try_into()?))
         }

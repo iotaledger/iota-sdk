@@ -11,6 +11,7 @@ use iota_sdk::{
     client::{
         api::{PreparedTransactionDataDto, SignedTransactionDataDto},
         node_manager::node::Node,
+        secret::mnemonic::Mnemonic,
         NetworkInfoDto, NodeInfoWrapper,
     },
     types::{
@@ -246,7 +247,7 @@ pub enum Response {
     Faucet(String),
     /// Response for:
     /// - [`GenerateMnemonic`](crate::method::UtilsMethod::GenerateMnemonic)
-    GeneratedMnemonic(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
+    GeneratedMnemonic(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] Mnemonic),
     /// Response for
     /// - [`GetLedgerNanoStatus`](crate::method::SecretManagerMethod::GetLedgerNanoStatus)
     #[cfg(feature = "ledger_nano")]

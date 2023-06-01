@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::client::secret::SecretManagerDto;
+use iota_sdk::client::secret::{mnemonic::MnemonicLike, SecretManagerDto};
 use iota_sdk_bindings_core::{ClientMethod, Response, UtilsMethod, WalletOptions};
 
 #[test]
@@ -40,7 +40,7 @@ fn method_interface_secrets_debug() {
     };
     assert_eq!(format!("{:?}", wallet_method), "VerifyMnemonic { mnemonic: <omitted> }");
 
-    let response = Response::GeneratedMnemonic("mnemonic".to_string());
+    let response = Response::GeneratedMnemonic("mnemonic".to_owned().to_mnemonic().unwrap());
     assert_eq!(format!("{:?}", response), "GeneratedMnemonic(<omitted>)");
 
     let wallet_options = WalletOptions {
