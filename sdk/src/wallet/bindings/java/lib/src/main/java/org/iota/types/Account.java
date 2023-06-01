@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.iota.api.NativeApi.callBaseApi;
+
 @JsonAdapter(AccountAdapter.class)
 public class Account extends AbstractObject {
 
@@ -118,7 +119,7 @@ public class Account extends AbstractObject {
         method.addProperty("name", methodName.substring(0, 1).toLowerCase() + methodName.substring(1));
 
         JsonElement data = CustomGson.get().toJsonTree(accountMethod);
-        if(data.toString().equals("{}"))
+        if (data.toString().equals("{}"))
             method.add("data", null);
         else
             method.add("data", data);
@@ -226,12 +227,13 @@ public class Account extends AbstractObject {
      * @param options The options.
      * @return The generated addresses.
      */
-    public AccountAddress[] generateAddresses(GenerateAddresses options) throws WalletException {
+    public AccountAddress[] generateEd25519Addresses(GenerateEd25519Addresses options) throws WalletException {
         JsonArray responsePayload = (JsonArray) callAccountMethod(options);
 
         AccountAddress[] accountAddress = new AccountAddress[responsePayload.size()];
         for (int i = 0; i < responsePayload.size(); i++)
-            accountAddress[i] = CustomGson.get().fromJson(responsePayload.get(i).getAsJsonObject(), AccountAddress.class);
+            accountAddress[i] = CustomGson.get().fromJson(responsePayload.get(i).getAsJsonObject(),
+                    AccountAddress.class);
 
         return accountAddress;
     }
@@ -262,7 +264,8 @@ public class Account extends AbstractObject {
      * @param options The options.
      * @return The given transaction.
      */
-    public Output[] getOutputsWithAdditionalUnlockConditions(GetOutputsWithAdditionalUnlockConditions options) throws WalletException {
+    public Output[] getOutputsWithAdditionalUnlockConditions(GetOutputsWithAdditionalUnlockConditions options)
+            throws WalletException {
         JsonArray responsePayload = (JsonArray) callAccountMethod(options);
 
         Output[] outputs = new Output[responsePayload.size()];
@@ -282,9 +285,9 @@ public class Account extends AbstractObject {
         return CustomGson.get().fromJson(callAccountMethod(options), Transaction.class);
     }
 
-
     /**
-     * Get the transaction with inputs of an incoming transaction stored in the account.
+     * Get the transaction with inputs of an incoming transaction stored in the
+     * account.
      * List might not be complete, if the node pruned the data already.
      *
      * @param options The options.
@@ -436,7 +439,8 @@ public class Account extends AbstractObject {
     }
 
     /**
-     * Retries (promotes or reattaches) a transaction sent from the account for a provided transaction id until it's
+     * Retries (promotes or reattaches) a transaction sent from the account for a
+     * provided transaction id until it's
      * included (referenced by a milestone). Returns the included block id.
      *
      * @param options The options.
@@ -455,7 +459,8 @@ public class Account extends AbstractObject {
     }
 
     /**
-     * Sync the account by fetching new information from the nodes. Will also retry pending transactions if necessary.
+     * Sync the account by fetching new information from the nodes. Will also retry
+     * pending transactions if necessary.
      *
      * @param options The options.
      */
@@ -530,7 +535,6 @@ public class Account extends AbstractObject {
         return CustomGson.get().fromJson(callAccountMethod(options), Transaction.class);
     }
 
-
     /**
      * This function claims all unclaimed outputs for the account.
      *
@@ -552,19 +556,23 @@ public class Account extends AbstractObject {
     }
 
     /**
-     * Syncs the account with the provided sync options and request funds from the faucet.
+     * Syncs the account with the provided sync options and request funds from the
+     * faucet.
      *
-     * @param options The options.
-     * @param targetAddressBalance The base coin balance that the address should have after the request.
-     * @param syncOptions The options.
-     * @throws NoFundsReceivedFromFaucetException when the faucet didn't fund the address.
+     * @param options              The options.
+     * @param targetAddressBalance The base coin balance that the address should
+     *                             have after the request.
+     * @param syncOptions          The options.
+     * @throws NoFundsReceivedFromFaucetException when the faucet didn't fund the
+     *                                            address.
      */
-    public void requestFundsFromFaucet(RequestFundsFromFaucet options, long targetAddressBalance, SyncOptions syncOptions) throws WalletException, NoFundsReceivedFromFaucetException {
+    public void requestFundsFromFaucet(RequestFundsFromFaucet options, long targetAddressBalance,
+            SyncOptions syncOptions) throws WalletException, NoFundsReceivedFromFaucetException {
         int maxAttempts = 5;
-        for(int i = 0; i < maxAttempts; i++) {
+        for (int i = 0; i < maxAttempts; i++) {
             long currentBalance = syncAccount(new SyncAccount().withOptions(syncOptions)).getBaseCoin().getAvailable();
 
-            if(currentBalance < targetAddressBalance) {
+            if (currentBalance < targetAddressBalance) {
                 callAccountMethod(options);
                 try {
                     Thread.sleep(1000 * 25);
@@ -576,7 +584,7 @@ public class Account extends AbstractObject {
         }
 
         long currentBalance = syncAccount(new SyncAccount().withOptions(syncOptions)).getBaseCoin().getAvailable();
-        if(currentBalance < targetAddressBalance)
+        if (currentBalance < targetAddressBalance)
             throw new NoFundsReceivedFromFaucetException();
     }
 

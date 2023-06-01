@@ -31,17 +31,15 @@ async function run() {
         };
 
         // Generates an address offline.
-        const offlineGeneratedAddress = await offlineClient.generateAddresses(
-            secretManager,
-            {
+        const offlineGeneratedAddress =
+            await offlineClient.generateEd25519Addresses(secretManager, {
                 coinType: CoinType.Shimmer,
                 range: {
                     start: 0,
                     end: 1,
                 },
                 bech32Hrp: SHIMMER_TESTNET_BECH32_HRP,
-            },
-        );
+            });
 
         await writeFile(
             ADDRESS_FILE_NAME,

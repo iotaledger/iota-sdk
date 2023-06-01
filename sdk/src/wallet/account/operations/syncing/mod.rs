@@ -12,7 +12,7 @@ use std::collections::{HashMap, HashSet};
 pub use self::options::SyncOptions;
 use crate::{
     types::block::{
-        address::{Address, AliasAddress, NftAddress},
+        address::{Address, AliasAddress, NftAddress, ToBech32Ext},
         output::{dto::OutputMetadataDto, FoundryId, Output, OutputId},
     },
     wallet::account::{

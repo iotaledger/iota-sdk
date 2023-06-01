@@ -66,8 +66,8 @@ export type __GetLedgerNanoStatusMessage__ = {
     cmd: 'getLedgerNanoStatus';
 };
 
-export type __GenerateAddressMessage__ = {
-    cmd: 'generateAddress';
+export type __GenerateEd25519AddressMessage__ = {
+    cmd: 'generateEd25519Address';
     payload: {
         accountIndex: number;
         addressIndex: number;

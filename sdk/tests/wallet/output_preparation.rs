@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 use iota_sdk::{
     types::block::{
-        address::{Address, Bech32Address},
+        address::{Address, Bech32Address, ToBech32Ext},
         output::{NativeToken, NftId, TokenId},
     },
     wallet::{

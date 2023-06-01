@@ -319,7 +319,7 @@ public class Wallet extends NativeApi {
      * @param options The options.
      * @return The generated address.
      */
-    public String generateAddress(int accountIndex, int addressIndex,
+    public String generateEd25519Address(int accountIndex, int addressIndex,
             GenerateAddressOptions options, String bechHrp) throws WalletException {
         JsonObject o = new JsonObject();
         o.addProperty("accountIndex", accountIndex);
@@ -327,7 +327,7 @@ public class Wallet extends NativeApi {
         o.add("options", CustomGson.get().toJsonTree(options));
         o.addProperty("bech32Hrp", bechHrp);
 
-        return callBaseApi(new WalletCommand("generateAddress", o)).getAsString();
+        return callBaseApi(new WalletCommand("generateEd25519Address", o)).getAsString();
     }
 
     /**

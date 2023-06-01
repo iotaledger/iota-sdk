@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
     // let accounts = wallet.get_accounts().await?;
     // println!("Accounts: {:?}", accounts);
 
-    let _address = account.generate_addresses(5, None).await?;
+    let _address = account.generate_ed25519_addresses(5, None).await?;
 
     let addresses = account.addresses().await?;
     println!("Addresses: {}", addresses.len());
