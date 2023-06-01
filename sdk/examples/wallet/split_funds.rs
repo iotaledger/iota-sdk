@@ -25,7 +25,7 @@ use iota_sdk::{
 // The base coin amount to send
 const SEND_AMOUNT: u64 = 1_000_000;
 // The maximum number of addresses funds are distributed to
-const MAX_ADDRESSES_TO_SPLIT_FUNDS: usize = 15;
+const ADDRESSES_TO_SPLIT_FUNDS: usize = 15;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
     let alias = var("ACCOUNT_ALIAS_1").unwrap();
     let account = create_account(&wallet, &alias).await?;
 
-    let _ = generate_max_addresses(&account, MAX_ADDRESSES_TO_SPLIT_FUNDS).await?;
+    let _ = ensure_enough_addresses(&account, ADDRESSES_TO_SPLIT_FUNDS).await?;
 
     let addresses = account.addresses().await?;
     println!("Total address count: {}", addresses.len());
@@ -131,10 +131,10 @@ async fn sync_print_balance(account: &Account) -> Result<()> {
     Ok(())
 }
 
-async fn generate_max_addresses(account: &Account, max: usize) -> Result<Vec<AccountAddress>> {
+async fn ensure_enough_addresses(account: &Account, limit: usize) -> Result<Vec<AccountAddress>> {
     let alias = account.alias().await;
-    if account.addresses().await?.len() < max {
-        let num_addresses_to_generate = max - account.addresses().await?.len();
+    if account.addresses().await?.len() < limit {
+        let num_addresses_to_generate = limit - account.addresses().await?.len();
         println!("Generating {num_addresses_to_generate} addresses for account '{alias}'...");
         account
             .generate_ed25519_addresses(num_addresses_to_generate as u32, None)
