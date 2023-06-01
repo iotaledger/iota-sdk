@@ -13,21 +13,18 @@ The `client` module is stateless. It aims to provide more flexibility and access
 
 ## Table of Contents
 
+# Table of contents
+
 - [Features](#features)
 - [Branching Structure for Development](#branching-structure-for-development)
+- [Before You Start](#before-you-start)
+  - [Requirements](#requirements)
+  - [Dependencies](#dependencies)
 - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Dependencies](#dependencies)
-- [Install the iota-sdk](#install-the-iota-sdk)
-    - [Rust](#rust)
-    - [Node.js](#nodejs)
-    - [Python](#python)
-- [Usage](#usage)
-    - [Wallet](#wallet)
-    - [Client](#client)
-    - [API Reference](#api-reference)
-    - [Usage Examples](#usage-examples)
-- [Contributing](#contributing)
+  - [Install the iota-sdk](#install-the-iota-sdk)
+  - [Usage](#usage)
+  - [API Reference](#api-reference)
+- [Contribute](#contribute)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
 
@@ -191,7 +188,6 @@ let client = Client::builder()
     .await?;
 ```
 
-
 #### Examples
 
 You can use the provided code [examples](sdk/examples) to acquainted with the iota-sdk. You can use the following command to run any example:
@@ -217,11 +213,7 @@ cargo run --example
 
 The iota-sdk Rust API Reference is in the [crate documentation](https://docs.rs/iota-sdk/latest/iota_sdk/).
 
-#### Python
-
-Please refer the [Python binding's wallet usage section](bindings/python/README.md#client).
-
-## Contributing
+## Contribute
 
 If you find any issues or have suggestions for improvements, please open an issue on the GitHub repository. You can also
 submit pull requests with bug fixes, new features, or documentation enhancements.

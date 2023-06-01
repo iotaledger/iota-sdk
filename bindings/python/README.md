@@ -2,46 +2,58 @@
 
 Python binding to the [iota-sdk library](/README.md).
 
+## Table of contents
+
+- [Getting Started](#getting-started)
+   - [Requirements](#requirements)
+- [Install the iota-sdk](#install-the-iota-sdk)
+- [Usage](#usage)
+   - [Wallet](#wallet)
+   - [Client](#client)
+   - [Examples](#examples)
+   - [API Reference](#api-reference)
+- [Learn More](#learn-more)
+
 ## Getting Started
 
 ### Requirements
 
-* [Python 3.x](https://www.python.org) 
-* [pip ^21.x](https://pypi.org/project/pip)
-* `Rust` and `Cargo`, to compile the binding. Install them [here](https://doc.rust-lang.org/cargo/getting-started/installation.html).
+- [Python 3.x](https://www.python.org)
+- [pip ^21.x](https://pypi.org/project/pip)
+- `Rust` and `Cargo` to compile the binding. Install them [here](https://doc.rust-lang.org/cargo/getting-started/installation.html).
 
 ## Install the iota-sdk
 
-1. Move to the python bindings directory:
-    
-    ```bash
-    cd iota-sdk/bindings/python
-    ```
+1. Move to the Python bindings directory:
 
-2. (optional) Create a virtual environment and use it. On Linux and macOS you can run the following commands:
+   ```bash
+   cd iota-sdk/bindings/python
+   ```
 
-    '''bash
-    python3 -m venv iota_sdk_venv
-    source iota_sdk_venv/bin/activate
-    '''
+2. (optional) Create a virtual environment and use it. On Linux and macOS, you can run the following commands:
 
-    If you are using Windows you should run the following instead:
-    
-    ```bash
-    .\iota_sdk_venv\Scripts\activate`
-    ```
+   '''bash
+   python3 -m venv iota_sdk_venv
+   source iota_sdk_venv/bin/activate
+   '''
 
-3. Install required dependencies and build the wheel by running the following commands:
+   If you are using Windows, you should run the following instead:
 
-    ```bash
-    pip install -r requirements-dev.txt
-    pip install .
-    ````
+   ```bash
+   .\iota_sdk_venv\Scripts\activate`
+   ```
+
+3. Install the required dependencies and build the wheel by running the following commands:
+
+   ```bash
+   pip install -r requirements-dev.txt
+   pip install .
+   ```
 
 4. (optional) If you want to deactivate the virtual environment, run the following command:
 
-    ```bash
-    deactivate
+   ```bash
+   deactivate
    ```
 
 ## Usage
@@ -63,7 +75,7 @@ secret_manager = StrongholdSecretManager("wallet.stronghold", "some_hopefully_se
 
 wallet = Wallet('./alice-database', wallet_options, coin_type=CoinType.SHIMMER, secret_manager)
 
-# Store the mnemonic in the Stronghold snapshot, this only needs to be done once
+# Store the mnemonic in the Stronghold snapshot. This only needs to be done once
 account = wallet.store_mnemonic("flame fever pig forward exact dash body idea link scrub tennis minute " +
           "surge unaware prosper over waste kitten ceiling human knife arch situate civil")
 
@@ -88,12 +100,13 @@ print(f'{node_info}')
 
 ### Examples
 
-You can use the provided code [examples](examples) to acquainted with the iota-sdk. You can use the following command to run any example:  
+You can use the provided code [examples](examples) to acquainted with the iota-sdk. You can use the following command to run any example:
 
 ```bash
 python3 example/[example file]
 ```
-* Where `[example file]` is the file name from the example folder. For example: 
+
+- Where `[example file]` is the file name from the example folder. For example:
 
 ```bash
 python3 examples/client/00_get_info.py
@@ -101,8 +114,12 @@ python3 examples/client/00_get_info.py
 
 ### API Reference
 
-You can generate the python API reference with the following command from this directory:
+You can generate the Python API reference with the following command from this directory:
 
 ```bash
-pipx install pydoc-markdown && pydoc-markdown
+pip install pydoc-markdown && pydoc-markdown
 ```
+
+## Learn More
+
+To learn more about Rust, see the [Rust documentation](https://www.rust-lang.org).
