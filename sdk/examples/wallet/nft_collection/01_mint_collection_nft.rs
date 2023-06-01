@@ -29,16 +29,6 @@ const ISSUER_NFT_ID: &str = "0x13c490ac052e575cffd40e170c2d46c6029b8b68cdf0e899b
 const NFT_COLLECTION_SIZE: usize = 150;
 // Mint NFTs in chunks since the transaction size is limited
 const NUM_NFTS_MINTED_PER_TRANSACTION: usize = 50;
-// The location of the NFT.
-const NFT_URI: &str = "ipfs://wrongcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5Ywrong";
-// The name of the NFT
-const NFT_NAME: &str = "Shimmer OG NFT";
-// The description of the NFT
-const NFT_DESCRIPTION: &str = "The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.";
-// The issuer of the NFT
-const NFT_ISSUER_NAME: &str = "IOTA Foundation";
-// The name of the NFT collection
-const NFT_COLLECTION_NAME: &str = "Shimmer OG";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -104,7 +94,17 @@ async fn main() -> Result<()> {
 
 fn get_immutable_metadata(index: usize, issuer_nft_id: NftId) -> String {
     format!(
-        "{{\"standard\":\"IRC27\",\"version\":\"v1.0\",\"type\":\"video/mp4\",\"uri\":\"{NFT_URI}\",\"name\":\"{NFT_NAME} #{index}\",\"description\":\"{NFT_DESCRIPTION}\",\"issuerName\":\"{NFT_ISSUER_NAME}\",\"collectionId\":\"{issuer_nft_id}\",\"collectionName\":\"{NFT_COLLECTION_NAME}\" }}"
+        r#"{{
+        "standard":"IRC27",
+        "version":"v1.0",
+        "type":"video/mp4",
+        "uri":"ipfs://wrongcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5Ywrong",
+        "name":"Shimmer OG NFT #{index}",
+        "description":"The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.",
+        "issuerName":"IOTA Foundation",
+        "collectionId":"{issuer_nft_id}",
+        "collectionName":"Shimmer OG"
+    }}"#
     )
 }
 
