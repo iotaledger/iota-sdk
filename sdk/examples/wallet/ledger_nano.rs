@@ -26,8 +26,6 @@ use iota_sdk::{
 
 // The account alias used in this example
 const ACCOUNT_ALIAS: &str = "ledger";
-// The wallet database folder created in this example
-const WALLET_DB_PATH: &str = "./example-ledger_nano-walletdb";
 // The number of addresses to generate
 const NUM_ADDRESSES_TO_GENERATE: u32 = 1;
 // The address to send coins to
@@ -44,7 +42,7 @@ async fn main() -> Result<()> {
     let secret_manager = LedgerSecretManager::new(true);
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::LedgerNano(secret_manager))
-        .with_storage_path(WALLET_DB_PATH)
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
