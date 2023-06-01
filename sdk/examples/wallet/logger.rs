@@ -18,10 +18,6 @@ use iota_sdk::{
     wallet::{ClientOptions, Result, Wallet},
 };
 
-// The log file name
-const LOG_FILE_NAME: &str = "example.log";
-// The log level to use (error, warn, info, debug, trace)
-const LOG_LEVEL: log::LevelFilter = log::LevelFilter::Debug;
 // The number of addresses to generate
 const NUM_ADDRESSES_TO_GENERATE: u32 = 5;
 
@@ -32,9 +28,9 @@ async fn main() -> Result<()> {
 
     // Initialize a logger that writes to the specified file
     let logger_output_config = fern_logger::LoggerOutputConfigBuilder::new()
-        .name(LOG_FILE_NAME)
+        .name("example.log")
         .target_exclusions(&["h2", "hyper", "rustls"])
-        .level_filter(LOG_LEVEL);
+        .level_filter(log::LevelFilter::Debug);
     let config = fern_logger::LoggerConfig::build()
         .with_output(logger_output_config)
         .finish();
