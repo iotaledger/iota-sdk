@@ -79,6 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Made certain `prepare_` methods public: `prepare_mint_nfts`, `prepare_send_native_tokens`, `prepare_send_nft` and `prepare_create_alias_output`;
 - `Address`-like types now implement `ToBech32Ext` for `to_bech32` and similar fns;
 - Add constructors for `SendNftParams`, `SendAmountParams`, `SendNativeTokensParams`, `MintNftParams`;
+- `Bech32AddressLike`, `HrpLike` and other `TryInto` parameters unified with `ConvertTo` trait;
 
 ### Removed
 
