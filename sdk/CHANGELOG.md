@@ -79,6 +79,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Made certain `prepare_` methods public: `prepare_mint_nfts`, `prepare_send_native_tokens`, `prepare_send_nft` and `prepare_create_alias_output`;
 - `Address`-like types now implement `ToBech32Ext` for `to_bech32` and similar fns;
 - Add constructors for `SendNftParams`, `SendAmountParams`, `SendNativeTokensParams`, `MintNftParams`;
+- `Client` methods `get_outputs`, `get_outputs_ignore_errors`, `get_outputs_metadata_ignore_errors` now accept a slice of output ids;
+- More functions accept generic types for ergonomics: `Wallet::listen`, `clear_listeners`, `EventEmitter` fns, `RegularTransactionEssenceBuilder` fns, `AliasOutputBuilder` fns, `Account::claim_outputs`, `prepare_transaction`, `send`, `finish_transaction`, `send_nft`, `prepare_send_nft`, `send_native_tokens`, `prepare_send_native_tokens`, `send_amount`, `prepare_send_amount`, `mint_nfts`, `prepare_mint_nfts`, `vote`, `prepare_vote`, `Unlocks::new`, `TaggedDataPayload::new`, `MilestonePayload::new`, `ReceiptMilestoneOption::new`, `Client::subscribe`, `unsubscribe`, `basic_output_ids`, `alias_output_ids`, `foundry_output_ids`, `nft_output_ids`, `MqttManager::with_topics`, `MqttTopicManager::new`, `with_topics`, `QueryParameters::new`;
 
 ### Removed
 
