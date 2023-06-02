@@ -24,7 +24,7 @@ use iota_sdk::{
 
 // The base coin amount to send
 const SEND_AMOUNT: u64 = 1_000_000;
-// The maximum number of addresses funds are distributed to
+// The number of addresses funds are distributed to
 const ADDRESSES_TO_SPLIT_FUNDS: usize = 15;
 
 #[tokio::main]
