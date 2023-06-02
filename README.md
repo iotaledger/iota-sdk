@@ -7,7 +7,7 @@ Shimmer network. It consists of two main modules: `wallet` and `client`.
 
 The `wallet` module is stateful, with a standardized interface for developers to build applications involving value
 transactions. It uses high-level functions that simplify everyday operations. It can optionally interact
-with [IOTA Stronghold](https://github.com/iotaledger/stronghold.rs/) for seed handling and storage and state backup.
+with [IOTA Stronghold](https://github.com/iotaledger/stronghold.rs/) for seed handling, storage, and state backup.
 
 The `client` module is stateless. It aims to provide more flexibility and access to low-level functions.
 
@@ -33,7 +33,7 @@ The `client` module is stateless. It aims to provide more flexibility and access
   developers to build applications on the Shimmer network.
 
 - **Client module**: The `client` module in the IOTA SDK offers low-level functions that allow you to have
-  fine-grained control over their interactions with Shimmer nodes. It provides access to the underlying API endpoints
+  fine-grained control over your interactions with Shimmer nodes. It provides access to the underlying API endpoints
   and enables advanced operations such as custom message construction and direct communication with the network.
 
 - **Python, Node.js, and WASM Bindings**: The IOTA SDK includes bindings for Python, Node.js, and WASM, which allow you to use the
@@ -61,13 +61,12 @@ and [Node.js](bindings/nodejs/README.md) instructions if you want information on
 The IOTA SDK requires `Rust` and `Cargo`. You can find installation instructions in
 the [Rust documentation](https://doc.rust-lang.org/cargo/getting-started/installation.html).
 
-We recommend you first update the Rust compiler to the latest stable version:
+We recommend that you update the Rust compiler to the latest stable version first:
 
 ```shell
 rustup update stable
 ```
 
-The nightly Rust compiler should be fine, but some changes might not be compatible.
 
 ### Dependencies
 
@@ -107,8 +106,7 @@ brew install cmake openssl@1.1
 #### Linux
 
 You can install `cmake`, `clang`, and `openssl` with your distro's package manager or download them from their websites.
-On
-Debian and Ubuntu, you will also need the `build-essential` and `libudev-dev` packages.
+On Debian and Ubuntu, you will also need the `build-essential` and `libudev-dev` packages.
 
 ## Getting Started
 
@@ -118,7 +116,7 @@ To start using the IOTA SDK in your Rust project, you can include the following 
 
 ```toml
 [dependencies]
-iota-sdk = " { git = "https://github.com/iotaledger/iota-sdk", branch = "develop" }"
+iota-sdk = { branch = "develop" }
 ```
 
 ### Usage
