@@ -167,6 +167,13 @@ pub enum AccountMethod {
     /// Expected response:
     /// [`GeneratedEvmAddresses`](crate::wallet::message_interface::Response::GeneratedEvmAddresses)
     GenerateEvmAddresses { options: GetAddressesOptions },
+    /// Signs a message with an Evm private key.
+    SignEvm {
+        /// The message to sign, hex encoded String
+        message: String,
+        /// Chain to sign the essence hash with
+        chain: Vec<u32>,
+    },
     /// Get the [`OutputData`](crate::wallet::account::types::OutputData) of an output stored in the account
     /// Expected response: [`OutputData`](crate::wallet::message_interface::Response::OutputData)
     #[serde(rename_all = "camelCase")]

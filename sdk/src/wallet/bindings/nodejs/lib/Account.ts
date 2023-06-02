@@ -42,7 +42,9 @@ import type {
     BuildNftOutputData,
 } from '../types/buildOutputData';
 import type {
+    EvmSignature,
     HexEncodedAmount,
+    HexEncodedString,
     IAliasOutput,
     IBasicOutput,
     IFoundryOutput,
@@ -389,6 +391,26 @@ export class Account {
             },
         );
 
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Signs a message with an Evm private key.
+     */
+    async signEvm(
+        message: HexEncodedString,
+        chain: number[],
+    ): Promise<EvmSignature> {
+        const response = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'signEvm',
+                data: {
+                    message,
+                    chain,
+                },
+            },
+        );
         return JSON.parse(response).payload;
     }
 

@@ -11,6 +11,7 @@ use std::{
 
 use backtrace::Backtrace;
 use futures::{Future, FutureExt};
+use iota_stronghold::procedures::Chain;
 use primitive_types::U256;
 use zeroize::Zeroize;
 
@@ -20,7 +21,9 @@ use crate::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
         constants::SHIMMER_TESTNET_BECH32_HRP,
-        request_funds_from_faucet, utils, Client, NodeInfoWrapper,
+        request_funds_from_faucet,
+        secret::SecretManage,
+        utils, Client, NodeInfoWrapper,
     },
     types::block::{
         address::{HrpLike, ToBech32Ext},
@@ -584,6 +587,20 @@ impl WalletMessageHandler {
                     .generate_evm_addresses(options)
                     .await?;
                 Ok(Response::GeneratedEvmAddresses(addresses))
+            }
+            AccountMethod::SignEvm { message, chain } => {
+                let msg: Vec<u8> = prefix_hex::decode(message).unwrap();
+                let (public_key, signature) = account
+                    .wallet
+                    .secret_manager
+                    .read()
+                    .await
+                    .sign_evm(&msg, &Chain::from_u32(chain))
+                    .await?;
+                Ok(Response::EvmSignature {
+                    public_key: prefix_hex::encode(public_key.to_bytes()),
+                    signature: prefix_hex::encode(signature.to_bytes()),
+                })
             }
             AccountMethod::GetOutputsWithAdditionalUnlockConditions { outputs_to_claim } => {
                 let output_ids = account
