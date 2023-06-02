@@ -81,10 +81,10 @@ pub trait SecretManage: Send + Sync {
         options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<EvmAddress>, Self::Error>;
 
-    /// Signs ed25519 key using the given [`Chain`].
+    /// Signs msg using the given [`Chain`] using Ed25519.
     async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error>;
 
-    /// Signs evm key using the given [`Chain`].
+    /// Signs msg using the given [`Chain`] using Secp256k1.
     async fn sign_evm(
         &self,
         msg: &[u8],
