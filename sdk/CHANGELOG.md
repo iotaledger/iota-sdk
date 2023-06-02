@@ -79,6 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `SecretManage::generate_ed25519_addresses` returns `Ed25519Address` type;
 - Made certain `prepare_` methods public: `prepare_mint_nfts`, `prepare_send_native_tokens`, `prepare_send_nft` and `prepare_create_alias_output`;
 - `Address`-like types now implement `ToBech32Ext` for `to_bech32` and similar fns;
+- Add constructors for `SendNftParams`, `SendAmountParams`, `SendNativeTokensParams`, `MintNftParams`;
 - `WalletInner::generate_mnemonic` returns a `Mnemonic` instead of a `String`;
 
 ### Removed
@@ -98,6 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Storage records decryption;
+- CoinType check, by moving it from AccountBuilder to WalletBuilder;
 
 ### Fixed
 

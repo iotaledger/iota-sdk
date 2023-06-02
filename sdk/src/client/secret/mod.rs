@@ -376,7 +376,7 @@ impl SecretManager {
         for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
             // Get the address that is required to unlock the input
             let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
-            let alias_transition = is_alias_transition(input, regular.outputs()).map(|t| t.0);
+            let alias_transition = is_alias_transition(&input.output, *input.output_id(), regular.outputs(), None);
             let (input_address, _) = input.output.required_and_unlocked_address(
                 time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32),
                 input.output_metadata.output_id(),
