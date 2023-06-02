@@ -16,9 +16,9 @@ use packable::{
     Packable, PackableExt,
 };
 
-use crate::types::{
-    block::{address::Address, Error},
-    convert::ConvertTo,
+use crate::{
+    types::block::{address::Address, Error},
+    utils::convert::ConvertTo,
 };
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]

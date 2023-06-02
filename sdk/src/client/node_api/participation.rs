@@ -16,8 +16,8 @@ use crate::{
             },
         },
         block::{address::Bech32Address, output::OutputId},
-        convert::ConvertTo,
     },
+    utils::convert::ConvertTo,
 };
 
 impl ClientInner {

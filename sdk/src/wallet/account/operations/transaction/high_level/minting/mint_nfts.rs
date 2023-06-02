@@ -6,18 +6,16 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     client::api::PreparedTransactionData,
-    types::{
-        block::{
-            address::Bech32Address,
-            output::{
-                feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
-                unlock_condition::AddressUnlockCondition,
-                NftId, NftOutputBuilder,
-            },
-            Error as BlockError,
+    types::block::{
+        address::Bech32Address,
+        output::{
+            feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
+            unlock_condition::AddressUnlockCondition,
+            NftId, NftOutputBuilder,
         },
-        convert::ConvertTo,
+        Error as BlockError,
     },
+    utils::convert::ConvertTo,
     wallet::{
         account::{operations::transaction::Transaction, Account, TransactionOptions},
         Error as WalletError,

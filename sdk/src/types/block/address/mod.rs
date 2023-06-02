@@ -14,15 +14,15 @@ pub use self::{
     ed25519::Ed25519Address,
     nft::NftAddress,
 };
-use crate::types::{
-    block::{
+use crate::{
+    types::block::{
         output::{Output, OutputId},
         semantic::{ConflictReason, ValidationContext},
         signature::Signature,
         unlock::Unlock,
         Error,
     },
-    convert::ConvertTo,
+    utils::convert::ConvertTo,
 };
 
 /// A generic address supporting different address kinds.

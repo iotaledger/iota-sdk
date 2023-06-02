@@ -22,17 +22,15 @@ use crate::{
         constants::SHIMMER_TESTNET_BECH32_HRP,
         request_funds_from_faucet, utils, Client, NodeInfoWrapper,
     },
-    types::{
-        block::{
-            address::{Hrp, ToBech32Ext},
-            output::{
-                dto::{OutputBuilderAmountDto, OutputDto},
-                AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
-            },
-            Error,
+    types::block::{
+        address::{Hrp, ToBech32Ext},
+        output::{
+            dto::{OutputBuilderAmountDto, OutputDto},
+            AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
         },
-        convert::ConvertTo,
+        Error,
     },
+    utils::convert::ConvertTo,
     wallet::{
         account::{
             operations::transaction::{

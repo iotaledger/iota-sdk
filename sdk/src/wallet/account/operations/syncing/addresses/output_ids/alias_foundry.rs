@@ -14,8 +14,8 @@ use crate::{
             address::{AliasAddress, Bech32Address, ToBech32Ext},
             output::{Output, OutputId},
         },
-        convert::ConvertTo,
     },
+    utils::convert::ConvertTo,
     wallet::{
         account::{Account, SyncOptions},
         task,

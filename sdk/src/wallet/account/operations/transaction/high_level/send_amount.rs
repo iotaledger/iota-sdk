@@ -6,18 +6,16 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     client::api::PreparedTransactionData,
-    types::{
-        block::{
-            address::Bech32Address,
-            output::{
-                unlock_condition::{
-                    AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-                },
-                BasicOutputBuilder,
+    types::block::{
+        address::Bech32Address,
+        output::{
+            unlock_condition::{
+                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
             },
+            BasicOutputBuilder,
         },
-        convert::ConvertTo,
     },
+    utils::convert::ConvertTo,
     wallet::{
         account::{
             constants::DEFAULT_EXPIRATION_TIME,

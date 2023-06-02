@@ -15,14 +15,12 @@ use zeroize::Zeroize;
 use super::{Client, ClientInner};
 use crate::{
     client::{Error, Result},
-    types::{
-        block::{
-            address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
-            output::{AliasId, NftId},
-            payload::TaggedDataPayload,
-        },
-        convert::ConvertTo,
+    types::block::{
+        address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
+        output::{AliasId, NftId},
+        payload::TaggedDataPayload,
     },
+    utils::convert::ConvertTo,
 };
 
 /// Transforms bech32 to hex

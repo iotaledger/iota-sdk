@@ -16,20 +16,17 @@ use crate::{
         api::block_builder::input_selection::Burn, constants::SHIMMER_COIN_TYPE, secret::SecretManager, Client, Error,
         Result,
     },
-    types::{
-        block::{
-            address::{Address, Bech32Address, Ed25519Address},
-            input::{dto::UtxoInputDto, UtxoInput, INPUT_COUNT_MAX},
-            output::{
-                dto::OutputDto, unlock_condition::AddressUnlockCondition, BasicOutputBuilder, Output,
-                OUTPUT_COUNT_RANGE,
-            },
-            parent::Parents,
-            payload::{Payload, TaggedDataPayload},
-            Block, BlockId,
+    types::block::{
+        address::{Address, Bech32Address, Ed25519Address},
+        input::{dto::UtxoInputDto, UtxoInput, INPUT_COUNT_MAX},
+        output::{
+            dto::OutputDto, unlock_condition::AddressUnlockCondition, BasicOutputBuilder, Output, OUTPUT_COUNT_RANGE,
         },
-        convert::ConvertTo,
+        parent::Parents,
+        payload::{Payload, TaggedDataPayload},
+        Block, BlockId,
     },
+    utils::convert::ConvertTo,
 };
 
 /// Builder of the block API

@@ -65,13 +65,13 @@ macro_rules! impl_id {
             }
         }
 
-        impl $crate::types::convert::ConvertTo<$name> for &alloc::string::String {
+        impl $crate::utils::convert::ConvertTo<$name> for &alloc::string::String {
             fn convert(self) -> Result<$name, $crate::types::block::Error> {
                 self.try_into()
             }
         }
 
-        impl $crate::types::convert::ConvertTo<$name> for &str {
+        impl $crate::utils::convert::ConvertTo<$name> for &str {
             fn convert(self) -> Result<$name, $crate::types::block::Error> {
                 self.try_into()
             }

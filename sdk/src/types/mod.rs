@@ -8,4 +8,3 @@ extern crate std;
 
 pub mod api;
 pub mod block;
-pub mod convert;

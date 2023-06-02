@@ -11,10 +11,8 @@ use futures::FutureExt;
 use crate::types::api::plugins::indexer::OutputIdsResponse;
 use crate::{
     client::node_api::indexer::query_parameters::QueryParameter,
-    types::{
-        block::{address::Bech32Address, output::OutputId},
-        convert::ConvertTo,
-    },
+    types::block::{address::Bech32Address, output::OutputId},
+    utils::convert::ConvertTo,
     wallet::Account,
 };
 
