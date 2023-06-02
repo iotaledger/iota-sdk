@@ -126,7 +126,7 @@ impl Account {
         let new_foundry_output_builder =
             FoundryOutputBuilder::from(&foundry_output).with_token_scheme(updated_token_scheme);
 
-        let outputs = vec![
+        let outputs = [
             new_alias_output_builder.finish_output(token_supply)?,
             new_foundry_output_builder.finish_output(token_supply)?,
             // Native Tokens will be added automatically in the remainder output in try_select_inputs()

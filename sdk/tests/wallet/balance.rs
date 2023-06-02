@@ -137,24 +137,20 @@ async fn balance_expiration() -> Result<()> {
 
     let seconds_until_expired = 20;
     let token_supply = account_0.client().get_token_supply().await?;
-    let outputs = vec![
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            // Send to account 1 with expiration to account 2, both have no amount yet
-            .with_unlock_conditions(vec![
-                UnlockCondition::Address(AddressUnlockCondition::new(
-                    *account_1.addresses().await?[0].address().as_ref(),
-                )),
-                UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    *account_2.addresses().await?[0].address().as_ref(),
-                    // Current time + 20s
-                    account_0.client().get_time_checked().await? + seconds_until_expired,
-                )?),
-            ])
-            .with_features(vec![SenderFeature::new(
-                *account_0.addresses().await?[0].address().as_ref(),
-            )])
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
+        // Send to account 1 with expiration to account 2, both have no amount yet
+        .with_unlock_conditions([
+            UnlockCondition::Address(AddressUnlockCondition::new(
+                *account_1.addresses().await?[0].address().as_ref(),
+            )),
+            UnlockCondition::Expiration(ExpirationUnlockCondition::new(
+                *account_2.addresses().await?[0].address().as_ref(),
+                // Current time + 20s
+                account_0.client().get_time_checked().await? + seconds_until_expired,
+            )?),
+        ])
+        .with_features([SenderFeature::new(*account_0.addresses().await?[0].address().as_ref())])
+        .finish_output(token_supply)?];
 
     let balance_before_tx = account_0.balance().await?;
     let tx = account_0.send(outputs, None).await?;
@@ -198,14 +194,12 @@ async fn balance_expiration() -> Result<()> {
     assert_eq!(balance.base_coin().available(), 1_000_000);
 
     // It's possible to send the expired output
-    let outputs = vec![
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            // Send to account 1 with expiration to account 2, both have no amount yet
-            .with_unlock_conditions(vec![AddressUnlockCondition::new(
-                *account_1.addresses().await?[0].address().as_ref(),
-            )])
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
+        // Send to account 1 with expiration to account 2, both have no amount yet
+        .with_unlock_conditions([AddressUnlockCondition::new(
+            *account_1.addresses().await?[0].address().as_ref(),
+        )])
+        .finish_output(token_supply)?];
     let _tx = account_2.send(outputs, None).await?;
 
     tear_down(storage_path)

@@ -39,28 +39,32 @@ impl SecretManage for MnemonicSecretManager {
         options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<Ed25519Address>, Self::Error> {
         let internal = options.into().map(|o| o.internal).unwrap_or_default();
-        let mut addresses = Vec::new();
 
-        for address_index in address_indexes {
-            let chain =
-                Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index, internal as u32, address_index]);
+        Ok(address_indexes
+            .map(|address_index| {
+                let chain = Chain::from_u32_hardened([
+                    HD_WALLET_TYPE,
+                    coin_type,
+                    account_index,
+                    internal as u32,
+                    address_index,
+                ]);
 
-            let public_key = self
-                .0
-                .derive::<ed25519::SecretKey>(&chain)?
-                .secret_key()
-                .public_key()
-                .to_bytes();
+                let public_key = self
+                    .0
+                    .derive::<ed25519::SecretKey>(&chain)?
+                    .secret_key()
+                    .public_key()
+                    .to_bytes();
 
-            // Hash the public key to get the address
-            let result = Blake2b256::digest(public_key).try_into().map_err(|_e| {
-                crate::client::Error::Blake2b256("hashing the public key while generating the address failed.")
-            });
+                // Hash the public key to get the address
+                let result = Blake2b256::digest(public_key).try_into().map_err(|_e| {
+                    crate::client::Error::Blake2b256("hashing the public key while generating the address failed.")
+                })?;
 
-            addresses.push(Ed25519Address::new(result?));
-        }
-
-        Ok(addresses)
+                crate::client::Result::Ok(Ed25519Address::new(result))
+            })
+            .collect::<Result<_, _>>()?)
     }
 
     async fn generate_evm_addresses(
@@ -71,22 +75,21 @@ impl SecretManage for MnemonicSecretManager {
         options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<EvmAddress>, Self::Error> {
         let internal = options.into().map(|o| o.internal).unwrap_or_default();
-        let mut addresses = Vec::new();
 
-        for address_index in address_indexes {
-            let chain = Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index])
-                .join(Chain::from_u32([internal as u32, address_index]));
+        Ok(address_indexes
+            .map(|address_index| {
+                let chain = Chain::from_u32_hardened([HD_WALLET_TYPE, coin_type, account_index])
+                    .join(Chain::from_u32([internal as u32, address_index]));
 
-            let public_key = self
-                .0
-                .derive::<secp256k1_ecdsa::SecretKey>(&chain)?
-                .secret_key()
-                .public_key();
+                let public_key = self
+                    .0
+                    .derive::<secp256k1_ecdsa::SecretKey>(&chain)?
+                    .secret_key()
+                    .public_key();
 
-            addresses.push(public_key.to_evm_address());
-        }
-
-        Ok(addresses)
+                crate::client::Result::Ok(public_key.to_evm_address())
+            })
+            .collect::<Result<_, _>>()?)
     }
 
     async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error> {

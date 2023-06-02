@@ -87,7 +87,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
         .await?;
     account.sync(None).await?;
 
-    let foundry_metadata = vec![1, 3, 3, 7];
+    let foundry_metadata = [1, 3, 3, 7];
 
     let mint_tx = account
         .mint_native_token(
@@ -95,7 +95,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
                 alias_id: None,
                 circulating_supply: U256::from(50),
                 maximum_supply: U256::from(100),
-                foundry_metadata: Some(foundry_metadata.clone()),
+                foundry_metadata: Some(foundry_metadata.to_vec()),
             },
             None,
         )

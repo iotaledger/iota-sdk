@@ -26,14 +26,15 @@ impl EventEmitter {
 
     /// Registers function `handler` as a listener for a `WalletEventType`. There may be
     /// multiple listeners for a single event.
-    pub fn on<F>(&mut self, events: Vec<WalletEventType>, handler: F)
+    pub fn on<F>(&mut self, events: impl IntoIterator<Item = WalletEventType>, handler: F)
     where
         F: Fn(&Event) + 'static + Clone + Send + Sync,
     {
+        let mut events = events.into_iter().peekable();
         // if no event is provided the handler is registered for all event types
-        if events.is_empty() {
+        if events.peek().is_none() {
             // we could use a crate like strum or a macro to iterate over all values, but not sure if it's worth it
-            for event_type in &[
+            for event_type in [
                 WalletEventType::NewOutput,
                 WalletEventType::SpentOutput,
                 WalletEventType::TransactionInclusion,
@@ -42,21 +43,23 @@ impl EventEmitter {
                 #[cfg(feature = "ledger_nano")]
                 WalletEventType::LedgerAddressGeneration,
             ] {
-                let event_handlers = self.handlers.entry(*event_type).or_insert_with(Vec::new);
-                event_handlers.push(Box::new(handler.clone()));
+                self.handlers
+                    .entry(event_type)
+                    .or_default()
+                    .push(Box::new(handler.clone()));
             }
         }
-        for event in events.into_iter() {
-            let event_handlers = self.handlers.entry(event).or_insert_with(Vec::new);
-            event_handlers.push(Box::new(handler.clone()));
+        for event in events {
+            self.handlers.entry(event).or_default().push(Box::new(handler.clone()));
         }
     }
 
     /// Removes handlers for each given `WalletEventType`.
     /// If no `WalletEventType` is given, handlers will be removed for all event types.
-    pub fn clear(&mut self, events: Vec<WalletEventType>) {
+    pub fn clear(&mut self, events: impl IntoIterator<Item = WalletEventType>) {
+        let mut events = events.into_iter().peekable();
         // if no event is provided handlers are removed for all event types
-        if events.is_empty() {
+        if events.peek().is_none() {
             self.handlers.clear();
         }
         for event in events {
@@ -123,13 +126,13 @@ mod tests {
         let event_counter = Arc::new(AtomicUsize::new(0));
 
         // single event
-        emitter.on(vec![WalletEventType::ConsolidationRequired], |_name| {
+        emitter.on([WalletEventType::ConsolidationRequired], |_name| {
             // println!("ConsolidationRequired: {:?}", name);
         });
 
         // listen to two events
         emitter.on(
-            vec![
+            [
                 WalletEventType::TransactionProgress,
                 WalletEventType::ConsolidationRequired,
             ],
@@ -140,7 +143,7 @@ mod tests {
 
         // listen to all events
         let event_counter_clone = Arc::clone(&event_counter);
-        emitter.on(vec![], move |_name| {
+        emitter.on([], move |_name| {
             // println!("Any event: {:?}", name);
             event_counter_clone.fetch_add(1, Ordering::SeqCst);
         });
@@ -165,14 +168,14 @@ mod tests {
         assert_eq!(3, event_counter.load(Ordering::SeqCst));
 
         // remove handlers of single event
-        emitter.clear(vec![WalletEventType::ConsolidationRequired]);
+        emitter.clear([WalletEventType::ConsolidationRequired]);
         // emit event of removed type
         emitter.emit(0, WalletEvent::ConsolidationRequired);
 
         assert_eq!(3, event_counter.load(Ordering::SeqCst));
 
         // remove handlers of all events
-        emitter.clear(vec![]);
+        emitter.clear([]);
         // emit events
         emitter.emit(
             0,
@@ -192,7 +195,7 @@ mod tests {
 
         // listen to a single event
         let event_counter_clone = Arc::clone(&event_counter);
-        emitter.on(vec![WalletEventType::ConsolidationRequired], move |_name| {
+        emitter.on([WalletEventType::ConsolidationRequired], move |_name| {
             // println!("Any event: {:?}", name);
             event_counter_clone.fetch_add(1, Ordering::SeqCst);
         });

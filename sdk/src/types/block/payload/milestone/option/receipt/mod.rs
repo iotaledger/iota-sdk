@@ -49,11 +49,11 @@ impl ReceiptMilestoneOption {
     pub fn new(
         migrated_at: MilestoneIndex,
         last: bool,
-        funds: Vec<MigratedFundsEntry>,
+        funds: impl Into<Vec<MigratedFundsEntry>>,
         transaction: TreasuryTransactionPayload,
         token_supply: u64,
     ) -> Result<Self, Error> {
-        let funds = VecPrefix::<MigratedFundsEntry, ReceiptFundsCount>::try_from(funds)
+        let funds = VecPrefix::<MigratedFundsEntry, ReceiptFundsCount>::try_from(funds.into())
             .map_err(Error::InvalidReceiptFundsCount)?;
 
         verify_funds::<true>(&funds, &token_supply)?;
@@ -196,7 +196,7 @@ pub mod dto {
                     .funds
                     .iter()
                     .map(|f| MigratedFundsEntry::try_from_dto(f, token_supply))
-                    .collect::<Result<_, _>>()?,
+                    .collect::<Result<Vec<_>, _>>()?,
                 if let PayloadDto::TreasuryTransaction(ref transaction) = value.transaction {
                     TreasuryTransactionPayload::try_from_dto(transaction.as_ref(), token_supply)?
                 } else {

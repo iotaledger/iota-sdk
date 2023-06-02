@@ -33,7 +33,7 @@ use iota_sdk::{
 };
 
 use crate::client::{
-    addresses, build_inputs, build_outputs,
+    build_inputs, build_outputs,
     Build::{Alias, Basic, Nft},
     ALIAS_ID_1, ALIAS_ID_2, NFT_ID_1, NFT_ID_2, NFT_ID_3, NFT_ID_4,
 };
@@ -72,7 +72,7 @@ async fn all_combined() -> Result<()> {
     let nft_3_bech32_address = &Address::Nft(NftAddress::new(nft_id_3)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
     let nft_4_bech32_address = &Address::Nft(NftAddress::new(nft_id_4)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Alias(
             1_000_000,
             alias_id_1,
@@ -272,7 +272,7 @@ async fn all_combined() -> Result<()> {
         ),
     ]);
 
-    let outputs = build_outputs(vec![
+    let outputs = build_outputs([
         Alias(
             1_000_000,
             alias_id_1,
@@ -356,11 +356,11 @@ async fn all_combined() -> Result<()> {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![
-            &ed25519_bech32_address_0.to_string(),
-            &ed25519_bech32_address_1.to_string(),
-            &ed25519_bech32_address_2.to_string(),
-        ]),
+        [
+            *ed25519_bech32_address_0.inner(),
+            *ed25519_bech32_address_1.inner(),
+            *ed25519_bech32_address_2.inner(),
+        ],
         protocol_parameters.clone(),
     )
     .timestamp(current_time)
@@ -377,7 +377,7 @@ async fn all_combined() -> Result<()> {
                 .inputs
                 .iter()
                 .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
-                .collect(),
+                .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
         .finish(&protocol_parameters)?,

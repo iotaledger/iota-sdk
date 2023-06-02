@@ -59,7 +59,7 @@ fn pack_unpack_valid() {
 #[test]
 fn pack_unpack_invalid_index() {
     assert!(matches!(
-        ReferenceUnlock::unpack_verified(vec![0x2a, 0x2a].as_slice(), &()),
+        ReferenceUnlock::unpack_verified([0x2a, 0x2a], &()),
         Err(UnpackError::Packable(Error::InvalidReferenceIndex(InvalidBoundedU16(
             10794
         ))))
