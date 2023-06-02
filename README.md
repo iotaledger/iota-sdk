@@ -186,12 +186,12 @@ let client = Client::builder()
 
 #### Examples
 
-You can use the provided code [examples](sdk/examples) to acquainted with the IOTA SDK. You can use the following command to run any example:
+You can use the provided code [examples](sdk/examples) to get acquainted with the IOTA SDK. You can use the following command to run any example:
 
 ```bash
 cargo run --example example_name --release
 ```
-* Where `example_name` is the example name from the [Cargo.toml](sdk/Cargo.toml) name from the example folder. For example:
+* Where `example_name` is the name from the [Cargo.toml](sdk/Cargo.toml) name from the examples section. For example:
 
 ```bash
 cargo run --example node_api_core_get_info --release 
