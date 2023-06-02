@@ -6,7 +6,7 @@ use core::str::FromStr;
 use iota_sdk::types::block::{
     address::{
         dto::{AddressDto, Ed25519AddressDto},
-        Address, Bech32Address, Ed25519Address,
+        Address, Bech32Address, Ed25519Address, ToBech32Ext,
     },
     Error,
 };

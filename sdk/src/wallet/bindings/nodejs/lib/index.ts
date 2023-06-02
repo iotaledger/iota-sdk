@@ -1,7 +1,10 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { internalInitLogger, migrateStrongholdSnapshotV2ToV3 } from './bindings';
+import {
+    internalInitLogger,
+    migrateStrongholdSnapshotV2ToV3,
+} from './bindings';
 import type { LoggerConfig } from '../types';
 
 export * from './AccountManager';

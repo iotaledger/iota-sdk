@@ -12,7 +12,7 @@ use crate::{
 };
 use crate::{
     client::{
-        api::{PreparedTransactionDataDto, SignedTransactionDataDto},
+        api::{GetAddressesOptions, PreparedTransactionDataDto, SignedTransactionDataDto},
         secret::GenerateAddressOptions,
     },
     types::block::{
@@ -156,12 +156,17 @@ pub enum AccountMethod {
         foundry_id: FoundryId,
         options: Option<TransactionOptionsDto>,
     },
-    /// Generate new unused addresses.
-    /// Expected response: [`GeneratedAddress`](crate::wallet::message_interface::Response::GeneratedAddress)
-    GenerateAddresses {
+    /// Generate new unused ed25519 addresses.
+    /// Expected response:
+    /// [`GeneratedEd25519Addresses`](crate::wallet::message_interface::Response::GeneratedEd25519Addresses)
+    GenerateEd25519Addresses {
         amount: u32,
         options: Option<GenerateAddressOptions>,
     },
+    /// Generate EVM addresses.
+    /// Expected response:
+    /// [`GeneratedEvmAddresses`](crate::wallet::message_interface::Response::GeneratedEvmAddresses)
+    GenerateEvmAddresses { options: GetAddressesOptions },
     /// Get the [`OutputData`](crate::wallet::account::types::OutputData) of an output stored in the account
     /// Expected response: [`OutputData`](crate::wallet::message_interface::Response::OutputData)
     #[serde(rename_all = "camelCase")]

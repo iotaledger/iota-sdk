@@ -8,7 +8,10 @@
 use std::{collections::HashMap, ops::Range};
 
 use async_trait::async_trait;
-use crypto::keys::slip10::{Chain, Segment};
+use crypto::{
+    keys::slip10::{Chain, Segment},
+    signatures::secp256k1_ecdsa::EvmAddress,
+};
 use iota_ledger_nano::{
     get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index, Packable as LedgerNanoPackable,
     TransportTypes,
@@ -127,16 +130,16 @@ impl TryFrom<u8> for LedgerDeviceType {
 impl SecretManage for LedgerSecretManager {
     type Error = Error;
 
-    async fn generate_addresses(
+    async fn generate_ed25519_addresses(
         &self,
         // https://github.com/satoshilabs/slips/blob/master/slip-0044.md
         // current ledger app only supports IOTA_COIN_TYPE, SHIMMER_COIN_TYPE and TESTNET_COIN_TYPE
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
-    ) -> Result<Vec<Address>, Self::Error> {
-        let options = options.unwrap_or_default();
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<Ed25519Address>, Self::Error> {
+        let options = options.into().unwrap_or_default();
         let bip32_account = account_index | Segment::HARDEN_MASK;
 
         let bip32 = LedgerBIP32Index {
@@ -161,9 +164,19 @@ impl SecretManage for LedgerSecretManager {
 
         let mut ed25519_addresses = Vec::new();
         for address in addresses {
-            ed25519_addresses.push(Address::Ed25519(Ed25519Address::new(address)));
+            ed25519_addresses.push(Ed25519Address::new(address));
         }
         Ok(ed25519_addresses)
+    }
+
+    async fn generate_evm_addresses(
+        &self,
+        _coin_type: u32,
+        _account_index: u32,
+        _address_indexes: Range<u32>,
+        _options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<EvmAddress>, Self::Error> {
+        Err(Error::UnsupportedOperation)
     }
 
     async fn sign_ed25519(&self, _msg: &[u8], _chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
@@ -464,7 +477,7 @@ fn merge_unlocks(
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
         let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
-        let alias_transition = is_alias_transition(input, regular.outputs()).map(|t| t.0);
+        let alias_transition = is_alias_transition(&input.output, *input.output_id(), regular.outputs(), None);
         let (input_address, _) =
             input
                 .output

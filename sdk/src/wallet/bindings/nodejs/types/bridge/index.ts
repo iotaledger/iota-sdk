@@ -4,13 +4,17 @@ import type {
     __BuildBasicOutputMethod__,
     __BuildFoundryOutputMethod__,
     __BuildNftOutputMethod__,
-    __BurnMethod__,
+    __BurnNativeTokenMethod__,
+    __BurnNftMethod__,
     __ClaimOutputsMethod__,
     __ConsolidateOutputsMethod__,
     __CreateAliasOutputMethod__,
     __DecreaseNativeTokenSupplyMethod__,
+    __DestroyAliasMethod__,
+    __DestroyFoundryMethod__,
     __DeregisterParticipationEventMethod__,
-    __GenerateAddressesMethod__,
+    __GenerateEd25519AddressesMethod__,
+    __GenerateEvmAddressesMethod__,
     __GetBalanceMethod__,
     __GetOutputMethod__,
     __GetFoundryOutputMethod__,
@@ -66,7 +70,7 @@ import type {
     __GetAccountIndexesMessage__,
     __GetAccountsMessage__,
     __GetLedgerNanoStatusMessage__,
-    __GenerateAddressMessage__,
+    __GenerateEd25519AddressMessage__,
     __GetNodeInfoMessage__,
     __HexToBech32__,
     __IsStrongholdPasswordAvailableMessage__,
@@ -88,12 +92,16 @@ export type __AccountMethod__ =
     | __BuildBasicOutputMethod__
     | __BuildFoundryOutputMethod__
     | __BuildNftOutputMethod__
-    | __BurnMethod__
+    | __BurnNativeTokenMethod__
+    | __BurnNftMethod__
     | __ClaimOutputsMethod__
     | __ConsolidateOutputsMethod__
     | __CreateAliasOutputMethod__
     | __DeregisterParticipationEventMethod__
-    | __GenerateAddressesMethod__
+    | __DestroyAliasMethod__
+    | __DestroyFoundryMethod__
+    | __GenerateEd25519AddressesMethod__
+    | __GenerateEvmAddressesMethod__
     | __GetBalanceMethod__
     | __GetOutputMethod__
     | __GetIncomingTransactionMethod__
@@ -159,7 +167,7 @@ export type __Message__ =
     | __GetAccountIndexesMessage__
     | __GetAccountsMessage__
     | __GetLedgerNanoStatusMessage__
-    | __GenerateAddressMessage__
+    | __GenerateEd25519AddressMessage__
     | __GetNodeInfoMessage__
     | __HexToBech32__
     | __IsStrongholdPasswordAvailableMessage__

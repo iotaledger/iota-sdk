@@ -29,7 +29,7 @@ async function run() {
         };
 
         // Generate the first address
-        const addresses = await client.generateAddresses(secretManager, {
+        const addresses = await client.generateEd25519Addresses(secretManager, {
             accountIndex: 0,
             range: {
                 start: 0,

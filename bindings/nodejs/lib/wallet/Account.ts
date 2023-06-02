@@ -168,7 +168,7 @@ export class Account {
                 name: 'prepareBurn',
                 data: {
                     burn: {
-                        nativeTokens: [{ id: tokenId, amount: burnAmount }],
+                        nativeTokens: new Map([[tokenId, burnAmount]]),
                     },
                     options: transactionOptions,
                 },
@@ -367,31 +367,19 @@ export class Account {
     }
 
     /**
-     * Generate a new unused address.
-     * @param options Options for address generation.
-     * @returns The address.
-     */
-    async generateAddress(
-        options?: GenerateAddressOptions,
-    ): Promise<AccountAddress> {
-        const addresses = await this.generateAddresses(1, options);
-        return addresses[0];
-    }
-
-    /**
-     * Generate new unused addresses.
+     * Generate new unused ed25519 addresses.
      * @param amount The amount of addresses to generate.
      * @param options Options for address generation.
      * @returns The addresses.
      */
-    async generateAddresses(
+    async generateEd25519Addresses(
         amount: number,
         options?: GenerateAddressOptions,
     ): Promise<AccountAddress[]> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'generateAddresses',
+                name: 'generateEd25519Addresses',
                 data: {
                     amount,
                     options,

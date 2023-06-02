@@ -1,6 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use core::convert::Infallible;
 use std::fmt::Debug;
 
 use serde::{
@@ -135,6 +136,13 @@ impl Serialize for Error {
     }
 }
 
+// Implements conversion from Infallible. This never happens, but is required by the compiler.
+impl From<Infallible> for Error {
+    fn from(_: Infallible) -> Self {
+        unreachable!()
+    }
+}
+
 impl From<crate::types::block::Error> for Error {
     fn from(error: crate::types::block::Error) -> Self {
         Self::Block(Box::new(error))
@@ -149,7 +157,16 @@ impl From<crate::client::Error> for Error {
 
 impl From<crate::client::api::input_selection::Error> for Error {
     fn from(error: crate::client::api::input_selection::Error) -> Self {
-        Self::Client(Box::new(crate::client::Error::InputSelection(error)))
+        // Map "same" error so it's easier to handle
+        match error {
+            crate::client::api::input_selection::Error::InsufficientAmount { found, required } => {
+                Self::InsufficientFunds {
+                    available: found,
+                    required,
+                }
+            }
+            _ => Self::Client(Box::new(crate::client::Error::InputSelection(error))),
+        }
     }
 }
 

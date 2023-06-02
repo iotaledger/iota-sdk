@@ -74,7 +74,7 @@ impl OutputData {
                 .iter()
                 .find(|a| a.address.inner == unlock_address)
             {
-                Some(Chain::from_u32_hardened(vec![
+                Some(Chain::from_u32_hardened([
                     HD_WALLET_TYPE,
                     account.coin_type,
                     account.index,

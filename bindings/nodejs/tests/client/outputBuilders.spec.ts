@@ -19,7 +19,7 @@ const secretManager = {
 // Skip for CI
 describe.skip('Output builder methods', () => {
     it('builds a basic output', async () => {
-        const addresses = await client.generateAddresses(secretManager, {
+        const addresses = await client.generateEd25519Addresses(secretManager, {
             range: {
                 start: 0,
                 end: 1,
@@ -42,7 +42,7 @@ describe.skip('Output builder methods', () => {
     });
 
     it('builds an alias output', async () => {
-        const addresses = await client.generateAddresses(secretManager, {
+        const addresses = await client.generateEd25519Addresses(secretManager, {
             range: {
                 start: 0,
                 end: 1,
@@ -95,7 +95,7 @@ describe.skip('Output builder methods', () => {
     });
 
     it('builds an nft output', async () => {
-        const addresses = await client.generateAddresses(secretManager, {
+        const addresses = await client.generateEd25519Addresses(secretManager, {
             range: {
                 start: 0,
                 end: 1,
