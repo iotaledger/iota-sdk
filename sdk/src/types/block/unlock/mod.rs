@@ -6,6 +6,7 @@ mod nft;
 mod reference;
 mod signature;
 
+use alloc::boxed::Box;
 use core::ops::RangeInclusive;
 
 use derive_more::{Deref, From};

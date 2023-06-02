@@ -3,7 +3,7 @@
 
 //! Module describing the tagged data payload.
 
-use alloc::vec::Vec;
+use alloc::{boxed::Box, vec::Vec};
 use core::ops::RangeInclusive;
 
 use packable::{
