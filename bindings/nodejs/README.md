@@ -38,7 +38,7 @@ an environment variable `RUSTFLAGS` to `-C target-feature=+crt-static`.
 
 ## Getting Started
 
-### Install the IOTA SDK
+### Installing the IOTA SDK
 
 #### Install With a Package Manager
 
@@ -132,7 +132,8 @@ run().then(() => process.exit());
 You can use the provided code [examples](examples) to acquainted with the IOTA SDK. You can use the following command to run any example:
 
 ```bash
-node example/[example file]
+cd examples
+yarn run-example ./[example folder]/[example file]
 ```
 
 - Where `[example file]` is the file name from the example folder. For example:
