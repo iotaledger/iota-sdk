@@ -101,6 +101,7 @@ fn get_immutable_metadata(index: usize, issuer_nft_id: NftId) -> String {
         "collectionName":"Shimmer OG"
     }}"#
     )
+    .replace('\n', "")
 }
 
 async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
