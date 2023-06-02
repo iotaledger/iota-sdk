@@ -129,7 +129,7 @@ run().then(() => process.exit());
 
 #### Examples
 
-You can use the provided code [examples](examples) to acquainted with the IOTA SDK. You can use the following command to run any example:
+You can use the provided code [examples](examples) to get acquainted with the IOTA SDK. You can use the following command to run any example:
 
 ```bash
 cd examples
