@@ -88,7 +88,8 @@ async fn main() -> Result<()> {
 }
 
 fn get_immutable_metadata(index: usize, issuer_nft_id: NftId) -> String {
-    format!(
+    // Note: we use `serde_json::from_str` to remove all unnecessary whitespace
+    serde_json::from_str::<serde_json::Value>(&format!(
         r#"{{
         "standard":"IRC27",
         "version":"v1.0",
@@ -100,8 +101,7 @@ fn get_immutable_metadata(index: usize, issuer_nft_id: NftId) -> String {
         "collectionId":"{issuer_nft_id}",
         "collectionName":"Shimmer OG"
     }}"#
-    )
-    .replace('\n', "")
+    )).unwrap().to_string()
 }
 
 async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
