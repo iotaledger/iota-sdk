@@ -46,7 +46,7 @@ This library follows the following branching strategy:
 
 | Branch       | Description                                                                                                                    |
 |--------------|--------------------------------------------------------------------------------------------------------------------------------|
-| `develop`    | Ongoing development for future releases of the networks. This branch gets merged into `staging` on releases.                   |
+| `develop`    | Ongoing development for future releases of the staging networks. This branch gets merged into `staging` on releases.                   |
 | `production` | The latest releases for the IOTA network.                                                                                      |
 | `staging`    | The latest releases for the Shimmer network.                                                                                   |
 | other        | Other branches that may reflect current projects. Like `develop`, they will find their way into `staging` once they are ready. |
