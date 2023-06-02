@@ -89,12 +89,12 @@ impl<'a> ClientBlockBuilder<'a> {
         // Assume that we own the addresses for inputs that are required for the provided outputs
         let mut available_input_addresses = Vec::new();
         for input in &available_inputs {
-            let alias_transition = is_alias_transition(input, &self.outputs);
-            let (required_unlock_address, unlocked_alias_or_nft_address) = input.output.required_and_unlocked_address(
-                current_time,
-                input.output_id(),
-                alias_transition.map(|(alias_transition, _)| alias_transition),
-            )?;
+            let alias_transition =
+                is_alias_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref());
+            let (required_unlock_address, unlocked_alias_or_nft_address) =
+                input
+                    .output
+                    .required_and_unlocked_address(current_time, input.output_id(), alias_transition)?;
             available_input_addresses.push(required_unlock_address);
             if let Some(unlocked_alias_or_nft_address) = unlocked_alias_or_nft_address {
                 available_input_addresses.push(unlocked_alias_or_nft_address);
