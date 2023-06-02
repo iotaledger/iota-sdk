@@ -118,6 +118,23 @@ export class SecretManager {
     }
 
     /**
+     * Signs a message with an Evm private key.
+     */
+    async signEvm(
+        message: HexEncodedString,
+        chain: IBip32Chain,
+    ): Promise<IEd25519Signature> {
+        const response = await this.methodHandler.callMethod({
+            name: 'signEvm',
+            data: {
+                message,
+                chain,
+            },
+        });
+        return JSON.parse(response).payload;
+    }
+
+    /**
      * Get the status of a Ledger Nano
      */
     async getLedgerNanoStatus(): Promise<LedgerNanoStatus> {

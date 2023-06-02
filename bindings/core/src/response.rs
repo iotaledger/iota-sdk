@@ -105,6 +105,9 @@ pub enum Response {
     /// - [`SignEd25519`](crate::method::SecretManagerMethod::SignEd25519)
     Ed25519Signature(Ed25519SignatureDto),
     /// Response for:
+    /// - [`SignEvm`](crate::method::SecretManagerMethod::SignEvm)
+    EvmSignature { public_key: String, signature: String },
+    /// Response for:
     /// - [`UnhealthyNodes`](crate::method::ClientMethod::UnhealthyNodes)
     #[cfg(not(target_family = "wasm"))]
     UnhealthyNodes(HashSet<Node>),

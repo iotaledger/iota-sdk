@@ -62,6 +62,14 @@ pub(crate) async fn call_secret_manager_method_internal(
                 .await?;
             Response::Ed25519Signature(Ed25519SignatureDto::from(&signature))
         }
+        SecretManagerMethod::SignEvm { message, chain } => {
+            let msg: Vec<u8> = prefix_hex::decode(message)?;
+            let (public_key, signature) = secret_manager.sign_evm(&msg, &Chain::from_u32(chain)).await?;
+            Response::EvmSignature {
+                public_key: prefix_hex::encode(public_key.to_bytes()),
+                signature: prefix_hex::encode(signature.to_bytes()),
+            }
+        }
         #[cfg(feature = "stronghold")]
         SecretManagerMethod::StoreMnemonic { mnemonic } => {
             if let SecretManager::Stronghold(secret_manager) = secret_manager {
