@@ -103,7 +103,7 @@ impl SecretManage for MnemonicSecretManager {
         msg: &[u8],
         chain: &Chain,
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
-        // Get the private and public key for this Ed25519 address
+        // Get the private and public key for this Evm address
         let private_key = self.0.derive::<secp256k1_ecdsa::SecretKey>(chain)?.secret_key();
         let public_key = private_key.public_key();
         let signature = private_key.sign(msg);
