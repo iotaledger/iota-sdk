@@ -7,10 +7,7 @@ use core::borrow::Borrow;
 use packable::{prefix::StringPrefix, Packable};
 
 use super::address::Hrp;
-use crate::{
-    types::block::{helper::network_name_to_id, output::RentStructure, Error, PROTOCOL_VERSION},
-    utils::convert::ConvertTo,
-};
+use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
 
 /// Defines the parameters of the protocol.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable)]

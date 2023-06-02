@@ -12,8 +12,10 @@ use crate::{
         secret::{GenerateAddressOptions, SecretManage, SecretManager},
         Client, Result,
     },
-    types::block::address::{Address, Bech32Address, Hrp, ToBech32Ext},
-    utils::convert::ConvertTo,
+    types::block::{
+        address::{Address, Bech32Address, Hrp, ToBech32Ext},
+        ConvertTo,
+    },
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

@@ -14,8 +14,8 @@ use crate::{
             },
             BasicOutputBuilder,
         },
+        ConvertTo,
     },
-    utils::convert::ConvertTo,
     wallet::{
         account::{
             constants::DEFAULT_EXPIRATION_TIME,

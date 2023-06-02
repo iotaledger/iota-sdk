@@ -13,9 +13,8 @@ use crate::{
             unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
         },
-        Error as BlockError,
+        ConvertTo, Error as BlockError,
     },
-    utils::convert::ConvertTo,
     wallet::{
         account::{operations::transaction::Transaction, Account, TransactionOptions},
         Error as WalletError,

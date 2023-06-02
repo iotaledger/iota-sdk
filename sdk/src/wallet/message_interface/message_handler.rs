@@ -28,9 +28,8 @@ use crate::{
             dto::{OutputBuilderAmountDto, OutputDto},
             AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
         },
-        Error,
+        ConvertTo, Error,
     },
-    utils::convert::ConvertTo,
     wallet::{
         account::{
             operations::transaction::{

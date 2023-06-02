@@ -15,8 +15,8 @@ use crate::{
             },
             BasicOutputBuilder, NativeToken, TokenId,
         },
+        ConvertTo,
     },
-    utils::convert::ConvertTo,
     wallet::{
         account::{
             constants::DEFAULT_EXPIRATION_TIME,

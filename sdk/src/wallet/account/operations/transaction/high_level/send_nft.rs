@@ -9,8 +9,8 @@ use crate::{
     types::block::{
         address::Bech32Address,
         output::{unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
+        ConvertTo,
     },
-    utils::convert::ConvertTo,
     wallet::account::{operations::transaction::Transaction, Account, TransactionOptions},
 };
 

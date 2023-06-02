@@ -15,9 +15,9 @@ use iota_sdk::{
                 Output, OutputId, TokenId,
             },
             payload::transaction::TransactionId,
+            ConvertTo,
         },
     },
-    utils::convert::ConvertTo,
     wallet::{
         account::{types::AccountAddress, Account, OutputsToClaim, TransactionOptions},
         MintNativeTokenParams, MintNftParams, SendAmountParams, SendNativeTokensParams, SendNftParams,

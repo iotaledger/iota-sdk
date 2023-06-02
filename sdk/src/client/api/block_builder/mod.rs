@@ -24,9 +24,8 @@ use crate::{
         },
         parent::Parents,
         payload::{Payload, TaggedDataPayload},
-        Block, BlockId,
+        Block, BlockId, ConvertTo,
     },
-    utils::convert::ConvertTo,
 };
 
 /// Builder of the block API

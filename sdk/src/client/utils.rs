@@ -19,8 +19,8 @@ use crate::{
         address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
         output::{AliasId, NftId},
         payload::TaggedDataPayload,
+        ConvertTo,
     },
-    utils::convert::ConvertTo,
 };
 
 /// Transforms bech32 to hex

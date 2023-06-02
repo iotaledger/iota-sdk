@@ -19,8 +19,8 @@ use crate::{
         secret::types::InputSigningData,
         Error, Result,
     },
-    types::block::{address::Bech32Address, output::OutputWithMetadata, protocol::ProtocolParameters},
-    utils::{convert::ConvertTo, unix_timestamp_now},
+    types::block::{address::Bech32Address, output::OutputWithMetadata, protocol::ProtocolParameters, ConvertTo},
+    utils::unix_timestamp_now,
 };
 
 impl<'a> ClientBlockBuilder<'a> {

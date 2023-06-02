@@ -16,10 +16,7 @@ use packable::{
     Packable, PackableExt,
 };
 
-use crate::{
-    types::block::{address::Address, Error},
-    utils::convert::ConvertTo,
-};
+use crate::types::block::{address::Address, ConvertTo, Error};
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Hrp {
