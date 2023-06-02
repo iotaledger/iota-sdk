@@ -56,15 +56,15 @@ async fn main() -> Result<()> {
         .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // Build an NFT using `MintNftParams` and use the `mint_nfts` API
-    let nft_params = vec![MintNftParams {
-        address: Some(NFT1_OWNER_ADDRESS.parse()?),
-        sender: Some(sender_address),
-        metadata: Some(NFT1_METADATA.as_bytes().to_vec()),
-        tag: Some(NFT1_TAG.as_bytes().to_vec()),
-        issuer: Some(sender_address),
-        immutable_metadata: Some(NFT1_IMMUTABLE_METADATA.as_bytes().to_vec()),
-    }];
+    let nft_params = vec![
+        MintNftParams::new()
+            .try_with_address(NFT1_OWNER_ADDRESS)?
+            .try_with_sender(sender_address)?
+            .with_metadata(NFT1_METADATA.as_bytes().to_vec())
+            .with_tag(NFT1_TAG.as_bytes().to_vec())
+            .try_with_issuer(sender_address)?
+            .with_immutable_metadata(NFT1_IMMUTABLE_METADATA.as_bytes().to_vec()),
+    ];
 
     println!("Sending minting transaction for NFT 1...");
 

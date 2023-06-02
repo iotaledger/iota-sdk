@@ -40,10 +40,9 @@ async fn main() -> Result<()> {
             .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        let recv_address = RECV_ADDRESS.parse()?;
-        println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, recv_address);
+        println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
         // Send a transaction
-        let outputs = vec![SendAmountParams::new(recv_address, SEND_AMOUNT)];
+        let outputs = vec![SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
         let transaction = account.send_amount(outputs, None).await?;
 
         // Wait for transaction to get included

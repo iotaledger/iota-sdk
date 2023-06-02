@@ -559,15 +559,16 @@ pub async fn mint_nft_command(
     } else {
         None
     };
-    let nft_options = vec![MintNftParams {
-        issuer,
-        sender,
-        tag,
-        address,
-        immutable_metadata,
-        metadata,
-    }];
-    let transaction = account.mint_nfts(nft_options, None).await?;
+
+    let nft_options = MintNftParams::new()
+        .with_address(address)
+        .with_immutable_metadata(immutable_metadata)
+        .with_metadata(metadata)
+        .with_tag(tag)
+        .with_sender(sender)
+        .with_issuer(issuer);
+
+    let transaction = account.mint_nfts(vec![nft_options], None).await?;
 
     println_log_info!(
         "NFT minting transaction sent:\n{:?}\n{:?}",
@@ -624,7 +625,7 @@ pub async fn send_command(
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
     let outputs = vec![
-        SendAmountParams::new(address.to_bech32()?, amount)
+        SendAmountParams::new(address, amount)?
             .with_return_address(return_address.map(Bech32AddressLike::to_bech32).transpose()?)
             .with_expiration(expiration),
     ];
@@ -676,15 +677,13 @@ pub async fn send_native_token_command(
         account.send(outputs, None).await?
     } else {
         // Send native tokens with storage deposit return and expiration
-        let outputs = vec![SendNativeTokensParams {
+        let outputs = vec![SendNativeTokensParams::new(
             address,
-            native_tokens: vec![(
+            [(
                 TokenId::from_str(&token_id)?,
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
             )],
-            return_address: Default::default(),
-            expiration: Default::default(),
-        }];
+        )?];
         account.send_native_tokens(outputs, None).await?
     };
 
@@ -699,10 +698,7 @@ pub async fn send_native_token_command(
 
 // `send-nft` command
 pub async fn send_nft_command(account: &Account, address: impl Bech32AddressLike, nft_id: String) -> Result<(), Error> {
-    let outputs = vec![SendNftParams {
-        address: address.to_bech32()?,
-        nft_id: NftId::from_str(&nft_id)?,
-    }];
+    let outputs = vec![SendNftParams::new(address.to_bech32()?, &nft_id)?];
     let transaction = account.send_nft(outputs, None).await?;
 
     println_log_info!(

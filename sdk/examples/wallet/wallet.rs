@@ -53,10 +53,8 @@ async fn main() -> Result<()> {
 
     print_addresses_with_funds(&account).await?;
 
-    let recv_address = RECV_ADDRESS.parse()?;
-
-    println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, recv_address);
-    let outputs = vec![SendAmountParams::new(recv_address, SEND_AMOUNT)];
+    println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
+    let outputs = vec![SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
     let transaction = account.send_amount(outputs, None).await?;
     wait_for_inclusion(&transaction.transaction_id, &account).await?;
 

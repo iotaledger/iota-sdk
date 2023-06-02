@@ -85,7 +85,7 @@ async fn main() -> Result<()> {
         println!("Splitting funds...");
 
         let transaction = account
-            .send_amount(vec![SendAmountParams::new(recv_address, output_amount); 127], None)
+            .send_amount(vec![SendAmountParams::new(recv_address, output_amount)?; 127], None)
             .await?;
         wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
@@ -108,7 +108,7 @@ async fn main() -> Result<()> {
                 println!("Thread {n}: sending {SEND_AMOUNT} coins to own address");
 
                 let thread_timer = Instant::now();
-                let outputs = vec![SendAmountParams::new(recv_address, SEND_AMOUNT)];
+                let outputs = vec![SendAmountParams::new(recv_address, SEND_AMOUNT).map_err(|err| (n, err))?];
                 let transaction = account_clone.send_amount(outputs, None).await.map_err(|err| (n, err))?;
                 let elapsed = thread_timer.elapsed();
 

@@ -55,12 +55,10 @@ async fn main() -> Result<()> {
 
         let bech32_address = RECV_ADDRESS.parse::<Bech32Address>()?;
 
-        let outputs = vec![SendNativeTokensParams {
-            address: bech32_address,
-            native_tokens: vec![(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))],
-            return_address: None,
-            expiration: None,
-        }];
+        let outputs = vec![SendNativeTokensParams::new(
+            bech32_address,
+            [(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))],
+        )?];
 
         println!(
             "Sending '{}' native tokens to '{}'...",
