@@ -3,6 +3,7 @@
 **/target
 *.pyc
 **/*.rs.bk
+yarn.lock
 
 # IDE files
 .vscode
