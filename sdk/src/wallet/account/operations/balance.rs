@@ -19,6 +19,16 @@ use crate::{
 };
 
 impl Account {
+    /// Get the balance of the account.
+    pub async fn balance(&self) -> crate::wallet::Result<Balance> {
+        log::debug!("[BALANCE] balance");
+
+        let account_details = self.details().await;
+
+        self.balance_inner(account_details.addresses_with_unspent_outputs.iter(), &account_details)
+            .await
+    }
+
     /// Get the balance of the given addresses.
     pub async fn addresses_balance(&self, addresses: Vec<impl Bech32AddressLike>) -> Result<Balance> {
         log::debug!("[BALANCE] addresses_balance");
@@ -42,16 +52,6 @@ impl Account {
             .collect::<Result<Vec<&_>>>()?;
 
         self.balance_inner(addresses_with_unspent_outputs.into_iter(), &account_details)
-            .await
-    }
-
-    /// Get the balance of the account.
-    pub async fn balance(&self) -> crate::wallet::Result<Balance> {
-        log::debug!("[BALANCE] balance");
-
-        let account_details = self.details().await;
-
-        self.balance_inner(account_details.addresses_with_unspent_outputs.iter(), &account_details)
             .await
     }
 
