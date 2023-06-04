@@ -3,7 +3,7 @@
 
 import { SendNftParams, Wallet } from '@iota/sdk';
 
-// The address to send the tokens to
+// The address to send the NFT to
 const RECV_ADDRESS =
     'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu';
 
