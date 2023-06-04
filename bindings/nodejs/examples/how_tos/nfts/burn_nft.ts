@@ -43,7 +43,7 @@ async function run() {
 
         console.log(`Balance BEFORE burning:\n`, balance);
 
-        // Burn a native token
+        // Burn an NFT
         const transaction = await account
             .prepareBurnNft(nftId)
             .then((prepared) => prepared.send());
