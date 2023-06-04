@@ -11,7 +11,7 @@ import {
 // running the `how_tos/accounts-and-addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./wallet/14-burn-nft.ts
+// yarn run-example ./how_tos/nfts/burn_nft.ts
 async function run() {
     try {
         if (!process.env.STRONGHOLD_PASSWORD) {
