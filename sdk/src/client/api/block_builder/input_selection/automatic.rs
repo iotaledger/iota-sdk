@@ -19,7 +19,7 @@ use crate::{
         secret::types::InputSigningData,
         Error, Result,
     },
-    types::block::{address::Bech32AddressLike, output::OutputWithMetadata, protocol::ProtocolParameters},
+    types::block::{address::Bech32Address, output::OutputWithMetadata, protocol::ProtocolParameters, ConvertTo},
     utils::unix_timestamp_now,
 };
 
@@ -27,9 +27,9 @@ impl<'a> ClientBlockBuilder<'a> {
     // Get basic outputs for an address without storage deposit return unlock condition
     pub(crate) async fn basic_address_outputs(
         &self,
-        address: impl Bech32AddressLike,
+        address: impl ConvertTo<Bech32Address>,
     ) -> Result<Vec<OutputWithMetadata>> {
-        let address = address.to_bech32()?;
+        let address = address.convert()?;
         let mut output_ids = Vec::new();
 
         // First request to get all basic outputs that can directly be unlocked by the address.

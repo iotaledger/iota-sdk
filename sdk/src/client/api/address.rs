@@ -12,7 +12,10 @@ use crate::{
         secret::{GenerateAddressOptions, SecretManage, SecretManager},
         Client, Result,
     },
-    types::block::address::{Address, Bech32Address, Hrp, HrpLike, ToBech32Ext},
+    types::block::{
+        address::{Address, Bech32Address, Hrp, ToBech32Ext},
+        ConvertTo,
+    },
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -61,8 +64,8 @@ impl GetAddressesOptions {
     }
 
     /// Set bech32 human readable part (hrp) from something that might be valid
-    pub fn try_with_bech32_hrp(mut self, bech32_hrp: impl HrpLike) -> Result<Self> {
-        self.bech32_hrp = bech32_hrp.to_hrp()?;
+    pub fn try_with_bech32_hrp(mut self, bech32_hrp: impl ConvertTo<Hrp>) -> Result<Self> {
+        self.bech32_hrp = bech32_hrp.convert()?;
         Ok(self)
     }
 

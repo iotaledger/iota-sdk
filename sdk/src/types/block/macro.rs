@@ -65,6 +65,18 @@ macro_rules! impl_id {
             }
         }
 
+        impl $crate::types::block::ConvertTo<$name> for &alloc::string::String {
+            fn convert(self) -> Result<$name, $crate::types::block::Error> {
+                self.try_into()
+            }
+        }
+
+        impl $crate::types::block::ConvertTo<$name> for &str {
+            fn convert(self) -> Result<$name, $crate::types::block::Error> {
+                self.try_into()
+            }
+        }
+
         impl core::fmt::Display for $name {
             fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                 write!(f, "{}", prefix_hex::encode(self.0))
