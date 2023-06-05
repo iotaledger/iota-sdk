@@ -209,7 +209,7 @@ impl TryFrom<&SecretManagerDto> for SecretManager {
             SecretManagerDto::LedgerNano(is_simulator) => Self::LedgerNano(LedgerSecretManager::new(*is_simulator)),
 
             SecretManagerDto::Mnemonic(mnemonic) => {
-                // `SecretManagerDto` is `SeroizeOnDrop` so it will take care of the original.
+                // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
                 Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.clone())?)
             }
 

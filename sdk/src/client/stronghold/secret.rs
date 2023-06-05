@@ -373,7 +373,7 @@ impl StrongholdAdapter {
     pub async fn store_mnemonic(&self, mnemonic: impl MnemonicLike) -> Result<(), Error> {
         let mnemonic = match mnemonic.to_mnemonic() {
             Err(err) => {
-                // FIXME (dedicated PR): make errors consistent and compatible
+                // TODO: make errors consistent and compatible (dedicated PR)
                 if let crate::client::error::Error::InvalidMnemonic(s) = err {
                     return Err(Error::InvalidMnemonic(s));
                 } else {

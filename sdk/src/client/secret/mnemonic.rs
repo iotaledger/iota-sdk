@@ -300,4 +300,11 @@ mod tests {
             .is_err()
         );
     }
+
+    #[test]
+    fn zeroize_mnemonic() {
+        let mut mnemonic1 = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally".to_owned().to_mnemonic().unwrap();
+        mnemonic1.zeroize();
+        assert!(mnemonic1.as_str().is_empty());
+    }
 }
