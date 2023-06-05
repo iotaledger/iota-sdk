@@ -11,7 +11,7 @@ use futures::FutureExt;
 use crate::types::api::plugins::indexer::OutputIdsResponse;
 use crate::{
     client::node_api::indexer::query_parameters::QueryParameter,
-    types::block::{address::Bech32AddressLike, output::OutputId},
+    types::block::{address::Bech32Address, output::OutputId, ConvertTo},
     wallet::Account,
 };
 
@@ -19,9 +19,9 @@ impl Account {
     /// Returns output ids of nft outputs that have the address in any unlock condition
     pub(crate) async fn get_nft_output_ids_with_any_unlock_condition(
         &self,
-        bech32_address: impl Bech32AddressLike,
+        bech32_address: impl ConvertTo<Bech32Address>,
     ) -> crate::wallet::Result<Vec<OutputId>> {
-        let bech32_address = bech32_address.to_bech32()?;
+        let bech32_address = bech32_address.convert()?;
         #[cfg(target_family = "wasm")]
         {
             let mut output_ids = Vec::new();
