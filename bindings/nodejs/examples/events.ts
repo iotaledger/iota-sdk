@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
+    Event,
     Wallet,
     CoinType,
     initLogger,
@@ -42,10 +43,8 @@ async function run() {
 
         const wallet = new Wallet(walletOptions);
 
-        const callback = function (err: any, data: string) {
-            // don't know if something like this could make sense
-            // const walletEvent: typeof WalletEvent = JSON.parse(data);
-            console.log('data:', JSON.parse(data));
+        const callback = function (err: any, event: Event) {
+            console.log('AccountIndex:', event.getAccountIndex(), ', Event:', event.getEvent());
         };
 
         await wallet.listen([], callback);

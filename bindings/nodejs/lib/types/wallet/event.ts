@@ -9,6 +9,30 @@ import { IInputSigningData, IRemainder } from '../client';
 
 export type TransactionId = string;
 
+class Event {
+    private accountIndex: number;
+    private event: WalletEvent;
+
+    constructor(accountIndex: number, event: WalletEvent) {
+        this.accountIndex = accountIndex;
+        this.event = event;
+    }
+
+    /**
+     * The account index for which the event was emitted.
+     */
+    getAccountIndex(): number {
+        return this.accountIndex;
+    }
+
+    /**
+     * The wallet event.
+     */
+    getEvent(): WalletEvent {
+        return this.event;
+    }
+}
+
 /**
  * All of the wallet event types.
  */
@@ -248,6 +272,7 @@ class BroadcastingProgress extends TransactionProgress {
 }
 
 export {
+    Event,
     WalletEventType,
     WalletEvent,
     ConsolidationRequiredWalletEvent,

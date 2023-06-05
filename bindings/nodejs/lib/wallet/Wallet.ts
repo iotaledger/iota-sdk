@@ -12,6 +12,7 @@ import type {
     GenerateAddressOptions,
     SyncOptions,
     WalletEvent,
+    Event,
 } from '../types/wallet';
 import { IAuth, IClientOptions, LedgerNanoStatus } from '../types/client';
 import { Client } from '../client';
@@ -189,7 +190,7 @@ export class Wallet {
      */
     async listen(
         eventTypes: WalletEventType[],
-        callback: (error: Error, result: string) => void,
+        callback: (error: Error, event: Event) => void,
     ): Promise<void> {
         return this.methodHandler.listen(eventTypes, callback);
     }
