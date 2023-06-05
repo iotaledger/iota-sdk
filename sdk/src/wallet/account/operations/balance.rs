@@ -39,7 +39,7 @@ impl Account {
         let addresses_with_unspent_outputs = addresses
             .into_iter()
             .map(|address| {
-                address.convert().map_err(|e| Error::from(e)).and_then(|address| {
+                address.convert().map_err(Error::from).and_then(|address| {
                     account_details
                         .addresses_with_unspent_outputs
                         .iter()
