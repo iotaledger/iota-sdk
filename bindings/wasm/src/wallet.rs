@@ -94,8 +94,8 @@ pub async fn listen_wallet(
     for event_type in vec.keys() {
         // We know the built-in iterator for set elements won't throw
         // exceptions, so just unwrap the element.
-        let event_type = event_type.unwrap().as_string().unwrap();
-        let wallet_event_type = WalletEventType::try_from(event_type.as_str()).map_err(JsValue::from)?;
+        let event_type = event_type.unwrap().as_f64().unwrap() as u8;
+        let wallet_event_type = WalletEventType::try_from(event_type).map_err(JsValue::from)?;
         event_types.push(wallet_event_type);
     }
 

@@ -9,11 +9,12 @@ import {
     getClientFromWallet,
 } from '../bindings';
 import type {
-    EventType,
+    WalletEventType,
     WalletOptions,
     __Method__,
     __AccountMethod__,
     AccountId,
+    Event,
 } from '../types/wallet';
 import { Client } from '../client';
 
@@ -71,8 +72,8 @@ export class WalletMethodHandler {
     }
 
     async listen(
-        eventTypes: EventType[],
-        callback: (error: Error, result: string) => void,
+        eventTypes: WalletEventType[],
+        callback: (error: Error, event: Event) => void,
     ): Promise<void> {
         return listenWalletAsync(eventTypes, callback, this.methodHandler);
     }
