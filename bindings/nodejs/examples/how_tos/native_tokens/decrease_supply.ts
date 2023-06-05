@@ -39,7 +39,7 @@ async function run() {
         }
 
         // TODO Convert to int
-        console.log(`Balance before melting: `, token.available);
+        console.log(`Balance before melting:`, token.available);
 
         // Melt some of the circulating supply
         const transaction = await account
@@ -62,7 +62,7 @@ async function run() {
             (nativeToken) => nativeToken.tokenId == tokenId,
         );
         // TODO Convert to int
-        console.log(`Balance after melting:  `, token?.available);
+        console.log(`Balance after melting:`, token?.available);
     } catch (error) {
         console.log('Error: ', error);
     }

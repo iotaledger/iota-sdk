@@ -26,16 +26,17 @@ async fn main() -> Result<()> {
     let account = wallet.get_account("Alice").await?;
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
-    println!("Balance before melting:\n{balance:?}",);
 
     // Set the stronghold password
     wallet
         .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // Replace with a TokenId that is available in the account, the foundry output which minted it, also needs to be
-    // available.
-    let token_id = TokenId::from_str("0x089dc1b964591b15819ef1912fab48c001fed4558b37766dfa5daa512495d5b25a0100000000")?;
+    // Find first foundry and corresponding token id
+    let token_id = TokenId::from(*balance.foundries().first().unwrap());
+
+    let available_balance = balance.native_tokens().iter().find(|t| t.token_id() == &token_id).unwrap().available();
+    println!("Balance before minting: {available_balance}",);
 
     // Mint some more native tokens
     let mint_amount = U256::from(10);
@@ -55,8 +56,8 @@ async fn main() -> Result<()> {
     );
 
     let balance = account.sync(None).await?;
-
-    println!("Balance after minting:\n{balance:?}",);
+    let available_balance = balance.native_tokens().iter().find(|t| t.token_id() == &token_id).unwrap().available();
+    println!("Balance after minting: {available_balance:?}",);
 
     Ok(())
 }
