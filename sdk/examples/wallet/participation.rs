@@ -45,8 +45,6 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
-        // TODO: is this needed?
-        // .with_client_options(ClientOptions::new().with_ignore_node_health())
         .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;

@@ -31,7 +31,7 @@ const NUM_ROUNDS: usize = 1000;
 // The amount to send in each transaction
 const SEND_AMOUNT: u64 = 1_000_000;
 // The number of simultaneous transactions
-const NUM_SIMULTANEOUS_TXS: usize = 64;
+const NUM_SIMULTANEOUS_TXS: usize = 16;
 
 #[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<()> {
@@ -43,12 +43,11 @@ async fn main() -> Result<()> {
     println!("Spammer set up to issue {num_simultaneous_txs} transactions simultaneously.");
 
     // Restore wallet from a mnemonic phrase.
-    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(&var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
-        // .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
@@ -58,40 +57,34 @@ async fn main() -> Result<()> {
     let recv_address = *account.addresses().await?[0].address();
 
     // Ensure there are enough available funds for spamming.
-    let available_funds = ensure_enough_funds(&account, &recv_address, num_simultaneous_txs).await?;
-    account.sync(None).await?;
+    ensure_enough_funds(&account, &recv_address).await?;
 
-    let split_amount = available_funds / 2;
-    let output_amount = split_amount / 127u64;
-
-    println!("Consolidating outputs...");
-    if let Ok(transaction) = account.consolidate_outputs(false, Some(127)).await {
-        wait_for_inclusion(&transaction.transaction_id, &account).await?;
-
-        account.sync(None).await?;
-    } else {
-        println!("not necessary");
-    }
-
-    let num_unspent_basic_outputs = account
+    // We make sure that for all threads there are always inputs available to
+    // fund the transaction, otherwise we create enough unspent outputs.
+    let num_unspent_basic_outputs_with_send_amount = account
         .unspent_outputs(FilterOptions {
             output_types: Some(vec![3]),
             ..Default::default()
         })
         .await?
-        .len();
+        .iter()
+        .filter(|data| data.output.amount() >= SEND_AMOUNT)
+        .count();
 
-    if num_unspent_basic_outputs < 127 {
-        println!("Splitting funds...");
+    println!("Num unspent basic output holding >={SEND_AMOUNT}: {num_unspent_basic_outputs_with_send_amount}");
+
+    if num_unspent_basic_outputs_with_send_amount < 127 {
+        println!("Creating unspent outputs...");
 
         let transaction = account
-            .send_amount(vec![SendAmountParams::new(recv_address, output_amount)?; 127], None)
+            .send_amount(
+                vec![SendAmountParams::new(recv_address, SEND_AMOUNT)?; 127],
+                None,
+            )
             .await?;
         wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
         account.sync(None).await?;
-    } else {
-        println!("Splitting funds not necessary");
     }
 
     println!("Spamming transactions...");
@@ -134,11 +127,6 @@ async fn main() -> Result<()> {
             }
         }
 
-        println!(
-            "==> BPS (issued): {:.2}",
-            sent_transactions as f64 / round_timer.elapsed().as_secs_f64()
-        );
-
         if error_state.is_err() {
             // Sync when getting an error, because that's probably when no outputs are available anymore
             let mut balance = account.sync(None).await?;
@@ -153,7 +141,7 @@ async fn main() -> Result<()> {
         }
 
         println!(
-            "==> BPS (actual): {:.2}",
+            "==> BPS: {:.2}",
             sent_transactions as f64 / round_timer.elapsed().as_secs_f64()
         );
     }
@@ -169,17 +157,13 @@ async fn get_or_create_account(wallet: &Wallet, alias: &str) -> Result<Account> 
     })
 }
 
-async fn ensure_enough_funds(
-    account: &Account,
-    bech32_address: &Bech32Address,
-    num_simultaneous_txs: usize,
-) -> Result<u64> {
+async fn ensure_enough_funds(account: &Account, bech32_address: &Bech32Address) -> Result<()> {
     let balance = account.sync(None).await?;
-    let available_funds_before = balance.base_coin().available();
-    println!("Current available funds: {available_funds_before}");
-
-    let min_required_funds = available_funds_before / 2 / num_simultaneous_txs as u64;
-    if min_required_funds < SEND_AMOUNT {
+    let available_funds = balance.base_coin().available();
+    println!("Available funds: {available_funds}");
+    let min_required_funds = (1.1f64 * (127u64 * SEND_AMOUNT) as f64) as u64;
+    println!("Min required funds: {min_required_funds}");
+    if available_funds < min_required_funds {
         println!("Requesting funds from faucet...");
         let faucet_response = request_funds_from_faucet(&var("FAUCET_URL").unwrap(), bech32_address).await?;
         println!("Response from faucet: {}", faucet_response.trim_end());
@@ -190,23 +174,27 @@ async fn ensure_enough_funds(
         println!("Waiting for funds (timeout=60s)...");
         // Check for changes to the balance
         let start = std::time::Instant::now();
-        let available_funds_after = loop {
+        let new_available_funds = loop {
             if start.elapsed().as_secs() > 60 {
                 panic!("Requesting funds failed (timeout)");
             };
             let balance = account.sync(None).await?;
             let available_funds_after = balance.base_coin().available();
-            if available_funds_after > available_funds_before {
+            if available_funds_after > available_funds {
                 break available_funds_after;
             } else {
                 tokio::time::sleep(instant::Duration::from_secs(2)).await;
             }
         };
-        println!("New available funds: {available_funds_after}");
-        Ok(available_funds_after)
+        println!("New available funds: {new_available_funds}");
+        if new_available_funds < min_required_funds {
+            panic!("insufficient funds: pick a smaller SEND_AMOUNT");
+        } else {
+            Ok(())
+        }
     } else {
         println!("No faucet request necessary");
-        Ok(available_funds_before)
+        Ok(())
     }
 }
 
