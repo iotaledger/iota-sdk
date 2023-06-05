@@ -32,7 +32,7 @@ fn essence_kind() {
     );
     let essence = TransactionEssence::Regular(
         RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-            .with_inputs(vec![input1, input2])
+            .with_inputs([input1, input2])
             .add_output(output)
             .finish(&protocol_parameters)
             .unwrap(),
@@ -44,7 +44,7 @@ fn essence_kind() {
 #[test]
 fn essence_unpack_invalid_kind() {
     assert!(matches!(
-        TransactionEssence::unpack_verified(vec![2u8; 32].as_slice(), &protocol_parameters()),
+        TransactionEssence::unpack_verified([2u8; 32], &protocol_parameters()),
         Err(UnpackError::Packable(Error::InvalidEssenceKind(2)))
     ));
 }

@@ -370,7 +370,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::FoundryOutputId { foundry_id } => Response::OutputId(client.foundry_output_id(foundry_id).await?),
         ClientMethod::GetOutputs { output_ids } => {
             let outputs_response = client
-                .get_outputs(output_ids)
+                .get_outputs(&output_ids)
                 .await?
                 .iter()
                 .map(OutputWithMetadataResponse::from)
@@ -379,7 +379,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::GetOutputsIgnoreErrors { output_ids } => {
             let outputs_response = client
-                .get_outputs_ignore_errors(output_ids)
+                .get_outputs_ignore_errors(&output_ids)
                 .await?
                 .iter()
                 .map(OutputWithMetadataResponse::from)

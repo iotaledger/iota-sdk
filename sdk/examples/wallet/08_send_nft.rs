@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
             .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        let outputs = vec![SendNftParams::new(RECV_ADDRESS, *nft_id)?];
+        let outputs = [SendNftParams::new(RECV_ADDRESS, *nft_id)?];
 
         println!("Sending NFT '{}' to '{}'...", nft_id, RECV_ADDRESS);
 

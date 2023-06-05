@@ -56,15 +56,13 @@ async fn main() -> Result<()> {
         .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let nft_params = vec![
-        MintNftParams::new()
-            .try_with_address(NFT1_OWNER_ADDRESS)?
-            .try_with_sender(sender_address)?
-            .with_metadata(NFT1_METADATA.as_bytes().to_vec())
-            .with_tag(NFT1_TAG.as_bytes().to_vec())
-            .try_with_issuer(sender_address)?
-            .with_immutable_metadata(NFT1_IMMUTABLE_METADATA.as_bytes().to_vec()),
-    ];
+    let nft_params = [MintNftParams::new()
+        .try_with_address(NFT1_OWNER_ADDRESS)?
+        .try_with_sender(sender_address)?
+        .with_metadata(NFT1_METADATA.as_bytes().to_vec())
+        .with_tag(NFT1_TAG.as_bytes().to_vec())
+        .try_with_issuer(sender_address)?
+        .with_immutable_metadata(NFT1_IMMUTABLE_METADATA.as_bytes().to_vec())];
 
     println!("Sending minting transaction for NFT 1...");
 
@@ -84,12 +82,12 @@ async fn main() -> Result<()> {
 
     // Build an NFT manually by using the `NftOutputBuilder`
     let token_supply = account.client().get_token_supply().await?;
-    let outputs = vec![
+    let outputs = [
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(NFT2_AMOUNT, NftId::null())
-            .add_unlock_condition(AddressUnlockCondition::new(*sender_address.as_ref()))
-            .add_feature(SenderFeature::new(*sender_address.as_ref()))
-            .add_immutable_feature(IssuerFeature::new(*sender_address.as_ref()))
+            .add_unlock_condition(AddressUnlockCondition::new(sender_address))
+            .add_feature(SenderFeature::new(sender_address))
+            .add_immutable_feature(IssuerFeature::new(sender_address))
             .finish_output(token_supply)?,
     ];
 

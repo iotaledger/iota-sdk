@@ -44,10 +44,10 @@ async fn main() -> Result<()> {
     // Get the alias output by its alias id
     let alias_id = AliasId::from_str(ALIAS_ID)?;
     if let Some(alias_output_data) = account
-        .unspent_outputs(Some(FilterOptions {
+        .unspent_outputs(FilterOptions {
             output_types: Some(vec![AliasOutput::KIND]),
             ..Default::default()
-        }))
+        })
         .await?
         .into_iter()
         .find_map(|output_data| match &output_data.output {

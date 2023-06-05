@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
 
         println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
         // Send a transaction
-        let outputs = vec![SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
+        let outputs = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
         let transaction = account.send_amount(outputs, None).await?;
 
         // Wait for transaction to get included

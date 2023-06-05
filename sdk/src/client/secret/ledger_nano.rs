@@ -10,7 +10,7 @@ use std::{collections::HashMap, ops::Range};
 use async_trait::async_trait;
 use crypto::{
     keys::slip10::{Chain, Segment},
-    signatures::secp256k1_ecdsa::EvmAddress,
+    signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
 use iota_ledger_nano::{
     get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index, Packable as LedgerNanoPackable,
@@ -162,11 +162,7 @@ impl SecretManage for LedgerSecretManager {
 
         drop(lock);
 
-        let mut ed25519_addresses = Vec::new();
-        for address in addresses {
-            ed25519_addresses.push(Ed25519Address::new(address));
-        }
-        Ok(ed25519_addresses)
+        Ok(addresses.into_iter().map(Ed25519Address::new).collect())
     }
 
     async fn generate_evm_addresses(
@@ -180,6 +176,14 @@ impl SecretManage for LedgerSecretManager {
     }
 
     async fn sign_ed25519(&self, _msg: &[u8], _chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
+        Err(Error::UnsupportedOperation)
+    }
+
+    async fn sign_evm(
+        &self,
+        _msg: &[u8],
+        _chain: &Chain,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
         Err(Error::UnsupportedOperation)
     }
 }
@@ -477,7 +481,7 @@ fn merge_unlocks(
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
         let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
-        let alias_transition = is_alias_transition(input, regular.outputs()).map(|t| t.0);
+        let alias_transition = is_alias_transition(&input.output, *input.output_id(), regular.outputs(), None);
         let (input_address, _) =
             input
                 .output

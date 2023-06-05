@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
         .await?;
 
     wallet
-        .listen(vec![], move |event| {
+        .listen([], move |event| {
             println!("RECEIVED AN EVENT:\n{:?}", event.event);
         })
         .await;
@@ -65,11 +65,9 @@ async fn main() -> Result<()> {
     println!("Balance BEFORE:\n{:#?}", balance.base_coin());
 
     // send transaction
-    let outputs = vec![
-        BasicOutputBuilder::new_with_amount(SEND_AMOUNT)
-            .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(RECV_ADDRESS)?))
-            .finish_output(account.client().get_token_supply().await?)?,
-    ];
+    let outputs = [BasicOutputBuilder::new_with_amount(SEND_AMOUNT)
+        .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(RECV_ADDRESS)?))
+        .finish_output(account.client().get_token_supply().await?)?];
 
     let transaction = account.send(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);

@@ -16,7 +16,7 @@ use iota_sdk::{
         request_funds_from_faucet,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::{address::Bech32Address, payload::transaction::TransactionId},
+    types::block::{address::Bech32Address, output::BasicOutput, payload::transaction::TransactionId},
     wallet::{account::FilterOptions, Account, ClientOptions, Result, SendAmountParams, Wallet},
 };
 use tokio::{
@@ -63,7 +63,7 @@ async fn main() -> Result<()> {
     // fund the transaction, otherwise we create enough unspent outputs.
     let num_unspent_basic_outputs_with_send_amount = account
         .unspent_outputs(FilterOptions {
-            output_types: Some(vec![3]),
+            output_types: Some(vec![BasicOutput::KIND]),
             ..Default::default()
         })
         .await?
@@ -77,10 +77,7 @@ async fn main() -> Result<()> {
         println!("Creating unspent outputs...");
 
         let transaction = account
-            .send_amount(
-                vec![SendAmountParams::new(recv_address, SEND_AMOUNT)?; 127],
-                None,
-            )
+            .send_amount(vec![SendAmountParams::new(recv_address, SEND_AMOUNT)?; 127], None)
             .await?;
         wait_for_inclusion(&transaction.transaction_id, &account).await?;
 

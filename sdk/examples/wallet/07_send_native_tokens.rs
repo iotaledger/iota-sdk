@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
 
         let bech32_address = RECV_ADDRESS.parse::<Bech32Address>()?;
 
-        let outputs = vec![SendNativeTokensParams::new(
+        let outputs = [SendNativeTokensParams::new(
             bech32_address,
             [(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))],
         )?];
@@ -86,12 +86,10 @@ async fn main() -> Result<()> {
         // Send native tokens together with the required storage deposit
         let rent_structure = account.client().get_rent_structure().await?;
 
-        let outputs = vec![
-            BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                .add_unlock_condition(AddressUnlockCondition::new(bech32_address))
-                .with_native_tokens(vec![NativeToken::new(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))?])
-                .finish_output(account.client().get_token_supply().await?)?,
-        ];
+        let outputs = [BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+            .add_unlock_condition(AddressUnlockCondition::new(bech32_address))
+            .with_native_tokens([NativeToken::new(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))?])
+            .finish_output(account.client().get_token_supply().await?)?];
 
         let transaction = account.send(outputs, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);

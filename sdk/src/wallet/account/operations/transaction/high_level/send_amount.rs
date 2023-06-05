@@ -7,13 +7,14 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::api::PreparedTransactionData,
     types::block::{
-        address::{Bech32Address, Bech32AddressLike},
+        address::Bech32Address,
         output::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
             },
             BasicOutputBuilder,
         },
+        ConvertTo,
     },
     wallet::{
         account::{
@@ -50,17 +51,20 @@ pub struct SendAmountParams {
 }
 
 impl SendAmountParams {
-    pub fn new(address: impl Bech32AddressLike, amount: u64) -> Result<Self, crate::wallet::Error> {
+    pub fn new(address: impl ConvertTo<Bech32Address>, amount: u64) -> Result<Self, crate::wallet::Error> {
         Ok(Self {
-            address: address.to_bech32()?,
+            address: address.convert()?,
             amount,
             return_address: None,
             expiration: None,
         })
     }
 
-    pub fn try_with_return_address(mut self, address: impl Bech32AddressLike) -> Result<Self, crate::wallet::Error> {
-        self.return_address = Some(address.to_bech32()?);
+    pub fn try_with_return_address(
+        mut self,
+        address: impl ConvertTo<Bech32Address>,
+    ) -> Result<Self, crate::wallet::Error> {
+        self.return_address = Some(address.convert()?);
         Ok(self)
     }
 
@@ -81,7 +85,7 @@ impl Account {
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
-    /// let outputs = vec![SendAmountParams::new(
+    /// let outputs = [SendAmountParams::new(
     ///     "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
     ///     1_000_000)?
     /// ];
@@ -92,22 +96,28 @@ impl Account {
     ///     println!("Block sent: {}", block_id);
     /// }
     /// ```
-    pub async fn send_amount(
+    pub async fn send_amount<I: IntoIterator<Item = SendAmountParams> + Send>(
         &self,
-        params: Vec<SendAmountParams>,
+        params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<Transaction>
+    where
+        I::IntoIter: Send,
+    {
         let prepared_transaction = self.prepare_send_amount(params, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
 
     /// Function to prepare the transaction for
     /// [Account.send_amount()](crate::account::Account.send_amount)
-    pub async fn prepare_send_amount(
+    pub async fn prepare_send_amount<I: IntoIterator<Item = SendAmountParams> + Send>(
         &self,
-        params: Vec<SendAmountParams>,
+        params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> crate::wallet::Result<PreparedTransactionData>
+    where
+        I::IntoIter: Send,
+    {
         log::debug!("[TRANSACTION] prepare_send_amount");
         let options = options.into();
         let rent_structure = self.client().get_rent_structure().await?;

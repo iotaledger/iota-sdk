@@ -8,13 +8,14 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::api::PreparedTransactionData,
     types::block::{
-        address::{Bech32Address, Bech32AddressLike},
+        address::Bech32Address,
         output::{
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
             },
             BasicOutputBuilder, NativeToken, TokenId,
         },
+        ConvertTo,
     },
     wallet::{
         account::{
@@ -51,11 +52,11 @@ pub struct SendNativeTokensParams {
 impl SendNativeTokensParams {
     /// Creates a new instance of [`SendNativeTokensParams`]
     pub fn new(
-        address: impl Bech32AddressLike,
+        address: impl ConvertTo<Bech32Address>,
         native_tokens: impl IntoIterator<Item = (TokenId, U256)>,
     ) -> Result<Self> {
         Ok(Self {
-            address: address.to_bech32()?,
+            address: address.convert()?,
             native_tokens: native_tokens.into_iter().collect(),
             return_address: None,
             expiration: None,
@@ -63,8 +64,8 @@ impl SendNativeTokensParams {
     }
 
     /// Set the return address and try convert to [`Bech32Address`]
-    pub fn try_with_return_address(mut self, return_address: impl Bech32AddressLike) -> Result<Self> {
-        self.return_address = Some(return_address.to_bech32()?);
+    pub fn try_with_return_address(mut self, return_address: impl ConvertTo<Bech32Address>) -> Result<Self> {
+        self.return_address = Some(return_address.convert()?);
         Ok(self)
     }
 
@@ -89,7 +90,7 @@ impl Account {
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
-    /// let outputs = vec![SendNativeTokensParams {
+    /// let outputs = [SendNativeTokensParams {
     ///     address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
     ///     native_tokens: vec![(
     ///         TokenId::from_str("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?,
@@ -104,22 +105,28 @@ impl Account {
     ///     println!("Block sent: {}", block_id);
     /// }
     /// ```
-    pub async fn send_native_tokens(
+    pub async fn send_native_tokens<I: IntoIterator<Item = SendNativeTokensParams> + Send>(
         &self,
-        params: Vec<SendNativeTokensParams>,
+        params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<Transaction>
+    where
+        I::IntoIter: Send,
+    {
         let prepared_transaction = self.prepare_send_native_tokens(params, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
 
     /// Function to prepare the transaction for
     /// [Account.send_native_tokens()](crate::account::Account.send_native_tokens)
-    pub async fn prepare_send_native_tokens(
+    pub async fn prepare_send_native_tokens<I: IntoIterator<Item = SendNativeTokensParams> + Send>(
         &self,
-        params: Vec<SendNativeTokensParams>,
+        params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> crate::wallet::Result<PreparedTransactionData>
+    where
+        I::IntoIter: Send,
+    {
         log::debug!("[TRANSACTION] prepare_send_native_tokens");
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;

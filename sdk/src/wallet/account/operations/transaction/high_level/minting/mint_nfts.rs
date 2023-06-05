@@ -7,13 +7,13 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::api::PreparedTransactionData,
     types::block::{
-        address::{Bech32Address, Bech32AddressLike},
+        address::Bech32Address,
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
         },
-        Error as BlockError,
+        ConvertTo, Error as BlockError,
     },
     wallet::{
         account::{operations::transaction::Transaction, Account, TransactionOptions},
@@ -52,8 +52,8 @@ impl MintNftParams {
     }
 
     /// Set the address and try convert to [`Bech32Address`]
-    pub fn try_with_address(mut self, address: impl Bech32AddressLike) -> crate::wallet::Result<Self> {
-        self.address = Some(address.to_bech32()?);
+    pub fn try_with_address(mut self, address: impl ConvertTo<Bech32Address>) -> crate::wallet::Result<Self> {
+        self.address = Some(address.convert()?);
         Ok(self)
     }
 
@@ -64,8 +64,8 @@ impl MintNftParams {
     }
 
     /// Set the sender address and try convert to [`Bech32Address`]
-    pub fn try_with_sender(mut self, sender: impl Bech32AddressLike) -> crate::wallet::Result<Self> {
-        self.sender = Some(sender.to_bech32()?);
+    pub fn try_with_sender(mut self, sender: impl ConvertTo<Bech32Address>) -> crate::wallet::Result<Self> {
+        self.sender = Some(sender.convert()?);
         Ok(self)
     }
 
@@ -88,8 +88,8 @@ impl MintNftParams {
     }
 
     /// Set the issuer address and try convert to [`Bech32Address`]
-    pub fn try_with_issuer(mut self, issuer: impl Bech32AddressLike) -> crate::wallet::Result<Self> {
-        self.issuer = Some(issuer.to_bech32()?);
+    pub fn try_with_issuer(mut self, issuer: impl ConvertTo<Bech32Address>) -> crate::wallet::Result<Self> {
+        self.issuer = Some(issuer.convert()?);
         Ok(self)
     }
 
@@ -161,7 +161,7 @@ impl Account {
     ///     prefix_hex::decode("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?
     ///         .try_into()
     ///         .unwrap();
-    /// let params = vec![MintNftParams::new()
+    /// let params = [MintNftParams::new()
     ///     try_with_address("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?
     ///     with_metadata(b"some nft metadata".to_vec())
     ///     with_immutable_metadata(b"some immutable nft metadata".to_vec())
@@ -174,22 +174,28 @@ impl Account {
     ///     transaction.transaction_id,
     /// );
     /// ```
-    pub async fn mint_nfts(
+    pub async fn mint_nfts<I: IntoIterator<Item = MintNftParams> + Send>(
         &self,
-        params: Vec<MintNftParams>,
+        params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<Transaction>
+    where
+        I::IntoIter: Send,
+    {
         let prepared_transaction = self.prepare_mint_nfts(params, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
 
     /// Function to prepare the transaction for
     /// [Account.mint_nfts()](crate::account::Account.mint_nfts)
-    pub async fn prepare_mint_nfts(
+    pub async fn prepare_mint_nfts<I: IntoIterator<Item = MintNftParams> + Send>(
         &self,
-        params: Vec<MintNftParams>,
+        params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> crate::wallet::Result<PreparedTransactionData>
+    where
+        I::IntoIter: Send,
+    {
         log::debug!("[TRANSACTION] prepare_mint_nfts");
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;

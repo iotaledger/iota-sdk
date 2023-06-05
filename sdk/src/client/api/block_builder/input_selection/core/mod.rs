@@ -64,7 +64,8 @@ pub struct Selected {
 
 impl InputSelection {
     fn required_alias_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
-        let alias_transition = is_alias_transition(input, &self.outputs).map(|transition| transition.0);
+        let alias_transition =
+            is_alias_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref());
         let required_address = input
             .output
             .required_and_unlocked_address(self.timestamp, input.output_id(), alias_transition)?
@@ -164,11 +165,12 @@ impl InputSelection {
 
     /// Creates a new [`InputSelection`].
     pub fn new(
-        available_inputs: Vec<InputSigningData>,
-        outputs: Vec<Output>,
-        addresses: Vec<Address>,
+        available_inputs: impl Into<Vec<InputSigningData>>,
+        outputs: impl Into<Vec<Output>>,
+        addresses: impl IntoIterator<Item = Address>,
         protocol_parameters: ProtocolParameters,
     ) -> Self {
+        let available_inputs = available_inputs.into();
         let mut addresses = HashSet::from_iter(addresses);
 
         addresses.extend(available_inputs.iter().filter_map(|input| match &input.output {
@@ -186,7 +188,7 @@ impl InputSelection {
             required_inputs: None,
             forbidden_inputs: HashSet::new(),
             selected_inputs: Vec::new(),
-            outputs,
+            outputs: outputs.into(),
             addresses,
             burn: None,
             remainder_address: None,
@@ -271,14 +273,15 @@ impl InputSelection {
         // filter for ed25519 address first
         let (mut sorted_inputs, alias_nft_address_inputs): (Vec<InputSigningData>, Vec<InputSigningData>) =
             inputs.into_iter().partition(|input_signing_data| {
-                let alias_transition = is_alias_transition(input_signing_data, outputs);
+                let alias_transition = is_alias_transition(
+                    &input_signing_data.output,
+                    *input_signing_data.output_id(),
+                    outputs,
+                    None,
+                );
                 let (input_address, _) = input_signing_data
                     .output
-                    .required_and_unlocked_address(
-                        time,
-                        input_signing_data.output_id(),
-                        alias_transition.map(|(alias_transition, _)| alias_transition),
-                    )
+                    .required_and_unlocked_address(time, input_signing_data.output_id(), alias_transition)
                     // PANIC: safe to unwrap, because we filtered treasury outputs out before
                     .unwrap();
 
@@ -286,12 +289,11 @@ impl InputSelection {
             });
 
         for input in alias_nft_address_inputs {
-            let alias_transition = is_alias_transition(&input, outputs);
-            let (input_address, _) = input.output.required_and_unlocked_address(
-                time,
-                input.output_id(),
-                alias_transition.map(|(alias_transition, _)| alias_transition),
-            )?;
+            let alias_transition = is_alias_transition(&input.output, *input.output_id(), outputs, None);
+            let (input_address, _) =
+                input
+                    .output
+                    .required_and_unlocked_address(time, input.output_id(), alias_transition)?;
 
             match sorted_inputs.iter().position(|input_signing_data| match input_address {
                 Address::Alias(unlock_address) => {
@@ -329,14 +331,15 @@ impl InputSelection {
                     if let Some(alias_or_nft_address) = alias_or_nft_address {
                         // Check for existing outputs for this address, and insert before
                         match sorted_inputs.iter().position(|input_signing_data| {
-                            let alias_transition = is_alias_transition(input_signing_data, outputs);
+                            let alias_transition = is_alias_transition(
+                                &input_signing_data.output,
+                                *input_signing_data.output_id(),
+                                outputs,
+                                None,
+                            );
                             let (input_address, _) = input_signing_data
                                 .output
-                                .required_and_unlocked_address(
-                                    time,
-                                    input.output_id(),
-                                    alias_transition.map(|(alias_transition, _)| alias_transition),
-                                )
+                                .required_and_unlocked_address(time, input.output_id(), alias_transition)
                                 // PANIC: safe to unwrap, because we filtered treasury outputs out before
                                 .unwrap();
 
