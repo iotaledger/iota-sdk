@@ -24,6 +24,7 @@ const {
     listenWallet,
     destroyWallet,
     getClientFromWallet,
+    getSecretManagerFromWallet,
 } = addon;
 
 const callClientMethodAsync = (
@@ -109,5 +110,6 @@ export {
     destroyWallet,
     listenWalletAsync,
     getClientFromWallet,
+    getSecretManagerFromWallet,
     listenMqtt,
 };

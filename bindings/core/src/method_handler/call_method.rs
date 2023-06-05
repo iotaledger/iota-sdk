@@ -8,6 +8,7 @@ use iota_sdk::{
     client::{secret::SecretManager, Client},
     wallet::wallet::Wallet,
 };
+use tokio::sync::RwLock;
 
 use crate::{
     method::{ClientMethod, SecretManagerMethod, WalletMethod},
@@ -40,14 +41,6 @@ impl CallMethod for Wallet {
 
     fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + 'a>> {
         Box::pin(call_wallet_method(self, method))
-    }
-}
-
-impl CallMethod for SecretManager {
-    type Method = SecretManagerMethod;
-
-    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + 'a>> {
-        Box::pin(call_secret_manager_method(self, method))
     }
 }
 
@@ -85,7 +78,10 @@ pub fn call_utils_method(method: UtilsMethod) -> Response {
 }
 
 /// Call a secret manager method.
-pub async fn call_secret_manager_method(secret_manager: &SecretManager, method: SecretManagerMethod) -> Response {
+pub async fn call_secret_manager_method(
+    secret_manager: &RwLock<SecretManager>,
+    method: SecretManagerMethod,
+) -> Response {
     log::debug!("Secret manager method: {method:?}");
     let result =
         convert_async_panics(|| async { call_secret_manager_method_internal(secret_manager, method).await }).await;

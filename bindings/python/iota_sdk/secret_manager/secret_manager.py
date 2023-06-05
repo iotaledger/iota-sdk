@@ -60,8 +60,11 @@ class SecretManagerError(Exception):
 
 
 class SecretManager():
-    def __init__(self, secret_manager: MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager | LedgerNanoSecretManager):
-        self.handle = create_secret_manager(dumps(secret_manager))
+    def __init__(self, secret_manager: MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager | LedgerNanoSecretManager=None, secret_manager_handle=None):
+        if secret_manager_handle is None:
+            self.handle = create_secret_manager(dumps(secret_manager))
+        else:
+            self.handle = secret_manager_handle
 
     def _call_method(self, name, data=None):
         """Dumps json string and call call_secret_manager_method()

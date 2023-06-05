@@ -14,7 +14,7 @@ use iota_sdk_bindings_core::{
 use neon::prelude::*;
 use tokio::sync::RwLock;
 
-use crate::client::ClientMethodHandler;
+use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHandler};
 
 // Wrapper so we can destroy the WalletMethodHandler
 pub type WalletMethodHandlerWrapperInner = Arc<RwLock<Option<WalletMethodHandler>>>;
@@ -190,6 +190,31 @@ pub fn get_client(mut cx: FunctionContext) -> JsResult<JsPromise> {
             let client_method_handler =
                 ClientMethodHandler::new_with_client(channel.clone(), method_handler.wallet.client().clone());
             deferred.settle_with(&channel, move |mut cx| Ok(cx.boxed(client_method_handler)));
+        } else {
+            deferred.settle_with(&channel, move |mut cx| {
+                cx.error(
+                    serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string()))
+                        .expect("json to string error"),
+                )
+            });
+        }
+    });
+
+    Ok(promise)
+}
+
+pub fn get_secret_manager(mut cx: FunctionContext) -> JsResult<JsPromise> {
+    let method_handler = Arc::clone(&&cx.argument::<JsBox<WalletMethodHandlerWrapper>>(0)?.0);
+    let channel = cx.channel();
+
+    let (deferred, promise) = cx.promise();
+    crate::RUNTIME.spawn(async move {
+        if let Some(method_handler) = &*method_handler.read().await {
+            let secret_manager_method_handler = SecretManagerMethodHandler::new_with_secret_manager(
+                channel.clone(),
+                method_handler.wallet.get_secret_manager().clone(),
+            );
+            deferred.settle_with(&channel, move |mut cx| Ok(cx.boxed(secret_manager_method_handler)));
         } else {
             deferred.settle_with(&channel, move |mut cx| {
                 cx.error(
