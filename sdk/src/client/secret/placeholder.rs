@@ -6,7 +6,10 @@
 use std::ops::Range;
 
 use async_trait::async_trait;
-use crypto::{keys::slip10::Chain, signatures::secp256k1_ecdsa::EvmAddress};
+use crypto::{
+    keys::slip10::Chain,
+    signatures::secp256k1_ecdsa::{self, EvmAddress},
+};
 
 use super::{GenerateAddressOptions, SecretManage, SignTransactionEssence};
 use crate::{
@@ -43,6 +46,14 @@ impl SecretManage for PlaceholderSecretManager {
     }
 
     async fn sign_ed25519(&self, _msg: &[u8], _chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
+        Err(Error::PlaceholderSecretManager)
+    }
+
+    async fn sign_evm(
+        &self,
+        _msg: &[u8],
+        _chain: &Chain,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
         Err(Error::PlaceholderSecretManager)
     }
 }

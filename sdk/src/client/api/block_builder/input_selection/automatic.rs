@@ -19,7 +19,7 @@ use crate::{
         secret::types::InputSigningData,
         Error, Result,
     },
-    types::block::{address::Bech32AddressLike, output::OutputWithMetadata, protocol::ProtocolParameters},
+    types::block::{address::Bech32Address, output::OutputWithMetadata, protocol::ProtocolParameters, ConvertTo},
     utils::unix_timestamp_now,
 };
 
@@ -27,9 +27,9 @@ impl<'a> ClientBlockBuilder<'a> {
     // Get basic outputs for an address without storage deposit return unlock condition
     pub(crate) async fn basic_address_outputs(
         &self,
-        address: impl Bech32AddressLike,
+        address: impl ConvertTo<Bech32Address>,
     ) -> Result<Vec<OutputWithMetadata>> {
-        let address = address.to_bech32()?;
+        let address = address.convert()?;
         let mut output_ids = Vec::new();
 
         // First request to get all basic outputs that can directly be unlocked by the address.
@@ -89,12 +89,12 @@ impl<'a> ClientBlockBuilder<'a> {
         // Assume that we own the addresses for inputs that are required for the provided outputs
         let mut available_input_addresses = Vec::new();
         for input in &available_inputs {
-            let alias_transition = is_alias_transition(input, &self.outputs);
-            let (required_unlock_address, unlocked_alias_or_nft_address) = input.output.required_and_unlocked_address(
-                current_time,
-                input.output_id(),
-                alias_transition.map(|(alias_transition, _)| alias_transition),
-            )?;
+            let alias_transition =
+                is_alias_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref());
+            let (required_unlock_address, unlocked_alias_or_nft_address) =
+                input
+                    .output
+                    .required_and_unlocked_address(current_time, input.output_id(), alias_transition)?;
             available_input_addresses.push(required_unlock_address);
             if let Some(unlocked_alias_or_nft_address) = unlocked_alias_or_nft_address {
                 available_input_addresses.push(unlocked_alias_or_nft_address);
