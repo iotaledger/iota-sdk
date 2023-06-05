@@ -5,13 +5,13 @@
 The IOTA SDK is a Rust-based project that provides a convenient and efficient way to interact with nodes in the
 Shimmer and IOTA networks running
 the [Stardust protocol](https://wiki.iota.org/shimmer/develop/explanations/what-is-stardust). It consists of two main
-modules: `wallet` and `client`.
+modules: `client` and `wallet`.
+
+The `client` module is stateless. It aims to provide more flexibility and access to low-level functions.
 
 The `wallet` module is stateful, with a standardized interface for developers to build applications involving value
 transactions. It uses high-level functions that simplify everyday operations. It can optionally interact
 with [IOTA Stronghold](https://github.com/iotaledger/stronghold.rs/) for seed handling, storage, and state backup.
-
-The `client` module is stateless. It aims to provide more flexibility and access to low-level functions.
 
 ## Table of Contents
 
@@ -29,13 +29,13 @@ The `client` module is stateless. It aims to provide more flexibility and access
 
 ## Features
 
-- **Wallet module**: The `wallet` module in the IOTA SDK provides high-level functions for managing accounts, generating
-  addresses, creating transactions, and interacting with the Shimmer network. It offers a user-friendly interface for
-  developers to build applications on the Shimmer network.
-
 - **Client module**: The `client` module in the IOTA SDK offers low-level functions that allow you to have
   fine-grained control over your interactions with Shimmer nodes. It provides access to the underlying API endpoints
   and enables advanced operations such as custom message construction and direct communication with the network.
+
+- **Wallet module**: The `wallet` module in the IOTA SDK provides high-level functions for managing accounts, generating
+  addresses, creating transactions, and interacting with the Shimmer network. It offers a user-friendly interface for
+  developers to build applications on the Shimmer network.
 
 - **Python, Node.js, and WASM Bindings**: The IOTA SDK includes bindings for Python, Node.js, and WASM, which allow you to use the
   SDK in your preferred programming language. These bindings provide seamless integration with existing Python and
