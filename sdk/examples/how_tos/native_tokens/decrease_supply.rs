@@ -6,8 +6,6 @@
 //!
 //! `cargo run --example decrease_native_token_supply --release`
 
-use std::str::FromStr;
-
 use iota_sdk::{
     types::block::output::TokenId,
     wallet::{Result, Wallet},
@@ -28,16 +26,17 @@ async fn main() -> Result<()> {
     account.sync(None).await?;
 
     let balance = account.balance().await?;
-    println!("Balance before melting:\n{balance:?}",);
+
+    // Find first foundry and corresponding token id
+    let token_id = TokenId::from(*balance.foundries().first().unwrap());
+
+    let available_balance = balance.native_tokens().iter().find(|t| t.token_id() == &token_id).unwrap().available();
+    println!("Balance before melting: {available_balance}",);
 
     // Set the stronghold password
     wallet
         .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
-
-    // Replace with a TokenId that is available in the account, the foundry output which minted it, also needs to be
-    // available.
-    let token_id = TokenId::from_str("0x089dc1b964591b15819ef1912fab48c001fed4558b37766dfa5daa512495d5b25a0100000000")?;
 
     // Melt some of the circulating supply
     let melt_amount = U256::from(10);
@@ -57,8 +56,8 @@ async fn main() -> Result<()> {
     );
 
     let balance = account.sync(None).await?;
-
-    println!("Balance after melting:\n{balance:?}",);
+    let available_balance = balance.native_tokens().iter().find(|t| t.token_id() == &token_id).unwrap().available();
+    println!("Balance after melting: {available_balance}",);
 
     Ok(())
 }
