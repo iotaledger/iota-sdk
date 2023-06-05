@@ -11,6 +11,7 @@ use std::{
 
 use backtrace::Backtrace;
 use futures::{Future, FutureExt};
+#[cfg(feature = "stronghold")]
 use iota_stronghold::procedures::Chain;
 use primitive_types::U256;
 use zeroize::Zeroize;
