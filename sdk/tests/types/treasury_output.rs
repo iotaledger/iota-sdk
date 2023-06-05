@@ -58,10 +58,7 @@ fn pack_unpack_valid() {
 #[test]
 fn pack_unpack_invalid() {
     assert!(matches!(
-        TreasuryOutput::unpack_verified(
-            vec![0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a].as_slice(),
-            &protocol_parameters()
-        ),
+        TreasuryOutput::unpack_verified([0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a], &protocol_parameters()),
         Err(UnpackError::Packable(Error::InvalidTreasuryOutputAmount(
             3_038_287_259_199_220_266
         )))

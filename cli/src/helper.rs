@@ -86,13 +86,13 @@ pub async fn pick_account(wallet: &Wallet) -> Result<Option<Account>, Error> {
 }
 
 pub fn print_wallet_help() {
-    if let Err(err) = WalletCli::try_parse_from(vec!["Wallet:", "help"]) {
+    if let Err(err) = WalletCli::try_parse_from(["Wallet:", "help"]) {
         println!("{err}");
     }
 }
 
 pub fn print_account_help() {
-    if let Err(err) = AccountCli::try_parse_from(vec!["Account:", "help"]) {
+    if let Err(err) = AccountCli::try_parse_from(["Account:", "help"]) {
         println!("{err}");
     }
 }

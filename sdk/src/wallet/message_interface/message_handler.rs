@@ -24,12 +24,12 @@ use crate::{
         utils, Client, NodeInfoWrapper,
     },
     types::block::{
-        address::{HrpLike, ToBech32Ext},
+        address::{Hrp, ToBech32Ext},
         output::{
             dto::{OutputBuilderAmountDto, OutputDto},
             AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
         },
-        Error,
+        ConvertTo, Error,
     },
     wallet::{
         account::{
@@ -115,8 +115,9 @@ impl WalletMessageHandler {
     /// Listen to wallet events, empty vec will listen to all events
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
-    pub async fn listen<F>(&self, events: Vec<WalletEventType>, handler: F)
+    pub async fn listen<F, I: IntoIterator<Item = WalletEventType> + Send>(&self, events: I, handler: F)
     where
+        I::IntoIter: Send,
         F: Fn(&Event) + 'static + Clone + Send + Sync,
     {
         self.wallet.listen(events, handler).await;
@@ -199,12 +200,14 @@ impl WalletMessageHandler {
                         .wallet
                         .recover_accounts(account_start_index, account_gap_limit, address_gap_limit, sync_options)
                         .await?;
-                    let mut account_dtos = Vec::new();
-                    for account in accounts {
-                        let account = account.details().await;
-                        account_dtos.push(AccountDetailsDto::from(&*account));
-                    }
-                    Ok(Response::Accounts(account_dtos))
+                    Ok(Response::Accounts(
+                        futures::future::join_all(
+                            accounts
+                                .into_iter()
+                                .map(|account| async move { AccountDetailsDto::from(&*account.details().await) }),
+                        )
+                        .await,
+                    ))
                 })
                 .await
             }
@@ -856,7 +859,7 @@ impl WalletMessageHandler {
                             outputs
                                 .iter()
                                 .map(|o| Ok(Output::try_from_dto(o, token_supply)?))
-                                .collect::<crate::wallet::Result<Vec<Output>>>()?,
+                                .collect::<crate::wallet::Result<Vec<_>>>()?,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
@@ -1006,7 +1009,7 @@ impl WalletMessageHandler {
     }
 
     /// The create account message handler.
-    async fn create_account(&self, alias: Option<String>, bech32_hrp: Option<impl HrpLike>) -> Result<Response> {
+    async fn create_account(&self, alias: Option<String>, bech32_hrp: Option<impl ConvertTo<Hrp>>) -> Result<Response> {
         let mut builder = self.wallet.create_account();
 
         if let Some(alias) = alias {
@@ -1014,7 +1017,7 @@ impl WalletMessageHandler {
         }
 
         if let Some(bech32_hrp) = bech32_hrp {
-            builder = builder.with_bech32_hrp(bech32_hrp.to_hrp()?);
+            builder = builder.with_bech32_hrp(bech32_hrp.convert()?);
         }
 
         match builder.finish().await {
@@ -1034,12 +1037,15 @@ impl WalletMessageHandler {
 
     async fn get_accounts(&self) -> Result<Response> {
         let accounts = self.wallet.get_accounts().await?;
-        let mut account_dtos = Vec::new();
-        for account in accounts {
-            let account = account.details().await;
-            account_dtos.push(AccountDetailsDto::from(&*account));
-        }
-        Ok(Response::Accounts(account_dtos))
+
+        Ok(Response::Accounts(
+            futures::future::join_all(
+                accounts
+                    .into_iter()
+                    .map(|account| async move { AccountDetailsDto::from(&*account.details().await) }),
+            )
+            .await,
+        ))
     }
 }
 

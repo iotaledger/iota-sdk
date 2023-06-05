@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let outputs = vec![SendAmountParams::new(
+    let outputs = [SendAmountParams::new(
         // Address to which we want to send the amount.
         "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
         // The amount to send.

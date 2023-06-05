@@ -87,20 +87,20 @@ async fn main() -> Result<()> {
     for address_index in 0..1000 {
         let mut threads = Vec::new();
         for n in 1..4 {
-            let pong_account_ = pong_account.clone();
-            let ping_addresses_ = ping_addresses.clone();
+            let pong_account = pong_account.clone();
+            let ping_addresses = ping_addresses.clone();
             threads.push(async move {
                 tokio::spawn(async move {
                     // send transaction
-                    let outputs = vec![
+                    let outputs = [
                         // send one or two Mi for more different transactions
                         BasicOutputBuilder::new_with_amount(n * 1_000_000)
                             .add_unlock_condition(AddressUnlockCondition::new(
-                                ping_addresses_[address_index % amount_addresses].address(),
+                                ping_addresses[address_index % amount_addresses].address(),
                             ))
-                            .finish_output(pong_account_.client().get_token_supply().await?)?,
+                            .finish_output(pong_account.client().get_token_supply().await?)?,
                     ];
-                    let tx = pong_account_.send(outputs, None).await?;
+                    let tx = pong_account.send(outputs, None).await?;
                     println!(
                         "Block from thread {} sent: {}/block/{}",
                         n,

@@ -3,7 +3,7 @@
 
 //! In this example we will send 9_000_000 tokens to a given receiver and 1_000_000 tokens to a custom remainder
 //! address. The used addresses belong to the first seed in .env.example.
-//! 
+//!
 //! `cargo run --example custom_remainder_address --release`
 
 use iota_sdk::client::{
@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
     let output_ids_response = client
-        .basic_output_ids(vec![QueryParameter::Address(sender_address.clone())])
+        .basic_output_ids([QueryParameter::Address(sender_address.clone())])
         .await?;
     println!("{output_ids_response:?}");
 

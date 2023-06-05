@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
     let token_id: [u8; 38] =
         prefix_hex::decode("0x08e68f7616cd4948efebc6a77c4f935eaed770ac53869cba56d104f2b472a8836d0100000000")?;
 
-    let outputs = vec![
+    let outputs = [
         // Without StorageDepositReturnUnlockCondition, the receiver will get the amount of the output and the native
         // tokens
         BasicOutputBuilder::new_with_amount(1_000_000)

@@ -49,10 +49,7 @@ async fn main() -> Result<()> {
 
     let _address = account.generate_ed25519_addresses(5, None).await?;
     let addresses = account.generate_ed25519_addresses(300, None).await?;
-    let mut bech32_addresses = Vec::new();
-    for ad in addresses {
-        bech32_addresses.push(ad.address().to_string());
-    }
+    let _bech32_addresses = addresses.into_iter().map(|addr| *addr.address()).collect::<Vec<_>>();
 
     let addresses = account.addresses().await?;
     println!("Addresses: {}", addresses.len());
@@ -77,7 +74,7 @@ async fn main() -> Result<()> {
                     .finish_output(token_supply)
                     .unwrap()
             })
-            .collect();
+            .collect::<Vec<_>>();
         match account.send(outputs, None).await {
             Ok(transaction) => println!(
                 "Transaction sent: {}/transaction/{}",

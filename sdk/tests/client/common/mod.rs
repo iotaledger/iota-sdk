@@ -43,7 +43,7 @@ pub async fn create_client_and_secret_manager_with_funds(mnemonic: Option<&str>)
     for _ in 0..30 {
         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
         let output_ids_response = client
-            .basic_output_ids(vec![
+            .basic_output_ids([
                 QueryParameter::Address(address),
                 QueryParameter::HasExpiration(false),
                 QueryParameter::HasTimelock(false),

@@ -142,7 +142,7 @@ async fn main() -> Result<()> {
     //// vote
     //// ////////////////////////////
 
-    let transaction = account.vote(Some(event_id), Some(vec![0])).await?;
+    let transaction = account.vote(event_id, vec![0]).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account

@@ -92,7 +92,7 @@ async fn main() -> Result<()> {
             threads.push(async move {
                 tokio::spawn(async move {
                     // send transaction
-                    let outputs = vec![
+                    let outputs = [
                         // send one or two Mi for more different transactions
                         BasicOutputBuilder::new_with_amount(n * 1_000_000)
                             .add_unlock_condition(AddressUnlockCondition::new(

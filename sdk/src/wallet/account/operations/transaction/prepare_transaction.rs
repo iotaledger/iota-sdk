@@ -24,11 +24,12 @@ impl Account {
     /// Get inputs and build the transaction essence
     pub async fn prepare_transaction(
         &self,
-        outputs: Vec<Output>,
+        outputs: impl Into<Vec<Output>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_transaction");
         let options = options.into();
+        let outputs = outputs.into();
         let prepare_transaction_start_time = Instant::now();
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;

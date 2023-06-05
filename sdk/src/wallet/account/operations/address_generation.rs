@@ -35,7 +35,7 @@ impl Account {
             options.internal
         );
         if amount == 0 {
-            return Ok(vec![]);
+            return Ok(Vec::new());
         }
 
         let account_details = self.details().await;
@@ -139,7 +139,7 @@ impl Account {
                     )
                     .await?
             }
-            SecretManager::Placeholder(_) => vec![],
+            SecretManager::Placeholder(_) => Vec::new(),
         };
 
         drop(account_details);

@@ -32,7 +32,7 @@ async fn send_basic_output() -> Result<()> {
     let block = client
         .block()
         .with_secret_manager(&secret_manager)
-        .with_outputs(vec![output.clone()])?
+        .with_outputs([output.clone()])?
         .finish()
         .await?;
 
@@ -56,7 +56,7 @@ async fn send_basic_output() -> Result<()> {
 
     // output can be fetched from the second address
     let output_ids_response = client
-        .basic_output_ids(vec![
+        .basic_output_ids([
             QueryParameter::Address(second_address.to_bech32(bech32_hrp)),
             QueryParameter::HasExpiration(false),
             QueryParameter::HasTimelock(false),
@@ -64,7 +64,7 @@ async fn send_basic_output() -> Result<()> {
         ])
         .await?;
 
-    assert_eq!(output_ids_response.items, vec![output_id]);
+    assert_eq!(output_ids_response.items, [output_id]);
 
     Ok(())
 }

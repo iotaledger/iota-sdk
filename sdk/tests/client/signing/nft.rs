@@ -51,7 +51,7 @@ async fn nft_reference_unlocks() -> Result<()> {
     let nft_id = NftId::from_str(NFT_ID_1)?;
     let nft_bech32_address = &Address::Nft(NftAddress::new(nft_id)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Nft(
             1_000_000,
             nft_id,
@@ -85,7 +85,7 @@ async fn nft_reference_unlocks() -> Result<()> {
         ),
     ]);
 
-    let outputs = build_outputs(vec![
+    let outputs = build_outputs([
         Nft(
             1_000_000,
             nft_id,
@@ -118,7 +118,7 @@ async fn nft_reference_unlocks() -> Result<()> {
             inputs
                 .iter()
                 .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
-                .collect(),
+                .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
         .finish(&protocol_parameters)?,

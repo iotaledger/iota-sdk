@@ -14,92 +14,88 @@ use crate::{
 
 impl Client {
     /// Request outputs by their output ID in parallel
-    pub async fn get_outputs(&self, output_ids: Vec<OutputId>) -> Result<Vec<OutputWithMetadata>> {
-        let mut outputs = Vec::new();
-
+    pub async fn get_outputs(&self, output_ids: &[OutputId]) -> Result<Vec<OutputWithMetadata>> {
         #[cfg(target_family = "wasm")]
-        for output_id in output_ids {
-            outputs.push(self.get_output(&output_id).await?);
-        }
+        let outputs = futures::future::try_join_all(output_ids.iter().map(|id| self.get_output(id))).await?;
 
         #[cfg(not(target_family = "wasm"))]
-        for output_ids_chunk in output_ids.chunks(MAX_PARALLEL_API_REQUESTS).map(<[OutputId]>::to_vec) {
-            let mut tasks = Vec::new();
-            for output_id in output_ids_chunk {
+        let outputs =
+            futures::future::try_join_all(output_ids.chunks(MAX_PARALLEL_API_REQUESTS).map(|output_ids_chunk| {
                 let client = self.clone();
-
-                tasks.push(async move {
+                let output_ids_chunk = output_ids_chunk.to_vec();
+                async move {
                     tokio::spawn(async move {
-                        let output_response = client.get_output(&output_id).await?;
-                        crate::client::Result::Ok(output_response)
+                        futures::future::try_join_all(output_ids_chunk.iter().map(|id| client.get_output(id))).await
                     })
-                    .await
-                });
-            }
-            for res in futures::future::try_join_all(tasks).await? {
-                let output_response = res?;
-                outputs.push(output_response);
-            }
-        }
+                    .await?
+                }
+            }))
+            .await?
+            .into_iter()
+            .flatten()
+            .collect();
+
         Ok(outputs)
     }
 
     /// Request outputs by their output ID in parallel, ignoring failed requests
     /// Useful to get data about spent outputs, that might not be pruned yet
-    pub async fn get_outputs_ignore_errors(&self, output_ids: Vec<OutputId>) -> Result<Vec<OutputWithMetadata>> {
-        let mut outputs = Vec::new();
-
+    pub async fn get_outputs_ignore_errors(&self, output_ids: &[OutputId]) -> Result<Vec<OutputWithMetadata>> {
         #[cfg(target_family = "wasm")]
-        for output_id in output_ids {
-            if let Ok(output_response) = self.get_output(&output_id).await {
-                outputs.push(output_response);
-            }
-        }
+        let outputs = futures::future::join_all(output_ids.iter().map(|id| self.get_output(id)))
+            .await
+            .into_iter()
+            .filter_map(Result::ok)
+            .collect();
 
         #[cfg(not(target_family = "wasm"))]
-        for output_ids_chunk in output_ids.chunks(MAX_PARALLEL_API_REQUESTS).map(<[OutputId]>::to_vec) {
-            let mut tasks = Vec::new();
-            for output_id in output_ids_chunk {
-                let client_ = self.clone();
+        let outputs =
+            futures::future::try_join_all(output_ids.chunks(MAX_PARALLEL_API_REQUESTS).map(|output_ids_chunk| {
+                let client = self.clone();
+                let output_ids_chunk = output_ids_chunk.to_vec();
+                tokio::spawn(async move {
+                    futures::future::join_all(output_ids_chunk.iter().map(|id| client.get_output(id)))
+                        .await
+                        .into_iter()
+                        .filter_map(Result::ok)
+                        .collect::<Vec<_>>()
+                })
+            }))
+            .await?
+            .into_iter()
+            .flatten()
+            .collect();
 
-                tasks.push(async move { tokio::spawn(async move { client_.get_output(&output_id).await.ok() }).await });
-            }
-            for output_response in (futures::future::try_join_all(tasks).await?).into_iter().flatten() {
-                outputs.push(output_response);
-            }
-        }
         Ok(outputs)
     }
 
     /// Requests metadata for outputs by their output ID in parallel, ignoring failed requests
-    pub async fn get_outputs_metadata_ignore_errors(
-        &self,
-        output_ids: Vec<OutputId>,
-    ) -> Result<Vec<OutputMetadataDto>> {
-        let mut output_metadata_responses = Vec::new();
-
+    pub async fn get_outputs_metadata_ignore_errors(&self, output_ids: &[OutputId]) -> Result<Vec<OutputMetadataDto>> {
         #[cfg(target_family = "wasm")]
-        for output_id in output_ids {
-            if let Ok(output_metadata_response) = self.get_output_metadata(&output_id).await {
-                output_metadata_responses.push(output_metadata_response);
-            }
-        }
+        let metadata = futures::future::join_all(output_ids.iter().map(|id| self.get_output_metadata(id)))
+            .await
+            .into_iter()
+            .filter_map(Result::ok)
+            .collect();
 
         #[cfg(not(target_family = "wasm"))]
-        for output_ids_chunk in output_ids.chunks(MAX_PARALLEL_API_REQUESTS).map(<[OutputId]>::to_vec) {
-            let mut tasks = Vec::new();
-            for output_id in output_ids_chunk {
-                let client_ = self.clone();
+        let metadata =
+            futures::future::try_join_all(output_ids.chunks(MAX_PARALLEL_API_REQUESTS).map(|output_ids_chunk| {
+                let client = self.clone();
+                let output_ids_chunk = output_ids_chunk.to_vec();
+                tokio::spawn(async move {
+                    futures::future::join_all(output_ids_chunk.iter().map(|id| client.get_output_metadata(id)))
+                        .await
+                        .into_iter()
+                        .filter_map(Result::ok)
+                        .collect::<Vec<_>>()
+                })
+            }))
+            .await?
+            .into_iter()
+            .flatten()
+            .collect();
 
-                tasks.push(async move {
-                    tokio::spawn(async move { client_.get_output_metadata(&output_id).await.ok() }).await
-                });
-            }
-            for output_metadata_response in (futures::future::try_join_all(tasks).await?).into_iter().flatten() {
-                output_metadata_responses.push(output_metadata_response);
-            }
-        }
-
-        Ok(output_metadata_responses)
+        Ok(metadata)
     }
 }

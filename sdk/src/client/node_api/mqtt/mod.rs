@@ -32,14 +32,14 @@ impl Client {
     /// Subscribe to MQTT events with a callback.
     pub async fn subscribe<C: Fn(&TopicEvent) + Send + Sync + 'static>(
         &self,
-        topics: Vec<Topic>,
+        topics: impl IntoIterator<Item = Topic> + Send,
         callback: C,
     ) -> Result<(), Error> {
         MqttManager::new(self).with_topics(topics).subscribe(callback).await
     }
 
     /// Unsubscribe from MQTT events.
-    pub async fn unsubscribe(&self, topics: Vec<Topic>) -> Result<(), Error> {
+    pub async fn unsubscribe(&self, topics: impl IntoIterator<Item = Topic> + Send) -> Result<(), Error> {
         MqttManager::new(self).with_topics(topics).unsubscribe().await
     }
 }
@@ -290,7 +290,7 @@ impl<'a> MqttManager<'a> {
     }
 
     /// Add a collection of topics to the list.
-    pub fn with_topics(self, topics: Vec<Topic>) -> MqttTopicManager<'a> {
+    pub fn with_topics(self, topics: impl IntoIterator<Item = Topic>) -> MqttTopicManager<'a> {
         MqttTopicManager::new(self.client).with_topics(topics)
     }
 
@@ -323,7 +323,10 @@ pub struct MqttTopicManager<'a> {
 impl<'a> MqttTopicManager<'a> {
     /// Initializes a new instance of the mqtt topic manager.
     fn new(client: &'a Client) -> Self {
-        Self { client, topics: vec![] }
+        Self {
+            client,
+            topics: Vec::new(),
+        }
     }
 
     /// Add a new topic to the list.
@@ -333,8 +336,8 @@ impl<'a> MqttTopicManager<'a> {
     }
 
     /// Add a collection of topics to the list.
-    pub fn with_topics(mut self, topics: Vec<Topic>) -> Self {
-        self.topics.extend(topics.into_iter());
+    pub fn with_topics(mut self, topics: impl IntoIterator<Item = Topic>) -> Self {
+        self.topics.extend(topics);
         self
     }
 

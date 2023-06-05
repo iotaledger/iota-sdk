@@ -63,7 +63,7 @@ async fn main() -> Result<()> {
     println!("Addresses with balance: {}", addresses_with_unspent_outputs.len());
 
     // send transaction
-    let outputs = vec![SendAmountParams::new(
+    let outputs = [SendAmountParams::new(
         "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
         1_000_000,
     )?];
