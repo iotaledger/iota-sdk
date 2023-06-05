@@ -25,7 +25,6 @@ const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d
 
 fn assert_serde_eq(event_0: WalletEvent) {
     let json = serde_json::to_string(&event_0).unwrap();
-    println!("{json}");
     let event_1 = serde_json::from_str(&json).unwrap();
 
     assert_eq!(event_0, event_1);
