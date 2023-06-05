@@ -17,6 +17,9 @@ import type {
     SyncOptions,
     WalletEvent,
 } from '../types';
+import {
+    Event,
+} from '../types';
 
 /** The AccountManager class. */
 export class AccountManager {
@@ -229,7 +232,7 @@ export class AccountManager {
      */
     async listen(
         eventTypes: WalletEventType[],
-        callback: (error: Error, result: string) => void,
+        callback: (error: Error, result: Event) => void,
     ): Promise<void> {
         return this.messageHandler.listen(eventTypes, callback);
     }

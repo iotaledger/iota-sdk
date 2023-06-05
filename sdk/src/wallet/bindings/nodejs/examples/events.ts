@@ -8,6 +8,7 @@ import {
     ConsolidationRequiredWalletEvent,
     TransactionProgressWalletEvent,
     SelectingInputsProgress,
+    Event,
 } from '@iota/wallet';
 require('dotenv').config({ path: '.env' });
 
@@ -46,10 +47,8 @@ async function run() {
 
         const wallet = new AccountManager(walletOptions);
 
-        const callback = function (err: any, data: string) {
-            // don't know if something like this could make sense
-            // const walletEvent: typeof WalletEvent = JSON.parse(data);
-            console.log('data:', JSON.parse(data));
+        const callback = function (err: any, event: Event) {
+            console.log('AccountIndex:', event.getAccountIndex(), ', Event:', event.getEvent());
         };
 
         await wallet.listen([], callback);
