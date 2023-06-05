@@ -2,8 +2,10 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/iotaledger/iota-sdk/badge.svg?branch=develop)](https://coveralls.io/github/iotaledger/iota-sdk?branch=develop)
 
-The IOTA SDK is a Rust-based project that provides a convenient and efficient way to interact with Shimmer nodes in the
-Shimmer network. It consists of two main modules: `wallet` and `client`.
+The IOTA SDK is a Rust-based project that provides a convenient and efficient way to interact with nodes in the
+Shimmer and IOTA networks running
+the [Stardust protocol](https://wiki.iota.org/shimmer/develop/explanations/what-is-stardust). It consists of two main
+modules: `wallet` and `client`.
 
 The `wallet` module is stateful, with a standardized interface for developers to build applications involving value
 transactions. It uses high-level functions that simplify everyday operations. It can optionally interact
@@ -14,14 +16,14 @@ The `client` module is stateless. It aims to provide more flexibility and access
 ## Table of Contents
 
 - [Requirements](#requirements)
-  - [Dependencies](#dependencies)
+    - [Dependencies](#dependencies)
 - [Getting Started](#getting-started)
-  - [Install the IOTA SDK](#install-the-iota-sdk)
-  - [Usage](#usage)
-    - [Wallet](#wallet)
-    - [Client](#client)
-    - [Examples](#examples)
-  - [API Reference](#api-reference)
+    - [Install the IOTA SDK](#install-the-iota-sdk)
+    - [Usage](#usage)
+        - [Wallet](#wallet)
+        - [Client](#client)
+        - [Examples](#examples)
+    - [API Reference](#api-reference)
 - [Contribute](#contribute)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
@@ -53,8 +55,9 @@ This library follows the following branching strategy:
 
 ## Before You Start
 
-This file is focused on Rust. Please refer to the [Python](bindings/python/README.md)
-and [Node.js](bindings/nodejs/README.md) instructions if you want information on installing and using them.
+This file is focused on Rust. Please refer to
+the [Python](bindings/python/README.md), [Node.js](bindings/nodejs/README.md) and [Wasm](bindings/wasm/README.md)
+instructions if you want information on installing and using them.
 
 ## Requirements
 
@@ -121,6 +124,26 @@ iota-sdk = { branch = "develop" }
 
 ### Usage
 
+#### Client
+
+To use the Client module, you simply need to create a `Client`.
+
+```rust
+use iota_sdk::client::{
+    Client,
+};
+
+let client = Client::builder()
+    .with_node('https://api.testnet.shimmer.network')? // Insert your node URL here
+    .finish()
+    .await?;
+        
+let info = client.get_info().await?;
+println!("Node Info: {info:?}")
+
+Ok(())
+```
+
 #### Wallet
 
 To use the Wallet module, you need to create a `Wallet`:
@@ -133,6 +156,7 @@ use iota_sdk::{
     },
     wallet::{ClientOptions, Result, Wallet},
 };
+use std::path::PathBuf;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -168,22 +192,6 @@ async fn main() -> Result<()> {
 }
 ```
 
-#### Client
-
-To use the Client module, you simply need to create a `Client`.
-
-
-```rust
-use iota_sdk::client::{
-    Client,
-};
-
-let client = Client::builder()
-    .with_node("https://api.testnet.shimmer.network")? // Insert your node URL here
-    .finish()
-    .await?;
-```
-
 #### Examples
 
 You can use the provided code [examples](sdk/examples) to get acquainted with the IOTA SDK. You can use the following command to run any example:
@@ -191,7 +199,7 @@ You can use the provided code [examples](sdk/examples) to get acquainted with th
 ```bash
 cargo run --example example_name --release
 ```
-* Where `example_name` is the name from the [Cargo.toml](sdk/Cargo.toml) name from the examples section. For example:
+* Where `example_name` is the name from the [Cargo.toml](sdk/Cargo.toml) name from the examples folder. For example:
 
 ```bash
 cargo run --example node_api_core_get_info --release 
@@ -211,8 +219,12 @@ The IOTA SDK Rust API Reference is in the [crate documentation](https://docs.rs/
 
 ## Contribute
 
-If you find any issues or have suggestions for improvements, please open an issue on the GitHub repository. You can also
-submit pull requests with bug fixes, new features, or documentation enhancements.
+If you find any issues or have suggestions for improvements,
+please [open an issue](https://github.com/iotaledger/iota-sdk/issues/new/choose) on the GitHub repository. You can also
+submit [pull requests](https://github.com/iotaledger/iota-sdk/compare)
+with [bug fixes](https://github.com/iotaledger/iota-sdk/issues/new?assignees=&labels=bug+report&projects=&template=bug_report.yml&title=%5BBug%5D%3A+), 
+[new features](https://github.com/iotaledger/iota-sdk/issues/new?assignees=&labels=&projects=&template=feature_request.md),
+or documentation enhancements.
 
 Before contributing, please read and adhere to the [code of conduct](/.github/CODE_OF_CONDUCT.md).
 
@@ -220,11 +232,3 @@ Before contributing, please read and adhere to the [code of conduct](/.github/CO
 
 The IOTA SDK is open-source software licensed under Apache License 2.0. For more information, please read
 the [LICENSE](/LICENSE).
-
-## Acknowledgments
-
-The IOTA SDK project is built upon the contributions of many individuals and organizations. We would like to express our
-gratitude to the IOTA community and all the developers who have contributed to the project.
-
-For a complete list of contributors and acknowledgments, please refer to
-the [GitHub repository's contributor page](https://github.com/iotaledger/iota-sdk/graphs/contributors).
