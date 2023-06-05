@@ -38,8 +38,8 @@ impl RegularTransactionEssenceBuilder {
     }
 
     /// Adds inputs to a [`RegularTransactionEssenceBuilder`].
-    pub fn with_inputs(mut self, inputs: Vec<Input>) -> Self {
-        self.inputs = inputs;
+    pub fn with_inputs(mut self, inputs: impl Into<Vec<Input>>) -> Self {
+        self.inputs = inputs.into();
         self
     }
 
@@ -50,8 +50,8 @@ impl RegularTransactionEssenceBuilder {
     }
 
     /// Add outputs to a [`RegularTransactionEssenceBuilder`].
-    pub fn with_outputs(mut self, outputs: Vec<Output>) -> Self {
-        self.outputs = outputs;
+    pub fn with_outputs(mut self, outputs: impl Into<Vec<Output>>) -> Self {
+        self.outputs = outputs.into();
         self
     }
 

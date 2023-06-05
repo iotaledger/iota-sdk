@@ -38,7 +38,7 @@ async fn main() -> Result<()> {
 
     client
         .subscribe(
-            vec![
+            [
                 Topic::try_from("milestone-info/latest".to_string())?,
                 Topic::try_from("blocks".to_string())?,
                 Topic::try_from(
@@ -63,7 +63,7 @@ async fn main() -> Result<()> {
         rx.recv().unwrap();
         if i == 7 {
             // unsubscribe from topic "blocks", will continue to receive events for "milestones/latest"
-            client.unsubscribe(vec![Topic::try_from("blocks".to_string())?]).await?;
+            client.unsubscribe([Topic::try_from("blocks".to_string())?]).await?;
         }
     }
 

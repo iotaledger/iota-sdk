@@ -80,7 +80,7 @@ impl InputSelection {
                 "{address:?} sender requirement already fulfilled by {:?}",
                 input.output_id()
             );
-            return Ok(vec![]);
+            return Ok(Vec::new());
         }
 
         // Checks if the requirement can be fulfilled by a basic output.

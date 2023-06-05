@@ -158,8 +158,9 @@ impl WalletInner {
     /// Listen to wallet events, empty vec will listen to all events
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
-    pub async fn listen<F>(&self, events: Vec<WalletEventType>, handler: F)
+    pub async fn listen<F, I: IntoIterator<Item = WalletEventType> + Send>(&self, events: I, handler: F)
     where
+        I::IntoIter: Send,
         F: Fn(&Event) + 'static + Clone + Send + Sync,
     {
         let mut emitter = self.event_emitter.write().await;
@@ -169,7 +170,10 @@ impl WalletInner {
     /// Remove wallet event listeners, empty vec will remove all listeners
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
-    pub async fn clear_listeners(&self, events: Vec<WalletEventType>) {
+    pub async fn clear_listeners<I: IntoIterator<Item = WalletEventType> + Send>(&self, events: I)
+    where
+        I::IntoIter: Send,
+    {
         let mut emitter = self.event_emitter.write().await;
         emitter.clear(events);
     }

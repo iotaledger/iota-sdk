@@ -54,7 +54,7 @@ fn build_valid() {
     );
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-        .with_inputs(vec![input1, input2])
+        .with_inputs([input1, input2])
         .add_output(output)
         .finish(&protocol_parameters);
 
@@ -78,7 +78,7 @@ fn build_valid_with_payload() {
     );
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-        .with_inputs(vec![input1, input2])
+        .with_inputs([input1, input2])
         .add_output(output)
         .with_payload(rand_tagged_data_payload())
         .finish(&protocol_parameters);
@@ -103,7 +103,7 @@ fn build_valid_add_inputs_outputs() {
     );
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-        .with_inputs(vec![input1, input2])
+        .with_inputs([input1, input2])
         .add_output(output)
         .finish(&protocol_parameters);
 
@@ -127,7 +127,7 @@ fn build_invalid_payload_kind() {
     );
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-        .with_inputs(vec![input1, input2])
+        .with_inputs([input1, input2])
         .add_output(output)
         .with_payload(rand_treasury_transaction_payload(protocol_parameters.token_supply()))
         .finish(&protocol_parameters);
@@ -315,7 +315,7 @@ fn build_invalid_accumulated_output() {
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .add_input(input)
-        .with_outputs(vec![output1, output2])
+        .with_outputs([output1, output2])
         .finish(&protocol_parameters);
 
     assert!(matches!(essence, Err(Error::InvalidTransactionAmountSum(_))));
@@ -330,7 +330,7 @@ fn getters() {
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
-    let outputs = vec![Output::Basic(
+    let outputs = [Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .finish(protocol_parameters.token_supply())
@@ -339,7 +339,7 @@ fn getters() {
     let payload = Payload::from(rand_tagged_data_payload());
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-        .with_inputs(vec![input1, input2])
+        .with_inputs([input1, input2])
         .with_outputs(outputs.clone())
         .with_payload(payload.clone())
         .finish(&protocol_parameters)
@@ -369,8 +369,8 @@ fn duplicate_output_nft() {
         .unwrap();
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-        .with_inputs(vec![input1, input2])
-        .with_outputs(vec![basic, nft.clone(), nft])
+        .with_inputs([input1, input2])
+        .with_outputs([basic, nft.clone(), nft])
         .finish(&protocol_parameters);
 
     assert!(matches!(
@@ -399,8 +399,8 @@ fn duplicate_output_nft_null() {
         .unwrap();
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-        .with_inputs(vec![input1, input2])
-        .with_outputs(vec![basic, nft.clone(), nft])
+        .with_inputs([input1, input2])
+        .with_outputs([basic, nft.clone(), nft])
         .finish(&protocol_parameters);
 
     assert!(essence.is_ok());
@@ -427,8 +427,8 @@ fn duplicate_output_alias() {
         .unwrap();
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-        .with_inputs(vec![input1, input2])
-        .with_outputs(vec![basic, alias.clone(), alias])
+        .with_inputs([input1, input2])
+        .with_outputs([basic, alias.clone(), alias])
         .finish(&protocol_parameters);
 
     assert!(matches!(
@@ -462,8 +462,8 @@ fn duplicate_output_foundry() {
         .unwrap();
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-        .with_inputs(vec![input1, input2])
-        .with_outputs(vec![basic, foundry.clone(), foundry])
+        .with_inputs([input1, input2])
+        .with_outputs([basic, foundry.clone(), foundry])
         .finish(&protocol_parameters);
 
     assert!(matches!(

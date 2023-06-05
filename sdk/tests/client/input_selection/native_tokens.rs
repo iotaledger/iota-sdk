@@ -18,7 +18,7 @@ use crate::client::{
 fn two_native_tokens_one_needed() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -40,7 +40,7 @@ fn two_native_tokens_one_needed() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 150)]),
@@ -54,7 +54,7 @@ fn two_native_tokens_one_needed() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -79,7 +79,7 @@ fn two_native_tokens_one_needed() {
 fn two_native_tokens_both_needed_plus_remainder() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -101,7 +101,7 @@ fn two_native_tokens_both_needed_plus_remainder() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 150), (TOKEN_ID_2, 100)]),
@@ -115,7 +115,7 @@ fn two_native_tokens_both_needed_plus_remainder() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -140,7 +140,7 @@ fn two_native_tokens_both_needed_plus_remainder() {
 fn three_inputs_two_needed_plus_remainder() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -172,7 +172,7 @@ fn three_inputs_two_needed_plus_remainder() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 120)]),
@@ -186,7 +186,7 @@ fn three_inputs_two_needed_plus_remainder() {
     let selected = InputSelection::new(
         inputs,
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -211,7 +211,7 @@ fn three_inputs_two_needed_plus_remainder() {
 fn three_inputs_two_needed_no_remainder() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -243,7 +243,7 @@ fn three_inputs_two_needed_no_remainder() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 200)]),
@@ -257,7 +257,7 @@ fn three_inputs_two_needed_no_remainder() {
     let selected = InputSelection::new(
         inputs,
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -271,7 +271,7 @@ fn three_inputs_two_needed_no_remainder() {
 fn insufficient_native_tokens_one_input() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 100)]),
@@ -281,7 +281,7 @@ fn insufficient_native_tokens_one_input() {
         None,
         None,
     )]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 150)]),
@@ -295,7 +295,7 @@ fn insufficient_native_tokens_one_input() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select();
@@ -313,7 +313,7 @@ fn insufficient_native_tokens_one_input() {
 fn insufficient_native_tokens_three_inputs() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -345,7 +345,7 @@ fn insufficient_native_tokens_three_inputs() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 301)]),
@@ -359,7 +359,7 @@ fn insufficient_native_tokens_three_inputs() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select();
@@ -377,7 +377,7 @@ fn insufficient_native_tokens_three_inputs() {
 fn burn_and_send_at_the_same_time() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs([Basic(
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 100), (TOKEN_ID_2, 100)]),
@@ -387,7 +387,7 @@ fn burn_and_send_at_the_same_time() {
         None,
         None,
     )]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 50), (TOKEN_ID_2, 100)]),
@@ -401,7 +401,7 @@ fn burn_and_send_at_the_same_time() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .burn(Burn::new().add_native_token(TokenId::from_str(TOKEN_ID_1).unwrap(), 10))
@@ -427,7 +427,7 @@ fn burn_and_send_at_the_same_time() {
 fn burn_one_input_no_output() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 100)]),
@@ -441,7 +441,7 @@ fn burn_one_input_no_output() {
     let selected = InputSelection::new(
         inputs.clone(),
         Vec::new(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .burn(Burn::new().add_native_token(TokenId::from_str(TOKEN_ID_1).unwrap(), 50))
@@ -462,7 +462,7 @@ fn burn_one_input_no_output() {
 fn burn_two_inputs_no_output() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -488,7 +488,7 @@ fn burn_two_inputs_no_output() {
     let selected = InputSelection::new(
         inputs.clone(),
         Vec::new(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .burn(Burn::new().add_native_token(TokenId::from_str(TOKEN_ID_1).unwrap(), 50))
@@ -510,7 +510,7 @@ fn burn_two_inputs_no_output() {
 fn burn_one_input_two_tokens_no_output() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 100), (TOKEN_ID_2, 100)]),
@@ -524,7 +524,7 @@ fn burn_one_input_two_tokens_no_output() {
     let selected = InputSelection::new(
         inputs.clone(),
         Vec::new(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .burn(Burn::new().add_native_token(TokenId::from_str(TOKEN_ID_1).unwrap(), 50))
@@ -545,7 +545,7 @@ fn burn_one_input_two_tokens_no_output() {
 fn multiple_native_tokens_1() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -567,7 +567,7 @@ fn multiple_native_tokens_1() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 100)]),
@@ -581,7 +581,7 @@ fn multiple_native_tokens_1() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -596,7 +596,7 @@ fn multiple_native_tokens_1() {
 fn multiple_native_tokens_2() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -618,7 +618,7 @@ fn multiple_native_tokens_2() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 150)]),
@@ -632,7 +632,7 @@ fn multiple_native_tokens_2() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -653,7 +653,7 @@ fn multiple_native_tokens_2() {
 fn multiple_native_tokens_3() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -675,7 +675,7 @@ fn multiple_native_tokens_3() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 200)]),
@@ -689,7 +689,7 @@ fn multiple_native_tokens_3() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -710,7 +710,7 @@ fn multiple_native_tokens_3() {
 fn insufficient_native_tokens() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
@@ -720,7 +720,7 @@ fn insufficient_native_tokens() {
         None,
         None,
     )]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 150)]),
@@ -734,7 +734,7 @@ fn insufficient_native_tokens() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select();
@@ -752,7 +752,7 @@ fn insufficient_native_tokens() {
 fn insufficient_native_tokens_2() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 100)]),
@@ -762,7 +762,7 @@ fn insufficient_native_tokens_2() {
         None,
         None,
     )]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 150)]),
@@ -776,7 +776,7 @@ fn insufficient_native_tokens_2() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select();
@@ -794,7 +794,7 @@ fn insufficient_native_tokens_2() {
 fn insufficient_amount_for_remainder() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 100)]),
@@ -804,7 +804,7 @@ fn insufficient_amount_for_remainder() {
         None,
         None,
     )]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 50)]),
@@ -818,7 +818,7 @@ fn insufficient_amount_for_remainder() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select();
@@ -836,7 +836,7 @@ fn insufficient_amount_for_remainder() {
 fn single_output_native_token_no_remainder() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 100)]),
@@ -846,7 +846,7 @@ fn single_output_native_token_no_remainder() {
         None,
         None,
     )]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 100)]),
@@ -860,7 +860,7 @@ fn single_output_native_token_no_remainder() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -874,7 +874,7 @@ fn single_output_native_token_no_remainder() {
 fn single_output_native_token_remainder_1() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 100)]),
@@ -884,7 +884,7 @@ fn single_output_native_token_remainder_1() {
         None,
         None,
     )]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         500_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 50)]),
@@ -898,7 +898,7 @@ fn single_output_native_token_remainder_1() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -919,7 +919,7 @@ fn single_output_native_token_remainder_1() {
 fn single_output_native_token_remainder_2() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 100)]),
@@ -929,7 +929,7 @@ fn single_output_native_token_remainder_2() {
         None,
         None,
     )]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         500_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 100)]),
@@ -943,7 +943,7 @@ fn single_output_native_token_remainder_2() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -964,7 +964,7 @@ fn single_output_native_token_remainder_2() {
 fn two_basic_outputs_1() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -986,7 +986,7 @@ fn two_basic_outputs_1() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         500_000,
         BECH32_ADDRESS_ED25519_0,
         None,
@@ -1000,7 +1000,7 @@ fn two_basic_outputs_1() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -1022,7 +1022,7 @@ fn two_basic_outputs_1() {
 fn two_basic_outputs_2() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -1044,7 +1044,7 @@ fn two_basic_outputs_2() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         500_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 50)]),
@@ -1058,7 +1058,7 @@ fn two_basic_outputs_2() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -1080,7 +1080,7 @@ fn two_basic_outputs_2() {
 fn two_basic_outputs_3() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -1102,7 +1102,7 @@ fn two_basic_outputs_3() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         500_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 75)]),
@@ -1116,7 +1116,7 @@ fn two_basic_outputs_3() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -1138,7 +1138,7 @@ fn two_basic_outputs_3() {
 fn two_basic_outputs_4() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -1160,7 +1160,7 @@ fn two_basic_outputs_4() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         500_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 100)]),
@@ -1174,7 +1174,7 @@ fn two_basic_outputs_4() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -1196,7 +1196,7 @@ fn two_basic_outputs_4() {
 fn two_basic_outputs_5() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -1218,7 +1218,7 @@ fn two_basic_outputs_5() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         500_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 100)]),
@@ -1232,7 +1232,7 @@ fn two_basic_outputs_5() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -1254,7 +1254,7 @@ fn two_basic_outputs_5() {
 fn two_basic_outputs_6() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -1276,7 +1276,7 @@ fn two_basic_outputs_6() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         500_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 250)]),
@@ -1290,7 +1290,7 @@ fn two_basic_outputs_6() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -1311,7 +1311,7 @@ fn two_basic_outputs_6() {
 fn two_basic_outputs_7() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -1333,7 +1333,7 @@ fn two_basic_outputs_7() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         500_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 300)]),
@@ -1347,7 +1347,7 @@ fn two_basic_outputs_7() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()
@@ -1368,7 +1368,7 @@ fn two_basic_outputs_7() {
 fn two_basic_outputs_8() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -1390,7 +1390,7 @@ fn two_basic_outputs_8() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         500_000,
         BECH32_ADDRESS_ED25519_0,
         Some(vec![(TOKEN_ID_1, 350)]),
@@ -1404,7 +1404,7 @@ fn two_basic_outputs_8() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select();
@@ -1422,7 +1422,7 @@ fn two_basic_outputs_8() {
 fn two_basic_outputs_native_tokens_not_needed() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -1435,7 +1435,7 @@ fn two_basic_outputs_native_tokens_not_needed() {
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         500_000,
         BECH32_ADDRESS_ED25519_0,
         None,
@@ -1449,7 +1449,7 @@ fn two_basic_outputs_native_tokens_not_needed() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .select()

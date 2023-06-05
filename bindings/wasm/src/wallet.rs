@@ -90,7 +90,7 @@ pub async fn listen_wallet(
     callback: js_sys::Function,
     method_handler: &WalletMethodHandler,
 ) -> Result<JsValue, JsValue> {
-    let mut event_types = vec![];
+    let mut event_types = Vec::with_capacity(vec.length() as _);
     for event_type in vec.keys() {
         // We know the built-in iterator for set elements won't throw
         // exceptions, so just unwrap the element.

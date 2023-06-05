@@ -62,7 +62,7 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
     for _ in 0..30 {
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let output_ids_response = client
-            .basic_output_ids(vec![
+            .basic_output_ids([
                 QueryParameter::Address(addresses[0]),
                 QueryParameter::HasExpiration(false),
                 QueryParameter::HasTimelock(false),
@@ -206,11 +206,11 @@ async fn test_get_address_outputs() {
         .unwrap();
 
     let output_ids_response = client
-        .basic_output_ids(vec![QueryParameter::Address(address)])
+        .basic_output_ids([QueryParameter::Address(address)])
         .await
         .unwrap();
 
-    let r = client.get_outputs(output_ids_response.items).await.unwrap();
+    let r = client.get_outputs(&output_ids_response.items).await.unwrap();
 
     println!("{r:#?}");
 }

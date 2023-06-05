@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
     let basic_output_builder =
         BasicOutputBuilder::new_with_amount(1_000_000).add_unlock_condition(AddressUnlockCondition::new(address));
 
-    let outputs = vec![
+    let outputs = [
         // most simple output
         basic_output_builder.clone().finish_output(token_supply)?,
         // with metadata feature block
