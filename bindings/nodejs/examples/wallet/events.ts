@@ -3,21 +3,18 @@
 
 import {
     Event,
-    Wallet,
-    CoinType,
-    initLogger,
     ConsolidationRequiredWalletEvent,
     TransactionProgressWalletEvent,
     SelectingInputsProgress,
 } from '@iota/sdk';
+import { getUnlockedManager } from './account-manager';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example events.ts
+// yarn run-example wallet/events.ts
 
 // This example listens to wallet events.
 async function run() {
-    initLogger();
     if (!process.env.NODE_URL) {
         throw new Error('.env NODE_URL is undefined, see .env.example');
     }
@@ -27,21 +24,8 @@ async function run() {
         );
     }
     try {
-        const walletOptions = {
-            storagePath: './alice-database',
-            clientOptions: {
-                nodes: [process.env.NODE_URL],
-            },
-            coinType: CoinType.Shimmer,
-            secretManager: {
-                stronghold: {
-                    snapshotPath: `./wallet.stronghold`,
-                    password: `${process.env.STRONGHOLD_PASSWORD}`,
-                },
-            },
-        };
-
-        const wallet = new Wallet(walletOptions);
+        // Create the wallet
+        const wallet = await getUnlockedManager();
 
         const callback = function (err: any, event: Event) {
             console.log(
