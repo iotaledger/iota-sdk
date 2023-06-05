@@ -179,7 +179,7 @@ use iota_sdk::client::{
 };
 
 let client = Client::builder()
-    .with_node('https://api.testnet.shimmer.network')? // Insert your node URL here
+    .with_node("https://api.testnet.shimmer.network")? // Insert your node URL here
     .finish()
     .await?;
 ```
