@@ -22,8 +22,10 @@ use std::time::Duration;
 use std::{collections::HashMap, fmt::Debug, ops::Range, str::FromStr};
 
 use async_trait::async_trait;
-use crypto::signatures::secp256k1_ecdsa::{self, EvmAddress};
-use iota_stronghold::procedures::Chain;
+use crypto::{
+    keys::slip10::Chain,
+    signatures::secp256k1_ecdsa::{self, EvmAddress},
+};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use zeroize::ZeroizeOnDrop;
 
