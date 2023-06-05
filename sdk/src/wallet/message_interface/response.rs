@@ -101,6 +101,7 @@ pub enum Response {
     GeneratedEvmAddresses(Vec<String>),
     /// Response for:
     /// - [`SignEvm`](crate::method::SecretManagerMethod::SignEvm)
+    #[serde(rename_all = "camelCase")]
     EvmSignature { public_key: String, signature: String },
     /// Response for
     /// [`GetBalance`](crate::wallet::message_interface::AccountMethod::GetBalance),

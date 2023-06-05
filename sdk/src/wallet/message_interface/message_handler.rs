@@ -589,7 +589,7 @@ impl WalletMessageHandler {
                 Ok(Response::GeneratedEvmAddresses(addresses))
             }
             AccountMethod::SignEvm { message, chain } => {
-                let msg: Vec<u8> = prefix_hex::decode(message).unwrap();
+                let msg: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
                 let (public_key, signature) = account
                     .wallet
                     .secret_manager

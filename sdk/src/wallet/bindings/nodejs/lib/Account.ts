@@ -33,6 +33,7 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
     GenerateAddressesOptions,
+    EvmSignature,
 } from '../types';
 import type { SignedTransactionEssence } from '../types/signedTransactionEssence';
 import type {
@@ -42,7 +43,6 @@ import type {
     BuildNftOutputData,
 } from '../types/buildOutputData';
 import type {
-    EvmSignature,
     HexEncodedAmount,
     HexEncodedString,
     IAliasOutput,
