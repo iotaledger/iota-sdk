@@ -44,7 +44,12 @@ async function run() {
         const wallet = new Wallet(walletOptions);
 
         const callback = function (err: any, event: Event) {
-            console.log('AccountIndex:', event.getAccountIndex(), ', Event:', event.getEvent());
+            console.log(
+                'AccountIndex:',
+                event.getAccountIndex(),
+                ', Event:',
+                event.getEvent(),
+            );
         };
 
         await wallet.listen([], callback);

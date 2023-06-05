@@ -17,9 +17,7 @@ import type {
     SyncOptions,
     WalletEvent,
 } from '../types';
-import {
-    Event,
-} from '../types';
+import { Event } from '../types';
 
 /** The AccountManager class. */
 export class AccountManager {

@@ -72,10 +72,14 @@ const listenWalletAsync = (
     callback: (error: Error, event: Event) => void,
     handler: WalletMethodHandler,
 ): Promise<void> => {
-    listenWallet(eventTypes, function (err: any, data: string) {
-        const parsed = JSON.parse(data);
-        callback(err, new Event(parsed.accountIndex, parsed.event));
-    }, handler);
+    listenWallet(
+        eventTypes,
+        function (err: any, data: string) {
+            const parsed = JSON.parse(data);
+            callback(err, new Event(parsed.accountIndex, parsed.event));
+        },
+        handler,
+    );
     return Promise.resolve();
 };
 
