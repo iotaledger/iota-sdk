@@ -10,9 +10,8 @@ use std::{
 };
 
 use backtrace::Backtrace;
+use crypto::keys::slip10::Chain;
 use futures::{Future, FutureExt};
-#[cfg(feature = "stronghold")]
-use iota_stronghold::procedures::Chain;
 use primitive_types::U256;
 use zeroize::Zeroize;
 
