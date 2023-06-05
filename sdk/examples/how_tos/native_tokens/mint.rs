@@ -70,6 +70,8 @@ async fn main() -> Result<()> {
         block_id
     );
 
+    println!("Minted token: {}", mint_txn.token_id);
+
     // Ensure the account is synced after minting.
     account.sync(None).await?;
     println!("Account synced");

@@ -19,12 +19,19 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 # Sync account with the node
 response = account.sync()
 
-transaction = account.prepare_create_alias_output(None, None).send()
+print('Preparing alias output transaction...')
 
-# Wait a few seconds for the transaction to get confirmed
-time.sleep(7)
+transaction = account.prepare_create_alias_output(None, None).send()
+print(f'Transaction sent: {transaction["transactionId"]}')
+
+# Wait for transaction to get included
+blockId = account.retry_transaction_until_included(transaction['transactionId'])
+print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
 
 account.sync()
+print("Account synced")
+
+print('Preparing minting transaction...')
 
 params = {
     # 1000 hex encoded
@@ -33,8 +40,16 @@ params = {
     "foundryMetadata": "0xab",
 }
 
-transaction = account.prepare_mint_native_token(params, None)
-print(f'Token id: {transaction.token_id()}')
+prepared_transaction = account.prepare_mint_native_token(params, None)
+transaction = prepared_transaction.send()
+print(f'Transaction sent: {transaction["transactionId"]}')
 
-transaction = transaction.send()
-print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
+# Wait for transaction to get included
+blockId = account.retry_transaction_until_included(transaction['transactionId'])
+print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
+
+print(f'Minted token: {prepared_transaction.token_id()}')
+
+# Ensure the account is synced after minting.
+account.sync()
+print('Account synced')

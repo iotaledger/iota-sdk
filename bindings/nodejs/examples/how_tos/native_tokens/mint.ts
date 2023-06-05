@@ -27,7 +27,7 @@ async function run() {
             `${process.env.ACCOUNT_ALIAS_1}`,
         );
 
-        console.log('Sending alias output transaction...');
+        console.log('Preparing alias output transaction...');
 
         // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs
         let transaction = await account
@@ -41,13 +41,13 @@ async function run() {
         );
 
         console.log(
-            `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
         await account.sync();
         console.log('Account synced');
 
-        console.log('Sending the minting transaction...');
+        console.log('Preparing minting transaction...');
 
         // If we omit the AccountAddress field the first address of the account is used by default
         const params: MintNativeTokenParams = {
@@ -66,7 +66,7 @@ async function run() {
         );
 
         console.log(
-            `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
         console.log(`Minted token: ${prepared.tokenId()}`);
