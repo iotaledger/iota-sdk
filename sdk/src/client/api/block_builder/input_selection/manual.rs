@@ -12,7 +12,7 @@ use crate::{
         api::{
             address::search_address,
             block_builder::input_selection::{Burn, InputSelection, Selected},
-            input_selection::{core::requirement::alias::is_alias_transition_internal, is_alias_transition},
+            input_selection::is_alias_transition,
             ClientBlockBuilder,
         },
         constants::HD_WALLET_TYPE,
@@ -42,12 +42,16 @@ impl<'a> ClientBlockBuilder<'a> {
                 let output_with_meta = self.client.get_output(input.output_id()).await?;
 
                 if !output_with_meta.metadata().is_spent() {
-                    let alias_transition =
-                        is_alias_transition_internal(output_with_meta.output(), *input.output_id(), &self.outputs);
+                    let alias_transition = is_alias_transition(
+                        output_with_meta.output(),
+                        *input.output_id(),
+                        &self.outputs,
+                        burn.as_ref(),
+                    );
                     let (unlock_address, _) = output_with_meta.output().required_and_unlocked_address(
                         current_time,
                         input.output_id(),
-                        alias_transition.map(|g| g.0),
+                        alias_transition,
                     )?;
 
                     let bech32_hrp = self.client.get_bech32_hrp().await?;
@@ -77,7 +81,7 @@ impl<'a> ClientBlockBuilder<'a> {
                         output: output_with_meta.output,
                         output_metadata: output_with_meta.metadata,
                         chain: address_index_internal.map(|(address_index, internal)| {
-                            Chain::from_u32_hardened(vec![
+                            Chain::from_u32_hardened([
                                 HD_WALLET_TYPE,
                                 self.coin_type,
                                 self.account_index,
@@ -98,12 +102,11 @@ impl<'a> ClientBlockBuilder<'a> {
         // Assume that we own the addresses for inputs that are provided
         let mut available_input_addresses = Vec::new();
         for input in &inputs_data {
-            let alias_transition = is_alias_transition(input, &self.outputs);
-            let (required_unlock_address, unlocked_alias_or_nft_address) = input.output.required_and_unlocked_address(
-                current_time,
-                input.output_id(),
-                alias_transition.map(|(alias_transition, _)| alias_transition),
-            )?;
+            let alias_transition = is_alias_transition(&input.output, *input.output_id(), &self.outputs, burn.as_ref());
+            let (required_unlock_address, unlocked_alias_or_nft_address) =
+                input
+                    .output
+                    .required_and_unlocked_address(current_time, input.output_id(), alias_transition)?;
             available_input_addresses.push(required_unlock_address);
             if let Some(unlocked_alias_or_nft_address) = unlocked_alias_or_nft_address {
                 available_input_addresses.push(unlocked_alias_or_nft_address);

@@ -64,7 +64,7 @@ async fn main() -> Result<()> {
     // generate addresses so we find all funds
     if pong_account.addresses().await?.len() < amount_addresses {
         pong_account
-            .generate_addresses((amount_addresses - pong_account.addresses().await?.len()) as u32, None)
+            .generate_ed25519_addresses((amount_addresses - pong_account.addresses().await?.len()) as u32, None)
             .await?;
     }
     let balance = ping_account.sync(None).await?;
@@ -74,7 +74,7 @@ async fn main() -> Result<()> {
         let mut addresses = ping_account.addresses().await?;
         if addresses.len() < amount_addresses {
             addresses = ping_account
-                .generate_addresses((amount_addresses - addresses.len()) as u32, None)
+                .generate_ed25519_addresses((amount_addresses - addresses.len()) as u32, None)
                 .await?
         };
         println!(

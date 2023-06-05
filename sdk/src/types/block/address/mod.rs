@@ -10,7 +10,7 @@ use derive_more::From;
 
 pub use self::{
     alias::AliasAddress,
-    bech32::{Bech32Address, Bech32AddressLike, Hrp, HrpLike},
+    bech32::{Bech32Address, Hrp},
     ed25519::Ed25519Address,
     nft::NftAddress,
 };
@@ -19,7 +19,7 @@ use crate::types::block::{
     semantic::{ConflictReason, ValidationContext},
     signature::Signature,
     unlock::Unlock,
-    Error,
+    ConvertTo, Error,
 };
 
 /// A generic address supporting different address kinds.
@@ -109,24 +109,8 @@ impl Address {
     }
 
     /// Tries to create an [`Address`] from a bech32 encoded string.
-    pub fn try_from_bech32<T: AsRef<str>>(address: T) -> Result<Self, Error> {
+    pub fn try_from_bech32(address: impl AsRef<str>) -> Result<Self, Error> {
         Bech32Address::try_from_str(address).map(|res| res.inner)
-    }
-
-    /// Try to encode this address to a bech32 string with the given Human Readable Part as prefix.
-    pub fn try_to_bech32(&self, hrp: impl HrpLike) -> Result<Bech32Address, Error> {
-        Bech32Address::try_new(hrp, self)
-    }
-
-    /// Encodes this address to a bech32 string with the given Human Readable Part as prefix.
-    pub fn to_bech32(&self, hrp: Hrp) -> Bech32Address {
-        Bech32Address::new(hrp, self)
-    }
-
-    /// Encodes this address to a bech32 string with the given Human Readable Part as prefix without checking
-    /// validity.
-    pub fn to_bech32_unchecked(&self, hrp: impl HrpLike) -> Bech32Address {
-        Bech32Address::new(hrp.to_hrp_unchecked(), self)
     }
 
     /// Checks if an string is a valid bech32 encoded address.
@@ -192,6 +176,35 @@ impl Address {
         }
 
         Ok(())
+    }
+}
+
+pub trait ToBech32Ext: Sized {
+    /// Try to encode this address to a bech32 string with the given Human Readable Part as prefix.
+    fn try_to_bech32(self, hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address, Error>;
+
+    /// Encodes this address to a bech32 string with the given Human Readable Part as prefix.
+    fn to_bech32(self, hrp: Hrp) -> Bech32Address;
+
+    /// Encodes this address to a bech32 string with the given Human Readable Part as prefix without checking
+    /// validity.
+    fn to_bech32_unchecked(self, hrp: impl ConvertTo<Hrp>) -> Bech32Address;
+}
+impl<T: Into<Address>> ToBech32Ext for T {
+    /// Try to encode this address to a bech32 string with the given Human Readable Part as prefix.
+    fn try_to_bech32(self, hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address, Error> {
+        Bech32Address::try_new(hrp, self)
+    }
+
+    /// Encodes this address to a bech32 string with the given Human Readable Part as prefix.
+    fn to_bech32(self, hrp: Hrp) -> Bech32Address {
+        Bech32Address::new(hrp, self)
+    }
+
+    /// Encodes this address to a bech32 string with the given Human Readable Part as prefix without checking
+    /// validity.
+    fn to_bech32_unchecked(self, hrp: impl ConvertTo<Hrp>) -> Bech32Address {
+        Bech32Address::new(hrp.convert_unchecked(), self)
     }
 }
 

@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
         }
     };
 
-    account.generate_addresses(1, None).await?;
+    account.generate_ed25519_addresses(1, None).await?;
 
     wallet.start_background_syncing(None, None).await?;
     sleep(Duration::from_secs(10)).await;

@@ -54,7 +54,7 @@ async fn main() -> Result<()> {
         }
     };
 
-    let _address = account.generate_addresses(5, None).await?;
+    let _address = account.generate_ed25519_addresses(5, None).await?;
 
     let balance = account.sync(None).await?;
     println!("Balance: {balance:?}");

@@ -59,8 +59,8 @@ export type __GetLedgerNanoStatusMethod__ = {
     name: 'getLedgerNanoStatus';
 };
 
-export type __GenerateAddressMethod__ = {
-    name: 'generateAddress';
+export type __GenerateEd25519AddressMethod__ = {
+    name: 'generateEd25519Address';
     data: {
         accountIndex: number;
         addressIndex: number;

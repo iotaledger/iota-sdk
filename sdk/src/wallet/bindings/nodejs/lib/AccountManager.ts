@@ -162,14 +162,14 @@ export class AccountManager {
     /**
      * Generate an address without storing it.
      */
-    async generateAddress(
+    async generateEd25519Address(
         accountIndex: number,
         addressIndex: number,
         options?: GenerateAddressOptions,
         bech32Hrp?: string,
     ): Promise<string> {
         const response = await this.messageHandler.sendMessage({
-            cmd: 'generateAddress',
+            cmd: 'generateEd25519Address',
             payload: {
                 accountIndex,
                 addressIndex,
