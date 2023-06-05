@@ -85,7 +85,8 @@ fn iota_sdk(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(call_wallet_method, m)?).unwrap();
     m.add_function(wrap_pyfunction!(destroy_wallet, m)?).unwrap();
     m.add_function(wrap_pyfunction!(get_client_from_wallet, m)?).unwrap();
-    m.add_function(wrap_pyfunction!(get_secret_manager_from_wallet, m)?).unwrap();
+    m.add_function(wrap_pyfunction!(get_secret_manager_from_wallet, m)?)
+        .unwrap();
     m.add_function(wrap_pyfunction!(listen_wallet, m)?).unwrap();
 
     m.add_function(wrap_pyfunction!(migrate_stronghold_snapshot_v2_to_v3, m)?)

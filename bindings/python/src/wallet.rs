@@ -126,8 +126,7 @@ pub fn get_secret_manager_from_wallet(wallet: &Wallet) -> Result<SecretManager> 
                         .as_str(),
                 )
             })
-    })?
-    .clone();
+    })?;
 
     Ok(SecretManager { secret_manager })
 }
