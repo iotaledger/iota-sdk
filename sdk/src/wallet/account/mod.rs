@@ -27,7 +27,7 @@ use tokio::sync::{Mutex, RwLock};
 pub use self::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes};
 use self::types::{
     address::{AccountAddress, AddressWithUnspentOutputs},
-    AccountBalance, OutputData, Transaction,
+    Balance, OutputData, Transaction,
 };
 pub use self::{
     operations::{
