@@ -67,7 +67,7 @@ async fn main() -> Result<()> {
 
     // Get outputs for address and request if they're participating
     let output_ids_response = client
-        .basic_output_ids(vec![
+        .basic_output_ids([
             QueryParameter::Address(address),
             QueryParameter::HasExpiration(false),
             QueryParameter::HasTimelock(false),
@@ -101,11 +101,9 @@ async fn participate(client: &Client, event_id: ParticipationEventId) -> Result<
         .generate_ed25519_addresses(GetAddressesOptions::from_client(client).await?.with_range(0..1))
         .await?[0];
 
-    let outputs = vec![
-        BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+        .add_unlock_condition(AddressUnlockCondition::new(address))
+        .finish_output(token_supply)?];
 
     let block = client
         .block()

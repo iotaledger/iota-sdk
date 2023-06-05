@@ -1,8 +1,6 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::vec;
-
 use crate::types::block::{
     payload::{
         milestone::{MilestoneEssence, MilestoneOptions, MilestonePayload},
@@ -46,10 +44,10 @@ pub fn rand_milestone_payload(protocol_version: u8) -> MilestonePayload {
         rand_merkle_root(),
         rand_merkle_root(),
         rand_bytes(32),
-        MilestoneOptions::from_vec(vec![]).unwrap(),
+        MilestoneOptions::from_vec(Vec::new()).unwrap(),
     )
     .unwrap();
-    let signatures = vec![Signature::from(Ed25519Signature::new(
+    let signatures = [Signature::from(Ed25519Signature::new(
         rand_bytes_array(),
         rand_bytes_array(),
     ))];

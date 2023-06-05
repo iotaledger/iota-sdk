@@ -33,39 +33,39 @@ impl Account {
         log::debug!("[SYNC] convert output_responses");
         // store outputs with network_id
         let network_id = self.client().get_network_id().await?;
-        let mut outputs = Vec::new();
         let account_details = self.details().await;
 
-        for output_with_meta in outputs_with_meta {
-            // check if we know the transaction that created this output and if we created it (if we store incoming
-            // transactions separated, then this check wouldn't be required)
-            let remainder = account_details
-                .transactions
-                .get(output_with_meta.metadata().transaction_id())
-                .map_or(false, |tx| !tx.incoming);
+        Ok(outputs_with_meta
+            .into_iter()
+            .map(|output_with_meta| {
+                // check if we know the transaction that created this output and if we created it (if we store incoming
+                // transactions separated, then this check wouldn't be required)
+                let remainder = account_details
+                    .transactions
+                    .get(output_with_meta.metadata().transaction_id())
+                    .map_or(false, |tx| !tx.incoming);
 
-            // 44 is for BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
-            let chain = Chain::from_u32_hardened([
-                HD_WALLET_TYPE,
-                account_details.coin_type,
-                account_details.index,
-                associated_address.internal as u32,
-                associated_address.key_index,
-            ]);
+                // 44 is for BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
+                let chain = Chain::from_u32_hardened([
+                    HD_WALLET_TYPE,
+                    account_details.coin_type,
+                    account_details.index,
+                    associated_address.internal as u32,
+                    associated_address.key_index,
+                ]);
 
-            outputs.push(OutputData {
-                output_id: output_with_meta.metadata().output_id().to_owned(),
-                metadata: output_with_meta.metadata().clone(),
-                output: output_with_meta.output().clone(),
-                is_spent: output_with_meta.metadata().is_spent(),
-                address: associated_address.address.inner,
-                network_id,
-                remainder,
-                chain: Some(chain),
-            });
-        }
-
-        Ok(outputs)
+                OutputData {
+                    output_id: output_with_meta.metadata().output_id().to_owned(),
+                    metadata: output_with_meta.metadata().clone(),
+                    output: output_with_meta.output().clone(),
+                    is_spent: output_with_meta.metadata().is_spent(),
+                    address: associated_address.address.inner,
+                    network_id,
+                    remainder,
+                    chain: Some(chain),
+                }
+            })
+            .collect())
     }
 
     /// Gets outputs by their id, already known outputs are not requested again, but loaded from the account set as
@@ -104,7 +104,7 @@ impl Account {
         drop(account_details);
 
         if !unknown_outputs.is_empty() {
-            outputs.extend(self.client().get_outputs(unknown_outputs).await?);
+            outputs.extend(self.client().get_outputs(&unknown_outputs).await?);
         }
 
         log::debug!(
@@ -120,81 +120,75 @@ impl Account {
     // returned
     pub(crate) async fn request_incoming_transaction_data(
         &self,
-        transaction_ids: Vec<TransactionId>,
+        mut transaction_ids: Vec<TransactionId>,
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] request_incoming_transaction_data");
 
+        let account_details = self.details().await;
+        transaction_ids.retain(|transaction_id| {
+            !(account_details.transactions.contains_key(transaction_id)
+                || account_details.incoming_transactions.contains_key(transaction_id)
+                || account_details
+                    .inaccessible_incoming_transactions
+                    .contains(transaction_id))
+        });
+
         // Limit parallel requests to 100, to avoid timeouts
-        for transaction_ids_chunk in transaction_ids.chunks(100).map(|x: &[TransactionId]| x.to_vec()) {
-            let mut tasks = Vec::new();
-            let account_details = self.details().await;
-
-            for transaction_id in transaction_ids_chunk {
-                // Don't request known or inaccessible transactions again
-                if account_details.transactions.contains_key(&transaction_id)
-                    || account_details.incoming_transactions.contains_key(&transaction_id)
-                    || account_details
-                        .inaccessible_incoming_transactions
-                        .contains(&transaction_id)
-                {
-                    continue;
-                }
-
+        let results =
+            futures::future::try_join_all(transaction_ids.chunks(100).map(|x| x.to_vec()).map(|transaction_ids| {
                 let client = self.client().clone();
-                tasks.push(async move {
+                async move {
                     task::spawn(async move {
-                        match client.get_included_block(&transaction_id).await {
-                            Ok(block) => {
-                                if let Some(Payload::Transaction(transaction_payload)) = block.payload() {
-                                    let inputs_with_meta =
-                                        get_inputs_for_transaction_payload(&client, transaction_payload).await?;
-                                    let inputs_response: Vec<OutputWithMetadataResponse> = inputs_with_meta
-                                        .into_iter()
-                                        .map(OutputWithMetadataResponse::from)
-                                        .collect();
+                        futures::future::try_join_all(transaction_ids.iter().map(|transaction_id| async {
+                            let transaction_id = *transaction_id;
+                            match client.get_included_block(&transaction_id).await {
+                                Ok(block) => {
+                                    if let Some(Payload::Transaction(transaction_payload)) = block.payload() {
+                                        let inputs_with_meta =
+                                            get_inputs_for_transaction_payload(&client, transaction_payload).await?;
+                                        let inputs_response: Vec<OutputWithMetadataResponse> = inputs_with_meta
+                                            .into_iter()
+                                            .map(OutputWithMetadataResponse::from)
+                                            .collect();
 
-                                    let transaction = build_transaction_from_payload_and_inputs(
-                                        transaction_id,
-                                        *transaction_payload.clone(),
-                                        inputs_response,
-                                    )?;
+                                        let transaction = build_transaction_from_payload_and_inputs(
+                                            transaction_id,
+                                            *transaction_payload.clone(),
+                                            inputs_response,
+                                        )?;
 
-                                    Ok((transaction_id, Some(transaction)))
-                                } else {
+                                        Ok((transaction_id, Some(transaction)))
+                                    } else {
+                                        Ok((transaction_id, None))
+                                    }
+                                }
+                                Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {
                                     Ok((transaction_id, None))
                                 }
+                                Err(e) => Err(crate::wallet::Error::Client(e.into())),
                             }
-                            Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {
-                                Ok((transaction_id, None))
-                            }
-                            Err(e) => Err(crate::wallet::Error::Client(e.into())),
-                        }
+                        }))
+                        .await
                     })
-                    .await
-                });
-            }
-
-            drop(account_details);
-
-            let results = futures::future::try_join_all(tasks).await?;
-            // Update account with new transactions
-            let mut account_details = self.details_mut().await;
-            for res in results {
-                match res? {
-                    (transaction_id, Some(transaction)) => {
-                        account_details
-                            .incoming_transactions
-                            .insert(transaction_id, transaction);
-                    }
-                    (transaction_id, None) => {
-                        log::debug!("[SYNC] adding {transaction_id} to inaccessible_incoming_transactions");
-                        // Save transactions that weren't found by the node to avoid requesting them endlessly.
-                        // Will be cleared when new client options are provided.
-                        account_details
-                            .inaccessible_incoming_transactions
-                            .insert(transaction_id);
-                    }
+                    .await?
                 }
+            }))
+            .await?;
+
+        // Update account with new transactions
+        let mut account_details = self.details_mut().await;
+        for (transaction_id, txn) in results.into_iter().flatten() {
+            if let Some(transaction) = txn {
+                account_details
+                    .incoming_transactions
+                    .insert(transaction_id, transaction);
+            } else {
+                log::debug!("[SYNC] adding {transaction_id} to inaccessible_incoming_transactions");
+                // Save transactions that weren't found by the node to avoid requesting them endlessly.
+                // Will be cleared when new client options are provided.
+                account_details
+                    .inaccessible_incoming_transactions
+                    .insert(transaction_id);
             }
         }
 
@@ -208,13 +202,21 @@ pub(crate) async fn get_inputs_for_transaction_payload(
     transaction_payload: &TransactionPayload,
 ) -> crate::wallet::Result<Vec<OutputWithMetadata>> {
     let TransactionEssence::Regular(essence) = transaction_payload.essence();
-    let mut output_ids = Vec::new();
 
-    for input in essence.inputs() {
-        if let Input::Utxo(input) = input {
-            output_ids.push(*input.output_id());
-        }
-    }
+    let output_ids = essence
+        .inputs()
+        .iter()
+        .filter_map(|input| {
+            if let Input::Utxo(input) = input {
+                Some(*input.output_id())
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
 
-    client.get_outputs_ignore_errors(output_ids).await.map_err(|e| e.into())
+    client
+        .get_outputs_ignore_errors(&output_ids)
+        .await
+        .map_err(|e| e.into())
 }

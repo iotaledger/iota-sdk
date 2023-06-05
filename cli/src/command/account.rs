@@ -305,7 +305,7 @@ pub async fn claim_command(account: &Account, output_id: Option<String>) -> Resu
     if let Some(output_id) = output_id {
         println_log_info!("Claiming output {output_id}");
 
-        let transaction = account.claim_outputs(vec![OutputId::from_str(&output_id)?]).await?;
+        let transaction = account.claim_outputs([OutputId::from_str(&output_id)?]).await?;
 
         println_log_info!(
             "Claiming transaction sent:\n{:?}\n{:?}",
@@ -569,7 +569,7 @@ pub async fn mint_nft_command(
         .with_sender(sender)
         .with_issuer(issuer);
 
-    let transaction = account.mint_nfts(vec![nft_options], None).await?;
+    let transaction = account.mint_nfts([nft_options], None).await?;
 
     println_log_info!(
         "NFT minting transaction sent:\n{:?}\n{:?}",
@@ -625,11 +625,9 @@ pub async fn send_command(
     expiration: Option<u32>,
     allow_micro_amount: bool,
 ) -> Result<(), Error> {
-    let outputs = vec![
-        SendAmountParams::new(address, amount)?
-            .with_return_address(return_address.map(ConvertTo::convert).transpose()?)
-            .with_expiration(expiration),
-    ];
+    let outputs = [SendAmountParams::new(address, amount)?
+        .with_return_address(return_address.map(ConvertTo::convert).transpose()?)
+        .with_expiration(expiration)];
     let transaction = account
         .send_amount(
             outputs,
@@ -665,20 +663,18 @@ pub async fn send_native_token_command(
 
         account.client().bech32_hrp_matches(address.hrp()).await?;
 
-        let outputs = vec![
-            BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                .add_unlock_condition(AddressUnlockCondition::new(address))
-                .with_native_tokens(vec![NativeToken::new(
-                    TokenId::from_str(&token_id)?,
-                    U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-                )?])
-                .finish_output(token_supply)?,
-        ];
+        let outputs = [BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+            .add_unlock_condition(AddressUnlockCondition::new(address))
+            .with_native_tokens([NativeToken::new(
+                TokenId::from_str(&token_id)?,
+                U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+            )?])
+            .finish_output(token_supply)?];
 
         account.send(outputs, None).await?
     } else {
         // Send native tokens with storage deposit return and expiration
-        let outputs = vec![SendNativeTokensParams::new(
+        let outputs = [SendNativeTokensParams::new(
             address,
             [(
                 TokenId::from_str(&token_id)?,
@@ -703,7 +699,7 @@ pub async fn send_nft_command(
     address: impl ConvertTo<Bech32Address>,
     nft_id: String,
 ) -> Result<(), Error> {
-    let outputs = vec![SendNftParams::new(address.convert()?, &nft_id)?];
+    let outputs = [SendNftParams::new(address.convert()?, &nft_id)?];
     let transaction = account.send_nft(outputs, None).await?;
 
     println_log_info!(

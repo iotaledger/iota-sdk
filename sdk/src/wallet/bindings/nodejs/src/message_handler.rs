@@ -78,7 +78,7 @@ fn call_event_callback(channel: &neon::event::Channel, event_data: Event, callba
     channel.send(move |mut cx| {
         let cb = (*callback).to_inner(&mut cx);
         let this = cx.undefined();
-        let args = vec![
+        let args = [
             cx.undefined().upcast::<JsValue>(),
             cx.string(serde_json::to_string(&event_data).unwrap())
                 .upcast::<JsValue>(),
@@ -122,7 +122,7 @@ pub fn send_message(mut cx: FunctionContext) -> JsResult<JsUndefined> {
                 let cb = callback.into_inner(&mut cx);
                 let this = cx.undefined();
 
-                let args = vec![
+                let args = [
                     if is_error {
                         cx.string(response.clone()).upcast::<JsValue>()
                     } else {
@@ -146,7 +146,7 @@ pub fn send_message(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 pub fn listen(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let js_arr_handle: Handle<JsArray> = cx.argument(0)?;
     let vec: Vec<Handle<JsValue>> = js_arr_handle.to_vec(&mut cx)?;
-    let mut event_types = vec![];
+    let mut event_types = Vec::new();
     for event_string in vec {
         let event_type = event_string.downcast_or_throw::<JsNumber, FunctionContext>(&mut cx)?;
         let wallet_event_type =

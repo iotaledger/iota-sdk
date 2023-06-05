@@ -32,11 +32,9 @@ async fn main() -> Result<()> {
         .await?[0];
     request_funds_from_faucet(&faucet_url, &address).await?;
 
-    let outputs = vec![
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
+        .add_unlock_condition(AddressUnlockCondition::new(address))
+        .finish_output(token_supply)?];
 
     let block = client
         .block()
