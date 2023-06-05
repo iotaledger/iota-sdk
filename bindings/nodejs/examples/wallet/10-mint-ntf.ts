@@ -11,7 +11,7 @@ import {
     Utils,
 } from '@iota/sdk';
 
-import { getUnlockedManager } from './account-manager';
+import { getUnlockedWallet } from './common';
 
 // The owner address of the first NFT we'll mint
 const NFT1_OWNER_ADDRESS =
@@ -35,10 +35,10 @@ const NFT2_AMOUNT = '1000000';
 async function run() {
     try {
         // Create the wallet
-        const manager = await getUnlockedManager();
+        const wallet = await getUnlockedWallet();
 
         // Get the account we generated with `01-create-wallet`
-        const account = await manager.getAccount(
+        const account = await wallet.getAccount(
             `${process.env.ACCOUNT_ALIAS_1}`,
         );
 
@@ -75,7 +75,7 @@ async function run() {
         console.log('Minted NFT 1');
 
         // Build an NFT manually by using the `NftOutputBuilder`
-        const client = await manager.getClient();
+        const client = await wallet.getClient();
 
         const hexAddress = Utils.bech32ToHex(senderAddress);
         const output = await client.buildNftOutput({
