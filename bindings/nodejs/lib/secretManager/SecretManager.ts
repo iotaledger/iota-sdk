@@ -14,7 +14,7 @@ import type {
     HexEncodedString,
     IEd25519Signature,
 } from '@iota/types';
-import { SecretManagerType } from '../types/secretManager/';
+import { EvmSignature, SecretManagerType } from '../types/secretManager/';
 
 /** The SecretManager to interact with nodes. */
 export class SecretManager {
@@ -123,7 +123,7 @@ export class SecretManager {
     async signEvm(
         message: HexEncodedString,
         chain: IBip32Chain,
-    ): Promise<IEd25519Signature> {
+    ): Promise<EvmSignature> {
         const response = await this.methodHandler.callMethod({
             name: 'signEvm',
             data: {

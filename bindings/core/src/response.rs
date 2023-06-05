@@ -106,6 +106,7 @@ pub enum Response {
     Ed25519Signature(Ed25519SignatureDto),
     /// Response for:
     /// - [`SignEvm`](crate::method::SecretManagerMethod::SignEvm)
+    #[serde(rename_all = "camelCase")]
     EvmSignature { public_key: String, signature: String },
     /// Response for:
     /// - [`UnhealthyNodes`](crate::method::ClientMethod::UnhealthyNodes)
