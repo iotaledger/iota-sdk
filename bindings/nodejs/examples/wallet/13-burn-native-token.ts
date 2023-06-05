@@ -1,5 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
 import { getUnlockedManager } from './account-manager';
 
 // The native token id. Replace it with a TokenId that is available in the account, the foundry output which minted it,
