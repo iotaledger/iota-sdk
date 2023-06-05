@@ -29,6 +29,8 @@ async function run() {
 
         console.log('Preparing alias output transaction...');
 
+        await account.sync();
+
         // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs
         let transaction = await account
             .prepareCreateAliasOutput()
