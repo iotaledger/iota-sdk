@@ -43,12 +43,10 @@ async fn main() -> Result<()> {
         let bech32_address =
             Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?;
 
-        let outputs = vec![SendNativeTokensParams {
-            address: bech32_address,
-            native_tokens: vec![(*token_id, U256::from(10))],
-            return_address: Default::default(),
-            expiration: Default::default(),
-        }];
+        let outputs = vec![SendNativeTokensParams::new(
+            bech32_address,
+            [(*token_id, U256::from(10))],
+        )?];
 
         println!("Preparing native token transaction...");
 

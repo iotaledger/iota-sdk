@@ -32,14 +32,10 @@ async fn main() -> Result<()> {
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let nft_options = vec![MintNftParams {
-        address: None,
-        immutable_metadata: Some(b"This NFT will be the issuer from the awesome NFT collection".to_vec()),
-        issuer: None,
-        metadata: None,
-        sender: None,
-        tag: None,
-    }];
+    let nft_options = vec![
+        MintNftParams::new()
+            .with_immutable_metadata(b"This NFT will be the issuer from the awesome NFT collection".to_vec()),
+    ];
 
     let transaction = account.mint_nfts(nft_options, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);

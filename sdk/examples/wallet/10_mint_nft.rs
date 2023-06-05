@@ -7,13 +7,10 @@
 //! `cargo run --example mint_nft --release`
 
 use iota_sdk::{
-    types::block::{
-        address::Bech32Address,
-        output::{
-            feature::{IssuerFeature, SenderFeature},
-            unlock_condition::AddressUnlockCondition,
-            NftId, NftOutputBuilder,
-        },
+    types::block::output::{
+        feature::{IssuerFeature, SenderFeature},
+        unlock_condition::AddressUnlockCondition,
+        NftId, NftOutputBuilder,
     },
     wallet::{MintNftParams, Result, Wallet},
 };
@@ -34,20 +31,15 @@ async fn main() -> Result<()> {
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let nft_options = vec![MintNftParams {
-        address: Some(Bech32Address::try_from_str(
-            "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
-        )?),
-        sender: Some(Bech32Address::try_from_str(
-            "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
-        )?),
-        metadata: Some(b"some NFT metadata".to_vec()),
-        tag: Some(b"some NFT tag".to_vec()),
-        issuer: Some(Bech32Address::try_from_str(
-            "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
-        )?),
-        immutable_metadata: Some(b"some NFT immutable metadata".to_vec()),
-    }];
+    let nft_options = vec![
+        MintNftParams::new()
+            .try_with_address("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?
+            .try_with_sender("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?
+            .with_metadata(b"some NFT metadata".to_vec())
+            .with_tag(b"some NFT tag".to_vec())
+            .try_with_issuer("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?
+            .with_immutable_metadata(b"some NFT immutable metadata".to_vec()),
+    ];
 
     let transaction = account.mint_nfts(nft_options, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
