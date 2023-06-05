@@ -171,7 +171,7 @@ pub enum AccountMethod {
     SignEvm {
         /// The message to sign, hex encoded String
         message: String,
-        /// Chain to sign the essence hash with
+        /// Chain to sign the message with
         chain: Vec<u32>,
     },
     /// Get the [`OutputData`](crate::wallet::account::types::OutputData) of an output stored in the account
