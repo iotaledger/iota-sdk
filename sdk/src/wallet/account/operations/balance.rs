@@ -5,8 +5,9 @@ use primitive_types::U256;
 
 use crate::{
     types::block::{
-        address::Bech32AddressLike,
+        address::Bech32Address,
         output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
+        ConvertTo,
     },
     wallet::{
         account::{
@@ -30,7 +31,7 @@ impl Account {
     }
 
     /// Get the balance of the given addresses.
-    pub async fn addresses_balance(&self, addresses: Vec<impl Bech32AddressLike>) -> Result<Balance> {
+    pub async fn addresses_balance(&self, addresses: Vec<impl ConvertTo<Bech32Address>>) -> Result<Balance> {
         log::debug!("[BALANCE] addresses_balance");
 
         let account_details = self.details().await;
@@ -39,7 +40,7 @@ impl Account {
             .into_iter()
             .map(|address| {
                 address
-                    .to_bech32()
+                    .convert()
                     .map_err(|e| Error::Block(Box::new(e)))
                     .and_then(|address| {
                         account_details
