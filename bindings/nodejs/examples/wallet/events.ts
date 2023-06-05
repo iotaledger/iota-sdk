@@ -7,7 +7,7 @@ import {
     TransactionProgressWalletEvent,
     SelectingInputsProgress,
 } from '@iota/sdk';
-import { getUnlockedManager } from './account-manager';
+import { getUnlockedWallet } from './common';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -25,7 +25,7 @@ async function run() {
     }
     try {
         // Create the wallet
-        const wallet = await getUnlockedManager();
+        const wallet = await getUnlockedWallet();
 
         const callback = function (err: any, event: Event) {
             console.log(

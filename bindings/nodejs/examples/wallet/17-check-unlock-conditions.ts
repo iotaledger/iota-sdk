@@ -3,7 +3,7 @@
 
 import { AddressUnlockCondition, BasicOutput, Output, Utils } from '@iota/sdk';
 
-import { getUnlockedManager } from './account-manager';
+import { getUnlockedWallet } from './common';
 
 // The amount to build the basic output with
 const AMOUNT = '1000000';
@@ -18,10 +18,10 @@ const AMOUNT = '1000000';
 async function run() {
     try {
         // Create the wallet
-        const manager = await getUnlockedManager();
+        const wallet = await getUnlockedWallet();
 
         // Get the account we generated with `01-create-wallet`
-        const account = await manager.getAccount(
+        const account = await wallet.getAccount(
             `${process.env.ACCOUNT_ALIAS_1}`,
         );
 
@@ -42,7 +42,7 @@ async function run() {
             if (
                 basicOutput.getUnlockConditions().length === 1 &&
                 basicOutput.getUnlockConditions()[0] instanceof
-                    AddressUnlockCondition &&
+                AddressUnlockCondition &&
                 hexEncodedAccountAddresses.includes(
                     (
                         basicOutput.getUnlockConditions()[0] as AddressUnlockCondition
@@ -56,7 +56,7 @@ async function run() {
 
             console.log(
                 'The output has only an address unlock condition and the address is from the account: ' +
-                    controlledByAccount,
+                controlledByAccount,
             );
         }
     } catch (error) {

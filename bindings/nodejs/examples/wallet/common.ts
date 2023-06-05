@@ -6,7 +6,7 @@ import { initLogger, Wallet, CoinType, WalletOptions } from '@iota/sdk';
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 require('dotenv').config({ path: '.env' });
 
-async function getUnlockedManager() {
+async function getUnlockedWallet() {
     initLogger();
     if (!process.env.NODE_URL) {
         throw new Error('.env NODE_URL is undefined, see .env.example');
@@ -48,4 +48,4 @@ async function getUnlockedManager() {
     return wallet;
 }
 
-export { getUnlockedManager };
+export { getUnlockedWallet };
