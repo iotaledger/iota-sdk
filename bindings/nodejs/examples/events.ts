@@ -12,7 +12,7 @@ import {
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/events.ts
+// yarn run-example events.ts
 
 // This example listens to wallet events.
 async function run() {
