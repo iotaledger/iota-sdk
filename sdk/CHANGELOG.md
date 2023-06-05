@@ -78,10 +78,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename `SecretManager` and `SecretManage` ed25519 address generation methods;
 - `SecretManage::generate_ed25519_addresses` returns `Ed25519Address` type;
 - Made certain `prepare_` methods public: `prepare_mint_nfts`, `prepare_send_native_tokens`, `prepare_send_nft` and `prepare_create_alias_output`;
-- Custom `Serialize` and `Deserialize` impls for `WalletEvent` to have an integer `type` as tag;
 - `Address`-like types now implement `ToBech32Ext` for `to_bech32` and similar fns;
 - Add constructors for `SendNftParams`, `SendAmountParams`, `SendNativeTokensParams`, `MintNftParams`;
 - `Bech32AddressLike`, `HrpLike` and other `TryInto` parameters unified with `ConvertTo` trait;
+- Custom `Serialize` and `Deserialize` impls for `WalletEvent` to have an integer `type` as tag;
+- `WalletEventType` now converts to/from u8 instead of string;
 
 ### Removed
 
