@@ -82,7 +82,7 @@ Prebuild requires that the binary is in `build/Release` as though it was built w
 After you [installed the library](#install-the-iota-sdk), you can create a `Wallet` instance and interact with it.
 
 ```javascript
-import { initLogger, Wallet, CoinType, WalletOptions } from '@iota/sdk';
+import {  Wallet, CoinType, WalletOptions } from '@iota/sdk';
 
 const walletOptions: WalletOptions = {
     storagePath: `Alice`, // A name to associate with the created account.
@@ -146,21 +146,23 @@ node examples/client/00_get_info.ts
 
 In the project directory, you can run the following:
 
-### `npm install`
+### `npm install` or `yarn install`
 
 Installs the project, including running `npm run build`.
 
-### `npm build`
+### `npm build` or `yarn build`
 
 Builds the Node addon (`index.node`) from source.
 
-### `npm test`
+### `npm test` or `yarn test`
 
 Runs the unit tests by calling `cargo test`. You can learn more
 about [adding tests to your Rust code](https://doc.rust-lang.org/book/ch11-01-writing-tests.html) from
 the [Rust book](https://doc.rust-lang.org/book/).
 
-### Cargo.toml
+## Important Files and Directories
+
+## Cargo.toml
 
 The Cargo [manifest file](https://doc.rust-lang.org/cargo/reference/manifest.html) informs the `cargo` command.
 
