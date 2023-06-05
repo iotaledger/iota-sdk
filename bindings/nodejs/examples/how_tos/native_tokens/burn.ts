@@ -3,12 +3,6 @@
 
 import { getUnlockedManager } from '../../wallet/account-manager';
 
-// The native token id. Replace it with a TokenId that is available in the account, the foundry output which minted it,
-// also needs to be available. You can check this by running the `get_balance` example. You can mint a new native token
-// by running the `mint_native_token` example.
-// eslint-disable-next-line prefer-const
-let TOKEN_ID =
-    '0x08dc44610c24f32f26330440f3f0d4afb562a8dfd81afe7c2f79024f8f1b9e21940100000000';
 // The minimum available native token amount to search for in the account, 11 hex encoded.
 const MIN_AVAILABLE_AMOUNT = '0xB';
 // The amount of the native token to burn, 1 hex encoded.
@@ -25,15 +19,6 @@ const BURN_AMOUNT = '0x1';
 // yarn run-example ./wallet/13-burn-native-token.ts
 async function run() {
     try {
-        if (
-            TOKEN_ID ==
-            '0x086f7011adb53642e8ed7db230c2307fe980f4aff2685c22f7c84a61ec558f691b0200000000'
-        ) {
-            throw new Error(
-                'You need to change the TOKEN_ID constant before you can run this example successfully!',
-            );
-        }
-
         // Create the wallet
         const manager = await getUnlockedManager();
 
@@ -45,21 +30,25 @@ async function run() {
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
 
+        // Get a token with sufficient balance
+        const tokenId = balance.nativeTokens.find(
+            (t) => Number(t.available) >= Number(MIN_AVAILABLE_AMOUNT),
+        )?.tokenId;
+
         let token = balance.nativeTokens.find(
             (nativeToken) =>
-                nativeToken.tokenId == TOKEN_ID &&
+                nativeToken.tokenId == tokenId &&
                 Number(nativeToken.available) >= Number(MIN_AVAILABLE_AMOUNT),
         );
         if (!token) {
             throw new Error(
-                `"Native token '${TOKEN_ID}' doesn't exist or there's not at least '${Number(
+                `"Native token '${tokenId}' doesn't exist or there's not at least '${Number(
                     MIN_AVAILABLE_AMOUNT,
                 )}' tokens of it in account '${process.env.ACCOUNT_ALIAS_1}'"`,
             );
         }
 
-        console.log(`Balance BEFORE burning:\n`, token);
-        console.log(`Sending the burning transaction...`);
+        console.log(`Balance before burning: ${token.available}`);
 
         // Burn a native token
         const transaction = await account
@@ -74,20 +63,16 @@ async function run() {
         );
 
         console.log(
-            `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
-        );
-        console.log(
-            `Burned ${Number(BURN_AMOUNT)} native token(s) (${token.tokenId})`,
+            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
         balance = await account.sync();
 
-        console.log(`Balance AFTER burning:`);
         token = balance.nativeTokens.find(
-            (nativeToken) => nativeToken.tokenId == TOKEN_ID,
+            (nativeToken) => nativeToken.tokenId == tokenId,
         );
         if (token) {
-            console.log(token);
+            console.log(`Balance after burning: ${token.available}`);
         } else {
             console.log(`No remaining tokens`);
         }
