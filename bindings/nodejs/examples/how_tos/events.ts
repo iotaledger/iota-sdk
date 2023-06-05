@@ -14,7 +14,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/events.ts
 
-// This example creates a new database and account
+// This example listens to wallet events.
 async function run() {
     initLogger();
     if (!process.env.NODE_URL) {
