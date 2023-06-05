@@ -39,13 +39,12 @@ impl Account {
         let addresses_with_unspent_outputs = addresses
             .into_iter()
             .map(|address| {
-                address.convert().map_err(Error::from).and_then(|address| {
-                    account_details
-                        .addresses_with_unspent_outputs
-                        .iter()
-                        .find(|&a| a.address == address)
-                        .ok_or(Error::AddressNotFoundInAccount(address))
-                })
+                let address = address.convert()?;
+                account_details
+                    .addresses_with_unspent_outputs
+                    .iter()
+                    .find(|&a| a.address == address)
+                    .ok_or(Error::AddressNotFoundInAccount(address))
             })
             .collect::<Result<Vec<&_>>>()?;
 
