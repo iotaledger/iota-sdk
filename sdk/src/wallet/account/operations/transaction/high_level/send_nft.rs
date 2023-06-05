@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// use primitive_types::U256;
+use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -9,18 +9,34 @@ use crate::{
     types::block::{
         address::Bech32Address,
         output::{unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
+        ConvertTo,
     },
     wallet::account::{operations::transaction::Transaction, Account, TransactionOptions},
 };
 
 /// Params for `send_nft()`
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct SendNftParams {
     /// Bech32 encoded address
-    pub address: Bech32Address,
+    #[getset(get = "pub")]
+    address: Bech32Address,
     /// Nft id
-    pub nft_id: NftId,
+    #[getset(get = "pub")]
+    nft_id: NftId,
+}
+
+impl SendNftParams {
+    /// Creates a new instance of [`SendNftParams`]
+    pub fn new(
+        address: impl ConvertTo<Bech32Address>,
+        nft_id: impl ConvertTo<NftId>,
+    ) -> Result<Self, crate::wallet::Error> {
+        Ok(Self {
+            address: address.convert()?,
+            nft_id: nft_id.convert()?,
+        })
+    }
 }
 
 impl Account {
@@ -32,10 +48,10 @@ impl Account {
     /// internally, the options can define the RemainderValueStrategy. Custom inputs will be replaced with the
     /// required nft inputs. Address needs to be Bech32 encoded
     /// ```ignore
-    /// let outputs = vec![SendNftParams {
-    ///     address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
-    ///     nft_id: NftId::from_str("04f9b54d488d2e83a6c90db08ae4b39651bbba8a")?,
-    /// }];
+    /// let outputs = vec![SendNftParams::new(
+    ///     "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
+    ///     "0xe645042a8a082957cb4bec4927936699ee8e56048834b090379da64213ce231b",
+    /// )?];
     ///
     /// let transaction = account.send_nft(outputs, None).await?;
     ///
