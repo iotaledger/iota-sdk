@@ -6,12 +6,12 @@ import {
     BasicOutputBuilderParams,
     Ed25519Address,
     SendNativeTokensParams,
-    utf8ToHex,
 } from '@iota/sdk';
 
 import { getUnlockedManager } from './account-manager';
 
-const SEND_NATIVE_TOKEN_AMOUNT = utf8ToHex('10');
+// The native token amount to send, `10` hex encoded
+const SEND_NATIVE_TOKEN_AMOUNT = '0xA';
 // The address to send the tokens to
 const RECV_ADDRESS =
     'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu';

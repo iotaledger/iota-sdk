@@ -1,14 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { MintNativeTokenParams, utf8ToHex } from '@iota/sdk';
+import { MintNativeTokenParams } from '@iota/sdk';
 
 import { getUnlockedManager } from './account-manager';
 
-// The circulating supply of the native token. `100`
-const CIRCULATING_SUPPLY = utf8ToHex('100');
-// The maximum supply of the native token. `100`
-const MAXIMUM_SUPPLY = utf8ToHex('100');
+// The circulating supply of the native token. `100` hex encoded
+const CIRCULATING_SUPPLY = '0x64';
+// The maximum supply of the native token. `100` hex encoded
+const MAXIMUM_SUPPLY = '0x64';
 
 // In this example we will mint a native token.
 //

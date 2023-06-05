@@ -7,7 +7,6 @@ import {
     ImmutableAliasAddressUnlockCondition,
     AliasAddress,
     SimpleTokenScheme,
-    utf8ToHex,
 } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
@@ -35,11 +34,8 @@ async function run() {
 
         const foundryOutput = await client.buildFoundryOutput({
             serialNumber: 0,
-            tokenScheme: new SimpleTokenScheme(
-                utf8ToHex('10'),
-                utf8ToHex('0'),
-                utf8ToHex('10'),
-            ),
+            // 10 hex encoded
+            tokenScheme: new SimpleTokenScheme('0xa', '0x0', '0xa'),
             amount: '1000000',
             unlockConditions: [
                 new ImmutableAliasAddressUnlockCondition(

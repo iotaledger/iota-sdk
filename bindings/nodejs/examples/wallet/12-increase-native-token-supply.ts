@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { getUnlockedManager } from './account-manager';
-import { utf8ToHex } from '@iota/sdk';
 
 // The native token id. Replace it with a TokenId that is available in the account, the foundry output which minted it,
 // also needs to be available. You can check this by running the `get-balance` example. You can mint a new native token
@@ -10,8 +9,9 @@ import { utf8ToHex } from '@iota/sdk';
 // eslint-disable-next-line prefer-const
 let TOKEN_ID =
     '0x086a62922fd743b541c987020d2cb2942cf789bcefe41572854119180cb8e037a90100000000';
-// The amount of native tokens to mint, 10
-const MINT_AMOUNT = utf8ToHex('10');
+// The amount of native tokens to mint, 10 hex encoded.
+const MINT_AMOUNT = '0xA';
+
 // In this example we will mint an existing native token with its foundry.
 //
 // Make sure that `example.stronghold` and `example.walletdb` already exist by
