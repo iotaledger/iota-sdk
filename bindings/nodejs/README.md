@@ -4,15 +4,15 @@
 
 - [Requirements (only for building the binary yourself)](#requirements-only-for-building-the-binary-yourself)
 - [Getting Started](#getting-started)
-    - [Install the IOTA SDK](#install-the-iota-sdk)
+    - [Install the IOTA SDK](#installing-the-iota-sdk)
     - [Usage](#usage)
-      - [Wallet](#wallet)
       - [Client](#client)
+      - [Wallet](#wallet)
       - [Examples](#examples)
 - [Available Scripts](#available-scripts)
-    - [`npm install`](#npm-install)
-    - [`npm build`](#npm-build)
-    - [`npm test`](#npm-test)
+    - [`install`](#npm-install-or-yarn-install)
+    - [`build`](#npm-build-or-yarn-build)
+    - [`test`](#npm-test-or-yarn-test)
     - [Cargo.toml](#cargotoml)
     - [README.md](#readmemd)
     - [index.node](#indexnode)
@@ -77,33 +77,9 @@ Prebuild requires that the binary is in `build/Release` as though it was built w
 
 ### Usage
 
-#### Wallet
-
-After you [installed the library](#install-the-iota-sdk), you can create a `Wallet` instance and interact with it.
-
-```javascript
-import {  Wallet, CoinType, WalletOptions } from '@iota/sdk';
-
-const walletOptions: WalletOptions = {
-    storagePath: `Alice`, // A name to associate with the created account.
-    clientOptions: {
-        nodes: ['https://api.testnet.shimmer.network'], // The node to connect to.
-    },
-    coinType: CoinType.Shimmer,
-    secretManager: {
-        // Setup Stronghold secret manager
-        stronghold: {
-            snapshotPath: 'vault.stronghold', //  The path to store the account snapshot.
-            password: 'a-secure-password', // A password to encrypt the stored data. WARNING: Never hardcode passwords in production code.
-        },
-    },
-};
-const wallet = new Wallet(walletOptions);
-```
-
 #### Client
 
-After you [installed the library](#install-the-iota-sdk), you can create a `Client` instance and interface with it.
+After you [installed the library](#installing-the-iota-sdk), you can create a `Client` instance and interface with it.
 
 ```javascript
 const { Client, initLogger } = require('@iota/sdk');
@@ -125,6 +101,30 @@ async function run() {
 }
 
 run().then(() => process.exit());
+```
+
+#### Wallet
+
+After you [installed the library](#installing-the-iota-sdk), you can create a `Wallet` instance and interact with it.
+
+```javascript
+import {  Wallet, CoinType, WalletOptions } from '@iota/sdk';
+
+const walletOptions: WalletOptions = {
+    storagePath: `Alice`, // A name to associate with the created account.
+    clientOptions: {
+        nodes: ['https://api.testnet.shimmer.network'], // The node to connect to.
+    },
+    coinType: CoinType.Shimmer,
+    secretManager: {
+        // Setup Stronghold secret manager
+        stronghold: {
+            snapshotPath: 'vault.stronghold', //  The path to store the account snapshot.
+            password: 'a-secure-password', // A password to encrypt the stored data. WARNING: Never hardcode passwords in production code.
+        },
+    },
+};
+const wallet = new Wallet(walletOptions);
 ```
 
 #### Examples

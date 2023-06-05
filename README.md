@@ -20,13 +20,12 @@ The `client` module is stateless. It aims to provide more flexibility and access
 - [Getting Started](#getting-started)
     - [Install the IOTA SDK](#install-the-iota-sdk)
     - [Usage](#usage)
-        - [Wallet](#wallet)
         - [Client](#client)
+        - [Wallet](#wallet)
         - [Examples](#examples)
     - [API Reference](#api-reference)
 - [Contribute](#contribute)
 - [License](#license)
-- [Acknowledgments](#acknowledgments)
 
 ## Features
 
@@ -48,7 +47,7 @@ This library follows the following branching strategy:
 
 | Branch       | Description                                                                                                                    |
 |--------------|--------------------------------------------------------------------------------------------------------------------------------|
-| `develop`    | Ongoing development for future releases of the staging networks. This branch gets merged into `staging` on releases.                   |
+| `develop`    | Ongoing development for future releases of the staging networks. This branch gets merged into `staging` on releases.           |
 | `production` | The latest releases for the IOTA network.                                                                                      |
 | `staging`    | The latest releases for the Shimmer network.                                                                                   |
 | other        | Other branches that may reflect current projects. Like `develop`, they will find their way into `staging` once they are ready. |
@@ -199,7 +198,7 @@ You can use the provided code [examples](sdk/examples) to get acquainted with th
 ```bash
 cargo run --example example_name --release
 ```
-* Where `example_name` is the name from the [Cargo.toml](sdk/Cargo.toml) name from the examples folder. For example:
+* Where `example_name` is the name from the [Cargo.toml](sdk/Cargo.toml) name from the example folder. For example:
 
 ```bash
 cargo run --example node_api_core_get_info --release 

@@ -8,8 +8,8 @@ Python binding to the [iota-sdk library](/README.md).
 - [Getting Started](#getting-started)
     - [Install the IOTA SDK](#install-the-iota-sdk)
     - [Usage](#usage)
-        - [Wallet](#wallet)
         - [Client](#client)
+        - [Wallet](#wallet)
         - [Examples](#examples)
     - [API Reference](#api-reference)
 - [Learn More](#learn-more)
@@ -58,6 +58,21 @@ Python binding to the [iota-sdk library](/README.md).
 
 ### Usage
 
+#### Client
+
+After you [installed the library](#install-the-iota-sdk), you can create a `Client` instance and interface with it.
+
+```python
+from iota_sdk import Client
+
+# Create a Client instance
+client = Client(nodes=['https://api.testnet.shimmer.network'])
+
+# Get the node info
+node_info = client.get_info()
+print(f'{node_info}')
+```
+
 #### Wallet
 
 After you [installed the library](#install-the-iota-sdk), you can create a `Wallet` instance and interact with it.
@@ -81,21 +96,6 @@ account = wallet.store_mnemonic("flame fever pig forward exact dash body idea li
 
 account = wallet.create_account('Alice')
 print(account)
-```
-
-#### Client
-
-After you [installed the library](#install-the-iota-sdk), you can create a `Client` instance and interface with it.
-
-```python
-from iota_sdk import Client
-
-# Create a Client instance
-client = Client(nodes=['https://api.testnet.shimmer.network'])
-
-# Get the node info
-node_info = client.get_info()
-print(f'{node_info}')
 ```
 
 #### Examples
