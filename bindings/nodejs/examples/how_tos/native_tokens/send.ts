@@ -34,7 +34,7 @@ async function run() {
         );
 
         // May want to ensure the account is synced before sending a transaction.
-        const balance = await account.sync();
+        var balance = await account.sync();
 
         // Get a token with sufficient balance
         // TODO: use BigNumber library
@@ -50,11 +50,10 @@ async function run() {
                 },
             ];
 
-            console.log(
-                `Sending '${Number(
-                    SEND_NATIVE_TOKEN_AMOUNT,
-                )}' coin(s) to '${RECV_ADDRESS}'...`,
-            );
+            var availableBalance = balance.nativeTokens.find(
+                (t) => t.tokenId === tokenId,
+            )?.available;
+            console.log(`Balance before sending: ${availableBalance}`);
 
             let transaction = await account
                 .prepareSendNativeTokens(outputs)
@@ -68,44 +67,13 @@ async function run() {
             );
 
             console.log(
-                `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+                `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
             );
 
-            await account.sync();
-            console.log('Account synced');
-
-            console.log('Sending basic output transaction...');
-
-            // Send native tokens together with the required storage deposit
-            const client = await manager.getClient();
-
-            const basicOutput: BasicOutputBuilderParams = {
-                unlockConditions: [
-                    new AddressUnlockCondition(
-                        new Ed25519Address(RECV_ADDRESS),
-                    ),
-                ],
-                nativeTokens: [
-                    {
-                        id: tokenId,
-                        amount: SEND_NATIVE_TOKEN_AMOUNT,
-                    },
-                ],
-            };
-
-            const output = await client.buildBasicOutput(basicOutput);
-            transaction = await account.sendOutputs([output]);
-
-            console.log(`Transaction sent: ${transaction.transactionId}`);
-
-            // Wait for transaction to get included
-            blockId = await account.retryTransactionUntilIncluded(
-                transaction.transactionId,
-            );
-
-            console.log(
-                `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
-            );
+            availableBalance = (await account.sync()).nativeTokens.find(
+                (t) => t.tokenId === tokenId,
+            )?.available;
+            console.log(`Balance after sending: ${availableBalance}`);
         }
     } catch (error) {
         console.log('Error: ', error);
