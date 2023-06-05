@@ -23,7 +23,8 @@ async fn main() -> Result<()> {
 
     // Get the first foundry
     if let Some(foundry_id) = balance.foundries().first() {
-        println!("Balance before destroying:\n{balance:?}",);
+        let foundry_count = balance.foundries().len();
+        println!("Foundries before destroying: {foundry_count}");
 
         // Set the stronghold password
         wallet
@@ -45,7 +46,8 @@ async fn main() -> Result<()> {
 
         let balance = account.sync(None).await?;
 
-        println!("Balance after destroying:\n{balance:?}",);
+        let foundry_count = balance.foundries().len();
+        println!("Foundries after destroying: {foundry_count}");
     }
 
     Ok(())

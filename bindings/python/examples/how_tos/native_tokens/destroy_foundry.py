@@ -1,6 +1,7 @@
 from iota_sdk import Wallet, HexStr
 from dotenv import load_dotenv
 import os
+import json
 
 load_dotenv()
 
@@ -11,17 +12,24 @@ wallet = Wallet('./alice-database')
 account = wallet.get_account('Alice')
 
 # Sync account with the node
-response = account.sync()
+balance = account.sync()
+print(f'Foundries before destroying: {len(balance["foundries"])}')
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-# TODO: replace with your own values.
-foundry_id = HexStr("0x08429fe5864378ce70699fc2d22bb144cb86a3c4833d136e3b95c5dadfd6ba0cef0500000000")
+# We try to destroy the first foundry in the account
+foundry_id = balance['foundries'][0]
 
 # Send transaction.
 transaction = account.prepare_destroy_foundry(foundry_id).send()
-print(
-    f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction["blockId"]}')
+print(f'Transaction sent: {transaction["transactionId"]}')
+
+# Wait for transaction to get included
+blockId = account.retry_transaction_until_included(transaction['transactionId'])
+print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
+
+balance = account.sync()
+print(f'Foundries before destroying: {len(balance["foundries"])}')
