@@ -1,4 +1,8 @@
-import type { IOutputResponse, ITransactionPayload, ITransactionEssence } from '@iota/types';
+import type {
+    IOutputResponse,
+    ITransactionPayload,
+    ITransactionEssence,
+} from '@iota/types';
 import type { OutputData } from './output';
 import type { InclusionState } from './transaction';
 import { IInputSigningData, IRemainder } from '../client';
@@ -14,7 +18,7 @@ enum WalletEventType {
     NewOutput = 2,
     SpentOutput = 3,
     TransactionInclusion = 4,
-    TransactionProgress = 5
+    TransactionProgress = 5,
 }
 
 abstract class WalletEvent {
@@ -47,8 +51,8 @@ class LedgerAddressGenerationWalletEvent extends WalletEvent {
     }
 
     /**
-    * The address.
-    */
+     * The address.
+     */
     getAddress(): string {
         return this.address;
     }
@@ -59,9 +63,11 @@ class NewOutputWalletEvent extends WalletEvent {
     transaction?: ITransactionPayload;
     transactionInputs?: [IOutputResponse];
 
-    constructor(output: OutputData,
+    constructor(
+        output: OutputData,
         transaction?: ITransactionPayload,
-        transactionInputs?: [IOutputResponse]) {
+        transactionInputs?: [IOutputResponse],
+    ) {
         super(WalletEventType.NewOutput);
         this.output = output;
         this.transaction = transaction;
@@ -69,22 +75,22 @@ class NewOutputWalletEvent extends WalletEvent {
     }
 
     /**
-    * The output.
-    */
+     * The output.
+     */
     getOutput(): OutputData {
         return this.output;
     }
 
     /**
-    * The transaction.
-    */
+     * The transaction.
+     */
     getTransaction(): ITransactionPayload | undefined {
         return this.transaction;
     }
 
     /**
-    * The transaction inputs.
-    */
+     * The transaction inputs.
+     */
     getTransactionInputs(): [IOutputResponse] | undefined {
         return this.transactionInputs;
     }
@@ -93,14 +99,14 @@ class NewOutputWalletEvent extends WalletEvent {
 class SpentOutputWalletEvent extends WalletEvent {
     output: OutputData;
 
-    constructor(output: OutputData,) {
+    constructor(output: OutputData) {
         super(WalletEventType.SpentOutput);
         this.output = output;
     }
 
     /**
-    * The output.
-    */
+     * The output.
+     */
     getOutput(): OutputData {
         return this.output;
     }
@@ -110,23 +116,22 @@ class TransactionInclusionWalletEvent extends WalletEvent {
     transactionId: TransactionId;
     inclusionState: InclusionState;
 
-    constructor(transactionId: TransactionId,
-        inclusionState: InclusionState) {
+    constructor(transactionId: TransactionId, inclusionState: InclusionState) {
         super(WalletEventType.TransactionInclusion);
         this.transactionId = transactionId;
         this.inclusionState = inclusionState;
     }
 
     /**
-    * The transaction ID.
-    */
+     * The transaction ID.
+     */
     getTransactionId(): TransactionId {
         return this.transactionId;
     }
 
     /**
-    * The transaction inclusion state
-    */
+     * The transaction inclusion state
+     */
     getInclusionState(): InclusionState {
         return this.inclusionState;
     }
@@ -142,7 +147,7 @@ enum TransactionProgressType {
     PreparedTransactionEssenceHash = 3,
     SigningTransaction = 4,
     PerformingPow = 5,
-    Broadcasting = 6
+    Broadcasting = 6,
 }
 
 class TransactionProgressWalletEvent extends WalletEvent {
@@ -184,8 +189,8 @@ class GeneratingRemainderDepositAddressProgress extends TransactionProgress {
     }
 
     /**
-    * The address.
-    */
+     * The address.
+     */
     getAddress(): string {
         return this.address;
     }
@@ -196,7 +201,11 @@ class PreparedTransactionProgress extends TransactionProgress {
     inputsData: IInputSigningData[];
     remainder?: IRemainder;
 
-    constructor(essence: ITransactionEssence, inputsData: IInputSigningData[], remainder?: IRemainder) {
+    constructor(
+        essence: ITransactionEssence,
+        inputsData: IInputSigningData[],
+        remainder?: IRemainder,
+    ) {
         super(TransactionProgressType.PreparedTransaction);
         this.essence = essence;
         this.inputsData = inputsData;
@@ -213,8 +222,8 @@ class PreparedTransactionEssenceHashProgress extends TransactionProgress {
     }
 
     /**
-    * The address.
-    */
+     * The address.
+     */
     getHash(): string {
         return this.hash;
     }
@@ -254,5 +263,5 @@ export {
     PreparedTransactionEssenceHashProgress,
     SigningTransactionProgress,
     PerformingPowProgress,
-    BroadcastingProgress
+    BroadcastingProgress,
 };
