@@ -44,7 +44,7 @@ pub enum SecretManagerMethod {
     SignEvm {
         /// The message to sign, hex encoded String
         message: String,
-        /// Chain to sign the essence hash with
+        /// Chain to sign the message with
         chain: Vec<u32>,
     },
     /// Sign a transaction
