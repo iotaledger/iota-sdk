@@ -8,7 +8,7 @@ use std::ops::Range;
 use async_trait::async_trait;
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
-    signatures::secp256k1_ecdsa::EvmAddress,
+    signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
 use instant::Duration;
 use iota_stronghold::{
@@ -204,6 +204,53 @@ impl SecretManage for StrongholdAdapter {
         Ok(Ed25519Signature::new(public_key, signature))
     }
 
+    async fn sign_evm(
+        &self,
+        msg: &[u8],
+        chain: &Chain,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
+        // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
+        // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
+        // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
+        // Thus, we put an extra guard here to prevent this methods from being invoked when our cached key has
+        // been cleared.
+        if !self.is_key_available().await {
+            return Err(Error::KeyCleared.into());
+        }
+
+        // Stronghold arguments.
+        let seed_location = Slip10DeriveInput::Seed(Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH));
+
+        let derive_location = Location::generic(
+            SECRET_VAULT_PATH,
+            [
+                DERIVE_OUTPUT_RECORD_PATH,
+                &chain.segments().iter().flat_map(|seg| seg.bs()).collect::<Vec<u8>>(),
+            ]
+            .concat(),
+        );
+
+        // Derive a SLIP-10 private key in the vault.
+        self.slip10_derive(Curve::Secp256k1, chain.clone(), seed_location, derive_location.clone())
+            .await?;
+
+        // Get the public key from the derived SLIP-10 private key in the vault.
+        let public_key = self.secp256k1_ecdsa_public_key(derive_location.clone()).await?;
+        let signature = self.secp256k1_ecdsa_sign(derive_location.clone(), msg).await?;
+
+        // Cleanup location afterwards
+        self.stronghold
+            .lock()
+            .await
+            .get_client(PRIVATE_DATA_CLIENT_PATH)
+            .map_err(Error::from)?
+            .vault(SECRET_VAULT_PATH)
+            .delete_secret(derive_location.record_path())
+            .map_err(Error::from)?;
+
+        Ok((public_key, signature))
+    }
+
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
@@ -331,12 +378,29 @@ impl StrongholdAdapter {
             })?)
     }
 
-    /// Execute [Procedure::PublicKey] in Stronghold to get a Secp256k1Ecdsa public key from the
-    /// SLIP-10 private key located in `private_key`.
-    async fn secp256k1_ecdsa_public_key(
+    /// Execute [Procedure::Secp256k1EcdsaSign] in Stronghold to sign `msg` with `private_key` stored in the Stronghold
+    /// vault.
+    async fn secp256k1_ecdsa_sign(
         &self,
         private_key: Location,
-    ) -> Result<crypto::signatures::secp256k1_ecdsa::PublicKey, Error> {
+        msg: &[u8],
+    ) -> Result<secp256k1_ecdsa::Signature, Error> {
+        Ok(secp256k1_ecdsa::Signature::try_from_bytes(
+            &self
+                .stronghold
+                .lock()
+                .await
+                .get_client(PRIVATE_DATA_CLIENT_PATH)?
+                .execute_procedure(procedures::Secp256k1EcdsaSign {
+                    private_key,
+                    msg: msg.to_vec(),
+                })?,
+        )?)
+    }
+
+    /// Execute [Procedure::PublicKey] in Stronghold to get a Secp256k1Ecdsa public key from the
+    /// SLIP-10 private key located in `private_key`.
+    async fn secp256k1_ecdsa_public_key(&self, private_key: Location) -> Result<secp256k1_ecdsa::PublicKey, Error> {
         let bytes = self
             .stronghold
             .lock()
@@ -346,7 +410,7 @@ impl StrongholdAdapter {
                 ty: KeyType::Secp256k1Ecdsa,
                 private_key,
             })?;
-        Ok(crypto::signatures::secp256k1_ecdsa::PublicKey::try_from_slice(&bytes)?)
+        Ok(secp256k1_ecdsa::PublicKey::try_from_slice(&bytes)?)
     }
 
     /// Store a mnemonic into the Stronghold vault.

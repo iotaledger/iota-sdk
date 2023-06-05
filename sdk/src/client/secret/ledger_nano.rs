@@ -10,7 +10,7 @@ use std::{collections::HashMap, ops::Range};
 use async_trait::async_trait;
 use crypto::{
     keys::slip10::{Chain, Segment},
-    signatures::secp256k1_ecdsa::EvmAddress,
+    signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
 use iota_ledger_nano::{
     get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index, Packable as LedgerNanoPackable,
@@ -184,6 +184,14 @@ impl SecretManage for LedgerSecretManager {
     }
 
     async fn sign_ed25519(&self, _msg: &[u8], _chain: &Chain) -> Result<Ed25519Signature, Self::Error> {
+        Err(Error::UnsupportedOperation.into())
+    }
+
+    async fn sign_evm(
+        &self,
+        _msg: &[u8],
+        _chain: &Chain,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
         Err(Error::UnsupportedOperation.into())
     }
 

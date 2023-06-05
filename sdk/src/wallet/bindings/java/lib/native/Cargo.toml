@@ -19,16 +19,16 @@ doc = false
 [dependencies]
 iota-sdk = { path = "../../../../../..", features = [ "wallet", "tls", "message_interface", "events", "rocksdb", "stronghold", "storage", "participation"] }
 
-futures = { version = "0.3.26", default-features = false }
+futures = { version = "0.3.28", default-features = false }
 jni = { version = "0.21.1", default-features = false }
-once_cell = { version = "1.17.1", default-features = false }
-serde_json = { version = "1.0.94", default-features = false }
-tokio = { version = "1.26.0", default-features = false, features = [ "macros" ] }
+once_cell = { version = "1.17.2", default-features = false }
+serde_json = { version = "1.0.96", default-features = false }
+tokio = { version = "1.28.2", default-features = false, features = [ "macros" ] }
 lazy_static = { version = "1.4.0", default-features = false }
 
 [target.'cfg(target_os = "android")'.dependencies]
-log = { version = "0.4.0", default-features = false }
-android_logger = { version = "0.13", default-features = false }
+log = { version = "0.4.18", default-features = false }
+android_logger = { version = "0.13.1", default-features = false }
 
 [features]
 ledger_nano = [ "iota-sdk/ledger_nano" ]
