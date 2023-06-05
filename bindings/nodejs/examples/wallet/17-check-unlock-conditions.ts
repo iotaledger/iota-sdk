@@ -42,7 +42,7 @@ async function run() {
             if (
                 basicOutput.getUnlockConditions().length === 1 &&
                 basicOutput.getUnlockConditions()[0] instanceof
-                AddressUnlockCondition &&
+                    AddressUnlockCondition &&
                 hexEncodedAccountAddresses.includes(
                     (
                         basicOutput.getUnlockConditions()[0] as AddressUnlockCondition
@@ -56,7 +56,7 @@ async function run() {
 
             console.log(
                 'The output has only an address unlock condition and the address is from the account: ' +
-                controlledByAccount,
+                    controlledByAccount,
             );
         }
     } catch (error) {
