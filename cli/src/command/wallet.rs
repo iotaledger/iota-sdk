@@ -153,7 +153,7 @@ pub async fn init_command(
         .password(&password)
         .build(snapshot_path)?;
     // TODO: allow providing the mnemonic in the builder?
-    secret_manager.store_mnemonic(mnemonic.clone()).await?;
+    secret_manager.store_mnemonic(mnemonic).await?;
     let secret_manager = SecretManager::Stronghold(secret_manager);
 
     Ok(Wallet::builder()
