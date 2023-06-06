@@ -89,7 +89,7 @@ class AddressUnlockCondition extends UnlockCondition /*implements IAddressUnlock
     }
 }
 /**
- * Storage Desposit Return Unlock Condition.
+ * Storage Deposit Return Unlock Condition.
  */
 class StorageDepositReturnUnlockCondition extends UnlockCondition /*implements IStorageDepositReturnUnlockCondition*/ {
     private amount: string;

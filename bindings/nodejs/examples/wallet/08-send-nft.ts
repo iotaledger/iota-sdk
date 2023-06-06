@@ -3,7 +3,7 @@
 
 import { SendNftParams } from '@iota/sdk';
 
-import { getUnlockedManager } from './account-manager';
+import { getUnlockedWallet } from './common';
 
 // The address to send the tokens to
 const RECV_ADDRESS =
@@ -19,10 +19,10 @@ const RECV_ADDRESS =
 async function run() {
     try {
         // Create the wallet
-        const manager = await getUnlockedManager();
+        const wallet = await getUnlockedWallet();
 
         // Get the account we generated with `01-create-wallet`
-        const account = await manager.getAccount(
+        const account = await wallet.getAccount(
             `${process.env.ACCOUNT_ALIAS_1}`,
         );
 

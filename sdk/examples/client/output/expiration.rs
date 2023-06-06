@@ -53,7 +53,7 @@ async fn main() -> Result<()> {
         .try_into()
         .unwrap();
 
-    let outputs = vec![
+    let outputs = [
         // with storage deposit return
         BasicOutputBuilder::new_with_amount(255_100)
             .add_unlock_condition(AddressUnlockCondition::new(receiver_address))

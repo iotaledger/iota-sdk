@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
             .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        let outputs = vec![SendNftParams::new(
+        let outputs = [SendNftParams::new(
             "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
             *nft_id,
         )?];

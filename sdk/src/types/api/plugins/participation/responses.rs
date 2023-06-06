@@ -65,7 +65,7 @@ pub struct AddressOutputsResponse {
 impl OutputStatusResponse {
     pub fn mock() -> Self {
         Self {
-            participations: vec![(
+            participations: [(
                 ParticipationEventId::new([42; 32]),
                 TrackedParticipation {
                     block_id: BlockId::new([23; 32]),
@@ -75,8 +75,7 @@ impl OutputStatusResponse {
                     answers: None,
                 },
             )]
-            .into_iter()
-            .collect::<_>(),
+            .into(),
         }
     }
 }

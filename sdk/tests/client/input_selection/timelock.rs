@@ -15,7 +15,7 @@ use crate::client::{
 fn one_output_timelock_not_expired() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs([Basic(
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
@@ -25,7 +25,7 @@ fn one_output_timelock_not_expired() {
         None,
         None,
     )]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_1,
         None,
@@ -39,7 +39,7 @@ fn one_output_timelock_not_expired() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .timestamp(100)
@@ -52,7 +52,7 @@ fn one_output_timelock_not_expired() {
 fn timelock_equal_timestamp() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs([Basic(
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
@@ -62,7 +62,7 @@ fn timelock_equal_timestamp() {
         None,
         None,
     )]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         2_000_000,
         BECH32_ADDRESS_ED25519_1,
         None,
@@ -76,7 +76,7 @@ fn timelock_equal_timestamp() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .timestamp(200)
@@ -91,7 +91,7 @@ fn timelock_equal_timestamp() {
 fn two_outputs_one_timelock_expired() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             2_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -113,7 +113,7 @@ fn two_outputs_one_timelock_expired() {
             None,
         ),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         2_000_000,
         BECH32_ADDRESS_ED25519_1,
         None,
@@ -127,7 +127,7 @@ fn two_outputs_one_timelock_expired() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .timestamp(100)
@@ -143,7 +143,7 @@ fn two_outputs_one_timelock_expired() {
 fn two_outputs_one_timelocked_one_missing() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Basic(
             2_000_000,
             BECH32_ADDRESS_ED25519_0,
@@ -156,7 +156,7 @@ fn two_outputs_one_timelocked_one_missing() {
         ),
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         2_000_000,
         BECH32_ADDRESS_ED25519_1,
         None,
@@ -170,7 +170,7 @@ fn two_outputs_one_timelocked_one_missing() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .timestamp(100)
@@ -186,7 +186,7 @@ fn two_outputs_one_timelocked_one_missing() {
 fn one_output_timelock_expired() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs(vec![Basic(
+    let inputs = build_inputs([Basic(
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
         None,
@@ -196,7 +196,7 @@ fn one_output_timelock_expired() {
         None,
         None,
     )]);
-    let outputs = build_outputs(vec![Basic(
+    let outputs = build_outputs([Basic(
         2_000_000,
         BECH32_ADDRESS_ED25519_1,
         None,
@@ -210,7 +210,7 @@ fn one_output_timelock_expired() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![BECH32_ADDRESS_ED25519_0]),
+        addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .timestamp(100)

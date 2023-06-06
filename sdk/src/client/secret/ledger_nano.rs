@@ -162,11 +162,7 @@ impl SecretManage for LedgerSecretManager {
 
         drop(lock);
 
-        let mut ed25519_addresses = Vec::new();
-        for address in addresses {
-            ed25519_addresses.push(Ed25519Address::new(address));
-        }
-        Ok(ed25519_addresses)
+        Ok(addresses.into_iter().map(Ed25519Address::new).collect())
     }
 
     async fn generate_evm_addresses(
