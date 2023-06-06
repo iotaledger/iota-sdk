@@ -13,8 +13,8 @@ use crypto::{
     signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
 use iota_ledger_nano::{
-    get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index, Packable as LedgerNanoPackable,
-    TransportTypes,
+    api::errors::APIError, get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index,
+    Packable as LedgerNanoPackable, TransportTypes,
 };
 use packable::{error::UnexpectedEOF, unpacker::SliceUnpacker, Packable, PackableExt};
 use tokio::sync::Mutex;
@@ -90,15 +90,14 @@ impl From<crate::types::block::Error> for Error {
 // LedgerDeviceNotFound: No usable Ledger device was found
 // LedgerMiscError: Everything else.
 // LedgerEssenceTooLarge: Essence with bip32 input indices need more space then the internal buffer is big
-#[cfg(feature = "ledger_nano")]
-impl From<iota_ledger_nano::api::errors::APIError> for Error {
-    fn from(error: iota_ledger_nano::api::errors::APIError) -> Self {
+impl From<APIError> for Error {
+    fn from(error: APIError) -> Self {
         log::info!("ledger error: {}", error);
         match error {
-            iota_ledger_nano::api::errors::APIError::ConditionsOfUseNotSatisfied => Self::DeniedByUser,
-            iota_ledger_nano::api::errors::APIError::EssenceTooLarge => Self::EssenceTooLarge,
-            iota_ledger_nano::api::errors::APIError::SecurityStatusNotSatisfied => Self::DongleLocked,
-            iota_ledger_nano::api::errors::APIError::TransportError => Self::DeviceNotFound,
+            APIError::ConditionsOfUseNotSatisfied => Self::DeniedByUser,
+            APIError::EssenceTooLarge => Self::EssenceTooLarge,
+            APIError::SecurityStatusNotSatisfied => Self::DongleLocked,
+            APIError::TransportError => Self::DeviceNotFound,
             _ => Self::MiscError,
         }
     }
