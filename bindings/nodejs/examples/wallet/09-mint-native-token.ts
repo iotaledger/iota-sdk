@@ -3,7 +3,7 @@
 
 import { MintNativeTokenParams } from '@iota/sdk';
 
-import { getUnlockedManager } from './account-manager';
+import { getUnlockedWallet } from './common';
 
 // The circulating supply of the native token. `100` hex encoded
 const CIRCULATING_SUPPLY = '0x64';
@@ -20,10 +20,10 @@ const MAXIMUM_SUPPLY = '0x64';
 async function run() {
     try {
         // Create the wallet
-        const manager = await getUnlockedManager();
+        const wallet = await getUnlockedWallet();
 
         // Get the account we generated with `01-create-wallet`
-        const account = await manager.getAccount(
+        const account = await wallet.getAccount(
             `${process.env.ACCOUNT_ALIAS_1}`,
         );
 

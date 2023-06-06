@@ -42,7 +42,7 @@ impl InputSelection {
             .find(|input| is_nft_with_id(&input.output, &nft_id, input.output_id()))
         {
             log::debug!("{nft_id:?} requirement already fulfilled by {:?}", input.output_id());
-            return Ok(vec![]);
+            return Ok(Vec::new());
         }
 
         // Check if the requirement can be fulfilled.

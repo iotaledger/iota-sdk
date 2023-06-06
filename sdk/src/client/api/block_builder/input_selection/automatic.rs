@@ -19,7 +19,7 @@ use crate::{
         secret::types::InputSigningData,
         Error, Result,
     },
-    types::block::{address::Bech32AddressLike, output::OutputWithMetadata, protocol::ProtocolParameters},
+    types::block::{address::Bech32Address, output::OutputWithMetadata, protocol::ProtocolParameters, ConvertTo},
     utils::unix_timestamp_now,
 };
 
@@ -27,15 +27,15 @@ impl<'a> ClientBlockBuilder<'a> {
     // Get basic outputs for an address without storage deposit return unlock condition
     pub(crate) async fn basic_address_outputs(
         &self,
-        address: impl Bech32AddressLike,
+        address: impl ConvertTo<Bech32Address>,
     ) -> Result<Vec<OutputWithMetadata>> {
-        let address = address.to_bech32()?;
+        let address = address.convert()?;
         let mut output_ids = Vec::new();
 
         // First request to get all basic outputs that can directly be unlocked by the address.
         output_ids.extend(
             self.client
-                .basic_output_ids(vec![
+                .basic_output_ids([
                     QueryParameter::Address(address),
                     QueryParameter::HasStorageDepositReturn(false),
                 ])
@@ -46,7 +46,7 @@ impl<'a> ClientBlockBuilder<'a> {
         // Second request to get all basic outputs that can be unlocked by the address through the expiration condition.
         output_ids.extend(
             self.client
-                .basic_output_ids(vec![
+                .basic_output_ids([
                     QueryParameter::ExpirationReturnAddress(address),
                     QueryParameter::HasExpiration(true),
                     QueryParameter::HasStorageDepositReturn(false),
@@ -57,7 +57,7 @@ impl<'a> ClientBlockBuilder<'a> {
                 .items,
         );
 
-        self.client.get_outputs(output_ids).await
+        self.client.get_outputs(&output_ids).await
     }
 
     /// Searches inputs for provided outputs, by requesting the outputs from the account addresses or for
@@ -139,17 +139,16 @@ impl<'a> ClientBlockBuilder<'a> {
             available_input_addresses.extend(internal.iter().map(|bech32_address| bech32_address.inner));
 
             // Have public and internal addresses with the index ascending ordered.
-            let mut public_and_internal_addresses = Vec::new();
-
-            for index in 0..public.len() {
-                public_and_internal_addresses.push((public[index], false));
-                public_and_internal_addresses.push((internal[index], true));
-            }
+            let public_and_internal_addresses = public
+                .iter()
+                .map(|a| (a, false))
+                .zip(internal.iter().map(|a| (a, true)))
+                .flat_map(|(a, b)| [a, b]);
 
             // For each address, get the address outputs.
             let mut address_index = gap_index;
 
-            for (index, (bech32_address, internal)) in public_and_internal_addresses.iter().enumerate() {
+            for (index, (bech32_address, internal)) in public_and_internal_addresses.enumerate() {
                 let address_outputs = self.basic_address_outputs(*bech32_address).await?;
 
                 // If there are more than 20 (ADDRESS_GAP_RANGE) consecutive empty addresses, then we stop
@@ -181,7 +180,7 @@ impl<'a> ClientBlockBuilder<'a> {
                                     HD_WALLET_TYPE,
                                     self.coin_type,
                                     account_index,
-                                    *internal as u32,
+                                    internal as u32,
                                     address_index,
                                 ])),
                             });

@@ -38,7 +38,7 @@ impl Client {
 
                 // Get output ids of outputs that can be controlled by this address without further unlock constraints
                 let output_ids_response = self
-                    .basic_output_ids(vec![
+                    .basic_output_ids([
                         QueryParameter::Address(*address),
                         QueryParameter::HasExpiration(false),
                         QueryParameter::HasTimelock(false),
@@ -46,7 +46,7 @@ impl Client {
                     ])
                     .await?;
 
-                let basic_outputs_responses = self.get_outputs(output_ids_response.items).await?;
+                let basic_outputs_responses = self.get_outputs(&output_ids_response.items).await?;
 
                 if !basic_outputs_responses.is_empty() {
                     // If we reach the same index again
@@ -85,7 +85,7 @@ impl Client {
 
                     let block = block_builder
                         .with_input_range(index..index + 1)
-                        .with_outputs(vec![consolidation_output])?
+                        .with_outputs([consolidation_output])?
                         .with_initial_address_index(0)
                         .finish()
                         .await?;

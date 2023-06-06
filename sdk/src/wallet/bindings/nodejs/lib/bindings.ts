@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { EventType } from '../types';
+import type { WalletEventType } from '../types';
 import type { MessageHandler } from './MessageHandler';
 
 // @ts-ignore: path is set to match runtime transpiled js path
@@ -17,7 +17,7 @@ const {
 } = addon;
 
 const listenWallet = (
-    eventTypes: EventType[],
+    eventTypes: WalletEventType[],
     callback: (error: Error, result: string) => void,
     handler: MessageHandler,
 ): Promise<void> => {

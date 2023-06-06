@@ -26,7 +26,7 @@ use crate::{
     wallet::{
         account::{
             operations::transaction::high_level::minting::mint_native_token::MintTokenTransactionDto,
-            types::{address::AccountAddress, AccountBalanceDto, AddressWithUnspentOutputs, TransactionDto},
+            types::{address::AccountAddress, AddressWithUnspentOutputs, BalanceDto, TransactionDto},
             OutputDataDto,
         },
         message_interface::dtos::AccountDetailsDto,
@@ -99,10 +99,14 @@ pub enum Response {
     /// Response for
     /// [`GenerateEvmAddresses`](crate::wallet::message_interface::AccountMethod::GenerateEvmAddresses)
     GeneratedEvmAddresses(Vec<String>),
+    /// Response for:
+    /// - [`SignEvm`](crate::method::SecretManagerMethod::SignEvm)
+    #[serde(rename_all = "camelCase")]
+    EvmSignature { public_key: String, signature: String },
     /// Response for
     /// [`GetBalance`](crate::wallet::message_interface::AccountMethod::GetBalance),
     /// [`SyncAccount`](crate::wallet::message_interface::AccountMethod::SyncAccount)
-    Balance(AccountBalanceDto),
+    Balance(BalanceDto),
     /// Response for
     /// [`GetLedgerNanoStatus`](crate::wallet::message_interface::Message::GetLedgerNanoStatus),
     #[cfg(feature = "ledger_nano")]
@@ -215,6 +219,12 @@ impl Debug for Response {
             }
             Self::GeneratedEd25519Addresses(addresses) => write!(f, "GeneratedEd25519Addresses({addresses:?})"),
             Self::GeneratedEvmAddresses(addresses) => write!(f, "GeneratedEvmAddresses({addresses:?})"),
+            Self::EvmSignature { public_key, signature } => {
+                write!(
+                    f,
+                    "EvmSignature{{ public_key: {public_key:?}, signature: {signature:?} }}"
+                )
+            }
             Self::Balance(balance) => write!(f, "Balance({balance:?})"),
             Self::SentTransaction(transaction) => write!(f, "SentTransaction({transaction:?})"),
             Self::MintTokenTransaction(mint_transaction) => {

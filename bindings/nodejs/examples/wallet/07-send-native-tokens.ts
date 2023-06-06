@@ -8,7 +8,7 @@ import {
     SendNativeTokensParams,
 } from '@iota/sdk';
 
-import { getUnlockedManager } from './account-manager';
+import { getUnlockedWallet } from './common';
 
 // The native token amount to send, `10` hex encoded
 const SEND_NATIVE_TOKEN_AMOUNT = '0xA';
@@ -26,10 +26,10 @@ const RECV_ADDRESS =
 async function run() {
     try {
         // Create the wallet
-        const manager = await getUnlockedManager();
+        const wallet = await getUnlockedWallet();
 
         // Get the account we generated with `01-create-wallet`
-        const account = await manager.getAccount(
+        const account = await wallet.getAccount(
             `${process.env.ACCOUNT_ALIAS_1}`,
         );
 
@@ -77,7 +77,7 @@ async function run() {
             console.log('Sending basic output transaction...');
 
             // Send native tokens together with the required storage deposit
-            const client = await manager.getClient();
+            const client = await wallet.getClient();
 
             const basicOutput: BasicOutputBuilderParams = {
                 unlockConditions: [

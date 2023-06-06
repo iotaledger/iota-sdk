@@ -3,7 +3,7 @@
 
 import type { MessageHandler } from './MessageHandler';
 import type {
-    AccountBalance,
+    Balance,
     AccountMetadata,
     SyncOptions,
     AccountMeta,
@@ -33,6 +33,7 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
     GenerateAddressesOptions,
+    EvmSignature,
 } from '../types';
 import type { SignedTransactionEssence } from '../types/signedTransactionEssence';
 import type {
@@ -43,6 +44,7 @@ import type {
 } from '../types/buildOutputData';
 import type {
     HexEncodedAmount,
+    HexEncodedString,
     IAliasOutput,
     IBasicOutput,
     IFoundryOutput,
@@ -393,10 +395,30 @@ export class Account {
     }
 
     /**
+     * Signs a message with an Evm private key.
+     */
+    async signEvm(
+        message: HexEncodedString,
+        chain: number[],
+    ): Promise<EvmSignature> {
+        const response = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'signEvm',
+                data: {
+                    message,
+                    chain,
+                },
+            },
+        );
+        return JSON.parse(response).payload;
+    }
+
+    /**
      * Get the account balance.
      * @returns The account balance.
      */
-    async getBalance(): Promise<AccountBalance> {
+    async getBalance(): Promise<Balance> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1082,7 +1104,7 @@ export class Account {
      * @param options Optional synchronization options.
      * @returns The account balance.
      */
-    async sync(options?: SyncOptions): Promise<AccountBalance> {
+    async sync(options?: SyncOptions): Promise<Balance> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {

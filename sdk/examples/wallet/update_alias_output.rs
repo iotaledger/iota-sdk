@@ -36,10 +36,10 @@ async fn main() -> Result<()> {
 
     // Get the alias output by its alias id
     let alias_output_data = account
-        .unspent_outputs(Some(FilterOptions {
+        .unspent_outputs(FilterOptions {
             output_types: Some(vec![AliasOutput::KIND]),
             ..Default::default()
-        }))
+        })
         .await?
         .into_iter()
         .find_map(|output_data| match &output_data.output {
@@ -70,7 +70,7 @@ async fn main() -> Result<()> {
         .finish_output(token_supply)?;
 
     // Send the updated output
-    let transaction = account.send(vec![updated_alias_output], None).await?;
+    let transaction = account.send([updated_alias_output], None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account
