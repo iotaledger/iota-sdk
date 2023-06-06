@@ -222,7 +222,7 @@ impl Account {
 
         // Set new address unlock condition
         first_output_builder =
-            first_output_builder.with_unlock_conditions(vec![AddressUnlockCondition::new(params.recipient_address)]);
+            first_output_builder.with_unlock_conditions([AddressUnlockCondition::new(params.recipient_address)]);
 
         if let Some(assets) = params.assets {
             if let Some(native_tokens) = assets.native_tokens {

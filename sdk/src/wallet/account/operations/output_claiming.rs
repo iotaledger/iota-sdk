@@ -159,7 +159,13 @@ impl Account {
 
     /// Try to claim basic or nft outputs that have additional unlock conditions to their [AddressUnlockCondition]
     /// from [`Account::get_unlockable_outputs_with_additional_unlock_conditions()`].
-    pub async fn claim_outputs(&self, output_ids_to_claim: Vec<OutputId>) -> crate::wallet::Result<Transaction> {
+    pub async fn claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
+        &self,
+        output_ids_to_claim: I,
+    ) -> crate::wallet::Result<Transaction>
+    where
+        I::IntoIter: Send,
+    {
         log::debug!("[OUTPUT_CLAIMING] claim_outputs");
         let basic_outputs = self.get_basic_outputs_for_additional_inputs().await?;
         self.claim_outputs_internal(output_ids_to_claim, basic_outputs)
@@ -183,11 +189,14 @@ impl Account {
     }
 
     /// Try to claim basic outputs that have additional unlock conditions to their [AddressUnlockCondition].
-    pub(crate) async fn claim_outputs_internal(
+    pub(crate) async fn claim_outputs_internal<I: IntoIterator<Item = OutputId> + Send>(
         &self,
-        output_ids_to_claim: Vec<OutputId>,
+        output_ids_to_claim: I,
         mut possible_additional_inputs: Vec<OutputData>,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<Transaction>
+    where
+        I::IntoIter: Send,
+    {
         log::debug!("[OUTPUT_CLAIMING] claim_outputs_internal");
 
         let current_time = self.client().get_time_checked().await?;

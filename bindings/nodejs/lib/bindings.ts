@@ -1,7 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { EventType } from './types/wallet';
+import type { WalletEventType } from './types/wallet';
+import { Event } from './types/wallet';
 import type { WalletMethodHandler } from './wallet/WalletMethodHandler';
 import { __UtilsMethods__ } from './types/utils';
 import type { SecretManagerMethodHandler } from './secretManager/SecretManagerMethodHandler';
@@ -67,11 +68,18 @@ const callUtilsMethod = (method: __UtilsMethods__): any => {
 };
 
 const listenWalletAsync = (
-    eventTypes: EventType[],
-    callback: (error: Error, result: string) => void,
+    eventTypes: WalletEventType[],
+    callback: (error: Error, event: Event) => void,
     handler: WalletMethodHandler,
 ): Promise<void> => {
-    listenWallet(eventTypes, callback, handler);
+    listenWallet(
+        eventTypes,
+        function (err: any, data: string) {
+            const parsed = JSON.parse(data);
+            callback(err, new Event(parsed.accountIndex, parsed.event));
+        },
+        handler,
+    );
     return Promise.resolve();
 };
 

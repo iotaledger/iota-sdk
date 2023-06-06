@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
             .await?;
 
         // Send a transaction with 1 Mi
-        let outputs = vec![SendAmountParams::new(
+        let outputs = [SendAmountParams::new(
             "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
             1_000_000,
         )?];

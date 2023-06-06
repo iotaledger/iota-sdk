@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
     let nft_output_builder = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())
         .add_unlock_condition(AddressUnlockCondition::new(address));
 
-    let outputs = vec![
+    let outputs = [
         // with sender feature
         nft_output_builder
             .clone()

@@ -38,7 +38,7 @@ impl Account {
     /// Send a transaction, if sending a block fails, the function will return None for the block_id, but the wallet
     /// will retry sending the transaction during syncing.
     /// ```ignore
-    /// let outputs = vec![
+    /// let outputs = [
     ///    BasicOutputBuilder::new_with_amount(1_000_000)?
     ///    .add_unlock_condition(AddressUnlockCondition::new(
     ///        Address::try_from_bech32("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
@@ -61,9 +61,10 @@ impl Account {
     /// ```
     pub async fn send(
         &self,
-        outputs: Vec<Output>,
+        outputs: impl Into<Vec<Output>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
+        let outputs = outputs.into();
         // here to check before syncing, how to prevent duplicated verification (also in prepare_transaction())?
         // Checking it also here is good to return earlier if something is invalid
         let protocol_parameters = self.client().get_protocol_parameters().await?;
@@ -83,7 +84,7 @@ impl Account {
     /// transactions
     pub async fn finish_transaction(
         &self,
-        outputs: Vec<Output>,
+        outputs: impl Into<Vec<Output>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!("[TRANSACTION] finish_transaction");

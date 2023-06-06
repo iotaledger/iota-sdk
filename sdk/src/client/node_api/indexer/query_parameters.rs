@@ -21,7 +21,8 @@ pub struct QueryParameters(Vec<QueryParameter>);
 impl QueryParameters {
     /// Creates a hashset from a provided vec of query parameters.
     #[must_use]
-    pub fn new(mut query_parameters: Vec<QueryParameter>) -> Self {
+    pub fn new(query_parameters: impl Into<Vec<QueryParameter>>) -> Self {
+        let mut query_parameters = query_parameters.into();
         query_parameters.sort_unstable_by_key(QueryParameter::kind);
         query_parameters.dedup_by_key(|qp| qp.kind());
 
@@ -312,7 +313,7 @@ mod tests {
             Bech32Address::try_from_str("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r").unwrap(),
         );
 
-        let mut query_parameters = QueryParameters::new(vec![address1, address2, state_controller]);
+        let mut query_parameters = QueryParameters::new([address1, address2, state_controller]);
         // since address1 and address2 are of the same enum variant, we should only have one
         assert!(query_parameters.0.len() == 2);
         // since address2 and address3 are of the same enum variant, we should only have one

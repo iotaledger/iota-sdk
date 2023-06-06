@@ -165,11 +165,12 @@ impl InputSelection {
 
     /// Creates a new [`InputSelection`].
     pub fn new(
-        available_inputs: Vec<InputSigningData>,
-        outputs: Vec<Output>,
-        addresses: Vec<Address>,
+        available_inputs: impl Into<Vec<InputSigningData>>,
+        outputs: impl Into<Vec<Output>>,
+        addresses: impl IntoIterator<Item = Address>,
         protocol_parameters: ProtocolParameters,
     ) -> Self {
+        let available_inputs = available_inputs.into();
         let mut addresses = HashSet::from_iter(addresses);
 
         addresses.extend(available_inputs.iter().filter_map(|input| match &input.output {
@@ -187,7 +188,7 @@ impl InputSelection {
             required_inputs: None,
             forbidden_inputs: HashSet::new(),
             selected_inputs: Vec::new(),
-            outputs,
+            outputs: outputs.into(),
             addresses,
             burn: None,
             remainder_address: None,

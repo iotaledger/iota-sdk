@@ -119,29 +119,26 @@ impl Wallet {
             log::debug!("[recover_accounts] generating {updated_account_gap_limit} new accounts");
 
             // Generate account with addresses and get their outputs in parallel
-            let mut tasks = Vec::new();
-            for _ in 0..updated_account_gap_limit {
+            let results = futures::future::try_join_all((0..updated_account_gap_limit).map(|_| {
                 let mut new_account = self.create_account();
                 let sync_options_ = sync_options.clone();
-                tasks.push(async move {
+                async move {
                     task::spawn(async move {
                         let new_account = new_account.finish().await?;
                         let account_outputs_count = new_account
                             .search_addresses_with_outputs(address_gap_limit, sync_options_)
                             .await?;
                         let account_index = *new_account.details().await.index();
-                        Ok((account_index, account_outputs_count))
+                        crate::wallet::Result::Ok((account_index, account_outputs_count))
                     })
-                    .await
-                });
-            }
-
-            let results: Vec<crate::wallet::Result<(u32, usize)>> = futures::future::try_join_all(tasks).await?;
+                    .await?
+                }
+            }))
+            .await?;
 
             let mut new_accounts_with_outputs = 0;
             let mut highest_account_index = 0;
-            for res in results {
-                let (account_index, outputs_count): (u32, usize) = res?;
+            for (account_index, outputs_count) in results {
                 if outputs_count != 0 {
                     new_accounts_with_outputs += 1;
 
