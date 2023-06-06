@@ -171,7 +171,7 @@ impl Topic {
         Self(value.into())
     }
 
-    pub fn is_valid(&self) -> bool {
+    pub(crate) fn is_valid(&self) -> bool {
         let valid_topics = lazy_static!(
             RegexSet::new([
                 // Milestone topics.

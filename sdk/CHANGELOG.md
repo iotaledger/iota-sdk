@@ -37,7 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stronghold snapshot migration from v2 to v3;
 - `SecretManage::sign_evm`;
 - `Account::addresses_balance` method accepting addresses to get balance for;
-- `Topic::is_valid`;
 - `Wallet::get_secret_manager` method;
 
 ### Changed
