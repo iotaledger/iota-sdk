@@ -16,11 +16,10 @@ below.
 | Rocksdb      |         ❌         |          ✔️           |
 | Stronghold   |         ❌         |          ✔️           |
 
-*Node.js bindings only need to be compiled during `npm install` if a pre-compiled binary is not available for your
+* The Node.js bindings only need to be compiled during `npm install` if a pre-compiled binary is not available for your
 platform.
 
-**tl;dr: Use the Node.js bindings if you can. The Wasm bindings are just more portable and support browser environments.
-**
+**tl;dr: Use the Node.js bindings if you can. The Wasm bindings are just more portable and support browser environments.**
 
 ## Requirements
 
@@ -38,13 +37,13 @@ To install the library from your package manager of choice, you only need to run
 ##### npm
 
 ```bash
-$ npm i @iota/sdk-wasm
+npm i @iota/sdk-wasm
 ```
 
 ##### yarn
 
 ```bash
-$ yarn add @iota/sdk-wasm
+yarn add @iota/sdk-wasm
 ```
 
 ### Usage
