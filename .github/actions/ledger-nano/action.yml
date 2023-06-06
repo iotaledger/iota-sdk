@@ -12,7 +12,9 @@ runs:
     - name: Update submodules
       shell: bash
       run: git submodule init && git submodule update --recursive
+      working-directory: ledger-shimmer-app
         
     - name: Run the simulator
       shell: bash
       run: ./build.sh -s
+      working-directory: ledger-shimmer-app
