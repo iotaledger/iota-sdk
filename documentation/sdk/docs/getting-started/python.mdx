@@ -4,7 +4,15 @@ import WarningPasswordStorage from '../_admonitions/_warning_password_storage.md
 
 <WarningPasswordStorage />
 
+## Requirements
+
+- [Python 3.x](https://www.python.org)
+- [pip ^21.x](https://pypi.org/project/pip)
+- `Rust` and `Cargo` to compile the binding. Install them [here](https://doc.rust-lang.org/cargo/getting-started/installation.html).
+
 ## Install the IOTA SDK
+
+### Install Using a Pip
 
 To start using the IOTA SDK in your Python project, you can use pip to install:
 
@@ -12,74 +20,80 @@ To start using the IOTA SDK in your Python project, you can use pip to install:
 pip install iota-sdk
 ```
 
+### Build the Binding from Source
+
+1. Move to the Python bindings directory:
+
+    ```bash
+    cd iota-sdk/bindings/python
+   ```
+
+2. (optional) Create a virtual environment and use it. On Linux and macOS, you can run the following commands:
+
+    ```bash
+    python3 -m venv iota_sdk_venv
+    source iota_sdk_venv/bin/activate
+    ```
+
+    If you are using Windows, you should run the following instead:
+
+    ```bash
+    .\iota_sdk_venv\Scripts\activate
+    ```
+
+3. Install the required dependencies and build the wheel by running the following commands:
+
+    ```bash
+    pip install -r requirements-dev.txt
+    pip install .
+   ```
+
+4. (optional) If you want to deactivate the virtual environment, run the following command:
+
+    ```bash
+    deactivate
+   ```
+
 ## Usage
 
 ### Client
 
-To use the Client module, you simply need to create a `Client`.
+After you [installed the library](#install-the-iota-sdk), you can create a `Client` instance and interface with it.
 
-```rust
-use iota_sdk::client::{
-    Client,
-};
+```python
+from iota_sdk import Client
 
-let client = Client::builder()
-    .with_node('https://api.testnet.shimmer.network')? // Insert your node URL here
-    .finish()
-    .await?;
-        
-let info = client.get_info().await?;
-println!("Node Info: {info:?}")
+# Create a Client instance
+client = Client(nodes=['https://api.testnet.shimmer.network'])
 
-Ok(())
+# Get the node info
+node_info = client.get_info()
+print(f'{node_info}')
 ```
 
 ### Wallet
 
-To use the Wallet module, you need to create a `Wallet`:
+After you [installed the library](#install-the-iota-sdk), you can create a `Wallet` instance and interact with it.
 
-```rust
-use iota_sdk::{
-    client::{
-        constants::SHIMMER_COIN_TYPE,
-        secret::{stronghold::StrongholdSecretManager, SecretManager},
-    },
-    wallet::{ClientOptions, Result, Wallet},
-};
-use std::path::PathBuf;
+```python
+from iota_sdk import Wallet, StrongholdSecretManager, CoinType
 
-#[tokio::main]
-async fn main() -> Result<()> {
-    // Setup Stronghold secret manager.
-    let secret_manager = StrongholdSecretManager::builder()
-        .password("vault.stronghold") // A password to encrypt the stored data.WARNING: Never hardcode passwords in production code.
-        .build(PathBuf::from("vault.stronghold"))?; // The path to store the account snapshot.
+# This example creates a new database and account
 
-    let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;// The node to connect to.
-
-    // Set up and store the wallet.
-    let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::Stronghold(secret_manager))
-        .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .finish()
-        .await?;
-
-    // Generate a mnemonic and store it in the Stronghold vault.
-    // INFO: It is best practice to back up the mnemonic somewhere secure.
-    let mnemonic = wallet.generate_mnemonic()?;
-    wallet.store_mnemonic(mnemonic).await?;
-
-    // Create an account.
-    let account = wallet
-        .create_account()
-        .with_alias("Alice".to_string()) // A name to associate with the created account.
-        .finish()
-        .await?;
-
-
-    Ok(())
+wallet_options = {
+    'nodes': ['https://api.testnet.shimmer.network'],
 }
+
+secret_manager = StrongholdSecretManager("wallet.stronghold", "some_hopefully_secure_password")
+
+wallet = Wallet('./alice-database', wallet_options, coin_type=CoinType.SHIMMER, secret_manager)
+
+# Store the mnemonic in the Stronghold snapshot. This only needs to be done once
+account = wallet.store_mnemonic("flame fever pig forward exact dash body idea link scrub tennis minute " +
+          "surge unaware prosper over waste kitten ceiling human knife arch situate civil")
+
+account = wallet.create_account('Alice')
+print(account)
 ```
 
 ## What's next?
@@ -91,25 +105,25 @@ usage examples in this Wiki's [how-to guides](../how_tos/accounts_and_addresses/
 
 ### More Examples
 
-You can use the provided code [examples](https://github.com/iotaledger/iota-sdk/tree/develop/sdk/examples) to get
+You can use the provided code [examples](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/python/examples) to get
 acquainted with the IOTA SDK. You can use the following command to run any example:
 
 ```bash
-cargo run --example example_name --release
+python3 example/[example file]
 ```
 
-* Where `example_name` is the name from
-  the [Cargo.toml](https://github.com/iotaledger/iota-sdk/tree/develop/sdk/sdk/Cargo.toml) name from the example folder.
-  For example:
+- Where `[example file]` is the file name from the example folder. For example:
 
 ```bash
-cargo run --example node_api_core_get_info --release 
+python3 examples/client/00_get_info.py
 ```
 
-You can get a list of the available code examples with the following command:
+### API Reference
+
+You can generate the Python API reference with the following command from this directory:
 
 ```bash
-cargo run --example
+pip install pydoc-markdown && pydoc-markdown
 ```
 
 ## API Reference

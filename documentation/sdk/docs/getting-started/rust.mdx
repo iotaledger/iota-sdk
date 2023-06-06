@@ -6,12 +6,86 @@ import WarningPasswordStorage from '../_admonitions/_warning_password_storage.md
 
 ## Install the IOTA SDK
 
+### Requirements
+
+The IOTA SDK requires `Rust` and `Cargo`. You can find installation instructions in
+the [Rust documentation](https://doc.rust-lang.org/cargo/getting-started/installation.html).
+
+We recommend that you update the Rust compiler to the latest stable version first:
+
+```shell
+rustup update stable
+```
+
+#### Dependencies
+
+You must also install `cmake`, `clang`, and `openssl`. You may need to install additional build tools on your system to
+run the build process successfully using Cargo.
+
+##### Windows
+
+You can download `cmake` from the [official website](https://cmake.org/download/). You can install `openssl`
+with [vcpkg](https://github.com/microsoft/vcpkg) or [chocolatey](https://chocolatey.org/).
+
+- Installing `openssl` with `vcpkg`:
+
+```shell
+./vcpkg.exe install openssl:x64-windows
+./vcpkg.exe integrate install
+# You may want to add this to the system environment variables since you'll need it to compile the crate
+set VCPKGRS_DYNAMIC=1
+```
+
+- Installing `openssl` with `chocolatey`:
+
+```
+choco install openssl
+# You may need to set the OPENSSL_DIR environment variable
+set OPENSSL_DIR="C:\Program Files\OpenSSL-Win64"
+```
+
+##### macOS
+
+You can install `cmake` and `openssl` with `Homebrew`:
+
+```
+brew install cmake openssl@1.1
+```
+
+##### Linux
+
+You can install `cmake`, `clang`, and `openssl` with your distro's package manager or download them from their websites.
+On Debian and Ubuntu, you will also need the `build-essential` and `libudev-dev` packages.
+
+### Install the SDK Using Cargo
+
 To start using the IOTA SDK in your Rust project, you can include the following dependencies in your `Cargo.toml` file:
 
 ```toml
 [dependencies]
 iota-sdk = { branch = "develop" }
 ```
+
+### Build the SDK from Source
+
+
+1. Download the repository to any directory you choose:
+
+     ```shell
+     git clone https://github.com/iotaledger/iota-sdk
+    ```
+
+2. Move to the base directory:
+
+     ```shell
+    cd iota-sdk/
+    ```
+
+3. Build the SDK by running the following:
+
+    ```shell
+   cargo build
+    ```
 
 ## Usage
 
