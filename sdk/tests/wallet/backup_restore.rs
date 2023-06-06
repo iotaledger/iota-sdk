@@ -22,12 +22,14 @@ use crate::wallet::common::{setup, tear_down, NODE_LOCAL, NODE_OTHER};
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore() -> Result<()> {
+    use iota_sdk::client::secret::types::Password;
+
     let storage_path = "test-storage/backup_and_restore";
     setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
-    let stronghold_password = "some_hopefully_secure_password".to_owned();
+    let stronghold_password: Password = "some_hopefully_secure_password".to_owned().into();
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).ok();
@@ -71,7 +73,7 @@ async fn backup_and_restore() -> Result<()> {
     restore_wallet
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
-            "wrong password".to_string(),
+            "wrong password".to_owned().into(),
             None,
             None,
         )
@@ -134,14 +136,15 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
 
     let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
 
-    let stronghold_password = "some_hopefully_secure_password";
+    let stronghold_password: iota_sdk::client::secret::types::Password =
+        "some_hopefully_secure_password".to_owned().into();
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).ok();
     wallet
         .backup(
             PathBuf::from("test-storage/backup_and_restore_mnemonic_secret_manager/backup.stronghold"),
-            stronghold_password.to_string(),
+            stronghold_password.clone(),
         )
         .await?;
 
@@ -163,7 +166,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
     restore_wallet
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore_mnemonic_secret_manager/backup.stronghold"),
-            stronghold_password.to_string(),
+            stronghold_password,
             None,
             None,
         )
@@ -201,7 +204,8 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
 
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
-    let stronghold_password = "some_hopefully_secure_password".to_owned();
+    let stronghold_password: iota_sdk::client::secret::types::Password =
+        "some_hopefully_secure_password".to_owned().into();
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).ok();
@@ -284,7 +288,8 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
 
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
-    let stronghold_password = "some_hopefully_secure_password".to_owned();
+    let stronghold_password: iota_sdk::client::secret::types::Password =
+        "some_hopefully_secure_password".to_owned().into();
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).ok();
@@ -365,7 +370,8 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
 
     let client_options = ClientOptions::new().with_node(NODE_OTHER)?;
 
-    let stronghold_password = "some_hopefully_secure_password".to_owned();
+    let stronghold_password: iota_sdk::client::secret::types::Password =
+        "some_hopefully_secure_password".to_owned().into();
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).ok();
@@ -451,7 +457,8 @@ async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
 
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
-    let stronghold_password = "some_hopefully_secure_password".to_owned();
+    let stronghold_password: iota_sdk::client::secret::types::Password =
+        "some_hopefully_secure_password".to_owned().into();
 
     // Create directory if not existing, because stronghold panics otherwise
     std::fs::create_dir_all(storage_path).ok();

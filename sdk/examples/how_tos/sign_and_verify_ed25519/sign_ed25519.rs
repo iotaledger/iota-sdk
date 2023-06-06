@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let stronghold = StrongholdSecretManager::builder()
-        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap().into())
         .build("sign_ed25519.stronghold")?;
 
     stronghold

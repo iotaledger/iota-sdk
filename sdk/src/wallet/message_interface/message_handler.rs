@@ -150,7 +150,7 @@ impl WalletMessageHandler {
             #[cfg(feature = "stronghold")]
             Message::Backup { destination, password } => {
                 convert_async_panics(|| async {
-                    self.wallet.backup(destination.to_path_buf(), password).await?;
+                    self.wallet.backup(destination.to_path_buf(), password.into()).await?;
                     Ok(Response::Ok(()))
                 })
                 .await
@@ -162,7 +162,7 @@ impl WalletMessageHandler {
             } => {
                 convert_async_panics(|| async {
                     self.wallet
-                        .change_stronghold_password(current_password, new_password)
+                        .change_stronghold_password(current_password.into(), new_password.into())
                         .await?;
                     Ok(Response::Ok(()))
                 })
@@ -222,7 +222,7 @@ impl WalletMessageHandler {
                     self.wallet
                         .restore_backup(
                             source.to_path_buf(),
-                            password,
+                            password.into(),
                             ignore_if_coin_type_mismatch,
                             ignore_if_bech32_mismatch,
                         )
@@ -290,7 +290,7 @@ impl WalletMessageHandler {
             #[cfg(feature = "stronghold")]
             Message::SetStrongholdPassword { password } => {
                 convert_async_panics(|| async {
-                    self.wallet.set_stronghold_password(password).await?;
+                    self.wallet.set_stronghold_password(password.into()).await?;
                     Ok(Response::Ok(()))
                 })
                 .await

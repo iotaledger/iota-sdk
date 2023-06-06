@@ -18,7 +18,7 @@ const V3_PATH: &str = "./v3.stronghold";
 async fn main() -> Result<()> {
     // This should fail with error, migration required.
     let error = if let Err(e) = StrongholdSecretManager::builder()
-        .password("current_password".to_owned())
+        .password("current_password".to_owned().into())
         .build(V2_PATH)
     {
         e
@@ -30,17 +30,17 @@ async fn main() -> Result<()> {
     println!("Migrating snapshot from v2 to v3");
     StrongholdAdapter::migrate_snapshot_v2_to_v3(
         V2_PATH,
-        "current_password".to_owned(),
+        "current_password".to_owned().into(),
         "wallet.rs".to_owned(),
         100,
         Some(V3_PATH),
-        Some("new_password".to_owned()),
+        Some("new_password".to_owned().into()),
     )
     .unwrap();
 
     // This shouldn't fail anymore as snapshot has been migrated.
     let stronghold_secret_manager = StrongholdSecretManager::builder()
-        .password("new_password".to_owned())
+        .password("new_password".to_owned().into())
         .build(V3_PATH)?;
 
     // Generate addresses with custom account index and range

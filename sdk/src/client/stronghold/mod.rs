@@ -150,9 +150,9 @@ fn check_or_create_snapshot(
 /// Extra / custom builder method implementations.
 impl StrongholdAdapterBuilder {
     /// Use an user-input password string to derive a key to use Stronghold.
-    pub fn password(mut self, password: impl Into<Password>) -> Self {
+    pub fn password(mut self, password: Password) -> Self {
         // Note that derive_builder always adds another layer of Option<T>.
-        self.key_provider = Some(self::common::key_provider_from_password(password.into()));
+        self.key_provider = Some(self::common::key_provider_from_password(password));
 
         self
     }
@@ -237,10 +237,10 @@ impl StrongholdAdapter {
     /// `password` after `timeout` (if set).
     /// It will also try to load a snapshot to check if the provided password is correct, if not it's cleared and an
     /// error will be returned.
-    pub async fn set_password(&self, password: impl Into<Password> + Send) -> Result<(), Error> {
+    pub async fn set_password(&self, password: Password) -> Result<(), Error> {
         let mut key_provider_guard = self.key_provider.lock().await;
 
-        let key_provider = self::common::key_provider_from_password(password.into());
+        let key_provider = self::common::key_provider_from_password(password);
 
         if let Some(old_key_provider) = &*key_provider_guard {
             if old_key_provider.try_unlock()? != key_provider.try_unlock()? {
@@ -562,7 +562,7 @@ mod tests {
 
         let stronghold_path = "test_clear_key.stronghold";
         let mut adapter = StrongholdAdapter::builder()
-            .password("drowssap".to_owned())
+            .password("drowssap".to_owned().into())
             .timeout(timeout)
             .build(stronghold_path)
             .unwrap();
@@ -585,7 +585,7 @@ mod tests {
         let timeout = None;
         adapter.set_timeout(timeout).await;
 
-        assert!(adapter.set_password("password".to_owned()).await.is_err());
+        assert!(adapter.set_password("password".to_owned().into()).await.is_err());
 
         adapter.clear_key().await;
         assert!(matches!(*adapter.key_provider.lock().await, None));
@@ -605,17 +605,17 @@ mod tests {
     async fn stronghold_password_already_set() {
         let stronghold_path = "stronghold_password_already_set.stronghold";
         let adapter = StrongholdAdapter::builder()
-            .password("drowssap".to_owned())
+            .password("drowssap".to_owned().into())
             .build(stronghold_path)
             .unwrap();
 
         adapter.clear_key().await;
         // After the key got cleared it should work again to set it
-        assert!(adapter.set_password("drowssap".to_owned()).await.is_ok());
+        assert!(adapter.set_password("drowssap".to_owned().into()).await.is_ok());
         // When the password already exists, it should still work
-        assert!(adapter.set_password("drowssap".to_owned()).await.is_ok());
+        assert!(adapter.set_password("drowssap".to_owned().into()).await.is_ok());
         // When the password already exists, but a wrong one is provided, it should return an error
-        assert!(adapter.set_password("other_password".to_owned()).await.is_err());
+        assert!(adapter.set_password("other_password".to_owned().into()).await.is_err());
 
         fs::remove_file(stronghold_path).unwrap();
     }

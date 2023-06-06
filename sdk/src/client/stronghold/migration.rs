@@ -19,13 +19,13 @@ use crate::client::{
 
 impl StrongholdAdapter {
     /// Migrates a snapshot from version 2 to version 3.
-    pub fn migrate_snapshot_v2_to_v3<P: AsRef<Path>, PW: Into<Password>>(
+    pub fn migrate_snapshot_v2_to_v3<P: AsRef<Path>>(
         current_path: P,
-        current_password: PW,
-        mut salt: String,
+        current_password: Password,
+        salt: String,
         rounds: u32,
         new_path: Option<P>,
-        new_password: Option<PW>,
+        new_password: Option<Password>,
     ) -> Result<(), Error> {
         log::debug!("migrate_snapshot_v2_to_v3");
         use iota_stronghold::engine::snapshot::migration::{migrate, Version};
@@ -39,7 +39,6 @@ impl StrongholdAdapter {
             return Err(Error::PathAlreadyExists(tmp_path));
         }
 
-        let current_password = current_password.into();
         crypto::keys::pbkdf::PBKDF2_HMAC_SHA512(
             current_password.as_bytes(),
             salt.as_bytes(),
@@ -47,15 +46,12 @@ impl StrongholdAdapter {
             buffer.as_mut(),
         );
 
-        salt.zeroize();
-
         let current_version = Version::V2 {
             path: current_path.as_ref(),
             key: &buffer,
             aad: &[],
         };
 
-        let new_password: Option<Password> = new_password.map(Into::into);
         let new_password = new_password.unwrap_or(current_password);
         let new_version = Version::V3 {
             path: &tmp_path,

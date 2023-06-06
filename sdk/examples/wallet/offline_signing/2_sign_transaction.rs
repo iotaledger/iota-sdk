@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let secret_manager = StrongholdSecretManager::builder()
-        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap().into())
         .build("examples/wallet/offline_signing/offline_signing.stronghold")?;
 
     // Load snapshot file
