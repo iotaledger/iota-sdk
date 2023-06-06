@@ -5,7 +5,7 @@
 
 use iota_stronghold::KeyProvider;
 
-use crate::client::secret::types::Password;
+use crate::client::utils::Password;
 
 /// Stronghold vault path to secrets.
 ///

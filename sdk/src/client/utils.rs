@@ -10,7 +10,8 @@ use crypto::{
     keys::{bip39::wordlist, slip10::Seed},
     utils,
 };
-use zeroize::Zeroize;
+use serde::{Deserialize, Serialize};
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use super::{Client, ClientInner};
 use crate::{
@@ -189,5 +190,42 @@ impl Client {
     /// UTF-8 encodes both the `tag` and `data` of a given TaggedDataPayload.
     pub fn tagged_data_to_utf8(payload: &TaggedDataPayload) -> Result<(String, String)> {
         Ok((Self::tag_to_utf8(payload)?, Self::data_to_utf8(payload)?))
+    }
+}
+
+/// A password wrapper that takes care of zeroing the memory when being dropped.
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Zeroize, ZeroizeOnDrop, derive_more::From)]
+pub struct Password(String);
+
+impl Password {
+    pub fn as_bytes(&self) -> &[u8] {
+        self.0.as_bytes()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // necessary for `assert_xx!` macros
+    impl core::fmt::Debug for Password {
+        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(f, "<password>")
+        }
+    }
+
+    #[test]
+    fn from_string() {
+        let s1 = "motdepasse".to_string();
+        let s2 = s1.clone();
+        assert_eq!(Password::from(s1), Password(s2));
+    }
+
+    #[test]
+    fn zeroize_password() {
+        let mut password: Password = "motdepasse".to_owned().into();
+        assert_ne!(password, Password(String::new()));
+        password.zeroize();
+        assert_eq!(password, Password(String::new()));
     }
 }

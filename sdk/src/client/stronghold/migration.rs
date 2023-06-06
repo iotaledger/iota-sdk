@@ -13,8 +13,8 @@ use zeroize::Zeroize;
 
 use super::{common::PRIVATE_DATA_CLIENT_PATH, Error, StrongholdAdapter};
 use crate::client::{
-    secret::types::Password,
     stronghold::{check_or_create_snapshot, storage::insert as v3_insert, Error as StrongholdError},
+    utils::Password,
 };
 
 impl StrongholdAdapter {

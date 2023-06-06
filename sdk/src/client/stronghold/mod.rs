@@ -69,7 +69,7 @@ use zeroize::Zeroizing;
 
 use self::common::PRIVATE_DATA_CLIENT_PATH;
 pub use self::error::Error;
-use super::secret::types::Password;
+use super::utils::Password;
 use crate::client::storage::StorageProvider;
 
 /// A wrapper on [Stronghold].

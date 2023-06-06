@@ -11,7 +11,10 @@ use self::stronghold_snapshot::{read_data_from_stronghold_snapshot, store_data_t
 #[cfg(feature = "storage")]
 use crate::wallet::WalletBuilder;
 use crate::{
-    client::secret::{stronghold::StrongholdSecretManager, types::Password, SecretManager, SecretManagerDto},
+    client::{
+        secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerDto},
+        utils::Password,
+    },
     types::block::address::Hrp,
     wallet::{Account, Wallet},
 };

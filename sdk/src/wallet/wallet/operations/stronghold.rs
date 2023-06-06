@@ -4,7 +4,7 @@
 use std::time::Duration;
 
 use crate::{
-    client::secret::{types::Password, SecretManager},
+    client::{secret::SecretManager, utils::Password},
     wallet::Wallet,
 };
 
