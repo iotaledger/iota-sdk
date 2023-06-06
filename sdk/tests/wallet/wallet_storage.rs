@@ -10,7 +10,7 @@ use iota_sdk::{
 
 use crate::wallet::common::{setup, tear_down};
 
-// Db created with commit 8dd389ddeed0d95bb493c38f376b41a6a9127148
+// Db created with wallet.rs commit 8dd389ddeed0d95bb493c38f376b41a6a9127148
 #[cfg(all(feature = "stronghold", feature = "rocksdb"))]
 #[tokio::test]
 async fn check_existing_db() -> Result<()> {
@@ -86,7 +86,7 @@ async fn check_existing_db() -> Result<()> {
     tear_down(storage_path)
 }
 
-// Db created with commit 2dd9974c1bc05c2b0b7d6f0ee100deb2da60d071
+// Db created with wallet.rs commit 2dd9974c1bc05c2b0b7d6f0ee100deb2da60d071
 #[cfg(all(feature = "ledger_nano", feature = "rocksdb"))]
 #[tokio::test]
 async fn check_existing_db_1() -> Result<()> {
