@@ -151,7 +151,7 @@ impl Wallet {
 
 impl WalletInner {
     /// Get the [SecretManager]
-    pub fn get_secret_manager(&self) -> &RwLock<SecretManager> {
+    pub fn get_secret_manager(&self) -> &Arc<RwLock<SecretManager>> {
         &self.secret_manager
     }
 

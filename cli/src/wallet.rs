@@ -1,6 +1,8 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::path::Path;
+
 use iota_sdk::wallet::Wallet;
 
 use crate::{
@@ -15,8 +17,8 @@ use crate::{
 };
 
 pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String>), Error> {
-    let storage_path = std::path::Path::new(&cli.wallet_db_path);
-    let snapshot_path = std::path::Path::new(&cli.stronghold_snapshot_path);
+    let storage_path = Path::new(&cli.wallet_db_path);
+    let snapshot_path = Path::new(&cli.stronghold_snapshot_path);
 
     let (wallet, account) = if let Some(command) = cli.command {
         match command {

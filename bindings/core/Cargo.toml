@@ -23,10 +23,8 @@ primitive-types = { version = "0.12.1", default-features = false }
 serde = { version = "1.0.163", default-features = false }
 serde_json = { version = "1.0.96", default-features = false }
 thiserror = { version = "1.0.40", default-features = false }
-zeroize = { version = "1.6.0", default-features = false }
-
-[dev-dependencies]
 tokio = { version = "1.28.2", default-features = false }
+zeroize = { version = "1.6.0", default-features = false }
 
 [features]
 events = [ "iota-sdk/events" ]
