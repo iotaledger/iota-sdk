@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { OutputData } from './output';
-import { InclusionState} from './transaction';
-import { InputSigningData, Remainder,} from '../client';
+import { InclusionState } from './transaction';
+import { InputSigningData, Remainder } from '../client';
 import { TransactionEssence, TransactionPayload } from '../block';
 import { OutputResponse } from '../models';
 
