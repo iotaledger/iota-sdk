@@ -140,10 +140,7 @@ pub async fn init_command(
             snapshot_path.display()
         )));
     }
-    // Set up password.
     let password = get_password("Stronghold password", true)?;
-
-    // Set up mnemonic.
     let mnemonic = match parameters.mnemonic_file_path {
         Some(path) => import_mnemonic(&path).await?,
         None => enter_or_generate_mnemonic().await?,
