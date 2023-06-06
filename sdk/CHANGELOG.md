@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multiple prepare methods returning `PreparedMintTokenTransaction`: `prepare_mint_native_token` and `prepare_increase_native_token_supply`;
 - Stronghold snapshot migration from v2 to v3;
 - `SecretManage::sign_evm`;
+- `Account::addresses_balance` method accepting addresses to get balance for;
 
 ### Changed
 
@@ -81,7 +82,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Made certain `prepare_` methods public: `prepare_mint_nfts`, `prepare_send_native_tokens`, `prepare_send_nft` and `prepare_create_alias_output`;
 - `Address`-like types now implement `ToBech32Ext` for `to_bech32` and similar fns;
 - Add constructors for `SendNftParams`, `SendAmountParams`, `SendNativeTokensParams`, `MintNftParams`;
+- Rename `AccountBalance` to `Balance` and `AccountBalanceDto` to `BalanceDto`:
 - `Bech32AddressLike`, `HrpLike` and other `TryInto` parameters unified with `ConvertTo` trait;
+- Custom `Serialize` and `Deserialize` impls for `WalletEvent` to have an integer `type` as tag;
+- `WalletEventType` now converts to/from u8 instead of string;
+- `Client` methods `get_outputs`, `get_outputs_ignore_errors`, `get_outputs_metadata_ignore_errors` now accept a slice of output ids;
+- More functions accept generic types for ergonomics: `Wallet::listen`, `clear_listeners`, `EventEmitter` fns, `RegularTransactionEssenceBuilder` fns, `AliasOutputBuilder` fns, `Account::claim_outputs`, `prepare_transaction`, `send`, `finish_transaction`, `send_nft`, `prepare_send_nft`, `send_native_tokens`, `prepare_send_native_tokens`, `send_amount`, `prepare_send_amount`, `mint_nfts`, `prepare_mint_nfts`, `vote`, `prepare_vote`, `Unlocks::new`, `TaggedDataPayload::new`, `MilestonePayload::new`, `ReceiptMilestoneOption::new`, `Client::subscribe`, `unsubscribe`, `basic_output_ids`, `alias_output_ids`, `foundry_output_ids`, `nft_output_ids`, `MqttManager::with_topics`, `MqttTopicManager::new`, `with_topics`, `QueryParameters::new`;
 
 ### Removed
 
@@ -100,9 +106,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Storage records decryption;
 - CoinType check, by moving it from AccountBuilder to WalletBuilder;
-
-### Fixed
-
 - Validation for transitions in the input selection;
 - Automatically increase foundry counter of alias outputs;
 - Validate that foundry outputs can't have serial number `0`;

@@ -58,7 +58,7 @@ pub fn call_wallet_method(wallet: &Wallet, method: String) -> Result<String> {
 /// Listen to wallet events.
 #[pyfunction]
 pub fn listen_wallet(wallet: &Wallet, events: Vec<String>, handler: PyObject) {
-    let mut rust_events = Vec::new();
+    let mut rust_events = Vec::with_capacity(events.len());
 
     for event in events {
         let event = match serde_json::from_str::<WalletEventType>(&event) {

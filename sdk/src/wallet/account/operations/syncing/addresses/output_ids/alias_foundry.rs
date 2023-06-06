@@ -39,13 +39,13 @@ impl Account {
         {
             output_ids.extend(
                 client
-                    .alias_output_ids(vec![QueryParameter::Governor(bech32_address)])
+                    .alias_output_ids([QueryParameter::Governor(bech32_address)])
                     .await?
                     .items,
             );
             output_ids.extend(
                 client
-                    .alias_output_ids(vec![QueryParameter::StateController(bech32_address)])
+                    .alias_output_ids([QueryParameter::StateController(bech32_address)])
                     .await?
                     .items,
             );
@@ -53,13 +53,13 @@ impl Account {
 
         #[cfg(not(target_family = "wasm"))]
         {
-            let tasks = vec![
+            let tasks = [
                 // Get outputs where the address is in the governor address unlock condition
                 async move {
                     let client = client.clone();
                     task::spawn(async move {
                         client
-                            .alias_output_ids(vec![QueryParameter::Governor(bech32_address)])
+                            .alias_output_ids([QueryParameter::Governor(bech32_address)])
                             .await
                             .map_err(From::from)
                     })
@@ -71,7 +71,7 @@ impl Account {
                     let client = client.clone();
                     task::spawn(async move {
                         client
-                            .alias_output_ids(vec![QueryParameter::StateController(bech32_address)])
+                            .alias_output_ids([QueryParameter::StateController(bech32_address)])
                             .await
                             .map_err(From::from)
                     })
@@ -108,7 +108,7 @@ impl Account {
 
         let bech32_hrp = self.client().get_bech32_hrp().await?;
 
-        let mut tasks = vec![];
+        let mut tasks = Vec::new();
 
         for alias_output_with_meta in alias_outputs_with_meta {
             if let Output::Alias(alias_output) = alias_output_with_meta.output() {
@@ -118,7 +118,7 @@ impl Account {
                 let client = self.client().clone();
                 tasks.push(Box::pin(task::spawn(async move {
                     client
-                        .foundry_output_ids(vec![QueryParameter::AliasAddress(alias_bech32_address)])
+                        .foundry_output_ids([QueryParameter::AliasAddress(alias_bech32_address)])
                         .await
                         .map_err(From::from)
                 })));

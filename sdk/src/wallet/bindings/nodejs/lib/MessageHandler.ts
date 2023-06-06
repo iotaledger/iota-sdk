@@ -8,12 +8,13 @@ import {
     destroy,
 } from './bindings';
 import type {
-    EventType,
+    WalletEventType,
     AccountManagerOptions,
     __Message__,
     __AccountMethod__,
     AccountId,
 } from '../types';
+import { Event } from '../types';
 
 // The MessageHandler class interacts with messages with the rust bindings.
 export class MessageHandler {
@@ -58,10 +59,17 @@ export class MessageHandler {
     }
 
     async listen(
-        eventTypes: EventType[],
-        callback: (error: Error, result: string) => void,
+        eventTypes: WalletEventType[],
+        callback: (error: Error, result: Event) => void,
     ): Promise<void> {
-        return listenWallet(eventTypes, callback, this.messageHandler);
+        return listenWallet(
+            eventTypes,
+            function (err: any, data: string) {
+                const parsed = JSON.parse(data);
+                callback(err, new Event(parsed.accountIndex, parsed.event));
+            },
+            this.messageHandler,
+        );
     }
 
     async destroy(): Promise<void> {
