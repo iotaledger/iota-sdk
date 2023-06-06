@@ -284,7 +284,7 @@ const OutputDiscriminator = {
         { value: TreasuryOutput, name: OutputType.Treasury as any },
         { value: BasicOutput, name: OutputType.Basic as any },
         { value: AliasOutput, name: OutputType.Alias as any },
-        { value: NftOutput, name: OutputType.Alias as any },
+        { value: NftOutput, name: OutputType.Nft as any },
         { value: FoundryOutput, name: OutputType.Foundry as any },
     ],
 };

@@ -5,9 +5,7 @@ import type { AccountAddress, AddressWithUnspentOutputs } from './address';
 import type { OutputData } from './output';
 import type { Transaction } from './transaction';
 import { CoinType } from '../../client';
-import { TransactionPayload } from '../block/payload/transaction';
 import { HexEncodedAmount, HexEncodedString } from '../utils';
-import { OutputResponse } from '../models/api';
 
 /**
  * Account identifier
