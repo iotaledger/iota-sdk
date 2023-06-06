@@ -16,6 +16,7 @@ import type {
 } from '../types/wallet';
 import { IAuth, IClientOptions, LedgerNanoStatus } from '../types/client';
 import { Client } from '../client';
+import { SecretManager } from '../secretManager';
 
 /** The Wallet class. */
 export class Wallet {
@@ -142,6 +143,13 @@ export class Wallet {
      */
     async getClient(): Promise<Client> {
         return this.methodHandler.getClient();
+    }
+
+    /**
+     * Get secret manager.
+     */
+    async getSecretManager(): Promise<SecretManager> {
+        return this.methodHandler.getSecretManager();
     }
 
     /**
