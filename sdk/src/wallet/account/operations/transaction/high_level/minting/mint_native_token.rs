@@ -187,7 +187,7 @@ where
             );
             let token_id = TokenId::from(foundry_id);
 
-            let outputs = vec![
+            let outputs = [
                 new_alias_output_builder.finish_output(token_supply)?,
                 {
                     let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_storage_deposit(

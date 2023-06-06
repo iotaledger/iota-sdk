@@ -46,7 +46,7 @@ Enter the "main" account and get some funds from the faucet.
 > Account "main": sync
 ```
 ```sh title=Output
-> INFO  Synced: AccountBalance ...
+> INFO  Synced: Balance ...
 ```
 
 ### Send an amount
@@ -80,7 +80,7 @@ Enter the "savings" account and check the balance.
 > Account "savings": balance
 ```
 ```sh title=Output
-> INFO  AccountBalance ...
+> INFO  Balance ...
 ```
 
 ## Native tokens
@@ -119,7 +119,7 @@ Enter the "main" account and synchronize the account balances.
 > Account "main": sync
 ```
 ```sh title=Output
-> INFO  Synced: AccountBalance ...TokenId([TOKEN_ID])...
+> INFO  Synced: Balance ...TokenId([TOKEN_ID])...
 ```
 
 Send native tokens from the "main" account to the new "savings" address.
@@ -168,7 +168,7 @@ Enter the "main" account and synchronize the account balances.
 > Account "main": sync
 ```
 ```sh title=Output
-> INFO  Synced: AccountBalance ...NftId([NFT_ID])...
+> INFO  Synced: Balance ...NftId([NFT_ID])...
 ```
 
 Send the NFT to the new "savings" address.

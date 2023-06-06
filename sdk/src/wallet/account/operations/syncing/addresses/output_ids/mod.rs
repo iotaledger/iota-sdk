@@ -45,10 +45,10 @@ where
         }
 
         #[cfg(target_family = "wasm")]
-        let mut results = vec![];
+        let mut results = Vec::new();
 
         #[cfg(not(target_family = "wasm"))]
-        let mut tasks = vec![];
+        let mut tasks = Vec::new();
 
         if (address.is_ed25519() && sync_options.account.basic_outputs)
             || (address.is_nft() && sync_options.nft.basic_outputs)

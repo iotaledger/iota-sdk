@@ -21,10 +21,22 @@ Lists all account addresses.
 
 Prints the account balance.
 
-#### Example
+#### Parameters
 
+| Name        | Optional  | Default | Example                                                         |
+| ----------- | --------- | ------- | --------------------------------------------------------------- |
+| `addresses` | ✓         | N/A     | rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3 |
+
+#### Examples
+
+Compute the balance of account.
 ```sh
 > Account "main": balance
+```
+
+Compute the balance of given addresses.
+```sh
+> Account "main": balance rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3
 ```
 
 ### `burn-native-token`

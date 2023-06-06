@@ -164,7 +164,7 @@ where
     ///     prefix_hex::decode("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?
     ///         .try_into()
     ///         .unwrap();
-    /// let params = vec![MintNftParams::new()
+    /// let params = [MintNftParams::new()
     ///     try_with_address("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?
     ///     with_metadata(b"some nft metadata".to_vec())
     ///     with_immutable_metadata(b"some immutable nft metadata".to_vec())
@@ -177,22 +177,28 @@ where
     ///     transaction.transaction_id,
     /// );
     /// ```
-    pub async fn mint_nfts(
+    pub async fn mint_nfts<I: IntoIterator<Item = MintNftParams> + Send>(
         &self,
-        params: Vec<MintNftParams>,
+        params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<Transaction>
+    where
+        I::IntoIter: Send,
+    {
         let prepared_transaction = self.prepare_mint_nfts(params, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
 
     /// Function to prepare the transaction for
     /// [Account.mint_nfts()](crate::account::Account.mint_nfts)
-    pub async fn prepare_mint_nfts(
+    pub async fn prepare_mint_nfts<I: IntoIterator<Item = MintNftParams> + Send>(
         &self,
-        params: Vec<MintNftParams>,
+        params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> crate::wallet::Result<PreparedTransactionData>
+    where
+        I::IntoIter: Send,
+    {
         log::debug!("[TRANSACTION] prepare_mint_nfts");
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;

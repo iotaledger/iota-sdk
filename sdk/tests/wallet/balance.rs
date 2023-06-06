@@ -8,7 +8,7 @@ use iota_sdk::{
         BasicOutputBuilder, UnlockCondition,
     },
     wallet::{
-        account::types::{AccountBalance, AccountBalanceDto},
+        account::types::{Balance, BalanceDto},
         Result,
     },
 };
@@ -17,8 +17,8 @@ use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear
 
 #[test]
 fn balance_to_dto() {
-    let balance = AccountBalance::rand_mock();
-    let balance_dto = AccountBalanceDto::from(&balance);
+    let balance = Balance::rand_mock();
+    let balance_dto = BalanceDto::from(&balance);
 
     assert_eq!(balance.base_coin().total(), balance_dto.base_coin.total());
     assert_eq!(balance.base_coin().available(), balance_dto.base_coin.available());
@@ -56,7 +56,7 @@ fn balance_to_dto() {
 fn balance_add_assign() {
     use iota_sdk::U256;
 
-    let mut balance1 = AccountBalance::rand_mock();
+    let mut balance1 = Balance::rand_mock();
     let total1 = balance1.base_coin().total();
     let available1 = balance1.base_coin().available();
     #[cfg(feature = "participation")]
@@ -72,7 +72,7 @@ fn balance_add_assign() {
     let num_foundries1 = balance1.foundries().len();
     let num_nfts1 = balance1.nfts().len();
 
-    let balance2 = AccountBalance::rand_mock();
+    let balance2 = Balance::rand_mock();
     let total2 = balance2.base_coin().total();
     let available2 = balance2.base_coin().available();
     #[cfg(feature = "participation")]
@@ -137,24 +137,20 @@ async fn balance_expiration() -> Result<()> {
 
     let seconds_until_expired = 20;
     let token_supply = account_0.client().get_token_supply().await?;
-    let outputs = vec![
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            // Send to account 1 with expiration to account 2, both have no amount yet
-            .with_unlock_conditions(vec![
-                UnlockCondition::Address(AddressUnlockCondition::new(
-                    *account_1.addresses().await?[0].address().as_ref(),
-                )),
-                UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    *account_2.addresses().await?[0].address().as_ref(),
-                    // Current time + 20s
-                    account_0.client().get_time_checked().await? + seconds_until_expired,
-                )?),
-            ])
-            .with_features(vec![SenderFeature::new(
-                *account_0.addresses().await?[0].address().as_ref(),
-            )])
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
+        // Send to account 1 with expiration to account 2, both have no amount yet
+        .with_unlock_conditions([
+            UnlockCondition::Address(AddressUnlockCondition::new(
+                *account_1.addresses().await?[0].address().as_ref(),
+            )),
+            UnlockCondition::Expiration(ExpirationUnlockCondition::new(
+                *account_2.addresses().await?[0].address().as_ref(),
+                // Current time + 20s
+                account_0.client().get_time_checked().await? + seconds_until_expired,
+            )?),
+        ])
+        .with_features([SenderFeature::new(*account_0.addresses().await?[0].address().as_ref())])
+        .finish_output(token_supply)?];
 
     let balance_before_tx = account_0.balance().await?;
     let tx = account_0.send(outputs, None).await?;
@@ -198,14 +194,12 @@ async fn balance_expiration() -> Result<()> {
     assert_eq!(balance.base_coin().available(), 1_000_000);
 
     // It's possible to send the expired output
-    let outputs = vec![
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            // Send to account 1 with expiration to account 2, both have no amount yet
-            .with_unlock_conditions(vec![AddressUnlockCondition::new(
-                *account_1.addresses().await?[0].address().as_ref(),
-            )])
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
+        // Send to account 1 with expiration to account 2, both have no amount yet
+        .with_unlock_conditions([AddressUnlockCondition::new(
+            *account_1.addresses().await?[0].address().as_ref(),
+        )])
+        .finish_output(token_supply)?];
     let _tx = account_2.send(outputs, None).await?;
 
     tear_down(storage_path)

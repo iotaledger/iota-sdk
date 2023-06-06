@@ -28,7 +28,7 @@ where
         // Only request basic outputs with `AddressUnlockCondition` only
         Ok(self
             .client()
-            .basic_output_ids(vec![
+            .basic_output_ids([
                 QueryParameter::Address(bech32_address),
                 QueryParameter::HasExpiration(false),
                 QueryParameter::HasTimelock(false),
@@ -48,22 +48,22 @@ where
         // aliases and foundries
         #[cfg(target_family = "wasm")]
         {
-            let mut output_ids = vec![];
+            let mut output_ids = Vec::new();
             output_ids.extend(
                 self.client()
-                    .basic_output_ids(vec![QueryParameter::Address(bech32_address)])
+                    .basic_output_ids([QueryParameter::Address(bech32_address)])
                     .await?
                     .items,
             );
             output_ids.extend(
                 self.client()
-                    .basic_output_ids(vec![QueryParameter::StorageDepositReturnAddress(bech32_address)])
+                    .basic_output_ids([QueryParameter::StorageDepositReturnAddress(bech32_address)])
                     .await?
                     .items,
             );
             output_ids.extend(
                 self.client()
-                    .basic_output_ids(vec![QueryParameter::ExpirationReturnAddress(bech32_address)])
+                    .basic_output_ids([QueryParameter::ExpirationReturnAddress(bech32_address)])
                     .await?
                     .items,
             );
@@ -74,13 +74,13 @@ where
         #[cfg(not(target_family = "wasm"))]
         {
             let client = self.client();
-            let tasks = vec![
+            let tasks = [
                 // Get basic outputs
                 async move {
                     let client = client.clone();
                     tokio::spawn(async move {
                         client
-                            .basic_output_ids(vec![QueryParameter::Address(bech32_address)])
+                            .basic_output_ids([QueryParameter::Address(bech32_address)])
                             .await
                             .map_err(From::from)
                     })
@@ -92,7 +92,7 @@ where
                     let client = client.clone();
                     tokio::spawn(async move {
                         client
-                            .basic_output_ids(vec![QueryParameter::StorageDepositReturnAddress(bech32_address)])
+                            .basic_output_ids([QueryParameter::StorageDepositReturnAddress(bech32_address)])
                             .await
                             .map_err(From::from)
                     })
@@ -104,7 +104,7 @@ where
                     let client = client.clone();
                     tokio::spawn(async move {
                         client
-                            .basic_output_ids(vec![QueryParameter::ExpirationReturnAddress(bech32_address)])
+                            .basic_output_ids([QueryParameter::ExpirationReturnAddress(bech32_address)])
                             .await
                             .map_err(From::from)
                     })

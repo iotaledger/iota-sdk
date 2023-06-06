@@ -1,4 +1,8 @@
-import type { OutputTypes, HexEncodedAmount } from '@iota/types';
+import type {
+    OutputTypes,
+    HexEncodedAmount,
+    HexEncodedString,
+} from '@iota/types';
 import type { SyncOptions, FilterOptions } from '../account';
 import type {
     SendAmountParams,
@@ -134,6 +138,14 @@ export type __GenerateEvmAddressesMethod__ = {
     name: 'generateEvmAddresses';
     data: {
         options: GenerateAddressesOptions;
+    };
+};
+
+export type __SignEvmMethod__ = {
+    name: 'signEvm';
+    data: {
+        message: HexEncodedString;
+        chain: number[];
     };
 };
 

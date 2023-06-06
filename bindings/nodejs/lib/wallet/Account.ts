@@ -3,7 +3,7 @@
 
 import type { WalletMethodHandler } from './WalletMethodHandler';
 import {
-    AccountBalance,
+    Balance,
     AccountMetadata,
     SyncOptions,
     AccountMeta,
@@ -341,7 +341,7 @@ export class Account {
 
     /**
      * Function to destroy a foundry output with a circulating supply of 0.
-     * Native tokens in the foundry (minted by other foundries) will be transactioned to the controlling alias.
+     * Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias.
      * @param foundryId The FoundryId.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
@@ -393,7 +393,7 @@ export class Account {
      * Get the account balance.
      * @returns The account balance.
      */
-    async getBalance(): Promise<AccountBalance> {
+    async getBalance(): Promise<Balance> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1086,7 +1086,7 @@ export class Account {
      * @param options Optional synchronization options.
      * @returns The account balance.
      */
-    async sync(options?: SyncOptions): Promise<AccountBalance> {
+    async sync(options?: SyncOptions): Promise<Balance> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {

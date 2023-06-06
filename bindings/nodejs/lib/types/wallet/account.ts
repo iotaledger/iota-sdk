@@ -14,8 +14,8 @@ import { CoinType } from '../../client';
  */
 export type AccountId = number | string;
 
-/** The balance of an account */
-export interface AccountBalance {
+/** A balance */
+export interface Balance {
     /** The balance of the base coin */
     baseCoin: BaseCoinBalance;
     /** The required storage deposit for the outputs */

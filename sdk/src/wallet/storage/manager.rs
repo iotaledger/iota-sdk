@@ -1,6 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use futures::{StreamExt, TryStreamExt};
 use serde::{Deserialize, Serialize};
 
 use crate::wallet::{
@@ -97,18 +98,14 @@ impl StorageManager {
             return Ok(Vec::new());
         }
 
-        let mut accounts = Vec::new();
-        for account_index in self.account_indexes.clone() {
-            // PANIC: we assume that ACCOUNTS_INDEXATION_KEY and the different indexes are set together and
-            // ACCOUNTS_INDEXATION_KEY has already been checked.
-            accounts.push(
-                self.get(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"))
-                    .await?
-                    .unwrap(),
-            );
-        }
-
-        Ok(accounts)
+        futures::stream::iter(&self.account_indexes)
+            .filter_map(|account_index| async {
+                let account_index = *account_index;
+                let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}");
+                self.get(&key).await.transpose()
+            })
+            .try_collect::<Vec<_>>()
+            .await
     }
 
     pub async fn save_account(&mut self, account: &AccountDetails) -> crate::wallet::Result<()> {

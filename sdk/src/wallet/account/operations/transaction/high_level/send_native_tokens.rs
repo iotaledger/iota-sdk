@@ -93,7 +93,7 @@ where
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
-    /// let outputs = vec![SendNativeTokensParams {
+    /// let outputs = [SendNativeTokensParams {
     ///     address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
     ///     native_tokens: vec![(
     ///         TokenId::from_str("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?,
@@ -108,22 +108,28 @@ where
     ///     println!("Block sent: {}", block_id);
     /// }
     /// ```
-    pub async fn send_native_tokens(
+    pub async fn send_native_tokens<I: IntoIterator<Item = SendNativeTokensParams> + Send>(
         &self,
-        params: Vec<SendNativeTokensParams>,
+        params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<Transaction>
+    where
+        I::IntoIter: Send,
+    {
         let prepared_transaction = self.prepare_send_native_tokens(params, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
 
     /// Function to prepare the transaction for
     /// [Account.send_native_tokens()](crate::account::Account.send_native_tokens)
-    pub async fn prepare_send_native_tokens(
+    pub async fn prepare_send_native_tokens<I: IntoIterator<Item = SendNativeTokensParams> + Send>(
         &self,
-        params: Vec<SendNativeTokensParams>,
+        params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> crate::wallet::Result<PreparedTransactionData>
+    where
+        I::IntoIter: Send,
+    {
         log::debug!("[TRANSACTION] prepare_send_native_tokens");
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;

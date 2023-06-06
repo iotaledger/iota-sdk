@@ -89,7 +89,7 @@ where
             ),
         };
 
-        self.prepare_transaction(vec![new_output], tx_options).await
+        self.prepare_transaction([new_output], tx_options).await
     }
 
     /// Reduces an account's "voting power" by a given amount.
@@ -135,7 +135,7 @@ where
         };
 
         self.prepare_transaction(
-            vec![new_output],
+            [new_output],
             Some(TransactionOptions {
                 // Use the previous voting output and additionally others for possible additional required amount for
                 // the remainder to reach the minimum required storage deposit.
@@ -167,7 +167,7 @@ where
             participation_bytes
         } else {
             // TODO participation bytes are incorrect, should we really just ignore?
-            vec![]
+            Vec::new()
         };
 
         Ok((

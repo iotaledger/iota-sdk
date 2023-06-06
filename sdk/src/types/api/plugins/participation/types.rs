@@ -247,7 +247,7 @@ impl Participations {
 
     /// Serialize to bytes.
     pub fn to_bytes(&self) -> Result<Vec<u8>, Error> {
-        let mut bytes: Vec<u8> = vec![
+        let mut bytes = vec![
             self.participations
                 .len()
                 .try_into()

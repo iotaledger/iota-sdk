@@ -3,7 +3,7 @@
 
 import { SendAmountParams } from '@iota/sdk';
 
-import { getUnlockedManager } from './account-manager';
+import { getUnlockedWallet } from './common';
 
 // The base coin micro amount to send
 const SEND_MICRO_AMOUNT = '1';
@@ -21,10 +21,10 @@ const RECV_ADDRESS =
 async function run() {
     try {
         // Create the wallet
-        const manager = await getUnlockedManager();
+        const wallet = await getUnlockedWallet();
 
         // Get the account we generated with `01-create-wallet`
-        const account = await manager.getAccount(
+        const account = await wallet.getAccount(
             `${process.env.ACCOUNT_ALIAS_1}`,
         );
 

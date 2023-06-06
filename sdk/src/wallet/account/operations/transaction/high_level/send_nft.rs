@@ -51,7 +51,7 @@ where
     /// internally, the options can define the RemainderValueStrategy. Custom inputs will be replaced with the
     /// required nft inputs. Address needs to be Bech32 encoded
     /// ```ignore
-    /// let outputs = vec![SendNftParams::new(
+    /// let outputs = [SendNftParams::new(
     ///     "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
     ///     "0xe645042a8a082957cb4bec4927936699ee8e56048834b090379da64213ce231b",
     /// )?];
@@ -64,22 +64,28 @@ where
     ///     transaction.transaction_id
     /// );
     /// ```
-    pub async fn send_nft(
+    pub async fn send_nft<I: IntoIterator<Item = SendNftParams> + Send>(
         &self,
-        params: Vec<SendNftParams>,
+        params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<Transaction>
+    where
+        I::IntoIter: Send,
+    {
         let prepared_transaction = self.prepare_send_nft(params, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
 
     /// Function to prepare the transaction for
     /// [Account.send_nft()](crate::account::Account.send_nft)
-    pub async fn prepare_send_nft(
+    pub async fn prepare_send_nft<I: IntoIterator<Item = SendNftParams> + Send>(
         &self,
-        params: Vec<SendNftParams>,
+        params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> crate::wallet::Result<PreparedTransactionData>
+    where
+        I::IntoIter: Send,
+    {
         log::debug!("[TRANSACTION] prepare_send_nft");
 
         let unspent_outputs = self.unspent_outputs(None).await?;
@@ -102,7 +108,7 @@ where
                     // Set the nft id and new address unlock condition
                     let nft_builder = NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_id)
-                        .with_unlock_conditions(vec![AddressUnlockCondition::new(address)]);
+                        .with_unlock_conditions([AddressUnlockCondition::new(address)]);
                     outputs.push(nft_builder.finish_output(token_supply)?);
                 }
             } else {

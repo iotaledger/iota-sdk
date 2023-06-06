@@ -41,7 +41,7 @@ where
             options.internal
         );
         if amount == 0 {
-            return Ok(vec![]);
+            return Ok(Vec::new());
         }
 
         let account_details = self.details().await;
@@ -129,7 +129,7 @@ where
                 .generate_ed25519_addresses(
                     account_details.coin_type,
                     account_details.index,
-                    address_range.clone(),
+                    address_range,
                     Some(options),
                 )
                 .await?
@@ -144,7 +144,7 @@ where
             .generate_ed25519_addresses(
                 account_details.coin_type,
                 account_details.index,
-                address_range.clone(),
+                address_range,
                 Some(options),
             )
             .await?;

@@ -153,7 +153,7 @@ where
             }
         }
 
-        let outputs = vec![alias_output_builder.finish_output(token_supply)?];
+        let outputs = [alias_output_builder.finish_output(token_supply)?];
 
         self.prepare_transaction(outputs, options).await
     }
