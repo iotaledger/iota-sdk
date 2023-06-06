@@ -97,10 +97,10 @@ async fn check_existing_db_1() -> Result<()> {
 
     let wallet = Wallet::builder().with_storage_path(storage_path).finish().await?;
 
-    matches!(
+    assert!(matches!(
         *wallet.get_secret_manager().read().await,
         iota_sdk::client::secret::SecretManager::LedgerNano(_)
-    );
+    ));
 
     assert_eq!(wallet.get_accounts().await?.len(), 1);
 
