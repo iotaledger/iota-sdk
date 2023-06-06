@@ -152,7 +152,6 @@ pub async fn init_command(
     let secret_manager = StrongholdSecretManager::builder()
         .password(&password)
         .build(snapshot_path)?;
-    // TODO: allow providing the mnemonic in the builder?
     secret_manager.store_mnemonic(mnemonic).await?;
     let secret_manager = SecretManager::Stronghold(secret_manager);
 
