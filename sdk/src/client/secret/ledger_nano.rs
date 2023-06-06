@@ -541,3 +541,33 @@ fn merge_unlocks(
     }
     Ok(merged_unlocks)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        client::{api::GetAddressesOptions, constants::IOTA_COIN_TYPE, secret::SecretManager},
+        types::block::address::ToBech32Ext,
+    };
+
+    #[tokio::test]
+    #[ignore = "requires ledger nano instance"]
+    async fn ed25519_address() {
+        let secret_manager = LedgerSecretManager::new(true);
+
+        let addresses = SecretManager::LedgerNano(secret_manager)
+            .generate_ed25519_addresses(
+                GetAddressesOptions::default()
+                    .with_coin_type(IOTA_COIN_TYPE)
+                    .with_account_index(0)
+                    .with_range(0..1),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(
+            addresses[0].to_bech32_unchecked("atoi"),
+            "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e"
+        );
+    }
+}
