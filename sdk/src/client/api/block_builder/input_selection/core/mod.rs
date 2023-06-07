@@ -112,7 +112,6 @@ impl InputSelection {
         Ok(())
     }
 
-    // TODO rename
     fn init(&mut self) -> Result<(), Error> {
         // Adds an initial amount requirement.
         self.requirements.push(Requirement::Amount);
