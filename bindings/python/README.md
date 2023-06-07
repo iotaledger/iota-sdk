@@ -40,7 +40,7 @@ Python binding to the [iota-sdk library](/README.md).
    If you are using Windows, you should run the following instead:
 
    ```bash
-   .\iota_sdk_venv\Scripts\activate`
+   .\iota_sdk_venv\Scripts\activate
    ```
 
 3. Install the required dependencies and build the wheel by running the following commands:
@@ -117,7 +117,7 @@ python3 examples/client/00_get_info.py
 You can generate the Python API reference with the following command from this directory:
 
 ```bash
-pip install pydoc-markdown && pydoc-markdown
+pipx install pydoc-markdown && pydoc-markdown
 ```
 
 ## Learn More
