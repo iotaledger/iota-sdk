@@ -32,32 +32,27 @@ async fn main() -> Result<()> {
     let account = wallet.get_account("Alice").await?;
 
     // May want to ensure the account is synced before sending a transaction.
-    let balance = wallet.sync(None).await?;
+    let _ = wallet.sync(None).await?;
 
-    if balance.base_coin().available() >= SEND_AMOUNT {
-        // Set the stronghold password
-        wallet
-            .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
-            .await?;
+    // Set the stronghold password
+    wallet
+        .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
+        .await?;
 
-        println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
-        // Send a transaction
-        let outputs = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
-        let transaction = account.send_amount(outputs, None).await?;
+    println!("Trying to send '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
+    let outputs = [SendAmountParams::new(RECV_ADDRESS, SEND_AMOUNT)?];
+    let transaction = account.send_amount(outputs, None).await?;
 
-        // Wait for transaction to get included
-        let block_id = account
-            .retry_transaction_until_included(&transaction.transaction_id, None, None)
-            .await?;
+    // Wait for transaction to get included
+    let block_id = account
+        .retry_transaction_until_included(&transaction.transaction_id, None, None)
+        .await?;
 
-        println!(
-            "Transaction included: {}/block/{}",
-            var("EXPLORER_URL").unwrap(),
-            block_id
-        );
-    } else {
-        println!("Insufficient base coin funds");
-    }
+    println!(
+        "Transaction included: {}/block/{}",
+        var("EXPLORER_URL").unwrap(),
+        block_id
+    );
 
     Ok(())
 }
