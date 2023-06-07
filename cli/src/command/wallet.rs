@@ -162,7 +162,7 @@ pub async fn migrate_stronghold_snapshot_v2_to_v3_command(path: Option<String>) 
     StrongholdAdapter::migrate_snapshot_v2_to_v3(
         path.as_deref().unwrap_or(DEFAULT_STRONGHOLD_SNAPSHOT_PATH),
         password,
-        "wallet.rs".to_owned(),
+        "wallet.rs",
         100,
         None,
         None,

@@ -51,7 +51,7 @@ pub fn call_utils_method(method: String) -> Result<String> {
 pub fn migrate_stronghold_snapshot_v2_to_v3(
     current_path: String,
     current_password: String,
-    salt: String,
+    salt: &str,
     rounds: u32,
     new_path: Option<String>,
     new_password: Option<String>,

@@ -38,7 +38,7 @@ async fn stronghold_snapshot_v2_v3_migration() {
     StrongholdAdapter::migrate_snapshot_v2_to_v3(
         "./tests/wallet/fixtures/v2.stronghold",
         "current_password".to_owned().into(),
-        PBKDF_SALT.to_owned(),
+        PBKDF_SALT,
         PBKDF_ITER,
         Some("./tests/wallet/fixtures/v3.stronghold"),
         Some("new_password".to_owned().into()),
@@ -136,7 +136,7 @@ async fn stronghold_snapshot_v2_v3_migration_same_path() {
     StrongholdAdapter::migrate_snapshot_v2_to_v3(
         "./tests/wallet/fixtures/v2-copy.stronghold",
         "current_password".to_owned().into(),
-        PBKDF_SALT.to_owned(),
+        PBKDF_SALT,
         PBKDF_ITER,
         Some("./tests/wallet/fixtures/v2-copy.stronghold"),
         Some("new_password".to_owned().into()),
@@ -166,7 +166,7 @@ async fn stronghold_snapshot_v2_v3_migration_with_backup() {
     StrongholdAdapter::migrate_snapshot_v2_to_v3(
         "./tests/wallet/fixtures/v2_with_backup.stronghold",
         "current_password".to_owned().into(),
-        PBKDF_SALT.to_owned(),
+        PBKDF_SALT,
         PBKDF_ITER,
         Some("./tests/wallet/fixtures/v3_with_backup.stronghold"),
         Some("new_password".to_owned().into()),

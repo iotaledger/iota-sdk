@@ -22,7 +22,7 @@ impl StrongholdAdapter {
     pub fn migrate_snapshot_v2_to_v3<P: AsRef<Path>>(
         current_path: P,
         current_password: Password,
-        salt: String,
+        salt: impl AsRef<str>,
         rounds: u32,
         new_path: Option<P>,
         new_password: Option<Password>,
@@ -41,7 +41,7 @@ impl StrongholdAdapter {
 
         crypto::keys::pbkdf::PBKDF2_HMAC_SHA512(
             current_password.as_bytes(),
-            salt.as_bytes(),
+            salt.as_ref().as_bytes(),
             NonZeroU32::try_from(rounds).map_err(|_| StrongholdError::InvalidRounds(rounds))?,
             buffer.as_mut(),
         );

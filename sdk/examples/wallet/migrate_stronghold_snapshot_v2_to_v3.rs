@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
     StrongholdAdapter::migrate_snapshot_v2_to_v3(
         V2_PATH,
         "current_password".to_owned().into(),
-        "wallet.rs".to_owned(),
+        "wallet.rs",
         100,
         Some(V3_PATH),
         Some("new_password".to_owned().into()),

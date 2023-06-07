@@ -24,7 +24,7 @@ async fn check_existing_db() -> Result<()> {
     let _ = StrongholdAdapter::migrate_snapshot_v2_to_v3(
         "check_existing_db_test/strongholdfile",
         "STRONGHOLD_PASSWORD".to_owned().into(),
-        "wallet.rs".to_owned(),
+        "wallet.rs",
         100,
         None,
         None,
