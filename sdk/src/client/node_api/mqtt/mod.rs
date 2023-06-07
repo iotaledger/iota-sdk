@@ -164,7 +164,7 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
                                 .read()
                                 .await
                                 .keys()
-                                .map(|t| SubscribeFilter::new(t.topic().to_string(), QoS::AtLeastOnce))
+                                .map(|t| SubscribeFilter::new(t.as_str().to_owned(), QoS::AtLeastOnce))
                                 .collect::<Vec<SubscribeFilter>>();
                             if !topics.is_empty() {
                                 let _ = client
@@ -181,21 +181,20 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
                         }
                     }
                     Ok(Event::Incoming(Incoming::Publish(p))) => {
-                        let topic = p.topic.clone();
                         let client = client.clone();
 
                         crate::client::async_runtime::spawn(async move {
                             let mqtt_topic_handlers = client.mqtt.topic_handlers.read().await;
 
-                            if let Some(handlers) = mqtt_topic_handlers.get(&Topic::new_unchecked(topic.clone())) {
+                            if let Some(handlers) = mqtt_topic_handlers.get(&Topic::new_unchecked(&p.topic)) {
                                 let event = {
-                                    if topic.contains("blocks") || topic.contains("included-block") {
+                                    if p.topic.contains("blocks") || p.topic.contains("included-block") {
                                         let payload = &*p.payload;
                                         let protocol_parameters = &client.network_info.read().await.protocol_parameters;
 
                                         match Block::unpack_verified(payload, protocol_parameters) {
                                             Ok(block) => Ok(TopicEvent {
-                                                topic,
+                                                topic: p.topic.clone(),
                                                 payload: MqttPayload::Block(block),
                                             }),
                                             Err(e) => {
@@ -203,13 +202,13 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
                                                 Err(())
                                             }
                                         }
-                                    } else if topic.contains("milestones") {
+                                    } else if p.topic.contains("milestones") {
                                         let payload = &*p.payload;
                                         let protocol_parameters = &client.network_info.read().await.protocol_parameters;
 
                                         match MilestonePayload::unpack_verified(payload, protocol_parameters) {
                                             Ok(milestone_payload) => Ok(TopicEvent {
-                                                topic,
+                                                topic: p.topic.clone(),
                                                 payload: MqttPayload::MilestonePayload(milestone_payload),
                                             }),
                                             Err(e) => {
@@ -217,13 +216,13 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
                                                 Err(())
                                             }
                                         }
-                                    } else if topic.contains("receipts") {
+                                    } else if p.topic.contains("receipts") {
                                         let payload = &*p.payload;
                                         let protocol_parameters = &client.network_info.read().await.protocol_parameters;
 
                                         match ReceiptMilestoneOption::unpack_verified(payload, protocol_parameters) {
                                             Ok(receipt) => Ok(TopicEvent {
-                                                topic,
+                                                topic: p.topic.clone(),
                                                 payload: MqttPayload::Receipt(receipt),
                                             }),
                                             Err(e) => {
@@ -234,7 +233,7 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
                                     } else {
                                         match serde_json::from_slice(&p.payload) {
                                             Ok(value) => Ok(TopicEvent {
-                                                topic,
+                                                topic: p.topic.clone(),
                                                 payload: MqttPayload::Json(value),
                                             }),
                                             Err(e) => {
@@ -363,19 +362,13 @@ impl<'a> MqttTopicManager<'a> {
             .subscribe_many(
                 self.topics
                     .iter()
-                    .map(|t| SubscribeFilter::new(t.topic().to_string(), QoS::AtLeastOnce)),
+                    .map(|t| SubscribeFilter::new(t.as_str().to_owned(), QoS::AtLeastOnce)),
             )
             .await?;
         {
             let mut mqtt_topic_handlers = self.client.mqtt.topic_handlers.write().await;
             for topic in self.topics {
-                #[allow(clippy::option_if_let_else)]
-                match mqtt_topic_handlers.get_mut(&topic) {
-                    Some(handlers) => handlers.push(cb.clone()),
-                    None => {
-                        mqtt_topic_handlers.insert(topic, vec![cb.clone()]);
-                    }
-                }
+                mqtt_topic_handlers.entry(topic).or_default().push(cb.clone());
             }
         }
         Ok(())
@@ -395,7 +388,7 @@ impl<'a> MqttTopicManager<'a> {
 
         if let Some(client) = &*self.client.mqtt.client.write().await {
             for topic in &topics {
-                client.unsubscribe(topic.topic()).await?;
+                client.unsubscribe(topic.as_str()).await?;
             }
         }
 
