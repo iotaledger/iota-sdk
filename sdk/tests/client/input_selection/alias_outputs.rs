@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{collections::HashSet, str::FromStr};
+use std::str::FromStr;
 
 use iota_sdk::{
     client::{
@@ -1417,26 +1417,22 @@ fn two_aliases_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 3);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| if let Output::Alias(output) = output {
-                output.alias_id() == &alias_id_1
-            } else {
-                false
-            })
-    );
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| if let Output::Alias(output) = output {
-                output.alias_id() == &alias_id_2
-            } else {
-                false
-            })
-    )
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| if let Output::Alias(output) = output {
+            output.alias_id() == &alias_id_1
+        } else {
+            false
+        }));
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| if let Output::Alias(output) = output {
+            output.alias_id() == &alias_id_2
+        } else {
+            false
+        }))
 }
 
 #[test]
@@ -1478,16 +1474,14 @@ fn state_controller_sender_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| if let Output::Alias(output) = output {
-                output.state_index() == inputs[0].output.as_alias().state_index() + 1
-            } else {
-                false
-            })
-    )
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| if let Output::Alias(output) = output {
+            output.state_index() == inputs[0].output.as_alias().state_index() + 1
+        } else {
+            false
+        }))
 }
 
 #[test]
@@ -1536,7 +1530,7 @@ fn state_controller_sender_required_already_selected() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1590,7 +1584,7 @@ fn state_controller_sender_required_but_governance() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select();
 
     assert!(matches!(
@@ -1641,16 +1635,14 @@ fn governor_sender_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| if let Output::Alias(output) = output {
-                output.state_index() == inputs[0].output.as_alias().state_index()
-            } else {
-                false
-            })
-    )
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| if let Output::Alias(output) = output {
+            output.state_index() == inputs[0].output.as_alias().state_index()
+        } else {
+            false
+        }))
 }
 
 #[test]
@@ -1702,7 +1694,7 @@ fn governor_sender_required_already_selected() {
         addresses([BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1744,7 +1736,7 @@ fn governance_transition_and_required() {
         addresses([BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1786,7 +1778,7 @@ fn state_transition_and_required() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1840,7 +1832,7 @@ fn governor_sender_required_but_state() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select();
 
     assert!(matches!(
@@ -1992,7 +1984,7 @@ fn remainder_address_in_governor() {
         protocol_parameters,
     )
     // Add the basic output so it will be consumed
-    .required_inputs(HashSet::from_iter([*inputs[1].output_id()]))
+    .required_inputs([*inputs[1].output_id()])
     .select()
     .unwrap();
 

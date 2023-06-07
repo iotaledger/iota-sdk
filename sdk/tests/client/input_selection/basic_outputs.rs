@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{collections::HashSet, str::FromStr};
+use std::str::FromStr;
 
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection, Requirement},
@@ -493,12 +493,10 @@ fn ed25519_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(
-        selected
-            .inputs
-            .iter()
-            .any(|input| *input.output.as_basic().address() == sender)
-    );
+    assert!(selected
+        .inputs
+        .iter()
+        .any(|input| *input.output.as_basic().address() == sender));
     // Provided output + remainder
     assert_eq!(selected.outputs.len(), 2);
 }
@@ -587,12 +585,10 @@ fn alias_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(
-        selected
-            .inputs
-            .iter()
-            .any(|input| input.output.is_alias() && *input.output.as_alias().alias_id() == alias_id_1)
-    );
+    assert!(selected
+        .inputs
+        .iter()
+        .any(|input| input.output.is_alias() && *input.output.as_alias().alias_id() == alias_id_1));
     // Provided output + alias
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
@@ -644,12 +640,10 @@ fn alias_sender_zero_id() {
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| output.is_alias() && *output.as_alias().alias_id() == alias_id)
-    );
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| output.is_alias() && *output.as_alias().alias_id() == alias_id));
 }
 
 #[test]
@@ -735,12 +729,10 @@ fn nft_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(
-        selected
-            .inputs
-            .iter()
-            .any(|input| input.output.is_nft() && *input.output.as_nft().nft_id() == nft_id_1)
-    );
+    assert!(selected
+        .inputs
+        .iter()
+        .any(|input| input.output.is_nft() && *input.output.as_nft().nft_id() == nft_id_1));
     // Provided output + nft
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&inputs[2].output));
@@ -793,12 +785,10 @@ fn nft_sender_zero_id() {
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| output.is_nft() && *output.as_nft().nft_id() == nft_id)
-    );
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| output.is_nft() && *output.as_nft().nft_id() == nft_id));
 }
 
 #[test]
@@ -1194,7 +1184,7 @@ fn sender_already_selected() {
         addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1233,7 +1223,7 @@ fn single_mandatory_input() {
         addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 

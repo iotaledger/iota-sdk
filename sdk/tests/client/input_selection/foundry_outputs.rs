@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{collections::HashSet, str::FromStr};
+use std::str::FromStr;
 
 use iota_sdk::{
     client::{
@@ -1022,7 +1022,7 @@ fn foundry_in_outputs_and_required() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[1].output_id()]))
+    .required_inputs([*inputs[1].output_id()])
     .select()
     .unwrap();
 

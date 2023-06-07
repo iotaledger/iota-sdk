@@ -196,8 +196,8 @@ impl InputSelection {
     }
 
     /// Sets the required inputs of an [`InputSelection`].
-    pub fn required_inputs(mut self, inputs: HashSet<OutputId>) -> Self {
-        self.required_inputs = inputs;
+    pub fn required_inputs(mut self, inputs: impl Into<HashSet<OutputId>>) -> Self {
+        self.required_inputs = inputs.into();
         self
     }
 
