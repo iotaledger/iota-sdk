@@ -130,10 +130,10 @@ impl Wallet {
         if let Some(mut read_secret_manager) = read_secret_manager {
             // We have to replace the snapshot path with the current one, when building stronghold
             if let SecretManagerDto::Stronghold(stronghold_dto) = &mut read_secret_manager {
-                stronghold_dto.snapshot_path = new_snapshot_path.clone().into_os_string().to_string_lossy().into();
+                stronghold_dto.snapshot_path = new_snapshot_path.clone().to_string_lossy().into_owned();
             }
 
-            let mut restored_secret_manager = SecretManager::try_from(&read_secret_manager)
+            let mut restored_secret_manager = SecretManager::try_from(read_secret_manager)
                 .map_err(|_| crate::wallet::Error::Backup("invalid secret_manager"))?;
 
             if let SecretManager::Stronghold(stronghold) = &mut restored_secret_manager {

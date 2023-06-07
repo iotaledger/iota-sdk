@@ -423,13 +423,13 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&FeatureDto> for Feature {
+    impl TryFrom<FeatureDto> for Feature {
         type Error = Error;
 
-        fn try_from(value: &FeatureDto) -> Result<Self, Self::Error> {
+        fn try_from(value: FeatureDto) -> Result<Self, Self::Error> {
             Ok(match value {
-                FeatureDto::Sender(v) => Self::Sender(SenderFeature::new(Address::try_from(&v.address)?)),
-                FeatureDto::Issuer(v) => Self::Issuer(IssuerFeature::new(Address::try_from(&v.address)?)),
+                FeatureDto::Sender(v) => Self::Sender(SenderFeature::new(Address::try_from(v.address)?)),
+                FeatureDto::Issuer(v) => Self::Issuer(IssuerFeature::new(Address::try_from(v.address)?)),
                 FeatureDto::Metadata(v) => Self::Metadata(MetadataFeature::new(
                     prefix_hex::decode::<Vec<u8>>(&v.data).map_err(|_e| Error::InvalidField("MetadataFeature"))?,
                 )?),

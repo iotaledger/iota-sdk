@@ -137,7 +137,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 },
                 native_tokens,
                 serial_number,
-                &token_scheme,
+                token_scheme,
                 unlock_conditions,
                 features,
                 immutable_features,
@@ -178,7 +178,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             let mut block_builder = client.block();
 
             let secret_manager = match secret_manager {
-                Some(secret_manager) => Some((&secret_manager).try_into()?),
+                Some(secret_manager) => Some(secret_manager.try_into()?),
                 None => None,
             };
 
@@ -232,7 +232,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             let mut block_builder = client.block();
 
             let secret_manager = match secret_manager {
-                Some(secret_manager) => Some((&secret_manager).try_into()?),
+                Some(secret_manager) => Some(secret_manager.try_into()?),
                 None => None,
             };
 
@@ -254,14 +254,14 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         } => {
             let mut block_builder = client.block();
 
-            let secret_manager = (&secret_manager).try_into()?;
+            let secret_manager = secret_manager.try_into()?;
 
             block_builder = block_builder.with_secret_manager(&secret_manager);
 
             Response::SignedTransaction(PayloadDto::from(
                 &block_builder
                     .sign_transaction(PreparedTransactionData::try_from_dto_unverified(
-                        &prepared_transaction_data,
+                        prepared_transaction_data,
                     )?)
                     .await?,
             ))
@@ -271,7 +271,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
 
             let block = block_builder
                 .finish_block(Some(Payload::try_from_dto(
-                    &payload,
+                    payload,
                     &client.get_protocol_parameters().await?,
                 )?))
                 .await?;
@@ -297,7 +297,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ),
         ClientMethod::PostBlock { block } => Response::BlockId(
             client
-                .post_block(&Block::try_from_dto(&block, &client.get_protocol_parameters().await?)?)
+                .post_block(&Block::try_from_dto(block, &client.get_protocol_parameters().await?)?)
                 .await?,
         ),
         ClientMethod::GetBlock { block_id } => Response::Block(BlockDto::from(&client.get_block(&block_id).await?)),
@@ -404,7 +404,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             secret_manager,
             generate_addresses_options,
         } => {
-            let secret_manager = (&secret_manager).try_into()?;
+            let secret_manager = secret_manager.try_into()?;
             Response::ConsolidatedFunds(
                 client
                     .consolidate_funds(&secret_manager, generate_addresses_options)

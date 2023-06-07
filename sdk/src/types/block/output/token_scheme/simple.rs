@@ -141,15 +141,11 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&SimpleTokenSchemeDto> for SimpleTokenScheme {
+    impl TryFrom<SimpleTokenSchemeDto> for SimpleTokenScheme {
         type Error = Error;
 
-        fn try_from(value: &SimpleTokenSchemeDto) -> Result<Self, Self::Error> {
-            Self::new(
-                U256::try_from(&value.minted_tokens).map_err(|_| Error::InvalidField("mintedTokens"))?,
-                U256::try_from(&value.melted_tokens).map_err(|_| Error::InvalidField("meltedTokens"))?,
-                U256::try_from(&value.maximum_supply).map_err(|_| Error::InvalidField("maximumSupply"))?,
-            )
+        fn try_from(value: SimpleTokenSchemeDto) -> Result<Self, Self::Error> {
+            Self::new(value.minted_tokens, value.melted_tokens, value.maximum_supply)
         }
     }
 }

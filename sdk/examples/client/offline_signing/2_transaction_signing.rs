@@ -57,7 +57,7 @@ fn read_prepared_transaction_from_file<P: AsRef<Path>>(path: P) -> Result<Prepar
     file.read_to_string(&mut json).unwrap();
 
     Ok(PreparedTransactionData::try_from_dto_unverified(
-        &serde_json::from_str::<PreparedTransactionDataDto>(&json)?,
+        serde_json::from_str::<PreparedTransactionDataDto>(&json)?,
     )?)
 }
 

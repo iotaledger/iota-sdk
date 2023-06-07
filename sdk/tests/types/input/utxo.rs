@@ -101,12 +101,12 @@ fn dto_roundtrip() {
     let utxo_input = UtxoInput::from_str(OUTPUT_ID).unwrap();
     let utxo_dto = UtxoInputDto::from(&utxo_input);
 
-    assert_eq!(UtxoInput::try_from(&utxo_dto).unwrap(), utxo_input);
+    assert_eq!(UtxoInput::try_from(utxo_dto).unwrap(), utxo_input);
 
     let input = Input::from(utxo_input);
     let dto = InputDto::from(&input);
 
-    assert_eq!(Input::try_from(&dto).unwrap(), input);
+    assert_eq!(Input::try_from(dto).unwrap(), input);
 }
 
 #[test]
@@ -118,7 +118,7 @@ fn dto_invalid() {
     };
 
     assert!(matches!(
-        UtxoInput::try_from(&dto),
+        UtxoInput::try_from(dto),
         Err(Error::InvalidField("transactionId"))
     ));
 
@@ -129,7 +129,7 @@ fn dto_invalid() {
     };
 
     assert!(matches!(
-        UtxoInput::try_from(&dto),
+        UtxoInput::try_from(dto),
         Err(Error::InvalidInputOutputIndex(InvalidBoundedU16(1000)))
     ));
 }

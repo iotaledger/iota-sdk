@@ -73,7 +73,7 @@ pub async fn create_message_handler(options: Option<ManagerOptions>) -> crate::w
         }
 
         if let Some(secret_manager) = options.secret_manager {
-            builder = builder.with_secret_manager(SecretManager::try_from(&secret_manager)?);
+            builder = builder.with_secret_manager(SecretManager::try_from(secret_manager)?);
         }
 
         if let Some(client_options) = options.client_options {

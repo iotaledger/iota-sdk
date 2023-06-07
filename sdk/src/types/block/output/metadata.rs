@@ -158,10 +158,10 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&OutputMetadataDto> for OutputMetadata {
+    impl TryFrom<OutputMetadataDto> for OutputMetadata {
         type Error = Error;
 
-        fn try_from(response: &OutputMetadataDto) -> Result<Self, Self::Error> {
+        fn try_from(response: OutputMetadataDto) -> Result<Self, Self::Error> {
             Ok(Self {
                 block_id: BlockId::from_str(&response.block_id)?,
                 output_id: OutputId::new(

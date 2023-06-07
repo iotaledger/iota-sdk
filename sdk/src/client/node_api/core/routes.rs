@@ -240,7 +240,7 @@ impl ClientInner {
             .await?;
 
         match resp {
-            BlockResponse::Json(dto) => Ok(Block::try_from_dto(&dto, &self.get_protocol_parameters().await?)?),
+            BlockResponse::Json(dto) => Ok(Block::try_from_dto(dto, &self.get_protocol_parameters().await?)?),
             BlockResponse::Raw(_) => Err(crate::client::Error::UnexpectedApiResponse),
         }
     }
@@ -284,8 +284,8 @@ impl ClientInner {
             .await?;
 
         let token_supply = self.get_token_supply().await?;
-        let output = Output::try_from_dto(&response.output, token_supply)?;
-        let metadata = OutputMetadata::try_from(&response.metadata)?;
+        let output = Output::try_from_dto(response.output, token_supply)?;
+        let metadata = OutputMetadata::try_from(response.metadata)?;
 
         Ok(OutputWithMetadata::new(output, metadata))
     }
@@ -370,7 +370,7 @@ impl ClientInner {
             .await?;
 
         match resp {
-            BlockResponse::Json(dto) => Ok(Block::try_from_dto(&dto, &self.get_protocol_parameters().await?)?),
+            BlockResponse::Json(dto) => Ok(Block::try_from_dto(dto, &self.get_protocol_parameters().await?)?),
             BlockResponse::Raw(_) => Err(crate::client::Error::UnexpectedApiResponse),
         }
     }
@@ -415,7 +415,7 @@ impl ClientInner {
 
         match resp {
             MilestoneResponse::Json(dto) => Ok(MilestonePayload::try_from_dto(
-                &dto,
+                dto,
                 &self.get_protocol_parameters().await?,
             )?),
             MilestoneResponse::Raw(_) => Err(crate::client::Error::UnexpectedApiResponse),
@@ -460,7 +460,7 @@ impl ClientInner {
 
         match resp {
             MilestoneResponse::Json(dto) => Ok(MilestonePayload::try_from_dto(
-                &dto,
+                dto,
                 &self.get_protocol_parameters().await?,
             )?),
             MilestoneResponse::Raw(_) => Err(crate::client::Error::UnexpectedApiResponse),

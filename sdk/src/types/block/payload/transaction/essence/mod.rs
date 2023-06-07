@@ -65,7 +65,7 @@ pub mod dto {
 
     impl TransactionEssence {
         pub fn try_from_dto(
-            value: &TransactionEssenceDto,
+            value: TransactionEssenceDto,
             protocol_parameters: &ProtocolParameters,
         ) -> Result<Self, Error> {
             match value {
@@ -76,7 +76,7 @@ pub mod dto {
             }
         }
 
-        pub fn try_from_dto_unverified(value: &TransactionEssenceDto) -> Result<Self, Error> {
+        pub fn try_from_dto_unverified(value: TransactionEssenceDto) -> Result<Self, Error> {
             match value {
                 TransactionEssenceDto::Regular(r) => {
                     Ok(Self::Regular(RegularTransactionEssence::try_from_dto_unverified(r)?))

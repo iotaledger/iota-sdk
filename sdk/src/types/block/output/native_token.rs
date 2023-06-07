@@ -270,10 +270,10 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&NativeTokenDto> for NativeToken {
+    impl TryFrom<NativeTokenDto> for NativeToken {
         type Error = Error;
 
-        fn try_from(value: &NativeTokenDto) -> Result<Self, Self::Error> {
+        fn try_from(value: NativeTokenDto) -> Result<Self, Self::Error> {
             Self::new(
                 value.token_id,
                 U256::try_from(&value.amount).map_err(|_| Error::InvalidField("amount"))?,

@@ -7,7 +7,7 @@ use crypto::keys::slip10::{Chain, Segment};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::Result,
+    client::{Password, Result},
     types::block::{
         address::Address,
         output::{
@@ -20,15 +20,24 @@ use crate::{
 /// Stronghold DTO to allow the creation of a Stronghold secret manager from bindings
 #[cfg(feature = "stronghold")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, zeroize::ZeroizeOnDrop)]
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StrongholdDto {
     /// The Stronghold password
-    pub password: Option<String>,
+    pub password: Option<Password>,
     /// The timeout for auto key clearing, in seconds
     pub timeout: Option<u64>,
     /// The path for the Stronghold file
     pub snapshot_path: String,
+}
+
+impl core::fmt::Debug for StrongholdDto {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("StrongholdDto")
+            .field("timeout", &self.timeout)
+            .field("snapshot_path", &self.snapshot_path)
+            .finish()
+    }
 }
 
 /// An account address.
@@ -173,19 +182,19 @@ pub struct InputSigningDataDto {
 
 #[allow(missing_docs)]
 impl InputSigningData {
-    pub fn try_from_dto(input: &InputSigningDataDto, token_supply: u64) -> Result<Self> {
+    pub fn try_from_dto(input: InputSigningDataDto, token_supply: u64) -> Result<Self> {
         Ok(Self {
-            output: Output::try_from_dto(&input.output, token_supply)?,
-            output_metadata: OutputMetadata::try_from(&input.output_metadata)?,
-            chain: input.chain.clone().map(Chain::from_u32_hardened),
+            output: Output::try_from_dto(input.output, token_supply)?,
+            output_metadata: OutputMetadata::try_from(input.output_metadata)?,
+            chain: input.chain.map(Chain::from_u32_hardened),
         })
     }
 
-    pub fn try_from_dto_unverified(input: &InputSigningDataDto) -> Result<Self> {
+    pub fn try_from_dto_unverified(input: InputSigningDataDto) -> Result<Self> {
         Ok(Self {
-            output: Output::try_from_dto_unverified(&input.output)?,
-            output_metadata: OutputMetadata::try_from(&input.output_metadata)?,
-            chain: input.chain.clone().map(Chain::from_u32_hardened),
+            output: Output::try_from_dto_unverified(input.output)?,
+            output_metadata: OutputMetadata::try_from(input.output_metadata)?,
+            chain: input.chain.map(Chain::from_u32_hardened),
         })
     }
 }

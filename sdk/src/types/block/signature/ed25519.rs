@@ -108,10 +108,10 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&Ed25519SignatureDto> for Ed25519Signature {
+    impl TryFrom<Ed25519SignatureDto> for Ed25519Signature {
         type Error = Error;
 
-        fn try_from(value: &Ed25519SignatureDto) -> Result<Self, Self::Error> {
+        fn try_from(value: Ed25519SignatureDto) -> Result<Self, Self::Error> {
             Ok(Self::new(
                 prefix_hex::decode(&value.public_key).map_err(|_| Error::InvalidField("publicKey"))?,
                 prefix_hex::decode(&value.signature).map_err(|_| Error::InvalidField("signature"))?,

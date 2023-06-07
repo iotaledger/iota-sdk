@@ -27,7 +27,6 @@ use crypto::{
     signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
 use serde::{Deserialize, Serialize};
-use zeroize::ZeroizeOnDrop;
 
 #[cfg(feature = "ledger_nano")]
 use self::ledger_nano::LedgerSecretManager;
@@ -154,12 +153,12 @@ impl FromStr for SecretManager {
     type Err = Error;
 
     fn from_str(s: &str) -> crate::client::Result<Self> {
-        Self::try_from(&serde_json::from_str::<SecretManagerDto>(s)?)
+        Self::try_from(serde_json::from_str::<SecretManagerDto>(s)?)
     }
 }
 
 /// DTO for secret manager types with required data.
-#[derive(Debug, Clone, Serialize, Deserialize, ZeroizeOnDrop)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum SecretManagerDto {
     /// Stronghold
     #[cfg(feature = "stronghold")]
@@ -182,35 +181,37 @@ pub enum SecretManagerDto {
     Placeholder,
 }
 
-impl TryFrom<&SecretManagerDto> for SecretManager {
+impl TryFrom<SecretManagerDto> for SecretManager {
     type Error = Error;
 
-    fn try_from(value: &SecretManagerDto) -> crate::client::Result<Self> {
+    fn try_from(value: SecretManagerDto) -> crate::client::Result<Self> {
         Ok(match value {
             #[cfg(feature = "stronghold")]
             SecretManagerDto::Stronghold(stronghold_dto) => {
                 let mut builder = StrongholdSecretManager::builder();
 
-                if let Some(password) = &stronghold_dto.password {
+                if let Some(password) = stronghold_dto.password {
                     // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
-                    builder = builder.password(password.clone());
+                    builder = builder.password(password);
                 }
 
-                if let Some(timeout) = &stronghold_dto.timeout {
-                    builder = builder.timeout(Duration::from_secs(*timeout));
+                if let Some(timeout) = stronghold_dto.timeout {
+                    builder = builder.timeout(Duration::from_secs(timeout));
                 }
 
                 Self::Stronghold(builder.build(&stronghold_dto.snapshot_path)?)
             }
 
             #[cfg(feature = "ledger_nano")]
-            SecretManagerDto::LedgerNano(is_simulator) => Self::LedgerNano(LedgerSecretManager::new(*is_simulator)),
+            SecretManagerDto::LedgerNano(is_simulator) => Self::LedgerNano(LedgerSecretManager::new(is_simulator)),
 
-            SecretManagerDto::Mnemonic(mnemonic) => Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?),
+            SecretManagerDto::Mnemonic(mnemonic) => {
+                Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(&mnemonic)?)
+            }
 
             SecretManagerDto::HexSeed(hex_seed) => {
                 // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
-                Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed.clone())?)
+                Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed)?)
             }
 
             SecretManagerDto::Placeholder => Self::Placeholder(PlaceholderSecretManager),

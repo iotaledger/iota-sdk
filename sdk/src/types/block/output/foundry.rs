@@ -655,42 +655,52 @@ pub mod dto {
     }
 
     impl FoundryOutput {
-        fn _try_from_dto(value: &FoundryOutputDto) -> Result<FoundryOutputBuilder, Error> {
+        pub fn try_from_dto(value: FoundryOutputDto, token_supply: u64) -> Result<Self, Error> {
             let mut builder = FoundryOutputBuilder::new_with_amount(
                 value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
                 value.serial_number,
-                (&value.token_scheme).try_into()?,
+                value.token_scheme.try_into()?,
             );
 
-            for t in &value.native_tokens {
+            for t in value.native_tokens {
                 builder = builder.add_native_token(t.try_into()?);
             }
 
-            for b in &value.features {
+            for b in value.features {
                 builder = builder.add_feature(Feature::try_from(b)?);
             }
 
-            for b in &value.immutable_features {
+            for b in value.immutable_features {
                 builder = builder.add_immutable_feature(Feature::try_from(b)?);
             }
 
-            Ok(builder)
-        }
-
-        pub fn try_from_dto(value: &FoundryOutputDto, token_supply: u64) -> Result<Self, Error> {
-            let mut builder = Self::_try_from_dto(value)?;
-
-            for u in &value.unlock_conditions {
+            for u in value.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto(u, token_supply)?);
             }
 
             builder.finish(token_supply)
         }
 
-        pub fn try_from_dto_unverified(value: &FoundryOutputDto) -> Result<Self, Error> {
-            let mut builder = Self::_try_from_dto(value)?;
+        pub fn try_from_dto_unverified(value: FoundryOutputDto) -> Result<Self, Error> {
+            let mut builder = FoundryOutputBuilder::new_with_amount(
+                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
+                value.serial_number,
+                value.token_scheme.try_into()?,
+            );
 
-            for u in &value.unlock_conditions {
+            for t in value.native_tokens {
+                builder = builder.add_native_token(t.try_into()?);
+            }
+
+            for b in value.features {
+                builder = builder.add_feature(Feature::try_from(b)?);
+            }
+
+            for b in value.immutable_features {
+                builder = builder.add_immutable_feature(Feature::try_from(b)?);
+            }
+
+            for u in value.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_unverified(u)?);
             }
 
@@ -702,7 +712,7 @@ pub mod dto {
             amount: OutputBuilderAmountDto,
             native_tokens: Option<Vec<NativeTokenDto>>,
             serial_number: u32,
-            token_scheme: &TokenSchemeDto,
+            token_scheme: TokenSchemeDto,
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<FeatureDto>>,
             immutable_features: Option<Vec<FeatureDto>>,
@@ -723,21 +733,21 @@ pub mod dto {
 
             if let Some(native_tokens) = native_tokens {
                 let native_tokens = native_tokens
-                    .iter()
+                    .into_iter()
                     .map(NativeToken::try_from)
                     .collect::<Result<Vec<NativeToken>, Error>>()?;
                 builder = builder.with_native_tokens(native_tokens);
             }
 
             let unlock_conditions = unlock_conditions
-                .iter()
+                .into_iter()
                 .map(|u| UnlockCondition::try_from_dto(u, token_supply))
                 .collect::<Result<Vec<UnlockCondition>, Error>>()?;
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(features) = features {
                 let features = features
-                    .iter()
+                    .into_iter()
                     .map(Feature::try_from)
                     .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_features(features);
@@ -745,7 +755,7 @@ pub mod dto {
 
             if let Some(immutable_features) = immutable_features {
                 let immutable_features = immutable_features
-                    .iter()
+                    .into_iter()
                     .map(Feature::try_from)
                     .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_immutable_features(immutable_features);
@@ -836,9 +846,9 @@ mod tests {
         let protocol_parameters = protocol_parameters();
         let output = rand_foundry_output(protocol_parameters.token_supply());
         let dto = OutputDto::Foundry((&output).into());
-        let output_unver = Output::try_from_dto_unverified(&dto).unwrap();
+        let output_unver = Output::try_from_dto_unverified(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_foundry());
-        let output_ver = Output::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
+        let output_ver = Output::try_from_dto(dto, protocol_parameters.token_supply()).unwrap();
         assert_eq!(&output, output_ver.as_foundry());
 
         let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
@@ -848,7 +858,7 @@ mod tests {
                 (&builder.amount).into(),
                 Some(builder.native_tokens.iter().map(Into::into).collect()),
                 builder.serial_number,
-                &(&builder.token_scheme).into(),
+                (&builder.token_scheme).into(),
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().map(Into::into).collect()),
                 Some(builder.immutable_features.iter().map(Into::into).collect()),
