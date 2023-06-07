@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Replace with a TokenId that is available in the account, the foundry output which minted it, also needs to be

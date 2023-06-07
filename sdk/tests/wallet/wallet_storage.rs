@@ -24,7 +24,7 @@ async fn check_existing_db() -> Result<()> {
     // Migrate old snapshots.
     let _ = StrongholdAdapter::migrate_snapshot_v2_to_v3(
         "check_existing_db_test/strongholdfile",
-        "STRONGHOLD_PASSWORD",
+        "STRONGHOLD_PASSWORD".to_owned().into(),
         "wallet.rs",
         100,
         None,
@@ -32,7 +32,7 @@ async fn check_existing_db() -> Result<()> {
     );
 
     // Test if setting stronghold password still works
-    wallet.set_stronghold_password("STRONGHOLD_PASSWORD").await?;
+    wallet.set_stronghold_password("STRONGHOLD_PASSWORD".to_owned()).await?;
 
     assert_eq!(wallet.get_accounts().await?.len(), 1);
 

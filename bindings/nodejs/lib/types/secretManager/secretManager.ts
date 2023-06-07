@@ -1,3 +1,8 @@
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import { HexEncodedString } from "../utils";
+
 /** Secret manager that uses a Ledger Nano hardware wallet or Speculos simulator. */
 export interface LedgerNanoSecretManager {
     /** boolean indicates whether it's a simulator or not. */
@@ -31,3 +36,14 @@ export type SecretManagerType =
     | MnemonicSecretManager
     | StrongholdSecretManager
     | PlaceholderSecretManager;
+
+export interface EvmSignature {
+    /**
+     * The public key.
+     */
+    publicKey: HexEncodedString;
+    /**
+     * The signature.
+     */
+    signature: HexEncodedString;
+}

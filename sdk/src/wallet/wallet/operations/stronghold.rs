@@ -3,11 +3,16 @@
 
 use std::time::Duration;
 
-use crate::{client::secret::SecretManager, wallet::Wallet};
+use crate::{
+    client::{secret::SecretManager, utils::Password},
+    wallet::Wallet,
+};
 
 impl Wallet {
     /// Sets the Stronghold password
-    pub async fn set_stronghold_password(&self, password: &str) -> crate::wallet::Result<()> {
+    pub async fn set_stronghold_password(&self, password: impl Into<Password> + Send) -> crate::wallet::Result<()> {
+        let password = password.into();
+
         if let SecretManager::Stronghold(stronghold) = &mut *self.secret_manager.write().await {
             stronghold.set_password(password).await?;
         }
@@ -17,9 +22,12 @@ impl Wallet {
     /// Change the Stronghold password to another one and also re-encrypt the values in the loaded snapshot with it.
     pub async fn change_stronghold_password(
         &self,
-        current_password: &str,
-        new_password: &str,
+        current_password: impl Into<Password> + Send,
+        new_password: impl Into<Password> + Send,
     ) -> crate::wallet::Result<()> {
+        let current_password = current_password.into();
+        let new_password = new_password.into();
+
         if let SecretManager::Stronghold(stronghold) = &mut *self.secret_manager.write().await {
             stronghold.set_password(current_password).await?;
             stronghold.change_password(new_password).await?;
