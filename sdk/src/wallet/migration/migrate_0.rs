@@ -21,6 +21,66 @@ fn migrate_native_token(output: &mut serde_json::Value) {
     }
 }
 
+fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
+    for output_data in account["outputs"]
+        .as_object_mut()
+        .ok_or(Error::Storage("malformatted outputs".to_owned()))?
+        .values_mut()
+    {
+        ConvertOutputMetadata::check(&mut output_data["metadata"])?;
+
+        if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
+            for segment in chain {
+                ConvertSegment::check(segment)?;
+            }
+        }
+
+        migrate_native_token(&mut output_data["output"]["data"]);
+    }
+
+    for output_data in account["unspentOutputs"]
+        .as_object_mut()
+        .ok_or(Error::Storage("malformatted unspent outputs".to_owned()))?
+        .values_mut()
+    {
+        ConvertOutputMetadata::check(&mut output_data["metadata"])?;
+
+        if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
+            for segment in chain {
+                ConvertSegment::check(segment)?;
+            }
+        }
+
+        migrate_native_token(&mut output_data["output"]["data"]);
+    }
+
+    for (_key, transaction) in account["transactions"].as_object_mut().unwrap() {
+        let outputs = transaction["payload"]["essence"]["data"]["outputs"]["inner"]
+            .as_array_mut()
+            .unwrap();
+        for output in outputs {
+            migrate_native_token(&mut output["data"]);
+        }
+    }
+
+    ConvertIncomingTransactions::check(&mut account["incomingTransactions"])?;
+
+    for (_key, transaction) in account["incomingTransactions"].as_object_mut().unwrap() {
+        let outputs = transaction["payload"]["essence"]["data"]["outputs"]["inner"]
+            .as_array_mut()
+            .unwrap();
+        for output in outputs {
+            migrate_native_token(&mut output["data"]);
+        }
+    }
+
+    for (_key, foundry) in account["nativeTokenFoundries"].as_object_mut().unwrap() {
+        migrate_native_token(foundry);
+    }
+
+    Ok(())
+}
+
 #[async_trait]
 impl MigrationData for Migrate {
     const ID: usize = 0;
@@ -42,61 +102,7 @@ impl Migration<crate::wallet::storage::Storage> for Migrate {
                     .get::<serde_json::Value>(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"))
                     .await?
                 {
-                    for output_data in account["outputs"]
-                        .as_object_mut()
-                        .ok_or(Error::Storage("malformatted outputs".to_owned()))?
-                        .values_mut()
-                    {
-                        ConvertOutputMetadata::check(&mut output_data["metadata"])?;
-
-                        if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
-                            for segment in chain {
-                                ConvertSegment::check(segment)?;
-                            }
-                        }
-
-                        migrate_native_token(&mut output_data["output"]["data"]);
-                    }
-
-                    for output_data in account["unspentOutputs"]
-                        .as_object_mut()
-                        .ok_or(Error::Storage("malformatted unspent outputs".to_owned()))?
-                        .values_mut()
-                    {
-                        ConvertOutputMetadata::check(&mut output_data["metadata"])?;
-
-                        if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
-                            for segment in chain {
-                                ConvertSegment::check(segment)?;
-                            }
-                        }
-
-                        migrate_native_token(&mut output_data["output"]["data"]);
-                    }
-
-                    for (_key, transaction) in account["transactions"].as_object_mut().unwrap() {
-                        let outputs = transaction["payload"]["essence"]["data"]["outputs"]["inner"]
-                            .as_array_mut()
-                            .unwrap();
-                        for output in outputs {
-                            migrate_native_token(&mut output["data"]);
-                        }
-                    }
-
-                    ConvertIncomingTransactions::check(&mut account["incomingTransactions"])?;
-
-                    for (_key, transaction) in account["incomingTransactions"].as_object_mut().unwrap() {
-                        let outputs = transaction["payload"]["essence"]["data"]["outputs"]["inner"]
-                            .as_array_mut()
-                            .unwrap();
-                        for output in outputs {
-                            migrate_native_token(&mut output["data"]);
-                        }
-                    }
-
-                    for (_key, foundry) in account["nativeTokenFoundries"].as_object_mut().unwrap() {
-                        migrate_native_token(foundry);
-                    }
+                    migrate_account(&mut account)?;
 
                     storage
                         .set(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"), &account)
@@ -124,31 +130,7 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
 
         if let Some(mut accounts) = storage.get::<Vec<serde_json::Value>>(ACCOUNTS_KEY).await? {
             for account in &mut accounts {
-                ConvertIncomingTransactions::check(&mut account["incomingTransactions"])?;
-                for output_data in account["outputs"]
-                    .as_object_mut()
-                    .ok_or(Error::Storage("malformatted outputs".to_owned()))?
-                    .values_mut()
-                {
-                    ConvertOutputMetadata::check(&mut output_data["metadata"])?;
-                    if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
-                        for segment in chain {
-                            ConvertSegment::check(segment)?;
-                        }
-                    }
-                }
-                for output_data in account["unspentOutputs"]
-                    .as_object_mut()
-                    .ok_or(Error::Storage("malformatted unspent outputs".to_owned()))?
-                    .values_mut()
-                {
-                    ConvertOutputMetadata::check(&mut output_data["metadata"])?;
-                    if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
-                        for segment in chain {
-                            ConvertSegment::check(segment)?;
-                        }
-                    }
-                }
+                migrate_account(account)?;
             }
             storage.set(ACCOUNTS_KEY, &accounts).await?;
         }
