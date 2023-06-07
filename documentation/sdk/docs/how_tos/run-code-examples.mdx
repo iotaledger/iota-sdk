@@ -1,6 +1,5 @@
----
 description: 'The IOTA SDK has multiple how-to guides to get you up and running in no time. However, these require a
-specific set up depending on your language of choice.'
+specific setup depending on your language of choice.'
 image: /img/logo/iota_mark_light.png
 keywords:
 - how to
@@ -19,17 +18,18 @@ import NodeExampleEnv from '!!raw-loader!../../../../bindings/nodejs/examples/.e
 import PythonExampleEnv from '!!raw-loader!../../../../bindings/python/.env.example';
 import RustExampleEnv from '!!raw-loader!../../../../sdk/.env.example';
 import CodeBlock from '@theme/CodeBlock';
-//(import WarningPasswordStorage from '../_admonitions/_password_storage.md';)
+
+[//]: # (import WarningPasswordStorage from '../_admonitions/_password_storage.md';)
 
 
 # Run Code Examples
 
-You can use the following how-to guides to get acquainted with IOTA SDK from
-[creating an account](./accounts_and_addresses/create_account.mdx) to minting NFTs and native tokens.
+You can use the following how-to guides to get acquainted with IOTA SDK, from creating an account to minting NFTs and
+native tokens.
 
-You can start anywhere, but since the guides may build on previous examples, if you are new to IOTA SDK
+You can start anywhere, but since the guides may build on previous examples if you are new to IOTA SDK
 you should probably start by [creating a wallet account](./accounts_and_addresses/create_account.mdx) and then
-carry on to the next guide.
+carry on to the following guide.
 
 ## Requirements
 
@@ -67,22 +67,22 @@ to set up the IOTA SDK in your project:
 <Tabs groupId="language">
 <TabItem value="rust" label="Rust">
 
-[Getting Started With Rust](../getting-started/rust.md)
+    [Getting Started With Rust](../getting-started/rust.md)
 
 </TabItem>
 <TabItem value="nodejs" label="Nodejs">
 
-[Getting Started With Node.js](../getting-started/node.md)
+    [Getting Started With Node.js](../getting-started/node.md)
 
 </TabItem>
 <TabItem value="python" label="Python">
 
-[Getting Started With Python](../getting-started/python.md)
+    [Getting Started With Python](../getting-started/python.md)
 
 </TabItem>
 <TabItem value="wasm" label="Wasm">
 
-[Getting Started With Wasm](../getting-started/wasm.md)
+    [Getting Started With Wasm](../getting-started/wasm.md)
 
 </TabItem>
 </Tabs>
@@ -95,28 +95,28 @@ The code examples use a .env file to store variables. You can download the examp
 <TabItem value="rust" label="Rust">
 
 <CodeBlock className={'language-dotenv'}>
-{RustExampleEnv}
+    {RustExampleEnv}
 </CodeBlock>
 
 </TabItem>
 <TabItem value="nodejs" label="Nodejs">
 
 <CodeBlock className={'language-dotenv'}>
-{NodeExampleEnv}
+    {NodeExampleEnv}
 </CodeBlock>
 
 </TabItem>
 <TabItem value="python" label="Python">
 
 <CodeBlock className={'language-dotenv'}>
-{PythonExampleEnv}
+    {PythonExampleEnv}
 </CodeBlock>
 
 </TabItem>
 <TabItem value="wasm" label="Wasm">
 
 <CodeBlock className={'language-dotenv'}>
-{NodeExampleEnv}
+    {NodeExampleEnv}
 </CodeBlock>
 
 </TabItem>
@@ -132,7 +132,7 @@ Please ensure you have followed the instructions to
 <Tabs groupId="language">
 <TabItem value="rust" label="Rust">
 
-You can get a full list of the available [Rust examples](https://github.com/iotaledger/iota-sdk/tree/develop/sdk/examples)
+You can get a complete list of the available [Rust examples](https://github.com/iotaledger/iota-sdk/tree/develop/sdk/examples)
 by running the following command:
 
 ```shell
@@ -149,14 +149,14 @@ cargo run --example example_name --release
 <TabItem value="nodejs" label="Nodejs">
 
 You can browse all the available [Node.js examples](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/nodejs/examples)
-in the repository.  You can use the following command to run any example from the Node.js directory:
+in the repository. You can use the following command to run any example from the Node.js directory:
 
 ```bash
 cd examples
-yarn run-example ./[example folder]/[example file]
+yarn run-example ./[example_folder]/[example_file]
 ```
 
-- Where `[example file]` is the file name from the example folder, and example folder is the folder name. For example:
+- Where `[example_file]` is the file name from the example folder, and `[example_folder]` is the folder name. For example:
 
 ```bash
 yarn run-example  examples/client/00_get_info.ts
@@ -165,7 +165,7 @@ yarn run-example  examples/client/00_get_info.ts
 </TabItem>
 <TabItem value="python" label="Python">
 
-You can browse all the available [Python examples](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/python/examples) to get
+You can browse all the available [Python examples](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/python/examples)
 in the repository. You can use the following command to run any example from the Python bindings directory:
 
 ```bash
@@ -183,14 +183,14 @@ python3 examples/client/00_get_info.py
 
 
 You can browse and use all the available [Node.js examples](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/nodejs/examples)
-in the repository.  You can use the following command to run any example from the Node.js directory:
+in the repository. You can use the following command to run any example from the Node.js directory:
 
 ```bash
 cd examples
-yarn run-example ./[example folder]/[example file]
+yarn run-example ./[example_folder]/[example_file]
 ```
 
-- Where `[example file]` is the file name from the example folder, and example folder is the folder name. For example:
+- Where `[example_file]` is the file name from the example folder, and `[example_folder]` is the folder name. For example:
 
 ```bash
 yarn run-example  examples/client/00_get_info.ts
@@ -199,3 +199,4 @@ yarn run-example  examples/client/00_get_info.ts
 
 </TabItem>
 </Tabs>
+
