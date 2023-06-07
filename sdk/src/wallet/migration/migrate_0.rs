@@ -203,7 +203,7 @@ mod types {
         };
     }
 
-    #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
     pub struct TransactionId([u8; Self::LENGTH]);
 
     impl TransactionId {
@@ -226,7 +226,7 @@ mod types {
 
     string_serde_impl!(TransactionId);
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct Transaction {
         pub payload: TransactionPayload,
@@ -241,19 +241,19 @@ mod types {
         pub inputs: Vec<OutputWithMetadataResponse>,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct TransactionPayload {
         pub essence: TransactionEssence,
         pub unlocks: serde_json::Value,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     #[serde(tag = "type", content = "data")]
     pub enum TransactionEssence {
         Regular(RegularTransactionEssence),
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct RegularTransactionEssence {
         pub network_id: u64,
         pub inputs: serde_json::Value,
@@ -262,7 +262,7 @@ mod types {
         pub payload: serde_json::Value,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct OutputWithMetadataResponse {
         pub metadata: OutputMetadataDto,
@@ -328,7 +328,7 @@ mod types {
         pub ledger_index: u32,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct OutputMetadataDto {
         pub block_id: serde_json::Value,
@@ -346,7 +346,7 @@ mod types {
         pub ledger_index: u32,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub enum InclusionState {
         Pending,
         Confirmed,
