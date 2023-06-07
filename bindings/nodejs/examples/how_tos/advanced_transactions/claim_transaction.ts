@@ -1,11 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    OutputsToClaim,
-    Wallet,
-    initLogger,
-} from '@iota/sdk';
+import { OutputsToClaim, Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
