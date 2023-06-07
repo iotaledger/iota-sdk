@@ -9,13 +9,10 @@ pub mod rocksdb;
 
 use async_trait::async_trait;
 
-use crate::client::storage::{StorageAdapter as ClientStorageAdapter, StorageAdapterId};
+use crate::client::storage::StorageAdapter;
 
 #[async_trait]
-pub trait StorageAdapter: std::fmt::Debug + Send + Sync {
-    /// Gets the storage identifier (used internally on the default storage adapters)
-    fn id(&self) -> &'static str;
-
+pub(crate) trait DynStorageAdapter: std::fmt::Debug + Send + Sync {
     async fn dyn_get_bytes(&self, key: &str) -> crate::wallet::Result<Option<Vec<u8>>>;
 
     async fn dyn_set_bytes(&self, key: &str, record: &[u8]) -> crate::wallet::Result<()>;
@@ -25,14 +22,10 @@ pub trait StorageAdapter: std::fmt::Debug + Send + Sync {
 }
 
 #[async_trait]
-impl<T: StorageAdapterId> StorageAdapter for T
+impl<T: StorageAdapter> DynStorageAdapter for T
 where
     crate::wallet::Error: From<T::Error>,
 {
-    fn id(&self) -> &'static str {
-        T::ID
-    }
-
     async fn dyn_get_bytes(&self, key: &str) -> crate::wallet::Result<Option<Vec<u8>>> {
         Ok(self.get_bytes(key).await?)
     }
@@ -47,7 +40,7 @@ where
 }
 
 #[async_trait]
-impl ClientStorageAdapter for dyn StorageAdapter {
+impl StorageAdapter for dyn DynStorageAdapter {
     type Error = crate::wallet::Error;
 
     async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, Self::Error> {

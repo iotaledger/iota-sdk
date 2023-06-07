@@ -6,7 +6,7 @@ use std::{path::Path, sync::Arc};
 use rocksdb::{DBCompressionType, Options, DB};
 use tokio::sync::Mutex;
 
-use crate::client::storage::{StorageAdapter, StorageAdapterId};
+use crate::client::storage::StorageAdapter;
 
 /// Key value storage adapter.
 #[derive(Debug)]
@@ -26,10 +26,6 @@ impl RocksdbStorageAdapter {
             db: Arc::new(Mutex::new(db)),
         })
     }
-}
-
-impl StorageAdapterId for RocksdbStorageAdapter {
-    const ID: &'static str = "RocksDB";
 }
 
 #[async_trait::async_trait]
