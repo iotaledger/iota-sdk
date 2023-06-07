@@ -34,6 +34,8 @@ module.exports = {
       type: 'category',
       label: 'How To',
       items: [
+
+        'how_tos/run-code-examples',
         {
           type: "category",
           label: 'Accounts and Addresses',

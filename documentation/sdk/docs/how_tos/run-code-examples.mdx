@@ -1,0 +1,160 @@
+---
+description: 'The IOTA SDK has multiple how-to guides to get you up and running in no time. However, these require a
+specific set up depending on your language of choice.'
+image: /img/logo/iota_mark_light.png
+keywords:
+- how to
+- examples
+- npm
+- cargo
+- yarn
+- rust
+- nodejs
+- python
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import NodeExampleEnv from '!!raw-loader!../../../../bindings/nodejs/examples/.env.example';
+import PythonExampleEnv from '!!raw-loader!../../../../bindings/python/.env.example';
+import RustExampleEnv from '!!raw-loader!../../../../sdk/.env.example';
+import CodeBlock from '@theme/CodeBlock';
+
+[//]: # (import WarningPasswordStorage from '../_admonitions/_password_storage.md';)
+
+
+# Run Code Examples
+
+You can use the following how-to guides to get acquainted with IOTA SDK from creating an account to minting NFTs and
+native tokens.
+
+You can start anywhere, but since the guides may build on previous examples, if you are new to IOTA SDK
+you should probably start by [creating a wallet account](./accounts_and_addresses/create_account.mdx) and then
+carry on to the next guide.
+
+## Requirements
+
+### Hornet Node
+
+Most of the examples require a [Hornet Node](https://wiki.iota.org/shimmer/hornet/welcome) running the
+[Stardust](https://wiki.iota.org/shimmer/introduction/welcome) upgrade. You can connect to the
+[Shimmer Testnet](#shimmer-testnet), a node you trust,
+[run your own node](https://wiki.iota.org/shimmer/hornet/how_tos/using_docker) or
+[run a local private tangle](https://wiki.iota.org/shimmer/hornet/how_tos/private_tangle).
+
+#### Shimmer Testnet
+
+You can use the following public, load-balanced endpoint to run code examples:
+
+#### Node URL
+
+```plaintext
+https://api.testnet.shimmer.network
+```
+
+#### Faucet URL
+
+```plaintext
+https://faucet.testnet.shimmer.network/api/enqueue
+```
+
+[//]: # (<WarningPasswordStorage/>)
+
+### Install the IOTA SDK
+
+Before you can start using the code examples, please refer to the "Getting Started" section of your language of choice
+to set up the IOTA SDK in your project:
+
+<Tabs groupId="language">
+<TabItem value="rust" label="Rust">
+
+[Getting Started With Rust](../getting-started/rust.md)
+
+</TabItem>
+<TabItem value="nodejs" label="Nodejs">
+
+[Getting Started With Node.js](../getting-started/node.md)
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+[Getting Started With Python](../getting-started/python.md)
+
+</TabItem>
+<TabItem value="wasm" label="Wasm">
+
+[Getting Started With Wasm](../getting-started/wasm.md)
+
+</TabItem>
+</Tabs>
+
+### Set Up Your `.env` File
+
+The code examples use a .env file to store variables. You can download the example file or create a new one with the following variables:
+
+<Tabs groupId="language">
+<TabItem value="rust" label="Rust">
+
+<CodeBlock className={'language-dotenv'}>
+{RustExampleEnv}
+</CodeBlock>
+
+</TabItem>
+<TabItem value="nodejs" label="Nodejs">
+
+<CodeBlock className={'language-dotenv'}>
+    {NodeExampleEnv}
+</CodeBlock>
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+<CodeBlock className={'language-dotenv'}>
+{PythonExampleEnv}
+</CodeBlock>
+
+</TabItem>
+<TabItem value="wasm" label="Wasm">
+
+<CodeBlock className={'language-dotenv'}>
+    {NodeExampleEnv}
+</CodeBlock>
+
+</TabItem>
+</Tabs>
+
+## Run Code Examples
+
+<Tabs groupId="language">
+<TabItem value="rust" label="Rust">
+
+The IOTA SDK has numerous examples you can run to get acquainted with the `client` and `wallet` modules.
+Once you followed the instructions to [build the library](#install-the-iota-sdk) for you language of choice, you will need to select one of the
+[Rust examples](https://github.com/iotaledger/iota-sdk/tree/develop/sdk/examples). You can run any example by running the following command:
+
+
+
+
+</TabItem>
+<TabItem value="nodejs" label="Nodejs">
+
+<CodeBlock className={'language-dotenv'}>
+    {NodeExampleEnv}
+</CodeBlock>
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+<CodeBlock className={'language-dotenv'}>
+    {PythonExampleEnv}
+</CodeBlock>
+
+</TabItem>
+<TabItem value="wasm" label="Wasm">
+
+<CodeBlock className={'language-dotenv'}>
+    {NodeExampleEnv}
+</CodeBlock>
+
+</TabItem>
+</Tabs>
