@@ -119,7 +119,7 @@ impl LedgerNanoStatus {
     pub fn connected(&self) -> bool {
         self.connected
     }
-    /// Ledger is connected and locked.
+    /// Ledger is connected and locked, Some(true/false) for IOTA/Shimmer, None for the rest.
     pub fn locked(&self) -> Option<bool> {
         self.locked
     }
