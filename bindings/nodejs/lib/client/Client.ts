@@ -126,22 +126,6 @@ export class Client {
         return plainToInstance(OutputResponse, parsed.payload);
     }
 
-    /** Generate addresses */
-    async generateEd25519Addresses(
-        secretManager: SecretManagerType,
-        generateAddressesOptions: IGenerateAddressesOptions,
-    ): Promise<string[]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'generateEd25519Addresses',
-            data: {
-                secretManager,
-                options: generateAddressesOptions,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
     /** Build and post a block */
     async buildAndPostBlock(
         secretManager?: SecretManagerType,

@@ -44,14 +44,6 @@ export interface __GetOutputsMethod__ {
     };
 }
 
-export interface __GenerateEd25519AddressesMethod__ {
-    name: 'generateEd25519Addresses';
-    data: {
-        secretManager: SecretManagerType;
-        options: IGenerateAddressesOptions;
-    };
-}
-
 export interface __PostBlockMethod__ {
     name: 'postBlock';
     data: {

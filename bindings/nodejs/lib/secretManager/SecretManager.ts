@@ -15,7 +15,7 @@ import { Ed25519Signature, HexEncodedString, Payload, Unlock } from '../types';
 export class SecretManager {
     private methodHandler: SecretManagerMethodHandler;
 
-    constructor(options: SecretManagerType) {
+    constructor(options: SecretManagerType | SecretManagerMethodHandler) {
         this.methodHandler = new SecretManagerMethodHandler(options);
     }
 

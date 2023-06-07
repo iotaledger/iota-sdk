@@ -60,8 +60,11 @@ class SecretManagerError(Exception):
 
 
 class SecretManager():
-    def __init__(self, secret_manager: MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager | LedgerNanoSecretManager):
-        self.handle = create_secret_manager(dumps(secret_manager))
+    def __init__(self, secret_manager: MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager | LedgerNanoSecretManager=None, secret_manager_handle=None):
+        if secret_manager_handle is None:
+            self.handle = create_secret_manager(dumps(secret_manager))
+        else:
+            self.handle = secret_manager_handle
 
     def _call_method(self, name, data=None):
         """Dumps json string and call call_secret_manager_method()
@@ -133,9 +136,14 @@ class SecretManager():
                 options['range']['end'] = options.pop('end')
         if 'coin_type' in options:
             options['coin_type'] = int(options.pop('coin_type'))
+        if 'internal' in options:
+            if 'options' not in options:
+                options['options'] = {}
+            options['options']['internal'] = options.pop('internal')
         if 'ledger_nano_prompt' in options:
-            options['options'] = {
-                'ledger_nano_prompt': options.pop('ledger_nano_prompt')}
+            if 'options' not in options:
+                options['options'] = {}
+            options['options']['ledger_nano_prompt'] = options.pop('ledger_nano_prompt')
 
         options = humps.camelize(options)
 

@@ -5,7 +5,7 @@ import { describe, it } from '@jest/globals';
 import 'reflect-metadata';
 import 'dotenv/config';
 
-import { AddressUnlockCondition, AliasAddress, Client, Ed25519Address, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition, SimpleTokenScheme, StateControllerAddressUnlockCondition, Utils } from '../../';
+import { AddressUnlockCondition, AliasAddress, Client, SecretManager, Ed25519Address, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition, SimpleTokenScheme, StateControllerAddressUnlockCondition, Utils } from '../../';
 import '../customMatchers';
 
 const client = new Client({
@@ -25,7 +25,7 @@ const secretManager = {
 // Skip for CI
 describe.skip('Output builder methods', () => {
     it('builds a basic output', async () => {
-        const addresses = await client.generateEd25519Addresses(secretManager, {
+        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
             range: {
                 start: 0,
                 end: 1,
@@ -48,7 +48,7 @@ describe.skip('Output builder methods', () => {
     });
 
     it('builds an alias output', async () => {
-        const addresses = await client.generateEd25519Addresses(secretManager, {
+        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
             range: {
                 start: 0,
                 end: 1,
@@ -101,7 +101,7 @@ describe.skip('Output builder methods', () => {
     });
 
     it('builds an nft output', async () => {
-        const addresses = await client.generateEd25519Addresses(secretManager, {
+        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
             range: {
                 start: 0,
                 end: 1,
