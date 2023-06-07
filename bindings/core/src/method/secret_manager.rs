@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use derivative::Derivative;
-use iota_sdk::client::api::{GetAddressesBuilderOptions, PreparedTransactionDataDto};
+use iota_sdk::client::api::{GetAddressesOptions, PreparedTransactionDataDto};
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "stronghold")]
@@ -14,10 +14,12 @@ use crate::OmittedDebug;
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 pub enum SecretManagerMethod {
     /// Generate addresses.
-    GenerateAddresses {
+    GenerateEd25519Addresses {
         /// Addresses generation options
-        options: GetAddressesBuilderOptions,
+        options: GetAddressesOptions,
     },
+    /// Generate EVM addresses.
+    GenerateEvmAddresses { options: GetAddressesOptions },
     /// Get the ledger status
     /// Expected response: [`LedgerNanoStatus`](crate::Response::LedgerNanoStatus)
     #[cfg(feature = "ledger_nano")]
@@ -36,6 +38,13 @@ pub enum SecretManagerMethod {
         /// The message to sign, hex encoded String
         message: String,
         /// Chain to sign the essence hash with
+        chain: Vec<u32>,
+    },
+    /// Signs a message with an Evm private key.
+    SignEvm {
+        /// The message to sign, hex encoded String
+        message: String,
+        /// Chain to sign the message with
         chain: Vec<u32>,
     },
     /// Sign a transaction

@@ -12,14 +12,14 @@ use iota_sdk::{
     client::{
         api::{
             input_selection::InputSelection, transaction::validate_transaction_payload_length, verify_semantic,
-            PreparedTransactionData,
+            GetAddressesOptions, PreparedTransactionData,
         },
         constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-        secret::{SecretManage, SecretManager, SignTransactionEssence},
+        secret::{SecretManager, SignTransactionEssence},
         Result,
     },
     types::block::{
-        address::{Address, AliasAddress, NftAddress},
+        address::{Address, AliasAddress, NftAddress, ToBech32Ext},
         input::{Input, UtxoInput},
         output::{AliasId, InputsCommitment, NftId},
         payload::{
@@ -33,7 +33,7 @@ use iota_sdk::{
 };
 
 use crate::client::{
-    addresses, build_inputs, build_outputs,
+    build_inputs, build_outputs,
     Build::{Alias, Basic, Nft},
     ALIAS_ID_1, ALIAS_ID_2, NFT_ID_1, NFT_ID_2, NFT_ID_3, NFT_ID_4,
 };
@@ -48,7 +48,11 @@ async fn all_combined() -> Result<()> {
     let protocol_parameters = protocol_parameters();
 
     let ed25519_bech32_addresses = secret_manager
-        .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..3, None)
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_range(0..3),
+        )
         .await?;
     let ed25519_bech32_address_0 = &ed25519_bech32_addresses[0].to_bech32(SHIMMER_TESTNET_BECH32_HRP);
     let ed25519_bech32_address_1 = &ed25519_bech32_addresses[1].to_bech32(SHIMMER_TESTNET_BECH32_HRP);
@@ -68,7 +72,7 @@ async fn all_combined() -> Result<()> {
     let nft_3_bech32_address = &Address::Nft(NftAddress::new(nft_id_3)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
     let nft_4_bech32_address = &Address::Nft(NftAddress::new(nft_id_4)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Alias(
             1_000_000,
             alias_id_1,
@@ -89,13 +93,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened(vec![
-                HD_WALLET_TYPE,
-                SHIMMER_COIN_TYPE,
-                0,
-                0,
-                0,
-            ])),
+            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
         ),
         Basic(
             1_000_000,
@@ -165,13 +163,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened(vec![
-                HD_WALLET_TYPE,
-                SHIMMER_COIN_TYPE,
-                0,
-                0,
-                0,
-            ])),
+            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
         ),
         Basic(
             1_000_000,
@@ -181,13 +173,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened(vec![
-                HD_WALLET_TYPE,
-                SHIMMER_COIN_TYPE,
-                0,
-                0,
-                1,
-            ])),
+            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 1])),
         ),
         Basic(
             1_000_000,
@@ -197,13 +183,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened(vec![
-                HD_WALLET_TYPE,
-                SHIMMER_COIN_TYPE,
-                0,
-                0,
-                2,
-            ])),
+            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 2])),
         ),
         Basic(
             1_000_000,
@@ -213,13 +193,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened(vec![
-                HD_WALLET_TYPE,
-                SHIMMER_COIN_TYPE,
-                0,
-                0,
-                2,
-            ])),
+            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 2])),
         ),
         Nft(
             1_000_000,
@@ -230,13 +204,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened(vec![
-                HD_WALLET_TYPE,
-                SHIMMER_COIN_TYPE,
-                0,
-                0,
-                0,
-            ])),
+            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
         ),
         Nft(
             1_000_000,
@@ -278,13 +246,7 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             Some((&nft_3_bech32_address.to_string(), 150)),
-            Some(Chain::from_u32_hardened(vec![
-                HD_WALLET_TYPE,
-                SHIMMER_COIN_TYPE,
-                0,
-                0,
-                0,
-            ])),
+            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
         ),
         Nft(
             1_000_000,
@@ -310,7 +272,7 @@ async fn all_combined() -> Result<()> {
         ),
     ]);
 
-    let outputs = build_outputs(vec![
+    let outputs = build_outputs([
         Alias(
             1_000_000,
             alias_id_1,
@@ -394,11 +356,11 @@ async fn all_combined() -> Result<()> {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses(vec![
-            &ed25519_bech32_address_0.to_string(),
-            &ed25519_bech32_address_1.to_string(),
-            &ed25519_bech32_address_2.to_string(),
-        ]),
+        [
+            *ed25519_bech32_address_0.inner(),
+            *ed25519_bech32_address_1.inner(),
+            *ed25519_bech32_address_2.inner(),
+        ],
         protocol_parameters.clone(),
     )
     .timestamp(current_time)
@@ -415,7 +377,7 @@ async fn all_combined() -> Result<()> {
                 .inputs
                 .iter()
                 .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
-                .collect(),
+                .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
         .finish(&protocol_parameters)?,

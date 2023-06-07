@@ -3,15 +3,19 @@
 
 use std::sync::Arc;
 
+use futures::{StreamExt, TryStreamExt};
 use serde::{Deserialize, Serialize};
 use tokio::sync::RwLock;
 
 use crate::{
-    client::secret::{SecretManager, SecretManagerDto},
+    client::{
+        secret::{SecretManager, SecretManagerDto},
+        storage::StorageAdapter,
+    },
     wallet::{
         account::{AccountDetails, SyncOptions},
-        migration::migrate_storage,
-        storage::{constants::*, Storage, StorageAdapter},
+        migration::migrate,
+        storage::{constants::*, DynStorageAdapter, Storage},
         WalletBuilder,
     },
 };
@@ -42,7 +46,7 @@ impl Default for ManagerStorage {
 
 /// Storage manager
 #[derive(Debug)]
-pub struct StorageManager {
+pub(crate) struct StorageManager {
     pub(crate) storage: Storage,
     // account indexes for accounts in the database
     account_indexes: Vec<u32>,
@@ -50,14 +54,14 @@ pub struct StorageManager {
 
 impl StorageManager {
     pub(crate) async fn new(
-        storage: impl StorageAdapter + Send + Sync + 'static,
+        storage: impl DynStorageAdapter + 'static,
         encryption_key: impl Into<Option<[u8; 32]>> + Send,
     ) -> crate::wallet::Result<Self> {
         let storage = Storage {
             inner: Box::new(storage) as _,
             encryption_key: encryption_key.into(),
         };
-        migrate_storage(&storage).await?;
+        migrate(&storage).await?;
 
         // Get the db version or set it
         if let Some(db_schema_version) = storage.get::<u8>(DATABASE_SCHEMA_VERSION_KEY).await? {
@@ -68,7 +72,7 @@ impl StorageManager {
             }
         } else {
             storage
-                .set(DATABASE_SCHEMA_VERSION_KEY, DATABASE_SCHEMA_VERSION)
+                .set(DATABASE_SCHEMA_VERSION_KEY, &DATABASE_SCHEMA_VERSION)
                 .await?;
         };
 
@@ -80,15 +84,6 @@ impl StorageManager {
         };
 
         Ok(storage_manager)
-    }
-
-    pub fn id(&self) -> &'static str {
-        self.storage.id()
-    }
-
-    #[cfg(test)]
-    pub fn is_encrypted(&self) -> bool {
-        self.storage.encryption_key.is_some()
     }
 
     pub async fn get<T: for<'de> Deserialize<'de>>(&self, key: &str) -> crate::wallet::Result<Option<T>> {
@@ -107,7 +102,7 @@ impl StorageManager {
             match secret_manager_dto {
                 SecretManagerDto::Mnemonic(_) => {}
                 _ => {
-                    self.storage.set(SECRET_MANAGER_KEY, secret_manager_dto).await?;
+                    self.storage.set(SECRET_MANAGER_KEY, &secret_manager_dto).await?;
                 }
             }
         }
@@ -147,18 +142,14 @@ impl StorageManager {
             return Ok(Vec::new());
         }
 
-        let mut accounts = Vec::new();
-        for account_index in self.account_indexes.clone() {
-            // PANIC: we assume that ACCOUNTS_INDEXATION_KEY and the different indexes are set together and
-            // ACCOUNTS_INDEXATION_KEY has already been checked.
-            accounts.push(
-                self.get(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"))
-                    .await?
-                    .unwrap(),
-            );
-        }
-
-        Ok(accounts)
+        futures::stream::iter(&self.account_indexes)
+            .filter_map(|account_index| async {
+                let account_index = *account_index;
+                let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}");
+                self.get(&key).await.transpose()
+            })
+            .try_collect::<Vec<_>>()
+            .await
     }
 
     pub async fn save_account(&mut self, account: &AccountDetails) -> crate::wallet::Result<()> {
@@ -167,9 +158,7 @@ impl StorageManager {
             self.account_indexes.push(*account.index());
         }
 
-        self.storage
-            .set(ACCOUNTS_INDEXATION_KEY, self.account_indexes.clone())
-            .await?;
+        self.storage.set(ACCOUNTS_INDEXATION_KEY, &self.account_indexes).await?;
         self.storage
             .set(&format!("{ACCOUNT_INDEXATION_KEY}{}", account.index()), account)
             .await
@@ -177,12 +166,10 @@ impl StorageManager {
 
     pub async fn remove_account(&mut self, account_index: u32) -> crate::wallet::Result<()> {
         self.storage
-            .remove(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"))
+            .delete(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"))
             .await?;
         self.account_indexes.retain(|a| a != &account_index);
-        self.storage
-            .set(ACCOUNTS_INDEXATION_KEY, self.account_indexes.clone())
-            .await
+        self.storage.set(ACCOUNTS_INDEXATION_KEY, &self.account_indexes).await
     }
 
     pub async fn set_default_sync_options(
@@ -191,7 +178,7 @@ impl StorageManager {
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<()> {
         let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}-{ACCOUNT_SYNC_OPTIONS}");
-        self.storage.set(&key, sync_options.clone()).await
+        self.storage.set(&key, &sync_options).await
     }
 
     pub async fn get_default_sync_options(&self, account_index: u32) -> crate::wallet::Result<Option<SyncOptions>> {
@@ -203,14 +190,7 @@ impl StorageManager {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::wallet::storage::adapter::memory::{Memory, STORAGE_ID};
-
-    #[tokio::test]
-    async fn id() {
-        let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert_eq!(storage_manager.id(), STORAGE_ID);
-        assert!(!storage_manager.is_encrypted());
-    }
+    use crate::wallet::storage::adapter::memory::Memory;
 
     #[tokio::test]
     async fn get() {
@@ -227,7 +207,7 @@ mod tests {
             c: -420,
         };
         let storage = Memory::default();
-        storage.set("key", serde_json::to_string(&rec).unwrap()).await.unwrap();
+        storage.set("key", &rec).await.unwrap();
 
         let storage_manager = StorageManager::new(storage, None).await.unwrap();
         assert_eq!(Some(rec), storage_manager.get::<Record>("key").await.unwrap());

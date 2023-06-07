@@ -6,7 +6,7 @@
 //! `cargo run --example all_automatic_input_selection --release`
 
 use iota_sdk::{
-    client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
+    client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::{
         address::AliasAddress,
         output::{
@@ -43,7 +43,9 @@ async fn main() -> Result<()> {
 
     let token_supply = client.get_token_supply().await?;
 
-    let address = client.get_addresses(&secret_manager).with_range(0..1).finish().await?[0];
+    let address = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .await?[0];
     println!("{}", request_funds_from_faucet(&faucet_url, &address).await?);
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
@@ -61,7 +63,7 @@ async fn main() -> Result<()> {
     let nft_output_builder = NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
         .add_unlock_condition(AddressUnlockCondition::new(address));
 
-    let outputs = vec![
+    let outputs = [
         alias_output_builder.clone().finish_output(token_supply)?,
         nft_output_builder
             .clone()
@@ -101,7 +103,7 @@ async fn main() -> Result<()> {
     let foundry_output_builder = FoundryOutputBuilder::new_with_amount(1_000_000, 1, token_scheme)
         .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)));
 
-    let outputs = vec![
+    let outputs = [
         alias_output_builder
             .clone()
             .with_amount(1_000_000)
@@ -139,7 +141,7 @@ async fn main() -> Result<()> {
     let basic_output_builder =
         BasicOutputBuilder::new_with_amount(1_000_000).add_unlock_condition(AddressUnlockCondition::new(address));
 
-    let outputs = vec![
+    let outputs = [
         alias_output_builder
             .with_amount(1_000_000)
             .with_alias_id(alias_id)

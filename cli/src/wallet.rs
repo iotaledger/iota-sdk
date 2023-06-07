@@ -1,12 +1,15 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::path::Path;
+
 use iota_sdk::wallet::Wallet;
 
 use crate::{
     command::wallet::{
-        add_account, backup_command, change_password_command, init_command, mnemonic_command, new_command,
-        restore_command, set_node_command, sync_command, unlock_wallet, InitParameters, WalletCli, WalletCommand,
+        add_account, backup_command, change_password_command, init_command,
+        migrate_stronghold_snapshot_v2_to_v3_command, mnemonic_command, new_command, restore_command, set_node_command,
+        sync_command, unlock_wallet, InitParameters, WalletCli, WalletCommand,
     },
     error::Error,
     helper::{get_account_alias, get_decision, get_password, pick_account, print_wallet_help},
@@ -14,8 +17,8 @@ use crate::{
 };
 
 pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String>), Error> {
-    let storage_path = std::path::Path::new(&cli.wallet_db_path);
-    let snapshot_path = std::path::Path::new(&cli.stronghold_snapshot_path);
+    let storage_path = Path::new(&cli.wallet_db_path);
+    let snapshot_path = Path::new(&cli.stronghold_snapshot_path);
 
     let (wallet, account) = if let Some(command) = cli.command {
         match command {
@@ -34,6 +37,10 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
             WalletCommand::ChangePassword => {
                 let wallet = change_password_command(storage_path, snapshot_path).await?;
                 (Some(wallet), None)
+            }
+            WalletCommand::MigrateStrongholdSnapshotV2ToV3 { path } => {
+                migrate_stronghold_snapshot_v2_to_v3_command(path).await?;
+                return Ok((None, None));
             }
             WalletCommand::New { alias } => {
                 let (wallet, account) = new_command(storage_path, snapshot_path, alias).await?;
@@ -57,7 +64,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
         match (storage_path.exists(), snapshot_path.exists()) {
             (true, true) => {
                 let password = get_password("Stronghold password", false)?;
-                let wallet = unlock_wallet(storage_path, snapshot_path, &password).await?;
+                let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
                 if wallet.get_accounts().await?.is_empty() {
                     create_initial_account(wallet).await?
                 } else if let Some(alias) = cli.account {

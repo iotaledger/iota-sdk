@@ -4,50 +4,10 @@
 use std::collections::BTreeMap;
 
 use iota_sdk::{
-    client::{api::GetAddressesBuilderOptions, constants::SHIMMER_COIN_TYPE, secret::SecretManagerDto, ClientBuilder},
-    types::block::address::Hrp,
+    client::{constants::SHIMMER_COIN_TYPE, ClientBuilder},
     wallet::account::types::AccountIdentifier,
 };
 use iota_sdk_bindings_core::{AccountMethod, CallMethod, ClientMethod, Response, Result, WalletMethod, WalletOptions};
-
-#[tokio::test]
-async fn generate_addresses() -> Result<()> {
-    let client_config = r#"{
-            "nodes":[],
-            "localPow":true,
-            "fallbackToLocalPow": true
-    }"#
-    .to_string();
-
-    let client = ClientBuilder::new().from_json(&client_config)?.finish().await?;
-
-    let secret_manager = format!(
-        "{{\"mnemonic\":\"{}\"}}",
-        "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river"
-    );
-    let options = GetAddressesBuilderOptions {
-        coin_type: None,
-        account_index: None,
-        range: Some(0..10),
-        bech32_hrp: Some(Hrp::from_str_unchecked("atoi")),
-        options: None,
-    };
-    let method = ClientMethod::GenerateAddresses {
-        secret_manager: serde_json::from_str::<SecretManagerDto>(&secret_manager).unwrap(),
-        options,
-    };
-
-    let response = client.call_method(method).await;
-    match response {
-        Response::GeneratedAddresses(addresses) => assert_eq!(
-            addresses[0],
-            "atoi1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxxja54p"
-        ),
-        _ => panic!("Unexpected response type"),
-    };
-
-    Ok(())
-}
 
 #[tokio::test]
 async fn create_account() -> Result<()> {

@@ -3,9 +3,10 @@
 
 use std::time::Duration;
 
-use iota_sdk::wallet::{message_interface::dtos::AccountDetailsDto, wallet::Wallet};
-#[cfg(feature = "stronghold")]
-use zeroize::Zeroize;
+use iota_sdk::{
+    types::block::address::ToBech32Ext,
+    wallet::{message_interface::dtos::AccountDetailsDto, wallet::Wallet},
+};
 
 use super::account::call_account_method_internal;
 use crate::{method::WalletMethod, response::Response, Result};
@@ -39,7 +40,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         WalletMethod::GetAccountIndexes => {
             let accounts = wallet.get_accounts().await?;
-            let mut account_indexes = Vec::new();
+            let mut account_indexes = Vec::with_capacity(accounts.len());
             for account in accounts.iter() {
                 account_indexes.push(*account.details().await.index());
             }
@@ -47,7 +48,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         WalletMethod::GetAccounts => {
             let accounts = wallet.get_accounts().await?;
-            let mut account_dtos = Vec::new();
+            let mut account_dtos = Vec::with_capacity(accounts.len());
             for account in accounts {
                 let account = account.details().await;
                 account_dtos.push(AccountDetailsDto::from(&*account));
@@ -65,14 +66,12 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::ChangeStrongholdPassword {
-            mut current_password,
-            mut new_password,
+            current_password,
+            new_password,
         } => {
             wallet
-                .change_stronghold_password(&current_password, &new_password)
+                .change_stronghold_password(current_password, new_password)
                 .await?;
-            current_password.zeroize();
-            new_password.zeroize();
             Response::Ok
         }
         #[cfg(feature = "stronghold")]
@@ -94,7 +93,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let accounts = wallet
                 .recover_accounts(account_start_index, account_gap_limit, address_gap_limit, sync_options)
                 .await?;
-            let mut account_dtos = Vec::new();
+            let mut account_dtos = Vec::with_capacity(accounts.len());
             for account in accounts {
                 let account = account.details().await;
                 account_dtos.push(AccountDetailsDto::from(&*account));
@@ -131,13 +130,15 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let ledger_nano_status = wallet.get_ledger_nano_status().await?;
             Response::LedgerNanoStatus(ledger_nano_status)
         }
-        WalletMethod::GenerateAddress {
+        WalletMethod::GenerateEd25519Address {
             account_index,
             address_index,
             options,
             bech32_hrp,
         } => {
-            let address = wallet.generate_address(account_index, address_index, options).await?;
+            let address = wallet
+                .generate_ed25519_address(account_index, address_index, options)
+                .await?;
 
             let bech32_hrp = match bech32_hrp {
                 Some(bech32_hrp) => bech32_hrp,
@@ -147,9 +148,8 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             Response::Bech32Address(address.to_bech32(bech32_hrp))
         }
         #[cfg(feature = "stronghold")]
-        WalletMethod::SetStrongholdPassword { mut password } => {
-            wallet.set_stronghold_password(&password).await?;
-            password.zeroize();
+        WalletMethod::SetStrongholdPassword { password } => {
+            wallet.set_stronghold_password(password).await?;
             Response::Ok
         }
         #[cfg(feature = "stronghold")]

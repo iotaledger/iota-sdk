@@ -1,3 +1,5 @@
+import { HexEncodedString } from '@iota/types';
+
 /** Secret manager that uses a Ledger Nano hardware wallet or Speculos simulator. */
 export interface LedgerNanoSecretManager {
     /** boolean indicates whether it's a simulator or not. */
@@ -31,3 +33,14 @@ export type SecretManagerType =
     | MnemonicSecretManager
     | StrongholdSecretManager
     | PlaceholderSecretManager;
+
+export interface EvmSignature {
+    /**
+     * The public key.
+     */
+    publicKey: HexEncodedString;
+    /**
+     * The signature.
+     */
+    signature: HexEncodedString;
+}

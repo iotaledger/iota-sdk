@@ -26,7 +26,7 @@ use crate::{
     wallet::{
         account::{
             operations::transaction::high_level::minting::mint_native_token::MintTokenTransactionDto,
-            types::{address::AccountAddress, AccountBalanceDto, AddressWithUnspentOutputs, TransactionDto},
+            types::{address::AccountAddress, AddressWithUnspentOutputs, BalanceDto, TransactionDto},
             OutputDataDto,
         },
         message_interface::dtos::AccountDetailsDto,
@@ -92,12 +92,21 @@ pub enum Response {
     /// [`SubmitAndStoreTransaction`](crate::wallet::message_interface::AccountMethod::SubmitAndStoreTransaction)
     SignedTransactionData(SignedTransactionDataDto),
     /// GenerateAddress response.
-    /// Response for [`GenerateAddresses`](crate::wallet::message_interface::AccountMethod::GenerateAddresses)
-    GeneratedAddress(Vec<AccountAddress>),
+    /// Response for
+    /// [`GenerateEd25519Addresses`](crate::wallet::message_interface::AccountMethod::GenerateEd25519Addresses)
+    GeneratedEd25519Addresses(Vec<AccountAddress>),
+    /// GenerateAddress response.
+    /// Response for
+    /// [`GenerateEvmAddresses`](crate::wallet::message_interface::AccountMethod::GenerateEvmAddresses)
+    GeneratedEvmAddresses(Vec<String>),
+    /// Response for:
+    /// - [`SignEvm`](crate::method::SecretManagerMethod::SignEvm)
+    #[serde(rename_all = "camelCase")]
+    EvmSignature { public_key: String, signature: String },
     /// Response for
     /// [`GetBalance`](crate::wallet::message_interface::AccountMethod::GetBalance),
     /// [`SyncAccount`](crate::wallet::message_interface::AccountMethod::SyncAccount)
-    Balance(AccountBalanceDto),
+    Balance(BalanceDto),
     /// Response for
     /// [`GetLedgerNanoStatus`](crate::wallet::message_interface::Message::GetLedgerNanoStatus),
     #[cfg(feature = "ledger_nano")]
@@ -162,7 +171,7 @@ pub enum Response {
     /// Response for [`Bech32ToHex`](crate::wallet::message_interface::Message::Bech32ToHex)
     HexAddress(String),
     /// Response for [`HexToBech32`](crate::wallet::message_interface::Message::HexToBech32)
-    /// Response for [`GenerateAddress`](crate::wallet::message_interface::Message::GenerateAddress)
+    /// Response for [`GenerateEd25519Address`](crate::wallet::message_interface::Message::GenerateEd25519Address)
     Bech32Address(Bech32Address),
     /// Response for
     /// [`RequestFundsFromFaucet`](crate::wallet::message_interface::AccountMethod::RequestFundsFromFaucet)
@@ -208,7 +217,14 @@ impl Debug for Response {
             Self::SignedTransactionData(signed_transaction_data) => {
                 write!(f, "SignedTransactionData({signed_transaction_data:?})")
             }
-            Self::GeneratedAddress(addresses) => write!(f, "GeneratedAddress({addresses:?})"),
+            Self::GeneratedEd25519Addresses(addresses) => write!(f, "GeneratedEd25519Addresses({addresses:?})"),
+            Self::GeneratedEvmAddresses(addresses) => write!(f, "GeneratedEvmAddresses({addresses:?})"),
+            Self::EvmSignature { public_key, signature } => {
+                write!(
+                    f,
+                    "EvmSignature{{ public_key: {public_key:?}, signature: {signature:?} }}"
+                )
+            }
             Self::Balance(balance) => write!(f, "Balance({balance:?})"),
             Self::SentTransaction(transaction) => write!(f, "SentTransaction({transaction:?})"),
             Self::MintTokenTransaction(mint_transaction) => {

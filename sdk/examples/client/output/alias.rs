@@ -6,7 +6,7 @@
 //! `cargo run --example alias --release`
 
 use iota_sdk::{
-    client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
+    client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::{
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
@@ -35,7 +35,9 @@ async fn main() -> Result<()> {
 
     let token_supply = client.get_token_supply().await?;
 
-    let address = client.get_addresses(&secret_manager).with_range(0..1).finish().await?[0];
+    let address = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .await?[0];
     request_funds_from_faucet(&faucet_url, &address).await?;
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
@@ -49,7 +51,7 @@ async fn main() -> Result<()> {
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
 
-    let outputs = vec![alias_output_builder.clone().finish_output(token_supply)?];
+    let outputs = [alias_output_builder.clone().finish_output(token_supply)?];
 
     let block = client
         .block()
@@ -70,12 +72,10 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
     let alias_id = AliasId::from(&alias_output_id);
-    let outputs = vec![
-        alias_output_builder
-            .with_alias_id(alias_id)
-            .with_state_index(1)
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [alias_output_builder
+        .with_alias_id(alias_id)
+        .with_state_index(1)
+        .finish_output(token_supply)?];
 
     let block = client
         .block()

@@ -21,7 +21,7 @@ use crate::{
         Error, Result,
     },
     types::block::{
-        address::Address,
+        address::{Address, ToBech32Ext},
         output::{feature::Features, Output},
     },
 };
@@ -71,7 +71,7 @@ impl<'a> ClientBlockBuilder<'a> {
                             required_inputs.push(InputSigningData {
                                 output: output_with_meta.output().to_owned(),
                                 output_metadata: output_with_meta.metadata().to_owned(),
-                                chain: Some(Chain::from_u32_hardened(vec![
+                                chain: Some(Chain::from_u32_hardened([
                                     HD_WALLET_TYPE,
                                     self.coin_type,
                                     self.account_index,
@@ -131,7 +131,7 @@ impl<'a> ClientBlockBuilder<'a> {
                                 output: output_with_meta.output().to_owned(),
                                 output_metadata: output_with_meta.metadata().to_owned(),
                                 chain: address_index_internal.map(|(address_index, internal)| {
-                                    Chain::from_u32_hardened(vec![
+                                    Chain::from_u32_hardened([
                                         HD_WALLET_TYPE,
                                         self.coin_type,
                                         self.account_index,
@@ -188,7 +188,7 @@ impl<'a> ClientBlockBuilder<'a> {
                                 output: output_with_meta.output,
                                 output_metadata: output_with_meta.metadata,
                                 chain: address_index_internal.map(|(address_index, internal)| {
-                                    Chain::from_u32_hardened(vec![
+                                    Chain::from_u32_hardened([
                                         HD_WALLET_TYPE,
                                         self.coin_type,
                                         self.account_index,
@@ -226,13 +226,15 @@ fn get_required_addresses_for_sender_and_issuer(
     // Addresses in the inputs that will be unlocked in the transaction
     let mut unlocked_addresses = HashSet::new();
     for input_signing_data in selected_inputs {
-        let alias_transition = is_alias_transition(input_signing_data, outputs);
-        let (required_unlock_address, unlocked_alias_or_nft_address) =
-            input_signing_data.output.required_and_unlocked_address(
-                current_time,
-                input_signing_data.output_id(),
-                alias_transition.map(|(alias_transition, _)| alias_transition),
-            )?;
+        let alias_transition = is_alias_transition(
+            &input_signing_data.output,
+            *input_signing_data.output_id(),
+            outputs,
+            None,
+        );
+        let (required_unlock_address, unlocked_alias_or_nft_address) = input_signing_data
+            .output
+            .required_and_unlocked_address(current_time, input_signing_data.output_id(), alias_transition)?;
         unlocked_addresses.insert(required_unlock_address);
         if let Some(unlocked_alias_or_nft_address) = unlocked_alias_or_nft_address {
             unlocked_addresses.insert(unlocked_alias_or_nft_address);

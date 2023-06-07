@@ -60,7 +60,7 @@ impl Account {
                 .finish_output(token_supply)?;
 
             let TokenScheme::Simple(token_scheme) = existing_foundry_output.token_scheme();
-            let outputs = vec![
+            let outputs = [
                 alias_output,
                 FoundryOutputBuilder::from(&existing_foundry_output)
                     .with_token_scheme(TokenScheme::Simple(SimpleTokenScheme::new(

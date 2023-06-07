@@ -3,7 +3,7 @@
 
 import type { WalletMethodHandler } from './WalletMethodHandler';
 import {
-    AccountBalance,
+    Balance,
     AccountMetadata,
     SyncOptions,
     AccountMeta,
@@ -168,7 +168,7 @@ export class Account {
                 name: 'prepareBurn',
                 data: {
                     burn: {
-                        nativeTokens: [{ id: tokenId, amount: burnAmount }],
+                        nativeTokens: new Map([[tokenId, burnAmount]]),
                     },
                     options: transactionOptions,
                 },
@@ -341,7 +341,7 @@ export class Account {
 
     /**
      * Function to destroy a foundry output with a circulating supply of 0.
-     * Native tokens in the foundry (minted by other foundries) will be transactioned to the controlling alias.
+     * Native tokens in the foundry (minted by other foundries) will be transacted to the controlling alias.
      * @param foundryId The FoundryId.
      * @param transactionOptions The options to define a `RemainderValueStrategy`
      * or custom inputs.
@@ -367,31 +367,19 @@ export class Account {
     }
 
     /**
-     * Generate a new unused address.
-     * @param options Options for address generation.
-     * @returns The address.
-     */
-    async generateAddress(
-        options?: GenerateAddressOptions,
-    ): Promise<AccountAddress> {
-        const addresses = await this.generateAddresses(1, options);
-        return addresses[0];
-    }
-
-    /**
-     * Generate new unused addresses.
+     * Generate new unused ed25519 addresses.
      * @param amount The amount of addresses to generate.
      * @param options Options for address generation.
      * @returns The addresses.
      */
-    async generateAddresses(
+    async generateEd25519Addresses(
         amount: number,
         options?: GenerateAddressOptions,
     ): Promise<AccountAddress[]> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'generateAddresses',
+                name: 'generateEd25519Addresses',
                 data: {
                     amount,
                     options,
@@ -405,7 +393,7 @@ export class Account {
      * Get the account balance.
      * @returns The account balance.
      */
-    async getBalance(): Promise<AccountBalance> {
+    async getBalance(): Promise<Balance> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1098,7 +1086,7 @@ export class Account {
      * @param options Optional synchronization options.
      * @returns The account balance.
      */
-    async sync(options?: SyncOptions): Promise<AccountBalance> {
+    async sync(options?: SyncOptions): Promise<Balance> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {

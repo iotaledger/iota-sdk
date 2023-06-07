@@ -139,7 +139,7 @@ pub enum Message {
     /// Generate an address without storing it
     /// Expected response: [`Bech32Address`](crate::wallet::message_interface::Response::Bech32Address)
     #[serde(rename_all = "camelCase")]
-    GenerateAddress {
+    GenerateEd25519Address {
         /// Account index
         account_index: u32,
         /// Account index
@@ -282,14 +282,14 @@ impl Debug for Message {
             }
             #[cfg(feature = "ledger_nano")]
             Self::GetLedgerNanoStatus => write!(f, "GetLedgerNanoStatus"),
-            Self::GenerateAddress {
+            Self::GenerateEd25519Address {
                 account_index,
                 address_index,
                 options,
                 bech32_hrp,
             } => write!(
                 f,
-                "GenerateAddress{{ account_index: {account_index:?}, address_index: {address_index:?}, options: {options:?}, bech32_hrp: {bech32_hrp:?} }}"
+                "GenerateEd25519Address{{ account_index: {account_index:?}, address_index: {address_index:?}, options: {options:?}, bech32_hrp: {bech32_hrp:?} }}"
             ),
             Self::GetNodeInfo { url, auth: _ } => write!(f, "GetNodeInfo{{ url: {url:?} }}"),
             #[cfg(feature = "stronghold")]

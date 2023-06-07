@@ -60,12 +60,12 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
 
     let token_supply = account_0.client().get_token_supply().await?;
     // Only one basic output without further unlock conditions
-    let outputs = vec![
+    let outputs = [
         BasicOutputBuilder::new_with_amount(1_000_000)
-            .with_unlock_conditions(vec![AddressUnlockCondition::new(account_1_address)])
+            .with_unlock_conditions([AddressUnlockCondition::new(account_1_address)])
             .finish_output(token_supply)?,
         BasicOutputBuilder::new_with_amount(1_000_000)
-            .with_unlock_conditions(vec![
+            .with_unlock_conditions([
                 UnlockCondition::Address(AddressUnlockCondition::new(account_1_address)),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
                     account_1_address,
@@ -75,7 +75,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
             ])
             .finish_output(token_supply)?,
         BasicOutputBuilder::new_with_amount(1_000_000)
-            .with_unlock_conditions(vec![
+            .with_unlock_conditions([
                 UnlockCondition::Address(AddressUnlockCondition::new(account_1_address)),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
                     account_1_address,
@@ -85,7 +85,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
             ])
             .finish_output(token_supply)?,
         BasicOutputBuilder::new_with_amount(1_000_000)
-            .with_unlock_conditions(vec![
+            .with_unlock_conditions([
                 UnlockCondition::Address(AddressUnlockCondition::new(account_1_address)),
                 UnlockCondition::StorageDepositReturn(StorageDepositReturnUnlockCondition::new(
                     account_1_address,
@@ -95,10 +95,10 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
             ])
             .finish_output(token_supply)?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
-            .with_unlock_conditions(vec![AddressUnlockCondition::new(account_1_address)])
+            .with_unlock_conditions([AddressUnlockCondition::new(account_1_address)])
             .finish_output(token_supply)?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
-            .with_unlock_conditions(vec![
+            .with_unlock_conditions([
                 UnlockCondition::Address(AddressUnlockCondition::new(account_1_address)),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
                     account_1_address,
@@ -107,7 +107,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
             ])
             .finish_output(token_supply)?,
         AliasOutputBuilder::new_with_amount(1_000_000, AliasId::null())
-            .with_unlock_conditions(vec![
+            .with_unlock_conditions([
                 UnlockCondition::StateControllerAddress(StateControllerAddressUnlockCondition::new(account_1_address)),
                 UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(account_1_address)),
             ])

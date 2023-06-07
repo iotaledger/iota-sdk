@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
 
     // Get output IDs of basic outputs that can be controlled by this address without further unlock constraints.
     let output_ids_response = client
-        .basic_output_ids(vec![
+        .basic_output_ids([
             QueryParameter::Address(address),
             QueryParameter::HasExpiration(false),
             QueryParameter::HasTimelock(false),
@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
     println!("Basic output IDs: {output_ids_response:#?}");
 
     // Get the outputs by their IDs.
-    let outputs_responses = client.get_outputs(output_ids_response.items).await?;
+    let outputs_responses = client.get_outputs(&output_ids_response.items).await?;
 
     println!("{outputs_responses:#?}");
 

@@ -15,7 +15,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            types::{AccountBalanceDto, TransactionDto},
+            types::{BalanceDto, TransactionDto},
             Account, CreateAliasParams, OutputDataDto, OutputParams, PreparedMintTokenTransactionDto,
             TransactionOptions,
         },
@@ -45,12 +45,11 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             account.deregister_participation_event(&event_id).await?;
             Response::Ok
         }
-        AccountMethod::GenerateAddresses { amount, options } => {
-            let address: Vec<iota_sdk::wallet::account::types::AccountAddress> =
-                account.generate_addresses(amount, options).await?;
-            Response::GeneratedAddress(address)
+        AccountMethod::GenerateEd25519Addresses { amount, options } => {
+            let address = account.generate_ed25519_addresses(amount, options).await?;
+            Response::GeneratedAccountAddresses(address)
         }
-        AccountMethod::GetBalance => Response::Balance(AccountBalanceDto::from(&account.balance().await?)),
+        AccountMethod::GetBalance => Response::Balance(BalanceDto::from(&account.balance().await?)),
         AccountMethod::GetFoundryOutput { token_id } => {
             let output = account.get_foundry_output(token_id).await?;
             Response::Output(OutputDto::from(&output))
@@ -367,7 +366,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let transaction = account.submit_and_store_transaction(signed_transaction_data).await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
-        AccountMethod::Sync { options } => Response::Balance(AccountBalanceDto::from(&account.sync(options).await?)),
+        AccountMethod::Sync { options } => Response::Balance(BalanceDto::from(&account.sync(options).await?)),
         AccountMethod::Transactions => {
             let transactions = account.transactions().await;
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())

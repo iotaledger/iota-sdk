@@ -7,7 +7,7 @@ use iota_sdk::client::mqtt::Topic;
 use iota_sdk::{
     client::{
         api::{
-            ClientBlockBuilderOptions as BuildBlockOptions, GetAddressesBuilderOptions as GenerateAddressesOptions,
+            ClientBlockBuilderOptions as BuildBlockOptions, GetAddressesOptions as GenerateAddressesOptions,
             PreparedTransactionDataDto,
         },
         node_api::indexer::query_parameters::QueryParameter,
@@ -96,15 +96,6 @@ pub enum ClientMethod {
     ClearListeners {
         /// Topics for which listeners should be removed.
         topics: Vec<Topic>,
-    },
-    /// Generate addresses.
-    #[serde(rename_all = "camelCase")]
-    GenerateAddresses {
-        /// Create secret manager from json
-        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        secret_manager: SecretManagerDto,
-        /// Addresses generation options
-        options: GenerateAddressesOptions,
     },
     /// Build and post a block
     #[serde(rename_all = "camelCase")]

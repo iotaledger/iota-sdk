@@ -64,7 +64,7 @@ async fn main() -> Result<()> {
     // generate addresses so we find all funds
     if pong_account.addresses().await?.len() < amount_addresses {
         pong_account
-            .generate_addresses((amount_addresses - pong_account.addresses().await?.len()) as u32, None)
+            .generate_ed25519_addresses((amount_addresses - pong_account.addresses().await?.len()) as u32, None)
             .await?;
     }
     let balance = ping_account.sync(None).await?;
@@ -74,7 +74,7 @@ async fn main() -> Result<()> {
         let mut addresses = ping_account.addresses().await?;
         if addresses.len() < amount_addresses {
             addresses = ping_account
-                .generate_addresses((amount_addresses - addresses.len()) as u32, None)
+                .generate_ed25519_addresses((amount_addresses - addresses.len()) as u32, None)
                 .await?
         };
         println!(
@@ -87,20 +87,20 @@ async fn main() -> Result<()> {
     for address_index in 0..1000 {
         let mut threads = Vec::new();
         for n in 1..4 {
-            let pong_account_ = pong_account.clone();
-            let ping_addresses_ = ping_addresses.clone();
+            let pong_account = pong_account.clone();
+            let ping_addresses = ping_addresses.clone();
             threads.push(async move {
                 tokio::spawn(async move {
                     // send transaction
-                    let outputs = vec![
+                    let outputs = [
                         // send one or two Mi for more different transactions
                         BasicOutputBuilder::new_with_amount(n * 1_000_000)
                             .add_unlock_condition(AddressUnlockCondition::new(
-                                ping_addresses_[address_index % amount_addresses].address(),
+                                ping_addresses[address_index % amount_addresses].address(),
                             ))
-                            .finish_output(pong_account_.client().get_token_supply().await?)?,
+                            .finish_output(pong_account.client().get_token_supply().await?)?,
                     ];
-                    let tx = pong_account_.send(outputs, None).await?;
+                    let tx = pong_account.send(outputs, None).await?;
                     println!(
                         "Block from thread {} sent: {}/block/{}",
                         n,

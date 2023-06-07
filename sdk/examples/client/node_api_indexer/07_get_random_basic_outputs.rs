@@ -25,14 +25,12 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get a single page with random output IDs by providing only `QueryParameter::Cursor(_)`.
-    let output_ids_response = client
-        .basic_output_ids(vec![QueryParameter::Cursor(String::new())])
-        .await?;
+    let output_ids_response = client.basic_output_ids([QueryParameter::Cursor(String::new())]).await?;
 
     println!("Basic output IDs from first page {output_ids_response:#?}");
 
     // Get the outputs by their IDs.
-    let outputs_responses = client.get_outputs(output_ids_response.items).await?;
+    let outputs_responses = client.get_outputs(&output_ids_response.items).await?;
 
     println!("{outputs_responses:#?}");
 

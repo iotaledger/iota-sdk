@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::client::{
-    api::GetAddressesBuilder, constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Result,
+    api::GetAddressesOptions, constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Result,
 };
 
 #[tokio::test]
@@ -10,11 +10,13 @@ async fn mnemonic_secret_manager_dto() -> Result<()> {
     let dto = r#"{"mnemonic": "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast"}"#;
     let secret_manager: SecretManager = dto.parse()?;
 
-    let addresses = GetAddressesBuilder::new(&secret_manager)
-        .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
-        .with_account_index(0)
-        .with_range(0..1)
-        .finish()
+    let addresses = secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
+                .with_account_index(0)
+                .with_range(0..1),
+        )
         .await
         .unwrap();
 
@@ -43,11 +45,13 @@ async fn stronghold_secret_manager_dto() -> Result<()> {
         panic!("expect a Stronghold secret manager, but it's not the case!");
     }
 
-    let addresses = GetAddressesBuilder::new(&secret_manager)
-        .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
-        .with_account_index(0)
-        .with_range(0..1)
-        .finish()
+    let addresses = secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
+                .with_account_index(0)
+                .with_range(0..1),
+        )
         .await
         .unwrap();
 
@@ -75,14 +79,16 @@ async fn stronghold_mnemonic_missing() -> Result<()> {
     std::fs::remove_dir_all("stronghold_mnemonic_missing").ok();
 
     let stronghold_secret_manager = iota_sdk::client::secret::stronghold::StrongholdSecretManager::builder()
-        .password("some_hopefully_secure_password")
+        .password("some_hopefully_secure_password".to_owned())
         .build("stronghold_mnemonic_missing/test.stronghold")?;
 
     // Generating addresses will fail because no mnemonic has been stored
-    let error = GetAddressesBuilder::new(&SecretManager::Stronghold(stronghold_secret_manager))
-        // .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
-        // .with_coin_type(iota_sdk::client::constants::SHIMMER_COIN_TYPE)
-        .finish()
+    let error = SecretManager::Stronghold(stronghold_secret_manager)
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default(),
+            // .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
+            // .with_coin_type(iota_sdk::client::constants::SHIMMER_COIN_TYPE)
+        )
         .await
         .unwrap_err();
 

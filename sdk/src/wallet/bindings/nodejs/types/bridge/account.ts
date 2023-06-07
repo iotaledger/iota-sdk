@@ -1,10 +1,15 @@
-import type { OutputTypes, HexEncodedAmount } from '@iota/types';
+import type {
+    OutputTypes,
+    HexEncodedAmount,
+    HexEncodedString,
+} from '@iota/types';
 import type { SyncOptions, FilterOptions } from '../account';
 import type {
     SendAmountParams,
     SendNativeTokensParams,
     SendNftParams,
     GenerateAddressOptions,
+    GenerateAddressesOptions,
 } from '../address';
 import type {
     BuildAliasOutputData,
@@ -28,7 +33,6 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventType,
 } from '../participation';
-import { Burn } from '../burn';
 
 export type __BuildAliasOutputMethod__ = {
     name: 'buildAliasOutput';
@@ -50,10 +54,19 @@ export type __BuildNftOutputMethod__ = {
     data: BuildNftOutputData;
 };
 
-export type __BurnMethod__ = {
-    name: 'burn';
+export type __BurnNativeTokenMethod__ = {
+    name: 'burnNativeToken';
     data: {
-        burn: Burn;
+        tokenId: string;
+        burnAmount: HexEncodedAmount;
+        options?: TransactionOptions;
+    };
+};
+
+export type __BurnNftMethod__ = {
+    name: 'burnNft';
+    data: {
+        nftId: string;
         options?: TransactionOptions;
     };
 };
@@ -97,11 +110,42 @@ export type __DeregisterParticipationEventMethod__ = {
     };
 };
 
-export type __GenerateAddressesMethod__ = {
-    name: 'generateAddresses';
+export type __DestroyAliasMethod__ = {
+    name: 'destroyAlias';
+    data: {
+        aliasId: string;
+        options?: TransactionOptions;
+    };
+};
+
+export type __DestroyFoundryMethod__ = {
+    name: 'destroyFoundry';
+    data: {
+        foundryId: string;
+        options?: TransactionOptions;
+    };
+};
+
+export type __GenerateEd25519AddressesMethod__ = {
+    name: 'generateEd25519Addresses';
     data: {
         amount: number;
         options?: GenerateAddressOptions;
+    };
+};
+
+export type __GenerateEvmAddressesMethod__ = {
+    name: 'generateEvmAddresses';
+    data: {
+        options: GenerateAddressesOptions;
+    };
+};
+
+export type __SignEvmMethod__ = {
+    name: 'signEvm';
+    data: {
+        message: HexEncodedString;
+        chain: number[];
     };
 };
 

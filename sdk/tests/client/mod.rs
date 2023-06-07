@@ -7,7 +7,6 @@ mod common;
 mod error;
 mod input_selection;
 mod input_signing_data;
-mod message_interface;
 mod mnemonic;
 #[cfg(feature = "mqtt")]
 mod mqtt;
@@ -304,7 +303,7 @@ fn build_output_inner(build: Build) -> (Output, Option<Chain>) {
     }
 }
 
-fn build_inputs(outputs: Vec<Build>) -> Vec<InputSigningData> {
+fn build_inputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<InputSigningData> {
     outputs
         .into_iter()
         .map(|build| {
@@ -329,7 +328,7 @@ fn build_inputs(outputs: Vec<Build>) -> Vec<InputSigningData> {
         .collect()
 }
 
-fn build_outputs(outputs: Vec<Build>) -> Vec<Output> {
+fn build_outputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<Output> {
     outputs.into_iter().map(|build| build_output_inner(build).0).collect()
 }
 
@@ -400,9 +399,9 @@ fn is_remainder_or_return(
     }
 }
 
-fn addresses(addresses: Vec<&str>) -> Vec<Address> {
+fn addresses<'a>(addresses: impl IntoIterator<Item = &'a str>) -> Vec<Address> {
     addresses
-        .iter()
+        .into_iter()
         .map(|address| Address::try_from_bech32(address).unwrap())
         .collect()
 }

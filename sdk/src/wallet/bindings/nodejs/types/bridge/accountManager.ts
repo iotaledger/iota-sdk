@@ -1,6 +1,6 @@
 import type { AccountId, CreateAccountPayload, SyncOptions } from '../account';
 import type { GenerateAddressOptions } from '../address';
-import type { EventType, WalletEvent } from '../event';
+import type { WalletEventType, WalletEvent } from '../event';
 import type { Auth, ClientOptions } from '../network';
 
 export type __BackupMessage__ = {
@@ -32,7 +32,7 @@ export type __ClearStrongholdPasswordMessage__ = {
 
 export type __ClearListenersMessage__ = {
     cmd: 'clearListeners';
-    payload: { eventTypes: EventType[] };
+    payload: { eventTypes: WalletEventType[] };
 };
 
 export type __CreateAccountMessage__ = {
@@ -66,8 +66,8 @@ export type __GetLedgerNanoStatusMessage__ = {
     cmd: 'getLedgerNanoStatus';
 };
 
-export type __GenerateAddressMessage__ = {
-    cmd: 'generateAddress';
+export type __GenerateEd25519AddressMessage__ = {
+    cmd: 'generateEd25519Address';
     payload: {
         accountIndex: number;
         addressIndex: number;

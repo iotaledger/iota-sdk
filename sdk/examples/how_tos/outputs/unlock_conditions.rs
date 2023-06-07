@@ -46,7 +46,7 @@ async fn main() -> Result<()> {
     let foundry_output_builder =
         FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, 1, token_scheme);
 
-    let outputs = vec![
+    let outputs = [
         //// most simple output
         basic_output_builder.clone().finish_output(token_supply)?,
         // with storage deposit return unlock condition

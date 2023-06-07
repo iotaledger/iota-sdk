@@ -32,7 +32,7 @@ impl InputSelection {
                 "{foundry_id:?} requirement already fulfilled by {:?}",
                 input.output_id()
             );
-            return Ok(vec![]);
+            return Ok(Vec::new());
         }
 
         // Check if the requirement can be fulfilled.

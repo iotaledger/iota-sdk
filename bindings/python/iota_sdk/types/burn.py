@@ -24,10 +24,10 @@ class Burn:
         The native tokens to burn
     """
 
-    aliases: Optional[List[HexStr]]
-    nfts: Optional[List[HexStr]]
-    foundries: Optional[List[HexStr]]
-    nativeTokens: Optional[List[NativeToken]]
+    aliases: Optional[List[HexStr]] = None
+    nfts: Optional[List[HexStr]] = None
+    foundries: Optional[List[HexStr]] = None
+    nativeTokens: Optional[List[NativeToken]] = None
 
     def add_alias(self, alias: HexStr) -> Burn:
         if self.aliases is None:

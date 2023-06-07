@@ -6,10 +6,7 @@
 //!
 //! `cargo run --release --all-features --example send_micro_transaction`
 
-use iota_sdk::{
-    types::block::address::Bech32Address,
-    wallet::{account::TransactionOptions, Result, SendAmountParams, Wallet},
-};
+use iota_sdk::wallet::{account::TransactionOptions, Result, SendAmountParams, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -26,14 +23,14 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Send a micro transaction with amount 1
-    let outputs = vec![SendAmountParams::new(
-        Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
+    let outputs = [SendAmountParams::new(
+        "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
         1,
-    )];
+    )?];
 
     let transaction = account
         .send_amount(

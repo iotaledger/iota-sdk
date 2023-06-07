@@ -5,8 +5,15 @@ import type {
     IBip32Chain,
 } from '../../client/preparedTransactionData';
 
-export interface __GenerateAddressesMethod__ {
-    name: 'generateAddresses';
+export interface __GenerateEd25519AddressesMethod__ {
+    name: 'generateEd25519Addresses';
+    data: {
+        options: IGenerateAddressesOptions;
+    };
+}
+
+export interface __GenerateEvmAddressesMethod__ {
+    name: 'generateEvmAddresses';
     data: {
         options: IGenerateAddressesOptions;
     };
@@ -36,6 +43,14 @@ export interface __StoreMnemonicMethod__ {
 
 export interface __SignEd25519Method__ {
     name: 'signEd25519';
+    data: {
+        message: HexEncodedString;
+        chain: IBip32Chain;
+    };
+}
+
+export interface __SignEvmMethod__ {
+    name: 'signEvm';
     data: {
         message: HexEncodedString;
         chain: IBip32Chain;

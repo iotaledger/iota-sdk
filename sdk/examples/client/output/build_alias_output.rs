@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
     // Alias id needs to be null the first time
     let alias_output = AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())
         // `hello` in bytes
-        .with_state_metadata(vec![104, 101, 108, 108, 111])
+        .with_state_metadata([104, 101, 108, 108, 111])
         .add_feature(SenderFeature::new(address))
         .add_feature(MetadataFeature::new([104, 101, 108, 108, 111])?)
         .add_immutable_feature(IssuerFeature::new(address))

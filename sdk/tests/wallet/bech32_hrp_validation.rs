@@ -3,7 +3,7 @@
 
 use iota_sdk::{
     client::Error as ClientError,
-    types::block::address::Bech32Address,
+    types::block::address::{Bech32Address, ToBech32Ext},
     wallet::{account::OutputParams, Error, Result, SendAmountParams},
 };
 
@@ -21,10 +21,10 @@ async fn bech32_hrp_send_amount() -> Result<()> {
 
     let error = account
         .send_amount(
-            vec![SendAmountParams::new(
+            [SendAmountParams::new(
                 Bech32Address::try_new("wronghrp", account.addresses().await?[0].address())?,
                 1_000_000,
-            )],
+            )?],
             None,
         )
         .await

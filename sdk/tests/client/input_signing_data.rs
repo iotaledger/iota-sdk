@@ -21,7 +21,7 @@ use iota_sdk::{
 fn input_signing_data_conversion() {
     let protocol_parameters = protocol_parameters();
 
-    let bip32_chain = vec![HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0];
+    let bip32_chain = [HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0];
 
     let output = BasicOutput::build_with_amount(1_000_000)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -43,11 +43,11 @@ fn input_signing_data_conversion() {
             0,
             0,
         ),
-        chain: Some(Chain::from_u32_hardened(bip32_chain.clone())),
+        chain: Some(Chain::from_u32_hardened(bip32_chain)),
     };
 
     let input_signing_data_dto = InputSigningDataDto::from(&input_signing_data);
-    assert_eq!(input_signing_data_dto.chain.as_ref(), Some(&bip32_chain));
+    assert_eq!(input_signing_data_dto.chain.as_deref(), Some(&bip32_chain[..]));
 
     let restored_input_signing_data =
         InputSigningData::try_from_dto(&input_signing_data_dto, protocol_parameters.token_supply()).unwrap();
@@ -61,7 +61,7 @@ fn input_signing_data_conversion() {
 
     let restored_input_signing_data_dto =
         serde_json::from_str::<InputSigningDataDto>(input_signing_data_dto_str).unwrap();
-    assert_eq!(restored_input_signing_data_dto.chain.as_ref(), Some(&bip32_chain));
+    assert_eq!(restored_input_signing_data_dto.chain.as_deref(), Some(&bip32_chain[..]));
 
     let restored_input_signing_data =
         InputSigningData::try_from_dto(&restored_input_signing_data_dto, protocol_parameters.token_supply()).unwrap();

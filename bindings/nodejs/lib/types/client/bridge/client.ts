@@ -44,14 +44,6 @@ export interface __GetOutputsMethod__ {
     };
 }
 
-export interface __GenerateAddressesMethod__ {
-    name: 'generateAddresses';
-    data: {
-        secretManager: SecretManagerType;
-        options: IGenerateAddressesOptions;
-    };
-}
-
 export interface __PostBlockMethod__ {
     name: 'postBlock';
     data: {

@@ -1,6 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use getset::Getters;
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
@@ -14,6 +15,7 @@ use crate::{
             },
             BasicOutputBuilder, NativeToken, TokenId,
         },
+        ConvertTo,
     },
     wallet::{
         account::{
@@ -28,19 +30,56 @@ use crate::{
 };
 
 /// Params for `send_native_tokens()`
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct SendNativeTokensParams {
     /// Bech32 encoded address
-    pub address: Bech32Address,
+    #[getset(get = "pub")]
+    address: Bech32Address,
     /// Native tokens
-    pub native_tokens: Vec<(TokenId, U256)>,
+    #[getset(get = "pub")]
+    native_tokens: Vec<(TokenId, U256)>,
     /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
     /// first address of the account
-    pub return_address: Option<Bech32Address>,
+    #[getset(get = "pub")]
+    return_address: Option<Bech32Address>,
     /// Expiration in seconds, after which the output will be available for the sender again, if not spent by the
     /// receiver before. Default is 1 day
-    pub expiration: Option<u32>,
+    #[getset(get = "pub")]
+    expiration: Option<u32>,
+}
+
+impl SendNativeTokensParams {
+    /// Creates a new instance of [`SendNativeTokensParams`]
+    pub fn new(
+        address: impl ConvertTo<Bech32Address>,
+        native_tokens: impl IntoIterator<Item = (TokenId, U256)>,
+    ) -> Result<Self> {
+        Ok(Self {
+            address: address.convert()?,
+            native_tokens: native_tokens.into_iter().collect(),
+            return_address: None,
+            expiration: None,
+        })
+    }
+
+    /// Set the return address and try convert to [`Bech32Address`]
+    pub fn try_with_return_address(mut self, return_address: impl ConvertTo<Bech32Address>) -> Result<Self> {
+        self.return_address = Some(return_address.convert()?);
+        Ok(self)
+    }
+
+    /// Set the return address
+    pub fn with_return_address(mut self, return_address: impl Into<Option<Bech32Address>>) -> Self {
+        self.return_address = return_address.into();
+        self
+    }
+
+    /// Set the expiration in seconds
+    pub fn with_expiration(mut self, expiration_secs: Option<u32>) -> Self {
+        self.expiration = expiration_secs;
+        self
+    }
 }
 
 impl Account {
@@ -51,7 +90,7 @@ impl Account {
     /// RemainderValueStrategy or custom inputs.
     /// Address needs to be Bech32 encoded
     /// ```ignore
-    /// let outputs = vec![SendNativeTokensParams {
+    /// let outputs = [SendNativeTokensParams {
     ///     address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
     ///     native_tokens: vec![(
     ///         TokenId::from_str("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?,
@@ -66,22 +105,28 @@ impl Account {
     ///     println!("Block sent: {}", block_id);
     /// }
     /// ```
-    pub async fn send_native_tokens(
+    pub async fn send_native_tokens<I: IntoIterator<Item = SendNativeTokensParams> + Send>(
         &self,
-        params: Vec<SendNativeTokensParams>,
+        params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<Transaction>
+    where
+        I::IntoIter: Send,
+    {
         let prepared_transaction = self.prepare_send_native_tokens(params, options).await?;
         self.sign_and_submit_transaction(prepared_transaction).await
     }
 
     /// Function to prepare the transaction for
     /// [Account.send_native_tokens()](crate::account::Account.send_native_tokens)
-    pub async fn prepare_send_native_tokens(
+    pub async fn prepare_send_native_tokens<I: IntoIterator<Item = SendNativeTokensParams> + Send>(
         &self,
-        params: Vec<SendNativeTokensParams>,
+        params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> crate::wallet::Result<PreparedTransactionData>
+    where
+        I::IntoIter: Send,
+    {
         log::debug!("[TRANSACTION] prepare_send_native_tokens");
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;

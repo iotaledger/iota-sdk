@@ -10,6 +10,7 @@ use std::{
 };
 
 use backtrace::Backtrace;
+use crypto::keys::slip10::Chain;
 use futures::{Future, FutureExt};
 use primitive_types::U256;
 use zeroize::Zeroize;
@@ -20,15 +21,17 @@ use crate::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
         constants::SHIMMER_TESTNET_BECH32_HRP,
-        request_funds_from_faucet, utils, Client, NodeInfoWrapper,
+        request_funds_from_faucet,
+        secret::SecretManage,
+        utils, Client, NodeInfoWrapper,
     },
     types::block::{
-        address::HrpLike,
+        address::{Hrp, ToBech32Ext},
         output::{
             dto::{OutputBuilderAmountDto, OutputDto},
             AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
         },
-        Error,
+        ConvertTo, Error,
     },
     wallet::{
         account::{
@@ -37,7 +40,7 @@ use crate::{
                 prepare_output::OutputParams,
                 TransactionOptions,
             },
-            types::{AccountBalanceDto, AccountIdentifier, TransactionDto},
+            types::{AccountIdentifier, BalanceDto, TransactionDto},
             OutputDataDto,
         },
         message_interface::{
@@ -114,8 +117,9 @@ impl WalletMessageHandler {
     /// Listen to wallet events, empty vec will listen to all events
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
-    pub async fn listen<F>(&self, events: Vec<WalletEventType>, handler: F)
+    pub async fn listen<F, I: IntoIterator<Item = WalletEventType> + Send>(&self, events: I, handler: F)
     where
+        I::IntoIter: Send,
         F: Fn(&Event) + 'static + Clone + Send + Sync,
     {
         self.wallet.listen(events, handler).await;
@@ -157,15 +161,13 @@ impl WalletMessageHandler {
             }
             #[cfg(feature = "stronghold")]
             Message::ChangeStrongholdPassword {
-                mut current_password,
-                mut new_password,
+                current_password,
+                new_password,
             } => {
                 convert_async_panics(|| async {
                     self.wallet
-                        .change_stronghold_password(&current_password, &new_password)
+                        .change_stronghold_password(current_password, new_password)
                         .await?;
-                    current_password.zeroize();
-                    new_password.zeroize();
                     Ok(Response::Ok(()))
                 })
                 .await
@@ -197,12 +199,14 @@ impl WalletMessageHandler {
                         .wallet
                         .recover_accounts(account_start_index, account_gap_limit, address_gap_limit, sync_options)
                         .await?;
-                    let mut account_dtos = Vec::new();
-                    for account in accounts {
-                        let account = account.details().await;
-                        account_dtos.push(AccountDetailsDto::from(&*account));
-                    }
-                    Ok(Response::Accounts(account_dtos))
+                    Ok(Response::Accounts(
+                        futures::future::join_all(
+                            accounts
+                                .into_iter()
+                                .map(|account| async move { AccountDetailsDto::from(&*account.details().await) }),
+                        )
+                        .await,
+                    ))
                 })
                 .await
             }
@@ -256,7 +260,7 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            Message::GenerateAddress {
+            Message::GenerateEd25519Address {
                 account_index,
                 address_index,
                 options,
@@ -265,7 +269,7 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let address = self
                         .wallet
-                        .generate_address(account_index, address_index, options)
+                        .generate_ed25519_address(account_index, address_index, options)
                         .await?;
 
                     let bech32_hrp = match bech32_hrp {
@@ -290,10 +294,9 @@ impl WalletMessageHandler {
                 .await
             }
             #[cfg(feature = "stronghold")]
-            Message::SetStrongholdPassword { mut password } => {
+            Message::SetStrongholdPassword { password } => {
                 convert_async_panics(|| async {
-                    self.wallet.set_stronghold_password(&password).await?;
-                    password.zeroize();
+                    self.wallet.set_stronghold_password(password).await?;
                     Ok(Response::Ok(()))
                 })
                 .await
@@ -571,9 +574,33 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::GenerateAddresses { amount, options } => {
-                let address = account.generate_addresses(amount, options).await?;
-                Ok(Response::GeneratedAddress(address))
+            AccountMethod::GenerateEd25519Addresses { amount, options } => {
+                let address = account.generate_ed25519_addresses(amount, options).await?;
+                Ok(Response::GeneratedEd25519Addresses(address))
+            }
+            AccountMethod::GenerateEvmAddresses { options } => {
+                let addresses = account
+                    .wallet
+                    .secret_manager
+                    .read()
+                    .await
+                    .generate_evm_addresses(options)
+                    .await?;
+                Ok(Response::GeneratedEvmAddresses(addresses))
+            }
+            AccountMethod::SignEvm { message, chain } => {
+                let msg: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
+                let (public_key, signature) = account
+                    .wallet
+                    .secret_manager
+                    .read()
+                    .await
+                    .sign_evm(&msg, &Chain::from_u32(chain))
+                    .await?;
+                Ok(Response::EvmSignature {
+                    public_key: prefix_hex::encode(public_key.to_bytes()),
+                    signature: prefix_hex::encode(signature.to_bytes()),
+                })
             }
             AccountMethod::GetOutputsWithAdditionalUnlockConditions { outputs_to_claim } => {
                 let output_ids = account
@@ -721,7 +748,7 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::GetBalance => Ok(Response::Balance(AccountBalanceDto::from(&account.balance().await?))),
+            AccountMethod::GetBalance => Ok(Response::Balance(BalanceDto::from(&account.balance().await?))),
             AccountMethod::PrepareOutput {
                 params: options,
                 transaction_options,
@@ -781,9 +808,9 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::SyncAccount { options } => Ok(Response::Balance(AccountBalanceDto::from(
-                &account.sync(options).await?,
-            ))),
+            AccountMethod::SyncAccount { options } => {
+                Ok(Response::Balance(BalanceDto::from(&account.sync(options).await?)))
+            }
             AccountMethod::SendAmount { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
@@ -842,7 +869,7 @@ impl WalletMessageHandler {
                             outputs
                                 .iter()
                                 .map(|o| Ok(Output::try_from_dto(o, token_supply)?))
-                                .collect::<crate::wallet::Result<Vec<Output>>>()?,
+                                .collect::<crate::wallet::Result<Vec<_>>>()?,
                             options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
@@ -992,7 +1019,7 @@ impl WalletMessageHandler {
     }
 
     /// The create account message handler.
-    async fn create_account(&self, alias: Option<String>, bech32_hrp: Option<impl HrpLike>) -> Result<Response> {
+    async fn create_account(&self, alias: Option<String>, bech32_hrp: Option<impl ConvertTo<Hrp>>) -> Result<Response> {
         let mut builder = self.wallet.create_account();
 
         if let Some(alias) = alias {
@@ -1000,7 +1027,7 @@ impl WalletMessageHandler {
         }
 
         if let Some(bech32_hrp) = bech32_hrp {
-            builder = builder.with_bech32_hrp(bech32_hrp.to_hrp()?);
+            builder = builder.with_bech32_hrp(bech32_hrp.convert()?);
         }
 
         match builder.finish().await {
@@ -1020,12 +1047,15 @@ impl WalletMessageHandler {
 
     async fn get_accounts(&self) -> Result<Response> {
         let accounts = self.wallet.get_accounts().await?;
-        let mut account_dtos = Vec::new();
-        for account in accounts {
-            let account = account.details().await;
-            account_dtos.push(AccountDetailsDto::from(&*account));
-        }
-        Ok(Response::Accounts(account_dtos))
+
+        Ok(Response::Accounts(
+            futures::future::join_all(
+                accounts
+                    .into_iter()
+                    .map(|account| async move { AccountDetailsDto::from(&*account.details().await) }),
+            )
+            .await,
+        ))
     }
 }
 

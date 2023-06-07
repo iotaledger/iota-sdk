@@ -151,8 +151,10 @@ jobs:
           #
           # - RUSTSEC-2021-0145: `atty` potential unaligned read.
           #   - Waiting for https://github.com/mackwic/colored/pull/122 to be merged.
+          # - RUSTSEC-2021-0065: https://rustsec.org/advisories/RUSTSEC-2021-0065
+          #   - anymap is unmaintained 🤷‍♀️
 
-          args: --file Cargo.lock --deny warnings --ignore RUSTSEC-2021-0145
+          args: --file Cargo.lock --deny warnings --ignore RUSTSEC-2021-0145 --ignore RUSTSEC-2021-0065
 
   no_std:
     name: Check `no_std` compatability

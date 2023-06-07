@@ -49,6 +49,34 @@ macro_rules! impl_id {
             }
         }
 
+        impl TryFrom<&alloc::string::String> for $name {
+            type Error = $crate::types::block::Error;
+
+            fn try_from(s: &alloc::string::String) -> Result<Self, Self::Error> {
+                core::str::FromStr::from_str(s.as_str())
+            }
+        }
+
+        impl TryFrom<&str> for $name {
+            type Error = $crate::types::block::Error;
+
+            fn try_from(s: &str) -> Result<Self, Self::Error> {
+                core::str::FromStr::from_str(s)
+            }
+        }
+
+        impl $crate::types::block::ConvertTo<$name> for &alloc::string::String {
+            fn convert(self) -> Result<$name, $crate::types::block::Error> {
+                self.try_into()
+            }
+        }
+
+        impl $crate::types::block::ConvertTo<$name> for &str {
+            fn convert(self) -> Result<$name, $crate::types::block::Error> {
+                self.try_into()
+            }
+        }
+
         impl core::fmt::Display for $name {
             fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                 write!(f, "{}", prefix_hex::encode(self.0))

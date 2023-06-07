@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
 
     // Get output ids of outputs that can be controlled by this address without further unlock constraints
     let output_ids_response = client
-        .basic_output_ids(vec![
+        .basic_output_ids([
             QueryParameter::Address(addresses[0].clone()),
             QueryParameter::HasExpiration(false),
             QueryParameter::HasTimelock(false),

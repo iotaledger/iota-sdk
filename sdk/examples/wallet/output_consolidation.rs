@@ -12,6 +12,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
+    types::block::address::ToBech32Ext,
     wallet::{ClientOptions, Result, Wallet},
 };
 
@@ -39,7 +40,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Sync account to make sure account is updated with outputs from previous examples

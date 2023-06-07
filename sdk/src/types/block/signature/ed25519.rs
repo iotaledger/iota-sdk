@@ -5,7 +5,7 @@ use core::{fmt, ops::Deref};
 
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
-    signatures::ed25519::{PublicKey, Signature, PUBLIC_KEY_LENGTH, SIGNATURE_LENGTH},
+    signatures::ed25519::{PublicKey, Signature},
 };
 
 use crate::types::block::{address::Ed25519Address, Error};
@@ -23,9 +23,9 @@ impl Ed25519Signature {
     /// The signature kind of an [`Ed25519Signature`].
     pub const KIND: u8 = 0;
     /// Length of an ED25519 public key.
-    pub const PUBLIC_KEY_LENGTH: usize = PUBLIC_KEY_LENGTH;
+    pub const PUBLIC_KEY_LENGTH: usize = PublicKey::LENGTH;
     /// Length of an ED25519 signature.
-    pub const SIGNATURE_LENGTH: usize = SIGNATURE_LENGTH;
+    pub const SIGNATURE_LENGTH: usize = Signature::LENGTH;
 
     /// Creates a new [`Ed25519Signature`].
     pub fn new(public_key: [u8; Self::PUBLIC_KEY_LENGTH], signature: [u8; Self::SIGNATURE_LENGTH]) -> Self {
@@ -44,7 +44,7 @@ impl Ed25519Signature {
 
     /// Verifies the [`Ed25519Signature`] for a message against an [`Ed25519Address`].
     pub fn is_valid(&self, message: &[u8], address: &Ed25519Address) -> Result<(), Error> {
-        let signature_address: [u8; PUBLIC_KEY_LENGTH] = Blake2b256::digest(self.public_key).into();
+        let signature_address: [u8; Self::PUBLIC_KEY_LENGTH] = Blake2b256::digest(self.public_key).into();
 
         if address.deref() != &signature_address {
             return Err(Error::SignaturePublicKeyMismatch {

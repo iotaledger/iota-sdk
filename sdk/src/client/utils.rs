@@ -10,21 +10,23 @@ use crypto::{
     keys::{bip39::wordlist, slip10::Seed},
     utils,
 };
-use zeroize::Zeroize;
+use serde::{Deserialize, Serialize};
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use super::{Client, ClientInner};
 use crate::{
     client::{Error, Result},
     types::block::{
-        address::{Address, Bech32Address, Bech32AddressLike, Ed25519Address, HrpLike},
+        address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
         output::{AliasId, NftId},
         payload::TaggedDataPayload,
+        ConvertTo,
     },
 };
 
 /// Transforms bech32 to hex
-pub fn bech32_to_hex(bech32: impl Bech32AddressLike) -> Result<String> {
-    Ok(match bech32.to_bech32()?.inner() {
+pub fn bech32_to_hex(bech32: impl ConvertTo<Bech32Address>) -> Result<String> {
+    Ok(match bech32.convert()?.inner() {
         Address::Ed25519(ed) => ed.to_string(),
         Address::Alias(alias) => alias.to_string(),
         Address::Nft(nft) => nft.to_string(),
@@ -32,13 +34,13 @@ pub fn bech32_to_hex(bech32: impl Bech32AddressLike) -> Result<String> {
 }
 
 /// Transforms a hex encoded address to a bech32 encoded address
-pub fn hex_to_bech32(hex: &str, bech32_hrp: impl HrpLike) -> Result<Bech32Address> {
+pub fn hex_to_bech32(hex: &str, bech32_hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address> {
     let address: Ed25519Address = hex.parse::<Ed25519Address>()?;
     Ok(Address::Ed25519(address).try_to_bech32(bech32_hrp)?)
 }
 
 /// Transforms a prefix hex encoded public key to a bech32 encoded address
-pub fn hex_public_key_to_bech32_address(hex: &str, bech32_hrp: impl HrpLike) -> Result<Bech32Address> {
+pub fn hex_public_key_to_bech32_address(hex: &str, bech32_hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address> {
     let public_key: [u8; Ed25519Address::LENGTH] = prefix_hex::decode(hex)?;
 
     let address = Blake2b256::digest(public_key)
@@ -110,7 +112,7 @@ impl ClientInner {
     pub async fn hex_to_bech32(
         &self,
         hex: &str,
-        bech32_hrp: Option<impl HrpLike>,
+        bech32_hrp: Option<impl ConvertTo<Hrp>>,
     ) -> crate::client::Result<Bech32Address> {
         match bech32_hrp {
             Some(hrp) => Ok(hex_to_bech32(hex, hrp)?),
@@ -122,10 +124,10 @@ impl ClientInner {
     pub async fn alias_id_to_bech32(
         &self,
         alias_id: AliasId,
-        bech32_hrp: Option<impl HrpLike>,
+        bech32_hrp: Option<impl ConvertTo<Hrp>>,
     ) -> crate::client::Result<Bech32Address> {
         match bech32_hrp {
-            Some(hrp) => Ok(alias_id.to_bech32(hrp.to_hrp()?)),
+            Some(hrp) => Ok(alias_id.to_bech32(hrp.convert()?)),
             None => Ok(alias_id.to_bech32(self.get_bech32_hrp().await?)),
         }
     }
@@ -134,10 +136,10 @@ impl ClientInner {
     pub async fn nft_id_to_bech32(
         &self,
         nft_id: NftId,
-        bech32_hrp: Option<impl HrpLike>,
+        bech32_hrp: Option<impl ConvertTo<Hrp>>,
     ) -> crate::client::Result<Bech32Address> {
         match bech32_hrp {
-            Some(hrp) => Ok(nft_id.to_bech32(hrp.to_hrp()?)),
+            Some(hrp) => Ok(nft_id.to_bech32(hrp.convert()?)),
             None => Ok(nft_id.to_bech32(self.get_bech32_hrp().await?)),
         }
     }
@@ -146,7 +148,7 @@ impl ClientInner {
     pub async fn hex_public_key_to_bech32_address(
         &self,
         hex: &str,
-        bech32_hrp: Option<impl HrpLike>,
+        bech32_hrp: Option<impl ConvertTo<Hrp>>,
     ) -> crate::client::Result<Bech32Address> {
         match bech32_hrp {
             Some(hrp) => Ok(hex_public_key_to_bech32_address(hex, hrp)?),
@@ -157,7 +159,7 @@ impl ClientInner {
 
 impl Client {
     /// Transforms bech32 to hex
-    pub fn bech32_to_hex(bech32: impl Bech32AddressLike) -> crate::client::Result<String> {
+    pub fn bech32_to_hex(bech32: impl ConvertTo<Bech32Address>) -> crate::client::Result<String> {
         bech32_to_hex(bech32)
     }
 
@@ -189,5 +191,15 @@ impl Client {
     /// UTF-8 encodes both the `tag` and `data` of a given TaggedDataPayload.
     pub fn tagged_data_to_utf8(payload: &TaggedDataPayload) -> Result<(String, String)> {
         Ok((Self::tag_to_utf8(payload)?, Self::data_to_utf8(payload)?))
+    }
+}
+
+/// A password wrapper that takes care of zeroing the memory when being dropped.
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Zeroize, ZeroizeOnDrop, derive_more::From)]
+pub struct Password(String);
+
+impl Password {
+    pub fn as_bytes(&self) -> &[u8] {
+        self.0.as_bytes()
     }
 }

@@ -170,18 +170,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
 
             Response::Output(OutputDto::from(&output))
         }
-        ClientMethod::GenerateAddresses {
-            secret_manager,
-            options,
-        } => {
-            let secret_manager = (&secret_manager).try_into()?;
-            let addresses = client
-                .get_addresses(&secret_manager)
-                .set_options(options)?
-                .finish()
-                .await?;
-            Response::GeneratedAddresses(addresses)
-        }
         ClientMethod::BuildAndPostBlock {
             secret_manager,
             options,
@@ -372,7 +360,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::FoundryOutputId { foundry_id } => Response::OutputId(client.foundry_output_id(foundry_id).await?),
         ClientMethod::GetOutputs { output_ids } => {
             let outputs_response = client
-                .get_outputs(output_ids)
+                .get_outputs(&output_ids)
                 .await?
                 .iter()
                 .map(OutputWithMetadataResponse::from)
@@ -381,7 +369,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::GetOutputsIgnoreErrors { output_ids } => {
             let outputs_response = client
-                .get_outputs_ignore_errors(output_ids)
+                .get_outputs_ignore_errors(&output_ids)
                 .await?
                 .iter()
                 .map(OutputWithMetadataResponse::from)
