@@ -7,6 +7,8 @@ export const SHIMMER_TESTNET_BECH32_HRP = 'rms';
 export enum CoinType {
     IOTA = 4218,
     Shimmer = 4219,
+    Ether = 60,
 }
 
 export const HD_WALLET_TYPE = 44;
+export const HARDEN_MASK = (1 << 31) >>> 0;

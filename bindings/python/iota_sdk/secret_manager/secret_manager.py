@@ -224,6 +224,14 @@ class SecretManager():
             'chain': chain,
         })
 
+    def sign_evm(self, message: HexStr, chain: List[int]):
+        """Signs a message with an Evm private key.
+        """
+        return self._call_method('signEvm', {
+            'message': message,
+            'chain': chain,
+        })
+
     def sign_transaction(self, prepared_transaction_data):
         """Sign a transaction.
         """
