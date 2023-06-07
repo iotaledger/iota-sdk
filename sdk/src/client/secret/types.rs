@@ -102,7 +102,7 @@ pub enum LedgerDeviceType {
 pub struct LedgerNanoStatus {
     /// Ledger is available and ready to be used.
     pub(crate) connected: bool,
-    /// Ledger is connected and locked.
+    /// Ledger is connected and locked, Some(true/false) for IOTA/Shimmer, None for the rest.
     pub(crate) locked: Option<bool>,
     /// Ledger blind signing enabled
     pub(crate) blind_signing_enabled: bool,
