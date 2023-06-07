@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { ProtocolParamsMilestoneOption } from '../milestoneOptions/ProtocolParamsMilestoneOption';
+import { ProtocolParamsMilestoneOption } from '../milestoneOptions/protocolParamsMilestoneOption';
 /**
  * Defines changing protocol parameters in a milestone.
  */

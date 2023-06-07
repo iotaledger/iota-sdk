@@ -5,8 +5,8 @@ import type { WalletEventType } from './types/wallet';
 import { Event } from './types/wallet';
 import type { WalletMethodHandler } from './wallet/WalletMethodHandler';
 import { __UtilsMethods__ } from './types/utils';
-import type { SecretManagerMethodHandler } from './secretManager/SecretManagerMethodHandler';
-import type { ClientMethodHandler } from './client/ClientMethodHandler';
+import type { SecretManagerMethodHandler } from './secretManager/secretManagerMethodHandler';
+import type { ClientMethodHandler } from './client/clientMethodHandler';
 
 // @ts-ignore: path is set to match runtime transpiled js path
 import addon = require('../build/Release/index.node');

@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { MilestoneOptionType } from './milestoneOptions';
-import { ProtocolParamsMilestoneOption } from './ProtocolParamsMilestoneOption';
-import { ReceiptMilestoneOption } from './ReceiptMilestoneOption';
+import { ProtocolParamsMilestoneOption } from './protocolParamsMilestoneOption';
+import { ReceiptMilestoneOption } from './receiptMilestoneOption';
 
-export * from './ProtocolParamsMilestoneOption';
-export * from './ReceiptMilestoneOption';
+export * from './protocolParamsMilestoneOption';
+export * from './receiptMilestoneOption';
 export * from './milestoneOptions';
 
 export const MilestoneOptionDiscriminator = {

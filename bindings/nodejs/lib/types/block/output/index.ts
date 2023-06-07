@@ -2,6 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export * from './feature';
-export * from './unlock_condition';
+export * from './unlockCondition';
 export * from './output';
-export * from './token_scheme';
+export * from './tokenScheme';

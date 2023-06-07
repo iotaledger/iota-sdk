@@ -6,6 +6,6 @@ export * from './INodeInfoBaseToken';
 export * from './INodeInfoMetrics';
 export * from './INodeInfoMilesone';
 export * from './INodeInfoProtocol';
-export * from './NodeInfoProtocolParamsMilestoneOpt';
+export * from './nodeInfoProtocolParamsMilestoneOpt';
 export * from './INodeInfoStatus';
 export * from './IRoutesResponse';

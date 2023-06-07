@@ -4,7 +4,7 @@
 import type { INodeInfoBaseToken } from './INodeInfoBaseToken';
 import type { INodeInfoMetrics } from './INodeInfoMetrics';
 import type { INodeInfoProtocol } from './INodeInfoProtocol';
-import type { NodeInfoProtocolParamsMilestoneOpt } from './NodeInfoProtocolParamsMilestoneOpt';
+import type { NodeInfoProtocolParamsMilestoneOpt } from './nodeInfoProtocolParamsMilestoneOpt';
 import type { INodeInfoStatus } from './INodeInfoStatus';
 /**
  * Response from the /info endpoint.
