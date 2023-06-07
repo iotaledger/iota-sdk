@@ -136,9 +136,14 @@ class SecretManager():
                 options['range']['end'] = options.pop('end')
         if 'coin_type' in options:
             options['coin_type'] = int(options.pop('coin_type'))
+        if 'internal' in options:
+            if 'options' not in options:
+                options['options'] = {}
+            options['options']['internal'] = options.pop('internal')
         if 'ledger_nano_prompt' in options:
-            options['options'] = {
-                'ledger_nano_prompt': options.pop('ledger_nano_prompt')}
+            if 'options' not in options:
+                options['options'] = {}
+            options['options']['ledger_nano_prompt'] = options.pop('ledger_nano_prompt')
 
         options = humps.camelize(options)
 

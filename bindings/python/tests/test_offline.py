@@ -18,9 +18,9 @@ def test_mnemonic_address_generation():
     mnemonic_address_test_cases = tv['general']['address_generations']
 
     for test in mnemonic_address_test_cases:
-        secret_manager = MnemonicSecretManager(test['mnemonic'])
+        secret_manager = SecretManager(MnemonicSecretManager(test['mnemonic']))
 
-        generated_address = client.generate_ed25519_addresses(secret_manager,
+        generated_address = secret_manager.generate_ed25519_addresses(
                                                       coin_type=test['coin_type'],
                                                       account_index=test['account_index'],
                                                       bech32_hrp=test['bech32_hrp'],
