@@ -103,7 +103,7 @@ The code examples use a .env file to store variables. You can download the examp
 <TabItem value="nodejs" label="Nodejs">
 
 <CodeBlock className={'language-dotenv'}>
-    {NodeExampleEnv}
+{NodeExampleEnv}
 </CodeBlock>
 
 </TabItem>
@@ -117,7 +117,7 @@ The code examples use a .env file to store variables. You can download the examp
 <TabItem value="wasm" label="Wasm">
 
 <CodeBlock className={'language-dotenv'}>
-    {NodeExampleEnv}
+{NodeExampleEnv}
 </CodeBlock>
 
 </TabItem>
@@ -125,36 +125,78 @@ The code examples use a .env file to store variables. You can download the examp
 
 ## Run Code Examples
 
+
+After you have [installed the IOTA SDK](#install-the-iota-sdk), you can browse the IOTA SDK code examples to get
+acquainted with the `client` and `wallet` modules.
+Please ensure you have followed the instructions to
+
 <Tabs groupId="language">
 <TabItem value="rust" label="Rust">
 
-The IOTA SDK has numerous examples you can run to get acquainted with the `client` and `wallet` modules.
-Once you followed the instructions to [build the library](#install-the-iota-sdk) for you language of choice, you will need to select one of the
-[Rust examples](https://github.com/iotaledger/iota-sdk/tree/develop/sdk/examples). You can run any example by running the following command:
+You can get a full list of the available [Rust examples](https://github.com/iotaledger/iota-sdk/tree/develop/sdk/examples)
+by running the following command:
 
+```shell
+cargo run --example
+```
 
+You can use the following command to run the examples, replacing `example_name` with any example name:
 
+```rust
+cargo run --example example_name --release
+```
 
 </TabItem>
 <TabItem value="nodejs" label="Nodejs">
 
-<CodeBlock className={'language-dotenv'}>
-    {NodeExampleEnv}
-</CodeBlock>
+You can browse all the available [Node.js examples](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/nodejs/examples)
+in the repository.  You can use the following command to run any example from the Node.js directory:
+
+```bash
+cd examples
+yarn run-example ./[example folder]/[example file]
+```
+
+- Where `[example file]` is the file name from the example folder, and example folder is the folder name. For example:
+
+```bash
+yarn run-example  examples/client/00_get_info.ts
+```
 
 </TabItem>
 <TabItem value="python" label="Python">
 
-<CodeBlock className={'language-dotenv'}>
-    {PythonExampleEnv}
-</CodeBlock>
+You can browse all the available [Python examples](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/python/examples) to get
+in the repository. You can use the following command to run any example from the Python bindings directory:
+
+```bash
+python3 example/[example file]
+```
+
+- Where `[example file]` is the file name from the example folder. For example:
+
+```bash
+python3 examples/client/00_get_info.py
+```
 
 </TabItem>
 <TabItem value="wasm" label="Wasm">
 
-<CodeBlock className={'language-dotenv'}>
-    {NodeExampleEnv}
-</CodeBlock>
+
+You can browse and use all the available [Node.js examples](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/nodejs/examples)
+in the repository.  You can use the following command to run any example from the Node.js directory:
+
+```bash
+cd examples
+yarn run-example ./[example folder]/[example file]
+```
+
+- Where `[example file]` is the file name from the example folder, and example folder is the folder name. For example:
+
+```bash
+yarn run-example  examples/client/00_get_info.ts
+```
+
 
 </TabItem>
 </Tabs>
