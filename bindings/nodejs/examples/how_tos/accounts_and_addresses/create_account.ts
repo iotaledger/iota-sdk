@@ -59,7 +59,7 @@ async function run() {
 
         // Create a new account
         const account = await wallet.createAccount({
-            alias: "Alice",
+            alias: 'Alice',
         });
         console.log('Generated new account:', account.getMetadata().alias);
     } catch (error) {

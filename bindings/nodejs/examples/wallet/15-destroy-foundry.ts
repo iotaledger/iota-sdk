@@ -17,17 +17,13 @@ async function run() {
         const wallet = await getUnlockedWallet();
 
         // Get the account we generated with `01-create-wallet`
-        const account = await wallet.getAccount(
-            "Alice",
-        );
+        const account = await wallet.getAccount('Alice');
 
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
 
         if (balance.foundries.length == 0) {
-            throw new Error(
-                `No Foundry available in account 'Alice'`,
-            );
+            throw new Error(`No Foundry available in account 'Alice'`);
         }
         // We try to destroy the first foundry in the account
         const foundry = balance.foundries[0];

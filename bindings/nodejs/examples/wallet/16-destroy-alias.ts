@@ -17,17 +17,13 @@ async function run() {
         const manager = await getUnlockedManager();
 
         // Get the account we generated with `01-create-wallet`
-        const account = await manager.getAccount(
-            "Alice",
-        );
+        const account = await manager.getAccount('Alice');
 
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
 
         if (balance.aliases.length == 0) {
-            throw new Error(
-                `No Alias available in account ''`,
-            );
+            throw new Error(`No Alias available in account ''`);
         }
 
         // We try to destroy the first alias in the account

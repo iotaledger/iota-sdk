@@ -23,9 +23,7 @@ async function run() {
         const wallet = await getUnlockedWallet();
 
         // Get the account we generated with `01-create-wallet`
-        const account = await wallet.getAccount(
-            "Alice",
-        );
+        const account = await wallet.getAccount('Alice');
 
         console.log('Sending alias output transaction...');
 

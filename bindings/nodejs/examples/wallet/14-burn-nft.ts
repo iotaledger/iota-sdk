@@ -16,17 +16,13 @@ async function run() {
         const wallet = await getUnlockedWallet();
 
         // Get the account we generated with `01-create-wallet`
-        const account = await wallet.getAccount(
-            "Alice",
-        );
+        const account = await wallet.getAccount('Alice');
 
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
 
         if (balance.nfts.length == 0) {
-            throw new Error(
-                `No NFT available in account 'Alice'`,
-            );
+            throw new Error(`No NFT available in account 'Alice'`);
         }
         // Get the first nft
         const nftId = balance.nfts[0];

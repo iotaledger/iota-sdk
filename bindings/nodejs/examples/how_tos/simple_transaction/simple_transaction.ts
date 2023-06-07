@@ -23,9 +23,7 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount(
-            "Alice",
-        );
+        const account = await wallet.getAccount('Alice');
 
         await account.sync();
 

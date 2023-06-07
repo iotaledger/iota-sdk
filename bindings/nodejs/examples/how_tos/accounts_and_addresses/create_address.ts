@@ -21,9 +21,7 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount(
-            "Alice",
-        );
+        const account = await wallet.getAccount('Alice');
 
         // To create an address we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);

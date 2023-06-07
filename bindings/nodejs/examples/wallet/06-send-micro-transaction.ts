@@ -24,9 +24,7 @@ async function run() {
         const wallet = await getUnlockedWallet();
 
         // Get the account we generated with `01-create-wallet`
-        const account = await wallet.getAccount(
-            "Alice",
-        );
+        const account = await wallet.getAccount('Alice');
 
         // May want to ensure the account is synced before sending a transaction.
         await account.sync();
