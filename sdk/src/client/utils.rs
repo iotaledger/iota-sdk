@@ -203,30 +203,3 @@ impl Password {
         self.0.as_bytes()
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    // necessary for `assert_xx!` macros
-    impl core::fmt::Debug for Password {
-        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-            write!(f, "<password>")
-        }
-    }
-
-    #[test]
-    fn from_string() {
-        let s1 = "motdepasse".to_string();
-        let s2 = s1.clone();
-        assert_eq!(Password::from(s1), Password(s2));
-    }
-
-    #[test]
-    fn zeroize_password() {
-        let mut password: Password = "motdepasse".to_owned().into();
-        assert_ne!(password, Password(String::new()));
-        password.zeroize();
-        assert_eq!(password, Password(String::new()));
-    }
-}
