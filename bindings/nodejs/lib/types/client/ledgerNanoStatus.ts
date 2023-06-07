@@ -1,7 +1,7 @@
 /** The status of a Ledger Nano */
 export interface LedgerNanoStatus {
     connected: boolean;
-    locked: boolean;
+    locked?: boolean;
     blindSigningEnabled: boolean;
     app?: LedgerApp;
     device?: LedgerDeviceType;
