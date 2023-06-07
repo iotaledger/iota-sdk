@@ -16,10 +16,7 @@ mod storage_stub {
             ClientBuilder,
         },
         wallet::{
-            storage::{
-                constants::{SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY},
-                manager::StorageManager,
-            },
+            storage::constants::{SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY},
             wallet::builder::StorageOptions,
             WalletBuilder,
         },
@@ -45,9 +42,14 @@ mod storage_stub {
 
     #[async_trait]
     pub trait SaveLoadWallet {
-        async fn save_data(&self, storage: &StorageManager) -> crate::wallet::Result<()>;
+        async fn save_data(
+            &self,
+            storage: &impl StorageAdapter<Error = crate::wallet::Error>,
+        ) -> crate::wallet::Result<()>;
 
-        async fn get_data(storage: &StorageManager) -> crate::wallet::Result<Option<Self>>
+        async fn get_data(
+            storage: &impl StorageAdapter<Error = crate::wallet::Error>,
+        ) -> crate::wallet::Result<Option<Self>>
         where
             Self: Sized;
     }
@@ -57,21 +59,26 @@ mod storage_stub {
     where
         crate::wallet::Error: From<S::Error>,
     {
-        async fn save_data(&self, storage: &StorageManager) -> crate::wallet::Result<()> {
+        async fn save_data(
+            &self,
+            storage: &impl StorageAdapter<Error = crate::wallet::Error>,
+        ) -> crate::wallet::Result<()> {
             log::debug!("save_wallet_data");
-            storage.storage.set(WALLET_INDEXATION_KEY, self).await?;
+            storage.set(WALLET_INDEXATION_KEY, self).await?;
 
             if let Some(secret_manager) = &self.secret_manager {
                 let secret_manager = secret_manager.read().await;
                 if let Some(config) = secret_manager.to_config() {
                     log::debug!("save_secret_manager: {config:?}");
-                    storage.storage.set(SECRET_MANAGER_KEY, &config).await?;
+                    storage.set(SECRET_MANAGER_KEY, &config).await?;
                 }
             }
             Ok(())
         }
 
-        async fn get_data(storage: &StorageManager) -> crate::wallet::Result<Option<Self>> {
+        async fn get_data(
+            storage: &impl StorageAdapter<Error = crate::wallet::Error>,
+        ) -> crate::wallet::Result<Option<Self>> {
             log::debug!("get_wallet_data");
             if let Some(data) = storage.get::<WalletData>(WALLET_INDEXATION_KEY).await? {
                 log::debug!("get_wallet_data {data:?}");
@@ -90,13 +97,18 @@ mod storage_stub {
 
     #[async_trait]
     impl SaveLoadWallet for WalletBuilder<MnemonicSecretManager> {
-        async fn save_data(&self, storage: &StorageManager) -> crate::wallet::Result<()> {
+        async fn save_data(
+            &self,
+            storage: &impl StorageAdapter<Error = crate::wallet::Error>,
+        ) -> crate::wallet::Result<()> {
             log::debug!("save_wallet_data");
-            storage.storage.set(WALLET_INDEXATION_KEY, self).await?;
+            storage.set(WALLET_INDEXATION_KEY, self).await?;
             Ok(())
         }
 
-        async fn get_data(storage: &StorageManager) -> crate::wallet::Result<Option<Self>> {
+        async fn get_data(
+            storage: &impl StorageAdapter<Error = crate::wallet::Error>,
+        ) -> crate::wallet::Result<Option<Self>> {
             log::debug!("get_wallet_data");
             let res = storage.get::<WalletData>(WALLET_INDEXATION_KEY).await?;
             log::debug!("get_wallet_data {res:?}");

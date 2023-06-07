@@ -5,11 +5,11 @@ use futures::{StreamExt, TryStreamExt};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::storage::StorageAdapter as ClientStorageAdapter,
+    client::storage::StorageAdapter,
     wallet::{
         account::{AccountDetails, SyncOptions},
         migration::migrate,
-        storage::{constants::*, Storage, StorageAdapter},
+        storage::{constants::*, DynStorageAdapter, Storage},
     },
 };
 
@@ -39,7 +39,7 @@ impl Default for ManagerStorage {
 
 /// Storage manager
 #[derive(Debug)]
-pub struct StorageManager {
+pub(crate) struct StorageManager {
     pub(crate) storage: Storage,
     // account indexes for accounts in the database
     account_indexes: Vec<u32>,
@@ -47,7 +47,7 @@ pub struct StorageManager {
 
 impl StorageManager {
     pub(crate) async fn new(
-        storage: impl StorageAdapter + 'static,
+        storage: impl DynStorageAdapter + 'static,
         encryption_key: impl Into<Option<[u8; 32]>> + Send,
     ) -> crate::wallet::Result<Self> {
         let storage = Storage {
@@ -79,21 +79,8 @@ impl StorageManager {
         Ok(storage_manager)
     }
 
-    pub fn id(&self) -> &'static str {
-        self.storage.id()
-    }
-
-    #[cfg(test)]
-    pub fn is_encrypted(&self) -> bool {
-        self.storage.encryption_key.is_some()
-    }
-
-    pub async fn get<T: for<'de> Deserialize<'de>>(&self, key: &str) -> crate::wallet::Result<Option<T>> {
-        self.storage.get(key).await
-    }
-
     pub async fn get_accounts(&mut self) -> crate::wallet::Result<Vec<AccountDetails>> {
-        if let Some(account_indexes) = self.storage.get(ACCOUNTS_INDEXATION_KEY).await? {
+        if let Some(account_indexes) = self.get(ACCOUNTS_INDEXATION_KEY).await? {
             if self.account_indexes.is_empty() {
                 self.account_indexes = account_indexes;
             }
@@ -117,18 +104,15 @@ impl StorageManager {
             self.account_indexes.push(*account.index());
         }
 
-        self.storage.set(ACCOUNTS_INDEXATION_KEY, &self.account_indexes).await?;
-        self.storage
-            .set(&format!("{ACCOUNT_INDEXATION_KEY}{}", account.index()), account)
+        self.set(ACCOUNTS_INDEXATION_KEY, &self.account_indexes).await?;
+        self.set(&format!("{ACCOUNT_INDEXATION_KEY}{}", account.index()), account)
             .await
     }
 
     pub async fn remove_account(&mut self, account_index: u32) -> crate::wallet::Result<()> {
-        self.storage
-            .delete(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"))
-            .await?;
+        self.delete(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}")).await?;
         self.account_indexes.retain(|a| a != &account_index);
-        self.storage.set(ACCOUNTS_INDEXATION_KEY, &self.account_indexes).await
+        self.set(ACCOUNTS_INDEXATION_KEY, &self.account_indexes).await
     }
 
     pub async fn set_default_sync_options(
@@ -137,12 +121,29 @@ impl StorageManager {
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<()> {
         let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}-{ACCOUNT_SYNC_OPTIONS}");
-        self.storage.set(&key, &sync_options).await
+        self.set(&key, &sync_options).await
     }
 
     pub async fn get_default_sync_options(&self, account_index: u32) -> crate::wallet::Result<Option<SyncOptions>> {
         let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}-{ACCOUNT_SYNC_OPTIONS}");
-        self.storage.get(&key).await
+        self.get(&key).await
+    }
+}
+
+#[async_trait::async_trait]
+impl StorageAdapter for StorageManager {
+    type Error = crate::wallet::Error;
+
+    async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, Self::Error> {
+        self.storage.get_bytes(key).await
+    }
+
+    async fn set_bytes(&self, key: &str, record: &[u8]) -> Result<(), Self::Error> {
+        self.storage.set_bytes(key, record).await
+    }
+
+    async fn delete(&self, key: &str) -> Result<(), Self::Error> {
+        self.storage.delete(key).await
     }
 }
 
@@ -150,16 +151,9 @@ impl StorageManager {
 mod tests {
     use super::*;
     use crate::{
-        client::{secret::SecretManager, storage::StorageAdapterId},
+        client::secret::SecretManager,
         wallet::{storage::adapter::memory::Memory, wallet::operations::storage::SaveLoadWallet, WalletBuilder},
     };
-
-    #[tokio::test]
-    async fn id() {
-        let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert_eq!(storage_manager.id(), Memory::ID);
-        assert!(!storage_manager.is_encrypted());
-    }
 
     #[tokio::test]
     async fn get() {
