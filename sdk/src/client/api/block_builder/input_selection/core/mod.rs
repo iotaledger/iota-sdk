@@ -32,8 +32,6 @@ use crate::{
     utils::unix_timestamp_now,
 };
 
-// TODO make methods actually take self? There was a mut issue.
-
 /// Working state for the input selection algorithm.
 pub struct InputSelection {
     available_inputs: Vec<InputSigningData>,

@@ -83,7 +83,6 @@ pub(crate) fn get_minted_and_melted_native_tokens(
     Ok((minted_native_tokens, melted_native_tokens))
 }
 
-// TODO checked ops
 // TODO only handles one side
 pub(crate) fn get_native_tokens_diff(
     inputs: &NativeTokensBuilder,
