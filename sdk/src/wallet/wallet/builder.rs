@@ -30,19 +30,15 @@ use crate::{
     wallet::{wallet::WalletInner, Account, ClientOptions, Wallet},
 };
 
-#[derive(Debug, Serialize, Deserialize)]
 /// Builder for the wallet.
+#[derive(Debug, Serialize)]
 pub struct WalletBuilder<S: SecretManage = SecretManager> {
-    client_options: Option<ClientOptions>,
-    coin_type: Option<u32>,
+    pub(crate) client_options: Option<ClientOptions>,
+    pub(crate) coin_type: Option<u32>,
     #[cfg(feature = "storage")]
-    storage_options: Option<StorageOptions>,
-    #[serde(skip, default = "default_secret_manager")]
+    pub(crate) storage_options: Option<StorageOptions>,
+    #[serde(skip)]
     pub(crate) secret_manager: Option<Arc<RwLock<S>>>,
-}
-
-fn default_secret_manager<S>() -> Option<Arc<RwLock<S>>> {
-    None
 }
 
 impl<S: SecretManage> Default for WalletBuilder<S> {

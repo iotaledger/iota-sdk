@@ -6,21 +6,43 @@ mod storage_stub {
     use alloc::sync::Arc;
 
     use async_trait::async_trait;
+    use serde::{Deserialize, Serialize};
     use tokio::sync::RwLock;
 
     use crate::{
         client::{
-            secret::{mnemonic::MnemonicSecretManager, SecretManagerConfig},
+            secret::{mnemonic::MnemonicSecretManager, SecretManage, SecretManagerConfig},
             storage::StorageAdapter,
+            ClientBuilder,
         },
         wallet::{
             storage::{
                 constants::{SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY},
                 manager::StorageManager,
             },
+            wallet::builder::StorageOptions,
             WalletBuilder,
         },
     };
+
+    #[derive(Debug, Serialize, Deserialize)]
+    struct WalletData {
+        client_options: Option<ClientBuilder>,
+        coin_type: Option<u32>,
+        storage_options: Option<StorageOptions>,
+    }
+
+    impl WalletData {
+        fn to_builder<S: SecretManage>(self, secret_manager: Option<S>) -> WalletBuilder<S> {
+            WalletBuilder {
+                client_options: self.client_options,
+                coin_type: self.coin_type,
+                storage_options: self.storage_options,
+                secret_manager: secret_manager.map(|s| Arc::new(RwLock::new(s))),
+            }
+        }
+    }
+
     #[async_trait]
     pub trait SaveLoadWallet {
         async fn save_data(&self, storage: &StorageManager) -> crate::wallet::Result<()>;
@@ -51,16 +73,15 @@ mod storage_stub {
 
         async fn get_data(storage: &StorageManager) -> crate::wallet::Result<Option<Self>> {
             log::debug!("get_wallet_data");
-            if let Some(mut builder) = storage.get::<Self>(WALLET_INDEXATION_KEY).await? {
-                log::debug!("get_wallet_data {builder:?}");
+            if let Some(data) = storage.get::<WalletData>(WALLET_INDEXATION_KEY).await? {
+                log::debug!("get_wallet_data {data:?}");
 
-                if let Some(secret_manager_dto) = storage.get(SECRET_MANAGER_KEY).await? {
-                    log::debug!("get_secret_manager {secret_manager_dto:?}");
+                let secret_manager_dto = storage.get(SECRET_MANAGER_KEY).await?;
+                log::debug!("get_secret_manager {secret_manager_dto:?}");
 
-                    let secret_manager = S::from_config(&secret_manager_dto)?;
-                    builder.secret_manager = Some(Arc::new(RwLock::new(secret_manager)));
-                }
-                Ok(Some(builder))
+                Ok(Some(data.to_builder(
+                    secret_manager_dto.map(|dto| S::from_config(&dto)).transpose()?,
+                )))
             } else {
                 Ok(None)
             }
@@ -77,9 +98,9 @@ mod storage_stub {
 
         async fn get_data(storage: &StorageManager) -> crate::wallet::Result<Option<Self>> {
             log::debug!("get_wallet_data");
-            let res = storage.get::<Self>(WALLET_INDEXATION_KEY).await?;
+            let res = storage.get::<WalletData>(WALLET_INDEXATION_KEY).await?;
             log::debug!("get_wallet_data {res:?}");
-            Ok(res)
+            Ok(res.map(|data| data.to_builder(None)))
         }
     }
 }

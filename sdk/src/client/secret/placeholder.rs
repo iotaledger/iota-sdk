@@ -5,5 +5,4 @@
 
 /// Secret manager that is only useful to prevent accidental address generation in a wallet
 /// that has an offline counterpart for address generation and signing.
-#[derive(Debug)]
 pub struct PlaceholderSecretManager;

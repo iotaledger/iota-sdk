@@ -59,7 +59,7 @@ use crate::{
 
 /// The secret manager interface.
 #[async_trait]
-pub trait SecretManage: Debug + Send + Sync {
+pub trait SecretManage: Send + Sync {
     type Error: std::error::Error + Send + Sync;
 
     /// Generates addresses.
