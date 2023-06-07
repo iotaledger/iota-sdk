@@ -11,6 +11,7 @@ import {
     Ed25519Address,
     IssuerFeature,
     GovernorAddressUnlockCondition,
+    utf8ToHex,
 } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
@@ -36,8 +37,7 @@ async function run() {
         const aliasOutput = await client.buildAliasOutput({
             aliasId:
                 '0x0000000000000000000000000000000000000000000000000000000000000000',
-            // `hello` hex encoded
-            stateMetadata: '0x68656c6c6f',
+            stateMetadata: utf8ToHex('hello'),
             unlockConditions: [
                 new StateControllerAddressUnlockCondition(
                     new Ed25519Address(hexAddress),
@@ -48,13 +48,11 @@ async function run() {
             ],
             features: [
                 new SenderFeature(new Ed25519Address(hexAddress)),
-                // `hello` hex encoded
-                new MetadataFeature('0x68656c6c6f'),
+                new MetadataFeature(utf8ToHex('hello')),
             ],
             immutableFeatures: [
                 new IssuerFeature(new Ed25519Address(hexAddress)),
-                // `hello` hex encoded
-                new MetadataFeature('0x68656c6c6f'),
+                new MetadataFeature(utf8ToHex('hello')),
             ],
         });
 

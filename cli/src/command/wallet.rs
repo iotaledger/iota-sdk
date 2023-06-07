@@ -129,32 +129,37 @@ pub async fn init_command(
     snapshot_path: &Path,
     parameters: InitParameters,
 ) -> Result<Wallet, Error> {
-    let password = get_password("Stronghold password", !snapshot_path.exists())?;
-    let secret_manager = SecretManager::Stronghold(
-        StrongholdSecretManager::builder()
-            .password(password)
-            .build(snapshot_path)?,
-    );
-    let wallet = Wallet::builder()
-        .with_secret_manager(secret_manager)
-        .with_client_options(ClientOptions::new().with_node(parameters.node_url.as_str())?)
-        .with_storage_path(storage_path.to_str().expect("invalid unicode"))
-        .with_coin_type(parameters.coin_type)
-        .finish()
-        .await?;
-
+    if storage_path.exists() {
+        return Err(Error::Miscellaneous(format!(
+            "cannot initialize: {} already exists",
+            storage_path.display()
+        )));
+    }
+    if snapshot_path.exists() {
+        return Err(Error::Miscellaneous(format!(
+            "cannot initialize: {} already exists",
+            snapshot_path.display()
+        )));
+    }
+    let password = get_password("Stronghold password", true)?;
     let mnemonic = match parameters.mnemonic_file_path {
         Some(path) => import_mnemonic(&path).await?,
         None => enter_or_generate_mnemonic().await?,
     };
 
-    if let SecretManager::Stronghold(secret_manager) = &mut *wallet.get_secret_manager().write().await {
-        secret_manager.store_mnemonic(mnemonic).await?;
-    } else {
-        panic!("cli-wallet only supports Stronghold-backed secret managers at the moment.");
-    }
+    let secret_manager = StrongholdSecretManager::builder()
+        .password(password)
+        .build(snapshot_path)?;
+    secret_manager.store_mnemonic(mnemonic).await?;
+    let secret_manager = SecretManager::Stronghold(secret_manager);
 
-    Ok(wallet)
+    Ok(Wallet::builder()
+        .with_secret_manager(secret_manager)
+        .with_client_options(ClientOptions::new().with_node(parameters.node_url.as_str())?)
+        .with_storage_path(storage_path.to_str().expect("invalid unicode"))
+        .with_coin_type(parameters.coin_type)
+        .finish()
+        .await?)
 }
 
 pub async fn migrate_stronghold_snapshot_v2_to_v3_command(path: Option<String>) -> Result<(), Error> {

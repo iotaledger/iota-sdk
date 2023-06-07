@@ -14,6 +14,7 @@ import {
     Ed25519Address,
     ExpirationUnlockCondition,
     TimelockUnlockCondition,
+    utf8ToHex,
 } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
@@ -51,10 +52,7 @@ async function run() {
         const basicOutputWithMetadata = await client.buildBasicOutput({
             amount: '1000000',
             unlockConditions: [addressUnlockCondition],
-            features: [
-                // "Hello, World!" hex encoded
-                new MetadataFeature('0x48656c6c6f2c20576f726c6421'),
-            ],
+            features: [new MetadataFeature(utf8ToHex('Hello World!'))],
         });
 
         console.log(JSON.stringify(basicOutputWithMetadata, null, 2));
@@ -102,7 +100,7 @@ async function run() {
         const basicOutputWithTag = await client.buildBasicOutput({
             amount: '1000000',
             unlockConditions: [addressUnlockCondition],
-            features: [new TagFeature('0x48656c6c6f2c20576f726c6421')],
+            features: [new TagFeature(utf8ToHex('Hello, World!'))],
         });
 
         console.log(JSON.stringify(basicOutputWithTag, null, 2));
