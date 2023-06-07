@@ -24,8 +24,8 @@ async fn main() -> Result<()> {
         .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let alias = var("ACCOUNT_ALIAS_1").unwrap();
-    let account = wallet.get_account(&alias).await?;
+    let alias = "Alice";
+    let account = wallet.get_account(alias).await?;
 
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;

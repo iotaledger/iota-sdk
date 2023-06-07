@@ -17,7 +17,7 @@ async function run() {
 
         // Get the account we generated with `01-create-wallet`
         const account = await manager.getAccount(
-            `${process.env.ACCOUNT_ALIAS_1}`,
+            "Alice",
         );
 
         // May want to ensure the account is synced before sending a transaction.
@@ -25,7 +25,7 @@ async function run() {
 
         if (balance.nfts.length == 0) {
             throw new Error(
-                `No NFT available in account '${process.env.ACCOUNT_ALIAS_1}'`,
+                `No NFT available in account 'Alice'`,
             );
         }
         // Get the first nft

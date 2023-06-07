@@ -39,7 +39,7 @@ async function run() {
 
         // Get the account we generated with `01-create-wallet`
         const account = await manager.getAccount(
-            `${process.env.ACCOUNT_ALIAS_1}`,
+            "Alice",
         );
 
         // May want to ensure the account is synced before sending a transaction.
@@ -54,7 +54,7 @@ async function run() {
             throw new Error(
                 `"Native token '${TOKEN_ID}' doesn't exist or there's not at least '${Number(
                     MIN_AVAILABLE_AMOUNT,
-                )}' tokens of it in account '${process.env.ACCOUNT_ALIAS_1}'"`,
+                )}' tokens of it in account 'Alice'"`,
             );
         }
 

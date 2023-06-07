@@ -48,8 +48,7 @@ async fn main() -> Result<()> {
     wallet.store_mnemonic(mnemonic).await?;
 
     // Create an account.
-    let alias = var("ACCOUNT_ALIAS_1").unwrap();
-    let account = wallet.create_account().with_alias(alias).finish().await?;
+    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
 
     // Get the first address and print it.
     let addresses = account.addresses().await?;

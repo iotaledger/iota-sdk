@@ -44,12 +44,11 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get or create first account
-    let alias1 = var("ACCOUNT_ALIAS_1").unwrap();
-    let _ = get_or_create_account(&wallet, &alias1).await?;
+    let _ = get_or_create_account(&wallet, "Alice").await?;
 
     // Get or create second account
-    let alias2 = var("ACCOUNT_ALIAS_2").unwrap();
-    let account2 = get_or_create_account(&wallet, &alias2).await?;
+    let alias2 = "Bob";
+    let account2 = get_or_create_account(&wallet, alias2).await?;
 
     let accounts = wallet.get_accounts().await?;
     println!("WALLET ACCOUNTS:");

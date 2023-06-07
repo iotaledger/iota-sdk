@@ -40,8 +40,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get account or create a new one
-    let alias = var("ACCOUNT_ALIAS_1").unwrap();
-    let account = get_or_create_account(&wallet, &alias).await?;
+    let account = get_or_create_account(&wallet, "Alice").await?;
 
     let addresses = generate_max_addresses(&account, MAX_ADDRESSES_TO_GENERATE).await?;
     let bech32_addresses = addresses

@@ -18,7 +18,7 @@ async function run() {
 
         // Get the account we generated with `01-create-wallet`
         const account = await manager.getAccount(
-            `${process.env.ACCOUNT_ALIAS_1}`,
+            "Alice",
         );
 
         // May want to ensure the account is synced before sending a transaction.
@@ -26,7 +26,7 @@ async function run() {
 
         if (balance.foundries.length == 0) {
             throw new Error(
-                `No Foundry available in account '${process.env.ACCOUNT_ALIAS_1}'`,
+                `No Foundry available in account 'Alice'`,
             );
         }
         // We try to destroy the first foundry in the account

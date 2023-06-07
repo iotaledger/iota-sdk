@@ -24,7 +24,7 @@ async function run() {
         });
 
         const account = await wallet.getAccount(
-            `${process.env.ACCOUNT_ALIAS_1}`,
+            "Alice",
         );
 
         await account.sync();

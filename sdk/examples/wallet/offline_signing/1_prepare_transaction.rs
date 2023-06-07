@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
     // Create a new account
     let account = wallet
         .create_account()
-        .with_alias(var("ACCOUNT_ALIAS_1").unwrap().to_string())
+        .with_alias("Alice".to_string())
         .with_addresses(addresses)
         .finish()
         .await?;

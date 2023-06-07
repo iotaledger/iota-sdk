@@ -25,7 +25,7 @@ async function run() {
 
         // Get the account we generated with `01-create-wallet`
         const account = await manager.getAccount(
-            `${process.env.ACCOUNT_ALIAS_1}`,
+            "Alice",
         );
 
         // May want to ensure the account is synced before sending a transaction.

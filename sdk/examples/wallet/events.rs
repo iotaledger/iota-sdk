@@ -53,12 +53,12 @@ async fn main() -> Result<()> {
         .await;
 
     // Get or create an account
-    let alias = var("ACCOUNT_ALIAS_1").unwrap();
-    let account = if let Ok(account) = wallet.get_account(&alias).await {
+    let alias = "Alice";
+    let account = if let Ok(account) = wallet.get_account(alias).await {
         account
     } else {
         println!("Creating account '{alias}'");
-        wallet.create_account().with_alias(alias).finish().await?
+        wallet.create_account().with_alias(alias.to_string()).finish().await?
     };
 
     let balance = account.sync(None).await?;

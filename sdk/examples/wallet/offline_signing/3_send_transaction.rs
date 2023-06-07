@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Create a new account
-    let account = wallet.get_account(var("ACCOUNT_ALIAS_1").unwrap()).await?;
+    let account = wallet.get_account("Alice").await?;
 
     let signed_transaction_data = read_signed_transaction_from_file(account.client()).await?;
 

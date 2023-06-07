@@ -46,8 +46,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get account or create a new one
-    let alias = var("ACCOUNT_ALIAS_1").unwrap();
-    let account = create_account(&wallet, &alias).await?;
+    let account = create_account(&wallet, "Alice").await?;
 
     let _ = ensure_enough_addresses(&account, ADDRESSES_TO_SPLIT_FUNDS).await?;
 

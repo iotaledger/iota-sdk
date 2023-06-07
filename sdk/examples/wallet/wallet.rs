@@ -41,8 +41,7 @@ async fn main() -> Result<()> {
 
     let wallet = restore_wallet().await?;
 
-    let alias = var("ACCOUNT_ALIAS_1").unwrap();
-    let account = get_or_create_account(&wallet, &alias).await?;
+    let account = get_or_create_account(&wallet, "Alice").await?;
     print_accounts(&wallet).await?;
 
     generate_addresses(&account, MAX_ADDRESSES_TO_GENERATE).await?;

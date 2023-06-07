@@ -44,8 +44,8 @@ async fn main() -> Result<()> {
         .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let alias = var("ACCOUNT_ALIAS_1").unwrap();
-    let account = wallet.get_account(&alias).await?;
+    let alias = "Alice";
+    let account = wallet.get_account(alias.to_string()).await?;
 
     let token_id = TokenId::from_str(TOKEN_ID)?;
 
