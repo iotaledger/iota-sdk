@@ -32,7 +32,7 @@ async fn create_account() -> Result<()> {
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
 
-    let wallet = options.build_manager().await?;
+    let wallet = options.build().await?;
 
     // create an account
     let response = wallet
@@ -90,7 +90,7 @@ async fn verify_accounts() -> Result<()> {
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
 
-    let wallet = options.build_manager().await?;
+    let wallet = options.build().await?;
 
     let mut account_details = BTreeMap::new();
     let mut handle_response = |response| match response {
@@ -198,7 +198,7 @@ async fn client_from_wallet() -> Result<()> {
         secret_manager: Some(serde_json::from_str(secret_manager).unwrap()),
     };
 
-    let wallet = options.build_manager().await?;
+    let wallet = options.build().await?;
 
     // create an account
     let response = wallet

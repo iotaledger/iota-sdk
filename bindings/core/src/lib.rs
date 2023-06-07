@@ -49,8 +49,8 @@ pub struct WalletOptions {
 }
 
 impl WalletOptions {
-    pub async fn build_manager(self) -> iota_sdk::wallet::Result<Wallet> {
-        log::debug!("build_manager {self:?}");
+    pub async fn build(self) -> iota_sdk::wallet::Result<Wallet> {
+        log::debug!("wallet options: {self:?}");
         let mut builder = Wallet::builder();
 
         #[cfg(feature = "storage")]

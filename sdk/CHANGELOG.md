@@ -95,6 +95,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `StorageManager` and wallet dynamic `StorageAdapter` are now private;
 - All public password-related methods now claim ownership over provided passwords and take care of zeroing the memory on drop;
 - Dto type conversion to represented type now always takes owned data;
+- Rename `WalletOptions::build_manager` to `build`;
 
 ### Removed
 
