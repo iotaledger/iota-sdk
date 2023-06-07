@@ -13,21 +13,47 @@ module.exports = {
   docs: [
     {
       type: 'doc',
-      id: 'welcome',
+      id:'about-the-iota-sdk',
+    },
+    {
+    type: 'category',
+    label: 'Getting Started',
+    items: [
+      {
+        type: 'doc',
+        id: 'explanations/account_approaches'
+      },
+      {
+        type: 'doc',
+        id:'explanations/testnet-and-test-tokens',
+      },
+    ]
     },
     {
       type: 'category',
-      label: 'Overview',
-      items: [
+      label: 'Getting Started',
+      items:[
         {
+          label: 'Rust',
           type: 'doc',
-          id: 'overview',
-          label: 'SDK Overview'
+          id: 'getting-started/rust',
+        },
+
+        {
+          label: 'Node.js',
+          type: 'doc',
+          id: 'getting-started/nodejs',
         },
         {
+          label: 'Python',
           type: 'doc',
-          id: 'explanations/account_approaches'
-        }
+          id:  'getting-started/python',
+        },
+        {
+          label: 'Wasm',
+          type: 'doc',
+          id:'getting-started/wasm',
+        },
       ]
     },
     {
