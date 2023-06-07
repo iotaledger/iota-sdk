@@ -31,9 +31,7 @@ async fn check_existing_db() -> Result<()> {
     );
 
     // Test if setting stronghold password still works
-    wallet
-        .set_stronghold_password("STRONGHOLD_PASSWORD".to_owned().into())
-        .await?;
+    wallet.set_stronghold_password("STRONGHOLD_PASSWORD".to_owned()).await?;
 
     assert_eq!(wallet.get_accounts().await?.len(), 1);
 

@@ -72,7 +72,7 @@ async fn backup_and_restore() -> Result<()> {
     restore_wallet
         .restore_backup(
             PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
-            "wrong password".to_owned().into(),
+            "wrong password".to_owned(),
             None,
             None,
         )

@@ -10,7 +10,7 @@ use crate::{
 
 impl Wallet {
     /// Sets the Stronghold password
-    pub async fn set_stronghold_password(&self, password: Password) -> crate::wallet::Result<()> {
+    pub async fn set_stronghold_password(&self, password: impl Into<Password> + Send) -> crate::wallet::Result<()> {
         if let SecretManager::Stronghold(stronghold) = &mut *self.secret_manager.write().await {
             stronghold.set_password(password).await?;
         }
@@ -20,8 +20,8 @@ impl Wallet {
     /// Change the Stronghold password to another one and also re-encrypt the values in the loaded snapshot with it.
     pub async fn change_stronghold_password(
         &self,
-        current_password: Password,
-        new_password: Password,
+        current_password: impl Into<Password> + Send,
+        new_password: impl Into<Password> + Send,
     ) -> crate::wallet::Result<()> {
         if let SecretManager::Stronghold(stronghold) = &mut *self.secret_manager.write().await {
             if let Err(err) = stronghold.set_password(current_password).await {

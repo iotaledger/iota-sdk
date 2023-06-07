@@ -22,7 +22,13 @@ use crate::{
 impl Wallet {
     /// Backup the wallet data in a Stronghold file
     /// stronghold_password must be the current one when Stronghold is used as SecretManager.
-    pub async fn backup(&self, backup_path: PathBuf, stronghold_password: Password) -> crate::wallet::Result<()> {
+    pub async fn backup(
+        &self,
+        backup_path: PathBuf,
+        stronghold_password: impl Into<Password> + Send,
+    ) -> crate::wallet::Result<()> {
+        let stronghold_password = stronghold_password.into();
+
         log::debug!("[backup] creating a stronghold backup");
         let secret_manager = self.secret_manager.read().await;
 
@@ -67,10 +73,12 @@ impl Wallet {
     pub async fn restore_backup(
         &self,
         backup_path: PathBuf,
-        stronghold_password: Password,
+        stronghold_password: impl Into<Password> + Send,
         ignore_if_coin_type_mismatch: Option<bool>,
         ignore_if_bech32_hrp_mismatch: Option<Hrp>,
     ) -> crate::wallet::Result<()> {
+        let stronghold_password = stronghold_password.into();
+
         log::debug!("[restore_backup] loading stronghold backup");
 
         if !backup_path.is_file() {

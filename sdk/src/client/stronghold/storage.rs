@@ -121,7 +121,7 @@ mod tests {
         fs::remove_file(snapshot_path).unwrap_or(());
 
         let stronghold = StrongholdAdapter::builder()
-            .password("drowssap".to_owned().into())
+            .password("drowssap".to_owned())
             .build(snapshot_path)
             .unwrap();
 

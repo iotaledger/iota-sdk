@@ -27,7 +27,7 @@ async fn stronghold_snapshot_v2_v3_migration() {
     setup(storage_path).unwrap();
 
     let error = StrongholdSecretManager::builder()
-        .password("current_password".to_owned().into())
+        .password("current_password".to_owned())
         .build("./tests/wallet/fixtures/v2.stronghold");
 
     assert!(matches!(
@@ -47,7 +47,7 @@ async fn stronghold_snapshot_v2_v3_migration() {
 
     let stronghold_secret_manager = SecretManager::Stronghold(
         StrongholdSecretManager::builder()
-            .password("new_password".to_owned().into())
+            .password("new_password".to_owned())
             .build("./tests/wallet/fixtures/v3.stronghold")
             .unwrap(),
     );
@@ -95,7 +95,7 @@ async fn stronghold_snapshot_v2_v3_migration() {
     let error = restore_manager
         .restore_backup(
             PathBuf::from("./tests/wallet/fixtures/v3.stronghold"),
-            "wrong_password".to_owned().into(),
+            "wrong_password".to_owned(),
             Some(false),
             None,
         )
@@ -125,7 +125,7 @@ async fn stronghold_snapshot_v2_v3_migration_same_path() {
     .unwrap();
 
     let error = StrongholdSecretManager::builder()
-        .password("current_password".to_owned().into())
+        .password("current_password".to_owned())
         .build("./tests/wallet/fixtures/v2-copy.stronghold");
 
     assert!(matches!(
@@ -144,7 +144,7 @@ async fn stronghold_snapshot_v2_v3_migration_same_path() {
     .unwrap();
 
     StrongholdSecretManager::builder()
-        .password("new_password".to_owned().into())
+        .password("new_password".to_owned())
         .build("./tests/wallet/fixtures/v2-copy.stronghold")
         .unwrap();
 
@@ -155,7 +155,7 @@ async fn stronghold_snapshot_v2_v3_migration_same_path() {
 #[tokio::test]
 async fn stronghold_snapshot_v2_v3_migration_with_backup() {
     let error = StrongholdSecretManager::builder()
-        .password("current_password".to_owned().into())
+        .password("current_password".to_owned())
         .build("./tests/wallet/fixtures/v2_with_backup.stronghold");
 
     assert!(matches!(
@@ -174,7 +174,7 @@ async fn stronghold_snapshot_v2_v3_migration_with_backup() {
     .unwrap();
 
     let stronghold_secret_manager = StrongholdSecretManager::builder()
-        .password("new_password".to_owned().into())
+        .password("new_password".to_owned())
         .build("./tests/wallet/fixtures/v3_with_backup.stronghold")
         .unwrap();
 

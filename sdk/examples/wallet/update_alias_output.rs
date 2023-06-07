@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(env::var("STRONGHOLD_PASSWORD").unwrap().into())
+        .set_stronghold_password(env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Replace with an AliasId

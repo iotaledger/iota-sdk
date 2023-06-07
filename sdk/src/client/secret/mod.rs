@@ -193,7 +193,7 @@ impl TryFrom<&SecretManagerDto> for SecretManager {
 
                 if let Some(password) = &stronghold_dto.password {
                     // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
-                    builder = builder.password(password.clone().into());
+                    builder = builder.password(password.clone());
                 }
 
                 if let Some(timeout) = &stronghold_dto.timeout {
