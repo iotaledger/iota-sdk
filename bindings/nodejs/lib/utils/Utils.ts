@@ -28,7 +28,7 @@ export class Utils {
     /**
      * Returns a hex encoded seed for a mnemonic.
      */
-    static mnemonicToHexSeed(mnemonic: string): HexEncodedString  {
+    static mnemonicToHexSeed(mnemonic: string): HexEncodedString {
         return callUtilsMethod({
             name: 'mnemonicToHexSeed',
             data: {
