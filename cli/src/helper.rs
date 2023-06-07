@@ -3,9 +3,9 @@
 
 use chrono::{DateTime, NaiveDateTime, Utc};
 use clap::Parser;
-use dialoguer::{console::Term, theme::ColorfulTheme, Input, Password, Select};
+use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use iota_sdk::{
-    client::verify_mnemonic,
+    client::{utils::Password, verify_mnemonic},
     wallet::{Account, Wallet},
 };
 use tokio::{
@@ -21,8 +21,8 @@ use crate::{
 
 const DEFAULT_MNEMONIC_FILE_PATH: &str = "./mnemonic.txt";
 
-pub fn get_password(prompt: &str, confirmation: bool) -> Result<String, Error> {
-    let mut password = Password::new();
+pub fn get_password(prompt: &str, confirmation: bool) -> Result<Password, Error> {
+    let mut password = dialoguer::Password::new();
 
     password.with_prompt(prompt);
 
@@ -30,7 +30,7 @@ pub fn get_password(prompt: &str, confirmation: bool) -> Result<String, Error> {
         password.with_confirmation("Confirm password", "Password mismatch");
     }
 
-    Ok(password.interact()?)
+    Ok(password.interact()?.into())
 }
 
 pub fn get_decision(prompt: &str) -> Result<bool, Error> {
@@ -86,13 +86,13 @@ pub async fn pick_account(wallet: &Wallet) -> Result<Option<Account>, Error> {
 }
 
 pub fn print_wallet_help() {
-    if let Err(err) = WalletCli::try_parse_from(vec!["Wallet:", "help"]) {
+    if let Err(err) = WalletCli::try_parse_from(["Wallet:", "help"]) {
         println!("{err}");
     }
 }
 
 pub fn print_account_help() {
-    if let Err(err) = AccountCli::try_parse_from(vec!["Account:", "help"]) {
+    if let Err(err) = AccountCli::try_parse_from(["Account:", "help"]) {
         println!("{err}");
     }
 }

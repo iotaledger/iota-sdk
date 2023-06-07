@@ -2,17 +2,22 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { callSecretManagerMethodAsync, createSecretManager } from '../bindings';
-import type {
+import {
     SecretManagerType,
     __SecretManagerMethods__,
-} from '../../types/secretManager/';
+} from '../types/secretManager';
 
 /** The MethodHandler which sends the commands to the Rust side. */
 export class SecretManagerMethodHandler {
     methodHandler: SecretManagerMethodHandler;
 
-    constructor(secretManager: SecretManagerType) {
-        this.methodHandler = createSecretManager(JSON.stringify(secretManager));
+    constructor(options: SecretManagerType | SecretManagerMethodHandler) {
+        // The rust secret manager object is not extensible
+        if (Object.isExtensible(options)) {
+            this.methodHandler = createSecretManager(JSON.stringify(options));
+        } else {
+            this.methodHandler = options as SecretManagerMethodHandler;
+        }
     }
 
     async callMethod(method: __SecretManagerMethods__): Promise<string> {

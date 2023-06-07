@@ -143,8 +143,8 @@ impl AliasOutputBuilder {
 
     ///
     #[inline(always)]
-    pub fn with_state_metadata(mut self, state_metadata: Vec<u8>) -> Self {
-        self.state_metadata = state_metadata;
+    pub fn with_state_metadata(mut self, state_metadata: impl Into<Vec<u8>>) -> Self {
+        self.state_metadata = state_metadata.into();
         self
     }
 
@@ -769,7 +769,8 @@ pub mod dto {
 
             if !value.state_metadata.is_empty() {
                 builder = builder.with_state_metadata(
-                    prefix_hex::decode(&value.state_metadata).map_err(|_| Error::InvalidField("state_metadata"))?,
+                    prefix_hex::decode::<Vec<_>>(&value.state_metadata)
+                        .map_err(|_| Error::InvalidField("state_metadata"))?,
                 );
             }
 

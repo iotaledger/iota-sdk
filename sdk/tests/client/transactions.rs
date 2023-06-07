@@ -4,8 +4,9 @@
 // These are E2E test samples, so they are ignored by default.
 
 use iota_sdk::{
-    client::{node_api::indexer::query_parameters::QueryParameter, Result},
+    client::{api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, Result},
     types::block::{
+        address::ToBech32Ext,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, OutputId},
         payload::{transaction::TransactionEssence, Payload},
     },
@@ -20,7 +21,9 @@ async fn send_basic_output() -> Result<()> {
 
     let token_supply = client.get_token_supply().await?;
 
-    let second_address = client.get_addresses(&secret_manager).with_range(1..2).get_raw().await?[0];
+    let second_address = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(1..2))
+        .await?[0];
 
     let output = BasicOutputBuilder::new_with_amount(1_000_000)
         .add_unlock_condition(AddressUnlockCondition::new(second_address))
@@ -29,7 +32,7 @@ async fn send_basic_output() -> Result<()> {
     let block = client
         .block()
         .with_secret_manager(&secret_manager)
-        .with_outputs(vec![output.clone()])?
+        .with_outputs([output.clone()])?
         .finish()
         .await?;
 
@@ -53,7 +56,7 @@ async fn send_basic_output() -> Result<()> {
 
     // output can be fetched from the second address
     let output_ids_response = client
-        .basic_output_ids(vec![
+        .basic_output_ids([
             QueryParameter::Address(second_address.to_bech32(bech32_hrp)),
             QueryParameter::HasExpiration(false),
             QueryParameter::HasTimelock(false),
@@ -61,7 +64,7 @@ async fn send_basic_output() -> Result<()> {
         ])
         .await?;
 
-    assert_eq!(output_ids_response.items, vec![output_id]);
+    assert_eq!(output_ids_response.items, [output_id]);
 
     Ok(())
 }

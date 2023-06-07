@@ -6,8 +6,8 @@ use std::collections::{HashMap, HashSet};
 use tokio::sync::RwLock;
 
 use crate::{
-    client::secret::{SecretManage, SecretManager},
-    types::block::address::{Address, Bech32Address},
+    client::{api::GetAddressesOptions, secret::SecretManager},
+    types::block::address::{Bech32Address, Hrp},
     wallet::{
         account::{types::AccountAddress, Account, AccountDetails},
         Error, Wallet,
@@ -18,7 +18,7 @@ use crate::{
 pub struct AccountBuilder {
     addresses: Option<Vec<AccountAddress>>,
     alias: Option<String>,
-    bech32_hrp: Option<String>,
+    bech32_hrp: Option<Hrp>,
     wallet: Wallet,
 }
 
@@ -47,7 +47,7 @@ impl AccountBuilder {
     }
 
     /// Set the bech32 HRP
-    pub fn with_bech32_hrp(mut self, bech32_hrp: impl Into<Option<String>>) -> Self {
+    pub fn with_bech32_hrp(mut self, bech32_hrp: impl Into<Option<Hrp>>) -> Self {
         self.bech32_hrp = bech32_hrp.into();
         self
     }
@@ -66,30 +66,22 @@ impl AccountBuilder {
             account_index
         );
 
-        let coin_type = self.wallet.coin_type.load(core::sync::atomic::Ordering::Relaxed);
-
-        // Check that the alias isn't already used for another account and that the coin type is the same for new and
-        // existing accounts
+        // Check that the alias isn't already used for another account
         for account in accounts.iter() {
             let account = account.details().await;
-            let existing_coin_type = account.coin_type;
-            if existing_coin_type != coin_type {
-                return Err(Error::InvalidCoinType {
-                    new_coin_type: coin_type,
-                    existing_coin_type,
-                });
-            }
             if account.alias().to_lowercase() == account_alias.to_lowercase() {
                 return Err(Error::AccountAliasAlreadyExists(account_alias));
             }
         }
+
+        let coin_type = self.wallet.coin_type.load(core::sync::atomic::Ordering::Relaxed);
 
         // If addresses are provided we will use them directly without the additional checks, because then we assume
         // that it's for offline signing and the secretManager can't be used
         let addresses = match &self.addresses {
             Some(addresses) => addresses.clone(),
             None => {
-                let mut bech32_hrp = self.bech32_hrp.clone();
+                let mut bech32_hrp = self.bech32_hrp;
                 if let Some(first_account) = accounts.first() {
                     let first_account_coin_type = *first_account.details().await.coin_type();
                     // Generate the first address of the first account and compare it to the stored address from the
@@ -99,7 +91,7 @@ impl AccountBuilder {
                         get_first_public_address(&self.wallet.secret_manager, first_account_coin_type, 0).await?;
                     let first_account_addresses = first_account.public_addresses().await;
 
-                    if first_account_public_address
+                    if first_account_public_address.inner
                         != first_account_addresses
                             .first()
                             .ok_or(Error::FailedToGetRemainder)?
@@ -114,7 +106,7 @@ impl AccountBuilder {
                     // Get bech32_hrp from address
                     if let Some(address) = first_account_addresses.first() {
                         if bech32_hrp.is_none() {
-                            bech32_hrp = Some(address.address.hrp.clone());
+                            bech32_hrp = Some(address.address.hrp);
                         }
                     }
                 }
@@ -131,7 +123,7 @@ impl AccountBuilder {
                     get_first_public_address(&self.wallet.secret_manager, coin_type, account_index).await?;
 
                 let first_public_account_address = AccountAddress {
-                    address: Bech32Address::new(bech32_hrp, first_public_address)?,
+                    address: Bech32Address::new(bech32_hrp, first_public_address),
                     key_index: 0,
                     internal: false,
                     used: false,
@@ -172,10 +164,15 @@ pub(crate) async fn get_first_public_address(
     secret_manager: &RwLock<SecretManager>,
     coin_type: u32,
     account_index: u32,
-) -> crate::wallet::Result<Address> {
+) -> crate::wallet::Result<Bech32Address> {
     Ok(secret_manager
         .read()
         .await
-        .generate_addresses(coin_type, account_index, 0..1, None)
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_coin_type(coin_type)
+                .with_account_index(account_index)
+                .with_range(0..1),
+        )
         .await?[0])
 }

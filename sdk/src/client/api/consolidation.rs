@@ -1,13 +1,11 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use super::GetAddressesOptions;
 use crate::{
-    client::{
-        api::GetAddressesBuilderOptions, node_api::indexer::query_parameters::QueryParameter, secret::SecretManager,
-        Client, Result,
-    },
+    client::{node_api::indexer::query_parameters::QueryParameter, secret::SecretManager, Client, Result},
     types::block::{
-        address::Address,
+        address::Bech32Address,
         input::{UtxoInput, INPUT_COUNT_MAX},
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder},
     },
@@ -19,20 +17,16 @@ impl Client {
     pub async fn consolidate_funds(
         &self,
         secret_manager: &SecretManager,
-        address_builder_options: GetAddressesBuilderOptions,
-    ) -> Result<String> {
+        options: GetAddressesOptions,
+    ) -> Result<Bech32Address> {
         let token_supply = self.get_token_supply().await?;
-        let mut last_transfer_index = address_builder_options.range.as_ref().unwrap_or(&(0..1)).start;
+        let mut last_transfer_index = options.range.start;
         // use the start index as offset
         let offset = last_transfer_index;
 
-        let addresses = self
-            .get_addresses(secret_manager)
-            .set_options(address_builder_options)?
-            .finish()
-            .await?;
+        let addresses = secret_manager.generate_ed25519_addresses(options).await?;
 
-        let consolidation_address = addresses[0].clone();
+        let consolidation_address = addresses[0];
 
         'consolidation: loop {
             let mut block_ids = Vec::new();
@@ -44,15 +38,15 @@ impl Client {
 
                 // Get output ids of outputs that can be controlled by this address without further unlock constraints
                 let output_ids_response = self
-                    .basic_output_ids(vec![
-                        QueryParameter::Address(address.to_string()),
+                    .basic_output_ids([
+                        QueryParameter::Address(*address),
                         QueryParameter::HasExpiration(false),
                         QueryParameter::HasTimelock(false),
                         QueryParameter::HasStorageDepositReturn(false),
                     ])
                     .await?;
 
-                let basic_outputs_responses = self.get_outputs(output_ids_response.items).await?;
+                let basic_outputs_responses = self.get_outputs(&output_ids_response.items).await?;
 
                 if !basic_outputs_responses.is_empty() {
                     // If we reach the same index again
@@ -67,8 +61,7 @@ impl Client {
 
                 let outputs_chunks = basic_outputs_responses.chunks(INPUT_COUNT_MAX.into());
 
-                let (bech32_hrp, consolidation_address) = Address::try_from_bech32_with_hrp(&consolidation_address)?;
-                self.bech32_hrp_matches(&bech32_hrp).await?;
+                self.bech32_hrp_matches(consolidation_address.hrp()).await?;
 
                 for chunk in outputs_chunks {
                     let mut block_builder = self.block().with_secret_manager(secret_manager);
@@ -92,7 +85,7 @@ impl Client {
 
                     let block = block_builder
                         .with_input_range(index..index + 1)
-                        .with_outputs(vec![consolidation_output])?
+                        .with_outputs([consolidation_output])?
                         .with_initial_address_index(0)
                         .finish()
                         .await?;

@@ -5,10 +5,11 @@
 
 use iota_sdk::{
     client::{
-        bech32_to_hex, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
-        secret::SecretManager, Client,
+        api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
+        request_funds_from_faucet, secret::SecretManager, Client,
     },
     types::block::{
+        address::ToBech32Ext,
         output::OutputId,
         payload::{transaction::TransactionId, Payload},
         BlockId,
@@ -35,7 +36,7 @@ async fn setup_tagged_data_block() -> BlockId {
 }
 
 pub fn setup_secret_manager() -> SecretManager {
-    SecretManager::try_from_hex_seed(DEFAULT_DEVELOPMENT_SEED).unwrap()
+    SecretManager::try_from_hex_seed(DEFAULT_DEVELOPMENT_SEED.to_owned()).unwrap()
 }
 
 // Sends a transaction block to the node to test against it.
@@ -43,21 +44,26 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
     let client = setup_client_with_node_health_ignored().await;
     let secret_manager = setup_secret_manager();
 
-    let addresses = client
-        .get_addresses(&secret_manager)
-        .with_range(0..2)
-        .get_raw()
+    let addresses = secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::from_client(&client)
+                .await
+                .unwrap()
+                .with_range(0..2),
+        )
         .await
         .unwrap();
-    let address = addresses[0].to_bech32(client.get_bech32_hrp().await.unwrap());
-    println!("{}", request_funds_from_faucet(FAUCET_URL, &address,).await.unwrap());
+    println!(
+        "{}",
+        request_funds_from_faucet(FAUCET_URL, &addresses[0]).await.unwrap()
+    );
 
     // Continue only after funds are received
     for _ in 0..30 {
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let output_ids_response = client
-            .basic_output_ids(vec![
-                QueryParameter::Address(address.to_string()),
+            .basic_output_ids([
+                QueryParameter::Address(addresses[0]),
                 QueryParameter::HasExpiration(false),
                 QueryParameter::HasTimelock(false),
                 QueryParameter::HasStorageDepositReturn(false),
@@ -75,7 +81,7 @@ async fn setup_transaction_block() -> (BlockId, TransactionId) {
         .with_secret_manager(&secret_manager)
         .with_output_hex(
             // Send funds back to the sender.
-            &bech32_to_hex(&addresses[1].to_bech32(client.get_bech32_hrp().await.unwrap())).unwrap(),
+            &bech32_to_hex(addresses[1].to_bech32(client.get_bech32_hrp().await.unwrap())).unwrap(),
             // The amount to spend, cannot be zero.
             1_000_000,
         )
@@ -186,21 +192,25 @@ async fn test_get_address_outputs() {
     let client = setup_client_with_node_health_ignored().await;
     let secret_manager = setup_secret_manager();
 
-    let address = client
-        .get_addresses(&secret_manager)
-        .with_range(0..1)
-        .get_raw()
+    let address = secret_manager
+        .generate_ed25519_addresses(
+            GetAddressesOptions::from_client(&client)
+                .await
+                .unwrap()
+                .with_range(0..1),
+        )
         .await
-        .unwrap()[0];
+        .unwrap()
+        .into_iter()
+        .next()
+        .unwrap();
 
     let output_ids_response = client
-        .basic_output_ids(vec![QueryParameter::Address(
-            address.to_bech32(&client.get_bech32_hrp().await.unwrap()),
-        )])
+        .basic_output_ids([QueryParameter::Address(address)])
         .await
         .unwrap();
 
-    let r = client.get_outputs(output_ids_response.items).await.unwrap();
+    let r = client.get_outputs(&output_ids_response.items).await.unwrap();
 
     println!("{r:#?}");
 }
@@ -353,4 +363,60 @@ async fn test_get_included_block() {
         .unwrap();
 
     println!("{r:#?}");
+}
+
+#[ignore]
+#[tokio::test]
+#[cfg(feature = "mqtt")]
+async fn test_mqtt() {
+    use iota_sdk::client::mqtt::{MqttEvent, MqttPayload, Topic};
+    use tokio::sync::mpsc::error::TrySendError;
+
+    const BUFFER_SIZE: usize = 10;
+
+    let client = setup_client_with_node_health_ignored().await;
+
+    let (tx, mut rx) = tokio::sync::mpsc::channel(BUFFER_SIZE);
+
+    client
+        .subscribe(
+            [
+                Topic::new("milestone-info/latest").unwrap(),
+                Topic::new("blocks").unwrap(),
+            ],
+            move |evt| {
+                match &evt.payload {
+                    MqttPayload::Block(_) => {
+                        assert_eq!(evt.topic, "blocks");
+                    }
+                    MqttPayload::Json(_) => {
+                        assert_eq!(evt.topic, "milestone-info/latest");
+                    }
+                    _ => panic!("unexpected mqtt payload type: {:?}", evt),
+                }
+                match tx.try_send(()) {
+                    Ok(_) | Err(TrySendError::Full(_)) => (),
+                    e => e.unwrap(),
+                }
+            },
+        )
+        .await
+        .unwrap();
+
+    // Wait for messages to come through
+    for i in 0..BUFFER_SIZE {
+        tokio::select! {
+            _ = rx.recv() => {
+                if i == 7 {
+                    client.unsubscribe([Topic::new("blocks").unwrap()]).await.unwrap();
+                }
+            }
+            _ = async {
+                client.mqtt_event_receiver().await.wait_for(|msg| *msg == MqttEvent::Disconnected).await.unwrap();
+            } => {
+                panic!("mqtt disconnected");
+            }
+        }
+    }
+    client.subscriber().disconnect().await.unwrap();
 }

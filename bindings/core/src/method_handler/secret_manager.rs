@@ -4,30 +4,33 @@
 use crypto::keys::slip10::Chain;
 use iota_sdk::{
     client::{
-        api::{GetAddressesBuilder, PreparedTransactionData},
+        api::PreparedTransactionData,
         secret::{SecretManage, SecretManager},
     },
     types::block::{payload::dto::PayloadDto, signature::dto::Ed25519SignatureDto, unlock::Unlock},
 };
+use tokio::sync::RwLock;
 
 use crate::{method::SecretManagerMethod, response::Response, Result};
 
 /// Call a secret manager method.
 pub(crate) async fn call_secret_manager_method_internal(
-    secret_manager: &SecretManager,
+    secret_manager: &RwLock<SecretManager>,
     method: SecretManagerMethod,
 ) -> Result<Response> {
+    let secret_manager = secret_manager.read().await;
     let response = match method {
-        SecretManagerMethod::GenerateAddresses { options } => {
-            let addresses = GetAddressesBuilder::new(secret_manager)
-                .set_options(options)?
-                .finish()
-                .await?;
-            Response::GeneratedAddresses(addresses)
+        SecretManagerMethod::GenerateEd25519Addresses { options } => {
+            let addresses = secret_manager.generate_ed25519_addresses(options).await?;
+            Response::GeneratedEd25519Addresses(addresses)
+        }
+        SecretManagerMethod::GenerateEvmAddresses { options } => {
+            let addresses = secret_manager.generate_evm_addresses(options).await?;
+            Response::GeneratedEvmAddresses(addresses)
         }
         #[cfg(feature = "ledger_nano")]
         SecretManagerMethod::GetLedgerNanoStatus => {
-            if let SecretManager::LedgerNano(secret_manager) = secret_manager {
+            if let SecretManager::LedgerNano(secret_manager) = &*secret_manager {
                 Response::LedgerNanoStatus(secret_manager.get_ledger_nano_status().await)
             } else {
                 return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
@@ -61,9 +64,17 @@ pub(crate) async fn call_secret_manager_method_internal(
                 .await?;
             Response::Ed25519Signature(Ed25519SignatureDto::from(&signature))
         }
+        SecretManagerMethod::SignEvm { message, chain } => {
+            let msg: Vec<u8> = prefix_hex::decode(message)?;
+            let (public_key, signature) = secret_manager.sign_evm(&msg, &Chain::from_u32(chain)).await?;
+            Response::EvmSignature {
+                public_key: prefix_hex::encode(public_key.to_bytes()),
+                signature: prefix_hex::encode(signature.to_bytes()),
+            }
+        }
         #[cfg(feature = "stronghold")]
         SecretManagerMethod::StoreMnemonic { mnemonic } => {
-            if let SecretManager::Stronghold(secret_manager) = secret_manager {
+            if let SecretManager::Stronghold(secret_manager) = &*secret_manager {
                 secret_manager.store_mnemonic(mnemonic).await?;
                 Response::Ok
             } else {

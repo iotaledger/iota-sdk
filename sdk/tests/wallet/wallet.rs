@@ -10,10 +10,11 @@ use iota_sdk::{
 };
 use iota_sdk::{
     client::{
-        constants::IOTA_COIN_TYPE,
+        constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    wallet::{ClientOptions, Result, Wallet},
+    types::block::address::{Bech32Address, ToBech32Ext},
+    wallet::{ClientOptions, Error, Result, Wallet},
 };
 
 use crate::wallet::common::{make_wallet, setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL, NODE_OTHER};
@@ -37,6 +38,13 @@ async fn update_client_options() -> Result<()> {
         .set_client_options(ClientOptions::new().with_node(NODE_LOCAL)?)
         .await?;
 
+    let client_options = wallet.client_options().await;
+    assert!(client_options.node_manager_builder.nodes.contains(&node_dto_new));
+    assert!(!client_options.node_manager_builder.nodes.contains(&node_dto_old));
+
+    // The client options are also updated in the database and available the next time
+    drop(wallet);
+    let wallet = make_wallet(storage_path, None, None).await?;
     let client_options = wallet.client_options().await;
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto_new));
     assert!(!client_options.node_manager_builder.nodes.contains(&node_dto_old));
@@ -84,24 +92,41 @@ async fn changed_coin_type() -> Result<()> {
     drop(_account);
     drop(wallet);
 
-    // Recreate Wallet with same mnemonic
-    let secret_manager2 = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC)?;
-    let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::Mnemonic(secret_manager2))
+    let err = Wallet::builder()
+        .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
+            DEFAULT_MNEMONIC,
+        )?))
         .with_coin_type(IOTA_COIN_TYPE)
         .with_storage_path(storage_path)
         .finish()
-        .await?;
+        .await;
 
-    // Generating a new account needs to return an error, because a different coin type was set and we require all
-    // accounts to have the same coin type
+    // Building the wallet with another coin type needs to return an error, because a different coin type was used in
+    // the existing account
+    assert!(matches!(
+        err,
+        Err(Error::InvalidCoinType {
+            new_coin_type: IOTA_COIN_TYPE,
+            existing_coin_type: SHIMMER_COIN_TYPE
+        })
+    ));
+
+    // Building the wallet with the same coin type still works
+    let wallet = Wallet::builder()
+        .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
+            DEFAULT_MNEMONIC,
+        )?))
+        .with_storage_path(storage_path)
+        .finish()
+        .await?;
+    // Also still possible to create a new account
     assert!(
         wallet
             .create_account()
             .with_alias("Bob".to_string())
             .finish()
             .await
-            .is_err()
+            .is_ok()
     );
 
     tear_down(storage_path)
@@ -117,7 +142,7 @@ async fn shimmer_coin_type() -> Result<()> {
 
     // Creating a new account with providing a coin type will use the Shimmer coin type with shimmer testnet bech32 hrp
     assert_eq!(
-        &account.addresses().await?[0].address().as_ref().to_bech32("smr"),
+        Bech32Address::try_new("smr", account.addresses().await?[0].address())?.to_string(),
         // Address generated with bip32 path: [44, 4219, 0, 0, 0]
         "smr1qq724zgvdujt3jdcd3xzsuqq7wl9pwq3dvsa5zvx49rj9tme8cat65xq7jz"
     );
@@ -149,7 +174,7 @@ async fn iota_coin_type() -> Result<()> {
 
     // Creating a new account with providing a coin type will use the iota coin type with shimmer testnet bech32 hrp
     assert_eq!(
-        &account.addresses().await?[0].address().as_ref().to_bech32("smr"),
+        Bech32Address::try_new("smr", account.addresses().await?[0].address())?.to_string(),
         // Address generated with bip32 path: [44, 4218, 0, 0, 0]
         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
     );
@@ -177,10 +202,10 @@ async fn wallet_address_generation() -> Result<()> {
     }
     let wallet = wallet_builder.finish().await?;
 
-    let address = wallet.generate_address(0, 0, None).await?;
+    let address = wallet.generate_ed25519_address(0, 0, None).await?;
 
     assert_eq!(
-        &address.to_bech32("smr"),
+        address.to_bech32_unchecked("smr"),
         // Address generated with bip32 path: [44, 4218, 0, 0, 0]
         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
     );
@@ -190,7 +215,7 @@ async fn wallet_address_generation() -> Result<()> {
     #[cfg(feature = "stronghold")]
     {
         let secret_manager = StrongholdSecretManager::builder()
-            .password("some_hopefully_secure_password")
+            .password("some_hopefully_secure_password".to_owned())
             .build("test-storage/wallet_address_generation/test.stronghold")?;
         secret_manager.store_mnemonic(DEFAULT_MNEMONIC.to_string()).await?;
 
@@ -206,10 +231,10 @@ async fn wallet_address_generation() -> Result<()> {
         }
         let wallet = wallet_builder.finish().await?;
 
-        let address = wallet.generate_address(0, 0, None).await?;
+        let address = wallet.generate_ed25519_address(0, 0, None).await?;
 
         assert_eq!(
-            &address.to_bech32("smr"),
+            address.to_bech32_unchecked("smr"),
             // Address generated with bip32 path: [44, 4218, 0, 0, 0]
             "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
         );

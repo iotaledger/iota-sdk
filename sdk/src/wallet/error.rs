@@ -8,7 +8,7 @@ use serde::{
     Serialize,
 };
 
-use crate::types::block::payload::transaction::TransactionId;
+use crate::types::block::{address::Bech32Address, payload::transaction::TransactionId};
 
 /// The wallet error type.
 #[derive(Debug, thiserror::Error)]
@@ -21,7 +21,7 @@ pub enum Error {
     AccountNotFound(String),
     /// Address not found in account
     #[error("address {0} not found in account")]
-    AddressNotFoundInAccount(String),
+    AddressNotFoundInAccount(Bech32Address),
     /// Errors during backup creation or restoring
     #[error("backup failed {0}")]
     Backup(&'static str),
@@ -149,7 +149,16 @@ impl From<crate::client::Error> for Error {
 
 impl From<crate::client::api::input_selection::Error> for Error {
     fn from(error: crate::client::api::input_selection::Error) -> Self {
-        Self::Client(Box::new(crate::client::Error::InputSelection(error)))
+        // Map "same" error so it's easier to handle
+        match error {
+            crate::client::api::input_selection::Error::InsufficientAmount { found, required } => {
+                Self::InsufficientFunds {
+                    available: found,
+                    required,
+                }
+            }
+            _ => Self::Client(Box::new(crate::client::Error::InputSelection(error))),
+        }
     }
 }
 

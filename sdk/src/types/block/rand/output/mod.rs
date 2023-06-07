@@ -3,11 +3,14 @@
 
 /// Module providing random feature generation utilities.
 pub mod feature;
+/// Module providing random output metadata generation utilities.
+pub mod metadata;
 /// Module providing random unlock condition generation utilities.
 pub mod unlock_condition;
 
 use primitive_types::U256;
 
+pub use self::metadata::rand_output_metadata;
 use crate::types::block::{
     output::{
         unlock_condition::ImmutableAliasAddressUnlockCondition, AliasId, AliasOutput, BasicOutput, FoundryOutput,

@@ -7,8 +7,10 @@ use crate::{
     types::block::output::{AliasOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme},
     wallet::{
         account::{
-            operations::transaction::high_level::minting::mint_native_token::MintTokenTransaction, Account,
-            TransactionOptions,
+            operations::transaction::high_level::minting::mint_native_token::{
+                MintTokenTransaction, PreparedMintTokenTransaction,
+            },
+            Account, TransactionOptions,
         },
         Error,
     },
@@ -34,6 +36,25 @@ impl Account {
         mint_amount: U256,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<MintTokenTransaction> {
+        let prepared = self
+            .prepare_increase_native_token_supply(token_id, mint_amount, options)
+            .await?;
+        let transaction = self.sign_and_submit_transaction(prepared.transaction).await?;
+
+        Ok(MintTokenTransaction {
+            token_id: prepared.token_id,
+            transaction,
+        })
+    }
+
+    /// Function to prepare the transaction for
+    /// [Account.increase_native_token_supply()](crate::account::Account.increase_native_token_supply)
+    pub async fn prepare_increase_native_token_supply(
+        &self,
+        token_id: TokenId,
+        mint_amount: U256,
+        options: impl Into<Option<TransactionOptions>> + Send,
+    ) -> crate::wallet::Result<PreparedMintTokenTransaction> {
         log::debug!("[TRANSACTION] increase_native_token_supply");
 
         let account_details = self.details().await;
@@ -105,14 +126,14 @@ impl Account {
         let new_foundry_output_builder =
             FoundryOutputBuilder::from(&foundry_output).with_token_scheme(updated_token_scheme);
 
-        let outputs = vec![
+        let outputs = [
             new_alias_output_builder.finish_output(token_supply)?,
             new_foundry_output_builder.finish_output(token_supply)?,
             // Native Tokens will be added automatically in the remainder output in try_select_inputs()
         ];
 
-        self.send(outputs, options)
+        self.prepare_transaction(outputs, options)
             .await
-            .map(|transaction| MintTokenTransaction { token_id, transaction })
+            .map(|transaction| PreparedMintTokenTransaction { token_id, transaction })
     }
 }

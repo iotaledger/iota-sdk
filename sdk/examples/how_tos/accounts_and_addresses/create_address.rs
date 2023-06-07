@@ -21,10 +21,10 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let address = account.generate_addresses(1, None).await?;
+    let address = account.generate_ed25519_addresses(1, None).await?;
     println!("Generated address: {}", address[0].address());
 
     Ok(())

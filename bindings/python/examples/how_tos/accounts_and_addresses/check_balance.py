@@ -8,8 +8,8 @@ wallet = Wallet('./alice-database')
 account = wallet.get_account('Alice')
 
 # Sync account with the node
-_response = account.sync()
+_balance = account.sync()
 
 # Just calculate the balance with the known state
 balance = account.get_balance()
-print(f'AccountBalance {json.dumps(balance, indent=4)}')
+print(f'Balance {json.dumps(balance, indent=4)}')

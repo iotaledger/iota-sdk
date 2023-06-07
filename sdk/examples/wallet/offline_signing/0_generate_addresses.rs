@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let secret_manager = StrongholdSecretManager::builder()
-        .password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .build("examples/wallet/offline_signing/offline_signing.stronghold")?;
     // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
     let mnemonic = std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();
@@ -51,7 +51,7 @@ async fn main() -> Result<()> {
     let account = wallet
         .create_account()
         .with_alias("Alice".to_string())
-        .with_bech32_hrp(SHIMMER_BECH32_HRP.to_string())
+        .with_bech32_hrp(SHIMMER_BECH32_HRP)
         .finish()
         .await?;
 

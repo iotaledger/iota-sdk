@@ -4,6 +4,7 @@
 package org.iota.types;
 
 import org.iota.types.ids.OutputId;
+
 public class AddressWithUnspentOutputs extends AbstractObject {
 
     /// The address.
@@ -31,5 +32,3 @@ public class AddressWithUnspentOutputs extends AbstractObject {
         return output_ids;
     }
 }
-
-

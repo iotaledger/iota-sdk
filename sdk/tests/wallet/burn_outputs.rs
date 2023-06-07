@@ -22,14 +22,10 @@ async fn mint_and_burn_nft() -> Result<()> {
     let wallet = make_wallet(storage_path, None, None).await?;
     let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
-    let nft_options = vec![MintNftParams {
-        address: Some(account.addresses().await?[0].address().to_string()),
-        sender: None,
-        metadata: Some(b"some nft metadata".to_vec()),
-        tag: None,
-        issuer: None,
-        immutable_metadata: Some(b"some immutable nft metadata".to_vec()),
-    }];
+    let nft_options = [MintNftParams::new()
+        .with_address(*account.addresses().await?[0].address())
+        .with_metadata(b"some nft metadata".to_vec())
+        .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
 
     let transaction = account.mint_nfts(nft_options, None).await.unwrap();
     account
@@ -70,20 +66,18 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
     let token_supply = account_0.client().get_token_supply().await?;
 
     let amount = 1_000_000;
-    let outputs = vec![
-        NftOutputBuilder::new_with_amount(amount, NftId::null())
-            .with_unlock_conditions(vec![
-                UnlockCondition::Address(AddressUnlockCondition::new(
-                    *account_0.addresses().await?[0].address().as_ref(),
-                )),
-                // immediately expired to account_1
-                UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    *account_1.addresses().await?[0].address().as_ref(),
-                    1,
-                )?),
-            ])
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [NftOutputBuilder::new_with_amount(amount, NftId::null())
+        .with_unlock_conditions([
+            UnlockCondition::Address(AddressUnlockCondition::new(
+                *account_0.addresses().await?[0].address().as_ref(),
+            )),
+            // immediately expired to account_1
+            UnlockCondition::Expiration(ExpirationUnlockCondition::new(
+                *account_1.addresses().await?[0].address().as_ref(),
+                1,
+            )?),
+        ])
+        .finish_output(token_supply)?];
 
     let transaction = account_0.send(outputs, None).await?;
     account_0
@@ -296,11 +290,9 @@ async fn mint_and_burn_nft_with_alias() -> Result<()> {
         .await?;
     account.sync(None).await?;
 
-    let nft_options = vec![MintNftParams {
-        metadata: Some(b"some nft metadata".to_vec()),
-        immutable_metadata: Some(b"some immutable nft metadata".to_vec()),
-        ..Default::default()
-    }];
+    let nft_options = [MintNftParams::new()
+        .with_metadata(b"some nft metadata".to_vec())
+        .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
     let nft_tx = account.mint_nfts(nft_options, None).await.unwrap();
     account
         .retry_transaction_until_included(&nft_tx.transaction_id, None, None)

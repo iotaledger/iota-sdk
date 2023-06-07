@@ -7,11 +7,14 @@
 
 use iota_sdk::{
     client::{
-        api::input_selection::Burn, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
-        secret::SecretManager, Client, Result,
+        api::{input_selection::Burn, GetAddressesOptions},
+        node_api::indexer::query_parameters::QueryParameter,
+        request_funds_from_faucet,
+        secret::SecretManager,
+        Client, Result,
     },
     types::block::{
-        address::AliasAddress,
+        address::{AliasAddress, ToBech32Ext},
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
             unlock_condition::{
@@ -45,11 +48,10 @@ async fn main() -> Result<()> {
 
     let token_supply = client.get_token_supply().await?;
 
-    let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
-    println!(
-        "{}",
-        request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?
-    );
+    let address = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .await?[0];
+    println!("{}", request_funds_from_faucet(&faucet_url, &address).await?);
     tokio::time::sleep(std::time::Duration::from_secs(20)).await;
 
     //////////////////////////////////
@@ -63,7 +65,7 @@ async fn main() -> Result<()> {
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
 
-    let outputs = vec![alias_output_builder.clone().finish_output(token_supply)?];
+    let outputs = [alias_output_builder.clone().finish_output(token_supply)?];
 
     let block = client
         .block()
@@ -92,7 +94,7 @@ async fn main() -> Result<()> {
         token_scheme.kind(),
     );
     let token_id = TokenId::from(foundry_id);
-    let outputs = vec![
+    let outputs = [
         alias_output_builder
             .clone()
             .with_amount(1_000_000)
@@ -133,7 +135,7 @@ async fn main() -> Result<()> {
 
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
     let foundry_output_id = get_foundry_output_id(block.payload().unwrap())?;
-    let outputs = vec![
+    let outputs = [
         alias_output_builder
             .clone()
             .with_amount(1_000_000)
@@ -170,7 +172,7 @@ async fn main() -> Result<()> {
 
     let alias_output_id = get_alias_output_id(block.payload().unwrap())?;
     let foundry_output_id = get_foundry_output_id(block.payload().unwrap())?;
-    let outputs = vec![
+    let outputs = [
         alias_output_builder
             .clone()
             .with_amount(57_700)
@@ -187,7 +189,7 @@ async fn main() -> Result<()> {
 
     // get additional input for the new basic output
     let output_ids_response = client
-        .basic_output_ids(vec![QueryParameter::Address(
+        .basic_output_ids([QueryParameter::Address(
             address.to_bech32(client.get_bech32_hrp().await?),
         )])
         .await?;
@@ -209,12 +211,10 @@ async fn main() -> Result<()> {
     //////////////////////////////////
 
     let basic_output_id = get_basic_output_id_with_native_tokens(block.payload().unwrap())?;
-    let outputs = vec![
-        basic_output_builder
-            .clone()
-            .add_native_token(NativeToken::new(token_id, U256::from(50u8))?)
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [basic_output_builder
+        .clone()
+        .add_native_token(NativeToken::new(token_id, U256::from(50u8))?)
+        .finish_output(token_supply)?];
 
     let block = client
         .block()
@@ -234,11 +234,9 @@ async fn main() -> Result<()> {
     //////////////////////////////////
 
     let basic_output_id = get_basic_output_id_with_native_tokens(block.payload().unwrap())?;
-    let outputs = vec![
-        basic_output_builder
-            .add_native_token(NativeToken::new(token_id, U256::from(30u8))?)
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [basic_output_builder
+        .add_native_token(NativeToken::new(token_id, U256::from(30u8))?)
+        .finish_output(token_supply)?];
 
     let block = client
         .block()

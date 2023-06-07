@@ -31,6 +31,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `OutputWithMetadata::{into_output, into_metadata}` methods;
 - Storage and Backup migration;
 - `types::block::Error::InvalidFoundryZeroSerialNumber` variant;
+- `Hrp` type to represent a valid bech32 human-readable part;
+- Multiple prepare methods returning `PreparedTransactionData`: `prepare_consolidate_outputs`, `prepare_vote`, `prepare_stop_participating`, `prepare_increase_voting_power`, `prepare_decrease_voting_power`, `prepare_decrease_native_token_supply` and `prepare_burn`;
+- Multiple prepare methods returning `PreparedMintTokenTransaction`: `prepare_mint_native_token` and `prepare_increase_native_token_supply`;
+- Stronghold snapshot migration from v2 to v3;
+- `SecretManage::sign_evm`;
+- `Account::addresses_balance` method accepting addresses to get balance for;
+- `Wallet::get_secret_manager` method;
+- `Password` type which is `Zeroize` and `ZeroizeOnDrop`;
 
 ### Changed
 
@@ -49,6 +57,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All `Node` related errors have been moved from the client error to a newly created `client::node_api::Error`;
 - MQTT connections to a node using https will now use wss/tls with native certificates;
 - `ClientBuilder::finish` is now async;
+- Features and UnlockConditions that take an `Address` now take `impl Into<Address>`;
+- Functions that accepted a string bech32 address now accept a `Bech32Address`;
+- Functions that accepted a string bech32 HRP now accept an `Hrp`;
 - `Account::read` and `write` now accessible via `details` and `details_mut`;
 - `Wallet::emit_test_event` no longer returns a `Result`;
 - `Client`, `Wallet`, and `Account` fns updated to reflect internal reorganization;
@@ -62,7 +73,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename `AccountInner::get_incoming_transaction_data` to `get_incoming_transaction`;
 - `AccountInner::{incoming_transactions, transactions, pending_transactions}` don't return a `Result` anymore;
 - `AccountInner::incoming_transactions` returns a `Vec` instead of a `HashMap`;
+- `Address::try_from_bech32_with_hrp` refactored to `try_from_bech32`;
 - `{MetadataFeature, TagFeature}::new` take an `impl Into<Vec<u8>>` param;
+- Merged `StorageProvider` into `StorageAdapter`;
+- `GetAddressesBuilderOptions` renamed to `GetAddressesOptions` and fields no longer nullable;
+- Methods on `GetAddressesBuilder` moved to `SecretManager`;
+- Rename `GenerateAddresses` method to `GenerateEd25519Addresses` for Account and SecretManager, and their respective responses;
+- Rename `SecretManager` and `SecretManage` ed25519 address generation methods;
+- `SecretManage::generate_ed25519_addresses` returns `Ed25519Address` type;
+- Made certain `prepare_` methods public: `prepare_mint_nfts`, `prepare_send_native_tokens`, `prepare_send_nft` and `prepare_create_alias_output`;
+- `Address`-like types now implement `ToBech32Ext` for `to_bech32` and similar fns;
+- Add constructors for `SendNftParams`, `SendAmountParams`, `SendNativeTokensParams`, `MintNftParams`;
+- Rename `AccountBalance` to `Balance` and `AccountBalanceDto` to `BalanceDto`:
+- `Bech32AddressLike`, `HrpLike` and other `TryInto` parameters unified with `ConvertTo` trait;
+- Custom `Serialize` and `Deserialize` impls for `WalletEvent` to have an integer `type` as tag;
+- `WalletEventType` now converts to/from u8 instead of string;
+- `Client` methods `get_outputs`, `get_outputs_ignore_errors`, `get_outputs_metadata_ignore_errors` now accept a slice of output ids;
+- More functions accept generic types for ergonomics: `Wallet::listen`, `clear_listeners`, `EventEmitter` fns, `RegularTransactionEssenceBuilder` fns, `AliasOutputBuilder` fns, `Account::claim_outputs`, `prepare_transaction`, `send`, `finish_transaction`, `send_nft`, `prepare_send_nft`, `send_native_tokens`, `prepare_send_native_tokens`, `send_amount`, `prepare_send_amount`, `mint_nfts`, `prepare_mint_nfts`, `vote`, `prepare_vote`, `Unlocks::new`, `TaggedDataPayload::new`, `MilestonePayload::new`, `ReceiptMilestoneOption::new`, `Client::subscribe`, `unsubscribe`, `basic_output_ids`, `alias_output_ids`, `foundry_output_ids`, `nft_output_ids`, `MqttManager::with_topics`, `MqttTopicManager::new`, `with_topics`, `QueryParameters::new`;
+- `Topic::try_new` renamed to `new`, `topic` renamed to `as_str`;
+- `LedgerNanoStatus::locked` is now optional since it's an IOTA/Shimmer specific API;
+- All public password-related methods now claim ownership over provided passwords and take care of zeroing the memory on drop;
 
 ### Removed
 
@@ -72,14 +102,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `HARDENED` const;
 - `AliasIdDto`, `NftIdDto` and `TokenIdDto`;
 - `U256Dto`, `SendAmountParamsDto`, `AddressWithUnspentOutputsDto`, `RequiredStorageDepositDto` and `BaseCoinBalanceDto`;
+- `GetAddressesBuilder`;
+- Excess `SecretManager` address generation methods;
+- `Bech32Addresses` and `RawAddresses`;
+- `Client::get_addresses`;
+- `Topic` `TryFrom<String>` impl;
 - `NativeTokenDto`, which required a migration;
 
 ### Fixed
 
 - Storage records decryption;
-
-### Fixed
-
+- CoinType check, by moving it from AccountBuilder to WalletBuilder;
 - Validation for transitions in the input selection;
 - Automatically increase foundry counter of alias outputs;
 - Validate that foundry outputs can't have serial number `0`;

@@ -7,7 +7,7 @@ use iota_sdk::client::mqtt::Topic;
 use iota_sdk::{
     client::{
         api::{
-            ClientBlockBuilderOptions as BuildBlockOptions, GetAddressesBuilderOptions as GenerateAddressesOptions,
+            ClientBlockBuilderOptions as BuildBlockOptions, GetAddressesOptions as GenerateAddressesOptions,
             PreparedTransactionDataDto,
         },
         node_api::indexer::query_parameters::QueryParameter,
@@ -15,6 +15,7 @@ use iota_sdk::{
         secret::SecretManagerDto,
     },
     types::block::{
+        address::{Bech32Address, Hrp},
         output::{
             dto::TokenSchemeDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto, AliasId,
             FoundryId, NativeToken, NftId, OutputId,
@@ -93,15 +94,6 @@ pub enum ClientMethod {
     ClearListeners {
         /// Topics for which listeners should be removed.
         topics: Vec<Topic>,
-    },
-    /// Generate addresses.
-    #[serde(rename_all = "camelCase")]
-    GenerateAddresses {
-        /// Create secret manager from json
-        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        secret_manager: SecretManagerDto,
-        /// Addresses generation options
-        options: GenerateAddressesOptions,
     },
     /// Build and post a block
     #[serde(rename_all = "camelCase")]
@@ -374,7 +366,7 @@ pub enum ClientMethod {
     /// Function to find inputs from addresses for a provided amount (useful for offline signing)
     FindInputs {
         /// Addresses
-        addresses: Vec<String>,
+        addresses: Vec<Bech32Address>,
         /// Amount
         amount: u64,
     },
@@ -385,7 +377,7 @@ pub enum ClientMethod {
         /// Output IDs
         output_ids: Vec<OutputId>,
         /// Addresses
-        addresses: Vec<String>,
+        addresses: Vec<Bech32Address>,
     },
     /// Reattaches blocks for provided block id. Blocks can be reattached only if they are valid and haven't been
     /// confirmed for a while.
@@ -423,7 +415,7 @@ pub enum ClientMethod {
         /// Hex encoded bech32 address
         hex: String,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Transforms an alias id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -431,7 +423,7 @@ pub enum ClientMethod {
         /// Alias ID
         alias_id: AliasId,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Transforms an nft id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -439,7 +431,7 @@ pub enum ClientMethod {
         /// Nft ID
         nft_id: NftId,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Transforms a hex encoded public key to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
@@ -447,13 +439,13 @@ pub enum ClientMethod {
         /// Hex encoded public key
         hex: String,
         /// Human readable part
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Requests funds for a given address from the faucet, for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.
     RequestFundsFromFaucet {
         /// Faucet URL
         url: String,
         /// The address for request funds
-        address: String,
+        address: Bech32Address,
     },
 }

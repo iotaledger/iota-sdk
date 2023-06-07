@@ -6,19 +6,20 @@ mod bech32;
 mod ed25519;
 mod nft;
 
-use alloc::{string::String, vec::Vec};
-
-use ::bech32::{FromBase32, ToBase32, Variant};
 use derive_more::From;
-use packable::PackableExt;
 
-pub use self::{alias::AliasAddress, bech32::Bech32Address, ed25519::Ed25519Address, nft::NftAddress};
+pub use self::{
+    alias::AliasAddress,
+    bech32::{Bech32Address, Hrp},
+    ed25519::Ed25519Address,
+    nft::NftAddress,
+};
 use crate::types::block::{
     output::{Output, OutputId},
     semantic::{ConflictReason, ValidationContext},
     signature::Signature,
     unlock::Unlock,
-    Error,
+    ConvertTo, Error,
 };
 
 /// A generic address supporting different address kinds.
@@ -108,27 +109,8 @@ impl Address {
     }
 
     /// Tries to create an [`Address`] from a bech32 encoded string.
-    pub fn try_from_bech32<T: AsRef<str>>(address: T) -> Result<Self, Error> {
-        Self::try_from_bech32_with_hrp(address).map(|res| res.1)
-    }
-
-    /// Tries to create an [`Address`] from a bech32 encoded string, also returns the HRP.
-    pub fn try_from_bech32_with_hrp<T: AsRef<str>>(address: T) -> Result<(String, Self), Error> {
-        match ::bech32::decode(address.as_ref()) {
-            Ok((hrp, data, _)) => {
-                let bytes = Vec::<u8>::from_base32(&data).map_err(|_| Error::InvalidAddress)?;
-                Self::unpack_verified(bytes.as_slice(), &())
-                    .map_err(|_| Error::InvalidAddress)
-                    .map(|address| (hrp, address))
-            }
-            Err(_) => Err(Error::InvalidAddress),
-        }
-    }
-
-    /// Encodes this address to a bech32 string with the given Human Readable Part as prefix.
-    pub fn to_bech32<T: AsRef<str>>(&self, hrp: T) -> String {
-        // PANIC: encoding can't fail as `self` has already been validated and built.
-        ::bech32::encode(hrp.as_ref(), self.pack_to_vec().to_base32(), Variant::Bech32).unwrap()
+    pub fn try_from_bech32(address: impl AsRef<str>) -> Result<Self, Error> {
+        Bech32Address::try_from_str(address).map(|res| res.inner)
     }
 
     /// Checks if an string is a valid bech32 encoded address.
@@ -194,6 +176,41 @@ impl Address {
         }
 
         Ok(())
+    }
+}
+
+pub trait ToBech32Ext: Sized {
+    /// Try to encode this address to a bech32 string with the given Human Readable Part as prefix.
+    fn try_to_bech32(self, hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address, Error>;
+
+    /// Encodes this address to a bech32 string with the given Human Readable Part as prefix.
+    fn to_bech32(self, hrp: Hrp) -> Bech32Address;
+
+    /// Encodes this address to a bech32 string with the given Human Readable Part as prefix without checking
+    /// validity.
+    fn to_bech32_unchecked(self, hrp: impl ConvertTo<Hrp>) -> Bech32Address;
+}
+impl<T: Into<Address>> ToBech32Ext for T {
+    /// Try to encode this address to a bech32 string with the given Human Readable Part as prefix.
+    fn try_to_bech32(self, hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address, Error> {
+        Bech32Address::try_new(hrp, self)
+    }
+
+    /// Encodes this address to a bech32 string with the given Human Readable Part as prefix.
+    fn to_bech32(self, hrp: Hrp) -> Bech32Address {
+        Bech32Address::new(hrp, self)
+    }
+
+    /// Encodes this address to a bech32 string with the given Human Readable Part as prefix without checking
+    /// validity.
+    fn to_bech32_unchecked(self, hrp: impl ConvertTo<Hrp>) -> Bech32Address {
+        Bech32Address::new(hrp.convert_unchecked(), self)
+    }
+}
+
+impl From<&Self> for Address {
+    fn from(value: &Self) -> Self {
+        *value
     }
 }
 

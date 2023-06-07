@@ -6,7 +6,10 @@
 //!
 //! `cargo run --example node_api_indexer_get_alias_outputs --release -- [NODE URL] [ADDRESS]`
 
-use iota_sdk::client::{node_api::indexer::query_parameters::QueryParameter, Client, Result};
+use iota_sdk::{
+    client::{node_api::indexer::query_parameters::QueryParameter, Client, Result},
+    types::block::address::Bech32Address,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -25,14 +28,17 @@ async fn main() -> Result<()> {
         .await?;
 
     // Take the address from command line argument or use a default one.
-    let address = std::env::args()
-        .nth(2)
-        .unwrap_or_else(|| String::from("rms1qrrdjmdkadtcnuw0ue5n9g4fmkelrj3dl26eyeshkha3w3uu0wheu5z5qqz"));
+    let address = Bech32Address::try_from_str(
+        std::env::args()
+            .nth(2)
+            .as_deref()
+            .unwrap_or("rms1qrrdjmdkadtcnuw0ue5n9g4fmkelrj3dl26eyeshkha3w3uu0wheu5z5qqz"),
+    )?;
 
     // Get output IDs of alias outputs that can be controlled by this address.
     let output_ids_response = client
-        .alias_output_ids(vec![
-            QueryParameter::Governor(address.clone()),
+        .alias_output_ids([
+            QueryParameter::Governor(address),
             QueryParameter::StateController(address),
         ])
         .await?;
@@ -40,7 +46,7 @@ async fn main() -> Result<()> {
     println!("Alias output IDs: {output_ids_response:#?}");
 
     // Get the outputs by their IDs.
-    let outputs_responses = client.get_outputs(output_ids_response.items).await?;
+    let outputs_responses = client.get_outputs(&output_ids_response.items).await?;
 
     println!("{outputs_responses:#?}");
 

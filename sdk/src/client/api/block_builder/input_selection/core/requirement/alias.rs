@@ -3,50 +3,39 @@
 
 use super::{Error, InputSelection, Requirement};
 use crate::{
-    client::secret::types::InputSigningData,
+    client::{api::input_selection::Burn, secret::types::InputSigningData},
     types::block::output::{AliasId, AliasTransition, Output, OutputId},
 };
 
-// Returns
-// - the alias transition type of a given input and outputs
-// - whether the output was provided or not, to differentiate a burn from a proper governance transition
-pub(crate) fn is_alias_transition(input: &InputSigningData, outputs: &[Output]) -> Option<(AliasTransition, bool)> {
-    is_alias_transition_internal(&input.output, *input.output_id(), outputs)
-}
-
-pub(crate) fn is_alias_transition_internal(
+pub fn is_alias_transition<'a>(
     input: &Output,
     input_id: OutputId,
     outputs: &[Output],
-) -> Option<(AliasTransition, bool)> {
+    burn: impl Into<Option<&'a Burn>>,
+) -> Option<AliasTransition> {
     if let Output::Alias(alias_input) = &input {
         let alias_id = alias_input.alias_id_non_null(&input_id);
         // Checks if the alias exists in the outputs and gets the transition type.
-        outputs
-            .iter()
-            .find_map(|output| {
-                if let Output::Alias(alias_output) = output {
-                    if *alias_output.alias_id() == alias_id {
-                        if alias_output.state_index() == alias_input.state_index() {
-                            // Governance transition.
-                            Some(Some((AliasTransition::Governance, true)))
-                        } else {
-                            // State transition.
-                            Some(Some((AliasTransition::State, true)))
-                        }
+        for output in outputs.iter() {
+            if let Output::Alias(alias_output) = output {
+                if *alias_output.alias_id() == alias_id {
+                    if alias_output.state_index() == alias_input.state_index() {
+                        // Governance transition.
+                        return Some(AliasTransition::Governance);
                     } else {
-                        None
+                        // State transition.
+                        return Some(AliasTransition::State);
                     }
-                } else {
-                    None
                 }
-            })
-            // If the alias was not found in the outputs, it gets burned which is a governance transition.
-            .unwrap_or(Some((AliasTransition::Governance, false)))
-    } else {
-        // Not an alias transition.
-        None
+            }
+        }
+        if let Some(burn) = burn.into() {
+            if burn.aliases().contains(&alias_id) {
+                return Some(AliasTransition::Governance);
+            }
+        }
     }
+    None
 }
 
 /// Checks if an output is an alias with a given non null alias ID.
@@ -136,7 +125,9 @@ impl InputSelection {
         // PANIC: safe to unwrap as it's been checked that both can't be None at the same time.
         let input = selected_input.unwrap_or_else(|| &self.available_inputs[available_index.unwrap()]);
 
-        if is_alias_transition(input, &self.outputs) == Some((AliasTransition::Governance, true)) {
+        if is_alias_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref())
+            == Some(AliasTransition::Governance)
+        {
             return Err(Error::UnfulfillableRequirement(Requirement::Alias(
                 alias_id,
                 alias_transition,

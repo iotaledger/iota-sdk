@@ -6,13 +6,16 @@ use std::str::FromStr;
 use crypto::keys::slip10::Chain;
 use iota_sdk::{
     client::{
-        api::{transaction::validate_transaction_payload_length, verify_semantic, PreparedTransactionData},
+        api::{
+            transaction::validate_transaction_payload_length, verify_semantic, GetAddressesOptions,
+            PreparedTransactionData,
+        },
         constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-        secret::{SecretManage, SecretManager, SignTransactionEssence},
+        secret::{SecretManager, SignTransactionEssence},
         Client, Result,
     },
     types::block::{
-        address::{Address, NftAddress},
+        address::{Address, NftAddress, ToBech32Ext},
         input::{Input, UtxoInput},
         output::{InputsCommitment, NftId},
         payload::{
@@ -36,7 +39,11 @@ async fn nft_reference_unlocks() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
-        .generate_addresses(SHIMMER_COIN_TYPE, 0, 0..1, None)
+        .generate_ed25519_addresses(
+            GetAddressesOptions::default()
+                .with_coin_type(SHIMMER_COIN_TYPE)
+                .with_range(0..1),
+        )
         .await?[0]
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
@@ -44,31 +51,62 @@ async fn nft_reference_unlocks() -> Result<()> {
     let nft_id = NftId::from_str(NFT_ID_1)?;
     let nft_bech32_address = &Address::Nft(NftAddress::new(nft_id)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
-    let inputs = build_inputs(vec![
+    let inputs = build_inputs([
         Nft(
             1_000_000,
             nft_id,
-            bech32_address_0,
+            &bech32_address_0.to_string(),
             None,
             None,
             None,
             None,
             None,
-            Some(Chain::from_u32_hardened(vec![
-                HD_WALLET_TYPE,
-                SHIMMER_COIN_TYPE,
-                0,
-                0,
-                0,
-            ])),
+            Some(Chain::from_u32_hardened([HD_WALLET_TYPE, SHIMMER_COIN_TYPE, 0, 0, 0])),
         ),
-        Basic(1_000_000, nft_bech32_address, None, None, None, None, None, None),
-        Basic(1_000_000, nft_bech32_address, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            &nft_bech32_address.to_string(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            1_000_000,
+            &nft_bech32_address.to_string(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
 
-    let outputs = build_outputs(vec![
-        Nft(1_000_000, nft_id, bech32_address_0, None, None, None, None, None, None),
-        Basic(2_000_000, nft_bech32_address, None, None, None, None, None, None),
+    let outputs = build_outputs([
+        Nft(
+            1_000_000,
+            nft_id,
+            &bech32_address_0.to_string(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            &nft_bech32_address.to_string(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
 
     let essence = TransactionEssence::Regular(
@@ -80,7 +118,7 @@ async fn nft_reference_unlocks() -> Result<()> {
             inputs
                 .iter()
                 .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
-                .collect(),
+                .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
         .finish(&protocol_parameters)?,

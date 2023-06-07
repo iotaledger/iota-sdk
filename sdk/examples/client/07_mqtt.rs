@@ -5,8 +5,6 @@
 //!
 //! cargo run --example 07_mqtt --features=mqtt --release
 
-use std::sync::{mpsc::channel, Arc, Mutex};
-
 use iota_sdk::client::{
     mqtt::{MqttEvent, MqttPayload, Topic},
     Client, Result,
@@ -22,29 +20,14 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let (tx, rx) = channel();
-    let tx = Arc::new(Mutex::new(tx));
-
-    let mut event_rx = client.mqtt_event_receiver().await;
-    tokio::spawn(async move {
-        while event_rx.changed().await.is_ok() {
-            let event = event_rx.borrow();
-            if *event == MqttEvent::Disconnected {
-                println!("mqtt disconnected");
-                std::process::exit(1);
-            }
-        }
-    });
+    let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel();
 
     client
         .subscribe(
-            vec![
-                Topic::try_from("milestone-info/latest".to_string())?,
-                Topic::try_from("blocks".to_string())?,
-                Topic::try_from(
-                    "outputs/unlock/address/atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r"
-                        .to_string(),
-                )?,
+            [
+                Topic::new("milestone-info/latest")?,
+                Topic::new("blocks")?,
+                Topic::new("outputs/unlock/address/atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r")?,
             ],
             move |event| {
                 println!("Topic: {}", event.topic);
@@ -54,16 +37,23 @@ async fn main() -> Result<()> {
                     MqttPayload::MilestonePayload(ms) => println!("{ms:?}"),
                     MqttPayload::Receipt(receipt) => println!("{receipt:?}"),
                 }
-                tx.lock().unwrap().send(()).unwrap();
+                tx.send(()).unwrap();
             },
         )
         .await?;
 
     for i in 0..10 {
-        rx.recv().unwrap();
-        if i == 7 {
-            // unsubscribe from topic "blocks", will continue to receive events for "milestones/latest"
-            client.unsubscribe(vec![Topic::try_from("blocks".to_string())?]).await?;
+        tokio::select! {
+            _ = rx.recv() => {
+                if i == 7 {
+                    client.unsubscribe([Topic::new("blocks")?]).await?;
+                }
+            }
+            _ = async {
+                client.mqtt_event_receiver().await.wait_for(|msg| *msg == MqttEvent::Disconnected).await.unwrap();
+            } => {
+                panic!("mqtt disconnected");
+            }
         }
     }
 

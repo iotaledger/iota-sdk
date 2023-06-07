@@ -5,6 +5,8 @@
 
 use std::time::Duration;
 
+use crate::types::block::address::Hrp;
+
 /// Default timeout for all API requests apart from post_block with remote PoW
 pub(crate) const DEFAULT_API_TIMEOUT: Duration = Duration::from_secs(15);
 pub(crate) const DEFAULT_REMOTE_POW_API_TIMEOUT: Duration = Duration::from_secs(100);
@@ -27,13 +29,13 @@ pub(crate) const FIVE_MINUTES_IN_SECONDS: u32 = 300;
 pub(crate) const CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS: u32 = 60;
 
 /// Bech32 hrp for the IOTA mainnet <https://github.com/satoshilabs/slips/blob/master/slip-0173.md>
-pub const IOTA_BECH32_HRP: &str = "iota";
+pub const IOTA_BECH32_HRP: Hrp = Hrp::from_str_unchecked("iota");
 /// Bech32 hrp for the IOTA testnet <https://github.com/satoshilabs/slips/blob/master/slip-0173.md>
-pub const IOTA_TESTNET_BECH32_HRP: &str = "atoi";
+pub const IOTA_TESTNET_BECH32_HRP: Hrp = Hrp::from_str_unchecked("atoi");
 /// Bech32 hrp for the Shimmer mainnet <https://github.com/satoshilabs/slips/blob/master/slip-0173.md>
-pub const SHIMMER_BECH32_HRP: &str = "smr";
+pub const SHIMMER_BECH32_HRP: Hrp = Hrp::from_str_unchecked("smr");
 /// Bech32 hrp for the Shimmer testnet <https://github.com/satoshilabs/slips/blob/master/slip-0173.md>
-pub const SHIMMER_TESTNET_BECH32_HRP: &str = "rms";
+pub const SHIMMER_TESTNET_BECH32_HRP: Hrp = Hrp::from_str_unchecked("rms");
 
 /// BIP-0044 defines a logical hierarchy for deterministic wallets
 pub const HD_WALLET_TYPE: u32 = 44;
@@ -41,3 +43,5 @@ pub const HD_WALLET_TYPE: u32 = 44;
 pub const IOTA_COIN_TYPE: u32 = 4218;
 /// Shimmer coin type <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>
 pub const SHIMMER_COIN_TYPE: u32 = 4219;
+/// Ethereum coin type <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>
+pub const ETHER_COIN_TYPE: u32 = 60;

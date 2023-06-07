@@ -64,7 +64,7 @@ async fn main() -> Result<()> {
     // generate addresses so we find all funds
     if ping_account.addresses().await?.len() < amount_addresses {
         ping_account
-            .generate_addresses((amount_addresses - ping_account.addresses().await?.len()) as u32, None)
+            .generate_ed25519_addresses((amount_addresses - ping_account.addresses().await?.len()) as u32, None)
             .await?;
     }
     let balance = ping_account.sync(None).await?;
@@ -74,16 +74,12 @@ async fn main() -> Result<()> {
         let mut addresses = pong_account.addresses().await?;
         if addresses.len() < amount_addresses {
             addresses = pong_account
-                .generate_addresses((amount_addresses - addresses.len()) as u32, None)
+                .generate_ed25519_addresses((amount_addresses - addresses.len()) as u32, None)
                 .await?
         };
         println!(
             "{}",
-            request_funds_from_faucet(
-                &std::env::var("FAUCET_URL").unwrap(),
-                &addresses[0].address().to_string()
-            )
-            .await?
+            request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), addresses[0].address()).await?
         );
         addresses
     };
@@ -96,7 +92,7 @@ async fn main() -> Result<()> {
             threads.push(async move {
                 tokio::spawn(async move {
                     // send transaction
-                    let outputs = vec![
+                    let outputs = [
                         // send one or two Mi for more different transactions
                         BasicOutputBuilder::new_with_amount(n * 1_000_000)
                             .add_unlock_condition(AddressUnlockCondition::new(

@@ -48,7 +48,8 @@ impl Account {
             log::debug!(
                 "[search_addresses_with_outputs] generate {address_amount_to_generate} public addresses below the start index"
             );
-            self.generate_addresses(address_amount_to_generate, None).await?;
+            self.generate_ed25519_addresses(address_amount_to_generate, None)
+                .await?;
         }
         // internal addresses
         if sync_options.address_start_index_internal != 0 {
@@ -63,7 +64,7 @@ impl Account {
             log::debug!(
                 "[search_addresses_with_outputs] generate {address_amount_to_generate} internal addresses below the start index"
             );
-            self.generate_addresses(address_amount_to_generate, Some(GenerateAddressOptions::internal()))
+            self.generate_ed25519_addresses(address_amount_to_generate, Some(GenerateAddressOptions::internal()))
                 .await?;
         }
 
@@ -88,9 +89,9 @@ impl Account {
                 "[search_addresses_with_outputs] address_gap_limit: {address_gap_limit}, address_gap_limit_internal: {address_gap_limit_internal}"
             );
             // generate public and internal addresses
-            let addresses = self.generate_addresses(address_gap_limit, None).await?;
+            let addresses = self.generate_ed25519_addresses(address_gap_limit, None).await?;
             let internal_addresses = self
-                .generate_addresses(address_gap_limit_internal, Some(GenerateAddressOptions::internal()))
+                .generate_ed25519_addresses(address_gap_limit_internal, Some(GenerateAddressOptions::internal()))
                 .await?;
 
             let address_start_index = addresses

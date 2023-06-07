@@ -7,11 +7,11 @@
 
 use iota_sdk::{
     client::{
-        node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet, secret::SecretManager, Client,
-        Result,
+        api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
+        secret::SecretManager, Client, Result,
     },
     types::block::{
-        address::{Address, NftAddress},
+        address::{Bech32Address, NftAddress},
         output::{
             unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NftId, NftOutputBuilder, Output, OutputId,
         },
@@ -38,15 +38,17 @@ async fn main() -> Result<()> {
 
     let token_supply = client.get_token_supply().await?;
 
-    let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
-    request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?;
+    let address = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .await?[0];
+    request_funds_from_faucet(&faucet_url, &address).await?;
     tokio::time::sleep(std::time::Duration::from_secs(20)).await;
 
     //////////////////////////////////
     // create new nft output
     //////////////////////////////////
 
-    let outputs = vec![
+    let outputs = [
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .add_unlock_condition(AddressUnlockCondition::new(address))
@@ -73,7 +75,7 @@ async fn main() -> Result<()> {
     let nft_id = NftId::from(&nft_output_id);
 
     let nft_address = NftAddress::new(nft_id);
-    let bech32_nft_address = Address::Nft(nft_address).to_bech32(client.get_bech32_hrp().await?);
+    let bech32_nft_address = Bech32Address::new(client.get_bech32_hrp().await?, nft_address);
     println!("bech32_nft_address {bech32_nft_address}");
     println!(
         "Faucet request {:?}",
@@ -82,7 +84,7 @@ async fn main() -> Result<()> {
     tokio::time::sleep(std::time::Duration::from_secs(20)).await;
 
     let output_ids_response = client
-        .basic_output_ids(vec![QueryParameter::Address(bech32_nft_address)])
+        .basic_output_ids([QueryParameter::Address(bech32_nft_address)])
         .await?;
     let output_with_meta = client.get_output(&output_ids_response.items[0]).await?;
 
@@ -91,9 +93,9 @@ async fn main() -> Result<()> {
         .with_secret_manager(&secret_manager)
         .with_input(nft_output_id.into())?
         .with_input(output_ids_response.items[0].into())?
-        .with_outputs(vec![
+        .with_outputs([
             NftOutputBuilder::new_with_amount(1_000_000 + output_with_meta.output().amount(), nft_id)
-                .add_unlock_condition(AddressUnlockCondition::new(address))
+                .add_unlock_condition(AddressUnlockCondition::new(bech32_nft_address))
                 .finish_output(token_supply)?,
         ])?
         .finish()
@@ -112,11 +114,9 @@ async fn main() -> Result<()> {
 
     let nft_output_id = get_nft_output_id(block.payload().unwrap())?;
     let output_with_meta = client.get_output(&nft_output_id).await?;
-    let outputs = vec![
-        BasicOutputBuilder::new_with_amount(output_with_meta.output().amount())
-            .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [BasicOutputBuilder::new_with_amount(output_with_meta.output().amount())
+        .add_unlock_condition(AddressUnlockCondition::new(bech32_nft_address))
+        .finish_output(token_supply)?];
 
     let block = client
         .block()

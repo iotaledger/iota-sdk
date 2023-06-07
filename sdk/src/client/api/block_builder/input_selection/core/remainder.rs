@@ -27,8 +27,12 @@ impl InputSelection {
         }
 
         for input in &self.selected_inputs {
-            let alias_transition =
-                is_alias_transition(input, self.outputs.as_slice()).map(|(alias_transition, _)| alias_transition);
+            let alias_transition = is_alias_transition(
+                &input.output,
+                *input.output_id(),
+                self.outputs.as_slice(),
+                self.burn.as_ref(),
+            );
             // PANIC: safe to unwrap as outputs with no address have been filtered out already.
             let required_address = input
                 .output
@@ -125,7 +129,6 @@ impl InputSelection {
             return Err(Error::MissingInputWithEd25519Address);
         };
 
-        // TODO checked ops ?
         let diff = inputs_sum - outputs_sum;
         let mut remainder_builder = BasicOutputBuilder::new_with_amount(diff);
 

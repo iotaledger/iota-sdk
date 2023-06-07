@@ -3,7 +3,7 @@
 
 import type { MessageHandler } from './MessageHandler';
 import type {
-    AccountBalance,
+    Balance,
     AccountMetadata,
     SyncOptions,
     AccountMeta,
@@ -32,6 +32,8 @@ import type {
     ParticipationEventWithNodes,
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
+    GenerateAddressesOptions,
+    EvmSignature,
 } from '../types';
 import type { SignedTransactionEssence } from '../types/signedTransactionEssence';
 import type {
@@ -42,13 +44,13 @@ import type {
 } from '../types/buildOutputData';
 import type {
     HexEncodedAmount,
+    HexEncodedString,
     IAliasOutput,
     IBasicOutput,
     IFoundryOutput,
     INftOutput,
     OutputTypes,
 } from '@iota/types';
-import { Burn } from '../types/burn';
 
 /** The Account class. */
 export class Account {
@@ -128,36 +130,6 @@ export class Account {
     }
 
     /**
-     * A generic `burn()` function that can be used to burn native tokens, nfts, foundries and aliases.
-     *
-     * Note that burning **native tokens** doesn't require the foundry output which minted them, but will not increase
-     * the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
-     * recommended to use melting, if the foundry output is available.
-     *
-     * @param burn The outputs to burn.
-     * @param transactionOptions The options to define a `RemainderValueStrategy`
-     * or custom inputs.
-     * @returns The resulting transaction.
-     */
-    async burn(
-        burn: Burn,
-        transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
-        const resp = await this.messageHandler.callAccountMethod(
-            this.meta.index,
-            {
-                name: 'burn',
-                data: {
-                    burn,
-                    options: transactionOptions,
-                },
-            },
-        );
-        return JSON.parse(resp).payload;
-    }
-
-
-    /**
      * Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
      * the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
      * recommended to use melting, if the foundry output is available.
@@ -175,11 +147,10 @@ export class Account {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'burn',
+                name: 'burnNativeToken',
                 data: {
-                    burn: {
-                        nativeTokens: [{ amount: burnAmount, id: tokenId, }]
-                    },
+                    tokenId,
+                    burnAmount,
                     options: transactionOptions,
                 },
             },
@@ -201,11 +172,9 @@ export class Account {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'burn',
+                name: 'burnNft',
                 data: {
-                    burn: {
-                        nfts: [nftId],
-                    },
+                    nftId,
                     options: transactionOptions,
                 },
             },
@@ -338,11 +307,9 @@ export class Account {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'burn',
+                name: 'destroyAlias',
                 data: {
-                    burn: {
-                        aliases: [aliasId],
-                    },
+                    aliasId,
                     options: transactionOptions,
                 },
             },
@@ -365,11 +332,9 @@ export class Account {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'burn',
+                name: 'destroyFoundry',
                 data: {
-                    burn: {
-                        foundries: [foundryId],
-                    },
+                    foundryId,
                     options: transactionOptions,
                 },
             },
@@ -382,8 +347,10 @@ export class Account {
      * @param options Options for address generation.
      * @returns The address.
      */
-    async generateAddress(options?: GenerateAddressOptions): Promise<Address> {
-        const addresses = await this.generateAddresses(1, options);
+    async generateEd25519Address(
+        options?: GenerateAddressOptions,
+    ): Promise<Address> {
+        const addresses = await this.generateEd25519Addresses(1, options);
         return addresses[0];
     }
 
@@ -393,17 +360,54 @@ export class Account {
      * @param options Options for address generation.
      * @returns The addresses.
      */
-    async generateAddresses(
+    async generateEd25519Addresses(
         amount: number,
         options?: GenerateAddressOptions,
     ): Promise<Address[]> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'generateAddresses',
+                name: 'generateEd25519Addresses',
                 data: {
                     amount,
                     options,
+                },
+            },
+        );
+        return JSON.parse(response).payload;
+    }
+
+    /** Generate EVM addresses */
+    async generateEvmAddresses(
+        generateAddressesOptions: GenerateAddressesOptions,
+    ): Promise<string[]> {
+        const response = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'generateEvmAddresses',
+                data: {
+                    options: generateAddressesOptions,
+                },
+            },
+        );
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Signs a message with an Evm private key.
+     */
+    async signEvm(
+        message: HexEncodedString,
+        chain: number[],
+    ): Promise<EvmSignature> {
+        const response = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'signEvm',
+                data: {
+                    message,
+                    chain,
                 },
             },
         );
@@ -414,7 +418,7 @@ export class Account {
      * Get the account balance.
      * @returns The account balance.
      */
-    async getBalance(): Promise<AccountBalance> {
+    async getBalance(): Promise<Balance> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -563,9 +567,7 @@ export class Account {
      * @param transactionId The ID of the transaction to get.
      * @returns The transaction.
      */
-    async getIncomingTransaction(
-        transactionId: string,
-    ): Promise<Transaction> {
+    async getIncomingTransaction(transactionId: string): Promise<Transaction> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1102,7 +1104,7 @@ export class Account {
      * @param options Optional synchronization options.
      * @returns The account balance.
      */
-    async sync(options?: SyncOptions): Promise<AccountBalance> {
+    async sync(options?: SyncOptions): Promise<Balance> {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {

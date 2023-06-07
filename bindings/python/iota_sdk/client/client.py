@@ -7,10 +7,16 @@ from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
 from iota_sdk.client._utils import ClientUtils
-from iota_sdk.types.common import Node
+from iota_sdk.types.common import HexStr, Node
+from iota_sdk.types.feature import Feature
+from iota_sdk.types.native_token import NativeToken
+from iota_sdk.types.token_scheme import TokenScheme
+from iota_sdk.types.unlock_condition import UnlockCondition
 from json import dumps, loads
 import humps
 from datetime import timedelta
+from typing import Any, Dict, List, Optional
+
 
 class ClientError(Exception):
     """client error"""
@@ -20,22 +26,22 @@ class ClientError(Exception):
 class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     def __init__(
         self,
-        nodes=None,
-        primary_node=None,
-        primary_pow_node=None,
-        permanode=None,
-        ignore_node_health=None,
-        api_timeout=None,
-        node_sync_interval=None,
-        remote_pow_timeout=None,
-        tips_interval=None,
-        quorum=None,
-        min_quorum_size=None,
-        quorum_threshold=None,
-        user_agent=None,
-        local_pow=None,
-        fallback_to_local_pow=None,
-        pow_worker_count=None,
+        nodes: Optional[str | List[str]] = None,
+        primary_node: Optional[str] = None,
+        primary_pow_node: Optional[str] = None,
+        permanode: Optional[str] = None,
+        ignore_node_health: Optional[bool] = None,
+        api_timeout: Optional[timedelta] = None,
+        node_sync_interval: Optional[timedelta] = None,
+        remote_pow_timeout: Optional[timedelta] = None,
+        tips_interval: Optional[int] = None,
+        quorum: Optional[bool] = None,
+        min_quorum_size: Optional[int] = None,
+        quorum_threshold: Optional[int] = None,
+        user_agent: Optional[str] = None,
+        local_pow: Optional[bool] = None,
+        fallback_to_local_pow: Optional[bool] = None,
+        pow_worker_count: Optional[int] = None,
         client_handle=None
     ):
         """Initialize the IOTA Client.
@@ -108,11 +114,11 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             )), 'nanos': get_remaining_nano_seconds(client_config['remote_pow_timeout'])}
 
         client_config = humps.camelize(client_config)
-        client_config = dumps(client_config)
+        client_config_str = dumps(client_config)
 
         # Create the message handler
         if client_handle is None:
-            self.handle = iota_sdk.create_client(client_config)
+            self.handle = iota_sdk.create_client(client_config_str)
         else:
             self.handle = client_handle
 
@@ -144,15 +150,15 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         return self.handle
 
     def build_alias_output(self,
-                           alias_id,
-                           unlock_conditions,
-                           amount=None,
-                           native_tokens=None,
-                           state_index=None,
-                           state_metadata=None,
-                           foundry_counter=None,
-                           features=None,
-                           immutable_features=None):
+                           alias_id: HexStr,
+                           unlock_conditions: List[UnlockCondition],
+                           amount: Optional[int] = None,
+                           native_tokens: Optional[List[NativeToken]] = None,
+                           state_index: Optional[int] = None,
+                           state_metadata: Optional[str] = None,
+                           foundry_counter: Optional[int] = None,
+                           features: Optional[List[Feature]] = None,
+                           immutable_features: Optional[List[Feature]] = None):
         """Build an AliasOutput.
 
         Parameters
@@ -181,15 +187,18 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         Output as dict
         """
 
-        unlock_conditions = [unlock_condition.as_dict() for unlock_condition in unlock_conditions]
+        unlock_conditions = [unlock_condition.as_dict()
+                             for unlock_condition in unlock_conditions]
 
         if native_tokens:
-            native_tokens = [native_token.as_dict() for native_token in native_tokens]
+            native_tokens = [native_token.as_dict()
+                             for native_token in native_tokens]
 
         if features:
             features = [feature.as_dict() for feature in features]
         if immutable_features:
-            immutable_features = [immutable_feature.as_dict() for immutable_feature in immutable_features]
+            immutable_features = [immutable_feature.as_dict()
+                                  for immutable_feature in immutable_features]
 
         if amount:
             amount = str(amount)
@@ -207,10 +216,10 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         })
 
     def build_basic_output(self,
-                           unlock_conditions,
-                           amount=None,
-                           native_tokens=None,
-                           features=None):
+                           unlock_conditions: List[UnlockCondition],
+                           amount: Optional[int] = None,
+                           native_tokens: Optional[List[NativeToken]] = None,
+                           features: Optional[List[Feature]] = None):
         """Build a BasicOutput.
 
         Parameters
@@ -229,10 +238,12 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         Output as dict
         """
 
-        unlock_conditions = [unlock_condition.as_dict() for unlock_condition in unlock_conditions]
+        unlock_conditions = [unlock_condition.as_dict()
+                             for unlock_condition in unlock_conditions]
 
         if native_tokens:
-            native_tokens = [native_token.as_dict() for native_token in native_tokens]
+            native_tokens = [native_token.as_dict()
+                             for native_token in native_tokens]
 
         if features:
             features = [feature.as_dict() for feature in features]
@@ -248,13 +259,13 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         })
 
     def build_foundry_output(self,
-                             serial_number,
-                             token_scheme,
-                             unlock_conditions,
-                             amount=None,
-                             native_tokens=None,
-                             features=None,
-                             immutable_features=None):
+                             serial_number: int,
+                             token_scheme: TokenScheme,
+                             unlock_conditions: List[UnlockCondition],
+                             amount: Optional[int] = None,
+                             native_tokens: Optional[List[NativeToken]] = None,
+                             features: Optional[List[Feature]] = None,
+                             immutable_features: Optional[List[Feature]] = None):
         """Build a FoundryOutput.
 
         Parameters
@@ -281,15 +292,18 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         token_scheme = humps.camelize(token_scheme.as_dict())
 
-        unlock_conditions = [unlock_condition.as_dict() for unlock_condition in unlock_conditions]
+        unlock_conditions = [unlock_condition.as_dict()
+                             for unlock_condition in unlock_conditions]
 
         if native_tokens:
-            native_tokens = [native_token.as_dict() for native_token in native_tokens]
+            native_tokens = [native_token.as_dict()
+                             for native_token in native_tokens]
 
         if features:
             features = [feature.as_dict() for feature in features]
         if immutable_features:
-            immutable_features = [immutable_feature.as_dict() for immutable_feature in immutable_features]
+            immutable_features = [immutable_feature.as_dict()
+                                  for immutable_feature in immutable_features]
 
         if amount:
             amount = str(amount)
@@ -305,12 +319,12 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         })
 
     def build_nft_output(self,
-                         nft_id,
-                         unlock_conditions,
-                         amount=None,
-                         native_tokens=None,
-                         features=None,
-                         immutable_features=None):
+                         nft_id: HexStr,
+                         unlock_conditions: List[UnlockCondition],
+                         amount: Optional[int] = None,
+                         native_tokens: Optional[List[NativeToken]] = None,
+                         features: Optional[List[Feature]] = None,
+                         immutable_features: Optional[List[Feature]] = None):
         """Build an NftOutput.
 
         Parameters
@@ -333,15 +347,18 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         Output as dict
         """
 
-        unlock_conditions = [unlock_condition.as_dict() for unlock_condition in unlock_conditions]
+        unlock_conditions = [unlock_condition.as_dict()
+                             for unlock_condition in unlock_conditions]
 
         if native_tokens:
-            native_tokens = [native_token.as_dict() for native_token in native_tokens]
+            native_tokens = [native_token.as_dict()
+                             for native_token in native_tokens]
 
         if features:
             features = [feature.as_dict() for feature in features]
         if immutable_features:
-            immutable_features = [immutable_feature.as_dict() for immutable_feature in immutable_features]
+            immutable_features = [immutable_feature.as_dict()
+                                  for immutable_feature in immutable_features]
 
         if amount:
             amount = str(amount)
@@ -355,83 +372,19 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'immutableFeatures': immutable_features
         })
 
-    def generate_addresses(self,
-                           secret_manager,
-                           account_index=None,
-                           start=None,
-                           end=None,
-                           internal=None,
-                           coin_type=None,
-                           bech32_hrp=None,
-                           ledger_nano_prompt=None):
-        """Generate addresses.
-
-        Parameters
-        ----------
-        secret_manager : Any type of SecretManager.
-            The secret manager to use. Can be (MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager or LedgerNanoSecretManager.
-        account_index : int
-            Account index.
-        start : int
-            Start index of generated addresses
-        end : int
-            End index of generated addresses
-        internal : bool
-            Internal addresses
-        coin_type : int
-            Coin type. The CoinType enum can be used
-        bech32_hrp : string
-            Bech32 human readable part.
-        ledger_nano_prompt : bool
-            Display the address on ledger devices.
-
-        Returns
-        -------
-        Addresses as array of strings.
-        """
-        options = dict(locals())
-        del options['self']
-        del options['secret_manager']
-
-        options = {k: v for k, v in options.items() if v != None}
-
-        if 'coin_type' in options:
-            options['coin_type'] = int(options.pop('coin_type'))
-
-        is_start_set = 'start' in options
-        is_end_set = 'end' in options
-        if is_start_set or is_end_set:
-            options['range'] = {}
-            if is_start_set:
-                options['range']['start'] = options.pop('start')
-            if is_end_set:
-                options['range']['end'] = options.pop('end')
-        options['options'] = {}
-        if 'internal' in options:
-            options['options']['internal'] = options.pop('internal')
-        if 'ledger_nano_prompt' in options:
-            options['options']['ledger_nano_prompt'] = options.pop('ledger_nano_prompt')
-
-        options = humps.camelize(options)
-
-        return self._call_method('generateAddresses', {
-            'secretManager': secret_manager,
-            'options': options
-        })
-
     def build_and_post_block(self,
-                             secret_manager=None, 
-                             account_index=None,
-                             coin_type=None,
-                             custom_remainder_address=None,
-                             data=None,
-                             initial_address_index=None,
-                             input_range_start=None,
-                             input_range_end=None,
-                             inputs=None,
-                             output=None,
-                             outputs=None,
-                             tag=None):
+                             secret_manager=None,
+                             account_index: Optional[int] = None,
+                             coin_type: Optional[int] = None,
+                             custom_remainder_address: Optional[str] = None,
+                             data: Optional[HexStr] = None,
+                             initial_address_index: Optional[int] = None,
+                             input_range_start: Optional[int] = None,
+                             input_range_end: Optional[int] = None,
+                             inputs: Optional[List[Dict[str, Any]]] = None,
+                             output: Optional[Dict[str, Any]] = None,
+                             outputs: Optional[List[Any]] = None,
+                             tag: Optional[HexStr] = None):
         """Build and post a block.
 
         Parameters
@@ -469,14 +422,14 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         del options['self']
         del options['secret_manager']
 
-        options = {k:v for k,v in options.items() if v != None}
+        options = {k: v for k, v in options.items() if v != None}
 
         if 'output' in options:
             options['output'] = options.pop('output').as_dict()
 
         if 'coin_type' in options:
             options['coin_type'] = int(options.pop('coin_type'))
-        
+
         is_start_set = 'input_range_start' in options
         is_end_set = 'input_range_end' in options
         if is_start_set or is_end_set:
@@ -493,47 +446,47 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'options': options
         })
 
-    def get_node(self):
+    def get_node(self) -> Dict[str, Any]:
         """Get a node candidate from the healthy node pool.
         """
         return self._call_method('getNode')
 
-    def get_network_info(self):
+    def get_network_info(self) -> Dict[str, Any]:
         """Gets the network related information such as network_id and min_pow_score.
         """
         return self._call_method('getNetworkInfo')
 
-    def get_network_id(self):
+    def get_network_id(self) -> int:
         """Gets the network id of the node we're connecting to.
         """
         return self._call_method('getNetworkId')
 
-    def get_bech32_hrp(self):
+    def get_bech32_hrp(self) -> str:
         """Returns the bech32_hrp.
         """
         return self._call_method('getBech32Hrp')
 
-    def get_min_pow_score(self):
+    def get_min_pow_score(self) -> int:
         """Returns the min pow score.
         """
         return self._call_method('getMinPowScore')
 
-    def get_tips_interval(self):
+    def get_tips_interval(self) -> int:
         """Returns the tips interval.
         """
         return self._call_method('getTipsInterval')
 
-    def get_local_pow(self):
+    def get_local_pow(self) -> bool:
         """Returns if local pow should be used or not.
         """
         return self._call_method('getLocalPow')
 
-    def get_fall_back_to_local_pow(self):
+    def get_fallback_to_local_pow(self) -> bool:
         """Get fallback to local proof of work timeout.
         """
         return self._call_method('getFallbackToLocalPow')
 
-    def unhealthy_nodes(self):
+    def unhealthy_nodes(self) -> List[Dict[str, Any]]:
         """Returns the unhealthy nodes.
         """
         return self._call_method('unhealthyNodes')

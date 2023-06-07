@@ -19,10 +19,10 @@ async fn send_amount() -> Result<()> {
     let amount = 1_000_000;
     let tx = account_0
         .send_amount(
-            vec![SendAmountParams::new(
-                account_1.addresses().await?[0].address().to_string(),
+            [SendAmountParams::new(
+                *account_1.addresses().await?[0].address(),
                 amount,
-            )],
+            )?],
             None,
         )
         .await?;
@@ -52,10 +52,10 @@ async fn send_amount_127_outputs() -> Result<()> {
     let tx = account_0
         .send_amount(
             vec![
-                SendAmountParams::new(
-                    account_1.addresses().await?[0].address().to_string(),
+SendAmountParams::new(
+                    *account_1.addresses().await?[0].address(),
                     amount,
-                );
+                )?;
                 // Only 127, because we need one remainder
                 127
             ],
@@ -88,7 +88,7 @@ async fn send_amount_custom_input() -> Result<()> {
     let amount = 1_000_000;
     let tx = account_0
         .send_amount(
-            vec![SendAmountParams::new(account_1.addresses().await?[0].address().to_string(), amount); 10],
+            vec![SendAmountParams::new(*account_1.addresses().await?[0].address(), amount)?; 10],
             None,
         )
         .await?;
@@ -104,10 +104,10 @@ async fn send_amount_custom_input() -> Result<()> {
     let custom_input = &account_1.unspent_outputs(None).await?[5];
     let tx = account_1
         .send_amount(
-            vec![SendAmountParams::new(
-                account_0.addresses().await?[0].address().to_string(),
+            [SendAmountParams::new(
+                *account_0.addresses().await?[0].address(),
                 amount,
-            )],
+            )?],
             Some(TransactionOptions {
                 custom_inputs: Some(vec![custom_input.output_id]),
                 ..Default::default()
@@ -130,14 +130,10 @@ async fn send_nft() -> Result<()> {
     let wallet = make_wallet(storage_path, None, None).await?;
     let accounts = &create_accounts_with_funds(&wallet, 2).await?;
 
-    let nft_options = vec![MintNftParams {
-        address: Some(accounts[0].addresses().await?[0].address().to_string()),
-        sender: None,
-        metadata: Some(b"some nft metadata".to_vec()),
-        tag: None,
-        issuer: None,
-        immutable_metadata: Some(b"some immutable nft metadata".to_vec()),
-    }];
+    let nft_options = [MintNftParams::new()
+        .with_address(*accounts[0].addresses().await?[0].address())
+        .with_metadata(b"some nft metadata".to_vec())
+        .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
 
     let transaction = accounts[0].mint_nfts(nft_options, None).await.unwrap();
     accounts[0]
@@ -148,10 +144,10 @@ async fn send_nft() -> Result<()> {
     // Send to account 1
     let transaction = accounts[0]
         .send_nft(
-            vec![SendNftParams {
-                address: accounts[1].addresses().await?[0].address().to_string(),
+            [SendNftParams::new(
+                *accounts[1].addresses().await?[0].address(),
                 nft_id,
-            }],
+            )?],
             None,
         )
         .await

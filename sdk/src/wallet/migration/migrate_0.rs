@@ -20,14 +20,19 @@ fn migrate_native_token(output: &mut serde_json::Value) {
 }
 
 #[async_trait]
-impl Migration for Migrate {
+impl MigrationData for Migrate {
     const ID: usize = 0;
     const SDK_VERSION: &'static str = "0.4.0";
     const DATE: time::Date = time::macros::date!(2023 - 05 - 15);
+}
 
-    #[cfg(feature = "storage")]
-    async fn migrate_storage(storage: &crate::wallet::storage::Storage) -> Result<()> {
-        use crate::wallet::storage::constants::{ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY};
+#[async_trait]
+#[cfg(feature = "storage")]
+impl Migration<crate::wallet::storage::Storage> for Migrate {
+    async fn migrate(storage: &crate::wallet::storage::Storage) -> Result<()> {
+        use crate::wallet::storage::constants::{
+            ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, WALLET_INDEXATION_KEY,
+        };
 
         if let Some(account_indexes) = storage.get::<Vec<u32>>(ACCOUNTS_INDEXATION_KEY).await? {
             for account_index in account_indexes {
@@ -48,99 +53,90 @@ impl Migration for Migrate {
                         }
                     }
 
-                    ConvertIncomingTransactions::check(
-                        account
-                            .get_mut("incomingTransactions")
-                            .ok_or(Error::Storage("missing incoming transactions".to_owned()))?,
-                    )?;
-
-                    for output_data in account
-                        .get_mut("outputs")
-                        .ok_or(Error::Storage("missing outputs".to_owned()))?
+                    ConvertIncomingTransactions::check(&mut account["incomingTransactions"])?;
+                    for output_data in account["outputs"]
                         .as_object_mut()
                         .ok_or(Error::Storage("malformatted outputs".to_owned()))?
                         .values_mut()
                     {
-                        ConvertOutputMetadata::check(
-                            output_data
-                                .get_mut("metadata")
-                                .ok_or(Error::Storage("missing metadata".to_owned()))?,
-                        )?;
+                        ConvertOutputMetadata::check(&mut output_data["metadata"])?;
+                        if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
+                            for segment in chain {
+                                ConvertSegment::check(segment)?;
+                            }
+                        }
                     }
-
-                    for output_data in account
-                        .get_mut("unspentOutputs")
-                        .ok_or(Error::Storage("missing unspent outputs".to_owned()))?
+                    for output_data in account["unspentOutputs"]
                         .as_object_mut()
                         .ok_or(Error::Storage("malformatted unspent outputs".to_owned()))?
                         .values_mut()
                     {
-                        ConvertOutputMetadata::check(
-                            output_data
-                                .get_mut("metadata")
-                                .ok_or(Error::Storage("missing metadata".to_owned()))?,
-                        )?;
+                        ConvertOutputMetadata::check(&mut output_data["metadata"])?;
+                        if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
+                            for segment in chain {
+                                ConvertSegment::check(segment)?;
+                            }
+                        }
                     }
                     storage
-                        .set(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"), account)
+                        .set(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}"), &account)
                         .await?;
                 }
             }
         }
+
+        if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
+            ConvertHrp::check(&mut wallet["client_options"]["protocolParameters"]["bech32_hrp"])?;
+            storage.set(WALLET_INDEXATION_KEY, &wallet).await?;
+        }
         Ok(())
     }
+}
 
-    #[cfg(feature = "stronghold")]
-    async fn migrate_backup(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
+#[async_trait]
+#[cfg(feature = "stronghold")]
+impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
+    async fn migrate(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
         use crate::{
-            client::storage::StorageProvider,
-            wallet::wallet::operations::stronghold_backup::stronghold_snapshot::ACCOUNTS_KEY,
+            client::storage::StorageAdapter,
+            wallet::wallet::operations::stronghold_backup::stronghold_snapshot::{ACCOUNTS_KEY, CLIENT_OPTIONS_KEY},
         };
 
-        if let Some(mut accounts) = storage
-            .get(ACCOUNTS_KEY.as_bytes())
-            .await?
-            .map(|bytes| serde_json::from_slice::<Vec<serde_json::Value>>(&bytes))
-            .transpose()?
-        {
+        if let Some(mut accounts) = storage.get::<Vec<serde_json::Value>>(ACCOUNTS_KEY).await? {
             for account in &mut accounts {
-                ConvertIncomingTransactions::check(
-                    account
-                        .get_mut("incomingTransactions")
-                        .ok_or(Error::Storage("missing incoming transactions".to_owned()))?,
-                )?;
-                for output_data in account
-                    .get_mut("outputs")
-                    .ok_or(Error::Storage("missing outputs".to_owned()))?
+                ConvertIncomingTransactions::check(&mut account["incomingTransactions"])?;
+                for output_data in account["outputs"]
                     .as_object_mut()
                     .ok_or(Error::Storage("malformatted outputs".to_owned()))?
                     .values_mut()
                 {
-                    ConvertOutputMetadata::check(
-                        output_data
-                            .get_mut("metadata")
-                            .ok_or(Error::Storage("missing metadata".to_owned()))?,
-                    )?;
+                    ConvertOutputMetadata::check(&mut output_data["metadata"])?;
+                    if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
+                        for segment in chain {
+                            ConvertSegment::check(segment)?;
+                        }
+                    }
                 }
-                for output_data in account
-                    .get_mut("unspentOutputs")
-                    .ok_or(Error::Storage("missing unspent outputs".to_owned()))?
+                for output_data in account["unspentOutputs"]
                     .as_object_mut()
                     .ok_or(Error::Storage("malformatted unspent outputs".to_owned()))?
                     .values_mut()
                 {
-                    ConvertOutputMetadata::check(
-                        output_data
-                            .get_mut("metadata")
-                            .ok_or(Error::Storage("missing metadata".to_owned()))?,
-                    )?;
+                    ConvertOutputMetadata::check(&mut output_data["metadata"])?;
+                    if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
+                        for segment in chain {
+                            ConvertSegment::check(segment)?;
+                        }
+                    }
                 }
             }
-            storage
-                .insert(ACCOUNTS_KEY.as_bytes(), serde_json::to_string(&accounts)?.as_bytes())
-                .await?;
+            storage.set(ACCOUNTS_KEY, &accounts).await?;
         }
-        storage.delete(b"backup_schema_version").await.ok();
+        if let Some(mut client_options) = storage.get::<serde_json::Value>(CLIENT_OPTIONS_KEY).await? {
+            ConvertHrp::check(&mut client_options["protocolParameters"]["bech32_hrp"])?;
+            storage.set(CLIENT_OPTIONS_KEY, &client_options).await?;
+        }
+        storage.delete("backup_schema_version").await.ok();
         Ok(())
     }
 }
@@ -160,7 +156,7 @@ trait Convert {
 }
 
 mod types {
-    use core::str::FromStr;
+    use core::{marker::PhantomData, str::FromStr};
 
     use serde::{Deserialize, Serialize};
 
@@ -355,6 +351,73 @@ mod types {
         Conflicting,
         UnknownPruned,
     }
+
+    #[derive(Deserialize)]
+    #[allow(non_camel_case_types)]
+    pub struct Crypto_0_18_0_Segment {
+        pub bs: [u8; 4],
+        pub hardened: bool,
+    }
+
+    pub struct Hrp {
+        inner: [u8; 83],
+        len: u8,
+    }
+
+    impl Hrp {
+        /// Convert a string to an Hrp without checking validity.
+        pub const fn from_str_unchecked(hrp: &str) -> Self {
+            let len = hrp.len();
+            let mut bytes = [0; 83];
+            let hrp = hrp.as_bytes();
+            let mut i = 0;
+            while i < len {
+                bytes[i] = hrp[i];
+                i += 1;
+            }
+            Self {
+                inner: bytes,
+                len: len as _,
+            }
+        }
+    }
+
+    impl FromStr for Hrp {
+        type Err = Error;
+
+        fn from_str(hrp: &str) -> Result<Self, Self::Err> {
+            let len = hrp.len();
+            if hrp.is_ascii() && len <= 83 {
+                let mut bytes = [0; 83];
+                bytes[..len].copy_from_slice(hrp.as_bytes());
+                Ok(Self {
+                    inner: bytes,
+                    len: len as _,
+                })
+            } else {
+                Err(Error::InvalidBech32Hrp(hrp.to_string()))
+            }
+        }
+    }
+
+    impl core::fmt::Display for Hrp {
+        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            let hrp_str = self.inner[..self.len as usize]
+                .iter()
+                .map(|b| *b as char)
+                .collect::<String>();
+            f.write_str(&hrp_str)
+        }
+    }
+
+    string_serde_impl!(Hrp);
+
+    #[derive(Serialize, Deserialize)]
+    #[repr(transparent)]
+    pub struct StringPrefix<B> {
+        pub inner: String,
+        bounded: PhantomData<B>,
+    }
 }
 
 struct ConvertIncomingTransactions;
@@ -412,5 +475,25 @@ impl Convert for ConvertOutputMetadata {
             milestone_timestamp_booked: old.milestone_timestamp_booked,
             ledger_index: old.ledger_index,
         })
+    }
+}
+
+struct ConvertSegment;
+impl Convert for ConvertSegment {
+    type New = u32;
+    type Old = types::Crypto_0_18_0_Segment;
+
+    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
+        Ok(u32::from_be_bytes(old.bs))
+    }
+}
+
+struct ConvertHrp;
+impl Convert for ConvertHrp {
+    type New = types::Hrp;
+    type Old = types::StringPrefix<u8>;
+
+    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
+        Ok(Self::New::from_str_unchecked(&old.inner))
     }
 }

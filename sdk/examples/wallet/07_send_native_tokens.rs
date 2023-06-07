@@ -8,7 +8,7 @@
 
 use iota_sdk::{
     types::block::{
-        address::Address,
+        address::Bech32Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken},
     },
     wallet::{Result, SendNativeTokensParams, Wallet},
@@ -37,16 +37,16 @@ async fn main() -> Result<()> {
     {
         // Set the stronghold password
         wallet
-            .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+            .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        let bech32_address = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string();
+        let bech32_address =
+            Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?;
 
-        let outputs = vec![SendNativeTokensParams {
-            address: bech32_address.clone(),
-            native_tokens: vec![(*token_id, U256::from(10))],
-            ..Default::default()
-        }];
+        let outputs = [SendNativeTokensParams::new(
+            bech32_address,
+            [(*token_id, U256::from(10))],
+        )?];
 
         println!("Preparing native token transaction...");
 
@@ -71,12 +71,10 @@ async fn main() -> Result<()> {
         // Send native tokens together with the required storage deposit
         let rent_structure = account.client().get_rent_structure().await?;
 
-        let outputs = vec![
-            BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(bech32_address)?))
-                .with_native_tokens(vec![NativeToken::new(*token_id, U256::from(10))?])
-                .finish_output(account.client().get_token_supply().await?)?,
-        ];
+        let outputs = [BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+            .add_unlock_condition(AddressUnlockCondition::new(bech32_address))
+            .with_native_tokens([NativeToken::new(*token_id, U256::from(10))?])
+            .finish_output(account.client().get_token_supply().await?)?];
 
         let transaction = account.send(outputs, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);

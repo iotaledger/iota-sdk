@@ -6,7 +6,7 @@
 //! `cargo run --example recursive_alias --release`
 
 use iota_sdk::{
-    client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
+    client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::{
         address::{Address, AliasAddress},
         output::{
@@ -35,11 +35,10 @@ async fn main() -> Result<()> {
     let secret_manager =
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
-    println!(
-        "{}",
-        request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?
-    );
+    let address = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .await?[0];
+    println!("{}", request_funds_from_faucet(&faucet_url, &address).await?);
     // Wait some time for the faucet transaction
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
@@ -51,7 +50,7 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     let alias_output_builder = AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AliasId::null())
         .add_feature(SenderFeature::new(address))
-        .with_state_metadata(vec![1, 2, 3])
+        .with_state_metadata([1, 2, 3])
         .add_immutable_feature(IssuerFeature::new(address))
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address));
@@ -83,7 +82,7 @@ async fn main() -> Result<()> {
     let alias_0_address = Address::Alias(AliasAddress::new(alias_id_0));
     let alias_1_address = Address::Alias(AliasAddress::new(alias_id_1));
 
-    let outputs = vec![
+    let outputs = [
         // make second alias output be controlled by the first one
         alias_output_builder
             .clone()
@@ -119,16 +118,14 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     // create third transaction with the third alias output updated
     //////////////////////////////////
-    let outputs = vec![
-        alias_output_builder
-            .clone()
-            .with_alias_id(alias_id_2)
-            .with_state_index(1)
-            .with_state_metadata(vec![3, 2, 1])
-            .replace_unlock_condition(StateControllerAddressUnlockCondition::new(alias_1_address))
-            .replace_unlock_condition(GovernorAddressUnlockCondition::new(alias_1_address))
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [alias_output_builder
+        .clone()
+        .with_alias_id(alias_id_2)
+        .with_state_index(1)
+        .with_state_metadata([3, 2, 1])
+        .replace_unlock_condition(StateControllerAddressUnlockCondition::new(alias_1_address))
+        .replace_unlock_condition(GovernorAddressUnlockCondition::new(alias_1_address))
+        .finish_output(token_supply)?];
 
     let block_3 = client
         .block()
@@ -145,15 +142,13 @@ async fn main() -> Result<()> {
     //////////////////////////////////
     // create fourth transaction with the third alias output updated again
     //////////////////////////////////
-    let outputs = vec![
-        alias_output_builder
-            .with_alias_id(alias_id_2)
-            .with_state_index(2)
-            .with_state_metadata(vec![2, 1, 3])
-            .replace_unlock_condition(StateControllerAddressUnlockCondition::new(alias_1_address))
-            .replace_unlock_condition(GovernorAddressUnlockCondition::new(alias_1_address))
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [alias_output_builder
+        .with_alias_id(alias_id_2)
+        .with_state_index(2)
+        .with_state_metadata([2, 1, 3])
+        .replace_unlock_condition(StateControllerAddressUnlockCondition::new(alias_1_address))
+        .replace_unlock_condition(GovernorAddressUnlockCondition::new(alias_1_address))
+        .finish_output(token_supply)?];
 
     let block_3 = client
         .block()

@@ -9,6 +9,7 @@ use derivative::Derivative;
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
 use iota_sdk::{
     client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions},
+    types::block::address::Hrp,
     wallet::{
         account::{types::AccountIdentifier, SyncOptions},
         ClientOptions,
@@ -33,7 +34,7 @@ pub enum WalletMethod {
         /// The account alias.
         alias: Option<String>,
         /// The bech32 HRP.
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Read account.
     /// Expected response: [`Account`](crate::Response::Account)
@@ -127,7 +128,7 @@ pub enum WalletMethod {
         ignore_if_coin_type_mismatch: Option<bool>,
         /// If ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", no
         /// accounts will be restored.
-        ignore_if_bech32_mismatch: Option<String>,
+        ignore_if_bech32_mismatch: Option<Hrp>,
     },
     /// Removes the latest account (account with the largest account index).
     /// Expected response: [`Ok`](crate::Response::Ok)
@@ -139,7 +140,7 @@ pub enum WalletMethod {
     /// Generate an address without storing it
     /// Expected response: [`Bech32Address`](crate::Response::Bech32Address)
     #[serde(rename_all = "camelCase")]
-    GenerateAddress {
+    GenerateEd25519Address {
         /// Account index
         account_index: u32,
         /// Account index
@@ -147,7 +148,7 @@ pub enum WalletMethod {
         /// Options
         options: Option<GenerateAddressOptions>,
         /// Bech32 HRP
-        bech32_hrp: Option<String>,
+        bech32_hrp: Option<Hrp>,
     },
     /// Get the ledger nano status
     /// Expected response: [`LedgerNanoStatus`](crate::Response::LedgerNanoStatus)

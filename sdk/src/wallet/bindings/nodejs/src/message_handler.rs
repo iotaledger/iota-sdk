@@ -3,13 +3,16 @@
 
 use std::sync::Arc;
 
-use iota_sdk::wallet::{
-    events::types::{Event, WalletEventType},
-    message_interface::{
-        create_message_handler, init_logger as init_logger_rust, ManagerOptions, Message, Response,
-        WalletMessageHandler,
+use iota_sdk::{
+    client::stronghold::StrongholdAdapter,
+    wallet::{
+        events::types::{Event, WalletEventType},
+        message_interface::{
+            create_message_handler, init_logger as init_logger_rust, ManagerOptions, Message, Response,
+            WalletMessageHandler,
+        },
+        Result,
     },
-    Result,
 };
 use neon::prelude::*;
 use tokio::sync::RwLock;
@@ -31,9 +34,8 @@ impl MessageHandler {
     fn new(channel: Channel, options: String) -> Result<Self> {
         let manager_options = serde_json::from_str::<ManagerOptions>(&options)?;
 
-        let wallet_message_handler = crate::RUNTIME
-            .block_on(async move { create_message_handler(Some(manager_options)).await })
-            .expect("error initializing account manager");
+        let wallet_message_handler =
+            crate::RUNTIME.block_on(async move { create_message_handler(Some(manager_options)).await })?;
 
         Ok(Self {
             channel,
@@ -76,7 +78,7 @@ fn call_event_callback(channel: &neon::event::Channel, event_data: Event, callba
     channel.send(move |mut cx| {
         let cb = (*callback).to_inner(&mut cx);
         let this = cx.undefined();
-        let args = vec![
+        let args = [
             cx.undefined().upcast::<JsValue>(),
             cx.string(serde_json::to_string(&event_data).unwrap())
                 .upcast::<JsValue>(),
@@ -120,7 +122,7 @@ pub fn send_message(mut cx: FunctionContext) -> JsResult<JsUndefined> {
                 let cb = callback.into_inner(&mut cx);
                 let this = cx.undefined();
 
-                let args = vec![
+                let args = [
                     if is_error {
                         cx.string(response.clone()).upcast::<JsValue>()
                     } else {
@@ -144,11 +146,11 @@ pub fn send_message(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 pub fn listen(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let js_arr_handle: Handle<JsArray> = cx.argument(0)?;
     let vec: Vec<Handle<JsValue>> = js_arr_handle.to_vec(&mut cx)?;
-    let mut event_types = vec![];
+    let mut event_types = Vec::new();
     for event_string in vec {
-        let event_type = event_string.downcast_or_throw::<JsString, FunctionContext>(&mut cx)?;
+        let event_type = event_string.downcast_or_throw::<JsNumber, FunctionContext>(&mut cx)?;
         let wallet_event_type =
-            WalletEventType::try_from(event_type.value(&mut cx).as_str()).or_else(|e| cx.throw_error(e))?;
+            WalletEventType::try_from(event_type.value(&mut cx) as u8).or_else(|e| cx.throw_error(e))?;
         event_types.push(wallet_event_type);
     }
 
@@ -181,4 +183,39 @@ pub fn destroy(mut cx: FunctionContext) -> JsResult<JsPromise> {
         deferred.settle_with(&channel, move |mut cx| Ok(cx.undefined()));
     });
     Ok(promise)
+}
+
+pub fn migrate_stronghold_snapshot_v2_to_v3(mut cx: FunctionContext) -> JsResult<JsUndefined> {
+    let current_path = cx.argument::<JsString>(0)?.value(&mut cx);
+    let current_password = cx.argument::<JsString>(1)?.value(&mut cx).into();
+    let salt = cx.argument::<JsString>(2)?.value(&mut cx);
+    let rounds = cx.argument::<JsNumber>(3)?.value(&mut cx);
+    let new_path = cx
+        .argument_opt(4)
+        .map(|opt| opt.downcast_or_throw::<JsString, _>(&mut cx))
+        .transpose()?
+        .map(|opt| opt.value(&mut cx));
+    let new_password = cx
+        .argument_opt(5)
+        .map(|opt| opt.downcast_or_throw::<JsString, _>(&mut cx))
+        .transpose()?
+        .map(|opt| opt.value(&mut cx))
+        .map(Into::into);
+
+    StrongholdAdapter::migrate_snapshot_v2_to_v3(
+        &current_path,
+        current_password,
+        salt,
+        rounds as u32,
+        new_path.as_ref(),
+        new_password,
+    )
+    .or_else(|e| {
+        cx.throw_error(
+            serde_json::to_string(&Response::Error(e.into()))
+                .expect("the response is generated manually, so unwrap is safe."),
+        )
+    })?;
+
+    Ok(cx.undefined())
 }

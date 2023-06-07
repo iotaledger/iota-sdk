@@ -7,12 +7,12 @@ use std::collections::{hash_map::Values, HashSet};
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
-        api::input_selection::{Burn, InputSelection, Selected},
+        api::input_selection::{is_alias_transition, Burn, InputSelection, Selected},
         secret::types::InputSigningData,
     },
     types::block::{
         address::Address,
-        output::{AliasTransition, Output, OutputId},
+        output::{Output, OutputId},
     },
     wallet::account::{
         operations::helpers::time::can_output_be_unlocked_forever_from_now_on, Account, AccountDetails, OutputData,
@@ -53,7 +53,7 @@ impl Account {
             .iter()
             .chain(account_details.internal_addresses().iter())
             .map(|address| *address.address.as_ref())
-            .collect();
+            .collect::<Vec<_>>();
 
         // Prevent consuming the voting output if not actually wanted
         #[cfg(feature = "participation")]
@@ -253,7 +253,7 @@ fn filter_inputs(
         }
 
         // Defaults to state transition if it is not explicitly a governance transition or a burn.
-        let alias_state_transition = alias_state_transition(output_data, outputs, burn)?;
+        let alias_state_transition = is_alias_transition(&output_data.output, output_data.output_id, outputs, burn);
 
         if let Some(available_input) = output_data.input_signing_data(account, current_time, alias_state_transition)? {
             available_outputs_signing_data.push(available_input);
@@ -261,45 +261,4 @@ fn filter_inputs(
     }
 
     Ok(available_outputs_signing_data)
-}
-
-// Returns if alias transition is a state transition with the provided outputs for a given input.
-pub(crate) fn alias_state_transition(
-    output_data: &OutputData,
-    outputs: &[Output],
-    burn: Option<&Burn>,
-) -> crate::wallet::Result<Option<AliasTransition>> {
-    Ok(if let Output::Alias(alias_input) = &output_data.output {
-        let alias_id = alias_input.alias_id_non_null(&output_data.output_id);
-        // Check if alias exists in the outputs and get the required transition type
-        outputs
-            .iter()
-            .find_map(|o| {
-                if let Output::Alias(alias_output) = o {
-                    if *alias_output.alias_id() == alias_id {
-                        if alias_output.state_index() == alias_input.state_index() {
-                            Some(Some(AliasTransition::Governance))
-                        } else {
-                            Some(Some(AliasTransition::State))
-                        }
-                    } else {
-                        None
-                    }
-                } else {
-                    None
-                }
-                // if not find in the outputs, the alias gets burned which is a governance transaction
-            })
-            .unwrap_or_else(|| {
-                burn.and_then(|burn| {
-                    if burn.aliases().contains(&alias_id) {
-                        Some(AliasTransition::Governance)
-                    } else {
-                        None
-                    }
-                })
-            })
-    } else {
-        None
-    })
 }

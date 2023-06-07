@@ -12,10 +12,11 @@ use crate::{
 };
 use crate::{
     client::{
-        api::{PreparedTransactionDataDto, SignedTransactionDataDto},
+        api::{GetAddressesOptions, PreparedTransactionDataDto, SignedTransactionDataDto},
         secret::GenerateAddressOptions,
     },
     types::block::{
+        address::Bech32Address,
         output::{
             dto::{OutputDto, TokenSchemeDto},
             feature::dto::FeatureDto,
@@ -155,11 +156,23 @@ pub enum AccountMethod {
         foundry_id: FoundryId,
         options: Option<TransactionOptionsDto>,
     },
-    /// Generate new unused addresses.
-    /// Expected response: [`GeneratedAddress`](crate::wallet::message_interface::Response::GeneratedAddress)
-    GenerateAddresses {
+    /// Generate new unused ed25519 addresses.
+    /// Expected response:
+    /// [`GeneratedEd25519Addresses`](crate::wallet::message_interface::Response::GeneratedEd25519Addresses)
+    GenerateEd25519Addresses {
         amount: u32,
         options: Option<GenerateAddressOptions>,
+    },
+    /// Generate EVM addresses.
+    /// Expected response:
+    /// [`GeneratedEvmAddresses`](crate::wallet::message_interface::Response::GeneratedEvmAddresses)
+    GenerateEvmAddresses { options: GetAddressesOptions },
+    /// Signs a message with an Evm private key.
+    SignEvm {
+        /// The message to sign, hex encoded String
+        message: String,
+        /// Chain to sign the message with
+        chain: Vec<u32>,
     },
     /// Get the [`OutputData`](crate::wallet::account::types::OutputData) of an output stored in the account
     /// Expected response: [`OutputData`](crate::wallet::message_interface::Response::OutputData)
@@ -254,7 +267,7 @@ pub enum AccountMethod {
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
-        params: OutputParamsDto,
+        params: Box<OutputParamsDto>,
         transaction_options: Option<TransactionOptionsDto>,
     },
     /// Prepare transaction.
@@ -417,5 +430,5 @@ pub enum AccountMethod {
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     GetParticipationEvents,
     /// Expected response: [`Faucet`](crate::wallet::message_interface::Response::Faucet)
-    RequestFundsFromFaucet { url: String, address: String },
+    RequestFundsFromFaucet { url: String, address: Bech32Address },
 }

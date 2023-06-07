@@ -170,18 +170,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
 
             Response::Output(OutputDto::from(&output))
         }
-        ClientMethod::GenerateAddresses {
-            secret_manager,
-            options,
-        } => {
-            let secret_manager = (&secret_manager).try_into()?;
-            let addresses = client
-                .get_addresses(&secret_manager)
-                .set_options(options)?
-                .finish()
-                .await?;
-            Response::GeneratedAddresses(addresses)
-        }
         ClientMethod::BuildAndPostBlock {
             secret_manager,
             options,
@@ -223,7 +211,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             let protocol_response = ProtocolParametersDto {
                 protocol_version: params.protocol_version(),
                 network_name: params.network_name().to_string(),
-                bech32_hrp: params.bech32_hrp().to_string(),
+                bech32_hrp: *params.bech32_hrp(),
                 min_pow_score: params.min_pow_score(),
                 below_max_depth: params.below_max_depth(),
                 rent_structure: RentStructureDto {
@@ -372,7 +360,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::FoundryOutputId { foundry_id } => Response::OutputId(client.foundry_output_id(foundry_id).await?),
         ClientMethod::GetOutputs { output_ids } => {
             let outputs_response = client
-                .get_outputs(output_ids)
+                .get_outputs(&output_ids)
                 .await?
                 .iter()
                 .map(OutputWithMetadataResponse::from)
@@ -381,7 +369,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::GetOutputsIgnoreErrors { output_ids } => {
             let outputs_response = client
-                .get_outputs_ignore_errors(output_ids)
+                .get_outputs_ignore_errors(&output_ids)
                 .await?
                 .iter()
                 .map(OutputWithMetadataResponse::from)
@@ -457,19 +445,17 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::Promoted((block_id, BlockDto::from(&block)))
         }
         ClientMethod::HexToBech32 { hex, bech32_hrp } => {
-            Response::Bech32Address(client.hex_to_bech32(&hex, bech32_hrp.as_deref()).await?)
+            Response::Bech32Address(client.hex_to_bech32(&hex, bech32_hrp).await?)
         }
         ClientMethod::AliasIdToBech32 { alias_id, bech32_hrp } => {
-            Response::Bech32Address(client.alias_id_to_bech32(alias_id, bech32_hrp.as_deref()).await?)
+            Response::Bech32Address(client.alias_id_to_bech32(alias_id, bech32_hrp).await?)
         }
         ClientMethod::NftIdToBech32 { nft_id, bech32_hrp } => {
-            Response::Bech32Address(client.nft_id_to_bech32(nft_id, bech32_hrp.as_deref()).await?)
+            Response::Bech32Address(client.nft_id_to_bech32(nft_id, bech32_hrp).await?)
         }
-        ClientMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => Response::Bech32Address(
-            client
-                .hex_public_key_to_bech32_address(&hex, bech32_hrp.as_deref())
-                .await?,
-        ),
+        ClientMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => {
+            Response::Bech32Address(client.hex_public_key_to_bech32_address(&hex, bech32_hrp).await?)
+        }
         ClientMethod::RequestFundsFromFaucet { url, address } => {
             Response::Faucet(request_funds_from_faucet(&url, &address).await?)
         }

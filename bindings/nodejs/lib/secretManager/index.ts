@@ -3,4 +3,4 @@
 
 export * from './SecretManager';
 export * from './SecretManagerMethodHandler';
-export * from '../../types/secretManager';
+export * from '../types/secretManager';

@@ -133,72 +133,76 @@ impl Account {
             }
         }
 
-        for (event_id, output_ids) in events {
+        for (event_id, mut output_ids) in events {
             log::debug!(
                 "[get_participation_overview] requesting {} outputs for event {event_id}",
                 output_ids.len()
             );
             let event_client = self.get_client_for_event(&event_id).await?;
 
-            for output_id_chunk in output_ids.chunks(100).map(|x| x.to_vec()) {
-                let mut tasks = Vec::new();
-                for output_id in output_id_chunk {
-                    // Skip if participations already contains this output id with participation for this event
-                    if let Some(p) = participations.get(&event_id) {
-                        if p.contains_key(&output_id) {
-                            log::debug!(
-                                "[get_participation_overview] skip requesting already known {output_id} for event {event_id}",
-                            );
-                            continue;
-                        }
+            output_ids.retain(|output_id| {
+                // Skip if participations already contains this output id with participation for this event
+                if let Some(p) = participations.get(&event_id) {
+                    if p.contains_key(output_id) {
+                        log::debug!(
+                            "[get_participation_overview] skip requesting already known {output_id} for event {event_id}",
+                        );
+                        return false;
                     }
-
-                    let event_client = event_client.clone();
-                    tasks.push(async move {
-                        task::spawn(async move { (event_client.output_status(&output_id).await, output_id) }).await
-                    });
                 }
+                true
+            });
 
-                let results = futures::future::try_join_all(tasks).await?;
-                for (result, output_id) in results {
-                    match result {
-                        Ok(status) => {
-                            // Cache data for spent outputs
-                            if spent_outputs.contains(&output_id) {
-                                match spent_cached_outputs.entry(output_id) {
-                                    Entry::Vacant(entry) => {
-                                        entry.insert(status.clone());
-                                    }
-                                    Entry::Occupied(mut entry) => {
-                                        let output_status_response = entry.get_mut();
-                                        for (event_id, participation) in &status.participations {
-                                            output_status_response
-                                                .participations
-                                                .insert(*event_id, participation.clone());
-                                        }
-                                    }
+            let results = futures::future::try_join_all(output_ids.chunks(100).map(ToOwned::to_owned).map(|chunk| {
+                let event_client = event_client.clone();
+                task::spawn(async move {
+                    futures::future::join_all(chunk.iter().map(|output_id| async {
+                        let output_id = *output_id;
+                        (event_client.output_status(&output_id).await, output_id)
+                    }))
+                    .await
+                })
+            }))
+            .await?;
+
+            for (result, output_id) in results.into_iter().flatten() {
+                match result {
+                    Ok(status) => {
+                        // Cache data for spent outputs
+                        if spent_outputs.contains(&output_id) {
+                            match spent_cached_outputs.entry(output_id) {
+                                Entry::Vacant(entry) => {
+                                    entry.insert(status.clone());
                                 }
-                            }
-                            for (event_id, participation) in status.participations {
-                                // Skip events that aren't in `event_ids` if not None
-                                if let Some(event_ids) = event_ids.as_ref() {
-                                    if !event_ids.contains(&event_id) {
-                                        continue;
-                                    }
-                                }
-                                match participations.entry(event_id) {
-                                    Entry::Vacant(entry) => {
-                                        entry.insert(HashMap::from([(output_id, participation)]));
-                                    }
-                                    Entry::Occupied(mut entry) => {
-                                        entry.get_mut().insert(output_id, participation);
+                                Entry::Occupied(mut entry) => {
+                                    let output_status_response = entry.get_mut();
+                                    for (event_id, participation) in &status.participations {
+                                        output_status_response
+                                            .participations
+                                            .insert(*event_id, participation.clone());
                                     }
                                 }
                             }
                         }
-                        Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {}
-                        Err(e) => return Err(crate::wallet::Error::Client(e.into())),
+                        for (event_id, participation) in status.participations {
+                            // Skip events that aren't in `event_ids` if not None
+                            if let Some(event_ids) = event_ids.as_ref() {
+                                if !event_ids.contains(&event_id) {
+                                    continue;
+                                }
+                            }
+                            match participations.entry(event_id) {
+                                Entry::Vacant(entry) => {
+                                    entry.insert(HashMap::from([(output_id, participation)]));
+                                }
+                                Entry::Occupied(mut entry) => {
+                                    entry.get_mut().insert(output_id, participation);
+                                }
+                            }
+                        }
                     }
+                    Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {}
+                    Err(e) => return Err(crate::wallet::Error::Client(e.into())),
                 }
             }
         }
@@ -213,7 +217,7 @@ impl Account {
                 .storage_manager
                 .read()
                 .await
-                .set_cached_participation_output_status(self.details().await.index, spent_cached_outputs)
+                .set_cached_participation_output_status(self.details().await.index, &spent_cached_outputs)
                 .await?;
         }
 
@@ -320,7 +324,7 @@ impl ParticipationEventWithNodes {
         Self {
             id: ParticipationEventId::new([42; 32]),
             data: ParticipationEventData::mock(),
-            nodes: vec![],
+            nodes: Vec::new(),
         }
     }
 }

@@ -11,7 +11,7 @@
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use iota_sdk::{
-    client::{request_funds_from_faucet, secret::SecretManager, Client, Result},
+    client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::output::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         BasicOutputBuilder,
@@ -35,13 +35,15 @@ async fn main() -> Result<()> {
     let secret_manager =
         SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let addresses = client.get_addresses(&secret_manager).with_range(0..2).get_raw().await?;
+    let addresses = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..2))
+        .await?;
     let sender_address = addresses[0];
     let receiver_address = addresses[1];
 
     let token_supply = client.get_token_supply().await?;
 
-    request_funds_from_faucet(&faucet_url, &sender_address.to_bech32(client.get_bech32_hrp().await?)).await?;
+    request_funds_from_faucet(&faucet_url, &sender_address).await?;
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
     let tomorrow = (SystemTime::now() + Duration::from_secs(24 * 3600))
@@ -51,7 +53,7 @@ async fn main() -> Result<()> {
         .try_into()
         .unwrap();
 
-    let outputs = vec![
+    let outputs = [
         // with storage deposit return
         BasicOutputBuilder::new_with_amount(255_100)
             .add_unlock_condition(AddressUnlockCondition::new(receiver_address))

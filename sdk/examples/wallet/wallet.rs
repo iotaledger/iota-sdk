@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
     // let accounts = wallet.get_accounts().await?;
     // println!("Accounts: {:?}", accounts);
 
-    let _address = account.generate_addresses(5, None).await?;
+    let _address = account.generate_ed25519_addresses(5, None).await?;
 
     let addresses = account.addresses().await?;
     println!("Addresses: {}", addresses.len());
@@ -63,10 +63,10 @@ async fn main() -> Result<()> {
     println!("Addresses with balance: {}", addresses_with_unspent_outputs.len());
 
     // send transaction
-    let outputs = vec![SendAmountParams::new(
-        "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
+    let outputs = [SendAmountParams::new(
+        "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
         1_000_000,
-    )];
+    )?];
     let transaction = account.send_amount(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 

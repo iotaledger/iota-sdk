@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
         }
     };
 
-    let address = account.generate_addresses(1, None).await?;
+    let address = account.generate_ed25519_addresses(1, None).await?;
 
     println!("{address:?}");
 
@@ -60,10 +60,10 @@ async fn main() -> Result<()> {
     println!("Balance: {balance:?}");
 
     // send transaction
-    let outputs = vec![SendAmountParams::new(
-        "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
+    let outputs = [SendAmountParams::new(
+        "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
         1_000_000,
-    )];
+    )?];
     let transaction = account.send_amount(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
+    client::api::PreparedTransactionData,
     types::{
         api::plugins::participation::types::{Participation, ParticipationEventId, Participations, PARTICIPATION_TAG},
         block::{
@@ -32,7 +33,24 @@ impl Account {
     ///
     /// This is an add OR update function, not just add.
     /// This should use regular client options, NOT specific node for the event.
-    pub async fn vote(&self, event_id: Option<ParticipationEventId>, answers: Option<Vec<u8>>) -> Result<Transaction> {
+    pub async fn vote(
+        &self,
+        event_id: impl Into<Option<ParticipationEventId>> + Send,
+        answers: impl Into<Option<Vec<u8>>> + Send,
+    ) -> Result<Transaction> {
+        let prepared = self.prepare_vote(event_id, answers).await?;
+        self.sign_and_submit_transaction(prepared).await
+    }
+
+    /// Function to prepare the transaction for
+    /// [Account.vote()](crate::account::Account.vote)
+    pub async fn prepare_vote(
+        &self,
+        event_id: impl Into<Option<ParticipationEventId>> + Send,
+        answers: impl Into<Option<Vec<u8>>> + Send,
+    ) -> Result<PreparedTransactionData> {
+        let event_id = event_id.into();
+        let answers = answers.into();
         if let Some(event_id) = event_id {
             let event_status = self.get_participation_event_status(&event_id).await?;
 
@@ -83,14 +101,14 @@ impl Account {
         .to_bytes()?;
 
         let new_output = BasicOutputBuilder::from(output)
-            .with_features(vec![
+            .with_features([
                 Feature::Tag(TagFeature::new(PARTICIPATION_TAG)?),
                 Feature::Metadata(MetadataFeature::new(participation_bytes.clone())?),
             ])
             .finish_output(self.client().get_token_supply().await?)?;
 
-        self.send(
-            vec![new_output],
+        self.prepare_transaction(
+            [new_output],
             Some(TransactionOptions {
                 // Only use previous voting output as input.
                 custom_inputs: Some(vec![voting_output.output_id]),
@@ -114,6 +132,13 @@ impl Account {
     /// If multiple outputs contain metadata for this event, removes all of them.
     /// If NOT already voting for this event, throws an error (e.g. output with this event ID not found).
     pub async fn stop_participating(&self, event_id: ParticipationEventId) -> Result<Transaction> {
+        let prepared = self.prepare_stop_participating(event_id).await?;
+        self.sign_and_submit_transaction(prepared).await
+    }
+
+    /// Function to prepare the transaction for
+    /// [Account.stop_participating()](crate::account::Account.stop_participating)
+    pub async fn prepare_stop_participating(&self, event_id: ParticipationEventId) -> Result<PreparedTransactionData> {
         let voting_output = self
             .get_voting_output()
             .await?
@@ -152,14 +177,14 @@ impl Account {
         .to_bytes()?;
 
         let new_output = BasicOutputBuilder::from(output)
-            .with_features(vec![
+            .with_features([
                 Feature::Tag(TagFeature::new(PARTICIPATION_TAG)?),
                 Feature::Metadata(MetadataFeature::new(participation_bytes.clone())?),
             ])
             .finish_output(self.client().get_token_supply().await?)?;
 
-        self.send(
-            vec![new_output],
+        self.prepare_transaction(
+            [new_output],
             Some(TransactionOptions {
                 // Only use previous voting output as input.
                 custom_inputs: Some(vec![voting_output.output_id]),

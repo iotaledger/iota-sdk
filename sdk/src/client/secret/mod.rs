@@ -22,7 +22,10 @@ use std::time::Duration;
 use std::{collections::HashMap, ops::Range, str::FromStr};
 
 use async_trait::async_trait;
-use crypto::keys::slip10::Chain;
+use crypto::{
+    keys::slip10::Chain,
+    signatures::secp256k1_ecdsa::{self, EvmAddress},
+};
 use serde::{Deserialize, Serialize};
 use zeroize::ZeroizeOnDrop;
 
@@ -44,7 +47,7 @@ use crate::{
         Error,
     },
     types::block::{
-        address::Address,
+        address::{Address, Ed25519Address},
         output::Output,
         payload::{transaction::TransactionEssence, Payload, TransactionPayload},
         semantic::ConflictReason,
@@ -62,16 +65,31 @@ pub trait SecretManage: Send + Sync {
     /// Generates addresses.
     ///
     /// For `coin_type`, see also <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>.
-    async fn generate_addresses(
+    async fn generate_ed25519_addresses(
         &self,
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
-    ) -> Result<Vec<Address>, Self::Error>;
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<Ed25519Address>, Self::Error>;
 
-    /// Signs `msg` using the given [`Chain`].
+    async fn generate_evm_addresses(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<EvmAddress>, Self::Error>;
+
+    /// Signs msg using the given [`Chain`] using Ed25519.
     async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error>;
+
+    /// Signs msg using the given [`Chain`] using Secp256k1.
+    async fn sign_evm(
+        &self,
+        msg: &[u8],
+        chain: &Chain,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error>;
 
     /// Signs `essence_hash` using the given `chain`, returning an [`Unlock`].
     async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: &Chain) -> Result<Unlock, Self::Error> {
@@ -174,7 +192,8 @@ impl TryFrom<&SecretManagerDto> for SecretManager {
                 let mut builder = StrongholdSecretManager::builder();
 
                 if let Some(password) = &stronghold_dto.password {
-                    builder = builder.password(password);
+                    // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
+                    builder = builder.password(password.clone());
                 }
 
                 if let Some(timeout) = &stronghold_dto.timeout {
@@ -189,7 +208,10 @@ impl TryFrom<&SecretManagerDto> for SecretManager {
 
             SecretManagerDto::Mnemonic(mnemonic) => Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?),
 
-            SecretManagerDto::HexSeed(hex_seed) => Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed)?),
+            SecretManagerDto::HexSeed(hex_seed) => {
+                // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
+                Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed.clone())?)
+            }
 
             SecretManagerDto::Placeholder => Self::Placeholder(PlaceholderSecretManager),
         })
@@ -227,30 +249,59 @@ impl From<&SecretManager> for SecretManagerDto {
 impl SecretManage for SecretManager {
     type Error = Error;
 
-    async fn generate_addresses(
+    async fn generate_ed25519_addresses(
         &self,
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
-    ) -> crate::client::Result<Vec<Address>> {
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> crate::client::Result<Vec<Ed25519Address>> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager
-                .generate_addresses(coin_type, account_index, address_indexes, options)
+                .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
                 .await?),
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => Ok(secret_manager
-                .generate_addresses(coin_type, account_index, address_indexes, options)
+                .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
                 .await?),
             Self::Mnemonic(secret_manager) => {
                 secret_manager
-                    .generate_addresses(coin_type, account_index, address_indexes, options)
+                    .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
             Self::Placeholder(secret_manager) => {
                 secret_manager
-                    .generate_addresses(coin_type, account_index, address_indexes, options)
+                    .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
+                    .await
+            }
+        }
+    }
+
+    async fn generate_evm_addresses(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<EvmAddress>, Self::Error> {
+        match self {
+            #[cfg(feature = "stronghold")]
+            Self::Stronghold(secret_manager) => Ok(secret_manager
+                .generate_evm_addresses(coin_type, account_index, address_indexes, options)
+                .await?),
+            #[cfg(feature = "ledger_nano")]
+            Self::LedgerNano(secret_manager) => Ok(secret_manager
+                .generate_evm_addresses(coin_type, account_index, address_indexes, options)
+                .await?),
+            Self::Mnemonic(secret_manager) => {
+                secret_manager
+                    .generate_evm_addresses(coin_type, account_index, address_indexes, options)
+                    .await
+            }
+            Self::Placeholder(secret_manager) => {
+                secret_manager
+                    .generate_evm_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
         }
@@ -264,6 +315,21 @@ impl SecretManage for SecretManager {
             Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_ed25519(msg, chain).await?),
             Self::Mnemonic(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
             Self::Placeholder(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
+        }
+    }
+
+    async fn sign_evm(
+        &self,
+        msg: &[u8],
+        chain: &Chain,
+    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
+        match self {
+            #[cfg(feature = "stronghold")]
+            Self::Stronghold(secret_manager) => Ok(secret_manager.sign_evm(msg, chain).await?),
+            #[cfg(feature = "ledger_nano")]
+            Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_evm(msg, chain).await?),
+            Self::Mnemonic(secret_manager) => secret_manager.sign_evm(msg, chain).await,
+            Self::Placeholder(secret_manager) => secret_manager.sign_evm(msg, chain).await,
         }
     }
 }
@@ -305,7 +371,7 @@ impl SecretManager {
     }
 
     /// Tries to create a [`SecretManager`] from a seed hex string.
-    pub fn try_from_hex_seed(seed: &str) -> crate::client::Result<Self> {
+    pub fn try_from_hex_seed(seed: String) -> crate::client::Result<Self> {
         Ok(Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(seed)?))
     }
 
@@ -324,7 +390,7 @@ impl SecretManager {
         for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
             // Get the address that is required to unlock the input
             let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
-            let alias_transition = is_alias_transition(input, regular.outputs()).map(|t| t.0);
+            let alias_transition = is_alias_transition(&input.output, *input.output_id(), regular.outputs(), None);
             let (input_address, _) = input.output.required_and_unlocked_address(
                 time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32),
                 input.output_metadata.output_id(),

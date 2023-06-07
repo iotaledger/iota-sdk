@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
         .await?;
 
     wallet
-        .listen(vec![], move |event| {
+        .listen([], move |event| {
             println!("Received an event {event:?}");
         })
         .await;
@@ -54,19 +54,17 @@ async fn main() -> Result<()> {
         }
     };
 
-    let _address = account.generate_addresses(5, None).await?;
+    let _address = account.generate_ed25519_addresses(5, None).await?;
 
     let balance = account.sync(None).await?;
     println!("Balance: {balance:?}");
 
     // send transaction
-    let outputs = vec![
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(
-                "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
-            )?))
-            .finish_output(account.client().get_token_supply().await?)?,
-    ];
+    let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
+        .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(
+            "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
+        )?))
+        .finish_output(account.client().get_token_supply().await?)?];
 
     let transaction = account.send(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);

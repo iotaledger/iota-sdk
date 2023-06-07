@@ -43,7 +43,7 @@ fn builder_no_essence_too_few_unlocks() {
     );
     let essence = TransactionEssence::Regular(
         RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-            .with_inputs(vec![input1, input2])
+            .with_inputs([input1, input2])
             .add_output(output)
             .finish(&protocol_parameters)
             .unwrap(),
@@ -54,7 +54,7 @@ fn builder_no_essence_too_few_unlocks() {
     let sig_bytes: [u8; 64] = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
     let signature = Ed25519Signature::new(pub_key_bytes, sig_bytes);
     let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::Ed25519(signature)));
-    let unlocks = Unlocks::new(vec![sig_unlock]).unwrap();
+    let unlocks = Unlocks::new([sig_unlock]).unwrap();
 
     assert!(matches!(
             TransactionPayload::new(essence, unlocks),
@@ -93,7 +93,7 @@ fn builder_no_essence_too_many_unlocks() {
     let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::Ed25519(signature)));
     let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
 
-    let unlocks = Unlocks::new(vec![sig_unlock, ref_unlock]).unwrap();
+    let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
     assert!(matches!(
             TransactionPayload::new(essence, unlocks),
@@ -120,7 +120,7 @@ fn pack_unpack_valid() {
     );
     let essence = TransactionEssence::Regular(
         RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-            .with_inputs(vec![input1, input2])
+            .with_inputs([input1, input2])
             .add_output(output)
             .finish(&protocol_parameters)
             .unwrap(),
@@ -132,7 +132,7 @@ fn pack_unpack_valid() {
     let signature = Ed25519Signature::new(pub_key_bytes, sig_bytes);
     let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::Ed25519(signature)));
     let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
-    let unlocks = Unlocks::new(vec![sig_unlock, ref_unlock]).unwrap();
+    let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
     let tx_payload = TransactionPayload::new(essence, unlocks).unwrap();
     let packed_tx_payload = tx_payload.pack_to_vec();
@@ -162,7 +162,7 @@ fn getters() {
     );
     let essence = TransactionEssence::Regular(
         RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-            .with_inputs(vec![input1, input2])
+            .with_inputs([input1, input2])
             .add_output(output)
             .finish(&protocol_parameters)
             .unwrap(),
@@ -174,7 +174,7 @@ fn getters() {
     let signature = Ed25519Signature::new(pub_key_bytes, sig_bytes);
     let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::Ed25519(signature)));
     let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
-    let unlocks = Unlocks::new(vec![sig_unlock, ref_unlock]).unwrap();
+    let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
     let tx_payload = TransactionPayload::new(essence.clone(), unlocks.clone()).unwrap();
 

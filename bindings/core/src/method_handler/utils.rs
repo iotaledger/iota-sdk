@@ -4,7 +4,7 @@
 use iota_sdk::{
     client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
     types::block::{
-        address::{dto::AddressDto, Address, Ed25519Address},
+        address::{dto::AddressDto, Address, Ed25519Address, ToBech32Ext},
         output::{AliasId, FoundryId, NftId},
         payload::{transaction::TransactionEssence, TransactionPayload},
         signature::Ed25519Signature,
@@ -18,18 +18,16 @@ use crate::{method::UtilsMethod, response::Response, Result};
 /// Call a utils method.
 pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response> {
     let response = match method {
-        UtilsMethod::Bech32ToHex { bech32 } => Response::Bech32ToHex(Client::bech32_to_hex(&bech32)?),
-        UtilsMethod::HexToBech32 { hex, bech32_hrp } => Response::Bech32Address(hex_to_bech32(&hex, &bech32_hrp)?),
+        UtilsMethod::Bech32ToHex { bech32 } => Response::Bech32ToHex(Client::bech32_to_hex(bech32)?),
+        UtilsMethod::HexToBech32 { hex, bech32_hrp } => Response::Bech32Address(hex_to_bech32(&hex, bech32_hrp)?),
         UtilsMethod::AliasIdToBech32 { alias_id, bech32_hrp } => {
-            Response::Bech32Address(alias_id.to_bech32(&bech32_hrp))
+            Response::Bech32Address(alias_id.to_bech32(bech32_hrp))
         }
-        UtilsMethod::NftIdToBech32 { nft_id, bech32_hrp } => Response::Bech32Address(nft_id.to_bech32(&bech32_hrp)),
+        UtilsMethod::NftIdToBech32 { nft_id, bech32_hrp } => Response::Bech32Address(nft_id.to_bech32(bech32_hrp)),
         UtilsMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => {
-            Response::Bech32Address(hex_public_key_to_bech32_address(&hex, &bech32_hrp)?)
+            Response::Bech32Address(hex_public_key_to_bech32_address(&hex, bech32_hrp)?)
         }
-        UtilsMethod::ParseBech32Address { address } => {
-            Response::ParsedBech32Address(AddressDto::from(&Address::try_from_bech32(address)?))
-        }
+        UtilsMethod::ParseBech32Address { address } => Response::ParsedBech32Address(AddressDto::from(address.inner())),
         UtilsMethod::IsAddressValid { address } => Response::Bool(Address::is_valid_bech32(&address)),
         UtilsMethod::GenerateMnemonic => Response::GeneratedMnemonic(Client::generate_mnemonic()?),
         UtilsMethod::MnemonicToHexSeed { mut mnemonic } => {

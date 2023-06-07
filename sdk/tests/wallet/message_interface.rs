@@ -8,7 +8,7 @@ use iota_sdk::wallet::events::types::WalletEvent;
 use iota_sdk::{
     client::{constants::SHIMMER_COIN_TYPE, secret::GenerateAddressOptions, ClientBuilder},
     types::block::{
-        address::Address,
+        address::{Address, Bech32Address, Hrp},
         output::{dto::OutputDto, unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
     },
     wallet::{
@@ -143,7 +143,7 @@ async fn message_interface_events() -> Result<()> {
     let wallet_handle = create_message_handler(Some(options)).await.unwrap();
 
     wallet_handle
-        .listen(vec![], |event| {
+        .listen([], |event| {
             if let WalletEvent::TransactionProgress(event) = &event.event {
                 println!("Received event....: {event:?}");
             }
@@ -167,7 +167,7 @@ async fn message_interface_events() -> Result<()> {
                 account_id: "alias".into(),
                 method: AccountMethod::RequestFundsFromFaucet {
                     url: FAUCET_URL.to_string(),
-                    address: account.public_addresses[0].address().to_string(),
+                    address: *account.public_addresses[0].address(),
                 },
             };
 
@@ -232,7 +232,7 @@ async fn message_interface_emit_event() -> Result<()> {
     let event_counter = Arc::new(std::sync::atomic::AtomicUsize::new(0));
     let event_counter_clone = Arc::clone(&event_counter);
     wallet_handle
-        .listen(vec![], move |_name| {
+        .listen([], move |_name| {
             event_counter_clone.fetch_add(1, Ordering::SeqCst);
         })
         .await;
@@ -342,13 +342,12 @@ async fn address_conversion_methods() -> Result<()> {
 
     let wallet_handle = create_message_handler(Some(options)).await.unwrap();
 
-    let bech32_address = "rms1qqk4svqpc89lxx89w7vksv9jgjjm2vwnrhad2j3cds9ev4cu434wjapdsxs";
+    let bech32_address =
+        Bech32Address::try_from_str("rms1qqk4svqpc89lxx89w7vksv9jgjjm2vwnrhad2j3cds9ev4cu434wjapdsxs").unwrap();
     let hex_address = "0x2d583001c1cbf318e577996830b244a5b531d31dfad54a386c0b96571cac6ae9";
 
     let response = wallet_handle
-        .send_message(Message::Bech32ToHex {
-            bech32_address: bech32_address.into(),
-        })
+        .send_message(Message::Bech32ToHex { bech32_address })
         .await;
 
     match response {
@@ -394,18 +393,18 @@ async fn message_interface_address_generation() -> Result<()> {
     let wallet_handle = create_message_handler(Some(options)).await.unwrap();
 
     let response = wallet_handle
-        .send_message(Message::GenerateAddress {
+        .send_message(Message::GenerateEd25519Address {
             account_index: 0,
             address_index: 0,
             options: None,
-            bech32_hrp: Some("rms".to_string()),
+            bech32_hrp: Some(Hrp::from_str_unchecked("rms")),
         })
         .await;
 
     match response {
         Response::Bech32Address(address) => {
             assert_eq!(
-                address,
+                address.to_string(),
                 "rms1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6v3ea5a"
             );
         }
@@ -413,18 +412,18 @@ async fn message_interface_address_generation() -> Result<()> {
     }
 
     let response = wallet_handle
-        .send_message(Message::GenerateAddress {
+        .send_message(Message::GenerateEd25519Address {
             account_index: 10,
             address_index: 10,
             options: Some(GenerateAddressOptions::internal()),
-            bech32_hrp: Some("rms".to_string()),
+            bech32_hrp: Some(Hrp::from_str_unchecked("rms")),
         })
         .await;
 
     match response {
         Response::Bech32Address(address) => {
             assert_eq!(
-                address,
+                address.to_string(),
                 "rms1qr239vcjzxxdyre8jsek8wrdves9hnnk6mguplvs43cwftt4svaszsvy98h"
             );
         }

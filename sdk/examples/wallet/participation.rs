@@ -93,7 +93,7 @@ async fn main() -> Result<()> {
 
     let address = account.addresses().await?;
     let faucet_response =
-        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &address[0].address().to_string()).await?;
+        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), address[0].address()).await?;
     println!("{faucet_response}");
 
     account.sync(None).await?;
@@ -142,7 +142,7 @@ async fn main() -> Result<()> {
     //// vote
     //// ////////////////////////////
 
-    let transaction = account.vote(Some(event_id), Some(vec![0])).await?;
+    let transaction = account.vote(event_id, vec![0]).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = account
