@@ -129,7 +129,6 @@ impl InputSelection {
             return Err(Error::MissingInputWithEd25519Address);
         };
 
-        // TODO checked ops ?
         let diff = inputs_sum - outputs_sum;
         let mut remainder_builder = BasicOutputBuilder::new_with_amount(diff);
 
