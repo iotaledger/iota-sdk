@@ -58,11 +58,11 @@ pub fn migrate_stronghold_snapshot_v2_to_v3(
 ) -> Result<()> {
     Ok(StrongholdAdapter::migrate_snapshot_v2_to_v3(
         &current_path,
-        current_password,
+        current_password.into(),
         salt,
         rounds,
         new_path.as_ref(),
-        new_password,
+        new_password.map(Into::into),
     )
     .map_err(iota_sdk_bindings_core::iota_sdk::client::Error::Stronghold)?)
 }

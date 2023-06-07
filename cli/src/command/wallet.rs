@@ -7,8 +7,9 @@ use clap::{Args, Parser, Subcommand};
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{stronghold::StrongholdSecretManager, types::Password, SecretManager},
+        secret::{stronghold::StrongholdSecretManager, SecretManager},
         stronghold::StrongholdAdapter,
+        utils::Password,
     },
     wallet::{ClientOptions, Wallet},
 };

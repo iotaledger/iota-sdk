@@ -187,7 +187,7 @@ pub fn destroy(mut cx: FunctionContext) -> JsResult<JsPromise> {
 
 pub fn migrate_stronghold_snapshot_v2_to_v3(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let current_path = cx.argument::<JsString>(0)?.value(&mut cx);
-    let current_password = cx.argument::<JsString>(1)?.value(&mut cx);
+    let current_password = cx.argument::<JsString>(1)?.value(&mut cx).into();
     let salt = cx.argument::<JsString>(2)?.value(&mut cx);
     let rounds = cx.argument::<JsNumber>(3)?.value(&mut cx);
     let new_path = cx
@@ -199,7 +199,8 @@ pub fn migrate_stronghold_snapshot_v2_to_v3(mut cx: FunctionContext) -> JsResult
         .argument_opt(5)
         .map(|opt| opt.downcast_or_throw::<JsString, _>(&mut cx))
         .transpose()?
-        .map(|opt| opt.value(&mut cx));
+        .map(|opt| opt.value(&mut cx))
+        .map(Into::into);
 
     StrongholdAdapter::migrate_snapshot_v2_to_v3(
         &current_path,
