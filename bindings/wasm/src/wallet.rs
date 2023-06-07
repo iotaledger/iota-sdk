@@ -14,7 +14,7 @@ use iota_sdk_bindings_core::{
 use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
-use crate::client::ClientMethodHandler;
+use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHandler};
 
 /// The Wallet method handler.
 #[wasm_bindgen(js_name = WalletMethodHandler)]
@@ -56,6 +56,19 @@ pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMe
         .clone();
 
     Ok(ClientMethodHandler { client })
+}
+
+#[wasm_bindgen(js_name = getSecretManagerFromWallet)]
+pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<SecretManagerMethodHandler, JsValue> {
+    let wallet = method_handler.wallet.borrow_mut();
+
+    let secret_manager = wallet
+        .as_ref()
+        .ok_or_else(|| "wallet got destroyed".to_string())?
+        .get_secret_manager()
+        .clone();
+
+    Ok(SecretManagerMethodHandler { secret_manager })
 }
 
 /// Handles a method, returns the response as a JSON-encoded string.

@@ -169,7 +169,7 @@ where
 
 impl<S: SecretManage> WalletInner<S> {
     /// Get the [SecretManager]
-    pub fn get_secret_manager(&self) -> &RwLock<S> {
+    pub fn get_secret_manager(&self) -> &Arc<RwLock<S>> {
         &self.secret_manager
     }
 

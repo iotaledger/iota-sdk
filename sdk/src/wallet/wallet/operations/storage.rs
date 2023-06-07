@@ -9,7 +9,10 @@ mod storage_stub {
     use tokio::sync::RwLock;
 
     use crate::{
-        client::secret::{mnemonic::MnemonicSecretManager, SecretManagerConfig},
+        client::{
+            secret::{mnemonic::MnemonicSecretManager, SecretManagerConfig},
+            storage::StorageAdapter,
+        },
         wallet::{
             storage::{
                 constants::{SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY},
@@ -40,7 +43,7 @@ mod storage_stub {
                 let secret_manager = secret_manager.read().await;
                 if let Some(config) = secret_manager.to_config() {
                     log::debug!("save_secret_manager: {config:?}");
-                    storage.storage.set(SECRET_MANAGER_KEY, config).await?;
+                    storage.storage.set(SECRET_MANAGER_KEY, &config).await?;
                 }
             }
             Ok(())

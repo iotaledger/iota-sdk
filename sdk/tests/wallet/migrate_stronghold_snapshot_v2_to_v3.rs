@@ -8,7 +8,7 @@ use iota_sdk::{
         api::GetAddressesOptions,
         constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
         secret::{stronghold::StrongholdSecretManager, SecretManager},
-        storage::StorageProvider,
+        storage::StorageAdapter,
         stronghold::{Error as StrongholdError, StrongholdAdapter},
         Error as ClientError,
     },
@@ -179,7 +179,7 @@ async fn stronghold_snapshot_v2_v3_migration_with_backup() {
         .unwrap();
 
     let coin_type_bytes = stronghold_secret_manager
-        .get("coin_type".as_bytes())
+        .get_bytes("coin_type")
         .await
         .unwrap()
         .expect("missing data");

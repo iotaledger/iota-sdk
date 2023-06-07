@@ -17,10 +17,7 @@ use crate::{
     Url,
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     pub fn client(&self) -> &Client {
         &self.client
     }
