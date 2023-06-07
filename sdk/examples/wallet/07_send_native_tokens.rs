@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
     {
         // Set the stronghold password
         wallet
-            .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
+            .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
         let bech32_address = RECV_ADDRESS.parse::<Bech32Address>()?;

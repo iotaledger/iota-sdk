@@ -69,7 +69,7 @@ pub async fn account_prompt_internal(account: Account, history: &mut AccountHist
             };
             if let Err(err) = match account_cli.command {
                 AccountCommand::Addresses => addresses_command(&account).await,
-                AccountCommand::Balance => balance_command(&account).await,
+                AccountCommand::Balance { addresses } => balance_command(&account, addresses).await,
                 AccountCommand::BurnNativeToken { token_id, amount } => {
                     burn_native_token_command(&account, token_id, amount).await
                 }

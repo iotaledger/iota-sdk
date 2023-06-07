@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Issue the minting transaction and wait for it's inclusion

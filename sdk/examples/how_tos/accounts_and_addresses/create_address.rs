@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
 
     // Provide the stronghold password
     wallet
-        .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     let explorer_url = var("EXPLORER_URL").ok();

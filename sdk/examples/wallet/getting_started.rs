@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let secret_manager = StrongholdSecretManager::builder()
-        .password(&var("STRONGHOLD_PASSWORD").unwrap())
+        .password(var("STRONGHOLD_PASSWORD").unwrap())
         .build(var("STRONGHOLD_SNAPSHOT_PATH").unwrap())?;
 
     let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;

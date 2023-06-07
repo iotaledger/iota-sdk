@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Sync account to make sure account is updated with outputs from previous examples

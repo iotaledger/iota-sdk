@@ -35,13 +35,13 @@ class WalletEventAdapter implements JsonDeserializer<WalletEvent>, JsonSerialize
         String type;
         JsonElement value;
 
-        // Ennum with value
+        // Enum with value
         if (json.isJsonObject()) {
             Entry<String, JsonElement> entry = json.getAsJsonObject().entrySet().iterator().next();
             type = entry.getKey();
             value = entry.getValue();
         } else {
-            // Enum without vaue
+            // Enum without value
             type = json.getAsString();
             value = new JsonObject();
         }

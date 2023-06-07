@@ -26,7 +26,7 @@ async function run() {
 
         if (balance.aliases.length == 0) {
             throw new Error(
-                `No Alias available in account '${process.env.ACCOUNT_ALIAS_1}'`,
+                `No Alias available in account ''`,
             );
         }
 

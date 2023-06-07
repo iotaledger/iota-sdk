@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let secret_manager = StrongholdSecretManager::builder()
-        .password(&var("STRONGHOLD_PASSWORD").unwrap())
+        .password(var("STRONGHOLD_PASSWORD").unwrap())
         .build(STRONGHOLD_SNAPSHOT_PATH)?;
 
     let mnemonic = var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap();

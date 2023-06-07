@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
     if let Some(nft_id) = balance.nfts().first() {
         // Set the stronghold password
         wallet
-            .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
+            .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
         let outputs = [SendNftParams::new(RECV_ADDRESS, *nft_id)?];

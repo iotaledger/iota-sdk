@@ -15,8 +15,7 @@ use serde::{Deserialize, Deserializer, Serialize};
 pub use self::{
     address::{AccountAddress, AddressWithUnspentOutputs},
     balance::{
-        AccountBalance, AccountBalanceDto, BaseCoinBalance, NativeTokensBalance, NativeTokensBalanceDto,
-        RequiredStorageDeposit,
+        Balance, BalanceDto, BaseCoinBalance, NativeTokensBalance, NativeTokensBalanceDto, RequiredStorageDeposit,
     },
 };
 use crate::{

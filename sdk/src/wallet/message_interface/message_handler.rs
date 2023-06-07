@@ -10,6 +10,7 @@ use std::{
 };
 
 use backtrace::Backtrace;
+use crypto::keys::slip10::Chain;
 use futures::{Future, FutureExt};
 use primitive_types::U256;
 use zeroize::Zeroize;
@@ -20,7 +21,9 @@ use crate::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
         constants::SHIMMER_TESTNET_BECH32_HRP,
-        request_funds_from_faucet, utils, Client, NodeInfoWrapper,
+        request_funds_from_faucet,
+        secret::SecretManage,
+        utils, Client, NodeInfoWrapper,
     },
     types::block::{
         address::{Hrp, ToBech32Ext},
@@ -37,7 +40,7 @@ use crate::{
                 prepare_output::OutputParams,
                 TransactionOptions,
             },
-            types::{AccountBalanceDto, AccountIdentifier, TransactionDto},
+            types::{AccountIdentifier, BalanceDto, TransactionDto},
             OutputDataDto,
         },
         message_interface::{
@@ -158,15 +161,13 @@ impl WalletMessageHandler {
             }
             #[cfg(feature = "stronghold")]
             Message::ChangeStrongholdPassword {
-                mut current_password,
-                mut new_password,
+                current_password,
+                new_password,
             } => {
                 convert_async_panics(|| async {
                     self.wallet
-                        .change_stronghold_password(&current_password, &new_password)
+                        .change_stronghold_password(current_password, new_password)
                         .await?;
-                    current_password.zeroize();
-                    new_password.zeroize();
                     Ok(Response::Ok(()))
                 })
                 .await
@@ -293,10 +294,9 @@ impl WalletMessageHandler {
                 .await
             }
             #[cfg(feature = "stronghold")]
-            Message::SetStrongholdPassword { mut password } => {
+            Message::SetStrongholdPassword { password } => {
                 convert_async_panics(|| async {
-                    self.wallet.set_stronghold_password(&password).await?;
-                    password.zeroize();
+                    self.wallet.set_stronghold_password(password).await?;
                     Ok(Response::Ok(()))
                 })
                 .await
@@ -588,6 +588,20 @@ impl WalletMessageHandler {
                     .await?;
                 Ok(Response::GeneratedEvmAddresses(addresses))
             }
+            AccountMethod::SignEvm { message, chain } => {
+                let msg: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
+                let (public_key, signature) = account
+                    .wallet
+                    .secret_manager
+                    .read()
+                    .await
+                    .sign_evm(&msg, &Chain::from_u32(chain))
+                    .await?;
+                Ok(Response::EvmSignature {
+                    public_key: prefix_hex::encode(public_key.to_bytes()),
+                    signature: prefix_hex::encode(signature.to_bytes()),
+                })
+            }
             AccountMethod::GetOutputsWithAdditionalUnlockConditions { outputs_to_claim } => {
                 let output_ids = account
                     .get_unlockable_outputs_with_additional_unlock_conditions(outputs_to_claim)
@@ -734,7 +748,7 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::GetBalance => Ok(Response::Balance(AccountBalanceDto::from(&account.balance().await?))),
+            AccountMethod::GetBalance => Ok(Response::Balance(BalanceDto::from(&account.balance().await?))),
             AccountMethod::PrepareOutput {
                 params: options,
                 transaction_options,
@@ -794,9 +808,9 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::SyncAccount { options } => Ok(Response::Balance(AccountBalanceDto::from(
-                &account.sync(options).await?,
-            ))),
+            AccountMethod::SyncAccount { options } => {
+                Ok(Response::Balance(BalanceDto::from(&account.sync(options).await?)))
+            }
             AccountMethod::SendAmount { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account

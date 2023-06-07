@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
     if balance.base_coin().available() >= SEND_AMOUNT {
         // Set the stronghold password
         wallet
-            .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
+            .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
         println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);

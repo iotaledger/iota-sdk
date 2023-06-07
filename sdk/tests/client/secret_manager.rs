@@ -79,7 +79,7 @@ async fn stronghold_mnemonic_missing() -> Result<()> {
     std::fs::remove_dir_all("stronghold_mnemonic_missing").ok();
 
     let stronghold_secret_manager = iota_sdk::client::secret::stronghold::StrongholdSecretManager::builder()
-        .password("some_hopefully_secure_password")
+        .password("some_hopefully_secure_password".to_owned())
         .build("stronghold_mnemonic_missing/test.stronghold")?;
 
     // Generating addresses will fail because no mnemonic has been stored

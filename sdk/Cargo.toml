@@ -34,6 +34,7 @@ serde = { version = "1.0.163", default-features = false, features = [ "derive" ]
 serde_json = { version = "1.0.96", default-features = false, features = [ "alloc" ] }
 
 # Optional dependencies
+anymap = { version = "0.12.1", default-features = false, optional = true }
 async-trait = { version = "0.1.68", default-features = false, optional = true }
 backtrace = { version = "0.3.67", default-features = false, optional = true }
 derive_builder = { version = "0.12.0", default-features = false, optional = true }
@@ -82,15 +83,15 @@ default = [ "client", "wallet", "tls" ]
 events = [  ]
 ledger_nano = [ "iota-ledger-nano" ]
 message_interface = [ "backtrace", "fern-logger" ]
-mqtt = [ "std", "regex", "rumqttc", "once_cell" ]
+mqtt = [ "std", "regex", "rumqttc", "dep:once_cell" ]
 participation = [ "storage" ]
 pow = [ "std", "num_cpus", "iota-crypto/curl-p" ]
 rand = [ "dep:rand" ]
 rocksdb = [ "dep:rocksdb", "storage" ]
 serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std" ]
 std = [ "packable/std", "prefix-hex/std", "primitive-types/std", "bech32/std", "bitflags/std", "rand?/std_rng", "regex?/std", "backtrace?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std" ]
-storage = [ "iota-crypto/chacha", "dep:time" ]
-stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time" ]
+storage = [ "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell" ]
+stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell" ]
 tls = [ "reqwest?/rustls-tls", "rumqttc?/use-rustls" ]
 
 client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10" ]

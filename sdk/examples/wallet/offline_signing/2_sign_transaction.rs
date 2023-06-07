@@ -38,7 +38,7 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let secret_manager = StrongholdSecretManager::builder()
-        .password(&var("STRONGHOLD_PASSWORD").unwrap())
+        .password(var("STRONGHOLD_PASSWORD").unwrap())
         .build(STRONGHOLD_SNAPSHOT_PATH)?;
 
     // Load snapshot file

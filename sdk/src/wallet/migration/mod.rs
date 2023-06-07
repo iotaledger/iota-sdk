@@ -3,21 +3,52 @@
 
 mod migrate_0;
 
+use std::collections::HashMap;
+
+use anymap::Map;
 use async_trait::async_trait;
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 
-use crate::wallet::Result;
-
-pub type LatestMigration = migrate_0::Migrate;
+use crate::{
+    client::storage::StorageAdapter,
+    wallet::{Error, Result},
+};
 
 pub(crate) const MIGRATION_VERSION_KEY: &str = "migration-version";
 
-/// The list of migrations, in order.
-const MIGRATIONS: &[&'static dyn DynMigration] = &[
-    // In order to add a new migration, change the `LatestMigration` type above and add an entry at the bottom of this
-    // list.
-    &migrate_0::Migrate,
-];
+#[cfg(feature = "stronghold")]
+struct LatestBackupMigration(MigrationVersion);
+
+static MIGRATIONS: Lazy<Map<dyn anymap::any::Any + Send + Sync>> = Lazy::new(|| {
+    let mut migrations = Map::new();
+    #[cfg(feature = "storage")]
+    {
+        use super::storage::Storage;
+        const STORAGE_MIGRATIONS: [(Option<usize>, &'static dyn DynMigration<Storage>); 1] = [
+            // In order to add a new storage migration, add an entry at the bottom of this list
+            // and change the list length above.
+            // The entry should be in the form of a key-value pair, from previous migration to next.
+            // i.e. (Some(migrate_<N>::Migrate::ID), &migrate_<N+1>::Migrate)
+            (None, &migrate_0::Migrate),
+        ];
+        migrations.insert(std::collections::HashMap::from(STORAGE_MIGRATIONS));
+    }
+    #[cfg(feature = "stronghold")]
+    {
+        use crate::client::stronghold::StrongholdAdapter;
+        const BACKUP_MIGRATIONS: [(Option<usize>, &'static dyn DynMigration<StrongholdAdapter>); 1] = [
+            // In order to add a new backup migration, and add an entry at the bottom of this list
+            // and change the list length above.
+            // The entry should be in the form of a key-value pair, from previous migration to next.
+            // i.e. (Some(migrate_<N>::Migrate::ID), &migrate_<N+1>::Migrate)
+            (None, &migrate_0::Migrate),
+        ];
+        migrations.insert(LatestBackupMigration(BACKUP_MIGRATIONS.last().unwrap().1.version()));
+        migrations.insert(std::collections::HashMap::from(BACKUP_MIGRATIONS));
+    }
+    migrations
+});
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct MigrationVersion {
@@ -32,8 +63,7 @@ impl std::fmt::Display for MigrationVersion {
     }
 }
 
-#[async_trait]
-pub(crate) trait Migration {
+pub(crate) trait MigrationData {
     const ID: usize;
     const SDK_VERSION: &'static str;
     const DATE: time::Date;
@@ -45,97 +75,71 @@ pub(crate) trait Migration {
             date: Self::DATE,
         }
     }
-
-    #[cfg(feature = "storage")]
-    async fn migrate_storage(storage: &super::storage::Storage) -> Result<()>;
-
-    #[cfg(feature = "stronghold")]
-    async fn migrate_backup(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()>;
 }
 
 #[async_trait]
-trait DynMigration: Send + Sync {
+pub(crate) trait Migration<S: StorageAdapter>: MigrationData {
+    async fn migrate(storage: &S) -> Result<()>;
+}
+
+#[async_trait]
+trait DynMigration<S: StorageAdapter>: Send + Sync {
     fn version(&self) -> MigrationVersion;
 
-    #[cfg(feature = "storage")]
-    async fn migrate_storage(&self, storage: &super::storage::Storage) -> Result<()>;
-
-    #[cfg(feature = "stronghold")]
-    async fn migrate_backup(&self, storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()>;
+    async fn migrate(&self, storage: &S) -> Result<()>;
 }
 
 #[async_trait]
-impl<T: Migration + Send + Sync> DynMigration for T {
+impl<S: StorageAdapter, T: Migration<S> + Send + Sync> DynMigration<S> for T
+where
+    crate::wallet::Error: From<S::Error>,
+    S::Error: From<serde_json::Error>,
+{
     fn version(&self) -> MigrationVersion {
         T::version()
     }
 
-    #[cfg(feature = "storage")]
-    async fn migrate_storage(&self, storage: &super::storage::Storage) -> Result<()> {
+    async fn migrate(&self, storage: &S) -> Result<()> {
         let version = self.version();
         log::info!("Migrating to version {}", version);
-        T::migrate_storage(storage).await?;
-        storage.set(MIGRATION_VERSION_KEY, version).await?;
-        Ok(())
-    }
-
-    #[cfg(feature = "stronghold")]
-    async fn migrate_backup(&self, storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
-        use crate::client::storage::StorageProvider;
-
-        let version = self.version();
-        log::info!("Migrating backup to version {}", version);
-        T::migrate_backup(storage).await?;
-        storage
-            .insert(
-                MIGRATION_VERSION_KEY.as_bytes(),
-                serde_json::to_string(&version)?.as_bytes(),
-            )
-            .await?;
+        T::migrate(storage).await?;
+        storage.set(MIGRATION_VERSION_KEY, &version).await?;
         Ok(())
     }
 }
 
-#[cfg(feature = "storage")]
-pub async fn migrate_storage(storage: &super::storage::Storage) -> Result<()> {
+pub async fn migrate<S: 'static + StorageAdapter>(storage: &S) -> Result<()>
+where
+    crate::wallet::Error: From<S::Error>,
+    S::Error: From<serde_json::Error>,
+{
     let last_migration = storage.get::<MigrationVersion>(MIGRATION_VERSION_KEY).await?;
     for migration in migrations(last_migration)? {
-        migration.migrate_storage(storage).await?;
+        migration.migrate(storage).await?;
     }
     Ok(())
+}
+
+fn migrations<S: 'static + StorageAdapter>(
+    mut last_migration: Option<MigrationVersion>,
+) -> Result<Vec<&'static dyn DynMigration<S>>> {
+    let migrations = MIGRATIONS
+        .get::<HashMap<Option<usize>, &'static dyn DynMigration<S>>>()
+        .ok_or_else(|| {
+            Error::Migration(format!(
+                "invalid migration storage kind: {}",
+                std::any::type_name::<S>()
+            ))
+        })?;
+    let mut res = Vec::new();
+    while let Some(next) = migrations.get(&last_migration.as_ref().map(|m| m.id)) {
+        last_migration = Some(next.version());
+        res.push(*next);
+    }
+    Ok(res)
 }
 
 #[cfg(feature = "stronghold")]
-pub async fn migrate_backup(storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
-    use crate::client::storage::StorageProvider;
-
-    let last_migration = storage
-        .get(MIGRATION_VERSION_KEY.as_bytes())
-        .await?
-        .map(|bytes| serde_json::from_slice::<MigrationVersion>(&bytes))
-        .transpose()?;
-    for migration in migrations(last_migration)? {
-        migration.migrate_backup(storage).await?;
-    }
-    Ok(())
-}
-
-fn migrations(last_migration: Option<MigrationVersion>) -> Result<impl Iterator<Item = &'static dyn DynMigration>> {
-    Ok(match last_migration {
-        Some(last_migration) => {
-            if last_migration.id > LatestMigration::ID {
-                return Err(crate::wallet::Error::Migration(format!(
-                    "invalid migration version: {last_migration}, current sdk version: {}",
-                    env!("CARGO_PKG_VERSION")
-                )));
-            }
-            MIGRATIONS[last_migration.id + 1..].iter().copied()
-        }
-        None => MIGRATIONS.iter().copied(),
-    })
-}
-
-#[allow(unused)]
-pub fn latest_migration_version() -> MigrationVersion {
-    <LatestMigration as Migration>::version()
+pub fn latest_backup_migration_version() -> MigrationVersion {
+    MIGRATIONS.get::<LatestBackupMigration>().unwrap().0.clone()
 }

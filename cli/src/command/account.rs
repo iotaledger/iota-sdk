@@ -40,7 +40,10 @@ pub enum AccountCommand {
     /// List the account addresses.
     Addresses,
     /// Print the account balance.
-    Balance,
+    Balance {
+        /// Addresses to compute the balance for.
+        addresses: Option<Vec<Bech32Address>>,
+    },
     /// Burn an amount of native token.
     BurnNativeToken {
         /// Token ID to be burnt, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
@@ -294,8 +297,13 @@ pub async fn burn_nft_command(account: &Account, nft_id: String) -> Result<(), E
 }
 
 // `balance` command
-pub async fn balance_command(account: &Account) -> Result<(), Error> {
-    println_log_info!("{:#?}", account.balance().await?);
+pub async fn balance_command(account: &Account, addresses: Option<Vec<Bech32Address>>) -> Result<(), Error> {
+    let balance = if let Some(addresses) = addresses {
+        account.addresses_balance(addresses).await?
+    } else {
+        account.balance().await?
+    };
+    println_log_info!("{balance:#?}");
 
     Ok(())
 }

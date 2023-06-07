@@ -14,7 +14,7 @@ use iota_sdk_bindings_core::{
 use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
-use crate::client::ClientMethodHandler;
+use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHandler};
 
 /// The Wallet method handler.
 #[wasm_bindgen(js_name = WalletMethodHandler)]
@@ -58,6 +58,19 @@ pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMe
     Ok(ClientMethodHandler { client })
 }
 
+#[wasm_bindgen(js_name = getSecretManagerFromWallet)]
+pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<SecretManagerMethodHandler, JsValue> {
+    let wallet = method_handler.wallet.borrow_mut();
+
+    let secret_manager = wallet
+        .as_ref()
+        .ok_or_else(|| "wallet got destroyed".to_string())?
+        .get_secret_manager()
+        .clone();
+
+    Ok(SecretManagerMethodHandler { secret_manager })
+}
+
 /// Handles a method, returns the response as a JSON-encoded string.
 ///
 /// Returns an error if the response itself is an error or panic.
@@ -94,8 +107,8 @@ pub async fn listen_wallet(
     for event_type in vec.keys() {
         // We know the built-in iterator for set elements won't throw
         // exceptions, so just unwrap the element.
-        let event_type = event_type.unwrap().as_string().unwrap();
-        let wallet_event_type = WalletEventType::try_from(event_type.as_str()).map_err(JsValue::from)?;
+        let event_type = event_type.unwrap().as_f64().unwrap() as u8;
+        let wallet_event_type = WalletEventType::try_from(event_type).map_err(JsValue::from)?;
         event_types.push(wallet_event_type);
     }
 

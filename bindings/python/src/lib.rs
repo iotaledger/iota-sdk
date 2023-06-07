@@ -51,18 +51,18 @@ pub fn call_utils_method(method: String) -> Result<String> {
 pub fn migrate_stronghold_snapshot_v2_to_v3(
     current_path: String,
     current_password: String,
-    salt: String,
+    salt: &str,
     rounds: u32,
     new_path: Option<String>,
     new_password: Option<String>,
 ) -> Result<()> {
     Ok(StrongholdAdapter::migrate_snapshot_v2_to_v3(
         &current_path,
-        &current_password,
-        &salt,
+        current_password.into(),
+        salt,
         rounds,
         new_path.as_ref(),
-        new_password.as_deref(),
+        new_password.map(Into::into),
     )
     .map_err(iota_sdk_bindings_core::iota_sdk::client::Error::Stronghold)?)
 }
@@ -85,6 +85,8 @@ fn iota_sdk(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(call_wallet_method, m)?).unwrap();
     m.add_function(wrap_pyfunction!(destroy_wallet, m)?).unwrap();
     m.add_function(wrap_pyfunction!(get_client_from_wallet, m)?).unwrap();
+    m.add_function(wrap_pyfunction!(get_secret_manager_from_wallet, m)?)
+        .unwrap();
     m.add_function(wrap_pyfunction!(listen_wallet, m)?).unwrap();
 
     m.add_function(wrap_pyfunction!(migrate_stronghold_snapshot_v2_to_v3, m)?)

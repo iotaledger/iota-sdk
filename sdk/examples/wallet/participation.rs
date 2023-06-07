@@ -52,7 +52,7 @@ async fn main() -> Result<()> {
 
     // Provide the stronghold password
     wallet
-        .set_stronghold_password(&var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     let event_id = ParticipationEventId::from_str(PARTICIPATION_EVENT_ID_1)?;
