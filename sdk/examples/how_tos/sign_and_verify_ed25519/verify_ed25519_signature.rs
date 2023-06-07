@@ -3,7 +3,10 @@
 
 //! In this example we will verify an Ed25519 signature.
 //!
-//! `cargo run --example verify_ed25519_signature --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example verify_ed25519_signature
+//! ```
 
 use iota_sdk::{crypto::signatures::ed25519, wallet::Result};
 
