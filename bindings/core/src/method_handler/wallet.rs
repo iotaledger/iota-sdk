@@ -7,8 +7,6 @@ use iota_sdk::{
     types::block::address::ToBech32Ext,
     wallet::{message_interface::dtos::AccountDetailsDto, wallet::Wallet},
 };
-#[cfg(feature = "stronghold")]
-use zeroize::Zeroize;
 
 use super::account::call_account_method_internal;
 use crate::{method::WalletMethod, response::Response, Result};
@@ -68,14 +66,12 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::ChangeStrongholdPassword {
-            mut current_password,
-            mut new_password,
+            current_password,
+            new_password,
         } => {
             wallet
-                .change_stronghold_password(&current_password, &new_password)
+                .change_stronghold_password(current_password, new_password)
                 .await?;
-            current_password.zeroize();
-            new_password.zeroize();
             Response::Ok
         }
         #[cfg(feature = "stronghold")]
@@ -152,9 +148,8 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             Response::Bech32Address(address.to_bech32(bech32_hrp))
         }
         #[cfg(feature = "stronghold")]
-        WalletMethod::SetStrongholdPassword { mut password } => {
-            wallet.set_stronghold_password(&password).await?;
-            password.zeroize();
+        WalletMethod::SetStrongholdPassword { password } => {
+            wallet.set_stronghold_password(password).await?;
             Response::Ok
         }
         #[cfg(feature = "stronghold")]
