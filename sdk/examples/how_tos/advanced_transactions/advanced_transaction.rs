@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
     if balance.base_coin().available() >= 1_000_000 {
         // Set the stronghold password
         wallet
-            .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+            .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
         // Create an ouput with amount 1_000_000 and a timelock of 1 hour
