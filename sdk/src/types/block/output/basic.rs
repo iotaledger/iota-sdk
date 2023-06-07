@@ -359,7 +359,7 @@ pub mod dto {
             Self {
                 kind: BasicOutput::KIND,
                 amount: value.amount().to_string(),
-                native_tokens: value.native_tokens().iter().copied().collect(),
+                native_tokens: value.native_tokens().to_vec(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
                 features: value.features().iter().map(Into::into).collect::<_>(),
             }

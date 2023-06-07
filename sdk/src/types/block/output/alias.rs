@@ -746,7 +746,7 @@ pub mod dto {
             Self {
                 kind: AliasOutput::KIND,
                 amount: value.amount().to_string(),
-                native_tokens: value.native_tokens().iter().copied().collect(),
+                native_tokens: value.native_tokens().to_vec(),
                 alias_id: *value.alias_id(),
                 state_index: value.state_index(),
                 state_metadata: prefix_hex::encode(value.state_metadata()),

@@ -644,7 +644,7 @@ pub mod dto {
             Self {
                 kind: FoundryOutput::KIND,
                 amount: value.amount().to_string(),
-                native_tokens: value.native_tokens().iter().copied().collect(),
+                native_tokens: value.native_tokens().to_vec(),
                 serial_number: value.serial_number(),
                 token_scheme: value.token_scheme().into(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
