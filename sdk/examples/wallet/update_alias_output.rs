@@ -14,8 +14,8 @@
 use std::{env::var, str::FromStr, time::Instant};
 
 use iota_sdk::{
-    types::block::output::{AliasId, AliasOutput, AliasOutputBuilder, Output},
-    wallet::{account::FilterOptions, Account, Result, Wallet},
+    types::block::output::{AliasId, AliasOutputBuilder, Output},
+    wallet::{Account, Result, Wallet},
 };
 
 // Replace with an alias id held in an unspent output of the account
@@ -43,21 +43,7 @@ async fn main() -> Result<()> {
 
     // Get the alias output by its alias id
     let alias_id = AliasId::from_str(ALIAS_ID)?;
-    if let Some(alias_output_data) = account
-        .unspent_outputs(FilterOptions {
-            output_types: Some(vec![AliasOutput::KIND]),
-            ..Default::default()
-        })
-        .await?
-        .into_iter()
-        .find_map(|output_data| match &output_data.output {
-            Output::Alias(alias_output) => {
-                let output_alias_id = alias_output.alias_id_non_null(&output_data.output_id);
-                (output_alias_id == alias_id).then_some(output_data)
-            }
-            _ => None,
-        })
-    {
+    if let Some(alias_output_data) = account.unspent_alias_output(&alias_id).await? {
         println!(
             "Alias '{ALIAS_ID}' found in unspent output: '{}'",
             alias_output_data.output_id
