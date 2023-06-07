@@ -11,7 +11,7 @@ use crate::{
 impl Wallet {
     /// Sets the Stronghold password
     pub async fn set_stronghold_password(&self, password: impl Into<Password> + Send) -> crate::wallet::Result<()> {
-        // Note: we need to enforce the conversions here to make sure sensitive data is always zeroed.
+        // Note: we need to enforce the conversion here to make sure sensitive data is never leaked.
         let password = password.into();
 
         if let SecretManager::Stronghold(stronghold) = &mut *self.secret_manager.write().await {
@@ -26,14 +26,12 @@ impl Wallet {
         current_password: impl Into<Password> + Send,
         new_password: impl Into<Password> + Send,
     ) -> crate::wallet::Result<()> {
-        // Note: we need to enforce the conversions here to make sure sensitive data is zeroed.
+        // Note: we need to enforce the conversion here to make sure sensitive data is never leaked.
         let current_password = current_password.into();
         let new_password = new_password.into();
 
         if let SecretManager::Stronghold(stronghold) = &mut *self.secret_manager.write().await {
-            if let Err(err) = stronghold.set_password(current_password).await {
-                return Err(err.into());
-            }
+            stronghold.set_password(current_password).await?;
             stronghold.change_password(new_password).await?;
         }
         Ok(())
