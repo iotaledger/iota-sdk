@@ -82,7 +82,7 @@ async function run() {
         // Build an NFT manually by using the `NftOutputBuilder`
         const client = await wallet.getClient();
 
-        const hexAddress = Utils.bech32ToHex(senderAddress);
+        const hexAddress = Utils.bech32ToHex(NFT1_OWNER_ADDRESS);
         const output = await client.buildNftOutput({
             amount: NFT2_AMOUNT,
             nftId: '0x0000000000000000000000000000000000000000000000000000000000000000',
