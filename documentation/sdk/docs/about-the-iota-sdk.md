@@ -1,17 +1,20 @@
---- 
-description: Get started with the IOTA SDK and choose your programming language.
-image: /img/logo/wallet_light.png
+---
+image: "/img/banner/client_lib_overview.png"
+description: "Learn about the IOTA SDK, its main modules (client and wallet), available programming languages (Rust, Node.js, Python, and Wasm), secure secret management using Stronghold, and how to join the discussion and get support."
 keywords:
-- rust
-- node.js
-- python
-- wasm
-- javascript
-- wallet
+- IOTA SDK
+- Rust
 - client
-- SDK
-- accounts
----  
+- wallet
+- Node.js
+- Python
+- Wasm
+- Stronghold
+- secret management
+- IOTA network
+- discussion
+- support
+---
 
 # About the IOTA SDK
 

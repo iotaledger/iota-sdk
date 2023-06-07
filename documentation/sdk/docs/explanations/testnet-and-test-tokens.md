@@ -1,3 +1,16 @@
+---
+image: /img/banner/client_lib_overview.png
+description: "Learn how to connect to the Shimmer Testnet API, explore the network using the Shimmer Tangle Explorer, and obtain test tokens through the Shimmer Faucet for testing value-based transactions on the testnet network."
+keywords:
+- Shimmer Testnet
+- API
+- Shimmer Tangle Explorer
+- test tokens
+- testnet network
+- testnet tokens
+- Shimmer Faucet
+---
+
 # Testnet and Test Tokens
 
 ## Connect to the Testnet API

@@ -1,3 +1,16 @@
+---
+image: /img/iota_layers_overview.svg
+description: "Learn about the multi-account and single account approaches in the IOTA SDK for managing user accounts and addresses on the IOTA network."
+keywords:
+- IOTA SDK
+- account approaches
+- multi-account approach
+- single account approach
+- user accounts
+- addresses
+- database
+- exchanges
+---
 # Account Approaches
 
 In [the IOTA SDK](../about-the-iota-sdk.md), you can use an account model
