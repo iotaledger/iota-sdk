@@ -1,12 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    SecretManager,
-    CoinType,
-    initLogger,
-    SHIMMER_TESTNET_BECH32_HRP,
-} from '@iota/sdk';
+import { SecretManager, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -59,25 +54,6 @@ async function run() {
             'List of generated internal addresses:',
             internalAddresses,
             '\n',
-        );
-
-        // Generate addresses with providing all inputs, that way it can also be done offline without a node.
-        const offlineGeneratedAddresses =
-            await secretManager.generateEd25519Addresses({
-                coinType: CoinType.Shimmer,
-                accountIndex: 0,
-                range: {
-                    start: 0,
-                    end: 4,
-                },
-                internal: false,
-                // Generating addresses with client.generateEd25519Addresses(secretManager, {}), will by default get the bech32_hrp (Bech32
-                // human readable part) from the node info, generating it "offline" requires setting it in the generateAddressesOptions
-                bech32Hrp: SHIMMER_TESTNET_BECH32_HRP,
-            });
-        console.log(
-            'List of offline generated public addresses:',
-            offlineGeneratedAddresses,
         );
     } catch (error) {
         console.error('Error: ', error);

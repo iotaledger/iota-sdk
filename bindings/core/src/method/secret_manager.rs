@@ -40,6 +40,13 @@ pub enum SecretManagerMethod {
         /// Chain to sign the essence hash with
         chain: Vec<u32>,
     },
+    /// Signs a message with an Evm private key.
+    SignEvm {
+        /// The message to sign, hex encoded String
+        message: String,
+        /// Chain to sign the message with
+        chain: Vec<u32>,
+    },
     /// Sign a transaction
     #[serde(rename_all = "camelCase")]
     SignTransaction {

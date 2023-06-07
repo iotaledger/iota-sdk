@@ -6,13 +6,15 @@ pub(crate) mod stronghold_snapshot;
 use std::{fs, path::PathBuf, sync::atomic::Ordering};
 
 use futures::{future::try_join_all, FutureExt};
-use zeroize::Zeroize;
 
 use self::stronghold_snapshot::read_data_from_stronghold_snapshot;
 #[cfg(feature = "storage")]
 use crate::wallet::WalletBuilder;
 use crate::{
-    client::secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerConfig, SecretManagerDto},
+    client::{
+        secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerConfig, SecretManagerDto},
+        utils::Password,
+    },
     types::block::address::Hrp,
     wallet::{Account, Wallet},
 };
@@ -20,14 +22,20 @@ use crate::{
 impl Wallet {
     /// Backup the wallet data in a Stronghold file
     /// stronghold_password must be the current one when Stronghold is used as SecretManager.
-    pub async fn backup(&self, backup_path: PathBuf, mut stronghold_password: String) -> crate::wallet::Result<()> {
+    pub async fn backup(
+        &self,
+        backup_path: PathBuf,
+        stronghold_password: impl Into<Password> + Send,
+    ) -> crate::wallet::Result<()> {
+        let stronghold_password = stronghold_password.into();
+
         log::debug!("[backup] creating a stronghold backup");
         let secret_manager = self.secret_manager.read().await;
 
         match &*secret_manager {
             // Backup with existing stronghold
             SecretManager::Stronghold(stronghold) => {
-                stronghold.set_password(&stronghold_password).await?;
+                stronghold.set_password(stronghold_password).await?;
                 self.store_data_to_stronghold(stronghold).await?;
                 // Write snapshot to backup path
                 stronghold.write_stronghold_snapshot(Some(&backup_path)).await?;
@@ -36,7 +44,7 @@ impl Wallet {
             _ => {
                 // If the SecretManager is not Stronghold we'll create a new one for the backup
                 let backup_stronghold = StrongholdSecretManager::builder()
-                    .password(&stronghold_password)
+                    .password(stronghold_password)
                     .build(backup_path)?;
 
                 self.store_data_to_stronghold(&backup_stronghold).await?;
@@ -45,8 +53,6 @@ impl Wallet {
                 backup_stronghold.write_stronghold_snapshot(None).await?;
             }
         }
-
-        stronghold_password.zeroize();
 
         Ok(())
     }
@@ -63,10 +69,12 @@ impl Wallet {
     pub async fn restore_backup(
         &self,
         backup_path: PathBuf,
-        mut stronghold_password: String,
+        stronghold_password: impl Into<Password> + Send,
         ignore_if_coin_type_mismatch: Option<bool>,
         ignore_if_bech32_hrp_mismatch: Option<Hrp>,
     ) -> crate::wallet::Result<()> {
+        let stronghold_password = stronghold_password.into();
+
         log::debug!("[restore_backup] loading stronghold backup");
 
         if !backup_path.is_file() {
@@ -91,7 +99,7 @@ impl Wallet {
 
         // We'll create a new stronghold to load the backup
         let new_stronghold = StrongholdSecretManager::builder()
-            .password(&stronghold_password)
+            .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
         let (read_client_options, read_coin_type, mut read_secret_manager, read_accounts) =
@@ -128,14 +136,12 @@ impl Wallet {
 
             if let SecretManager::Stronghold(stronghold) = &restored_secret_manager {
                 // Set password to restored secret manager
-                stronghold.set_password(&stronghold_password).await?;
+                stronghold.set_password(stronghold_password).await?;
             }
             *secret_manager = restored_secret_manager;
         }
 
-        stronghold_password.zeroize();
-
-        // drop secret manager, otherwise we get a deadlock in set_client_options()
+        // drop secret manager, otherwise we get a deadlock in set_client_options() (there inside of save_wallet_data())
         drop(secret_manager);
 
         if ignore_if_coin_type_mismatch.is_none() {
@@ -202,18 +208,20 @@ impl Wallet {
 impl Wallet<StrongholdSecretManager> {
     /// Backup the wallet data in a Stronghold file
     /// stronghold_password must be the current one when Stronghold is used as SecretManager.
-    pub async fn backup(&self, backup_path: PathBuf, mut stronghold_password: String) -> crate::wallet::Result<()> {
+    pub async fn backup(
+        &self,
+        backup_path: PathBuf,
+        stronghold_password: impl Into<Password> + Send,
+    ) -> crate::wallet::Result<()> {
         log::debug!("[backup] creating a stronghold backup");
         let secret_manager = self.secret_manager.read().await;
 
-        secret_manager.set_password(&stronghold_password).await?;
+        secret_manager.set_password(stronghold_password).await?;
 
         self.store_data_to_stronghold(&secret_manager).await?;
 
         // Write snapshot to backup path
         secret_manager.write_stronghold_snapshot(Some(&backup_path)).await?;
-
-        stronghold_password.zeroize();
 
         Ok(())
     }
@@ -230,10 +238,12 @@ impl Wallet<StrongholdSecretManager> {
     pub async fn restore_backup(
         &self,
         backup_path: PathBuf,
-        mut stronghold_password: String,
+        stronghold_password: impl Into<Password> + Send,
         ignore_if_coin_type_mismatch: Option<bool>,
         ignore_if_bech32_hrp_mismatch: Option<&str>,
     ) -> crate::wallet::Result<()> {
+        let stronghold_password = stronghold_password.into();
+
         log::debug!("[restore_backup] loading stronghold backup");
 
         if !backup_path.is_file() {
@@ -254,7 +264,7 @@ impl Wallet<StrongholdSecretManager> {
 
         // We'll create a new stronghold to load the backup
         let new_stronghold = StrongholdSecretManager::builder()
-            .password(&stronghold_password)
+            .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
         let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =
@@ -288,11 +298,9 @@ impl Wallet<StrongholdSecretManager> {
             fs::copy(backup_path, new_snapshot_path)?;
 
             // Set password to restored secret manager
-            restored_secret_manager.set_password(&stronghold_password).await?;
+            restored_secret_manager.set_password(stronghold_password).await?;
             *secret_manager = restored_secret_manager;
         }
-
-        stronghold_password.zeroize();
 
         // drop secret manager, otherwise we get a deadlock in set_client_options()
         drop(secret_manager);

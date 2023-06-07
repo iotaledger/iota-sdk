@@ -104,7 +104,7 @@ fn burn_alias_present_and_required() {
         protocol_parameters,
     )
     .burn(Burn::new().add_alias(alias_id_1))
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -387,7 +387,7 @@ fn burn_nft_present_and_required() {
         protocol_parameters,
     )
     .burn(Burn::new().add_nft(nft_id_1))
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 

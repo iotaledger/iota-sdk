@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{collections::HashSet, str::FromStr};
+use std::str::FromStr;
 
 use iota_sdk::{
     client::{
@@ -1536,7 +1536,7 @@ fn state_controller_sender_required_already_selected() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1590,7 +1590,7 @@ fn state_controller_sender_required_but_governance() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select();
 
     assert!(matches!(
@@ -1702,7 +1702,7 @@ fn governor_sender_required_already_selected() {
         addresses([BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1744,7 +1744,7 @@ fn governance_transition_and_required() {
         addresses([BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1786,7 +1786,7 @@ fn state_transition_and_required() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1840,7 +1840,7 @@ fn governor_sender_required_but_state() {
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select();
 
     assert!(matches!(
@@ -1992,7 +1992,7 @@ fn remainder_address_in_governor() {
         protocol_parameters,
     )
     // Add the basic output so it will be consumed
-    .required_inputs(HashSet::from_iter([*inputs[1].output_id()]))
+    .required_inputs([*inputs[1].output_id()])
     .select()
     .unwrap();
 

@@ -64,9 +64,8 @@ use crate::{error::Error, OmittedDebug};
 #[derivative(Debug)]
 #[serde(tag = "type", content = "payload", rename_all = "camelCase")]
 pub enum Response {
-    // Client responses
     /// Response for:
-    /// - [`GenerateEd25519Addresses`](crate::method::ClientMethod::GenerateEd25519Addresses)
+    /// - [`GenerateEd25519Addresses`](crate::method::SecretManagerMethod::GenerateEd25519Addresses)
     GeneratedEd25519Addresses(Vec<Bech32Address>),
     /// Response for:
     /// - [`GenerateEvmAddresses`](crate::method::SecretManagerMethod::GenerateEvmAddresses)
@@ -104,6 +103,10 @@ pub enum Response {
     /// Response for:
     /// - [`SignEd25519`](crate::method::SecretManagerMethod::SignEd25519)
     Ed25519Signature(Ed25519SignatureDto),
+    /// Response for:
+    /// - [`SignEvm`](crate::method::SecretManagerMethod::SignEvm)
+    #[serde(rename_all = "camelCase")]
+    EvmSignature { public_key: String, signature: String },
     /// Response for:
     /// - [`UnhealthyNodes`](crate::method::ClientMethod::UnhealthyNodes)
     #[cfg(not(target_family = "wasm"))]

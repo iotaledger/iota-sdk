@@ -21,17 +21,20 @@ use super::{
     common::{PRIVATE_DATA_CLIENT_PATH, SECRET_VAULT_PATH, USERDATA_STORE_KEY_RECORD_PATH},
     Error, StrongholdAdapter,
 };
-use crate::client::stronghold::{check_or_create_snapshot, Error as StrongholdError};
+use crate::client::{
+    stronghold::{check_or_create_snapshot, Error as StrongholdError},
+    utils::Password,
+};
 
 impl StrongholdAdapter {
     /// Migrates a snapshot from version 2 to version 3.
     pub fn migrate_snapshot_v2_to_v3<P: AsRef<Path>>(
         current_path: P,
-        current_password: &str,
-        salt: &str,
+        current_password: Password,
+        salt: impl AsRef<str>,
         rounds: u32,
         new_path: Option<P>,
-        new_password: Option<&str>,
+        new_password: Option<Password>,
     ) -> Result<(), Error> {
         log::debug!("migrate_snapshot_v2_to_v3");
         use iota_stronghold::engine::snapshot::migration::{migrate, Version};
@@ -47,7 +50,7 @@ impl StrongholdAdapter {
 
         crypto::keys::pbkdf::PBKDF2_HMAC_SHA512(
             current_password.as_bytes(),
-            salt.as_bytes(),
+            salt.as_ref().as_bytes(),
             NonZeroU32::try_from(rounds).map_err(|_| StrongholdError::InvalidRounds(rounds))?,
             buffer.as_mut(),
         );
@@ -79,7 +82,7 @@ impl StrongholdAdapter {
     fn reencrypt_data_v2_to_v3<P: AsRef<Path>>(
         path: P,
         v2_password_hash: &[u8; 32],
-        new_password: &str,
+        new_password: Password,
     ) -> Result<(), Error> {
         log::debug!("reencrypt_data_v2_to_v3");
 

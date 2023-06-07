@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{collections::HashSet, str::FromStr};
+use std::str::FromStr;
 
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection, Requirement},
@@ -1194,7 +1194,7 @@ fn sender_already_selected() {
         addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
@@ -1233,7 +1233,7 @@ fn single_mandatory_input() {
         addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
         protocol_parameters,
     )
-    .required_inputs(HashSet::from_iter([*inputs[0].output_id()]))
+    .required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 

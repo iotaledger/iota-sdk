@@ -67,7 +67,6 @@ impl InputSelection {
 
     /// Gets requirements from outputs.
     pub(crate) fn outputs_requirements(&mut self) {
-        // TODO do we really need to chain?
         let inputs = self.available_inputs.iter().chain(self.selected_inputs.iter());
         let outputs = self.outputs.iter();
 

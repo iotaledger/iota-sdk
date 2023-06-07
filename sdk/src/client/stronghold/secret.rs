@@ -282,7 +282,7 @@ impl SecretManagerConfig for StrongholdAdapter {
         let mut builder = Self::builder();
 
         if let Some(password) = &config.password {
-            builder = builder.password(password);
+            builder = builder.password(password.clone());
         }
 
         if let Some(timeout) = &config.timeout {
@@ -471,7 +471,7 @@ mod tests {
             "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally",
         );
         let stronghold_adapter = StrongholdAdapter::builder()
-            .password("drowssap")
+            .password("drowssap".to_owned())
             .build(stronghold_path)
             .unwrap();
 
@@ -503,7 +503,7 @@ mod tests {
             "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river",
         );
         let stronghold_adapter = StrongholdAdapter::builder()
-            .password("drowssap")
+            .password("drowssap".to_owned())
             .build(stronghold_path)
             .unwrap();
 
@@ -535,7 +535,7 @@ mod tests {
             "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally",
         );
         let stronghold_adapter = StrongholdAdapter::builder()
-            .password("drowssap")
+            .password("drowssap".to_owned())
             .build(stronghold_path)
             .unwrap();
 
@@ -554,7 +554,7 @@ mod tests {
                 .is_err()
         );
 
-        stronghold_adapter.set_password("drowssap").await.unwrap();
+        stronghold_adapter.set_password("drowssap".to_owned()).await.unwrap();
 
         // After setting the correct password it works again.
         let addresses = stronghold_adapter

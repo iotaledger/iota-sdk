@@ -1,7 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Client, initLogger } from '@iota/sdk';
+import { Client, SecretManager, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -32,7 +32,9 @@ async function run() {
         };
 
         // We generate an address from our own mnemonic so that we send the funds to ourselves
-        const addresses = await client.generateEd25519Addresses(secretManager, {
+        const addresses = await new SecretManager(
+            secretManager,
+        ).generateEd25519Addresses({
             range: {
                 start: 1,
                 end: 2,

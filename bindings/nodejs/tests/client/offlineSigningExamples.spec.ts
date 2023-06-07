@@ -30,7 +30,7 @@ const secretManager = {
 
 describe('Offline signing examples', () => {
     it('generates addresses offline', async () => {
-        const addresses = await offlineClient.generateEd25519Addresses(secretManager, {
+        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
             range: {
                 start: 0,
                 end: 1,
