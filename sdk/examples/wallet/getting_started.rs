@@ -42,17 +42,26 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    // Generate a mnemonic and store it in the Stronghold vault.
-    // INFO: It is best practice to back up the mnemonic somewhere secure.
+    // Generate a mnemonic and store it in the Stronghold vault
+    // INFO: It is best practice to back up the mnemonic somewhere secure
     let mnemonic = wallet.generate_mnemonic()?;
-    wallet.store_mnemonic(mnemonic).await?;
+    wallet.store_mnemonic(mnemonic.clone()).await?;
+    println!("Created a wallet from the mnemonic:\n'{mnemonic}'");
 
-    // Create an account.
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    // Create an account
+    let alias = "Alice";
+    let account = wallet.create_account().with_alias(alias.to_string()).finish().await?;
+    println!("Created account '{alias}'");
 
-    // Get the first address and print it.
+    // Display the adresses in the account (only 1 for a new account)
     let addresses = account.addresses().await?;
-    println!("ADDRESSES:\n{:#?}", addresses);
+    println!(
+        "{alias}'s addresses:\n{:#?}",
+        addresses
+            .iter()
+            .map(|addr| addr.address().to_string())
+            .collect::<Vec<_>>()
+    );
 
     Ok(())
 }
