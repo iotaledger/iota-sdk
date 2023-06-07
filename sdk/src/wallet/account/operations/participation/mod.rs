@@ -217,7 +217,7 @@ impl Account {
                 .storage_manager
                 .read()
                 .await
-                .set_cached_participation_output_status(self.details().await.index, spent_cached_outputs)
+                .set_cached_participation_output_status(self.details().await.index, &spent_cached_outputs)
                 .await?;
         }
 
