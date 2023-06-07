@@ -12,7 +12,7 @@ keywords:
 
 Thank you for thinking about contributing to the project! We have the following ways that you can contribute.
 
-## Join the IOTA Libraries Initiative
+## Join the IOTA `Libraries` Initiative
 
 The [IOTA Libraries Initiative](https://github.com/iota-community/X-Team_IOTA_Libraries) is a collaborative effort to help improve the developer experience.
 

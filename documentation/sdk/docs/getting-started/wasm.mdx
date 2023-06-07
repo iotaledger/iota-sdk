@@ -2,7 +2,7 @@ import WarningPasswordStorage from '../_admonitions/_warning_password_storage.md
 
 # Getting Started with Wasm
 
-<WarningPasswordStorage />
+<WarningPasswordStorage/>
 
 ## Before You Start
 
@@ -55,61 +55,61 @@ A bundler such as [webpack](https://webpack.js.org/) or [rollup](https://rollupj
 
 1. Install `rollup-plugin-copy`:
 
-     ```bash
-     npm install rollup-plugin-copy --save-dev
+  ```bash
+  npm install rollup-plugin-copy --save-dev
     ```
 
 2. Add the plugin to your `rollup.config.js`:
 
-     ```js
-     // Include the copy plugin.
-     import copy from 'rollup-plugin-copy'
+  ```js
+  // Include the copy plugin.
+  import copy from 'rollup-plugin-copy'
 
-     // ...
+  // ...
 
-     // Add the copy plugin to the `plugins` array:
-     copy({
-       targets: [{
-         src: 'node_modules/@iota/sdk-wasm/web/wasm/iota_sdk_wasm_bg.wasm',
-         dest: 'public',
-         rename: 'iota_sdk_wasm_bg.wasm'
-       }]
-     })
+  // Add the copy plugin to the `plugins` array:
+  copy({
+    targets: [{
+      src: 'node_modules/@iota/sdk-wasm/web/wasm/iota_sdk_wasm_bg.wasm',
+      dest: 'public',
+      rename: 'iota_sdk_wasm_bg.wasm'
+    }]
+  })
     ```
 
 #### Webpack
 
 1. Install `copy-webpack-plugin`:
 
-     ```bash
-     npm install copy-webpack-plugin --save-dev
+  ```bash
+  npm install copy-webpack-plugin --save-dev
     ```
 
 2. Add the plugin to your `webpack.config.js`:
 
-    ```js
-    // Include the copy plugin.
-    const CopyWebPlugin = require('copy-webpack-plugin');
+ ```js
+ // Include the copy plugin.
+ const CopyWebPlugin = require('copy-webpack-plugin');
 
-    // ...
+ // ...
 
-    experiments: {
-     // futureDefaults: true, // includes asyncWebAssembly, topLevelAwait etc.
-     asyncWebAssembly: true
-    }
+ experiments: {
+  // futureDefaults: true, // includes asyncWebAssembly, topLevelAwait etc.
+  asyncWebAssembly: true
+ }
 
-    // Add the copy plugin to the `plugins` array:
-    plugins: [
-     new CopyWebPlugin({
-       patterns: [
-         {
-           from: 'node_modules/@iota/sdk-wasm/web/wasm/iota_sdk_wasm_bg.wasm',
-           to: 'iota_sdk_wasm_bg.wasm'
-         }
-       ]
-     }),
-     // other plugins...
+ // Add the copy plugin to the `plugins` array:
+ plugins: [
+  new CopyWebPlugin({
+    patterns: [
+      {
+        from: 'node_modules/@iota/sdk-wasm/web/wasm/iota_sdk_wasm_bg.wasm',
+        to: 'iota_sdk_wasm_bg.wasm'
+      }
     ]
+  }),
+  // other plugins...
+ ]
     ```
 
 ## Usage
