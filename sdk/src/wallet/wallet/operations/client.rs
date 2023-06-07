@@ -11,7 +11,7 @@ use crate::{
             builder::NodeManagerBuilder,
             node::{Node, NodeAuth, NodeDto},
         },
-        Client, ClientBuilder, NodeInfoWrapper,
+        Client, ClientBuilder,
     },
     wallet::Wallet,
     Url,
@@ -60,13 +60,6 @@ impl Wallet {
                 .await?;
         }
         Ok(())
-    }
-
-    /// Get the node info.
-    pub async fn get_node_info(&self) -> crate::wallet::Result<NodeInfoWrapper> {
-        let node_info_wrapper = self.client().get_info().await?;
-
-        Ok(node_info_wrapper)
     }
 
     /// Update the authentication for a node.
