@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will:
-//! * restore a wallet from a mnemonic phrase
+//! * create a wallet from a mnemonic phrase
 //! * create an account if it does not exist yet
 //! * generate some addresses for that account - if necessary
 //! * print all addresses in the account
@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let wallet = restore_wallet().await?;
+    let wallet = create_wallet().await?;
 
     let account = get_or_create_account(&wallet, "Alice").await?;
     print_accounts(&wallet).await?;
@@ -63,7 +63,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn restore_wallet() -> Result<Wallet> {
+async fn create_wallet() -> Result<Wallet> {
     let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
     let secret_manager =
         MnemonicSecretManager::try_from_mnemonic(&var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
