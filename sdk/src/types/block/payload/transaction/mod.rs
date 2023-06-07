@@ -99,7 +99,7 @@ fn verify_essence_unlocks(essence: &TransactionEssence, unlocks: &Unlocks) -> Re
 
 #[allow(missing_docs)]
 pub mod dto {
-    use alloc::vec::Vec;
+    use alloc::{boxed::Box, vec::Vec};
 
     use serde::{Deserialize, Serialize};
 

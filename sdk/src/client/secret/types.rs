@@ -7,7 +7,7 @@ use crypto::keys::slip10::{Chain, Segment};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{Password, Result},
+    client::Result,
     types::block::{
         address::Address,
         output::{
@@ -24,13 +24,14 @@ use crate::{
 #[serde(rename_all = "camelCase")]
 pub struct StrongholdDto {
     /// The Stronghold password
-    pub password: Option<Password>,
+    pub password: Option<crate::client::Password>,
     /// The timeout for auto key clearing, in seconds
     pub timeout: Option<u64>,
     /// The path for the Stronghold file
     pub snapshot_path: String,
 }
 
+#[cfg(feature = "stronghold")]
 impl core::fmt::Debug for StrongholdDto {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("StrongholdDto")
