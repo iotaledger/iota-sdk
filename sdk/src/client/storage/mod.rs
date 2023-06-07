@@ -13,10 +13,6 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "stronghold")]
 pub use self::stronghold::StrongholdStorageAdapter;
 
-pub trait StorageAdapterId: StorageAdapter {
-    const ID: &'static str;
-}
-
 /// The storage adapter.
 #[async_trait]
 pub trait StorageAdapter: std::fmt::Debug + Send + Sync {
