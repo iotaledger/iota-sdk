@@ -1,5 +1,5 @@
 import type { IBlock, IOutputResponse, ITaggedDataPayload } from '@iota/types';
-import { Client, utf8ToHex, Utils } from '../../';
+import { Client, SecretManager, utf8ToHex, Utils } from '../../';
 import '../customMatchers';
 import 'dotenv/config';
 import * as addressOutputs from '../fixtures/addressOutputs.json';
@@ -34,7 +34,7 @@ describe.skip('Main examples', () => {
     });
 
     it('generates addresses', async () => {
-        const addresses = await client.generateEd25519Addresses(secretManager, {
+        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
             accountIndex: 0,
             range: {
                 start: 0,
@@ -82,7 +82,7 @@ describe.skip('Main examples', () => {
 
     it('gets the balance of an address', async () => {
         // Generate the first address
-        const addresses = await client.generateEd25519Addresses(secretManager, {
+        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
             accountIndex: 0,
             range: {
                 start: 0,
@@ -167,7 +167,7 @@ describe.skip('Main examples', () => {
     });
 
     it('sends a transaction', async () => {
-        const addresses = await client.generateEd25519Addresses(secretManager, {
+        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
             range: {
                 start: 1,
                 end: 2,
