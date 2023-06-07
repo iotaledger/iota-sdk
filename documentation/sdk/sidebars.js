@@ -93,11 +93,11 @@ module.exports = {
         {
           type: 'category',
           label: 'Node.js',
-          link:{
-            type: "doc",
-            id: "references/nodejs/api_ref",
-          },
           items:[
+            {
+              type: "doc",
+              id: "references/nodejs/api_ref",
+            },
             {
               type: "category",
               label: "Classes",
