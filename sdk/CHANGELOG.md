@@ -36,8 +36,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multiple prepare methods returning `PreparedMintTokenTransaction`: `prepare_mint_native_token` and `prepare_increase_native_token_supply`;
 - Stronghold snapshot migration from v2 to v3;
 - `SecretManage::sign_evm`;
+<<<<<<< HEAD
+- `Mnemonic` type which derives `Zeroize` and `ZeroizeOnDrop`;
+=======
 - `Account::addresses_balance` method accepting addresses to get balance for;
 - `Wallet::get_secret_manager` method;
+>>>>>>> upstream/develop
 
 ### Changed
 
@@ -91,6 +95,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - More functions accept generic types for ergonomics: `Wallet::listen`, `clear_listeners`, `EventEmitter` fns, `RegularTransactionEssenceBuilder` fns, `AliasOutputBuilder` fns, `Account::claim_outputs`, `prepare_transaction`, `send`, `finish_transaction`, `send_nft`, `prepare_send_nft`, `send_native_tokens`, `prepare_send_native_tokens`, `send_amount`, `prepare_send_amount`, `mint_nfts`, `prepare_mint_nfts`, `vote`, `prepare_vote`, `Unlocks::new`, `TaggedDataPayload::new`, `MilestonePayload::new`, `ReceiptMilestoneOption::new`, `Client::subscribe`, `unsubscribe`, `basic_output_ids`, `alias_output_ids`, `foundry_output_ids`, `nft_output_ids`, `MqttManager::with_topics`, `MqttTopicManager::new`, `with_topics`, `QueryParameters::new`;
 - `Topic::try_new` renamed to `new`, `topic` renamed to `as_str`;
 - `LedgerNanoStatus::locked` is now optional since it's an IOTA/Shimmer specific API;
+- `WalletInner::generate_mnemonic` returns a `Mnemonic` instead of a `String`;
 
 ### Removed
 
@@ -105,6 +110,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Bech32Addresses` and `RawAddresses`;
 - `Client::get_addresses`;
 - `Topic` `TryFrom<String>` impl;
+- `WalletInner::verify_mnemonic` (because verification is done now when trying to create a `Mnemonic`);
 
 ### Fixed
 

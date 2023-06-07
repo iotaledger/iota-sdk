@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::client::secret::SecretManagerDto;
+use iota_sdk::client::secret::{mnemonic::MnemonicLike, SecretManagerDto};
 use iota_sdk_bindings_core::{ClientMethod, Response, UtilsMethod, WalletOptions};
 
 #[test]
@@ -27,8 +27,10 @@ fn method_interface_secrets_debug() {
         );
     }
 
+    let mnemonic = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally";
+
     let client_method = UtilsMethod::MnemonicToHexSeed {
-        mnemonic: "mnemonic".to_string(),
+        mnemonic: mnemonic.to_string(),
     };
     assert_eq!(
         format!("{:?}", client_method),
@@ -36,11 +38,11 @@ fn method_interface_secrets_debug() {
     );
 
     let wallet_method = UtilsMethod::VerifyMnemonic {
-        mnemonic: "mnemonic".to_string(),
+        mnemonic: mnemonic.to_string(),
     };
     assert_eq!(format!("{:?}", wallet_method), "VerifyMnemonic { mnemonic: <omitted> }");
 
-    let response = Response::GeneratedMnemonic("mnemonic".to_string());
+    let response = Response::GeneratedMnemonic(mnemonic.to_owned().to_mnemonic().unwrap());
     assert_eq!(format!("{:?}", response), "GeneratedMnemonic(<omitted>)");
 
     let wallet_options = WalletOptions {

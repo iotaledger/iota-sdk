@@ -19,7 +19,7 @@ use crate::{
     },
 };
 
-/// Stronghold DTO to allow the creation of a Stronghold secret manager from bindings
+/// Stronghold DTO to allow the creation of a Stronghold secret manager from bindings.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, ZeroizeOnDrop)]
 #[cfg(feature = "stronghold")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
@@ -32,6 +32,7 @@ pub struct StrongholdDto {
     /// The path for the Stronghold file
     pub snapshot_path: String,
 }
+
 /// An account address.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

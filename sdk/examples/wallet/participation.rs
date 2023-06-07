@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
         .with_ignore_node_health();
 
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))

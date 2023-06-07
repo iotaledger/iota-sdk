@@ -11,7 +11,7 @@ use iota_sdk::client::{Client, Result};
 async fn main() -> Result<()> {
     let mnemonic = Client::generate_mnemonic()?;
 
-    println!("Mnemonic: {mnemonic}");
+    println!("Mnemonic: {}", mnemonic.as_str());
 
     Ok(())
 }

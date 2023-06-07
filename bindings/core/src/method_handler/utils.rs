@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
+    client::{hex_public_key_to_bech32_address, hex_to_bech32, secret::mnemonic::Mnemonic, Client},
     types::block::{
         address::{dto::AddressDto, Address, Ed25519Address, ToBech32Ext},
         output::{AliasId, FoundryId, NftId},
@@ -11,7 +11,6 @@ use iota_sdk::{
         Block,
     },
 };
-use zeroize::Zeroize;
 
 use crate::{method::UtilsMethod, response::Response, Result};
 
@@ -30,10 +29,8 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::ParseBech32Address { address } => Response::ParsedBech32Address(AddressDto::from(address.inner())),
         UtilsMethod::IsAddressValid { address } => Response::Bool(Address::is_valid_bech32(&address)),
         UtilsMethod::GenerateMnemonic => Response::GeneratedMnemonic(Client::generate_mnemonic()?),
-        UtilsMethod::MnemonicToHexSeed { mut mnemonic } => {
-            let response = Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(&mnemonic)?);
-            mnemonic.zeroize();
-            response
+        UtilsMethod::MnemonicToHexSeed { mnemonic } => {
+            Response::MnemonicHexSeed(Client::mnemonic_to_hex_seed(&mnemonic.try_into()?))
         }
         UtilsMethod::BlockId { block } => {
             let block = Block::try_from_dto_unverified(&block)?;
@@ -63,9 +60,8 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let address = Ed25519Address::try_from(&address)?;
             Response::Bool(signature.is_valid(&msg, &address).is_ok())
         }
-        UtilsMethod::VerifyMnemonic { mut mnemonic } => {
-            verify_mnemonic(&mnemonic)?;
-            mnemonic.zeroize();
+        UtilsMethod::VerifyMnemonic { mnemonic } => {
+            let _ = Mnemonic::try_from(mnemonic)?;
             Response::Ok
         }
     };

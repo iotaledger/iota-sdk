@@ -34,7 +34,10 @@ use self::ledger_nano::LedgerSecretManager;
 #[cfg(feature = "stronghold")]
 use self::stronghold::StrongholdSecretManager;
 pub use self::types::{GenerateAddressOptions, LedgerNanoStatus};
-use self::{mnemonic::MnemonicSecretManager, placeholder::PlaceholderSecretManager};
+use self::{
+    mnemonic::{Mnemonic, MnemonicSecretManager},
+    placeholder::PlaceholderSecretManager,
+};
 #[cfg(feature = "stronghold")]
 use crate::client::secret::types::StrongholdDto;
 use crate::{
@@ -205,7 +208,10 @@ impl TryFrom<&SecretManagerDto> for SecretManager {
             #[cfg(feature = "ledger_nano")]
             SecretManagerDto::LedgerNano(is_simulator) => Self::LedgerNano(LedgerSecretManager::new(*is_simulator)),
 
-            SecretManagerDto::Mnemonic(mnemonic) => Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?),
+            SecretManagerDto::Mnemonic(mnemonic) => {
+                // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
+                Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.clone())?)
+            }
 
             SecretManagerDto::HexSeed(hex_seed) => {
                 // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
@@ -363,9 +369,15 @@ impl SignTransactionEssence for SecretManager {
     }
 }
 
+impl From<Mnemonic> for SecretManager {
+    fn from(m: Mnemonic) -> Self {
+        Self::Mnemonic(MnemonicSecretManager::from(m))
+    }
+}
+
 impl SecretManager {
     /// Tries to create a [`SecretManager`] from a mnemonic string.
-    pub fn try_from_mnemonic(mnemonic: &str) -> crate::client::Result<Self> {
+    pub fn try_from_mnemonic(mnemonic: String) -> crate::client::Result<Self> {
         Ok(Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?))
     }
 

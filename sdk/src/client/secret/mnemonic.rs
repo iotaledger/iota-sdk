@@ -14,7 +14,8 @@ use crypto::{
         secp256k1_ecdsa::{self, EvmAddress},
     },
 };
-use zeroize::Zeroize;
+use serde::{Deserialize, Serialize};
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
@@ -119,8 +120,9 @@ impl MnemonicSecretManager {
     /// Create a new [`MnemonicSecretManager`] from a BIP-39 mnemonic in English.
     ///
     /// For more information, see <https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki>.
-    pub fn try_from_mnemonic(mnemonic: &str) -> Result<Self, Error> {
-        Ok(Self(Client::mnemonic_to_seed(mnemonic)?))
+    pub fn try_from_mnemonic(mnemonic: String) -> Result<Self, Error> {
+        let mnemonic = Mnemonic::try_from(mnemonic)?;
+        Ok(Self(Client::mnemonic_to_seed(&mnemonic)))
     }
 
     /// Create a new [`MnemonicSecretManager`] from a hex-encoded raw seed string.
@@ -133,6 +135,78 @@ impl MnemonicSecretManager {
     }
 }
 
+impl From<Mnemonic> for MnemonicSecretManager {
+    fn from(m: Mnemonic) -> Self {
+        Self(Client::mnemonic_to_seed(&m))
+    }
+}
+
+/// A mnemonic (space separated list of words) that allows to create a seed from.
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
+pub struct Mnemonic(String);
+
+impl Mnemonic {
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+}
+
+impl TryFrom<String> for Mnemonic {
+    type Error = Error;
+
+    fn try_from(mut value: String) -> Result<Self, Self::Error> {
+        // trim because empty spaces could create a different seed https://github.com/iotaledger/crypto.rs/issues/125
+        let trimmed = value.trim();
+        // first we check if the mnemonic is valid to give meaningful errors
+        if let Err(err) = crypto::keys::bip39::wordlist::verify(trimmed, &crypto::keys::bip39::wordlist::ENGLISH) {
+            value.zeroize();
+            Err(crate::client::Error::InvalidMnemonic(format!("{err:?}")))
+        } else {
+            let mnemonic = trimmed.to_string();
+            value.zeroize();
+            Ok(Self(mnemonic))
+        }
+    }
+}
+
+pub trait MnemonicLike: Send {
+    fn to_mnemonic(self) -> Result<Mnemonic, Error>;
+}
+
+impl MnemonicLike for Mnemonic {
+    fn to_mnemonic(self) -> Result<Mnemonic, Error> {
+        Ok(self)
+    }
+}
+
+impl MnemonicLike for String {
+    fn to_mnemonic(self) -> Result<Mnemonic, Error> {
+        Mnemonic::try_from(self)
+    }
+}
+
+impl MnemonicLike for Vec<String> {
+    fn to_mnemonic(mut self) -> Result<Mnemonic, Error> {
+        let m = self.join(" ");
+        self.zeroize();
+        Mnemonic::try_from(m)
+    }
+}
+
+impl MnemonicLike for [&'static str; 24] {
+    fn to_mnemonic(self) -> Result<Mnemonic, Error> {
+        let m = self.join(" ");
+        Mnemonic::try_from(m)
+    }
+}
+
+// that's only necessary to use it in `assert!` macros
+impl core::fmt::Debug for Mnemonic {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "<mnemonic>")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -142,7 +216,7 @@ mod tests {
     async fn address() {
         use crate::client::constants::IOTA_COIN_TYPE;
 
-        let mnemonic = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally";
+        let mnemonic = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally".to_owned();
         let secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic).unwrap();
 
         let addresses = secret_manager
@@ -172,5 +246,65 @@ mod tests {
             addresses[0].to_bech32_unchecked("atoi"),
             "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r"
         );
+    }
+
+    #[test]
+    fn mnemonic_like() {
+        // Mnemonic from a space-separated word list stored in a `String`
+        let mnemonic1 = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally".to_owned().to_mnemonic().unwrap();
+        // Mnemonic from a word list stored in a `Vec<String>`
+        let mnemonic2 = [
+            "giant", "dynamic", "museum", "toddler", "six", "deny", "defense", "ostrich", "bomb", "access", "mercy",
+            "blood", "explain", "muscle", "shoot", "shallow", "glad", "autumn", "author", "calm", "heavy", "hawk",
+            "abuse", "rally",
+        ]
+        .into_iter()
+        .map(|s| s.to_owned())
+        .collect::<Vec<_>>()
+        .to_mnemonic()
+        .unwrap();
+        // Mnemonic from a word list stored in a `[&'static str; 24]`
+        let mnemonic3 = [
+            "giant", "dynamic", "museum", "toddler", "six", "deny", "defense", "ostrich", "bomb", "access", "mercy",
+            "blood", "explain", "muscle", "shoot", "shallow", "glad", "autumn", "author", "calm", "heavy", "hawk",
+            "abuse", "rally",
+        ]
+        .to_mnemonic()
+        .unwrap();
+
+        assert_eq!(mnemonic1, mnemonic2);
+        assert_eq!(mnemonic1, mnemonic3);
+        assert_eq!(mnemonic2, mnemonic3);
+
+        // Different mnemonic
+        let mnemonic4 = [
+            "endorse", "answer", "radar", "about", "source", "reunion", "marriage", "tag", "sausage", "weekend",
+            "frost", "daring", "base", "attack", "because", "joke", "dream", "slender", "leisure", "group", "reason",
+            "prepare", "broken", "river",
+        ]
+        .to_mnemonic()
+        .unwrap();
+
+        assert_ne!(mnemonic1, mnemonic4);
+        assert_ne!(mnemonic2, mnemonic4);
+        assert_ne!(mnemonic3, mnemonic4);
+
+        // Incorrect mnemonic
+        assert!(
+            [
+                "dynamic", "giant", "museum", "toddler", "six", "deny", "defense", "ostrich", "bomb", "access",
+                "mercy", "blood", "explain", "muscle", "shoot", "shallow", "glad", "autumn", "author", "calm", "heavy",
+                "hawk", "abuse", "rally"
+            ]
+            .to_mnemonic()
+            .is_err()
+        );
+    }
+
+    #[test]
+    fn zeroize_mnemonic() {
+        let mut mnemonic1 = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally".to_owned().to_mnemonic().unwrap();
+        mnemonic1.zeroize();
+        assert!(mnemonic1.as_str().is_empty());
     }
 }

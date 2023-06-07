@@ -121,7 +121,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(
-        "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak",
+        "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_owned(),
     )?;
 
     let wallet = Wallet::builder()
@@ -148,7 +148,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
     // restore from backup
 
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(
-        "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak",
+        "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_owned(),
     )?;
 
     let restore_wallet = Wallet::builder()

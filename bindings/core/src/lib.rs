@@ -15,7 +15,7 @@ use derivative::Derivative;
 use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
 pub use iota_sdk;
 use iota_sdk::{
-    client::secret::{SecretManager, SecretManagerDto},
+    client::secret::{mnemonic::Mnemonic, SecretManager, SecretManagerDto},
     wallet::{wallet::Wallet, ClientOptions},
 };
 use serde::Deserialize;
@@ -79,6 +79,7 @@ pub(crate) trait OmittedDebug {
         f.write_str("<omitted>")
     }
 }
+impl OmittedDebug for Mnemonic {}
 impl OmittedDebug for String {}
 impl OmittedDebug for SecretManagerDto {}
 impl<T: OmittedDebug> OmittedDebug for Option<T> {

@@ -13,7 +13,6 @@ use backtrace::Backtrace;
 use crypto::keys::slip10::Chain;
 use futures::{Future, FutureExt};
 use primitive_types::U256;
-use zeroize::Zeroize;
 
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{Event, WalletEventType};
@@ -22,7 +21,7 @@ use crate::{
         api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
         constants::SHIMMER_TESTNET_BECH32_HRP,
         request_funds_from_faucet,
-        secret::SecretManage,
+        secret::{mnemonic::Mnemonic, SecretManage},
         utils, Client, NodeInfoWrapper,
     },
     types::block::{
@@ -164,6 +163,7 @@ impl WalletMessageHandler {
                 mut current_password,
                 mut new_password,
             } => {
+                use zeroize::Zeroize;
                 convert_async_panics(|| async {
                     self.wallet
                         .change_stronghold_password(&current_password, &new_password)
@@ -239,12 +239,13 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            Message::GenerateMnemonic => {
-                convert_panics(|| self.wallet.generate_mnemonic().map(Response::GeneratedMnemonic))
-            }
-            Message::VerifyMnemonic { mut mnemonic } => convert_panics(|| {
-                self.wallet.verify_mnemonic(&mnemonic)?;
-                mnemonic.zeroize();
+            Message::GenerateMnemonic => convert_panics(|| {
+                self.wallet
+                    .generate_mnemonic()
+                    .map(|m| Response::GeneratedMnemonic(m.as_str().to_owned()))
+            }),
+            Message::VerifyMnemonic { mnemonic } => convert_panics(|| {
+                let _ = Mnemonic::try_from(mnemonic)?;
                 Ok(Response::Ok(()))
             }),
             Message::SetClientOptions { client_options } => {
@@ -297,6 +298,7 @@ impl WalletMessageHandler {
             }
             #[cfg(feature = "stronghold")]
             Message::SetStrongholdPassword { mut password } => {
+                use zeroize::Zeroize;
                 convert_async_panics(|| async {
                     self.wallet.set_stronghold_password(&password).await?;
                     password.zeroize();

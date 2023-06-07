@@ -56,7 +56,7 @@ async fn public_key_to_address() {
 
 #[tokio::test]
 async fn mnemonic_address_generation_iota() {
-    let mnemonic = "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast";
+    let mnemonic = "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast".to_owned();
     let secret_manager = SecretManager::try_from_mnemonic(mnemonic).unwrap();
 
     // account 0, address 0 and 1
@@ -100,7 +100,7 @@ async fn mnemonic_address_generation_iota() {
 
 #[tokio::test]
 async fn mnemonic_address_generation_shimmer() {
-    let mnemonic = "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast";
+    let mnemonic = "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast".to_owned();
     let secret_manager = SecretManager::try_from_mnemonic(mnemonic).unwrap();
 
     // account 0, address 0 and 1
@@ -163,7 +163,7 @@ async fn address_generation() {
         serde_json::from_value(general.get("address_generations").unwrap().clone()).unwrap();
 
     for address in &addresses_data {
-        let secret_manager = SecretManager::try_from_mnemonic(&address.mnemonic).unwrap();
+        let secret_manager = SecretManager::try_from_mnemonic(address.mnemonic.clone()).unwrap();
         let addresses = secret_manager
             .generate_ed25519_addresses(
                 GetAddressesOptions::default()
