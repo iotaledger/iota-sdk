@@ -97,15 +97,6 @@ pub enum ClientMethod {
         /// Topics for which listeners should be removed.
         topics: Vec<Topic>,
     },
-    /// Generate addresses.
-    #[serde(rename_all = "camelCase")]
-    GenerateEd25519Addresses {
-        /// Create secret manager from json
-        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
-        secret_manager: SecretManagerDto,
-        /// Addresses generation options
-        options: GenerateAddressesOptions,
-    },
     /// Build and post a block
     #[serde(rename_all = "camelCase")]
     BuildAndPostBlock {
