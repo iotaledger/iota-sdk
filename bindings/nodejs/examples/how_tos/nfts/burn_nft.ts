@@ -1,9 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    Wallet
-} from '@iota/sdk';
+import { Wallet } from '@iota/sdk';
 
 // In this example we will burn an existing nft output.
 //

@@ -24,7 +24,13 @@ const NFT1_TAG = utf8ToHex('some NFT tag');
 // The base coin amount we sent with the second NFT
 const NFT2_AMOUNT = '1000000';
 
-// This example mints new NFT
+// In this example we will mint a new nft.
+//
+// Make sure that `example.stronghold` and `example.walletdb` already exist by
+// running the `how_tos/accounts-and-addresses/create-wallet` example!
+//
+// Rename `.env.example` to `.env` first, then run
+// yarn run-example ./how_tos/nfts/mint_nft.ts
 async function run() {
     try {
         if (!process.env.STRONGHOLD_PASSWORD) {
