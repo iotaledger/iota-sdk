@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `SecretManage::sign_evm`;
 - `Account::addresses_balance` method accepting addresses to get balance for;
 - `Wallet::get_secret_manager` method;
+- `Password` type which is `Zeroize` and `ZeroizeOnDrop`;
 
 ### Changed
 
@@ -92,6 +93,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Topic::try_new` renamed to `new`, `topic` renamed to `as_str`;
 - `LedgerNanoStatus::locked` is now optional since it's an IOTA/Shimmer specific API;
 - `StorageManager` and wallet dynamic `StorageAdapter` are now private;
+- All public password-related methods now claim ownership over provided passwords and take care of zeroing the memory on drop;
 
 ### Removed
 

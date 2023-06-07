@@ -64,7 +64,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
         match (storage_path.exists(), snapshot_path.exists()) {
             (true, true) => {
                 let password = get_password("Stronghold password", false)?;
-                let wallet = unlock_wallet(storage_path, snapshot_path, &password).await?;
+                let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
                 if wallet.get_accounts().await?.is_empty() {
                     create_initial_account(wallet).await?
                 } else if let Some(alias) = cli.account {

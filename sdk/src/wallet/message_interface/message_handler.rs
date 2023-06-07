@@ -161,15 +161,13 @@ impl WalletMessageHandler {
             }
             #[cfg(feature = "stronghold")]
             Message::ChangeStrongholdPassword {
-                mut current_password,
-                mut new_password,
+                current_password,
+                new_password,
             } => {
                 convert_async_panics(|| async {
                     self.wallet
-                        .change_stronghold_password(&current_password, &new_password)
+                        .change_stronghold_password(current_password, new_password)
                         .await?;
-                    current_password.zeroize();
-                    new_password.zeroize();
                     Ok(Response::Ok(()))
                 })
                 .await
@@ -296,10 +294,9 @@ impl WalletMessageHandler {
                 .await
             }
             #[cfg(feature = "stronghold")]
-            Message::SetStrongholdPassword { mut password } => {
+            Message::SetStrongholdPassword { password } => {
                 convert_async_panics(|| async {
-                    self.wallet.set_stronghold_password(&password).await?;
-                    password.zeroize();
+                    self.wallet.set_stronghold_password(password).await?;
                     Ok(Response::Ok(()))
                 })
                 .await

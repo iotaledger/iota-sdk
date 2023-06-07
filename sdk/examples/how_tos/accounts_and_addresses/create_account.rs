@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let secret_manager = StrongholdSecretManager::builder()
-        .password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .build("wallet.stronghold")?;
 
     // Only required the first time, can also be generated with `manager.generate_mnemonic()?`

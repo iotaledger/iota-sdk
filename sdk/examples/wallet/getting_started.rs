@@ -28,7 +28,7 @@ const STRONGHOLD_SNAPSHOT_PATH: &str = "vault.stronghold";
 async fn main() -> Result<()> {
     // Setup Stronghold secret manager.
     let secret_manager = StrongholdSecretManager::builder()
-        .password(STRONGHOLD_PASSWORD)
+        .password(STRONGHOLD_PASSWORD.to_owned())
         .build(PathBuf::from(STRONGHOLD_SNAPSHOT_PATH))?;
 
     let client_options = ClientOptions::new().with_node(NODE_URL)?;

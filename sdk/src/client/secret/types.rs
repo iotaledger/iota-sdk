@@ -5,8 +5,6 @@
 
 use crypto::keys::slip10::{Chain, Segment};
 use serde::{Deserialize, Serialize};
-#[cfg(feature = "stronghold")]
-use zeroize::ZeroizeOnDrop;
 
 use crate::{
     client::Result,
@@ -20,9 +18,9 @@ use crate::{
 };
 
 /// Stronghold DTO to allow the creation of a Stronghold secret manager from bindings
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, ZeroizeOnDrop)]
 #[cfg(feature = "stronghold")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, zeroize::ZeroizeOnDrop)]
 #[serde(rename_all = "camelCase")]
 pub struct StrongholdDto {
     /// The Stronghold password
@@ -32,6 +30,7 @@ pub struct StrongholdDto {
     /// The path for the Stronghold file
     pub snapshot_path: String,
 }
+
 /// An account address.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
