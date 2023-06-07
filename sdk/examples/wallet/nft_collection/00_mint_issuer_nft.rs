@@ -40,7 +40,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // Issue the minting transaction and wait for it's inclusion
+    // Issue the minting transaction and wait for its inclusion
     println!("Sending NFT minting transaction...");
     let nft_mint_params = [MintNftParams::new()
         .with_immutable_metadata(b"This NFT will be the issuer from the awesome NFT collection".to_vec())];

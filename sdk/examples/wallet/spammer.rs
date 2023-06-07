@@ -1,7 +1,7 @@
-// Copyright 2021 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will spam transactions from multiple threads simultaneously to our own addresses.
+//! In this example we will spam transactions from multiple threads simultaneously to our own address.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
