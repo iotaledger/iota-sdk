@@ -150,7 +150,9 @@ fn check_or_create_snapshot(
 impl StrongholdAdapterBuilder {
     /// Use an user-input password string to derive a key to use Stronghold.
     pub fn password(mut self, password: impl Into<Password>) -> Self {
+        // Note: we deliberately put the password conversion right here. Only change if you know what you're doing.
         let password = password.into();
+
         // Note that derive_builder always adds another layer of Option<T>.
         self.key_provider = Some(self::common::key_provider_from_password(password));
 
@@ -238,6 +240,7 @@ impl StrongholdAdapter {
     /// It will also try to load a snapshot to check if the provided password is correct, if not it's cleared and an
     /// error will be returned.
     pub async fn set_password(&self, password: impl Into<Password> + Send) -> Result<(), Error> {
+        // Note: we deliberately put the password conversion right here. Only change if you know what you're doing.
         let password = password.into();
 
         let mut key_provider_guard = self.key_provider.lock().await;
