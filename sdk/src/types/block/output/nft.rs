@@ -704,7 +704,7 @@ mod tests {
 
         let output_split = NftOutput::try_from_dtos(
             OutputBuilderAmountDto::Amount(output.amount().to_string()),
-            Some(output.native_tokens().iter().copied().collect()),
+            Some(output.native_tokens().to_vec()),
             output.nft_id(),
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().iter().map(Into::into).collect()),
