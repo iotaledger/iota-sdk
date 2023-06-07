@@ -33,7 +33,7 @@ mod storage_stub {
     }
 
     impl WalletData {
-        fn to_builder<S: SecretManage>(self, secret_manager: Option<S>) -> WalletBuilder<S> {
+        fn into_builder<S: SecretManage>(self, secret_manager: Option<S>) -> WalletBuilder<S> {
             WalletBuilder {
                 client_options: self.client_options,
                 coin_type: self.coin_type,
@@ -79,7 +79,7 @@ mod storage_stub {
                 let secret_manager_dto = storage.get(SECRET_MANAGER_KEY).await?;
                 log::debug!("get_secret_manager {secret_manager_dto:?}");
 
-                Ok(Some(data.to_builder(
+                Ok(Some(data.into_builder(
                     secret_manager_dto.map(|dto| S::from_config(&dto)).transpose()?,
                 )))
             } else {
@@ -100,7 +100,7 @@ mod storage_stub {
             log::debug!("get_wallet_data");
             let res = storage.get::<WalletData>(WALLET_INDEXATION_KEY).await?;
             log::debug!("get_wallet_data {res:?}");
-            Ok(res.map(|data| data.to_builder(None)))
+            Ok(res.map(|data| data.into_builder(None)))
         }
     }
 }
