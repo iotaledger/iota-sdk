@@ -27,7 +27,7 @@ async function run() {
 
         // After syncing the balance can also be computed with the local data
         const balance = await account.getBalance();
-        console.log('AccountBalance', balance);
+        console.log('Balance', balance);
     } catch (error) {
         console.error('Error: ', error);
     }

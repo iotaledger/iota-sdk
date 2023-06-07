@@ -1,7 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Client, initLogger } from '@iota/sdk';
+import { Client, SecretManager, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -24,12 +24,12 @@ async function run() {
         if (!process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1) {
             throw new Error('.env mnemonic is undefined, see .env.example');
         }
-        const secretManager = {
+        const secretManager = new SecretManager({
             mnemonic: process.env.NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1,
-        };
+        });
 
         // Generate the first address
-        const addresses = await client.generateEd25519Addresses(secretManager, {
+        const addresses = await secretManager.generateEd25519Addresses({
             accountIndex: 0,
             range: {
                 start: 0,

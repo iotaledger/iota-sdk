@@ -20,7 +20,7 @@ import { SecretManagerType } from '../types/secretManager/';
 export class SecretManager {
     private methodHandler: SecretManagerMethodHandler;
 
-    constructor(options: SecretManagerType) {
+    constructor(options: SecretManagerType | SecretManagerMethodHandler) {
         this.methodHandler = new SecretManagerMethodHandler(options);
     }
 

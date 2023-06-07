@@ -10,13 +10,14 @@ import type {
     Auth,
     ClientOptions,
     CreateAccountPayload,
-    EventType,
+    WalletEventType,
     GenerateAddressOptions,
     LedgerNanoStatus,
     NodeInfoWrapper,
     SyncOptions,
     WalletEvent,
 } from '../types';
+import { Event } from '../types';
 
 /** The AccountManager class. */
 export class AccountManager {
@@ -228,8 +229,8 @@ export class AccountManager {
      * Listen to wallet events with a callback. An empty array will listen to all possible events.
      */
     async listen(
-        eventTypes: EventType[],
-        callback: (error: Error, result: string) => void,
+        eventTypes: WalletEventType[],
+        callback: (error: Error, result: Event) => void,
     ): Promise<void> {
         return this.messageHandler.listen(eventTypes, callback);
     }
@@ -237,7 +238,7 @@ export class AccountManager {
     /**
      * Clear the callbacks for provided events. An empty array will clear all listeners.
      */
-    async clearListeners(eventTypes: EventType[]): Promise<void> {
+    async clearListeners(eventTypes: WalletEventType[]): Promise<void> {
         const response = await this.messageHandler.sendMessage({
             cmd: 'clearListeners',
             payload: { eventTypes },

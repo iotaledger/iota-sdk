@@ -148,9 +148,9 @@ pub fn listen(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let vec: Vec<Handle<JsValue>> = js_arr_handle.to_vec(&mut cx)?;
     let mut event_types = Vec::new();
     for event_string in vec {
-        let event_type = event_string.downcast_or_throw::<JsString, FunctionContext>(&mut cx)?;
+        let event_type = event_string.downcast_or_throw::<JsNumber, FunctionContext>(&mut cx)?;
         let wallet_event_type =
-            WalletEventType::try_from(event_type.value(&mut cx).as_str()).or_else(|e| cx.throw_error(e))?;
+            WalletEventType::try_from(event_type.value(&mut cx) as u8).or_else(|e| cx.throw_error(e))?;
         event_types.push(wallet_event_type);
     }
 

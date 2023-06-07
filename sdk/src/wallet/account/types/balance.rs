@@ -14,7 +14,7 @@ use crate::types::block::output::{feature::MetadataFeature, AliasId, FoundryId, 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, Getters)]
 #[serde(rename_all = "camelCase")]
 #[getset(get = "pub")]
-pub struct AccountBalance {
+pub struct Balance {
     /// Total and available amount of the base coin
     pub(crate) base_coin: BaseCoinBalance,
     /// Current required storage deposit amount
@@ -34,7 +34,7 @@ pub struct AccountBalance {
     pub(crate) potentially_locked_outputs: HashMap<OutputId, bool>,
 }
 
-impl std::ops::AddAssign for AccountBalance {
+impl std::ops::AddAssign for Balance {
     fn add_assign(&mut self, rhs: Self) {
         self.base_coin += rhs.base_coin;
         self.required_storage_deposit += rhs.required_storage_deposit;
@@ -61,7 +61,7 @@ impl std::ops::AddAssign for AccountBalance {
 /// [`crate::wallet::account::Account::balance()`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AccountBalanceDto {
+pub struct BalanceDto {
     /// Total and available amount of the base coin
     pub base_coin: BaseCoinBalance,
     /// Current required storage deposit amount
@@ -81,8 +81,8 @@ pub struct AccountBalanceDto {
     pub potentially_locked_outputs: HashMap<OutputId, bool>,
 }
 
-impl From<&AccountBalance> for AccountBalanceDto {
-    fn from(value: &AccountBalance) -> Self {
+impl From<&Balance> for BalanceDto {
+    fn from(value: &Balance) -> Self {
         Self {
             base_coin: value.base_coin.clone(),
             required_storage_deposit: value.required_storage_deposit.clone(),
@@ -99,7 +99,7 @@ impl From<&AccountBalance> for AccountBalanceDto {
     }
 }
 
-/// Base coin fields for [`AccountBalance`]
+/// Base coin fields for [`Balance`]
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters)]
 #[serde(rename_all = "camelCase")]
 #[getset(get_copy = "pub")]
@@ -149,7 +149,7 @@ impl std::ops::AddAssign for RequiredStorageDeposit {
     }
 }
 
-/// Native tokens fields for [`AccountBalance`]
+/// Native tokens fields for [`Balance`]
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, Getters, CopyGetters)]
 #[serde(rename_all = "camelCase")]
 pub struct NativeTokensBalance {
@@ -188,7 +188,7 @@ impl std::ops::AddAssign for NativeTokensBalance {
     }
 }
 
-/// Base coin fields for [`AccountBalanceDto`]
+/// Base coin fields for [`BalanceDto`]
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NativeTokensBalanceDto {
@@ -214,7 +214,7 @@ impl From<&NativeTokensBalance> for NativeTokensBalanceDto {
 }
 
 #[cfg(feature = "rand")]
-impl AccountBalance {
+impl Balance {
     pub fn rand_mock() -> Self {
         use rand::Rng;
 

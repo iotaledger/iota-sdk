@@ -11,8 +11,13 @@ import {
 export class SecretManagerMethodHandler {
     methodHandler: SecretManagerMethodHandler;
 
-    constructor(secretManager: SecretManagerType) {
-        this.methodHandler = createSecretManager(JSON.stringify(secretManager));
+    constructor(options: SecretManagerType | SecretManagerMethodHandler) {
+        // The rust secret manager object is not extensible
+        if (Object.isExtensible(options)) {
+            this.methodHandler = createSecretManager(JSON.stringify(options));
+        } else {
+            this.methodHandler = options as SecretManagerMethodHandler;
+        }
     }
 
     async callMethod(method: __SecretManagerMethods__): Promise<string> {

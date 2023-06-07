@@ -13,6 +13,8 @@ pub enum Error {
     /// Invalid stronghold password.
     #[error("invalid stronghold password")]
     InvalidPassword,
+    #[error("invalid json {0}")]
+    Json(#[from] serde_json::Error),
     /// No password has been supplied to a Stronghold vault, or it has been cleared
     #[error("no password has been supplied, or the key has been cleared from the memory")]
     KeyCleared,
