@@ -15,7 +15,9 @@ fn migrate_native_token(output: &mut serde_json::Value) {
     let native_tokens = output["native_tokens"]["inner"].as_array_mut().unwrap();
 
     for native_token in native_tokens.iter_mut() {
-        *native_token = serde_json::json!({ "amount": native_token["amount"], "id": native_token["token_id"]});
+        if let Some(id) = native_token.get("token_id") {
+            *native_token = serde_json::json!({ "amount": native_token["amount"], "id": id});
+        }
     }
 }
 
