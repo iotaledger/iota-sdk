@@ -119,7 +119,7 @@ const walletOptions: WalletOptions = {
     secretManager: {
         // Setup Stronghold secret manager
         stronghold: {
-            snapshotPath: 'vault.stronghold', //  The path to store the account snapshot.
+            snapshotPath: 'vault.stronghold', // The path to store the account snapshot.
             password: 'a-secure-password', // A password to encrypt the stored data. WARNING: Never hardcode passwords in production code.
         },
     },
