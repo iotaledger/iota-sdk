@@ -4,7 +4,7 @@
 use std::sync::atomic::Ordering;
 
 use crate::{
-    client::secret::{mnemonic::MnemonicSecretManager, GenerateAddressOptions, SecretManage, SecretManager},
+    client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
     types::block::address::{Ed25519Address, Hrp},
     wallet::Wallet,
 };
@@ -204,42 +204,6 @@ impl Wallet<crate::client::secret::ledger_nano::LedgerSecretManager> {
 
 #[cfg(feature = "stronghold")]
 impl Wallet<crate::client::secret::stronghold::StrongholdSecretManager> {
-    /// Generate an address without storing it
-    /// ```ignore
-    /// let public_addresses = wallet
-    ///     .generate_ed25519_address(
-    ///         0,
-    ///         false,
-    ///         0,
-    ///         None,
-    ///     )
-    ///     .await?;
-    /// ```
-    pub async fn generate_ed25519_address(
-        &self,
-        account_index: u32,
-        address_index: u32,
-        options: Option<GenerateAddressOptions>,
-    ) -> crate::wallet::Result<Ed25519Address> {
-        let address = self
-            .secret_manager
-            .read()
-            .await
-            .generate_ed25519_addresses(
-                self.coin_type.load(Ordering::Relaxed),
-                account_index,
-                address_index..address_index + 1,
-                options,
-            )
-            .await?;
-
-        Ok(*address
-            .first()
-            .ok_or(crate::wallet::Error::MissingParameter("address"))?)
-    }
-}
-
-impl Wallet<MnemonicSecretManager> {
     /// Generate an address without storing it
     /// ```ignore
     /// let public_addresses = wallet
