@@ -191,7 +191,6 @@ impl TryFrom<SecretManagerDto> for SecretManager {
                 let mut builder = StrongholdSecretManager::builder();
 
                 if let Some(password) = stronghold_dto.password {
-                    // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
                     builder = builder.password(password);
                 }
 
