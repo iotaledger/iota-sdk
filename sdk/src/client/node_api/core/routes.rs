@@ -16,13 +16,10 @@ use crate::{
         Client, ClientInner, Error, Result,
     },
     types::{
-        api::core::{
-            dto::{PeerDto, ReceiptDto},
-            response::{
-                BlockMetadataResponse, BlockResponse, InfoResponse, MilestoneResponse, OutputWithMetadataResponse,
-                PeersResponse, ReceiptsResponse, RoutesResponse, SubmitBlockResponse, TipsResponse, TreasuryResponse,
-                UtxoChangesResponse,
-            },
+        api::core::response::{
+            BlockMetadataResponse, BlockResponse, InfoResponse, MilestoneResponse, OutputWithMetadataResponse,
+            PeerResponse, ReceiptResponse, ReceiptsResponse, RoutesResponse, SubmitBlockResponse, TipsResponse,
+            TreasuryResponse, UtxoChangesResponse,
         },
         block::{
             output::{dto::OutputMetadataDto, Output, OutputId, OutputMetadata, OutputWithMetadata},
@@ -316,7 +313,7 @@ impl ClientInner {
 
     /// Gets all stored receipts.
     /// GET /api/core/v2/receipts
-    pub async fn get_receipts(&self) -> Result<Vec<ReceiptDto>> {
+    pub async fn get_receipts(&self) -> Result<Vec<ReceiptResponse>> {
         let path = &"api/core/v2/receipts";
 
         let resp = self
@@ -331,7 +328,7 @@ impl ClientInner {
 
     /// Gets the receipts by the given milestone index.
     /// GET /api/core/v2/receipts/{migratedAt}
-    pub async fn get_receipts_migrated_at(&self, milestone_index: u32) -> Result<Vec<ReceiptDto>> {
+    pub async fn get_receipts_migrated_at(&self, milestone_index: u32) -> Result<Vec<ReceiptResponse>> {
         let path = &format!("api/core/v2/receipts/{milestone_index}");
 
         let resp = self
@@ -494,17 +491,17 @@ impl ClientInner {
     // Peers routes.
 
     /// GET /api/core/v2/peers
-    pub async fn get_peers(&self) -> Result<Vec<PeerDto>> {
+    pub async fn get_peers(&self) -> Result<Vec<PeerResponse>> {
         let path = "api/core/v2/peers";
 
         let resp = self
             .node_manager
             .read()
             .await
-            .get_request::<PeersResponse>(path, None, self.get_timeout().await, false, false)
+            .get_request::<Vec<PeerResponse>>(path, None, self.get_timeout().await, false, false)
             .await?;
 
-        Ok(resp.0)
+        Ok(resp)
     }
 
     // // RoutePeer is the route for getting peers by their peerID.
