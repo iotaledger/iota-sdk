@@ -81,6 +81,20 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
     Ok(())
 }
 
+fn migrate_client_options(client_options: &mut serde_json::Value) -> Result<()> {
+    println!("{client_options:#}");
+    let protocol_parameters = &mut client_options["protocolParameters"];
+
+    ConvertHrp::check(&mut protocol_parameters["bech32_hrp"])?;
+
+    // TODO this is temporary to merge https://github.com/iotaledger/iota-sdk/pull/570.
+    // We actually need to migrate the whole protocol_parameters, including this.
+    let rent_structure = &mut protocol_parameters["rent_structure"];
+    *rent_structure = serde_json::json!({ "vByteCost": rent_structure["v_byte_cost"], "vByteFactorData": rent_structure["v_byte_factor_data"], "vByteFactorKey": rent_structure["v_byte_factor_key"]});
+
+    Ok(())
+}
+
 #[async_trait]
 impl MigrationData for Migrate {
     const ID: usize = 0;
@@ -112,7 +126,8 @@ impl Migration<crate::wallet::storage::Storage> for Migrate {
         }
 
         if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
-            ConvertHrp::check(&mut wallet["client_options"]["protocolParameters"]["bech32_hrp"])?;
+            migrate_client_options(&mut wallet["client_options"])?;
+
             storage.set(WALLET_INDEXATION_KEY, &wallet).await?;
         }
         Ok(())
@@ -135,7 +150,8 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
             storage.set(ACCOUNTS_KEY, &accounts).await?;
         }
         if let Some(mut client_options) = storage.get::<serde_json::Value>(CLIENT_OPTIONS_KEY).await? {
-            ConvertHrp::check(&mut client_options["protocolParameters"]["bech32_hrp"])?;
+            migrate_client_options(&mut client_options)?;
+
             storage.set(CLIENT_OPTIONS_KEY, &client_options).await?;
         }
         storage.delete("backup_schema_version").await.ok();
