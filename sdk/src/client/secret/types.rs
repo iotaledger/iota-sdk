@@ -5,8 +5,6 @@
 
 use crypto::keys::slip10::{Chain, Segment};
 use serde::{Deserialize, Serialize};
-#[cfg(feature = "stronghold")]
-use zeroize::ZeroizeOnDrop;
 
 use crate::{
     client::Result,
@@ -20,9 +18,9 @@ use crate::{
 };
 
 /// Stronghold DTO to allow the creation of a Stronghold secret manager from bindings
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, ZeroizeOnDrop)]
 #[cfg(feature = "stronghold")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, zeroize::ZeroizeOnDrop)]
 #[serde(rename_all = "camelCase")]
 pub struct StrongholdDto {
     /// The Stronghold password
@@ -32,6 +30,7 @@ pub struct StrongholdDto {
     /// The path for the Stronghold file
     pub snapshot_path: String,
 }
+
 /// An account address.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -102,8 +101,8 @@ pub enum LedgerDeviceType {
 pub struct LedgerNanoStatus {
     /// Ledger is available and ready to be used.
     pub(crate) connected: bool,
-    /// Ledger is connected and locked.
-    pub(crate) locked: bool,
+    /// Ledger is connected and locked, Some(true/false) for IOTA/Shimmer, None for the rest.
+    pub(crate) locked: Option<bool>,
     /// Ledger blind signing enabled
     pub(crate) blind_signing_enabled: bool,
     /// Ledger opened app.
@@ -119,8 +118,8 @@ impl LedgerNanoStatus {
     pub fn connected(&self) -> bool {
         self.connected
     }
-    /// Ledger is connected and locked.
-    pub fn locked(&self) -> bool {
+    /// Ledger is connected and locked, Some(true/false) for IOTA/Shimmer, None for the rest.
+    pub fn locked(&self) -> Option<bool> {
         self.locked
     }
     /// Ledger blind signing enabled

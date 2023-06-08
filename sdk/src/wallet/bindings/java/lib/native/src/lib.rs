@@ -15,7 +15,7 @@ use iota_sdk::{
     },
 };
 use jni::{
-    objects::{GlobalRef, JClass, JObject, JObjectArray, JStaticMethodID, JString, JValue},
+    objects::{GlobalRef, JClass, JIntArray, JObject, JStaticMethodID, JString, JValue},
     signature::{Primitive, ReturnType},
     sys::{jclass, jint, jobject, jstring},
     JNIEnv, JavaVM,
@@ -194,25 +194,24 @@ pub unsafe extern "system" fn Java_org_iota_api_NativeApi_sendMessage(
 pub unsafe extern "system" fn Java_org_iota_api_NativeApi_listen(
     mut env: JNIEnv,
     _class: jclass,
-    events: JObjectArray,
+    events: JIntArray,
     callback: jobject,
 ) -> jstring {
     env_assert!(env, std::ptr::null_mut());
 
-    let string_count = jni_err_assert!(env, env.get_array_length(&events), std::ptr::null_mut());
+    let count = jni_err_assert!(env, env.get_array_length(&events), std::ptr::null_mut());
 
-    // Safe cast as we dont have that many events
-    let mut events_list: Vec<WalletEventType> = Vec::with_capacity(string_count as usize);
+    // Safe cast as we don't have that many events
+    let mut events_list: Vec<WalletEventType> = Vec::with_capacity(count as usize);
+    let mut events_integers = vec![0; count as usize];
+    env.get_int_array_region(events, 0, &mut events_integers).unwrap();
 
-    for i in 0..string_count {
-        let arr_obj = jni_err_assert!(env, env.get_object_array_element(&events, i), std::ptr::null_mut()).into();
-        let java_str = string_from_jni!(env, arr_obj, std::ptr::null_mut());
-
-        let event = jni_err_assert!(env, WalletEventType::try_from(&*java_str), std::ptr::null_mut());
+    for event in events_integers {
+        let event = jni_err_assert!(env, WalletEventType::try_from(event as u8), std::ptr::null_mut());
         events_list.push(event);
     }
 
-    // Allocate callback globaly to not lose the reference
+    // Allocate callback globally to not lose the reference
     let global_obj = jni_err_assert!(
         env,
         env.new_global_ref(JObject::from_raw(callback)),
@@ -255,19 +254,19 @@ pub unsafe extern "system" fn Java_org_iota_api_NativeApi_migrateStrongholdSnaps
     env_assert!(env, std::ptr::null_mut());
 
     let current_path = string_from_jni!(env, current_path, std::ptr::null_mut());
-    let current_password = string_from_jni!(env, current_password, std::ptr::null_mut());
+    let current_password = string_from_jni!(env, current_password, std::ptr::null_mut()).into();
     let salt = string_from_jni!(env, salt, std::ptr::null_mut());
     let rounds = rounds as u32;
     let new_path = env.get_string(&new_path).map(String::from).ok();
-    let new_password = env.get_string(&new_password).map(String::from).ok();
+    let new_password = env.get_string(&new_password).map(String::from).ok().map(Into::into);
 
     let ret = StrongholdAdapter::migrate_snapshot_v2_to_v3(
         &current_path,
-        &current_password,
-        &salt,
+        current_password,
+        salt,
         rounds,
         new_path.as_ref(),
-        new_password.as_deref(),
+        new_password,
     );
 
     jni_err_assert!(env, ret, std::ptr::null_mut());

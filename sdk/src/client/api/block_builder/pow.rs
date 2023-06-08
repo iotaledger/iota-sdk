@@ -65,9 +65,7 @@ impl ClientInner {
                 do_pow(client_miner.finish(), min_pow_score, payload_, parents).map(Some)
             });
 
-            let threads = vec![pow_thread, time_thread];
-
-            for t in threads {
+            for t in [pow_thread, time_thread] {
                 match t.join().expect("failed to join threads.") {
                     Ok(block) => {
                         if let Some(block) = block {

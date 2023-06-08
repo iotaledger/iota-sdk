@@ -11,6 +11,8 @@ mod claim_outputs;
 mod common;
 mod consolidation;
 mod error;
+#[cfg(feature = "events")]
+mod events;
 #[cfg(feature = "message_interface")]
 mod message_interface;
 mod migrate_stronghold_snapshot_v2_to_v3;

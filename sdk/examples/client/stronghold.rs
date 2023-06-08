@@ -15,7 +15,7 @@ use iota_sdk::client::{
 #[tokio::main]
 async fn main() -> Result<()> {
     let stronghold_secret_manager = StrongholdSecretManager::builder()
-        .password("some_hopefully_secure_password")
+        .password("some_hopefully_secure_password".to_owned())
         .build("test.stronghold")?;
 
     // This example uses secrets in environment variables for simplicity which should not be done in production.

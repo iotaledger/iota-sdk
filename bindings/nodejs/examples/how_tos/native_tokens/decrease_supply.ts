@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { getUnlockedManager } from '../../wallet/account-manager';
+import { getUnlockedWallet } from '../../wallet/common';
 
 // The amount of native tokens to melt, 10 hex encoded. TODO Convert to int
 const MELT_AMOUNT = '0xA';
@@ -16,10 +16,10 @@ const MELT_AMOUNT = '0xA';
 async function run() {
     try {
         // Create the wallet
-        const manager = await getUnlockedManager();
+        const wallet = await getUnlockedWallet();
 
         // Get the account we generated with `01-create-wallet`
-        const account = await manager.getAccount(
+        const account = await wallet.getAccount(
             `${process.env.ACCOUNT_ALIAS_1}`,
         );
 

@@ -8,13 +8,15 @@ import type {
     AccountId,
     WalletOptions,
     CreateAccountPayload,
-    EventType,
+    WalletEventType,
     GenerateAddressOptions,
     SyncOptions,
     WalletEvent,
+    Event,
 } from '../types/wallet';
 import { IAuth, IClientOptions, LedgerNanoStatus } from '../types/client';
 import { Client } from '../client';
+import { SecretManager } from '../secretManager';
 
 /** The Wallet class. */
 export class Wallet {
@@ -144,6 +146,13 @@ export class Wallet {
     }
 
     /**
+     * Get secret manager.
+     */
+    async getSecretManager(): Promise<SecretManager> {
+        return this.methodHandler.getSecretManager();
+    }
+
+    /**
      * Generate an address without storing it.
      */
     async generateEd25519Address(
@@ -188,8 +197,8 @@ export class Wallet {
      * Listen to wallet events with a callback. An empty array will listen to all possible events.
      */
     async listen(
-        eventTypes: EventType[],
-        callback: (error: Error, result: string) => void,
+        eventTypes: WalletEventType[],
+        callback: (error: Error, event: Event) => void,
     ): Promise<void> {
         return this.methodHandler.listen(eventTypes, callback);
     }
@@ -197,7 +206,7 @@ export class Wallet {
     /**
      * Clear the callbacks for provided events. An empty array will clear all listeners.
      */
-    async clearListeners(eventTypes: EventType[]): Promise<void> {
+    async clearListeners(eventTypes: WalletEventType[]): Promise<void> {
         const response = await this.methodHandler.callMethod({
             name: 'clearListeners',
             data: { eventTypes },

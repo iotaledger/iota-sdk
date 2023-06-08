@@ -8,8 +8,8 @@
 //! - Smart-card-like secret vault
 //! - Generic key-value, encrypted database
 //!
-//! [`StrongholdAdapter`] respectively implements [`StorageProvider`] and [`SecretManage`] for the above purposes
-//! using Stronghold. Type aliases `StrongholdStorageProvider` and `StrongholdSecretManager` are also provided if one
+//! [`StrongholdAdapter`] respectively implements [`StorageAdapter`] and [`SecretManage`] for the above purposes
+//! using Stronghold. Type aliases `StrongholdStorageAdapter` and `StrongholdSecretManager` are also provided if one
 //! wants to have a more consistent naming when using any of the feature sets.
 //!
 //! Use [`builder()`] to construct a [`StrongholdAdapter`] with customized parameters; see documentation of methods of
@@ -38,7 +38,7 @@
 //! after creating a [`StrongholdAdapter`] with a non-existent snapshot path.
 //!
 //! [Stronghold]: iota_stronghold
-//! [`StorageProvider`]: crate::client::storage::StorageProvider
+//! [`StorageAdapter`]: crate::client::storage::StorageAdapter
 //! [`SecretManage`]: crate::client::secret::SecretManage
 //! [`builder()`]: self::StrongholdAdapter::builder()
 //! [`set_password()`]: self::StrongholdAdapter::set_password()
@@ -69,12 +69,12 @@ use zeroize::Zeroizing;
 
 use self::common::PRIVATE_DATA_CLIENT_PATH;
 pub use self::error::Error;
-use crate::client::storage::StorageProvider;
+use super::{storage::StorageAdapter, utils::Password};
 
 /// A wrapper on [Stronghold].
 ///
 /// See the [module-level documentation](self) for more details.
-#[derive(Builder)]
+#[derive(Builder, Debug)]
 #[builder(pattern = "owned", build_fn(skip))]
 pub struct StrongholdAdapter {
     /// A stronghold instance.
@@ -149,7 +149,9 @@ fn check_or_create_snapshot(
 /// Extra / custom builder method implementations.
 impl StrongholdAdapterBuilder {
     /// Use an user-input password string to derive a key to use Stronghold.
-    pub fn password(mut self, password: &str) -> Self {
+    pub fn password(mut self, password: impl Into<Password>) -> Self {
+        let password = password.into();
+
         // Note that derive_builder always adds another layer of Option<T>.
         self.key_provider = Some(self::common::key_provider_from_password(password));
 
@@ -236,7 +238,9 @@ impl StrongholdAdapter {
     /// `password` after `timeout` (if set).
     /// It will also try to load a snapshot to check if the provided password is correct, if not it's cleared and an
     /// error will be returned.
-    pub async fn set_password(&self, password: &str) -> Result<(), Error> {
+    pub async fn set_password(&self, password: impl Into<Password> + Send) -> Result<(), Error> {
+        let password = password.into();
+
         let mut key_provider_guard = self.key_provider.lock().await;
 
         let key_provider = self::common::key_provider_from_password(password);
@@ -282,11 +286,13 @@ impl StrongholdAdapter {
     /// If a snapshot path has been set, then it'll be rewritten with the newly set password.
     ///
     /// The secrets (e.g. mnemonic) stored in the Stronghold vault will be preserved, but the data saved via the
-    /// [`StorageProvider`] interface won't - they'll stay encrypted with the old password. To re-encrypt these
+    /// [`StorageAdapter`] interface won't - they'll stay encrypted with the old password. To re-encrypt these
     /// data, provide a list of keys in `keys_to_re_encrypt`, as we have no way to list and iterate over every
     /// key-value in the Stronghold store - we'll attempt on the ones provided instead. Set it to `None` to skip
     /// re-encryption.
-    pub async fn change_password(&self, new_password: &str) -> Result<(), Error> {
+    pub async fn change_password(&self, new_password: impl Into<Password> + Send) -> Result<(), Error> {
+        let new_password = new_password.into();
+
         // Stop the key clearing task to prevent the key from being abruptly cleared (largely).
         if let Some(timeout_task) = self.timeout_task.lock().await.take() {
             timeout_task.abort();
@@ -298,7 +304,7 @@ impl StrongholdAdapter {
         // If there are keys to re-encrypt, we iterate over the requested keys and attempt to re-encrypt the
         // corresponding values.
         //
-        // Note that [`StorageProvider`] methods will do encryption / decryption automatically, so we collect values
+        // Note that [`StorageAdapter`] methods will do encryption / decryption automatically, so we collect values
         // to the memory first (decrypted with the old key), then change `self.key`, then store them back (encrypted
         // with the new key).
         let mut values = Vec::new();
@@ -308,10 +314,13 @@ impl StrongholdAdapter {
             .await
             .get_client(PRIVATE_DATA_CLIENT_PATH)?
             .store()
-            .keys()?;
+            .keys()?
+            .into_iter()
+            .map(|k| unsafe { String::from_utf8_unchecked(k) })
+            .collect::<Vec<_>>();
 
         for key in keys_to_re_encrypt {
-            let value = match self.get(&key).await {
+            let value = match self.get_bytes(&key).await {
                 Err(err) => {
                     error!("an error occurred during the re-encryption of Stronghold Store: {err}");
 
@@ -349,7 +358,7 @@ impl StrongholdAdapter {
         };
 
         for (key, value) in values {
-            if let Err(err) = self.insert(&key, &value).await {
+            if let Err(err) = self.set_bytes(&key, &value).await {
                 error!("an error occurred during the re-encryption of Stronghold store: {err}");
 
                 // Recover: put the old key back
@@ -561,7 +570,7 @@ mod tests {
 
         let stronghold_path = "test_clear_key.stronghold";
         let mut adapter = StrongholdAdapter::builder()
-            .password("drowssap")
+            .password("drowssap".to_owned())
             .timeout(timeout)
             .build(stronghold_path)
             .unwrap();
@@ -584,7 +593,7 @@ mod tests {
         let timeout = None;
         adapter.set_timeout(timeout).await;
 
-        assert!(adapter.set_password("password").await.is_err());
+        assert!(adapter.set_password("password".to_owned()).await.is_err());
 
         adapter.clear_key().await;
         assert!(matches!(*adapter.key_provider.lock().await, None));
@@ -604,17 +613,17 @@ mod tests {
     async fn stronghold_password_already_set() {
         let stronghold_path = "stronghold_password_already_set.stronghold";
         let adapter = StrongholdAdapter::builder()
-            .password("drowssap")
+            .password("drowssap".to_owned())
             .build(stronghold_path)
             .unwrap();
 
         adapter.clear_key().await;
         // After the key got cleared it should work again to set it
-        assert!(adapter.set_password("drowssap").await.is_ok());
+        assert!(adapter.set_password("drowssap".to_owned()).await.is_ok());
         // When the password already exists, it should still work
-        assert!(adapter.set_password("drowssap").await.is_ok());
+        assert!(adapter.set_password("drowssap".to_owned()).await.is_ok());
         // When the password already exists, but a wrong one is provided, it should return an error
-        assert!(adapter.set_password("other_password").await.is_err());
+        assert!(adapter.set_password("other_password".to_owned()).await.is_err());
 
         fs::remove_file(stronghold_path).unwrap();
     }

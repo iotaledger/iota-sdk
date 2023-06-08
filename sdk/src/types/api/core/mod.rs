@@ -3,6 +3,5 @@
 
 //! Core API-related types like responses and DTOs.
 
-pub mod dto;
 pub mod error;
 pub mod response;

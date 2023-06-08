@@ -4,9 +4,7 @@
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
-        request_funds_from_faucet,
-        secret::SecretManager,
-        Client,
+        request_funds_from_faucet, Client,
     },
     types::{
         api::core::response::OutputWithMetadataResponse,
@@ -171,14 +169,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             )?);
 
             Response::Output(OutputDto::from(&output))
-        }
-        ClientMethod::GenerateEd25519Addresses {
-            secret_manager,
-            options,
-        } => {
-            let secret_manager = SecretManager::try_from(&secret_manager)?;
-            let addresses = secret_manager.generate_ed25519_addresses(options).await?;
-            Response::GeneratedEd25519Addresses(addresses)
         }
         ClientMethod::BuildAndPostBlock {
             secret_manager,
@@ -370,7 +360,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::FoundryOutputId { foundry_id } => Response::OutputId(client.foundry_output_id(foundry_id).await?),
         ClientMethod::GetOutputs { output_ids } => {
             let outputs_response = client
-                .get_outputs(output_ids)
+                .get_outputs(&output_ids)
                 .await?
                 .iter()
                 .map(OutputWithMetadataResponse::from)
@@ -379,7 +369,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::GetOutputsIgnoreErrors { output_ids } => {
             let outputs_response = client
-                .get_outputs_ignore_errors(output_ids)
+                .get_outputs_ignore_errors(&output_ids)
                 .await?
                 .iter()
                 .map(OutputWithMetadataResponse::from)

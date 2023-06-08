@@ -35,20 +35,16 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     let bech32_hrp = account.client().get_bech32_hrp().await?;
-    let mut nft_options = Vec::new();
 
-    // Create the metadata with another index for each
-    for index in 0..nft_collection_size {
-        nft_options.push(MintNftParams::new()
-            .with_immutable_metadata(format!("{{\"standard\":\"IRC27\",\"version\":\"v1.0\",\"type\":\"video/mp4\",\"uri\":\"ipfs://wrongcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5Ywrong\",\"name\":\"Shimmer OG NFT #{index}\",\"description\":\"The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.\",\"issuerName\":\"IOTA Foundation\",\"collectionId\":\"{issuer_nft_id}\",\"collectionName\":\"Shimmer OG\" }}").as_bytes().to_vec())
-            // The NFT address from the NFT we minted in mint_issuer_nft example
-            .with_issuer(Bech32Address::new(bech32_hrp, NftAddress::new(issuer_nft_id)))
-        );
-    }
+    let nft_options = (0..nft_collection_size).map(|index| MintNftParams::new()
+        .with_immutable_metadata(format!("{{\"standard\":\"IRC27\",\"version\":\"v1.0\",\"type\":\"video/mp4\",\"uri\":\"ipfs://wrongcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5Ywrong\",\"name\":\"Shimmer OG NFT #{index}\",\"description\":\"The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.\",\"issuerName\":\"IOTA Foundation\",\"collectionId\":\"{issuer_nft_id}\",\"collectionName\":\"Shimmer OG\" }}").as_bytes().to_vec())
+        // The NFT address from the NFT we minted in mint_issuer_nft example
+        .with_issuer(Bech32Address::new(bech32_hrp, NftAddress::new(issuer_nft_id)))
+    ).collect::<Vec<_>>();
 
     // Mint nfts in chunks, since the transaction size is limited
     for nfts in nft_options.chunks(50) {

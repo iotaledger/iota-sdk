@@ -28,18 +28,16 @@ async fn main() -> Result<()> {
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let nft_options = vec![
-        MintNftParams::new()
-            .try_with_address("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?
-            .try_with_sender("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?
-            .with_metadata(b"some NFT metadata".to_vec())
-            .with_tag(b"some NFT tag".to_vec())
-            .try_with_issuer("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?
-            .with_immutable_metadata(b"some NFT immutable metadata".to_vec()),
-    ];
+    let nft_options = [MintNftParams::new()
+        .try_with_address("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?
+        .try_with_sender("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?
+        .with_metadata(b"some NFT metadata".to_vec())
+        .with_tag(b"some NFT tag".to_vec())
+        .try_with_issuer("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?
+        .with_immutable_metadata(b"some NFT immutable metadata".to_vec())];
 
     let transaction = account.mint_nfts(nft_options, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
@@ -59,13 +57,11 @@ async fn main() -> Result<()> {
     let account_address = &account.addresses().await?[0];
     let sender_address = account_address.address();
     let token_supply = account.client().get_token_supply().await?;
-    let outputs = vec![
-        NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
-            .add_unlock_condition(AddressUnlockCondition::new(sender_address))
-            .add_feature(SenderFeature::new(sender_address))
-            .add_immutable_feature(IssuerFeature::new(sender_address))
-            .finish_output(token_supply)?,
-    ];
+    let outputs = [NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
+        .add_unlock_condition(AddressUnlockCondition::new(sender_address))
+        .add_feature(SenderFeature::new(sender_address))
+        .add_immutable_feature(IssuerFeature::new(sender_address))
+        .finish_output(token_supply)?];
 
     let transaction = account.send(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);

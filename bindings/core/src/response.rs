@@ -15,12 +15,9 @@ use iota_sdk::{
     },
     types::{
         api::{
-            core::{
-                dto::{PeerDto, ReceiptDto},
-                response::{
-                    BlockMetadataResponse, InfoResponse as NodeInfo, OutputWithMetadataResponse, TreasuryResponse,
-                    UtxoChangesResponse as MilestoneUTXOChanges,
-                },
+            core::response::{
+                BlockMetadataResponse, InfoResponse as NodeInfo, OutputWithMetadataResponse, PeerResponse,
+                ReceiptResponse, TreasuryResponse, UtxoChangesResponse as MilestoneUTXOChanges,
             },
             plugins::indexer::OutputIdsResponse,
         },
@@ -43,7 +40,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            types::{AccountAddress, AccountBalanceDto, AddressWithUnspentOutputs, OutputDataDto, TransactionDto},
+            types::{AccountAddress, AddressWithUnspentOutputs, BalanceDto, OutputDataDto, TransactionDto},
             PreparedMintTokenTransactionDto,
         },
         message_interface::dtos::AccountDetailsDto,
@@ -64,9 +61,8 @@ use crate::{error::Error, OmittedDebug};
 #[derivative(Debug)]
 #[serde(tag = "type", content = "payload", rename_all = "camelCase")]
 pub enum Response {
-    // Client responses
     /// Response for:
-    /// - [`GenerateEd25519Addresses`](crate::method::ClientMethod::GenerateEd25519Addresses)
+    /// - [`GenerateEd25519Addresses`](crate::method::SecretManagerMethod::GenerateEd25519Addresses)
     GeneratedEd25519Addresses(Vec<Bech32Address>),
     /// Response for:
     /// - [`GenerateEvmAddresses`](crate::method::SecretManagerMethod::GenerateEvmAddresses)
@@ -105,6 +101,10 @@ pub enum Response {
     /// - [`SignEd25519`](crate::method::SecretManagerMethod::SignEd25519)
     Ed25519Signature(Ed25519SignatureDto),
     /// Response for:
+    /// - [`SignEvm`](crate::method::SecretManagerMethod::SignEvm)
+    #[serde(rename_all = "camelCase")]
+    EvmSignature { public_key: String, signature: String },
+    /// Response for:
     /// - [`UnhealthyNodes`](crate::method::ClientMethod::UnhealthyNodes)
     #[cfg(not(target_family = "wasm"))]
     UnhealthyNodes(HashSet<Node>),
@@ -116,7 +116,7 @@ pub enum Response {
     Info(NodeInfoWrapper),
     /// Response for:
     /// - [`GetPeers`](crate::method::ClientMethod::GetPeers)
-    Peers(Vec<PeerDto>),
+    Peers(Vec<PeerResponse>),
     /// Response for:
     /// - [`GetTips`](crate::method::ClientMethod::GetTips)
     Tips(Vec<BlockId>),
@@ -161,7 +161,7 @@ pub enum Response {
     /// Response for:
     /// - [`GetReceipts`](crate::method::ClientMethod::GetReceipts)
     /// - [`GetReceiptsMigratedAt`](crate::method::ClientMethod::GetReceiptsMigratedAt)
-    Receipts(Vec<ReceiptDto>),
+    Receipts(Vec<ReceiptResponse>),
     /// Response for:
     /// - [`GetTreasury`](crate::method::ClientMethod::GetTreasury)
     Treasury(TreasuryResponse),
@@ -350,7 +350,7 @@ pub enum Response {
     /// Response for
     /// - [`GetBalance`](crate::method::AccountMethod::GetBalance),
     /// - [`Sync`](crate::method::AccountMethod::Sync)
-    Balance(AccountBalanceDto),
+    Balance(BalanceDto),
     /// Response for
     /// - [`ClaimOutputs`](crate::method::AccountMethod::ClaimOutputs)
     /// - [`SendAmount`](crate::method::AccountMethod::SendAmount)

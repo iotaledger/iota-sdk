@@ -42,13 +42,13 @@ async fn main() -> Result<()> {
 
         // Set the stronghold password
         wallet
-            .set_stronghold_password(&std::env::var("STRONGHOLD_PASSWORD").unwrap())
+            .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
         let bech32_address =
             Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?;
 
-        let outputs = vec![SendNativeTokensParams::new(
+        let outputs = [SendNativeTokensParams::new(
             bech32_address,
             [(*token_id, U256::from(10))],
         )?];

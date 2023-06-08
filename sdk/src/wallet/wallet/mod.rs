@@ -23,7 +23,7 @@ use crate::wallet::events::{
 use crate::wallet::storage::manager::StorageManager;
 use crate::{
     client::{secret::SecretManager, verify_mnemonic, Client},
-    wallet::account::{builder::AccountBuilder, operations::syncing::SyncOptions, types::AccountBalance, Account},
+    wallet::account::{builder::AccountBuilder, operations::syncing::SyncOptions, types::Balance, Account},
 };
 
 /// The wallet, used to create and get accounts. One wallet can hold many accounts, but they should
@@ -126,8 +126,8 @@ impl Wallet {
     }
 
     /// Get the balance of all accounts added together
-    pub async fn balance(&self) -> crate::wallet::Result<AccountBalance> {
-        let mut balance = AccountBalance::default();
+    pub async fn balance(&self) -> crate::wallet::Result<Balance> {
+        let mut balance = Balance::default();
         let accounts = self.accounts.read().await;
 
         for account in accounts.iter() {
@@ -138,8 +138,8 @@ impl Wallet {
     }
 
     /// Sync all accounts
-    pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<AccountBalance> {
-        let mut balance = AccountBalance::default();
+    pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<Balance> {
+        let mut balance = Balance::default();
 
         for account in self.accounts.read().await.iter() {
             balance += account.sync(options.clone()).await?;
@@ -151,15 +151,16 @@ impl Wallet {
 
 impl WalletInner {
     /// Get the [SecretManager]
-    pub fn get_secret_manager(&self) -> &RwLock<SecretManager> {
+    pub fn get_secret_manager(&self) -> &Arc<RwLock<SecretManager>> {
         &self.secret_manager
     }
 
     /// Listen to wallet events, empty vec will listen to all events
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
-    pub async fn listen<F>(&self, events: Vec<WalletEventType>, handler: F)
+    pub async fn listen<F, I: IntoIterator<Item = WalletEventType> + Send>(&self, events: I, handler: F)
     where
+        I::IntoIter: Send,
         F: Fn(&Event) + 'static + Clone + Send + Sync,
     {
         let mut emitter = self.event_emitter.write().await;
@@ -169,7 +170,10 @@ impl WalletInner {
     /// Remove wallet event listeners, empty vec will remove all listeners
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
-    pub async fn clear_listeners(&self, events: Vec<WalletEventType>) {
+    pub async fn clear_listeners<I: IntoIterator<Item = WalletEventType> + Send>(&self, events: I)
+    where
+        I::IntoIter: Send,
+    {
         let mut emitter = self.event_emitter.write().await;
         emitter.clear(events);
     }

@@ -32,13 +32,10 @@ use crate::{
     utils::unix_timestamp_now,
 };
 
-// TODO make methods actually take self? There was a mut issue.
-
 /// Working state for the input selection algorithm.
 pub struct InputSelection {
     available_inputs: Vec<InputSigningData>,
-    // TODO option needed ?
-    required_inputs: Option<HashSet<OutputId>>,
+    required_inputs: HashSet<OutputId>,
     forbidden_inputs: HashSet<OutputId>,
     selected_inputs: Vec<InputSigningData>,
     outputs: Vec<Output>,
@@ -115,7 +112,6 @@ impl InputSelection {
         Ok(())
     }
 
-    // TODO rename
     fn init(&mut self) -> Result<(), Error> {
         // Adds an initial amount requirement.
         self.requirements.push(Requirement::Amount);
@@ -126,30 +122,29 @@ impl InputSelection {
         self.available_inputs
             .retain(|input| !self.forbidden_inputs.contains(input.output_id()));
 
-        // The `take` avoids a mutable borrow compilation issue without having to clone the required inputs.
-        // TODO could be reworked by having select_input not taking mut.
-        if let Some(required_inputs) = self.required_inputs.take() {
-            for required_input in required_inputs.into_iter() {
-                // Checks that required input is not forbidden.
-                if self.forbidden_inputs.contains(&required_input) {
-                    return Err(Error::RequiredInputIsForbidden(required_input));
-                }
+        // This is to avoid a borrow of self since there is a mutable borrow in the loop already.
+        let required_inputs = std::mem::take(&mut self.required_inputs);
 
-                // Checks that required input is available.
-                match self
-                    .available_inputs
-                    .iter()
-                    .position(|input| input.output_id() == &required_input)
-                {
-                    Some(index) => {
-                        // Removes required input from available inputs.
-                        let input = self.available_inputs.swap_remove(index);
+        for required_input in required_inputs {
+            // Checks that required input is not forbidden.
+            if self.forbidden_inputs.contains(&required_input) {
+                return Err(Error::RequiredInputIsForbidden(required_input));
+            }
 
-                        // Selects required input.
-                        self.select_input(input, None)?
-                    }
-                    None => return Err(Error::RequiredInputIsNotAvailable(required_input)),
+            // Checks that required input is available.
+            match self
+                .available_inputs
+                .iter()
+                .position(|input| input.output_id() == &required_input)
+            {
+                Some(index) => {
+                    // Removes required input from available inputs.
+                    let input = self.available_inputs.swap_remove(index);
+
+                    // Selects required input.
+                    self.select_input(input, None)?
                 }
+                None => return Err(Error::RequiredInputIsNotAvailable(required_input)),
             }
         }
 
@@ -165,11 +160,12 @@ impl InputSelection {
 
     /// Creates a new [`InputSelection`].
     pub fn new(
-        available_inputs: Vec<InputSigningData>,
-        outputs: Vec<Output>,
-        addresses: Vec<Address>,
+        available_inputs: impl Into<Vec<InputSigningData>>,
+        outputs: impl Into<Vec<Output>>,
+        addresses: impl IntoIterator<Item = Address>,
         protocol_parameters: ProtocolParameters,
     ) -> Self {
+        let available_inputs = available_inputs.into();
         let mut addresses = HashSet::from_iter(addresses);
 
         addresses.extend(available_inputs.iter().filter_map(|input| match &input.output {
@@ -184,10 +180,10 @@ impl InputSelection {
 
         Self {
             available_inputs,
-            required_inputs: None,
+            required_inputs: HashSet::new(),
             forbidden_inputs: HashSet::new(),
             selected_inputs: Vec::new(),
-            outputs,
+            outputs: outputs.into(),
             addresses,
             burn: None,
             remainder_address: None,
@@ -199,7 +195,7 @@ impl InputSelection {
     }
 
     /// Sets the required inputs of an [`InputSelection`].
-    pub fn required_inputs(mut self, inputs: impl Into<Option<HashSet<OutputId>>>) -> Self {
+    pub fn required_inputs(mut self, inputs: impl Into<HashSet<OutputId>>) -> Self {
         self.required_inputs = inputs.into();
         self
     }

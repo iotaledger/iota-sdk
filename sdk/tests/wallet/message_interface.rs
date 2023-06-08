@@ -143,7 +143,7 @@ async fn message_interface_events() -> Result<()> {
     let wallet_handle = create_message_handler(Some(options)).await.unwrap();
 
     wallet_handle
-        .listen(vec![], |event| {
+        .listen([], |event| {
             if let WalletEvent::TransactionProgress(event) = &event.event {
                 println!("Received event....: {event:?}");
             }
@@ -232,7 +232,7 @@ async fn message_interface_emit_event() -> Result<()> {
     let event_counter = Arc::new(std::sync::atomic::AtomicUsize::new(0));
     let event_counter_clone = Arc::clone(&event_counter);
     wallet_handle
-        .listen(vec![], move |_name| {
+        .listen([], move |_name| {
             event_counter_clone.fetch_add(1, Ordering::SeqCst);
         })
         .await;
@@ -360,7 +360,7 @@ async fn address_conversion_methods() -> Result<()> {
     let response = wallet_handle
         .send_message(Message::HexToBech32 {
             hex: hex_address.into(),
-            bech32_hrp: None,
+            bech32_hrp: Some(Hrp::from_str_unchecked("rms")),
         })
         .await;
 

@@ -7,15 +7,18 @@ import {
     listenWalletAsync,
     destroyWallet,
     getClientFromWallet,
+    getSecretManagerFromWallet,
 } from '../bindings';
 import type {
-    EventType,
+    WalletEventType,
     WalletOptions,
     __Method__,
     __AccountMethod__,
     AccountId,
+    Event,
 } from '../types/wallet';
 import { Client } from '../client';
+import { SecretManager } from '../secretManager';
 
 // The WalletMethodHandler class interacts with methods with the rust bindings.
 export class WalletMethodHandler {
@@ -71,8 +74,8 @@ export class WalletMethodHandler {
     }
 
     async listen(
-        eventTypes: EventType[],
-        callback: (error: Error, result: string) => void,
+        eventTypes: WalletEventType[],
+        callback: (error: Error, event: Event) => void,
     ): Promise<void> {
         return listenWalletAsync(eventTypes, callback, this.methodHandler);
     }
@@ -90,6 +93,20 @@ export class WalletMethodHandler {
                     resolve(new Client(result));
                 }
             });
+        });
+    }
+
+    async getSecretManager(): Promise<SecretManager> {
+        return new Promise((resolve, reject) => {
+            getSecretManagerFromWallet(this.methodHandler).then(
+                (result: any) => {
+                    if (result.message !== undefined) {
+                        reject(JSON.parse(result.message).payload);
+                    } else {
+                        resolve(new SecretManager(result));
+                    }
+                },
+            );
         });
     }
 }

@@ -40,9 +40,7 @@ async fn main() -> Result<()> {
     println!("{}", request_funds_from_faucet(&faucet_url, &addresses[0]).await?);
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
-    let output_ids_response = client
-        .basic_output_ids(vec![QueryParameter::Address(addresses[0])])
-        .await?;
+    let output_ids_response = client.basic_output_ids([QueryParameter::Address(addresses[0])]).await?;
     println!("{output_ids_response:?}");
 
     let block = client

@@ -6,7 +6,7 @@ mod nft;
 mod reference;
 mod signature;
 
-use alloc::vec::Vec;
+use alloc::boxed::Box;
 use core::ops::RangeInclusive;
 
 use derive_more::{Deref, From};
@@ -87,11 +87,9 @@ pub struct Unlocks(#[packable(verify_with = verify_unlocks)] BoxedSlicePrefix<Un
 
 impl Unlocks {
     /// Creates a new [`Unlocks`].
-    pub fn new(unlocks: Vec<Unlock>) -> Result<Self, Error> {
-        let unlocks: BoxedSlicePrefix<Unlock, UnlockCount> = unlocks
-            .into_boxed_slice()
-            .try_into()
-            .map_err(Error::InvalidUnlockCount)?;
+    pub fn new(unlocks: impl Into<Box<[Unlock]>>) -> Result<Self, Error> {
+        let unlocks: BoxedSlicePrefix<Unlock, UnlockCount> =
+            unlocks.into().try_into().map_err(Error::InvalidUnlockCount)?;
 
         verify_unlocks::<true>(&unlocks, &())?;
 

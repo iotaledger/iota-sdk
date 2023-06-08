@@ -5,6 +5,8 @@
 
 use iota_stronghold::KeyProvider;
 
+use crate::client::utils::Password;
+
 /// Stronghold vault path to secrets.
 ///
 /// The value has been hard-coded historically.
@@ -29,7 +31,7 @@ pub(super) const PRIVATE_DATA_CLIENT_PATH: &[u8] = b"iota_seed";
 pub(super) const USERDATA_STORE_KEY_RECORD_PATH: &[u8] = b"userdata-store-key";
 
 /// Hash a password, deriving a key, for accessing Stronghold.
-pub(super) fn key_provider_from_password(password: &str) -> KeyProvider {
+pub(super) fn key_provider_from_password(password: Password) -> KeyProvider {
     // PANIC: the hashed password length is guaranteed to be 32.
     KeyProvider::with_passphrase_hashed_blake2b(password.as_bytes().to_vec()).unwrap()
 }

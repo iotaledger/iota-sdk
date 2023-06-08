@@ -484,10 +484,7 @@ pub mod dto {
 
     use super::*;
     use crate::types::block::{
-        output::{
-            dto::OutputBuilderAmountDto, feature::dto::FeatureDto, native_token::dto::NativeTokenDto,
-            unlock_condition::dto::UnlockConditionDto,
-        },
+        output::{dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto},
         Error,
     };
 
@@ -501,7 +498,7 @@ pub mod dto {
         pub amount: String,
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeTokenDto>,
+        pub native_tokens: Vec<NativeToken>,
         // Unique identifier of the NFT.
         pub nft_id: NftId,
         pub unlock_conditions: Vec<UnlockConditionDto>,
@@ -516,7 +513,7 @@ pub mod dto {
             Self {
                 kind: NftOutput::KIND,
                 amount: value.amount().to_string(),
-                native_tokens: value.native_tokens().iter().map(Into::into).collect::<_>(),
+                native_tokens: value.native_tokens().to_vec(),
                 nft_id: *value.nft_id(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
                 features: value.features().iter().map(Into::into).collect::<_>(),
@@ -533,7 +530,7 @@ pub mod dto {
             );
 
             for t in &value.native_tokens {
-                builder = builder.add_native_token(t.try_into()?);
+                builder = builder.add_native_token(*t);
             }
 
             for b in &value.features {
@@ -569,7 +566,7 @@ pub mod dto {
 
         pub fn try_from_dtos(
             amount: OutputBuilderAmountDto,
-            native_tokens: Option<Vec<NativeTokenDto>>,
+            native_tokens: Option<Vec<NativeToken>>,
             nft_id: &NftId,
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<FeatureDto>>,
@@ -587,10 +584,6 @@ pub mod dto {
             };
 
             if let Some(native_tokens) = native_tokens {
-                let native_tokens = native_tokens
-                    .iter()
-                    .map(NativeToken::try_from)
-                    .collect::<Result<Vec<NativeToken>, Error>>()?;
                 builder = builder.with_native_tokens(native_tokens);
             }
 
@@ -711,7 +704,7 @@ mod tests {
 
         let output_split = NftOutput::try_from_dtos(
             OutputBuilderAmountDto::Amount(output.amount().to_string()),
-            Some(output.native_tokens().iter().map(Into::into).collect()),
+            Some(output.native_tokens().to_vec()),
             output.nft_id(),
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().iter().map(Into::into).collect()),
@@ -724,7 +717,7 @@ mod tests {
         let test_split_dto = |builder: NftOutputBuilder| {
             let output_split = NftOutput::try_from_dtos(
                 (&builder.amount).into(),
-                Some(builder.native_tokens.iter().map(Into::into).collect()),
+                Some(builder.native_tokens.iter().copied().collect()),
                 &builder.nft_id,
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().map(Into::into).collect()),

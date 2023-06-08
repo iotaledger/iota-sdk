@@ -27,7 +27,7 @@ use tokio::sync::{Mutex, RwLock};
 pub use self::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes};
 use self::types::{
     address::{AccountAddress, AddressWithUnspentOutputs},
-    AccountBalance, OutputData, Transaction,
+    Balance, OutputData, Transaction,
 };
 pub use self::{
     operations::{
@@ -122,7 +122,7 @@ pub struct AccountDetails {
     /// Sent transactions
     // stored separated from the account for performance and only the transaction id here? where to add the network id?
     // transactions: HashSet<TransactionId>,
-    transactions: HashMap<TransactionId, types::Transaction>,
+    transactions: HashMap<TransactionId, Transaction>,
     /// Pending transactions
     // Maybe pending transactions even additionally separated?
     pending_transactions: HashSet<TransactionId>,
@@ -495,7 +495,7 @@ fn serialize() {
     );
     let essence = TransactionEssence::Regular(
         RegularTransactionEssence::builder(protocol_parameters.network_id(), InputsCommitment::from([0u8; 32]))
-            .with_inputs(vec![input1, input2])
+            .with_inputs([input1, input2])
             .add_output(output)
             .finish(&protocol_parameters)
             .unwrap(),
@@ -506,7 +506,7 @@ fn serialize() {
     let signature = Ed25519Signature::new(pub_key_bytes, sig_bytes);
     let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::Ed25519(signature)));
     let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
-    let unlocks = Unlocks::new(vec![sig_unlock, ref_unlock]).unwrap();
+    let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
     let tx_payload = TransactionPayload::new(essence, unlocks).unwrap();
 

@@ -83,7 +83,7 @@ pub fn call_client_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
             let cb = callback.into_inner(&mut cx);
             let this = cx.undefined();
 
-            let args = vec![
+            let args = [
                 if is_error {
                     cx.string(response.clone()).upcast::<JsValue>()
                 } else {
@@ -105,10 +105,10 @@ pub fn call_client_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 pub fn listen_mqtt(mut cx: FunctionContext) -> JsResult<JsPromise> {
     let js_arr_handle: Handle<JsArray> = cx.argument(0)?;
     let vec: Vec<Handle<JsValue>> = js_arr_handle.to_vec(&mut cx)?;
-    let mut topics = vec![];
+    let mut topics = Vec::with_capacity(vec.len());
     for topic_string in vec {
         let topic = topic_string.downcast::<JsString, FunctionContext>(&mut cx).unwrap();
-        topics.push(Topic::try_from(topic.value(&mut cx).as_str().to_string()).expect("invalid MQTT topic"));
+        topics.push(Topic::new(topic.value(&mut cx).as_str()).expect("invalid MQTT topic"));
     }
 
     let callback = Arc::new(cx.argument::<JsFunction>(1)?.root(&mut cx));
@@ -133,7 +133,7 @@ fn call_event_callback(channel: &neon::event::Channel, event_data: String, callb
     channel.send(move |mut cx| {
         let cb = (*callback).to_inner(&mut cx);
         let this = cx.undefined();
-        let args = vec![
+        let args = [
             cx.undefined().upcast::<JsValue>(),
             cx.string(event_data).upcast::<JsValue>(),
         ];
