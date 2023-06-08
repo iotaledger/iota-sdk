@@ -15,7 +15,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/advanced_transactions/advanced_transaction.ts
 
-// This example syncs the account and sends an output with a timelock unlock conditions
+// This example syncs the account and sends an output with a timelock unlock condition
 async function run() {
     initLogger();
     try {
