@@ -23,7 +23,7 @@ async function run() {
         let balance = await account.sync();
 
         if (balance.aliases.length == 0) {
-            throw new Error(`No Alias available in account ''`);
+            throw new Error(`No Alias available in account 'Alice'`);
         }
 
         // We try to destroy the first alias in the account
