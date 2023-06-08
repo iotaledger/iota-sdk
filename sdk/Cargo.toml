@@ -161,6 +161,23 @@ name = "simple_transaction"
 path = "examples/how_tos/simple_transaction/simple_transaction.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
+# Advanced Transactions Examples
+
+[[example]]
+name = "send_micro_transaction"
+path = "examples/how_tos/advanced_transactions/send_micro_transaction.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "advanced_transaction"
+path = "examples/how_tos/advanced_transactions/advanced_transaction.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "claim_transaction"
+path = "examples/how_tos/advanced_transactions/claim_transaction.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
 # Outputs
 
 [[example]]
@@ -530,11 +547,6 @@ required-features = [ "wallet", "stronghold" ]
 name = "3_send_transaction"
 path = "examples/wallet/offline_signing/3_send_transaction.rs"
 required-features = [ "wallet", "storage" ]
-
-[[example]]
-name = "send_micro_transaction"
-path = "examples/wallet/06_send_micro_transaction.rs"
-required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "send_native_tokens"
