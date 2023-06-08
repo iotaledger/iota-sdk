@@ -6,7 +6,7 @@ use std::str::FromStr;
 use crate::{
     client::secret::SecretManage,
     types::{
-        api::core::dto::LedgerInclusionStateDto,
+        api::core::response::LedgerInclusionState,
         block::{input::Input, output::OutputId, payload::transaction::TransactionEssence, BlockId},
     },
     utils::unix_timestamp_now,
@@ -106,7 +106,7 @@ where
                     Ok(metadata) => {
                         if let Some(inclusion_state) = metadata.ledger_inclusion_state {
                             match inclusion_state {
-                                LedgerInclusionStateDto::Included => {
+                                LedgerInclusionState::Included => {
                                     log::debug!(
                                         "[SYNC] confirmed transaction {transaction_id} in block {}",
                                         metadata.block_id
@@ -120,7 +120,7 @@ where
                                         &mut spent_output_ids,
                                     );
                                 }
-                                LedgerInclusionStateDto::Conflicting => {
+                                LedgerInclusionState::Conflicting => {
                                     // try to get the included block, because maybe only this attachment is
                                     // conflicting because it got confirmed in another block
                                     if let Ok(included_block) =
@@ -146,7 +146,7 @@ where
                                         );
                                     }
                                 }
-                                LedgerInclusionStateDto::NoTransaction => {
+                                LedgerInclusionState::NoTransaction => {
                                     unreachable!(
                                         "We should only get the metadata for blocks with a transaction payload"
                                     )

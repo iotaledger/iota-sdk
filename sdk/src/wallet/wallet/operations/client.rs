@@ -11,7 +11,7 @@ use crate::{
             node::{Node, NodeAuth, NodeDto},
         },
         secret::SecretManage,
-        Client, ClientBuilder, NodeInfoWrapper,
+        Client, ClientBuilder,
     },
     wallet::{Wallet, WalletBuilder},
     Url,
@@ -24,13 +24,6 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
     pub async fn client_options(&self) -> ClientBuilder {
         ClientBuilder::from_client(self.client()).await
-    }
-
-    /// Get the node info.
-    pub async fn get_node_info(&self) -> crate::wallet::Result<NodeInfoWrapper> {
-        let node_info_wrapper = self.client().get_info().await?;
-
-        Ok(node_info_wrapper)
     }
 }
 

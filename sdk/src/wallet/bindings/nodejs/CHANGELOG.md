@@ -1,5 +1,18 @@
 # Changelog
 
+## \[2.0.3-rc.36]
+
+- [`43fed82c`](https://github.com/iotaledger/iota-sdk/commit/43fed82ce5d11fc6da0003565c44f10843165a32)([#498](https://github.com/iotaledger/iota-sdk/pull/498)) Rename `AccountBalance` to `Balance`.
+- [`e6b709e3`](https://github.com/iotaledger/iota-sdk/commit/e6b709e381c69e8d007f6f4a0e5017bccfe7a6c7)([#501](https://github.com/iotaledger/iota-sdk/pull/501)) Changed `Burn.nativeTokens` from `INativeToken[]` to `Map<string, HexEncodedAmount>`;
+- [`df2f8ce0`](https://github.com/iotaledger/iota-sdk/commit/df2f8ce0ab3235b67c75ff89cb7e2c553d9557d3)([#453](https://github.com/iotaledger/iota-sdk/pull/453)) Rename generateAddresses to generateEd25519Addresses for Account.
+  Add generateEvmAddresses function for Account.
+- [`8f5cbae0`](https://github.com/iotaledger/iota-sdk/commit/8f5cbae05a19a38222d55dbd7ba95c53d54e25e3)([#469](https://github.com/iotaledger/iota-sdk/pull/469)) Rename `getIncomingTransactionData` to `getIncomingTransaction`.
+  Change `incomingTransactions()` return type from `[string, Transaction][]`to `Transaction[]`.
+- [`020770df`](https://github.com/iotaledger/iota-sdk/commit/020770df163623b58b93be67d60cd8bbf95b1fe2)([#553](https://github.com/iotaledger/iota-sdk/pull/553)) `LedgerNanoStatus::locked` is now optional since it's an IOTA/Shimmer specific API.
+- [`b5e8a185`](https://github.com/iotaledger/iota-sdk/commit/b5e8a185a6fcda5103aa43eee3e4ded502212127)([#530](https://github.com/iotaledger/iota-sdk/pull/530)) Add `Account::signEvm` method. Add `EvmSignature` to types.
+- [`bfed9aad`](https://github.com/iotaledger/iota-sdk/commit/bfed9aad82404b235f863f5f8cd87e4f010fad85)([#11](https://github.com/iotaledger/iota-sdk/pull/11)) `EventType` renamed to `WalletEventType`.
+  Properly typed events.
+
 ## \[2.0.3-rc.35]
 
 - [`6df8879f`](https://github.com/iotaledger/iota-sdk/commit/6df8879f70fe58b2445deb65e7d2aa83284d3d36)([#385](https://github.com/iotaledger/iota-sdk/pull/385)) Remove `IncreaseNativeTokenSupplyOptions`.

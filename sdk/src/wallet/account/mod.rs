@@ -125,7 +125,7 @@ pub struct AccountDetails {
     /// Sent transactions
     // stored separated from the account for performance and only the transaction id here? where to add the network id?
     // transactions: HashSet<TransactionId>,
-    transactions: HashMap<TransactionId, types::Transaction>,
+    transactions: HashMap<TransactionId, Transaction>,
     /// Pending transactions
     // Maybe pending transactions even additionally separated?
     pending_transactions: HashSet<TransactionId>,
