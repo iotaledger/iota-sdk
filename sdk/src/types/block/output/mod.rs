@@ -513,7 +513,6 @@ pub mod dto {
         basic::dto::BasicOutputDto,
         foundry::dto::FoundryOutputDto,
         metadata::dto::OutputMetadataDto,
-        native_token::dto::NativeTokenDto,
         nft::dto::NftOutputDto,
         rent::dto::RentStructureDto,
         token_scheme::dto::{SimpleTokenSchemeDto, TokenSchemeDto},
