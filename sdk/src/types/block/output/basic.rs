@@ -371,9 +371,7 @@ pub mod dto {
             let mut builder =
                 BasicOutputBuilder::new_with_amount(value.amount.parse().map_err(|_| Error::InvalidField("amount"))?);
 
-            for t in value.native_tokens {
-                builder = builder.add_native_token(t);
-            }
+            builder = builder.with_native_tokens(value.native_tokens);
 
             for b in value.features {
                 builder = builder.add_feature(Feature::try_from(b)?);
@@ -390,9 +388,7 @@ pub mod dto {
             let mut builder =
                 BasicOutputBuilder::new_with_amount(value.amount.parse().map_err(|_| Error::InvalidField("amount"))?);
 
-            for t in value.native_tokens {
-                builder = builder.add_native_token(t);
-            }
+            builder = builder.with_native_tokens(value.native_tokens);
 
             for b in value.features {
                 builder = builder.add_feature(Feature::try_from(b)?);
