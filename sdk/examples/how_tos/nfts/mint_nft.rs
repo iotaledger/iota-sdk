@@ -62,6 +62,7 @@ async fn main() -> Result<()> {
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
+    println!("Minted NFT 1");
 
     // Build nft output manually
     let account_address = &account.addresses().await?[0];
@@ -88,6 +89,7 @@ async fn main() -> Result<()> {
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
+    println!("Minted NFT 2");
 
     // Ensure the account is synced after minting.
     account.sync(None).await?;

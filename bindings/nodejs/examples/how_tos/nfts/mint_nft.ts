@@ -54,7 +54,7 @@ async function run() {
         // We send from the first address in the account.
         const senderAddress = (await account.addresses())[0].address;
 
-        console.log('Sending the minting transaction for NFT 1...');
+        // console.log('Sending the minting transaction for NFT 1...');
 
         const params: MintNftParams = {
             address: NFT1_OWNER_ADDRESS, // Remove or change to senderAddress to send to self
@@ -75,7 +75,7 @@ async function run() {
         );
 
         console.log(
-            `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
         console.log('Minted NFT 1');
 
@@ -95,7 +95,7 @@ async function run() {
             features: [new SenderFeature(new Ed25519Address(hexAddress))],
         });
 
-        console.log('Sending minting transaction for NFT 2...');
+        // console.log('Sending minting transaction for NFT 2...');
 
         transaction = await account.sendOutputs([output]);
         console.log(`Transaction sent: ${transaction.transactionId}`);
@@ -106,7 +106,7 @@ async function run() {
         );
 
         console.log(
-            `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
         console.log('Minted NFT 2');
@@ -115,12 +115,12 @@ async function run() {
         balance = await account.sync();
         const nftsAfter = balance.nfts;
 
-        console.log('New owned NFTs:', nftsBefore.length, nftsAfter.length);
-        for (const nftId of nftsAfter) {
-            if (!nftsBefore.includes(nftId)) {
-                console.log(`- ${nftId}`);
-            }
-        }
+        // console.log('New owned NFTs:', nftsBefore.length, nftsAfter.length);
+        // for (const nftId of nftsAfter) {
+        //     if (!nftsBefore.includes(nftId)) {
+        //         console.log(`- ${nftId}`);
+        //     }
+        // }
     } catch (error) {
         console.error('Error: ', error);
     }

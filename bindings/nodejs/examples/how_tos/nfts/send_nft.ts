@@ -47,7 +47,7 @@ async function run() {
             },
         ];
 
-        console.log(`Sending NFT '${nftId}' to '${RECV_ADDRESS}'...`);
+        // console.log(`Sending NFT ${nftId} to ${RECV_ADDRESS}...`);
 
         // Send the full NFT output to the specified address
         const transaction = await account
@@ -62,7 +62,7 @@ async function run() {
         );
 
         console.log(
-            `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
         // To send an NFT with expiration unlock condition prepareOutput() can be used like this:
