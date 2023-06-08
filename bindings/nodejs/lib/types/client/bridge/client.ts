@@ -1,22 +1,25 @@
-import type { SecretManagerType } from '../../secretManager/secretManager';
-import type { IGenerateAddressesOptions } from '../generateAddressesOptions';
-import type { IBuildBlockOptions } from '../buildBlockOptions';
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import type { SecretManagerType } from '../../secret_manager/secret-manager';
+import type { IGenerateAddressesOptions } from '../generate-addresses-options';
+import type { IBuildBlockOptions } from '../build-block-options';
 import type { Block, BlockId, Payload } from '../../block';
 import type {
     PreparedTransactionData,
     IBip32Chain,
-} from '../preparedTransactionData';
+} from '../prepared-transaction-data';
 import type {
     AliasQueryParameter,
     FoundryQueryParameter,
     NftQueryParameter,
     QueryParameter,
-} from '../queryParameters';
+} from '../query-parameters';
 import type { IAuth } from '../network';
-import type { BasicOutputBuilderParams } from '../outputBuilderParams/basicOutputParams';
-import type { AliasOutputBuilderParams } from '../outputBuilderParams/aliasOutputParams';
-import type { FoundryOutputBuilderParams } from '../outputBuilderParams/foundryOutputParams';
-import type { NftOutputBuilderParams } from '../outputBuilderParams/nftOutputParams';
+import type { BasicOutputBuilderParams } from '../output_builder_params/basic-output-params';
+import type { AliasOutputBuilderParams } from '../output_builder_params/alias-output-params';
+import type { FoundryOutputBuilderParams } from '../output_builder_params/foundry-output-params';
+import type { NftOutputBuilderParams } from '../output_builder_params/nft-output-params';
 import { HexEncodedString } from '../../utils';
 
 export interface __GetInfoMethod__ {

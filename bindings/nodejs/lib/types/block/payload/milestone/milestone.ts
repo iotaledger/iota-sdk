@@ -6,7 +6,7 @@ import {
     MilestoneOption,
     MilestoneOptionDiscriminator,
 } from '../../../models/milestoneOptions';
-import { HexEncodedString } from '../../../utils/hexEncodedTypes';
+import { HexEncodedString } from '../../../utils/hex-encoded-types';
 import { Ed25519Signature } from '../../signature';
 import { Payload, PayloadType } from '../payload';
 

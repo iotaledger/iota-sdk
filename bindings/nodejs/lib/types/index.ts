@@ -4,10 +4,13 @@
 export * from './block';
 export * from './client';
 export * from './models';
-export * from './secretManager';
+export * from './secret_manager';
 export * from './utils';
 export * from './wallet';
 
+/**
+ * Response from the message interface
+ */
 export interface Response<T> {
     type: string;
     payload: T;

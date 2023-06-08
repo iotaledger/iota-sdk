@@ -1,7 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { ClientMethodHandler } from './clientMethodHandler';
+import { ClientMethodHandler } from './client-method-handler';
 import {
     IClientOptions,
     IGenerateAddressesOptions,
@@ -21,7 +21,7 @@ import {
     IBip32Chain,
 } from '../types/client';
 import type { INodeInfoWrapper } from '../types/client/nodeInfo';
-import { SecretManagerType } from '../types/secretManager/secretManager';
+import { SecretManagerType } from '../types/secret_manager/secret-manager';
 import {
     AliasOutput,
     BasicOutput,

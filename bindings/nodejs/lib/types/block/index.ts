@@ -6,6 +6,6 @@ export * from './output/index';
 export * from './payload/index';
 
 export * from './address';
-export * from './blockId';
+export * from './block-id';
 export * from './block';
 export * from './signature';

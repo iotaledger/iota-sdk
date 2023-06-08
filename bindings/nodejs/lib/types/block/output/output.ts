@@ -4,13 +4,13 @@
 import {
     UnlockCondition,
     UnlockConditionDiscriminator,
-} from './unlockCondition';
+} from './unlock-condition';
 import { Feature, FeatureDiscriminator } from './feature';
 
 // Temp solution for not double parsing JSON
 import { plainToInstance, Type } from 'class-transformer';
 import { HexEncodedString } from '../../utils';
-import { TokenScheme, TokenSchemeDiscriminator } from './tokenScheme';
+import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
 import { INativeToken } from '../../models';
 
 export type OutputId = string;

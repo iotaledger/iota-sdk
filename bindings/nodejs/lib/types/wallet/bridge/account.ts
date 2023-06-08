@@ -13,17 +13,17 @@ import type {
     BuildBasicOutputData,
     BuildFoundryOutputData,
     BuildNftOutputData,
-} from '../buildOutputData';
+} from '../build-output-data';
 import type { Burn, INode, PreparedTransactionData } from '../../client';
-import type { OutputParams } from '../outputParams';
+import type { OutputParams } from '../output-params';
 import type { OutputsToClaim } from '../output';
-import type { SignedTransactionEssence } from '../signedTransactionEssence';
+import type { SignedTransactionEssence } from '../signed-transaction-essence';
 import type {
     AliasOutputParams,
     MintNativeTokenParams,
     TransactionOptions,
     MintNftParams,
-} from '../transactionOptions';
+} from '../transaction-options';
 import type {
     ParticipationEventId,
     ParticipationEventRegistrationOptions,
