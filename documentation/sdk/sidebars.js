@@ -16,20 +16,6 @@ module.exports = {
       id:'about-the-iota-sdk',
     },
     {
-    type: 'category',
-    label: 'Getting Started',
-    items: [
-      {
-        type: 'doc',
-        id: 'explanations/account_approaches'
-      },
-      {
-        type: 'doc',
-        id:'explanations/testnet-and-test-tokens',
-      },
-    ]
-    },
-    {
       type: 'category',
       label: 'Getting Started',
       items:[
@@ -55,6 +41,20 @@ module.exports = {
           id:'getting-started/wasm',
         },
       ]
+    },
+    {
+    type: 'category',
+    label: 'Explanations',
+    items: [
+      {
+        type: 'doc',
+        id: 'explanations/account_approaches'
+      },
+      {
+        type: 'doc',
+        id:'explanations/testnet-and-test-tokens',
+      },
+    ]
     },
     {
       type: 'category',

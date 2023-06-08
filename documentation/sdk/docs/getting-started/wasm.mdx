@@ -12,8 +12,10 @@ keywords:
 - examples
 - development
 ---
-
 import WarningPasswordStorage from '../_admonitions/_warning_password_storage.md'
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
 
 # Getting Started with Wasm
 
@@ -46,17 +48,22 @@ Use the Node.js bindings if you can. The Wasm bindings are just more portable an
 
 To start using the IOTA SDK in your Wasm project, you can install the IOTA SDK from your package manager of choice:
 
-#### npm
+<Tabs groupId="nodePackageManager">
+<TabItem value="npm" label="npm">
 
 ```sh
 npm i @iota/sdk-wasm
 ```
-
-#### Yarn
+</TabItem>
+<TabItem value="yarn" label="Yarn">
 
 ```sh
 yarn add @iota/sdk-wasm
 ```
+
+</TabItem>
+</Tabs>
+
 ### Web Setup
 
 Unlike Node.js, a few more steps are required to use this binding in a browser.
@@ -66,135 +73,123 @@ the root of the distribution folder.
 
 A bundler such as [webpack](https://webpack.js.org/) or [rollup](https://rollupjs.org/) is recommended.
 
-#### Rollup
+
+<Tabs groupId="bundler">
+<TabItem value="rollup" label="Rollup">
 
 1. Install `rollup-plugin-copy`:
 
-  ```bash
-  npm install rollup-plugin-copy --save-dev
+    ```bash
+    npm install rollup-plugin-copy --save-dev
     ```
 
 2. Add the plugin to your `rollup.config.js`:
 
-  ```js
-  // Include the copy plugin.
-  import copy from 'rollup-plugin-copy'
+    ```js
+    // Include the copy plugin.
+    import copy from 'rollup-plugin-copy'
 
-  // ...
+    // ...
 
-  // Add the copy plugin to the `plugins` array:
-  copy({
+    // Add the copy plugin to the `plugins` array:
+    copy({
     targets: [{
-      src: 'node_modules/@iota/sdk-wasm/web/wasm/iota_sdk_wasm_bg.wasm',
-      dest: 'public',
-      rename: 'iota_sdk_wasm_bg.wasm'
+    src: 'node_modules/@iota/sdk-wasm/web/wasm/iota_sdk_wasm_bg.wasm',
+    dest: 'public',
+    rename: 'iota_sdk_wasm_bg.wasm'
     }]
-  })
+    })
     ```
 
-#### Webpack
+</TabItem>
+<TabItem value="webpack" label="Webpack">
 
 1. Install `copy-webpack-plugin`:
 
-  ```bash
-  npm install copy-webpack-plugin --save-dev
+    ```bash
+    npm install copy-webpack-plugin --save-dev
     ```
 
 2. Add the plugin to your `webpack.config.js`:
 
- ```js
- // Include the copy plugin.
- const CopyWebPlugin = require('copy-webpack-plugin');
+    ```js
+    // Include the copy plugin.
+    const CopyWebPlugin = require('copy-webpack-plugin');
 
- // ...
+    // ...
 
- experiments: {
-  // futureDefaults: true, // includes asyncWebAssembly, topLevelAwait etc.
-  asyncWebAssembly: true
- }
+        experiments: {
+        // futureDefaults: true, // includes asyncWebAssembly, topLevelAwait etc.
+        asyncWebAssembly: true
+    }
 
- // Add the copy plugin to the `plugins` array:
- plugins: [
-  new CopyWebPlugin({
-    patterns: [
-      {
+        // Add the copy plugin to the `plugins` array:
+        plugins: [
+        new CopyWebPlugin({
+        patterns: [
+    {
         from: 'node_modules/@iota/sdk-wasm/web/wasm/iota_sdk_wasm_bg.wasm',
         to: 'iota_sdk_wasm_bg.wasm'
-      }
-    ]
-  }),
-  // other plugins...
- ]
+    }
+        ]
+    }),
+        // other plugins...
+        ]
     ```
+
+</TabItem>
+</Tabs>
 
 ## Usage
 
 ### Client
 
-To use the Client module, you simply need to create a `Client`.
+After you [installed the library](#install-the-iota-sdk), you can create a `Client` instance and interface with it.
 
-```rust
-use iota_sdk::client::{
-    Client,
-};
+```javascript
+const { Client, initLogger } = require('@iota/sdk');
 
-let client = Client::builder()
-    .with_node('https://api.testnet.shimmer.network')? // Insert your node URL here
-    .finish()
-    .await?;
-        
-let info = client.get_info().await?;
-println!("Node Info: {info:?}")
+async function run() {
+    initLogger();
 
-Ok(())
+    const client = new Client({
+        nodes: ['https://api.testnet.shimmer.network'],
+        localPow: true,
+    });
+
+    try {
+        const nodeInfo = await client.getInfo();
+        console.log('Node info: ', nodeInfo);
+    } catch (error) {
+        console.error('Error: ', error);
+    }
+}
+
+run().then(() => process.exit());
 ```
 
 ### Wallet
 
-To use the Wallet module, you need to create a `Wallet`:
+After you [installed the library](#installing-the-iota-sdk), you can create a `Wallet` instance and interact with it.
 
-```rust
-use iota_sdk::{
-    client::{
-        constants::SHIMMER_COIN_TYPE,
-        secret::{stronghold::StrongholdSecretManager, SecretManager},
+```javascript
+import {  Wallet, CoinType, WalletOptions } from '@iota/sdk';
+
+const walletOptions: WalletOptions = {
+    storagePath: `Alice`, // A name to associate with the created account.
+    clientOptions: {
+        nodes: ['https://api.testnet.shimmer.network'], // The node to connect to.
     },
-    wallet::{ClientOptions, Result, Wallet},
+    coinType: CoinType.Shimmer,
+    secretManager: {
+        // Setup Stronghold secret manager
+        stronghold: {
+            snapshotPath: 'vault.stronghold', //  The path to store the account snapshot.
+            password: 'a-secure-password', // A password to encrypt the stored data. WARNING: Never hardcode passwords in production code.
+        },
+    },
 };
-use std::path::PathBuf;
-
-#[tokio::main]
-async fn main() -> Result<()> {
-    // Setup Stronghold secret manager.
-    let secret_manager = StrongholdSecretManager::builder()
-        .password("vault.stronghold") // A password to encrypt the stored data.WARNING: Never hardcode passwords in production code.
-        .build(PathBuf::from("vault.stronghold"))?; // The path to store the account snapshot.
-
-    let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;// The node to connect to.
-
-    // Set up and store the wallet.
-    let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::Stronghold(secret_manager))
-        .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .finish()
-        .await?;
-
-    // Generate a mnemonic and store it in the Stronghold vault.
-    // INFO: It is best practice to back up the mnemonic somewhere secure.
-    let mnemonic = wallet.generate_mnemonic()?;
-    wallet.store_mnemonic(mnemonic).await?;
-
-    // Create an account.
-    let account = wallet
-        .create_account()
-        .with_alias("Alice".to_string()) // A name to associate with the created account.
-        .finish()
-        .await?;
-
-
-    Ok(())
-}
+const wallet = new Wallet(walletOptions);
 ```
 
 ### Web Usage
@@ -229,7 +224,6 @@ init().then(() => {
 // init("./static/iota_sdk_wasm_bg.wasm").then(...)
 ```
 
-
 ## What's next?
 
 ### How-To Guides
@@ -239,11 +233,13 @@ usage examples in this Wiki's [how-to guides](../how_tos/accounts_and_addresses/
 
 ### More Examples
 
-You can use the provided [Node.js code examples](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/nodejs/examples) to get
-acquainted with the IOTA SDK. You can use the following command to run any example:
+You can use the provided
+[Node.js code examples](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/nodejs/examples) to get acquainted
+with the IOTA SDK. You can use the following commands to run any example:
 
 ```bash
 cd examples
+yarn
 yarn run-example ./[example folder]/[example file]
 ```
 

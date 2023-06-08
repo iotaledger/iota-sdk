@@ -12,8 +12,9 @@ keywords:
 - examples
 - development
 ---
-
 import WarningPasswordStorage from '../_admonitions/_warning_password_storage.md'
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 # Getting Started with Node.js
 
@@ -29,17 +30,21 @@ import WarningPasswordStorage from '../_admonitions/_warning_password_storage.md
 
 To start using the IOTA SDK in your Node.js project, you can install the IOTA SDK from your package manager of choice:
 
-### npm
+<Tabs groupId="nodePackageManager">
+<TabItem value="npm" label="npm">
 
 ```sh
 npm i @iota/sdk
 ```
-
-### Yarn
+</TabItem>
+<TabItem value="yarn" label="Yarn">
 
 ```sh
 yarn add @iota/sdk
 ```
+
+</TabItem>
+</Tabs>
 
 ### Build the Binding from Source
 
@@ -69,30 +74,52 @@ You can build the IOTA SDK from source by doing the following:
 
 1. Download the repository to any directory you choose:
 
- ```shell
- git clone https://github.com/iotaledger/iota-sdk
+    ```shell
+     git clone https://github.com/iotaledger/iota-sdk
     ```
 
 2. Move to the Node.js binding directory:
 
- ```shell
-cd iota-sdk/bindings/nodejs
+    ```shell
+    cd iota-sdk/bindings/nodejs
     ```
 
 3. Install the necessary dependencies with either of the following commands:
 
- ```shell
- npm install
+    <Tabs groupId="nodePackageManager">
+    <TabItem value="npm" label="npm">
+
+    ```sh
+    npm install
     ```
- ```shell
- yarn install
+
+    </TabItem>
+    <TabItem value="yarn" label="Yarn">
+
+    ```shell
+    yarn install
     ```
+    </TabItem>
+    </Tabs>
 
 4. Build the SDK:
 
- ```shell
- npm run build
+    <Tabs groupId="nodePackageManager">
+    <TabItem value="npm" label="npm">
+
+    ```shell
+    npm run build
     ```
+
+    </TabItem>
+    <TabItem value="yarn" label="Yarn">
+
+    ```shell
+    yarn build
+    ```
+
+    </TabItem>
+    </Tabs>
 
 This command uses the [cargo-cp-artifact](https://github.com/neon-bindings/cargo-cp-artifact) utility to run the Rust
 build and copy the built library into `./build/Release/index.node`.
@@ -159,10 +186,12 @@ usage examples in this Wiki's [how-to guides](../how_tos/accounts_and_addresses/
 
 ### More Examples
 
-You can use the provided code [examples](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/nodejs/examples) to get acquainted with the IOTA SDK. You can use the following command to run any example:
+You can use the provided code [examples](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/nodejs/examples)
+to get acquainted with the IOTA SDK. You can use the following commands to run any example:
 
 ```bash
 cd examples
+yarn
 yarn run-example ./[example folder]/[example file]
 ```
 

@@ -13,6 +13,9 @@ keywords:
 - API reference
 ---
 import WarningPasswordStorage from '../_admonitions/_warning_password_storage.md'
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
 
 # Getting Started with Python
 
@@ -42,31 +45,39 @@ pip install iota-sdk
  cd iota-sdk/bindings/python
    ```
 
-2. (optional) Create a virtual environment and use it. On Linux and macOS, you can run the following commands:
+2. (optional) You can run the following commands create a virtual environment and use it:
 
- ```bash
- python3 -m venv iota_sdk_venv
- source iota_sdk_venv/bin/activate
+    <Tabs groupId="operatingSystem">
+    <TabItem value="linuxOrMacOS" label="Linux or Mac OS">
+
+    ```bash
+    python3 -m venv iota_sdk_venv
+    source iota_sdk_venv/bin/activate
     ```
 
-If you are using Windows, you should run the following instead:
+    </TabItem>
+    <TabItem value="windows" label="Windows">
 
- ```bash
- .\iota_sdk_venv\Scripts\activate
+    ```bash
+    .\iota_sdk_venv\Scripts\activate
     ```
+
+    </TabItem>
+    </Tabs>
+
 
 3. Install the required dependencies and build the wheel by running the following commands:
 
- ```bash
- pip install -r requirements-dev.txt
- pip install .
-   ```
+    ```bash
+    pip install -r requirements-dev.txt
+    pip install .
+    ```
 
 4. (optional) If you want to deactivate the virtual environment, run the following command:
 
- ```bash
- deactivate
-   ```
+    ```bash
+    deactivate
+    ```
 
 ## Usage
 
@@ -119,8 +130,8 @@ usage examples in this Wiki's [how-to guides](../how_tos/accounts_and_addresses/
 
 ### More Examples
 
-You can use the provided code [examples](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/python/examples) to get
-acquainted with the IOTA SDK. You can use the following command to run any example:
+You can use the provided code [examples](https://github.com/iotaledger/iota-sdk/tree/develop/bindings/python/examples)
+to get acquainted with the IOTA SDK. You can use the following command to run any example:
 
 ```bash
 python3 example/[example file]

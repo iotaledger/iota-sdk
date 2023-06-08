@@ -13,8 +13,8 @@ keywords:
 - examples
 - development
 ---
-
-
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 import WarningPasswordStorage from '../_admonitions/_warning_password_storage.md'
 
 # Getting Started with Rust
@@ -39,12 +39,31 @@ rustup update stable
 You must also install `cmake`, `clang`, and `openssl`. You may need to install additional build tools on your system to
 run the build process successfully using Cargo.
 
-##### Windows
+<Tabs groupId="operatingSystem">
+<TabItem value="linux" label="Linux">
+
+You can install `cmake`, `clang`, and `openssl` with your distro's package manager or download them from their websites.
+On Debian and Ubuntu, you will also need the `build-essential` and `libudev-dev` packages.
+
+</TabItem>
+
+<TabItem value="macOS" label="MacOS">
+
+You can install `cmake` and `openssl` with `Homebrew`:
+
+```
+brew install cmake openssl@1.1
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows">
 
 You can download `cmake` from the [official website](https://cmake.org/download/). You can install `openssl`
 with [vcpkg](https://github.com/microsoft/vcpkg) or [chocolatey](https://chocolatey.org/).
 
-- Installing `openssl` with `vcpkg`:
+
+<Tabs groupId="windowsPackageManager">
+<TabItem value="vcpkg" label="vcpkg">
 
 ```shell
 ./vcpkg.exe install openssl:x64-windows
@@ -53,7 +72,8 @@ with [vcpkg](https://github.com/microsoft/vcpkg) or [chocolatey](https://chocola
 set VCPKGRS_DYNAMIC=1
 ```
 
-- Installing `openssl` with `chocolatey`:
+</TabItem>
+<TabItem value="chocolatey" label="chocolatey">
 
 ```
 choco install openssl
@@ -61,18 +81,10 @@ choco install openssl
 set OPENSSL_DIR="C:\Program Files\OpenSSL-Win64"
 ```
 
-##### macOS
-
-You can install `cmake` and `openssl` with `Homebrew`:
-
-```
-brew install cmake openssl@1.1
-```
-
-##### Linux
-
-You can install `cmake`, `clang`, and `openssl` with your distro's package manager or download them from their websites.
-On Debian and Ubuntu, you will also need the `build-essential` and `libudev-dev` packages.
+</TabItem>
+</Tabs>
+</TabItem>
+</Tabs>
 
 ### Install the SDK Using Cargo
 
@@ -88,20 +100,20 @@ iota-sdk = { branch = "develop" }
 
 1. Download the repository to any directory you choose:
 
-  ```shell
-  git clone https://github.com/iotaledger/iota-sdk
+    ```shell
+    git clone https://github.com/iotaledger/iota-sdk
     ```
 
 2. Move to the base directory:
 
-  ```shell
- cd iota-sdk/
+    ```shell
+    cd iota-sdk/
     ```
 
 3. Build the SDK by running the following:
 
- ```shell
-cargo build
+    ```shell
+    cargo build
     ```
 
 ## Usage
