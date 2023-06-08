@@ -94,6 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `LedgerNanoStatus::locked` is now optional since it's an IOTA/Shimmer specific API;
 - `StorageManager` and wallet dynamic `StorageAdapter` are now private;
 - All public password-related methods now claim ownership over provided passwords and take care of zeroing the memory on drop;
+- `PeerDto` renamed to `PeerResponse`, `ReceiptDto` to `ReceiptResponse`, `LedgerInclusionStateDto` to `LedgerInclusionState`, `HeartbeatDto` to `Heartbeat`, `MetricsDto` tp `Metrics`, `GossipDto` to `Gossip`, `RelationDto` to `Relation`;
 
 ### Removed
 

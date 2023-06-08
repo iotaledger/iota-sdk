@@ -167,7 +167,7 @@ pub enum BlockResponse {
 }
 
 /// Describes the ledger inclusion state of a transaction.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -265,11 +265,7 @@ pub struct ReceiptResponse {
 /// * GET /api/core/v2/receipts/{milestone_index}, returns all stored receipts for the given milestone index.
 /// * GET /api/core/v2/receipts, returns all stored receipts, independent of a milestone index.
 #[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReceiptsResponse {
     pub receipts: Vec<ReceiptResponse>,
 }
