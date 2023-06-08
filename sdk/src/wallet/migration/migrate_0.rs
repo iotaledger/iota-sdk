@@ -82,7 +82,6 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
 }
 
 fn migrate_client_options(client_options: &mut serde_json::Value) -> Result<()> {
-    println!("{client_options:#}");
     let protocol_parameters = &mut client_options["protocolParameters"];
 
     ConvertHrp::check(&mut protocol_parameters["bech32_hrp"])?;
