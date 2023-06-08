@@ -453,21 +453,20 @@ pub struct OutputParamsDto {
     storage_deposit: Option<StorageDeposit>,
 }
 
-impl TryFrom<&OutputParamsDto> for OutputParams {
+impl TryFrom<OutputParamsDto> for OutputParams {
     type Error = crate::wallet::Error;
 
-    fn try_from(value: &OutputParamsDto) -> crate::wallet::Result<Self> {
+    fn try_from(value: OutputParamsDto) -> crate::wallet::Result<Self> {
         Ok(Self {
             recipient_address: value.recipient_address,
-            amount: u64::from_str(&value.amount)
-                .map_err(|_| crate::client::Error::InvalidAmount(value.amount.clone()))?,
-            assets: match &value.assets {
+            amount: u64::from_str(&value.amount).map_err(|_| crate::client::Error::InvalidAmount(value.amount))?,
+            assets: match value.assets {
                 Some(r) => Some(Assets::try_from(r)?),
                 None => None,
             },
-            features: value.features.clone(),
-            unlocks: value.unlocks.clone(),
-            storage_deposit: value.storage_deposit.clone(),
+            features: value.features,
+            unlocks: value.unlocks,
+            storage_deposit: value.storage_deposit,
         })
     }
 }
@@ -479,12 +478,12 @@ pub struct AssetsDto {
     nft_id: Option<String>,
 }
 
-impl TryFrom<&AssetsDto> for Assets {
+impl TryFrom<AssetsDto> for Assets {
     type Error = crate::wallet::Error;
 
-    fn try_from(value: &AssetsDto) -> crate::wallet::Result<Self> {
+    fn try_from(value: AssetsDto) -> crate::wallet::Result<Self> {
         Ok(Self {
-            native_tokens: value.native_tokens.clone(),
+            native_tokens: value.native_tokens,
             nft_id: match &value.nft_id {
                 Some(r) => Some(NftId::from_str(r)?),
                 None => None,

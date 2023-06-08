@@ -122,7 +122,7 @@ impl StorageManager {
                 match secret_manager_dto {
                     SecretManagerDto::Mnemonic(_) => {}
                     _ => {
-                        let secret_manager = SecretManager::try_from(&secret_manager_dto)?;
+                        let secret_manager = SecretManager::try_from(secret_manager_dto)?;
                         builder.secret_manager = Some(Arc::new(RwLock::new(secret_manager)));
                     }
                 }

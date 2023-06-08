@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will try to find the index and address type of an address.
-//! 
+//!
 //! `cargo run --example search_address --release`
 
 use iota_sdk::client::{
@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
         .finish()?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let addresses = client
         .get_addresses(&secret_manager)

@@ -120,12 +120,12 @@ fn dto_roundtrip() {
     let alias_address = AliasAddress::from_str(ALIAS_ID).unwrap();
     let alias_dto = AliasAddressDto::from(&alias_address);
 
-    assert_eq!(AliasAddress::try_from(&alias_dto).unwrap(), alias_address);
+    assert_eq!(AliasAddress::try_from(alias_dto).unwrap(), alias_address);
 
     let address = Address::from(alias_address);
     let dto = AddressDto::from(&address);
 
-    assert_eq!(Address::try_from(&dto).unwrap(), address);
+    assert_eq!(Address::try_from(dto).unwrap(), address);
 }
 
 #[test]
@@ -136,7 +136,7 @@ fn dto_invalid_alias_id() {
     };
 
     assert!(matches!(
-        AliasAddress::try_from(&dto),
+        AliasAddress::try_from(dto),
         Err(Error::InvalidField("aliasId"))
     ));
 }

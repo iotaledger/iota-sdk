@@ -102,26 +102,26 @@ pub mod dto {
     }
 
     impl MigratedFundsEntry {
-        pub fn try_from_dto(value: &MigratedFundsEntryDto, token_supply: u64) -> Result<Self, Error> {
+        pub fn try_from_dto(value: MigratedFundsEntryDto, token_supply: u64) -> Result<Self, Error> {
             let tail_transaction_hash = prefix_hex::decode(&value.tail_transaction_hash)
                 .map_err(|_| Error::InvalidField("tailTransactionHash"))?;
 
             Self::new(
                 TailTransactionHash::new(tail_transaction_hash)?,
-                (&value.address).try_into()?,
+                value.address.try_into()?,
                 value.deposit,
                 token_supply,
             )
         }
 
-        pub fn try_from_dto_unverified(value: &MigratedFundsEntryDto) -> Result<Self, Error> {
+        pub fn try_from_dto_unverified(value: MigratedFundsEntryDto) -> Result<Self, Error> {
             let tail_transaction_hash = prefix_hex::decode(&value.tail_transaction_hash)
                 .map_err(|_| Error::InvalidField("tailTransactionHash"))?;
 
             Ok(Self {
                 tail_transaction_hash: TailTransactionHash::new(tail_transaction_hash)?,
                 amount: value.deposit,
-                address: (&value.address).try_into()?,
+                address: value.address.try_into()?,
             })
         }
     }
