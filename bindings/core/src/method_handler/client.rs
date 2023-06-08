@@ -11,8 +11,8 @@ use iota_sdk::{
         block::{
             input::dto::UtxoInputDto,
             output::{
-                dto::{OutputBuilderAmountDto, OutputDto, RentStructureDto},
-                AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output,
+                dto::{OutputBuilderAmountDto, OutputDto},
+                AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, RentStructure,
             },
             payload::{
                 dto::{MilestonePayloadDto, PayloadDto},
@@ -214,11 +214,11 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 bech32_hrp: *params.bech32_hrp(),
                 min_pow_score: params.min_pow_score(),
                 below_max_depth: params.below_max_depth(),
-                rent_structure: RentStructureDto {
-                    v_byte_cost: params.rent_structure().byte_cost(),
-                    v_byte_factor_key: params.rent_structure().byte_factor_key(),
-                    v_byte_factor_data: params.rent_structure().byte_factor_data(),
-                },
+                rent_structure: RentStructure::new(
+                    params.rent_structure().byte_cost(),
+                    params.rent_structure().byte_factor_key(),
+                    params.rent_structure().byte_factor_data(),
+                ),
                 token_supply: params.token_supply().to_string(),
             };
             Response::ProtocolParameters(protocol_response)
