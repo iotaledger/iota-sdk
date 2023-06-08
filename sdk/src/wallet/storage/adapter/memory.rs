@@ -6,40 +6,26 @@ use std::collections::HashMap;
 
 use tokio::sync::RwLock;
 
-use super::StorageAdapter;
-
-/// The storage id.
-pub const STORAGE_ID: &str = "Memory";
+use crate::client::storage::StorageAdapter;
 
 /// A storage adapter that stores data in memory.
 #[derive(Debug, Default)]
-pub struct Memory(Arc<RwLock<HashMap<String, String>>>);
+pub struct Memory(Arc<RwLock<HashMap<String, Vec<u8>>>>);
 
 #[async_trait::async_trait]
 impl StorageAdapter for Memory {
-    fn id(&self) -> &'static str {
-        STORAGE_ID
-    }
+    type Error = crate::wallet::Error;
 
-    /// Gets the record associated with the given key from the storage.
-    async fn get(&self, key: &str) -> crate::wallet::Result<Option<String>> {
+    async fn get_bytes(&self, key: &str) -> crate::wallet::Result<Option<Vec<u8>>> {
         Ok(self.0.read().await.get(key).cloned())
     }
 
-    /// Saves or updates a record on the storage.
-    async fn set(&self, key: &str, record: String) -> crate::wallet::Result<()> {
-        self.0.write().await.insert(key.to_string(), record);
+    async fn set_bytes(&self, key: &str, record: &[u8]) -> crate::wallet::Result<()> {
+        self.0.write().await.insert(key.to_string(), record.to_owned());
         Ok(())
     }
 
-    /// Batch writes records to the storage.
-    async fn batch_set(&self, records: HashMap<String, String>) -> crate::wallet::Result<()> {
-        self.0.write().await.extend(records.into_iter());
-        Ok(())
-    }
-
-    /// Removes a record from the storage.
-    async fn remove(&self, key: &str) -> crate::wallet::Result<()> {
+    async fn delete(&self, key: &str) -> crate::wallet::Result<()> {
         self.0.write().await.remove(key);
         Ok(())
     }

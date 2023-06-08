@@ -432,11 +432,11 @@ impl LedgerSecretManager {
         // device, debug-flag, version number, lock-state but here we only are interested in a
         // successful call and the locked-flag
         let (connected_, locked, blind_signing_enabled, device) =
-            get_app_config(&transport_type).map_or((false, false, false, None), |config| {
+            get_app_config(&transport_type).map_or((false, None, false, None), |config| {
                 (
                     true,
                     // locked flag
-                    config.flags & (1 << 0) != 0,
+                    Some(config.flags & (1 << 0) != 0),
                     // blind signing enabled flag
                     config.flags & (1 << 1) != 0,
                     LedgerDeviceType::try_from(config.device).ok(),

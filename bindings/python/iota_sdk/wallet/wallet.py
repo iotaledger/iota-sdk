@@ -1,8 +1,8 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import destroy_wallet, create_wallet, listen_wallet, get_client_from_wallet, Client
-from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager
+from iota_sdk import destroy_wallet, create_wallet, listen_wallet, get_client_from_wallet, get_secret_manager_from_wallet, Client
+from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SecretManager
 from iota_sdk.wallet.account import Account, _call_method_routine
 from json import dumps
 from typing import Any, Dict, List, Optional
@@ -49,6 +49,11 @@ class Wallet():
         """Get the client instance
         """
         return Client(client_handle=get_client_from_wallet(self.handle))
+
+    def get_secret_manager(self):
+        """Get the secret manager instance
+        """
+        return SecretManager(secret_manager_handle=get_secret_manager_from_wallet(self.handle))
 
     @_call_method_routine
     def _call_method(self, name: str, data=None):
@@ -177,16 +182,6 @@ class Wallet():
                 'addressIndex': address_index,
                 'options': options,
                 'bech32Hrp': bech32_hrp
-            }
-        )
-
-    def get_node_info(self, url: str, auth):
-        """Get node info.
-        """
-        return self._call_method(
-            'getNodeInfo', {
-                'url': url,
-                'auth': auth
             }
         )
 

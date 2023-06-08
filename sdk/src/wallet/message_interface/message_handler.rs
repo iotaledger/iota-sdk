@@ -161,15 +161,13 @@ impl WalletMessageHandler {
             }
             #[cfg(feature = "stronghold")]
             Message::ChangeStrongholdPassword {
-                mut current_password,
-                mut new_password,
+                current_password,
+                new_password,
             } => {
                 convert_async_panics(|| async {
                     self.wallet
-                        .change_stronghold_password(&current_password, &new_password)
+                        .change_stronghold_password(current_password, new_password)
                         .await?;
-                    current_password.zeroize();
-                    new_password.zeroize();
                     Ok(Response::Ok(()))
                 })
                 .await
@@ -290,16 +288,15 @@ impl WalletMessageHandler {
                             let node_info = Client::get_node_info(&url, auth).await?;
                             Ok(Response::NodeInfo(NodeInfoWrapper { node_info, url }))
                         }
-                        None => self.wallet.get_node_info().await.map(Response::NodeInfo),
+                        None => Ok(self.wallet.client().get_info().await.map(Response::NodeInfo)?),
                     }
                 })
                 .await
             }
             #[cfg(feature = "stronghold")]
-            Message::SetStrongholdPassword { mut password } => {
+            Message::SetStrongholdPassword { password } => {
                 convert_async_panics(|| async {
-                    self.wallet.set_stronghold_password(&password).await?;
-                    password.zeroize();
+                    self.wallet.set_stronghold_password(password).await?;
                     Ok(Response::Ok(()))
                 })
                 .await
@@ -356,10 +353,12 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let bech32_hrp = match bech32_hrp {
                         Some(bech32_hrp) => bech32_hrp,
-                        None => match self.wallet.get_node_info().await {
-                            Ok(node_info_wrapper) => node_info_wrapper.node_info.protocol.bech32_hrp,
-                            Err(_) => SHIMMER_TESTNET_BECH32_HRP,
-                        },
+                        None => self
+                            .wallet
+                            .client()
+                            .get_bech32_hrp()
+                            .await
+                            .unwrap_or(SHIMMER_TESTNET_BECH32_HRP),
                     };
 
                     Ok(Response::Bech32Address(utils::hex_to_bech32(&hex, bech32_hrp)?))

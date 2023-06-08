@@ -76,5 +76,5 @@ print(account)
 You can generate the python API reference with the following command from this directory:
 
 ```bash
-pip install pydoc-markdown && pydoc-markdown
+pipx install pydoc-markdown && pydoc-markdown
 ```

@@ -16,8 +16,6 @@ use crate::{
     },
 };
 
-// TODO checked operations ?
-
 /// Get the `StorageDepositReturnUnlockCondition`, if not expired.
 pub(crate) fn sdruc_not_expired(output: &Output, current_time: u32) -> Option<&StorageDepositReturnUnlockCondition> {
     // PANIC: safe to unwrap as outputs without unlock conditions have been filtered out already.

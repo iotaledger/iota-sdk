@@ -254,19 +254,19 @@ pub unsafe extern "system" fn Java_org_iota_api_NativeApi_migrateStrongholdSnaps
     env_assert!(env, std::ptr::null_mut());
 
     let current_path = string_from_jni!(env, current_path, std::ptr::null_mut());
-    let current_password = string_from_jni!(env, current_password, std::ptr::null_mut());
+    let current_password = string_from_jni!(env, current_password, std::ptr::null_mut()).into();
     let salt = string_from_jni!(env, salt, std::ptr::null_mut());
     let rounds = rounds as u32;
     let new_path = env.get_string(&new_path).map(String::from).ok();
-    let new_password = env.get_string(&new_password).map(String::from).ok();
+    let new_password = env.get_string(&new_password).map(String::from).ok().map(Into::into);
 
     let ret = StrongholdAdapter::migrate_snapshot_v2_to_v3(
         &current_path,
-        &current_password,
-        &salt,
+        current_password,
+        salt,
         rounds,
         new_path.as_ref(),
-        new_password.as_deref(),
+        new_password,
     );
 
     jni_err_assert!(env, ret, std::ptr::null_mut());

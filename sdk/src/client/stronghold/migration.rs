@@ -7,22 +7,34 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crypto::ciphers::chacha::{self};
-use iota_stronghold::{Client, SnapshotPath, Stronghold};
-use zeroize::Zeroize;
+use crypto::ciphers::{
+    chacha::{self, XChaCha20Poly1305},
+    traits::Aead,
+};
+use iota_stronghold::{
+    procedures::{self, AeadCipher},
+    Client, Location, SnapshotPath, Stronghold,
+};
+use zeroize::{Zeroize, Zeroizing};
 
-use super::{common::PRIVATE_DATA_CLIENT_PATH, Error, StrongholdAdapter};
-use crate::client::stronghold::{check_or_create_snapshot, storage::insert as v3_insert, Error as StrongholdError};
+use super::{
+    common::{PRIVATE_DATA_CLIENT_PATH, SECRET_VAULT_PATH, USERDATA_STORE_KEY_RECORD_PATH},
+    Error, StrongholdAdapter,
+};
+use crate::client::{
+    stronghold::{check_or_create_snapshot, Error as StrongholdError},
+    utils::Password,
+};
 
 impl StrongholdAdapter {
     /// Migrates a snapshot from version 2 to version 3.
     pub fn migrate_snapshot_v2_to_v3<P: AsRef<Path>>(
         current_path: P,
-        current_password: &str,
-        salt: &str,
+        current_password: Password,
+        salt: impl AsRef<str>,
         rounds: u32,
         new_path: Option<P>,
-        new_password: Option<&str>,
+        new_password: Option<Password>,
     ) -> Result<(), Error> {
         log::debug!("migrate_snapshot_v2_to_v3");
         use iota_stronghold::engine::snapshot::migration::{migrate, Version};
@@ -38,7 +50,7 @@ impl StrongholdAdapter {
 
         crypto::keys::pbkdf::PBKDF2_HMAC_SHA512(
             current_password.as_bytes(),
-            salt.as_bytes(),
+            salt.as_ref().as_bytes(),
             NonZeroU32::try_from(rounds).map_err(|_| StrongholdError::InvalidRounds(rounds))?,
             buffer.as_mut(),
         );
@@ -70,7 +82,7 @@ impl StrongholdAdapter {
     fn reencrypt_data_v2_to_v3<P: AsRef<Path>>(
         path: P,
         v2_password_hash: &[u8; 32],
-        new_password: &str,
+        new_password: Password,
     ) -> Result<(), Error> {
         log::debug!("reencrypt_data_v2_to_v3");
 
@@ -105,4 +117,33 @@ fn v2_get(stronghold_client: &Client, k: &[u8], encryption_key: &[u8; 32]) -> Re
         None => return Ok(None),
     };
     Ok(Some(chacha::aead_decrypt(encryption_key, &data)?))
+}
+
+fn v3_insert(stronghold_client: &Client, k: &[u8], v: &[u8]) -> Result<Option<Vec<u8>>, Error> {
+    let store_key_location = Location::generic(SECRET_VAULT_PATH, USERDATA_STORE_KEY_RECORD_PATH);
+
+    // Generate and store encryption key if not existent yet.
+    if !stronghold_client.record_exists(&store_key_location)? {
+        let mut key = Zeroizing::new(vec![0_u8; 32]);
+        crypto::utils::rand::fill(key.as_mut())?;
+        let vault_path = store_key_location.vault_path();
+        let vault = stronghold_client.vault(vault_path);
+        vault.write_secret(store_key_location.clone(), key)?;
+    }
+
+    let mut nonce = [0; XChaCha20Poly1305::NONCE_LENGTH];
+    crypto::utils::rand::fill(&mut nonce)?;
+
+    let encrypted_value = stronghold_client.execute_procedure(procedures::AeadEncrypt {
+        cipher: AeadCipher::XChaCha20Poly1305,
+        associated_data: Vec::new(),
+        nonce: nonce.to_vec(),
+        plaintext: v.to_vec(),
+        key: store_key_location,
+    })?;
+
+    // The value is assumed to be `nonce || tag || ciphertext`
+    let final_data = [nonce.to_vec(), encrypted_value].concat();
+
+    Ok(stronghold_client.store().insert(k.to_vec(), final_data, None)?)
 }

@@ -3,17 +3,14 @@
 
 use alloc::{boxed::Box, string::String, vec::Vec};
 
-use crate::types::{
-    api::core::dto::{LedgerInclusionStateDto, PeerDto, ReceiptDto},
-    block::{
-        output::{
-            dto::{OutputDto, OutputMetadataDto},
-            OutputWithMetadata,
-        },
-        payload::dto::MilestonePayloadDto,
-        protocol::dto::ProtocolParametersDto,
-        BlockDto,
+use crate::types::block::{
+    output::{
+        dto::{OutputDto, OutputMetadataDto},
+        OutputWithMetadata,
     },
+    payload::{dto::MilestonePayloadDto, milestone::option::dto::ReceiptMilestoneOptionDto},
+    protocol::dto::ProtocolParametersDto,
+    BlockDto,
 };
 
 /// Response of GET /api/core/v2/info.
@@ -169,6 +166,19 @@ pub enum BlockResponse {
     Raw(Vec<u8>),
 }
 
+/// Describes the ledger inclusion state of a transaction.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub enum LedgerInclusionState {
+    Conflicting,
+    Included,
+    NoTransaction,
+}
+
 /// Response of GET /api/core/v2/blocks/{block_id}/metadata.
 /// Returns the metadata of a block.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -186,7 +196,7 @@ pub struct BlockMetadataResponse {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub milestone_index: Option<u32>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub ledger_inclusion_state: Option<LedgerInclusionStateDto>,
+    pub ledger_inclusion_state: Option<LedgerInclusionState>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub conflict_reason: Option<u8>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -239,17 +249,25 @@ pub enum OutputResponse {
     Raw(Vec<u8>),
 }
 
-/// Response of:
-/// * GET /api/core/v2/receipts/{milestone_index}, returns all stored receipts for the given milestone index.
-/// * GET /api/core/v2/receipts, returns all stored receipts, independent of a milestone index.
+/// Describes a receipt.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+pub struct ReceiptResponse {
+    pub receipt: ReceiptMilestoneOptionDto,
+    pub milestone_index: u32,
+}
+
+/// Response of:
+/// * GET /api/core/v2/receipts/{milestone_index}, returns all stored receipts for the given milestone index.
+/// * GET /api/core/v2/receipts, returns all stored receipts, independent of a milestone index.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReceiptsResponse {
-    pub receipts: Vec<ReceiptDto>,
+    pub receipts: Vec<ReceiptResponse>,
 }
 
 /// Response of GET /api/core/v2/treasury.
@@ -293,35 +311,83 @@ pub struct UtxoChangesResponse {
     pub consumed_outputs: Vec<String>,
 }
 
-/// Response of GET /api/core/v2/peers.
-/// Returns information about all peers of the node.
-#[derive(Clone, Debug, Eq, PartialEq)]
+/// Describes the heartbeat of a node.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-pub struct PeersResponse(pub Vec<PeerDto>);
+pub struct Heartbeat {
+    pub solid_milestone_index: u32,
+    pub pruned_milestone_index: u32,
+    pub latest_milestone_index: u32,
+    pub connected_peers: u8,
+    pub synced_peers: u8,
+}
 
-/// Response of POST /api/core/v2/peers.
-/// Returns information about the added peer.
-#[derive(Clone, Debug, Eq, PartialEq)]
+/// Describes metrics of a gossip stream.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-pub struct AddPeerResponse(pub PeerDto);
+pub struct Metrics {
+    pub new_blocks: u64,
+    pub received_blocks: u64,
+    pub known_blocks: u64,
+    pub received_block_requests: u64,
+    pub received_milestone_requests: u64,
+    pub received_heartbeats: u64,
+    pub sent_blocks: u64,
+    pub sent_block_requests: u64,
+    pub sent_milestone_requests: u64,
+    pub sent_heartbeats: u64,
+    pub dropped_packets: u64,
+}
 
-/// Response of GET /api/core/v2/peer/{peer_id}.
-/// Returns information about a specific peer of the node.
+/// Returns all information about the gossip stream with the peer.
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Gossip {
+    pub heartbeat: Heartbeat,
+    pub metrics: Metrics,
+}
+
+/// Describes the relation with the peer.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-pub struct PeerResponse(pub PeerDto);
+pub enum Relation {
+    Known,
+    Unknown,
+    Autopeered,
+}
+
+/// Response of
+/// - GET /api/core/v2/peer/{peer_id}
+/// - POST /api/core/v2/peers
+/// Returns information about a peer.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct PeerResponse {
+    pub id: String,
+    pub multi_addresses: Vec<String>,
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub alias: Option<String>,
+    pub relation: Relation,
+    pub connected: bool,
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub gossip: Option<Gossip>,
+}
 
 /// Response of GET /api/plugins/debug/whiteflag.
 /// Returns the computed merkle tree hash for the given white flag traversal.

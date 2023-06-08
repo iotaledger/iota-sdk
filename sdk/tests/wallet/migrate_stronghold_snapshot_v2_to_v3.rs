@@ -8,7 +8,7 @@ use iota_sdk::{
         api::GetAddressesOptions,
         constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
         secret::{stronghold::StrongholdSecretManager, SecretManager},
-        storage::StorageProvider,
+        storage::StorageAdapter,
         stronghold::{Error as StrongholdError, StrongholdAdapter},
         Error as ClientError,
     },
@@ -27,7 +27,7 @@ async fn stronghold_snapshot_v2_v3_migration() {
     setup(storage_path).unwrap();
 
     let error = StrongholdSecretManager::builder()
-        .password("current_password")
+        .password("current_password".to_owned())
         .build("./tests/wallet/fixtures/v2.stronghold");
 
     assert!(matches!(
@@ -37,17 +37,17 @@ async fn stronghold_snapshot_v2_v3_migration() {
 
     StrongholdAdapter::migrate_snapshot_v2_to_v3(
         "./tests/wallet/fixtures/v2.stronghold",
-        "current_password",
+        "current_password".to_owned().into(),
         PBKDF_SALT,
         PBKDF_ITER,
         Some("./tests/wallet/fixtures/v3.stronghold"),
-        Some("new_password"),
+        Some("new_password".to_owned().into()),
     )
     .unwrap();
 
     let stronghold_secret_manager = SecretManager::Stronghold(
         StrongholdSecretManager::builder()
-            .password("new_password")
+            .password("new_password".to_owned())
             .build("./tests/wallet/fixtures/v3.stronghold")
             .unwrap(),
     );
@@ -95,7 +95,7 @@ async fn stronghold_snapshot_v2_v3_migration() {
     let error = restore_manager
         .restore_backup(
             PathBuf::from("./tests/wallet/fixtures/v3.stronghold"),
-            "wrong_password".to_string(),
+            "wrong_password".to_owned(),
             Some(false),
             None,
         )
@@ -125,7 +125,7 @@ async fn stronghold_snapshot_v2_v3_migration_same_path() {
     .unwrap();
 
     let error = StrongholdSecretManager::builder()
-        .password("current_password")
+        .password("current_password".to_owned())
         .build("./tests/wallet/fixtures/v2-copy.stronghold");
 
     assert!(matches!(
@@ -135,16 +135,16 @@ async fn stronghold_snapshot_v2_v3_migration_same_path() {
 
     StrongholdAdapter::migrate_snapshot_v2_to_v3(
         "./tests/wallet/fixtures/v2-copy.stronghold",
-        "current_password",
+        "current_password".to_owned().into(),
         PBKDF_SALT,
         PBKDF_ITER,
         Some("./tests/wallet/fixtures/v2-copy.stronghold"),
-        Some("new_password"),
+        Some("new_password".to_owned().into()),
     )
     .unwrap();
 
     StrongholdSecretManager::builder()
-        .password("new_password")
+        .password("new_password".to_owned())
         .build("./tests/wallet/fixtures/v2-copy.stronghold")
         .unwrap();
 
@@ -155,7 +155,7 @@ async fn stronghold_snapshot_v2_v3_migration_same_path() {
 #[tokio::test]
 async fn stronghold_snapshot_v2_v3_migration_with_backup() {
     let error = StrongholdSecretManager::builder()
-        .password("current_password")
+        .password("current_password".to_owned())
         .build("./tests/wallet/fixtures/v2_with_backup.stronghold");
 
     assert!(matches!(
@@ -165,21 +165,21 @@ async fn stronghold_snapshot_v2_v3_migration_with_backup() {
 
     StrongholdAdapter::migrate_snapshot_v2_to_v3(
         "./tests/wallet/fixtures/v2_with_backup.stronghold",
-        "current_password",
+        "current_password".to_owned().into(),
         PBKDF_SALT,
         PBKDF_ITER,
         Some("./tests/wallet/fixtures/v3_with_backup.stronghold"),
-        Some("new_password"),
+        Some("new_password".to_owned().into()),
     )
     .unwrap();
 
     let stronghold_secret_manager = StrongholdSecretManager::builder()
-        .password("new_password")
+        .password("new_password".to_owned())
         .build("./tests/wallet/fixtures/v3_with_backup.stronghold")
         .unwrap();
 
     let coin_type_bytes = stronghold_secret_manager
-        .get("coin_type".as_bytes())
+        .get_bytes("coin_type")
         .await
         .unwrap()
         .expect("missing data");

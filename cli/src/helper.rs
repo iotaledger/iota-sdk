@@ -3,9 +3,9 @@
 
 use chrono::{DateTime, NaiveDateTime, Utc};
 use clap::Parser;
-use dialoguer::{console::Term, theme::ColorfulTheme, Input, Password, Select};
+use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use iota_sdk::{
-    client::verify_mnemonic,
+    client::{utils::Password, verify_mnemonic},
     wallet::{Account, Wallet},
 };
 use tokio::{
@@ -21,8 +21,8 @@ use crate::{
 
 const DEFAULT_MNEMONIC_FILE_PATH: &str = "./mnemonic.txt";
 
-pub fn get_password(prompt: &str, confirmation: bool) -> Result<String, Error> {
-    let mut password = Password::new();
+pub fn get_password(prompt: &str, confirmation: bool) -> Result<Password, Error> {
+    let mut password = dialoguer::Password::new();
 
     password.with_prompt(prompt);
 
@@ -30,7 +30,7 @@ pub fn get_password(prompt: &str, confirmation: bool) -> Result<String, Error> {
         password.with_confirmation("Confirm password", "Password mismatch");
     }
 
-    Ok(password.interact()?)
+    Ok(password.interact()?.into())
 }
 
 pub fn get_decision(prompt: &str) -> Result<bool, Error> {
