@@ -10,7 +10,6 @@ use crate::{
     types::block::{
         address::{Address, Bech32Address},
         output::{
-            dto::NativeTokenDto,
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
@@ -475,7 +474,7 @@ impl TryFrom<OutputParamsDto> for OutputParams {
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AssetsDto {
-    native_tokens: Option<Vec<NativeTokenDto>>,
+    native_tokens: Option<Vec<NativeToken>>,
     nft_id: Option<String>,
 }
 
@@ -484,14 +483,7 @@ impl TryFrom<AssetsDto> for Assets {
 
     fn try_from(value: AssetsDto) -> crate::wallet::Result<Self> {
         Ok(Self {
-            native_tokens: match value.native_tokens {
-                Some(r) => Some(
-                    r.into_iter()
-                        .map(|r| Ok(NativeToken::try_from(r)?))
-                        .collect::<crate::wallet::Result<_>>()?,
-                ),
-                None => None,
-            },
+            native_tokens: value.native_tokens,
             nft_id: match &value.nft_id {
                 Some(r) => Some(NftId::from_str(r)?),
                 None => None,

@@ -45,7 +45,7 @@ jobs:
           command: "version-or-publish"
       - name: Create Pull Request With Versions Bumped
         if: steps.covector.outputs.commandRan == 'version'
-        uses: iotaledger/create-pull-request@v3.4.1
+        uses: tauri-apps/create-pull-request@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: release/version-updates
@@ -159,8 +159,12 @@ jobs:
         run: npm install typescript && npm ci
         working-directory: sdk/src/wallet/bindings/nodejs
 
-      - name: Build Node.js prebuild
-        run: npm run prebuild
+      - name: Build Node.js prebuild (x64)
+        run: npm run prebuild-x64
+        working-directory: sdk/src/wallet/bindings/nodejs
+
+      - name: Build Node.js prebuild (arm64)
+        run: npm run prebuild-arm64
         working-directory: sdk/src/wallet/bindings/nodejs
 
       - name: Upload prebuild to GitHub release

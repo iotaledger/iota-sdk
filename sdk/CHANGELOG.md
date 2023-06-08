@@ -111,6 +111,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Client::get_addresses`;
 - `StorageAdapterId`;
 - `Topic` `TryFrom<String>` impl;
+- `Client::generate_ed25519_addresses`
+- `Wallet::get_node_info`
+- `NativeTokenDto`, which required a migration;
 
 ### Fixed
 

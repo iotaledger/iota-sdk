@@ -360,7 +360,7 @@ async fn address_conversion_methods() -> Result<()> {
     let response = wallet_handle
         .send_message(Message::HexToBech32 {
             hex: hex_address.into(),
-            bech32_hrp: None,
+            bech32_hrp: Some(Hrp::from_str_unchecked("rms")),
         })
         .await;
 
