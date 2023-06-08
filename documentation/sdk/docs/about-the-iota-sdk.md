@@ -50,8 +50,7 @@ Your application communicates directly with the IOTA SDK in Rust or through one 
 your requests into REST API calls and sends them to a node through the Internet. The node, in turn, interacts with the
 rest of an IOTA network, which could be
 the [main operational network (mainnet)](https://wiki.iota.org/shimmer/develop/explanations/what-is-shimmer/networks/#shimmer-mainnet)
-or
-a [network for testing purposes (testnet)](https://wiki.iota.org/shimmer/develop/explanations/what-is-shimmer/networks/#public-testnet).   !["An overview of IOTA layers."](/img/iota_layers_overview.svg "An overview of IOTA layers.")
+or a [network for testing purposes (testnet)](https://wiki.iota.org/shimmer/develop/explanations/what-is-shimmer/networks/#public-testnet). !["An overview of IOTA layers."](/img/iota_layers_overview.svg "An overview of IOTA layers.")
 
 ## Secure Secret Management
 
@@ -62,7 +61,7 @@ are further secured with a password.
 
 ## Join the Discussion
 
-If you want to get involved in discussions about this library, or you're looking for support, go to the TODO channel
+If you want to get involved in discussions about this library, or you're looking for support, go to the `#iota-sdk` channel
 on [Discord](https://discord.iota.org). 
 
 

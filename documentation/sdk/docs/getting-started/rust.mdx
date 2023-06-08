@@ -116,7 +116,7 @@ use iota_sdk::client::{
 };
 
 let client = Client::builder()
-    .with_node('https://api.testnet.shimmer.network')? // Insert your node URL here
+    .with_node("https://api.testnet.shimmer.network")? // Insert your node URL here
     .finish()
     .await?;
         
@@ -160,6 +160,7 @@ async fn main() -> Result<()> {
     // Generate a mnemonic and store it in the Stronghold vault.
     // INFO: It is best practice to back up the mnemonic somewhere secure.
     let mnemonic = wallet.generate_mnemonic()?;
+    println!("Creating a wallet with mnemonic:\n'{mnemonic}'");
     wallet.store_mnemonic(mnemonic).await?;
 
     // Create an account.
@@ -187,15 +188,14 @@ You can use the provided code [examples](https://github.com/iotaledger/iota-sdk/
 acquainted with the IOTA SDK. You can use the following command to run any example:
 
 ```bash
-cargo run --example example_name --release
-```
+cargo run --release --all-features --example example_name
 
 * Where `example_name` is the name from
 the [Cargo.toml](https://github.com/iotaledger/iota-sdk/tree/develop/sdk/sdk/Cargo.toml) name from the example folder.
 For example:
 
 ```bash
-cargo run --example node_api_core_get_info --release 
+cargo run --release --all-features --example node_api_core_get_info
 ```
 
 You can get a list of the available code examples with the following command:

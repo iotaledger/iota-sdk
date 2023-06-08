@@ -53,9 +53,15 @@ If you want to build the IOTA SDK from source, please ensure you have the instal
 
 #### Windows
 
-On Windows, you will also need an LLVM. Our workflow uses
+On Windows, you will also need LLVM. Our workflow uses
 `https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.1/LLVM-11.0.1-win64.exe`. You may also need to set
 an environment variable `RUSTFLAGS` to `-C target-feature=+crt-static`.
+
+:::tip Install LLVM with Chocolatey
+
+If you use [Chocolatey](https://chocolatey.org) you can install LLVM by executing `choco install llvm`
+
+:::
 
 #### Build
 
