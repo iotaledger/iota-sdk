@@ -34,7 +34,12 @@ async fn main() -> Result<()> {
         .find(|t| t.available() >= U256::from(11))
         .map(|t| t.token_id())
     {
-        let available_balance = balance.native_tokens().iter().find(|t| t.token_id() == token_id).unwrap().available();
+        let available_balance = balance
+            .native_tokens()
+            .iter()
+            .find(|t| t.token_id() == token_id)
+            .unwrap()
+            .available();
         println!("Balance before burning: {available_balance:?}");
 
         // Set the stronghold password
@@ -58,7 +63,12 @@ async fn main() -> Result<()> {
         );
 
         let balance = account.sync(None).await?;
-        let available_balance = balance.native_tokens().iter().find(|t| t.token_id() == token_id).unwrap().available();
+        let available_balance = balance
+            .native_tokens()
+            .iter()
+            .find(|t| t.token_id() == token_id)
+            .unwrap()
+            .available();
         println!("Balance after burning: {available_balance:?}");
     }
 

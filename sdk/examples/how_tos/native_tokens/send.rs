@@ -7,9 +7,7 @@
 //! `cargo run --example send_native_tokens --release`
 
 use iota_sdk::{
-    types::block::{
-        address::Bech32Address,
-    },
+    types::block::address::Bech32Address,
     wallet::{Result, SendNativeTokensParams, Wallet},
 };
 use primitive_types::U256;
@@ -34,7 +32,12 @@ async fn main() -> Result<()> {
         .find(|t| t.available() >= U256::from(10))
         .map(|t| t.token_id())
     {
-        let available_balance = balance.native_tokens().iter().find(|t| t.token_id() == token_id).unwrap().available();
+        let available_balance = balance
+            .native_tokens()
+            .iter()
+            .find(|t| t.token_id() == token_id)
+            .unwrap()
+            .available();
         println!("Balance before sending: {available_balance}");
 
         // Set the stronghold password
@@ -65,7 +68,12 @@ async fn main() -> Result<()> {
 
         let balance = account.sync(None).await?;
 
-        let available_balance = balance.native_tokens().iter().find(|t| t.token_id() == token_id).unwrap().available();
+        let available_balance = balance
+            .native_tokens()
+            .iter()
+            .find(|t| t.token_id() == token_id)
+            .unwrap()
+            .available();
         println!("Balance after sending: {available_balance}",);
     } else {
         println!("Insufficient native token funds");

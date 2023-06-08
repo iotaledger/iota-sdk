@@ -6,8 +6,6 @@
 //!
 //! `cargo run --example increase_native_token_supply --release`
 
-use std::str::FromStr;
-
 use iota_sdk::{
     types::block::output::TokenId,
     wallet::{Result, Wallet},
@@ -35,7 +33,12 @@ async fn main() -> Result<()> {
     // Find first foundry and corresponding token id
     let token_id = TokenId::from(*balance.foundries().first().unwrap());
 
-    let available_balance = balance.native_tokens().iter().find(|t| t.token_id() == &token_id).unwrap().available();
+    let available_balance = balance
+        .native_tokens()
+        .iter()
+        .find(|t| t.token_id() == &token_id)
+        .unwrap()
+        .available();
     println!("Balance before minting: {available_balance}",);
 
     // Mint some more native tokens
@@ -56,7 +59,12 @@ async fn main() -> Result<()> {
     );
 
     let balance = account.sync(None).await?;
-    let available_balance = balance.native_tokens().iter().find(|t| t.token_id() == &token_id).unwrap().available();
+    let available_balance = balance
+        .native_tokens()
+        .iter()
+        .find(|t| t.token_id() == &token_id)
+        .unwrap()
+        .available();
     println!("Balance after minting: {available_balance:?}",);
 
     Ok(())

@@ -30,7 +30,12 @@ async fn main() -> Result<()> {
     // Find first foundry and corresponding token id
     let token_id = TokenId::from(*balance.foundries().first().unwrap());
 
-    let available_balance = balance.native_tokens().iter().find(|t| t.token_id() == &token_id).unwrap().available();
+    let available_balance = balance
+        .native_tokens()
+        .iter()
+        .find(|t| t.token_id() == &token_id)
+        .unwrap()
+        .available();
     println!("Balance before melting: {available_balance}",);
 
     // Set the stronghold password
@@ -56,7 +61,12 @@ async fn main() -> Result<()> {
     );
 
     let balance = account.sync(None).await?;
-    let available_balance = balance.native_tokens().iter().find(|t| t.token_id() == &token_id).unwrap().available();
+    let available_balance = balance
+        .native_tokens()
+        .iter()
+        .find(|t| t.token_id() == &token_id)
+        .unwrap()
+        .available();
     println!("Balance after melting: {available_balance}",);
 
     Ok(())
