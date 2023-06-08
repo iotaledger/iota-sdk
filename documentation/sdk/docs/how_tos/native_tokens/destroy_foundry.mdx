@@ -10,7 +10,6 @@ keywords:
 - foundry
 - nodejs
 - python
-- java
 - rust
 ---
 
@@ -21,7 +20,7 @@ import NodejsCode from '!!raw-loader!../../../../../bindings/nodejs/examples/how
 import PythonCode from '!!raw-loader!../../../../../bindings/python/examples/how_tos/native_tokens/destroy_foundry.py';
 import RustCode from '!!raw-loader!../../../../../sdk/examples/how_tos/native_tokens/destroy_foundry.rs';
 
-You can destroy a foundry by calling the `Account.destroy_foundry(foundry_id, options)` function. The function will
+You can destroy a foundry by calling the `Account.burn(burn, options)` function. The function will
 destroy a foundry output as long as its circulating
 [native token](https://wiki.iota.org/shimmer/introduction/explanations/ledger/foundry) supply is zero. Any native tokens
 which were minted by other foundries will be sent to the controlling
@@ -29,18 +28,17 @@ which were minted by other foundries will be sent to the controlling
 
 ## Code Example
 
-Before you run the example you should update the `foundry_id` to one available in your account that has no available
-[native tokens](https://wiki.iota.org/shimmer/introduction/explanations/ledger/foundry). If you have no available
-foundries, you can create one by [minting a native token](./01_mint_native_token.mdx). If you've already minted your
-tokens but need to empty the foundry, you can decrease your native token supply by [melting them](./03_melt_native_token.mdx).
+Before you run the example you should make sure the first foundy on your account has zero circulating supply. If you have no available
+foundries, you can create one by [minting a native token](mint.mdx). If you've already minted your
+tokens but need to empty the foundry, you can decrease your native token supply by [melting them](decrease_supply.mdx).
 
 The following example will:
 
 1. Create an account manager.
-2. Get Alice's account which was [created in the first guide](../accounts_and_addresses/01_create_a_wallet_account.mdx).
-3. [Get the account's balance](./../accounts_and_addresses/04_check_balance.mdx).
-4. Destroy a [foundry](https://wiki.iota.org/shimmer/introduction/explanations/ledger/foundry) output by id.
-5. Get the account's balance again to show the difference after step 4.
+2. Get Alice's account which was [created in the first guide](../accounts_and_addresses/create_account.mdx).
+3. [Get the account's balance](./../accounts_and_addresses/check_balance.mdx) and show the amount of foundries.
+4. Try to destroy the first [foundry](https://wiki.iota.org/shimmer/introduction/explanations/ledger/foundry) output.
+5. Get the account's foundry count again to show the difference after step 4.
 
 <Tabs groupId="language">
     <TabItem value="rust" label="Rust">
@@ -62,17 +60,9 @@ The following example will:
 
 ## Expected Output
 
-<Tabs groupId="language">
-    <TabItem value="rust" label="Rust">
+```plaintext
 Foundries before destroying: 51
 Transaction sent: 0xe0930e445aa9e78f59e3979744102bb0980fe6332950c7bb4785700dcb24fe8e
 Block included: https://explorer.shimmer.network/testnet/block/0x31d08663ae1d175d798d0f2925f41fa97f0eee8f9e233a4f5dacedb1398ed544
 Foundries after destroying: 50
-    </TabItem>
-    <TabItem value="nodejs" label="Nodejs">
-        <NodejsOutput/>
-    </TabItem>
-    <TabItem value="python" label="Python">
-        <PythonOutput/>
-    </TabItem>
-</Tabs>
+```

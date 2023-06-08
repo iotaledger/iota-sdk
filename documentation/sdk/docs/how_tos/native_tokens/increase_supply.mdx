@@ -1,15 +1,14 @@
 ---
-title: Melt Native Tokens
-sidebar_label: Melt
-description: 'How to melt native tokens with wallet.rs'
+title: Increase Native Token Circulating Supply 
+sidebar_label: Increase Circulating Supply
+description: 'How to increase the circulating supply of native tokens'
 image: /img/logo/iota_mark_light.png
 keywords:
 - how to
-- melt native token
+- increase native token circulating supply
 - foundry
 - nodejs
 - python
-- java
 - rust
 ---
 
@@ -19,23 +18,18 @@ import TabItem from '@theme/TabItem';
 import NodejsCode from '!!raw-loader!../../../../../bindings/nodejs/examples/how_tos/native_tokens/increase_supply.ts';
 import PythonCode from '!!raw-loader!../../../../../bindings/python/examples/how_tos/native_tokens/increase_supply.py';
 import RustCode from '!!raw-loader!../../../../../sdk/examples/how_tos/native_tokens/increase_supply.rs';
-//import ReplaceNativeTokenId from '../../_admonitions/_note_replace_native_token_id.md';
 
-You may want to melt some of your circulating native tokens. To do so, you will need to call the
-`Account.melt_native_token(native_token, options)` function.
-
-If you melt your native tokens, you can still destroy the foundry that created them.
+You may want to increase the circulating native token supply. To do so, you will need to call the
+`Account.increase_native_token_supply(token_id, mint_amount, options)` function.
 
 ## Code Example
-
-<ReplaceNativeTokenId/>
 
 The following example will:
 
 1. Create an account manager.
-2. Get Alice's account which was [created in the first guide](../accounts_and_addresses/01_create_a_wallet_account.mdx).
+2. Get Alice's account which was [created in the first guide](../accounts_and_addresses/create_account.mdx).
 3. Get the account's balance.
-4. Melt 10 native tokens of the supplied ID.
+4. Mint 10 native tokens of the first ID.
 
 <Tabs groupId="language">
     <TabItem value="rust" label="Rust">

@@ -21,10 +21,9 @@ import PythonCode from '!!raw-loader!../../../../../bindings/python/examples/how
 import RustCode from '!!raw-loader!../../../../../sdk/examples/how_tos/native_tokens/mint.rs';
 import TipFaucet from '../../_admonitions/_tip_faucet.md';
 
-You can use a node running the stardust update to mint
-[native tokens](https://wiki.iota.org/shimmer/introduction/explanations/what_is_stardust/tokenization#native-tokens).
-To do so, you will only need to [add some funds to your account](../accounts_and_addresses/03_request_funds.mdx), define
-the native token's options and call the `Account.mint_native_token(native_token_options, options)` function.
+The stardust update allows you to create your own [native tokens](https://wiki.iota.org/shimmer/introduction/explanations/what_is_stardust/tokenization#native-tokens)
+Native tokens are minted by a so-called Foundry. The Foundry allows you to specify a max supply once and change the circulating supply.
+To create a Foundry you need an Alias Output which owns it. This Alias Output only needs to be generated once and can own multiple foundries.
 
 <TipFaucet/>
 
@@ -33,9 +32,9 @@ the native token's options and call the `Account.mint_native_token(native_token_
 The following example will:
 
 1. Create an account manager.
-2. Get Alice's which was [created in the first guide](../accounts_and_addresses/01_create_a_wallet_account.mdx).
-3. Create the `NativeTokenOptions`.
-4. Mint the native token by calling the `Account.mint_native_token(native_token_options, options)` function.
+2. Get Alice's which was [created in the first guide](../accounts_and_addresses/create_a_wallet_account.mdx).
+3. Create the `MintNativeTokenParams`.
+4. Mint the native token by calling the `Account.mint_native_token(params, options)` function.
 
 <Tabs groupId="language">
     <TabItem value="rust" label="Rust">
