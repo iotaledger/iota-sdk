@@ -27,6 +27,7 @@ use crypto::{
     signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
 use serde::{Deserialize, Serialize};
+use zeroize::Zeroizing;
 
 #[cfg(feature = "ledger_nano")]
 use self::ledger_nano::LedgerSecretManager;
@@ -158,7 +159,7 @@ impl FromStr for SecretManager {
 }
 
 /// DTO for secret manager types with required data.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum SecretManagerDto {
     /// Stronghold
     #[cfg(feature = "stronghold")]
@@ -172,10 +173,10 @@ pub enum SecretManagerDto {
     LedgerNano(bool),
     /// Mnemonic
     #[serde(alias = "mnemonic")]
-    Mnemonic(String),
+    Mnemonic(Zeroizing<String>),
     /// Hex seed
     #[serde(alias = "hexSeed")]
-    HexSeed(String),
+    HexSeed(Zeroizing<String>),
     /// Placeholder
     #[serde(alias = "placeholder")]
     Placeholder,
@@ -204,9 +205,7 @@ impl TryFrom<SecretManagerDto> for SecretManager {
             #[cfg(feature = "ledger_nano")]
             SecretManagerDto::LedgerNano(is_simulator) => Self::LedgerNano(LedgerSecretManager::new(is_simulator)),
 
-            SecretManagerDto::Mnemonic(mnemonic) => {
-                Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(&mnemonic)?)
-            }
+            SecretManagerDto::Mnemonic(mnemonic) => Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?),
 
             SecretManagerDto::HexSeed(hex_seed) => {
                 // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
@@ -239,7 +238,7 @@ impl From<&SecretManager> for SecretManagerDto {
             // `MnemonicSecretManager(Seed)` doesn't have Debug or Display implemented and in the current use cases of
             // the client/wallet we also don't need to convert it in this direction with the mnemonic/seed, we only need
             // to know the type
-            SecretManager::Mnemonic(_mnemonic) => Self::Mnemonic("...".to_string()),
+            SecretManager::Mnemonic(_mnemonic) => Self::Mnemonic("...".to_string().into()),
             SecretManager::Placeholder(_) => Self::Placeholder,
         }
     }
@@ -366,12 +365,12 @@ impl SignTransactionEssence for SecretManager {
 
 impl SecretManager {
     /// Tries to create a [`SecretManager`] from a mnemonic string.
-    pub fn try_from_mnemonic(mnemonic: &str) -> crate::client::Result<Self> {
+    pub fn try_from_mnemonic(mnemonic: impl Into<Zeroizing<String>>) -> crate::client::Result<Self> {
         Ok(Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?))
     }
 
     /// Tries to create a [`SecretManager`] from a seed hex string.
-    pub fn try_from_hex_seed(seed: String) -> crate::client::Result<Self> {
+    pub fn try_from_hex_seed(seed: impl Into<Zeroizing<String>>) -> crate::client::Result<Self> {
         Ok(Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(seed)?))
     }
 

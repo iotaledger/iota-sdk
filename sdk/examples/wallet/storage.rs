@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
