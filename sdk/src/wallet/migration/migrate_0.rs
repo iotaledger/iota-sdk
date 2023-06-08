@@ -11,6 +11,25 @@ use crate::wallet::Error;
 
 pub struct Migrate;
 
+fn rename_keys(json: &mut serde_json::Value) {
+    match json {
+        serde_json::Value::Array(a) => a.iter_mut().for_each(rename_keys),
+        serde_json::Value::Object(o) => {
+            let mut replace = serde_json::Map::with_capacity(o.len());
+            o.retain(|k, v| {
+                rename_keys(v);
+                replace.insert(
+                    heck::ToLowerCamelCase::to_lower_camel_case(k.as_str()),
+                    std::mem::replace(v, serde_json::Value::Null),
+                );
+                true
+            });
+            *o = replace;
+        }
+        _ => (),
+    }
+}
+
 fn migrate_native_token(output: &mut serde_json::Value) {
     let native_tokens = output["native_tokens"]["inner"].as_array_mut().unwrap();
 
@@ -88,8 +107,7 @@ fn migrate_client_options(client_options: &mut serde_json::Value) -> Result<()> 
 
     // TODO this is temporary to merge https://github.com/iotaledger/iota-sdk/pull/570.
     // We actually need to migrate the whole protocol_parameters, including this.
-    let rent_structure = &mut protocol_parameters["rent_structure"];
-    *rent_structure = serde_json::json!({ "vByteCost": rent_structure["v_byte_cost"], "vByteFactorData": rent_structure["v_byte_factor_data"], "vByteFactorKey": rent_structure["v_byte_factor_key"]});
+    rename_keys(&mut protocol_parameters["rent_structure"]);
 
     Ok(())
 }
