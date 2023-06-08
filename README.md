@@ -177,6 +177,7 @@ async fn main() -> Result<()> {
     // Generate a mnemonic and store it in the Stronghold vault.
     // INFO: It is best practice to back up the mnemonic somewhere secure.
     let mnemonic = wallet.generate_mnemonic()?;
+    println!("Creating a wallet with mnemonic:\n'{mnemonic}'");
     wallet.store_mnemonic(mnemonic).await?;
 
     // Create an account.
