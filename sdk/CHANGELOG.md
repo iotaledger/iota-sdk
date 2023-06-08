@@ -92,6 +92,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - More functions accept generic types for ergonomics: `Wallet::listen`, `clear_listeners`, `EventEmitter` fns, `RegularTransactionEssenceBuilder` fns, `AliasOutputBuilder` fns, `Account::claim_outputs`, `prepare_transaction`, `send`, `finish_transaction`, `send_nft`, `prepare_send_nft`, `send_native_tokens`, `prepare_send_native_tokens`, `send_amount`, `prepare_send_amount`, `mint_nfts`, `prepare_mint_nfts`, `vote`, `prepare_vote`, `Unlocks::new`, `TaggedDataPayload::new`, `MilestonePayload::new`, `ReceiptMilestoneOption::new`, `Client::subscribe`, `unsubscribe`, `basic_output_ids`, `alias_output_ids`, `foundry_output_ids`, `nft_output_ids`, `MqttManager::with_topics`, `MqttTopicManager::new`, `with_topics`, `QueryParameters::new`;
 - `Topic::try_new` renamed to `new`, `topic` renamed to `as_str`;
 - `LedgerNanoStatus::locked` is now optional since it's an IOTA/Shimmer specific API;
+- `StorageManager` and wallet dynamic `StorageAdapter` are now private;
 - All public password-related methods now claim ownership over provided passwords and take care of zeroing the memory on drop;
 
 ### Removed
@@ -106,7 +107,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excess `SecretManager` address generation methods;
 - `Bech32Addresses` and `RawAddresses`;
 - `Client::get_addresses`;
+- `StorageAdapterId`;
 - `Topic` `TryFrom<String>` impl;
+- `Client::generate_ed25519_addresses`
+- `Wallet::get_node_info`
 - `NativeTokenDto`, which required a migration;
 
 ### Fixed
