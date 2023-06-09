@@ -27,9 +27,7 @@ async fn main() -> Result<()> {
     let account = wallet.get_account("Alice").await?;
 
     // Sync and get the balance
-    let _ = account.sync(None).await?;
-    // If already synced, just get the balance
-    let balance = account.balance().await?;
+    let balance = account.sync(None).await?;
     println!("{balance:#?}");
 
     println!("ADDRESSES:");

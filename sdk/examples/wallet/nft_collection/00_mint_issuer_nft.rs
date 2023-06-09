@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
         .await?;
     let account = wallet.get_account("Alice").await?;
 
-    let _ = account.sync(None).await?;
+    account.sync(None).await?;
     println!("Account synced!");
 
     // Set the stronghold password

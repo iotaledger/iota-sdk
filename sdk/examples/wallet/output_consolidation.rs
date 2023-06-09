@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Sync account to make sure account is updated with outputs from previous examples
-    let _ = account.sync(None).await?;
+    account.sync(None).await?;
     println!("Account synced");
 
     // List unspent outputs before consolidation.
@@ -74,7 +74,7 @@ async fn main() -> Result<()> {
     );
 
     // Sync account
-    let _ = account.sync(None).await?;
+    account.sync(None).await?;
     println!("Account synced");
 
     // Outputs after consolidation

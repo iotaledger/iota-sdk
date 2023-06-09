@@ -194,7 +194,7 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    let _ = account.sync(None).await?;
+    account.sync(None).await?;
     println!("Account synced");
 
     ////////////////////////////////////////////////
@@ -221,7 +221,7 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    let _ = account.sync(None).await?;
+    account.sync(None).await?;
     println!("Account synced");
 
     ////////////////////////////////////////////////
@@ -245,7 +245,7 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    let _ = account.sync(None).await?;
+    account.sync(None).await?;
     println!("Account synced");
 
     assert!(account.get_voting_output().await.is_err());

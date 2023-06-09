@@ -63,7 +63,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!("Syncing account");
-    let _ = account.sync(None).await?;
+    account.sync(None).await?;
 
     println!("Example finished successfully");
     Ok(())
