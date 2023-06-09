@@ -176,6 +176,9 @@ impl StrongholdAdapterBuilder {
         // In any case, Stronghold - as a necessary component - needs to be present at this point.
         let stronghold = self.stronghold.unwrap_or_default();
 
+        #[cfg(test)]
+        iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
         if let Some(key_provider) = &self.key_provider {
             check_or_create_snapshot(&stronghold, key_provider, &SnapshotPath::from_path(&snapshot_path))?;
         }

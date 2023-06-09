@@ -104,7 +104,7 @@ where
                 if output_metadata_response.is_spent {
                     account_details.unspent_outputs.remove(&output_id);
                     if let Some(output_data) = account_details.outputs.get_mut(&output_id) {
-                        output_data.metadata = OutputMetadata::try_from(&output_metadata_response)?;
+                        output_data.metadata = OutputMetadata::try_from(output_metadata_response)?;
                     }
                 } else {
                     // not spent, just not synced, skip

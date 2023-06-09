@@ -88,7 +88,7 @@ fn read_prepared_transaction_from_file<P: AsRef<Path>>(
     file.read_to_string(&mut json)?;
 
     Ok(PreparedTransactionData::try_from_dto(
-        &serde_json::from_str::<PreparedTransactionDataDto>(&json)?,
+        serde_json::from_str::<PreparedTransactionDataDto>(&json)?,
         protocol_parameters,
     )?)
 }

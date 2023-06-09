@@ -102,7 +102,7 @@ impl Wallet {
             .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
-        let (read_client_options, read_coin_type, mut read_secret_manager, read_accounts) =
+        let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =
             read_data_from_stronghold_snapshot::<SecretManager>(&new_stronghold).await?;
 
         // If the coin type is not matching the current one, then the addresses in the accounts will also not be
@@ -123,12 +123,13 @@ impl Wallet {
             }
         }
 
-        if let Some(read_secret_manager) = &mut read_secret_manager {
-            if let SecretManagerDto::Stronghold(stronghold) = read_secret_manager {
-                stronghold.snapshot_path = new_snapshot_path.clone().into_os_string().to_string_lossy().into();
+        if let Some(mut read_secret_manager) = read_secret_manager {
+            // We have to replace the snapshot path with the current one, when building stronghold
+            if let SecretManagerDto::Stronghold(stronghold_dto) = &mut read_secret_manager {
+                stronghold_dto.snapshot_path = new_snapshot_path.to_string_lossy().into_owned();
             }
 
-            let restored_secret_manager = SecretManager::from_config(read_secret_manager)
+            let restored_secret_manager = SecretManager::from_config(&read_secret_manager)
                 .map_err(|_| crate::wallet::Error::Backup("invalid secret_manager"))?;
 
             // Copy Stronghold file so the seed is available in the new location

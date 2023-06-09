@@ -125,28 +125,28 @@ pub struct MintNftParamsDto {
     pub immutable_metadata: Option<String>,
 }
 
-impl TryFrom<&MintNftParamsDto> for MintNftParams {
+impl TryFrom<MintNftParamsDto> for MintNftParams {
     type Error = crate::wallet::Error;
 
-    fn try_from(value: &MintNftParamsDto) -> crate::wallet::Result<Self> {
+    fn try_from(value: MintNftParamsDto) -> crate::wallet::Result<Self> {
         Ok(Self {
             address: value.address,
             sender: value.sender,
-            metadata: match &value.metadata {
-                Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("metadata"))?),
-                None => None,
-            },
-            tag: match &value.tag {
-                Some(tag) => Some(prefix_hex::decode(tag).map_err(|_| BlockError::InvalidField("tag"))?),
-                None => None,
-            },
+            metadata: value
+                .metadata
+                .map(|metadata| prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("metadata")))
+                .transpose()?,
+            tag: value
+                .tag
+                .map(|tag| prefix_hex::decode(tag).map_err(|_| BlockError::InvalidField("tag")))
+                .transpose()?,
             issuer: value.issuer,
-            immutable_metadata: match &value.immutable_metadata {
-                Some(metadata) => {
-                    Some(prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("immutable_metadata"))?)
-                }
-                None => None,
-            },
+            immutable_metadata: value
+                .immutable_metadata
+                .map(|metadata| {
+                    prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("immutable_metadata"))
+                })
+                .transpose()?,
         })
     }
 }

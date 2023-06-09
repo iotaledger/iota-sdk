@@ -201,12 +201,12 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&UnlockDto> for Unlock {
+    impl TryFrom<UnlockDto> for Unlock {
         type Error = Error;
 
-        fn try_from(value: &UnlockDto) -> Result<Self, Self::Error> {
+        fn try_from(value: UnlockDto) -> Result<Self, Self::Error> {
             match value {
-                UnlockDto::Signature(s) => match &s.signature {
+                UnlockDto::Signature(s) => match s.signature {
                     SignatureDto::Ed25519(ed) => {
                         let public_key =
                             prefix_hex::decode(&ed.public_key).map_err(|_| Error::InvalidField("publicKey"))?;

@@ -56,7 +56,7 @@ async fn public_key_to_address() {
 
 #[tokio::test]
 async fn mnemonic_address_generation_iota() {
-    let mnemonic = "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast";
+    let mnemonic = "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast".to_owned();
     let secret_manager = SecretManager::try_from_mnemonic(mnemonic).unwrap();
 
     // account 0, address 0 and 1
@@ -100,7 +100,7 @@ async fn mnemonic_address_generation_iota() {
 
 #[tokio::test]
 async fn mnemonic_address_generation_shimmer() {
-    let mnemonic = "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast";
+    let mnemonic = "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast".to_owned();
     let secret_manager = SecretManager::try_from_mnemonic(mnemonic).unwrap();
 
     // account 0, address 0 and 1
@@ -163,7 +163,7 @@ async fn address_generation() {
         serde_json::from_value(general.get("address_generations").unwrap().clone()).unwrap();
 
     for address in &addresses_data {
-        let secret_manager = SecretManager::try_from_mnemonic(&address.mnemonic).unwrap();
+        let secret_manager = SecretManager::try_from_mnemonic(address.mnemonic.clone()).unwrap();
         let addresses = secret_manager
             .generate_ed25519_addresses(
                 GetAddressesOptions::default()
@@ -188,39 +188,42 @@ async fn address_generation() {
     }
 
     #[cfg(feature = "stronghold")]
-    for address in &addresses_data {
-        let stronghold_filename = format!("{}.stronghold", address.bech32_address);
-        let stronghold_secret_manager = StrongholdSecretManager::builder()
-            .password("some_hopefully_secure_password".to_owned())
-            .build(&stronghold_filename)
-            .unwrap();
+    {
+        iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+        for address in &addresses_data {
+            let stronghold_filename = format!("{}.stronghold", address.bech32_address);
+            let stronghold_secret_manager = StrongholdSecretManager::builder()
+                .password("some_hopefully_secure_password".to_owned())
+                .build(&stronghold_filename)
+                .unwrap();
 
-        stronghold_secret_manager
-            .store_mnemonic(address.mnemonic.clone())
-            .await
-            .unwrap();
+            stronghold_secret_manager
+                .store_mnemonic(address.mnemonic.clone())
+                .await
+                .unwrap();
 
-        let addresses = SecretManager::Stronghold(stronghold_secret_manager)
-            .generate_ed25519_addresses(
-                GetAddressesOptions::default()
-                    .with_bech32_hrp(address.bech32_hrp)
-                    .with_coin_type(address.coin_type)
-                    .with_range(address.address_index..address.address_index + 1)
-                    .with_account_index(address.account_index)
-                    .with_options(GenerateAddressOptions {
-                        internal: address.internal,
-                        ..Default::default()
-                    }),
-            )
-            .await
-            .unwrap();
+            let addresses = SecretManager::Stronghold(stronghold_secret_manager)
+                .generate_ed25519_addresses(
+                    GetAddressesOptions::default()
+                        .with_bech32_hrp(address.bech32_hrp)
+                        .with_coin_type(address.coin_type)
+                        .with_range(address.address_index..address.address_index + 1)
+                        .with_account_index(address.account_index)
+                        .with_options(GenerateAddressOptions {
+                            internal: address.internal,
+                            ..Default::default()
+                        }),
+                )
+                .await
+                .unwrap();
 
-        assert_eq!(addresses[0], address.bech32_address);
-        if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
-            assert_eq!(ed25519_address.to_string(), address.ed25519_address);
-        } else {
-            panic!("Invalid address type")
+            assert_eq!(addresses[0], address.bech32_address);
+            if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
+                assert_eq!(ed25519_address.to_string(), address.ed25519_address);
+            } else {
+                panic!("Invalid address type")
+            }
+            std::fs::remove_file(stronghold_filename).unwrap();
         }
-        std::fs::remove_file(stronghold_filename).unwrap();
     }
 }

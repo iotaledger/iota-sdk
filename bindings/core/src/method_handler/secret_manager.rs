@@ -41,7 +41,7 @@ pub(crate) async fn call_secret_manager_method_internal(
         } => {
             let payload = &secret_manager
                 .sign_transaction(PreparedTransactionData::try_from_dto_unverified(
-                    &prepared_transaction_data,
+                    prepared_transaction_data,
                 )?)
                 .await?;
             Response::SignedTransaction(PayloadDto::from(payload))

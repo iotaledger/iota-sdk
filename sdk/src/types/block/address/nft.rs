@@ -87,10 +87,10 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&NftAddressDto> for NftAddress {
+    impl TryFrom<NftAddressDto> for NftAddress {
         type Error = Error;
 
-        fn try_from(value: &NftAddressDto) -> Result<Self, Self::Error> {
+        fn try_from(value: NftAddressDto) -> Result<Self, Self::Error> {
             value.nft_id.parse::<Self>().map_err(|_| Error::InvalidField("nftId"))
         }
     }

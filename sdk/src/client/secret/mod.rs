@@ -27,7 +27,7 @@ use crypto::{
     signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use zeroize::ZeroizeOnDrop;
+use zeroize::Zeroizing;
 
 #[cfg(feature = "ledger_nano")]
 use self::ledger_nano::LedgerSecretManager;
@@ -161,12 +161,12 @@ impl FromStr for SecretManager {
     type Err = Error;
 
     fn from_str(s: &str) -> crate::client::Result<Self> {
-        Self::try_from(&serde_json::from_str::<SecretManagerDto>(s)?)
+        Self::try_from(serde_json::from_str::<SecretManagerDto>(s)?)
     }
 }
 
 /// DTO for secret manager types with required data.
-#[derive(Debug, Clone, Serialize, Deserialize, ZeroizeOnDrop)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum SecretManagerDto {
     /// Stronghold
     #[cfg(feature = "stronghold")]
@@ -180,44 +180,43 @@ pub enum SecretManagerDto {
     LedgerNano(bool),
     /// Mnemonic
     #[serde(alias = "mnemonic")]
-    Mnemonic(String),
+    Mnemonic(Zeroizing<String>),
     /// Hex seed
     #[serde(alias = "hexSeed")]
-    HexSeed(String),
+    HexSeed(Zeroizing<String>),
     /// Placeholder
     #[serde(alias = "placeholder")]
     Placeholder,
 }
 
-impl TryFrom<&SecretManagerDto> for SecretManager {
+impl TryFrom<SecretManagerDto> for SecretManager {
     type Error = Error;
 
-    fn try_from(value: &SecretManagerDto) -> crate::client::Result<Self> {
+    fn try_from(value: SecretManagerDto) -> crate::client::Result<Self> {
         Ok(match value {
             #[cfg(feature = "stronghold")]
             SecretManagerDto::Stronghold(stronghold_dto) => {
                 let mut builder = StrongholdSecretManager::builder();
 
-                if let Some(password) = &stronghold_dto.password {
-                    // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
-                    builder = builder.password(password.clone());
+                if let Some(password) = stronghold_dto.password {
+                    builder = builder.password(password);
                 }
 
-                if let Some(timeout) = &stronghold_dto.timeout {
-                    builder = builder.timeout(Duration::from_secs(*timeout));
+                if let Some(timeout) = stronghold_dto.timeout {
+                    builder = builder.timeout(Duration::from_secs(timeout));
                 }
 
                 Self::Stronghold(builder.build(&stronghold_dto.snapshot_path)?)
             }
 
             #[cfg(feature = "ledger_nano")]
-            SecretManagerDto::LedgerNano(is_simulator) => Self::LedgerNano(LedgerSecretManager::new(*is_simulator)),
+            SecretManagerDto::LedgerNano(is_simulator) => Self::LedgerNano(LedgerSecretManager::new(is_simulator)),
 
             SecretManagerDto::Mnemonic(mnemonic) => Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?),
 
             SecretManagerDto::HexSeed(hex_seed) => {
                 // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
-                Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed.clone())?)
+                Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed)?)
             }
 
             SecretManagerDto::Placeholder => Self::Placeholder(PlaceholderSecretManager),
@@ -246,7 +245,7 @@ impl From<&SecretManager> for SecretManagerDto {
             // `MnemonicSecretManager(Seed)` doesn't have Debug or Display implemented and in the current use cases of
             // the client/wallet we also don't need to convert it in this direction with the mnemonic/seed, we only need
             // to know the type
-            SecretManager::Mnemonic(_mnemonic) => Self::Mnemonic("...".to_string()),
+            SecretManager::Mnemonic(_mnemonic) => Self::Mnemonic("...".to_string().into()),
             SecretManager::Placeholder(_) => Self::Placeholder,
         }
     }
@@ -393,7 +392,9 @@ impl SecretManagerConfig for SecretManager {
             SecretManagerDto::HexSeed(hex_seed) => {
                 Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed.clone())?)
             }
-            SecretManagerDto::Mnemonic(mnemonic) => Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?),
+            SecretManagerDto::Mnemonic(mnemonic) => {
+                Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.clone())?)
+            }
             SecretManagerDto::Placeholder => Self::Placeholder(PlaceholderSecretManager),
         })
     }
@@ -401,12 +402,12 @@ impl SecretManagerConfig for SecretManager {
 
 impl SecretManager {
     /// Tries to create a [`SecretManager`] from a mnemonic string.
-    pub fn try_from_mnemonic(mnemonic: &str) -> crate::client::Result<Self> {
+    pub fn try_from_mnemonic(mnemonic: impl Into<Zeroizing<String>>) -> crate::client::Result<Self> {
         Ok(Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?))
     }
 
     /// Tries to create a [`SecretManager`] from a seed hex string.
-    pub fn try_from_hex_seed(seed: String) -> crate::client::Result<Self> {
+    pub fn try_from_hex_seed(seed: impl Into<Zeroizing<String>>) -> crate::client::Result<Self> {
         Ok(Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(seed)?))
     }
 }

@@ -77,10 +77,10 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&TreasuryInputDto> for TreasuryInput {
+    impl TryFrom<TreasuryInputDto> for TreasuryInput {
         type Error = Error;
 
-        fn try_from(value: &TreasuryInputDto) -> Result<Self, Self::Error> {
+        fn try_from(value: TreasuryInputDto) -> Result<Self, Self::Error> {
             Ok(Self::new(
                 value
                     .milestone_id

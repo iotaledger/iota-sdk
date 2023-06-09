@@ -1,13 +1,13 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will send an amount below the minimum storage deposit.
+//! In this example we will claim all claimable outputs.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example send_micro_transaction --release`
+//! `cargo run --release --all-features --example claim_transaction`
 
 use iota_sdk::{
-    wallet::{account::TransactionOptions, Result, SendAmountParams},
+    wallet::{account::OutputsToClaim, Result},
     Wallet,
 };
 
@@ -21,6 +21,7 @@ async fn main() -> Result<()> {
 
     // Get the account we generated with `01_create_wallet`
     let account = wallet.get_account("Alice").await?;
+
     // May want to ensure the account is synced before sending a transaction.
     account.sync(None).await?;
 
@@ -29,30 +30,23 @@ async fn main() -> Result<()> {
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // Send a micro transaction with amount 1
-    let outputs = [SendAmountParams::new(
-        "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
-        1,
-    )?];
-
-    let transaction = account
-        .send_amount(
-            outputs,
-            TransactionOptions {
-                allow_micro_amount: true,
-                ..Default::default()
-            },
-        )
+    let output_ids = account
+        .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::All)
         .await?;
+    println!("Available outputs to claim:");
+    for output_id in &output_ids {
+        println!("{}", output_id);
+    }
+
+    let transaction = account.claim_outputs(output_ids).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for transaction to get included
     let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
-
     println!(
-        "Block included: {}/block/{}",
+        "Block sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );

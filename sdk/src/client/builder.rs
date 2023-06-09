@@ -20,7 +20,7 @@ use crate::{
         Client,
     },
     types::block::{
-        output::dto::RentStructureDto,
+        output::RentStructure,
         protocol::{dto::ProtocolParametersDto, ProtocolParameters},
     },
 };
@@ -69,11 +69,11 @@ impl From<NetworkInfo> for NetworkInfoDto {
                 bech32_hrp: *info.protocol_parameters.bech32_hrp(),
                 min_pow_score: info.protocol_parameters.min_pow_score(),
                 below_max_depth: info.protocol_parameters.below_max_depth(),
-                rent_structure: RentStructureDto {
-                    v_byte_cost: info.protocol_parameters.rent_structure().byte_cost(),
-                    v_byte_factor_key: info.protocol_parameters.rent_structure().byte_factor_key(),
-                    v_byte_factor_data: info.protocol_parameters.rent_structure().byte_factor_data(),
-                },
+                rent_structure: RentStructure::new(
+                    info.protocol_parameters.rent_structure().byte_cost(),
+                    info.protocol_parameters.rent_structure().byte_factor_key(),
+                    info.protocol_parameters.rent_structure().byte_factor_data(),
+                ),
                 token_supply: info.protocol_parameters.token_supply().to_string(),
             },
             local_pow: info.local_pow,

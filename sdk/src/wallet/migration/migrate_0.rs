@@ -11,6 +11,25 @@ use crate::wallet::Error;
 
 pub struct Migrate;
 
+fn rename_keys(json: &mut serde_json::Value) {
+    match json {
+        serde_json::Value::Array(a) => a.iter_mut().for_each(rename_keys),
+        serde_json::Value::Object(o) => {
+            let mut replace = serde_json::Map::with_capacity(o.len());
+            o.retain(|k, v| {
+                rename_keys(v);
+                replace.insert(
+                    heck::ToLowerCamelCase::to_lower_camel_case(k.as_str()),
+                    std::mem::replace(v, serde_json::Value::Null),
+                );
+                true
+            });
+            *o = replace;
+        }
+        _ => (),
+    }
+}
+
 fn migrate_native_token(output: &mut serde_json::Value) {
     let native_tokens = output["native_tokens"]["inner"].as_array_mut().unwrap();
 
@@ -81,6 +100,18 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
     Ok(())
 }
 
+fn migrate_client_options(client_options: &mut serde_json::Value) -> Result<()> {
+    let protocol_parameters = &mut client_options["protocolParameters"];
+
+    ConvertHrp::check(&mut protocol_parameters["bech32_hrp"])?;
+
+    // TODO this is temporary to merge https://github.com/iotaledger/iota-sdk/pull/570.
+    // We actually need to migrate the whole protocol_parameters, including this.
+    rename_keys(&mut protocol_parameters["rent_structure"]);
+
+    Ok(())
+}
+
 #[async_trait]
 impl MigrationData for Migrate {
     const ID: usize = 0;
@@ -112,7 +143,8 @@ impl Migration<crate::wallet::storage::Storage> for Migrate {
         }
 
         if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
-            ConvertHrp::check(&mut wallet["client_options"]["protocolParameters"]["bech32_hrp"])?;
+            migrate_client_options(&mut wallet["client_options"])?;
+
             storage.set(WALLET_INDEXATION_KEY, &wallet).await?;
         }
         Ok(())
@@ -135,7 +167,8 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
             storage.set(ACCOUNTS_KEY, &accounts).await?;
         }
         if let Some(mut client_options) = storage.get::<serde_json::Value>(CLIENT_OPTIONS_KEY).await? {
-            ConvertHrp::check(&mut client_options["protocolParameters"]["bech32_hrp"])?;
+            migrate_client_options(&mut client_options)?;
+
             storage.set(CLIENT_OPTIONS_KEY, &client_options).await?;
         }
         storage.delete("backup_schema_version").await.ok();

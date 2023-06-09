@@ -35,7 +35,7 @@ pub fn destroy_wallet(wallet: &Wallet) -> PyResult<()> {
 #[pyfunction]
 pub fn create_wallet(options: String) -> Result<Wallet> {
     let wallet_options = serde_json::from_str::<WalletOptions>(&options)?;
-    let wallet = crate::block_on(async { wallet_options.build_manager().await })?;
+    let wallet = crate::block_on(async { wallet_options.build().await })?;
 
     Ok(Wallet {
         wallet: Arc::new(RwLock::new(Some(wallet))),
