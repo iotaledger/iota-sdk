@@ -12,7 +12,6 @@ use crate::{
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
             AliasId, AliasOutputBuilder, Output,
         },
-        Error,
     },
     wallet::account::{types::Transaction, Account, OutputData, TransactionOptions},
 };
@@ -25,52 +24,12 @@ pub struct CreateAliasParams {
     /// address of the account
     pub address: Option<Bech32Address>,
     /// Immutable alias metadata
+    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     pub immutable_metadata: Option<Vec<u8>>,
     /// Alias metadata
     pub metadata: Option<Vec<u8>>,
     /// Alias state metadata
     pub state_metadata: Option<Vec<u8>>,
-}
-
-/// Dto for aliasOptions
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct CreateAliasParamsDto {
-    /// Bech32 encoded address which will control the alias. Default will use the first
-    /// address of the account
-    pub address: Option<Bech32Address>,
-    /// Immutable alias metadata, hex encoded bytes
-    pub immutable_metadata: Option<String>,
-    /// Alias metadata, hex encoded bytes
-    pub metadata: Option<String>,
-    /// Alias state metadata
-    pub state_metadata: Option<String>,
-}
-
-impl TryFrom<CreateAliasParamsDto> for CreateAliasParams {
-    type Error = crate::wallet::Error;
-
-    fn try_from(value: CreateAliasParamsDto) -> crate::wallet::Result<Self> {
-        Ok(Self {
-            address: value.address,
-            immutable_metadata: match value.immutable_metadata {
-                Some(metadata) => {
-                    Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("immutable_metadata"))?)
-                }
-                None => None,
-            },
-            metadata: match value.metadata {
-                Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("metadata"))?),
-                None => None,
-            },
-            state_metadata: match value.state_metadata {
-                Some(metadata) => {
-                    Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("state_metadata"))?)
-                }
-                None => None,
-            },
-        })
-    }
 }
 
 impl Account {

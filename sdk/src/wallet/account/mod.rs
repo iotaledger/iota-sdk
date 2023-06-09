@@ -38,7 +38,7 @@ pub use self::{
         },
         transaction::{
             high_level::{
-                create_alias::{CreateAliasParams, CreateAliasParamsDto},
+                create_alias::CreateAliasParams,
                 minting::{
                     mint_native_token::{
                         MintNativeTokenParams, MintNativeTokenParamsDto, MintTokenTransactionDto,
