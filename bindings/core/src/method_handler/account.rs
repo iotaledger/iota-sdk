@@ -16,8 +16,7 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{BalanceDto, TransactionDto},
-            Account, CreateAliasParams, OutputDataDto, OutputParams, PreparedMintTokenTransactionDto,
-            TransactionOptions,
+            Account, OutputDataDto, OutputParams, PreparedMintTokenTransactionDto, TransactionOptions,
         },
         MintNativeTokenParams, MintNftParams,
     },
