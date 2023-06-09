@@ -137,6 +137,83 @@ async fn check_existing_db_1() -> Result<()> {
     tear_down(storage_path)
 }
 
+// Db created with wallet.rs commit b5132eb545cd0a2043640677bca335efee4029b8
+#[cfg(all(feature = "stronghold", feature = "rocksdb"))]
+#[tokio::test]
+async fn check_existing_db_2() -> Result<()> {
+    let storage_path = "check_existing_2_db_test";
+    setup(storage_path)?;
+    // Copy db so the original doesn't get modified
+    copy_folder("./tests/wallet/fixtures/check_existing_2_db_test", storage_path).unwrap();
+
+    let wallet = Wallet::builder().with_storage_path(storage_path).finish().await?;
+
+    // Migrate old snapshots.
+    let _ = StrongholdAdapter::migrate_snapshot_v2_to_v3(
+        "check_existing_2_db_test/walletstronghold",
+        "STRONGHOLD_PASSWORD".to_owned().into(),
+        "wallet.rs",
+        100,
+        None,
+        None,
+    );
+
+    // Test if setting stronghold password still works
+    wallet.set_stronghold_password("STRONGHOLD_PASSWORD".to_owned()).await?;
+
+    assert_eq!(wallet.get_accounts().await?.len(), 2);
+
+    let client_options = wallet.client_options().await;
+    assert_eq!(client_options.node_manager_builder.nodes.len(), 1);
+
+    let account = wallet.get_account("Alice").await?;
+
+    let addresses = account.addresses().await?;
+    // One public address
+    assert_eq!(addresses.len(), 1);
+    // Wallet was created with mnemonic: "memory waste latin swing spy must tail leaf eyebrow meat any river resist sort
+    // paper bacon aware edit tragic shop mirror ramp foster blue"
+    assert_eq!(
+        addresses[0].address().to_string(),
+        "tst1qqpaynvgh3d3q30zjzjz27g95pzsevw2m5pk75rq32vm7x8ap7hpy2pdy9y"
+    );
+    assert!(!addresses[0].internal());
+
+    let transactions = account.transactions().await;
+    assert_eq!(transactions.len(), 5);
+
+    use std::str::FromStr;
+    let tx = account
+        .get_transaction(&iota_sdk::types::block::payload::transaction::TransactionId::from_str(
+            "0x09bb7e0a77f944a4625428d2cdc7a637f5bb5d9a877c9c0b116c909ab4a6795d",
+        )?)
+        .await
+        .expect("missing tx");
+
+    let iota_sdk::types::block::payload::transaction::TransactionEssence::Regular(essence) = tx.payload.essence();
+    if let iota_sdk::types::block::payload::Payload::TaggedData(tagged_data_payload) = essence.payload().unwrap() {
+        assert_eq!(tagged_data_payload.tag(), "Stardust".as_bytes());
+        assert_eq!(tagged_data_payload.data(), "Stardust".as_bytes());
+    } else {
+        panic!("expected tagged data payload")
+    }
+    assert_eq!(
+        tx.inclusion_state,
+        iota_sdk::wallet::account::types::InclusionState::Pending
+    );
+
+    let pending_transactions = account.pending_transactions().await;
+    assert_eq!(pending_transactions.len(), 1);
+
+    let incoming_transactions = account.incoming_transactions().await;
+    assert_eq!(incoming_transactions.len(), 0);
+
+    let unspent_outputs = account.unspent_outputs(None).await?;
+    assert_eq!(unspent_outputs.len(), 4);
+
+    tear_down(storage_path)
+}
+
 fn copy_folder(src: impl AsRef<Path>, dest: impl AsRef<Path>) -> io::Result<()> {
     fs::create_dir_all(&dest)?;
     for entry in fs::read_dir(src)? {

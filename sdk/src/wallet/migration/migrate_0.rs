@@ -93,8 +93,10 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
         }
     }
 
-    for (_key, foundry) in account["nativeTokenFoundries"].as_object_mut().unwrap() {
-        migrate_native_token(foundry);
+    if let Some(native_token_foundries) = account.get_mut("nativeTokenFoundries") {
+        for (_key, foundry) in native_token_foundries.as_object_mut().unwrap() {
+            migrate_native_token(foundry);
+        }
     }
 
     Ok(())
