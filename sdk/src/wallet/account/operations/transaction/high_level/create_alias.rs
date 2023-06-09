@@ -27,8 +27,10 @@ pub struct CreateAliasParams {
     #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     pub immutable_metadata: Option<Vec<u8>>,
     /// Alias metadata
+    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     pub metadata: Option<Vec<u8>>,
     /// Alias state metadata
+    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     pub state_metadata: Option<Vec<u8>>,
 }
 
