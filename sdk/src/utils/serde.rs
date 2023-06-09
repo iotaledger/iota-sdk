@@ -26,7 +26,7 @@ pub mod string {
 }
 
 pub mod option_prefix_hex_vec {
-    use alloc::vec::Vec;
+    use alloc::{string::String, vec::Vec};
 
     use serde::{de, Deserialize, Deserializer, Serializer};
 
