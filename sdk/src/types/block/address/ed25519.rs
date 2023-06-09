@@ -76,10 +76,10 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&Ed25519AddressDto> for Ed25519Address {
+    impl TryFrom<Ed25519AddressDto> for Ed25519Address {
         type Error = Error;
 
-        fn try_from(value: &Ed25519AddressDto) -> Result<Self, Self::Error> {
+        fn try_from(value: Ed25519AddressDto) -> Result<Self, Self::Error> {
             value
                 .pub_key_hash
                 .parse::<Self>()

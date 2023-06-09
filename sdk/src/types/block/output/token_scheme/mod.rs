@@ -58,10 +58,10 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&TokenSchemeDto> for TokenScheme {
+    impl TryFrom<TokenSchemeDto> for TokenScheme {
         type Error = Error;
 
-        fn try_from(value: &TokenSchemeDto) -> Result<Self, Self::Error> {
+        fn try_from(value: TokenSchemeDto) -> Result<Self, Self::Error> {
             Ok(match value {
                 TokenSchemeDto::Simple(v) => Self::Simple(v.try_into()?),
             })

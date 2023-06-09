@@ -34,7 +34,7 @@ impl WalletMethodHandler {
         let wallet_options = serde_json::from_str::<WalletOptions>(&options)?;
 
         let wallet = crate::RUNTIME
-            .block_on(async move { wallet_options.build_manager().await })
+            .block_on(async move { wallet_options.build().await })
             .expect("error initializing wallet");
 
         Ok(Self { channel, wallet })

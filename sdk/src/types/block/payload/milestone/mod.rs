@@ -217,7 +217,7 @@ pub mod dto {
     impl MilestonePayload {
         // TODO: find a solution to factorize.
         pub fn try_from_dto(
-            value: &MilestonePayloadDto,
+            value: MilestonePayloadDto,
             protocol_parameters: &ProtocolParameters,
         ) -> Result<Self, Error> {
             let essence = {
@@ -227,7 +227,7 @@ pub mod dto {
                     .map_err(|_| Error::InvalidField("previousMilestoneId"))?;
                 let parent_ids = value
                     .parents
-                    .iter()
+                    .into_iter()
                     .map(|block_id| block_id.parse::<BlockId>().map_err(|_| Error::InvalidField("parents")))
                     .collect::<Result<_, _>>()?;
 
@@ -238,7 +238,7 @@ pub mod dto {
                 let options = MilestoneOptions::try_from(
                     value
                         .options
-                        .iter()
+                        .into_iter()
                         .map(|o| MilestoneOption::try_from_dto(o, protocol_parameters.token_supply()))
                         .collect::<Result<Vec<_>, _>>()?,
                 )?;
@@ -263,14 +263,14 @@ pub mod dto {
 
             let signatures = value
                 .signatures
-                .iter()
+                .into_iter()
                 .map(|v| v.try_into().map_err(|_| Error::InvalidField("signatures")))
                 .collect::<Result<Vec<_>, _>>()?;
 
             Self::new(essence, signatures)
         }
 
-        pub fn try_from_dto_unverified(value: &MilestonePayloadDto) -> Result<Self, Error> {
+        pub fn try_from_dto_unverified(value: MilestonePayloadDto) -> Result<Self, Error> {
             let essence = {
                 let index = value.index;
                 let timestamp = value.timestamp;
@@ -280,7 +280,7 @@ pub mod dto {
 
                 let parent_ids = value
                     .parents
-                    .iter()
+                    .into_iter()
                     .map(|block_id| block_id.parse::<BlockId>().map_err(|_| Error::InvalidField("parents")))
                     .collect::<Result<_, _>>()?;
 
@@ -291,7 +291,7 @@ pub mod dto {
                 let options = MilestoneOptions::try_from(
                     value
                         .options
-                        .iter()
+                        .into_iter()
                         .map(MilestoneOption::try_from_dto_unverified)
                         .collect::<Result<Vec<_>, _>>()?,
                 )?;
@@ -315,7 +315,7 @@ pub mod dto {
             };
 
             let mut signatures = Vec::new();
-            for v in &value.signatures {
+            for v in value.signatures {
                 signatures.push(v.try_into().map_err(|_| Error::InvalidField("signatures"))?)
             }
 

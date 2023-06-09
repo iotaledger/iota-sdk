@@ -14,7 +14,7 @@ use crypto::{
         secp256k1_ecdsa::{self, EvmAddress},
     },
 };
-use zeroize::Zeroize;
+use zeroize::Zeroizing;
 
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
@@ -119,16 +119,15 @@ impl MnemonicSecretManager {
     /// Create a new [`MnemonicSecretManager`] from a BIP-39 mnemonic in English.
     ///
     /// For more information, see <https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki>.
-    pub fn try_from_mnemonic(mnemonic: &str) -> Result<Self, Error> {
-        Ok(Self(Client::mnemonic_to_seed(mnemonic)?))
+    pub fn try_from_mnemonic(mnemonic: impl Into<Zeroizing<String>>) -> Result<Self, Error> {
+        Ok(Self(Client::mnemonic_to_seed(mnemonic.into())?))
     }
 
     /// Create a new [`MnemonicSecretManager`] from a hex-encoded raw seed string.
-    pub fn try_from_hex_seed(mut hex: String) -> Result<Self, Error> {
-        let mut bytes: Vec<u8> = prefix_hex::decode(hex.as_str())?;
-        let seed = Seed::from_bytes(&bytes);
-        hex.zeroize();
-        bytes.zeroize();
+    pub fn try_from_hex_seed(hex: impl Into<Zeroizing<String>>) -> Result<Self, Error> {
+        let hex = hex.into();
+        let bytes = Zeroizing::new(prefix_hex::decode::<Vec<u8>>(hex.as_str())?);
+        let seed = Seed::from_bytes(bytes.as_ref());
         Ok(Self(seed))
     }
 }
@@ -143,7 +142,7 @@ mod tests {
         use crate::client::constants::IOTA_COIN_TYPE;
 
         let mnemonic = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally";
-        let secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic).unwrap();
+        let secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic.to_owned()).unwrap();
 
         let addresses = secret_manager
             .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None)

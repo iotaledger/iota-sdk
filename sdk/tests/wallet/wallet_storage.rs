@@ -14,6 +14,8 @@ use crate::wallet::common::{setup, tear_down};
 #[cfg(all(feature = "stronghold", feature = "rocksdb"))]
 #[tokio::test]
 async fn check_existing_db() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "check_existing_db_test";
     setup(storage_path)?;
     // Copy db so the original doesn't get modified

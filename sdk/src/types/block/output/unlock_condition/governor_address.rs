@@ -52,13 +52,12 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&GovernorAddressUnlockConditionDto> for GovernorAddressUnlockCondition {
+    impl TryFrom<GovernorAddressUnlockConditionDto> for GovernorAddressUnlockCondition {
         type Error = Error;
 
-        fn try_from(value: &GovernorAddressUnlockConditionDto) -> Result<Self, Error> {
+        fn try_from(value: GovernorAddressUnlockConditionDto) -> Result<Self, Error> {
             Ok(Self::new(
-                Address::try_from(&value.address)
-                    .map_err(|_e| Error::InvalidField("governorAddressUnlockCondition"))?,
+                Address::try_from(value.address).map_err(|_e| Error::InvalidField("governorAddressUnlockCondition"))?,
             ))
         }
     }
