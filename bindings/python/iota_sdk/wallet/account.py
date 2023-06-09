@@ -235,7 +235,7 @@ class Account:
         prepared = self._call_account_method(
             'prepareDecreaseNativeTokenSupply', {
                 'tokenId': token_id,
-                'meltAmount': melt_amount,
+                'meltAmount': hex(melt_amount),
                 'options': options
             }
         )
@@ -247,7 +247,7 @@ class Account:
         prepared = self._call_account_method(
             'prepareIncreaseNativeTokenSupply', {
                 'tokenId': token_id,
-                'mintAmount': mint_amount,
+                'mintAmount': hex(mint_amount),
                 'options': options
             }
         )
