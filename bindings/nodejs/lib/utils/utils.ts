@@ -185,7 +185,7 @@ export class Utils {
     /**
      * Compute the hash of a transaction essence.
      */
-    static hashTransactionEssence(essence: TransactionEssence): string {
+    static hashTransactionEssence(essence: TransactionEssence): HexEncodedString {
         return callUtilsMethod({
             name: 'hashTransactionEssence',
             data: {
