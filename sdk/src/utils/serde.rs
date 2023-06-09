@@ -26,8 +26,9 @@ pub mod string {
 }
 
 pub mod option_prefix_hex_vec {
+    use alloc::vec::Vec;
 
-    use serde::{de, Deserializer, Serializer};
+    use serde::{de, Deserialize, Deserializer, Serializer};
 
     pub fn serialize<S>(value: &Option<Vec<u8>>, serializer: S) -> Result<S::Ok, S::Error>
     where
