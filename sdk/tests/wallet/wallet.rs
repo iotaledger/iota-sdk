@@ -216,6 +216,8 @@ async fn wallet_address_generation() -> Result<()> {
 
     #[cfg(feature = "stronghold")]
     {
+        iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
         let secret_manager = StrongholdSecretManager::builder()
             .password("some_hopefully_secure_password".to_owned())
             .build("test-storage/wallet_address_generation/test.stronghold")?;

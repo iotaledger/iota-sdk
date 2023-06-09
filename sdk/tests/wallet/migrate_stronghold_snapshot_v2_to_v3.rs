@@ -23,6 +23,8 @@ const PBKDF_ITER: u32 = 100;
 #[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn stronghold_snapshot_v2_v3_migration() {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/stronghold_snapshot_v2_v3_migration";
     setup(storage_path).unwrap();
 
@@ -118,6 +120,8 @@ async fn stronghold_snapshot_v2_v3_migration() {
 #[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn stronghold_snapshot_v2_v3_migration_same_path() {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     std::fs::copy(
         "./tests/wallet/fixtures/v2.stronghold",
         "./tests/wallet/fixtures/v2-copy.stronghold",
@@ -154,6 +158,8 @@ async fn stronghold_snapshot_v2_v3_migration_same_path() {
 #[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn stronghold_snapshot_v2_v3_migration_with_backup() {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let error = StrongholdSecretManager::builder()
         .password("current_password".to_owned())
         .build("./tests/wallet/fixtures/v2_with_backup.stronghold");

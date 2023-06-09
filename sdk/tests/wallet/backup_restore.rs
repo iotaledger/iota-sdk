@@ -22,6 +22,8 @@ use crate::wallet::common::{setup, tear_down, NODE_LOCAL, NODE_OTHER};
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore";
     setup(storage_path)?;
 
@@ -115,6 +117,8 @@ async fn backup_and_restore() -> Result<()> {
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold and MnemonicSecretManager
 async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore_mnemonic_secret_manager";
     setup(storage_path)?;
 
@@ -196,6 +200,8 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore_different_coin_type() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore_different_coin_type";
     setup(storage_path)?;
 
@@ -279,6 +285,8 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore_same_coin_type() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore_same_coin_type";
     setup(storage_path)?;
 
@@ -360,6 +368,8 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore_different_coin_type_dont_ignore";
     setup(storage_path)?;
 
@@ -446,6 +456,8 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
 #[tokio::test]
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore_bech32_hrp_mismatch";
     setup(storage_path)?;
 
