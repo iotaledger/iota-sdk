@@ -3,6 +3,7 @@
 
 //! In this example we will build NFT outputs with all possible features.
 //!
+//! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
 //! cargo run --release --all-features --example output_features
 //! ```

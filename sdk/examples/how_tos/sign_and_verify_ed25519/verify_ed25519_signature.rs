@@ -3,7 +3,6 @@
 
 //! In this example we will verify an Ed25519 signature.
 //!
-//! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
 //! cargo run --release --all-features --example verify_ed25519_signature
 //! ```

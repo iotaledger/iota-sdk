@@ -3,6 +3,7 @@
 
 //! In this example we will list all outputs of an account.
 //!
+//! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
 //! cargo run --release --all-features --example list_outputs
 //! ```

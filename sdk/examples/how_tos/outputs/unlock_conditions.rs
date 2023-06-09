@@ -3,6 +3,7 @@
 
 //! In this example we will build outputs with all possible unlock conditions.
 //!
+//! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
 //! cargo run --release --all-features --example output_unlock_conditions
 //! ```
