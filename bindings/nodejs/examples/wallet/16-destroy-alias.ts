@@ -14,10 +14,10 @@ import { getUnlockedManager } from './account-manager';
 async function run() {
     try {
         // Create the wallet
-        const manager = await getUnlockedManager();
+        const wallet = await getUnlockedWallet();
 
         // Get the account we generated with `01-create-wallet`
-        const account = await manager.getAccount('Alice');
+        const account = await wallet.getAccount('Alice');
 
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
