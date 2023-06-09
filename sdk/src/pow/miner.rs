@@ -25,8 +25,6 @@ use crypto::{
 
 use crate::pow::{score::count_trailing_zeros, LN_3};
 
-const DEFAULT_NUM_WORKERS: usize = 1;
-
 /// A type to cancel a [`Miner`] to abort operations.
 #[derive(Default, Clone)]
 pub struct MinerCancel(Arc<AtomicBool>);
@@ -82,7 +80,7 @@ impl MinerBuilder {
     /// Builds the [`Miner`].
     pub fn finish(self) -> Miner {
         Miner {
-            num_workers: self.num_workers.unwrap_or(DEFAULT_NUM_WORKERS),
+            num_workers: self.num_workers.unwrap_or(num_cpus::get()),
             cancel: self.cancel.unwrap_or_else(MinerCancel::new),
         }
     }
