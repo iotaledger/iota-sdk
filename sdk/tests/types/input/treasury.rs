@@ -101,12 +101,12 @@ fn dto_roundtrip() {
     let treasury_input = TreasuryInput::from_str(MILESTONE_ID).unwrap();
     let treasury_dto = TreasuryInputDto::from(&treasury_input);
 
-    assert_eq!(TreasuryInput::try_from(&treasury_dto).unwrap(), treasury_input);
+    assert_eq!(TreasuryInput::try_from(treasury_dto).unwrap(), treasury_input);
 
     let input = Input::from(treasury_input);
     let dto = InputDto::from(&input);
 
-    assert_eq!(Input::try_from(&dto).unwrap(), input);
+    assert_eq!(Input::try_from(dto).unwrap(), input);
 }
 
 #[test]
@@ -117,7 +117,7 @@ fn dto_invalid() {
     };
 
     assert!(matches!(
-        TreasuryInput::try_from(&dto),
+        TreasuryInput::try_from(dto),
         Err(Error::InvalidField("milestoneId"))
     ));
 }

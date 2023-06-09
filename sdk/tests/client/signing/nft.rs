@@ -36,7 +36,7 @@ use crate::client::{
 
 #[tokio::test]
 async fn nft_reference_unlocks() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_ed25519_addresses(

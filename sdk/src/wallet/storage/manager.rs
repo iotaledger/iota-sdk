@@ -10,12 +10,12 @@ use tokio::sync::RwLock;
 use crate::{
     client::{
         secret::{SecretManager, SecretManagerDto},
-        storage::StorageAdapter as ClientStorageAdapter,
+        storage::StorageAdapter,
     },
     wallet::{
         account::{AccountDetails, SyncOptions},
         migration::migrate,
-        storage::{constants::*, Storage, StorageAdapter},
+        storage::{constants::*, DynStorageAdapter, Storage},
         WalletBuilder,
     },
 };
@@ -46,7 +46,7 @@ impl Default for ManagerStorage {
 
 /// Storage manager
 #[derive(Debug)]
-pub struct StorageManager {
+pub(crate) struct StorageManager {
     pub(crate) storage: Storage,
     // account indexes for accounts in the database
     account_indexes: Vec<u32>,
@@ -54,7 +54,7 @@ pub struct StorageManager {
 
 impl StorageManager {
     pub(crate) async fn new(
-        storage: impl StorageAdapter + 'static,
+        storage: impl DynStorageAdapter + 'static,
         encryption_key: impl Into<Option<[u8; 32]>> + Send,
     ) -> crate::wallet::Result<Self> {
         let storage = Storage {
@@ -84,15 +84,6 @@ impl StorageManager {
         };
 
         Ok(storage_manager)
-    }
-
-    pub fn id(&self) -> &'static str {
-        self.storage.id()
-    }
-
-    #[cfg(test)]
-    pub fn is_encrypted(&self) -> bool {
-        self.storage.encryption_key.is_some()
     }
 
     pub async fn get<T: for<'de> Deserialize<'de>>(&self, key: &str) -> crate::wallet::Result<Option<T>> {
@@ -131,7 +122,7 @@ impl StorageManager {
                 match secret_manager_dto {
                     SecretManagerDto::Mnemonic(_) => {}
                     _ => {
-                        let secret_manager = SecretManager::try_from(&secret_manager_dto)?;
+                        let secret_manager = SecretManager::try_from(secret_manager_dto)?;
                         builder.secret_manager = Some(Arc::new(RwLock::new(secret_manager)));
                     }
                 }
@@ -199,14 +190,7 @@ impl StorageManager {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{client::storage::StorageAdapterId, wallet::storage::adapter::memory::Memory};
-
-    #[tokio::test]
-    async fn id() {
-        let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert_eq!(storage_manager.id(), Memory::ID);
-        assert!(!storage_manager.is_encrypted());
-    }
+    use crate::wallet::storage::adapter::memory::Memory;
 
     #[tokio::test]
     async fn get() {

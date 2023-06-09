@@ -36,11 +36,11 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             response
         }
         UtilsMethod::BlockId { block } => {
-            let block = Block::try_from_dto_unverified(&block)?;
+            let block = Block::try_from_dto_unverified(block)?;
             Response::BlockId(block.id())
         }
         UtilsMethod::TransactionId { payload } => {
-            let payload = TransactionPayload::try_from_dto_unverified(&payload)?;
+            let payload = TransactionPayload::try_from_dto_unverified(payload)?;
             Response::TransactionId(payload.id())
         }
         UtilsMethod::ComputeAliasId { output_id } => Response::AliasId(AliasId::from(&output_id)),
@@ -51,16 +51,16 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             token_scheme_kind,
         } => Response::FoundryId(FoundryId::build(&alias_address, serial_number, token_scheme_kind)),
         UtilsMethod::HashTransactionEssence { essence } => Response::TransactionEssenceHash(prefix_hex::encode(
-            TransactionEssence::try_from_dto_unverified(&essence)?.hash(),
+            TransactionEssence::try_from_dto_unverified(essence)?.hash(),
         )),
         UtilsMethod::VerifyEd25519Signature {
             signature,
             message,
             address,
         } => {
-            let signature = Ed25519Signature::try_from(&signature)?;
+            let signature = Ed25519Signature::try_from(signature)?;
             let msg: Vec<u8> = prefix_hex::decode(message)?;
-            let address = Ed25519Address::try_from(&address)?;
+            let address = Ed25519Address::try_from(address)?;
             Response::Bool(signature.is_valid(&msg, &address).is_ok())
         }
         UtilsMethod::VerifyMnemonic { mut mnemonic } => {

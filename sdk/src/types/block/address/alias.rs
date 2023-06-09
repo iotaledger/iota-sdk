@@ -87,10 +87,10 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&AliasAddressDto> for AliasAddress {
+    impl TryFrom<AliasAddressDto> for AliasAddress {
         type Error = Error;
 
-        fn try_from(value: &AliasAddressDto) -> Result<Self, Self::Error> {
+        fn try_from(value: AliasAddressDto) -> Result<Self, Self::Error> {
             value
                 .alias_id
                 .parse::<Self>()

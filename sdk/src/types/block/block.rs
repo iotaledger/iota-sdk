@@ -287,36 +287,40 @@ pub mod dto {
     }
 
     impl Block {
-        fn _try_from_dto(value: &BlockDto) -> Result<BlockBuilder, Error> {
+        pub fn try_from_dto(value: BlockDto, protocol_parameters: &ProtocolParameters) -> Result<Self, Error> {
             let parents = Parents::from_vec(
                 value
                     .parents
-                    .iter()
+                    .into_iter()
                     .map(|m| m.parse::<BlockId>().map_err(|_| Error::InvalidField("parents")))
                     .collect::<Result<Vec<BlockId>, Error>>()?,
             )?;
 
-            let builder = BlockBuilder::new(parents)
+            let mut builder = BlockBuilder::new(parents)
                 .with_protocol_version(value.protocol_version)
                 .with_nonce(value.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?);
 
-            Ok(builder)
-        }
-
-        pub fn try_from_dto(value: &BlockDto, protocol_parameters: &ProtocolParameters) -> Result<Self, Error> {
-            let mut builder = Self::_try_from_dto(value)?;
-
-            if let Some(p) = value.payload.as_ref() {
+            if let Some(p) = value.payload {
                 builder = builder.with_payload(Payload::try_from_dto(p, protocol_parameters)?);
             }
 
             builder.finish()
         }
 
-        pub fn try_from_dto_unverified(value: &BlockDto) -> Result<Self, Error> {
-            let mut builder = Self::_try_from_dto(value)?;
+        pub fn try_from_dto_unverified(value: BlockDto) -> Result<Self, Error> {
+            let parents = Parents::from_vec(
+                value
+                    .parents
+                    .into_iter()
+                    .map(|m| m.parse::<BlockId>().map_err(|_| Error::InvalidField("parents")))
+                    .collect::<Result<Vec<BlockId>, Error>>()?,
+            )?;
 
-            if let Some(p) = value.payload.as_ref() {
+            let mut builder = BlockBuilder::new(parents)
+                .with_protocol_version(value.protocol_version)
+                .with_nonce(value.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?);
+
+            if let Some(p) = value.payload {
                 builder = builder.with_payload(Payload::try_from_dto_unverified(p)?);
             }
 

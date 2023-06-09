@@ -49,6 +49,14 @@ export interface __SignEd25519Method__ {
     };
 }
 
+export interface __SignEvmMethod__ {
+    name: 'signEvm';
+    data: {
+        message: HexEncodedString;
+        chain: IBip32Chain;
+    };
+}
+
 export interface __GetLedgerNanoStatusMethod__ {
     name: 'getLedgerNanoStatus';
 }

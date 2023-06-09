@@ -246,10 +246,10 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&AddressDto> for Address {
+    impl TryFrom<AddressDto> for Address {
         type Error = Error;
 
-        fn try_from(value: &AddressDto) -> Result<Self, Self::Error> {
+        fn try_from(value: AddressDto) -> Result<Self, Self::Error> {
             match value {
                 AddressDto::Ed25519(a) => Ok(Self::Ed25519(a.try_into()?)),
                 AddressDto::Alias(a) => Ok(Self::Alias(a.try_into()?)),

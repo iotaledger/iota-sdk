@@ -91,7 +91,7 @@ async fn read_prepared_transaction_from_file(
     file.read_to_string(&mut json).await?;
 
     Ok(PreparedTransactionData::try_from_dto(
-        &serde_json::from_str::<PreparedTransactionDataDto>(&json)?,
+        serde_json::from_str::<PreparedTransactionDataDto>(&json)?,
         protocol_parameters,
     )?)
 }

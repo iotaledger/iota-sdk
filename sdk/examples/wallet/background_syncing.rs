@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
     // Create a wallet
     let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(&var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_storage_path(&var("WALLET_DB_PATH").unwrap())

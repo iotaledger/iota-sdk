@@ -99,10 +99,10 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&ParametersMilestoneOptionDto> for ParametersMilestoneOption {
+    impl TryFrom<ParametersMilestoneOptionDto> for ParametersMilestoneOption {
         type Error = Error;
 
-        fn try_from(value: &ParametersMilestoneOptionDto) -> Result<Self, Self::Error> {
+        fn try_from(value: ParametersMilestoneOptionDto) -> Result<Self, Self::Error> {
             Self::new(
                 value.target_milestone_index.into(),
                 value.protocol_version,

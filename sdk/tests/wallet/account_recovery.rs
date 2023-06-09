@@ -66,7 +66,7 @@ async fn account_recovery_with_balance_and_empty_addresses() -> Result<()> {
         .finish()
         .await?;
 
-    let secret_manager = SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(&mnemonic)?);
+    let secret_manager = SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.clone())?);
 
     let addresses = secret_manager
         .generate_ed25519_addresses(
@@ -84,7 +84,7 @@ async fn account_recovery_with_balance_and_empty_addresses() -> Result<()> {
     // Wait for faucet transaction
     tokio::time::sleep(Duration::new(10, 0)).await;
 
-    let wallet = make_wallet(storage_path, Some(&mnemonic), None).await?;
+    let wallet = make_wallet(storage_path, Some(mnemonic), None).await?;
 
     let accounts = wallet.recover_accounts(0, 3, 2, None).await?;
 

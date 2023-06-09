@@ -185,16 +185,6 @@ class Wallet():
             }
         )
 
-    def get_node_info(self, url: str, auth):
-        """Get node info.
-        """
-        return self._call_method(
-            'getNodeInfo', {
-                'url': url,
-                'auth': auth
-            }
-        )
-
     def set_stronghold_password(self, password: str):
         """Set stronghold password.
         """
