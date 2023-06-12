@@ -27,7 +27,7 @@ async function run() {
         const account = await wallet.getAccount('Alice');
 
         // May want to ensure the account is synced before sending a transaction.
-        var balance = await account.sync();
+        let balance = await account.sync();
 
         // Get a token with sufficient balance
         // TODO: use BigNumber library
@@ -53,14 +53,14 @@ async function run() {
             }
             console.log(`Balance before sending:`, parseInt(token.available));
 
-            let transaction = await account
+            const transaction = await account
                 .prepareSendNativeTokens(outputs)
                 .then((prepared) => prepared.send());
 
             console.log(`Transaction sent: ${transaction.transactionId}`);
 
             // Wait for transaction to get included
-            let blockId = await account.retryTransactionUntilIncluded(
+            const blockId = await account.retryTransactionUntilIncluded(
                 transaction.transactionId,
             );
 
