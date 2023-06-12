@@ -7,11 +7,10 @@ Python binding to the [iota-sdk library](/README.md).
 - [Requirements](#requirements)
 - [Getting Started](#getting-started)
     - [Install the IOTA SDK](#install-the-iota-sdk)
-    - [Usage](#usage)
-        - [Client](#client)
-        - [Wallet](#wallet)
-        - [Examples](#examples)
-    - [API Reference](#api-reference)
+- [Client](#client)
+- [Wallet](#wallet)
+- [Examples](#examples)
+- [API Reference](#api-reference)
 - [Learn More](#learn-more)
 
 ## Requirements
@@ -56,11 +55,7 @@ Python binding to the [iota-sdk library](/README.md).
    deactivate
    ```
 
-### Usage
-
-#### Client
-
-After you [installed the library](#install-the-iota-sdk), you can create a `Client` instance and interface with it.
+## Client Usage
 
 ```python
 from iota_sdk import Client
@@ -73,9 +68,7 @@ node_info = client.get_info()
 print(f'{node_info}')
 ```
 
-#### Wallet
-
-After you [installed the library](#install-the-iota-sdk), you can create a `Wallet` instance and interact with it.
+## Wallet Usage
 
 ```python
 from iota_sdk import Wallet, StrongholdSecretManager, CoinType
@@ -98,7 +91,7 @@ account = wallet.create_account('Alice')
 print(account)
 ```
 
-#### Examples
+## Examples
 
 You can use the provided code [examples](examples) to acquainted with the IOTA SDK. You can use the following command to run any example:
 
@@ -112,7 +105,7 @@ python3 example/[example file]
 python3 examples/client/00_get_info.py
 ```
 
-### API Reference
+## API Reference
 
 You can generate the Python API reference with the following command from this directory:
 
