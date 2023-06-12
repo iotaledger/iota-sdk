@@ -128,9 +128,7 @@ iota-sdk = { branch = "develop" }
 To use the Client module, you simply need to create a `Client`.
 
 ```rust
-use iota_sdk::client::{
-    Client,
-};
+use iota_sdk::client::Client;
 
 let client = Client::builder()
     .with_node('https://api.testnet.shimmer.network')? // Insert your node URL here
@@ -161,7 +159,7 @@ use std::path::PathBuf;
 async fn main() -> Result<()> {
     // Setup Stronghold secret manager.
     let secret_manager = StrongholdSecretManager::builder()
-        .password("vault.stronghold") // A password to encrypt the stored data.WARNING: Never hardcode passwords in production code.
+        .password("vault.stronghold") // A password to encrypt the stored data. WARNING: Never hardcode passwords in production code.
         .build(PathBuf::from("vault.stronghold"))?; // The path to store the account snapshot.
 
     let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;// The node to connect to.
