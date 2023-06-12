@@ -84,11 +84,11 @@ When just initialised, the wallet has no account yet, use the `new` command to c
 
 #### Options
 
-| Name                           | Description                                      | Default                               | Environment Variable | Example                   |
-| ------------------------------ | ------------------------------------------------ |-------------------------------------- |--------------------- | ------------------------- |
-| `--mnemonic-file-path` (`-m`)  | Sets the path to a file containing mnemonics     | ✘                                     | ✘                    | my_mnemonic.txt           |
-| `--node-url` (`-n`)            | Sets the node to connect to                      | <https://api.testnet.shimmer.network> | `NODE_URL`           | <http://localhost:14265>  |
-| `--coin-type` (`-c`)           | Sets the coin type associated with the wallet    | 4219 (=Shimmer)                       | ✘                    | 4218(=IOTA)               |
+| Name                           | Description                                      | Default                             | Environment Variable | Example                   |
+| ------------------------------ | ------------------------------------------------ |------------------------------------ |--------------------- | ------------------------- |
+| `--mnemonic-file-path` (`-m`)  | Sets the path to a file containing mnemonics     | ✘                                   | ✘                    | my_mnemonic.txt           |
+| `--node-url` (`-n`)            | Sets the node to connect to                      | https://api.testnet.shimmer.network | `NODE_URL`           | http://localhost:14265    |
+| `--coin-type` (`-c`)           | Sets the coin type associated with the wallet    | 4219 (=Shimmer)                     | ✘                    | 4218(=IOTA)               |
 
 #### Examples
 
@@ -207,7 +207,7 @@ The new node URL is persisted to the storage and all future requests will use it
 
 | Name  | Optional  | Example                |
 | ----- | --------- | ---------------------- |
-| `url` | ✘         | <http://localhost:14265> |
+| `url` | ✘         | http://localhost:14265 |
 
 #### Example
 
