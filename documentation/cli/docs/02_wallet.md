@@ -84,11 +84,11 @@ When just initialised, the wallet has no account yet, use the `new` command to c
 
 #### Options
 
-| Name                       | Description                                            | Default                              | Environment Variable | Example                   |
-| ------------------------------ | ------------------------------------------------------ |-------------------------------------- |----------------------| ------------------------- |
-| `--mnemonic-file-path` (`-m`)  | Sets the path to a file containing mnemonics      | ✘                                    | ✘                    | my_mnemonic.txt   |
-| `--node-url` (`-n`)        | Sets the node to connect to                        | <https://api.testnet.shimmer.network> | `NODE_URL`           | <http://localhost:14265>  |
-| `--coin-type` (`-c`)       | Sets the coin type associated with the wallet      | 4219 (=Shimmer)                      | ✘                    | 4218(=IOTA)               |
+| Name                           | Description                                      | Default                               | Environment Variable | Example                   |
+| ------------------------------ | ------------------------------------------------ |-------------------------------------- |--------------------- | ------------------------- |
+| `--mnemonic-file-path` (`-m`)  | Sets the path to a file containing mnemonics     | ✘                                     | ✘                    | my_mnemonic.txt           |
+| `--node-url` (`-n`)            | Sets the node to connect to                      | <https://api.testnet.shimmer.network> | `NODE_URL`           | <http://localhost:14265>  |
+| `--coin-type` (`-c`)           | Sets the coin type associated with the wallet    | 4219 (=Shimmer)                       | ✘                    | 4218(=IOTA)               |
 
 #### Examples
 
@@ -98,11 +98,10 @@ Initialize the wallet with a randomly generated mnemonic and the default node.
 ./wallet init
 ```
 
-Initialize the wallet with a given mnemonic and the default node.
-DO NOT USE THIS MNEMONIC.
+Initialize the wallet with the default node and a file containing mnemonic.
 
 ```sh
-./wallet init --mnemonic "aunt middle impose faith ramp kid olive good practice motor grab ready group episode oven matrix silver rhythm avocado assume humble tiger shiver hurt"
+./wallet init --mnemonic my_mnemonic.txt
 ```
 
 Initialize the wallet with a randomly generated mnemonic and a given node.
