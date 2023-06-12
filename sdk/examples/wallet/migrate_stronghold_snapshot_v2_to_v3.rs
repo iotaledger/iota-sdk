@@ -1,7 +1,11 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+//! In this example we will migrate a snapshot from V2 to V3.
+//!
+//! ```sh
 //! cargo run --release --all-features --example migrate_stronghold_snapshot_v2_to_v3
+//! ```
 
 use iota_sdk::client::{
     api::GetAddressesOptions,
