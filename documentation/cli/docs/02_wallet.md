@@ -20,6 +20,7 @@ You can run `./wallet --help` to print all available CLI commands, arguments, an
 ### `./wallet`
 
 Starts the wallet without a specified account:
+
 - If the wallet has only one account, it will be used;
 - If the wallet has more than one account, a selector will be shown to decide which account to use.
 
@@ -56,6 +57,7 @@ Creates a stronghold backup file.
 #### Example
 
 Create a stronghold backup file.
+
 ```sh
 ./wallet backup backup.stronghold
 ```
@@ -67,6 +69,7 @@ Changes the stronghold password.
 #### Example
 
 Change the stronghold password.
+
 ```sh
 ./wallet change-password
 ```
@@ -81,32 +84,36 @@ When just initialised, the wallet has no account yet, use the `new` command to c
 
 #### Options
 
-| Name                 | Description                                    | Default                             | Environment Variable | Example                 |
-| -------------------- | ---------------------------------------------- |------------------------------------ |----------------------| ----------------------- |
-| `--mnemonic` (`-m`)  | Initialises a wallet from an existing mnemonic | ✘                                   | ✘                    |"aunt middle impose ..." |
-| `--node-url` (`-n`)  | Sets the node to connect to                    | https://api.testnet.shimmer.network | `NODE_URL`           | http://localhost:14265  |
-| `--coin-type` (`-c`) | Sets the coin type associated with the wallet  | 4219 (=Shimmer)                     | ✘                    | 4218(=IOTA)             |
+| Name                       | Description                                            | Default                              | Environment Variable | Example                   |
+| ------------------------------ | ------------------------------------------------------ |-------------------------------------- |----------------------| ------------------------- |
+| `--mnemonic-file-path` (`-m`)  | Sets the path to a file containing mnemonics      | ✘                                    | ✘                    | my_mnemonic.txt   |
+| `--node-url` (`-n`)        | Sets the node to connect to                        | <https://api.testnet.shimmer.network> | `NODE_URL`           | <http://localhost:14265>  |
+| `--coin-type` (`-c`)       | Sets the coin type associated with the wallet      | 4219 (=Shimmer)                      | ✘                    | 4218(=IOTA)               |
 
 #### Examples
 
 Initialize the wallet with a randomly generated mnemonic and the default node.
+
 ```sh
 ./wallet init
 ```
 
 Initialize the wallet with a given mnemonic and the default node.
 DO NOT USE THIS MNEMONIC.
+
 ```sh
 ./wallet init --mnemonic "aunt middle impose faith ramp kid olive good practice motor grab ready group episode oven matrix silver rhythm avocado assume humble tiger shiver hurt"
 ```
 
 Initialize the wallet with a randomly generated mnemonic and a given node.
+
 ```sh
 ./wallet init --node http://localhost:14265
 ```
 
 Initialize the wallet with a given coin type.
 See [SLIP-0044](https://github.com/satoshilabs/slips/blob/master/slip-0044.md) for all registered coin types.
+
 ```sh
 ./wallet init --coin-type 4219
 ```
@@ -124,11 +131,13 @@ Migrates a stronghold snapshot from v2 to v3.
 #### Example
 
 Migrate a stronghold snapshot from v2 to v3 with the default path: "./stardust-cli-wallet.stronghold".
+
 ```sh
 ./wallet migrate-stronghold-snapshot-v2-to-v3
 ```
 
 Migrate a stronghold snapshot from v2 to v3 with a custom path.
+
 ```sh
 ./wallet migrate-stronghold-snapshot-v2-to-v3 some-other-path.stronghold
 ```
@@ -140,6 +149,7 @@ Generates a new random mnemonic.
 #### Example
 
 Generate a new random mnemonic.
+
 ```sh
 ./wallet mnemonic
 ```
@@ -159,11 +169,13 @@ The wallet needs to be initialised (`init` command).
 #### Examples
 
 Create a new account with the account index as alias.
+
 ```sh
 ./wallet new
 ```
 
 Create a new account with a provided alias.
+
 ```sh
 ./wallet new main
 ```
@@ -181,6 +193,7 @@ Restores accounts from a stronghold backup file.
 #### Example
 
 Restore accounts from a stronghold backup file.
+
 ```sh
 ./wallet restore backup.stronghold
 ```
@@ -195,7 +208,7 @@ The new node URL is persisted to the storage and all future requests will use it
 
 | Name  | Optional  | Example                |
 | ----- | --------- | ---------------------- |
-| `url` | ✘         | http://localhost:14265 |
+| `url` | ✘         | <http://localhost:14265> |
 
 #### Example
 
