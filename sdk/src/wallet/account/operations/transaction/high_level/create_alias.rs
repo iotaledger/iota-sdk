@@ -17,7 +17,7 @@ use crate::{
 };
 
 /// Params `create_alias_output()`
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateAliasParams {
     /// Bech32 encoded address which will control the alias. Default will use the first
@@ -140,5 +140,35 @@ impl Account {
                 }
                 _ => None,
             })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn create_alias_params_serde() {
+        let params_none_1 = CreateAliasParams {
+            address: None,
+            immutable_metadata: None,
+            metadata: None,
+            state_metadata: None,
+        };
+        let json_none = serde_json::to_string(&params_none_1).unwrap();
+        let params_none_2 = serde_json::from_str(&json_none).unwrap();
+
+        assert_eq!(params_none_1, params_none_2);
+
+        let params_some_1 = CreateAliasParams {
+            address: None,
+            immutable_metadata: Some(b"immutable_metadata".to_vec()),
+            metadata: Some(b"metadata".to_vec()),
+            state_metadata: Some(b"state_metadata".to_vec()),
+        };
+        let json_some = serde_json::to_string(&params_some_1).unwrap();
+        let params_some_2 = serde_json::from_str(&json_some).unwrap();
+
+        assert_eq!(params_some_1, params_some_2);
     }
 }
