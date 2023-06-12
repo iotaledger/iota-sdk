@@ -7,12 +7,6 @@ Shimmer and IOTA networks running
 the [Stardust protocol](https://wiki.iota.org/shimmer/develop/explanations/what-is-stardust). It consists of two main
 modules: `client` and `wallet`.
 
-The `client` module is stateless. It aims to provide more flexibility and access to low-level functions.
-
-The `wallet` module is stateful, with a standardized interface for developers to build applications involving value
-transactions. It uses high-level functions that simplify everyday operations. It can optionally interact
-with [IOTA Stronghold](https://github.com/iotaledger/stronghold.rs/) for seed handling, storage, and state backup.
-
 ## Table of Contents
 
 - [Requirements](#requirements)
@@ -30,15 +24,17 @@ with [IOTA Stronghold](https://github.com/iotaledger/stronghold.rs/) for seed ha
 ## Features
 
 - **Client module**: The `client` module in the IOTA SDK offers low-level functions that allow you to have
-  fine-grained control over your interactions with Shimmer nodes. It provides access to the underlying API endpoints
-  and enables advanced operations such as custom message construction and direct communication with the network.
+  fine-grained control over your interactions with Shimmer nodes. The module is stateless. It provides access to the
+  underlying API endpoints and enables advanced operations such as custom message construction and direct communication
+- with the network.
 
 - **Wallet module**: The `wallet` module in the IOTA SDK provides high-level functions for managing accounts, generating
   addresses, creating transactions, and interacting with the Shimmer network. It offers a user-friendly interface for
-  developers to build applications on the Shimmer network.
+  developers to build applications on the Shimmer network. It is stateful, and it can optionally interact
+  with [IOTA Stronghold](https://github.com/iotaledger/stronghold.rs/) for seed handling, storage, and state backup.
 
-- **Python, Node.js, and WASM Bindings**: The IOTA SDK includes bindings for Python, Node.js, and WASM, which allow you to use the
-  SDK in your preferred programming language. These bindings provide seamless integration with existing Python and
+- **Python, Node.js, and WASM Bindings**: The IOTA SDK includes bindings for Python, Node.js, and WASM, which allow you
+  to use the SDK in your preferred programming language. These bindings provide seamless integration with existing Python and
   Node.js projects, enabling cross-platform compatibility and flexibility.
 
 ## Branching Structure for Development
@@ -68,7 +64,6 @@ We recommend that you update the Rust compiler to the latest stable version firs
 ```shell
 rustup update stable
 ```
-
 
 ### Dependencies
 
@@ -118,7 +113,7 @@ To start using the IOTA SDK in your Rust project, you can include the following 
 
 ```toml
 [dependencies]
-iota-sdk = { branch = "develop" }
+iota-sdk = { git = "https://github.com/iotaledger/iota-sdk" branch = "develop" }
 ```
 
 ### Usage
@@ -128,17 +123,22 @@ iota-sdk = { branch = "develop" }
 To use the Client module, you simply need to create a `Client`.
 
 ```rust
-use iota_sdk::client::Client;
+use iota_sdk::client::{
+    Client,
+};
 
-let client = Client::builder()
-    .with_node('https://api.testnet.shimmer.network')? // Insert your node URL here
-    .finish()
-    .await?;
-        
-let info = client.get_info().await?;
-println!("Node Info: {info:?}")
-
-Ok(())
+#[tokio::main]
+async fn main() -> Result<()> {
+    let client = Client::builder()
+        .with_node('https://api.testnet.shimmer.network')? // Insert your node URL here
+        .finish()
+        .await?;
+            
+    let info = client.get_info().await?;
+    println!("Node Info: {info:?}")
+    
+    Ok(())
+}
 ```
 
 #### Wallet
@@ -159,7 +159,7 @@ use std::path::PathBuf;
 async fn main() -> Result<()> {
     // Setup Stronghold secret manager.
     let secret_manager = StrongholdSecretManager::builder()
-        .password("vault.stronghold") // A password to encrypt the stored data. WARNING: Never hardcode passwords in production code.
+        .password("vault.stronghold") // A password to encrypt the stored data.WARNING: Never hardcode passwords in production code.
         .build(PathBuf::from("vault.stronghold"))?; // The path to store the account snapshot.
 
     let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;// The node to connect to.
@@ -175,7 +175,6 @@ async fn main() -> Result<()> {
     // Generate a mnemonic and store it in the Stronghold vault.
     // INFO: It is best practice to back up the mnemonic somewhere secure.
     let mnemonic = wallet.generate_mnemonic()?;
-    println!("Creating a wallet with mnemonic:\n'{mnemonic}'");
     wallet.store_mnemonic(mnemonic).await?;
 
     // Create an account.
@@ -192,11 +191,13 @@ async fn main() -> Result<()> {
 
 #### Examples
 
-You can use the provided code [examples](sdk/examples) to get acquainted with the IOTA SDK. You can use the following command to run any example:
+You can use the provided code [examples](sdk/examples) to get acquainted with the IOTA SDK. You can use the following
+command to run any example:
 
 ```bash
 cargo run --example example_name --release
 ```
+
 * Where `example_name` is the name from the [Cargo.toml](sdk/Cargo.toml) name from the example folder. For example:
 
 ```bash
@@ -220,7 +221,7 @@ The IOTA SDK Rust API Reference is in the [crate documentation](https://docs.rs/
 If you find any issues or have suggestions for improvements,
 please [open an issue](https://github.com/iotaledger/iota-sdk/issues/new/choose) on the GitHub repository. You can also
 submit [pull requests](https://github.com/iotaledger/iota-sdk/compare)
-with [bug fixes](https://github.com/iotaledger/iota-sdk/issues/new?assignees=&labels=bug+report&projects=&template=bug_report.yml&title=%5BBug%5D%3A+), 
+with [bug fixes](https://github.com/iotaledger/iota-sdk/issues/new?assignees=&labels=bug+report&projects=&template=bug_report.yml&title=%5BBug%5D%3A+),
 [new features](https://github.com/iotaledger/iota-sdk/issues/new?assignees=&labels=&projects=&template=feature_request.md),
 or documentation enhancements.
 
@@ -230,3 +231,4 @@ Before contributing, please read and adhere to the [code of conduct](/.github/CO
 
 The IOTA SDK is open-source software licensed under Apache License 2.0. For more information, please read
 the [LICENSE](/LICENSE).
+
