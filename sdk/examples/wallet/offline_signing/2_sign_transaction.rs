@@ -26,7 +26,6 @@ use tokio::{
     io::{AsyncReadExt, AsyncWriteExt, BufReader, BufWriter},
 };
 
-// TODO: .env file?
 const STRONGHOLD_SNAPSHOT_PATH: &str = "./examples/wallet/offline_signing/example.stronghold";
 const PREPARED_TRANSACTION_FILE_PATH: &str = "./examples/wallet/offline_signing/example.prepared_transaction.json";
 const SIGNED_TRANSACTION_FILE_PATH: &str = "./examples/wallet/offline_signing/example.signed_transaction.json";

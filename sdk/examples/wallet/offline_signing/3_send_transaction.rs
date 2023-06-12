@@ -23,7 +23,6 @@ use tokio::{
     io::{AsyncReadExt, BufReader},
 };
 
-// TODO: .env file?
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
 const SIGNED_TRANSACTION_FILE_PATH: &str = "./examples/wallet/offline_signing/example.signed_transaction.json";
 

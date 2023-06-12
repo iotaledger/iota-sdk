@@ -22,7 +22,6 @@ use tokio::{
     io::{AsyncWriteExt, BufWriter},
 };
 
-// TODO: .env file?
 const OFFLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-offline-walletdb";
 const STRONGHOLD_SNAPSHOT_PATH: &str = "./examples/wallet/offline_signing/example.stronghold";
 const ADDRESSES_FILE_PATH: &str = "./examples/wallet/offline_signing/example.addresses.json";
