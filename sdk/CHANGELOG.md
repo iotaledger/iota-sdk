@@ -98,6 +98,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dto type conversion to represented type now always takes owned data;
 - Rename `WalletOptions::build_manager` to `build`;
 - `PeerDto` renamed to `PeerResponse`, `ReceiptDto` to `ReceiptResponse`, `LedgerInclusionStateDto` to `LedgerInclusionState`, `HeartbeatDto` to `Heartbeat`, `MetricsDto` tp `Metrics`, `GossipDto` to `Gossip`, `RelationDto` to `Relation`;
+- Default number of workers for nonce `Miner` changed from `1` to `num_cpu::get()`;
 
 ### Removed
 
