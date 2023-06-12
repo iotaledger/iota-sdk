@@ -34,9 +34,8 @@ print("Account synced")
 print('Preparing minting transaction...')
 
 params = {
-    # 1000 hex encoded
-    "circulatingSupply": "0x3e8",
-    "maximumSupply": "0x3e8",
+    "circulatingSupply": hex(1000),
+    "maximumSupply": hex(1000),
     "foundryMetadata": "0xab",
 }
 

@@ -1,4 +1,4 @@
-from iota_sdk import Wallet, HexStr
+from iota_sdk import Wallet
 from dotenv import load_dotenv
 import os
 
@@ -24,7 +24,7 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-mint_amount = '0x10'
+mint_amount = 10
 
 # Prepare and send transaction.
 transaction = account.prepare_increase_native_token_supply(token_id, mint_amount).send()

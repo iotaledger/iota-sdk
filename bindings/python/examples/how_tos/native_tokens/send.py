@@ -26,8 +26,7 @@ outputs = [{
     "address": "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
     "nativeTokens": [(
         token["tokenId"],
-        # 10 hex encoded
-        "0xA"
+        hex(10)
     )],
 }]
 
