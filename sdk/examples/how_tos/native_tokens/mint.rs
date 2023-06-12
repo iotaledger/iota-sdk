@@ -2,30 +2,42 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will mint a native token.
-//! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --release --all-features --example mint_native_token`
+//! Make sure that `example.stronghold` and `example.walletdb` already exist by
+//! running the `create_account` example!
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example mint_native_token
+//! ```
+
+use std::env::var;
 
 use iota_sdk::{
     wallet::{MintNativeTokenParams, Result, Wallet},
     U256,
 };
 
+// The circulating supply of the native token
+const CIRCULATING_SUPPLY: u64 = 100;
+// The maximum supply of the native token
+const MAXIMUM_SUPPLY: u64 = 100;
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
-
-    // Get the account we generated with `01_create_wallet`
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
     let account = wallet.get_account("Alice").await?;
     account.sync(None).await?;
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     println!("Preparing alias output transaction...");
@@ -40,7 +52,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Block included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
 
@@ -51,26 +63,24 @@ async fn main() -> Result<()> {
 
     let params = MintNativeTokenParams {
         alias_id: None,
-        circulating_supply: U256::from(100),
-        maximum_supply: U256::from(100),
+        circulating_supply: U256::from(CIRCULATING_SUPPLY),
+        maximum_supply: U256::from(MAXIMUM_SUPPLY),
         foundry_metadata: None,
     };
 
-    let mint_txn = account.mint_native_token(params, None).await?;
-    println!("Transaction sent: {}", mint_txn.transaction.transaction_id);
+    let transaction = account.mint_native_token(params, None).await?;
+    println!("Transaction sent: {}", transaction.transaction.transaction_id);
 
     // Wait for transaction to get included
     let block_id = account
-        .retry_transaction_until_included(&mint_txn.transaction.transaction_id, None, None)
+        .retry_transaction_until_included(&transaction.transaction.transaction_id, None, None)
         .await?;
-
     println!(
         "Block included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
-
-    println!("Minted token: {}", mint_txn.token_id);
+    println!("Minted token: {}", transaction.token_id);
 
     // Ensure the account is synced after minting.
     account.sync(None).await?;

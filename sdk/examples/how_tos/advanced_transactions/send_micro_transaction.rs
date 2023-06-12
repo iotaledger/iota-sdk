@@ -2,35 +2,47 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will send an amount below the minimum storage deposit.
-//! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --release --all-features --example send_micro_transaction`
+//! Make sure that `example.stronghold` and `example.walletdb` already exist by
+//! running the `create_account` example!
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example send_micro_transaction
+//! ```
+
+use std::env::var;
 
 use iota_sdk::wallet::{account::TransactionOptions, Result, SendAmountParams, Wallet};
+
+// The base coin micro amount to send
+const SEND_MICRO_AMOUNT: u64 = 1;
+// The address to send the coins to
+const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
-
-    // Get the account we generated with `01_create_wallet`
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
     let account = wallet.get_account("Alice").await?;
+
     // May want to ensure the account is synced before sending a transaction.
     account.sync(None).await?;
 
     // Set the stronghold password
     wallet
-        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // Send a micro transaction with amount 1
-    let outputs = [SendAmountParams::new(
-        "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
-        1,
-    )?];
+    println!("Sending '{}' coin(s) to '{}'...", SEND_MICRO_AMOUNT, RECV_ADDRESS);
+
+    // Send a micro transaction
+    let outputs = [SendAmountParams::new(RECV_ADDRESS, SEND_MICRO_AMOUNT)?];
 
     let transaction = account
         .send_amount(
@@ -49,8 +61,8 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Block included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        "Transaction included: {}/block/{}",
+        var("EXPLORER_URL").unwrap(),
         block_id
     );
 

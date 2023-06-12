@@ -2,9 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will send native tokens.
-//! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --release --all-features --example send_native_tokens`
+//! Make sure that `example.stronghold` and `example.walletdb` already exist by
+//! running the `create_account` example!
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example send_native_tokens
+//! ```
+
+use std::env::var;
 
 use iota_sdk::{
     types::block::address::Bech32Address,
@@ -12,16 +19,22 @@ use iota_sdk::{
 };
 use primitive_types::U256;
 
+// The native token amount to send
+const SEND_NATIVE_TOKEN_AMOUNT: u64 = 10;
+// The address to send the tokens to
+const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
-
-    // Get the account we generated with `01_create_wallet`
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
     let account = wallet.get_account("Alice").await?;
+
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
 
@@ -29,7 +42,7 @@ async fn main() -> Result<()> {
     if let Some(token_id) = balance
         .native_tokens()
         .iter()
-        .find(|t| t.available() >= U256::from(10))
+        .find(|t| t.available() >= U256::from(SEND_NATIVE_TOKEN_AMOUNT))
         .map(|t| t.token_id())
     {
         let available_balance = balance
@@ -42,15 +55,14 @@ async fn main() -> Result<()> {
 
         // Set the stronghold password
         wallet
-            .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+            .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        let bech32_address =
-            Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?;
+        let bech32_address = RECV_ADDRESS.parse::<Bech32Address>()?;
 
         let outputs = [SendNativeTokensParams::new(
             bech32_address,
-            [(*token_id, U256::from(10))],
+            [(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))],
         )?];
 
         let transaction = account.send_native_tokens(outputs, None).await?;
@@ -62,7 +74,7 @@ async fn main() -> Result<()> {
             .await?;
         println!(
             "Block included: {}/block/{}",
-            std::env::var("EXPLORER_URL").unwrap(),
+            var("EXPLORER_URL").unwrap(),
             block_id
         );
 

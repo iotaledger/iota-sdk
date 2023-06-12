@@ -24,9 +24,7 @@ async function run() {
         });
 
         // Get the account we generated with `01_create_wallet`
-        const account = await wallet.getAccount(
-            `${process.env.ACCOUNT_ALIAS_1}`,
-        );
+        const account = await wallet.getAccount('Alice');
 
         const address = (await account.addresses())[0].address;
         console.log(address);
