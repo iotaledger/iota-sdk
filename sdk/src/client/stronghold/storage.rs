@@ -86,6 +86,7 @@ impl StorageAdapter for StrongholdAdapter {
         Ok(())
     }
 }
+
 #[cfg(test)]
 mod tests {
 
