@@ -31,6 +31,8 @@ async fn mnemonic_secret_manager_dto() -> Result<()> {
 #[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn stronghold_secret_manager_dto() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let dto = r#"{"stronghold": {"password": "some_hopefully_secure_password", "snapshotPath": "snapshot_test_dir/test.stronghold"}}"#;
     let mnemonic = String::from(
         "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast",
@@ -75,6 +77,8 @@ async fn stronghold_secret_manager_dto() -> Result<()> {
 #[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn stronghold_mnemonic_missing() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     // Cleanup of a possibly failed run
     std::fs::remove_dir_all("stronghold_mnemonic_missing").ok();
 

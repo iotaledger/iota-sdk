@@ -76,6 +76,7 @@ iota-sdk = { path = ".", default-features = false, features = [ "rand" ] }
 
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
+tokio = { version = "1.28.2", default-features = false, features = [ "macros", "rt-multi-thread", "time", "sync", "fs" ] }
 
 [features]
 default = [ "client", "wallet", "tls" ]
@@ -644,18 +645,13 @@ path = "examples/wallet/output_consolidation.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
-name = "ping"
-path = "examples/wallet/ping.rs"
-required-features = [ "wallet", "storage" ]
-
-[[example]]
-name = "pong"
-path = "examples/wallet/pong.rs"
-required-features = [ "wallet", "storage" ]
-
-[[example]]
 name = "recover_accounts"
 path = "examples/wallet/recover_accounts.rs"
+required-features = [ "wallet" ]
+
+[[example]]
+name = "spammer"
+path = "examples/wallet/spammer.rs"
 required-features = [ "wallet" ]
 
 [[example]]
@@ -667,11 +663,6 @@ required-features = [ "wallet" ]
 name = "storage"
 path = "examples/wallet/storage.rs"
 required-features = [ "wallet", "storage" ]
-
-[[example]]
-name = "threads"
-path = "examples/wallet/threads.rs"
-required-features = [ "wallet" ]
 
 [[example]]
 name = "update_alias_output"
