@@ -53,7 +53,7 @@ async function run() {
         const params: MintNativeTokenParams = {
             circulatingSupply: CIRCULATING_SUPPLY,
             maximumSupply: MAXIMUM_SUPPLY,
-            foundryMetadata: utf8ToHex('Hello, World!')
+            foundryMetadata: utf8ToHex('Hello, World!'),
         };
 
         const prepared = await account.prepareMintNativeToken(params);

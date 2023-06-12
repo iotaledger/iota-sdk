@@ -50,11 +50,7 @@ async fn main() -> Result<()> {
     let block_id = account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
-    println!(
-        "Block included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
-        block_id
-    );
+    println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
 
     account.sync(None).await?;
     println!("Account synced");
@@ -75,11 +71,7 @@ async fn main() -> Result<()> {
     let block_id = account
         .retry_transaction_until_included(&transaction.transaction.transaction_id, None, None)
         .await?;
-    println!(
-        "Block included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
-        block_id
-    );
+    println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
     println!("Minted token: {}", transaction.token_id);
 
     // Ensure the account is synced after minting.

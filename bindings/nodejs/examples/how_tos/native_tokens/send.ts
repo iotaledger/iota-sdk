@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
-    AddressUnlockCondition,
-    BasicOutputBuilderParams,
-    Ed25519Address,
     SendNativeTokensParams,
 } from '@iota/sdk';
 
