@@ -1,9 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    SendNativeTokensParams,
-} from '@iota/sdk';
+import { SendNativeTokensParams } from '@iota/sdk';
 
 import { getUnlockedWallet } from '../../wallet/common';
 
