@@ -31,7 +31,7 @@ pub fn create_wallet(options: String) -> Result<WalletMethodHandler, JsValue> {
     let wallet_method_handler = tokio::runtime::Builder::new_current_thread()
         .build()
         .unwrap()
-        .block_on(async move { wallet_options.build_manager().await })
+        .block_on(async move { wallet_options.build().await })
         .map_err(|e| e.to_string())?;
 
     Ok(WalletMethodHandler {

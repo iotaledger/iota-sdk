@@ -47,23 +47,23 @@ pub struct CreateAliasParamsDto {
     pub state_metadata: Option<String>,
 }
 
-impl TryFrom<&CreateAliasParamsDto> for CreateAliasParams {
+impl TryFrom<CreateAliasParamsDto> for CreateAliasParams {
     type Error = crate::wallet::Error;
 
-    fn try_from(value: &CreateAliasParamsDto) -> crate::wallet::Result<Self> {
+    fn try_from(value: CreateAliasParamsDto) -> crate::wallet::Result<Self> {
         Ok(Self {
             address: value.address,
-            immutable_metadata: match &value.immutable_metadata {
+            immutable_metadata: match value.immutable_metadata {
                 Some(metadata) => {
                     Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("immutable_metadata"))?)
                 }
                 None => None,
             },
-            metadata: match &value.metadata {
+            metadata: match value.metadata {
                 Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("metadata"))?),
                 None => None,
             },
-            state_metadata: match &value.state_metadata {
+            state_metadata: match value.state_metadata {
                 Some(metadata) => {
                     Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("state_metadata"))?)
                 }

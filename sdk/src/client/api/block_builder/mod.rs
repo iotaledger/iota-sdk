@@ -244,7 +244,7 @@ impl<'a> ClientBlockBuilder<'a> {
 
         if let Some(inputs) = options.inputs {
             for input in inputs {
-                self = self.with_input(UtxoInput::try_from(&input)?)?;
+                self = self.with_input(UtxoInput::try_from(input)?)?;
             }
         }
 
@@ -281,7 +281,7 @@ impl<'a> ClientBlockBuilder<'a> {
 
             self = self.with_outputs(
                 outputs
-                    .iter()
+                    .into_iter()
                     .map(|o| Ok(Output::try_from_dto(o, token_supply)?))
                     .collect::<Result<Vec<Output>>>()?,
             )?;

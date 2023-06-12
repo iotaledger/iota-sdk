@@ -99,7 +99,7 @@ fn verify_essence_unlocks(essence: &TransactionEssence, unlocks: &Unlocks) -> Re
 
 #[allow(missing_docs)]
 pub mod dto {
-    use alloc::vec::Vec;
+    use alloc::{boxed::Box, vec::Vec};
 
     use serde::{Deserialize, Serialize};
 
@@ -127,31 +127,33 @@ pub mod dto {
     }
 
     impl TransactionPayload {
-        fn _try_from_dto(
-            value: &TransactionPayloadDto,
-            transaction_essence: TransactionEssence,
-        ) -> Result<Self, Error> {
-            let mut unlocks = Vec::new();
-
-            for b in &value.unlocks {
-                unlocks.push(b.try_into()?);
-            }
-
-            Self::new(transaction_essence, Unlocks::new(unlocks)?)
-        }
-
         pub fn try_from_dto(
-            value: &TransactionPayloadDto,
+            value: TransactionPayloadDto,
             protocol_parameters: &ProtocolParameters,
         ) -> Result<Self, Error> {
-            Self::_try_from_dto(
-                value,
-                TransactionEssence::try_from_dto(&value.essence, protocol_parameters)?,
+            Self::new(
+                TransactionEssence::try_from_dto(value.essence, protocol_parameters)?,
+                Unlocks::new(
+                    value
+                        .unlocks
+                        .into_iter()
+                        .map(TryInto::try_into)
+                        .collect::<Result<Box<[_]>, _>>()?,
+                )?,
             )
         }
 
-        pub fn try_from_dto_unverified(value: &TransactionPayloadDto) -> Result<Self, Error> {
-            Self::_try_from_dto(value, TransactionEssence::try_from_dto_unverified(&value.essence)?)
+        pub fn try_from_dto_unverified(value: TransactionPayloadDto) -> Result<Self, Error> {
+            Self::new(
+                TransactionEssence::try_from_dto_unverified(value.essence)?,
+                Unlocks::new(
+                    value
+                        .unlocks
+                        .into_iter()
+                        .map(TryInto::try_into)
+                        .collect::<Result<Box<[_]>, _>>()?,
+                )?,
+            )
         }
     }
 }

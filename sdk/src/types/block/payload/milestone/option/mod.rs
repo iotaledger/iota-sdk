@@ -255,14 +255,14 @@ pub mod dto {
     }
 
     impl MilestoneOption {
-        pub fn try_from_dto(value: &MilestoneOptionDto, token_supply: u64) -> Result<Self, Error> {
+        pub fn try_from_dto(value: MilestoneOptionDto, token_supply: u64) -> Result<Self, Error> {
             Ok(match value {
                 MilestoneOptionDto::Receipt(v) => Self::Receipt(ReceiptMilestoneOption::try_from_dto(v, token_supply)?),
                 MilestoneOptionDto::Parameters(v) => Self::Parameters(v.try_into()?),
             })
         }
 
-        pub fn try_from_dto_unverified(value: &MilestoneOptionDto) -> Result<Self, Error> {
+        pub fn try_from_dto_unverified(value: MilestoneOptionDto) -> Result<Self, Error> {
             Ok(match value {
                 MilestoneOptionDto::Receipt(v) => Self::Receipt(ReceiptMilestoneOption::try_from_dto_unverified(v)?),
                 MilestoneOptionDto::Parameters(v) => Self::Parameters(v.try_into()?),

@@ -89,17 +89,17 @@ pub mod dto {
     }
 
     impl StorageDepositReturnUnlockCondition {
-        pub fn try_from_dto(value: &StorageDepositReturnUnlockConditionDto, token_supply: u64) -> Result<Self, Error> {
+        pub fn try_from_dto(value: StorageDepositReturnUnlockConditionDto, token_supply: u64) -> Result<Self, Error> {
             Self::new(
-                Address::try_from(&value.return_address)?,
+                Address::try_from(value.return_address)?,
                 value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
                 token_supply,
             )
         }
 
-        pub fn try_from_dto_unverified(value: &StorageDepositReturnUnlockConditionDto) -> Result<Self, Error> {
+        pub fn try_from_dto_unverified(value: StorageDepositReturnUnlockConditionDto) -> Result<Self, Error> {
             Ok(Self {
-                return_address: Address::try_from(&value.return_address)?,
+                return_address: Address::try_from(value.return_address)?,
                 amount: value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
             })
         }

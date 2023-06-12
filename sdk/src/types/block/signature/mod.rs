@@ -67,10 +67,10 @@ pub mod dto {
         }
     }
 
-    impl TryFrom<&SignatureDto> for Signature {
+    impl TryFrom<SignatureDto> for Signature {
         type Error = Error;
 
-        fn try_from(value: &SignatureDto) -> Result<Self, Self::Error> {
+        fn try_from(value: SignatureDto) -> Result<Self, Self::Error> {
             match value {
                 SignatureDto::Ed25519(s) => Ok(Self::Ed25519(s.try_into()?)),
             }

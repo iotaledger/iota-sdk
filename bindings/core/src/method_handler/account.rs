@@ -111,7 +111,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
         }
         AccountMethod::MinimumRequiredStorageDeposit { output } => {
-            let output = Output::try_from_dto(&output, account.client().get_token_supply().await?)?;
+            let output = Output::try_from_dto(output, account.client().get_token_supply().await?)?;
             let rent_structure = account.client().get_rent_structure().await?;
 
             let minimum_storage_deposit = output.rent_cost(&rent_structure);
@@ -129,8 +129,8 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::PrepareBurn { burn, options } => {
             let data = account
                 .prepare_burn(
-                    Burn::try_from(&burn)?,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                    Burn::try_from(burn)?,
+                    options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
@@ -145,15 +145,10 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         AccountMethod::PrepareCreateAliasOutput { params, options } => {
-            let params = params
-                .map(|options| CreateAliasParams::try_from(&options))
-                .transpose()?;
+            let params = params.map(CreateAliasParams::try_from).transpose()?;
 
             let data = account
-                .prepare_create_alias_output(
-                    params,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
+                .prepare_create_alias_output(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
@@ -166,7 +161,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .prepare_decrease_native_token_supply(
                     token_id,
                     U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                    options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
@@ -189,7 +184,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .prepare_increase_native_token_supply(
                     token_id,
                     U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                    options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
             Response::PreparedMintTokenTransaction(PreparedMintTokenTransactionDto::from(&data))
@@ -207,10 +202,10 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let data = account
                 .prepare_mint_nfts(
                     params
-                        .iter()
+                        .into_iter()
                         .map(MintNftParams::try_from)
                         .collect::<iota_sdk::wallet::Result<Vec<MintNftParams>>>()?,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                    options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
@@ -218,8 +213,8 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::PrepareMintNativeToken { params, options } => {
             let data = account
                 .prepare_mint_native_token(
-                    MintNativeTokenParams::try_from(&params)?,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                    MintNativeTokenParams::try_from(params)?,
+                    options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
             Response::PreparedMintTokenTransaction(PreparedMintTokenTransactionDto::from(&data))
@@ -230,21 +225,15 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         } => {
             let output = account
                 .prepare_output(
-                    OutputParams::try_from(options.as_ref())?,
-                    transaction_options
-                        .as_ref()
-                        .map(TransactionOptions::try_from_dto)
-                        .transpose()?,
+                    OutputParams::try_from(*options)?,
+                    transaction_options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
             Response::Output(OutputDto::from(&output))
         }
         AccountMethod::PrepareSendAmount { params, options } => {
             let data = account
-                .prepare_send_amount(
-                    params,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
+                .prepare_send_amount(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
@@ -252,7 +241,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let data = account
                 .prepare_send_native_tokens(
                     params.clone(),
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                    options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
@@ -261,7 +250,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let data = account
                 .prepare_send_nft(
                     params.clone(),
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                    options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
@@ -276,10 +265,10 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let data = account
                 .prepare_transaction(
                     outputs
-                        .iter()
+                        .into_iter()
                         .map(|o| Ok(Output::try_from_dto(o, token_supply)?))
                         .collect::<Result<Vec<Output>>>()?,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                    options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
@@ -306,10 +295,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::SendAmount { params, options } => {
             let transaction = account
-                .send_amount(
-                    params,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                )
+                .send_amount(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
@@ -318,10 +304,10 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let transaction = account
                 .send(
                     outputs
-                        .iter()
+                        .into_iter()
                         .map(|o| Ok(Output::try_from_dto(o, token_supply)?))
                         .collect::<iota_sdk::wallet::Result<Vec<Output>>>()?,
-                    options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                    options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
@@ -339,7 +325,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         } => {
             let transaction = account
                 .sign_and_submit_transaction(PreparedTransactionData::try_from_dto(
-                    &prepared_transaction_data,
+                    prepared_transaction_data,
                     &account.client().get_protocol_parameters().await?,
                 )?)
                 .await?;
@@ -350,7 +336,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         } => {
             let signed_transaction_data = account
                 .sign_transaction_essence(&PreparedTransactionData::try_from_dto(
-                    &prepared_transaction_data,
+                    prepared_transaction_data,
                     &account.client().get_protocol_parameters().await?,
                 )?)
                 .await?;
@@ -360,7 +346,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             signed_transaction_data,
         } => {
             let signed_transaction_data = SignedTransactionData::try_from_dto(
-                &signed_transaction_data,
+                signed_transaction_data,
                 &account.client().get_protocol_parameters().await?,
             )?;
             let transaction = account.submit_and_store_transaction(signed_transaction_data).await?;
