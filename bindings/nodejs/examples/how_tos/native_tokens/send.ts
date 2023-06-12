@@ -50,10 +50,15 @@ async function run() {
                 },
             ];
 
-            var availableBalance = balance.nativeTokens.find(
-                (t) => t.tokenId === tokenId,
-            )?.available;
-            console.log(`Balance before sending: ${availableBalance}`);
+            let token = balance.nativeTokens.find(
+                (nativeToken) => nativeToken.tokenId == tokenId,
+            );
+            if (token == null) {
+                throw new Error(
+                    `Couldn't find native token '${tokenId}' in the account`,
+                );
+            }
+            console.log(`Balance before sending:`, parseInt(token.available));
 
             let transaction = await account
                 .prepareSendNativeTokens(outputs)
@@ -70,10 +75,16 @@ async function run() {
                 `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
             );
 
-            availableBalance = (await account.sync()).nativeTokens.find(
-                (t) => t.tokenId === tokenId,
-            )?.available;
-            console.log(`Balance after sending: ${availableBalance}`);
+            balance = await account.sync();
+            token = balance.nativeTokens.find(
+                (nativeToken) => nativeToken.tokenId == tokenId,
+            );
+            if (token == null) {
+                throw new Error(
+                    `Couldn't find native token '${tokenId}' in the account`,
+                );
+            }
+            console.log(`Balance after sending:`, parseInt(token.available));
         }
     } catch (error) {
         console.log('Error: ', error);

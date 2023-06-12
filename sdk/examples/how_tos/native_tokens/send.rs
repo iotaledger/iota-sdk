@@ -4,7 +4,7 @@
 //! In this example we will send native tokens.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example send_native_tokens --release`
+//! `cargo run --release --all-features --example send_native_tokens`
 
 use iota_sdk::{
     types::block::address::Bech32Address,

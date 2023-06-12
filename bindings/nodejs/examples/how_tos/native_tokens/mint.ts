@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { MintNativeTokenParams } from '@iota/sdk';
+import { MintNativeTokenParams, utf8ToHex } from '@iota/sdk';
 
 import { getUnlockedWallet } from '../../wallet/common';
 
@@ -55,6 +55,7 @@ async function run() {
         const params: MintNativeTokenParams = {
             circulatingSupply: CIRCULATING_SUPPLY,
             maximumSupply: MAXIMUM_SUPPLY,
+            foundryMetadata: utf8ToHex('Hello, World!')
         };
 
         const prepared = await account.prepareMintNativeToken(params);

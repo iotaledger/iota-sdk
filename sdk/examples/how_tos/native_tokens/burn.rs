@@ -6,7 +6,7 @@
 //! output that minted it.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example burn_native_token --release`
+//! `cargo run --release --all-features --example burn_native_token`
 
 use iota_sdk::{
     types::block::output::NativeToken,

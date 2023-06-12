@@ -20,7 +20,7 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # Find native token with enough balance
 token = [native_balance for native_balance in balance['nativeTokens'] if int(native_balance['available'], 0) >= 10][0]
-print(f'Balance before sending: {token["available"]}')
+print(f'Balance before burning: {int(token["available"], 0)}')
 
 burn_amount = 1
 
@@ -33,5 +33,5 @@ blockId = account.retry_transaction_until_included(transaction['transactionId'])
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
 
 balance = account.sync()
-available_balance = [native_balance for native_balance in balance['nativeTokens'] if native_balance['tokenId'] == token["tokenId"]][0]['available']
-print(f'Balance after minting: {available_balance}')
+available_balance = int([native_balance for native_balance in balance['nativeTokens'] if native_balance['tokenId'] == token["tokenId"]][0]['available'], 0)
+print(f'Balance after burning: {available_balance}')

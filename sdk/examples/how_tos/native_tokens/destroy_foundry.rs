@@ -4,7 +4,7 @@
 //! In this example we will destroy an existing foundry output. This is only possible if its circulating supply is 0.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example destroy_foundry --release`
+//! `cargo run --release --all-features --example destroy_foundry`
 
 use iota_sdk::wallet::{Result, Wallet};
 

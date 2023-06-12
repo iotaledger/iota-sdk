@@ -39,7 +39,7 @@ async function run() {
         }
 
         // TODO Convert to int
-        console.log(`Balance before melting:`, token.available);
+        console.log(`Balance before melting:`, parseInt(token.available));
 
         // Melt some of the circulating supply
         const transaction = await account
@@ -61,8 +61,12 @@ async function run() {
         token = balance.nativeTokens.find(
             (nativeToken) => nativeToken.tokenId == tokenId,
         );
-        // TODO Convert to int
-        console.log(`Balance after melting:`, token?.available);
+        if (token == null) {
+            throw new Error(
+                `Couldn't find native token '${tokenId}' in the account`,
+            );
+        }
+        console.log(`Balance after melting:`, parseInt(token.available));
     } catch (error) {
         console.log('Error: ', error);
     }

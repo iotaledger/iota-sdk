@@ -48,7 +48,7 @@ async function run() {
             );
         }
 
-        console.log(`Balance before burning: ${token.available}`);
+        console.log(`Balance before burning: ${parseInt(token.available)}`);
 
         // Burn a native token
         const transaction = await account
@@ -72,7 +72,7 @@ async function run() {
             (nativeToken) => nativeToken.tokenId == tokenId,
         );
         if (token) {
-            console.log(`Balance after burning: ${token.available}`);
+            console.log(`Balance after burning: ${parseInt(token.available)}`);
         } else {
             console.log(`No remaining tokens`);
         }

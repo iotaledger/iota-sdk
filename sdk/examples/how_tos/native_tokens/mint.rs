@@ -4,7 +4,7 @@
 //! In this example we will mint a native token.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example mint_native_token --release`
+//! `cargo run --release --all-features --example mint_native_token`
 
 use iota_sdk::{
     wallet::{MintNativeTokenParams, Result, Wallet},

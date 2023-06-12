@@ -4,7 +4,7 @@
 //! In this example we will melt an existing native token with its foundry.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example increase_native_token_supply --release`
+//! `cargo run --release --all-features --example increase_native_token_supply`
 
 use iota_sdk::{
     types::block::output::TokenId,

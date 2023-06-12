@@ -1,4 +1,4 @@
-from iota_sdk import Wallet
+from iota_sdk import Wallet, utf8_to_hex
 from dotenv import load_dotenv
 import time
 import os
@@ -34,9 +34,9 @@ print("Account synced")
 print('Preparing minting transaction...')
 
 params = {
-    "circulatingSupply": hex(1000),
-    "maximumSupply": hex(1000),
-    "foundryMetadata": "0xab",
+    "circulatingSupply": hex(100),
+    "maximumSupply": hex(100),
+    "foundryMetadata": utf8_to_hex('Hello, World!'),
 }
 
 prepared_transaction = account.prepare_mint_native_token(params, None)
