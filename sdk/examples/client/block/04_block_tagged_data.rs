@@ -5,7 +5,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --example block_tagged_data -- [TAG] [DATA]
+//! cargo run --release --example block_tagged_data [TAG] [DATA]
 //! ```
 
 use std::env;
@@ -52,7 +52,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Block with tag and data sent: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
 

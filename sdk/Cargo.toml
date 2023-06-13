@@ -230,6 +230,23 @@ name = "transaction"
 path = "examples/client/block/transaction.rs"
 required-features = [ "client" ]
 
+# High Level examples
+
+[[example]]
+name = "address_consolidation"
+path = "examples/client/high_level/consolidation.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "inputs_from_transaction_id"
+path = "examples/client/high_level/inputs_from_transaction_id.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "search_address"
+path = "examples/client/high_level/search_address.rs"
+required-features = [ "client" ]
+
 # Node API core examples
 
 [[example]]

@@ -2,26 +2,35 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will fetch all inputs from a given transaction id.
+//! You need to provide a somewhat recent transaction id for this example to run successfully.
 //!
-//! `cargo run --example inputs_from_transaction_id --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example inputs_from_transaction_id [TRANSACTION_ID]
+//! ```
 
-use iota_sdk::client::{block::payload::transaction::TransactionId, Client, Result};
+use std::env;
+
+use iota_sdk::{
+    client::{Client, Result},
+    types::block::payload::transaction::TransactionId,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let node_url = std::env::var("NODE_URL").unwrap();
+    let node_url = env::var("NODE_URL").unwrap();
+
+    let mut args = env::args().skip(1);
 
     let client = Client::builder().with_node(&node_url)?.finish().await?;
-
-    let transaction_id =
-        "0xaf7579fb57746219561072c2cc0e4d0fbb8d493d075bd21bf25ae81a450c11ef".parse::<TransactionId>()?;
+    let transaction_id = args.next().expect("missing transaction id").parse::<TransactionId>()?;
 
     let inputs = client.inputs_from_transaction_id(&transaction_id).await?;
 
-    println!("Transaction inputs {:?}", inputs);
+    println!("Transaction inputs:\n{:#?}", inputs);
 
     Ok(())
 }

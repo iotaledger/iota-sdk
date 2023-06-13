@@ -5,7 +5,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --example transaction -- [AMOUNT] [ADDRESS]
+//! cargo run --release --example transaction [AMOUNT] [ADDRESS]
 //! ```
 
 use std::{env, time::Duration};
