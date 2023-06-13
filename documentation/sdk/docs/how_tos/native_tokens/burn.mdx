@@ -20,12 +20,12 @@ import NodejsCode from '!!raw-loader!../../../../../bindings/nodejs/examples/how
 import PythonCode from '!!raw-loader!../../../../../bindings/python/examples/how_tos/native_tokens/burn.py';
 import RustCode from '!!raw-loader!../../../../../sdk/examples/how_tos/native_tokens/burn.rs';
 
-You may want to burn some of your circulating native tokens. To do so, you will need to call the
+You may want to burn some native tokens. To do so, you will need to call the
 `Account.burn(burn, options)` function.
 
 :::warning
 
-If you burn your native tokens, you will not be able to destroy the foundry that created them. If you want to destroy
+If you burn native tokens, it will be impossible to destroy the foundry that created them and get its storage deposit amount back. If you control the foundry and want to destroy
 the foundry in the future, you should consider [melting your native tokens](decrease_supply.mdx)
 
 :::
@@ -34,7 +34,7 @@ the foundry in the future, you should consider [melting your native tokens](decr
 
 The following example will:
 
-1. Create an account manager.
+1. Create a wallet.
 2. Get Alice's account which was [created in the first guide](../accounts_and_addresses/create_account.mdx).
 3. [Get the account's balance](../accounts_and_addresses/check_balance.mdx).
 4. Burn 1 native tokens of the first ID with enough funds.

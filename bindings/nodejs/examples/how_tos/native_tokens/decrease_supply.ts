@@ -36,7 +36,6 @@ async function run() {
             );
         }
 
-        // TODO Convert to int
         console.log(`Balance before melting:`, parseInt(token.available));
 
         // Melt some of the circulating supply

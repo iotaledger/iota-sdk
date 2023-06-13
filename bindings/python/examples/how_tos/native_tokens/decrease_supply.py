@@ -26,7 +26,6 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-# TODO Doesn't work yet. Should be fixed
 melt_amount = 10
 
 # Send transaction.
