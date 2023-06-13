@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     let account = wallet.get_account("Alice").await?;
-    account.sync(None).await?;
+    let balance = account.sync(None).await?;
 
     // Set the stronghold password
     wallet
@@ -42,18 +42,21 @@ async fn main() -> Result<()> {
 
     println!("Preparing alias output transaction...");
 
-    // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs
-    let transaction = account.create_alias_output(None, None).await?;
-    println!("Transaction sent: {}", transaction.transaction_id);
+    // We can first check if we already have an alias in our account, because an alias can have many foundry outputs and therefore we can reuse an existing one
+    if let None = balance.aliases().first() {
+        // If we don't have an alias, we need to create one
+        let transaction = account.create_alias_output(None, None).await?;
+        println!("Transaction sent: {}", transaction.transaction_id);
 
-    // Wait for transaction to get included
-    let block_id = account
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
-        .await?;
-    println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
+        // Wait for transaction to get included
+        let block_id = account
+            .retry_transaction_until_included(&transaction.transaction_id, None, None)
+            .await?;
+        println!("Block included: {}/block/{}", var("EXPLORER_URL").unwrap(), block_id);
 
-    account.sync(None).await?;
-    println!("Account synced");
+        account.sync(None).await?;
+        println!("Account synced");
+    }
 
     println!("Preparing minting transaction...");
 

@@ -21,15 +21,18 @@ response = account.sync()
 
 print('Preparing alias output transaction...')
 
-transaction = account.prepare_create_alias_output(None, None).send()
-print(f'Transaction sent: {transaction["transactionId"]}')
+# We can first check if we already have an alias in our account, because an alias can have many foundry outputs and therefore we can reuse an existing one
+if len(account.aliases) == 0:
+    # If we don't have an alias, we need to create one
+    transaction = account.prepare_create_alias_output(None, None).send()
+    print(f'Transaction sent: {transaction["transactionId"]}')
 
-# Wait for transaction to get included
-blockId = account.retry_transaction_until_included(transaction['transactionId'])
-print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
+    # Wait for transaction to get included
+    blockId = account.retry_transaction_until_included(transaction['transactionId'])
+    print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
 
-account.sync()
-print("Account synced")
+    account.sync()
+    print("Account synced")
 
 print('Preparing minting transaction...')
 

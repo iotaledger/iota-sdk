@@ -27,25 +27,28 @@ async function run() {
 
         console.log('Preparing alias output transaction...');
 
-        await account.sync();
+        const balance = await account.sync();
 
-        // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs
-        let transaction = await account
-            .prepareCreateAliasOutput()
-            .then((prepared) => prepared.send());
-        console.log(`Transaction sent: ${transaction.transactionId}`);
+        // We can first check if we already have an alias in our account, because an alias can have many foundry outputs and therefore we can reuse an existing one
+        if (balance.aliases.length > 0) {
+            // If we don't have an alias, we need to create one
+            let transaction = await account
+                .prepareCreateAliasOutput()
+                .then((prepared) => prepared.send());
+            console.log(`Transaction sent: ${transaction.transactionId}`);
 
-        // Wait for transaction to get included
-        let blockId = await account.retryTransactionUntilIncluded(
-            transaction.transactionId,
-        );
+            // Wait for transaction to get included
+            let blockId = await account.retryTransactionUntilIncluded(
+                transaction.transactionId,
+            );
 
-        console.log(
-            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
-        );
+            console.log(
+                `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            );
 
-        await account.sync();
-        console.log('Account synced');
+            await account.sync();
+            console.log('Account synced');
+        }
 
         console.log('Preparing minting transaction...');
 
@@ -57,12 +60,12 @@ async function run() {
         };
 
         const prepared = await account.prepareMintNativeToken(params);
-        transaction = await prepared.send();
+        let transaction = await prepared.send();
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         // Wait for transaction to get included
-        blockId = await account.retryTransactionUntilIncluded(
+        let blockId = await account.retryTransactionUntilIncluded(
             transaction.transactionId,
         );
 
