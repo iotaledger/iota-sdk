@@ -24,3 +24,28 @@ pub mod string {
         String::deserialize(deserializer)?.parse().map_err(de::Error::custom)
     }
 }
+
+pub mod option_prefix_hex_vec {
+    use alloc::{string::String, vec::Vec};
+
+    use serde::{de, Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S>(value: &Option<Vec<u8>>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match value {
+            Some(bytes) => serializer.serialize_str(&prefix_hex::encode(bytes.as_slice())),
+            None => serializer.serialize_none(),
+        }
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<Vec<u8>>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Option::<String>::deserialize(deserializer)?
+            .map(|string| prefix_hex::decode(string).map_err(de::Error::custom))
+            .transpose()
+    }
+}

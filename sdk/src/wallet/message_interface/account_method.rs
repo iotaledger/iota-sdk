@@ -32,7 +32,7 @@ use crate::{
                 syncing::SyncOptions,
                 transaction::{
                     high_level::{
-                        create_alias::CreateAliasParamsDto,
+                        create_alias::CreateAliasParams,
                         minting::{mint_native_token::MintNativeTokenParamsDto, mint_nfts::MintNftParamsDto},
                     },
                     prepare_output::OutputParamsDto,
@@ -136,7 +136,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     CreateAliasOutput {
-        params: Option<CreateAliasParamsDto>,
+        params: Option<CreateAliasParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
