@@ -180,7 +180,7 @@ async fn main() -> Result<()> {
     // Create an account.
     let account = wallet
         .create_account()
-        .with_alias("Alice".to_string()) // A name to associate with the created account.
+        .with_alias("Alice") // A name to associate with the created account.
         .finish()
         .await?;
 

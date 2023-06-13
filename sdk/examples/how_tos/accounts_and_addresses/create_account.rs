@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Create a new account
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     println!("Generated new account: '{}'", account.alias().await);
 
