@@ -130,6 +130,42 @@ export class SecretManager {
     }
 
     /**
+     * Verifies an Ed25519 Signature with a message.
+     */
+    async verifyEd25519(
+        signature: Ed25519Signature,
+        message: HexEncodedString,
+    ): Promise<Ed25519Signature> {
+        const response = await this.methodHandler.callMethod({
+            name: 'verifyEd25519',
+            data: {
+                signature,
+                message,
+            },
+        });
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Verifies an Evm Signature with a message.
+     */
+    async verifyEvm(
+        public_key: HexEncodedString,
+        signature: HexEncodedString,
+        message: HexEncodedString,
+    ): Promise<EvmSignature> {
+        const response = await this.methodHandler.callMethod({
+            name: 'verifyEvm',
+            data: {
+                public_key,
+                signature,
+                message,
+            },
+        });
+        return JSON.parse(response).payload;
+    }
+
+    /**
      * Get the status of a Ledger Nano
      */
     async getLedgerNanoStatus(): Promise<LedgerNanoStatus> {

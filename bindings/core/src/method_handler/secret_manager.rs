@@ -7,7 +7,11 @@ use iota_sdk::{
         api::PreparedTransactionData,
         secret::{SecretManage, SecretManager},
     },
-    types::block::{payload::dto::PayloadDto, signature::dto::Ed25519SignatureDto, unlock::Unlock},
+    types::block::{
+        payload::dto::PayloadDto,
+        signature::{dto::Ed25519SignatureDto, Ed25519Signature},
+        unlock::Unlock,
+    },
 };
 use tokio::sync::RwLock;
 
@@ -71,6 +75,25 @@ pub(crate) async fn call_secret_manager_method_internal(
                 public_key: prefix_hex::encode(public_key.to_bytes()),
                 signature: prefix_hex::encode(signature.to_bytes()),
             }
+        }
+        SecretManagerMethod::VerifyEd25519Signature { signature, message } => {
+            let signature = Ed25519Signature::try_from(signature)?;
+            let message: Vec<u8> = prefix_hex::decode(message)?;
+            Response::Bool(signature.verify(&message)?)
+        }
+        SecretManagerMethod::VerifyEvmSignature {
+            public_key,
+            signature,
+            message,
+        } => {
+            use crypto::signatures::secp256k1_ecdsa;
+            use iota_sdk::types::block::Error;
+            let public_key = prefix_hex::decode(&public_key).map_err(|_| Error::InvalidField("publicKey"))?;
+            let public_key = secp256k1_ecdsa::PublicKey::try_from_bytes(&public_key).map_err(Error::from)?;
+            let signature = prefix_hex::decode(&signature).map_err(|_| Error::InvalidField("signature"))?;
+            let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature).map_err(Error::from)?;
+            let message: Vec<u8> = prefix_hex::decode(message)?;
+            Response::Bool(public_key.verify(&signature, &message))
         }
         #[cfg(feature = "stronghold")]
         SecretManagerMethod::StoreMnemonic { mnemonic } => {

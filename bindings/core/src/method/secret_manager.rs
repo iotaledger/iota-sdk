@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use derivative::Derivative;
-use iota_sdk::client::api::{GetAddressesOptions, PreparedTransactionDataDto};
+use iota_sdk::{
+    client::api::{GetAddressesOptions, PreparedTransactionDataDto},
+    types::block::signature::dto::Ed25519SignatureDto,
+};
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "stronghold")]
@@ -46,6 +49,18 @@ pub enum SecretManagerMethod {
         message: String,
         /// Chain to sign the message with
         chain: Vec<u32>,
+    },
+    /// Verify an ed25519 signature with a message.
+    VerifyEd25519Signature {
+        signature: Ed25519SignatureDto,
+        message: String,
+    },
+    /// Verify an Evm signature with a message.
+    #[serde(rename_all = "camelCase")]
+    VerifyEvmSignature {
+        public_key: String,
+        signature: String,
+        message: String,
     },
     /// Sign a transaction
     #[serde(rename_all = "camelCase")]

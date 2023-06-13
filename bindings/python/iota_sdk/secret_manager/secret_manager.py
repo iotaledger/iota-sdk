@@ -232,6 +232,24 @@ class SecretManager():
             'chain': chain,
         })
 
+    # TODO: Add the Ed25519Signature class
+    def verify_ed25519(self, signature: Ed25519Signature, message: HexStr):
+        """Signs a message with an Ed25519 private key.
+        """
+        return self._call_method('verifyEd25519', {
+            'signature': signature,
+            'message': message,
+        })
+
+    def verify_evm(self, public_key: HexStr, signature: HexStr, message: HexStr):
+        """Signs a message with an Evm private key.
+        """
+        return self._call_method('verifyEvm', {
+            'publicKey': public_key,
+            'signature': signature,
+            'message': message,
+        })
+
     def sign_transaction(self, prepared_transaction_data):
         """Sign a transaction.
         """
