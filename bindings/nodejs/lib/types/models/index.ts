@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export * from './api';
-export * from './milestoneOptions';
+export * from './milestone_options';
 export * from './info';
 
 export * from './conflict-reason';

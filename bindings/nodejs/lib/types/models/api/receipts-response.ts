@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { ReceiptMilestoneOption } from '../milestoneOptions';
+import { ReceiptMilestoneOption } from '../milestone_options';
 /**
  * Receipts response details.
  */

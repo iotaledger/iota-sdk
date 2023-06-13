@@ -37,15 +37,15 @@ class RegularTransactionEssence extends TransactionEssence {
     /**
      * The transactionessence.
      */
-    transactionessence: HexEncodedString;
+    transactionEssence: HexEncodedString;
 
     constructor(
         publicKey: HexEncodedString,
-        transactionessence: HexEncodedString,
+        transactionEssence: HexEncodedString,
     ) {
         super(TransactionEssenceType.Regular);
         this.publicKey = publicKey;
-        this.transactionessence = transactionessence;
+        this.transactionEssence = transactionEssence;
     }
 }
 

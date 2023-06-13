@@ -5,7 +5,7 @@ import { Type } from 'class-transformer';
 import {
     MilestoneOption,
     MilestoneOptionDiscriminator,
-} from '../../../models/milestoneOptions';
+} from '../../../models/milestone_options';
 import { HexEncodedString } from '../../../utils/hex-encoded-types';
 import { Ed25519Signature } from '../../signature';
 import { Payload, PayloadType } from '../payload';
