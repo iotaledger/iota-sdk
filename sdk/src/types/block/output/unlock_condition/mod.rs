@@ -586,7 +586,7 @@ pub mod dto {
     }
 
     impl UnlockCondition {
-        pub fn try_from_dto(value: &UnlockConditionDto, token_supply: u64) -> Result<Self, Error> {
+        pub fn try_from_dto(value: UnlockConditionDto, token_supply: u64) -> Result<Self, Error> {
             Ok(match value {
                 UnlockConditionDto::Address(v) => Self::Address(AddressUnlockCondition::try_from(v)?),
                 UnlockConditionDto::StorageDepositReturn(v) => {
@@ -606,7 +606,7 @@ pub mod dto {
             })
         }
 
-        pub fn try_from_dto_unverified(value: &UnlockConditionDto) -> Result<Self, Error> {
+        pub fn try_from_dto_unverified(value: UnlockConditionDto) -> Result<Self, Error> {
             Ok(match value {
                 UnlockConditionDto::Address(v) => Self::Address(AddressUnlockCondition::try_from(v)?),
                 UnlockConditionDto::StorageDepositReturn(v) => {

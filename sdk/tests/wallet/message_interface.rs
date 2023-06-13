@@ -270,6 +270,8 @@ async fn message_interface_emit_event() -> Result<()> {
 #[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn message_interface_stronghold() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/message_interface_stronghold";
     setup(storage_path)?;
     let snapshot_path = "test-storage/message_interface_stronghold/message_interface.stronghold";
@@ -360,7 +362,7 @@ async fn address_conversion_methods() -> Result<()> {
     let response = wallet_handle
         .send_message(Message::HexToBech32 {
             hex: hex_address.into(),
-            bech32_hrp: None,
+            bech32_hrp: Some(Hrp::from_str_unchecked("rms")),
         })
         .await;
 

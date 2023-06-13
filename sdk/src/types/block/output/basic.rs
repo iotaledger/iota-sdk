@@ -334,10 +334,7 @@ pub mod dto {
 
     use super::*;
     use crate::types::block::{
-        output::{
-            dto::OutputBuilderAmountDto, feature::dto::FeatureDto, native_token::dto::NativeTokenDto,
-            unlock_condition::dto::UnlockConditionDto,
-        },
+        output::{dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto},
         Error,
     };
 
@@ -351,7 +348,7 @@ pub mod dto {
         pub amount: String,
         // Native tokens held by the output.
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeTokenDto>,
+        pub native_tokens: Vec<NativeToken>,
         pub unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<FeatureDto>,
@@ -362,7 +359,7 @@ pub mod dto {
             Self {
                 kind: BasicOutput::KIND,
                 amount: value.amount().to_string(),
-                native_tokens: value.native_tokens().iter().map(Into::into).collect::<_>(),
+                native_tokens: value.native_tokens().to_vec(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
                 features: value.features().iter().map(Into::into).collect::<_>(),
             }
@@ -370,35 +367,34 @@ pub mod dto {
     }
 
     impl BasicOutput {
-        fn _try_from_dto(value: &BasicOutputDto) -> Result<BasicOutputBuilder, Error> {
+        pub fn try_from_dto(value: BasicOutputDto, token_supply: u64) -> Result<Self, Error> {
             let mut builder =
                 BasicOutputBuilder::new_with_amount(value.amount.parse().map_err(|_| Error::InvalidField("amount"))?);
 
-            for t in &value.native_tokens {
-                builder = builder.add_native_token(t.try_into()?);
-            }
+            builder = builder.with_native_tokens(value.native_tokens);
 
-            for b in &value.features {
+            for b in value.features {
                 builder = builder.add_feature(Feature::try_from(b)?);
             }
 
-            Ok(builder)
-        }
-
-        pub fn try_from_dto(value: &BasicOutputDto, token_supply: u64) -> Result<Self, Error> {
-            let mut builder = Self::_try_from_dto(value)?;
-
-            for u in &value.unlock_conditions {
+            for u in value.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto(u, token_supply)?);
             }
 
             builder.finish(token_supply)
         }
 
-        pub fn try_from_dto_unverified(value: &BasicOutputDto) -> Result<Self, Error> {
-            let mut builder = Self::_try_from_dto(value)?;
+        pub fn try_from_dto_unverified(value: BasicOutputDto) -> Result<Self, Error> {
+            let mut builder =
+                BasicOutputBuilder::new_with_amount(value.amount.parse().map_err(|_| Error::InvalidField("amount"))?);
 
-            for u in &value.unlock_conditions {
+            builder = builder.with_native_tokens(value.native_tokens);
+
+            for b in value.features {
+                builder = builder.add_feature(Feature::try_from(b)?);
+            }
+
+            for u in value.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_unverified(u)?);
             }
 
@@ -407,7 +403,7 @@ pub mod dto {
 
         pub fn try_from_dtos(
             amount: OutputBuilderAmountDto,
-            native_tokens: Option<Vec<NativeTokenDto>>,
+            native_tokens: Option<Vec<NativeToken>>,
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<FeatureDto>>,
             token_supply: u64,
@@ -422,22 +418,18 @@ pub mod dto {
             };
 
             if let Some(native_tokens) = native_tokens {
-                let native_tokens = native_tokens
-                    .iter()
-                    .map(NativeToken::try_from)
-                    .collect::<Result<Vec<NativeToken>, Error>>()?;
                 builder = builder.with_native_tokens(native_tokens);
             }
 
             let unlock_conditions = unlock_conditions
-                .iter()
+                .into_iter()
                 .map(|u| UnlockCondition::try_from_dto(u, token_supply))
                 .collect::<Result<Vec<UnlockCondition>, Error>>()?;
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(features) = features {
                 let features = features
-                    .iter()
+                    .into_iter()
                     .map(Feature::try_from)
                     .collect::<Result<Vec<Feature>, Error>>()?;
                 builder = builder.with_features(features);
@@ -527,14 +519,14 @@ mod tests {
         let protocol_parameters = protocol_parameters();
         let output = rand_basic_output(protocol_parameters.token_supply());
         let dto = OutputDto::Basic((&output).into());
-        let output_unver = Output::try_from_dto_unverified(&dto).unwrap();
+        let output_unver = Output::try_from_dto_unverified(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_basic());
-        let output_ver = Output::try_from_dto(&dto, protocol_parameters.token_supply()).unwrap();
+        let output_ver = Output::try_from_dto(dto, protocol_parameters.token_supply()).unwrap();
         assert_eq!(&output, output_ver.as_basic());
 
         let output_split = BasicOutput::try_from_dtos(
             OutputBuilderAmountDto::Amount(output.amount().to_string()),
-            Some(output.native_tokens().iter().map(Into::into).collect()),
+            Some(output.native_tokens().to_vec()),
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().iter().map(Into::into).collect()),
             protocol_parameters.token_supply(),
@@ -548,7 +540,7 @@ mod tests {
         let test_split_dto = |builder: BasicOutputBuilder| {
             let output_split = BasicOutput::try_from_dtos(
                 (&builder.amount).into(),
-                Some(builder.native_tokens.iter().map(Into::into).collect()),
+                Some(builder.native_tokens.iter().copied().collect()),
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().map(Into::into).collect()),
                 protocol_parameters.token_supply(),

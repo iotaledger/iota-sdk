@@ -19,10 +19,10 @@ pub async fn setup_client_with_node_health_ignored() -> Client {
 
 /// Create a client with `DEFAULT_DEVNET_NODE_URL` and a random mnemonic, request funds from the faucet to the first
 /// address and wait until they arrived.
-pub async fn create_client_and_secret_manager_with_funds(mnemonic: Option<&str>) -> Result<(Client, SecretManager)> {
+pub async fn create_client_and_secret_manager_with_funds(mnemonic: Option<String>) -> Result<(Client, SecretManager)> {
     let client = Client::builder().with_node(NODE_LOCAL)?.finish().await?;
 
-    let secret_manager = SecretManager::try_from_mnemonic(mnemonic.unwrap_or(&Client::generate_mnemonic().unwrap()))?;
+    let secret_manager = SecretManager::try_from_mnemonic(mnemonic.unwrap_or(Client::generate_mnemonic().unwrap()))?;
 
     let address = secret_manager
         .generate_ed25519_addresses(

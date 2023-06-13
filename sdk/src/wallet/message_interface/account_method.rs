@@ -18,10 +18,10 @@ use crate::{
     types::block::{
         address::Bech32Address,
         output::{
-            dto::{NativeTokenDto, OutputDto, TokenSchemeDto},
+            dto::{OutputDto, TokenSchemeDto},
             feature::dto::FeatureDto,
             unlock_condition::dto::UnlockConditionDto,
-            AliasId, FoundryId, NftId, OutputId, TokenId,
+            AliasId, FoundryId, NativeToken, NftId, OutputId, TokenId,
         },
         payload::transaction::TransactionId,
     },
@@ -57,7 +57,7 @@ pub enum AccountMethod {
     BuildAliasOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        native_tokens: Option<Vec<NativeTokenDto>>,
+        native_tokens: Option<Vec<NativeToken>>,
         alias_id: AliasId,
         state_index: Option<u32>,
         state_metadata: Option<Vec<u8>>,
@@ -73,7 +73,7 @@ pub enum AccountMethod {
     BuildBasicOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        native_tokens: Option<Vec<NativeTokenDto>>,
+        native_tokens: Option<Vec<NativeToken>>,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,
     },
@@ -84,7 +84,7 @@ pub enum AccountMethod {
     BuildFoundryOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        native_tokens: Option<Vec<NativeTokenDto>>,
+        native_tokens: Option<Vec<NativeToken>>,
         serial_number: u32,
         token_scheme: TokenSchemeDto,
         unlock_conditions: Vec<UnlockConditionDto>,
@@ -98,7 +98,7 @@ pub enum AccountMethod {
     BuildNftOutput {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
-        native_tokens: Option<Vec<NativeTokenDto>>,
+        native_tokens: Option<Vec<NativeToken>>,
         nft_id: NftId,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<FeatureDto>>,

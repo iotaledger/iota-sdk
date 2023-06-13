@@ -186,6 +186,8 @@ async fn account_first_address_exists() -> Result<()> {
 #[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn account_creation_stronghold() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/account_creation_stronghold";
     setup(storage_path)?;
 

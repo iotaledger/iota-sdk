@@ -97,9 +97,9 @@ pub mod dto {
     }
 
     impl TreasuryTransactionPayload {
-        fn _try_from_dto(value: &TreasuryTransactionPayloadDto, output: TreasuryOutput) -> Result<Self, Error> {
+        fn _try_from_dto(value: TreasuryTransactionPayloadDto, output: TreasuryOutput) -> Result<Self, Error> {
             Self::new(
-                if let InputDto::Treasury(ref input) = value.input {
+                if let InputDto::Treasury(input) = value.input {
                     input.try_into()?
                 } else {
                     return Err(Error::InvalidField("input"));
@@ -108,26 +108,28 @@ pub mod dto {
             )
         }
 
-        pub fn try_from_dto(value: &TreasuryTransactionPayloadDto, token_supply: u64) -> Result<Self, Error> {
-            Self::_try_from_dto(
-                value,
-                if let OutputDto::Treasury(ref output) = value.output {
-                    TreasuryOutput::try_from_dto(output, token_supply)?
+        pub fn try_from_dto(value: TreasuryTransactionPayloadDto, token_supply: u64) -> Result<Self, Error> {
+            if let OutputDto::Treasury(output) = value.output {
+                if let InputDto::Treasury(input) = value.input {
+                    Self::new(input.try_into()?, TreasuryOutput::try_from_dto(output, token_supply)?)
                 } else {
-                    return Err(Error::InvalidField("output"));
-                },
-            )
+                    Err(Error::InvalidField("input"))
+                }
+            } else {
+                Err(Error::InvalidField("output"))
+            }
         }
 
-        pub fn try_from_dto_unverified(value: &TreasuryTransactionPayloadDto) -> Result<Self, Error> {
-            Self::_try_from_dto(
-                value,
-                if let OutputDto::Treasury(ref output) = value.output {
-                    TreasuryOutput::try_from_dto_unverified(output)?
+        pub fn try_from_dto_unverified(value: TreasuryTransactionPayloadDto) -> Result<Self, Error> {
+            if let OutputDto::Treasury(output) = value.output {
+                if let InputDto::Treasury(input) = value.input {
+                    Self::new(input.try_into()?, TreasuryOutput::try_from_dto_unverified(output)?)
                 } else {
-                    return Err(Error::InvalidField("output"));
-                },
-            )
+                    Err(Error::InvalidField("input"))
+                }
+            } else {
+                Err(Error::InvalidField("output"))
+            }
         }
     }
 }

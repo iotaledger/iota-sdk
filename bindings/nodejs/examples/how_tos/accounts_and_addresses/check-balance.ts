@@ -17,9 +17,7 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount(
-            `${process.env.ACCOUNT_ALIAS_1}`,
-        );
+        const account = await wallet.getAccount('Alice');
 
         // Sync new outputs from the node.
         // eslint-disable-next-line @typescript-eslint/no-unused-vars

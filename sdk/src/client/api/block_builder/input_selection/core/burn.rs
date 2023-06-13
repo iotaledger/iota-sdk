@@ -163,26 +163,15 @@ impl From<&Burn> for BurnDto {
     }
 }
 
-impl TryFrom<&BurnDto> for Burn {
+impl TryFrom<BurnDto> for Burn {
     type Error = Error;
 
-    fn try_from(value: &BurnDto) -> Result<Self, Self::Error> {
+    fn try_from(value: BurnDto) -> Result<Self, Self::Error> {
         Ok(Self {
-            aliases: value.aliases.clone().unwrap_or_default(),
-            nfts: value.nfts.clone().unwrap_or_default(),
-            foundries: value.foundries.clone().unwrap_or_default(),
-            native_tokens: value
-                .native_tokens
-                .as_ref()
-                .map(|native_tokens| {
-                    native_tokens
-                        .iter()
-                        .map(|(token_id, amount)| U256::try_from(amount).map(|amount| (*token_id, amount)))
-                        .collect::<Result<BTreeMap<_, _>, _>>()
-                })
-                .transpose()
-                .map_err(|_| Error::InvalidField("native_tokens"))?
-                .unwrap_or_default(),
+            aliases: value.aliases.unwrap_or_default(),
+            nfts: value.nfts.unwrap_or_default(),
+            foundries: value.foundries.unwrap_or_default(),
+            native_tokens: value.native_tokens.unwrap_or_default(),
         })
     }
 }

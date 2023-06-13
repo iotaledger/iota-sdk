@@ -156,5 +156,5 @@ interface Governor {
 }
 /** Define the page size for the results */
 interface PageSize {
-    pageSize: string;
+    pageSize: number;
 }

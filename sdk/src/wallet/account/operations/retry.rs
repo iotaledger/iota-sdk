@@ -3,7 +3,7 @@
 
 use crate::{
     types::{
-        api::core::dto::LedgerInclusionStateDto,
+        api::core::response::LedgerInclusionState,
         block::{
             payload::{transaction::TransactionId, Payload},
             Block, BlockId,
@@ -89,12 +89,12 @@ impl Account {
                     let block_metadata = self.client().get_block_metadata(block_id_).await?;
                     if let Some(inclusion_state) = block_metadata.ledger_inclusion_state {
                         match inclusion_state {
-                            LedgerInclusionStateDto::Included | LedgerInclusionStateDto::NoTransaction => {
+                            LedgerInclusionState::Included | LedgerInclusionState::NoTransaction => {
                                 return Ok(*block_id_);
                             }
                             // only set it as conflicting here and don't return, because another reattached block could
                             // have the included transaction
-                            LedgerInclusionStateDto::Conflicting => conflicting = true,
+                            LedgerInclusionState::Conflicting => conflicting = true,
                         };
                     }
                     // Only reattach or promote latest attachment of the block

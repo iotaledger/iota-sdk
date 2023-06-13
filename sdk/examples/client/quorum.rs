@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
         .finish()?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     // Generate the first address
     let addresses = client

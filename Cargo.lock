@@ -1654,6 +1654,7 @@ dependencies = [
  "gloo-storage",
  "gloo-timers",
  "hashbrown 0.13.2",
+ "heck",
  "hex",
  "instant",
  "iota-crypto",
@@ -1790,7 +1791,7 @@ dependencies = [
 [[package]]
 name = "iota_stronghold"
 version = "1.1.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#7a2e9dd55fad90c320cb4fc291b4ee1fd24d499f"
+source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#9df6d19de325481771d69b47534d151e03eae623"
 dependencies = [
  "bincode",
  "hkdf",
@@ -3158,7 +3159,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stronghold-derive"
 version = "1.0.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#7a2e9dd55fad90c320cb4fc291b4ee1fd24d499f"
+source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#9df6d19de325481771d69b47534d151e03eae623"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3168,7 +3169,7 @@ dependencies = [
 [[package]]
 name = "stronghold-runtime"
 version = "1.1.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#7a2e9dd55fad90c320cb4fc291b4ee1fd24d499f"
+source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#9df6d19de325481771d69b47534d151e03eae623"
 dependencies = [
  "dirs",
  "iota-crypto",
@@ -3186,7 +3187,7 @@ dependencies = [
 [[package]]
 name = "stronghold-utils"
 version = "1.0.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#7a2e9dd55fad90c320cb4fc291b4ee1fd24d499f"
+source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#9df6d19de325481771d69b47534d151e03eae623"
 dependencies = [
  "rand",
  "stronghold-derive",
@@ -3195,7 +3196,7 @@ dependencies = [
 [[package]]
 name = "stronghold_engine"
 version = "1.1.0"
-source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#7a2e9dd55fad90c320cb4fc291b4ee1fd24d499f"
+source = "git+https://github.com/iotaledger/stronghold.rs?branch=2.0#9df6d19de325481771d69b47534d151e03eae623"
 dependencies = [
  "anyhow",
  "dirs-next",
