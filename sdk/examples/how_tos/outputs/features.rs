@@ -3,7 +3,10 @@
 
 //! In this example we will build NFT outputs with all possible features.
 //!
-//! `cargo run --release --example output_features`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example output_features
+//! ```
 
 use iota_sdk::{
     client::{Client, Result},
