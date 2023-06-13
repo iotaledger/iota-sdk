@@ -36,8 +36,7 @@ use crate::{
     wallet::{
         account::{
             operations::transaction::{
-                high_level::{create_alias::CreateAliasParams, minting::mint_native_token::MintTokenTransactionDto},
-                prepare_output::OutputParams,
+                high_level::minting::mint_native_token::MintTokenTransactionDto, prepare_output::OutputParams,
                 TransactionOptions,
             },
             types::{AccountIdentifier, BalanceDto, TransactionDto},
@@ -535,8 +534,6 @@ impl WalletMessageHandler {
             }
             AccountMethod::CreateAliasOutput { params, options } => {
                 convert_async_panics(|| async {
-                    let params = params.map(CreateAliasParams::try_from).transpose()?;
-
                     let transaction = account
                         .create_alias_output(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;

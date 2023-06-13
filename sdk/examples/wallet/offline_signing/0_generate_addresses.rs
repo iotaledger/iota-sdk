@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
     // Create a new account
     let account = wallet
         .create_account()
-        .with_alias("Alice".to_string())
+        .with_alias("Alice")
         .with_bech32_hrp(SHIMMER_BECH32_HRP)
         .finish()
         .await?;

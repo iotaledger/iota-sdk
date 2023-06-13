@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { HexEncodedString } from '@iota/types';
+import { HexEncodedString } from '../utils';
 
 enum AddressType {
     Ed25519 = 0,
