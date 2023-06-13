@@ -35,7 +35,7 @@ pub mod option_prefix_hex_vec {
         S: Serializer,
     {
         match value {
-            Some(bytes) => serializer.collect_str(&prefix_hex::encode(bytes.as_slice())),
+            Some(bytes) => serializer.serialize_str(&prefix_hex::encode(bytes.as_slice())),
             None => serializer.serialize_none(),
         }
     }
