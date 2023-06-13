@@ -3,17 +3,24 @@
 
 //! Returns all stored receipts by calling `GET /api/core/v2/receipts`.
 //!
-//! `cargo run --example node_api_core_get_receipts --release -- [NODE URL]`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example node_api_core_get_receipts [NODE URL]
+//! ```
+//!
+
+use std::env;
 
 use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // If not provided we use the default node from the `.env` file.
+    dotenvy::dotenv().ok();
+
     // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses secrets in environment variables for simplicity which should not be done in production.
-        dotenvy::dotenv().ok();
-        std::env::var("NODE_URL").unwrap()
+    let node_url = env::args().nth(1).unwrap_or_else(|| {
+        env::var("NODE_URL").unwrap()
     });
 
     // Create a client with that node.
@@ -22,7 +29,7 @@ async fn main() -> Result<()> {
     // Send the request.
     let receipts = client.get_receipts().await?;
 
-    println!("{receipts:#?}");
+    println!("Receipts:\n{receipts:#?}");
 
     Ok(())
 }

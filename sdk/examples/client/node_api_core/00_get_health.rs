@@ -3,20 +3,24 @@
 
 //! This example returns the health of the node by calling `GET /health`.
 //!
-//! `cargo run --example node_api_core_get_health --release -- [NODE URL]`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example node_api_core_get_health [NODE_URL]
+//! ```
+
+use std::env;
 
 use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses secrets in environment variables for simplicity which should not be done in production.
-        dotenvy::dotenv().ok();
-        std::env::var("NODE_URL").unwrap()
-    });
+    // If not provided we use the default node from the `.env` file.
+    dotenvy::dotenv().ok();
 
-    // Create a client with that node.
+    // Take the node URL from command line argument or use one from env as default.
+    let node_url = env::args().nth(1).unwrap_or_else(|| env::var("NODE_URL").unwrap());
+
+    // Create a client.
     let client = Client::builder()
         .with_node(&node_url)?
         .with_ignore_node_health()
@@ -26,7 +30,7 @@ async fn main() -> Result<()> {
     // Get node health.
     let health = client.get_health(&node_url).await?;
 
-    println!("Health: {health}");
+    println!("Node '{node_url}' is healthy: {health}");
 
     Ok(())
 }

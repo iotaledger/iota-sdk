@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will fetch all inputs from a given transaction id.
-//! You need to provide a somewhat recent transaction id for this example to run successfully.
+//!
+//! Make sure to provide a somewhat recent transaction id to make this example run successfully!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -26,7 +27,10 @@ async fn main() -> Result<()> {
     let mut args = env::args().skip(1);
 
     let client = Client::builder().with_node(&node_url)?.finish().await?;
-    let transaction_id = args.next().expect("missing transaction id").parse::<TransactionId>()?;
+    let transaction_id = args
+        .next()
+        .expect("missing example argument: transaction id")
+        .parse::<TransactionId>()?;
 
     let inputs = client.inputs_from_transaction_id(&transaction_id).await?;
 
