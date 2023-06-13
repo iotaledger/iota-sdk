@@ -36,8 +36,7 @@ use crate::{
     wallet::{
         account::{
             operations::transaction::{
-                high_level::minting::mint_native_token::MintTokenTransactionDto, prepare_output::OutputParams,
-                TransactionOptions,
+                high_level::minting::mint_native_token::MintTokenTransactionDto, TransactionOptions,
             },
             types::{AccountIdentifier, BalanceDto, TransactionDto},
             OutputDataDto,
@@ -735,13 +734,13 @@ impl WalletMessageHandler {
             }
             AccountMethod::GetBalance => Ok(Response::Balance(BalanceDto::from(&account.balance().await?))),
             AccountMethod::PrepareOutput {
-                params: options,
+                params,
                 transaction_options,
             } => {
                 convert_async_panics(|| async {
                     let output = account
                         .prepare_output(
-                            OutputParams::try_from(*options)?,
+                            *params,
                             transaction_options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;

@@ -18,8 +18,8 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            CreateAliasParams, FilterOptions, MintNativeTokenParamsDto, MintNftParamsDto, OutputParamsDto,
-            OutputsToClaim, SyncOptions, TransactionOptionsDto,
+            CreateAliasParams, FilterOptions, MintNativeTokenParamsDto, MintNftParamsDto, OutputParams, OutputsToClaim,
+            SyncOptions, TransactionOptionsDto,
         },
         SendAmountParams, SendNativeTokensParams, SendNftParams,
     },
@@ -206,7 +206,7 @@ pub enum AccountMethod {
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
-        params: Box<OutputParamsDto>,
+        params: Box<OutputParams>,
         transaction_options: Option<TransactionOptionsDto>,
     },
     /// Prepare send amount.
