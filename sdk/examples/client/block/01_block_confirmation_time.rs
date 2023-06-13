@@ -3,18 +3,21 @@
 
 //! This example sends a block and returns the time at which it got confirmed.
 //!
-//! `cargo run --example block_confirmation_time --release -- [NODE URL]`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example block_confirmation_time
+//! ```
+
+use std::env;
 
 use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses secrets in environment variables for simplicity which should not be done in production.
-        dotenvy::dotenv().ok();
-        std::env::var("NODE_URL").unwrap()
-    });
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
+
+    let node_url = env::var("NODE_URL").unwrap();
 
     // Create a client with that node.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
@@ -26,10 +29,10 @@ async fn main() -> Result<()> {
     println!("{block:#?}");
 
     // Try to check if the block has been confirmed.
-    let _ = client.retry_until_included(&block_id, None, None).await?;
+    client.retry_until_included(&block_id, None, None).await?;
     println!(
         "Block with no payload included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        env::var("EXPLORER_URL").unwrap(),
         block_id
     );
 

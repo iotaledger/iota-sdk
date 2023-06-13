@@ -3,7 +3,12 @@
 
 //! This example sends a block with a tagged data payload.
 //!
-//! `cargo run --example block_tagged_data --release -- [NODE URL]`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example block_tagged_data -- [TAG] [DATA]
+//! ```
+
+use std::env;
 
 use iota_sdk::{
     client::{Client, Result},
@@ -12,12 +17,14 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses secrets in environment variables for simplicity which should not be done in production.
-        dotenvy::dotenv().ok();
-        std::env::var("NODE_URL").unwrap()
-    });
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
+
+    let node_url = env::var("NODE_URL").unwrap();
+
+    let mut args = env::args().skip(1);
+    let tag = args.next().unwrap_or_else(|| "Hello".to_string());
+    let data = args.next().unwrap_or_else(|| "Tangle".to_string());
 
     // Create a client with that node.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
@@ -25,8 +32,8 @@ async fn main() -> Result<()> {
     // Create and send the block with tag and data.
     let block = client
         .block()
-        .with_tag(b"Hello".to_vec())
-        .with_data(b"Tangle".to_vec())
+        .with_tag(tag.as_bytes().to_vec())
+        .with_data(data.as_bytes().to_vec())
         .finish()
         .await?;
 

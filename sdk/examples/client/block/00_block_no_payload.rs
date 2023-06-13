@@ -3,18 +3,21 @@
 
 //! This example sends a block with no payload.
 //!
-//! `cargo run --example block_no_payload --release -- [NODE URL]`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example block_no_payload
+//! ```
+
+use std::env;
 
 use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses secrets in environment variables for simplicity which should not be done in production.
-        dotenvy::dotenv().ok();
-        std::env::var("NODE_URL").unwrap()
-    });
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
+
+    let node_url = env::var("NODE_URL").unwrap();
 
     // Create a client with that node.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
@@ -26,7 +29,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Block with no payload sent: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
 
