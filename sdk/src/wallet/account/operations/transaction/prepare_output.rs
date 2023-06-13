@@ -394,9 +394,13 @@ pub struct OutputParams {
     pub recipient_address: Bech32Address,
     #[serde(with = "crate::utils::serde::string")]
     pub amount: u64,
+    #[serde(default)]
     pub assets: Option<Assets>,
+    #[serde(default)]
     pub features: Option<Features>,
+    #[serde(default)]
     pub unlocks: Option<Unlocks>,
+    #[serde(default)]
     pub storage_deposit: Option<StorageDeposit>,
 }
 
