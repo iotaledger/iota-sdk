@@ -133,7 +133,9 @@ pub enum Response {
     MintTokenTransaction(MintTokenTransactionDto),
     /// Response for
     /// [`IsStrongholdPasswordAvailable`](crate::wallet::message_interface::Message::IsStrongholdPasswordAvailable)
-    StrongholdPasswordIsAvailable(bool),
+    /// [`VerifyEd25519Signature`](crate::wallet::message_interface::account_method::AccountMethod::VerifyEd25519Signature)
+    /// [`VerifyEvmSignature`](crate::wallet::message_interface::account_method::AccountMethod::VerifyEvmSignature)
+    Bool(bool),
     /// An error occurred.
     Error(Error),
     /// A panic occurred.
@@ -230,8 +232,8 @@ impl Debug for Response {
             Self::MintTokenTransaction(mint_transaction) => {
                 write!(f, "MintTokenTransaction({mint_transaction:?})")
             }
-            Self::StrongholdPasswordIsAvailable(is_available) => {
-                write!(f, "StrongholdPasswordIsAvailable({is_available:?})")
+            Self::Bool(b) => {
+                write!(f, "Bool({b})")
             }
             Self::Error(error) => write!(f, "Error({error:?})"),
             Self::Panic(panic_msg) => write!(f, "Panic({panic_msg:?})"),

@@ -24,6 +24,7 @@ use crate::{
             AliasId, FoundryId, NativeToken, NftId, OutputId, TokenId,
         },
         payload::transaction::TransactionId,
+        signature::dto::Ed25519SignatureDto,
     },
     wallet::{
         account::{
@@ -167,6 +168,21 @@ pub enum AccountMethod {
     /// Expected response:
     /// [`GeneratedEvmAddresses`](crate::wallet::message_interface::Response::GeneratedEvmAddresses)
     GenerateEvmAddresses { options: GetAddressesOptions },
+    /// TODO
+    /// Expected response:
+    /// [`Bool`](crate::wallet::message_interface::Response::Bool)
+    VerifyEd25519Signature {
+        signature: Ed25519SignatureDto,
+        message: String,
+    },
+    /// TODO
+    /// Expected response:
+    /// [`Bool`](crate::wallet::message_interface::Response::Bool)
+    VerifyEvmSignature {
+        public_key: String,
+        signature: String,
+        message: String,
+    },
     /// Signs a message with an Evm private key.
     SignEvm {
         /// The message to sign, hex encoded String

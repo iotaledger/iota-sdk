@@ -111,6 +111,25 @@ pub trait SecretManage: Send + Sync {
     ) -> Result<Payload, Self::Error>;
 }
 
+// pub trait VerifySignature {
+//     type Signature;
+//     fn verify(&self, sig: &Self::Signature, msg: &[u8]) -> bool;
+// }
+
+// impl VerifySignature for ed25519::PublicKey {
+//     type Signature = ed25519::Signature;
+//     fn verify(&self, sig: &Self::Signature, msg: &[u8]) -> bool {
+//         self.verify(sig, msg)
+//     }
+// }
+
+// impl VerifySignature for secp256k1_ecdsa::PublicKey {
+//     type Signature = secp256k1_ecdsa::Signature;
+//     fn verify(&self, sig: &Self::Signature, msg: &[u8]) -> bool {
+//         self.verify(sig, msg)
+//     }
+// }
+
 pub trait SecretManagerConfig: SecretManage {
     type Config: Serialize + DeserializeOwned + Debug + Send + Sync;
 

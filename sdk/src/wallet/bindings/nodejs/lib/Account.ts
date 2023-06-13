@@ -34,6 +34,7 @@ import type {
     ParticipationEventMap,
     GenerateAddressesOptions,
     EvmSignature,
+    Ed25519Signature,
 } from '../types';
 import type { SignedTransactionEssence } from '../types/signedTransactionEssence';
 import type {
@@ -391,6 +392,48 @@ export class Account {
             },
         );
 
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Verifies a message with an ed25519 signature.
+     */
+    async verifyEd25519(
+        signature: Ed25519Signature,
+        message: HexEncodedString,
+    ): Promise<EvmSignature> {
+        const response = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'verifyEd25519',
+                data: {
+                    signature,
+                    message,
+                },
+            },
+        );
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Verifies a message with an Evm public key and signature.
+     */
+    async verifyEvm(
+        public_key: HexEncodedString,
+        signature: HexEncodedString,
+        message: HexEncodedString,
+    ): Promise<EvmSignature> {
+        const response = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'verifyEvm',
+                data: {
+                    public_key,
+                    signature,
+                    message,
+                },
+            },
+        );
         return JSON.parse(response).payload;
     }
 
