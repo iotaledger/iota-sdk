@@ -44,9 +44,8 @@ pub mod option_prefix_hex_vec {
     where
         D: Deserializer<'de>,
     {
-        Ok(match Option::<String>::deserialize(deserializer)? {
-            Some(string) => Some(prefix_hex::decode(string).map_err(de::Error::custom)?),
-            None => None,
-        })
+        Option::<String>::deserialize(deserializer)?
+            .map(|string| prefix_hex::decode(string).map_err(de::Error::custom))
+            .transpose()
     }
 }
