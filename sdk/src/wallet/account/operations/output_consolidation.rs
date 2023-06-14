@@ -1,11 +1,10 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[cfg(feature = "ledger_nano")]
+use crate::client::secret::{ledger_nano::LedgerSecretManager, DowncastSecretManager};
 use crate::{
-    client::{
-        api::PreparedTransactionData,
-        secret::{DowncastSecretManager, SecretManage},
-    },
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         input::INPUT_COUNT_MAX,
         output::{
@@ -133,7 +132,7 @@ where
                     .secret_manager
                     .read()
                     .await
-                    .downcast::<crate::client::secret::ledger_nano::LedgerSecretManager>()
+                    .downcast::<LedgerSecretManager>()
                     .is_some()
                 {
                     DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD
@@ -166,7 +165,7 @@ where
             .secret_manager
             .read()
             .await
-            .downcast::<crate::client::secret::ledger_nano::LedgerSecretManager>()
+            .downcast::<LedgerSecretManager>()
         {
             let ledger_nano_status = ledger.get_ledger_nano_status().await;
             // With blind signing we are only limited by the protocol

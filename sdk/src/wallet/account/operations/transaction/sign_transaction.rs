@@ -2,14 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[cfg(all(feature = "events", feature = "ledger_nano"))]
-use {crate::client::api::PreparedTransactionDataDto, crate::client::secret::ledger_nano::needs_blind_signing};
+use {
+    crate::client::api::PreparedTransactionDataDto,
+    crate::client::secret::{
+        ledger_nano::{needs_blind_signing, LedgerSecretManager},
+        DowncastSecretManager,
+    },
+};
 
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
         api::{transaction::validate_transaction_payload_length, PreparedTransactionData, SignedTransactionData},
-        secret::{DowncastSecretManager, SecretManage},
+        secret::SecretManage,
     },
     wallet::account::{operations::transaction::TransactionPayload, Account},
 };
@@ -38,7 +44,7 @@ where
             .secret_manager
             .read()
             .await
-            .downcast::<crate::client::secret::ledger_nano::LedgerSecretManager>()
+            .downcast::<LedgerSecretManager>()
         {
             let ledger_nano_status = ledger.get_ledger_nano_status().await;
             if let Some(buffer_size) = ledger_nano_status.buffer_size() {

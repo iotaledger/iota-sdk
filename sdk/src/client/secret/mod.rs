@@ -370,11 +370,11 @@ impl SecretManage for SecretManager {
 }
 
 pub trait DowncastSecretManager: SecretManage {
-    fn downcast<'a, T: 'static + SecretManage>(&'a self) -> Option<&'a T>;
+    fn downcast<T: 'static + SecretManage>(&self) -> Option<&T>;
 }
 
 impl<S: 'static + SecretManage + Send + Sync> DowncastSecretManager for S {
-    fn downcast<'a, T: 'static + SecretManage>(&'a self) -> Option<&'a T> {
+    fn downcast<T: 'static + SecretManage>(&self) -> Option<&T> {
         (self as &(dyn std::any::Any + Send + Sync)).downcast_ref::<T>()
     }
 }
