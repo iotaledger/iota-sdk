@@ -85,7 +85,7 @@ pub trait SecretManage: Send + Sync {
     async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error>;
 
     /// Signs msg using the given [`Chain`] using Secp256k1.
-    async fn sign_evm(
+    async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
         chain: &Chain,
@@ -316,17 +316,17 @@ impl SecretManage for SecretManager {
         }
     }
 
-    async fn sign_evm(
+    async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
         chain: &Chain,
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
-            Self::Stronghold(secret_manager) => Ok(secret_manager.sign_evm(msg, chain).await?),
+            Self::Stronghold(secret_manager) => Ok(secret_manager.sign_secp256k1_ecdsa(msg, chain).await?),
             #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_evm(msg, chain).await?),
-            Self::Mnemonic(secret_manager) => secret_manager.sign_evm(msg, chain).await,
+            Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_secp256k1_ecdsa(msg, chain).await?),
+            Self::Mnemonic(secret_manager) => secret_manager.sign_secp256k1_ecdsa(msg, chain).await,
             Self::Placeholder(_) => Err(Error::PlaceholderSecretManager),
         }
     }

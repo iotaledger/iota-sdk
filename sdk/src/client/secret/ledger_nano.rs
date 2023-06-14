@@ -183,7 +183,7 @@ impl SecretManage for LedgerSecretManager {
         Err(Error::UnsupportedOperation.into())
     }
 
-    async fn sign_evm(
+    async fn sign_secp256k1_ecdsa(
         &self,
         _msg: &[u8],
         _chain: &Chain,

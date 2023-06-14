@@ -204,7 +204,7 @@ impl SecretManage for StrongholdAdapter {
         Ok(Ed25519Signature::new(public_key, signature))
     }
 
-    async fn sign_evm(
+    async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
         chain: &Chain,
