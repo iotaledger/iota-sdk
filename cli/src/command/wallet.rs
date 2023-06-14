@@ -183,7 +183,7 @@ pub async fn mnemonic_command() -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn new_command(
+pub async fn new_account_command(
     storage_path: &Path,
     snapshot_path: &Path,
     alias: Option<String>,
