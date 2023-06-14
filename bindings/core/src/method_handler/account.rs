@@ -16,7 +16,7 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{BalanceDto, TransactionDto},
-            Account, OutputDataDto, OutputParams, PreparedMintTokenTransactionDto, TransactionOptions,
+            Account, OutputDataDto, PreparedMintTokenTransactionDto, TransactionOptions,
         },
         MintNativeTokenParams, MintNftParams,
     },
@@ -217,12 +217,12 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::PreparedMintTokenTransaction(PreparedMintTokenTransactionDto::from(&data))
         }
         AccountMethod::PrepareOutput {
-            params: options,
+            params,
             transaction_options,
         } => {
             let output = account
                 .prepare_output(
-                    OutputParams::try_from(*options)?,
+                    *params,
                     transaction_options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;
