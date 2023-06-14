@@ -584,9 +584,9 @@ impl WalletMessageHandler {
                 message,
             } => {
                 use crypto::signatures::secp256k1_ecdsa;
-                let public_key = prefix_hex::decode(&public_key).map_err(|_| Error::InvalidField("publicKey"))?;
+                let public_key = prefix_hex::decode(public_key).map_err(|_| Error::InvalidField("publicKey"))?;
                 let public_key = secp256k1_ecdsa::PublicKey::try_from_bytes(&public_key)?;
-                let signature = prefix_hex::decode(&signature).map_err(|_| Error::InvalidField("signature"))?;
+                let signature = prefix_hex::decode(signature).map_err(|_| Error::InvalidField("signature"))?;
                 let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature)?;
                 let message: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
                 Ok(Response::Bool(public_key.verify(&signature, &message)))
