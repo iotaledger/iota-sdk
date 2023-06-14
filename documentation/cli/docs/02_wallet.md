@@ -185,9 +185,9 @@ Restore accounts from a stronghold backup file.
 ./wallet restore backup.stronghold
 ```
 
-### `./wallet set-node`
+### `./wallet set-node-url`
 
-Sets the node to be used for all requests.
+Sets the URL of the node to be used for all requests.
 
 The new node URL is persisted to the storage and all future requests will use it.
 
@@ -200,7 +200,7 @@ The new node URL is persisted to the storage and all future requests will use it
 #### Example
 
 ```sh
-./wallet set-node http://localhost:14265
+./wallet set-node-url http://localhost:14265
 ```
 
 ### `./wallet sync`

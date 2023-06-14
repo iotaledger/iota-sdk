@@ -42,11 +42,11 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                 migrate_stronghold_snapshot_v2_to_v3_command(path).await?;
                 return Ok((None, None));
             }
-            WalletCommand::New { alias } => {
+            WalletCommand::NewAccount { alias } => {
                 let (wallet, account) = new_command(storage_path, snapshot_path, alias).await?;
                 (Some(wallet), Some(account))
             }
-            WalletCommand::SetNode { url } => {
+            WalletCommand::SetNodeURL { url } => {
                 let wallet = set_node_command(storage_path, snapshot_path, url).await?;
                 (Some(wallet), None)
             }

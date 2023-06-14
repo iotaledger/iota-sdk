@@ -63,7 +63,7 @@ pub enum WalletCommand {
     /// Generate a random mnemonic.
     Mnemonic,
     /// Create a new account.
-    New {
+    NewAccount {
         /// Account alias, next available account index if not provided.
         alias: Option<String>,
     },
@@ -72,8 +72,8 @@ pub enum WalletCommand {
         /// Path of the to be restored stronghold backup file.
         backup_path: String,
     },
-    /// Set the node to use.
-    SetNode {
+    /// Set the URL of the node to use.
+    SetNodeURL {
         /// Node URL to use for all future operations.
         url: String,
     },
