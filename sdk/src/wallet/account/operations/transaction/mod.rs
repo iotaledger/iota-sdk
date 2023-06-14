@@ -14,7 +14,7 @@ pub use self::options::{RemainderValueStrategy, TransactionOptions, TransactionO
 use crate::{
     client::{
         api::{verify_semantic, PreparedTransactionData, SignedTransactionData},
-        secret::types::InputSigningData,
+        secret::{types::InputSigningData, SecretManage},
         Error,
     },
     types::{
@@ -34,7 +34,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Send a transaction, if sending a block fails, the function will return None for the block_id, but the wallet
     /// will retry sending the transaction during syncing.
     /// ```ignore

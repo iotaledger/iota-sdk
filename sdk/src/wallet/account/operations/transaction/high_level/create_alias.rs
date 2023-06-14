@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::api::PreparedTransactionData,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::Bech32Address,
         output::{
@@ -34,7 +34,10 @@ pub struct CreateAliasParams {
     pub state_metadata: Option<Vec<u8>>,
 }
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Function to create an alias output.
     /// ```ignore
     /// let params = CreateAliasParams {

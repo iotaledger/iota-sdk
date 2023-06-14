@@ -14,8 +14,8 @@
 use std::env::var;
 
 use iota_sdk::{
-    wallet::{MintNativeTokenParams, Result, Wallet},
-    U256,
+    wallet::{MintNativeTokenParams, Result},
+    Wallet, U256,
 };
 
 // The circulating supply of the native token

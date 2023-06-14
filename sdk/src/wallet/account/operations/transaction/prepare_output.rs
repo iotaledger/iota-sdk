@@ -6,7 +6,7 @@ use std::cmp::Ordering;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::api::input_selection::minimum_storage_deposit_basic_output,
+    client::{api::input_selection::minimum_storage_deposit_basic_output, secret::SecretManage},
     types::block::{
         address::{Address, Bech32Address},
         output::{
@@ -22,7 +22,10 @@ use crate::{
     wallet::account::{operations::transaction::RemainderValueStrategy, Account, FilterOptions, TransactionOptions},
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Prepare an output for sending
     /// If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
     /// be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full

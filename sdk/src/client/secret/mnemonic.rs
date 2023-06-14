@@ -18,14 +18,20 @@ use zeroize::Zeroizing;
 
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
-    client::{constants::HD_WALLET_TYPE, Client, Error},
-    types::block::{address::Ed25519Address, signature::Ed25519Signature},
+    client::{api::PreparedTransactionData, constants::HD_WALLET_TYPE, Client, Error},
+    types::block::{address::Ed25519Address, payload::Payload, signature::Ed25519Signature, unlock::Unlocks},
 };
 
 /// Secret manager that uses only a mnemonic.
 ///
 /// Computation are done in-memory. A mnemonic needs to be supplied upon the creation of [`MnemonicSecretManager`].
 pub struct MnemonicSecretManager(Seed);
+
+impl std::fmt::Debug for MnemonicSecretManager {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_tuple("MnemonicSecretManager").finish()
+    }
+}
 
 #[async_trait]
 impl SecretManage for MnemonicSecretManager {
@@ -112,6 +118,21 @@ impl SecretManage for MnemonicSecretManager {
         let signature = private_key.sign(msg);
 
         Ok((public_key, signature))
+    }
+
+    async fn sign_transaction_essence(
+        &self,
+        prepared_transaction_data: &PreparedTransactionData,
+        time: Option<u32>,
+    ) -> Result<Unlocks, Self::Error> {
+        super::default_sign_transaction_essence(self, prepared_transaction_data, time).await
+    }
+
+    async fn sign_transaction(
+        &self,
+        prepared_transaction_data: PreparedTransactionData,
+    ) -> Result<Payload, Self::Error> {
+        super::default_sign_transaction(self, prepared_transaction_data).await
     }
 }
 

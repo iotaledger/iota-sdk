@@ -19,14 +19,14 @@ pub mod types;
 
 #[cfg(feature = "stronghold")]
 use std::time::Duration;
-use std::{collections::HashMap, ops::Range, str::FromStr};
+use std::{collections::HashMap, fmt::Debug, ops::Range, str::FromStr};
 
 use async_trait::async_trait;
 use crypto::{
     keys::slip10::Chain,
     signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
-use serde::{Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use zeroize::Zeroizing;
 
 #[cfg(feature = "ledger_nano")]
@@ -60,7 +60,7 @@ use crate::{
 /// The secret manager interface.
 #[async_trait]
 pub trait SecretManage: Send + Sync {
-    type Error;
+    type Error: std::error::Error + Send + Sync;
 
     /// Generates addresses.
     ///
@@ -97,21 +97,28 @@ pub trait SecretManage: Send + Sync {
             self.sign_ed25519(essence_hash, chain).await?,
         ))))
     }
-}
 
-/// Defines a type that can sign a transaction essence.
-#[async_trait]
-pub trait SignTransactionEssence: SecretManage {
-    /// Signs transaction essence.
-    ///
-    /// Secret managers usually don't implement this, as the default implementation has taken care of the placement of
-    /// blocks (e.g. references between them). [`SecretManager::signature_unlock()`] will be invoked every time a
-    /// necessary signing action needs to be performed.
+    /// Signs a transaction essence.
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
         time: Option<u32>,
-    ) -> Result<Unlocks, <Self as SecretManage>::Error>;
+    ) -> Result<Unlocks, Self::Error>;
+
+    async fn sign_transaction(
+        &self,
+        prepared_transaction_data: PreparedTransactionData,
+    ) -> Result<Payload, Self::Error>;
+}
+
+pub trait SecretManagerConfig: SecretManage {
+    type Config: Serialize + DeserializeOwned + Debug + Send + Sync;
+
+    fn to_config(&self) -> Option<Self::Config>;
+
+    fn from_config(config: &Self::Config) -> Result<Self, Self::Error>
+    where
+        Self: Sized;
 }
 
 /// Supported secret managers
@@ -137,7 +144,7 @@ pub enum SecretManager {
     Placeholder(PlaceholderSecretManager),
 }
 
-impl std::fmt::Debug for SecretManager {
+impl Debug for SecretManager {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             #[cfg(feature = "stronghold")]
@@ -269,11 +276,7 @@ impl SecretManage for SecretManager {
                     .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
-            Self::Placeholder(secret_manager) => {
-                secret_manager
-                    .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
-                    .await
-            }
+            Self::Placeholder(_) => Err(Error::PlaceholderSecretManager),
         }
     }
 
@@ -298,11 +301,7 @@ impl SecretManage for SecretManager {
                     .generate_evm_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
-            Self::Placeholder(secret_manager) => {
-                secret_manager
-                    .generate_evm_addresses(coin_type, account_index, address_indexes, options)
-                    .await
-            }
+            Self::Placeholder(_) => Err(Error::PlaceholderSecretManager),
         }
     }
 
@@ -313,7 +312,7 @@ impl SecretManage for SecretManager {
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_ed25519(msg, chain).await?),
             Self::Mnemonic(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
-            Self::Placeholder(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
+            Self::Placeholder(_) => Err(Error::PlaceholderSecretManager),
         }
     }
 
@@ -328,38 +327,76 @@ impl SecretManage for SecretManager {
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_evm(msg, chain).await?),
             Self::Mnemonic(secret_manager) => secret_manager.sign_evm(msg, chain).await,
-            Self::Placeholder(secret_manager) => secret_manager.sign_evm(msg, chain).await,
+            Self::Placeholder(_) => Err(Error::PlaceholderSecretManager),
         }
     }
-}
 
-#[async_trait]
-impl SignTransactionEssence for SecretManager {
     async fn sign_transaction_essence(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
         time: Option<u32>,
-    ) -> crate::client::Result<Unlocks> {
+    ) -> Result<Unlocks, Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
-            Self::Stronghold(_) => {
-                self.default_sign_transaction_essence(prepared_transaction_data, time)
-                    .await
-            }
+            Self::Stronghold(secret_manager) => Ok(secret_manager
+                .sign_transaction_essence(prepared_transaction_data, time)
+                .await?),
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => Ok(secret_manager
                 .sign_transaction_essence(prepared_transaction_data, time)
                 .await?),
-            Self::Mnemonic(_) => {
-                self.default_sign_transaction_essence(prepared_transaction_data, time)
-                    .await
-            }
-            Self::Placeholder(secret_manager) => {
+            Self::Mnemonic(secret_manager) => {
                 secret_manager
                     .sign_transaction_essence(prepared_transaction_data, time)
                     .await
             }
+            Self::Placeholder(_) => Err(Error::PlaceholderSecretManager),
         }
+    }
+
+    async fn sign_transaction(
+        &self,
+        prepared_transaction_data: PreparedTransactionData,
+    ) -> Result<Payload, Self::Error> {
+        match self {
+            #[cfg(feature = "stronghold")]
+            Self::Stronghold(secret_manager) => Ok(secret_manager.sign_transaction(prepared_transaction_data).await?),
+            #[cfg(feature = "ledger_nano")]
+            Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_transaction(prepared_transaction_data).await?),
+            Self::Mnemonic(secret_manager) => secret_manager.sign_transaction(prepared_transaction_data).await,
+            Self::Placeholder(_) => Err(Error::PlaceholderSecretManager),
+        }
+    }
+}
+
+impl SecretManagerConfig for SecretManager {
+    type Config = SecretManagerDto;
+
+    fn to_config(&self) -> Option<Self::Config> {
+        match self {
+            #[cfg(feature = "stronghold")]
+            Self::Stronghold(s) => s.to_config().map(Self::Config::Stronghold),
+            #[cfg(feature = "ledger_nano")]
+            Self::LedgerNano(s) => s.to_config().map(Self::Config::LedgerNano),
+            Self::Mnemonic(_) => None,
+            Self::Placeholder(_) => None,
+        }
+    }
+
+    fn from_config(config: &Self::Config) -> Result<Self, Self::Error> {
+        Ok(match config {
+            #[cfg(feature = "stronghold")]
+            SecretManagerDto::Stronghold(config) => Self::Stronghold(StrongholdSecretManager::from_config(config)?),
+            #[cfg(feature = "ledger_nano")]
+            SecretManagerDto::LedgerNano(config) => Self::LedgerNano(LedgerSecretManager::from_config(config)?),
+            SecretManagerDto::HexSeed(hex_seed) => {
+                Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed.clone())?)
+            }
+            SecretManagerDto::Mnemonic(mnemonic) => {
+                Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.clone())?)
+            }
+            SecretManagerDto::Placeholder => Self::Placeholder(PlaceholderSecretManager),
+        })
     }
 }
 
@@ -373,99 +410,103 @@ impl SecretManager {
     pub fn try_from_hex_seed(seed: impl Into<Zeroizing<String>>) -> crate::client::Result<Self> {
         Ok(Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(seed)?))
     }
+}
 
-    // Shared implementation for MnemonicSecretManager and StrongholdSecretManager
-    async fn default_sign_transaction_essence(
-        &self,
-        prepared_transaction_data: &PreparedTransactionData,
-        time: Option<u32>,
-    ) -> crate::client::Result<Unlocks> {
-        // The hashed_essence gets signed
-        let hashed_essence = prepared_transaction_data.essence.hash();
-        let mut blocks = Vec::new();
-        let mut block_indexes = HashMap::<Address, usize>::new();
+pub(crate) async fn default_sign_transaction_essence<M: SecretManage>(
+    secret_manager: &M,
+    prepared_transaction_data: &PreparedTransactionData,
+    time: Option<u32>,
+) -> crate::client::Result<Unlocks>
+where
+    crate::client::Error: From<M::Error>,
+{
+    // The hashed_essence gets signed
+    let hashed_essence = prepared_transaction_data.essence.hash();
+    let mut blocks = Vec::new();
+    let mut block_indexes = HashMap::<Address, usize>::new();
 
-        // Assuming inputs_data is ordered by address type
-        for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
-            // Get the address that is required to unlock the input
-            let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
-            let alias_transition = is_alias_transition(&input.output, *input.output_id(), regular.outputs(), None);
-            let (input_address, _) = input.output.required_and_unlocked_address(
-                time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32),
-                input.output_metadata.output_id(),
-                alias_transition,
-            )?;
+    // Assuming inputs_data is ordered by address type
+    for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
+        // Get the address that is required to unlock the input
+        let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
+        let alias_transition = is_alias_transition(&input.output, *input.output_id(), regular.outputs(), None);
+        let (input_address, _) = input.output.required_and_unlocked_address(
+            time.unwrap_or_else(|| unix_timestamp_now().as_secs() as u32),
+            input.output_metadata.output_id(),
+            alias_transition,
+        )?;
 
-            // Check if we already added an [Unlock] for this address
-            match block_indexes.get(&input_address) {
-                // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
-                Some(block_index) => match input_address {
-                    Address::Alias(_alias) => blocks.push(Unlock::Alias(AliasUnlock::new(*block_index as u16)?)),
-                    Address::Ed25519(_ed25519) => {
-                        blocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
-                    }
-                    Address::Nft(_nft) => blocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
-                },
-                None => {
-                    // We can only sign ed25519 addresses and block_indexes needs to contain the alias or nft
-                    // address already at this point, because the reference index needs to be lower
-                    // than the current block index
-                    if !input_address.is_ed25519() {
-                        return Err(InputSelectionError::MissingInputWithEd25519Address)?;
-                    }
-
-                    let chain = input.chain.as_ref().ok_or(Error::MissingBip32Chain)?;
-
-                    let block = self.signature_unlock(&hashed_essence, chain).await?;
-                    blocks.push(block);
-
-                    // Add the ed25519 address to the block_indexes, so it gets referenced if further inputs have
-                    // the same address in their unlock condition
-                    block_indexes.insert(input_address, current_block_index);
+        // Check if we already added an [Unlock] for this address
+        match block_indexes.get(&input_address) {
+            // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
+            Some(block_index) => match input_address {
+                Address::Alias(_alias) => blocks.push(Unlock::Alias(AliasUnlock::new(*block_index as u16)?)),
+                Address::Ed25519(_ed25519) => {
+                    blocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                 }
+                Address::Nft(_nft) => blocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
+            },
+            None => {
+                // We can only sign ed25519 addresses and block_indexes needs to contain the alias or nft
+                // address already at this point, because the reference index needs to be lower
+                // than the current block index
+                if !input_address.is_ed25519() {
+                    Err(InputSelectionError::MissingInputWithEd25519Address)?;
+                }
+
+                let chain = input.chain.as_ref().ok_or(Error::MissingBip32Chain)?;
+
+                let block = secret_manager.signature_unlock(&hashed_essence, chain).await?;
+                blocks.push(block);
+
+                // Add the ed25519 address to the block_indexes, so it gets referenced if further inputs have
+                // the same address in their unlock condition
+                block_indexes.insert(input_address, current_block_index);
             }
-
-            // When we have an alias or Nft output, we will add their alias or nft address to block_indexes,
-            // because they can be used to unlock outputs via [Unlock::Alias] or [Unlock::Nft],
-            // that have the corresponding alias or nft address in their unlock condition
-            match &input.output {
-                Output::Alias(alias_output) => block_indexes.insert(
-                    Address::Alias(alias_output.alias_address(input.output_id())),
-                    current_block_index,
-                ),
-                Output::Nft(nft_output) => block_indexes.insert(
-                    Address::Nft(nft_output.nft_address(input.output_id())),
-                    current_block_index,
-                ),
-                _ => None,
-            };
         }
 
-        Ok(Unlocks::new(blocks)?)
+        // When we have an alias or Nft output, we will add their alias or nft address to block_indexes,
+        // because they can be used to unlock outputs via [Unlock::Alias] or [Unlock::Nft],
+        // that have the corresponding alias or nft address in their unlock condition
+        match &input.output {
+            Output::Alias(alias_output) => block_indexes.insert(
+                Address::Alias(alias_output.alias_address(input.output_id())),
+                current_block_index,
+            ),
+            Output::Nft(nft_output) => block_indexes.insert(
+                Address::Nft(nft_output.nft_address(input.output_id())),
+                current_block_index,
+            ),
+            _ => None,
+        };
     }
 
-    /// Sign a transaction
-    pub async fn sign_transaction(
-        &self,
-        prepared_transaction_data: PreparedTransactionData,
-    ) -> crate::client::Result<Payload> {
-        log::debug!("[sign_transaction] {:?}", prepared_transaction_data);
-        let current_time = unix_timestamp_now().as_secs() as u32;
+    Ok(Unlocks::new(blocks)?)
+}
 
-        let unlocks = self
-            .sign_transaction_essence(&prepared_transaction_data, Some(current_time))
-            .await?;
-        let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+pub(crate) async fn default_sign_transaction<M: SecretManage>(
+    secret_manager: &M,
+    prepared_transaction_data: PreparedTransactionData,
+) -> crate::client::Result<Payload>
+where
+    crate::client::Error: From<M::Error>,
+{
+    log::debug!("[sign_transaction] {:?}", prepared_transaction_data);
+    let current_time = unix_timestamp_now().as_secs() as u32;
 
-        validate_transaction_payload_length(&tx_payload)?;
+    let unlocks = secret_manager
+        .sign_transaction_essence(&prepared_transaction_data, Some(current_time))
+        .await?;
+    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
 
-        let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
+    validate_transaction_payload_length(&tx_payload)?;
 
-        if conflict != ConflictReason::None {
-            log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);
-            return Err(Error::TransactionSemantic(conflict));
-        }
+    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
 
-        Ok(Payload::from(tx_payload))
+    if conflict != ConflictReason::None {
+        log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);
+        return Err(Error::TransactionSemantic(conflict));
     }
+
+    Ok(Payload::from(tx_payload))
 }

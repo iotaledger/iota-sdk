@@ -10,7 +10,10 @@
 
 use std::env::var;
 
-use iota_sdk::wallet::{account::SyncOptions, Result, Wallet};
+use iota_sdk::{
+    wallet::{account::SyncOptions, Result},
+    Wallet,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {

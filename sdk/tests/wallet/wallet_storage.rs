@@ -3,10 +3,7 @@
 
 use std::{fs, io, path::Path};
 
-use iota_sdk::{
-    client::stronghold::StrongholdAdapter,
-    wallet::{Result, Wallet},
-};
+use iota_sdk::{client::stronghold::StrongholdAdapter, wallet::Result, Wallet};
 
 use crate::wallet::common::{setup, tear_down};
 

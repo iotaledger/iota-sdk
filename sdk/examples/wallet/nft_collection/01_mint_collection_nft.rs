@@ -20,7 +20,8 @@ use iota_sdk::{
         output::NftId,
         payload::transaction::TransactionId,
     },
-    wallet::{Account, MintNftParams, Result, Wallet},
+    wallet::{Account, MintNftParams, Result},
+    Wallet,
 };
 
 // !!! Replace with the NFT address from the NFT we minted in `mint_issuer_nft` example !!!

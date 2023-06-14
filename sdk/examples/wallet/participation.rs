@@ -21,8 +21,8 @@ use std::{env::var, str::FromStr};
 use iota_sdk::{
     client::node_manager::node::Node,
     types::api::plugins::participation::types::ParticipationEventId,
-    wallet::{account::types::participation::ParticipationEventRegistrationOptions, Result, Wallet},
-    Url,
+    wallet::{account::types::participation::ParticipationEventRegistrationOptions, Result},
+    Url, Wallet,
 };
 
 // The node that runs the participation plugin

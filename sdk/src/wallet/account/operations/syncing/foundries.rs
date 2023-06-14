@@ -4,11 +4,15 @@
 use std::collections::HashSet;
 
 use crate::{
+    client::secret::SecretManage,
     types::block::output::{FoundryId, Output},
     wallet::{task, Account},
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     pub(crate) async fn request_and_store_foundry_outputs(
         &self,
         foundry_ids: HashSet<FoundryId>,

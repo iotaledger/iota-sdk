@@ -18,7 +18,8 @@ use iota_sdk::{
         address::Bech32Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken},
     },
-    wallet::{Result, SendNativeTokensParams, Wallet},
+    wallet::{Result, SendNativeTokensParams},
+    Wallet,
 };
 use primitive_types::U256;
 

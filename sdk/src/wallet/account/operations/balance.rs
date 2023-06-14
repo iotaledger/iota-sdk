@@ -4,6 +4,7 @@
 use primitive_types::U256;
 
 use crate::{
+    client::secret::SecretManage,
     types::block::{
         address::Bech32Address,
         output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
@@ -19,10 +20,13 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    Error: From<S::Error>,
+{
     /// Get the balance of the account.
-    pub async fn balance(&self) -> crate::wallet::Result<Balance> {
-        log::debug!("[BALANCE] balance");
+    pub async fn balance(&self) -> Result<Balance> {
+        log::debug!("[BALANCE] get balance");
 
         let account_details = self.details().await;
 

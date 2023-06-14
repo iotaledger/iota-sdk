@@ -16,7 +16,8 @@ use iota_sdk::{
         Client,
     },
     types::block::payload::transaction::TransactionId,
-    wallet::{Account, Result, Wallet},
+    wallet::{Account, Result},
+    Wallet,
 };
 use tokio::{
     fs::File,

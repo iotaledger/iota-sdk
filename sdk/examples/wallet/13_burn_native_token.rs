@@ -17,8 +17,8 @@ use std::{env::var, str::FromStr};
 
 use iota_sdk::{
     types::block::output::{NativeToken, TokenId},
-    wallet::{Result, Wallet},
-    U256,
+    wallet::Result,
+    Wallet, U256,
 };
 
 // The native token id. Replace it with a TokenId that is available in the account, the foundry output which minted it,

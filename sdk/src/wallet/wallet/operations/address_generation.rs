@@ -3,12 +3,15 @@
 
 use std::sync::atomic::Ordering;
 
-#[cfg(all(feature = "events", feature = "ledger_nano"))]
-use crate::wallet::events::types::{AddressData, WalletEvent};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
-    types::block::address::{Address, Hrp},
+    types::block::address::{Ed25519Address, Hrp},
     wallet::Wallet,
+};
+#[cfg(all(feature = "events", feature = "ledger_nano"))]
+use crate::{
+    types::block::address::ToBech32Ext,
+    wallet::events::types::{AddressData, WalletEvent},
 };
 
 impl Wallet {
@@ -28,7 +31,7 @@ impl Wallet {
         account_index: u32,
         address_index: u32,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> crate::wallet::Result<Address> {
+    ) -> crate::wallet::Result<Ed25519Address> {
         let address = match &*self.secret_manager.read().await {
             #[cfg(feature = "ledger_nano")]
             SecretManager::LedgerNano(ledger_nano) => {
@@ -59,7 +62,7 @@ impl Wallet {
                         self.emit(
                             account_index,
                             WalletEvent::LedgerAddressGeneration(AddressData {
-                                address: crate::types::block::address::ToBech32Ext::to_bech32(address[0], bech32_hrp),
+                                address: address[0].to_bech32(bech32_hrp),
                             }),
                         )
                         .await;
@@ -109,13 +112,16 @@ impl Wallet {
             SecretManager::Placeholder(_) => return Err(crate::client::Error::PlaceholderSecretManager.into()),
         };
 
-        Ok(Address::from(
-            *address
-                .first()
-                .ok_or(crate::wallet::Error::MissingParameter("address"))?,
-        ))
+        Ok(*address
+            .first()
+            .ok_or(crate::wallet::Error::MissingParameter("address"))?)
     }
+}
 
+impl<S: 'static + SecretManage> Wallet<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Get the bech32 hrp from the first account address or if not existent, from the client
     pub async fn get_bech32_hrp(&self) -> crate::wallet::Result<Hrp> {
         Ok(match self.get_accounts().await?.first() {

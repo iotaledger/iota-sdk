@@ -13,11 +13,7 @@
 
 use std::{env::var, str::FromStr};
 
-use iota_sdk::{
-    types::block::output::TokenId,
-    wallet::{Result, Wallet},
-    U256,
-};
+use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet, U256};
 
 // The native token id. Replace it with a TokenId that is available in the account, the foundry output which minted it,
 // also needs to be available. You can check this by running the `get_balance` example. You can mint a new native token
