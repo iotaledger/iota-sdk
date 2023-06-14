@@ -6,7 +6,7 @@ use iota_sdk::{
     types::block::{
         address::{dto::AddressDto, Address, Ed25519Address, ToBech32Ext},
         output::{AliasId, FoundryId, NftId},
-        payload::{transaction::TransactionEssence, TransactionPayload, MilestonePayload},
+        payload::{transaction::TransactionEssence, MilestonePayload, TransactionPayload},
         signature::Ed25519Signature,
         Block,
     },
