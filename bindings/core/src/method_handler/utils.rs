@@ -63,7 +63,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let message: Vec<u8> = prefix_hex::decode(message)?;
             Response::Bool(signature.verify(&message)?)
         }
-        UtilsMethod::VerifyEvmSignature {
+        UtilsMethod::VerifySecp256k1EcdsaSignature {
             public_key,
             signature,
             message,

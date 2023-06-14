@@ -13,8 +13,8 @@ import type {
     __HexPublicKeyToBech32AddressMethod__,
     __IsAddressValidMethod__,
     __HashTransactionEssenceMethod__,
-    __VerifyEd25519Method__,
-    __VerifyEvmMethod__,
+    __VerifyEd25519SignatureMethod__,
+    __VerifySecp256k1EcdsaSignatureMethod__,
     __VerifyMnemonicMethod__,
     __FaucetMethod__,
 } from './utils';
@@ -34,7 +34,7 @@ export type __UtilsMethods__ =
     | __HexPublicKeyToBech32AddressMethod__
     | __IsAddressValidMethod__
     | __HashTransactionEssenceMethod__
-    | __VerifyEd25519Method__
-    | __VerifyEvmMethod__
+    | __VerifyEd25519SignatureMethod__
+    | __VerifySecp256k1EcdsaSignatureMethod__
     | __VerifyMnemonicMethod__
     | __FaucetMethod__;

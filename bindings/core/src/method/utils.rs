@@ -123,7 +123,7 @@ pub enum UtilsMethod {
     },
     /// Verify an Evm signature with a message.
     #[serde(rename_all = "camelCase")]
-    VerifyEvmSignature {
+    VerifySecp256k1EcdsaSignature {
         public_key: String,
         signature: String,
         message: String,

@@ -138,10 +138,10 @@ class Utils():
         })
 
     @staticmethod
-    def verify_evm(self, public_key: HexStr, signature: HexStr, message: HexStr):
+    def verify_secp256k1_ecdsa(self, public_key: HexStr, signature: HexStr, message: HexStr):
         """Verifies an Evm Signature for a message.
         """
-        return self._call_method('verifyEvm', {
+        return self._call_method('verifySecp256k1Ecdsa', {
             'publicKey': public_key,
             'signature': signature,
             'message': message,

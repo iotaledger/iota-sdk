@@ -264,8 +264,8 @@ pub enum Response {
     /// - [`VerifyEd25519Signature`](crate::method::UtilsMethod::VerifyEd25519Signature)
     /// - [`GetHealth`](crate::method::ClientMethod::GetHealth)
     /// - [`IsAddressValid`](crate::method::UtilsMethod::IsAddressValid)
-    /// - [`VerifyEd25519Signature`](crate::method::SecretManagerMethod::VerifyEd25519Signature)
-    /// - [`VerifyEvmSignature`](crate::method::SecretManagerMethod::VerifyEvmSignature)
+    /// - [`VerifyEd25519Signature`](crate::method::UtilsMethod::VerifyEd25519Signature)
+    /// - [`VerifySecp256k1EcdsaSignature`](crate::method::UtilsMethod::VerifySecp256k1EcdsaSignature)
     Bool(bool),
     /// Response for
     /// - [`Backup`](crate::method::WalletMethod::Backup),
