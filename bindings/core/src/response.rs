@@ -30,7 +30,8 @@ use iota_sdk::{
             },
             payload::{
                 dto::{MilestonePayloadDto, PayloadDto},
-                transaction::TransactionId, milestone::MilestoneId,
+                milestone::MilestoneId,
+                transaction::TransactionId,
             },
             protocol::dto::ProtocolParametersDto,
             signature::dto::Ed25519SignatureDto,

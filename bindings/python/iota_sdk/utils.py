@@ -129,19 +129,19 @@ class Utils():
         })
 
     @staticmethod
-    def verify_ed25519(self, signature: Ed25519Signature, message: HexStr):
+    def verify_ed25519_signature(self, signature: Ed25519Signature, message: HexStr):
         """Verifies en Ed25519 Signature for a message.
         """
-        return self._call_method('verifyEd25519', {
+        return self._call_method('verifyEd25519Signature', {
             'signature': signature,
             'message': message,
         })
 
     @staticmethod
-    def verify_secp256k1_ecdsa(self, public_key: HexStr, signature: HexStr, message: HexStr):
+    def verify_secp256k1_ecdsa_signature(self, public_key: HexStr, signature: HexStr, message: HexStr):
         """Verifies an Evm Signature for a message.
         """
-        return self._call_method('verifySecp256k1Ecdsa', {
+        return self._call_method('verifySecp256k1EcdsaSignature', {
             'publicKey': public_key,
             'signature': signature,
             'message': message,
