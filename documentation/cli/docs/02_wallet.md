@@ -23,7 +23,7 @@ Starts the wallet without a specified account:
 - If the wallet has only one account, it will be used;
 - If the wallet has more than one account, a selector will be shown to decide which account to use.
 
-The wallet needs to be initialised (`init` command) and with at least one account (`new` command).
+The wallet needs to be initialised (`init` command) and with at least one account (`new-account` command).
 
 #### Example
 
@@ -77,7 +77,7 @@ Initialises the wallet by creating a [stronghold](https://github.com/iotaledger/
 
 The wallet can only be initialised once.
 
-When just initialised, the wallet has no account yet, use the `new` command to create one.
+When just initialised, the wallet has no account yet, use the `new-account` command to create one.
 
 #### Options
 
@@ -144,7 +144,7 @@ Generate a new random mnemonic.
 ./wallet mnemonic
 ```
 
-### `./wallet new`
+### `./wallet new-account`
 
 Creates a new account.
 
@@ -160,12 +160,12 @@ The wallet needs to be initialised (`init` command).
 
 Create a new account with the account index as alias.
 ```sh
-./wallet new
+./wallet new-account
 ```
 
 Create a new account with a provided alias.
 ```sh
-./wallet new main
+./wallet new-account main
 ```
 
 ### `./wallet restore`
