@@ -64,4 +64,12 @@ class UTXOInput extends Input {
     }
 }
 
-export { InputType, Input, TreasuryInput, UTXOInput };
+const InputDiscriminator = {
+    property: 'type',
+    subTypes: [
+        { value: TreasuryInput, name: InputType.Treasury as any },
+        { value: UTXOInput, name: InputType.UTXO as any },
+    ],
+};
+
+export { InputDiscriminator, InputType, Input, TreasuryInput, UTXOInput };
