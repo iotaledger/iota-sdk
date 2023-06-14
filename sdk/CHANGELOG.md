@@ -116,7 +116,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Client::generate_ed25519_addresses`
 - `Wallet::get_node_info`
 - `NativeTokenDto`, which required a migration;
-- `RentStructureDto`, `CreateAliasParamsDto`, `AssetsDto` and `OutputParamsDto`;
+- `RentStructureDto`, `CreateAliasParamsDto`, `AssetsDto`, `OutputParamsDto` and `MintNativeTokenParamsDto`;
 - `RentStructureBuilder`;
 
 ### Fixed
