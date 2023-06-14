@@ -9,7 +9,7 @@ use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
         api::{transaction::validate_transaction_payload_length, PreparedTransactionData, SignedTransactionData},
-        secret::SecretManage,
+        secret::{DowncastSecretManager, SecretManage},
     },
     wallet::account::{operations::transaction::TransactionPayload, Account},
 };
@@ -33,8 +33,12 @@ where
         .await;
 
         #[cfg(all(feature = "events", feature = "ledger_nano"))]
-        if let Some(ledger) = ((&*self.wallet.secret_manager.read().await) as &(dyn std::any::Any + Send + Sync))
-            .downcast_ref::<crate::client::secret::ledger_nano::LedgerSecretManager>()
+        if let Some(ledger) = self
+            .wallet
+            .secret_manager
+            .read()
+            .await
+            .downcast::<crate::client::secret::ledger_nano::LedgerSecretManager>()
         {
             let ledger_nano_status = ledger.get_ledger_nano_status().await;
             if let Some(buffer_size) = ledger_nano_status.buffer_size() {

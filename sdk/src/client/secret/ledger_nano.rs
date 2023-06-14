@@ -153,16 +153,9 @@ impl SecretManage for LedgerSecretManager {
         // get ledger
         let ledger = get_ledger(coin_type, bip32_account, self.is_simulator).map_err(Error::from)?;
 
-        let addresses = if options.ledger_nano_prompt {
-            // and generate a single address that is shown to the user
-            ledger
-                .get_addresses(true, bip32, address_indexes.len())
-                .map_err(Error::from)?
-        } else {
-            ledger
-                .get_addresses(false, bip32, address_indexes.len())
-                .map_err(Error::from)?
-        };
+        let addresses = ledger
+            .get_addresses(options.ledger_nano_prompt, bip32, address_indexes.len())
+            .map_err(Error::from)?;
 
         drop(lock);
 
@@ -400,24 +393,19 @@ impl SecretManagerConfig for LedgerSecretManager {
 /// If criteria are not met, blind signing is needed.
 /// This method finds out if we have to switch to blind signing mode.
 pub fn needs_blind_signing(prepared_transaction: &PreparedTransactionData, buffer_size: usize) -> bool {
-    match &prepared_transaction.essence {
-        TransactionEssence::Regular(essence) => {
-            for output in essence.outputs().iter() {
-                // only basic outputs allowed
-                if let Output::Basic(output) = output {
-                    if output.simple_deposit_address().is_some() {
-                        continue;
-                    }
-                }
-                // not fine, return
-                return true;
-            }
-        }
+    let TransactionEssence::Regular(essence) = &prepared_transaction.essence;
+
+    if essence
+        .outputs()
+        .iter()
+        .any(|output| !matches!(output, Output::Basic(o) if o.simple_deposit_address().is_some()))
+    {
+        return true;
     }
+
     // check if essence + bip32 indices fit into the buffer of the device
-    let essence_bytes = prepared_transaction.essence.pack_to_vec();
-    let total_size =
-        LedgerBIP32Index::default().packed_len() * prepared_transaction.inputs_data.len() + essence_bytes.len();
+    let total_size = LedgerBIP32Index::default().packed_len() * prepared_transaction.inputs_data.len()
+        + prepared_transaction.essence.packed_len();
 
     // return true if too large
     total_size > buffer_size

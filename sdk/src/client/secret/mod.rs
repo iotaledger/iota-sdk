@@ -369,6 +369,16 @@ impl SecretManage for SecretManager {
     }
 }
 
+pub trait DowncastSecretManager: SecretManage {
+    fn downcast<'a, T: 'static + SecretManage>(&'a self) -> Option<&'a T>;
+}
+
+impl<S: 'static + SecretManage + Send + Sync> DowncastSecretManager for S {
+    fn downcast<'a, T: 'static + SecretManage>(&'a self) -> Option<&'a T> {
+        (self as &(dyn std::any::Any + Send + Sync)).downcast_ref::<T>()
+    }
+}
+
 impl SecretManagerConfig for SecretManager {
     type Config = SecretManagerDto;
 
@@ -497,11 +507,15 @@ where
     let unlocks = secret_manager
         .sign_transaction_essence(&prepared_transaction_data, Some(current_time))
         .await?;
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+
+    let PreparedTransactionData {
+        essence, inputs_data, ..
+    } = prepared_transaction_data;
+    let tx_payload = TransactionPayload::new(essence, unlocks)?;
 
     validate_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
+    let conflict = verify_semantic(&inputs_data, &tx_payload, current_time)?;
 
     if conflict != ConflictReason::None {
         log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);

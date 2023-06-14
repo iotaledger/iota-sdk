@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{
+        api::PreparedTransactionData,
+        secret::{DowncastSecretManager, SecretManage},
+    },
     types::block::{
         input::INPUT_COUNT_MAX,
         output::{
@@ -125,8 +128,12 @@ where
             Some(t) => t,
             None => {
                 #[cfg(feature = "ledger_nano")]
-                if ((&*self.wallet.secret_manager.read().await) as &(dyn std::any::Any + Send + Sync))
-                    .downcast_ref::<crate::client::secret::ledger_nano::LedgerSecretManager>()
+                if self
+                    .wallet
+                    .secret_manager
+                    .read()
+                    .await
+                    .downcast::<crate::client::secret::ledger_nano::LedgerSecretManager>()
                     .is_some()
                 {
                     DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD
@@ -154,9 +161,12 @@ where
         }
 
         #[cfg(feature = "ledger_nano")]
-        let max_inputs = if let Some(ledger) = ((&*self.wallet.secret_manager.read().await)
-            as &(dyn std::any::Any + Send + Sync))
-            .downcast_ref::<crate::client::secret::ledger_nano::LedgerSecretManager>()
+        let max_inputs = if let Some(ledger) = self
+            .wallet
+            .secret_manager
+            .read()
+            .await
+            .downcast::<crate::client::secret::ledger_nano::LedgerSecretManager>()
         {
             let ledger_nano_status = ledger.get_ledger_nano_status().await;
             // With blind signing we are only limited by the protocol

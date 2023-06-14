@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::secret::{GenerateAddressOptions, SecretManage},
+    client::secret::{DowncastSecretManager, GenerateAddressOptions, SecretManage},
     types::block::address::Bech32Address,
     wallet::account::{types::address::AccountAddress, Account},
 };
@@ -68,8 +68,12 @@ where
         // prompt first
         #[cfg(feature = "ledger_nano")]
         let addresses = if options.ledger_nano_prompt
-            && ((&*self.wallet.secret_manager.read().await) as &(dyn std::any::Any + Send + Sync))
-                .downcast_ref::<crate::client::secret::ledger_nano::LedgerSecretManager>()
+            && self
+                .wallet
+                .secret_manager
+                .read()
+                .await
+                .downcast::<crate::client::secret::ledger_nano::LedgerSecretManager>()
                 .is_some()
         {
             #[cfg(feature = "events")]
