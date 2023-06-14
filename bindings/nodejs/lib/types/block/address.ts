@@ -96,6 +96,7 @@ const AddressDiscriminator = {
 export {
     AddressDiscriminator,
     Address,
+    AddressType,
     Ed25519Address,
     AliasAddress,
     NftAddress,

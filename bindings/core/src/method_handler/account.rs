@@ -18,7 +18,7 @@ use iota_sdk::{
             types::{BalanceDto, TransactionDto},
             Account, OutputDataDto, PreparedMintTokenTransactionDto, TransactionOptions,
         },
-        MintNativeTokenParams, MintNftParams,
+        MintNftParams,
     },
 };
 use primitive_types::U256;
@@ -209,10 +209,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::PrepareMintNativeToken { params, options } => {
             let data = account
-                .prepare_mint_native_token(
-                    MintNativeTokenParams::try_from(params)?,
-                    options.map(TransactionOptions::try_from_dto).transpose()?,
-                )
+                .prepare_mint_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
             Response::PreparedMintTokenTransaction(PreparedMintTokenTransactionDto::from(&data))
         }

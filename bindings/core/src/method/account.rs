@@ -18,7 +18,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            CreateAliasParams, FilterOptions, MintNativeTokenParamsDto, MintNftParamsDto, OutputParams, OutputsToClaim,
+            CreateAliasParams, FilterOptions, MintNativeTokenParams, MintNftParamsDto, OutputParams, OutputsToClaim,
             SyncOptions, TransactionOptionsDto,
         },
         SendAmountParams, SendNativeTokensParams, SendNftParams,
@@ -199,7 +199,7 @@ pub enum AccountMethod {
     /// Prepare to Mint native token.
     /// Expected response: [`PreparedMintTokenTransaction`](crate::Response::PreparedMintTokenTransaction)
     PrepareMintNativeToken {
-        params: MintNativeTokenParamsDto,
+        params: MintNativeTokenParams,
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare an output.

@@ -3,13 +3,6 @@
 
 import { HexEncodedAmount } from '../utils';
 
-/** Address Types */
-export enum AddressType {
-    Ed25519 = 'Ed25519',
-    Alias = 'Alias',
-    Nft = 'Nft',
-}
-
 /** An Address of the Account */
 export interface AccountAddress {
     address: string;
