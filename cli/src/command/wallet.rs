@@ -73,7 +73,7 @@ pub enum WalletCommand {
         backup_path: String,
     },
     /// Set the URL of the node to use.
-    SetNodeURL {
+    SetNodeUrl {
         /// Node URL to use for all future operations.
         url: String,
     },
