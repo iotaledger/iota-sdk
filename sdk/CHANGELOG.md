@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 0.5.0 - 2023-MM-DD
+
+### Changed
+
+- `SecretManage::sign_evm` renamed to `sign_secp256k1_ecdsa`;
+
 ## 0.4.0 - 2023-06-14
 
 ### Added
@@ -35,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multiple prepare methods returning `PreparedTransactionData`: `prepare_consolidate_outputs`, `prepare_vote`, `prepare_stop_participating`, `prepare_increase_voting_power`, `prepare_decrease_voting_power`, `prepare_decrease_native_token_supply` and `prepare_burn`;
 - Multiple prepare methods returning `PreparedMintTokenTransaction`: `prepare_mint_native_token` and `prepare_increase_native_token_supply`;
 - Stronghold snapshot migration from v2 to v3;
-- `SecretManage::sign_secp256k1_ecdsa`;
+- `SecretManage::sign_evm`;
 - `Account::addresses_balance` method accepting addresses to get balance for;
 - `Wallet::get_secret_manager` method;
 - `Password` type which is `Zeroize` and `ZeroizeOnDrop`;
