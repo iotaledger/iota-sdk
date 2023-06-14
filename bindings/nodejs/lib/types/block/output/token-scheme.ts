@@ -71,8 +71,8 @@ const TokenSchemeDiscriminator = {
 };
 
 export {
-    TokenSchemeType,
-    TokenScheme,
-    SimpleTokenScheme,
     TokenSchemeDiscriminator,
+    TokenScheme,
+    TokenSchemeType,
+    SimpleTokenScheme,
 };

@@ -206,6 +206,9 @@ pub enum Response {
     /// - [`MnemonicToHexSeed`](crate::method::UtilsMethod::MnemonicToHexSeed)
     MnemonicHexSeed(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
     /// Response for:
+    /// - [`MilestoneId`](crate::method::UtilsMethod::MilestoneId)
+    MilestoneId(MilestoneId),
+    /// Response for:
     /// - [`TransactionId`](crate::method::UtilsMethod::TransactionId)
     TransactionId(TransactionId),
     /// Response for:

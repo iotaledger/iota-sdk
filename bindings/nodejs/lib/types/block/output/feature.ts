@@ -101,6 +101,7 @@ const FeatureDiscriminator = {
 export {
     FeatureDiscriminator,
     Feature,
+    FeatureType,
     SenderFeature,
     IssuerFeature,
     MetadataFeature,

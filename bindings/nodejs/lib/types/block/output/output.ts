@@ -290,9 +290,9 @@ const OutputDiscriminator = {
 };
 
 export {
-    OutputType,
     OutputDiscriminator,
     Output,
+    OutputType,
     CommonOutput,
     TreasuryOutput,
     BasicOutput,

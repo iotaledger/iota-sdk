@@ -21,6 +21,7 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@types/node": "^18.15.12",
+        "blakejs": "^1.2.1",
         "cargo-cp-artifact": "^0.1.6",
         "class-transformer": "^0.5.1",
         "prebuild-install": "^7.1.1",
