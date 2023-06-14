@@ -44,7 +44,7 @@ use crate::{
         message_interface::{
             account_method::AccountMethod, dtos::AccountDetailsDto, message::Message, response::Response,
         },
-        MintNativeTokenParams, MintNftParams, Result, Wallet,
+        MintNftParams, Result, Wallet,
     },
 };
 
@@ -693,10 +693,7 @@ impl WalletMessageHandler {
             AccountMethod::MintNativeToken { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .mint_native_token(
-                            MintNativeTokenParams::try_from(params)?,
-                            options.map(TransactionOptions::try_from_dto).transpose()?,
-                        )
+                        .mint_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::MintTokenTransaction(MintTokenTransactionDto::from(
                         &transaction,

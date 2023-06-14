@@ -261,6 +261,7 @@ const UnlockConditionDiscriminator = {
 export {
     UnlockConditionDiscriminator,
     UnlockCondition,
+    UnlockConditionType,
     AddressUnlockCondition,
     StorageDepositReturnUnlockCondition,
     TimelockUnlockCondition,

@@ -4,6 +4,8 @@ import {
     HexEncodedString,
     Block,
     TransactionEssence,
+    MilestonePayload,
+    TransactionPayload,
 } from '../../';
 
 export interface __GenerateMnemonicMethod__ {
@@ -51,6 +53,20 @@ export interface __BlockIdMethod__ {
     name: 'blockId';
     data: {
         block: Block;
+    };
+}
+
+export interface __MilestoneIdMethod__ {
+    name: 'milestoneId';
+    data: {
+        payload: MilestonePayload;
+    };
+}
+
+export interface __TransactionIdMethod__ {
+    name: 'transactionId';
+    data: {
+        payload: TransactionPayload;
     };
 }
 

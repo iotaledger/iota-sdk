@@ -41,8 +41,7 @@ pub use self::{
                 create_alias::CreateAliasParams,
                 minting::{
                     mint_native_token::{
-                        MintNativeTokenParams, MintNativeTokenParamsDto, MintTokenTransactionDto,
-                        PreparedMintTokenTransactionDto,
+                        MintNativeTokenParams, MintTokenTransactionDto, PreparedMintTokenTransactionDto,
                     },
                     mint_nfts::{MintNftParams, MintNftParamsDto},
                 },

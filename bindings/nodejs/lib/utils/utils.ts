@@ -13,6 +13,10 @@ import {
     TransactionEssence,
     Response,
     EvmSignature,
+    MilestonePayload,
+    MilestoneId,
+    TransactionPayload,
+    TransactionId,
 } from '../types';
 
 /** Utils class for utils. */
@@ -103,6 +107,30 @@ export class Utils {
             name: 'blockId',
             data: {
                 block,
+            },
+        });
+    }
+
+    /**
+     * Returns a Milestone ID (Blake2b256 hash of the milestone essence)
+     */
+    static milestoneId(payload: MilestonePayload): MilestoneId {
+        return callUtilsMethod({
+            name: 'milestoneId',
+            data: {
+                payload,
+            },
+        });
+    }
+
+    /**
+     * Returns the transaction ID (Blake2b256 hash of the provided transaction payload)
+     */
+    static transactionId(payload: TransactionPayload): TransactionId {
+        return callUtilsMethod({
+            name: 'transactionId',
+            data: {
+                payload,
             },
         });
     }

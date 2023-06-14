@@ -60,8 +60,8 @@ const TransactionEssenceDiscriminator = {
 };
 
 export {
+    TransactionEssenceDiscriminator,
+    TransactionEssence,
     TransactionEssenceType,
     RegularTransactionEssence,
-    TransactionEssence,
-    TransactionEssenceDiscriminator,
 };
