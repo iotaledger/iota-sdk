@@ -47,9 +47,7 @@ pub use self::{
                     mint_nfts::{MintNftParams, MintNftParamsDto},
                 },
             },
-            prepare_output::{
-                Assets, Features, OutputParams, OutputParamsDto, ReturnStrategy, StorageDeposit, Unlocks,
-            },
+            prepare_output::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
             RemainderValueStrategy, TransactionOptions, TransactionOptionsDto,
         },
     },

@@ -36,7 +36,7 @@ use crate::{
                         create_alias::CreateAliasParams,
                         minting::{mint_native_token::MintNativeTokenParamsDto, mint_nfts::MintNftParamsDto},
                     },
-                    prepare_output::OutputParamsDto,
+                    prepare_output::OutputParams,
                     TransactionOptionsDto,
                 },
             },
@@ -284,7 +284,7 @@ pub enum AccountMethod {
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
-        params: Box<OutputParamsDto>,
+        params: Box<OutputParams>,
         transaction_options: Option<TransactionOptionsDto>,
     },
     /// Prepare transaction.
