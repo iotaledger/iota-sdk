@@ -1,5 +1,4 @@
 import {
-    Ed25519Address,
     Ed25519Signature,
     HexEncodedString,
     Block,
