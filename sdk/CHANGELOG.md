@@ -119,6 +119,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `NativeTokenDto`, which required a migration;
 - `RentStructureDto`, `CreateAliasParamsDto`, `AssetsDto`, `OutputParamsDto` and `MintNativeTokenParamsDto`;
 - `RentStructureBuilder`;
+- `PlaceholderSecretManager`;
 
 ### Fixed
 
