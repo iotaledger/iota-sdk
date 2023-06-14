@@ -3,7 +3,7 @@
 
 use derivative::Derivative;
 use iota_sdk::types::block::{
-    address::{dto::Ed25519AddressDto, AliasAddress, Bech32Address, Hrp},
+    address::{AliasAddress, Bech32Address, Hrp},
     output::{AliasId, NftId, OutputId},
     payload::transaction::dto::{TransactionEssenceDto, TransactionPayloadDto},
     signature::dto::Ed25519SignatureDto,
@@ -110,19 +110,22 @@ pub enum UtilsMethod {
         /// The transaction essence
         essence: TransactionEssenceDto,
     },
-    /// Verifies the Ed25519Signature for a message against an Ed25519Address.
-    VerifyEd25519Signature {
-        /// The Ed25519 Signature
-        signature: Ed25519SignatureDto,
-        /// The signed message, hex encoded String
-        message: String,
-        /// The hex encoded Ed25519 address
-        address: Ed25519AddressDto,
-    },
     /// Checks if the given mnemonic is valid.
     /// Expected response: [`Ok`](crate::Response::Ok)
     VerifyMnemonic {
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         mnemonic: String,
+    },
+    /// Verify an ed25519 signature with a message.
+    VerifyEd25519Signature {
+        signature: Ed25519SignatureDto,
+        message: String,
+    },
+    /// Verify an Evm signature with a message.
+    #[serde(rename_all = "camelCase")]
+    VerifyEvmSignature {
+        public_key: String,
+        signature: String,
+        message: String,
     },
 }

@@ -107,12 +107,20 @@ export interface __HashTransactionEssenceMethod__ {
     };
 }
 
-export interface __VerifyEd25519SignatureMethod__ {
-    name: 'verifyEd25519Signature';
+export interface __VerifyEd25519Method__ {
+    name: 'verifyEd25519';
     data: {
         signature: Ed25519Signature;
         message: HexEncodedString;
-        address: Ed25519Address;
+    };
+}
+
+export interface __VerifyEvmMethod__ {
+    name: 'verifyEvm';
+    data: {
+        public_key: HexEncodedString;
+        signature: HexEncodedString;
+        message: HexEncodedString;
     };
 }
 

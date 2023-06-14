@@ -127,14 +127,24 @@ class Utils():
             'essence': essence
         })
 
+    # TODO: Add the Ed25519Signature class
     @staticmethod
-    def verify_ed25519_signature(signature: HexStr, message: HexStr, address: Ed25519Address) -> bool:
-        """Verifies the Ed25519Signature for a message against an Ed25519Address.
+    def verify_ed25519(self, signature: Ed25519Signature, message: HexStr):
+        """Verifies en Ed25519 Signature for a message.
         """
-        return _call_method('verifyEd25519Signature', {
+        return self._call_method('verifyEd25519', {
             'signature': signature,
             'message': message,
-            'address': address,
+        })
+
+    @staticmethod
+    def verify_evm(self, public_key: HexStr, signature: HexStr, message: HexStr):
+        """Verifies an Evm Signature for a message.
+        """
+        return self._call_method('verifyEvm', {
+            'publicKey': public_key,
+            'signature': signature,
+            'message': message,
         })
 
 

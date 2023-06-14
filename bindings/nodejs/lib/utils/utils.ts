@@ -12,6 +12,7 @@ import {
     Ed25519Signature,
     TransactionEssence,
     Response,
+    EvmSignature,
 } from '../types';
 
 /** Utils class for utils. */
@@ -197,22 +198,39 @@ export class Utils {
     }
 
     /**
-     * Verifies the Ed25519Signature for a message against an Ed25519Address.
+     * Verifies an Ed25519 Signature with a message.
      */
-    static verifyEd25519Signature(
+    async verifyEd25519(
         signature: Ed25519Signature,
         message: HexEncodedString,
-        address: Ed25519Address,
-    ): boolean {
+    ): Promise<Ed25519Signature> {
         return callUtilsMethod({
-            name: 'verifyEd25519Signature',
+            name: 'verifyEd25519',
             data: {
                 signature,
                 message,
-                address,
             },
         });
     }
+
+    /**
+     * Verifies an Evm Signature with a message.
+     */
+    async verifyEvm(
+        public_key: HexEncodedString,
+        signature: HexEncodedString,
+        message: HexEncodedString,
+    ): Promise<EvmSignature> {
+        return callUtilsMethod({
+            name: 'verifyEvm',
+            data: {
+                public_key,
+                signature,
+                message,
+            },
+        });
+    }
+
     /**
      * Verify if a mnemonic is a valid BIP39 mnemonic.
      */

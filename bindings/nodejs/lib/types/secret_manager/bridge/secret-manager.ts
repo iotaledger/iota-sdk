@@ -61,23 +61,6 @@ export interface __SignEvmMethod__ {
     };
 }
 
-export interface __VerifyEd25519Method__ {
-    name: 'verifyEd25519';
-    data: {
-        signature: Ed25519Signature;
-        message: HexEncodedString;
-    };
-}
-
-export interface __VerifyEvmMethod__ {
-    name: 'verifyEvm';
-    data: {
-        public_key: HexEncodedString;
-        signature: HexEncodedString;
-        message: HexEncodedString;
-    };
-}
-
 export interface __GetLedgerNanoStatusMethod__ {
     name: 'getLedgerNanoStatus';
 }
