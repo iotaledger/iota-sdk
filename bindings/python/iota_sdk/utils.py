@@ -3,6 +3,7 @@
 
 from iota_sdk import call_utils_method
 from iota_sdk.types.address import Ed25519Address
+from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from json import dumps, loads
@@ -127,7 +128,6 @@ class Utils():
             'essence': essence
         })
 
-    # TODO: Add the Ed25519Signature class
     @staticmethod
     def verify_ed25519(self, signature: Ed25519Signature, message: HexStr):
         """Verifies en Ed25519 Signature for a message.
