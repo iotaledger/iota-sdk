@@ -14,7 +14,7 @@ use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
         constants::SHIMMER_COIN_TYPE,
-        secret::{placeholder::PlaceholderSecretManager, SecretManager},
+        secret::SecretManager,
     },
     wallet::{account::types::AccountAddress, ClientOptions, Result, SendAmountParams, Wallet},
 };
@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
 
     // Create the wallet with the secret_manager and client options
     let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::Placeholder(PlaceholderSecretManager))
+        .with_secret_manager(SecretManager::Placeholder)
         .with_storage_path(ONLINE_WALLET_DB_PATH)
         .with_client_options(client_options.clone())
         .with_coin_type(SHIMMER_COIN_TYPE)

@@ -109,7 +109,7 @@ impl Wallet {
                     )
                     .await?
             }
-            SecretManager::Placeholder(_) => return Err(crate::client::Error::PlaceholderSecretManager.into()),
+            SecretManager::Placeholder => return Err(crate::client::Error::PlaceholderSecretManager.into()),
         };
 
         Ok(*address
