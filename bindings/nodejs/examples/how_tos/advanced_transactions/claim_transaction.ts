@@ -30,7 +30,7 @@ async function run() {
 
         // Get all claimable outputs
         const output_ids =
-            await account.getOutputsWithAdditionalUnlockConditions(
+            await account.claimableOutputs(
                 OutputsToClaim.All,
             );
         console.log(`Available outputs to claim:`);

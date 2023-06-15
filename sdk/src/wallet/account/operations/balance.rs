@@ -165,16 +165,14 @@ where
 
                                 let account_addresses = self.addresses().await?;
                                 let local_time = self.client().get_time_checked().await?;
-                                let output_can_be_unlocked_now = self
-                                    .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::All)
-                                    .await?
-                                    .contains(output_id);
+                                let claimable_outputs =
+                                    self.claimable_outputs(OutputsToClaim::All).await?.contains(output_id);
 
                                 // For outputs that are expired or have a timelock unlock condition, but no expiration
                                 // unlock condition and we then can unlock them, then
                                 // they can never be not available for us anymore
                                 // and should be added to the balance
-                                if output_can_be_unlocked_now {
+                                if claimable_outputs {
                                     // check if output can be unlocked always from now on, in that case it should be
                                     // added to the total amount
                                     let output_can_be_unlocked_now_and_in_future =

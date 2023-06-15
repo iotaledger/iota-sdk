@@ -125,6 +125,10 @@ pub enum AccountMethod {
         nft_id: NftId,
         options: Option<TransactionOptionsDto>,
     },
+    /// Get outputs with additional unlock conditions
+    /// Expected response: [`OutputIds`](crate::wallet::message_interface::Response::OutputIds)
+    #[serde(rename_all = "camelCase")]
+    ClaimableOutputs { outputs_to_claim: OutputsToClaim },
     /// Consolidate outputs.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
@@ -182,10 +186,6 @@ pub enum AccountMethod {
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[serde(rename_all = "camelCase")]
     GetFoundryOutput { token_id: TokenId },
-    /// Get outputs with additional unlock conditions
-    /// Expected response: [`OutputIds`](crate::wallet::message_interface::Response::OutputIds)
-    #[serde(rename_all = "camelCase")]
-    GetOutputsWithAdditionalUnlockConditions { outputs_to_claim: OutputsToClaim },
     /// Get the [`Transaction`](crate::wallet::account::types::Transaction) of a transaction stored in the account
     /// Expected response: [`Transaction`](crate::wallet::message_interface::Response::Transaction)
     #[serde(rename_all = "camelCase")]

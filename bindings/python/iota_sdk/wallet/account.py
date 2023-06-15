@@ -145,11 +145,11 @@ class Account:
             }
         )
 
-    def get_outputs_with_additional_unlock_conditions(self, outputs_to_claim: List[OutputId]):
+    def claimable_outputs(self, outputs_to_claim: List[OutputId]):
         """Get outputs with additional unlock conditions.
         """
         return self._call_account_method(
-            'getOutputsWithAdditionalUnlockConditions', {
+            'claimableOutputs', {
                 'outputsToClaim': outputs_to_claim
             }
         )
