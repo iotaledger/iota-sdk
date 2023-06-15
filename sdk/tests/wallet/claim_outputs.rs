@@ -49,11 +49,7 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
     let base_coin_amount_before_claiming = balance.base_coin().available();
 
     let tx = accounts[0]
-        .claim_outputs(
-            accounts[0]
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::MicroTransactions)
-                .await?,
-        )
+        .claim_outputs(accounts[0].claimable_outputs(OutputsToClaim::MicroTransactions).await?)
         .await?;
     accounts[0]
         .retry_transaction_until_included(&tx.transaction_id, None, None)
@@ -103,11 +99,7 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
     let base_coin_amount_before_claiming = balance.base_coin().available();
 
     let tx = accounts[0]
-        .claim_outputs(
-            accounts[0]
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::Amount)
-                .await?,
-        )
+        .claim_outputs(accounts[0].claimable_outputs(OutputsToClaim::Amount).await?)
         .await?;
     accounts[0]
         .retry_transaction_until_included(&tx.transaction_id, None, None)
@@ -163,11 +155,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     let base_coin_amount_before_claiming = balance.base_coin().available();
 
     let tx = account_1
-        .claim_outputs(
-            account_1
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::All)
-                .await?,
-        )
+        .claim_outputs(account_1.claimable_outputs(OutputsToClaim::All).await?)
         .await?;
     account_1
         .retry_transaction_until_included(&tx.transaction_id, None, None)
@@ -257,11 +245,7 @@ async fn claim_2_native_tokens() -> Result<()> {
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
     let tx = accounts[0]
-        .claim_outputs(
-            accounts[0]
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::NativeTokens)
-                .await?,
-        )
+        .claim_outputs(accounts[0].claimable_outputs(OutputsToClaim::NativeTokens).await?)
         .await?;
     accounts[0]
         .retry_transaction_until_included(&tx.transaction_id, None, None)
@@ -376,11 +360,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
     let tx = account_1
-        .claim_outputs(
-            account_1
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::NativeTokens)
-                .await?,
-        )
+        .claim_outputs(account_1.claimable_outputs(OutputsToClaim::NativeTokens).await?)
         .await?;
     account_1
         .retry_transaction_until_included(&tx.transaction_id, None, None)
@@ -452,11 +432,7 @@ async fn claim_2_nft_outputs() -> Result<()> {
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
     let tx = accounts[0]
-        .claim_outputs(
-            accounts[0]
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::Nfts)
-                .await?,
-        )
+        .claim_outputs(accounts[0].claimable_outputs(OutputsToClaim::Nfts).await?)
         .await?;
     accounts[0]
         .retry_transaction_until_included(&tx.transaction_id, None, None)
@@ -517,11 +493,7 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
     let tx = account_1
-        .claim_outputs(
-            account_1
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::Nfts)
-                .await?,
-        )
+        .claim_outputs(account_1.claimable_outputs(OutputsToClaim::Nfts).await?)
         .await?;
     account_1
         .retry_transaction_until_included(&tx.transaction_id, None, None)
@@ -568,11 +540,7 @@ async fn claim_basic_micro_output_error() -> Result<()> {
     assert_eq!(balance.potentially_locked_outputs().len(), 1);
 
     let result = account_1
-        .claim_outputs(
-            account_1
-                .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::MicroTransactions)
-                .await?,
-        )
+        .claim_outputs(account_1.claimable_outputs(OutputsToClaim::MicroTransactions).await?)
         .await;
     assert!(matches!(result, Err(iota_sdk::wallet::Error::InsufficientFunds { .. })));
 

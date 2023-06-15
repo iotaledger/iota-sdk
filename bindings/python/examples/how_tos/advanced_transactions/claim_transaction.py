@@ -19,7 +19,7 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 response = account.sync()
 
 # Only the unspent outputs in the account
-output_ids = account.get_outputs_with_additional_unlock_conditions('All')
+output_ids = account.claimable_outputs('All')
 
 print(f'Available outputs to claim:')
 for output_id in output_ids:

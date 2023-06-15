@@ -66,7 +66,7 @@ pub enum Response {
     /// [`MinimumRequiredStorageDeposit`](crate::wallet::message_interface::AccountMethod::MinimumRequiredStorageDeposit)
     MinimumRequiredStorageDeposit(String),
     /// Response for
-    /// [`GetOutputsWithAdditionalUnlockConditions`](crate::wallet::message_interface::AccountMethod::GetOutputsWithAdditionalUnlockConditions)
+    /// [`ClaimableOutputs`](crate::wallet::message_interface::AccountMethod::ClaimableOutputs)
     OutputIds(Vec<OutputId>),
     /// Response for [`GetOutput`](crate::wallet::message_interface::AccountMethod::GetOutput)
     OutputData(Option<Box<OutputDataDto>>),
