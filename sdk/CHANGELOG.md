@@ -120,6 +120,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Wallet::get_node_info`
 - `NativeTokenDto`, which required a migration;
 - `RentStructureDto`, `CreateAliasParamsDto`, `AssetsDto`, `OutputParamsDto` and `MintNativeTokenParamsDto`;
+- `NativeTokensBalanceDto` and `BalanceDto`;
 - `RentStructureBuilder`;
 - `PlaceholderSecretManager`;
 
