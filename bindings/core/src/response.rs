@@ -30,6 +30,7 @@ use iota_sdk::{
             },
             payload::{
                 dto::{MilestonePayloadDto, PayloadDto},
+                milestone::MilestoneId,
                 transaction::TransactionId,
             },
             protocol::dto::ProtocolParametersDto,
@@ -205,6 +206,9 @@ pub enum Response {
     /// Response for:
     /// - [`MnemonicToHexSeed`](crate::method::UtilsMethod::MnemonicToHexSeed)
     MnemonicHexSeed(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
+    /// Response for:
+    /// - [`MilestoneId`](crate::method::UtilsMethod::MilestoneId)
+    MilestoneId(MilestoneId),
     /// Response for:
     /// - [`TransactionId`](crate::method::UtilsMethod::TransactionId)
     TransactionId(TransactionId),

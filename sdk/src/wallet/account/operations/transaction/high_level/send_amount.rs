@@ -5,7 +5,7 @@ use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::api::PreparedTransactionData,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::Bech32Address,
         output::{
@@ -79,7 +79,10 @@ impl SendAmountParams {
     }
 }
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Function to create basic outputs with which we then will call
     /// [Account.send()](crate::account::Account.send), the options can define the
     /// RemainderValueStrategy or custom inputs.

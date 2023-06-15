@@ -3,13 +3,19 @@
 
 use instant::Instant;
 
-use crate::wallet::{
-    task,
-    wallet::{SyncOptions, Wallet},
-    Account,
+use crate::{
+    client::secret::SecretManage,
+    wallet::{
+        task,
+        wallet::{SyncOptions, Wallet},
+        Account,
+    },
 };
 
-impl Wallet {
+impl<S: 'static + SecretManage> Wallet<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Find accounts with unspent outputs.
     ///
     /// Arguments:
@@ -30,7 +36,7 @@ impl Wallet {
         account_gap_limit: u32,
         address_gap_limit: u32,
         sync_options: Option<SyncOptions>,
-    ) -> crate::wallet::Result<Vec<Account>> {
+    ) -> crate::wallet::Result<Vec<Account<S>>> {
         log::debug!("[recover_accounts]");
         let start_time = Instant::now();
         let mut max_account_index_to_keep = None;

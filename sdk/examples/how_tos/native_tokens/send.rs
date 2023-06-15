@@ -15,7 +15,8 @@ use std::env::var;
 
 use iota_sdk::{
     types::block::address::Bech32Address,
-    wallet::{Result, SendNativeTokensParams, Wallet},
+    wallet::{Result, SendNativeTokensParams},
+    Wallet,
 };
 use primitive_types::U256;
 

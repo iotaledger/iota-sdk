@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::api::PreparedTransactionData,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::Bech32Address,
         output::{
@@ -12,68 +12,32 @@ use crate::{
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
             AliasId, AliasOutputBuilder, Output,
         },
-        Error,
     },
     wallet::account::{types::Transaction, Account, OutputData, TransactionOptions},
 };
 
 /// Params `create_alias_output()`
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateAliasParams {
     /// Bech32 encoded address which will control the alias. Default will use the first
     /// address of the account
     pub address: Option<Bech32Address>,
     /// Immutable alias metadata
+    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     pub immutable_metadata: Option<Vec<u8>>,
     /// Alias metadata
+    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     pub metadata: Option<Vec<u8>>,
     /// Alias state metadata
+    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     pub state_metadata: Option<Vec<u8>>,
 }
 
-/// Dto for aliasOptions
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct CreateAliasParamsDto {
-    /// Bech32 encoded address which will control the alias. Default will use the first
-    /// address of the account
-    pub address: Option<Bech32Address>,
-    /// Immutable alias metadata, hex encoded bytes
-    pub immutable_metadata: Option<String>,
-    /// Alias metadata, hex encoded bytes
-    pub metadata: Option<String>,
-    /// Alias state metadata
-    pub state_metadata: Option<String>,
-}
-
-impl TryFrom<CreateAliasParamsDto> for CreateAliasParams {
-    type Error = crate::wallet::Error;
-
-    fn try_from(value: CreateAliasParamsDto) -> crate::wallet::Result<Self> {
-        Ok(Self {
-            address: value.address,
-            immutable_metadata: match value.immutable_metadata {
-                Some(metadata) => {
-                    Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("immutable_metadata"))?)
-                }
-                None => None,
-            },
-            metadata: match value.metadata {
-                Some(metadata) => Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("metadata"))?),
-                None => None,
-            },
-            state_metadata: match value.state_metadata {
-                Some(metadata) => {
-                    Some(prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("state_metadata"))?)
-                }
-                None => None,
-            },
-        })
-    }
-}
-
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Function to create an alias output.
     /// ```ignore
     /// let params = CreateAliasParams {
@@ -179,5 +143,35 @@ impl Account {
                 }
                 _ => None,
             })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn create_alias_params_serde() {
+        let params_none_1 = CreateAliasParams {
+            address: None,
+            immutable_metadata: None,
+            metadata: None,
+            state_metadata: None,
+        };
+        let json_none = serde_json::to_string(&params_none_1).unwrap();
+        let params_none_2 = serde_json::from_str(&json_none).unwrap();
+
+        assert_eq!(params_none_1, params_none_2);
+
+        let params_some_1 = CreateAliasParams {
+            address: None,
+            immutable_metadata: Some(b"immutable_metadata".to_vec()),
+            metadata: Some(b"metadata".to_vec()),
+            state_metadata: Some(b"state_metadata".to_vec()),
+        };
+        let json_some = serde_json::to_string(&params_some_1).unwrap();
+        let params_some_2 = serde_json::from_str(&json_some).unwrap();
+
+        assert_eq!(params_some_1, params_some_2);
     }
 }

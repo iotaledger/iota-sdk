@@ -1,6 +1,12 @@
-import { AddressUnlockCondition, AliasAddress, Client, Ed25519Address, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition, SecretManager, SimpleTokenScheme, StateControllerAddressUnlockCondition, Utils } from '../../';
-import '../customMatchers';
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import { describe, it } from '@jest/globals';
+import 'reflect-metadata';
 import 'dotenv/config';
+
+import { AddressUnlockCondition, AliasAddress, Client, SecretManager, Ed25519Address, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition, SimpleTokenScheme, StateControllerAddressUnlockCondition, Utils } from '../../';
+import '../customMatchers';
 
 const client = new Client({
     nodes: [

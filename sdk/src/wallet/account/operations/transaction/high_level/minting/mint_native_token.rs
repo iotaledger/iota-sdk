@@ -5,14 +5,16 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::api::{PreparedTransactionData, PreparedTransactionDataDto},
+    client::{
+        api::{PreparedTransactionData, PreparedTransactionDataDto},
+        secret::SecretManage,
+    },
     types::block::{
         address::AliasAddress,
         output::{
             feature::MetadataFeature, unlock_condition::ImmutableAliasAddressUnlockCondition, AliasId,
             AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
         },
-        Error,
     },
     wallet::account::{
         types::{Transaction, TransactionDto},
@@ -31,37 +33,8 @@ pub struct MintNativeTokenParams {
     /// Maximum supply
     pub maximum_supply: U256,
     /// Foundry metadata
+    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     pub foundry_metadata: Option<Vec<u8>>,
-}
-
-/// Dto for MintNativeTokenParams
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct MintNativeTokenParamsDto {
-    /// The alias id which should be used to create the foundry.
-    pub alias_id: Option<AliasId>,
-    /// Circulating supply
-    pub circulating_supply: U256,
-    /// Maximum supply
-    pub maximum_supply: U256,
-    /// Foundry metadata, hex encoded bytes
-    pub foundry_metadata: Option<String>,
-}
-
-impl TryFrom<MintNativeTokenParamsDto> for MintNativeTokenParams {
-    type Error = crate::wallet::Error;
-
-    fn try_from(value: MintNativeTokenParamsDto) -> crate::wallet::Result<Self> {
-        Ok(Self {
-            alias_id: value.alias_id,
-            circulating_supply: value.circulating_supply,
-            maximum_supply: value.maximum_supply,
-            foundry_metadata: value
-                .foundry_metadata
-                .map(|metadata| prefix_hex::decode(metadata).map_err(|_| Error::InvalidField("foundry_metadata")))
-                .transpose()?,
-        })
-    }
 }
 
 /// The result of a minting native token transaction
@@ -114,7 +87,10 @@ impl From<&PreparedMintTokenTransaction> for PreparedMintTokenTransactionDto {
     }
 }
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Function to create a new foundry output with minted native tokens.
     /// Calls [Account.send()](crate::account::Account.send) internally, the options can define the
     /// RemainderValueStrategy or custom inputs.

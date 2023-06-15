@@ -15,7 +15,8 @@ use std::{env::var, str::FromStr, time::Instant};
 
 use iota_sdk::{
     types::block::output::{AliasId, AliasOutputBuilder, Output},
-    wallet::{Account, Result, Wallet},
+    wallet::{Account, Result},
+    Wallet,
 };
 
 // Replace with an alias id held in an unspent output of the account

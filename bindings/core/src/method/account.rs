@@ -18,8 +18,8 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            CreateAliasParamsDto, FilterOptions, MintNativeTokenParamsDto, MintNftParamsDto, OutputParamsDto,
-            OutputsToClaim, SyncOptions, TransactionOptionsDto,
+            CreateAliasParams, FilterOptions, MintNativeTokenParams, MintNftParamsDto, OutputParams, OutputsToClaim,
+            SyncOptions, TransactionOptionsDto,
         },
         SendAmountParams, SendNativeTokensParams, SendNftParams,
     },
@@ -152,7 +152,7 @@ pub enum AccountMethod {
     /// Create an alias output.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareCreateAliasOutput {
-        params: Option<CreateAliasParamsDto>,
+        params: Option<CreateAliasParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Melt native tokens. This happens with the foundry output which minted them, by increasing it's
@@ -199,14 +199,14 @@ pub enum AccountMethod {
     /// Prepare to Mint native token.
     /// Expected response: [`PreparedMintTokenTransaction`](crate::Response::PreparedMintTokenTransaction)
     PrepareMintNativeToken {
-        params: MintNativeTokenParamsDto,
+        params: MintNativeTokenParams,
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare an output.
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
-        params: Box<OutputParamsDto>,
+        params: Box<OutputParams>,
         transaction_options: Option<TransactionOptionsDto>,
     },
     /// Prepare send amount.

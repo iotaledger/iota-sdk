@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
 
     // Create an account
     let alias = "Alice";
-    let account = wallet.create_account().with_alias(alias.to_string()).finish().await?;
+    let account = wallet.create_account().with_alias(alias).finish().await?;
     println!("Created account '{alias}'");
 
     // Display the adresses in the account (only 1 for a new account)

@@ -16,10 +16,9 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{BalanceDto, TransactionDto},
-            Account, CreateAliasParams, OutputDataDto, OutputParams, PreparedMintTokenTransactionDto,
-            TransactionOptions,
+            Account, OutputDataDto, PreparedMintTokenTransactionDto, TransactionOptions,
         },
-        MintNativeTokenParams, MintNftParams,
+        MintNftParams,
     },
 };
 use primitive_types::U256;
@@ -145,8 +144,6 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         AccountMethod::PrepareCreateAliasOutput { params, options } => {
-            let params = params.map(CreateAliasParams::try_from).transpose()?;
-
             let data = account
                 .prepare_create_alias_output(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
@@ -212,20 +209,17 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::PrepareMintNativeToken { params, options } => {
             let data = account
-                .prepare_mint_native_token(
-                    MintNativeTokenParams::try_from(params)?,
-                    options.map(TransactionOptions::try_from_dto).transpose()?,
-                )
+                .prepare_mint_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
             Response::PreparedMintTokenTransaction(PreparedMintTokenTransactionDto::from(&data))
         }
         AccountMethod::PrepareOutput {
-            params: options,
+            params,
             transaction_options,
         } => {
             let output = account
                 .prepare_output(
-                    OutputParams::try_from(*options)?,
+                    *params,
                     transaction_options.map(TransactionOptions::try_from_dto).transpose()?,
                 )
                 .await?;

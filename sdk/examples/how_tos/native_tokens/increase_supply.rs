@@ -13,11 +13,7 @@
 
 use std::env::var;
 
-use iota_sdk::{
-    types::block::output::TokenId,
-    wallet::{Result, Wallet},
-    U256,
-};
+use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet, U256};
 
 // The amount of native tokens to mint
 const MINT_AMOUNT: u64 = 10;

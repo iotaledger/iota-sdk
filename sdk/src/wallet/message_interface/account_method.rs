@@ -32,10 +32,10 @@ use crate::{
                 syncing::SyncOptions,
                 transaction::{
                     high_level::{
-                        create_alias::CreateAliasParamsDto,
-                        minting::{mint_native_token::MintNativeTokenParamsDto, mint_nfts::MintNftParamsDto},
+                        create_alias::CreateAliasParams,
+                        minting::{mint_native_token::MintNativeTokenParams, mint_nfts::MintNftParamsDto},
                     },
-                    prepare_output::OutputParamsDto,
+                    prepare_output::OutputParams,
                     TransactionOptionsDto,
                 },
             },
@@ -136,7 +136,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     CreateAliasOutput {
-        params: Option<CreateAliasParamsDto>,
+        params: Option<CreateAliasParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
@@ -250,7 +250,7 @@ pub enum AccountMethod {
     /// Expected response: [`MintTokenTransaction`](crate::wallet::message_interface::Response::MintTokenTransaction)
     #[serde(rename_all = "camelCase")]
     MintNativeToken {
-        params: MintNativeTokenParamsDto,
+        params: MintNativeTokenParams,
         options: Option<TransactionOptionsDto>,
     },
     /// Mint nft.
@@ -267,7 +267,7 @@ pub enum AccountMethod {
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
-        params: Box<OutputParamsDto>,
+        params: Box<OutputParams>,
         transaction_options: Option<TransactionOptionsDto>,
     },
     /// Prepare transaction.

@@ -36,9 +36,7 @@ use crate::{
     wallet::{
         account::{
             operations::transaction::{
-                high_level::{create_alias::CreateAliasParams, minting::mint_native_token::MintTokenTransactionDto},
-                prepare_output::OutputParams,
-                TransactionOptions,
+                high_level::minting::mint_native_token::MintTokenTransactionDto, TransactionOptions,
             },
             types::{AccountIdentifier, BalanceDto, TransactionDto},
             OutputDataDto,
@@ -46,7 +44,7 @@ use crate::{
         message_interface::{
             account_method::AccountMethod, dtos::AccountDetailsDto, message::Message, response::Response,
         },
-        MintNativeTokenParams, MintNftParams, Result, Wallet,
+        MintNftParams, Result, Wallet,
     },
 };
 
@@ -535,8 +533,6 @@ impl WalletMessageHandler {
             }
             AccountMethod::CreateAliasOutput { params, options } => {
                 convert_async_panics(|| async {
-                    let params = params.map(CreateAliasParams::try_from).transpose()?;
-
                     let transaction = account
                         .create_alias_output(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
@@ -697,10 +693,7 @@ impl WalletMessageHandler {
             AccountMethod::MintNativeToken { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .mint_native_token(
-                            MintNativeTokenParams::try_from(params)?,
-                            options.map(TransactionOptions::try_from_dto).transpose()?,
-                        )
+                        .mint_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::MintTokenTransaction(MintTokenTransactionDto::from(
                         &transaction,
@@ -738,13 +731,13 @@ impl WalletMessageHandler {
             }
             AccountMethod::GetBalance => Ok(Response::Balance(BalanceDto::from(&account.balance().await?))),
             AccountMethod::PrepareOutput {
-                params: options,
+                params,
                 transaction_options,
             } => {
                 convert_async_panics(|| async {
                     let output = account
                         .prepare_output(
-                            OutputParams::try_from(*options)?,
+                            *params,
                             transaction_options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;

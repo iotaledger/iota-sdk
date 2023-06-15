@@ -54,7 +54,7 @@ async fn main() -> Result<()> {
         account
     } else {
         println!("Creating account '{alias}'");
-        wallet.create_account().with_alias(alias.to_string()).finish().await?
+        wallet.create_account().with_alias(alias).finish().await?
     };
 
     println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses...");

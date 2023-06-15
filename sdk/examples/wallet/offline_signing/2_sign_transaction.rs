@@ -16,9 +16,9 @@ use iota_sdk::{
             transaction::validate_transaction_payload_length, PreparedTransactionData, PreparedTransactionDataDto,
             SignedTransactionData, SignedTransactionDataDto,
         },
-        secret::{stronghold::StrongholdSecretManager, SecretManager, SignTransactionEssence},
+        secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManager},
     },
-    types::block::{output::RentStructureBuilder, payload::TransactionPayload, protocol::ProtocolParameters},
+    types::block::{output::RentStructure, payload::TransactionPayload, protocol::ProtocolParameters},
     wallet::Result,
 };
 use tokio::{
@@ -51,11 +51,10 @@ async fn main() -> Result<()> {
         "smr",
         1500,
         15,
-        RentStructureBuilder::new()
-            .byte_cost(100)
-            .byte_factor_key(1)
-            .byte_factor_data(10)
-            .finish(),
+        RentStructure::default()
+            .with_byte_cost(100)
+            .with_byte_factor_key(1)
+            .with_byte_factor_data(10),
         1813620509061365,
     )
     .unwrap();
