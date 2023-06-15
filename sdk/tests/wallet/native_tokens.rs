@@ -113,17 +113,15 @@ async fn native_token_foundry_metadata() -> Result<()> {
     assert_eq!(balance.native_tokens().len(), 1);
     // Metadata should exist and be the same
     assert_eq!(
-        prefix_hex::decode::<Vec<_>>(
-            balance
-                .native_tokens()
-                .iter()
-                .find(|t| t.token_id() == &mint_tx.token_id)
-                .unwrap()
-                .metadata()
-                .as_ref()
-                .unwrap()
-        )
-        .unwrap(),
+        balance
+            .native_tokens()
+            .iter()
+            .find(|t| t.token_id() == &mint_tx.token_id)
+            .unwrap()
+            .metadata()
+            .as_ref()
+            .unwrap()
+            .data(),
         &foundry_metadata
     );
 
