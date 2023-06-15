@@ -14,10 +14,7 @@ use iota_sdk::{
         Error,
     },
     wallet::{
-        account::{
-            types::{BalanceDto, TransactionDto},
-            Account, OutputDataDto, PreparedMintTokenTransactionDto, TransactionOptions,
-        },
+        account::{types::TransactionDto, Account, OutputDataDto, PreparedMintTokenTransactionDto, TransactionOptions},
         MintNftParams,
     },
 };
@@ -48,7 +45,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let address = account.generate_ed25519_addresses(amount, options).await?;
             Response::GeneratedAccountAddresses(address)
         }
-        AccountMethod::GetBalance => Response::Balance(BalanceDto::from(&account.balance().await?)),
+        AccountMethod::GetBalance => Response::Balance(account.balance().await?),
         AccountMethod::GetFoundryOutput { token_id } => {
             let output = account.get_foundry_output(token_id).await?;
             Response::Output(OutputDto::from(&output))
@@ -346,7 +343,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let transaction = account.submit_and_store_transaction(signed_transaction_data).await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
-        AccountMethod::Sync { options } => Response::Balance(BalanceDto::from(&account.sync(options).await?)),
+        AccountMethod::Sync { options } => Response::Balance(account.sync(options).await?),
         AccountMethod::Transactions => {
             let transactions = account.transactions().await;
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())

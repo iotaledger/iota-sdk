@@ -57,44 +57,6 @@ impl std::ops::AddAssign for Balance {
     }
 }
 
-/// Dto for the balance of an account, returned from [`crate::wallet::account::Account::sync()`] and
-/// [`crate::wallet::account::Account::balance()`].
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct BalanceDto {
-    /// Total and available amount of the base coin
-    pub base_coin: BaseCoinBalance,
-    /// Current required storage deposit amount
-    pub required_storage_deposit: RequiredStorageDeposit,
-    /// Native tokens
-    pub native_tokens: Vec<NativeTokensBalance>,
-    /// Nfts
-    pub nfts: Vec<NftId>,
-    /// Aliases
-    pub aliases: Vec<AliasId>,
-    /// Foundries
-    pub foundries: Vec<FoundryId>,
-    /// Outputs with multiple unlock conditions and if they can currently be spent or not. If there is a
-    /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) or
-    /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition) this
-    /// can change at any time
-    pub potentially_locked_outputs: HashMap<OutputId, bool>,
-}
-
-impl From<&Balance> for BalanceDto {
-    fn from(value: &Balance) -> Self {
-        Self {
-            base_coin: value.base_coin.clone(),
-            required_storage_deposit: value.required_storage_deposit.clone(),
-            native_tokens: value.native_tokens.clone(),
-            nfts: value.nfts.clone(),
-            aliases: value.aliases.clone(),
-            foundries: value.foundries.clone(),
-            potentially_locked_outputs: value.potentially_locked_outputs.clone(),
-        }
-    }
-}
-
 /// Base coin fields for [`Balance`]
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters)]
 #[serde(rename_all = "camelCase")]

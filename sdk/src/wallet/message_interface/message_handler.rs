@@ -38,7 +38,7 @@ use crate::{
             operations::transaction::{
                 high_level::minting::mint_native_token::MintTokenTransactionDto, TransactionOptions,
             },
-            types::{AccountIdentifier, BalanceDto, TransactionDto},
+            types::{AccountIdentifier, TransactionDto},
             OutputDataDto,
         },
         message_interface::{
@@ -729,7 +729,7 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::GetBalance => Ok(Response::Balance(BalanceDto::from(&account.balance().await?))),
+            AccountMethod::GetBalance => Ok(Response::Balance(account.balance().await?)),
             AccountMethod::PrepareOutput {
                 params,
                 transaction_options,
@@ -783,9 +783,7 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::SyncAccount { options } => {
-                Ok(Response::Balance(BalanceDto::from(&account.sync(options).await?)))
-            }
+            AccountMethod::SyncAccount { options } => Ok(Response::Balance(account.sync(options).await?)),
             AccountMethod::SendAmount { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
