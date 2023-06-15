@@ -26,7 +26,7 @@ where
 {
     /// Get the balance of the account.
     pub async fn balance(&self) -> Result<Balance> {
-        log::debug!("[BALANCE] get balance");
+        log::debug!("[BALANCE] balance");
 
         let account_details = self.details().await;
 
