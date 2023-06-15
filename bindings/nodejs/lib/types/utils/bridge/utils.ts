@@ -133,7 +133,7 @@ export interface __VerifyEd25519SignatureMethod__ {
 export interface __VerifySecp256k1EcdsaSignatureMethod__ {
     name: 'verifySecp256k1EcdsaSignature';
     data: {
-        public_key: HexEncodedString;
+        publicKey: HexEncodedString;
         signature: HexEncodedString;
         message: HexEncodedString;
     };
