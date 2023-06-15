@@ -221,6 +221,7 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
         "Wallet has been restored from the backup file \"{}\".",
         backup_path.display()
     );
+
     Ok(wallet)
 }
 
