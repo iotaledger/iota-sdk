@@ -245,14 +245,14 @@ export class Utils {
      * Verifies an Evm Signature with a message.
      */
     async verifySecp256k1EcdsaSignature(
-        public_key: HexEncodedString,
+        publicKey: HexEncodedString,
         signature: HexEncodedString,
         message: HexEncodedString,
     ): Promise<EvmSignature> {
         return callUtilsMethod({
             name: 'verifySecp256k1EcdsaSignature',
             data: {
-                public_key,
+                publicKey,
                 signature,
                 message,
             },
