@@ -8,8 +8,6 @@
 pub mod ledger_nano;
 /// Module for signing with a mnemonic or seed
 pub mod mnemonic;
-/// Module for the PlaceholderSecretManager
-pub mod placeholder;
 /// Module for signing with a Stronghold vault
 #[cfg(feature = "stronghold")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
@@ -31,10 +29,10 @@ use zeroize::Zeroizing;
 
 #[cfg(feature = "ledger_nano")]
 use self::ledger_nano::LedgerSecretManager;
+use self::mnemonic::MnemonicSecretManager;
 #[cfg(feature = "stronghold")]
 use self::stronghold::StrongholdSecretManager;
 pub use self::types::{GenerateAddressOptions, LedgerNanoStatus};
-use self::{mnemonic::MnemonicSecretManager, placeholder::PlaceholderSecretManager};
 #[cfg(feature = "stronghold")]
 use crate::client::secret::types::StrongholdDto;
 use crate::{
@@ -141,7 +139,7 @@ pub enum SecretManager {
 
     /// Secret manager that's just a placeholder, so it can be provided to an online wallet, but can't be used for
     /// signing.
-    Placeholder(PlaceholderSecretManager),
+    Placeholder,
 }
 
 impl Debug for SecretManager {
@@ -152,7 +150,7 @@ impl Debug for SecretManager {
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(_) => f.debug_tuple("LedgerNano").field(&"...").finish(),
             Self::Mnemonic(_) => f.debug_tuple("Mnemonic").field(&"...").finish(),
-            Self::Placeholder(_) => f.debug_struct("Placeholder").finish(),
+            Self::Placeholder => f.debug_struct("Placeholder").finish(),
         }
     }
 }
@@ -219,7 +217,7 @@ impl TryFrom<SecretManagerDto> for SecretManager {
                 Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed)?)
             }
 
-            SecretManagerDto::Placeholder => Self::Placeholder(PlaceholderSecretManager),
+            SecretManagerDto::Placeholder => Self::Placeholder,
         })
     }
 }
@@ -246,7 +244,7 @@ impl From<&SecretManager> for SecretManagerDto {
             // the client/wallet we also don't need to convert it in this direction with the mnemonic/seed, we only need
             // to know the type
             SecretManager::Mnemonic(_mnemonic) => Self::Mnemonic("...".to_string().into()),
-            SecretManager::Placeholder(_) => Self::Placeholder,
+            SecretManager::Placeholder => Self::Placeholder,
         }
     }
 }
@@ -276,7 +274,7 @@ impl SecretManage for SecretManager {
                     .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
-            Self::Placeholder(_) => Err(Error::PlaceholderSecretManager),
+            Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
     }
 
@@ -301,7 +299,7 @@ impl SecretManage for SecretManager {
                     .generate_evm_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
-            Self::Placeholder(_) => Err(Error::PlaceholderSecretManager),
+            Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
     }
 
@@ -312,7 +310,7 @@ impl SecretManage for SecretManager {
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_ed25519(msg, chain).await?),
             Self::Mnemonic(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
-            Self::Placeholder(_) => Err(Error::PlaceholderSecretManager),
+            Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
     }
 
@@ -327,7 +325,7 @@ impl SecretManage for SecretManager {
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_evm(msg, chain).await?),
             Self::Mnemonic(secret_manager) => secret_manager.sign_evm(msg, chain).await,
-            Self::Placeholder(_) => Err(Error::PlaceholderSecretManager),
+            Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
     }
 
@@ -350,7 +348,7 @@ impl SecretManage for SecretManager {
                     .sign_transaction_essence(prepared_transaction_data, time)
                     .await
             }
-            Self::Placeholder(_) => Err(Error::PlaceholderSecretManager),
+            Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
     }
 
@@ -364,8 +362,18 @@ impl SecretManage for SecretManager {
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_transaction(prepared_transaction_data).await?),
             Self::Mnemonic(secret_manager) => secret_manager.sign_transaction(prepared_transaction_data).await,
-            Self::Placeholder(_) => Err(Error::PlaceholderSecretManager),
+            Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
+    }
+}
+
+pub trait DowncastSecretManager: SecretManage {
+    fn downcast<T: 'static + SecretManage>(&self) -> Option<&T>;
+}
+
+impl<S: 'static + SecretManage + Send + Sync> DowncastSecretManager for S {
+    fn downcast<T: 'static + SecretManage>(&self) -> Option<&T> {
+        (self as &(dyn std::any::Any + Send + Sync)).downcast_ref::<T>()
     }
 }
 
@@ -379,7 +387,7 @@ impl SecretManagerConfig for SecretManager {
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(s) => s.to_config().map(Self::Config::LedgerNano),
             Self::Mnemonic(_) => None,
-            Self::Placeholder(_) => None,
+            Self::Placeholder => None,
         }
     }
 
@@ -395,7 +403,7 @@ impl SecretManagerConfig for SecretManager {
             SecretManagerDto::Mnemonic(mnemonic) => {
                 Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.clone())?)
             }
-            SecretManagerDto::Placeholder => Self::Placeholder(PlaceholderSecretManager),
+            SecretManagerDto::Placeholder => Self::Placeholder,
         })
     }
 }
@@ -497,11 +505,15 @@ where
     let unlocks = secret_manager
         .sign_transaction_essence(&prepared_transaction_data, Some(current_time))
         .await?;
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+
+    let PreparedTransactionData {
+        essence, inputs_data, ..
+    } = prepared_transaction_data;
+    let tx_payload = TransactionPayload::new(essence, unlocks)?;
 
     validate_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
+    let conflict = verify_semantic(&inputs_data, &tx_payload, current_time)?;
 
     if conflict != ConflictReason::None {
         log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);

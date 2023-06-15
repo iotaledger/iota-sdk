@@ -192,8 +192,8 @@ export type __GetFoundryOutputMethod__ = {
     };
 };
 
-export type __GetOutputsWithAdditionalUnlockConditionsMethod__ = {
-    name: 'getOutputsWithAdditionalUnlockConditions';
+export type __ClaimableOutputsMethod__ = {
+    name: 'claimableOutputs';
     data: {
         outputsToClaim: OutputsToClaim;
     };

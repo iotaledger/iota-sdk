@@ -195,7 +195,7 @@ impl Wallet {
                 )
                 .with_client_options(self.client_options().await)
                 .with_coin_type(self.coin_type.load(Ordering::Relaxed));
-            wallet_builder.save_data(&*self.storage_manager.read().await).await?;
+            wallet_builder.save(&*self.storage_manager.read().await).await?;
             // also save account to db
             for account in accounts.iter() {
                 account.save(None).await?;
@@ -290,7 +290,7 @@ impl Wallet<StrongholdSecretManager> {
         }
 
         if let Some(mut read_secret_manager) = read_secret_manager {
-            read_secret_manager.snapshot_path = new_snapshot_path.clone().into_os_string().to_string_lossy().into();
+            read_secret_manager.snapshot_path = new_snapshot_path.to_string_lossy().into_owned();
 
             let restored_secret_manager = StrongholdSecretManager::from_config(&read_secret_manager)
                 .map_err(|_| crate::wallet::Error::Backup("invalid secret_manager"))?;
@@ -358,7 +358,7 @@ impl Wallet<StrongholdSecretManager> {
                 )
                 .with_client_options(self.client_options().await)
                 .with_coin_type(self.coin_type.load(Ordering::Relaxed));
-            wallet_builder.save_data(&*self.storage_manager.read().await).await?;
+            wallet_builder.save(&*self.storage_manager.read().await).await?;
             // also save account to db
             for account in accounts.iter() {
                 account.save(None).await?;

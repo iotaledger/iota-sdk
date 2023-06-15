@@ -40,11 +40,8 @@ where
     /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) and can be
     /// unlocked now and also get basic outputs with only an [`AddressUnlockCondition`] unlock condition, for
     /// additional inputs
-    pub async fn get_unlockable_outputs_with_additional_unlock_conditions(
-        &self,
-        outputs_to_claim: OutputsToClaim,
-    ) -> crate::wallet::Result<Vec<OutputId>> {
-        log::debug!("[OUTPUT_CLAIMING] get_unlockable_outputs_with_additional_unlock_conditions");
+    pub async fn claimable_outputs(&self, outputs_to_claim: OutputsToClaim) -> crate::wallet::Result<Vec<OutputId>> {
+        log::debug!("[OUTPUT_CLAIMING] claimable_outputs");
         let account_details = self.details().await;
 
         let local_time = self.client().get_time_checked().await?;
@@ -161,7 +158,7 @@ where
     }
 
     /// Try to claim basic or nft outputs that have additional unlock conditions to their [AddressUnlockCondition]
-    /// from [`Account::get_unlockable_outputs_with_additional_unlock_conditions()`].
+    /// from [`Account::claimable_outputs()`].
     pub async fn claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,
         output_ids_to_claim: I,
@@ -411,7 +408,7 @@ pub(crate) fn sdr_not_expired(output: &Output, current_time: u32) -> Option<&Sto
                 .map_or(false, |expiration| current_time >= expiration.timestamp());
 
             // We only have to send the storage deposit return back if the output is not expired
-            if !expired { Some(sdr) } else { None }
+            (!expired).then_some(sdr)
         })
     })
 }

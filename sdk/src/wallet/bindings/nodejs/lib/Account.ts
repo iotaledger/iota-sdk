@@ -571,13 +571,11 @@ export class Account {
      * @param outputs The type of outputs to claim.
      * @returns The output IDs of the unlockable outputs.
      */
-    async getOutputsWithAdditionalUnlockConditions(
-        outputs: OutputsToClaim,
-    ): Promise<string[]> {
+    async claimableOutputs(outputs: OutputsToClaim): Promise<string[]> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'getOutputsWithAdditionalUnlockConditions',
+                name: 'claimableOutputs',
                 data: {
                     outputsToClaim: outputs,
                 },

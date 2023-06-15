@@ -323,9 +323,7 @@ pub async fn claim_command(account: &Account, output_id: Option<String>) -> Resu
     } else {
         println_log_info!("Claiming outputs.");
 
-        let output_ids = account
-            .get_unlockable_outputs_with_additional_unlock_conditions(OutputsToClaim::All)
-            .await?;
+        let output_ids = account.claimable_outputs(OutputsToClaim::All).await?;
 
         if output_ids.is_empty() {
             println_log_info!("No outputs available to claim.");

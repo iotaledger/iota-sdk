@@ -63,7 +63,7 @@ pub enum WalletCommand {
     /// Generate a random mnemonic.
     Mnemonic,
     /// Create a new account.
-    New {
+    NewAccount {
         /// Account alias, next available account index if not provided.
         alias: Option<String>,
     },
@@ -72,8 +72,8 @@ pub enum WalletCommand {
         /// Path of the to be restored stronghold backup file.
         backup_path: String,
     },
-    /// Set the node to use.
-    SetNode {
+    /// Set the URL of the node to use.
+    SetNodeUrl {
         /// Node URL to use for all future operations.
         url: String,
     },
@@ -183,7 +183,7 @@ pub async fn mnemonic_command() -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn new_command(
+pub async fn new_account_command(
     storage_path: &Path,
     snapshot_path: &Path,
     alias: Option<String>,
@@ -218,7 +218,7 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
     Ok(wallet)
 }
 
-pub async fn set_node_command(storage_path: &Path, snapshot_path: &Path, url: String) -> Result<Wallet, Error> {
+pub async fn set_node_url_command(storage_path: &Path, snapshot_path: &Path, url: String) -> Result<Wallet, Error> {
     let password = get_password("Stronghold password", !snapshot_path.exists())?;
     let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
     wallet.set_client_options(ClientOptions::new().with_node(&url)?).await?;
