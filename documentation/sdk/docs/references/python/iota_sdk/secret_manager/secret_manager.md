@@ -185,4 +185,3 @@ def signature_unlock(transaction_essence_hash: HexStr, chain: List[int])
 ```
 
 Sign a transaction essence hash.
-

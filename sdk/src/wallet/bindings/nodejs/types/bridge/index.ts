@@ -15,9 +15,9 @@ import type {
     __DeregisterParticipationEventMethod__,
     __GenerateEd25519AddressesMethod__,
     __GenerateEvmAddressesMethod__,
-    __SignEvmMethod__,
     __VerifyEd25519SignatureMethod__,
     __VerifySecp256k1EcdsaSignatureMethod__,
+    __SignSecp256k1EcdsaMethod__,
     __GetBalanceMethod__,
     __GetOutputMethod__,
     __GetFoundryOutputMethod__,
@@ -105,9 +105,9 @@ export type __AccountMethod__ =
     | __DestroyFoundryMethod__
     | __GenerateEd25519AddressesMethod__
     | __GenerateEvmAddressesMethod__
-    | __SignEvmMethod__
     | __VerifyEd25519SignatureMethod__
     | __VerifySecp256k1EcdsaSignatureMethod__
+    | __SignSecp256k1EcdsaMethod__
     | __GetBalanceMethod__
     | __GetOutputMethod__
     | __GetIncomingTransactionMethod__

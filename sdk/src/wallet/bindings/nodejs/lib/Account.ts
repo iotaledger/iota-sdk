@@ -438,7 +438,7 @@ export class Account {
     }
 
     /**
-     * Signs a message with an Evm private key.
+     * Signs a message with a Secp256k1Ecdsa private key.
      */
     async signSecp256k1Ecdsa(
         message: HexEncodedString,
@@ -447,7 +447,7 @@ export class Account {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'signEvm',
+                name: 'signSecp256k1Ecdsa',
                 data: {
                     message,
                     chain,

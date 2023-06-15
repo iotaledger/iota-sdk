@@ -188,8 +188,8 @@ pub enum AccountMethod {
         signature: String,
         message: String,
     },
-    /// Signs a message with an Evm private key.
-    SignEvm {
+    /// Signs a message with an Secp256k1Ecdsa private key.
+    SignSecp256k1Ecdsa {
         /// The message to sign, hex encoded String
         message: String,
         /// Chain to sign the message with

@@ -39,7 +39,7 @@ use crate::{
             operations::transaction::{
                 high_level::minting::mint_native_token::MintTokenTransactionDto, TransactionOptions,
             },
-            types::{AccountIdentifier, BalanceDto, TransactionDto},
+            types::{AccountIdentifier, TransactionDto},
             OutputDataDto,
         },
         message_interface::{
@@ -595,16 +595,16 @@ impl WalletMessageHandler {
                 let message: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
                 Ok(Response::Bool(public_key.verify(&signature, &message)))
             }
-            AccountMethod::SignEvm { message, chain } => {
+            AccountMethod::SignSecp256k1Ecdsa { message, chain } => {
                 let msg: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
                 let (public_key, signature) = account
                     .wallet
                     .secret_manager
                     .read()
                     .await
-                    .sign_evm(&msg, &Chain::from_u32(chain))
+                    .sign_secp256k1_ecdsa(&msg, &Chain::from_u32(chain))
                     .await?;
-                Ok(Response::EvmSignature {
+                Ok(Response::Secp256k1EcdsaSignature {
                     public_key: prefix_hex::encode(public_key.to_bytes()),
                     signature: prefix_hex::encode(signature.to_bytes()),
                 })
@@ -746,7 +746,7 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::GetBalance => Ok(Response::Balance(BalanceDto::from(&account.balance().await?))),
+            AccountMethod::GetBalance => Ok(Response::Balance(account.balance().await?)),
             AccountMethod::PrepareOutput {
                 params,
                 transaction_options,
@@ -800,9 +800,7 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::SyncAccount { options } => {
-                Ok(Response::Balance(BalanceDto::from(&account.sync(options).await?)))
-            }
+            AccountMethod::SyncAccount { options } => Ok(Response::Balance(account.sync(options).await?)),
             AccountMethod::SendAmount { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
