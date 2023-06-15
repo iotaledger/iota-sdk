@@ -416,7 +416,7 @@ export class Account {
     }
 
     /**
-     * Verifies a message with an Evm public key and signature.
+     * Verifies a message with an Secp256k1Ecdsa public key and signature.
      */
     async verifySecp256k1EcdsaSignature(
         publicKey: HexEncodedString,
