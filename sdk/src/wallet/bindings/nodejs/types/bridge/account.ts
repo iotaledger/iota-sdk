@@ -141,8 +141,8 @@ export type __GenerateEvmAddressesMethod__ = {
     };
 };
 
-export type __SignEvmMethod__ = {
-    name: 'signEvm';
+export type __SignSecp256k1EcdsaMethod__ = {
+    name: 'signSecp256k1Ecdsa';
     data: {
         message: HexEncodedString;
         chain: number[];

@@ -33,7 +33,7 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
     GenerateAddressesOptions,
-    EvmSignature,
+    Secp256k1EcdsaSignature,
 } from '../types';
 import type { SignedTransactionEssence } from '../types/signedTransactionEssence';
 import type {
@@ -395,16 +395,16 @@ export class Account {
     }
 
     /**
-     * Signs a message with an Evm private key.
+     * Signs a message with a Secp256k1Ecdsa private key.
      */
-    async signEvm(
+    async signSecp256k1Ecdsa(
         message: HexEncodedString,
         chain: number[],
-    ): Promise<EvmSignature> {
+    ): Promise<Secp256k1EcdsaSignature> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'signEvm',
+                name: 'signSecp256k1Ecdsa',
                 data: {
                     message,
                     chain,

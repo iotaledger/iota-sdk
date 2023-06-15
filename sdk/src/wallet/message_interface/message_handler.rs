@@ -576,16 +576,16 @@ impl WalletMessageHandler {
                     .await?;
                 Ok(Response::GeneratedEvmAddresses(addresses))
             }
-            AccountMethod::SignEvm { message, chain } => {
+            AccountMethod::SignSecp256k1Ecdsa { message, chain } => {
                 let msg: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
                 let (public_key, signature) = account
                     .wallet
                     .secret_manager
                     .read()
                     .await
-                    .sign_evm(&msg, &Chain::from_u32(chain))
+                    .sign_secp256k1_ecdsa(&msg, &Chain::from_u32(chain))
                     .await?;
-                Ok(Response::EvmSignature {
+                Ok(Response::Secp256k1EcdsaSignature {
                     public_key: prefix_hex::encode(public_key.to_bytes()),
                     signature: prefix_hex::encode(signature.to_bytes()),
                 })

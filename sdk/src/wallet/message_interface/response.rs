@@ -100,9 +100,9 @@ pub enum Response {
     /// [`GenerateEvmAddresses`](crate::wallet::message_interface::AccountMethod::GenerateEvmAddresses)
     GeneratedEvmAddresses(Vec<String>),
     /// Response for:
-    /// - [`SignEvm`](crate::method::SecretManagerMethod::SignEvm)
+    /// - [`SignSecp256k1Ecdsa`](crate::method::SecretManagerMethod::SignSecp256k1Ecdsa)
     #[serde(rename_all = "camelCase")]
-    EvmSignature { public_key: String, signature: String },
+    Secp256k1EcdsaSignature { public_key: String, signature: String },
     /// Response for
     /// [`GetBalance`](crate::wallet::message_interface::AccountMethod::GetBalance),
     /// [`SyncAccount`](crate::wallet::message_interface::AccountMethod::SyncAccount)
@@ -219,10 +219,10 @@ impl Debug for Response {
             }
             Self::GeneratedEd25519Addresses(addresses) => write!(f, "GeneratedEd25519Addresses({addresses:?})"),
             Self::GeneratedEvmAddresses(addresses) => write!(f, "GeneratedEvmAddresses({addresses:?})"),
-            Self::EvmSignature { public_key, signature } => {
+            Self::Secp256k1EcdsaSignature { public_key, signature } => {
                 write!(
                     f,
-                    "EvmSignature{{ public_key: {public_key:?}, signature: {signature:?} }}"
+                    "Secp256k1EcdsaSignature{{ public_key: {public_key:?}, signature: {signature:?} }}"
                 )
             }
             Self::Balance(balance) => write!(f, "Balance({balance:?})"),
