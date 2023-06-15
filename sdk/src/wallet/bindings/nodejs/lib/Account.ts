@@ -33,7 +33,7 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
     GenerateAddressesOptions,
-    EvmSignature,
+    Secp256k1EcdsaSignature,
     Ed25519Signature,
 } from '../types';
 import type { SignedTransactionEssence } from '../types/signedTransactionEssence';
@@ -401,7 +401,7 @@ export class Account {
     async verifyEd25519Signature(
         signature: Ed25519Signature,
         message: HexEncodedString,
-    ): Promise<EvmSignature> {
+    ): Promise<boolean> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -422,7 +422,7 @@ export class Account {
         publicKey: HexEncodedString,
         signature: HexEncodedString,
         message: HexEncodedString,
-    ): Promise<EvmSignature> {
+    ): Promise<boolean> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
@@ -440,10 +440,10 @@ export class Account {
     /**
      * Signs a message with an Evm private key.
      */
-    async signEvm(
+    async signSecp256k1Ecdsa(
         message: HexEncodedString,
         chain: number[],
-    ): Promise<EvmSignature> {
+    ): Promise<Secp256k1EcdsaSignature> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
