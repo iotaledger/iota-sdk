@@ -228,10 +228,10 @@ export class Utils {
     /**
      * Verifies an Ed25519 Signature with a message.
      */
-    async verifyEd25519Signature(
+    static verifyEd25519Signature(
         signature: Ed25519Signature,
         message: HexEncodedString,
-    ): Promise<Ed25519Signature> {
+    ): boolean {
         return callUtilsMethod({
             name: 'verifyEd25519Signature',
             data: {
@@ -244,11 +244,11 @@ export class Utils {
     /**
      * Verifies an Evm Signature with a message.
      */
-    async verifySecp256k1EcdsaSignature(
+    static verifySecp256k1EcdsaSignature(
         publicKey: HexEncodedString,
         signature: HexEncodedString,
         message: HexEncodedString,
-    ): Promise<EvmSignature> {
+    ): boolean {
         return callUtilsMethod({
             name: 'verifySecp256k1EcdsaSignature',
             data: {
