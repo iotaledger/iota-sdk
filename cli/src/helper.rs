@@ -197,8 +197,9 @@ pub async fn import_mnemonic(path: &str) -> Result<String, Error> {
 async fn write_mnemonic_to_file(path: &str, mnemonic: &str) -> Result<(), Error> {
     let mut open_options = OpenOptions::new().create(true).append(true).to_owned();
 
-    #[cfg(unix)]
-    open_options.mode(0o600);
+    if cfg!(unix) {
+        open_options.mode(0o600);
+    }
 
     let mut file = open_options.open(path).await?;
     file.write_all(format!("{mnemonic}\n").as_bytes()).await?;
