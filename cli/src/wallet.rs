@@ -9,7 +9,7 @@ use crate::{
     command::wallet::{
         add_account, backup_command, change_password_command, init_command,
         migrate_stronghold_snapshot_v2_to_v3_command, mnemonic_command, new_account_command, restore_command,
-        set_node_command, sync_command, unlock_wallet, InitParameters, WalletCli, WalletCommand,
+        set_node_url_command, sync_command, unlock_wallet, InitParameters, WalletCli, WalletCommand,
     },
     error::Error,
     helper::{get_account_alias, get_decision, get_password, pick_account, print_wallet_help},
@@ -47,7 +47,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                 (Some(wallet), Some(account))
             }
             WalletCommand::SetNodeUrl { url } => {
-                let wallet = set_node_command(storage_path, snapshot_path, url).await?;
+                let wallet = set_node_url_command(storage_path, snapshot_path, url).await?;
                 (Some(wallet), None)
             }
             WalletCommand::Sync => {
