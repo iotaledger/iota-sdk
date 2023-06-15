@@ -395,7 +395,7 @@ export class Account {
     }
 
     /**
-     * Signs a message with an Evm private key.
+     * Signs a message with a Secp256k1Ecdsa private key.
      */
     async signSecp256k1Ecdsa(
         message: HexEncodedString,
