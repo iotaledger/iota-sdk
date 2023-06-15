@@ -519,6 +519,10 @@ impl WalletMessageHandler {
                 })
                 .await
             }
+            AccountMethod::ClaimableOutputs { outputs_to_claim } => {
+                let output_ids = account.claimable_outputs(outputs_to_claim).await?;
+                Ok(Response::OutputIds(output_ids))
+            }
             AccountMethod::ConsolidateOutputs {
                 force,
                 output_consolidation_threshold,
@@ -585,12 +589,6 @@ impl WalletMessageHandler {
                     public_key: prefix_hex::encode(public_key.to_bytes()),
                     signature: prefix_hex::encode(signature.to_bytes()),
                 })
-            }
-            AccountMethod::GetOutputsWithAdditionalUnlockConditions { outputs_to_claim } => {
-                let output_ids = account
-                    .get_unlockable_outputs_with_additional_unlock_conditions(outputs_to_claim)
-                    .await?;
-                Ok(Response::OutputIds(output_ids))
             }
             AccountMethod::GetOutput { output_id } => {
                 let output_data = account.get_output(&output_id).await;

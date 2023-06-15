@@ -196,17 +196,17 @@ mod tests {
     async fn save_get_wallet_data() {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert!(
-            WalletBuilder::<SecretManager>::get_data(&storage_manager)
+            WalletBuilder::<SecretManager>::load(&storage_manager)
                 .await
                 .unwrap()
                 .is_none()
         );
 
         let wallet_builder = WalletBuilder::<SecretManager>::new();
-        wallet_builder.save_data(&storage_manager).await.unwrap();
+        wallet_builder.save(&storage_manager).await.unwrap();
 
         assert!(
-            WalletBuilder::<SecretManager>::get_data(&storage_manager)
+            WalletBuilder::<SecretManager>::load(&storage_manager)
                 .await
                 .unwrap()
                 .is_some()
