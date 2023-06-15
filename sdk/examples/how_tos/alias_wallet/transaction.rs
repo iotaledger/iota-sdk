@@ -32,7 +32,10 @@ async fn main() -> Result<()> {
     };
 
     // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
     wallet
         .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
         .await?;

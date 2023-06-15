@@ -26,7 +26,10 @@ async fn main() -> Result<()> {
     let faucet_url = var("FAUCET_URL").unwrap();
 
     // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
 
     // Get the account
     let account = wallet.get_account("Alice").await?;
