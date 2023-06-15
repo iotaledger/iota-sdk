@@ -33,7 +33,7 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
     GenerateAddressesOptions,
-    EvmSignature,
+    Secp256k1EcdsaSignature,
 } from '../types';
 import type { SignedTransactionEssence } from '../types/signedTransactionEssence';
 import type {
@@ -395,16 +395,16 @@ export class Account {
     }
 
     /**
-     * Signs a message with an Evm private key.
+     * Signs a message with a Secp256k1Ecdsa private key.
      */
-    async signEvm(
+    async signSecp256k1Ecdsa(
         message: HexEncodedString,
         chain: number[],
-    ): Promise<EvmSignature> {
+    ): Promise<Secp256k1EcdsaSignature> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'signEvm',
+                name: 'signSecp256k1Ecdsa',
                 data: {
                     message,
                     chain,
@@ -528,13 +528,11 @@ export class Account {
      * @param outputs The type of outputs to claim.
      * @returns The output IDs of the unlockable outputs.
      */
-    async getOutputsWithAdditionalUnlockConditions(
-        outputs: OutputsToClaim,
-    ): Promise<string[]> {
+    async claimableOutputs(outputs: OutputsToClaim): Promise<string[]> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'getOutputsWithAdditionalUnlockConditions',
+                name: 'claimableOutputs',
                 data: {
                     outputsToClaim: outputs,
                 },

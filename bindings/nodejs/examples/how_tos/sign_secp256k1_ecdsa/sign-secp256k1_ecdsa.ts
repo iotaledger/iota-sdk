@@ -11,9 +11,9 @@ import {
 } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
-// In this example we will sign with secp256k1.
+// In this example we will sign with secp256k1_ecdsa.
 // Run with command:
-// yarn run-example ./how_tos/sign_evm/sign-evm.ts
+// yarn run-example ./how_tos/sign_secp256k1_ecdsa/sign-secp256k1_ecdsa.ts
 
 const FOUNDRY_METADATA = {
     standard: 'IRC30',
@@ -42,7 +42,7 @@ async function run() {
         const secretManager = new SecretManager({
             stronghold: {
                 password: process.env.STRONGHOLD_PASSWORD,
-                snapshotPath: 'sign_evm.stronghold',
+                snapshotPath: 'sign_secp256k1_ecdsa.stronghold',
             },
         });
 
@@ -61,10 +61,13 @@ async function run() {
             ADDRESS_INDEX,
         ];
         const message = utf8ToHex(JSON.stringify(FOUNDRY_METADATA));
-        const evmSignature = await secretManager.signEvm(message, bip32Chain);
+        const secp256k1EcdsaSignature = await secretManager.signSecp256k1Ecdsa(
+            message,
+            bip32Chain,
+        );
 
-        console.log(`Public key: ${evmSignature.publicKey}`);
-        console.log(`Signature: ${evmSignature.signature}`);
+        console.log(`Public key: ${secp256k1EcdsaSignature.publicKey}`);
+        console.log(`Signature: ${secp256k1EcdsaSignature.signature}`);
     } catch (error) {
         console.error('Error: ', error);
     }
