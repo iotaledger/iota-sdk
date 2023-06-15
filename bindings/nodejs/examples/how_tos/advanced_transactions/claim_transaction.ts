@@ -29,10 +29,7 @@ async function run() {
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
         // Get all claimable outputs
-        const output_ids =
-            await account.claimableOutputs(
-                OutputsToClaim.All,
-            );
+        const output_ids = await account.claimableOutputs(OutputsToClaim.All);
         console.log(`Available outputs to claim:`);
         for (const output_id of output_ids) {
             console.log(output_id);
