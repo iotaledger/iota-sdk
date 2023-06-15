@@ -19,12 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 0.5.0 - YYYY-MM-DD
-
-### Changed
-
-- Rename `Account::signEvm` to `signSecp256k1Ecdsa` and `EvmSignature` to `Secp256k1EcdsaSignature`;
-
 ## 0.4.0 - 2023-06-14
 
 ### Added

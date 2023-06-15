@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `Account::getOutputsWithAdditionalUnlockConditions` renamed to `claimableOutputs`;
+- Rename `Account::signEvm` to `signSecp256k1Ecdsa` and `EvmSignature` to `Secp256k1EcdsaSignature`;
 
 ## 1.0.0-rc.0 - 2023-06-15
 
