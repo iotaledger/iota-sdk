@@ -51,13 +51,6 @@ def test_sign_verify_ed25519():
     )
     assert valid_signature
 
-    valid_signature = Utils.verify_ed25519_signature(
-        signature,
-        message,
-    )
-    # false, because the pubKeyHash is null
-    assert not valid_signature
-
 
 class TestTypes(unittest.TestCase):
     def test_output_id(self):

@@ -12,7 +12,6 @@ import {
     Ed25519Signature,
     TransactionEssence,
     Response,
-    EvmSignature,
     MilestonePayload,
     MilestoneId,
     TransactionPayload,
