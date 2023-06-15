@@ -38,6 +38,10 @@ pub enum AccountMethod {
     /// Expected response:
     /// [`AddressesWithUnspentOutputs`](crate::Response::AddressesWithUnspentOutputs)
     AddressesWithUnspentOutputs,
+    /// Get outputs with additional unlock conditions
+    /// Expected response: [`OutputIds`](crate::Response::OutputIds)
+    #[serde(rename_all = "camelCase")]
+    ClaimableOutputs { outputs_to_claim: OutputsToClaim },
     /// Claim outputs.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
@@ -70,10 +74,6 @@ pub enum AccountMethod {
     /// Expected response: [`OutputData`](crate::Response::OutputData)
     #[serde(rename_all = "camelCase")]
     GetOutput { output_id: OutputId },
-    /// Get outputs with additional unlock conditions
-    /// Expected response: [`OutputIds`](crate::Response::OutputIds)
-    #[serde(rename_all = "camelCase")]
-    GetOutputsWithAdditionalUnlockConditions { outputs_to_claim: OutputsToClaim },
     /// Expected response: [`ParticipationEvent`](crate::Response::ParticipationEvent)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]

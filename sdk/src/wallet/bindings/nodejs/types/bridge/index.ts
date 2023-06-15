@@ -19,7 +19,7 @@ import type {
     __GetBalanceMethod__,
     __GetOutputMethod__,
     __GetFoundryOutputMethod__,
-    __GetOutputsWithAdditionalUnlockConditionsMethod__,
+    __ClaimableOutputsMethod__,
     __GetTransactionMethod__,
     __AddressesMethod__,
     __AddressesWithUnspentOutputsMethod__,
@@ -108,7 +108,7 @@ export type __AccountMethod__ =
     | __GetOutputMethod__
     | __GetIncomingTransactionMethod__
     | __GetFoundryOutputMethod__
-    | __GetOutputsWithAdditionalUnlockConditionsMethod__
+    | __ClaimableOutputsMethod__
     | __GetParticipationEventMethod__
     | __GetParticipationEventIdsMethod__
     | __GetParticipationEventsMethod__
