@@ -195,7 +195,12 @@ pub async fn import_mnemonic(path: &str) -> Result<String, Error> {
 }
 
 async fn write_mnemonic_to_file(path: &str, mnemonic: &str) -> Result<(), Error> {
-    let mut file = OpenOptions::new().create(true).append(true).open(path).await?;
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .mode(0o600)
+        .open(path)
+        .await?;
     file.write_all(format!("{mnemonic}\n").as_bytes()).await?;
 
     Ok(())
