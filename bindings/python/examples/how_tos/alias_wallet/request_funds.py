@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 import time
 
-# In this example we use an alias as wallet.
+# In this example we request funds to an alias wallet.
 
 load_dotenv()
 

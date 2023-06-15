@@ -2,7 +2,7 @@ from iota_sdk import Wallet, Utils, NodeIndexerAPI
 from dotenv import load_dotenv
 import os
 
-# In this example we use an alias as wallet.
+# In this example we send funds from an alias wallet.
 
 load_dotenv()
 
