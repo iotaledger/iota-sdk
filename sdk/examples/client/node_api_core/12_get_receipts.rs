@@ -7,7 +7,6 @@
 //! ```sh
 //! cargo run --release --example node_api_core_get_receipts [NODE URL]
 //! ```
-//!
 
 use std::env;
 
@@ -19,11 +18,9 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Take the node URL from command line argument or use one from env as default.
-    let node_url = env::args().nth(1).unwrap_or_else(|| {
-        env::var("NODE_URL").unwrap()
-    });
+    let node_url = env::args().nth(1).unwrap_or_else(|| env::var("NODE_URL").unwrap());
 
-    // Create a client with that node.
+    // Create a client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Send the request.

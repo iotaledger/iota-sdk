@@ -3,26 +3,37 @@
 
 //! Returns all stored receipts for a given migration index by calling `GET /api/core/v2/receipts/{migratedAt}`.
 //!
-//! `cargo run --example node_api_core_get_receipts_migrated_at --release -- [NODE URL]`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example node_api_core_get_receipts_migrated_at <MILESTONE_INDEX> [NODE URL]
+//! ```
+
+use std::env;
 
 use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses secrets in environment variables for simplicity which should not be done in production.
-        dotenvy::dotenv().ok();
-        std::env::var("NODE_URL").unwrap()
-    });
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
-    // Create a client with that node.
+    // Take the node URL from command line argument or use one from env as default.
+    let node_url = env::args().nth(2).unwrap_or_else(|| env::var("NODE_URL").unwrap());
+
+    // Create a client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Send the request.
-    let receipts = client.get_receipts_migrated_at(1_000_000).await?;
+    // Take the transaction id from the command line, or panic.
+    let milestone_index = env::args()
+        .nth(1)
+        .expect("missing example argument: milestone index")
+        .parse()
+        .expect("invalid milestone index");
 
-    println!("{receipts:#?}");
+    // Send the request.
+    let receipts = client.get_receipts_migrated_at(milestone_index).await?;
+
+    println!("Receipts:\n{receipts:#?}");
 
     Ok(())
 }

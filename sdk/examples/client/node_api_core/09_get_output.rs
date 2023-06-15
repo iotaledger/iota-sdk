@@ -7,7 +7,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --example node_api_core_get_output [OUTPUT ID] [NODE URL]
+//! cargo run --release --example node_api_core_get_output <OUTPUT ID> [NODE URL]
 //! ```
 
 use std::env;
@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
     // Create a client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Take the output ID from command line argument.
+    // Take the output id from the command line, or panic.
     let output_id = env::args()
         .nth(1)
         .expect("missing example argument: output id")

@@ -4,9 +4,12 @@
 //! Returns milestone data as JSON by its identifier by calling
 //! `GET /api/core/v2/milestones/{milestoneId}`.
 //!
-//! `cargo run --example node_api_core_get_milestone_by_id --release -- [NODE URL]`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example node_api_core_get_milestone_by_id [MILESTONE ID] [NODE URL]`
+//! ```
 
-use std::str::FromStr;
+use std::env;
 
 use iota_sdk::{
     client::{Client, Result},
@@ -15,19 +18,24 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses secrets in environment variables for simplicity which should not be done in production.
-        dotenvy::dotenv().ok();
-        std::env::var("NODE_URL").unwrap()
-    });
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
-    // Create a client with that node.
+    // Take the node URL from command line argument or use one from env as default.
+    let node_url = std::env::args()
+        .nth(2)
+        .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
+
+    // Create a client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Fetch the latest milestone ID from the node.
+    // Take the milestone id from the command line, or use a default.
     let info = client.get_info().await?;
-    let milestone_id = MilestoneId::from_str(&info.node_info.status.latest_milestone.milestone_id.unwrap())?;
+    let milestone_id = env::args()
+        .nth(1)
+        .unwrap_or_else(|| info.node_info.status.latest_milestone.milestone_id.unwrap())
+        .parse::<MilestoneId>()?;
+
     // Send the request.
     let milestone = client.get_milestone_by_id(&milestone_id).await?;
 
