@@ -42,7 +42,8 @@ async fn main() -> Result<()> {
 
     println!("Preparing alias output transaction...");
 
-    // We can first check if we already have an alias in our account, because an alias can have many foundry outputs and therefore we can reuse an existing one
+    // We can first check if we already have an alias in our account, because an alias can have many foundry outputs and
+    // therefore we can reuse an existing one
     if balance.aliases().is_empty() {
         // If we don't have an alias, we need to create one
         let transaction = account.create_alias_output(None, None).await?;

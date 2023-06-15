@@ -32,13 +32,13 @@ async function run() {
         // We can first check if we already have an alias in our account, because an alias can have many foundry outputs and therefore we can reuse an existing one
         if (balance.aliases.length > 0) {
             // If we don't have an alias, we need to create one
-            let transaction = await account
+            const transaction = await account
                 .prepareCreateAliasOutput()
                 .then((prepared) => prepared.send());
             console.log(`Transaction sent: ${transaction.transactionId}`);
 
             // Wait for transaction to get included
-            let blockId = await account.retryTransactionUntilIncluded(
+            const blockId = await account.retryTransactionUntilIncluded(
                 transaction.transactionId,
             );
 
@@ -60,12 +60,12 @@ async function run() {
         };
 
         const prepared = await account.prepareMintNativeToken(params);
-        let transaction = await prepared.send();
+        const transaction = await prepared.send();
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         // Wait for transaction to get included
-        let blockId = await account.retryTransactionUntilIncluded(
+        const blockId = await account.retryTransactionUntilIncluded(
             transaction.transactionId,
         );
 

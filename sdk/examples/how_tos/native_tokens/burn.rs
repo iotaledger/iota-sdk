@@ -15,11 +15,7 @@
 
 use std::env::var;
 
-use iota_sdk::{
-    types::block::output::NativeToken,
-    wallet::Result,
-    Wallet, U256,
-};
+use iota_sdk::{types::block::output::NativeToken, wallet::Result, Wallet, U256};
 
 // The minimum available native token amount to search for in the account
 const MIN_AVAILABLE_AMOUNT: u64 = 11;
