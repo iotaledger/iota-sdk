@@ -40,9 +40,9 @@ async function run() {
         );
         if (!token) {
             throw new Error(
-                `"Native token '${tokenId}' doesn't exist or there's not at least '${Number(
+                `Native token '${tokenId}' doesn't exist or there's not at least '${Number(
                     MIN_AVAILABLE_AMOUNT,
-                )}' tokens of it in account 'Alice'"`,
+                )}' tokens of it in account 'Alice'`,
             );
         }
 
