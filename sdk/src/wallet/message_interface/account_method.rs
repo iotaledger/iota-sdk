@@ -175,11 +175,11 @@ pub enum AccountMethod {
         signature: Ed25519SignatureDto,
         message: String,
     },
-    /// Verify an Evm signature with a message.
+    /// Verify an Secp256k1Ecdsa signature with a message.
     /// Expected response:
     /// [`Bool`](crate::wallet::message_interface::Response::Bool)
     #[serde(rename_all = "camelCase")]
-    VerifyEvmSignature {
+    VerifySecp256k1EcdsaSignature {
         public_key: String,
         signature: String,
         message: String,

@@ -398,14 +398,14 @@ export class Account {
     /**
      * Verifies a message with an ed25519 signature.
      */
-    async verifyEd25519(
+    async verifyEd25519Signature(
         signature: Ed25519Signature,
         message: HexEncodedString,
     ): Promise<EvmSignature> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'verifyEd25519',
+                name: 'verifyEd25519Signature',
                 data: {
                     signature,
                     message,
@@ -418,17 +418,17 @@ export class Account {
     /**
      * Verifies a message with an Evm public key and signature.
      */
-    async verifyEvm(
-        public_key: HexEncodedString,
+    async verifySecp256k1EcdsaSignature(
+        publicKey: HexEncodedString,
         signature: HexEncodedString,
         message: HexEncodedString,
     ): Promise<EvmSignature> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'verifyEvm',
+                name: 'verifySecp256k1EcdsaSignature',
                 data: {
-                    public_key,
+                    publicKey,
                     signature,
                     message,
                 },

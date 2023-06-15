@@ -134,7 +134,7 @@ pub enum Response {
     /// Response for
     /// [`IsStrongholdPasswordAvailable`](crate::wallet::message_interface::Message::IsStrongholdPasswordAvailable)
     /// [`VerifyEd25519Signature`](crate::wallet::message_interface::account_method::AccountMethod::VerifyEd25519Signature)
-    /// [`VerifyEvmSignature`](crate::wallet::message_interface::account_method::AccountMethod::VerifyEvmSignature)
+    /// [`VerifySecp256k1EcdsaSignature`](crate::wallet::message_interface::account_method::AccountMethod::VerifySecp256k1EcdsaSignature)
     Bool(bool),
     /// An error occurred.
     Error(Error),

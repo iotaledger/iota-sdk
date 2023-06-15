@@ -142,18 +142,18 @@ export type __GenerateEvmAddressesMethod__ = {
     };
 };
 
-export type __VerifyEd25519Method__ = {
-    name: 'verifyEd25519';
+export type __VerifyEd25519SignatureMethod__ = {
+    name: 'verifyEd25519Signature';
     data: {
         signature: Ed25519Signature;
         message: HexEncodedString;
     };
 };
 
-export type __VerifyEvmMethod__ = {
-    name: 'verifyEvm';
+export type __VerifySecp256k1EcdsaSignatureMethod__ = {
+    name: 'verifySecp256k1EcdsaSignature';
     data: {
-        public_key: HexEncodedString;
+        publicKey: HexEncodedString;
         signature: HexEncodedString;
         message: HexEncodedString;
     };
