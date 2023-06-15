@@ -29,7 +29,7 @@ If you already created an account, you can just run the CLI without args to get 
 ./wallet
 ```
 
-Alternatively, you can select an existing account by it's alias:
+Alternatively, you can select an existing account by its alias:
 
 ```
 ./wallet Alice
