@@ -21,9 +21,11 @@ import RustCode from '!!raw-loader!../../../../../sdk/examples/how_tos/alias_wal
 import NodejsCode from '!!raw-loader!../../../../../bindings/nodejs/examples/how_tos/alias_wallet/request-funds.ts';
 import PythonCode from '!!raw-loader!../../../../../bindings/python/examples/how_tos/alias_wallet/request_funds.py';
 import TipFaucet from "../../_admonitions/_tip-faucet.md";
+import AliasNFT from "../../_admonitions/_alias_nft_wallet.md";
 
 Alias and NFT outputs have their own address and therefore can hold their own base token or any other native asset.
 
+<AliasNFT/>
 <TipFaucet/>
 
 ## Code Example
@@ -31,7 +33,7 @@ Alias and NFT outputs have their own address and therefore can hold their own ba
 The following example will:
 
 1. Create a wallet.
-2. Get Alice's account which was [created in the first guide](../accounts_and_addresses/create_account.mdx).
+2. Get Alice's account which was [created in the first guide](../accounts-and-addresses/create-account.mdx).
 3. Retrieve the address of the first Alias output.
 4. Request funds to the `FAUCET_URL` you defined in the `.env` file.
 
