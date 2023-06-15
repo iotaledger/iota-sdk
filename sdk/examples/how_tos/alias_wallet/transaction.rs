@@ -6,14 +6,24 @@
 //!
 //! `cargo run --release --all-features --example alias_wallet_transaction`
 
-use iota_sdk::{wallet::{Result, Wallet, account::{SyncOptions, AliasSyncOptions, TransactionOptions}, SendAmountParams}, types::block::{address::{AliasAddress, ToBech32Ext}}, client::{node_api::indexer::query_parameters::QueryParameter}};
+use std::env::var;
+
+use iota_sdk::{
+    client::node_api::indexer::query_parameters::QueryParameter,
+    types::block::address::{AliasAddress, ToBech32Ext},
+    wallet::{
+        account::{AliasSyncOptions, SyncOptions, TransactionOptions},
+        Result, SendAmountParams,
+    },
+    Wallet,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let sync_options = SyncOptions{
+    let sync_options = SyncOptions {
         alias: AliasSyncOptions {
             basic_outputs: true,
             ..Default::default()
@@ -24,13 +34,13 @@ async fn main() -> Result<()> {
     // Create the wallet
     let wallet = Wallet::builder().finish().await?;
     wallet
-        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
     // Get the account
     let account = wallet.get_account("Alice").await?;
     let balance = account.sync(Some(sync_options.clone())).await?;
-    
+
     let total_base_token_balance = balance.base_coin().total();
     println!("Balance before sending funds from alias: {total_base_token_balance:#?}");
 
@@ -41,11 +51,14 @@ async fn main() -> Result<()> {
     let alias_address = AliasAddress::new(*alias_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
 
     // Find first output unlockable by the alias address
-    let input = account.client()
-        .basic_output_ids([
-            QueryParameter::Address(alias_address),
-        ])
-        .await?.items.first().unwrap().clone();
+    let input = account
+        .client()
+        .basic_output_ids([QueryParameter::Address(alias_address)])
+        .await?
+        .items
+        .first()
+        .unwrap()
+        .clone();
 
     let transaction = account
         .send_amount(
