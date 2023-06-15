@@ -42,12 +42,9 @@ mod storage_stub {
 
     #[async_trait]
     pub trait SaveLoadWallet {
-        async fn save_data(
-            &self,
-            storage: &impl StorageAdapter<Error = crate::wallet::Error>,
-        ) -> crate::wallet::Result<()>;
+        async fn save(&self, storage: &impl StorageAdapter<Error = crate::wallet::Error>) -> crate::wallet::Result<()>;
 
-        async fn get_data(
+        async fn load(
             storage: &impl StorageAdapter<Error = crate::wallet::Error>,
         ) -> crate::wallet::Result<Option<Self>>
         where
@@ -59,10 +56,7 @@ mod storage_stub {
     where
         crate::wallet::Error: From<S::Error>,
     {
-        async fn save_data(
-            &self,
-            storage: &impl StorageAdapter<Error = crate::wallet::Error>,
-        ) -> crate::wallet::Result<()> {
+        async fn save(&self, storage: &impl StorageAdapter<Error = crate::wallet::Error>) -> crate::wallet::Result<()> {
             log::debug!("save_wallet_data");
             storage.set(WALLET_INDEXATION_KEY, self).await?;
 
@@ -76,7 +70,7 @@ mod storage_stub {
             Ok(())
         }
 
-        async fn get_data(
+        async fn load(
             storage: &impl StorageAdapter<Error = crate::wallet::Error>,
         ) -> crate::wallet::Result<Option<Self>> {
             log::debug!("get_wallet_data");
@@ -97,16 +91,13 @@ mod storage_stub {
 
     #[async_trait]
     impl SaveLoadWallet for WalletBuilder<MnemonicSecretManager> {
-        async fn save_data(
-            &self,
-            storage: &impl StorageAdapter<Error = crate::wallet::Error>,
-        ) -> crate::wallet::Result<()> {
+        async fn save(&self, storage: &impl StorageAdapter<Error = crate::wallet::Error>) -> crate::wallet::Result<()> {
             log::debug!("save_wallet_data");
             storage.set(WALLET_INDEXATION_KEY, self).await?;
             Ok(())
         }
 
-        async fn get_data(
+        async fn load(
             storage: &impl StorageAdapter<Error = crate::wallet::Error>,
         ) -> crate::wallet::Result<Option<Self>> {
             log::debug!("get_wallet_data");
