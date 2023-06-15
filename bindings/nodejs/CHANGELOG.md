@@ -19,6 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 0.1.0 - 2023-XX-XX
+## 1.0.0-rc.0 - 2023-06-15
 
-Initial release of the Node.js bindings.
+Initial release of the Node.js SDK bindings.
