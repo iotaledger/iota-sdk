@@ -438,38 +438,50 @@ impl<'de> Deserialize<'de> for UnlockCondition {
         let value = TypedUnlockCondition::deserialize(d)?;
         Ok(match value.kind {
             AddressUnlockCondition::KIND => AddressUnlockCondition::deserialize(value.data)
-                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize address unlock condition: {e}")))?
+                .map_err(|e| {
+                    serde::de::Error::custom(alloc::format!("cannot deserialize address unlock condition: {e}"))
+                })?
                 .into(),
             StorageDepositReturnUnlockCondition::KIND => StorageDepositReturnUnlockCondition::deserialize(value.data)
                 .map_err(|e| {
-                    serde::de::Error::custom(format!("cannot deserialize storage deposit unlock condition: {e}"))
+                    serde::de::Error::custom(alloc::format!(
+                        "cannot deserialize storage deposit unlock condition: {e}"
+                    ))
                 })?
                 .into(),
             TimelockUnlockCondition::KIND => TimelockUnlockCondition::deserialize(value.data)
-                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize timelock unlock condition: {e}")))?
+                .map_err(|e| {
+                    serde::de::Error::custom(alloc::format!("cannot deserialize timelock unlock condition: {e}"))
+                })?
                 .into(),
             ExpirationUnlockCondition::KIND => ExpirationUnlockCondition::deserialize(value.data)
-                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize expiration unlock condition: {e}")))?
+                .map_err(|e| {
+                    serde::de::Error::custom(alloc::format!("cannot deserialize expiration unlock condition: {e}"))
+                })?
                 .into(),
             StateControllerAddressUnlockCondition::KIND => {
                 StateControllerAddressUnlockCondition::deserialize(value.data)
                     .map_err(|e| {
-                        serde::de::Error::custom(format!("cannot deserialize state controller unlock condition: {e}"))
+                        serde::de::Error::custom(alloc::format!(
+                            "cannot deserialize state controller unlock condition: {e}"
+                        ))
                     })?
                     .into()
             }
             GovernorAddressUnlockCondition::KIND => GovernorAddressUnlockCondition::deserialize(value.data)
-                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize governor unlock condition: {e}")))?
+                .map_err(|e| {
+                    serde::de::Error::custom(alloc::format!("cannot deserialize governor unlock condition: {e}"))
+                })?
                 .into(),
             ImmutableAliasAddressUnlockCondition::KIND => ImmutableAliasAddressUnlockCondition::deserialize(value.data)
                 .map_err(|e| {
-                    serde::de::Error::custom(format!(
+                    serde::de::Error::custom(alloc::format!(
                         "cannot deserialize immutable alias address unlock condition: {e}"
                     ))
                 })?
                 .into(),
             _ => {
-                return Err(serde::de::Error::custom(format!(
+                return Err(serde::de::Error::custom(alloc::format!(
                     "invalid unlock condition type: {}",
                     value.kind
                 )));

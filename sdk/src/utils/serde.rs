@@ -101,7 +101,7 @@ pub mod boxed_slice_prefix {
         D: Deserializer<'de>,
         <L as TryFrom<usize>>::Error: core::fmt::Display,
     {
-        Box::<[V]>::deserialize(deserializer)?
+        alloc::boxed::Box::<[V]>::deserialize(deserializer)?
             .try_into()
             .map_err(de::Error::custom)
     }

@@ -224,16 +224,16 @@ impl<'de> Deserialize<'de> for Address {
         let value = TypedAddress::deserialize(d)?;
         Ok(match value.kind {
             Ed25519Address::KIND => Ed25519Address::deserialize(value.data)
-                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize ed25519 address: {e}")))?
+                .map_err(|e| serde::de::Error::custom(alloc::format!("cannot deserialize ed25519 address: {e}")))?
                 .into(),
             AliasAddress::KIND => AliasAddress::deserialize(value.data)
-                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize alias address: {e}")))?
+                .map_err(|e| serde::de::Error::custom(alloc::format!("cannot deserialize alias address: {e}")))?
                 .into(),
             NftAddress::KIND => NftAddress::deserialize(value.data)
-                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize NFT address: {e}")))?
+                .map_err(|e| serde::de::Error::custom(alloc::format!("cannot deserialize NFT address: {e}")))?
                 .into(),
             _ => {
-                return Err(serde::de::Error::custom(format!(
+                return Err(serde::de::Error::custom(alloc::format!(
                     "invalid address type: {}",
                     value.kind
                 )));

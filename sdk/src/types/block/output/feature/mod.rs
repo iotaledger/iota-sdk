@@ -158,19 +158,19 @@ impl<'de> Deserialize<'de> for Feature {
         let value = TypedFeature::deserialize(d)?;
         Ok(match value.kind {
             SenderFeature::KIND => SenderFeature::deserialize(value.data)
-                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize sender feature: {e}")))?
+                .map_err(|e| serde::de::Error::custom(alloc::format!("cannot deserialize sender feature: {e}")))?
                 .into(),
             IssuerFeature::KIND => IssuerFeature::deserialize(value.data)
-                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize issuer feature: {e}")))?
+                .map_err(|e| serde::de::Error::custom(alloc::format!("cannot deserialize issuer feature: {e}")))?
                 .into(),
             MetadataFeature::KIND => MetadataFeature::deserialize(value.data)
-                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize metadata feature: {e}")))?
+                .map_err(|e| serde::de::Error::custom(alloc::format!("cannot deserialize metadata feature: {e}")))?
                 .into(),
             TagFeature::KIND => TagFeature::deserialize(value.data)
-                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize tag feature: {e}")))?
+                .map_err(|e| serde::de::Error::custom(alloc::format!("cannot deserialize tag feature: {e}")))?
                 .into(),
             _ => {
-                return Err(serde::de::Error::custom(format!(
+                return Err(serde::de::Error::custom(alloc::format!(
                     "invalid feature type: {}",
                     value.kind
                 )));

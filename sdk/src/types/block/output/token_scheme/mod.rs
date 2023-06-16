@@ -49,10 +49,10 @@ impl<'de> Deserialize<'de> for TokenScheme {
         let value = TypedTokenScheme::deserialize(d)?;
         Ok(match value.kind {
             SimpleTokenScheme::KIND => SimpleTokenScheme::deserialize(value.data)
-                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize simple token scheme: {e}")))?
+                .map_err(|e| serde::de::Error::custom(alloc::format!("cannot deserialize simple token scheme: {e}")))?
                 .into(),
             _ => {
-                return Err(serde::de::Error::custom(format!(
+                return Err(serde::de::Error::custom(alloc::format!(
                     "invalid token scheme type: {}",
                     value.kind
                 )));
