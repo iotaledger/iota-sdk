@@ -16,7 +16,7 @@ Initialize the wallet with a given node and a randomly generated mnemonic.
 
 Create a main account.
 ```sh title=Input
-./wallet new main
+./wallet new-account main
 ```
 ```sh title=Output
 > INFO  Created account "main"
@@ -30,7 +30,7 @@ Note: exiting from an account is omitted from now on for the rest of this guide.
 
 Create a savings account.
 ```sh title=Input
-./wallet new savings
+./wallet new-account savings
 ```
 ```sh title=Output
 > INFO  Created account "savings"

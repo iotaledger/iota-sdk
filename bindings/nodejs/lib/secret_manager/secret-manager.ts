@@ -8,7 +8,10 @@ import type {
     LedgerNanoStatus,
     IBip32Chain,
 } from '../types/client';
-import { EvmSignature, SecretManagerType } from '../types/secret_manager';
+import {
+    Secp256k1EcdsaSignature,
+    SecretManagerType,
+} from '../types/secret_manager';
 import { Ed25519Signature, HexEncodedString, Payload, Unlock } from '../types';
 
 /** The SecretManager to interact with nodes. */
@@ -113,14 +116,14 @@ export class SecretManager {
     }
 
     /**
-     * Signs a message with an Evm private key.
+     * Signs a message with an Secp256k1Ecdsa private key.
      */
-    async signEvm(
+    async signSecp256k1Ecdsa(
         message: HexEncodedString,
         chain: IBip32Chain,
-    ): Promise<EvmSignature> {
+    ): Promise<Secp256k1EcdsaSignature> {
         const response = await this.methodHandler.callMethod({
-            name: 'signEvm',
+            name: 'signSecp256k1Ecdsa',
             data: {
                 message,
                 chain,

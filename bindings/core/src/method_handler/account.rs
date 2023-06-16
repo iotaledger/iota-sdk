@@ -14,10 +14,7 @@ use iota_sdk::{
         Error,
     },
     wallet::{
-        account::{
-            types::{BalanceDto, TransactionDto},
-            Account, OutputDataDto, PreparedMintTokenTransactionDto, TransactionOptions,
-        },
+        account::{types::TransactionDto, Account, OutputDataDto, PreparedMintTokenTransactionDto, TransactionOptions},
         MintNftParams,
     },
 };
@@ -35,6 +32,10 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let addresses = account.addresses_with_unspent_outputs().await?;
             Response::AddressesWithUnspentOutputs(addresses)
         }
+        AccountMethod::ClaimableOutputs { outputs_to_claim } => {
+            let output_ids = account.claimable_outputs(outputs_to_claim).await?;
+            Response::OutputIds(output_ids)
+        }
         AccountMethod::ClaimOutputs { output_ids_to_claim } => {
             let transaction = account.claim_outputs(output_ids_to_claim.to_vec()).await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
@@ -48,7 +49,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let address = account.generate_ed25519_addresses(amount, options).await?;
             Response::GeneratedAccountAddresses(address)
         }
-        AccountMethod::GetBalance => Response::Balance(BalanceDto::from(&account.balance().await?)),
+        AccountMethod::GetBalance => Response::Balance(account.balance().await?),
         AccountMethod::GetFoundryOutput { token_id } => {
             let output = account.get_foundry_output(token_id).await?;
             Response::Output(OutputDto::from(&output))
@@ -64,12 +65,6 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         AccountMethod::GetOutput { output_id } => {
             let output_data = account.get_output(&output_id).await;
             Response::OutputData(output_data.as_ref().map(OutputDataDto::from).map(Box::new))
-        }
-        AccountMethod::GetOutputsWithAdditionalUnlockConditions { outputs_to_claim } => {
-            let output_ids = account
-                .get_unlockable_outputs_with_additional_unlock_conditions(outputs_to_claim)
-                .await?;
-            Response::OutputIds(output_ids)
         }
         #[cfg(feature = "participation")]
         AccountMethod::GetParticipationEvent { event_id } => {
@@ -346,7 +341,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let transaction = account.submit_and_store_transaction(signed_transaction_data).await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
-        AccountMethod::Sync { options } => Response::Balance(BalanceDto::from(&account.sync(options).await?)),
+        AccountMethod::Sync { options } => Response::Balance(account.sync(options).await?),
         AccountMethod::Transactions => {
             let transactions = account.transactions().await;
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())

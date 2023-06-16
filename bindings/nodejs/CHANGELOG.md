@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 0.1.0 - 2023-XX-XX
+## 1.0.0-rc.1 - YYYY-MM-DD
 
-Initial release of the Node.js bindings.
+### Changed
+
+- `Account::getOutputsWithAdditionalUnlockConditions` renamed to `claimableOutputs`;
+- Rename `Account::signEvm` to `signSecp256k1Ecdsa` and `EvmSignature` to `Secp256k1EcdsaSignature`;
+
+## 1.0.0-rc.0 - 2023-06-15
+
+Initial release of the Node.js SDK bindings.

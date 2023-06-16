@@ -18,7 +18,7 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 secret_manager = SecretManager(StrongholdSecretManager(
-    "sign_evm.stronghold", os.environ['STRONGHOLD_PASSWORD']))
+    "sign_secp256k1_ecdsa.stronghold", os.environ['STRONGHOLD_PASSWORD']))
 
 # Store the mnemonic in the Stronghold snapshot, this needs to be done only the first time.
 # The mnemonic can't be retrieved from the Stronghold file, so make a backup in a secure place!
@@ -34,6 +34,6 @@ bip32_chain = [
 ]
 
 message = utf8_to_hex(FOUNDRY_METADATA)
-evm_signature = secret_manager.sign_evm(message, bip32_chain)
-print(f'Public key: {evm_signature["publicKey"]}')
-print(f'Signature: {evm_signature["signature"]}')
+secp256k1_ecdsa_signature = secret_manager.sign_secp256k1_ecdsa(message, bip32_chain)
+print(f'Public key: {secp256k1_ecdsa_signature["publicKey"]}')
+print(f'Signature: {secp256k1_ecdsa_signature["signature"]}')

@@ -26,7 +26,7 @@ use crate::{
     wallet::{
         account::{
             operations::transaction::high_level::minting::mint_native_token::MintTokenTransactionDto,
-            types::{address::AccountAddress, AddressWithUnspentOutputs, BalanceDto, TransactionDto},
+            types::{address::AccountAddress, AddressWithUnspentOutputs, Balance, TransactionDto},
             OutputDataDto,
         },
         message_interface::dtos::AccountDetailsDto,
@@ -66,7 +66,7 @@ pub enum Response {
     /// [`MinimumRequiredStorageDeposit`](crate::wallet::message_interface::AccountMethod::MinimumRequiredStorageDeposit)
     MinimumRequiredStorageDeposit(String),
     /// Response for
-    /// [`GetOutputsWithAdditionalUnlockConditions`](crate::wallet::message_interface::AccountMethod::GetOutputsWithAdditionalUnlockConditions)
+    /// [`ClaimableOutputs`](crate::wallet::message_interface::AccountMethod::ClaimableOutputs)
     OutputIds(Vec<OutputId>),
     /// Response for [`GetOutput`](crate::wallet::message_interface::AccountMethod::GetOutput)
     OutputData(Option<Box<OutputDataDto>>),
@@ -100,13 +100,13 @@ pub enum Response {
     /// [`GenerateEvmAddresses`](crate::wallet::message_interface::AccountMethod::GenerateEvmAddresses)
     GeneratedEvmAddresses(Vec<String>),
     /// Response for:
-    /// - [`SignEvm`](crate::method::SecretManagerMethod::SignEvm)
+    /// - [`SignSecp256k1Ecdsa`](crate::method::SecretManagerMethod::SignSecp256k1Ecdsa)
     #[serde(rename_all = "camelCase")]
-    EvmSignature { public_key: String, signature: String },
+    Secp256k1EcdsaSignature { public_key: String, signature: String },
     /// Response for
     /// [`GetBalance`](crate::wallet::message_interface::AccountMethod::GetBalance),
     /// [`SyncAccount`](crate::wallet::message_interface::AccountMethod::SyncAccount)
-    Balance(BalanceDto),
+    Balance(Balance),
     /// Response for
     /// [`GetLedgerNanoStatus`](crate::wallet::message_interface::Message::GetLedgerNanoStatus),
     #[cfg(feature = "ledger_nano")]
@@ -219,10 +219,10 @@ impl Debug for Response {
             }
             Self::GeneratedEd25519Addresses(addresses) => write!(f, "GeneratedEd25519Addresses({addresses:?})"),
             Self::GeneratedEvmAddresses(addresses) => write!(f, "GeneratedEvmAddresses({addresses:?})"),
-            Self::EvmSignature { public_key, signature } => {
+            Self::Secp256k1EcdsaSignature { public_key, signature } => {
                 write!(
                     f,
-                    "EvmSignature{{ public_key: {public_key:?}, signature: {signature:?} }}"
+                    "Secp256k1EcdsaSignature{{ public_key: {public_key:?}, signature: {signature:?} }}"
                 )
             }
             Self::Balance(balance) => write!(f, "Balance({balance:?})"),
