@@ -52,7 +52,10 @@ impl<'de> Deserialize<'de> for TokenScheme {
                 .map_err(|e| serde::de::Error::custom(format!("cannot deserialize simple token scheme: {e}")))?
                 .into(),
             _ => {
-                return Err(serde::de::Error::custom("invalid feature type"));
+                return Err(serde::de::Error::custom(format!(
+                    "invalid token scheme type: {}",
+                    value.kind
+                )));
             }
         })
     }

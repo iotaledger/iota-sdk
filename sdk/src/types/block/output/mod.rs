@@ -37,6 +37,8 @@ use packable::{
     unpacker::Unpacker,
     Packable, PackableExt,
 };
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer};
 
 pub(crate) use self::{
     alias::StateMetadataLength,
@@ -120,11 +122,6 @@ impl OutputWithMetadata {
 
 /// A generic output that can represent different types defining the deposit of funds.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(tag = "type", content = "data")
-)]
 pub enum Output {
     /// A treasury output.
     Treasury(TreasuryOutput),
@@ -497,4 +494,74 @@ fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, tok
         .finish(token_supply)
         .unwrap()
         .amount()
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for Output {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        struct TypedOutput {
+            #[serde(rename = "type")]
+            kind: u8,
+            data: serde_json::Value,
+        }
+
+        let value = TypedOutput::deserialize(d)?;
+        Ok(match value.kind {
+            TreasuryOutput::KIND => TreasuryOutput::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize treasury output: {e}")))?
+                .into(),
+            BasicOutput::KIND => BasicOutput::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize basic output: {e}")))?
+                .into(),
+            AliasOutput::KIND => AliasOutput::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize alias output: {e}")))?
+                .into(),
+            FoundryOutput::KIND => FoundryOutput::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize foundry output: {e}")))?
+                .into(),
+            NftOutput::KIND => NftOutput::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize nft output: {e}")))?
+                .into(),
+            _ => {
+                return Err(serde::de::Error::custom(format!("invalid output type: {}", value.kind)));
+            }
+        })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Output {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        #[derive(Serialize)]
+        #[serde(untagged)]
+        enum OutputDto<'a> {
+            T2(&'a TreasuryOutput),
+            T3(&'a BasicOutput),
+            T4(&'a AliasOutput),
+            T5(&'a FoundryOutput),
+            T6(&'a NftOutput),
+        }
+        #[derive(Serialize)]
+        struct TypedFeature<'a> {
+            #[serde(rename = "type")]
+            kind: u8,
+            data: OutputDto<'a>,
+        }
+        let data = match self {
+            Self::Treasury(data) => OutputDto::T2(data),
+            Self::Basic(data) => OutputDto::T3(data),
+            Self::Alias(data) => OutputDto::T4(data),
+            Self::Foundry(data) => OutputDto::T5(data),
+            Self::Nft(data) => OutputDto::T6(data),
+        };
+        TypedFeature {
+            kind: self.kind(),
+            data,
+        }
+        .serialize(serializer)
+    }
 }

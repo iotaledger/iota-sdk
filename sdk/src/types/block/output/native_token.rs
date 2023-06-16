@@ -12,7 +12,10 @@ use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 use primitive_types::U256;
 
-use crate::types::block::{output::TokenId, Error};
+use crate::{
+    types::block::{output::TokenId, Error},
+    utils::serde::boxed_slice_prefix,
+};
 
 ///
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Packable)]
@@ -154,7 +157,9 @@ pub(crate) type NativeTokenCount = BoundedU8<0, { NativeTokens::COUNT_MAX }>;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidNativeTokenCount(p.into())))]
 pub struct NativeTokens(
-    #[packable(verify_with = verify_unique_sorted)] BoxedSlicePrefix<NativeToken, NativeTokenCount>,
+    #[packable(verify_with = verify_unique_sorted)]
+    #[serde(with = "boxed_slice_prefix")]
+    BoxedSlicePrefix<NativeToken, NativeTokenCount>,
 );
 
 impl TryFrom<Vec<NativeToken>> for NativeTokens {

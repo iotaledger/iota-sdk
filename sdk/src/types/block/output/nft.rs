@@ -10,18 +10,23 @@ use packable::{
     Packable,
 };
 
-use crate::types::block::{
-    address::{Address, NftAddress},
-    output::{
-        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        verify_output_amount, ChainId, NativeToken, NativeTokens, NftId, Output, OutputBuilderAmount, OutputId, Rent,
-        RentStructure, StateTransitionError, StateTransitionVerifier,
+use crate::{
+    types::block::{
+        address::{Address, NftAddress},
+        output::{
+            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+            unlock_condition::{
+                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+            },
+            verify_output_amount, ChainId, NativeToken, NativeTokens, NftId, Output, OutputBuilderAmount, OutputId,
+            Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
+        },
+        protocol::ProtocolParameters,
+        semantic::{ConflictReason, ValidationContext},
+        unlock::Unlock,
+        Error,
     },
-    protocol::ProtocolParameters,
-    semantic::{ConflictReason, ValidationContext},
-    unlock::Unlock,
-    Error,
+    utils::serde::string,
 };
 
 ///
@@ -248,13 +253,13 @@ impl From<&NftOutput> for NftOutputBuilder {
 )]
 pub struct NftOutput {
     // Amount of IOTA tokens held by the output.
+    #[serde(with = "string")]
     amount: u64,
     // Native tokens held by the output.
     #[serde(skip_serializing_if = "NativeTokens::is_empty", default)]
     native_tokens: NativeTokens,
     // Unique identifier of the NFT.
     nft_id: NftId,
-    #[serde(skip_serializing_if = "UnlockConditions::is_empty", default)]
     unlock_conditions: UnlockConditions,
     #[serde(skip_serializing_if = "Features::is_empty", default)]
     features: Features,

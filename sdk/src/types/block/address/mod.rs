@@ -233,7 +233,10 @@ impl<'de> Deserialize<'de> for Address {
                 .map_err(|e| serde::de::Error::custom(format!("cannot deserialize NFT address: {e}")))?
                 .into(),
             _ => {
-                return Err(serde::de::Error::custom("invalid address type"));
+                return Err(serde::de::Error::custom(format!(
+                    "invalid address type: {}",
+                    value.kind
+                )));
             }
         })
     }

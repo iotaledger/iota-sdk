@@ -14,9 +14,12 @@ use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 pub use self::{alias::AliasUnlock, nft::NftUnlock, reference::ReferenceUnlock, signature::SignatureUnlock};
-use crate::types::block::{
-    input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX, INPUT_INDEX_RANGE},
-    Error,
+use crate::{
+    types::block::{
+        input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX, INPUT_INDEX_RANGE},
+        Error,
+    },
+    utils::serde::boxed_slice_prefix,
 };
 
 /// The maximum number of unlocks of a transaction.
@@ -83,7 +86,11 @@ pub(crate) type UnlockCount = BoundedU16<{ *UNLOCK_COUNT_RANGE.start() }, { *UNL
 #[derive(Clone, Debug, Eq, PartialEq, Deref, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidUnlockCount(p.into())))]
-pub struct Unlocks(#[packable(verify_with = verify_unlocks)] BoxedSlicePrefix<Unlock, UnlockCount>);
+pub struct Unlocks(
+    #[packable(verify_with = verify_unlocks)]
+    #[serde(with = "boxed_slice_prefix")]
+    BoxedSlicePrefix<Unlock, UnlockCount>,
+);
 
 impl Unlocks {
     /// Creates a new [`Unlocks`].

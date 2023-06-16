@@ -29,7 +29,7 @@ use crate::{
         unlock::Unlock,
         Error,
     },
-    utils::serde::prefix_hex_box,
+    utils::serde::{prefix_hex_box, string},
 };
 
 /// Types of alias transition.
@@ -333,6 +333,7 @@ pub(crate) type StateMetadataLength = BoundedU16<0, { AliasOutput::STATE_METADAT
 )]
 pub struct AliasOutput {
     // Amount of IOTA tokens held by the output.
+    #[serde(with = "string")]
     amount: u64,
     // Native tokens held by the output.
     #[serde(skip_serializing_if = "NativeTokens::is_empty", default)]
@@ -347,7 +348,6 @@ pub struct AliasOutput {
     state_metadata: BoxedSlicePrefix<u8, StateMetadataLength>,
     // A counter that denotes the number of foundries created by this alias account.
     foundry_counter: u32,
-    #[serde(skip_serializing_if = "UnlockConditions::is_empty", default)]
     unlock_conditions: UnlockConditions,
     //
     #[serde(skip_serializing_if = "Features::is_empty", default)]

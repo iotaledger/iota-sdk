@@ -12,18 +12,23 @@ use packable::{
 };
 use primitive_types::U256;
 
-use crate::types::block::{
-    address::{Address, AliasAddress},
-    output::{
-        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        verify_output_amount, ChainId, FoundryId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
-        Rent, RentStructure, StateTransitionError, StateTransitionVerifier, TokenId, TokenScheme,
+use crate::{
+    types::block::{
+        address::{Address, AliasAddress},
+        output::{
+            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+            unlock_condition::{
+                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+            },
+            verify_output_amount, ChainId, FoundryId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
+            Rent, RentStructure, StateTransitionError, StateTransitionVerifier, TokenId, TokenScheme,
+        },
+        protocol::ProtocolParameters,
+        semantic::{ConflictReason, ValidationContext},
+        unlock::Unlock,
+        Error,
     },
-    protocol::ProtocolParameters,
-    semantic::{ConflictReason, ValidationContext},
-    unlock::Unlock,
-    Error,
+    utils::serde::string,
 };
 
 ///
@@ -273,6 +278,7 @@ impl From<&FoundryOutput> for FoundryOutputBuilder {
 )]
 pub struct FoundryOutput {
     // Amount of IOTA tokens held by the output.
+    #[serde(with = "string")]
     amount: u64,
     // Native tokens held by the output.
     #[serde(skip_serializing_if = "NativeTokens::is_empty", default)]
@@ -280,7 +286,6 @@ pub struct FoundryOutput {
     // The serial number of the foundry with respect to the controlling alias.
     serial_number: u32,
     token_scheme: TokenScheme,
-    #[serde(skip_serializing_if = "UnlockConditions::is_empty", default)]
     unlock_conditions: UnlockConditions,
     #[serde(skip_serializing_if = "Features::is_empty", default)]
     features: Features,

@@ -31,7 +31,10 @@ pub use self::{
     state_controller_address::StateControllerAddressUnlockCondition,
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
-use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, Error};
+use crate::{
+    types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, Error},
+    utils::serde::boxed_slice_prefix,
+};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From)]
@@ -198,7 +201,9 @@ pub(crate) type UnlockConditionCount = BoundedU8<0, { UnlockConditions::COUNT_MA
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidUnlockConditionCount(p.into())))]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct UnlockConditions(
-    #[packable(verify_with = verify_unique_sorted_packable)] BoxedSlicePrefix<UnlockCondition, UnlockConditionCount>,
+    #[packable(verify_with = verify_unique_sorted_packable)]
+    #[serde(with = "boxed_slice_prefix")]
+    BoxedSlicePrefix<UnlockCondition, UnlockConditionCount>,
 );
 
 impl TryFrom<Vec<UnlockCondition>> for UnlockConditions {
@@ -364,10 +369,6 @@ impl UnlockConditions {
         self.expiration()
             .map_or(false, |expiration| milestone_timestamp >= expiration.timestamp())
     }
-
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
 }
 
 #[inline]
@@ -470,7 +471,10 @@ impl<'de> Deserialize<'de> for UnlockCondition {
                     .into(),
             ),
             _ => {
-                return Err(serde::de::Error::custom("invalid unlock condition type"));
+                return Err(serde::de::Error::custom(format!(
+                    "invalid unlock condition type: {}",
+                    value.kind
+                )));
             }
         })
     }

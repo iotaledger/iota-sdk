@@ -1,10 +1,11 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use core::str::FromStr;
+use core::{marker::PhantomData, str::FromStr};
 use std::collections::HashMap;
 
 use serde::de::DeserializeOwned;
+use serde_json::json;
 
 use super::*;
 use crate::wallet::Error;
@@ -31,18 +32,132 @@ fn rename_keys(json: &mut serde_json::Value) {
 }
 
 fn migrate_native_tokens(native_tokens: &mut serde_json::Value) {
-    for native_token in native_tokens["inner"].as_array_mut().unwrap() {
+    let mut native_tokens_v = native_tokens.take();
+    *native_tokens = native_tokens_v["inner"].take();
+    for native_token in native_tokens.as_array_mut().unwrap() {
         if let Some(id) = native_token.get("token_id") {
             *native_token = serde_json::json!({ "amount": native_token["amount"], "id": id});
         }
     }
 }
 
+fn migrate_token_scheme(token_scheme: &mut serde_json::Value) {
+    let token_scheme_map = token_scheme.as_object_mut().unwrap();
+    if let Some(mut data) = token_scheme_map.remove("Simple") {
+        rename_keys(&mut data);
+        *token_scheme = json!({
+            "type": 0,
+            "data": data
+        });
+    }
+}
+
+fn migrate_token_scheme_dto(token_scheme: &mut serde_json::Value) {
+    let mut token_scheme_v = token_scheme.take();
+    let token_scheme_map = token_scheme_v.as_object_mut().unwrap();
+    let kind = token_scheme_map.remove("type");
+    *token_scheme = json!({
+        "type": kind,
+        "data": token_scheme_v
+    });
+}
+
+fn migrate_address(address: &mut serde_json::Value) -> Result<()> {
+    ConvertTag::<types::AddressTag>::check(&mut address["type"])?;
+    Ok(())
+}
+
+fn migrate_address_dto(address: &mut serde_json::Value) -> Result<()> {
+    let address = address.as_object_mut().unwrap();
+    if let Some(pub_key_hash) = address.remove("pubKeyHash") {
+        address.insert("data".to_owned(), pub_key_hash);
+    }
+    if let Some(alias_id) = address.remove("aliasId") {
+        address.insert("data".to_owned(), alias_id);
+    }
+    if let Some(nft_id) = address.remove("nftId") {
+        address.insert("data".to_owned(), nft_id);
+    }
+    Ok(())
+}
+
+fn migrate_unlock_conditions(unlock_conditions: &mut serde_json::Value) -> Result<()> {
+    let mut unlock_conditions_v = unlock_conditions.take();
+    *unlock_conditions = unlock_conditions_v["inner"].take();
+    for unlock_condition in unlock_conditions.as_array_mut().unwrap() {
+        ConvertTag::<types::UnlockConditionTag>::check(&mut unlock_condition["type"])?;
+        if let Some(kind) = unlock_condition["type"].as_u64() {
+            match kind {
+                // Address
+                // Governor
+                // ImmutableAlias
+                // StateController
+                // Here data is an address
+                0 | 4 | 5 | 6 => migrate_address(&mut unlock_condition["data"])?,
+                // StorageDepositReturn
+                // Expiration
+                // These contain an address
+                1 | 3 => {
+                    migrate_address(&mut unlock_condition["data"]["return_address"])?;
+                    rename_keys(&mut unlock_condition["data"]);
+                }
+                _ => (),
+            }
+        }
+    }
+    Ok(())
+}
+
+fn migrate_unlock_conditions_dto(unlock_conditions: &mut serde_json::Value) -> Result<()> {
+    for unlock_condition in unlock_conditions.as_array_mut().unwrap() {
+        if let Some(kind) = unlock_condition["type"].as_u64() {
+            match kind {
+                // Address
+                // Governor
+                // ImmutableAlias
+                // StateController
+                // These should be renamed as they are a single field
+                0 | 4 | 5 | 6 => {
+                    let unlock_condition = unlock_condition.as_object_mut().unwrap();
+                    if let Some(mut address) = unlock_condition.remove("address") {
+                        migrate_address_dto(&mut address)?;
+                        unlock_condition.insert("data".to_owned(), address);
+                    }
+                }
+                // StorageDepositReturn
+                // Timelock
+                // Expiration
+                // These are flattened objects so we have to reorganize
+                1 | 2 | 3 => {
+                    let mut unlock_condition_v = unlock_condition.take();
+                    if let Some(return_address) = unlock_condition_v.get_mut("returnAddress") {
+                        migrate_address_dto(return_address)?;
+                    }
+                    let unlock_condition_map = unlock_condition_v.as_object_mut().unwrap();
+                    unlock_condition_map.remove("type");
+                    *unlock_condition = json!({
+                        "type": kind,
+                        "data": unlock_condition_v
+                    });
+                }
+                _ => (),
+            }
+        }
+    }
+    Ok(())
+}
+
 fn migrate_features(features: &mut serde_json::Value) -> Result<()> {
-    for feature in features["inner"].as_array_mut().unwrap() {
-        ConvertFeatureType::check(&mut feature["type"])?;
-        if matches!(feature["type"].as_u64(), Some(2 | 3)) {
-            ConvertBoxedSlice::check(&mut feature["data"])?;
+    let mut features_v = features.take();
+    *features = features_v["inner"].take();
+    for feature in features.as_array_mut().unwrap() {
+        ConvertTag::<types::FeatureTag>::check(&mut feature["type"])?;
+        if let Some(kind) = feature["type"].as_u64() {
+            match kind {
+                0 | 1 => migrate_address(&mut feature["data"])?,
+                2 | 3 => ConvertBoxedSlice::check(&mut feature["data"])?,
+                _ => (),
+            }
         }
     }
     Ok(())
@@ -51,17 +166,24 @@ fn migrate_features(features: &mut serde_json::Value) -> Result<()> {
 fn migrate_features_dto(features: &mut serde_json::Value) -> Result<()> {
     for feature in features.as_array_mut().unwrap() {
         let feature = feature.as_object_mut().unwrap();
-        if let Some(ty) = feature.remove("address") {
-            feature.insert("data".to_owned(), ty);
+        if let Some(mut address) = feature.remove("address") {
+            migrate_address_dto(&mut address)?;
+            feature.insert("data".to_owned(), address);
         }
-        if let Some(ty) = feature.remove("tag") {
-            feature.insert("data".to_owned(), ty);
+        if let Some(tag) = feature.remove("tag") {
+            feature.insert("data".to_owned(), tag);
         }
     }
     Ok(())
 }
 
-fn migrate_output(output: &mut serde_json::Value) -> Result<()> {
+fn migrate_output_inner(output: &mut serde_json::Value) -> Result<()> {
+    if let Some(amount) = output.get_mut("amount") {
+        *amount = amount.as_u64().unwrap().to_string().into();
+    }
+    if let Some(state_metadata) = output.get_mut("state_metadata") {
+        ConvertBoxedSlice::check(state_metadata)?
+    }
     if let Some(features) = output.get_mut("features") {
         migrate_features(features)?;
     }
@@ -71,23 +193,53 @@ fn migrate_output(output: &mut serde_json::Value) -> Result<()> {
     if let Some(native_tokens) = output.get_mut("native_tokens") {
         migrate_native_tokens(native_tokens);
     }
+    if let Some(unlock_conditions) = output.get_mut("unlock_conditions") {
+        migrate_unlock_conditions(unlock_conditions)?;
+    }
+    if let Some(token_scheme) = output.get_mut("token_scheme") {
+        migrate_token_scheme(token_scheme);
+    }
+    rename_keys(output);
+    Ok(())
+}
+
+fn migrate_output(output: &mut serde_json::Value) -> Result<()> {
+    ConvertTag::<types::OutputTag>::check(&mut output["type"])?;
+    migrate_output_inner(&mut output["data"])?;
     Ok(())
 }
 
 fn migrate_output_dto(output: &mut serde_json::Value) -> Result<()> {
-    if let Some(features) = output.get_mut("features") {
+    let mut output_v = output.take();
+    if let Some(state_metadata) = output.get_mut("stateMetadata") {
+        ConvertBoxedSlice::check(state_metadata)?
+    }
+    if let Some(features) = output_v.get_mut("features") {
         migrate_features_dto(features)?;
     }
-    if let Some(features) = output.get_mut("immutableFeatures") {
+    if let Some(features) = output_v.get_mut("immutableFeatures") {
         migrate_features_dto(features)?;
     }
+    if let Some(unlock_conditions) = output_v.get_mut("unlockConditions") {
+        migrate_unlock_conditions_dto(unlock_conditions)?;
+    }
+    if let Some(token_scheme) = output_v.get_mut("tokenScheme") {
+        migrate_token_scheme_dto(token_scheme);
+    }
+    let output_map = output_v.as_object_mut().unwrap();
+    let kind = output_map.remove("type");
+    *output = json!({
+        "type": kind,
+        "data": output_v
+    });
     Ok(())
 }
 
 fn migrate_output_data(output_data: &mut serde_json::Value) -> Result<()> {
     ConvertOutputMetadata::check(&mut output_data["metadata"])?;
+    migrate_address(&mut output_data["address"])?;
 
-    migrate_output(&mut output_data["output"]["data"])?;
+    migrate_output(&mut output_data["output"])?;
 
     if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
         for segment in chain {
@@ -97,43 +249,36 @@ fn migrate_output_data(output_data: &mut serde_json::Value) -> Result<()> {
     Ok(())
 }
 
-fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
-    let mut f = std::fs::OpenOptions::new()
-        .create(true)
-        .write(true)
-        .open("before.json")
-        .unwrap();
-    serde_json::to_writer_pretty(&mut f, account).unwrap();
-
-    for (_key, transaction) in account["transactions"].as_object_mut().unwrap() {
+fn migrate_transactions_map(map: &mut serde_json::Value) -> Result<()> {
+    for (_key, transaction) in map.as_object_mut().unwrap() {
         for input in transaction["inputs"].as_array_mut().unwrap() {
             migrate_output_dto(&mut input["output"])?;
+            ConvertOutputMetadata::check(&mut input["metadata"])?;
         }
+
+        let mut unlocks_v = transaction["payload"]["unlocks"].take();
+        transaction["payload"]["unlocks"] = unlocks_v["inner"].take();
+
         let outputs = transaction["payload"]["essence"]["data"]["outputs"]["inner"]
             .as_array_mut()
             .unwrap();
         for output in outputs {
-            migrate_output(&mut output["data"])?;
+            migrate_output(output)?;
         }
     }
+    Ok(())
+}
+
+fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
+    migrate_transactions_map(&mut account["transactions"])?;
 
     ConvertIncomingTransactions::check(&mut account["incomingTransactions"])?;
 
-    for (_key, transaction) in account["incomingTransactions"].as_object_mut().unwrap() {
-        for input in transaction["inputs"].as_array_mut().unwrap() {
-            migrate_output_dto(&mut input["output"])?;
-        }
-        let outputs = transaction["payload"]["essence"]["data"]["outputs"]["inner"]
-            .as_array_mut()
-            .unwrap();
-        for output in outputs {
-            migrate_output(&mut output["data"])?;
-        }
-    }
+    migrate_transactions_map(&mut account["incomingTransactions"])?;
 
     if let Some(native_token_foundries) = account.get_mut("nativeTokenFoundries") {
         for (_key, foundry) in native_token_foundries.as_object_mut().unwrap() {
-            migrate_output(foundry)?;
+            migrate_output_inner(foundry)?;
         }
     }
 
@@ -152,13 +297,6 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
     {
         migrate_output_data(output_data)?;
     }
-
-    let mut f = std::fs::OpenOptions::new()
-        .create(true)
-        .write(true)
-        .open("after.json")
-        .unwrap();
-    serde_json::to_writer_pretty(&mut f, account).unwrap();
 
     Ok(())
 }
@@ -527,11 +665,54 @@ mod types {
     #[derive(Deserialize)]
     #[repr(u8)]
     pub enum FeatureTag {
-        Sender = 0,
-        Issuer = 1,
-        Metadata = 2,
-        Tag = 3,
+        Sender,
+        Issuer,
+        Metadata,
+        Tag,
     }
+
+    #[derive(Deserialize)]
+    #[repr(u8)]
+    pub enum UnlockConditionTag {
+        Address,
+        StorageDepositReturn,
+        Timelock,
+        Expiration,
+        StateControllerAddress,
+        GovernorAddress,
+        ImmutableAliasAddress,
+    }
+
+    #[derive(Deserialize)]
+    #[repr(u8)]
+    pub enum AddressTag {
+        Ed25519 = 0,
+        Alias = 8,
+        Nft = 16,
+    }
+
+    #[derive(Deserialize)]
+    #[repr(u8)]
+    pub enum OutputTag {
+        Treasury = 2,
+        Basic = 3,
+        Alias = 4,
+        Foundry = 5,
+        Nft = 6,
+    }
+    macro_rules! impl_as_u8 {
+        ($v:ident) => {
+            impl Into<u8> for $v {
+                fn into(self) -> u8 {
+                    self as _
+                }
+            }
+        };
+    }
+    impl_as_u8!(FeatureTag);
+    impl_as_u8!(UnlockConditionTag);
+    impl_as_u8!(AddressTag);
+    impl_as_u8!(OutputTag);
 }
 
 struct ConvertIncomingTransactions;
@@ -612,13 +793,13 @@ impl Convert for ConvertHrp {
     }
 }
 
-struct ConvertFeatureType;
-impl Convert for ConvertFeatureType {
+struct ConvertTag<Old>(PhantomData<Old>);
+impl<Old: Into<u8> + DeserializeOwned> Convert for ConvertTag<Old> {
     type New = u8;
-    type Old = types::FeatureTag;
+    type Old = Old;
 
     fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
-        Ok(old as u8)
+        Ok(old.into())
     }
 }
 

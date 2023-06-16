@@ -5,18 +5,23 @@ use alloc::collections::BTreeSet;
 
 use packable::Packable;
 
-use crate::types::block::{
-    address::Address,
-    output::{
-        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        verify_output_amount, verify_output_amount_packable, NativeToken, NativeTokens, Output, OutputBuilderAmount,
-        OutputId, Rent, RentStructure,
+use crate::{
+    types::block::{
+        address::Address,
+        output::{
+            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+            unlock_condition::{
+                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+            },
+            verify_output_amount, verify_output_amount_packable, NativeToken, NativeTokens, Output,
+            OutputBuilderAmount, OutputId, Rent, RentStructure,
+        },
+        protocol::ProtocolParameters,
+        semantic::{ConflictReason, ValidationContext},
+        unlock::Unlock,
+        Error,
     },
-    protocol::ProtocolParameters,
-    semantic::{ConflictReason, ValidationContext},
-    unlock::Unlock,
-    Error,
+    utils::serde::string,
 };
 
 ///
@@ -202,12 +207,12 @@ impl From<&BasicOutput> for BasicOutputBuilder {
 pub struct BasicOutput {
     // Amount of IOTA tokens held by the output.
     #[packable(verify_with = verify_output_amount_packable)]
+    #[serde(with = "string")]
     amount: u64,
     // Native tokens held by the output.
     #[serde(skip_serializing_if = "NativeTokens::is_empty", default)]
     native_tokens: NativeTokens,
     #[packable(verify_with = verify_unlock_conditions_packable)]
-    #[serde(skip_serializing_if = "UnlockConditions::is_empty", default)]
     unlock_conditions: UnlockConditions,
     #[packable(verify_with = verify_features_packable)]
     #[serde(skip_serializing_if = "Features::is_empty", default)]

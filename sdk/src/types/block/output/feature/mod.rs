@@ -17,7 +17,10 @@ use serde::{Deserialize, Serialize, Serializer};
 
 pub use self::{issuer::IssuerFeature, metadata::MetadataFeature, sender::SenderFeature, tag::TagFeature};
 pub(crate) use self::{metadata::MetadataFeatureLength, tag::TagFeatureLength};
-use crate::types::block::{create_bitflags, Error};
+use crate::{
+    types::block::{create_bitflags, Error},
+    utils::serde::boxed_slice_prefix,
+};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
@@ -167,7 +170,10 @@ impl<'de> Deserialize<'de> for Feature {
                 .map_err(|e| serde::de::Error::custom(format!("cannot deserialize tag feature: {e}")))?
                 .into(),
             _ => {
-                return Err(serde::de::Error::custom("invalid feature type"));
+                return Err(serde::de::Error::custom(format!(
+                    "invalid feature type: {}",
+                    value.kind
+                )));
             }
         })
     }
@@ -225,7 +231,11 @@ pub(crate) type FeatureCount = BoundedU8<0, { Features::COUNT_MAX }>;
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidFeatureCount(p.into())))]
-pub struct Features(#[packable(verify_with = verify_unique_sorted)] BoxedSlicePrefix<Feature, FeatureCount>);
+pub struct Features(
+    #[packable(verify_with = verify_unique_sorted)]
+    #[serde(with = "boxed_slice_prefix")]
+    BoxedSlicePrefix<Feature, FeatureCount>,
+);
 
 impl TryFrom<Vec<Feature>> for Features {
     type Error = Error;
