@@ -57,14 +57,14 @@ def test_sign_verify_ed25519():
     valid_signature = Utils.verify_ed25519_signature(
         signature,
         message,
-        {'type': 0, 'pubKeyHash': pub_key_hash},
+        {'type': 0, 'data': pub_key_hash},
     )
     assert valid_signature
 
     valid_signature = Utils.verify_ed25519_signature(
         signature,
         message,
-        {'type': 0, 'pubKeyHash': '0x0000000000000000000000000000000000000000000000000000000000000000'},
+        {'type': 0, 'data': '0x0000000000000000000000000000000000000000000000000000000000000000'},
     )
     # false, because the pubKeyHash is null
     assert not valid_signature
