@@ -181,7 +181,7 @@ Create a new account with a provided alias.
 
 ### `./wallet node-info`
 
-Get information about currently set node.
+Displays information about currently set node.
 
 The wallet needs to be initialised (`init` command).
 
