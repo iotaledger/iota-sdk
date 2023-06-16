@@ -187,8 +187,6 @@ The wallet needs to be initialised (`init` command).
 
 #### Examples
 
-Get information about currently set node.
-
 ```sh
 ./wallet node-info
 ```
