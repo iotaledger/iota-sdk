@@ -7,6 +7,8 @@ WebAssembly (Wasm) bindings for TypeScript/JavaScript to the IOTA SDK library.
 The IOTA SDK library also offers dedicated [Node.js bindings](../nodejs). The differences with this package are outlined
 below.
 
+**NOTE: Use the Node.js bindings if you can. The Wasm bindings are more portable and exist to support browser environments.**
+
 |              |   Wasm bindings   |   Node.js bindings    |
 |:-------------|:-----------------:|:---------------------:|
 | Environment  | Node.js, browsers |        Node.js        |
@@ -16,10 +18,7 @@ below.
 | Rocksdb      |         ❌         |          ✔️           |
 | Stronghold   |         ❌         |          ✔️           |
 
-* The Node.js bindings only need to be compiled during `npm install` if a pre-compiled binary is not available for your
-platform.
-
-**tl;dr: Use the Node.js bindings if you can. The Wasm bindings are just more portable and support browser environments.**
+* The Node.js bindings only need to be compiled during `npm install` if a pre-compiled binary is not available for your platform.
 
 ## Requirements
 
@@ -28,94 +27,30 @@ platform.
 
 ## Getting Started
 
-### Installing the IOTA SDK
-
-#### Install With a Package Manager
+### Installing Using a Package Manager
 
 To install the library from your package manager of choice, you only need to run the following:
 
-##### npm
+#### npm
 
 ```bash
 npm i @iota/sdk-wasm
 ```
 
-##### yarn
+#### yarn
 
 ```bash
 yarn add @iota/sdk-wasm
 ```
 
-### Usage
-
-##### Node.js
-
-##### Client
-
-After installing the library, you can create a `Client` instance and interface with it.
-
-```javascript
-const {Client, initLogger} = require('@iota/sdk-wasm/node');
-
-async function run() {
-    initLogger();
-
-    const client = new Client({
-        nodes: ['https://api.testnet.shimmer.network'],
-        localPow: true,
-    });
-
-    try {
-        const nodeInfo = await client.getInfo();
-        console.log('Node info: ', nodeInfo);
-    } catch (error) {
-        console.error('Error: ', error);
-    }
-}
-
-run().then(() => process.exit());
-```
-
-##### Wallet
-
-After you [installed the library](#installing-the-iota-sdk), you can create a `Wallet` instance and interact with it.
-
-```javascript
-const {Wallet, CoinType} = require('@iota/sdk-wasm/node');
-
-const wallet = new Wallet({
-    storagePath: './my-database',
-    coinType: CoinType.Shimmer,
-    clientOptions: {
-        nodes: ['https://api.testnet.shimmer.network'],
-    },
-    secretManager: {
-        mnemonic: "my development mnemonic",
-    },
-});
-
-const account = await wallet.createAccount({
-    alias: 'Alice',
-});
-
-account.addresses().then((addresses) => {
-    console.log(addresses);
-});
-```
-
-See the [Node.js examples](../nodejs/examples) for more demonstrations; the only change needed is to import
-`@iota/sdk-wasm/node` instead of `@iota/sdk`.
-
 ### Web Setup
-
-Unlike Node.js, a few more steps are required to use this binding in a browser.
 
 The library loads the compiled Wasm file with an HTTP GET request, so the `iota_sdk_wasm_bg.wasm` file must be copied to
 the root of the distribution folder.
 
 A bundler such as [webpack](https://webpack.js.org/) or [rollup](https://rollupjs.org/) is recommended.
 
-#### Rollup
+### Rollup
 
 1. Install `rollup-plugin-copy`:
 
@@ -141,7 +76,7 @@ A bundler such as [webpack](https://webpack.js.org/) or [rollup](https://rollupj
     })
     ```
 
-#### Webpack
+### Webpack
 
 1. Install `copy-webpack-plugin`:
 
@@ -176,7 +111,31 @@ A bundler such as [webpack](https://webpack.js.org/) or [rollup](https://rollupj
     ]
     ```
 
-### Web Usage
+## Client Usage
+
+```javascript
+const {Client, initLogger} = require('@iota/sdk-wasm/node');
+
+async function run() {
+    initLogger();
+
+    const client = new Client({
+        nodes: ['https://api.testnet.shimmer.network'],
+        localPow: true,
+    });
+
+    try {
+        const nodeInfo = await client.getInfo();
+        console.log('Node info: ', nodeInfo);
+    } catch (error) {
+        console.error('Error: ', error);
+    }
+}
+
+run().then(() => process.exit());
+```
+
+## Wallet Usage
 
 ```javascript
 import init, {Wallet, CoinType} from "@iota/sdk-wasm/web";
