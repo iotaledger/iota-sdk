@@ -3,9 +3,14 @@
 
 //! In this example we send the signed transaction in a block.
 //!
-//! `cargo run --example 3_send_block --release`
+//! Make sure to run `2_transaction_signing` before.
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example 3_send_block
+//! ```
 
-use std::{fs::File, io::prelude::*, path::Path};
+use std::{env, path::Path};
 
 use iota_sdk::{
     client::{
@@ -14,6 +19,7 @@ use iota_sdk::{
     },
     types::block::{payload::Payload, semantic::ConflictReason},
 };
+use tokio::{fs::File, io::AsyncReadExt};
 
 const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/client/offline_signing/signed_transaction.json";
 
@@ -22,7 +28,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let node_url = std::env::var("NODE_URL").unwrap();
+    let node_url = env::var("NODE_URL").unwrap();
 
     // Create a client instance.
     let online_client = Client::builder()
@@ -31,7 +37,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let signed_transaction_payload = read_signed_transaction_from_file(SIGNED_TRANSACTION_FILE_NAME)?;
+    let signed_transaction_payload = read_signed_transaction_from_file(SIGNED_TRANSACTION_FILE_NAME).await?;
 
     let current_time = online_client.get_time_checked().await?;
 
@@ -55,17 +61,17 @@ async fn main() -> Result<()> {
 
     println!(
         "Posted block: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
 
     Ok(())
 }
 
-fn read_signed_transaction_from_file<P: AsRef<Path>>(path: P) -> Result<SignedTransactionData> {
-    let mut file = File::open(&path).unwrap();
+async fn read_signed_transaction_from_file(path: impl AsRef<Path>) -> Result<SignedTransactionData> {
+    let mut file = File::open(path).await.expect("failed to open file");
     let mut json = String::new();
-    file.read_to_string(&mut json).unwrap();
+    file.read_to_string(&mut json).await.expect("failed to read file");
 
     let dto = serde_json::from_str::<SignedTransactionDataDto>(&json)?;
 

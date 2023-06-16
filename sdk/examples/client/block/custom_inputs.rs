@@ -25,7 +25,6 @@ async fn main() -> Result<()> {
 
     let node_url = env::var("NODE_URL").unwrap();
     let faucet_url = env::var("FAUCET_URL").unwrap();
-    let seed = env::var("NON_SECURE_USE_OF_DEVELOPMENT_SEED_1").unwrap();
 
     let mut args = env::args().skip(1);
     let amount = args.next().map(|s| s.parse::<u64>().unwrap()).unwrap_or(1_000_000u64);
@@ -35,7 +34,8 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let secret_manager = SecretManager::try_from_hex_seed(seed)?;
+    let secret_manager =
+        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     // Get the first address of the seed
     let first_address = secret_manager
