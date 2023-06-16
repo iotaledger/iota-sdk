@@ -101,6 +101,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Default number of workers for nonce `Miner` changed from `1` to `num_cpu::get()`;
 - Made `Account::get_basic_outputs_for_additional_inputs` private;
 - `Account::get_unlockable_outputs_with_additional_unlock_conditions` renamed to `claimable_outputs`;
+- Reformat serialized versions of `Output` and contained types;
 
 ### Removed
 
