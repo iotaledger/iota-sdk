@@ -10,7 +10,6 @@ use iota_sdk::{
         secret::{stronghold::StrongholdSecretManager, SecretManager},
         stronghold::StrongholdAdapter,
         utils::Password,
-        Client,
     },
     wallet::{ClientOptions, Wallet},
 };
