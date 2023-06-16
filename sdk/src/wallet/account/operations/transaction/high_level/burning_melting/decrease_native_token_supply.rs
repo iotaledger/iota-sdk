@@ -27,10 +27,12 @@ where
         melt_amount: U256,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
+        let options = options.into();
         let prepared_transaction = self
-            .prepare_decrease_native_token_supply(token_id, melt_amount, options)
+            .prepare_decrease_native_token_supply(token_id, melt_amount, options.clone())
             .await?;
-        self.sign_and_submit_transaction(prepared_transaction).await
+
+        self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Function to prepare the transaction for
