@@ -242,12 +242,16 @@ pub fn to_utc_date_time(ts_millis: u128) -> Result<DateTime<Utc>, Error> {
 }
 
 pub async fn check_file_exits(path: &Path) -> Result<(), Error> {
-    if fs::metadata(path).await.is_err() {
-        Err(Error::Miscellaneous(format!(
+    if !fs::try_exists(path).await.map_err(|e| {
+        Error::Miscellaneous(format!(
+            "Error while accessing the file '{path}': '{e}'",
+            path = path.display()
+        ))
+    })? {
+        return Err(Error::Miscellaneous(format!(
             "File '{path}' does not exist.",
             path = path.display()
-        )))
-    } else {
-        Ok(())
+        )));
     }
+    Ok(())
 }
