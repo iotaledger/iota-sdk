@@ -17,9 +17,9 @@ import TabItem from "@theme/TabItem";
 import RustCode from "!!raw-loader!../../../../../sdk/examples/how_tos/accounts_and_addresses/check_balance.rs";
 import NodejsCode from "!!raw-loader!../../../../../bindings/nodejs/examples/how_tos/accounts_and_addresses/check-balance.ts";
 import PythonCode from "!!raw-loader!../../../../../bindings/python/examples/how_tos/accounts_and_addresses/check_balance.py";
-import TipFaucet from "../../_admonitions/_tip_faucet.md";
+import TipFaucet from "../../_admonitions/_tip-faucet.md";
 
-You can retrieve the balance for any [account you created](./create_account.mdx) by calling the
+You can retrieve the balance for any [account you created](./create-account.mdx) by calling the
 `Account.balance()` function. Bear in mind that you should always sync the account with the node to get the latest
 outputs. The sync function also returns the balance. So in some cases just calling that might be enough.
 
@@ -30,7 +30,7 @@ outputs. The sync function also returns the balance. So in some cases just calli
 The following example will:
 
 1. Create a wallet.
-2. Get Alice's account which was [created in the first guide](./create_account.mdx).
+2. Get Alice's account which was [created in the first guide](./create-account.mdx).
 3. Sync the account with the node to get the latest transactions.
 4. Request the account's balance.
 
