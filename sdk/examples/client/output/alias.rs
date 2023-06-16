@@ -3,7 +3,12 @@
 
 //! In this example we will create an alias output.
 //!
-//! `cargo run --example alias --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example alias [ALIAS AMOUNT]
+//! ```
+
+use std::env;
 
 use iota_sdk::{
     client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
@@ -24,27 +29,35 @@ async fn main() -> Result<()> {
     // non-zero balance.
     dotenvy::dotenv().ok();
 
-    let node_url = std::env::var("NODE_URL").unwrap();
-    let faucet_url = std::env::var("FAUCET_URL").unwrap();
-
     // Create a client instance.
-    let client = Client::builder().with_node(&node_url)?.finish().await?;
+    let client = Client::builder()
+        .with_node(&env::var("NODE_URL").unwrap())?
+        .finish()
+        .await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let token_supply = client.get_token_supply().await?;
 
     let address = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
         .await?[0];
-    request_funds_from_faucet(&faucet_url, &address).await?;
+
+    println!(
+        "Requesting funds (waiting 15s): {}",
+        request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &address).await?,
+    );
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
     //////////////////////////////////
     // create new alias output
     //////////////////////////////////
-    let alias_output_builder = AliasOutputBuilder::new_with_amount(1_000_000, AliasId::null())
+    let alias_amount = env::args()
+        .nth(1)
+        .map(|s| s.parse::<u64>().unwrap())
+        .unwrap_or(1_000_000u64);
+    let alias_output_builder = AliasOutputBuilder::new_with_amount(alias_amount, AliasId::null())
         .add_feature(SenderFeature::new(address))
         .add_feature(MetadataFeature::new([1, 2, 3])?)
         .add_immutable_feature(IssuerFeature::new(address))
@@ -62,7 +75,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Transaction with new alias output sent: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -87,7 +100,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Block with alias id set sent: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;

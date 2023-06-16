@@ -6,9 +6,15 @@
 //! When the receiver (address in AddressUnlockCondition) doesn't consume the output before it gets expired, the sender
 //! (address in ExpirationUnlockCondition) will get the full control back.
 //!
-//! `cargo run --example expiration --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example expiration
+//! ```
 
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::{
+    env,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 
 use iota_sdk::{
     client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
@@ -18,6 +24,8 @@ use iota_sdk::{
     },
 };
 
+const AMOUNT: u64 = 255_100;
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
@@ -25,15 +33,14 @@ async fn main() -> Result<()> {
     // non-zero balance.
     dotenvy::dotenv().ok();
 
-    let node_url = std::env::var("NODE_URL").unwrap();
-    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
-    let faucet_url = std::env::var("FAUCET_URL").unwrap();
-
     // Create a client instance.
-    let client = Client::builder().with_node(&node_url)?.finish().await?;
+    let client = Client::builder()
+        .with_node(&env::var("NODE_URL").unwrap())?
+        .finish()
+        .await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let addresses = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..2))
@@ -43,7 +50,10 @@ async fn main() -> Result<()> {
 
     let token_supply = client.get_token_supply().await?;
 
-    request_funds_from_faucet(&faucet_url, &sender_address).await?;
+    println!(
+        "Requesting funds (waiting 15s): {}",
+        request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &sender_address).await?,
+    );
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
     let tomorrow = (SystemTime::now() + Duration::from_secs(24 * 3600))
@@ -55,7 +65,7 @@ async fn main() -> Result<()> {
 
     let outputs = [
         // with storage deposit return
-        BasicOutputBuilder::new_with_amount(255_100)
+        BasicOutputBuilder::new_with_amount(AMOUNT)
             .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
             // If the receiver does not consume this output, we Unlock after a day to avoid
             // locking our funds forever.
@@ -71,7 +81,8 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Block with ExpirationUnlockCondition transaction sent: {explorer_url}/block/{}",
+        "Block with ExpirationUnlockCondition transaction sent: {}/block/{}",
+        env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;

@@ -7,9 +7,15 @@
 //! However, it is possible to send a large amount and ask a slightly smaller amount in return to
 //! effectively transfer a small amount.
 //!
-//! `cargo run --example microtransaction --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example microtransaction
+//! ```
 
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::{
+    env,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 
 use iota_sdk::{
     client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
@@ -26,12 +32,11 @@ async fn main() -> Result<()> {
     // non-zero balance.
     dotenvy::dotenv().ok();
 
-    let node_url = std::env::var("NODE_URL").unwrap();
-    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
-    let faucet_url = std::env::var("FAUCET_URL").unwrap();
-
     // Create a client instance.
-    let client = Client::builder().with_node(&node_url)?.finish().await?;
+    let client = Client::builder()
+        .with_node(&env::var("NODE_URL").unwrap())?
+        .finish()
+        .await?;
 
     let secret_manager =
         SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
@@ -44,7 +49,10 @@ async fn main() -> Result<()> {
 
     let token_supply = client.get_token_supply().await?;
 
-    request_funds_from_faucet(&faucet_url, &sender_address).await?;
+    println!(
+        "Requesting funds (waiting 15s): {}",
+        request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &sender_address).await?,
+    );
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
     let tomorrow = (SystemTime::now() + Duration::from_secs(24 * 3600))
@@ -53,6 +61,7 @@ async fn main() -> Result<()> {
         .as_secs()
         .try_into()
         .unwrap();
+
     let outputs = [
         // with storage deposit return
         BasicOutputBuilder::new_with_amount(255_100)
@@ -76,7 +85,11 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!("Block with micro amount sent: {explorer_url}/block/{}", block.id());
+    println!(
+        "Block with micro amount sent: {}/block/{}",
+        env::var("EXPLORER_URL").unwrap(),
+        block.id()
+    );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
     Ok(())

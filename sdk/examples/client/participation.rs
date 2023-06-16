@@ -52,7 +52,10 @@ async fn main() -> Result<()> {
         .await?[0];
 
     let faucet_url = std::env::var("FAUCET_URL").unwrap();
-    request_funds_from_faucet(&faucet_url, &address).await?;
+    println!(
+        "Requesting funds (waiting 15s): {}",
+        request_funds_from_faucet(&faucet_url, &address).await?
+    );
 
     let address_participation = client.address_staking_status(address).await?;
     println!("{address_participation:#?}");

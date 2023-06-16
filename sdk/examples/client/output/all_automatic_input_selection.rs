@@ -3,7 +3,12 @@
 
 //! In this example we will create all output types in a single transaction.
 //!
-//! `cargo run --example all_automatic_input_selection --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example all_automatic_input_selection
+//! ```
+
+use std::env;
 
 use iota_sdk::{
     client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
@@ -31,22 +36,25 @@ async fn main() -> Result<()> {
     // non-zero balance.
     dotenvy::dotenv().ok();
 
-    let node_url = std::env::var("NODE_URL").unwrap();
-    let explorer_url = std::env::var("EXPLORER_URL").unwrap();
-    let faucet_url = std::env::var("FAUCET_URL").unwrap();
-
     // Create a client instance.
-    let client = Client::builder().with_node(&node_url)?.finish().await?;
+    let client = Client::builder()
+        .with_node(&env::var("NODE_URL").unwrap())?
+        .finish()
+        .await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let token_supply = client.get_token_supply().await?;
 
     let address = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
         .await?[0];
-    println!("{}", request_funds_from_faucet(&faucet_url, &address).await?);
+
+    println!(
+        "Requesting funds (waiting 15s): {}",
+        request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &address).await?,
+    );
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
     //////////////////////////////////
@@ -80,7 +88,8 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "Block with new nft and alias output sent: {explorer_url}/block/{}",
+        "Block with new nft and alias output sent: {}/block/{}",
+        env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -129,8 +138,9 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     println!(
-        "Block with alias id, foundry output with minted native tokens, and nfts sent: {explorer_url}/block/{}",
-        block.id()
+        "Block with alias id, foundry output with minted native tokens, and nfts sent: {}/block/{}",
+        env::var("EXPLORER_URL").unwrap(),
+        block.id(),
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
@@ -190,7 +200,11 @@ async fn main() -> Result<()> {
         .with_outputs(outputs)?
         .finish()
         .await?;
-    println!("Block with all outputs sent: {explorer_url}/block/{}", block.id());
+    println!(
+        "Block with all outputs sent: {}/block/{}",
+        env::var("EXPLORER_URL").unwrap(),
+        block.id()
+    );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
 
     Ok(())

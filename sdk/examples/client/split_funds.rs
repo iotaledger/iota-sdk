@@ -24,12 +24,11 @@ async fn main() -> Result<()> {
 
     let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
     println!(
-        "{}",
+        "Requesting funds (waiting 15s): {}",
         request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?
     );
-
     // wait so the faucet can send the funds
-    // tokio::time::sleep(std::time::Duration::from_secs(20)).await;
+    tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
     let mut block_builder = client.block().with_secret_manager(&secret_manager);
     // Insert the output address and amount to spent. The amount cannot be zero.
