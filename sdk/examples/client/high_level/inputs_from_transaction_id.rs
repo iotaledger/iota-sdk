@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
     let transaction_id = args
         .next()
-        .expect("missing example argument: transaction id")
+        .expect("missing example argument: TRANSACTION ID")
         .parse::<TransactionId>()?;
 
     let inputs = client.inputs_from_transaction_id(&transaction_id).await?;

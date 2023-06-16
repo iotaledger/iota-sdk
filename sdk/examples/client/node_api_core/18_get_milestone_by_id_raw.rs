@@ -1,8 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Returns milestone data as raw bytes by its identifier by calling
-//! `GET /api/core/v2/milestones/{milestoneId}`.
+//! Returns milestone data as raw bytes by its identifier by querying the
+//! `/api/core/v2/milestones/{milestoneId}` node endpoint.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh

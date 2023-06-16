@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! This example returns the health of the node by calling `GET /health`.
+//! This example returns the health of the node by querying its `/health` endpoint.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh

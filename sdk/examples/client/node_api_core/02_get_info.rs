@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Returns general information about the node by calling `GET /api/core/v2/info`.
+//! Returns general information about the node by querying its `/api/core/v2/info` endpoint.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh

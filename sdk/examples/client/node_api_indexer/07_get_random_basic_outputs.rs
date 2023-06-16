@@ -1,28 +1,30 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! TODO: <insert example description> by calling
-//! `GET api/indexer/v1/outputs/basic`.
+//! Gets the first page of output ids when querying the
+//! `api/indexer/v1/outputs/basic` node endpoint.
 //!
-//! `cargo run --example node_api_indexer_get_random_basic_outputs --release -- [NODE URL]`
+//! Make sure that the node has the indexer plugin enabled.
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example node_api_indexer_get_random_basic_outputs [NODE_URL]
+//! ```
+
+use std::env;
 
 use iota_sdk::client::{node_api::indexer::query_parameters::QueryParameter, Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses secrets in environment variables for simplicity which should not be done in production.
-        dotenvy::dotenv().ok();
-        std::env::var("NODE_URL").unwrap()
-    });
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
-    // Create a client with that node.
-    let client = Client::builder()
-        // The node needs to have the indexer plugin enabled.
-        .with_node(&node_url)?
-        .finish()
-        .await?;
+    // Take the node URL from command line argument or use one from env as default.
+    let node_url = env::args().nth(2).unwrap_or_else(|| env::var("NODE_URL").unwrap());
+
+    // Create a client.
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Get a single page with random output IDs by providing only `QueryParameter::Cursor(_)`.
     let output_ids_response = client.basic_output_ids([QueryParameter::Cursor(String::new())]).await?;

@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Submits a block as raw bytes by calling `POST /api/core/v2/blocks`.
+//! Submits a block as raw bytes using the `/api/core/v2/blocks` node endpoint.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh

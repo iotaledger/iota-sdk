@@ -1,10 +1,17 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! TODO: <insert example description> by calling
-//! `GET api/indexer/v1/outputs/alias`.
+//! Gets all alias output ids accociated with an address by querying the
+//! `api/indexer/v1/outputs/alias` node endpoint.
 //!
-//! `cargo run --example node_api_indexer_get_alias_outputs --release -- [NODE URL] [ADDRESS]`
+//! Make sure that the node has the indexer plugin enabled.
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example node_api_indexer_get_alias_outputs <ADDRESS> [NODE URL]
+//! ```
+
+use std::env;
 
 use iota_sdk::{
     client::{node_api::indexer::query_parameters::QueryParameter, Client, Result},
@@ -13,12 +20,11 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
+
     // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args().nth(1).unwrap_or_else(|| {
-        // This example uses secrets in environment variables for simplicity which should not be done in production.
-        dotenvy::dotenv().ok();
-        std::env::var("NODE_URL").unwrap()
-    });
+    let node_url = env::args().nth(2).unwrap_or_else(|| env::var("NODE_URL").unwrap());
 
     // Create a client with that node.
     let client = Client::builder()
@@ -27,13 +33,11 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    // Take the address from command line argument or use a default one.
-    let address = Bech32Address::try_from_str(
-        std::env::args()
-            .nth(2)
-            .as_deref()
-            .unwrap_or("rms1qrrdjmdkadtcnuw0ue5n9g4fmkelrj3dl26eyeshkha3w3uu0wheu5z5qqz"),
-    )?;
+    // Take the address from the command line, or panic.
+    let address = env::args()
+        .nth(1)
+        .expect("missing example argument: ADDRESS")
+        .parse::<Bech32Address>()?;
 
     // Get output IDs of alias outputs that can be controlled by this address.
     let output_ids_response = client

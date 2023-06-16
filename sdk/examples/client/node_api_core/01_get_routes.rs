@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Returns the available API route groups of the node by calling `GET /api/routes`.
+//! Returns the available API route groups of the node by querying its `/api/routes` endpoint.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh

@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Returns all stored receipts by calling `GET /api/core/v2/receipts`.
+//! Returns all stored receipts by querying the `/api/core/v2/receipts` node endpoint.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh

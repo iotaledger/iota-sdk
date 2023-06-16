@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Returns information about the treasury by calling `GET /api/core/v2/treasury`.
+//! Returns information about the treasury by querying the `/api/core/v2/treasury` node endpoint.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh

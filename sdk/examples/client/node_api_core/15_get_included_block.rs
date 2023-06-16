@@ -1,8 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Returns the included block, as JSON, of a transaction by calling
-//! `GET /api/core/v2/transactions/{transactionId}/included-block`.
+//! Returns the included block, as JSON, of a transaction by querying the
+//! `/api/core/v2/transactions/{transactionId}/included-block` node endpoint.
 //!
 //! Make sure to provide a somewhat recent transaction id to make this example run successfully!
 //!
@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
     // Take the transaction id from the command line, or panic.
     let transaction_id = env::args()
         .nth(1)
-        .expect("missing example argument: transaction id")
+        .expect("missing example argument: TRANSACTION ID")
         .parse()?;
 
     // Send the request.

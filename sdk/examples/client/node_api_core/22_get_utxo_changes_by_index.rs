@@ -1,8 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Gets all UTXO changes of a given milestone by milestone index by calling
-//! `GET /api/core/v2/milestones/by-index/{index}/utxo-changes`.
+//! Gets all UTXO changes of a given milestone by milestone index by querying the
+//! `/api/core/v2/milestones/by-index/{index}/utxo-changes` node endpoint.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh

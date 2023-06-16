@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Find an output, as JSON, by its identifier by calling `GET /api/core/v2/outputs/{outputId}`.
+//! Find an output, as JSON, by its identifier by querying the `/api/core/v2/outputs/{outputId}` node endpoint.
 //!
 //! Make sure to provide a somewhat recent output id to make this example run successfully!
 //!
@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
     // Take the output id from the command line, or panic.
     let output_id = env::args()
         .nth(1)
-        .expect("missing example argument: output id")
+        .expect("missing example argument: OUTPUT ID")
         .parse::<OutputId>()?;
 
     // Get the output.

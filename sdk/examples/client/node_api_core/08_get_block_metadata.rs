@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Finds the metadata of a given block by calling `GET /api/core/v2/blocks/{blockId}/metadata`.
+//! Finds the metadata of a given block by querying the `/api/core/v2/blocks/{blockId}/metadata` node endpoint.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh

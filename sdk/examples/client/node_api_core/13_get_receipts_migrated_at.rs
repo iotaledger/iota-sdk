@@ -1,7 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Returns all stored receipts for a given migration index by calling `GET /api/core/v2/receipts/{migratedAt}`.
+//! Returns all stored receipts for a given migration index by querying the `/api/core/v2/receipts/{migratedAt}` node
+//! endpoint.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -26,7 +27,7 @@ async fn main() -> Result<()> {
     // Take the transaction id from the command line, or panic.
     let milestone_index = env::args()
         .nth(1)
-        .expect("missing example argument: milestone index")
+        .expect("missing example argument: MILESTONE INDEX")
         .parse()
         .expect("invalid milestone index");
 

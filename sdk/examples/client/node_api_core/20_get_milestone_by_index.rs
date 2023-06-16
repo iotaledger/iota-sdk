@@ -1,8 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Returns milestone data as JSON by its index by calling
-//! `GET /api/core/v2/milestones/by-index/{index}`.
+//! Returns milestone data as JSON by its index by querying the
+//! `/api/core/v2/milestones/by-index/{index}` node endpoint.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
