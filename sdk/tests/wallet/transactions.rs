@@ -162,3 +162,37 @@ async fn send_nft() -> Result<()> {
 
     tear_down(storage_path)
 }
+
+#[ignore]
+#[tokio::test]
+async fn send_with_note() -> Result<()> {
+    let storage_path = "test-storage/send_with_note";
+    setup(storage_path)?;
+
+    let wallet = make_wallet(storage_path, None, None).await?;
+
+    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
+    let account_1 = wallet.create_account().finish().await?;
+
+    let amount = 1_000_000;
+    let tx = account_0
+        .send_amount(
+            [SendAmountParams::new(
+                *account_1.addresses().await?[0].address(),
+                amount,
+            )?],
+            Some(TransactionOptions {
+                note: Some(String::from("send_with_note")),
+                ..Default::default()
+            }),
+        )
+        .await?;
+
+    account_0
+        .retry_transaction_until_included(&tx.transaction_id, None, None)
+        .await?;
+
+    assert_eq!(tx.note, Some(String::from("send_with_note")));
+
+    tear_down(storage_path)
+}
