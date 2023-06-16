@@ -150,7 +150,7 @@ impl From<NativeTokens> for NativeTokensBuilder {
 pub(crate) type NativeTokenCount = BoundedU8<0, { NativeTokens::COUNT_MAX }>;
 
 ///
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidNativeTokenCount(p.into())))]
 pub struct NativeTokens(
@@ -232,6 +232,10 @@ impl NativeTokens {
         self.0
             .binary_search_by_key(token_id, |native_token| native_token.token_id)
             .map_or(None, |index| Some(&self.0[index]))
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 }
 

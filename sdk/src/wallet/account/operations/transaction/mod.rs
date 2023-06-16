@@ -17,16 +17,10 @@ use crate::{
         secret::{types::InputSigningData, SecretManage},
         Error,
     },
-    types::{
-        api::core::response::OutputWithMetadataResponse,
-        block::{
-            output::{
-                dto::{OutputDto, OutputMetadataDto},
-                Output,
-            },
-            payload::transaction::TransactionPayload,
-            semantic::ConflictReason,
-        },
+    types::block::{
+        output::{Output, OutputWithMetadata},
+        payload::transaction::TransactionPayload,
+        semantic::ConflictReason,
     },
     wallet::account::{
         types::{InclusionState, Transaction},
@@ -165,9 +159,9 @@ where
         let inputs = signed_transaction_data
             .inputs_data
             .into_iter()
-            .map(|input| OutputWithMetadataResponse {
-                metadata: OutputMetadataDto::from(&input.output_metadata),
-                output: OutputDto::from(&input.output),
+            .map(|input| OutputWithMetadata {
+                metadata: input.output_metadata,
+                output: input.output,
             })
             .collect();
 

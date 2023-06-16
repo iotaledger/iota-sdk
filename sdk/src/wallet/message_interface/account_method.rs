@@ -18,10 +18,7 @@ use crate::{
     types::block::{
         address::Bech32Address,
         output::{
-            dto::{OutputDto, TokenSchemeDto},
-            feature::dto::FeatureDto,
-            unlock_condition::dto::UnlockConditionDto,
-            AliasId, FoundryId, NativeToken, NftId, OutputId, TokenId,
+            AliasId, Feature, FoundryId, NativeToken, NftId, Output, OutputId, TokenId, TokenScheme, UnlockCondition,
         },
         payload::transaction::TransactionId,
     },
@@ -62,9 +59,9 @@ pub enum AccountMethod {
         state_index: Option<u32>,
         state_metadata: Option<Vec<u8>>,
         foundry_counter: Option<u32>,
-        unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
-        immutable_features: Option<Vec<FeatureDto>>,
+        unlock_conditions: Vec<UnlockCondition>,
+        features: Option<Vec<Feature>>,
+        immutable_features: Option<Vec<Feature>>,
     },
     /// Build a BasicOutput.
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
@@ -74,8 +71,8 @@ pub enum AccountMethod {
         // If not provided, minimum storage deposit will be used
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
-        unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
+        unlock_conditions: Vec<UnlockCondition>,
+        features: Option<Vec<Feature>>,
     },
     /// Build a FoundryOutput.
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
@@ -86,10 +83,10 @@ pub enum AccountMethod {
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
         serial_number: u32,
-        token_scheme: TokenSchemeDto,
-        unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
-        immutable_features: Option<Vec<FeatureDto>>,
+        token_scheme: TokenScheme,
+        unlock_conditions: Vec<UnlockCondition>,
+        features: Option<Vec<Feature>>,
+        immutable_features: Option<Vec<Feature>>,
     },
     /// Build an NftOutput.
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
@@ -100,9 +97,9 @@ pub enum AccountMethod {
         amount: Option<String>,
         native_tokens: Option<Vec<NativeToken>>,
         nft_id: NftId,
-        unlock_conditions: Vec<UnlockConditionDto>,
-        features: Option<Vec<FeatureDto>>,
-        immutable_features: Option<Vec<FeatureDto>>,
+        unlock_conditions: Vec<UnlockCondition>,
+        features: Option<Vec<Feature>>,
+        immutable_features: Option<Vec<Feature>>,
     },
     /// Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
     /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
@@ -235,7 +232,7 @@ pub enum AccountMethod {
     /// Calculate the minimum required storage deposit for an output.
     /// Expected response:
     /// [`MinimumRequiredStorageDeposit`](crate::wallet::message_interface::Response::MinimumRequiredStorageDeposit)
-    MinimumRequiredStorageDeposit { output: OutputDto },
+    MinimumRequiredStorageDeposit { output: Output },
     /// Mint more native token.
     /// Expected response: [`MintTokenTransaction`](crate::wallet::message_interface::Response::MintTokenTransaction)
     #[serde(rename_all = "camelCase")]
@@ -273,7 +270,7 @@ pub enum AccountMethod {
     /// Prepare transaction.
     /// Expected response: [`PreparedTransaction`](crate::wallet::message_interface::Response::PreparedTransaction)
     PrepareTransaction {
-        outputs: Vec<OutputDto>,
+        outputs: Vec<Output>,
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare send amount.
@@ -333,7 +330,7 @@ pub enum AccountMethod {
     /// Send outputs in a transaction.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     SendOutputs {
-        outputs: Vec<OutputDto>,
+        outputs: Vec<Output>,
         options: Option<TransactionOptionsDto>,
     },
     /// Sign a prepared transaction.

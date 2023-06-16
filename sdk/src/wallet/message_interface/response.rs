@@ -20,14 +20,13 @@ use crate::{
     },
     types::block::{
         address::Bech32Address,
-        output::{dto::OutputDto, OutputId},
+        output::{Output, OutputId},
         BlockId,
     },
     wallet::{
         account::{
             operations::transaction::high_level::minting::mint_native_token::MintTokenTransactionDto,
-            types::{address::AccountAddress, AddressWithUnspentOutputs, Balance, TransactionDto},
-            OutputDataDto,
+            types::{address::AccountAddress, AddressWithUnspentOutputs, Balance, OutputData, TransactionDto},
         },
         message_interface::dtos::AccountDetailsDto,
         Error,
@@ -61,7 +60,7 @@ pub enum Response {
     /// [`BuildNftOutput`](crate::wallet::message_interface::AccountMethod::BuildNftOutput)
     /// [`GetFoundryOutput`](crate::wallet::message_interface::AccountMethod::GetFoundryOutput)
     /// [`PrepareOutput`](crate::wallet::message_interface::AccountMethod::PrepareOutput)
-    Output(OutputDto),
+    Output(Output),
     /// Response for
     /// [`MinimumRequiredStorageDeposit`](crate::wallet::message_interface::AccountMethod::MinimumRequiredStorageDeposit)
     MinimumRequiredStorageDeposit(String),
@@ -69,11 +68,11 @@ pub enum Response {
     /// [`ClaimableOutputs`](crate::wallet::message_interface::AccountMethod::ClaimableOutputs)
     OutputIds(Vec<OutputId>),
     /// Response for [`GetOutput`](crate::wallet::message_interface::AccountMethod::GetOutput)
-    OutputData(Option<Box<OutputDataDto>>),
+    OutputData(Option<Box<OutputData>>),
     /// Response for
     /// [`Outputs`](crate::wallet::message_interface::AccountMethod::Outputs),
     /// [`UnspentOutputs`](crate::wallet::message_interface::AccountMethod::UnspentOutputs)
-    OutputsData(Vec<OutputDataDto>),
+    OutputsData(Vec<OutputData>),
     /// Response for
     /// [`PrepareSendAmount`](crate::wallet::message_interface::AccountMethod::PrepareSendAmount),
     /// [`PrepareTransaction`](crate::wallet::message_interface::AccountMethod::PrepareTransaction)

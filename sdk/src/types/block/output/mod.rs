@@ -28,7 +28,6 @@ pub mod nft;
 ///
 pub mod unlock_condition;
 
-use alloc::string::ToString;
 use core::ops::RangeInclusive;
 
 use derive_more::From;
@@ -79,13 +78,13 @@ pub const OUTPUT_INDEX_MAX: u16 = OUTPUT_COUNT_MAX - 1; // 127
 pub const OUTPUT_INDEX_RANGE: RangeInclusive<u16> = 0..=OUTPUT_INDEX_MAX; // [0..127]
 
 #[derive(Clone)]
-pub(crate) enum OutputBuilderAmount {
+pub enum OutputBuilderAmount {
     Amount(u64),
     MinimumStorageDeposit(RentStructure),
 }
 
 /// Contains the generic [`Output`] with associated [`OutputMetadata`].
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OutputWithMetadata {
     pub(crate) output: Output,
@@ -498,160 +497,4 @@ fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, tok
         .finish(token_supply)
         .unwrap()
         .amount()
-}
-
-#[allow(missing_docs)]
-pub mod dto {
-    use alloc::{format, string::String};
-
-    use serde::{Deserialize, Serialize, Serializer};
-    use serde_json::Value;
-
-    use super::*;
-    pub use super::{
-        alias::dto::AliasOutputDto,
-        basic::dto::BasicOutputDto,
-        foundry::dto::FoundryOutputDto,
-        metadata::dto::OutputMetadataDto,
-        nft::dto::NftOutputDto,
-        token_scheme::dto::{SimpleTokenSchemeDto, TokenSchemeDto},
-        treasury::dto::TreasuryOutputDto,
-    };
-    use crate::types::block::Error;
-
-    #[derive(Clone, Debug, From)]
-    #[cfg_attr(feature = "serde", derive(serde::Deserialize))]
-    pub enum OutputBuilderAmountDto {
-        Amount(String),
-        MinimumStorageDeposit(RentStructure),
-    }
-
-    impl From<&OutputBuilderAmount> for OutputBuilderAmountDto {
-        fn from(value: &OutputBuilderAmount) -> Self {
-            match value {
-                OutputBuilderAmount::Amount(a) => Self::Amount(a.to_string()),
-                OutputBuilderAmount::MinimumStorageDeposit(r) => Self::MinimumStorageDeposit(*r),
-            }
-        }
-    }
-
-    /// Describes all the different output types.
-    #[derive(Clone, Debug, Eq, PartialEq, From)]
-    pub enum OutputDto {
-        Treasury(TreasuryOutputDto),
-        Basic(BasicOutputDto),
-        Alias(AliasOutputDto),
-        Foundry(FoundryOutputDto),
-        Nft(NftOutputDto),
-    }
-
-    impl From<&Output> for OutputDto {
-        fn from(value: &Output) -> Self {
-            match value {
-                Output::Treasury(o) => Self::Treasury(o.into()),
-                Output::Basic(o) => Self::Basic(o.into()),
-                Output::Alias(o) => Self::Alias(o.into()),
-                Output::Foundry(o) => Self::Foundry(o.into()),
-                Output::Nft(o) => Self::Nft(o.into()),
-            }
-        }
-    }
-
-    impl Output {
-        pub fn try_from_dto(value: OutputDto, token_supply: u64) -> Result<Self, Error> {
-            Ok(match value {
-                OutputDto::Treasury(o) => Self::Treasury(TreasuryOutput::try_from_dto(o, token_supply)?),
-                OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from_dto(o, token_supply)?),
-                OutputDto::Alias(o) => Self::Alias(AliasOutput::try_from_dto(o, token_supply)?),
-                OutputDto::Foundry(o) => Self::Foundry(FoundryOutput::try_from_dto(o, token_supply)?),
-                OutputDto::Nft(o) => Self::Nft(NftOutput::try_from_dto(o, token_supply)?),
-            })
-        }
-
-        pub fn try_from_dto_unverified(value: OutputDto) -> Result<Self, Error> {
-            Ok(match value {
-                OutputDto::Treasury(o) => Self::Treasury(TreasuryOutput::try_from_dto_unverified(o)?),
-                OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from_dto_unverified(o)?),
-                OutputDto::Alias(o) => Self::Alias(AliasOutput::try_from_dto_unverified(o)?),
-                OutputDto::Foundry(o) => Self::Foundry(FoundryOutput::try_from_dto_unverified(o)?),
-                OutputDto::Nft(o) => Self::Nft(NftOutput::try_from_dto_unverified(o)?),
-            })
-        }
-    }
-
-    impl<'de> Deserialize<'de> for OutputDto {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let value = Value::deserialize(d)?;
-            Ok(
-                match value
-                    .get("type")
-                    .and_then(Value::as_u64)
-                    .ok_or_else(|| serde::de::Error::custom("invalid output type"))? as u8
-                {
-                    TreasuryOutput::KIND => {
-                        Self::Treasury(TreasuryOutputDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize treasury output: {e}"))
-                        })?)
-                    }
-                    BasicOutput::KIND => Self::Basic(
-                        BasicOutputDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize basic output: {e}")))?,
-                    ),
-                    AliasOutput::KIND => Self::Alias(
-                        AliasOutputDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize alias output: {e}")))?,
-                    ),
-                    FoundryOutput::KIND => Self::Foundry(
-                        FoundryOutputDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize foundry output: {e}")))?,
-                    ),
-                    NftOutput::KIND => Self::Nft(
-                        NftOutputDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize NFT output: {e}")))?,
-                    ),
-                    _ => return Err(serde::de::Error::custom("invalid output type")),
-                },
-            )
-        }
-    }
-
-    impl Serialize for OutputDto {
-        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-        {
-            #[derive(Serialize)]
-            #[serde(untagged)]
-            enum OutputDto_<'a> {
-                T1(&'a TreasuryOutputDto),
-                T2(&'a BasicOutputDto),
-                T3(&'a AliasOutputDto),
-                T4(&'a FoundryOutputDto),
-                T5(&'a NftOutputDto),
-            }
-            #[derive(Serialize)]
-            struct TypedOutput<'a> {
-                #[serde(flatten)]
-                output: OutputDto_<'a>,
-            }
-            let output = match self {
-                Self::Treasury(o) => TypedOutput {
-                    output: OutputDto_::T1(o),
-                },
-                Self::Basic(o) => TypedOutput {
-                    output: OutputDto_::T2(o),
-                },
-                Self::Alias(o) => TypedOutput {
-                    output: OutputDto_::T3(o),
-                },
-                Self::Foundry(o) => TypedOutput {
-                    output: OutputDto_::T4(o),
-                },
-                Self::Nft(o) => TypedOutput {
-                    output: OutputDto_::T5(o),
-                },
-            };
-            output.serialize(serializer)
-        }
-    }
 }

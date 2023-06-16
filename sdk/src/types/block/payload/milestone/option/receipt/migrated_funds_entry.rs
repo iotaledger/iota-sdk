@@ -81,13 +81,13 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
+    use crate::types::block::{address::Address, Error};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct MigratedFundsEntryDto {
         pub tail_transaction_hash: String,
-        pub address: AddressDto,
+        pub address: Address,
         pub deposit: u64,
     }
 

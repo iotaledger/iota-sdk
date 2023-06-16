@@ -15,7 +15,6 @@ pub(crate) mod update;
 use std::{
     collections::{HashMap, HashSet},
     ops::Deref,
-    str::FromStr,
     sync::Arc,
 };
 
@@ -25,32 +24,27 @@ use tokio::sync::{Mutex, RwLock};
 
 #[cfg(feature = "participation")]
 pub use self::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes};
+pub use self::operations::{
+    output_claiming::OutputsToClaim,
+    syncing::{
+        options::{AccountSyncOptions, AliasSyncOptions, NftSyncOptions},
+        SyncOptions,
+    },
+    transaction::{
+        high_level::{
+            create_alias::CreateAliasParams,
+            minting::{
+                mint_native_token::{MintNativeTokenParams, MintTokenTransactionDto, PreparedMintTokenTransactionDto},
+                mint_nfts::MintNftParams,
+            },
+        },
+        prepare_output::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
+        RemainderValueStrategy, TransactionOptions, TransactionOptionsDto,
+    },
+};
 use self::types::{
     address::{AccountAddress, AddressWithUnspentOutputs},
     Balance, OutputData, Transaction,
-};
-pub use self::{
-    operations::{
-        output_claiming::OutputsToClaim,
-        syncing::{
-            options::{AccountSyncOptions, AliasSyncOptions, NftSyncOptions},
-            SyncOptions,
-        },
-        transaction::{
-            high_level::{
-                create_alias::CreateAliasParams,
-                minting::{
-                    mint_native_token::{
-                        MintNativeTokenParams, MintTokenTransactionDto, PreparedMintTokenTransactionDto,
-                    },
-                    mint_nfts::MintNftParams,
-                },
-            },
-            prepare_output::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
-            RemainderValueStrategy, TransactionOptions, TransactionOptionsDto,
-        },
-    },
-    types::OutputDataDto,
 };
 use super::wallet::WalletInner;
 use crate::{
@@ -58,15 +52,11 @@ use crate::{
         secret::{SecretManage, SecretManager},
         Client,
     },
-    types::{
-        api::core::response::OutputWithMetadataResponse,
-        block::{
-            output::{AliasId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
-            payload::{
-                transaction::{TransactionEssence, TransactionId},
-                TransactionPayload,
-            },
-            BlockId,
+    types::block::{
+        output::{AliasId, FoundryId, FoundryOutput, NftId, Output, OutputId, OutputWithMetadata, TokenId},
+        payload::{
+            transaction::{TransactionEssence, TransactionId},
+            TransactionPayload,
         },
     },
     wallet::{account::types::InclusionState, Result},
@@ -441,18 +431,16 @@ impl AccountInner {
 pub(crate) fn build_transaction_from_payload_and_inputs(
     tx_id: TransactionId,
     tx_payload: TransactionPayload,
-    inputs: Vec<OutputWithMetadataResponse>,
+    inputs: Vec<OutputWithMetadata>,
 ) -> crate::wallet::Result<Transaction> {
     let TransactionEssence::Regular(tx_essence) = &tx_payload.essence();
     Ok(Transaction {
         payload: tx_payload.clone(),
-        block_id: inputs
-            .first()
-            .and_then(|i| BlockId::from_str(&i.metadata.block_id).ok()),
+        block_id: inputs.first().map(|i| *i.metadata().block_id()),
         inclusion_state: InclusionState::Confirmed,
         timestamp: inputs
             .first()
-            .and_then(|i| i.metadata.milestone_timestamp_spent.map(|t| t as u128 * 1000))
+            .and_then(|i| i.metadata().milestone_timestamp_spent().map(|t| t as u128 * 1000))
             .unwrap_or_else(|| crate::utils::unix_timestamp_now().as_millis()),
         transaction_id: tx_id,
         network_id: tx_essence.network_id(),
@@ -464,6 +452,8 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
 
 #[test]
 fn serialize() {
+    use core::str::FromStr;
+
     use crate::types::block::{
         address::{Address, Ed25519Address},
         input::{Input, UtxoInput},
@@ -568,6 +558,7 @@ impl AccountDetails {
     /// (rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy), all other fields are set to their Rust
     /// defaults.
     pub(crate) fn mock() -> Self {
+        use core::str::FromStr;
         Self {
             index: 0,
             coin_type: 4218,

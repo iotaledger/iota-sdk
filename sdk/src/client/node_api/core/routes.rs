@@ -17,12 +17,11 @@ use crate::{
     },
     types::{
         api::core::response::{
-            BlockMetadataResponse, BlockResponse, InfoResponse, MilestoneResponse, OutputWithMetadataResponse,
-            PeerResponse, ReceiptResponse, ReceiptsResponse, RoutesResponse, SubmitBlockResponse, TipsResponse,
-            TreasuryResponse, UtxoChangesResponse,
+            BlockMetadataResponse, BlockResponse, InfoResponse, MilestoneResponse, PeerResponse, ReceiptResponse,
+            ReceiptsResponse, RoutesResponse, SubmitBlockResponse, TipsResponse, TreasuryResponse, UtxoChangesResponse,
         },
         block::{
-            output::{dto::OutputMetadataDto, Output, OutputId, OutputMetadata, OutputWithMetadata},
+            output::{OutputId, OutputMetadata, OutputWithMetadata},
             payload::{
                 milestone::{MilestoneId, MilestonePayload},
                 transaction::TransactionId,
@@ -273,18 +272,11 @@ impl ClientInner {
     pub async fn get_output(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
         let path = &format!("api/core/v2/outputs/{output_id}");
 
-        let response: OutputWithMetadataResponse = self
-            .node_manager
+        self.node_manager
             .read()
             .await
             .get_request(path, None, self.get_timeout().await, false, true)
-            .await?;
-
-        let token_supply = self.get_token_supply().await?;
-        let output = Output::try_from_dto(response.output, token_supply)?;
-        let metadata = OutputMetadata::try_from(response.metadata)?;
-
-        Ok(OutputWithMetadata::new(output, metadata))
+            .await
     }
 
     /// Finds an output, as raw bytes, by its OutputId (TransactionId + output_index).
@@ -301,13 +293,13 @@ impl ClientInner {
 
     /// Get the metadata for a given `OutputId` (TransactionId + output_index).
     /// GET /api/core/v2/outputs/{outputId}/metadata
-    pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadataDto> {
+    pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadata> {
         let path = &format!("api/core/v2/outputs/{output_id}/metadata");
 
         self.node_manager
             .read()
             .await
-            .get_request::<OutputMetadataDto>(path, None, self.get_timeout().await, false, true)
+            .get_request::<OutputMetadata>(path, None, self.get_timeout().await, false, true)
             .await
     }
 

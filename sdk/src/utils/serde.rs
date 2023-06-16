@@ -54,6 +54,32 @@ pub mod option_string {
     }
 }
 
+pub mod prefix_hex_box {
+    use alloc::{string::String, vec::Vec};
+
+    use packable::{bounded::Bounded, prefix::BoxedSlicePrefix};
+    use serde::{de, Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S, L: Bounded>(value: &BoxedSlicePrefix<u8, L>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&prefix_hex::encode(value.as_ref()))
+    }
+
+    pub fn deserialize<'de, D, L: Bounded>(deserializer: D) -> Result<BoxedSlicePrefix<u8, L>, D::Error>
+    where
+        D: Deserializer<'de>,
+        <L as TryFrom<usize>>::Error: core::fmt::Display,
+    {
+        Ok(prefix_hex::decode::<Vec<_>>(String::deserialize(deserializer)?)
+            .map_err(de::Error::custom)?
+            .into_boxed_slice()
+            .try_into()
+            .map_err(de::Error::custom)?)
+    }
+}
+
 pub mod option_prefix_hex_vec {
     use alloc::{string::String, vec::Vec};
 

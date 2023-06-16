@@ -1,7 +1,7 @@
 // Copyright 2021-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::collections::BTreeSet;
 
 use packable::Packable;
 
@@ -43,7 +43,7 @@ impl BasicOutputBuilder {
         Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure))
     }
 
-    fn new(amount: OutputBuilderAmount) -> Self {
+    pub fn new(amount: OutputBuilderAmount) -> Self {
         Self {
             amount,
             native_tokens: BTreeSet::new(),
@@ -192,7 +192,11 @@ impl From<&BasicOutput> for BasicOutputBuilder {
 
 /// Describes a basic output with optional features.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct BasicOutput {
@@ -200,10 +204,13 @@ pub struct BasicOutput {
     #[packable(verify_with = verify_output_amount_packable)]
     amount: u64,
     // Native tokens held by the output.
+    #[serde(skip_serializing_if = "NativeTokens::is_empty", default)]
     native_tokens: NativeTokens,
     #[packable(verify_with = verify_unlock_conditions_packable)]
+    #[serde(skip_serializing_if = "UnlockConditions::is_empty", default)]
     unlock_conditions: UnlockConditions,
     #[packable(verify_with = verify_features_packable)]
+    #[serde(skip_serializing_if = "Features::is_empty", default)]
     features: Features,
 }
 
@@ -326,135 +333,18 @@ fn verify_features_packable<const VERIFY: bool>(blocks: &Features, _: &ProtocolP
     verify_features::<VERIFY>(blocks)
 }
 
-#[allow(missing_docs)]
-pub mod dto {
-    use alloc::string::{String, ToString};
-
-    use serde::{Deserialize, Serialize};
-
-    use super::*;
-    use crate::types::block::{
-        output::{dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto},
-        Error,
-    };
-
-    /// Describes a basic output.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    pub struct BasicOutputDto {
-        #[serde(rename = "type")]
-        pub kind: u8,
-        // Amount of IOTA tokens held by the output.
-        pub amount: String,
-        // Native tokens held by the output.
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeToken>,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub features: Vec<FeatureDto>,
-    }
-
-    impl From<&BasicOutput> for BasicOutputDto {
-        fn from(value: &BasicOutput) -> Self {
-            Self {
-                kind: BasicOutput::KIND,
-                amount: value.amount().to_string(),
-                native_tokens: value.native_tokens().to_vec(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
-                features: value.features().iter().map(Into::into).collect::<_>(),
-            }
-        }
-    }
-
-    impl BasicOutput {
-        pub fn try_from_dto(value: BasicOutputDto, token_supply: u64) -> Result<Self, Error> {
-            let mut builder =
-                BasicOutputBuilder::new_with_amount(value.amount.parse().map_err(|_| Error::InvalidField("amount"))?);
-
-            builder = builder.with_native_tokens(value.native_tokens);
-
-            for b in value.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
-            }
-
-            for u in value.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto(u, token_supply)?);
-            }
-
-            builder.finish(token_supply)
-        }
-
-        pub fn try_from_dto_unverified(value: BasicOutputDto) -> Result<Self, Error> {
-            let mut builder =
-                BasicOutputBuilder::new_with_amount(value.amount.parse().map_err(|_| Error::InvalidField("amount"))?);
-
-            builder = builder.with_native_tokens(value.native_tokens);
-
-            for b in value.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
-            }
-
-            for u in value.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_unverified(u)?);
-            }
-
-            builder.finish_unverified()
-        }
-
-        pub fn try_from_dtos(
-            amount: OutputBuilderAmountDto,
-            native_tokens: Option<Vec<NativeToken>>,
-            unlock_conditions: Vec<UnlockConditionDto>,
-            features: Option<Vec<FeatureDto>>,
-            token_supply: u64,
-        ) -> Result<Self, Error> {
-            let mut builder = match amount {
-                OutputBuilderAmountDto::Amount(amount) => {
-                    BasicOutputBuilder::new_with_amount(amount.parse().map_err(|_| Error::InvalidField("amount"))?)
-                }
-                OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
-                    BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                }
-            };
-
-            if let Some(native_tokens) = native_tokens {
-                builder = builder.with_native_tokens(native_tokens);
-            }
-
-            let unlock_conditions = unlock_conditions
-                .into_iter()
-                .map(|u| UnlockCondition::try_from_dto(u, token_supply))
-                .collect::<Result<Vec<UnlockCondition>, Error>>()?;
-            builder = builder.with_unlock_conditions(unlock_conditions);
-
-            if let Some(features) = features {
-                let features = features
-                    .into_iter()
-                    .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, Error>>()?;
-                builder = builder.with_features(features);
-            }
-
-            builder.finish(token_supply)
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use packable::PackableExt;
 
     use super::*;
     use crate::types::block::{
-        output::{
-            dto::{OutputBuilderAmountDto, OutputDto},
-            FoundryId, SimpleTokenScheme, TokenId,
-        },
+        output::{FoundryId, SimpleTokenScheme, TokenId},
         protocol::protocol_parameters,
         rand::{
             address::rand_alias_address,
             output::{
-                feature::{rand_allowed_features, rand_metadata_feature, rand_sender_feature},
+                feature::{rand_metadata_feature, rand_sender_feature},
                 rand_basic_output,
                 unlock_condition::rand_address_unlock_condition,
             },
@@ -512,56 +402,5 @@ mod tests {
         let bytes = output.pack_to_vec();
         let output_unpacked = BasicOutput::unpack_verified(bytes, &protocol_parameters).unwrap();
         assert_eq!(output, output_unpacked);
-    }
-
-    #[test]
-    fn to_from_dto() {
-        let protocol_parameters = protocol_parameters();
-        let output = rand_basic_output(protocol_parameters.token_supply());
-        let dto = OutputDto::Basic((&output).into());
-        let output_unver = Output::try_from_dto_unverified(dto.clone()).unwrap();
-        assert_eq!(&output, output_unver.as_basic());
-        let output_ver = Output::try_from_dto(dto, protocol_parameters.token_supply()).unwrap();
-        assert_eq!(&output, output_ver.as_basic());
-
-        let output_split = BasicOutput::try_from_dtos(
-            OutputBuilderAmountDto::Amount(output.amount().to_string()),
-            Some(output.native_tokens().to_vec()),
-            output.unlock_conditions().iter().map(Into::into).collect(),
-            Some(output.features().iter().map(Into::into).collect()),
-            protocol_parameters.token_supply(),
-        )
-        .unwrap();
-        assert_eq!(output, output_split);
-
-        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
-        let address = rand_address_unlock_condition();
-
-        let test_split_dto = |builder: BasicOutputBuilder| {
-            let output_split = BasicOutput::try_from_dtos(
-                (&builder.amount).into(),
-                Some(builder.native_tokens.iter().copied().collect()),
-                builder.unlock_conditions.iter().map(Into::into).collect(),
-                Some(builder.features.iter().map(Into::into).collect()),
-                protocol_parameters.token_supply(),
-            )
-            .unwrap();
-            assert_eq!(
-                builder.finish(protocol_parameters.token_supply()).unwrap(),
-                output_split
-            );
-        };
-
-        let builder = BasicOutput::build_with_amount(100)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
-            .add_unlock_condition(address)
-            .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
-        test_split_dto(builder);
-
-        let builder = BasicOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure())
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
-            .add_unlock_condition(address)
-            .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
-        test_split_dto(builder);
     }
 }

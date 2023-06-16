@@ -26,17 +26,3 @@ impl SenderFeature {
         &self.0
     }
 }
-
-#[allow(missing_docs)]
-pub mod dto {
-    use serde::{Deserialize, Serialize};
-
-    use crate::types::block::address::dto::AddressDto;
-
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct SenderFeatureDto {
-        #[serde(rename = "type")]
-        pub kind: u8,
-        pub address: AddressDto,
-    }
-}

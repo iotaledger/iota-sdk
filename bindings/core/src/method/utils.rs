@@ -3,7 +3,7 @@
 
 use derivative::Derivative;
 use iota_sdk::types::block::{
-    address::{dto::Ed25519AddressDto, AliasAddress, Bech32Address, Hrp},
+    address::{AliasAddress, Bech32Address, Ed25519Address, Hrp},
     output::{AliasId, NftId, OutputId},
     payload::{
         dto::MilestonePayloadDto,
@@ -125,7 +125,7 @@ pub enum UtilsMethod {
         /// The signed message, hex encoded String
         message: String,
         /// The hex encoded Ed25519 address
-        address: Ed25519AddressDto,
+        address: Ed25519Address,
     },
     /// Checks if the given mnemonic is valid.
     /// Expected response: [`Ok`](crate::Response::Ok)

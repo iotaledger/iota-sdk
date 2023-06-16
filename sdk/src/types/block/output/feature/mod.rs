@@ -12,6 +12,8 @@ use bitflags::bitflags;
 use derive_more::{Deref, From};
 use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer};
 
 pub use self::{issuer::IssuerFeature, metadata::MetadataFeature, sender::SenderFeature, tag::TagFeature};
 pub(crate) use self::{metadata::MetadataFeatureLength, tag::TagFeatureLength};
@@ -19,11 +21,6 @@ use crate::types::block::{create_bitflags, Error};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(tag = "type", content = "data")
-)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidFeatureKind)]
 pub enum Feature {
@@ -145,6 +142,71 @@ impl Feature {
     }
 }
 
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for Feature {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        struct TypedFeature {
+            #[serde(rename = "type")]
+            kind: u8,
+            data: serde_json::Value,
+        }
+
+        let value = TypedFeature::deserialize(d)?;
+        Ok(match value.kind {
+            SenderFeature::KIND => SenderFeature::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize sender feature: {e}")))?
+                .into(),
+            IssuerFeature::KIND => IssuerFeature::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize issuer feature: {e}")))?
+                .into(),
+            MetadataFeature::KIND => MetadataFeature::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize metadata feature: {e}")))?
+                .into(),
+            TagFeature::KIND => TagFeature::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize tag feature: {e}")))?
+                .into(),
+            _ => {
+                return Err(serde::de::Error::custom("invalid feature type"));
+            }
+        })
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Feature {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        #[derive(Serialize)]
+        #[serde(untagged)]
+        enum FeatureDto<'a> {
+            T1(&'a SenderFeature),
+            T2(&'a IssuerFeature),
+            T3(&'a MetadataFeature),
+            T4(&'a TagFeature),
+        }
+        #[derive(Serialize)]
+        struct TypedFeature<'a> {
+            #[serde(rename = "type")]
+            kind: u8,
+            data: FeatureDto<'a>,
+        }
+        let data = match self {
+            Self::Sender(data) => FeatureDto::T1(data),
+            Self::Issuer(data) => FeatureDto::T2(data),
+            Self::Metadata(data) => FeatureDto::T3(data),
+            Self::Tag(data) => FeatureDto::T4(data),
+        };
+        TypedFeature {
+            kind: self.kind(),
+            data,
+        }
+        .serialize(serializer)
+    }
+}
+
 create_bitflags!(
     /// A bitflags-based representation of the set of active [`Feature`]s.
     pub FeatureFlags,
@@ -160,7 +222,7 @@ create_bitflags!(
 pub(crate) type FeatureCount = BoundedU8<0, { Features::COUNT_MAX }>;
 
 ///
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidFeatureCount(p.into())))]
 pub struct Features(#[packable(verify_with = verify_unique_sorted)] BoxedSlicePrefix<Feature, FeatureCount>);
@@ -264,6 +326,10 @@ impl Features {
             None
         }
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 }
 
 #[inline]
@@ -303,152 +369,5 @@ mod test {
                 FeatureFlags::TAG
             ]
         );
-    }
-}
-
-#[allow(missing_docs)]
-pub mod dto {
-    use alloc::{format, string::ToString};
-
-    use serde::{Deserialize, Serialize, Serializer};
-    use serde_json::Value;
-
-    pub use self::{
-        issuer::dto::IssuerFeatureDto, metadata::dto::MetadataFeatureDto, sender::dto::SenderFeatureDto,
-        tag::dto::TagFeatureDto,
-    };
-    use super::*;
-    use crate::types::block::{address::Address, Error};
-
-    #[derive(Clone, Debug, Eq, PartialEq, From)]
-    pub enum FeatureDto {
-        /// A sender feature.
-        Sender(SenderFeatureDto),
-        /// An issuer feature.
-        Issuer(IssuerFeatureDto),
-        /// A metadata feature.
-        Metadata(MetadataFeatureDto),
-        /// A tag feature.
-        Tag(TagFeatureDto),
-    }
-
-    impl<'de> Deserialize<'de> for FeatureDto {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let value = Value::deserialize(d)?;
-            Ok(
-                match value
-                    .get("type")
-                    .and_then(Value::as_u64)
-                    .ok_or_else(|| serde::de::Error::custom("invalid feature type"))? as u8
-                {
-                    SenderFeature::KIND => Self::Sender(
-                        SenderFeatureDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize sender feature: {e}")))?,
-                    ),
-                    IssuerFeature::KIND => Self::Issuer(
-                        IssuerFeatureDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize issuer feature: {e}")))?,
-                    ),
-                    MetadataFeature::KIND => {
-                        Self::Metadata(MetadataFeatureDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize metadata feature: {e}"))
-                        })?)
-                    }
-                    TagFeature::KIND => Self::Tag(
-                        TagFeatureDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize tag feature: {e}")))?,
-                    ),
-                    _ => return Err(serde::de::Error::custom("invalid feature type")),
-                },
-            )
-        }
-    }
-
-    impl Serialize for FeatureDto {
-        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-        {
-            #[derive(Serialize)]
-            #[serde(untagged)]
-            enum FeatureDto_<'a> {
-                T1(&'a SenderFeatureDto),
-                T2(&'a IssuerFeatureDto),
-                T3(&'a MetadataFeatureDto),
-                T4(&'a TagFeatureDto),
-            }
-            #[derive(Serialize)]
-            struct TypedFeature<'a> {
-                #[serde(flatten)]
-                feature: FeatureDto_<'a>,
-            }
-            let feature = match self {
-                Self::Sender(o) => TypedFeature {
-                    feature: FeatureDto_::T1(o),
-                },
-                Self::Issuer(o) => TypedFeature {
-                    feature: FeatureDto_::T2(o),
-                },
-                Self::Metadata(o) => TypedFeature {
-                    feature: FeatureDto_::T3(o),
-                },
-                Self::Tag(o) => TypedFeature {
-                    feature: FeatureDto_::T4(o),
-                },
-            };
-            feature.serialize(serializer)
-        }
-    }
-
-    impl From<&Feature> for FeatureDto {
-        fn from(value: &Feature) -> Self {
-            match value {
-                Feature::Sender(v) => Self::Sender(SenderFeatureDto {
-                    kind: SenderFeature::KIND,
-                    address: v.address().into(),
-                }),
-                Feature::Issuer(v) => Self::Issuer(IssuerFeatureDto {
-                    kind: IssuerFeature::KIND,
-                    address: v.address().into(),
-                }),
-                Feature::Metadata(v) => Self::Metadata(MetadataFeatureDto {
-                    kind: MetadataFeature::KIND,
-                    data: v.to_string(),
-                }),
-                Feature::Tag(v) => Self::Tag(TagFeatureDto {
-                    kind: TagFeature::KIND,
-                    tag: v.to_string(),
-                }),
-            }
-        }
-    }
-
-    impl TryFrom<FeatureDto> for Feature {
-        type Error = Error;
-
-        fn try_from(value: FeatureDto) -> Result<Self, Self::Error> {
-            Ok(match value {
-                FeatureDto::Sender(v) => Self::Sender(SenderFeature::new(Address::try_from(v.address)?)),
-                FeatureDto::Issuer(v) => Self::Issuer(IssuerFeature::new(Address::try_from(v.address)?)),
-                FeatureDto::Metadata(v) => Self::Metadata(MetadataFeature::new(
-                    prefix_hex::decode::<Vec<u8>>(&v.data).map_err(|_e| Error::InvalidField("MetadataFeature"))?,
-                )?),
-                FeatureDto::Tag(v) => Self::Tag(TagFeature::new(
-                    prefix_hex::decode::<Vec<u8>>(&v.tag).map_err(|_e| Error::InvalidField("TagFeature"))?,
-                )?),
-            })
-        }
-    }
-
-    impl FeatureDto {
-        /// Return the feature kind of a `FeatureDto`.
-        pub fn kind(&self) -> u8 {
-            match self {
-                Self::Sender(_) => SenderFeature::KIND,
-                Self::Issuer(_) => IssuerFeature::KIND,
-                Self::Metadata(_) => MetadataFeature::KIND,
-                Self::Tag(_) => TagFeature::KIND,
-            }
-        }
     }
 }

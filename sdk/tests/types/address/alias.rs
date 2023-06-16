@@ -4,18 +4,13 @@
 use std::str::FromStr;
 
 use iota_sdk::types::block::{
-    address::{
-        dto::{AddressDto, AliasAddressDto},
-        Address, AliasAddress, Bech32Address, ToBech32Ext,
-    },
+    address::{Address, AliasAddress, Bech32Address, ToBech32Ext},
     output::AliasId,
-    Error,
 };
 use packable::PackableExt;
 
 const ALIAS_ID: &str = "0xe9ba80ad1561e437b663a1f1efbfabd544b0d7da7bb33e0a62e99b20ee450bee";
 const ALIAS_BECH32: &str = "rms1pr5m4q9dz4s7gdakvwslrmal4025fvxhmfamx0s2vt5ekg8wg597um6lcnn";
-const ALIAS_ID_INVALID: &str = "0xb0c800965d7511f5fb4406274d4e607f87d5c5970bc05e896f841a700e86e";
 
 #[test]
 fn kind() {
@@ -99,46 +94,6 @@ fn bech32_roundtrip() {
         Bech32Address::try_from_str(bech32),
         Bech32Address::try_new("rms", address)
     );
-}
-
-#[test]
-fn dto_fields() {
-    let alias_address = AliasAddress::from_str(ALIAS_ID).unwrap();
-    let alias_dto = AliasAddressDto::from(&alias_address);
-
-    assert_eq!(alias_dto.kind, AliasAddress::KIND);
-    assert_eq!(alias_dto.alias_id, ALIAS_ID.to_string());
-
-    let address = Address::from(alias_address);
-    let dto = AddressDto::from(&address);
-
-    assert_eq!(dto, AddressDto::Alias(alias_dto));
-}
-
-#[test]
-fn dto_roundtrip() {
-    let alias_address = AliasAddress::from_str(ALIAS_ID).unwrap();
-    let alias_dto = AliasAddressDto::from(&alias_address);
-
-    assert_eq!(AliasAddress::try_from(alias_dto).unwrap(), alias_address);
-
-    let address = Address::from(alias_address);
-    let dto = AddressDto::from(&address);
-
-    assert_eq!(Address::try_from(dto).unwrap(), address);
-}
-
-#[test]
-fn dto_invalid_alias_id() {
-    let dto = AliasAddressDto {
-        kind: AliasAddress::KIND,
-        alias_id: ALIAS_ID_INVALID.to_string(),
-    };
-
-    assert!(matches!(
-        AliasAddress::try_from(dto),
-        Err(Error::InvalidField("aliasId"))
-    ));
 }
 
 #[test]

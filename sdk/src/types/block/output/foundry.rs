@@ -1,10 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{
-    collections::{BTreeMap, BTreeSet},
-    vec::Vec,
-};
+use alloc::collections::{BTreeMap, BTreeSet};
 use core::cmp::Ordering;
 
 use packable::{
@@ -62,7 +59,7 @@ impl FoundryOutputBuilder {
         )
     }
 
-    fn new(amount: OutputBuilderAmount, serial_number: u32, token_scheme: TokenScheme) -> Self {
+    pub fn new(amount: OutputBuilderAmount, serial_number: u32, token_scheme: TokenScheme) -> Self {
         Self {
             amount,
             native_tokens: BTreeSet::new(),
@@ -269,17 +266,25 @@ impl From<&FoundryOutput> for FoundryOutputBuilder {
 
 /// Describes a foundry output that is controlled by an alias.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub struct FoundryOutput {
     // Amount of IOTA tokens held by the output.
     amount: u64,
     // Native tokens held by the output.
+    #[serde(skip_serializing_if = "NativeTokens::is_empty", default)]
     native_tokens: NativeTokens,
     // The serial number of the foundry with respect to the controlling alias.
     serial_number: u32,
     token_scheme: TokenScheme,
+    #[serde(skip_serializing_if = "UnlockConditions::is_empty", default)]
     unlock_conditions: UnlockConditions,
+    #[serde(skip_serializing_if = "Features::is_empty", default)]
     features: Features,
+    #[serde(skip_serializing_if = "Features::is_empty", default)]
     immutable_features: Features,
 }
 
@@ -603,182 +608,17 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions) -> Result<(), 
     }
 }
 
-#[allow(missing_docs)]
-pub mod dto {
-    use alloc::string::{String, ToString};
-
-    use serde::{Deserialize, Serialize};
-
-    use super::*;
-    use crate::types::block::{
-        output::{
-            dto::OutputBuilderAmountDto, feature::dto::FeatureDto, token_scheme::dto::TokenSchemeDto,
-            unlock_condition::dto::UnlockConditionDto,
-        },
-        Error,
-    };
-
-    /// Describes a foundry output that is controlled by an alias.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    pub struct FoundryOutputDto {
-        #[serde(rename = "type")]
-        pub kind: u8,
-        // Amount of IOTA tokens held by the output.
-        pub amount: String,
-        // Native tokens held by the output.
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeToken>,
-        // The serial number of the foundry with respect to the controlling alias.
-        pub serial_number: u32,
-        pub token_scheme: TokenSchemeDto,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub features: Vec<FeatureDto>,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub immutable_features: Vec<FeatureDto>,
-    }
-
-    impl From<&FoundryOutput> for FoundryOutputDto {
-        fn from(value: &FoundryOutput) -> Self {
-            Self {
-                kind: FoundryOutput::KIND,
-                amount: value.amount().to_string(),
-                native_tokens: value.native_tokens().to_vec(),
-                serial_number: value.serial_number(),
-                token_scheme: value.token_scheme().into(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
-                features: value.features().iter().map(Into::into).collect::<_>(),
-                immutable_features: value.immutable_features().iter().map(Into::into).collect::<_>(),
-            }
-        }
-    }
-
-    impl FoundryOutput {
-        pub fn try_from_dto(value: FoundryOutputDto, token_supply: u64) -> Result<Self, Error> {
-            let mut builder = FoundryOutputBuilder::new_with_amount(
-                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                value.serial_number,
-                value.token_scheme.try_into()?,
-            );
-
-            for t in value.native_tokens {
-                builder = builder.add_native_token(t);
-            }
-
-            for b in value.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
-            }
-
-            for b in value.immutable_features {
-                builder = builder.add_immutable_feature(Feature::try_from(b)?);
-            }
-
-            for u in value.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto(u, token_supply)?);
-            }
-
-            builder.finish(token_supply)
-        }
-
-        pub fn try_from_dto_unverified(value: FoundryOutputDto) -> Result<Self, Error> {
-            let mut builder = FoundryOutputBuilder::new_with_amount(
-                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                value.serial_number,
-                value.token_scheme.try_into()?,
-            );
-
-            for t in value.native_tokens {
-                builder = builder.add_native_token(t);
-            }
-
-            for b in value.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
-            }
-
-            for b in value.immutable_features {
-                builder = builder.add_immutable_feature(Feature::try_from(b)?);
-            }
-
-            for u in value.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_unverified(u)?);
-            }
-
-            builder.finish_unverified()
-        }
-
-        #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos(
-            amount: OutputBuilderAmountDto,
-            native_tokens: Option<Vec<NativeToken>>,
-            serial_number: u32,
-            token_scheme: TokenSchemeDto,
-            unlock_conditions: Vec<UnlockConditionDto>,
-            features: Option<Vec<FeatureDto>>,
-            immutable_features: Option<Vec<FeatureDto>>,
-            token_supply: u64,
-        ) -> Result<Self, Error> {
-            let token_scheme = TokenScheme::try_from(token_scheme)?;
-
-            let mut builder = match amount {
-                OutputBuilderAmountDto::Amount(amount) => FoundryOutputBuilder::new_with_amount(
-                    amount.parse().map_err(|_| Error::InvalidField("amount"))?,
-                    serial_number,
-                    token_scheme,
-                ),
-                OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
-                    FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, serial_number, token_scheme)
-                }
-            };
-
-            if let Some(native_tokens) = native_tokens {
-                builder = builder.with_native_tokens(native_tokens);
-            }
-
-            let unlock_conditions = unlock_conditions
-                .into_iter()
-                .map(|u| UnlockCondition::try_from_dto(u, token_supply))
-                .collect::<Result<Vec<UnlockCondition>, Error>>()?;
-            builder = builder.with_unlock_conditions(unlock_conditions);
-
-            if let Some(features) = features {
-                let features = features
-                    .into_iter()
-                    .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, Error>>()?;
-                builder = builder.with_features(features);
-            }
-
-            if let Some(immutable_features) = immutable_features {
-                let immutable_features = immutable_features
-                    .into_iter()
-                    .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, Error>>()?;
-                builder = builder.with_immutable_features(immutable_features);
-            }
-
-            builder.finish(token_supply)
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use packable::PackableExt;
 
     use super::*;
     use crate::types::block::{
-        output::{
-            dto::OutputDto, unlock_condition::ImmutableAliasAddressUnlockCondition, FoundryId, SimpleTokenScheme,
-            TokenId,
-        },
+        output::{unlock_condition::ImmutableAliasAddressUnlockCondition, FoundryId, SimpleTokenScheme, TokenId},
         protocol::protocol_parameters,
         rand::{
             address::rand_alias_address,
-            output::{
-                feature::{rand_allowed_features, rand_metadata_feature},
-                rand_foundry_output, rand_token_scheme,
-            },
+            output::{feature::rand_metadata_feature, rand_foundry_output, rand_token_scheme},
         },
     };
 
@@ -835,54 +675,5 @@ mod tests {
         let bytes = output.pack_to_vec();
         let output_unpacked = FoundryOutput::unpack_verified(bytes, &protocol_parameters).unwrap();
         assert_eq!(output, output_unpacked);
-    }
-
-    #[test]
-    fn to_from_dto() {
-        let protocol_parameters = protocol_parameters();
-        let output = rand_foundry_output(protocol_parameters.token_supply());
-        let dto = OutputDto::Foundry((&output).into());
-        let output_unver = Output::try_from_dto_unverified(dto.clone()).unwrap();
-        assert_eq!(&output, output_unver.as_foundry());
-        let output_ver = Output::try_from_dto(dto, protocol_parameters.token_supply()).unwrap();
-        assert_eq!(&output, output_ver.as_foundry());
-
-        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
-
-        let test_split_dto = |builder: FoundryOutputBuilder| {
-            let output_split = FoundryOutput::try_from_dtos(
-                (&builder.amount).into(),
-                Some(builder.native_tokens.iter().copied().collect()),
-                builder.serial_number,
-                (&builder.token_scheme).into(),
-                builder.unlock_conditions.iter().map(Into::into).collect(),
-                Some(builder.features.iter().map(Into::into).collect()),
-                Some(builder.immutable_features.iter().map(Into::into).collect()),
-                protocol_parameters.token_supply(),
-            )
-            .unwrap();
-            assert_eq!(
-                builder.finish(protocol_parameters.token_supply()).unwrap(),
-                output_split
-            );
-        };
-
-        let builder = FoundryOutput::build_with_amount(100, 123, rand_token_scheme())
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
-            .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(rand_alias_address()))
-            .add_immutable_feature(rand_metadata_feature())
-            .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
-        test_split_dto(builder);
-
-        let builder = FoundryOutput::build_with_minimum_storage_deposit(
-            *protocol_parameters.rent_structure(),
-            123,
-            rand_token_scheme(),
-        )
-        .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
-        .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(rand_alias_address()))
-        .add_immutable_feature(rand_metadata_feature())
-        .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
-        test_split_dto(builder);
     }
 }

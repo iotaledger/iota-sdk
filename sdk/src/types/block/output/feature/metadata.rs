@@ -6,7 +6,7 @@ use core::{ops::RangeInclusive, str::FromStr};
 
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix};
 
-use crate::types::block::Error;
+use crate::{types::block::Error, utils::serde::prefix_hex_box};
 
 pub(crate) type MetadataFeatureLength =
     BoundedU16<{ *MetadataFeature::LENGTH_RANGE.start() }, { *MetadataFeature::LENGTH_RANGE.end() }>;
@@ -17,7 +17,7 @@ pub(crate) type MetadataFeatureLength =
 #[packable(unpack_error = Error, with = |err| Error::InvalidMetadataFeatureLength(err.into_prefix_err().into()))]
 pub struct MetadataFeature(
     // Binary data.
-    BoxedSlicePrefix<u8, MetadataFeatureLength>,
+    #[serde(with = "prefix_hex_box")] BoxedSlicePrefix<u8, MetadataFeatureLength>,
 );
 
 impl TryFrom<Vec<u8>> for MetadataFeature {
@@ -68,19 +68,5 @@ impl core::fmt::Display for MetadataFeature {
 impl core::fmt::Debug for MetadataFeature {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "MetadataFeature({self})")
-    }
-}
-
-#[allow(missing_docs)]
-pub mod dto {
-    use alloc::string::String;
-
-    use serde::{Deserialize, Serialize};
-
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct MetadataFeatureDto {
-        #[serde(rename = "type")]
-        pub kind: u8,
-        pub data: String,
     }
 }

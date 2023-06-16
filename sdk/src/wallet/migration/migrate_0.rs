@@ -30,31 +30,119 @@ fn rename_keys(json: &mut serde_json::Value) {
     }
 }
 
-fn migrate_native_token(output: &mut serde_json::Value) {
-    let native_tokens = output["native_tokens"]["inner"].as_array_mut().unwrap();
-
-    for native_token in native_tokens.iter_mut() {
+fn migrate_native_tokens(native_tokens: &mut serde_json::Value) {
+    for native_token in native_tokens["inner"].as_array_mut().unwrap() {
         if let Some(id) = native_token.get("token_id") {
             *native_token = serde_json::json!({ "amount": native_token["amount"], "id": id});
         }
     }
 }
 
+fn migrate_features(features: &mut serde_json::Value) -> Result<()> {
+    for feature in features["inner"].as_array_mut().unwrap() {
+        ConvertFeatureType::check(&mut feature["type"])?;
+        if matches!(feature["type"].as_u64(), Some(2 | 3)) {
+            ConvertBoxedSlice::check(&mut feature["data"])?;
+        }
+    }
+    Ok(())
+}
+
+fn migrate_features_dto(features: &mut serde_json::Value) -> Result<()> {
+    for feature in features.as_array_mut().unwrap() {
+        let feature = feature.as_object_mut().unwrap();
+        if let Some(ty) = feature.remove("address") {
+            feature.insert("data".to_owned(), ty);
+        }
+        if let Some(ty) = feature.remove("tag") {
+            feature.insert("data".to_owned(), ty);
+        }
+    }
+    Ok(())
+}
+
+fn migrate_output(output: &mut serde_json::Value) -> Result<()> {
+    if let Some(features) = output.get_mut("features") {
+        migrate_features(features)?;
+    }
+    if let Some(features) = output.get_mut("immutable_features") {
+        migrate_features(features)?;
+    }
+    if let Some(native_tokens) = output.get_mut("native_tokens") {
+        migrate_native_tokens(native_tokens);
+    }
+    Ok(())
+}
+
+fn migrate_output_dto(output: &mut serde_json::Value) -> Result<()> {
+    if let Some(features) = output.get_mut("features") {
+        migrate_features_dto(features)?;
+    }
+    if let Some(features) = output.get_mut("immutableFeatures") {
+        migrate_features_dto(features)?;
+    }
+    Ok(())
+}
+
+fn migrate_output_data(output_data: &mut serde_json::Value) -> Result<()> {
+    ConvertOutputMetadata::check(&mut output_data["metadata"])?;
+
+    migrate_output(&mut output_data["output"]["data"])?;
+
+    if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
+        for segment in chain {
+            ConvertSegment::check(segment)?;
+        }
+    }
+    Ok(())
+}
+
 fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
+    let mut f = std::fs::OpenOptions::new()
+        .create(true)
+        .write(true)
+        .open("before.json")
+        .unwrap();
+    serde_json::to_writer_pretty(&mut f, account).unwrap();
+
+    for (_key, transaction) in account["transactions"].as_object_mut().unwrap() {
+        for input in transaction["inputs"].as_array_mut().unwrap() {
+            migrate_output_dto(&mut input["output"])?;
+        }
+        let outputs = transaction["payload"]["essence"]["data"]["outputs"]["inner"]
+            .as_array_mut()
+            .unwrap();
+        for output in outputs {
+            migrate_output(&mut output["data"])?;
+        }
+    }
+
+    ConvertIncomingTransactions::check(&mut account["incomingTransactions"])?;
+
+    for (_key, transaction) in account["incomingTransactions"].as_object_mut().unwrap() {
+        for input in transaction["inputs"].as_array_mut().unwrap() {
+            migrate_output_dto(&mut input["output"])?;
+        }
+        let outputs = transaction["payload"]["essence"]["data"]["outputs"]["inner"]
+            .as_array_mut()
+            .unwrap();
+        for output in outputs {
+            migrate_output(&mut output["data"])?;
+        }
+    }
+
+    if let Some(native_token_foundries) = account.get_mut("nativeTokenFoundries") {
+        for (_key, foundry) in native_token_foundries.as_object_mut().unwrap() {
+            migrate_output(foundry)?;
+        }
+    }
+
     for output_data in account["outputs"]
         .as_object_mut()
         .ok_or(Error::Storage("malformatted outputs".to_owned()))?
         .values_mut()
     {
-        ConvertOutputMetadata::check(&mut output_data["metadata"])?;
-
-        if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
-            for segment in chain {
-                ConvertSegment::check(segment)?;
-            }
-        }
-
-        migrate_native_token(&mut output_data["output"]["data"]);
+        migrate_output_data(output_data)?;
     }
 
     for output_data in account["unspentOutputs"]
@@ -62,42 +150,15 @@ fn migrate_account(account: &mut serde_json::Value) -> Result<()> {
         .ok_or(Error::Storage("malformatted unspent outputs".to_owned()))?
         .values_mut()
     {
-        ConvertOutputMetadata::check(&mut output_data["metadata"])?;
-
-        if let Some(chain) = output_data.get_mut("chain").and_then(|c| c.as_array_mut()) {
-            for segment in chain {
-                ConvertSegment::check(segment)?;
-            }
-        }
-
-        migrate_native_token(&mut output_data["output"]["data"]);
+        migrate_output_data(output_data)?;
     }
 
-    for (_key, transaction) in account["transactions"].as_object_mut().unwrap() {
-        let outputs = transaction["payload"]["essence"]["data"]["outputs"]["inner"]
-            .as_array_mut()
-            .unwrap();
-        for output in outputs {
-            migrate_native_token(&mut output["data"]);
-        }
-    }
-
-    ConvertIncomingTransactions::check(&mut account["incomingTransactions"])?;
-
-    for (_key, transaction) in account["incomingTransactions"].as_object_mut().unwrap() {
-        let outputs = transaction["payload"]["essence"]["data"]["outputs"]["inner"]
-            .as_array_mut()
-            .unwrap();
-        for output in outputs {
-            migrate_native_token(&mut output["data"]);
-        }
-    }
-
-    if let Some(native_token_foundries) = account.get_mut("nativeTokenFoundries") {
-        for (_key, foundry) in native_token_foundries.as_object_mut().unwrap() {
-            migrate_native_token(foundry);
-        }
-    }
+    let mut f = std::fs::OpenOptions::new()
+        .create(true)
+        .write(true)
+        .open("after.json")
+        .unwrap();
+    serde_json::to_writer_pretty(&mut f, account).unwrap();
 
     Ok(())
 }
@@ -193,7 +254,7 @@ trait Convert {
 }
 
 mod types {
-    use core::{marker::PhantomData, str::FromStr};
+    use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
 
@@ -451,9 +512,25 @@ mod types {
 
     #[derive(Serialize, Deserialize)]
     #[repr(transparent)]
-    pub struct StringPrefix<B> {
+    pub struct StringPrefix {
         pub inner: String,
-        bounded: PhantomData<B>,
+        bounded: (),
+    }
+
+    #[derive(Serialize, Deserialize)]
+    #[repr(transparent)]
+    pub struct BoxedSlicePrefix<T> {
+        pub inner: Box<[T]>,
+        bounded: (),
+    }
+
+    #[derive(Deserialize)]
+    #[repr(u8)]
+    pub enum FeatureTag {
+        Sender = 0,
+        Issuer = 1,
+        Metadata = 2,
+        Tag = 3,
     }
 }
 
@@ -528,9 +605,29 @@ impl Convert for ConvertSegment {
 struct ConvertHrp;
 impl Convert for ConvertHrp {
     type New = types::Hrp;
-    type Old = types::StringPrefix<u8>;
+    type Old = types::StringPrefix;
 
     fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
         Ok(Self::New::from_str_unchecked(&old.inner))
+    }
+}
+
+struct ConvertFeatureType;
+impl Convert for ConvertFeatureType {
+    type New = u8;
+    type Old = types::FeatureTag;
+
+    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
+        Ok(old as u8)
+    }
+}
+
+struct ConvertBoxedSlice;
+impl Convert for ConvertBoxedSlice {
+    type New = String;
+    type Old = types::BoxedSlicePrefix<u8>;
+
+    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New> {
+        Ok(prefix_hex::encode(old.inner))
     }
 }

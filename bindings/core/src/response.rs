@@ -16,18 +16,15 @@ use iota_sdk::{
     types::{
         api::{
             core::response::{
-                BlockMetadataResponse, InfoResponse as NodeInfo, OutputWithMetadataResponse, PeerResponse,
-                ReceiptResponse, TreasuryResponse, UtxoChangesResponse as MilestoneUTXOChanges,
+                BlockMetadataResponse, InfoResponse as NodeInfo, PeerResponse, ReceiptResponse, TreasuryResponse,
+                UtxoChangesResponse as MilestoneUTXOChanges,
             },
             plugins::indexer::OutputIdsResponse,
         },
         block::{
-            address::{dto::AddressDto, Bech32Address, Hrp},
+            address::{Address, Bech32Address, Hrp},
             input::dto::UtxoInputDto,
-            output::{
-                dto::{OutputDto, OutputMetadataDto},
-                AliasId, FoundryId, NftId, OutputId,
-            },
+            output::{AliasId, FoundryId, NftId, Output, OutputId, OutputMetadata, OutputWithMetadata},
             payload::{
                 dto::{MilestonePayloadDto, PayloadDto},
                 milestone::MilestoneId,
@@ -41,7 +38,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            types::{AccountAddress, AddressWithUnspentOutputs, Balance, OutputDataDto, TransactionDto},
+            types::{AccountAddress, AddressWithUnspentOutputs, Balance, OutputData, TransactionDto},
             PreparedMintTokenTransactionDto,
         },
         message_interface::dtos::AccountDetailsDto,
@@ -138,15 +135,15 @@ pub enum Response {
     BlockRaw(Vec<u8>),
     /// Response for:
     /// - [`GetOutput`](crate::method::ClientMethod::GetOutput)
-    OutputWithMetadataResponse(OutputWithMetadataResponse),
+    OutputWithMetadataResponse(OutputWithMetadata),
     /// Response for:
     /// - [`GetOutputMetadata`](crate::method::ClientMethod::GetOutputMetadata)
-    OutputMetadata(OutputMetadataDto),
+    OutputMetadata(OutputMetadata),
     /// Response for:
     /// - [`GetOutputs`](crate::method::ClientMethod::GetOutputs)
     /// - [`GetOutputsIgnoreErrors`](crate::method::ClientMethod::GetOutputsIgnoreErrors)
     /// - [`FindOutputs`](crate::method::ClientMethod::FindOutputs)
-    Outputs(Vec<OutputWithMetadataResponse>),
+    Outputs(Vec<OutputWithMetadata>),
     /// Response for:
     /// - [`GetMilestoneById`](crate::method::ClientMethod::GetMilestoneById)
     /// - [`GetMilestoneByIndex`](crate::method::ClientMethod::GetMilestoneByIndex)
@@ -202,7 +199,7 @@ pub enum Response {
     Bech32ToHex(String),
     /// Response for:
     /// - [`ParseBech32Address`](crate::method::UtilsMethod::ParseBech32Address)
-    ParsedBech32Address(AddressDto),
+    ParsedBech32Address(Address),
     /// Response for:
     /// - [`MnemonicToHexSeed`](crate::method::UtilsMethod::MnemonicToHexSeed)
     MnemonicHexSeed(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
@@ -237,7 +234,7 @@ pub enum Response {
     /// - [`BuildNftOutput`](crate::method::ClientMethod::BuildNftOutput)
     /// - [`GetFoundryOutput`](crate::method::AccountMethod::GetFoundryOutput)
     /// - [`PrepareOutput`](crate::method::AccountMethod::PrepareOutput)
-    Output(OutputDto),
+    Output(Output),
     /// Response for:
     /// - [`HexToBech32`](crate::method::ClientMethod::HexToBech32)
     /// - [`GenerateEd25519Addresses`](crate::method::ClientMethod::GenerateEd25519Addresses)
@@ -312,11 +309,11 @@ pub enum Response {
     /// - [`ClaimableOutputs`](crate::method::AccountMethod::ClaimableOutputs)
     OutputIds(Vec<OutputId>),
     /// Response for [`GetOutput`](crate::method::AccountMethod::GetOutput)
-    OutputData(Option<Box<OutputDataDto>>),
+    OutputData(Option<Box<OutputData>>),
     /// Response for
     /// - [`Outputs`](crate::method::AccountMethod::Outputs),
     /// - [`UnspentOutputs`](crate::method::AccountMethod::UnspentOutputs)
-    OutputsData(Vec<OutputDataDto>),
+    OutputsData(Vec<OutputData>),
     /// Response for    
     /// [`PrepareBurn`](crate::method::AccountMethod::PrepareBurn),
     /// [`PrepareConsolidateOutputs`](crate::method::AccountMethod::PrepareConsolidateOutputs)

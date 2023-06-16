@@ -13,18 +13,23 @@ use packable::{
     Packable,
 };
 
-use crate::types::block::{
-    address::{Address, AliasAddress},
-    output::{
-        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        verify_output_amount, AliasId, ChainId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent,
-        RentStructure, StateTransitionError, StateTransitionVerifier,
+use crate::{
+    types::block::{
+        address::{Address, AliasAddress},
+        output::{
+            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+            unlock_condition::{
+                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+            },
+            verify_output_amount, AliasId, ChainId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
+            Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
+        },
+        protocol::ProtocolParameters,
+        semantic::{ConflictReason, ValidationContext},
+        unlock::Unlock,
+        Error,
     },
-    protocol::ProtocolParameters,
-    semantic::{ConflictReason, ValidationContext},
-    unlock::Unlock,
-    Error,
+    utils::serde::prefix_hex_box,
 };
 
 /// Types of alias transition.
@@ -85,7 +90,7 @@ impl AliasOutputBuilder {
         Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), alias_id)
     }
 
-    fn new(amount: OutputBuilderAmount, alias_id: AliasId) -> Self {
+    pub fn new(amount: OutputBuilderAmount, alias_id: AliasId) -> Self {
         Self {
             amount,
             native_tokens: BTreeSet::new(),
@@ -321,24 +326,34 @@ pub(crate) type StateMetadataLength = BoundedU16<0, { AliasOutput::STATE_METADAT
 
 /// Describes an alias account in the ledger that can be controlled by the state and governance controllers.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub struct AliasOutput {
     // Amount of IOTA tokens held by the output.
     amount: u64,
     // Native tokens held by the output.
+    #[serde(skip_serializing_if = "NativeTokens::is_empty", default)]
     native_tokens: NativeTokens,
     // Unique identifier of the alias.
     alias_id: AliasId,
     // A counter that must increase by 1 every time the alias is state transitioned.
     state_index: u32,
     // Metadata that can only be changed by the state controller.
+    #[serde(with = "prefix_hex_box")]
+    #[serde(skip_serializing_if = "<[u8]>::is_empty", default)]
     state_metadata: BoxedSlicePrefix<u8, StateMetadataLength>,
     // A counter that denotes the number of foundries created by this alias account.
     foundry_counter: u32,
+    #[serde(skip_serializing_if = "UnlockConditions::is_empty", default)]
     unlock_conditions: UnlockConditions,
     //
+    #[serde(skip_serializing_if = "Features::is_empty", default)]
     features: Features,
     //
+    #[serde(skip_serializing_if = "Features::is_empty", default)]
     immutable_features: Features,
 }
 
@@ -699,204 +714,6 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, alias_id: &Ali
     verify_allowed_unlock_conditions(unlock_conditions, AliasOutput::ALLOWED_UNLOCK_CONDITIONS)
 }
 
-#[allow(missing_docs)]
-pub mod dto {
-    use alloc::string::{String, ToString};
-
-    use serde::{Deserialize, Serialize};
-
-    use super::*;
-    use crate::types::block::{
-        output::{dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto},
-        Error,
-    };
-
-    /// Describes an alias account in the ledger that can be controlled by the state and governance controllers.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    pub struct AliasOutputDto {
-        #[serde(rename = "type")]
-        pub kind: u8,
-        // Amount of IOTA tokens held by the output.
-        pub amount: String,
-        // Native tokens held by the output.
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeToken>,
-        // Unique identifier of the alias.
-        pub alias_id: AliasId,
-        // A counter that must increase by 1 every time the alias is state transitioned.
-        pub state_index: u32,
-        // Metadata that can only be changed by the state controller.
-        #[serde(skip_serializing_if = "String::is_empty", default)]
-        pub state_metadata: String,
-        // A counter that denotes the number of foundries created by this alias account.
-        pub foundry_counter: u32,
-        //
-        pub unlock_conditions: Vec<UnlockConditionDto>,
-        //
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub features: Vec<FeatureDto>,
-        //
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub immutable_features: Vec<FeatureDto>,
-    }
-
-    impl From<&AliasOutput> for AliasOutputDto {
-        fn from(value: &AliasOutput) -> Self {
-            Self {
-                kind: AliasOutput::KIND,
-                amount: value.amount().to_string(),
-                native_tokens: value.native_tokens().to_vec(),
-                alias_id: *value.alias_id(),
-                state_index: value.state_index(),
-                state_metadata: prefix_hex::encode(value.state_metadata()),
-                foundry_counter: value.foundry_counter(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
-                features: value.features().iter().map(Into::into).collect::<_>(),
-                immutable_features: value.immutable_features().iter().map(Into::into).collect::<_>(),
-            }
-        }
-    }
-
-    impl AliasOutput {
-        pub fn try_from_dto(value: AliasOutputDto, token_supply: u64) -> Result<Self, Error> {
-            let mut builder = AliasOutputBuilder::new_with_amount(
-                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                value.alias_id,
-            );
-
-            builder = builder.with_state_index(value.state_index);
-
-            if !value.state_metadata.is_empty() {
-                builder = builder.with_state_metadata(
-                    prefix_hex::decode::<Vec<_>>(&value.state_metadata)
-                        .map_err(|_| Error::InvalidField("state_metadata"))?,
-                );
-            }
-
-            builder = builder.with_foundry_counter(value.foundry_counter);
-
-            for t in value.native_tokens {
-                builder = builder.add_native_token(t);
-            }
-
-            for b in value.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
-            }
-
-            for b in value.immutable_features {
-                builder = builder.add_immutable_feature(Feature::try_from(b)?);
-            }
-
-            for u in value.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto(u, token_supply)?);
-            }
-
-            builder.finish(token_supply)
-        }
-
-        pub fn try_from_dto_unverified(value: AliasOutputDto) -> Result<Self, Error> {
-            let mut builder = AliasOutputBuilder::new_with_amount(
-                value.amount.parse::<u64>().map_err(|_| Error::InvalidField("amount"))?,
-                value.alias_id,
-            );
-
-            builder = builder.with_state_index(value.state_index);
-
-            if !value.state_metadata.is_empty() {
-                builder = builder.with_state_metadata(
-                    prefix_hex::decode::<Vec<_>>(&value.state_metadata)
-                        .map_err(|_| Error::InvalidField("state_metadata"))?,
-                );
-            }
-
-            builder = builder.with_foundry_counter(value.foundry_counter);
-
-            for t in value.native_tokens {
-                builder = builder.add_native_token(t);
-            }
-
-            for b in value.features {
-                builder = builder.add_feature(Feature::try_from(b)?);
-            }
-
-            for b in value.immutable_features {
-                builder = builder.add_immutable_feature(Feature::try_from(b)?);
-            }
-
-            for u in value.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_unverified(u)?);
-            }
-
-            builder.finish_unverified()
-        }
-
-        #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos(
-            amount: OutputBuilderAmountDto,
-            native_tokens: Option<Vec<NativeToken>>,
-            alias_id: &AliasId,
-            state_index: Option<u32>,
-            state_metadata: Option<Vec<u8>>,
-            foundry_counter: Option<u32>,
-            unlock_conditions: Vec<UnlockConditionDto>,
-            features: Option<Vec<FeatureDto>>,
-            immutable_features: Option<Vec<FeatureDto>>,
-            token_supply: u64,
-        ) -> Result<Self, Error> {
-            let mut builder = match amount {
-                OutputBuilderAmountDto::Amount(amount) => AliasOutputBuilder::new_with_amount(
-                    amount.parse().map_err(|_| Error::InvalidField("amount"))?,
-                    *alias_id,
-                ),
-                OutputBuilderAmountDto::MinimumStorageDeposit(rent_structure) => {
-                    AliasOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *alias_id)
-                }
-            };
-
-            if let Some(native_tokens) = native_tokens {
-                builder = builder.with_native_tokens(native_tokens);
-            }
-
-            if let Some(state_index) = state_index {
-                builder = builder.with_state_index(state_index);
-            }
-
-            if let Some(state_metadata) = state_metadata {
-                builder = builder.with_state_metadata(state_metadata);
-            }
-
-            if let Some(foundry_counter) = foundry_counter {
-                builder = builder.with_foundry_counter(foundry_counter);
-            }
-
-            let unlock_conditions = unlock_conditions
-                .into_iter()
-                .map(|u| UnlockCondition::try_from_dto(u, token_supply))
-                .collect::<Result<Vec<UnlockCondition>, Error>>()?;
-            builder = builder.with_unlock_conditions(unlock_conditions);
-
-            if let Some(features) = features {
-                let features = features
-                    .into_iter()
-                    .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, Error>>()?;
-                builder = builder.with_features(features);
-            }
-
-            if let Some(immutable_features) = immutable_features {
-                let immutable_features = immutable_features
-                    .into_iter()
-                    .map(Feature::try_from)
-                    .collect::<Result<Vec<Feature>, Error>>()?;
-                builder = builder.with_immutable_features(immutable_features);
-            }
-
-            builder.finish(token_supply)
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use packable::PackableExt;
@@ -904,20 +721,14 @@ mod tests {
     use super::*;
     use crate::types::block::{
         address::AliasAddress,
-        output::{
-            dto::{OutputBuilderAmountDto, OutputDto},
-            FoundryId, SimpleTokenScheme, TokenId,
-        },
+        output::{FoundryId, SimpleTokenScheme, TokenId},
         protocol::protocol_parameters,
-        rand::{
-            address::rand_alias_address,
-            output::{
-                feature::{rand_allowed_features, rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
-                rand_alias_id, rand_alias_output,
-                unlock_condition::{
-                    rand_governor_address_unlock_condition_different_from,
-                    rand_state_controller_address_unlock_condition_different_from,
-                },
+        rand::output::{
+            feature::{rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
+            rand_alias_id, rand_alias_output,
+            unlock_condition::{
+                rand_governor_address_unlock_condition_different_from,
+                rand_state_controller_address_unlock_condition_different_from,
             },
         },
     };
@@ -997,72 +808,5 @@ mod tests {
         let bytes = output.pack_to_vec();
         let output_unpacked = AliasOutput::unpack_verified(bytes, &protocol_parameters).unwrap();
         assert_eq!(output, output_unpacked);
-    }
-
-    #[test]
-    fn to_from_dto() {
-        let protocol_parameters = protocol_parameters();
-        let output = rand_alias_output(protocol_parameters.token_supply());
-        let dto = OutputDto::Alias((&output).into());
-        let output_unver = Output::try_from_dto_unverified(dto.clone()).unwrap();
-        assert_eq!(&output, output_unver.as_alias());
-        let output_ver = Output::try_from_dto(dto, protocol_parameters.token_supply()).unwrap();
-        assert_eq!(&output, output_ver.as_alias());
-
-        let output_split = AliasOutput::try_from_dtos(
-            OutputBuilderAmountDto::Amount(output.amount().to_string()),
-            Some(output.native_tokens().to_vec()),
-            output.alias_id(),
-            output.state_index().into(),
-            output.state_metadata().to_owned().into(),
-            output.foundry_counter().into(),
-            output.unlock_conditions().iter().map(Into::into).collect(),
-            Some(output.features().iter().map(Into::into).collect()),
-            Some(output.immutable_features().iter().map(Into::into).collect()),
-            protocol_parameters.token_supply(),
-        )
-        .unwrap();
-        assert_eq!(output, output_split);
-
-        let alias_id = rand_alias_id();
-        let foundry_id = FoundryId::build(&rand_alias_address(), 0, SimpleTokenScheme::KIND);
-        let gov_address = rand_governor_address_unlock_condition_different_from(&alias_id);
-        let state_address = rand_state_controller_address_unlock_condition_different_from(&alias_id);
-
-        let test_split_dto = |builder: AliasOutputBuilder| {
-            let output_split = AliasOutput::try_from_dtos(
-                (&builder.amount).into(),
-                Some(builder.native_tokens.iter().copied().collect()),
-                &builder.alias_id,
-                builder.state_index,
-                builder.state_metadata.to_owned().into(),
-                builder.foundry_counter,
-                builder.unlock_conditions.iter().map(Into::into).collect(),
-                Some(builder.features.iter().map(Into::into).collect()),
-                Some(builder.immutable_features.iter().map(Into::into).collect()),
-                protocol_parameters.token_supply(),
-            )
-            .unwrap();
-            assert_eq!(
-                builder.finish(protocol_parameters.token_supply()).unwrap(),
-                output_split
-            );
-        };
-
-        let builder = AliasOutput::build_with_amount(100, alias_id)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
-            .add_unlock_condition(gov_address)
-            .add_unlock_condition(state_address)
-            .with_features(rand_allowed_features(AliasOutput::ALLOWED_FEATURES))
-            .with_immutable_features(rand_allowed_features(AliasOutput::ALLOWED_IMMUTABLE_FEATURES));
-        test_split_dto(builder);
-
-        let builder = AliasOutput::build_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), alias_id)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000.into()).unwrap())
-            .add_unlock_condition(gov_address)
-            .add_unlock_condition(state_address)
-            .with_features(rand_allowed_features(AliasOutput::ALLOWED_FEATURES))
-            .with_immutable_features(rand_allowed_features(AliasOutput::ALLOWED_IMMUTABLE_FEATURES));
-        test_split_dto(builder);
     }
 }

@@ -28,8 +28,8 @@ use crate::{
     types::block::{
         address::{Hrp, ToBech32Ext},
         output::{
-            dto::{OutputBuilderAmountDto, OutputDto},
-            AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
+            AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NftOutputBuilder,
+            OutputBuilderAmount, Rent,
         },
         ConvertTo, Error,
     },
@@ -39,7 +39,6 @@ use crate::{
                 high_level::minting::mint_native_token::MintTokenTransactionDto, TransactionOptions,
             },
             types::{AccountIdentifier, TransactionDto},
-            OutputDataDto,
         },
         message_interface::{
             account_method::AccountMethod, dtos::AccountDetailsDto, message::Message, response::Response,
@@ -405,24 +404,32 @@ impl WalletMessageHandler {
                 features,
                 immutable_features,
             } => {
-                let output = Output::from(AliasOutput::try_from_dtos(
+                let mut output = AliasOutputBuilder::new(
                     if let Some(amount) = amount {
-                        OutputBuilderAmountDto::Amount(amount)
+                        OutputBuilderAmount::Amount(amount.parse().map_err(|_| Error::InvalidField("amount"))?)
                     } else {
-                        OutputBuilderAmountDto::MinimumStorageDeposit(account.client().get_rent_structure().await?)
+                        OutputBuilderAmount::MinimumStorageDeposit(account.client().get_rent_structure().await?)
                     },
-                    native_tokens,
-                    &alias_id,
-                    state_index,
-                    state_metadata,
-                    foundry_counter,
-                    unlock_conditions,
-                    features,
-                    immutable_features,
-                    account.client().get_token_supply().await?,
-                )?);
+                    alias_id,
+                )
+                .with_state_index(state_index)
+                .with_foundry_counter(foundry_counter)
+                .with_unlock_conditions(unlock_conditions);
+                if let Some(native_tokens) = native_tokens {
+                    output = output.with_native_tokens(native_tokens);
+                }
+                if let Some(state_metadata) = state_metadata {
+                    output = output.with_state_metadata(state_metadata);
+                }
+                if let Some(features) = features {
+                    output = output.with_features(features);
+                }
+                if let Some(immutable_features) = immutable_features {
+                    output = output.with_immutable_features(immutable_features);
+                }
+                let output = output.finish_output(account.client().get_token_supply().await?)?;
 
-                Ok(Response::Output(OutputDto::from(&output)))
+                Ok(Response::Output(output))
             }
             AccountMethod::BuildBasicOutput {
                 amount,
@@ -430,19 +437,21 @@ impl WalletMessageHandler {
                 unlock_conditions,
                 features,
             } => {
-                let output = Output::from(BasicOutput::try_from_dtos(
-                    if let Some(amount) = amount {
-                        OutputBuilderAmountDto::Amount(amount)
-                    } else {
-                        OutputBuilderAmountDto::MinimumStorageDeposit(account.client().get_rent_structure().await?)
-                    },
-                    native_tokens,
-                    unlock_conditions,
-                    features,
-                    account.client().get_token_supply().await?,
-                )?);
+                let mut output = BasicOutputBuilder::new(if let Some(amount) = amount {
+                    OutputBuilderAmount::Amount(amount.parse().map_err(|_| Error::InvalidField("amount"))?)
+                } else {
+                    OutputBuilderAmount::MinimumStorageDeposit(account.client().get_rent_structure().await?)
+                })
+                .with_unlock_conditions(unlock_conditions);
+                if let Some(native_tokens) = native_tokens {
+                    output = output.with_native_tokens(native_tokens);
+                }
+                if let Some(features) = features {
+                    output = output.with_features(features);
+                }
+                let output = output.finish_output(account.client().get_token_supply().await?)?;
 
-                Ok(Response::Output(OutputDto::from(&output)))
+                Ok(Response::Output(output))
             }
             AccountMethod::BuildFoundryOutput {
                 amount,
@@ -453,22 +462,28 @@ impl WalletMessageHandler {
                 features,
                 immutable_features,
             } => {
-                let output = Output::from(FoundryOutput::try_from_dtos(
+                let mut output = FoundryOutputBuilder::new(
                     if let Some(amount) = amount {
-                        OutputBuilderAmountDto::Amount(amount)
+                        OutputBuilderAmount::Amount(amount.parse().map_err(|_| Error::InvalidField("amount"))?)
                     } else {
-                        OutputBuilderAmountDto::MinimumStorageDeposit(account.client().get_rent_structure().await?)
+                        OutputBuilderAmount::MinimumStorageDeposit(account.client().get_rent_structure().await?)
                     },
-                    native_tokens,
                     serial_number,
                     token_scheme,
-                    unlock_conditions,
-                    features,
-                    immutable_features,
-                    account.client().get_token_supply().await?,
-                )?);
+                )
+                .with_unlock_conditions(unlock_conditions);
+                if let Some(native_tokens) = native_tokens {
+                    output = output.with_native_tokens(native_tokens);
+                }
+                if let Some(features) = features {
+                    output = output.with_features(features);
+                }
+                if let Some(immutable_features) = immutable_features {
+                    output = output.with_immutable_features(immutable_features);
+                }
+                let output = output.finish_output(account.client().get_token_supply().await?)?;
 
-                Ok(Response::Output(OutputDto::from(&output)))
+                Ok(Response::Output(output))
             }
             AccountMethod::BuildNftOutput {
                 amount,
@@ -478,21 +493,27 @@ impl WalletMessageHandler {
                 features,
                 immutable_features,
             } => {
-                let output = Output::from(NftOutput::try_from_dtos(
+                let mut output = NftOutputBuilder::new(
                     if let Some(amount) = amount {
-                        OutputBuilderAmountDto::Amount(amount)
+                        OutputBuilderAmount::Amount(amount.parse().map_err(|_| Error::InvalidField("amount"))?)
                     } else {
-                        OutputBuilderAmountDto::MinimumStorageDeposit(account.client().get_rent_structure().await?)
+                        OutputBuilderAmount::MinimumStorageDeposit(account.client().get_rent_structure().await?)
                     },
-                    native_tokens,
-                    &nft_id,
-                    unlock_conditions,
-                    features,
-                    immutable_features,
-                    account.client().get_token_supply().await?,
-                )?);
+                    nft_id,
+                )
+                .with_unlock_conditions(unlock_conditions);
+                if let Some(native_tokens) = native_tokens {
+                    output = output.with_native_tokens(native_tokens);
+                }
+                if let Some(features) = features {
+                    output = output.with_features(features);
+                }
+                if let Some(immutable_features) = immutable_features {
+                    output = output.with_immutable_features(immutable_features);
+                }
+                let output = output.finish_output(account.client().get_token_supply().await?)?;
 
-                Ok(Response::Output(OutputDto::from(&output)))
+                Ok(Response::Output(output))
             }
             AccountMethod::BurnNativeToken {
                 token_id,
@@ -592,13 +613,11 @@ impl WalletMessageHandler {
             }
             AccountMethod::GetOutput { output_id } => {
                 let output_data = account.get_output(&output_id).await;
-                Ok(Response::OutputData(
-                    output_data.as_ref().map(OutputDataDto::from).map(Box::new),
-                ))
+                Ok(Response::OutputData(output_data.map(Box::new)))
             }
             AccountMethod::GetFoundryOutput { token_id } => {
                 let output = account.get_foundry_output(token_id).await?;
-                Ok(Response::Output(OutputDto::from(&output)))
+                Ok(Response::Output(output))
             }
             AccountMethod::GetTransaction { transaction_id } => {
                 let transaction = account.get_transaction(&transaction_id).await;
@@ -628,11 +647,11 @@ impl WalletMessageHandler {
             }
             AccountMethod::Outputs { filter_options } => {
                 let outputs = account.outputs(filter_options).await?;
-                Ok(Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect()))
+                Ok(Response::OutputsData(outputs))
             }
             AccountMethod::UnspentOutputs { filter_options } => {
                 let outputs = account.unspent_outputs(filter_options).await?;
-                Ok(Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect()))
+                Ok(Response::OutputsData(outputs))
             }
             AccountMethod::IncomingTransactions => {
                 let transactions = account.incoming_transactions().await;
@@ -701,7 +720,6 @@ impl WalletMessageHandler {
             }
             AccountMethod::MinimumRequiredStorageDeposit { output } => {
                 convert_async_panics(|| async {
-                    let output = Output::try_from_dto(output, account.client().get_token_supply().await?)?;
                     let rent_structure = account.client().get_rent_structure().await?;
 
                     let minimum_storage_deposit = output.rent_cost(&rent_structure);
@@ -733,7 +751,7 @@ impl WalletMessageHandler {
                             transaction_options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
-                    Ok(Response::Output(OutputDto::from(&output)))
+                    Ok(Response::Output(output))
                 })
                 .await
             }
@@ -748,15 +766,8 @@ impl WalletMessageHandler {
             }
             AccountMethod::PrepareTransaction { outputs, options } => {
                 convert_async_panics(|| async {
-                    let token_supply = account.client().get_token_supply().await?;
                     let data = account
-                        .prepare_transaction(
-                            outputs
-                                .into_iter()
-                                .map(|o| Ok(Output::try_from_dto(o, token_supply)?))
-                                .collect::<Result<Vec<Output>>>()?,
-                            options.map(TransactionOptions::try_from_dto).transpose()?,
-                        )
+                        .prepare_transaction(outputs, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
                 })
@@ -825,15 +836,8 @@ impl WalletMessageHandler {
             }
             AccountMethod::SendOutputs { outputs, options } => {
                 convert_async_panics(|| async {
-                    let token_supply = account.client().get_token_supply().await?;
                     let transaction = account
-                        .send(
-                            outputs
-                                .into_iter()
-                                .map(|o| Ok(Output::try_from_dto(o, token_supply)?))
-                                .collect::<crate::wallet::Result<Vec<_>>>()?,
-                            options.map(TransactionOptions::try_from_dto).transpose()?,
-                        )
+                        .send(outputs, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })

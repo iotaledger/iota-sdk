@@ -22,6 +22,8 @@ use packable::{
     unpacker::Unpacker,
     Packable,
 };
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer};
 
 pub use self::{
     address::AddressUnlockCondition, expiration::ExpirationUnlockCondition,
@@ -33,11 +35,6 @@ use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolP
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(tag = "type", content = "data")
-)]
 pub enum UnlockCondition {
     /// An address unlock condition.
     Address(AddressUnlockCondition),
@@ -196,7 +193,7 @@ impl Packable for UnlockCondition {
 pub(crate) type UnlockConditionCount = BoundedU8<0, { UnlockConditions::COUNT_MAX }>;
 
 ///
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidUnlockConditionCount(p.into())))]
 #[packable(unpack_visitor = ProtocolParameters)]
@@ -367,6 +364,10 @@ impl UnlockConditions {
         self.expiration()
             .map_or(false, |expiration| milestone_timestamp >= expiration.timestamp())
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 }
 
 #[inline]
@@ -423,222 +424,94 @@ mod test {
     }
 }
 
-#[allow(missing_docs)]
-pub mod dto {
-    use alloc::format;
-
-    use serde::{Deserialize, Serialize, Serializer};
-    use serde_json::Value;
-
-    pub use self::{
-        address::dto::AddressUnlockConditionDto, expiration::dto::ExpirationUnlockConditionDto,
-        governor_address::dto::GovernorAddressUnlockConditionDto,
-        immutable_alias_address::dto::ImmutableAliasAddressUnlockConditionDto,
-        state_controller_address::dto::StateControllerAddressUnlockConditionDto,
-        storage_deposit_return::dto::StorageDepositReturnUnlockConditionDto, timelock::dto::TimelockUnlockConditionDto,
-    };
-    use super::*;
-    use crate::types::block::Error;
-
-    #[derive(Clone, Debug, Eq, PartialEq, From)]
-    pub enum UnlockConditionDto {
-        /// An address unlock condition.
-        Address(AddressUnlockConditionDto),
-        /// A storage deposit return unlock condition.
-        StorageDepositReturn(StorageDepositReturnUnlockConditionDto),
-        /// A timelock unlock condition.
-        Timelock(TimelockUnlockConditionDto),
-        /// An expiration unlock condition.
-        Expiration(ExpirationUnlockConditionDto),
-        /// A state controller address unlock condition.
-        StateControllerAddress(StateControllerAddressUnlockConditionDto),
-        /// A governor address unlock condition.
-        GovernorAddress(GovernorAddressUnlockConditionDto),
-        /// An immutable alias address unlock condition.
-        ImmutableAliasAddress(ImmutableAliasAddressUnlockConditionDto),
-    }
-
-    impl<'de> Deserialize<'de> for UnlockConditionDto {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let value = Value::deserialize(d)?;
-            Ok(
-                match value
-                    .get("type")
-                    .and_then(Value::as_u64)
-                    .ok_or_else(|| serde::de::Error::custom("invalid unlock condition type"))?
-                    as u8
-                {
-                    AddressUnlockCondition::KIND => {
-                        Self::Address(AddressUnlockConditionDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize address unlock condition: {e}"))
-                        })?)
-                    }
-                    StorageDepositReturnUnlockCondition::KIND => Self::StorageDepositReturn(
-                        StorageDepositReturnUnlockConditionDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!(
-                                "cannot deserialize storage deposit unlock condition: {e}"
-                            ))
-                        })?,
-                    ),
-                    TimelockUnlockCondition::KIND => {
-                        Self::Timelock(TimelockUnlockConditionDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize timelock unlock condition: {e}"))
-                        })?)
-                    }
-                    ExpirationUnlockCondition::KIND => {
-                        Self::Expiration(ExpirationUnlockConditionDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize expiration unlock condition: {e}"))
-                        })?)
-                    }
-                    StateControllerAddressUnlockCondition::KIND => Self::StateControllerAddress(
-                        StateControllerAddressUnlockConditionDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!(
-                                "cannot deserialize state controller unlock condition: {e}"
-                            ))
-                        })?,
-                    ),
-                    GovernorAddressUnlockCondition::KIND => {
-                        Self::GovernorAddress(GovernorAddressUnlockConditionDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize governor unlock condition: {e}"))
-                        })?)
-                    }
-                    ImmutableAliasAddressUnlockCondition::KIND => Self::ImmutableAliasAddress(
-                        ImmutableAliasAddressUnlockConditionDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!(
-                                "cannot deserialize immutable alias address unlock condition: {e}"
-                            ))
-                        })?,
-                    ),
-                    _ => return Err(serde::de::Error::custom("invalid unlock condition type")),
-                },
-            )
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for UnlockCondition {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        struct TypedUnlockCondition {
+            #[serde(rename = "type")]
+            kind: u8,
+            data: serde_json::Value,
         }
-    }
 
-    impl Serialize for UnlockConditionDto {
-        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-        {
-            #[derive(Serialize)]
-            #[serde(untagged)]
-            enum UnlockConditionDto_<'a> {
-                T1(&'a AddressUnlockConditionDto),
-                T2(&'a StorageDepositReturnUnlockConditionDto),
-                T3(&'a TimelockUnlockConditionDto),
-                T4(&'a ExpirationUnlockConditionDto),
-                T5(&'a StateControllerAddressUnlockConditionDto),
-                T6(&'a GovernorAddressUnlockConditionDto),
-                T7(&'a ImmutableAliasAddressUnlockConditionDto),
+        let value = TypedUnlockCondition::deserialize(d)?;
+        Ok(match value.kind {
+            AddressUnlockCondition::KIND => AddressUnlockCondition::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize address unlock condition: {e}")))?
+                .into(),
+            StorageDepositReturnUnlockCondition::KIND => StorageDepositReturnUnlockCondition::deserialize(value.data)
+                .map_err(|e| {
+                    serde::de::Error::custom(format!("cannot deserialize storage deposit unlock condition: {e}"))
+                })?
+                .into(),
+            TimelockUnlockCondition::KIND => TimelockUnlockCondition::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize timelock unlock condition: {e}")))?
+                .into(),
+            ExpirationUnlockCondition::KIND => ExpirationUnlockCondition::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize expiration unlock condition: {e}")))?
+                .into(),
+            StateControllerAddressUnlockCondition::KIND => {
+                StateControllerAddressUnlockCondition::deserialize(value.data)
+                    .map_err(|e| {
+                        serde::de::Error::custom(format!("cannot deserialize state controller unlock condition: {e}"))
+                    })?
+                    .into()
             }
-            #[derive(Serialize)]
-            struct TypedUnlockCondition<'a> {
-                #[serde(flatten)]
-                unlock_condition: UnlockConditionDto_<'a>,
+            GovernorAddressUnlockCondition::KIND => GovernorAddressUnlockCondition::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize governor unlock condition: {e}")))?
+                .into(),
+            ImmutableAliasAddressUnlockCondition::KIND => Self::ImmutableAliasAddress(
+                ImmutableAliasAddressUnlockCondition::deserialize(value.data)
+                    .map_err(|e| {
+                        serde::de::Error::custom(format!(
+                            "cannot deserialize immutable alias address unlock condition: {e}"
+                        ))
+                    })?
+                    .into(),
+            ),
+            _ => {
+                return Err(serde::de::Error::custom("invalid unlock condition type"));
             }
-            let unlock_condition = match self {
-                Self::Address(o) => TypedUnlockCondition {
-                    unlock_condition: UnlockConditionDto_::T1(o),
-                },
-                Self::StorageDepositReturn(o) => TypedUnlockCondition {
-                    unlock_condition: UnlockConditionDto_::T2(o),
-                },
-                Self::Timelock(o) => TypedUnlockCondition {
-                    unlock_condition: UnlockConditionDto_::T3(o),
-                },
-                Self::Expiration(o) => TypedUnlockCondition {
-                    unlock_condition: UnlockConditionDto_::T4(o),
-                },
-                Self::StateControllerAddress(o) => TypedUnlockCondition {
-                    unlock_condition: UnlockConditionDto_::T5(o),
-                },
-                Self::GovernorAddress(o) => TypedUnlockCondition {
-                    unlock_condition: UnlockConditionDto_::T6(o),
-                },
-                Self::ImmutableAliasAddress(o) => TypedUnlockCondition {
-                    unlock_condition: UnlockConditionDto_::T7(o),
-                },
-            };
-            unlock_condition.serialize(serializer)
-        }
+        })
     }
+}
 
-    impl From<&UnlockCondition> for UnlockConditionDto {
-        fn from(value: &UnlockCondition) -> Self {
-            match value {
-                UnlockCondition::Address(v) => Self::Address(AddressUnlockConditionDto::from(v)),
-                UnlockCondition::StorageDepositReturn(v) => {
-                    Self::StorageDepositReturn(StorageDepositReturnUnlockConditionDto::from(v))
-                }
-                UnlockCondition::Timelock(v) => Self::Timelock(TimelockUnlockConditionDto::from(v)),
-                UnlockCondition::Expiration(v) => Self::Expiration(ExpirationUnlockConditionDto::from(v)),
-                UnlockCondition::StateControllerAddress(v) => {
-                    Self::StateControllerAddress(StateControllerAddressUnlockConditionDto::from(v))
-                }
-                UnlockCondition::GovernorAddress(v) => {
-                    Self::GovernorAddress(GovernorAddressUnlockConditionDto::from(v))
-                }
-                UnlockCondition::ImmutableAliasAddress(v) => {
-                    Self::ImmutableAliasAddress(ImmutableAliasAddressUnlockConditionDto::from(v))
-                }
-            }
+#[cfg(feature = "serde")]
+impl Serialize for UnlockCondition {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        #[derive(Serialize)]
+        #[serde(untagged)]
+        enum UnlockConditionDto<'a> {
+            T1(&'a AddressUnlockCondition),
+            T2(&'a StorageDepositReturnUnlockCondition),
+            T3(&'a TimelockUnlockCondition),
+            T4(&'a ExpirationUnlockCondition),
+            T5(&'a StateControllerAddressUnlockCondition),
+            T6(&'a GovernorAddressUnlockCondition),
+            T7(&'a ImmutableAliasAddressUnlockCondition),
         }
-    }
-
-    impl UnlockCondition {
-        pub fn try_from_dto(value: UnlockConditionDto, token_supply: u64) -> Result<Self, Error> {
-            Ok(match value {
-                UnlockConditionDto::Address(v) => Self::Address(AddressUnlockCondition::try_from(v)?),
-                UnlockConditionDto::StorageDepositReturn(v) => {
-                    Self::StorageDepositReturn(StorageDepositReturnUnlockCondition::try_from_dto(v, token_supply)?)
-                }
-                UnlockConditionDto::Timelock(v) => Self::Timelock(TimelockUnlockCondition::try_from(v)?),
-                UnlockConditionDto::Expiration(v) => Self::Expiration(ExpirationUnlockCondition::try_from(v)?),
-                UnlockConditionDto::StateControllerAddress(v) => {
-                    Self::StateControllerAddress(StateControllerAddressUnlockCondition::try_from(v)?)
-                }
-                UnlockConditionDto::GovernorAddress(v) => {
-                    Self::GovernorAddress(GovernorAddressUnlockCondition::try_from(v)?)
-                }
-                UnlockConditionDto::ImmutableAliasAddress(v) => {
-                    Self::ImmutableAliasAddress(ImmutableAliasAddressUnlockCondition::try_from(v)?)
-                }
-            })
+        #[derive(Serialize)]
+        struct TypedUnlockCondition<'a> {
+            #[serde(rename = "type")]
+            kind: u8,
+            data: UnlockConditionDto<'a>,
         }
-
-        pub fn try_from_dto_unverified(value: UnlockConditionDto) -> Result<Self, Error> {
-            Ok(match value {
-                UnlockConditionDto::Address(v) => Self::Address(AddressUnlockCondition::try_from(v)?),
-                UnlockConditionDto::StorageDepositReturn(v) => {
-                    Self::StorageDepositReturn(StorageDepositReturnUnlockCondition::try_from_dto_unverified(v)?)
-                }
-                UnlockConditionDto::Timelock(v) => Self::Timelock(TimelockUnlockCondition::try_from(v)?),
-                UnlockConditionDto::Expiration(v) => Self::Expiration(ExpirationUnlockCondition::try_from(v)?),
-                UnlockConditionDto::StateControllerAddress(v) => {
-                    Self::StateControllerAddress(StateControllerAddressUnlockCondition::try_from(v)?)
-                }
-                UnlockConditionDto::GovernorAddress(v) => {
-                    Self::GovernorAddress(GovernorAddressUnlockCondition::try_from(v)?)
-                }
-                UnlockConditionDto::ImmutableAliasAddress(v) => {
-                    Self::ImmutableAliasAddress(ImmutableAliasAddressUnlockCondition::try_from(v)?)
-                }
-            })
+        let data = match self {
+            Self::Address(data) => UnlockConditionDto::T1(data),
+            Self::StorageDepositReturn(data) => UnlockConditionDto::T2(data),
+            Self::Timelock(data) => UnlockConditionDto::T3(data),
+            Self::Expiration(data) => UnlockConditionDto::T4(data),
+            Self::StateControllerAddress(data) => UnlockConditionDto::T5(data),
+            Self::GovernorAddress(data) => UnlockConditionDto::T6(data),
+            Self::ImmutableAliasAddress(data) => UnlockConditionDto::T7(data),
+        };
+        TypedUnlockCondition {
+            kind: self.kind(),
+            data,
         }
-    }
-
-    impl UnlockConditionDto {
-        /// Return the unlock condition kind of a `UnlockConditionDto`.
-        pub fn kind(&self) -> u8 {
-            match self {
-                Self::Address(_) => AddressUnlockCondition::KIND,
-                Self::StorageDepositReturn(_) => StorageDepositReturnUnlockCondition::KIND,
-                Self::Timelock(_) => TimelockUnlockCondition::KIND,
-                Self::Expiration(_) => ExpirationUnlockCondition::KIND,
-                Self::StateControllerAddress(_) => StateControllerAddressUnlockCondition::KIND,
-                Self::GovernorAddress(_) => GovernorAddressUnlockCondition::KIND,
-                Self::ImmutableAliasAddress(_) => ImmutableAliasAddressUnlockCondition::KIND,
-            }
-        }
+        .serialize(serializer)
     }
 }

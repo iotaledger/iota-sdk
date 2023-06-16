@@ -7,6 +7,8 @@ mod ed25519;
 mod nft;
 
 use derive_more::From;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 pub use self::{
     alias::AliasAddress,
@@ -24,11 +26,6 @@ use crate::types::block::{
 
 /// A generic address supporting different address kinds.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(tag = "type", content = "data")
-)]
 #[packable(tag_type = u8, with_error = Error::InvalidAddressKind)]
 #[packable(unpack_error = Error)]
 pub enum Address {
@@ -214,107 +211,62 @@ impl From<&Self> for Address {
     }
 }
 
-#[allow(missing_docs)]
-pub mod dto {
-    use alloc::format;
-
-    use serde::{Deserialize, Serialize, Serializer};
-    use serde_json::Value;
-
-    use super::*;
-    pub use super::{alias::dto::AliasAddressDto, ed25519::dto::Ed25519AddressDto, nft::dto::NftAddressDto};
-    use crate::types::block::Error;
-
-    /// Describes all the different address types.
-    #[derive(Clone, Debug, Eq, PartialEq, From)]
-    pub enum AddressDto {
-        /// An Ed25519 address.
-        Ed25519(Ed25519AddressDto),
-        /// An alias address.
-        Alias(AliasAddressDto),
-        /// A NFT address.
-        Nft(NftAddressDto),
-    }
-
-    impl From<&Address> for AddressDto {
-        fn from(value: &Address) -> Self {
-            match value {
-                Address::Ed25519(a) => Self::Ed25519(a.into()),
-                Address::Alias(a) => Self::Alias(a.into()),
-                Address::Nft(a) => Self::Nft(a.into()),
-            }
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for Address {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        struct TypedAddress {
+            #[serde(rename = "type")]
+            kind: u8,
+            data: serde_json::Value,
         }
-    }
 
-    impl TryFrom<AddressDto> for Address {
-        type Error = Error;
-
-        fn try_from(value: AddressDto) -> Result<Self, Self::Error> {
-            match value {
-                AddressDto::Ed25519(a) => Ok(Self::Ed25519(a.try_into()?)),
-                AddressDto::Alias(a) => Ok(Self::Alias(a.try_into()?)),
-                AddressDto::Nft(a) => Ok(Self::Nft(a.try_into()?)),
+        let value = TypedAddress::deserialize(d)?;
+        Ok(match value.kind {
+            Ed25519Address::KIND => Ed25519Address::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize ed25519 address: {e}")))?
+                .into(),
+            AliasAddress::KIND => AliasAddress::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize alias address: {e}")))?
+                .into(),
+            NftAddress::KIND => NftAddress::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize NFT address: {e}")))?
+                .into(),
+            _ => {
+                return Err(serde::de::Error::custom("invalid address type"));
             }
-        }
+        })
     }
+}
 
-    impl<'de> Deserialize<'de> for AddressDto {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let value = Value::deserialize(d)?;
-            Ok(
-                match value
-                    .get("type")
-                    .and_then(Value::as_u64)
-                    .ok_or_else(|| serde::de::Error::custom("invalid address type"))? as u8
-                {
-                    Ed25519Address::KIND => {
-                        Self::Ed25519(Ed25519AddressDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize ed25519 address: {e}"))
-                        })?)
-                    }
-                    AliasAddress::KIND => Self::Alias(
-                        AliasAddressDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize alias address: {e}")))?,
-                    ),
-                    NftAddress::KIND => Self::Nft(
-                        NftAddressDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize NFT address: {e}")))?,
-                    ),
-                    _ => return Err(serde::de::Error::custom("invalid address type")),
-                },
-            )
+#[cfg(feature = "serde")]
+impl Serialize for Address {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        #[derive(Serialize)]
+        #[serde(untagged)]
+        enum AddressDto<'a> {
+            T1(&'a Ed25519Address),
+            T2(&'a AliasAddress),
+            T3(&'a NftAddress),
         }
-    }
-
-    impl Serialize for AddressDto {
-        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-        {
-            #[derive(Serialize)]
-            #[serde(untagged)]
-            enum AddressDto_<'a> {
-                T1(&'a Ed25519AddressDto),
-                T2(&'a AliasAddressDto),
-                T3(&'a NftAddressDto),
-            }
-            #[derive(Serialize)]
-            struct TypedAddress<'a> {
-                #[serde(flatten)]
-                address: AddressDto_<'a>,
-            }
-            let address = match self {
-                Self::Ed25519(o) => TypedAddress {
-                    address: AddressDto_::T1(o),
-                },
-                Self::Alias(o) => TypedAddress {
-                    address: AddressDto_::T2(o),
-                },
-                Self::Nft(o) => TypedAddress {
-                    address: AddressDto_::T3(o),
-                },
-            };
-            address.serialize(serializer)
+        #[derive(Serialize)]
+        struct TypedAddress<'a> {
+            #[serde(rename = "type")]
+            kind: u8,
+            data: AddressDto<'a>,
         }
+        let data = match self {
+            Self::Ed25519(data) => AddressDto::T1(data),
+            Self::Alias(data) => AddressDto::T2(data),
+            Self::Nft(data) => AddressDto::T3(data),
+        };
+        TypedAddress {
+            kind: self.kind(),
+            data,
+        }
+        .serialize(serializer)
     }
 }

@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use crate::{
     client::secret::SecretManage,
-    types::block::output::{dto::OutputMetadataDto, OutputId, OutputMetadata},
+    types::block::output::{OutputId, OutputMetadata},
     wallet::account::{
         operations::syncing::options::SyncOptions,
         types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, Transaction},
@@ -14,11 +14,8 @@ use crate::{
 };
 #[cfg(feature = "events")]
 use crate::{
-    types::{api::core::response::OutputWithMetadataResponse, block::payload::transaction::dto::TransactionPayloadDto},
-    wallet::{
-        account::types::OutputDataDto,
-        events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
-    },
+    types::block::payload::transaction::dto::TransactionPayloadDto,
+    wallet::events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
 };
 
 impl<S: 'static + SecretManage> Account<S>
@@ -39,7 +36,7 @@ where
         &self,
         addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
         unspent_outputs: Vec<OutputData>,
-        spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadataDto>>,
+        spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadata>>,
         options: &SyncOptions,
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] Update account with new synced transactions");
@@ -101,10 +98,10 @@ where
         for (output_id, output_metadata_response_opt) in spent_or_unsynced_output_metadata_map {
             // If we got the output response and it's still unspent, skip it
             if let Some(output_metadata_response) = output_metadata_response_opt {
-                if output_metadata_response.is_spent {
+                if output_metadata_response.is_spent() {
                     account_details.unspent_outputs.remove(&output_id);
                     if let Some(output_data) = account_details.outputs.get_mut(&output_id) {
-                        output_data.metadata = OutputMetadata::try_from(output_metadata_response)?;
+                        output_data.metadata = output_metadata_response;
                     }
                 } else {
                     // not spent, just not synced, skip
@@ -127,7 +124,7 @@ where
                             self.emit(
                                 account_index,
                                 WalletEvent::SpentOutput(Box::new(SpentOutputEvent {
-                                    output: OutputDataDto::from(&*output_data),
+                                    output: output_data.clone(),
                                 })),
                             )
                             .await;
@@ -153,15 +150,9 @@ where
                     self.emit(
                         account_index,
                         WalletEvent::NewOutput(Box::new(NewOutputEvent {
-                            output: OutputDataDto::from(&output_data),
+                            output: output_data.clone(),
                             transaction: transaction.as_ref().map(|tx| TransactionPayloadDto::from(&tx.payload)),
-                            transaction_inputs: transaction.as_ref().map(|tx| {
-                                tx.inputs
-                                    .clone()
-                                    .into_iter()
-                                    .map(OutputWithMetadataResponse::from)
-                                    .collect()
-                            }),
+                            transaction_inputs: transaction.as_ref().map(|tx| tx.inputs.clone()),
                         })),
                     )
                     .await;

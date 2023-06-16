@@ -283,7 +283,7 @@ fn unlock_unused_inputs(accounts: &mut [AccountDetails]) -> crate::wallet::Resul
         for transaction_id in account.pending_transactions() {
             if let Some(tx) = account.transactions().get(transaction_id) {
                 for input in &tx.inputs {
-                    used_inputs.insert(input.metadata.output_id()?);
+                    used_inputs.insert(*input.metadata.output_id());
                 }
             }
         }

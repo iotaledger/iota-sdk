@@ -343,7 +343,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{input::dto::InputDto, output::dto::OutputDto, payload::dto::PayloadDto, Error};
+    use crate::types::block::{input::dto::InputDto, output::Output, payload::dto::PayloadDto, Error};
 
     /// Describes the essence data making up a transaction by defining its inputs and outputs and an optional payload.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -354,7 +354,7 @@ pub mod dto {
         pub network_id: String,
         pub inputs: Vec<InputDto>,
         pub inputs_commitment: String,
-        pub outputs: Vec<OutputDto>,
+        pub outputs: Vec<Output>,
         #[serde(skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
     }
@@ -366,7 +366,7 @@ pub mod dto {
                 network_id: value.network_id().to_string(),
                 inputs: value.inputs().iter().map(Into::into).collect::<Vec<_>>(),
                 inputs_commitment: value.inputs_commitment().to_string(),
-                outputs: value.outputs().iter().map(Into::into).collect::<Vec<_>>(),
+                outputs: value.outputs().iter().cloned().collect::<Vec<_>>(),
                 payload: match value.payload() {
                     Some(Payload::TaggedData(i)) => Some(PayloadDto::TaggedData(Box::new(i.as_ref().into()))),
                     Some(_) => unimplemented!(),
@@ -381,12 +381,6 @@ pub mod dto {
             value: RegularTransactionEssenceDto,
             protocol_parameters: &ProtocolParameters,
         ) -> Result<Self, Error> {
-            let outputs = value
-                .outputs
-                .into_iter()
-                .map(|o| Output::try_from_dto(o, protocol_parameters.token_supply()))
-                .collect::<Result<Vec<Output>, Error>>()?;
-
             let network_id = value
                 .network_id
                 .parse::<u64>()
@@ -399,7 +393,7 @@ pub mod dto {
 
             let mut builder = Self::builder(network_id, InputsCommitment::from_str(&value.inputs_commitment)?)
                 .with_inputs(inputs)
-                .with_outputs(outputs);
+                .with_outputs(value.outputs);
 
             builder = if let Some(p) = value.payload {
                 if let PayloadDto::TaggedData(i) = p {
@@ -415,12 +409,6 @@ pub mod dto {
         }
 
         pub fn try_from_dto_unverified(value: RegularTransactionEssenceDto) -> Result<Self, Error> {
-            let outputs = value
-                .outputs
-                .into_iter()
-                .map(Output::try_from_dto_unverified)
-                .collect::<Result<Vec<Output>, Error>>()?;
-
             let network_id = value
                 .network_id
                 .parse::<u64>()
@@ -433,7 +421,7 @@ pub mod dto {
 
             let mut builder = Self::builder(network_id, InputsCommitment::from_str(&value.inputs_commitment)?)
                 .with_inputs(inputs)
-                .with_outputs(outputs);
+                .with_outputs(value.outputs);
 
             builder = if let Some(p) = value.payload {
                 if let PayloadDto::TaggedData(i) = p {

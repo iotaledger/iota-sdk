@@ -4,7 +4,7 @@
 use iota_sdk::{
     client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
     types::block::{
-        address::{dto::AddressDto, Address, Ed25519Address, ToBech32Ext},
+        address::{Address, ToBech32Ext},
         output::{AliasId, FoundryId, NftId},
         payload::{transaction::TransactionEssence, MilestonePayload, TransactionPayload},
         signature::Ed25519Signature,
@@ -27,7 +27,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => {
             Response::Bech32Address(hex_public_key_to_bech32_address(&hex, bech32_hrp)?)
         }
-        UtilsMethod::ParseBech32Address { address } => Response::ParsedBech32Address(AddressDto::from(address.inner())),
+        UtilsMethod::ParseBech32Address { address } => Response::ParsedBech32Address(*address.inner()),
         UtilsMethod::IsAddressValid { address } => Response::Bool(Address::is_valid_bech32(&address)),
         UtilsMethod::GenerateMnemonic => Response::GeneratedMnemonic(Client::generate_mnemonic()?),
         UtilsMethod::MnemonicToHexSeed { mut mnemonic } => {
@@ -64,7 +64,6 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         } => {
             let signature = Ed25519Signature::try_from(signature)?;
             let msg: Vec<u8> = prefix_hex::decode(message)?;
-            let address = Ed25519Address::try_from(address)?;
             Response::Bool(signature.is_valid(&msg, &address).is_ok())
         }
         UtilsMethod::VerifyMnemonic { mut mnemonic } => {

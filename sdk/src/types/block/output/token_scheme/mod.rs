@@ -3,12 +3,14 @@
 
 mod simple;
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer};
+
 pub use self::simple::SimpleTokenScheme;
 use crate::types::block::Error;
 
 ///
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, derive_more::From, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidTokenSchemeKind)]
 pub enum TokenScheme {
@@ -34,37 +36,52 @@ impl TokenScheme {
     }
 }
 
-#[allow(missing_docs)]
-pub mod dto {
-    use derive_more::From;
-    use serde::{Deserialize, Serialize};
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for TokenScheme {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        struct TypedTokenScheme {
+            #[serde(rename = "type")]
+            kind: u8,
+            data: serde_json::Value,
+        }
 
-    pub use super::simple::dto::SimpleTokenSchemeDto;
-    use super::*;
-    use crate::types::block::Error;
-
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
-    #[serde(untagged)]
-    pub enum TokenSchemeDto {
-        /// A simple token scheme.
-        Simple(SimpleTokenSchemeDto),
-    }
-
-    impl From<&TokenScheme> for TokenSchemeDto {
-        fn from(value: &TokenScheme) -> Self {
-            match value {
-                TokenScheme::Simple(v) => Self::Simple(v.into()),
+        let value = TypedTokenScheme::deserialize(d)?;
+        Ok(match value.kind {
+            SimpleTokenScheme::KIND => SimpleTokenScheme::deserialize(value.data)
+                .map_err(|e| serde::de::Error::custom(format!("cannot deserialize simple token scheme: {e}")))?
+                .into(),
+            _ => {
+                return Err(serde::de::Error::custom("invalid feature type"));
             }
-        }
+        })
     }
+}
 
-    impl TryFrom<TokenSchemeDto> for TokenScheme {
-        type Error = Error;
-
-        fn try_from(value: TokenSchemeDto) -> Result<Self, Self::Error> {
-            Ok(match value {
-                TokenSchemeDto::Simple(v) => Self::Simple(v.try_into()?),
-            })
+#[cfg(feature = "serde")]
+impl Serialize for TokenScheme {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        #[derive(Serialize)]
+        #[serde(untagged)]
+        enum TokenSchemeDto<'a> {
+            T1(&'a SimpleTokenScheme),
         }
+        #[derive(Serialize)]
+        struct TypedTokenScheme<'a> {
+            #[serde(rename = "type")]
+            kind: u8,
+            data: TokenSchemeDto<'a>,
+        }
+        let data = match self {
+            Self::Simple(data) => TokenSchemeDto::T1(data),
+        };
+        TypedTokenScheme {
+            kind: self.kind(),
+            data,
+        }
+        .serialize(serializer)
     }
 }

@@ -6,7 +6,7 @@ use core::ops::RangeInclusive;
 
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix};
 
-use crate::types::block::Error;
+use crate::{types::block::Error, utils::serde::prefix_hex_box};
 
 pub(crate) type TagFeatureLength =
     BoundedU8<{ *TagFeature::LENGTH_RANGE.start() }, { *TagFeature::LENGTH_RANGE.end() }>;
@@ -17,7 +17,7 @@ pub(crate) type TagFeatureLength =
 #[packable(unpack_error = Error, with = |e| Error::InvalidTagFeatureLength(e.into_prefix_err().into()))]
 pub struct TagFeature(
     // Binary tag.
-    BoxedSlicePrefix<u8, TagFeatureLength>,
+    #[serde(with = "prefix_hex_box")] BoxedSlicePrefix<u8, TagFeatureLength>,
 );
 
 impl TryFrom<Vec<u8>> for TagFeature {
@@ -60,19 +60,5 @@ impl core::fmt::Display for TagFeature {
 impl core::fmt::Debug for TagFeature {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "TagFeature({self})")
-    }
-}
-
-#[allow(missing_docs)]
-pub mod dto {
-    use alloc::string::String;
-
-    use serde::{Deserialize, Serialize};
-
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct TagFeatureDto {
-        #[serde(rename = "type")]
-        pub kind: u8,
-        pub tag: String,
     }
 }
