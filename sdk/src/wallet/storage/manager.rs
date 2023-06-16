@@ -13,9 +13,9 @@ use crate::{
     },
 };
 
-/// The storage used by the manager.
+/// The type of storage used by the manager.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) enum ManagerStorage {
+pub enum StorageKind {
     /// RocksDB storage.
     #[cfg(feature = "rocksdb")]
     Rocksdb,
@@ -26,7 +26,7 @@ pub(crate) enum ManagerStorage {
     Wasm,
 }
 
-impl Default for ManagerStorage {
+impl Default for StorageKind {
     fn default() -> Self {
         #[cfg(feature = "rocksdb")]
         return Self::Rocksdb;
@@ -195,21 +195,17 @@ mod tests {
     #[tokio::test]
     async fn save_get_wallet_data() {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert!(
-            WalletBuilder::<SecretManager>::load(&storage_manager)
-                .await
-                .unwrap()
-                .is_none()
-        );
+        assert!(WalletBuilder::<SecretManager>::load(&storage_manager)
+            .await
+            .unwrap()
+            .is_none());
 
         let wallet_builder = WalletBuilder::<SecretManager>::new();
         wallet_builder.save(&storage_manager).await.unwrap();
 
-        assert!(
-            WalletBuilder::<SecretManager>::load(&storage_manager)
-                .await
-                .unwrap()
-                .is_some()
-        );
+        assert!(WalletBuilder::<SecretManager>::load(&storage_manager)
+            .await
+            .unwrap()
+            .is_some());
     }
 }
