@@ -257,7 +257,7 @@ pub async fn unlock_wallet(
         Some(SecretManager::Stronghold(
             StrongholdSecretManager::builder()
                 .password(password)
-                .build(snapshot_path.ok_or(Error::Miscellaneous(format!("Snapshot file path is not given")))?)?,
+                .build(snapshot_path.ok_or(Error::Miscellaneous("Snapshot file path is not given".to_string()))?)?,
         ))
     } else {
         None
