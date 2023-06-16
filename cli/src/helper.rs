@@ -27,6 +27,7 @@ pub fn get_password(prompt: &str, confirmation: bool) -> Result<Password, Error>
     password.with_prompt(prompt);
 
     if confirmation {
+        password.with_prompt("Provide a new Stronghold password");
         password.with_confirmation("Confirm password", "Password mismatch");
     }
 

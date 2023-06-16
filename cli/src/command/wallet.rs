@@ -121,6 +121,8 @@ pub async fn change_password_command(storage_path: &Path, snapshot_path: &Path) 
     let new_password = get_password("Stronghold new password", true)?;
     wallet.change_stronghold_password(password, new_password).await?;
 
+    println_log_info!("The password has been changed");
+
     Ok(wallet)
 }
 
