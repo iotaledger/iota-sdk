@@ -72,11 +72,11 @@ pub mod prefix_hex_box {
         D: Deserializer<'de>,
         <L as TryFrom<usize>>::Error: core::fmt::Display,
     {
-        Ok(prefix_hex::decode::<Vec<_>>(String::deserialize(deserializer)?)
+        prefix_hex::decode::<Vec<_>>(String::deserialize(deserializer)?)
             .map_err(de::Error::custom)?
             .into_boxed_slice()
             .try_into()
-            .map_err(de::Error::custom)?)
+            .map_err(de::Error::custom)
     }
 }
 
@@ -101,9 +101,9 @@ pub mod boxed_slice_prefix {
         D: Deserializer<'de>,
         <L as TryFrom<usize>>::Error: core::fmt::Display,
     {
-        Ok(Box::<[V]>::deserialize(deserializer)?
+        Box::<[V]>::deserialize(deserializer)?
             .try_into()
-            .map_err(de::Error::custom)?)
+            .map_err(de::Error::custom)
     }
 }
 

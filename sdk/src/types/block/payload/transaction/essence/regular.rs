@@ -366,7 +366,7 @@ pub mod dto {
                 network_id: value.network_id().to_string(),
                 inputs: value.inputs().iter().map(Into::into).collect::<Vec<_>>(),
                 inputs_commitment: value.inputs_commitment().to_string(),
-                outputs: value.outputs().iter().cloned().collect::<Vec<_>>(),
+                outputs: value.outputs().to_vec(),
                 payload: match value.payload() {
                     Some(Payload::TaggedData(i)) => Some(PayloadDto::TaggedData(Box::new(i.as_ref().into()))),
                     Some(_) => unimplemented!(),

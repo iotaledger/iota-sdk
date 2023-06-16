@@ -461,15 +461,13 @@ impl<'de> Deserialize<'de> for UnlockCondition {
             GovernorAddressUnlockCondition::KIND => GovernorAddressUnlockCondition::deserialize(value.data)
                 .map_err(|e| serde::de::Error::custom(format!("cannot deserialize governor unlock condition: {e}")))?
                 .into(),
-            ImmutableAliasAddressUnlockCondition::KIND => Self::ImmutableAliasAddress(
-                ImmutableAliasAddressUnlockCondition::deserialize(value.data)
-                    .map_err(|e| {
-                        serde::de::Error::custom(format!(
-                            "cannot deserialize immutable alias address unlock condition: {e}"
-                        ))
-                    })?
-                    .into(),
-            ),
+            ImmutableAliasAddressUnlockCondition::KIND => ImmutableAliasAddressUnlockCondition::deserialize(value.data)
+                .map_err(|e| {
+                    serde::de::Error::custom(format!(
+                        "cannot deserialize immutable alias address unlock condition: {e}"
+                    ))
+                })?
+                .into(),
             _ => {
                 return Err(serde::de::Error::custom(format!(
                     "invalid unlock condition type: {}",

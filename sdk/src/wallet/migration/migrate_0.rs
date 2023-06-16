@@ -702,9 +702,9 @@ mod types {
     }
     macro_rules! impl_as_u8 {
         ($v:ident) => {
-            impl Into<u8> for $v {
-                fn into(self) -> u8 {
-                    self as _
+            impl From<$v> for u8 {
+                fn from(value: $v) -> Self {
+                    value as _
                 }
             }
         };
