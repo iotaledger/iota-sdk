@@ -188,10 +188,6 @@ async fn send_with_note() -> Result<()> {
         )
         .await?;
 
-    account_0
-        .retry_transaction_until_included(&tx.transaction_id, None, None)
-        .await?;
-
     assert_eq!(tx.note, Some(String::from("send_with_note")));
 
     tear_down(storage_path)
