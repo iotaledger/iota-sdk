@@ -10,6 +10,7 @@ use iota_sdk::{
         secret::{stronghold::StrongholdSecretManager, SecretManager},
         stronghold::StrongholdAdapter,
         utils::Password,
+        Client,
     },
     wallet::{ClientOptions, Wallet},
 };
@@ -67,6 +68,8 @@ pub enum WalletCommand {
         /// Account alias, next available account index if not provided.
         alias: Option<String>,
     },
+    /// Get information about currently set node.
+    NodeInfo,
     /// Restore a stronghold backup file.
     Restore {
         /// Path of the to be restored stronghold backup file.
@@ -194,6 +197,15 @@ pub async fn new_account_command(
     let alias = add_account(&wallet, alias).await?;
 
     Ok((wallet, alias))
+}
+
+pub async fn node_info_command(storage_path: &Path, snapshot_path: &Path) -> Result<Wallet, Error> {
+    let password = get_password("Stronghold password", !snapshot_path.exists())?;
+    let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
+    let node_info = wallet.client().get_info().await?;
+
+    println_log_info!("The current node info: {}", serde_json::to_string_pretty(&node_info)?);
+    Ok(wallet)
 }
 
 pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<Wallet, Error> {

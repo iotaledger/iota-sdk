@@ -8,8 +8,8 @@ use iota_sdk::wallet::Wallet;
 use crate::{
     command::wallet::{
         add_account, backup_command, change_password_command, init_command,
-        migrate_stronghold_snapshot_v2_to_v3_command, mnemonic_command, new_account_command, restore_command,
-        set_node_url_command, sync_command, unlock_wallet, InitParameters, WalletCli, WalletCommand,
+        migrate_stronghold_snapshot_v2_to_v3_command, mnemonic_command, new_account_command, node_info_command,
+        restore_command, set_node_url_command, sync_command, unlock_wallet, InitParameters, WalletCli, WalletCommand,
     },
     error::Error,
     helper::{get_account_alias, get_decision, get_password, pick_account, print_wallet_help},
@@ -56,6 +56,10 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
             }
             WalletCommand::Mnemonic => {
                 mnemonic_command().await?;
+                return Ok((None, None));
+            }
+            WalletCommand::NodeInfo => {
+                node_info_command(storage_path, snapshot_path).await?;
                 return Ok((None, None));
             }
         }
