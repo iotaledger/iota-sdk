@@ -198,8 +198,8 @@ pub async fn new_account_command(
     Ok((wallet, alias))
 }
 
-pub async fn node_info_command(storage_path: &Path, snapshot_path: &Path) -> Result<Wallet, Error> {
-    let wallet = unlock_wallet(storage_path, snapshot_path, None).await?;
+pub async fn node_info_command(storage_path: &Path) -> Result<Wallet, Error> {
+    let wallet = unlock_wallet(storage_path, None, None).await?;
     let node_info = wallet.client().get_info().await?;
 
     println_log_info!("The current node info: {}", serde_json::to_string_pretty(&node_info)?);
@@ -249,14 +249,15 @@ pub async fn sync_command(storage_path: &Path, snapshot_path: &Path) -> Result<W
 
 pub async fn unlock_wallet(
     storage_path: &Path,
-    snapshot_path: &Path,
+    snapshot_path: impl Into<Option<&Path>>,
     password: impl Into<Option<Password>>,
 ) -> Result<Wallet, Error> {
     let secret_manager = if let Some(password) = password.into() {
+        let snapshot_path: Option<&Path> = snapshot_path.into();
         Some(SecretManager::Stronghold(
             StrongholdSecretManager::builder()
                 .password(password)
-                .build(snapshot_path)?,
+                .build(snapshot_path.ok_or(Error::Miscellaneous(format!("Snapshot file path is not given")))?)?,
         ))
     } else {
         None

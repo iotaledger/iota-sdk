@@ -59,7 +59,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<String
                 return Ok((None, None));
             }
             WalletCommand::NodeInfo => {
-                node_info_command(storage_path, snapshot_path).await?;
+                node_info_command(storage_path).await?;
                 return Ok((None, None));
             }
         }
