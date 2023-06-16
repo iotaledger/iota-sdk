@@ -13,9 +13,8 @@ use iota_sdk::{
         output::{dto::OutputDto, Output, Rent},
         Error,
     },
-    wallet::{
-        account::{types::TransactionDto, Account, OutputDataDto, PreparedMintTokenTransactionDto, TransactionOptions},
-        MintNftParams,
+    wallet::account::{
+        types::TransactionDto, Account, OutputDataDto, PreparedMintTokenTransactionDto, TransactionOptions,
     },
 };
 use primitive_types::U256;
@@ -192,13 +191,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::PrepareMintNfts { params, options } => {
             let data = account
-                .prepare_mint_nfts(
-                    params
-                        .into_iter()
-                        .map(MintNftParams::try_from)
-                        .collect::<iota_sdk::wallet::Result<Vec<MintNftParams>>>()?,
-                    options.map(TransactionOptions::try_from_dto).transpose()?,
-                )
+                .prepare_mint_nfts(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
