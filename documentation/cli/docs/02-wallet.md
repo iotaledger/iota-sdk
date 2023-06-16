@@ -179,6 +179,20 @@ Create a new account with a provided alias.
 ./wallet new-account main
 ```
 
+### `./wallet node-info`
+
+Get information about currently set node.
+
+The wallet needs to be initialised (`init` command).
+
+#### Examples
+
+Get information about currently set node.
+
+```sh
+./wallet node-info
+```
+
 ### `./wallet restore`
 
 Restores accounts from a stronghold backup file.
