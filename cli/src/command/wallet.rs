@@ -199,8 +199,7 @@ pub async fn new_account_command(
 }
 
 pub async fn node_info_command(storage_path: &Path, snapshot_path: &Path) -> Result<Wallet, Error> {
-    let password = get_password("Stronghold password", !snapshot_path.exists())?;
-    let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
+    let wallet = unlock_wallet(storage_path, snapshot_path, None).await?;
     let node_info = wallet.client().get_info().await?;
 
     println_log_info!("The current node info: {}", serde_json::to_string_pretty(&node_info)?);
@@ -248,12 +247,21 @@ pub async fn sync_command(storage_path: &Path, snapshot_path: &Path) -> Result<W
     Ok(wallet)
 }
 
-pub async fn unlock_wallet(storage_path: &Path, snapshot_path: &Path, password: Password) -> Result<Wallet, Error> {
-    let secret_manager = SecretManager::Stronghold(
-        StrongholdSecretManager::builder()
-            .password(password)
-            .build(snapshot_path)?,
-    );
+pub async fn unlock_wallet(
+    storage_path: &Path,
+    snapshot_path: &Path,
+    password: impl Into<Option<Password>>,
+) -> Result<Wallet, Error> {
+    let secret_manager = if let Some(password) = password.into() {
+        Some(SecretManager::Stronghold(
+            StrongholdSecretManager::builder()
+                .password(password)
+                .build(snapshot_path)?,
+        ))
+    } else {
+        None
+    };
+
     let wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
