@@ -204,6 +204,7 @@ pub async fn node_info_command(storage_path: &Path, snapshot_path: &Path) -> Res
     let node_info = wallet.client().get_info().await?;
 
     println_log_info!("The current node info: {}", serde_json::to_string_pretty(&node_info)?);
+
     Ok(wallet)
 }
 
