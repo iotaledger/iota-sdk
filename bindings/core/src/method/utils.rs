@@ -4,10 +4,10 @@
 use derivative::Derivative;
 use iota_sdk::types::block::{
     address::{dto::Ed25519AddressDto, AliasAddress, Bech32Address, Hrp},
-    output::{AliasId, NftId, OutputId},
+    output::{AliasId, NftId, OutputId, TokenScheme, dto::OutputDto, RentStructure},
     payload::{
         dto::MilestonePayloadDto,
-        transaction::dto::{TransactionEssenceDto, TransactionPayloadDto},
+        transaction::{dto::{TransactionEssenceDto, TransactionPayloadDto}, TransactionId},
     },
     signature::dto::Ed25519SignatureDto,
     BlockDto,
@@ -81,10 +81,22 @@ pub enum UtilsMethod {
         /// Block
         block: BlockDto,
     },
+    /// Returns the output ID from transaction id and output index
+    OutputId {
+        id: TransactionId,
+        index: u16,
+    },
     /// Returns a milestone ID (Blake2b256 hash of milestone essence)
     MilestoneId {
         /// Block
         payload: MilestonePayloadDto,
+    },
+    /// Constructs a tokenId from the aliasId, serial number and token scheme type.
+    #[serde(rename_all = "camelCase")]
+    TokenId {
+        alias_id: AliasId, 
+        serial_number: u32, 
+        token_scheme_type: TokenScheme
     },
     /// Returns the transaction ID (Blake2b256 hash of the provided transaction payload)
     TransactionId {
@@ -117,6 +129,16 @@ pub enum UtilsMethod {
     HashTransactionEssence {
         /// The transaction essence
         essence: TransactionEssenceDto,
+    },
+    /// Calculate the input commitment from the output objects that are used as inputs to fund the transaction.
+    ComputeInputsCommitment { 
+        inputs: Vec<OutputDto>,
+    },
+    /// Calculates the required storage deposit of an output.
+    #[serde(rename_all = "camelCase")]
+    ComputeStorageDeposit {
+        output: OutputDto,
+        rent: RentStructure,
     },
     /// Verifies the Ed25519Signature for a message against an Ed25519Address.
     VerifyEd25519Signature {

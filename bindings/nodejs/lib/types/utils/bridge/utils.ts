@@ -6,7 +6,13 @@ import {
     TransactionEssence,
     MilestonePayload,
     TransactionPayload,
+    TransactionId,
+    TokenSchemeType,
+    Output,
+    IRent,
+    HexEncodedAmount,
 } from '../../';
+import { AliasId } from '../../block/id';
 
 export interface __GenerateMnemonicMethod__ {
     name: 'generateMnemonic';
@@ -56,10 +62,27 @@ export interface __BlockIdMethod__ {
     };
 }
 
+export interface __OutputIdMethod__ {
+    name: 'outputId';
+    data: {
+        id: TransactionId;
+        index: number;
+    };
+}
+
 export interface __MilestoneIdMethod__ {
     name: 'milestoneId';
     data: {
         payload: MilestonePayload;
+    };
+}
+
+export interface __TokenIdMethod__ {
+    name: 'tokenId';
+    data: {
+        aliasId: AliasId;
+        serialNumber: number;
+        tokenSchemeType: TokenSchemeType;
     };
 }
 
@@ -120,6 +143,21 @@ export interface __HashTransactionEssenceMethod__ {
     name: 'hashTransactionEssence';
     data: {
         essence: TransactionEssence;
+    };
+}
+
+export interface __ComputeInputsCommitmentMethod__ {
+    name: 'computeInputsCommitment';
+    data: {
+        inputs: Output[];
+    };
+}
+
+export interface __ComputeStorageDepositMethod__ {
+    name: 'computeStorageDeposit';
+    data: {
+        output: Output;
+        rentStructure: IRent;
     };
 }
 

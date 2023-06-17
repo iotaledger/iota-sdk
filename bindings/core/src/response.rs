@@ -26,7 +26,7 @@ use iota_sdk::{
             input::dto::UtxoInputDto,
             output::{
                 dto::{OutputDto, OutputMetadataDto},
-                AliasId, FoundryId, NftId, OutputId,
+                AliasId, FoundryId, NftId, OutputId, TokenId,
             },
             payload::{
                 dto::{MilestonePayloadDto, PayloadDto},
@@ -209,6 +209,9 @@ pub enum Response {
     /// Response for:
     /// - [`MilestoneId`](crate::method::UtilsMethod::MilestoneId)
     MilestoneId(MilestoneId),
+    /// Response for:
+    /// - [`TokenId`](crate::method::UtilsMethod::TokenId)
+    TokenId(TokenId),
     /// Response for:
     /// - [`TransactionId`](crate::method::UtilsMethod::TransactionId)
     TransactionId(TransactionId),

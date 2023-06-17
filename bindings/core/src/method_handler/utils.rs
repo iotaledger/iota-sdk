@@ -4,8 +4,8 @@
 use iota_sdk::{
     client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
     types::block::{
-        address::{dto::AddressDto, Address, Ed25519Address, ToBech32Ext},
-        output::{AliasId, FoundryId, NftId},
+        address::{dto::AddressDto, Address, Ed25519Address, ToBech32Ext, AliasAddress},
+        output::{AliasId, FoundryId, NftId, OutputId, TokenId, InputsCommitment, Output, Rent},
         payload::{transaction::TransactionEssence, MilestonePayload, TransactionPayload},
         signature::Ed25519Signature,
         Block,
@@ -39,9 +39,16 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let block = Block::try_from_dto_unverified(block)?;
             Response::BlockId(block.id())
         }
+        UtilsMethod::OutputId { id, index } => {
+            Response::OutputId(OutputId::new(id, index)?)
+        }
         UtilsMethod::MilestoneId { payload } => {
             let payload = MilestonePayload::try_from_dto_unverified(payload)?;
             Response::MilestoneId(payload.id())
+        }
+        UtilsMethod::TokenId { alias_id, serial_number, token_scheme_type } => {
+            let foundry_id = FoundryId::build(&AliasAddress::new(alias_id), serial_number, token_scheme_type.kind());
+            Response::TokenId(TokenId::from(foundry_id))
         }
         UtilsMethod::TransactionId { payload } => {
             let payload = TransactionPayload::try_from_dto_unverified(payload)?;
@@ -57,6 +64,18 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::HashTransactionEssence { essence } => Response::TransactionEssenceHash(prefix_hex::encode(
             TransactionEssence::try_from_dto_unverified(essence)?.hash(),
         )),
+        UtilsMethod::ComputeInputsCommitment { inputs } => {
+            let inputs = inputs.into_iter()
+                .map(|o| Ok(Output::try_from_dto_unverified(o)?))
+                .collect::<Result<Vec<Output>>>()?;
+            Response::TransactionEssenceHash(
+                InputsCommitment::new(inputs.iter()).to_string()
+            )
+        },
+        UtilsMethod::ComputeStorageDeposit { output, rent } => {
+            let out = Output::try_from_dto_unverified(output)?;
+            Response::MinimumRequiredStorageDeposit(out.rent_cost(&rent).to_string())
+        },
         UtilsMethod::VerifyEd25519Signature {
             signature,
             message,

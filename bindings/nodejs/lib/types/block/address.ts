@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { HexEncodedString } from '../utils';
+import { AliasId } from './id';
 
 enum AddressType {
     Ed25519 = 0,
@@ -47,15 +48,15 @@ class Ed25519Address extends Address {
 }
 
 class AliasAddress extends Address {
-    private aliasId: HexEncodedString;
-    constructor(address: HexEncodedString) {
+    private aliasId: AliasId;
+    constructor(address: AliasId) {
         super(AddressType.Alias);
         this.aliasId = address;
     }
     /**
      * The alias id.
      */
-    getAliasId(): HexEncodedString {
+    getAliasId(): AliasId {
         return this.aliasId;
     }
 
