@@ -283,10 +283,13 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             prepared_transaction_data,
         } => {
             let transaction = account
-                .sign_and_submit_transaction(PreparedTransactionData::try_from_dto(
-                    prepared_transaction_data,
-                    &account.client().get_protocol_parameters().await?,
-                )?)
+                .sign_and_submit_transaction(
+                    PreparedTransactionData::try_from_dto(
+                        prepared_transaction_data,
+                        &account.client().get_protocol_parameters().await?,
+                    )?,
+                    None,
+                )
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
@@ -308,7 +311,9 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 signed_transaction_data,
                 &account.client().get_protocol_parameters().await?,
             )?;
-            let transaction = account.submit_and_store_transaction(signed_transaction_data).await?;
+            let transaction = account
+                .submit_and_store_transaction(signed_transaction_data, None)
+                .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
         AccountMethod::Sync { options } => Response::Balance(account.sync(options).await?),

@@ -107,8 +107,10 @@ where
     where
         I::IntoIter: Send,
     {
-        let prepared_transaction = self.prepare_send_amount(params, options).await?;
-        self.sign_and_submit_transaction(prepared_transaction).await
+        let options = options.into();
+        let prepared_transaction = self.prepare_send_amount(params, options.clone()).await?;
+
+        self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Function to prepare the transaction for
