@@ -863,7 +863,9 @@ impl WalletMessageHandler {
                         signed_transaction_data,
                         &account.client().get_protocol_parameters().await?,
                     )?;
-                    let transaction = account.submit_and_store_transaction(signed_transaction_data).await?;
+                    let transaction = account
+                        .submit_and_store_transaction(signed_transaction_data, None)
+                        .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
