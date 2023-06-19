@@ -89,9 +89,10 @@ impl RentStructure {
 
     /// Returns the byte offset of the [`RentStructure`].
     pub fn byte_offset(&self) -> u32 {
-        // TODO MilestoneIndex has been removed, check how the specs will evolve about that.
         size_of::<OutputId>() as u32 * self.v_byte_factor_key as u32
             + size_of::<BlockId>() as u32 * self.v_byte_factor_data as u32
+            // TODO MilestoneIndex has been removed, check how the specs will evolve about that.
+            + 4 * self.v_byte_factor_data as u32
             + size_of::<ConfirmationUnixTimestamp>() as u32 * self.v_byte_factor_data as u32
     }
 }
