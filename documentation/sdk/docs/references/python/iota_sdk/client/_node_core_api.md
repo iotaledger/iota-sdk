@@ -153,22 +153,6 @@ def get_utxo_changes_by_index(index: int)
 
 Get the UTXO changes by the given milestone index.
 
-### get\_receipts
-
-```python
-def get_receipts()
-```
-
-Get all receipts.
-
-### get\_receipts\_migrated\_at
-
-```python
-def get_receipts_migrated_at(milestone_index: int)
-```
-
-Get the receipts by the given milestone index.
-
 ### get\_treasury
 
 ```python

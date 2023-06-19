@@ -41,8 +41,6 @@ The Client to interact with nodes.
 - [getUtxoChangesById](Client.md#getutxochangesbyid)
 - [getMilestoneByIndex](Client.md#getmilestonebyindex)
 - [getUtxoChangesByIndex](Client.md#getutxochangesbyindex)
-- [getReceipts](Client.md#getreceipts)
-- [getReceiptsMigratedAt](Client.md#getreceiptsmigratedat)
 - [getTreasury](Client.md#gettreasury)
 - [getIncludedBlock](Client.md#getincludedblock)
 - [getIncludedBlockMetadata](Client.md#getincludedblockmetadata)
@@ -638,36 +636,6 @@ Returns all UTXO changes that happened at a specific milestone.
 #### Returns
 
 `Promise`<`IMilestoneUtxoChangesResponse`\>
-
-___
-
-### getReceipts
-
-▸ **getReceipts**(): `Promise`<`IReceiptsResponse`\>
-
-Get receipts.
-
-#### Returns
-
-`Promise`<`IReceiptsResponse`\>
-
-___
-
-### getReceiptsMigratedAt
-
-▸ **getReceiptsMigratedAt**(`milestoneIndex`): `Promise`<`IReceiptsResponse`[]\>
-
-Get the receipts by the given milestone index.
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `milestoneIndex` | `number` |
-
-#### Returns
-
-`Promise`<`IReceiptsResponse`[]\>
 
 ___
 

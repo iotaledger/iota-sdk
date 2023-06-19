@@ -6,7 +6,6 @@ import { MilestonePayload } from './milestone';
 import { Payload, PayloadType } from './payload';
 import { TaggedDataPayload } from './tagged';
 import { TransactionPayload } from './transaction';
-import { TreasuryTransactionPayload } from './treasury';
 
 export * from './milestone';
 export * from './tagged';
@@ -19,10 +18,6 @@ export const PayloadDiscriminator = {
         { value: MilestonePayload, name: PayloadType.Milestone as any },
         { value: TaggedDataPayload, name: PayloadType.TaggedData as any },
         { value: TransactionPayload, name: PayloadType.Transaction as any },
-        {
-            value: TreasuryTransactionPayload,
-            name: PayloadType.TreasuryTransaction as any,
-        },
     ],
 };
 
@@ -42,11 +37,6 @@ export function parsePayload(data: any): Payload {
             TransactionPayload,
             data,
         ) as any as TransactionPayload;
-    } else if (data.type == PayloadType.TreasuryTransaction) {
-        return plainToInstance(
-            TreasuryTransactionPayload,
-            data,
-        ) as any as TreasuryTransactionPayload;
     }
     throw new Error('Invalid JSON');
 }
