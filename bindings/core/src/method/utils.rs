@@ -124,12 +124,12 @@ pub enum UtilsMethod {
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         mnemonic: String,
     },
-    /// Verify an ed25519 signature with a message.
+    /// Verify an ed25519 signature against a message.
     VerifyEd25519Signature {
         signature: Ed25519SignatureDto,
         message: String,
     },
-    /// Verify an Evm signature with a message.
+    /// Verify a Secp256k1Ecdsa signature against a message.
     #[serde(rename_all = "camelCase")]
     VerifySecp256k1EcdsaSignature {
         public_key: String,
