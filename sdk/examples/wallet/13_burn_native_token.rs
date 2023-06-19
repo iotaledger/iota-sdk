@@ -8,10 +8,8 @@
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
 //! running the `create_account` example!
 //!
-//! You need to provide a TOKEN ID that is available in the account. The foundry
-//! output which minted it needs to be available as well. You can check this by
-//! running the `get_balance` example. You can mint a new native token by running
-//! the `mint_native_token` example.
+//! You need to provide a TOKEN ID that is available in the account. You can check this by running the
+//! `get_balance` example. You can mint a new native token by running the `mint_native_token` example.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
