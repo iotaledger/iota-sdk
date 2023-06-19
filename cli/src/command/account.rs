@@ -601,7 +601,7 @@ pub async fn new_address_command(account: &Account) -> Result<(), Error> {
 pub async fn node_info_command(account: &Account) -> Result<(), Error> {
     let node_info = account.client().get_info().await?;
 
-    println_log_info!("The current node info: {}", serde_json::to_string_pretty(&node_info)?);
+    println_log_info!("Current node info: {}", serde_json::to_string_pretty(&node_info)?);
 
     Ok(())
 }
