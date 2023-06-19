@@ -253,7 +253,7 @@ pub async fn unlock_wallet(
     password: impl Into<Option<Password>>,
 ) -> Result<Wallet, Error> {
     let secret_manager = if let Some(password) = password.into() {
-        let snapshot_path: Option<&Path> = snapshot_path.into();
+        let snapshot_path = snapshot_path.into();
         Some(SecretManager::Stronghold(
             StrongholdSecretManager::builder()
                 .password(password)
