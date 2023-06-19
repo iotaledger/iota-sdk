@@ -19,7 +19,6 @@ import {
     Output,
     IRent,
     HexEncodedAmount,
-    AliasAddress,
 } from '../types';
 import { AliasId, BlockId, TokenId } from '../types/block/id';
 
@@ -93,13 +92,11 @@ export class Utils {
      * @param inputs The output objects used as inputs for the transaction.
      * @returns The inputs commitment.
      */
-     static computeInputsCommitment(
-        inputs: Output[],
-    ): HexEncodedString {
+    static computeInputsCommitment(inputs: Output[]): HexEncodedString {
         return callUtilsMethod({
             name: 'computeInputsCommitment',
             data: {
-                inputs
+                inputs,
             },
         });
     }
@@ -110,11 +107,12 @@ export class Utils {
      * @param outputIndex The index of the output.
      * @returns The output id.
      */
-     static computeOutputId(id: TransactionId, index: number): TransactionId {
+    static computeOutputId(id: TransactionId, index: number): TransactionId {
         return callUtilsMethod({
             name: 'computeOutputId',
             data: {
-                id, index
+                id,
+                index,
             },
         });
     }
@@ -125,15 +123,15 @@ export class Utils {
      * @param rentStructure Rent cost of objects which take node resources.
      * @returns The required storage deposit.
      */
-     static computeStorageDeposit(
-         output: Output,
-         rentStructure: IRent,
+    static computeStorageDeposit(
+        output: Output,
+        rentStructure: IRent,
     ): HexEncodedAmount {
         return callUtilsMethod({
             name: 'computeStorageDeposit',
             data: {
                 output,
-                rentStructure
+                rentStructure,
             },
         });
     }
@@ -145,7 +143,11 @@ export class Utils {
      * @param tokenSchemeType The tokenSchemeType of the foundry.
      * @returns The tokenId.
      */
-     static computeTokenId(aliasId: AliasId, serialNumber: number, tokenSchemeType: TokenSchemeType): TokenId {
+    static computeTokenId(
+        aliasId: AliasId,
+        serialNumber: number,
+        tokenSchemeType: TokenSchemeType,
+    ): TokenId {
         return callUtilsMethod({
             name: 'computeTokenId',
             data: {
