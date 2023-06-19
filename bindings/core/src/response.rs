@@ -226,7 +226,8 @@ pub enum Response {
     FoundryId(FoundryId),
     /// Response for:
     /// - [`HashTransactionEssence`](crate::method::UtilsMethod::HashTransactionEssence)
-    TransactionEssenceHash(String),
+    /// - [`ComputeStorageDeposit`](crate::method::UtilsMethod::ComputeStorageDeposit)
+    Hash(String),
     /// Response for [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
     NodeInfoWrapper(NodeInfoWrapper),
     /// Response for [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)

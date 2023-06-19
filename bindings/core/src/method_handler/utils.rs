@@ -61,14 +61,14 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             serial_number,
             token_scheme_kind,
         } => Response::FoundryId(FoundryId::build(&alias_address, serial_number, token_scheme_kind)),
-        UtilsMethod::HashTransactionEssence { essence } => Response::TransactionEssenceHash(prefix_hex::encode(
+        UtilsMethod::HashTransactionEssence { essence } => Response::Hash(prefix_hex::encode(
             TransactionEssence::try_from_dto_unverified(essence)?.hash(),
         )),
         UtilsMethod::ComputeInputsCommitment { inputs } => {
             let inputs = inputs.into_iter()
                 .map(|o| Ok(Output::try_from_dto_unverified(o)?))
                 .collect::<Result<Vec<Output>>>()?;
-            Response::TransactionEssenceHash(
+            Response::Hash(
                 InputsCommitment::new(inputs.iter()).to_string()
             )
         },
