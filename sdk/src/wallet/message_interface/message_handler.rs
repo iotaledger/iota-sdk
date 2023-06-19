@@ -31,22 +31,21 @@ use crate::{
             dto::{OutputBuilderAmountDto, OutputDto},
             AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
         },
+        signature::Ed25519Signature,
         ConvertTo, Error,
     },
     wallet::{
         account::{
             operations::transaction::{
-                high_level::{create_alias::CreateAliasParams, minting::mint_native_token::MintTokenTransactionDto},
-                prepare_output::OutputParams,
-                TransactionOptions,
+                high_level::minting::mint_native_token::MintTokenTransactionDto, TransactionOptions,
             },
-            types::{AccountIdentifier, BalanceDto, TransactionDto},
+            types::{AccountIdentifier, TransactionDto},
             OutputDataDto,
         },
         message_interface::{
             account_method::AccountMethod, dtos::AccountDetailsDto, message::Message, response::Response,
         },
-        MintNativeTokenParams, MintNftParams, Result, Wallet,
+        Result, Wallet,
     },
 };
 
@@ -184,7 +183,7 @@ impl WalletMessageHandler {
             Message::IsStrongholdPasswordAvailable => {
                 convert_async_panics(|| async {
                     let is_available = self.wallet.is_stronghold_password_available().await?;
-                    Ok(Response::StrongholdPasswordIsAvailable(is_available))
+                    Ok(Response::Bool(is_available))
                 })
                 .await
             }
@@ -288,7 +287,7 @@ impl WalletMessageHandler {
                             let node_info = Client::get_node_info(&url, auth).await?;
                             Ok(Response::NodeInfo(NodeInfoWrapper { node_info, url }))
                         }
-                        None => self.wallet.get_node_info().await.map(Response::NodeInfo),
+                        None => Ok(self.wallet.client().get_info().await.map(Response::NodeInfo)?),
                     }
                 })
                 .await
@@ -353,10 +352,12 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let bech32_hrp = match bech32_hrp {
                         Some(bech32_hrp) => bech32_hrp,
-                        None => match self.wallet.get_node_info().await {
-                            Ok(node_info_wrapper) => node_info_wrapper.node_info.protocol.bech32_hrp,
-                            Err(_) => SHIMMER_TESTNET_BECH32_HRP,
-                        },
+                        None => self
+                            .wallet
+                            .client()
+                            .get_bech32_hrp()
+                            .await
+                            .unwrap_or(SHIMMER_TESTNET_BECH32_HRP),
                     };
 
                     Ok(Response::Bech32Address(utils::hex_to_bech32(&hex, bech32_hrp)?))
@@ -461,7 +462,7 @@ impl WalletMessageHandler {
                     },
                     native_tokens,
                     serial_number,
-                    &token_scheme,
+                    token_scheme,
                     unlock_conditions,
                     features,
                     immutable_features,
@@ -503,7 +504,7 @@ impl WalletMessageHandler {
                     let transaction = account
                         .burn(
                             NativeToken::new(token_id, burn_amount)?,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                            options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
@@ -513,14 +514,15 @@ impl WalletMessageHandler {
             AccountMethod::BurnNft { nft_id, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .burn(
-                            nft_id,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
+                        .burn(nft_id, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
+            }
+            AccountMethod::ClaimableOutputs { outputs_to_claim } => {
+                let output_ids = account.claimable_outputs(outputs_to_claim).await?;
+                Ok(Response::OutputIds(output_ids))
             }
             AccountMethod::ConsolidateOutputs {
                 force,
@@ -536,15 +538,8 @@ impl WalletMessageHandler {
             }
             AccountMethod::CreateAliasOutput { params, options } => {
                 convert_async_panics(|| async {
-                    let params = params
-                        .map(|options| CreateAliasParams::try_from(&options))
-                        .transpose()?;
-
                     let transaction = account
-                        .create_alias_output(
-                            params,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
+                        .create_alias_output(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
@@ -553,10 +548,7 @@ impl WalletMessageHandler {
             AccountMethod::DestroyAlias { alias_id, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .burn(
-                            alias_id,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
+                        .burn(alias_id, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
@@ -565,10 +557,7 @@ impl WalletMessageHandler {
             AccountMethod::DestroyFoundry { foundry_id, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .burn(
-                            foundry_id,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
+                        .burn(foundry_id, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
@@ -588,25 +577,37 @@ impl WalletMessageHandler {
                     .await?;
                 Ok(Response::GeneratedEvmAddresses(addresses))
             }
-            AccountMethod::SignEvm { message, chain } => {
+            AccountMethod::VerifyEd25519Signature { signature, message } => {
+                let signature = Ed25519Signature::try_from(signature)?;
+                let message: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
+                Ok(Response::Bool(signature.verify(&message)?))
+            }
+            AccountMethod::VerifySecp256k1EcdsaSignature {
+                public_key,
+                signature,
+                message,
+            } => {
+                use crypto::signatures::secp256k1_ecdsa;
+                let public_key = prefix_hex::decode(public_key).map_err(|_| Error::InvalidField("publicKey"))?;
+                let public_key = secp256k1_ecdsa::PublicKey::try_from_bytes(&public_key)?;
+                let signature = prefix_hex::decode(signature).map_err(|_| Error::InvalidField("signature"))?;
+                let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature)?;
+                let message: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
+                Ok(Response::Bool(public_key.verify(&signature, &message)))
+            }
+            AccountMethod::SignSecp256k1Ecdsa { message, chain } => {
                 let msg: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
                 let (public_key, signature) = account
                     .wallet
                     .secret_manager
                     .read()
                     .await
-                    .sign_evm(&msg, &Chain::from_u32(chain))
+                    .sign_secp256k1_ecdsa(&msg, &Chain::from_u32(chain))
                     .await?;
-                Ok(Response::EvmSignature {
+                Ok(Response::Secp256k1EcdsaSignature {
                     public_key: prefix_hex::encode(public_key.to_bytes()),
                     signature: prefix_hex::encode(signature.to_bytes()),
                 })
-            }
-            AccountMethod::GetOutputsWithAdditionalUnlockConditions { outputs_to_claim } => {
-                let output_ids = account
-                    .get_unlockable_outputs_with_additional_unlock_conditions(outputs_to_claim)
-                    .await?;
-                Ok(Response::OutputIds(output_ids))
             }
             AccountMethod::GetOutput { output_id } => {
                 let output_data = account.get_output(&output_id).await;
@@ -680,7 +681,7 @@ impl WalletMessageHandler {
                         .decrease_native_token_supply(
                             token_id,
                             U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                            options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
@@ -697,7 +698,7 @@ impl WalletMessageHandler {
                         .increase_native_token_supply(
                             token_id,
                             U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                            options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
                     Ok(Response::MintTokenTransaction(MintTokenTransactionDto::from(
@@ -709,10 +710,7 @@ impl WalletMessageHandler {
             AccountMethod::MintNativeToken { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .mint_native_token(
-                            MintNativeTokenParams::try_from(&params)?,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
+                        .mint_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::MintTokenTransaction(MintTokenTransactionDto::from(
                         &transaction,
@@ -722,7 +720,7 @@ impl WalletMessageHandler {
             }
             AccountMethod::MinimumRequiredStorageDeposit { output } => {
                 convert_async_panics(|| async {
-                    let output = Output::try_from_dto(&output, account.client().get_token_supply().await?)?;
+                    let output = Output::try_from_dto(output, account.client().get_token_supply().await?)?;
                     let rent_structure = account.client().get_rent_structure().await?;
 
                     let minimum_storage_deposit = output.rent_cost(&rent_structure);
@@ -736,31 +734,22 @@ impl WalletMessageHandler {
             AccountMethod::MintNfts { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .mint_nfts(
-                            params
-                                .iter()
-                                .map(MintNftParams::try_from)
-                                .collect::<Result<Vec<MintNftParams>>>()?,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
+                        .mint_nfts(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
             }
-            AccountMethod::GetBalance => Ok(Response::Balance(BalanceDto::from(&account.balance().await?))),
+            AccountMethod::GetBalance => Ok(Response::Balance(account.balance().await?)),
             AccountMethod::PrepareOutput {
-                params: options,
+                params,
                 transaction_options,
             } => {
                 convert_async_panics(|| async {
                     let output = account
                         .prepare_output(
-                            OutputParams::try_from(options.as_ref())?,
-                            transaction_options
-                                .as_ref()
-                                .map(TransactionOptions::try_from_dto)
-                                .transpose()?,
+                            *params,
+                            transaction_options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
                     Ok(Response::Output(OutputDto::from(&output)))
@@ -770,10 +759,7 @@ impl WalletMessageHandler {
             AccountMethod::PrepareSendAmount { params, options } => {
                 convert_async_panics(|| async {
                     let data = account
-                        .prepare_send_amount(
-                            params,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
+                        .prepare_send_amount(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
                 })
@@ -785,10 +771,10 @@ impl WalletMessageHandler {
                     let data = account
                         .prepare_transaction(
                             outputs
-                                .iter()
+                                .into_iter()
                                 .map(|o| Ok(Output::try_from_dto(o, token_supply)?))
                                 .collect::<Result<Vec<Output>>>()?,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                            options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
                     Ok(Response::PreparedTransaction(PreparedTransactionDataDto::from(&data)))
@@ -808,16 +794,11 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::SyncAccount { options } => {
-                Ok(Response::Balance(BalanceDto::from(&account.sync(options).await?)))
-            }
+            AccountMethod::SyncAccount { options } => Ok(Response::Balance(account.sync(options).await?)),
             AccountMethod::SendAmount { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .send_amount(
-                            params,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
-                        )
+                        .send_amount(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
@@ -828,7 +809,7 @@ impl WalletMessageHandler {
                     let transaction = account
                         .send_native_tokens(
                             params.clone(),
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                            options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
@@ -840,7 +821,7 @@ impl WalletMessageHandler {
                     let transaction = account
                         .send_nft(
                             params.clone(),
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                            options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
@@ -867,10 +848,10 @@ impl WalletMessageHandler {
                     let transaction = account
                         .send(
                             outputs
-                                .iter()
+                                .into_iter()
                                 .map(|o| Ok(Output::try_from_dto(o, token_supply)?))
                                 .collect::<crate::wallet::Result<Vec<_>>>()?,
-                            options.as_ref().map(TransactionOptions::try_from_dto).transpose()?,
+                            options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
@@ -883,7 +864,7 @@ impl WalletMessageHandler {
                 convert_async_panics(|| async {
                     let signed_transaction_data = account
                         .sign_transaction_essence(&PreparedTransactionData::try_from_dto(
-                            &prepared_transaction_data,
+                            prepared_transaction_data,
                             &account.client().get_protocol_parameters().await?,
                         )?)
                         .await?;
@@ -898,10 +879,12 @@ impl WalletMessageHandler {
             } => {
                 convert_async_panics(|| async {
                     let signed_transaction_data = SignedTransactionData::try_from_dto(
-                        &signed_transaction_data,
+                        signed_transaction_data,
                         &account.client().get_protocol_parameters().await?,
                     )?;
-                    let transaction = account.submit_and_store_transaction(signed_transaction_data).await?;
+                    let transaction = account
+                        .submit_and_store_transaction(signed_transaction_data, None)
+                        .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await

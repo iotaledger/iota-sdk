@@ -5,7 +5,7 @@ use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::api::PreparedTransactionData,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::Bech32Address,
         output::{unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
@@ -39,7 +39,10 @@ impl SendNftParams {
     }
 }
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Function to send native tokens in basic outputs with a
     /// [`StorageDepositReturnUnlockCondition`](crate::types::block::output::unlock_condition::StorageDepositReturnUnlockCondition) and
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition), so the
@@ -69,8 +72,10 @@ impl Account {
     where
         I::IntoIter: Send,
     {
-        let prepared_transaction = self.prepare_send_nft(params, options).await?;
-        self.sign_and_submit_transaction(prepared_transaction).await
+        let options = options.into();
+        let prepared_transaction = self.prepare_send_nft(params, options.clone()).await?;
+
+        self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Function to prepare the transaction for

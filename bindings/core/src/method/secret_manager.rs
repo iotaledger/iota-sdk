@@ -13,12 +13,12 @@ use crate::OmittedDebug;
 #[derivative(Debug)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 pub enum SecretManagerMethod {
-    /// Generate addresses.
+    /// Generate Ed25519 addresses.
     GenerateEd25519Addresses {
         /// Addresses generation options
         options: GetAddressesOptions,
     },
-    /// Generate EVM addresses.
+    /// Generate Evm addresses.
     GenerateEvmAddresses { options: GetAddressesOptions },
     /// Get the ledger status
     /// Expected response: [`LedgerNanoStatus`](crate::Response::LedgerNanoStatus)
@@ -38,6 +38,13 @@ pub enum SecretManagerMethod {
         /// The message to sign, hex encoded String
         message: String,
         /// Chain to sign the essence hash with
+        chain: Vec<u32>,
+    },
+    /// Signs a message with an Secp256k1Ecdsa private key.
+    SignSecp256k1Ecdsa {
+        /// The message to sign, hex encoded String
+        message: String,
+        /// Chain to sign the message with
         chain: Vec<u32>,
     },
     /// Sign a transaction

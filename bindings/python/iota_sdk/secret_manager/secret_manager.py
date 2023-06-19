@@ -224,6 +224,14 @@ class SecretManager():
             'chain': chain,
         })
 
+    def sign_secp256k1_ecdsa(self, message: HexStr, chain: List[int]):
+        """Signs a message with an Secp256k1Ecdsa private key.
+        """
+        return self._call_method('signSecp256k1Ecdsa', {
+            'message': message,
+            'chain': chain,
+        })
+
     def sign_transaction(self, prepared_transaction_data):
         """Sign a transaction.
         """

@@ -11,7 +11,7 @@ use crypto::{
     utils,
 };
 use serde::{Deserialize, Serialize};
-use zeroize::{Zeroize, ZeroizeOnDrop};
+use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
 
 use super::{Client, ClientInner};
 use crate::{
@@ -72,14 +72,14 @@ pub fn mnemonic_to_hex_seed(mnemonic: &str) -> Result<String> {
 }
 
 /// Returns a seed for a mnemonic.
-pub fn mnemonic_to_seed(mnemonic: &str) -> Result<Seed> {
+pub fn mnemonic_to_seed(mnemonic: Zeroizing<String>) -> Result<Seed> {
     // trim because empty spaces could create a different seed https://github.com/iotaledger/crypto.rs/issues/125
-    let mnemonic = mnemonic.trim();
+    let mnemonic = mnemonic.as_str().trim();
     // first we check if the mnemonic is valid to give meaningful errors
     verify_mnemonic(mnemonic)?;
-    let mut mnemonic_seed = [0u8; 64];
+    let mut mnemonic_seed = Zeroizing::new([0u8; 64]);
     crypto::keys::bip39::mnemonic_to_seed(mnemonic, "", &mut mnemonic_seed);
-    Ok(Seed::from_bytes(&mnemonic_seed))
+    Ok(Seed::from_bytes(mnemonic_seed.as_ref()))
 }
 
 /// Verifies that a &str is a valid mnemonic.
@@ -169,7 +169,7 @@ impl Client {
     }
 
     /// Returns a seed for a mnemonic.
-    pub fn mnemonic_to_seed(mnemonic: &str) -> Result<Seed> {
+    pub fn mnemonic_to_seed(mnemonic: Zeroizing<String>) -> Result<Seed> {
         mnemonic_to_seed(mnemonic)
     }
 

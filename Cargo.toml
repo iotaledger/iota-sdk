@@ -7,9 +7,7 @@ members = [
 	"bindings/wasm",
 	"cli",
 	"sdk",
-	"sdk/src/wallet/bindings/java/lib/native",
-	"sdk/src/wallet/bindings/nodejs",
-	"sdk/src/wallet/bindings/swift"
+	"sdk/src/wallet/bindings/nodejs"
 ]
 
 [profile.dev]

@@ -15,7 +15,7 @@ use iota_sdk::{
             GetAddressesOptions, PreparedTransactionData,
         },
         constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-        secret::{SecretManager, SignTransactionEssence},
+        secret::{SecretManage, SecretManager},
         Result,
     },
     types::block::{
@@ -42,7 +42,7 @@ use crate::client::{
 async fn all_combined() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(
         // mnemonic needs to be hardcoded to make the ordering deterministic
-        "mirror add nothing long orphan hat this rough scare gallery fork twelve old shrug voyage job table obscure mimic holiday possible proud giraffe fan",
+        "mirror add nothing long orphan hat this rough scare gallery fork twelve old shrug voyage job table obscure mimic holiday possible proud giraffe fan".to_owned(),
     )?;
 
     let protocol_parameters = protocol_parameters();

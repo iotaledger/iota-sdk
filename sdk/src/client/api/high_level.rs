@@ -16,7 +16,7 @@ use crate::{
         Client,
     },
     types::{
-        api::core::dto::LedgerInclusionStateDto,
+        api::core::response::LedgerInclusionState,
         block::{
             address::Bech32Address,
             input::{Input, UtxoInput, INPUT_COUNT_MAX},
@@ -119,7 +119,7 @@ impl Client {
                 let block_metadata = self.get_block_metadata(id).await?;
                 if let Some(inclusion_state) = block_metadata.ledger_inclusion_state {
                     match inclusion_state {
-                        LedgerInclusionStateDto::Included | LedgerInclusionStateDto::NoTransaction => {
+                        LedgerInclusionState::Included | LedgerInclusionState::NoTransaction => {
                             // if original block, request it so we can return it on first position
                             if id == block_id {
                                 let mut included_and_reattached_blocks =
@@ -134,7 +134,7 @@ impl Client {
                         }
                         // only set it as conflicting here and don't return, because another reattached block could
                         // have the included transaction
-                        LedgerInclusionStateDto::Conflicting => conflicting = true,
+                        LedgerInclusionState::Conflicting => conflicting = true,
                     };
                 }
                 // Only reattach or promote latest attachment of the block

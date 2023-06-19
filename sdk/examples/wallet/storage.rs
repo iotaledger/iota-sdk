@@ -1,19 +1,25 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! TODO: Example description
+//! In this example we will verify the integrity of the wallet database.
 //!
-//! `cargo run --example storage --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example storage
+//! ```
 
-use std::time::Instant;
+use std::{env::var, time::Instant};
 
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{account::types::AccountAddress, Account, ClientOptions, Result, Wallet},
 };
+
+// The maximum number of addresses to generate
+const MAX_ADDRESSES_TO_GENERATE: usize = 3;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -21,46 +27,65 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(&std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
 
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_storage_path("wallet-database")
         .finish()
         .await?;
 
     // Get account or create a new one
-    let account_alias = "logger";
-    let account = match wallet.get_account(account_alias.to_string()).await {
-        Ok(account) => account,
-        _ => {
-            // first we'll create an example account and store it
-            wallet
-                .create_account()
-                .with_alias(account_alias.to_string())
-                .finish()
-                .await?
-        }
-    };
+    let account = get_or_create_account(&wallet, "Alice").await?;
 
-    let addresses = account.generate_ed25519_addresses(3, None).await?;
-    let mut bech32_addresses = Vec::new();
-    for address in addresses {
-        bech32_addresses.push(address.into_bech32());
-    }
-    println!("Generated new addresses: {bech32_addresses:#?}");
+    let addresses = generate_max_addresses(&account, MAX_ADDRESSES_TO_GENERATE).await?;
+    let bech32_addresses = addresses
+        .into_iter()
+        .map(|address| address.into_bech32())
+        .collect::<Vec<_>>();
 
-    println!("addresses: {:?}", account.addresses().await?.len());
-    let now = Instant::now();
-    let balance = account.sync(None).await?;
-    println!("Syncing took: {:.2?}", now.elapsed());
-    println!("Balance: {balance:?}");
+    println!("Total address count:\n{:?}", account.addresses().await?.len());
+    println!("ADDRESSES:\n{bech32_addresses:#?}");
+
+    sync_print_balance(&account).await?;
 
     #[cfg(debug_assertions)]
     wallet.verify_integrity().await?;
+
+    println!("Example finished successfully");
+    Ok(())
+}
+
+async fn get_or_create_account(wallet: &Wallet, alias: &str) -> Result<Account> {
+    Ok(if let Ok(account) = wallet.get_account(alias).await {
+        account
+    } else {
+        println!("Creating account '{alias}'");
+        wallet.create_account().with_alias(alias).finish().await?
+    })
+}
+
+async fn generate_max_addresses(account: &Account, max: usize) -> Result<Vec<AccountAddress>> {
+    let alias = account.alias().await;
+    if account.addresses().await?.len() < max {
+        let num_addresses_to_generate = max - account.addresses().await?.len();
+        println!("Generating {num_addresses_to_generate} addresses for account '{alias}'...");
+        account
+            .generate_ed25519_addresses(num_addresses_to_generate as u32, None)
+            .await?;
+    }
+    account.addresses().await
+}
+
+async fn sync_print_balance(account: &Account) -> Result<()> {
+    let alias = account.alias().await;
+    let now = Instant::now();
+    let balance = account.sync(None).await?;
+    println!("{alias}'s account synced in: {:.2?}", now.elapsed());
+    println!("{alias}'s balance:\n{:#?}", balance.base_coin());
     Ok(())
 }

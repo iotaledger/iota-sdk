@@ -109,40 +109,12 @@ async fn account_alias_already_exists() -> Result<()> {
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
-    let _account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
-    assert!(
-        &wallet
-            .create_account()
-            .with_alias("Alice".to_string())
-            .finish()
-            .await
-            .is_err()
-    );
-    assert!(
-        &wallet
-            .create_account()
-            .with_alias("alice".to_string())
-            .finish()
-            .await
-            .is_err()
-    );
-    assert!(
-        &wallet
-            .create_account()
-            .with_alias("ALICE".to_string())
-            .finish()
-            .await
-            .is_err()
-    );
+    let _account = wallet.create_account().with_alias("Alice").finish().await?;
+    assert!(&wallet.create_account().with_alias("Alice").finish().await.is_err());
+    assert!(&wallet.create_account().with_alias("alice").finish().await.is_err());
+    assert!(&wallet.create_account().with_alias("ALICE").finish().await.is_err());
     // Other alias works
-    assert!(
-        &wallet
-            .create_account()
-            .with_alias("Bob".to_string())
-            .finish()
-            .await
-            .is_ok()
-    );
+    assert!(&wallet.create_account().with_alias("Bob").finish().await.is_ok());
 
     tear_down(storage_path)
 }
@@ -153,7 +125,7 @@ async fn account_rename_alias() -> Result<()> {
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     assert_eq!(account.alias().await, "Alice".to_string());
     assert_eq!(account.details().await.alias(), "Alice");
@@ -173,7 +145,7 @@ async fn account_first_address_exists() -> Result<()> {
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     // When the account is generated, the first public address also gets generated and added to it
     assert_eq!(account.addresses().await?.len(), 1);
@@ -186,6 +158,8 @@ async fn account_first_address_exists() -> Result<()> {
 #[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn account_creation_stronghold() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/account_creation_stronghold";
     setup(storage_path)?;
 

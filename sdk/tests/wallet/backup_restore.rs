@@ -22,6 +22,8 @@ use crate::wallet::common::{setup, tear_down, NODE_LOCAL, NODE_OTHER};
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore";
     setup(storage_path)?;
 
@@ -45,7 +47,7 @@ async fn backup_and_restore() -> Result<()> {
         .finish()
         .await?;
 
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
@@ -115,13 +117,15 @@ async fn backup_and_restore() -> Result<()> {
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold and MnemonicSecretManager
 async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore_mnemonic_secret_manager";
     setup(storage_path)?;
 
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(
-        "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak",
+        "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_owned(),
     )?;
 
     let wallet = Wallet::builder()
@@ -132,7 +136,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
         .finish()
         .await?;
 
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     let stronghold_password = "some_hopefully_secure_password".to_owned();
 
@@ -148,7 +152,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
     // restore from backup
 
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(
-        "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak",
+        "inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_owned(),
     )?;
 
     let restore_wallet = Wallet::builder()
@@ -196,6 +200,8 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore_different_coin_type() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore_different_coin_type";
     setup(storage_path)?;
 
@@ -220,7 +226,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
         .await?;
 
     // Create one account
-    wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
@@ -279,6 +285,8 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore_same_coin_type() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore_same_coin_type";
     setup(storage_path)?;
 
@@ -303,7 +311,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
         .await?;
 
     // Create one account
-    let account_before_backup = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account_before_backup = wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
@@ -360,6 +368,8 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 // Backup and restore with Stronghold
 async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore_different_coin_type_dont_ignore";
     setup(storage_path)?;
 
@@ -384,7 +394,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
         .await?;
 
     // Create one account
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
@@ -446,6 +456,8 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
 #[tokio::test]
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
     let storage_path = "test-storage/backup_and_restore_bech32_hrp_mismatch";
     setup(storage_path)?;
 
@@ -469,7 +481,7 @@ async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
         .finish()
         .await?;
 
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(

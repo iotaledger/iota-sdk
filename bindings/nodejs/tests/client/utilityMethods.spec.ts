@@ -1,6 +1,12 @@
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import { describe, it } from '@jest/globals';
+import 'reflect-metadata';
+import 'dotenv/config';
+
 import { Client, Ed25519Address, SecretManager, Utils } from '../../';
 import '../customMatchers';
-import 'dotenv/config';
 
 const offlineClient = new Client({});
 
@@ -48,10 +54,7 @@ describe('Client utility methods', () => {
         const hexPublicKey =
             '0x2baaf3bca8ace9f862e60184bd3e79df25ff230f7eaaa4c7f03daa9833ba854a';
 
-        const address = Utils.hexPublicKeyToBech32Address(
-            hexPublicKey,
-            'rms',
-        );
+        const address = Utils.hexPublicKeyToBech32Address(hexPublicKey, 'rms');
 
         expect(address).toBeValidAddress();
     });
@@ -120,18 +123,7 @@ describe('Client utility methods', () => {
             [44, 4218, 0, 0, 0],
         );
 
-        const bech32Address = Utils.hexPublicKeyToBech32Address(
-            signature.publicKey,
-            'rms',
-        );
-
-        const pubKeyHash = Utils.bech32ToHex(bech32Address);
-
-        const validSignature = Utils.verifyEd25519Signature(
-            signature,
-            message,
-            new Ed25519Address(pubKeyHash),
-        );
+        const validSignature = Utils.verifyEd25519Signature(signature, message);
         expect(validSignature).toBeTruthy();
     });
 });

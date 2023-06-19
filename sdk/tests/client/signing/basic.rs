@@ -9,7 +9,7 @@ use iota_sdk::{
             PreparedTransactionData,
         },
         constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-        secret::{SecretManager, SignTransactionEssence},
+        secret::{SecretManage, SecretManager},
         Client, Result,
     },
     types::block::{
@@ -30,7 +30,7 @@ use crate::client::{build_inputs, build_outputs, Build::Basic};
 
 #[tokio::test]
 async fn single_ed25519_unlock() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_ed25519_addresses(
@@ -110,7 +110,7 @@ async fn single_ed25519_unlock() -> Result<()> {
 
 #[tokio::test]
 async fn ed25519_reference_unlocks() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_ed25519_addresses(
@@ -224,7 +224,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
 
 #[tokio::test]
 async fn two_signature_unlocks() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_ed25519_addresses(

@@ -11,7 +11,7 @@ use iota_sdk::{
             PreparedTransactionData,
         },
         constants::{HD_WALLET_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-        secret::{SecretManager, SignTransactionEssence},
+        secret::{SecretManage, SecretManager},
         Client, Result,
     },
     types::block::{
@@ -36,7 +36,7 @@ use crate::client::{
 
 #[tokio::test]
 async fn nft_reference_unlocks() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(&Client::generate_mnemonic()?)?;
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let bech32_address_0 = &secret_manager
         .generate_ed25519_addresses(

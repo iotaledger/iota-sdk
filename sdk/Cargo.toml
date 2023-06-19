@@ -1,6 +1,6 @@
 [package]
 name = "iota-sdk"
-version = "0.3.0"
+version = "0.4.0"
 authors = [ "IOTA Stiftung" ]
 edition = "2021"
 description = "The IOTA SDK provides developers with a seamless experience to develop on IOTA by providing account abstractions and clients to interact with node APIs."
@@ -40,6 +40,7 @@ backtrace = { version = "0.3.67", default-features = false, optional = true }
 derive_builder = { version = "0.12.0", default-features = false, optional = true }
 fern-logger = { version = "0.5.0", default-features = false, optional = true }
 futures = { version = "0.3.28", default-features = false, features = [ "thread-pool" ], optional = true }
+heck = { version = "0.4.1", default-features = false, optional = true }
 instant = { version = "0.1.12", default-features = false, optional = true }
 iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
 # iota_stronghold = { version = "1.0.5", default-features = false, optional = true }
@@ -75,6 +76,7 @@ iota-sdk = { path = ".", default-features = false, features = [ "rand" ] }
 
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
+tokio = { version = "1.28.2", default-features = false, features = [ "macros", "rt-multi-thread", "time", "sync", "fs" ] }
 
 [features]
 default = [ "client", "wallet", "tls" ]
@@ -87,9 +89,9 @@ participation = [ "storage" ]
 pow = [ "std", "num_cpus", "iota-crypto/curl-p" ]
 rand = [ "dep:rand" ]
 rocksdb = [ "dep:rocksdb", "storage" ]
-serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std" ]
+serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std", "zeroize?/serde" ]
 std = [ "packable/std", "prefix-hex/std", "primitive-types/std", "bech32/std", "bitflags/std", "rand?/std_rng", "regex?/std", "backtrace?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std" ]
-storage = [ "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell" ]
+storage = [ "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
 stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell" ]
 tls = [ "reqwest?/rustls-tls", "rumqttc?/use-rustls" ]
 
@@ -158,6 +160,23 @@ required-features = [ "rocksdb", "stronghold" ]
 [[example]]
 name = "simple_transaction"
 path = "examples/how_tos/simple_transaction/simple_transaction.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+# Advanced Transactions Examples
+
+[[example]]
+name = "send_micro_transaction"
+path = "examples/how_tos/advanced_transactions/send_micro_transaction.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "advanced_transaction"
+path = "examples/how_tos/advanced_transactions/advanced_transaction.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "claim_transaction"
+path = "examples/how_tos/advanced_transactions/claim_transaction.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 # Outputs
@@ -531,11 +550,6 @@ path = "examples/wallet/offline_signing/3_send_transaction.rs"
 required-features = [ "wallet", "storage" ]
 
 [[example]]
-name = "send_micro_transaction"
-path = "examples/wallet/06_send_micro_transaction.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
 name = "send_native_tokens"
 path = "examples/wallet/07_send_native_tokens.rs"
 required-features = [ "wallet", "stronghold" ]
@@ -631,18 +645,13 @@ path = "examples/wallet/output_consolidation.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
-name = "ping"
-path = "examples/wallet/ping.rs"
-required-features = [ "wallet", "storage" ]
-
-[[example]]
-name = "pong"
-path = "examples/wallet/pong.rs"
-required-features = [ "wallet", "storage" ]
-
-[[example]]
 name = "recover_accounts"
 path = "examples/wallet/recover_accounts.rs"
+required-features = [ "wallet" ]
+
+[[example]]
+name = "spammer"
+path = "examples/wallet/spammer.rs"
 required-features = [ "wallet" ]
 
 [[example]]
@@ -654,11 +663,6 @@ required-features = [ "wallet" ]
 name = "storage"
 path = "examples/wallet/storage.rs"
 required-features = [ "wallet", "storage" ]
-
-[[example]]
-name = "threads"
-path = "examples/wallet/threads.rs"
-required-features = [ "wallet" ]
 
 [[example]]
 name = "update_alias_output"

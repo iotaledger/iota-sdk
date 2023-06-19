@@ -6,15 +6,11 @@ use std::collections::HashMap;
 
 use tokio::sync::RwLock;
 
-use crate::client::storage::{StorageAdapter, StorageAdapterId};
+use crate::client::storage::StorageAdapter;
 
 /// A storage adapter that stores data in memory.
 #[derive(Debug, Default)]
 pub struct Memory(Arc<RwLock<HashMap<String, Vec<u8>>>>);
-
-impl StorageAdapterId for Memory {
-    const ID: &'static str = "Memory";
-}
 
 #[async_trait::async_trait]
 impl StorageAdapter for Memory {

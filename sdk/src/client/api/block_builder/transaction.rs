@@ -8,7 +8,7 @@ use packable::PackableExt;
 use crate::{
     client::{
         api::{types::PreparedTransactionData, ClientBlockBuilder},
-        secret::{types::InputSigningData, SignTransactionEssence},
+        secret::{types::InputSigningData, SecretManage},
         Error, Result,
     },
     types::block::{

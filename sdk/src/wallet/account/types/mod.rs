@@ -14,9 +14,7 @@ use serde::{Deserialize, Deserializer, Serialize};
 
 pub use self::{
     address::{AccountAddress, AddressWithUnspentOutputs},
-    balance::{
-        Balance, BalanceDto, BaseCoinBalance, NativeTokensBalance, NativeTokensBalanceDto, RequiredStorageDeposit,
-    },
+    balance::{Balance, BaseCoinBalance, NativeTokensBalance, RequiredStorageDeposit},
 };
 use crate::{
     client::{constants::HD_WALLET_TYPE, secret::types::InputSigningData},

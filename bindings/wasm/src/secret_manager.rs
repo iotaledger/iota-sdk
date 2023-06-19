@@ -25,7 +25,7 @@ pub struct SecretManagerMethodHandler {
 #[allow(non_snake_case)]
 pub fn create_secret_manager(options: String) -> Result<SecretManagerMethodHandler, JsValue> {
     let secret_manager_dto = serde_json::from_str::<SecretManagerDto>(&options).map_err(|err| err.to_string())?;
-    let secret_manager = SecretManager::try_from(&secret_manager_dto).map_err(|err| err.to_string())?;
+    let secret_manager = SecretManager::try_from(secret_manager_dto).map_err(|err| err.to_string())?;
 
     Ok(SecretManagerMethodHandler {
         secret_manager: Arc::new(RwLock::new(secret_manager)),

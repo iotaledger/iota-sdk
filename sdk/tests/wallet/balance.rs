@@ -7,50 +7,10 @@ use iota_sdk::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         BasicOutputBuilder, UnlockCondition,
     },
-    wallet::{
-        account::types::{Balance, BalanceDto},
-        Result,
-    },
+    wallet::{account::types::Balance, Result},
 };
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
-
-#[test]
-fn balance_to_dto() {
-    let balance = Balance::rand_mock();
-    let balance_dto = BalanceDto::from(&balance);
-
-    assert_eq!(balance.base_coin().total(), balance_dto.base_coin.total());
-    assert_eq!(balance.base_coin().available(), balance_dto.base_coin.available());
-    #[cfg(feature = "participation")]
-    assert_eq!(balance.base_coin().voting_power(), balance_dto.base_coin.voting_power());
-
-    assert_eq!(
-        balance.required_storage_deposit().alias(),
-        balance_dto.required_storage_deposit.alias()
-    );
-    assert_eq!(
-        balance.required_storage_deposit().basic(),
-        balance_dto.required_storage_deposit.basic()
-    );
-    assert_eq!(
-        balance.required_storage_deposit().foundry(),
-        balance_dto.required_storage_deposit.foundry()
-    );
-    assert_eq!(
-        balance.required_storage_deposit().nft(),
-        balance_dto.required_storage_deposit.nft()
-    );
-
-    assert_eq!(balance.native_tokens().len(), balance_dto.native_tokens.len());
-    assert_eq!(balance.nfts().len(), balance_dto.nfts.len());
-    assert_eq!(balance.aliases().len(), balance_dto.aliases.len());
-    assert_eq!(balance.foundries().len(), balance_dto.foundries.len());
-    assert_eq!(
-        balance.potentially_locked_outputs().len(),
-        balance_dto.potentially_locked_outputs.len()
-    );
-}
 
 #[test]
 fn balance_add_assign() {

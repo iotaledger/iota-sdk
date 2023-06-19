@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::vec::Vec;
-use core::ops::RangeInclusive;
+use core::{ops::RangeInclusive, str::FromStr};
 
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix};
 
@@ -28,6 +28,14 @@ impl TryFrom<Vec<u8>> for MetadataFeature {
             .try_into()
             .map(Self)
             .map_err(Error::InvalidMetadataFeatureLength)
+    }
+}
+
+impl FromStr for MetadataFeature {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::new(prefix_hex::decode::<Vec<u8>>(s).map_err(Error::Hex)?)
     }
 }
 

@@ -145,11 +145,11 @@ class Account:
             }
         )
 
-    def get_outputs_with_additional_unlock_conditions(self, outputs_to_claim: List[OutputId]):
+    def claimable_outputs(self, outputs_to_claim: List[OutputId]):
         """Get outputs with additional unlock conditions.
         """
         return self._call_account_method(
-            'getOutputsWithAdditionalUnlockConditions', {
+            'claimableOutputs', {
                 'outputsToClaim': outputs_to_claim
             }
         )
@@ -235,7 +235,7 @@ class Account:
         prepared = self._call_account_method(
             'prepareDecreaseNativeTokenSupply', {
                 'tokenId': token_id,
-                'meltAmount': melt_amount,
+                'meltAmount': hex(melt_amount),
                 'options': options
             }
         )
@@ -247,7 +247,7 @@ class Account:
         prepared = self._call_account_method(
             'prepareIncreaseNativeTokenSupply', {
                 'tokenId': token_id,
-                'mintAmount': mint_amount,
+                'mintAmount': hex(mint_amount),
                 'options': options
             }
         )

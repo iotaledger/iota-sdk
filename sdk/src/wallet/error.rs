@@ -79,17 +79,6 @@ pub enum Error {
     /// Nft not found in unspent outputs
     #[error("nft not found in unspent outputs")]
     NftNotFoundInUnspentOutputs,
-    // TODO more precise error
-    /// Voting error
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    #[error("voting error {0}")]
-    Voting(String),
-    /// Participation error
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    #[error("participation error {0}")]
-    Participation(#[from] crate::types::api::plugins::participation::error::Error),
     /// No outputs available for consolidating
     #[error(
         "nothing to consolidate: available outputs: {available_outputs}, consolidation threshold: {consolidation_threshold}"
@@ -100,6 +89,14 @@ pub enum Error {
         /// The consolidation threshold.
         consolidation_threshold: usize,
     },
+    /// Errors not covered by other variants.
+    #[error(transparent)]
+    Other(#[from] Box<dyn std::error::Error + Send + Sync>),
+    /// Participation error
+    #[cfg(feature = "participation")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    #[error("participation error {0}")]
+    Participation(#[from] crate::types::api::plugins::participation::error::Error),
     /// Storage access error.
     #[error("error accessing storage: {0}")]
     Storage(String),
@@ -112,6 +109,12 @@ pub enum Error {
     /// Transaction not found
     #[error("transaction {0} not found")]
     TransactionNotFound(TransactionId),
+    // TODO more precise error
+    /// Voting error
+    #[cfg(feature = "participation")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    #[error("voting error {0}")]
+    Voting(String),
 }
 
 // Serialize type with Display error

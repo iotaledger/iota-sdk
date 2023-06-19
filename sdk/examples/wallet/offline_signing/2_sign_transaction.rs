@@ -3,13 +3,12 @@
 
 //! In this example we sign the prepared transaction.
 //!
-//! `cargo run --example 2_sign_transaction --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example 2_sign_transaction
+//! ```
 
-use std::{
-    fs::File,
-    io::{prelude::*, BufWriter},
-    path::Path,
-};
+use std::env::var;
 
 use iota_sdk::{
     client::{
@@ -17,14 +16,19 @@ use iota_sdk::{
             transaction::validate_transaction_payload_length, PreparedTransactionData, PreparedTransactionDataDto,
             SignedTransactionData, SignedTransactionDataDto,
         },
-        secret::{stronghold::StrongholdSecretManager, SecretManager, SignTransactionEssence},
+        secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManager},
     },
-    types::block::{output::RentStructureBuilder, payload::TransactionPayload, protocol::ProtocolParameters},
+    types::block::{output::RentStructure, payload::TransactionPayload, protocol::ProtocolParameters},
     wallet::Result,
 };
+use tokio::{
+    fs::File,
+    io::{AsyncReadExt, AsyncWriteExt, BufReader, BufWriter},
+};
 
-const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/wallet/offline_signing/prepared_transaction.json";
-const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/wallet/offline_signing/signed_transaction.json";
+const STRONGHOLD_SNAPSHOT_PATH: &str = "./examples/wallet/offline_signing/example.stronghold";
+const PREPARED_TRANSACTION_FILE_PATH: &str = "./examples/wallet/offline_signing/example.prepared_transaction.json";
+const SIGNED_TRANSACTION_FILE_PATH: &str = "./examples/wallet/offline_signing/example.signed_transaction.json";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -33,8 +37,8 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let secret_manager = StrongholdSecretManager::builder()
-        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
-        .build("examples/wallet/offline_signing/offline_signing.stronghold")?;
+        .password(var("STRONGHOLD_PASSWORD").unwrap())
+        .build(STRONGHOLD_SNAPSHOT_PATH)?;
 
     // Load snapshot file
     secret_manager.read_stronghold_snapshot().await?;
@@ -47,17 +51,15 @@ async fn main() -> Result<()> {
         "smr",
         1500,
         15,
-        RentStructureBuilder::new()
-            .byte_cost(100)
-            .byte_factor_key(1)
-            .byte_factor_data(10)
-            .finish(),
+        RentStructure::default()
+            .with_byte_cost(100)
+            .with_byte_factor_key(1)
+            .with_byte_factor_data(10),
         1813620509061365,
     )
     .unwrap();
 
-    let prepared_transaction_data =
-        read_prepared_transaction_from_file(PREPARED_TRANSACTION_FILE_NAME, &protocol_parameters)?;
+    let prepared_transaction_data = read_prepared_transaction_from_file(&protocol_parameters).await?;
 
     // Signs prepared transaction offline.
     let unlocks = SecretManager::Stronghold(secret_manager)
@@ -74,36 +76,30 @@ async fn main() -> Result<()> {
 
     println!("Signed transaction.");
 
-    write_signed_transaction_to_file(SIGNED_TRANSACTION_FILE_NAME, &signed_transaction_data)?;
+    write_signed_transaction_to_file(&signed_transaction_data).await?;
 
     Ok(())
 }
 
-fn read_prepared_transaction_from_file<P: AsRef<Path>>(
-    path: P,
+async fn read_prepared_transaction_from_file(
     protocol_parameters: &ProtocolParameters,
 ) -> Result<PreparedTransactionData> {
-    let mut file = File::open(&path)?;
+    let mut file = BufReader::new(File::open(PREPARED_TRANSACTION_FILE_PATH).await?);
     let mut json = String::new();
-    file.read_to_string(&mut json)?;
+    file.read_to_string(&mut json).await?;
 
     Ok(PreparedTransactionData::try_from_dto(
-        &serde_json::from_str::<PreparedTransactionDataDto>(&json)?,
+        serde_json::from_str::<PreparedTransactionDataDto>(&json)?,
         protocol_parameters,
     )?)
 }
 
-fn write_signed_transaction_to_file<P: AsRef<Path>>(
-    path: P,
-    signed_transaction_data: &SignedTransactionData,
-) -> Result<()> {
+async fn write_signed_transaction_to_file(signed_transaction_data: &SignedTransactionData) -> Result<()> {
     let dto = SignedTransactionDataDto::from(signed_transaction_data);
     let json = serde_json::to_string_pretty(&dto)?;
-    let mut file = BufWriter::new(File::create(path)?);
-
-    println!("{json}");
-
-    file.write_all(json.as_bytes())?;
-
+    let mut file = BufWriter::new(File::create(SIGNED_TRANSACTION_FILE_PATH).await?);
+    println!("example.signed_transaction.json:\n{json}");
+    file.write_all(json.as_bytes()).await?;
+    file.flush().await?;
     Ok(())
 }

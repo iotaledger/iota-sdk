@@ -22,7 +22,7 @@ pub struct SecretManager {
 #[pyfunction]
 pub fn create_secret_manager(options: String) -> Result<SecretManager> {
     let secret_manager_dto = serde_json::from_str::<SecretManagerDto>(&options)?;
-    let secret_manager = RustSecretManager::try_from(&secret_manager_dto)?;
+    let secret_manager = RustSecretManager::try_from(secret_manager_dto)?;
     Ok(SecretManager {
         secret_manager: Arc::new(RwLock::new(secret_manager)),
     })
