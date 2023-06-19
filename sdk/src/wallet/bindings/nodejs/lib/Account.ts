@@ -419,8 +419,7 @@ export class Account {
      * Verifies a message with an Secp256k1Ecdsa public key and signature.
      */
     async verifySecp256k1EcdsaSignature(
-        publicKey: HexEncodedString,
-        signature: HexEncodedString,
+        signature: Secp256k1EcdsaSignature,
         message: HexEncodedString,
     ): Promise<boolean> {
         const response = await this.messageHandler.callAccountMethod(
@@ -428,8 +427,8 @@ export class Account {
             {
                 name: 'verifySecp256k1EcdsaSignature',
                 data: {
-                    publicKey,
-                    signature,
+                    publicKey: signature.publicKey,
+                    signature: signature.signature,
                     message,
                 },
             },
