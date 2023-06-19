@@ -46,7 +46,7 @@ async function run() {
         ).requestFundsFromFaucet(faucetUrl, aliasAddress);
         console.log(faucetResponse);
 
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 10000));
 
         const syncOptions = {
             alias: {

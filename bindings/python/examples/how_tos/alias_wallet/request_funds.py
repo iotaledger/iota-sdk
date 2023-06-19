@@ -25,7 +25,7 @@ alias_address = Utils.alias_id_to_bech32(alias_id, wallet.get_client().get_bech3
 faucet_response = wallet.get_client().request_funds_from_faucet(FAUCET_URL, alias_address)
 print(faucet_response)
 
-time.sleep(5)
+time.sleep(10)
 
 sync_options = {
     'alias': {

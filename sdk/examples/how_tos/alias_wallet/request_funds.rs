@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
 
     println!("{faucet_response}");
 
-    tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+    tokio::time::sleep(std::time::Duration::from_secs(10)).await;
 
     let sync_options = SyncOptions {
         alias: AliasSyncOptions {
