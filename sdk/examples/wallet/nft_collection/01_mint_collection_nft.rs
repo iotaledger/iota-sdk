@@ -4,8 +4,10 @@
 //! In this example we will mint some collection NFTs with issuer feature.
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_account` example. You have to provide the issuer nft id
-//! that you created by running the `mint_issuer_nft` example!
+//! running the `create_account` example.
+//!
+//! You have to provide the ISSUER NFT ID that you created by running the
+//! `mint_issuer_nft` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh

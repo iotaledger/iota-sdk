@@ -8,12 +8,17 @@
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
 //! running the `create_account` example!
 //!
+//! You need to provide a TOKEN ID that is available in the account. The foundry
+//! output which minted it needs to be available as well. You can check this by
+//! running the `get_balance` example. You can mint a new native token by running
+//! the `mint_native_token` example.
+//!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example burn_native_token
+//! cargo run --release --all-features --example burn_native_token [TOKEN ID]
 //! ```
 
-use std::{env::var, str::FromStr};
+use std::env;
 
 use iota_sdk::{
     types::block::output::{NativeToken, TokenId},
@@ -21,10 +26,6 @@ use iota_sdk::{
     U256,
 };
 
-// The native token id. Replace it with a TokenId that is available in the account, the foundry output which minted it,
-// also needs to be available. You can check this by running the `get_balance` example. You can mint a new native token
-// by running the `mint_native_token` example.
-const TOKEN_ID: &str = "0x08847bd287c912fadedb6bf38900bda9f2d377b75b2a0bece8738699f56ebca4130100000000";
 // The minimum available native token amount to search for in the account
 const MIN_AVAILABLE_AMOUNT: u64 = 11;
 // The amount of the native token to burn
@@ -32,22 +33,20 @@ const BURN_AMOUNT: u64 = 1;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    if TOKEN_ID == "0x08847bd287c912fadedb6bf38900bda9f2d377b75b2a0bece8738699f56ebca4130100000000" {
-        println!("You need to change the TOKEN_ID constant before you can run this example successfully!");
-        return Ok(());
-    }
+    let token_id = env::args()
+        .nth(1)
+        .expect("missing example argument: TOKEN ID")
+        .parse::<TokenId>()?;
 
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
     let alias = "Alice";
     let account = wallet.get_account(alias.to_string()).await?;
-
-    let token_id = TokenId::from_str(TOKEN_ID)?;
 
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
@@ -59,7 +58,7 @@ async fn main() -> Result<()> {
 
         // Set the stronghold password
         wallet
-            .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
+            .set_stronghold_password(env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
         println!("Sending the burning transaction...");
@@ -74,7 +73,7 @@ async fn main() -> Result<()> {
             .await?;
         println!(
             "Transaction included: {}/block/{}",
-            var("EXPLORER_URL").unwrap(),
+            env::var("EXPLORER_URL").unwrap(),
             block_id
         );
         println!(
@@ -97,7 +96,7 @@ async fn main() -> Result<()> {
         }
     } else {
         println!(
-            "Native token '{TOKEN_ID}' doesn't exist or there's not at least '{MIN_AVAILABLE_AMOUNT}' tokens of it in account '{alias}'"
+            "Native token '{token_id}' doesn't exist or there's not at least '{MIN_AVAILABLE_AMOUNT}' tokens of it in account '{alias}'"
         );
     }
 
