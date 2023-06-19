@@ -300,7 +300,7 @@ ___
 
 ▸ `Static` **verifySecp256k1EcdsaSignature**(`publicKey`, `signature`, `message`): `boolean`
 
-Verifies the Secp256k1Ecdsa Signature for a message.
+Verifies the Secp256k1Ecdsa Signature against a message.
 
 #### Parameters
 
