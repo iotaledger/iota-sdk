@@ -435,6 +435,11 @@ path = "examples/client/client_config.rs"
 required-features = [ "client" ]
 
 [[example]]
+name = "custom_remainder_address"
+path = "examples/client/custom_remainder_address.rs"
+required-features = [ "client" ]
+
+[[example]]
 name = "get_block"
 path = "examples/client/get_block.rs"
 required-features = [ "client" ]

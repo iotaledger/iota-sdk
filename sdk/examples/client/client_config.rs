@@ -35,7 +35,8 @@ async fn main() -> Result<()> {
                 }
              }"#,
         )?
-        .finish().await?;
+        .finish()
+        .await?;
 
     let info = client.get_info().await?;
     println!("{info:#?}");
