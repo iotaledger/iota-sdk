@@ -30,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::getOutputsWithAdditionalUnlockConditions` renamed to `claimableOutputs`;
 - Rename `Account::signEvm` to `signSecp256k1Ecdsa` and `EvmSignature` to `Secp256k1EcdsaSignature`;
 
+### Removed
+
+- `Utils::verifyEd25519Signature`'s `address` parameter;
+
 ## 1.0.0-rc.0 - 2023-06-15
 
 Initial release of the Node.js SDK bindings.
