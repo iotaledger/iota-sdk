@@ -81,7 +81,7 @@ Generate new addresses.
 ### get\_outputs\_with\_additional\_unlock\_conditions
 
 ```python
-def get_outputs_with_additional_unlock_conditions(
+def claimable_outputs(
         outputs_to_claim: List[OutputId])
 ```
 

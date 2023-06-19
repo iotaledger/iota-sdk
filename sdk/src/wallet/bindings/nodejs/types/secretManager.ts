@@ -57,7 +57,18 @@ export type SecretManager =
     | StrongholdSecretManager
     | PlaceholderSecretManager;
 
-export interface EvmSignature {
+export interface Secp256k1EcdsaSignature {
+    /**
+     * The public key.
+     */
+    publicKey: HexEncodedString;
+    /**
+     * The signature.
+     */
+    signature: HexEncodedString;
+}
+
+export interface Ed25519Signature {
     /**
      * The public key.
      */

@@ -18,9 +18,9 @@ blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rall
 Then create a new account
 
 ```
-./wallet new ALIAS
+./wallet new-account ALIAS
 // Example:
-./wallet new Alice
+./wallet new-account Alice
 ```
 
 If you already created an account, you can just run the CLI without args to get to the account selector:
@@ -29,10 +29,10 @@ If you already created an account, you can just run the CLI without args to get 
 ./wallet
 ```
 
-Alternatively, you can select an existing account by it's alias, to use with the `account` command:
+Alternatively, you can select an existing account by its alias:
 
 ```
-./wallet account Alice
+./wallet Alice
 ```
 
 ## Commands

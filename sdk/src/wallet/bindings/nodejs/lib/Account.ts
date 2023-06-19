@@ -33,7 +33,8 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
     GenerateAddressesOptions,
-    EvmSignature,
+    Secp256k1EcdsaSignature,
+    Ed25519Signature,
 } from '../types';
 import type { SignedTransactionEssence } from '../types/signedTransactionEssence';
 import type {
@@ -395,16 +396,57 @@ export class Account {
     }
 
     /**
-     * Signs a message with an Evm private key.
+     * Verifies an ed25519 signature against a message.
      */
-    async signEvm(
+    async verifyEd25519Signature(
+        signature: Ed25519Signature,
         message: HexEncodedString,
-        chain: number[],
-    ): Promise<EvmSignature> {
+    ): Promise<boolean> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'signEvm',
+                name: 'verifyEd25519Signature',
+                data: {
+                    signature,
+                    message,
+                },
+            },
+        );
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Verifies a Secp256k1Ecdsa signature against a message.
+     */
+    async verifySecp256k1EcdsaSignature(
+        signature: Secp256k1EcdsaSignature,
+        message: HexEncodedString,
+    ): Promise<boolean> {
+        const response = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'verifySecp256k1EcdsaSignature',
+                data: {
+                    publicKey: signature.publicKey,
+                    signature: signature.signature,
+                    message,
+                },
+            },
+        );
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Signs a message with a Secp256k1Ecdsa private key.
+     */
+    async signSecp256k1Ecdsa(
+        message: HexEncodedString,
+        chain: number[],
+    ): Promise<Secp256k1EcdsaSignature> {
+        const response = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'signSecp256k1Ecdsa',
                 data: {
                     message,
                     chain,
@@ -528,13 +570,11 @@ export class Account {
      * @param outputs The type of outputs to claim.
      * @returns The output IDs of the unlockable outputs.
      */
-    async getOutputsWithAdditionalUnlockConditions(
-        outputs: OutputsToClaim,
-    ): Promise<string[]> {
+    async claimableOutputs(outputs: OutputsToClaim): Promise<string[]> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'getOutputsWithAdditionalUnlockConditions',
+                name: 'claimableOutputs',
                 data: {
                     outputsToClaim: outputs,
                 },

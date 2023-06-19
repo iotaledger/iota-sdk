@@ -6,7 +6,7 @@ import type {
     __StoreMnemonicMethod__,
     __SignatureUnlockMethod__,
     __SignEd25519Method__,
-    __SignEvmMethod__,
+    __SignSecp256k1EcdsaMethod__,
 } from './secret-manager';
 
 export type __SecretManagerMethods__ =
@@ -17,4 +17,4 @@ export type __SecretManagerMethods__ =
     | __SignatureUnlockMethod__
     | __StoreMnemonicMethod__
     | __SignEd25519Method__
-    | __SignEvmMethod__;
+    | __SignSecp256k1EcdsaMethod__;

@@ -13,7 +13,7 @@ use crate::{
             unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
         },
-        ConvertTo, Error as BlockError,
+        ConvertTo,
     },
     wallet::{
         account::{operations::transaction::Transaction, Account, TransactionOptions},
@@ -34,15 +34,18 @@ pub struct MintNftParams {
     sender: Option<Bech32Address>,
     /// NFT metadata feature.
     #[getset(get = "pub")]
+    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     metadata: Option<Vec<u8>>,
     /// NFT tag feature.
     #[getset(get = "pub")]
+    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     tag: Option<Vec<u8>>,
     /// NFT issuer feature.
     #[getset(get = "pub")]
     issuer: Option<Bech32Address>,
     /// NFT immutable metadata feature.
     #[getset(get = "pub")]
+    #[serde(with = "crate::utils::serde::option_prefix_hex_vec")]
     immutable_metadata: Option<Vec<u8>>,
 }
 
@@ -106,51 +109,6 @@ impl MintNftParams {
     }
 }
 
-/// Dto for MintNftParams.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct MintNftParamsDto {
-    /// Bech32 encoded address to which the NFT will be minted. Default will use the
-    /// first address of the account.
-    pub address: Option<Bech32Address>,
-    /// NFT sender feature, bech32 encoded address.
-    pub sender: Option<Bech32Address>,
-    /// NFT metadata feature, hex encoded bytes.
-    pub metadata: Option<String>,
-    /// NFT tag feature, hex encoded bytes.
-    pub tag: Option<String>,
-    /// NFT issuer feature, bech32 encoded address.
-    pub issuer: Option<Bech32Address>,
-    /// Immutable NFT metadata, hex encoded bytes.
-    pub immutable_metadata: Option<String>,
-}
-
-impl TryFrom<MintNftParamsDto> for MintNftParams {
-    type Error = crate::wallet::Error;
-
-    fn try_from(value: MintNftParamsDto) -> crate::wallet::Result<Self> {
-        Ok(Self {
-            address: value.address,
-            sender: value.sender,
-            metadata: value
-                .metadata
-                .map(|metadata| prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("metadata")))
-                .transpose()?,
-            tag: value
-                .tag
-                .map(|tag| prefix_hex::decode(tag).map_err(|_| BlockError::InvalidField("tag")))
-                .transpose()?,
-            issuer: value.issuer,
-            immutable_metadata: value
-                .immutable_metadata
-                .map(|metadata| {
-                    prefix_hex::decode(metadata).map_err(|_| BlockError::InvalidField("immutable_metadata"))
-                })
-                .transpose()?,
-        })
-    }
-}
-
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
@@ -185,8 +143,10 @@ where
     where
         I::IntoIter: Send,
     {
-        let prepared_transaction = self.prepare_mint_nfts(params, options).await?;
-        self.sign_and_submit_transaction(prepared_transaction).await
+        let options = options.into();
+        let prepared_transaction = self.prepare_mint_nfts(params, options.clone()).await?;
+
+        self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Function to prepare the transaction for

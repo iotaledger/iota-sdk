@@ -224,10 +224,10 @@ class SecretManager():
             'chain': chain,
         })
 
-    def sign_evm(self, message: HexStr, chain: List[int]):
-        """Signs a message with an Evm private key.
+    def sign_secp256k1_ecdsa(self, message: HexStr, chain: List[int]):
+        """Signs a message with an Secp256k1Ecdsa private key.
         """
-        return self._call_method('signEvm', {
+        return self._call_method('signSecp256k1Ecdsa', {
             'message': message,
             'chain': chain,
         })

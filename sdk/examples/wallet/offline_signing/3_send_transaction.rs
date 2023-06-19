@@ -41,7 +41,9 @@ async fn main() -> Result<()> {
     let signed_transaction_data = read_signed_transaction_from_file(account.client()).await?;
 
     // Sends offline signed transaction online.
-    let transaction = account.submit_and_store_transaction(signed_transaction_data).await?;
+    let transaction = account
+        .submit_and_store_transaction(signed_transaction_data, None)
+        .await?;
     wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
     Ok(())

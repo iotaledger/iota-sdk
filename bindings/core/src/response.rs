@@ -41,7 +41,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            types::{AccountAddress, AddressWithUnspentOutputs, BalanceDto, OutputDataDto, TransactionDto},
+            types::{AccountAddress, AddressWithUnspentOutputs, Balance, OutputDataDto, TransactionDto},
             PreparedMintTokenTransactionDto,
         },
         message_interface::dtos::AccountDetailsDto,
@@ -102,9 +102,9 @@ pub enum Response {
     /// - [`SignEd25519`](crate::method::SecretManagerMethod::SignEd25519)
     Ed25519Signature(Ed25519SignatureDto),
     /// Response for:
-    /// - [`SignEvm`](crate::method::SecretManagerMethod::SignEvm)
+    /// - [`SignSecp256k1Ecdsa`](crate::method::SecretManagerMethod::SignSecp256k1Ecdsa)
     #[serde(rename_all = "camelCase")]
-    EvmSignature { public_key: String, signature: String },
+    Secp256k1EcdsaSignature { public_key: String, signature: String },
     /// Response for:
     /// - [`UnhealthyNodes`](crate::method::ClientMethod::UnhealthyNodes)
     #[cfg(not(target_family = "wasm"))]
@@ -313,7 +313,7 @@ pub enum Response {
     /// - [`MinimumRequiredStorageDeposit`](crate::method::AccountMethod::MinimumRequiredStorageDeposit)
     MinimumRequiredStorageDeposit(String),
     /// Response for
-    /// - [`GetOutputsWithAdditionalUnlockConditions`](crate::method::AccountMethod::GetOutputsWithAdditionalUnlockConditions)
+    /// - [`ClaimableOutputs`](crate::method::AccountMethod::ClaimableOutputs)
     OutputIds(Vec<OutputId>),
     /// Response for [`GetOutput`](crate::method::AccountMethod::GetOutput)
     OutputData(Option<Box<OutputDataDto>>),
@@ -358,7 +358,7 @@ pub enum Response {
     /// Response for
     /// - [`GetBalance`](crate::method::AccountMethod::GetBalance),
     /// - [`Sync`](crate::method::AccountMethod::Sync)
-    Balance(BalanceDto),
+    Balance(Balance),
     /// Response for
     /// - [`ClaimOutputs`](crate::method::AccountMethod::ClaimOutputs)
     /// - [`SendAmount`](crate::method::AccountMethod::SendAmount)
