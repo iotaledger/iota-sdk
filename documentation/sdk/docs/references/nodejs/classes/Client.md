@@ -41,7 +41,6 @@ The Client to interact with nodes.
 - [getUtxoChangesById](Client.md#getutxochangesbyid)
 - [getMilestoneByIndex](Client.md#getmilestonebyindex)
 - [getUtxoChangesByIndex](Client.md#getutxochangesbyindex)
-- [getTreasury](Client.md#gettreasury)
 - [getIncludedBlock](Client.md#getincludedblock)
 - [getIncludedBlockMetadata](Client.md#getincludedblockmetadata)
 - [hexToBech32](Client.md#hextobech32)
@@ -600,18 +599,6 @@ Returns all UTXO changes that happened at a specific milestone.
 #### Returns
 
 `Promise`<`IMilestoneUtxoChangesResponse`\>
-
-___
-
-### getTreasury
-
-▸ **getTreasury**(): `Promise`<`ITreasury`\>
-
-Get the treasury output.
-
-#### Returns
-
-`Promise`<`ITreasury`\>
 
 ___
 

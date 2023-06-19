@@ -153,14 +153,6 @@ def get_utxo_changes_by_index(index: int)
 
 Get the UTXO changes by the given milestone index.
 
-### get\_treasury
-
-```python
-def get_treasury()
-```
-
-Get the treasury output.
-
 ### get\_included\_block
 
 ```python

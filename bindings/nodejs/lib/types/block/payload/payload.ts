@@ -11,8 +11,6 @@ enum PayloadType {
     TaggedData = 5,
     /// A transaction payload.
     Transaction = 6,
-    /// A treasury transaction payload.
-    TreasuryTransaction = 4,
 }
 
 abstract class Payload {
