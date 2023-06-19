@@ -74,9 +74,9 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         } => {
             use crypto::signatures::secp256k1_ecdsa;
             use iota_sdk::types::block::Error;
-            let public_key = prefix_hex::decode(public_key).map_err(|_| Error::InvalidField("publicKey"))?;
+            let public_key = prefix_hex::decode(public_key)?;
             let public_key = secp256k1_ecdsa::PublicKey::try_from_bytes(&public_key).map_err(Error::from)?;
-            let signature = prefix_hex::decode(signature).map_err(|_| Error::InvalidField("signature"))?;
+            let signature = prefix_hex::decode(signature)?;
             let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature).map_err(Error::from)?;
             let message: Vec<u8> = prefix_hex::decode(message)?;
             Response::Bool(public_key.verify(&signature, &message))
