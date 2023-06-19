@@ -172,14 +172,14 @@ pub enum AccountMethod {
     /// Expected response:
     /// [`GeneratedEvmAddresses`](crate::wallet::message_interface::Response::GeneratedEvmAddresses)
     GenerateEvmAddresses { options: GetAddressesOptions },
-    /// Verify an ed25519 signature with a message.
+    /// Verify an ed25519 signature against a message.
     /// Expected response:
     /// [`Bool`](crate::wallet::message_interface::Response::Bool)
     VerifyEd25519Signature {
         signature: Ed25519SignatureDto,
         message: String,
     },
-    /// Verify a Secp256k1Ecdsa signature with a message.
+    /// Verify a Secp256k1Ecdsa signature against a message.
     /// Expected response:
     /// [`Bool`](crate::wallet::message_interface::Response::Bool)
     #[serde(rename_all = "camelCase")]
