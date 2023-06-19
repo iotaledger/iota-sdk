@@ -107,10 +107,16 @@ python3 examples/client/00_get_info.py
 
 ## API Reference
 
-You can generate the Python API reference with the following command from this directory:
+To generate the Python API reference you need to first install the needed dependencies with the following command:
 
 ```bash
-pip install pydoc-markdown && pydoc-markdown
+pip install -r requirements.txt
+```
+
+and afterwards you can generate them with:
+
+```bash
+pydoc-markdown
 ```
 
 ## Learn More

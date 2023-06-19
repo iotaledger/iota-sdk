@@ -17,17 +17,17 @@ def __init__(url=None, jwt=None, username=None, password=None, disabled=None)
 
 Initialize a Node
 
-Parameters
-----------
-url : string
+#### Parameters
+
+* __url__*: string*  
     Node url
-jwt : string
+* __jwt__*: string*  
     JWT token
-username : string
+* __username__*: string*  
     Username for basic authentication
-password : string
+* __password__*: string*  
     Password for basic authentication
-disabled : bool
+* __disabled__*: bool*  
     Disable node
 
 ## SendAmountParams Objects
@@ -44,10 +44,10 @@ def __init__(address, amount)
 
 Initialise SendAmountParams
 
-Parameters
-----------
-address : string
+#### Parameters
+
+* __address__*: string*  
     Address of the output
-amount : int
+* __amount__*: int*  
     Amount of the output
 
