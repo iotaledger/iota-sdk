@@ -33,6 +33,7 @@ import type {
     ParticipationEventRegistrationOptions,
     ParticipationEventType,
 } from '../participation';
+import { Ed25519Signature } from '../secretManager';
 
 export type __BuildAliasOutputMethod__ = {
     name: 'buildAliasOutput';
@@ -138,6 +139,23 @@ export type __GenerateEvmAddressesMethod__ = {
     name: 'generateEvmAddresses';
     data: {
         options: GenerateAddressesOptions;
+    };
+};
+
+export type __VerifyEd25519SignatureMethod__ = {
+    name: 'verifyEd25519Signature';
+    data: {
+        signature: Ed25519Signature;
+        message: HexEncodedString;
+    };
+};
+
+export type __VerifySecp256k1EcdsaSignatureMethod__ = {
+    name: 'verifySecp256k1EcdsaSignature';
+    data: {
+        publicKey: HexEncodedString;
+        signature: HexEncodedString;
+        message: HexEncodedString;
     };
 };
 
