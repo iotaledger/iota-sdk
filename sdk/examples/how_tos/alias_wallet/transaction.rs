@@ -54,14 +54,13 @@ async fn main() -> Result<()> {
     let alias_address = AliasAddress::new(*alias_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
 
     // Find first output unlockable by the alias address
-    let input = account
+    let input = *account
         .client()
         .basic_output_ids([QueryParameter::Address(alias_address)])
         .await?
         .items
         .first()
-        .unwrap()
-        .clone();
+        .unwrap();
 
     let transaction = account
         .send_amount(
