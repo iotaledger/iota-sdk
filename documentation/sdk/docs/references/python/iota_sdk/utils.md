@@ -143,7 +143,7 @@ Compute the hash of a transaction essence.
 def verify_ed25519_signature(signature: Ed25519Signature, message: HexStr) -> bool
 ```
 
-Verifies the Ed25519Signature for a message.
+Verifies the Ed25519Signature against a message.
 
 ### verify\_secp256k1\_ecdsa\_signature
 
