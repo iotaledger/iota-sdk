@@ -93,25 +93,25 @@ def generate_ed25519_addresses(account_index: Optional[int] = None,
 
 Generate ed25519 addresses.
 
-Parameters
-----------
-account_index : int
+#### Parameters
+
+* __account_index__*: int*  
     Account index.
-start : int
+* __start__*: int*  
     Start index of generated addresses
-end : int
+* __end__*: int*  
     End index of generated addresses
-internal : bool
+* __internal__*: bool*  
     Internal addresses
-coin_type : int
+* __coin_type__*: int*  
     Coin type. The CoinType enum can be used
-bech32_hrp : string
+* __bech32_hrp__*: string*  
     Bech32 human readable part.
-ledger_nano_prompt : bool
+* __ledger_nano_prompt__*: bool*  
     Display the address on ledger devices.
 
-Returns
--------
+#### Returns
+
 Addresses as array of strings.
 
 ### generate\_evm\_addresses
@@ -127,23 +127,23 @@ def generate_evm_addresses(account_index=None,
 
 Generate EVM addresses.
 
-Parameters
-----------
-account_index : int
+#### Parameters
+
+* __account_index__*: int*  
     Account index.
-start : int
+* __start__*: int*  
     Start index of generated addresses
-end : int
+* __end__*: int*  
     End index of generated addresses
-internal : bool
+* __internal__*: bool*  
     Internal addresses
-coin_type : int
+* __coin_type__*: int*  
     Coin type. The CoinType enum can be used
-ledger_nano_prompt : bool
+* __ledger_nano_prompt__*: bool*  
     Display the address on ledger devices.
 
-Returns
--------
+#### Returns
+
 Addresses as array of strings.
 
 ### get\_ledger\_nano\_status

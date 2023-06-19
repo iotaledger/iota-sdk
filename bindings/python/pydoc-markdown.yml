@@ -4,6 +4,7 @@ processors:
   - type: filter
     skip_empty_modules: true
   - type: smart
+  - type: pydoc_markdown_iota.IotaProcessor
   - type: crossref
 renderer:
   type: docusaurus
