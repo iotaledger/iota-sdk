@@ -170,6 +170,14 @@ def sign_ed25519(message: HexStr, chain: List[int])
 
 Signs a message with an Ed25519 private key.
 
+### sign\_secp256k1\_ecdsa
+
+```python
+def sign_secp256k1_ecdsa(message: HexStr, chain: List[int])
+```
+
+Signs a message with an Secp256k1Ecdsa private key.
+
 ### sign\_transaction
 
 ```python
@@ -185,3 +193,4 @@ def signature_unlock(transaction_essence_hash: HexStr, chain: List[int])
 ```
 
 Sign a transaction essence hash.
+

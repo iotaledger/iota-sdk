@@ -211,45 +211,6 @@ Returns
 -------
 Output as dict
 
-### generate\_ed25519\_addresses
-
-```python
-def generate_ed25519_addresses(
-        secret_manager,
-        account_index: Optional[int] = None,
-        start: Optional[int] = None,
-        end: Optional[int] = None,
-        internal: Optional[bool] = None,
-        coin_type: Optional[int] = None,
-        bech32_hrp: Optional[str] = None,
-        ledger_nano_prompt: Optional[bool] = None) -> List[str]
-```
-
-Generate addresses.
-
-Parameters
-----------
-secret_manager : Any type of SecretManager.
-    The secret manager to use. Can be (MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager or LedgerNanoSecretManager.
-account_index : int
-    Account index.
-start : int
-    Start index of generated addresses
-end : int
-    End index of generated addresses
-internal : bool
-    Internal addresses
-coin_type : int
-    Coin type. The CoinType enum can be used
-bech32_hrp : string
-    Bech32 human readable part.
-ledger_nano_prompt : bool
-    Display the address on ledger devices.
-
-Returns
--------
-Addresses as array of strings.
-
 ### build\_and\_post\_block
 
 ```python
