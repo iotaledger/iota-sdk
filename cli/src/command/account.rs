@@ -581,7 +581,6 @@ pub async fn mint_nft_command(
         transaction.transaction_id,
         transaction.block_id
     );
-    // println_log_info!("Minted to address: ", transaction.to )
 
     Ok(())
 }
