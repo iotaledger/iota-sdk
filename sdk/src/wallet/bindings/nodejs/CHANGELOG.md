@@ -1,5 +1,9 @@
 # Changelog
 
+## \[2.0.3-rc.38]
+
+- [`95359a93`](https://github.com/iotaledger/iota-sdk/commit/95359a93180c96a31b71b0cefcb587494a85eca4)([#629](https://github.com/iotaledger/iota-sdk/pull/629)) Fix windows arm64 prebuild.
+
 ## \[2.0.3-rc.37]
 
 - [`d90db186`](https://github.com/iotaledger/iota-sdk/commit/d90db186e670d63ab22b4bf2ecc573d52c4e6177)([#613](https://github.com/iotaledger/iota-sdk/pull/613)) Rename `Account::getOutputsWithAdditionalUnlockConditions` to `claimableOutputs`.
