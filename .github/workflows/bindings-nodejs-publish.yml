@@ -46,7 +46,7 @@ jobs:
       - name: Print Cargo.toml
         run: cat Cargo.toml
 
-      - name: Publish WASM bindings to NPM
+      - name: Publish nodejs bindings to NPM
         shell: sh
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -177,5 +177,5 @@ jobs:
         working-directory: bindings/nodejs
 
       - name: Upload prebuild to GitHub release
-        run: npx prebuild --upload-all ${{ secrets.GITHUB_TOKEN }} --tag-prefix iota-sdk-nodejs-binding-v
+        run: npx prebuild --upload-all ${{ secrets.GITHUB_TOKEN }} --tag-prefix iota-sdk-nodejs-v
         working-directory: bindings/nodejs
