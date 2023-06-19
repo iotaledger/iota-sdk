@@ -1,5 +1,9 @@
 # Changelog
 
+## \[2.0.3-rc.39]
+
+- [`f331200a`](https://github.com/iotaledger/iota-sdk/commit/f331200aaf3f71816c067be2fe2b4fcf3e2ff48f)([#633](https://github.com/iotaledger/iota-sdk/pull/633)) Fix folder name in CI.
+
 ## \[2.0.3-rc.38]
 
 - [`95359a93`](https://github.com/iotaledger/iota-sdk/commit/95359a93180c96a31b71b0cefcb587494a85eca4)([#629](https://github.com/iotaledger/iota-sdk/pull/629)) Fix windows arm64 prebuild.
