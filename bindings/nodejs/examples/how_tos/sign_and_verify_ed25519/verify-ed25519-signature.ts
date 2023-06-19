@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Ed25519Address, Utils, utf8ToHex, Ed25519Signature } from '@iota/sdk';
+import { Utils, utf8ToHex, Ed25519Signature } from '@iota/sdk';
 
 // In this example we will verify an Ed25519 signature.
 // Run with command:
@@ -22,19 +22,10 @@ const ED25519_SIGNATURE =
 
 function run() {
     try {
-        const bech32Address = Utils.hexPublicKeyToBech32Address(
-            PUBLIC_KEY,
-            'rms',
-        );
-        const address = Utils.parseBech32Address(
-            bech32Address,
-        ) as Ed25519Address;
-
         const message = utf8ToHex(JSON.stringify(FOUNDRY_METADATA));
         const validSignature = Utils.verifyEd25519Signature(
             new Ed25519Signature(PUBLIC_KEY, ED25519_SIGNATURE),
             message,
-            address,
         );
         console.log('Valid signature: ' + validSignature);
     } catch (error) {

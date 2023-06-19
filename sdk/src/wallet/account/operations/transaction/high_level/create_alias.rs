@@ -59,8 +59,10 @@ where
         params: Option<CreateAliasParams>,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
-        let prepared_transaction = self.prepare_create_alias_output(params, options).await?;
-        self.sign_and_submit_transaction(prepared_transaction).await
+        let options = options.into();
+        let prepared_transaction = self.prepare_create_alias_output(params, options.clone()).await?;
+
+        self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Function to prepare the transaction for

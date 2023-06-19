@@ -24,7 +24,7 @@ Starts the wallet without a specified account:
 - If the wallet has only one account, it will be used;
 - If the wallet has more than one account, a selector will be shown to decide which account to use.
 
-The wallet needs to be initialised (`init` command) and with at least one account (`new` command).
+The wallet needs to be initialised (`init` command) and with at least one account (`new-account` command).
 
 #### Example
 
@@ -80,7 +80,7 @@ Initialises the wallet by creating a [stronghold](https://github.com/iotaledger/
 
 The wallet can only be initialised once.
 
-When just initialised, the wallet has no account yet, use the `new` command to create one.
+When just initialised, the wallet has no account yet, use the `new-account` command to create one.
 
 #### Options
 
@@ -153,7 +153,7 @@ Generate a new random mnemonic.
 ./wallet mnemonic
 ```
 
-### `./wallet new`
+### `./wallet new-account`
 
 Creates a new account.
 
@@ -170,13 +170,25 @@ The wallet needs to be initialised (`init` command).
 Create a new account with the account index as alias.
 
 ```sh
-./wallet new
+./wallet new-account
 ```
 
 Create a new account with a provided alias.
 
 ```sh
-./wallet new main
+./wallet new-account main
+```
+
+### `./wallet node-info`
+
+Displays information about currently set node.
+
+The wallet needs to be initialised (`init` command).
+
+#### Examples
+
+```sh
+./wallet node-info
 ```
 
 ### `./wallet restore`
@@ -197,9 +209,9 @@ Restore accounts from a stronghold backup file.
 ./wallet restore backup.stronghold
 ```
 
-### `./wallet set-node`
+### `./wallet set-node-url`
 
-Sets the node to be used for all requests.
+Sets the URL of the node to be used for all requests.
 
 The new node URL is persisted to the storage and all future requests will use it.
 
@@ -212,7 +224,7 @@ The new node URL is persisted to the storage and all future requests will use it
 #### Example
 
 ```sh
-./wallet set-node http://localhost:14265
+./wallet set-node-url http://localhost:14265
 ```
 
 ### `./wallet sync`

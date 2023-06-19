@@ -1,6 +1,8 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[cfg(feature = "ledger_nano")]
+use crate::client::secret::{ledger_nano::LedgerSecretManager, DowncastSecretManager};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage},
     types::block::address::Bech32Address,
@@ -68,8 +70,12 @@ where
         // prompt first
         #[cfg(feature = "ledger_nano")]
         let addresses = if options.ledger_nano_prompt
-            && ((&*self.wallet.secret_manager.read().await) as &(dyn std::any::Any + Send + Sync))
-                .downcast_ref::<crate::client::secret::ledger_nano::LedgerSecretManager>()
+            && self
+                .wallet
+                .secret_manager
+                .read()
+                .await
+                .downcast::<LedgerSecretManager>()
                 .is_some()
         {
             #[cfg(feature = "events")]
