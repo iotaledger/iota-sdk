@@ -387,6 +387,16 @@ Generates a new address.
 > Account "main": new-address
 ```
 
+### `node-info`
+
+Displays information about currently set node.
+
+#### Example
+
+```sh
+> Account "main": node-info
+```
+
 ### `output`
 
 Displays an output that is stored in the account.
