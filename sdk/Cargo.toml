@@ -73,6 +73,7 @@ wasm-bindgen-futures = { version = "0.4.36", default-features = false, optional 
 
 [dev-dependencies]
 iota-sdk = { path = ".", default-features = false, features = [ "rand" ] }
+tokio = { version = "1.28.2", default-features = false, features = [ "fs", "macros", "rt", "time", "sync" ] }
 
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
@@ -409,8 +410,13 @@ required-features = [ "client" ]
 #######
 
 [[example]]
-name = "generate_addresses"
-path = "examples/client/01_generate_addresses.rs"
+name = "client_list_addresses"
+path = "examples/client/01_list_addresses.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "02_address_balance"
+path = "examples/client/02_address_balance.rs"
 required-features = [ "client" ]
 
 [[example]]
