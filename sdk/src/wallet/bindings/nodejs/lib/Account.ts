@@ -396,7 +396,7 @@ export class Account {
     }
 
     /**
-     * Verifies a message with an ed25519 signature.
+     * Verifies an ed25519 signature against a message.
      */
     async verifyEd25519Signature(
         signature: Ed25519Signature,
@@ -416,7 +416,7 @@ export class Account {
     }
 
     /**
-     * Verifies a message with an Secp256k1Ecdsa public key and signature.
+     * Verifies a Secp256k1Ecdsa signature against a message.
      */
     async verifySecp256k1EcdsaSignature(
         signature: Secp256k1EcdsaSignature,
