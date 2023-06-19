@@ -39,28 +39,28 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let block = Block::try_from_dto_unverified(block)?;
             Response::BlockId(block.id())
         }
-        UtilsMethod::OutputId { id, index } => {
-            Response::OutputId(OutputId::new(id, index)?)
-        }
         UtilsMethod::MilestoneId { payload } => {
             let payload = MilestonePayload::try_from_dto_unverified(payload)?;
             Response::MilestoneId(payload.id())
-        }
-        UtilsMethod::TokenId { alias_id, serial_number, token_scheme_type } => {
-            let foundry_id = FoundryId::build(&AliasAddress::new(alias_id), serial_number, token_scheme_type.kind());
-            Response::TokenId(TokenId::from(foundry_id))
         }
         UtilsMethod::TransactionId { payload } => {
             let payload = TransactionPayload::try_from_dto_unverified(payload)?;
             Response::TransactionId(payload.id())
         }
         UtilsMethod::ComputeAliasId { output_id } => Response::AliasId(AliasId::from(&output_id)),
-        UtilsMethod::ComputeNftId { output_id } => Response::NftId(NftId::from(&output_id)),
         UtilsMethod::ComputeFoundryId {
             alias_address,
             serial_number,
             token_scheme_kind,
         } => Response::FoundryId(FoundryId::build(&alias_address, serial_number, token_scheme_kind)),
+        UtilsMethod::ComputeNftId { output_id } => Response::NftId(NftId::from(&output_id)),
+        UtilsMethod::ComputeOutputId { id, index } => {
+            Response::OutputId(OutputId::new(id, index)?)
+        }
+        UtilsMethod::ComputeTokenId { alias_id, serial_number, token_scheme_type } => {
+            let foundry_id = FoundryId::build(&AliasAddress::new(alias_id), serial_number, token_scheme_type.kind());
+            Response::TokenId(TokenId::from(foundry_id))
+        }
         UtilsMethod::HashTransactionEssence { essence } => Response::Hash(prefix_hex::encode(
             TransactionEssence::try_from_dto_unverified(essence)?.hash(),
         )),

@@ -32,6 +32,22 @@ export interface __ComputeAliasIdMethod__ {
     };
 }
 
+export interface __ComputeFoundryIdMethod__ {
+    name: 'computeFoundryId';
+    data: {
+        aliasAddress: string;
+        serialNumber: number;
+        tokenSchemeKind: number;
+    };
+}
+
+export interface __ComputeInputsCommitmentMethod__ {
+    name: 'computeInputsCommitment';
+    data: {
+        inputs: Output[];
+    };
+}
+
 export interface __ComputeNftIdMethod__ {
     name: 'computeNftId';
     data: {
@@ -39,12 +55,28 @@ export interface __ComputeNftIdMethod__ {
     };
 }
 
-export interface __ComputeFoundryIdMethod__ {
-    name: 'computeFoundryId';
+export interface __ComputeOutputIdMethod__ {
+    name: 'computeOutputId';
     data: {
-        aliasAddress: string;
+        id: TransactionId;
+        index: number;
+    };
+}
+
+export interface __ComputeStorageDepositMethod__ {
+    name: 'computeStorageDeposit';
+    data: {
+        output: Output;
+        rentStructure: IRent;
+    };
+}
+
+export interface __ComputeTokenIdMethod__ {
+    name: 'computeTokenId';
+    data: {
+        aliasId: AliasId;
         serialNumber: number;
-        tokenSchemeKind: number;
+        tokenSchemeType: TokenSchemeType;
     };
 }
 
@@ -62,27 +94,10 @@ export interface __BlockIdMethod__ {
     };
 }
 
-export interface __OutputIdMethod__ {
-    name: 'outputId';
-    data: {
-        id: TransactionId;
-        index: number;
-    };
-}
-
 export interface __MilestoneIdMethod__ {
     name: 'milestoneId';
     data: {
         payload: MilestonePayload;
-    };
-}
-
-export interface __TokenIdMethod__ {
-    name: 'tokenId';
-    data: {
-        aliasId: AliasId;
-        serialNumber: number;
-        tokenSchemeType: TokenSchemeType;
     };
 }
 
@@ -143,21 +158,6 @@ export interface __HashTransactionEssenceMethod__ {
     name: 'hashTransactionEssence';
     data: {
         essence: TransactionEssence;
-    };
-}
-
-export interface __ComputeInputsCommitmentMethod__ {
-    name: 'computeInputsCommitment';
-    data: {
-        inputs: Output[];
-    };
-}
-
-export interface __ComputeStorageDepositMethod__ {
-    name: 'computeStorageDeposit';
-    data: {
-        output: Output;
-        rentStructure: IRent;
     };
 }
 

@@ -81,22 +81,10 @@ pub enum UtilsMethod {
         /// Block
         block: BlockDto,
     },
-    /// Returns the output ID from transaction id and output index
-    OutputId {
-        id: TransactionId,
-        index: u16,
-    },
     /// Returns a milestone ID (Blake2b256 hash of milestone essence)
     MilestoneId {
         /// Block
         payload: MilestonePayloadDto,
-    },
-    /// Constructs a tokenId from the aliasId, serial number and token scheme type.
-    #[serde(rename_all = "camelCase")]
-    TokenId {
-        alias_id: AliasId, 
-        serial_number: u32, 
-        token_scheme_type: TokenScheme
     },
     /// Returns the transaction ID (Blake2b256 hash of the provided transaction payload)
     TransactionId {
@@ -109,12 +97,6 @@ pub enum UtilsMethod {
         /// Output ID
         output_id: OutputId,
     },
-    /// Computes the NFT ID
-    #[serde(rename_all = "camelCase")]
-    ComputeNftId {
-        /// Output ID
-        output_id: OutputId,
-    },
     /// Computes the Foundry ID
     #[serde(rename_all = "camelCase")]
     ComputeFoundryId {
@@ -124,6 +106,24 @@ pub enum UtilsMethod {
         serial_number: u32,
         /// Token scheme kind
         token_scheme_kind: u8,
+    },
+    /// Computes the NFT ID
+    #[serde(rename_all = "camelCase")]
+    ComputeNftId {
+        /// Output ID
+        output_id: OutputId,
+    },
+    /// Returns the output ID from transaction id and output index
+    ComputeOutputId {
+        id: TransactionId,
+        index: u16,
+    },
+    /// Constructs a tokenId from the aliasId, serial number and token scheme type.
+    #[serde(rename_all = "camelCase")]
+    ComputeTokenId {
+        alias_id: AliasId, 
+        serial_number: u32, 
+        token_scheme_type: TokenScheme
     },
     /// Compute the hash of a transaction essence.
     HashTransactionEssence {

@@ -58,18 +58,6 @@ export class Utils {
     }
 
     /**
-     * Computes the NFT id for the given NFT output id.
-     */
-    static computeNftId(outputId: string): string {
-        return callUtilsMethod({
-            name: 'computeNftId',
-            data: {
-                outputId,
-            },
-        });
-    }
-
-    /**
      * Computes the foundry id.
      */
     static computeFoundryId(
@@ -83,6 +71,86 @@ export class Utils {
                 aliasAddress,
                 serialNumber,
                 tokenSchemeKind,
+            },
+        });
+    }
+
+    /**
+     * Computes the NFT id for the given NFT output id.
+     */
+    static computeNftId(outputId: string): string {
+        return callUtilsMethod({
+            name: 'computeNftId',
+            data: {
+                outputId,
+            },
+        });
+    }
+
+    /**
+     * Calculate the inputCommitment from the output objects that are used as inputs to fund the transaction.
+     * @param inputs The output objects used as inputs for the transaction.
+     * @returns The inputs commitment.
+     */
+     static computeInputsCommitment(
+        inputs: Output[],
+    ): HexEncodedString {
+        return callUtilsMethod({
+            name: 'computeInputsCommitment',
+            data: {
+                inputs
+            },
+        });
+    }
+
+    /**
+     * Returns the output ID from transaction id and output index.
+     * @param transactionId The id of the transaction.
+     * @param outputIndex The index of the output.
+     * @returns The output id.
+     */
+     static computeOutputId(id: TransactionId, index: number): TransactionId {
+        return callUtilsMethod({
+            name: 'computeOutputId',
+            data: {
+                id, index
+            },
+        });
+    }
+
+    /**
+     * Calculates the required storage deposit of an output.
+     * @param output The output.
+     * @param rentStructure Rent cost of objects which take node resources.
+     * @returns The required storage deposit.
+     */
+     static computeStorageDeposit(
+         output: Output,
+         rentStructure: IRent,
+    ): HexEncodedAmount {
+        return callUtilsMethod({
+            name: 'computeStorageDeposit',
+            data: {
+                output,
+                rentStructure
+            },
+        });
+    }
+
+    /**
+     * Constructs a tokenId from the aliasId, serial number and token scheme type.
+     * @param aliasId The alias Id of the alias that controls the foundry.
+     * @param serialNumber The serial number of the foundry.
+     * @param tokenSchemeType The tokenSchemeType of the foundry.
+     * @returns The tokenId.
+     */
+     static computeTokenId(aliasId: HexEncodedString, serialNumber: number, tokenSchemeType: TokenSchemeType): TokenId {
+        return callUtilsMethod({
+            name: 'computeTokenId',
+            data: {
+                aliasId,
+                serialNumber,
+                tokenSchemeType,
             },
         });
     }
@@ -127,24 +195,6 @@ export class Utils {
     }
 
     /**
-     * Constructs a tokenId from the aliasId, serial number and token scheme type.
-     * @param aliasId The alias Id of the alias that controls the foundry.
-     * @param serialNumber The serial number of the foundry.
-     * @param tokenSchemeType The tokenSchemeType of the foundry.
-     * @returns The tokenId.
-     */
-     static tokenId(aliasId: HexEncodedString, serialNumber: number, tokenSchemeType: TokenSchemeType): TokenId {
-        return callUtilsMethod({
-            name: 'tokenId',
-            data: {
-                aliasId,
-                serialNumber,
-                tokenSchemeType,
-            },
-        });
-    }
-
-    /**
      * Returns the transaction ID (Blake2b256 hash of the provided transaction payload)
      * @param payload The transaction payload.
      * @returns The transaction id.
@@ -154,21 +204,6 @@ export class Utils {
             name: 'transactionId',
             data: {
                 payload,
-            },
-        });
-    }
-
-    /**
-     * Returns the output ID from transaction id and output index.
-     * @param transactionId The id of the transaction.
-     * @param outputIndex The index of the output.
-     * @returns The output id.
-     */
-     static outputId(id: TransactionId, index: number): TransactionId {
-        return callUtilsMethod({
-            name: 'outputId',
-            data: {
-                id, index
             },
         });
     }
@@ -259,41 +294,6 @@ export class Utils {
             name: 'hashTransactionEssence',
             data: {
                 essence,
-            },
-        });
-    }
-
-    /**
-     * Calculates the required storage deposit of an output.
-     * @param output The output.
-     * @param rentStructure Rent cost of objects which take node resources.
-     * @returns The required storage deposit.
-     */
-     static computeStorageDeposit(
-         output: Output,
-         rentStructure: IRent,
-    ): HexEncodedAmount {
-        return callUtilsMethod({
-            name: 'computeStorageDeposit',
-            data: {
-                output,
-                rentStructure
-            },
-        });
-    }
-
-    /**
-     * Calculate the inputCommitment from the output objects that are used as inputs to fund the transaction.
-     * @param inputs The output objects used as inputs for the transaction.
-     * @returns The inputs commitment.
-     */
-     static computeInputsCommitment(
-        inputs: Output[],
-    ): HexEncodedString {
-        return callUtilsMethod({
-            name: 'computeInputsCommitment',
-            data: {
-                inputs
             },
         });
     }
