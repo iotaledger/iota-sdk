@@ -248,20 +248,6 @@ pub enum OutputResponse {
     Raw(Vec<u8>),
 }
 
-/// Response of GET /api/core/v2/milestone/{milestone_index}/utxo-changes.
-/// Returns all UTXO changes that happened at a specific milestone.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct UtxoChangesResponse {
-    pub index: u32,
-    pub created_outputs: Vec<String>,
-    pub consumed_outputs: Vec<String>,
-}
-
 /// Describes the heartbeat of a node.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(

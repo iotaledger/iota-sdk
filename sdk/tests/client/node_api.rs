@@ -265,26 +265,18 @@ async fn test_mqtt() {
     let (tx, mut rx) = tokio::sync::mpsc::channel(BUFFER_SIZE);
 
     client
-        .subscribe(
-            [
-                Topic::new("milestone-info/latest").unwrap(),
-                Topic::new("blocks").unwrap(),
-            ],
-            move |evt| {
-                match &evt.payload {
-                    MqttPayload::Block(_) => {
-                        assert_eq!(evt.topic, "blocks");
-                    }
-                    MqttPayload::Json(_) => {
-                        assert_eq!(evt.topic, "milestone-info/latest");
-                    }
+        .subscribe([Topic::new("blocks").unwrap()], move |evt| {
+            match &evt.payload {
+                MqttPayload::Block(_) => {
+                    assert_eq!(evt.topic, "blocks");
                 }
-                match tx.try_send(()) {
-                    Ok(_) | Err(TrySendError::Full(_)) => (),
-                    e => e.unwrap(),
-                }
-            },
-        )
+                MqttPayload::Json(_) => {}
+            }
+            match tx.try_send(()) {
+                Ok(_) | Err(TrySendError::Full(_)) => (),
+                e => e.unwrap(),
+            }
+        })
         .await
         .unwrap();
 

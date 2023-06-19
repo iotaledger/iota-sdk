@@ -54,7 +54,6 @@ pub enum Error {
     InvalidBlockLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
-    InvalidMilestoneOptionKind(u8),
     InvalidMigratedFundsEntryAmount(u64),
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
     InvalidNetworkName(FromUtf8Error),
@@ -85,9 +84,6 @@ pub enum Error {
     InvalidUnlockConditionKind(u8),
     InvalidFoundryZeroSerialNumber,
     MigratedFundsNotSorted,
-    MilestonePublicKeysSignaturesCountMismatch { key_count: usize, sig_count: usize },
-    MilestoneOptionsNotUniqueSorted,
-    MilestoneSignaturesNotUniqueSorted,
     MissingAddressUnlockCondition,
     MissingGovernorUnlockCondition,
     MissingPayload,
@@ -187,7 +183,6 @@ impl fmt::Display for Error {
             Self::InvalidMetadataFeatureLength(length) => {
                 write!(f, "invalid metadata feature length {length}")
             }
-            Self::InvalidMilestoneOptionKind(k) => write!(f, "invalid milestone option kind: {k}"),
             Self::InvalidMigratedFundsEntryAmount(amount) => {
                 write!(f, "invalid migrated funds entry amount: {amount}")
             }
@@ -239,18 +234,6 @@ impl fmt::Display for Error {
             Self::InvalidFoundryZeroSerialNumber => write!(f, "invalid foundry zero serial number"),
             Self::MigratedFundsNotSorted => {
                 write!(f, "migrated funds are not sorted")
-            }
-            Self::MilestonePublicKeysSignaturesCountMismatch { key_count, sig_count } => {
-                write!(
-                    f,
-                    "milestone public keys and signatures count mismatch: {key_count} != {sig_count}",
-                )
-            }
-            Self::MilestoneOptionsNotUniqueSorted => {
-                write!(f, "milestone options are not unique and/or sorted")
-            }
-            Self::MilestoneSignaturesNotUniqueSorted => {
-                write!(f, "milestone signatures are not unique and/or sorted")
             }
             Self::MissingAddressUnlockCondition => write!(f, "missing address unlock condition"),
             Self::MissingGovernorUnlockCondition => write!(f, "missing governor unlock condition"),

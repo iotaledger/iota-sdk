@@ -167,10 +167,6 @@ impl Topic {
     pub(crate) fn is_valid(&self) -> bool {
         let valid_topics = lazy_static!(
             RegexSet::new([
-                // Milestone topics.
-                r"^milestone-info/latest$",
-                r"^milestone-info/confirmed$",
-                r"^milestones$",
                 // Block topics.
                 r"^blocks$",
                 r"^blocks/transaction$",
