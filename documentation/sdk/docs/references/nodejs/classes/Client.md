@@ -567,24 +567,6 @@ Get block as raw bytes.
 
 ___
 
-### getMilestoneById
-
-▸ **getMilestoneById**(`milestoneId`): `Promise`<`IMilestonePayload`\>
-
-Look up a milestone by a given milestone index.
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `milestoneId` | `string` |
-
-#### Returns
-
-`Promise`<`IMilestonePayload`\>
-
-___
-
 ### getUtxoChangesById
 
 ▸ **getUtxoChangesById**(`milestoneId`): `Promise`<`IMilestoneUtxoChangesResponse`\>
@@ -600,24 +582,6 @@ Returns all UTXO changes that happened at a specific milestone.
 #### Returns
 
 `Promise`<`IMilestoneUtxoChangesResponse`\>
-
-___
-
-### getMilestoneByIndex
-
-▸ **getMilestoneByIndex**(`index`): `Promise`<`IMilestonePayload`\>
-
-Look up a milestone by a given milestone index.
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `index` | `number` |
-
-#### Returns
-
-`Promise`<`IMilestonePayload`\>
 
 ___
 
