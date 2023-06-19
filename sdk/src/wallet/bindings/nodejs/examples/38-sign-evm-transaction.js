@@ -69,8 +69,9 @@ async function run() {
         const txSignature = fromRpcSig(signature)
 
         // We need EIP155 compatibility for Shimmer EVM
-        
-        // txSignature.v = convertsVtoEip155Compatible(txSignature.v, CHAIN_ID)
+        console.log('Parsed signature', txSignature.v)
+        txSignature.v = convertsVtoEip155Compatible(txSignature.v, CHAIN_ID)
+        console.log('Parsed signature 2', txSignature.v)
         txData.v = txSignature.v
         txData.r = txSignature.r
         txData.s = txSignature.s
@@ -114,7 +115,7 @@ async function createTxData(provider, address) {
     const to = RECIPIENT_ACCOUNT_ADDRESS
     const value = provider.utils.toHex(ETH_AMOUNT)
 
-    return { nonce, gasPrice, gasLimit, to, value, data }
+    return { nonce, gasPrice, gasLimit, to, value, data, chainId: BigInt(CHAIN_ID), r: 0, s: 0 }
 }
 
 run();
