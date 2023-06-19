@@ -152,7 +152,7 @@ Verifies the Ed25519Signature for a message.
 def verify_secp256k1_ecdsa_signature(public_key: HexStr, signature: HexStr, message: HexStr) -> bool
 ```
 
-Verifies the Secp256k1Ecdsa Signature for a message.
+Verifies the Secp256k1Ecdsa Signature against a message.
 
 ## UtilsError Objects
 
