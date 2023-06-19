@@ -21,8 +21,8 @@ async function run() {
 
         const syncOptions = {
             alias: {
-                basicOutputs: true
-            }
+                basicOutputs: true,
+            },
         };
 
         const wallet = new Wallet({
@@ -32,38 +32,55 @@ async function run() {
         const account = await wallet.getAccount('Alice');
 
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
-        
+
         const balance = await account.sync(syncOptions);
 
         const totalBaseTokenBalance = balance.baseCoin.total;
-        console.log(`Balance before sending funds from alias: ${totalBaseTokenBalance}`);
+        console.log(
+            `Balance before sending funds from alias: ${totalBaseTokenBalance}`,
+        );
 
         const aliasId = balance.aliases[0];
         console.log(`Alias Id: ${aliasId}`);
 
         // Get Alias address
-        const aliasAddress = Utils.aliasIdToBech32(aliasId, await (await wallet.getClient()).getBech32Hrp());
+        const aliasAddress = Utils.aliasIdToBech32(
+            aliasId,
+            await (await wallet.getClient()).getBech32Hrp(),
+        );
 
         // Find first output unlockable by the alias address
-        const queryParameters = [{
-            address: aliasAddress
-        }];
-        const input = (await (await wallet.getClient()).basicOutputIds(queryParameters)).items[0];
+        const queryParameters = [
+            {
+                address: aliasAddress,
+            },
+        ];
+        const input = (
+            await (await wallet.getClient()).basicOutputIds(queryParameters)
+        ).items[0];
 
-        const params = [{
-            address: 'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu',
-            amount: '1000000',
-        }];
+        const params = [
+            {
+                address:
+                    'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu',
+                amount: '1000000',
+            },
+        ];
         const options = {
             mandatoryInputs: [input],
-            allowMicroAmount: false
+            allowMicroAmount: false,
         };
         const transaction = await account.sendAmount(params, options);
         await account.retryTransactionUntilIncluded(transaction.transactionId);
-        console.log(`Transaction with custom input: https://explorer.iota.org/testnet/transaction/${transaction.transactionId}`);
+        console.log(
+            `Transaction with custom input: https://explorer.iota.org/testnet/transaction/${transaction.transactionId}`,
+        );
 
-        const totalBaseTokenBalanceAfter = (await account.sync(syncOptions)).baseCoin.total;
-        console.log(`Balance after sending funds from alias: ${totalBaseTokenBalanceAfter}`);
+        const totalBaseTokenBalanceAfter = (await account.sync(syncOptions))
+            .baseCoin.total;
+        console.log(
+            `Balance after sending funds from alias: ${totalBaseTokenBalanceAfter}`,
+        );
     } catch (error) {
         console.error('Error: ', error);
     }

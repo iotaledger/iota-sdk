@@ -29,25 +29,35 @@ async function run() {
         const balance = await account.sync();
 
         const totalBaseTokenBalance = balance.baseCoin.total;
-        console.log(`Balance before requesting funds on alias address: ${totalBaseTokenBalance}`);
+        console.log(
+            `Balance before requesting funds on alias address: ${totalBaseTokenBalance}`,
+        );
 
         const aliasId = balance.aliases[0];
         console.log(`Alias Id: ${aliasId}`);
 
         // Get Alias address
-        const aliasAddress = Utils.aliasIdToBech32(aliasId, await (await wallet.getClient()).getBech32Hrp());
-        const faucetResponse = await (await wallet.getClient()).requestFundsFromFaucet(faucetUrl, aliasAddress);
+        const aliasAddress = Utils.aliasIdToBech32(
+            aliasId,
+            await (await wallet.getClient()).getBech32Hrp(),
+        );
+        const faucetResponse = await (
+            await wallet.getClient()
+        ).requestFundsFromFaucet(faucetUrl, aliasAddress);
         console.log(faucetResponse);
 
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
 
         const syncOptions = {
             alias: {
-                basicOutputs: true
-            }
+                basicOutputs: true,
+            },
         };
-        const totalBaseTokenBalanceAfter = (await account.sync(syncOptions)).baseCoin.total;
-        console.log(`Balance after requesting funds on alias address: ${totalBaseTokenBalanceAfter}`);
+        const totalBaseTokenBalanceAfter = (await account.sync(syncOptions))
+            .baseCoin.total;
+        console.log(
+            `Balance after requesting funds on alias address: ${totalBaseTokenBalanceAfter}`,
+        );
     } catch (error) {
         console.error('Error: ', error);
     }
