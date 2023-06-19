@@ -130,7 +130,7 @@ class Utils():
 
     @staticmethod
     def verify_ed25519_signature(signature: Ed25519Signature, message: HexStr) -> bool:
-        """Verifies an Ed25519 Signature for a message.
+        """Verifies an ed25519 signature against a message.
         """
         return _call_method('verifyEd25519Signature', {
             'signature': signature,
@@ -139,7 +139,7 @@ class Utils():
 
     @staticmethod
     def verify_secp256k1_ecdsa_signature(public_key: HexStr, signature: HexStr, message: HexStr) -> bool:
-        """Verifies a Secp256k1Ecdsa Signature for a message.
+        """Verifies a Secp256k1Ecdsa signature against a message.
         """
         return _call_method('verifySecp256k1EcdsaSignature', {
             'publicKey': public_key,

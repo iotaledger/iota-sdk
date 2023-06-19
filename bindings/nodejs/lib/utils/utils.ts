@@ -225,7 +225,7 @@ export class Utils {
     }
 
     /**
-     * Verifies an Ed25519 Signature with a message.
+     * Verifies an ed25519 signature against a message.
      */
     static verifyEd25519Signature(
         signature: Ed25519Signature,
@@ -241,7 +241,7 @@ export class Utils {
     }
 
     /**
-     * Verifies an Evm Signature with a message.
+     * Verifies a Secp256k1Ecdsa signature against a message.
      */
     static verifySecp256k1EcdsaSignature(
         publicKey: HexEncodedString,
