@@ -34,6 +34,7 @@ import type {
     ParticipationEventMap,
     GenerateAddressesOptions,
     Secp256k1EcdsaSignature,
+    Ed25519Signature,
 } from '../types';
 import type { SignedTransactionEssence } from '../types/signedTransactionEssence';
 import type {
@@ -391,6 +392,47 @@ export class Account {
             },
         );
 
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Verifies an ed25519 signature against a message.
+     */
+    async verifyEd25519Signature(
+        signature: Ed25519Signature,
+        message: HexEncodedString,
+    ): Promise<boolean> {
+        const response = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'verifyEd25519Signature',
+                data: {
+                    signature,
+                    message,
+                },
+            },
+        );
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Verifies a Secp256k1Ecdsa signature against a message.
+     */
+    async verifySecp256k1EcdsaSignature(
+        signature: Secp256k1EcdsaSignature,
+        message: HexEncodedString,
+    ): Promise<boolean> {
+        const response = await this.messageHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'verifySecp256k1EcdsaSignature',
+                data: {
+                    publicKey: signature.publicKey,
+                    signature: signature.signature,
+                    message,
+                },
+            },
+        );
         return JSON.parse(response).payload;
     }
 
