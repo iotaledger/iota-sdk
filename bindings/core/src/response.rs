@@ -135,7 +135,10 @@ pub enum Response {
     BlockMetadata(BlockMetadataResponse),
     /// Response for:
     /// - [`GetBlockRaw`](crate::method::ClientMethod::GetBlockRaw)
-    BlockRaw(Vec<u8>),
+    /// - [`GetMilestoneByIdRaw`](crate::method::ClientMethod::GetMilestoneByIdRaw)
+    /// - [`GetMilestoneByIndexRaw`](crate::method::ClientMethod::GetMilestoneByIndexRaw)
+    /// - [`PluginFetch`](crate::method::ClientMethod::PluginFetch)
+    Raw(Vec<u8>),
     /// Response for:
     /// - [`GetOutput`](crate::method::ClientMethod::GetOutput)
     OutputWithMetadataResponse(OutputWithMetadataResponse),
@@ -151,10 +154,6 @@ pub enum Response {
     /// - [`GetMilestoneById`](crate::method::ClientMethod::GetMilestoneById)
     /// - [`GetMilestoneByIndex`](crate::method::ClientMethod::GetMilestoneByIndex)
     Milestone(MilestonePayloadDto),
-    /// Response for:
-    /// - [`GetMilestoneByIdRaw`](crate::method::ClientMethod::GetMilestoneByIdRaw)
-    /// - [`GetMilestoneByIndexRaw`](crate::method::ClientMethod::GetMilestoneByIndexRaw)
-    MilestoneRaw(Vec<u8>),
     /// Response for:
     /// - [`GetUtxoChangesById`](crate::method::ClientMethod::GetUtxoChangesById)
     /// - [`GetUtxoChangesByIndex`](crate::method::ClientMethod::GetUtxoChangesByIndex)
@@ -269,9 +268,10 @@ pub enum Response {
     /// Response for
     /// - [`GetLocalPow`](crate::method::ClientMethod::GetLocalPow)
     /// - [`GetFallbackToLocalPow`](crate::method::ClientMethod::GetFallbackToLocalPow)
-    /// - [`VerifyEd25519Signature`](crate::method::UtilsMethod::VerifyEd25519Signature)
     /// - [`GetHealth`](crate::method::ClientMethod::GetHealth)
     /// - [`IsAddressValid`](crate::method::UtilsMethod::IsAddressValid)
+    /// - [`VerifyEd25519Signature`](crate::method::UtilsMethod::VerifyEd25519Signature)
+    /// - [`VerifySecp256k1EcdsaSignature`](crate::method::UtilsMethod::VerifySecp256k1EcdsaSignature)
     Bool(bool),
     /// Response for
     /// - [`Backup`](crate::method::WalletMethod::Backup),

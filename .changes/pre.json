@@ -132,6 +132,7 @@
     ".changes/voting-methods.md",
     ".changes/voting-output-input-selection.md",
     ".changes/voting-output-mandatory.md",
-    ".changes/voting-power-not-available.md"
+    ".changes/voting-power-not-available.md",
+    ".changes/windows-arm64-working-dir.md"
   ]
 }

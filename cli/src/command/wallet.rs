@@ -67,6 +67,8 @@ pub enum WalletCommand {
         /// Account alias, next available account index if not provided.
         alias: Option<String>,
     },
+    /// Get information about currently set node.
+    NodeInfo,
     /// Restore a stronghold backup file.
     Restore {
         /// Path of the to be restored stronghold backup file.
@@ -196,6 +198,15 @@ pub async fn new_account_command(
     Ok((wallet, alias))
 }
 
+pub async fn node_info_command(storage_path: &Path) -> Result<Wallet, Error> {
+    let wallet = unlock_wallet(storage_path, None, None).await?;
+    let node_info = wallet.client().get_info().await?;
+
+    println_log_info!("Current node info: {}", serde_json::to_string_pretty(&node_info)?);
+
+    Ok(wallet)
+}
+
 pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<Wallet, Error> {
     let password = get_password("Stronghold password", false)?;
     let secret_manager = SecretManager::Stronghold(
@@ -236,12 +247,22 @@ pub async fn sync_command(storage_path: &Path, snapshot_path: &Path) -> Result<W
     Ok(wallet)
 }
 
-pub async fn unlock_wallet(storage_path: &Path, snapshot_path: &Path, password: Password) -> Result<Wallet, Error> {
-    let secret_manager = SecretManager::Stronghold(
-        StrongholdSecretManager::builder()
-            .password(password)
-            .build(snapshot_path)?,
-    );
+pub async fn unlock_wallet(
+    storage_path: &Path,
+    snapshot_path: impl Into<Option<&Path>>,
+    password: impl Into<Option<Password>>,
+) -> Result<Wallet, Error> {
+    let secret_manager = if let Some(password) = password.into() {
+        let snapshot_path = snapshot_path.into();
+        Some(SecretManager::Stronghold(
+            StrongholdSecretManager::builder()
+                .password(password)
+                .build(snapshot_path.ok_or(Error::Miscellaneous("Snapshot file path is not given".to_string()))?)?,
+        ))
+    } else {
+        None
+    };
+
     let wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))

@@ -1,5 +1,4 @@
 import {
-    Ed25519Address,
     Ed25519Signature,
     HexEncodedString,
     Block,
@@ -166,7 +165,15 @@ export interface __VerifyEd25519SignatureMethod__ {
     data: {
         signature: Ed25519Signature;
         message: HexEncodedString;
-        address: Ed25519Address;
+    };
+}
+
+export interface __VerifySecp256k1EcdsaSignatureMethod__ {
+    name: 'verifySecp256k1EcdsaSignature';
+    data: {
+        publicKey: HexEncodedString;
+        signature: HexEncodedString;
+        message: HexEncodedString;
     };
 }
 

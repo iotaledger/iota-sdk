@@ -302,22 +302,39 @@ export class Utils {
     }
 
     /**
-     * Verifies the Ed25519Signature for a message against an Ed25519Address.
+     * Verifies an ed25519 signature against a message.
      */
     static verifyEd25519Signature(
         signature: Ed25519Signature,
         message: HexEncodedString,
-        address: Ed25519Address,
     ): boolean {
         return callUtilsMethod({
             name: 'verifyEd25519Signature',
             data: {
                 signature,
                 message,
-                address,
             },
         });
     }
+
+    /**
+     * Verifies a Secp256k1Ecdsa signature against a message.
+     */
+    static verifySecp256k1EcdsaSignature(
+        publicKey: HexEncodedString,
+        signature: HexEncodedString,
+        message: HexEncodedString,
+    ): boolean {
+        return callUtilsMethod({
+            name: 'verifySecp256k1EcdsaSignature',
+            data: {
+                publicKey,
+                signature,
+                message,
+            },
+        });
+    }
+
     /**
      * Verify if a mnemonic is a valid BIP39 mnemonic.
      */

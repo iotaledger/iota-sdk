@@ -304,7 +304,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetBlockMetadata { block_id } => {
             Response::BlockMetadata(client.get_block_metadata(&block_id).await?)
         }
-        ClientMethod::GetBlockRaw { block_id } => Response::BlockRaw(client.get_block_raw(&block_id).await?),
+        ClientMethod::GetBlockRaw { block_id } => Response::Raw(client.get_block_raw(&block_id).await?),
         ClientMethod::GetOutput { output_id } => Response::OutputWithMetadataResponse(
             client
                 .get_output(&output_id)
@@ -318,13 +318,13 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             &client.get_milestone_by_id(&milestone_id).await?,
         )),
         ClientMethod::GetMilestoneByIdRaw { milestone_id } => {
-            Response::MilestoneRaw(client.get_milestone_by_id_raw(&milestone_id).await?)
+            Response::Raw(client.get_milestone_by_id_raw(&milestone_id).await?)
         }
         ClientMethod::GetMilestoneByIndex { index } => {
             Response::Milestone(MilestonePayloadDto::from(&client.get_milestone_by_index(index).await?))
         }
         ClientMethod::GetMilestoneByIndexRaw { index } => {
-            Response::MilestoneRaw(client.get_milestone_by_index_raw(index).await?)
+            Response::Raw(client.get_milestone_by_index_raw(index).await?)
         }
         ClientMethod::GetUtxoChangesById { milestone_id } => {
             Response::MilestoneUtxoChanges(client.get_utxo_changes_by_id(&milestone_id).await?)
@@ -458,6 +458,18 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::RequestFundsFromFaucet { url, address } => {
             Response::Faucet(request_funds_from_faucet(&url, &address).await?)
+        }
+        ClientMethod::PluginFetch {
+            base_plugin_path,
+            method,
+            method_path,
+            query_params,
+            request_object,
+        } => {
+            let data: String = client
+                .plugin_fetch(&base_plugin_path, &method, &method_path, query_params, request_object)
+                .await?;
+            Response::Raw(data.as_bytes().to_vec())
         }
     };
     Ok(response)

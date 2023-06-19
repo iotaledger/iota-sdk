@@ -3,6 +3,7 @@
 
 from iota_sdk import call_utils_method
 from iota_sdk.types.address import Ed25519Address
+from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from json import dumps, loads
@@ -164,13 +165,22 @@ class Utils():
         })
 
     @staticmethod
-    def verify_ed25519_signature(signature: HexStr, message: HexStr, address: Ed25519Address) -> bool:
-        """Verifies the Ed25519Signature for a message against an Ed25519Address.
+    def verify_ed25519_signature(signature: Ed25519Signature, message: HexStr) -> bool:
+        """Verifies an ed25519 signature against a message.
         """
         return _call_method('verifyEd25519Signature', {
             'signature': signature,
             'message': message,
-            'address': address,
+        })
+
+    @staticmethod
+    def verify_secp256k1_ecdsa_signature(public_key: HexStr, signature: HexStr, message: HexStr) -> bool:
+        """Verifies a Secp256k1Ecdsa signature against a message.
+        """
+        return _call_method('verifySecp256k1EcdsaSignature', {
+            'publicKey': public_key,
+            'signature': signature,
+            'message': message,
         })
 
 

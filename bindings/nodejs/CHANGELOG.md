@@ -19,12 +19,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.0.0-rc.1 - YYYY-MM-DD
+## 1.0.0-rc.1 - 2023-06-19
+
+### Added
+
+- `Utils::verifySecp256k1EcdsaSignature`;
 
 ### Changed
 
 - `Account::getOutputsWithAdditionalUnlockConditions` renamed to `claimableOutputs`;
 - Rename `Account::signEvm` to `signSecp256k1Ecdsa` and `EvmSignature` to `Secp256k1EcdsaSignature`;
+
+### Removed
+
+- `Utils::verifyEd25519Signature`'s `address` parameter;
 
 ## 1.0.0-rc.0 - 2023-06-15
 

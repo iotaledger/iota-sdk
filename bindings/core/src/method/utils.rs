@@ -3,11 +3,14 @@
 
 use derivative::Derivative;
 use iota_sdk::types::block::{
-    address::{dto::Ed25519AddressDto, AliasAddress, Bech32Address, Hrp},
-    output::{AliasId, NftId, OutputId, TokenScheme, dto::OutputDto, RentStructure},
+    address::{AliasAddress, Bech32Address, Hrp},
+    output::{dto::OutputDto, AliasId, NftId, OutputId, RentStructure, TokenScheme},
     payload::{
         dto::MilestonePayloadDto,
-        transaction::{dto::{TransactionEssenceDto, TransactionPayloadDto}, TransactionId},
+        transaction::{
+            dto::{TransactionEssenceDto, TransactionPayloadDto},
+            TransactionId,
+        },
     },
     signature::dto::Ed25519SignatureDto,
     BlockDto,
@@ -114,16 +117,13 @@ pub enum UtilsMethod {
         output_id: OutputId,
     },
     /// Returns the output ID from transaction id and output index
-    ComputeOutputId {
-        id: TransactionId,
-        index: u16,
-    },
+    ComputeOutputId { id: TransactionId, index: u16 },
     /// Constructs a tokenId from the aliasId, serial number and token scheme type.
     #[serde(rename_all = "camelCase")]
     ComputeTokenId {
-        alias_id: AliasId, 
-        serial_number: u32, 
-        token_scheme_type: TokenScheme
+        alias_id: AliasId,
+        serial_number: u32,
+        token_scheme_type: TokenScheme,
     },
     /// Compute the hash of a transaction essence.
     HashTransactionEssence {
@@ -131,28 +131,26 @@ pub enum UtilsMethod {
         essence: TransactionEssenceDto,
     },
     /// Calculate the input commitment from the output objects that are used as inputs to fund the transaction.
-    ComputeInputsCommitment { 
-        inputs: Vec<OutputDto>,
-    },
+    ComputeInputsCommitment { inputs: Vec<OutputDto> },
     /// Calculates the required storage deposit of an output.
     #[serde(rename_all = "camelCase")]
-    ComputeStorageDeposit {
-        output: OutputDto,
-        rent: RentStructure,
-    },
-    /// Verifies the Ed25519Signature for a message against an Ed25519Address.
-    VerifyEd25519Signature {
-        /// The Ed25519 Signature
-        signature: Ed25519SignatureDto,
-        /// The signed message, hex encoded String
-        message: String,
-        /// The hex encoded Ed25519 address
-        address: Ed25519AddressDto,
-    },
+    ComputeStorageDeposit { output: OutputDto, rent: RentStructure },
     /// Checks if the given mnemonic is valid.
     /// Expected response: [`Ok`](crate::Response::Ok)
     VerifyMnemonic {
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         mnemonic: String,
+    },
+    /// Verify an ed25519 signature against a message.
+    VerifyEd25519Signature {
+        signature: Ed25519SignatureDto,
+        message: String,
+    },
+    /// Verify a Secp256k1Ecdsa signature against a message.
+    #[serde(rename_all = "camelCase")]
+    VerifySecp256k1EcdsaSignature {
+        public_key: String,
+        signature: String,
+        message: String,
     },
 }
