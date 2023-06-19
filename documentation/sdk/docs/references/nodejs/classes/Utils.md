@@ -281,7 +281,7 @@ ___
 
 ▸ `Static` **verifyEd25519Signature**(`signature`, `message`): `boolean`
 
-Verifies the Ed25519Signature for a message.
+Verifies the Ed25519Signature against a message.
 
 #### Parameters
 
