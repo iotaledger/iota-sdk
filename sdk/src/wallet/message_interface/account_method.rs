@@ -34,7 +34,7 @@ use crate::{
                 transaction::{
                     high_level::{
                         create_alias::CreateAliasParams,
-                        minting::{mint_native_token::MintNativeTokenParams, mint_nfts::MintNftParamsDto},
+                        minting::{mint_native_token::MintNativeTokenParams, mint_nfts::MintNftParams},
                     },
                     prepare_output::OutputParams,
                     TransactionOptionsDto,
@@ -274,7 +274,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     MintNfts {
-        params: Vec<MintNftParamsDto>,
+        params: Vec<MintNftParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Get account balance information.

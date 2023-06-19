@@ -45,7 +45,7 @@ use crate::{
         message_interface::{
             account_method::AccountMethod, dtos::AccountDetailsDto, message::Message, response::Response,
         },
-        MintNftParams, Result, Wallet,
+        Result, Wallet,
     },
 };
 
@@ -734,13 +734,7 @@ impl WalletMessageHandler {
             AccountMethod::MintNfts { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .mint_nfts(
-                            params
-                                .into_iter()
-                                .map(MintNftParams::try_from)
-                                .collect::<Result<Vec<MintNftParams>>>()?,
-                            options.map(TransactionOptions::try_from_dto).transpose()?,
-                        )
+                        .mint_nfts(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
@@ -888,7 +882,9 @@ impl WalletMessageHandler {
                         signed_transaction_data,
                         &account.client().get_protocol_parameters().await?,
                     )?;
-                    let transaction = account.submit_and_store_transaction(signed_transaction_data).await?;
+                    let transaction = account
+                        .submit_and_store_transaction(signed_transaction_data, None)
+                        .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await

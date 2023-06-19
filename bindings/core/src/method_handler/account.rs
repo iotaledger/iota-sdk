@@ -13,9 +13,8 @@ use iota_sdk::{
         output::{dto::OutputDto, Output, Rent},
         Error,
     },
-    wallet::{
-        account::{types::TransactionDto, Account, OutputDataDto, PreparedMintTokenTransactionDto, TransactionOptions},
-        MintNftParams,
+    wallet::account::{
+        types::TransactionDto, Account, OutputDataDto, PreparedMintTokenTransactionDto, TransactionOptions,
     },
 };
 use primitive_types::U256;
@@ -192,13 +191,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::PrepareMintNfts { params, options } => {
             let data = account
-                .prepare_mint_nfts(
-                    params
-                        .into_iter()
-                        .map(MintNftParams::try_from)
-                        .collect::<iota_sdk::wallet::Result<Vec<MintNftParams>>>()?,
-                    options.map(TransactionOptions::try_from_dto).transpose()?,
-                )
+                .prepare_mint_nfts(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
@@ -313,10 +306,13 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             prepared_transaction_data,
         } => {
             let transaction = account
-                .sign_and_submit_transaction(PreparedTransactionData::try_from_dto(
-                    prepared_transaction_data,
-                    &account.client().get_protocol_parameters().await?,
-                )?)
+                .sign_and_submit_transaction(
+                    PreparedTransactionData::try_from_dto(
+                        prepared_transaction_data,
+                        &account.client().get_protocol_parameters().await?,
+                    )?,
+                    None,
+                )
                 .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
@@ -338,7 +334,9 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 signed_transaction_data,
                 &account.client().get_protocol_parameters().await?,
             )?;
-            let transaction = account.submit_and_store_transaction(signed_transaction_data).await?;
+            let transaction = account
+                .submit_and_store_transaction(signed_transaction_data, None)
+                .await?;
             Response::SentTransaction(TransactionDto::from(&transaction))
         }
         AccountMethod::Sync { options } => Response::Balance(account.sync(options).await?),

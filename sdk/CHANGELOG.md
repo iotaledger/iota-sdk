@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::addresses_balance` method accepting addresses to get balance for;
 - `Wallet::get_secret_manager` method;
 - `Password` type which is `Zeroize` and `ZeroizeOnDrop`;
+- `TransactionOptions` parameter to `Account::{sign_and_submit_transaction, submit_and_store_transaction}`;
 
 ### Changed
 
@@ -119,7 +120,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Client::generate_ed25519_addresses`
 - `Wallet::get_node_info`
 - `NativeTokenDto`, which required a migration;
-- `RentStructureDto`, `CreateAliasParamsDto`, `AssetsDto`, `OutputParamsDto` and `MintNativeTokenParamsDto`;
+- `RentStructureDto`, `CreateAliasParamsDto`, `AssetsDto`, `OutputParamsDto`, `MintNativeTokenParamsDto` and `MintNftParamsDto`;
 - `NativeTokensBalanceDto` and `BalanceDto`;
 - `RentStructureBuilder`;
 - `PlaceholderSecretManager`;

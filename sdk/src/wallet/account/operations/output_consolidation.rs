@@ -78,7 +78,7 @@ where
         let prepared_transaction = self
             .prepare_consolidate_outputs(force, output_consolidation_threshold)
             .await?;
-        let consolidation_tx = self.sign_and_submit_transaction(prepared_transaction).await?;
+        let consolidation_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
 
         log::debug!(
             "[OUTPUT_CONSOLIDATION] consolidation transaction created: block_id: {:?} tx_id: {:?}",

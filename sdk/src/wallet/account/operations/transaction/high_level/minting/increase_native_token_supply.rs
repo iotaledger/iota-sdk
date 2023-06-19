@@ -40,10 +40,11 @@ where
         mint_amount: U256,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<MintTokenTransaction> {
+        let options = options.into();
         let prepared = self
-            .prepare_increase_native_token_supply(token_id, mint_amount, options)
+            .prepare_increase_native_token_supply(token_id, mint_amount, options.clone())
             .await?;
-        let transaction = self.sign_and_submit_transaction(prepared.transaction).await?;
+        let transaction = self.sign_and_submit_transaction(prepared.transaction, options).await?;
 
         Ok(MintTokenTransaction {
             token_id: prepared.token_id,

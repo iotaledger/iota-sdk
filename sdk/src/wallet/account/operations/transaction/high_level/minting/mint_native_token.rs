@@ -114,8 +114,10 @@ where
         params: MintNativeTokenParams,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<MintTokenTransaction> {
-        let prepared = self.prepare_mint_native_token(params, options).await?;
-        self.sign_and_submit_transaction(prepared.transaction)
+        let options = options.into();
+        let prepared = self.prepare_mint_native_token(params, options.clone()).await?;
+
+        self.sign_and_submit_transaction(prepared.transaction, options)
             .await
             .map(|transaction| MintTokenTransaction {
                 token_id: prepared.token_id,
