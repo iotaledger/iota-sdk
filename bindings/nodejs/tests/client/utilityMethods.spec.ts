@@ -97,13 +97,13 @@ describe('Client utility methods', () => {
     });
 
     it('compute foundry id', async () => {
-        const aliasAddress =
+        const aliasId =
             '0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f';
         const serialNumber = 0;
         const tokenSchemeKind = 0;
 
         const foundryId = Utils.computeFoundryId(
-            aliasAddress,
+            aliasId,
             serialNumber,
             tokenSchemeKind,
         );

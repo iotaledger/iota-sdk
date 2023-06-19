@@ -49,10 +49,10 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         }
         UtilsMethod::ComputeAliasId { output_id } => Response::AliasId(AliasId::from(&output_id)),
         UtilsMethod::ComputeFoundryId {
-            alias_address,
+            alias_id,
             serial_number,
             token_scheme_kind,
-        } => Response::FoundryId(FoundryId::build(&alias_address, serial_number, token_scheme_kind)),
+        } => Response::FoundryId(FoundryId::build(&AliasAddress::new(alias_id), serial_number, token_scheme_kind)),
         UtilsMethod::ComputeNftId { output_id } => Response::NftId(NftId::from(&output_id)),
         UtilsMethod::ComputeOutputId { id, index } => {
             Response::OutputId(OutputId::new(id, index)?)

@@ -19,8 +19,9 @@ import {
     Output,
     IRent,
     HexEncodedAmount,
+    AliasAddress,
 } from '../types';
-import { BlockId, TokenId } from '../types/block/id';
+import { AliasId, BlockId, TokenId } from '../types/block/id';
 
 /** Utils class for utils. */
 export class Utils {
@@ -48,7 +49,7 @@ export class Utils {
     /**
      * Computes the alias id for the given alias output id.
      */
-    static computeAliasId(outputId: string): string {
+    static computeAliasId(outputId: string): AliasId {
         return callUtilsMethod({
             name: 'computeAliasId',
             data: {
@@ -61,14 +62,14 @@ export class Utils {
      * Computes the foundry id.
      */
     static computeFoundryId(
-        aliasAddress: string,
+        aliasId: AliasId,
         serialNumber: number,
         tokenSchemeKind: number,
     ): string {
         return callUtilsMethod({
             name: 'computeFoundryId',
             data: {
-                aliasAddress,
+                aliasId,
                 serialNumber,
                 tokenSchemeKind,
             },
@@ -139,12 +140,12 @@ export class Utils {
 
     /**
      * Constructs a tokenId from the aliasId, serial number and token scheme type.
-     * @param aliasId The alias Id of the alias that controls the foundry.
+     * @param aliasId The alias that controls the foundry.
      * @param serialNumber The serial number of the foundry.
      * @param tokenSchemeType The tokenSchemeType of the foundry.
      * @returns The tokenId.
      */
-     static computeTokenId(aliasId: HexEncodedString, serialNumber: number, tokenSchemeType: TokenSchemeType): TokenId {
+     static computeTokenId(aliasId: AliasId, serialNumber: number, tokenSchemeType: TokenSchemeType): TokenId {
         return callUtilsMethod({
             name: 'computeTokenId',
             data: {

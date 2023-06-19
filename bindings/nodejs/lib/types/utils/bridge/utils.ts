@@ -35,7 +35,7 @@ export interface __ComputeAliasIdMethod__ {
 export interface __ComputeFoundryIdMethod__ {
     name: 'computeFoundryId';
     data: {
-        aliasAddress: string;
+        aliasId: AliasId;
         serialNumber: number;
         tokenSchemeKind: number;
     };
