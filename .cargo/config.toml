@@ -1,7 +1,5 @@
 [alias]
 ci-check-all = "check --all-targets --all-features"
-ci-check-java-client = "check --manifest-path sdk/src/client/bindings/java/lib/native/Cargo.toml --all-targets --lib"
-ci-check-java-wallet = "check --manifest-path sdk/src/wallet/bindings/java/lib/native/Cargo.toml --all-targets --lib"
 ci-check-nodejs = "check --manifest-path bindings/nodejs/Cargo.toml --all-targets --lib"
 ci-check-python = "check --manifest-path bindings/python/Cargo.toml --all-targets --lib"
 ci-check-wasm = "check --manifest-path bindings/wasm/Cargo.toml --target wasm32-unknown-unknown --lib"

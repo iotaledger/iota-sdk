@@ -4,6 +4,7 @@
 use std::str::FromStr;
 
 use crate::{
+    client::secret::SecretManage,
     types::{
         api::core::response::LedgerInclusionState,
         block::{input::Input, output::OutputId, payload::transaction::TransactionEssence, BlockId},
@@ -20,7 +21,10 @@ use crate::{
 // also revalidate that the locked outputs needs to be there, maybe there was a conflict or the transaction got
 // confirmed, then they should get removed
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Sync transactions and reattach them if unconfirmed. Returns the transaction with updated metadata and spent
     /// output ids that don't need to be locked anymore
     /// Return true if a transaction got confirmed for which we don't have an output already, based on this outputs will

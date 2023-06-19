@@ -4,7 +4,8 @@
 use std::collections::HashMap;
 
 use crate::{
-    types::block::output::{dto::OutputMetadataDto, OutputId},
+    client::secret::SecretManage,
+    types::block::output::{dto::OutputMetadataDto, OutputId, OutputMetadata},
     wallet::account::{
         operations::syncing::options::SyncOptions,
         types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, Transaction},
@@ -20,7 +21,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Set the alias for the account
     pub async fn set_alias(&self, alias: &str) -> crate::wallet::Result<()> {
         let mut account_details = self.details_mut().await;
@@ -100,7 +104,7 @@ impl Account {
                 if output_metadata_response.is_spent {
                     account_details.unspent_outputs.remove(&output_id);
                     if let Some(output_data) = account_details.outputs.get_mut(&output_id) {
-                        output_data.metadata = output_metadata_response.try_into()?;
+                        output_data.metadata = OutputMetadata::try_from(output_metadata_response)?;
                     }
                 } else {
                     // not spent, just not synced, skip

@@ -1,12 +1,12 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{cmp::Ordering, str::FromStr};
+use std::cmp::Ordering;
 
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::api::input_selection::minimum_storage_deposit_basic_output,
+    client::{api::input_selection::minimum_storage_deposit_basic_output, secret::SecretManage},
     types::block::{
         address::{Address, Bech32Address},
         output::{
@@ -22,7 +22,10 @@ use crate::{
     wallet::account::{operations::transaction::RemainderValueStrategy, Account, FilterOptions, TransactionOptions},
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Prepare an output for sending
     /// If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
     /// be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full
@@ -389,12 +392,18 @@ impl Account {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OutputParams {
     pub recipient_address: Bech32Address,
+    #[serde(with = "crate::utils::serde::string")]
     pub amount: u64,
+    #[serde(default)]
     pub assets: Option<Assets>,
+    #[serde(default)]
     pub features: Option<Features>,
+    #[serde(default)]
     pub unlocks: Option<Unlocks>,
+    #[serde(default)]
     pub storage_deposit: Option<StorageDeposit>,
 }
 
@@ -436,58 +445,4 @@ pub enum ReturnStrategy {
     Return,
     // The recipient address will get the additional amount to reach the minimum storage deposit gifted
     Gift,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct OutputParamsDto {
-    recipient_address: Bech32Address,
-    amount: String,
-    #[serde(default)]
-    assets: Option<AssetsDto>,
-    #[serde(default)]
-    features: Option<Features>,
-    #[serde(default)]
-    unlocks: Option<Unlocks>,
-    #[serde(default)]
-    storage_deposit: Option<StorageDeposit>,
-}
-
-impl TryFrom<OutputParamsDto> for OutputParams {
-    type Error = crate::wallet::Error;
-
-    fn try_from(value: OutputParamsDto) -> crate::wallet::Result<Self> {
-        Ok(Self {
-            recipient_address: value.recipient_address,
-            amount: u64::from_str(&value.amount).map_err(|_| crate::client::Error::InvalidAmount(value.amount))?,
-            assets: match value.assets {
-                Some(r) => Some(Assets::try_from(r)?),
-                None => None,
-            },
-            features: value.features,
-            unlocks: value.unlocks,
-            storage_deposit: value.storage_deposit,
-        })
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct AssetsDto {
-    native_tokens: Option<Vec<NativeToken>>,
-    nft_id: Option<String>,
-}
-
-impl TryFrom<AssetsDto> for Assets {
-    type Error = crate::wallet::Error;
-
-    fn try_from(value: AssetsDto) -> crate::wallet::Result<Self> {
-        Ok(Self {
-            native_tokens: value.native_tokens,
-            nft_id: match &value.nft_id {
-                Some(r) => Some(NftId::from_str(r)?),
-                None => None,
-            },
-        })
-    }
 }

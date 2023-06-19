@@ -9,7 +9,7 @@ use crate::{
             input_selection::Selected, transaction::validate_regular_transaction_essence_length,
             PreparedTransactionData,
         },
-        secret::types::InputSigningData,
+        secret::{types::InputSigningData, SecretManage},
     },
     types::block::{
         input::{Input, UtxoInput},
@@ -19,7 +19,10 @@ use crate::{
     wallet::account::{operations::transaction::TransactionOptions, Account},
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Function to build the transaction essence from the selected in and outputs
     pub(crate) async fn build_transaction_essence(
         &self,

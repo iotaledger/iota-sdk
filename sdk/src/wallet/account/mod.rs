@@ -38,18 +38,15 @@ pub use self::{
         },
         transaction::{
             high_level::{
-                create_alias::{CreateAliasParams, CreateAliasParamsDto},
+                create_alias::CreateAliasParams,
                 minting::{
                     mint_native_token::{
-                        MintNativeTokenParams, MintNativeTokenParamsDto, MintTokenTransactionDto,
-                        PreparedMintTokenTransactionDto,
+                        MintNativeTokenParams, MintTokenTransactionDto, PreparedMintTokenTransactionDto,
                     },
-                    mint_nfts::{MintNftParams, MintNftParamsDto},
+                    mint_nfts::MintNftParams,
                 },
             },
-            prepare_output::{
-                Assets, Features, OutputParams, OutputParamsDto, ReturnStrategy, StorageDeposit, Unlocks,
-            },
+            prepare_output::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
             RemainderValueStrategy, TransactionOptions, TransactionOptionsDto,
         },
     },
@@ -57,7 +54,10 @@ pub use self::{
 };
 use super::wallet::WalletInner;
 use crate::{
-    client::Client,
+    client::{
+        secret::{SecretManage, SecretManager},
+        Client,
+    },
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
@@ -140,10 +140,19 @@ pub struct AccountDetails {
 }
 
 /// A thread guard over an account, so we can lock the account during operations.
-#[derive(Debug, Clone)]
-pub struct Account {
+#[derive(Debug)]
+pub struct Account<S: SecretManage = SecretManager> {
     inner: Arc<AccountInner>,
-    pub(crate) wallet: Arc<WalletInner>,
+    pub(crate) wallet: Arc<WalletInner<S>>,
+}
+
+impl<S: SecretManage> Clone for Account<S> {
+    fn clone(&self) -> Self {
+        Self {
+            inner: self.inner.clone(),
+            wallet: self.wallet.clone(),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -157,7 +166,7 @@ pub struct AccountInner {
 }
 
 // impl Deref so we can use `account.details()` instead of `account.details.read()`
-impl Deref for Account {
+impl<S: SecretManage> Deref for Account<S> {
     type Target = AccountInner;
 
     fn deref(&self) -> &Self::Target {
@@ -165,9 +174,12 @@ impl Deref for Account {
     }
 }
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Create a new Account with an AccountDetails
-    pub(crate) async fn new(details: AccountDetails, wallet: Arc<WalletInner>) -> Result<Self> {
+    pub(crate) async fn new(details: AccountDetails, wallet: Arc<WalletInner<S>>) -> Result<Self> {
         #[cfg(feature = "storage")]
         let default_sync_options = wallet
             .storage_manager

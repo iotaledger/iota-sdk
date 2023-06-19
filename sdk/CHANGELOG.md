@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 0.4.0 - 2023-MM-DD
+## 0.4.0 - 2023-06-14
 
 ### Added
 
@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::addresses_balance` method accepting addresses to get balance for;
 - `Wallet::get_secret_manager` method;
 - `Password` type which is `Zeroize` and `ZeroizeOnDrop`;
+- `TransactionOptions` parameter to `Account::{sign_and_submit_transaction, submit_and_store_transaction}`;
 
 ### Changed
 
@@ -82,6 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename `SecretManager` and `SecretManage` ed25519 address generation methods;
 - `SecretManage::generate_ed25519_addresses` returns `Ed25519Address` type;
 - Made certain `prepare_` methods public: `prepare_mint_nfts`, `prepare_send_native_tokens`, `prepare_send_nft` and `prepare_create_alias_output`;
+- `Wallet`, `WalletBuilder`, `Account`, `AccountBuilder` now specify generic secret manager type;
 - `Address`-like types now implement `ToBech32Ext` for `to_bech32` and similar fns;
 - Add constructors for `SendNftParams`, `SendAmountParams`, `SendNativeTokensParams`, `MintNftParams`;
 - Rename `AccountBalance` to `Balance` and `AccountBalanceDto` to `BalanceDto`:
@@ -98,6 +100,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename `WalletOptions::build_manager` to `build`;
 - `PeerDto` renamed to `PeerResponse`, `ReceiptDto` to `ReceiptResponse`, `LedgerInclusionStateDto` to `LedgerInclusionState`, `HeartbeatDto` to `Heartbeat`, `MetricsDto` tp `Metrics`, `GossipDto` to `Gossip`, `RelationDto` to `Relation`;
 - Default number of workers for nonce `Miner` changed from `1` to `num_cpu::get()`;
+- Made `Account::get_basic_outputs_for_additional_inputs` private;
+- `Account::get_unlockable_outputs_with_additional_unlock_conditions` renamed to `claimable_outputs`;
 
 ### Removed
 
@@ -116,7 +120,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Client::generate_ed25519_addresses`
 - `Wallet::get_node_info`
 - `NativeTokenDto`, which required a migration;
-- `RentStructureDto`;
+- `RentStructureDto`, `CreateAliasParamsDto`, `AssetsDto`, `OutputParamsDto`, `MintNativeTokenParamsDto` and `MintNftParamsDto`;
+- `NativeTokensBalanceDto` and `BalanceDto`;
+- `RentStructureBuilder`;
+- `PlaceholderSecretManager`;
 
 ### Fixed
 

@@ -1,10 +1,12 @@
-import type {
-    IBlock,
-    ITransactionEssence,
+import {
+    Ed25519Address,
+    Ed25519Signature,
     HexEncodedString,
-    IEd25519Signature,
-} from '@iota/types';
-import { Ed25519Address } from '../../';
+    Block,
+    TransactionEssence,
+    MilestonePayload,
+    TransactionPayload,
+} from '../../';
 
 export interface __GenerateMnemonicMethod__ {
     name: 'generateMnemonic';
@@ -50,7 +52,21 @@ export interface __ParseBech32AddressMethod__ {
 export interface __BlockIdMethod__ {
     name: 'blockId';
     data: {
-        block: IBlock;
+        block: Block;
+    };
+}
+
+export interface __MilestoneIdMethod__ {
+    name: 'milestoneId';
+    data: {
+        payload: MilestonePayload;
+    };
+}
+
+export interface __TransactionIdMethod__ {
+    name: 'transactionId';
+    data: {
+        payload: TransactionPayload;
     };
 }
 
@@ -103,14 +119,14 @@ export interface __IsAddressValidMethod__ {
 export interface __HashTransactionEssenceMethod__ {
     name: 'hashTransactionEssence';
     data: {
-        essence: ITransactionEssence;
+        essence: TransactionEssence;
     };
 }
 
 export interface __VerifyEd25519SignatureMethod__ {
     name: 'verifyEd25519Signature';
     data: {
-        signature: IEd25519Signature;
+        signature: Ed25519Signature;
         message: HexEncodedString;
         address: Ed25519Address;
     };

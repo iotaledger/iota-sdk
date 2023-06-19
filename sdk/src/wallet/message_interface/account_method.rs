@@ -32,10 +32,10 @@ use crate::{
                 syncing::SyncOptions,
                 transaction::{
                     high_level::{
-                        create_alias::CreateAliasParamsDto,
-                        minting::{mint_native_token::MintNativeTokenParamsDto, mint_nfts::MintNftParamsDto},
+                        create_alias::CreateAliasParams,
+                        minting::{mint_native_token::MintNativeTokenParams, mint_nfts::MintNftParams},
                     },
-                    prepare_output::OutputParamsDto,
+                    prepare_output::OutputParams,
                     TransactionOptionsDto,
                 },
             },
@@ -125,6 +125,10 @@ pub enum AccountMethod {
         nft_id: NftId,
         options: Option<TransactionOptionsDto>,
     },
+    /// Get outputs with additional unlock conditions
+    /// Expected response: [`OutputIds`](crate::wallet::message_interface::Response::OutputIds)
+    #[serde(rename_all = "camelCase")]
+    ClaimableOutputs { outputs_to_claim: OutputsToClaim },
     /// Consolidate outputs.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
@@ -136,7 +140,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     CreateAliasOutput {
-        params: Option<CreateAliasParamsDto>,
+        params: Option<CreateAliasParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Destroy an alias output. Outputs controlled by it will be swept before if they don't have a
@@ -167,8 +171,8 @@ pub enum AccountMethod {
     /// Expected response:
     /// [`GeneratedEvmAddresses`](crate::wallet::message_interface::Response::GeneratedEvmAddresses)
     GenerateEvmAddresses { options: GetAddressesOptions },
-    /// Signs a message with an Evm private key.
-    SignEvm {
+    /// Signs a message with an Secp256k1Ecdsa private key.
+    SignSecp256k1Ecdsa {
         /// The message to sign, hex encoded String
         message: String,
         /// Chain to sign the message with
@@ -182,10 +186,6 @@ pub enum AccountMethod {
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[serde(rename_all = "camelCase")]
     GetFoundryOutput { token_id: TokenId },
-    /// Get outputs with additional unlock conditions
-    /// Expected response: [`OutputIds`](crate::wallet::message_interface::Response::OutputIds)
-    #[serde(rename_all = "camelCase")]
-    GetOutputsWithAdditionalUnlockConditions { outputs_to_claim: OutputsToClaim },
     /// Get the [`Transaction`](crate::wallet::account::types::Transaction) of a transaction stored in the account
     /// Expected response: [`Transaction`](crate::wallet::message_interface::Response::Transaction)
     #[serde(rename_all = "camelCase")]
@@ -250,14 +250,14 @@ pub enum AccountMethod {
     /// Expected response: [`MintTokenTransaction`](crate::wallet::message_interface::Response::MintTokenTransaction)
     #[serde(rename_all = "camelCase")]
     MintNativeToken {
-        params: MintNativeTokenParamsDto,
+        params: MintNativeTokenParams,
         options: Option<TransactionOptionsDto>,
     },
     /// Mint nft.
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     MintNfts {
-        params: Vec<MintNftParamsDto>,
+        params: Vec<MintNftParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Get account balance information.
@@ -267,7 +267,7 @@ pub enum AccountMethod {
     /// Expected response: [`Output`](crate::wallet::message_interface::Response::Output)
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
-        params: Box<OutputParamsDto>,
+        params: Box<OutputParams>,
         transaction_options: Option<TransactionOptionsDto>,
     },
     /// Prepare transaction.

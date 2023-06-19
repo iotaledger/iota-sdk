@@ -1,6 +1,12 @@
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import { describe, it } from '@jest/globals';
+import 'reflect-metadata';
+import 'dotenv/config';
+
 import { Client, Ed25519Address, SecretManager, Utils } from '../../';
 import '../customMatchers';
-import 'dotenv/config';
 
 const offlineClient = new Client({});
 

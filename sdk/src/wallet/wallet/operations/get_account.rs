@@ -1,17 +1,20 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::wallet::{
-    account::{types::AccountIdentifier, Account},
-    Wallet,
+use crate::{
+    client::secret::SecretManage,
+    wallet::{
+        account::{types::AccountIdentifier, Account},
+        Wallet,
+    },
 };
 
-impl Wallet {
+impl<S: SecretManage> Wallet<S> {
     /// Get an account with an AccountIdentifier
     pub async fn get_account<I: Into<AccountIdentifier> + Send>(
         &self,
         identifier: I,
-    ) -> crate::wallet::Result<Account> {
+    ) -> crate::wallet::Result<Account<S>> {
         let account_id = identifier.into();
         let accounts = self.accounts.read().await;
 

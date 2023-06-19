@@ -3,27 +3,48 @@
 
 //! In this example we check if an output has only an address unlock condition and that the address is from the account.
 //!
-//! `cargo run --example check_unlock_conditions --release`
+//! Make sure that `example.stronghold` and `example.walletdb` already exist by
+//! running the `create_account` example!
+//!
+//! ```sh
+//! cargo run --release --all-features --example check_unlock_conditions
+//! ```
+
+use std::env::var;
 
 use iota_sdk::{
     types::block::{
         address::Bech32Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
     },
-    wallet::{Result, Wallet},
+    wallet::Result,
+    Wallet,
 };
+
+// The amount to build the basic output with
+const AMOUNT: u64 = 1_000_000;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
 
-    // Get the account we generated with `01_create_wallet`
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
     let account = wallet.get_account("Alice").await?;
 
-    let account_addresses: Vec<Bech32Address> = account.addresses().await?.into_iter().map(|a| *a.address()).collect();
+    let account_addresses = account
+        .addresses()
+        .await?
+        .into_iter()
+        .map(|a| *a.address())
+        .collect::<Vec<Bech32Address>>();
 
-    let output = BasicOutputBuilder::new_with_amount(1_000_000)
+    println!("ADDRESSES:\n{:#?}", account_addresses);
+
+    let output = BasicOutputBuilder::new_with_amount(AMOUNT)
         .add_unlock_condition(AddressUnlockCondition::new(*account_addresses[0].as_ref()))
         .finish_output(account.client().get_token_supply().await?)?;
 
@@ -35,7 +56,7 @@ async fn main() -> Result<()> {
         // Check that address in the unlock condition belongs to the account
         account_addresses
             .iter()
-            .any(|a| a.as_ref() == address_unlock_condition.address())
+            .any(|address| address.as_ref() == address_unlock_condition.address())
     } else {
         false
     };

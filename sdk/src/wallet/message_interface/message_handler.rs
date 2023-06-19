@@ -36,17 +36,15 @@ use crate::{
     wallet::{
         account::{
             operations::transaction::{
-                high_level::{create_alias::CreateAliasParams, minting::mint_native_token::MintTokenTransactionDto},
-                prepare_output::OutputParams,
-                TransactionOptions,
+                high_level::minting::mint_native_token::MintTokenTransactionDto, TransactionOptions,
             },
-            types::{AccountIdentifier, BalanceDto, TransactionDto},
+            types::{AccountIdentifier, TransactionDto},
             OutputDataDto,
         },
         message_interface::{
             account_method::AccountMethod, dtos::AccountDetailsDto, message::Message, response::Response,
         },
-        MintNativeTokenParams, MintNftParams, Result, Wallet,
+        Result, Wallet,
     },
 };
 
@@ -521,6 +519,10 @@ impl WalletMessageHandler {
                 })
                 .await
             }
+            AccountMethod::ClaimableOutputs { outputs_to_claim } => {
+                let output_ids = account.claimable_outputs(outputs_to_claim).await?;
+                Ok(Response::OutputIds(output_ids))
+            }
             AccountMethod::ConsolidateOutputs {
                 force,
                 output_consolidation_threshold,
@@ -535,8 +537,6 @@ impl WalletMessageHandler {
             }
             AccountMethod::CreateAliasOutput { params, options } => {
                 convert_async_panics(|| async {
-                    let params = params.map(CreateAliasParams::try_from).transpose()?;
-
                     let transaction = account
                         .create_alias_output(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
@@ -576,25 +576,19 @@ impl WalletMessageHandler {
                     .await?;
                 Ok(Response::GeneratedEvmAddresses(addresses))
             }
-            AccountMethod::SignEvm { message, chain } => {
+            AccountMethod::SignSecp256k1Ecdsa { message, chain } => {
                 let msg: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
                 let (public_key, signature) = account
                     .wallet
                     .secret_manager
                     .read()
                     .await
-                    .sign_evm(&msg, &Chain::from_u32(chain))
+                    .sign_secp256k1_ecdsa(&msg, &Chain::from_u32(chain))
                     .await?;
-                Ok(Response::EvmSignature {
+                Ok(Response::Secp256k1EcdsaSignature {
                     public_key: prefix_hex::encode(public_key.to_bytes()),
                     signature: prefix_hex::encode(signature.to_bytes()),
                 })
-            }
-            AccountMethod::GetOutputsWithAdditionalUnlockConditions { outputs_to_claim } => {
-                let output_ids = account
-                    .get_unlockable_outputs_with_additional_unlock_conditions(outputs_to_claim)
-                    .await?;
-                Ok(Response::OutputIds(output_ids))
             }
             AccountMethod::GetOutput { output_id } => {
                 let output_data = account.get_output(&output_id).await;
@@ -697,10 +691,7 @@ impl WalletMessageHandler {
             AccountMethod::MintNativeToken { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .mint_native_token(
-                            MintNativeTokenParams::try_from(params)?,
-                            options.map(TransactionOptions::try_from_dto).transpose()?,
-                        )
+                        .mint_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::MintTokenTransaction(MintTokenTransactionDto::from(
                         &transaction,
@@ -724,27 +715,21 @@ impl WalletMessageHandler {
             AccountMethod::MintNfts { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .mint_nfts(
-                            params
-                                .into_iter()
-                                .map(MintNftParams::try_from)
-                                .collect::<Result<Vec<MintNftParams>>>()?,
-                            options.map(TransactionOptions::try_from_dto).transpose()?,
-                        )
+                        .mint_nfts(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
             }
-            AccountMethod::GetBalance => Ok(Response::Balance(BalanceDto::from(&account.balance().await?))),
+            AccountMethod::GetBalance => Ok(Response::Balance(account.balance().await?)),
             AccountMethod::PrepareOutput {
-                params: options,
+                params,
                 transaction_options,
             } => {
                 convert_async_panics(|| async {
                     let output = account
                         .prepare_output(
-                            OutputParams::try_from(*options)?,
+                            *params,
                             transaction_options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
@@ -790,9 +775,7 @@ impl WalletMessageHandler {
                 })
                 .await
             }
-            AccountMethod::SyncAccount { options } => {
-                Ok(Response::Balance(BalanceDto::from(&account.sync(options).await?)))
-            }
+            AccountMethod::SyncAccount { options } => Ok(Response::Balance(account.sync(options).await?)),
             AccountMethod::SendAmount { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
@@ -880,7 +863,9 @@ impl WalletMessageHandler {
                         signed_transaction_data,
                         &account.client().get_protocol_parameters().await?,
                     )?;
-                    let transaction = account.submit_and_store_transaction(signed_transaction_data).await?;
+                    let transaction = account
+                        .submit_and_store_transaction(signed_transaction_data, None)
+                        .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await

@@ -12,6 +12,7 @@ use futures::FutureExt;
 use instant::Instant;
 
 use crate::{
+    client::secret::SecretManage,
     types::block::{
         address::{Address, Bech32Address},
         output::OutputId,
@@ -22,7 +23,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Returns output ids for outputs that are directly (Ed25519 address in AddressUnlockCondition) or indirectly
     /// (alias/nft address in AddressUnlockCondition and the alias/nft output is controlled with the Ed25519 address)
     /// connected to

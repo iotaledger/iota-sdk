@@ -7,7 +7,7 @@ use std::collections::HashSet;
 use futures::FutureExt;
 
 use crate::{
-    client::node_api::indexer::query_parameters::QueryParameter,
+    client::{node_api::indexer::query_parameters::QueryParameter, secret::SecretManage},
     types::{
         api::plugins::indexer::OutputIdsResponse,
         block::{
@@ -22,7 +22,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Returns output ids of alias outputs
     pub(crate) async fn get_alias_and_foundry_output_ids(
         &self,

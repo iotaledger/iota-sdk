@@ -4,7 +4,7 @@
 use primitive_types::U256;
 
 use crate::{
-    client::api::PreparedTransactionData,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::output::{
         AliasId, AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
@@ -14,7 +14,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Function to melt native tokens. This happens with the foundry output which minted them, by increasing it's
     /// `melted_tokens` field. This should be preferred over burning, because after burning, the foundry can never be
     /// destroyed anymore.
@@ -24,10 +27,12 @@ impl Account {
         melt_amount: U256,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
+        let options = options.into();
         let prepared_transaction = self
-            .prepare_decrease_native_token_supply(token_id, melt_amount, options)
+            .prepare_decrease_native_token_supply(token_id, melt_amount, options.clone())
             .await?;
-        self.sign_and_submit_transaction(prepared_transaction).await
+
+        self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Function to prepare the transaction for
