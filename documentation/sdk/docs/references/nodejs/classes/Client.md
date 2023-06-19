@@ -37,10 +37,6 @@ The Client to interact with nodes.
 - [getPeers](Client.md#getpeers)
 - [postBlockRaw](Client.md#postblockraw)
 - [getBlockRaw](Client.md#getblockraw)
-- [getMilestoneById](Client.md#getmilestonebyid)
-- [getUtxoChangesById](Client.md#getutxochangesbyid)
-- [getMilestoneByIndex](Client.md#getmilestonebyindex)
-- [getUtxoChangesByIndex](Client.md#getutxochangesbyindex)
 - [getIncludedBlock](Client.md#getincludedblock)
 - [getIncludedBlockMetadata](Client.md#getincludedblockmetadata)
 - [hexToBech32](Client.md#hextobech32)
@@ -563,42 +559,6 @@ Get block as raw bytes.
 #### Returns
 
 `Promise`<`Uint8Array`\>
-
-___
-
-### getUtxoChangesById
-
-▸ **getUtxoChangesById**(`milestoneId`): `Promise`<`IMilestoneUtxoChangesResponse`\>
-
-Returns all UTXO changes that happened at a specific milestone.
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `milestoneId` | `string` |
-
-#### Returns
-
-`Promise`<`IMilestoneUtxoChangesResponse`\>
-
-___
-
-### getUtxoChangesByIndex
-
-▸ **getUtxoChangesByIndex**(`index`): `Promise`<`IMilestoneUtxoChangesResponse`\>
-
-Returns all UTXO changes that happened at a specific milestone.
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `index` | `number` |
-
-#### Returns
-
-`Promise`<`IMilestoneUtxoChangesResponse`\>
 
 ___
 

@@ -105,54 +105,6 @@ def get_output_metadata(output_id: OutputId)
 
 Get output metadata.
 
-### get\_milestone\_by\_id
-
-```python
-def get_milestone_by_id(milestone_id: HexStr)
-```
-
-Get the milestone by the given milestone id.
-
-### get\_milestone\_by\_id\_raw
-
-```python
-def get_milestone_by_id_raw(milestone_id: HexStr)
-```
-
-Get the raw milestone by the given milestone id.
-
-### get\_milestone\_by\_index
-
-```python
-def get_milestone_by_index(index: int)
-```
-
-Get the milestone by the given index.
-
-### get\_milestone\_by\_index\_raw
-
-```python
-def get_milestone_by_index_raw(index: int)
-```
-
-Get the milestone by the given index.
-
-### get\_utxo\_changes\_by\_id
-
-```python
-def get_utxo_changes_by_id(milestone_id: HexStr)
-```
-
-Get the UTXO changes by the given milestone id.
-
-### get\_utxo\_changes\_by\_index
-
-```python
-def get_utxo_changes_by_index(index: int)
-```
-
-Get the UTXO changes by the given milestone index.
-
 ### get\_included\_block
 
 ```python

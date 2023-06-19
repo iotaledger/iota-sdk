@@ -25,7 +25,6 @@ async fn main() -> Result<()> {
     client
         .subscribe(
             [
-                Topic::new("milestone-info/latest")?,
                 Topic::new("blocks")?,
                 Topic::new("outputs/unlock/address/atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r")?,
             ],
