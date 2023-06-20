@@ -141,7 +141,7 @@ fn build_invalid_payload_kind() {
     let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
-    let tx_payload = TransactionPayload::new(essence.clone(), unlocks.clone()).unwrap();
+    let tx_payload = TransactionPayload::new(essence, unlocks).unwrap();
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
         .with_inputs(vec![input1, input2])
