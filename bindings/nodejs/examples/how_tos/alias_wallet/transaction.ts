@@ -7,7 +7,7 @@ import { Wallet, initLogger, Utils } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/simple_transaction/simple-transaction.ts
+// yarn run-example ./how_tos/alias_wallet/transaction.ts
 
 // In this example we send funds from an alias wallet.
 async function run() {
