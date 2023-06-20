@@ -11,7 +11,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example mint_collection_nft [ISSUER_NFT_ID]
+//! cargo run --release --all-features --example mint_collection_nft <ISSUER NFT ID>
 //! ```
 
 use std::env;
@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
 
     let issuer_nft_id = env::args()
         .nth(1)
-        .expect("missing example argument: issuer nft id")
+        .expect("missing example argument: ISSUER NFT ID")
         .parse::<NftId>()?;
 
     let wallet = Wallet::builder()

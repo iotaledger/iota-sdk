@@ -13,7 +13,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example decrease_native_token_supply [TOKEN ID]
+//! cargo run --release --all-features --example decrease_native_token_supply <TOKEN ID>
 //! ```
 
 use std::env;
