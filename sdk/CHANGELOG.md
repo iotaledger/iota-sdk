@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 0.5.0 - YYYY-MM-DD
+
+### Removed
+
+- `block::Error::{InvalidControllerKind, MigratedFundsNotSorted, MissingPayload, MissingRequiredSenderBlock}` variants;
+- `client::Error::InvalidBIP32ChainData`;
+
 ## 0.4.0 - 2023-06-14
 
 ### Added
