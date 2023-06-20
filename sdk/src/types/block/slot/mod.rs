@@ -4,5 +4,6 @@
 mod commitment;
 mod commitment_id;
 mod index;
+mod roots_id;
 
-pub use self::{commitment::SlotCommitment, commitment_id::SlotCommitmentId, index::SlotIndex};
+pub use self::{commitment::SlotCommitment, commitment_id::SlotCommitmentId, index::SlotIndex, roots_id::RootsId};
