@@ -18,7 +18,7 @@ use log::LevelFilter;
 use crate::{
     error::Error,
     helper::{enter_or_generate_mnemonic, generate_mnemonic, get_password, import_mnemonic},
-    println_log_info,
+    println_log_error, println_log_info,
 };
 
 const DEFAULT_LOG_LEVEL: &str = "debug";
@@ -265,13 +265,17 @@ pub async fn unlock_wallet(
         None
     };
 
-    let wallet = Wallet::builder()
+    let maybe_wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
         .finish()
-        .await?;
+        .await;
 
-    Ok(wallet)
+    if let Err(iota_sdk::wallet::Error::MissingParameter(_)) = maybe_wallet {
+        println_log_error!("Please make sure the wallet is initialized.");
+    }
+
+    Ok(maybe_wallet?)
 }
 
 pub async fn add_account(wallet: &Wallet, alias: Option<String>) -> Result<String, Error> {
