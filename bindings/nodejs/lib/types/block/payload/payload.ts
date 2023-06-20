@@ -5,14 +5,10 @@
  * All of the payload types.
  */
 enum PayloadType {
-    /// A milestone payload.
-    Milestone = 7,
     /// A tagged data payload.
     TaggedData = 5,
     /// A transaction payload.
     Transaction = 6,
-    /// A treasury transaction payload.
-    TreasuryTransaction = 4,
 }
 
 abstract class Payload {

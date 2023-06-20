@@ -5,10 +5,7 @@ use derivative::Derivative;
 use iota_sdk::types::block::{
     address::{AliasAddress, Bech32Address, Hrp},
     output::{AliasId, NftId, OutputId},
-    payload::{
-        dto::MilestonePayloadDto,
-        transaction::dto::{TransactionEssenceDto, TransactionPayloadDto},
-    },
+    payload::transaction::dto::{TransactionEssenceDto, TransactionPayloadDto},
     signature::dto::Ed25519SignatureDto,
     BlockDto,
 };
@@ -80,11 +77,6 @@ pub enum UtilsMethod {
     BlockId {
         /// Block
         block: BlockDto,
-    },
-    /// Returns a milestone ID (Blake2b256 hash of milestone essence)
-    MilestoneId {
-        /// Block
-        payload: MilestonePayloadDto,
     },
     /// Returns the transaction ID (Blake2b256 hash of the provided transaction payload)
     TransactionId {
