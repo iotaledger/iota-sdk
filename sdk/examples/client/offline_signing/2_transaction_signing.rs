@@ -10,7 +10,7 @@
 //! cargo run --release --example 2_transaction_signing
 //! ```
 
-use std::path::Path;
+use std::{env, path::Path};
 
 use iota_sdk::{
     client::{
@@ -34,7 +34,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let prepared_transaction_data = read_prepared_transaction_from_file(PREPARED_TRANSACTION_FILE_NAME).await?;
 

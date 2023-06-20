@@ -6,7 +6,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --example node_api_core_get_receipts_migrated_at <MILESTONE_INDEX> [NODE URL]
+//! cargo run --release --example node_api_core_get_receipts_migrated_at [MILESTONE_INDEX] [NODE URL]
 //! ```
 
 use std::env;
@@ -15,7 +15,7 @@ use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    // If not provided we use the default node from the `.env` file.
     dotenvy::dotenv().ok();
 
     // Take the node URL from command line argument or use one from env as default.
@@ -24,12 +24,12 @@ async fn main() -> Result<()> {
     // Create a client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Take the milestone index from the command line, or panic.
-    let milestone_index = env::args()
-        .nth(1)
-        .expect("missing example argument: MILESTONE INDEX")
-        .parse()
-        .expect("invalid milestone index");
+    // Take the milestone index from the command line, or use a default.
+    let milestone_index = if let Some(s) = env::args().nth(1) {
+        s.parse().expect("invalid milestone index")
+    } else {
+        client.get_info().await?.node_info.status.latest_milestone.index
+    };
 
     // Send the request.
     let receipts = client.get_receipts_migrated_at(milestone_index).await?;

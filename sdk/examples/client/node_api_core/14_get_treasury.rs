@@ -14,7 +14,7 @@ use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    // If not provided we use the default node from the `.env` file.
     dotenvy::dotenv().ok();
 
     // Take the node URL from command line argument or use one from env as default.

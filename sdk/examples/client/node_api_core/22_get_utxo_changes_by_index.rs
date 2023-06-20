@@ -15,23 +15,21 @@ use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    // If not provided we use the default node from the `.env` file.
     dotenvy::dotenv().ok();
 
     // Take the node URL from command line argument or use one from env as default.
-    let node_url = std::env::args()
-        .nth(2)
-        .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
+    let node_url = env::args().nth(2).unwrap_or_else(|| env::var("NODE_URL").unwrap());
 
     // Create a client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Take the milestone index from the command line, or use a default.
-    let info = client.get_info().await?;
-    let milestone_index = env::args()
-        .nth(1)
-        .map(|s| s.parse::<u32>().expect("invalid milestone index"))
-        .unwrap_or_else(|| info.node_info.status.latest_milestone.index);
+    let milestone_index = if let Some(s) = env::args().nth(1) {
+        s.parse().expect("invalid milestone index")
+    } else {
+        client.get_info().await?.node_info.status.latest_milestone.index
+    };
 
     // Send the request.
     let utxo_changes = client.get_utxo_changes_by_index(milestone_index).await?;

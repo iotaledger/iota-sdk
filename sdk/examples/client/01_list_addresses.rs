@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! This example shows how to list the generated addresses of an account.
+//! This example shows how to generate addresses.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
