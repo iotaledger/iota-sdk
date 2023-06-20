@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
     // Create a client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Take the transaction id from the command line, or panic.
+    // Take the milestone index from the command line, or panic.
     let milestone_index = env::args()
         .nth(1)
         .expect("missing example argument: MILESTONE INDEX")

@@ -19,7 +19,6 @@ async fn main() -> Result<()> {
 
     let client = Client::builder()
         .with_node(&env::var("NODE_URL").unwrap())?
-        .with_pow_worker_count(1)
         .finish()
         .await?;
 

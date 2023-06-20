@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
     // Create a client with that node.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Take the alias id from the command line, or panic.
+    // Take the NFT id from the command line, or panic.
     let nft_id = env::args()
         .nth(1)
         .expect("missing example argument: NFT ID")

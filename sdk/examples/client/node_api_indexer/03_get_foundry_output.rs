@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
     // Create a client with that node.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Take the alias id from the command line, or panic.
+    // Take the foundry id from the command line, or panic.
     let foundry_id = env::args()
         .nth(1)
         .expect("missing example argument: FOUNDRY ID")
