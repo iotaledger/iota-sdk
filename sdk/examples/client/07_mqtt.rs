@@ -38,7 +38,6 @@ async fn main() -> Result<()> {
     client
         .subscribe(
             [
-                Topic::new("milestone-info/latest")?,
                 Topic::new("blocks")?,
                 Topic::new(format!("outputs/unlock/address/{address}"))?,
             ],
@@ -47,7 +46,6 @@ async fn main() -> Result<()> {
                 match &event.payload {
                     MqttPayload::Json(val) => println!("{}", serde_json::to_string(&val).unwrap()),
                     MqttPayload::Block(block) => println!("{block:?}"),
-                    MqttPayload::MilestonePayload(ms) => println!("{ms:?}"),
                 }
                 tx.send(()).unwrap();
             },

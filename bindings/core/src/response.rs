@@ -17,7 +17,6 @@ use iota_sdk::{
         api::{
             core::response::{
                 BlockMetadataResponse, InfoResponse as NodeInfo, OutputWithMetadataResponse, PeerResponse,
-                UtxoChangesResponse as MilestoneUTXOChanges,
             },
             plugins::indexer::OutputIdsResponse,
         },
@@ -28,11 +27,7 @@ use iota_sdk::{
                 dto::{OutputDto, OutputMetadataDto},
                 AliasId, FoundryId, NftId, OutputId, TokenId,
             },
-            payload::{
-                dto::{MilestonePayloadDto, PayloadDto},
-                milestone::MilestoneId,
-                transaction::TransactionId,
-            },
+            payload::{dto::PayloadDto, transaction::TransactionId},
             protocol::dto::ProtocolParametersDto,
             signature::dto::Ed25519SignatureDto,
             unlock::dto::UnlockDto,
@@ -147,14 +142,6 @@ pub enum Response {
     /// - [`GetOutputsIgnoreErrors`](crate::method::ClientMethod::GetOutputsIgnoreErrors)
     Outputs(Vec<OutputWithMetadataResponse>),
     /// Response for:
-    /// - [`GetMilestoneById`](crate::method::ClientMethod::GetMilestoneById)
-    /// - [`GetMilestoneByIndex`](crate::method::ClientMethod::GetMilestoneByIndex)
-    Milestone(MilestonePayloadDto),
-    /// Response for:
-    /// - [`GetUtxoChangesById`](crate::method::ClientMethod::GetUtxoChangesById)
-    /// - [`GetUtxoChangesByIndex`](crate::method::ClientMethod::GetUtxoChangesByIndex)
-    MilestoneUtxoChanges(MilestoneUTXOChanges),
-    /// Response for:
     /// - [`AliasOutputId`](crate::method::ClientMethod::AliasOutputId)
     /// - [`FoundryOutputId`](crate::method::ClientMethod::FoundryOutputId)
     /// - [`NftOutputId`](crate::method::ClientMethod::NftOutputId)
@@ -194,9 +181,6 @@ pub enum Response {
     /// Response for:
     /// - [`MnemonicToHexSeed`](crate::method::UtilsMethod::MnemonicToHexSeed)
     MnemonicHexSeed(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
-    /// Response for:
-    /// - [`MilestoneId`](crate::method::UtilsMethod::MilestoneId)
-    MilestoneId(MilestoneId),
     /// Response for:
     /// - [`ComputeTokenId`](crate::method::UtilsMethod::ComputeTokenId)
     TokenId(TokenId),

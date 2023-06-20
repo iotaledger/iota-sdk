@@ -19,7 +19,6 @@ export type OutputId = string;
  * All of the output types.
  */
 enum OutputType {
-    Treasury = 2,
     Basic = 3,
     Alias = 4,
     Foundry = 5,
@@ -51,12 +50,7 @@ abstract class Output /*implements ICommonOutput*/ {
     }
 
     public static parse(data: any): Output {
-        if (data.type == OutputType.Treasury) {
-            return plainToInstance(
-                TreasuryOutput,
-                data,
-            ) as any as TreasuryOutput;
-        } else if (data.type == OutputType.Basic) {
+        if (data.type == OutputType.Basic) {
             return plainToInstance(BasicOutput, data) as any as BasicOutput;
         } else if (data.type == OutputType.Alias) {
             return plainToInstance(AliasOutput, data) as any as AliasOutput;
@@ -120,14 +114,7 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
         this.features = features;
     }
 }
-/**
- * Treasury Output.
- */
-class TreasuryOutput extends Output /*implements ITreasuryOutput */ {
-    constructor(amount: string) {
-        super(OutputType.Treasury, amount);
-    }
-}
+
 /**
  * Basic output.
  */
@@ -281,7 +268,6 @@ class FoundryOutput extends ImmutableFeaturesOutput /*implements IFoundryOutput*
 const OutputDiscriminator = {
     property: 'type',
     subTypes: [
-        { value: TreasuryOutput, name: OutputType.Treasury as any },
         { value: BasicOutput, name: OutputType.Basic as any },
         { value: AliasOutput, name: OutputType.Alias as any },
         { value: NftOutput, name: OutputType.Nft as any },
@@ -294,7 +280,6 @@ export {
     Output,
     OutputType,
     CommonOutput,
-    TreasuryOutput,
     BasicOutput,
     AliasOutput,
     NftOutput,

@@ -3,7 +3,6 @@ import {
     HexEncodedString,
     Block,
     TransactionEssence,
-    MilestonePayload,
     TransactionPayload,
     TransactionId,
     TokenSchemeType,
@@ -89,13 +88,6 @@ export interface __BlockIdMethod__ {
     name: 'blockId';
     data: {
         block: Block;
-    };
-}
-
-export interface __MilestoneIdMethod__ {
-    name: 'milestoneId';
-    data: {
-        payload: MilestonePayload;
     };
 }
 

@@ -29,7 +29,6 @@ async fn test_mqtt() {
                     MqttPayload::Json(_) => {
                         assert_eq!(evt.topic, "milestone-info/latest");
                     }
-                    _ => panic!("unexpected mqtt payload type: {:?}", evt),
                 }
                 match tx.try_send(()) {
                     Ok(_) | Err(TrySendError::Full(_)) => (),
