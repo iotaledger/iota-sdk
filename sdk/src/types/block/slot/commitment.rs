@@ -61,14 +61,14 @@ impl SlotCommitment {
     }
 
     /// Derives a [`SlotCommitmentId`] from the [`SlotCommitment`] and a [`SlotIndex`].
-    pub fn id(&self, index: SlotIndex) -> SlotCommitmentId {
+    pub fn id(&self) -> SlotCommitmentId {
         let mut bytes = [0u8; SlotCommitmentId::LENGTH];
         let mut packer = SlicePacker::new(&mut bytes);
         let hash: [u8; 32] = Blake2b256::digest(self.pack_to_vec()).into();
 
         // PANIC: packing to an array of bytes can't fail.
         hash.pack(&mut packer).unwrap();
-        index.pack(&mut packer).unwrap();
+        self.index.pack(&mut packer).unwrap();
 
         SlotCommitmentId::from(bytes)
     }
