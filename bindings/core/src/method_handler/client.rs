@@ -16,10 +16,7 @@ use iota_sdk::{
                 dto::{OutputBuilderAmountDto, OutputDto},
                 AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, RentStructure,
             },
-            payload::{
-                dto::{MilestonePayloadDto, PayloadDto},
-                Payload,
-            },
+            payload::{dto::PayloadDto, Payload},
             protocol::dto::ProtocolParametersDto,
             Block, BlockDto,
         },
@@ -48,8 +45,6 @@ where
                 MqttPayload::Block(block) => {
                     serde_json::to_string(&BlockDto::from(block)).expect("failed to serialize MqttPayload::Block")
                 }
-                MqttPayload::MilestonePayload(ms) => serde_json::to_string(&MilestonePayloadDto::from(ms))
-                    .expect("failed to serialize MqttPayload::MilestonePayload"),
             };
             let response = MqttResponse {
                 topic: topic_event.topic.clone(),
@@ -308,24 +303,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ),
         ClientMethod::GetOutputMetadata { output_id } => {
             Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
-        }
-        ClientMethod::GetMilestoneById { milestone_id } => Response::Milestone(MilestonePayloadDto::from(
-            &client.get_milestone_by_id(&milestone_id).await?,
-        )),
-        ClientMethod::GetMilestoneByIdRaw { milestone_id } => {
-            Response::MilestoneRaw(client.get_milestone_by_id_raw(&milestone_id).await?)
-        }
-        ClientMethod::GetMilestoneByIndex { index } => {
-            Response::Milestone(MilestonePayloadDto::from(&client.get_milestone_by_index(index).await?))
-        }
-        ClientMethod::GetMilestoneByIndexRaw { index } => {
-            Response::MilestoneRaw(client.get_milestone_by_index_raw(index).await?)
-        }
-        ClientMethod::GetUtxoChangesById { milestone_id } => {
-            Response::MilestoneUtxoChanges(client.get_utxo_changes_by_id(&milestone_id).await?)
-        }
-        ClientMethod::GetUtxoChangesByIndex { index } => {
-            Response::MilestoneUtxoChanges(client.get_utxo_changes_by_index(index).await?)
         }
         ClientMethod::GetIncludedBlock { transaction_id } => {
             Response::Block(BlockDto::from(&client.get_included_block(&transaction_id).await?))

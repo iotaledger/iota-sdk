@@ -3,7 +3,6 @@
 
 //! The payload module defines the core data types for representing block payloads.
 
-pub mod milestone;
 pub mod tagged_data;
 pub mod transaction;
 
@@ -17,15 +16,10 @@ use packable::{
     Packable, PackableExt,
 };
 
+pub use self::{tagged_data::TaggedDataPayload, transaction::TransactionPayload};
 pub(crate) use self::{
-    milestone::{MilestoneMetadataLength, MilestoneOptionCount, SignatureCount},
     tagged_data::{TagLength, TaggedDataLength},
     transaction::{InputCount, OutputCount},
-};
-pub use self::{
-    milestone::{MilestoneOptions, MilestonePayload},
-    tagged_data::TaggedDataPayload,
-    transaction::TransactionPayload,
 };
 use crate::types::block::{protocol::ProtocolParameters, Error};
 
@@ -39,8 +33,6 @@ use crate::types::block::{protocol::ProtocolParameters, Error};
 pub enum Payload {
     /// A transaction payload.
     Transaction(Box<TransactionPayload>),
-    /// A milestone payload.
-    Milestone(Box<MilestonePayload>),
     /// A tagged data payload.
     TaggedData(Box<TaggedDataPayload>),
 }
@@ -49,7 +41,6 @@ impl core::fmt::Debug for Payload {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::Transaction(payload) => payload.fmt(f),
-            Self::Milestone(payload) => payload.fmt(f),
             Self::TaggedData(payload) => payload.fmt(f),
         }
     }
@@ -58,12 +49,6 @@ impl core::fmt::Debug for Payload {
 impl From<TransactionPayload> for Payload {
     fn from(payload: TransactionPayload) -> Self {
         Self::Transaction(Box::new(payload))
-    }
-}
-
-impl From<MilestonePayload> for Payload {
-    fn from(payload: MilestonePayload) -> Self {
-        Self::Milestone(Box::new(payload))
     }
 }
 
@@ -78,7 +63,6 @@ impl Payload {
     pub fn kind(&self) -> u32 {
         match self {
             Self::Transaction(_) => TransactionPayload::KIND,
-            Self::Milestone(_) => MilestonePayload::KIND,
             Self::TaggedData(_) => TaggedDataPayload::KIND,
         }
     }
@@ -93,10 +77,6 @@ impl Packable for Payload {
             Self::Transaction(transaction) => {
                 TransactionPayload::KIND.pack(packer)?;
                 transaction.pack(packer)
-            }
-            Self::Milestone(milestone) => {
-                MilestonePayload::KIND.pack(packer)?;
-                milestone.pack(packer)
             }
             Self::TaggedData(tagged_data) => {
                 TaggedDataPayload::KIND.pack(packer)?;
@@ -115,7 +95,6 @@ impl Packable for Payload {
             TransactionPayload::KIND => {
                 Self::from(TransactionPayload::unpack::<_, VERIFY>(unpacker, visitor).coerce()?)
             }
-            MilestonePayload::KIND => Self::from(MilestonePayload::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             TaggedDataPayload::KIND => Self::from(TaggedDataPayload::unpack::<_, VERIFY>(unpacker, &()).coerce()?),
             k => return Err(Error::InvalidPayloadKind(k)).map_err(UnpackError::Packable),
         })
@@ -204,10 +183,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    pub use super::{
-        milestone::dto::MilestonePayloadDto, tagged_data::dto::TaggedDataPayloadDto,
-        transaction::dto::TransactionPayloadDto,
-    };
+    pub use super::{tagged_data::dto::TaggedDataPayloadDto, transaction::dto::TransactionPayloadDto};
     use crate::types::block::Error;
 
     /// Describes all the different payload types.
@@ -215,19 +191,12 @@ pub mod dto {
     #[serde(untagged)]
     pub enum PayloadDto {
         Transaction(Box<TransactionPayloadDto>),
-        Milestone(Box<MilestonePayloadDto>),
         TaggedData(Box<TaggedDataPayloadDto>),
     }
 
     impl From<TransactionPayloadDto> for PayloadDto {
         fn from(payload: TransactionPayloadDto) -> Self {
             Self::Transaction(Box::new(payload))
-        }
-    }
-
-    impl From<MilestonePayloadDto> for PayloadDto {
-        fn from(payload: MilestonePayloadDto) -> Self {
-            Self::Milestone(Box::new(payload))
         }
     }
 
@@ -241,7 +210,6 @@ pub mod dto {
         fn from(value: &Payload) -> Self {
             match value {
                 Payload::Transaction(p) => Self::Transaction(Box::new(TransactionPayloadDto::from(p.as_ref()))),
-                Payload::Milestone(p) => Self::Milestone(Box::new(MilestonePayloadDto::from(p.as_ref()))),
                 Payload::TaggedData(p) => Self::TaggedData(Box::new(TaggedDataPayloadDto::from(p.as_ref()))),
             }
         }
@@ -251,7 +219,6 @@ pub mod dto {
         pub fn try_from_dto(value: PayloadDto, protocol_parameters: &ProtocolParameters) -> Result<Self, Error> {
             Ok(match value {
                 PayloadDto::Transaction(p) => Self::from(TransactionPayload::try_from_dto(*p, protocol_parameters)?),
-                PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from_dto(*p, protocol_parameters)?),
                 PayloadDto::TaggedData(p) => Self::from(TaggedDataPayload::try_from(*p)?),
             })
         }
@@ -259,7 +226,6 @@ pub mod dto {
         pub fn try_from_dto_unverified(value: PayloadDto) -> Result<Self, Error> {
             Ok(match value {
                 PayloadDto::Transaction(p) => Self::from(TransactionPayload::try_from_dto_unverified(*p)?),
-                PayloadDto::Milestone(p) => Self::from(MilestonePayload::try_from_dto_unverified(*p)?),
                 PayloadDto::TaggedData(p) => Self::from(TaggedDataPayload::try_from(*p)?),
             })
         }

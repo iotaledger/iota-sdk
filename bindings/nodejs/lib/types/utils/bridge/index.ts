@@ -6,7 +6,6 @@ import type {
     __ComputeFoundryIdMethod__,
     __ParseBech32AddressMethod__,
     __BlockIdMethod__,
-    __MilestoneIdMethod__,
     __TransactionIdMethod__,
     __Bech32ToHexMethod__,
     __HexToBech32Method__,
@@ -29,7 +28,6 @@ export type __UtilsMethods__ =
     | __ComputeFoundryIdMethod__
     | __ParseBech32AddressMethod__
     | __BlockIdMethod__
-    | __MilestoneIdMethod__
     | __TransactionIdMethod__
     | __Bech32ToHexMethod__
     | __HexToBech32Method__

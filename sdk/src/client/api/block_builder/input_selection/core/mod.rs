@@ -277,7 +277,7 @@ impl InputSelection {
                 let (input_address, _) = input_signing_data
                     .output
                     .required_and_unlocked_address(time, input_signing_data.output_id(), alias_transition)
-                    // PANIC: safe to unwrap, because we filtered treasury outputs out before
+                    // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
                     .unwrap();
 
                 input_address.is_ed25519()
@@ -335,7 +335,7 @@ impl InputSelection {
                             let (input_address, _) = input_signing_data
                                 .output
                                 .required_and_unlocked_address(time, input.output_id(), alias_transition)
-                                // PANIC: safe to unwrap, because we filtered treasury outputs out before
+                                // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
                                 .unwrap();
 
                             input_address == alias_or_nft_address

@@ -10,7 +10,7 @@ use serde::{de::Error as _, Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 
 use super::Error;
-use crate::types::block::{payload::MilestonePayload, Block};
+use crate::types::block::Block;
 
 type TopicHandler = Box<dyn Fn(&TopicEvent) + Send + Sync>;
 
@@ -34,8 +34,6 @@ pub enum MqttPayload {
     Json(Value),
     /// In case it contains a `Block` object.
     Block(Block),
-    /// In case it contains a `Milestone` object.
-    MilestonePayload(MilestonePayload),
 }
 
 /// Mqtt events.
@@ -169,10 +167,6 @@ impl Topic {
     pub(crate) fn is_valid(&self) -> bool {
         let valid_topics = lazy_static!(
             RegexSet::new([
-                // Milestone topics.
-                r"^milestone-info/latest$",
-                r"^milestone-info/confirmed$",
-                r"^milestones$",
                 // Block topics.
                 r"^blocks$",
                 r"^blocks/transaction$",
