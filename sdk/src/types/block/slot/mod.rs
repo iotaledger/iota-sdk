@@ -1,7 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod commitment;
 mod commitment_id;
 mod index;
 
-pub use self::{commitment_id::SlotCommitmentId, index::SlotIndex};
+pub use self::{commitment::SlotCommitment, commitment_id::SlotCommitmentId, index::SlotIndex};
