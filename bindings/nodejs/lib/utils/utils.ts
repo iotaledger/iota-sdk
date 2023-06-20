@@ -12,8 +12,6 @@ import {
     Ed25519Signature,
     TransactionEssence,
     Response,
-    MilestonePayload,
-    MilestoneId,
     TransactionPayload,
     TransactionId,
 } from '../types';
@@ -106,18 +104,6 @@ export class Utils {
             name: 'blockId',
             data: {
                 block,
-            },
-        });
-    }
-
-    /**
-     * Returns a Milestone ID (Blake2b256 hash of the milestone essence)
-     */
-    static milestoneId(payload: MilestonePayload): MilestoneId {
-        return callUtilsMethod({
-            name: 'milestoneId',
-            data: {
-                payload,
             },
         });
     }

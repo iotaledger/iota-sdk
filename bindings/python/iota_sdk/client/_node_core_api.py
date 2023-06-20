@@ -87,48 +87,6 @@ class NodeCoreAPI():
             'outputId': output_id
         })
 
-    def get_milestone_by_id(self, milestone_id: HexStr):
-        """Get the milestone by the given milestone id.
-        """
-        return self._call_method('getMilestoneById', {
-            'milestoneId': milestone_id
-        })
-
-    def get_milestone_by_id_raw(self, milestone_id: HexStr):
-        """Get the raw milestone by the given milestone id.
-        """
-        return self._call_method('getMilestoneByIdRaw', {
-            'milestoneId': milestone_id
-        })
-
-    def get_milestone_by_index(self, index: int):
-        """Get the milestone by the given index.
-        """
-        return self._call_method('getMilestoneByIndex', {
-            'index': index
-        })
-
-    def get_milestone_by_index_raw(self, index: int):
-        """Get the milestone by the given index.
-        """
-        return self._call_method('getMilestoneByIndexRaw', {
-            'index': index
-        })
-
-    def get_utxo_changes_by_id(self, milestone_id: HexStr):
-        """Get the UTXO changes by the given milestone id.
-        """
-        return self._call_method('getUtxoChangesById', {
-            'milestoneId': milestone_id
-        })
-
-    def get_utxo_changes_by_index(self, index: int):
-        """Get the UTXO changes by the given milestone index.
-        """
-        return self._call_method('getUtxoChangesByIndex', {
-            'index': index
-        })
-
     def get_included_block(self, transaction_id):
         """Returns the included block of the transaction.
         """
