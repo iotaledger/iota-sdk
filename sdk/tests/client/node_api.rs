@@ -270,7 +270,9 @@ async fn test_mqtt() {
                 MqttPayload::Block(_) => {
                     assert_eq!(evt.topic, "blocks");
                 }
-                MqttPayload::Json(_) => {}
+                MqttPayload::Json(_) => {
+                    panic!("unexpected mqtt payload type: {:?}", evt)
+                }
             }
             match tx.try_send(()) {
                 Ok(_) | Err(TrySendError::Full(_)) => (),

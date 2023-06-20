@@ -13,11 +13,13 @@ use iota_sdk::types::block::{
         SimpleTokenScheme, TokenId, TokenScheme,
     },
     payload::{
-        transaction::{RegularTransactionEssence, TransactionId},
+        transaction::{RegularTransactionEssence, TransactionEssence, TransactionId, TransactionPayload},
         Payload,
     },
     protocol::protocol_parameters,
     rand::{output::rand_inputs_commitment, payload::rand_tagged_data_payload},
+    signature::{Ed25519Signature, Signature},
+    unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     Error,
 };
 use packable::bounded::TryIntoBoundedU16Error;
@@ -26,6 +28,8 @@ use primitive_types::U256;
 const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
 const ED25519_ADDRESS_1: &str = "0xd56da1eb7726ed482dfe9d457cf548c2ae2a6ce3e053dbf82f11223be476adb9";
 const ED25519_ADDRESS_2: &str = "0xefda4275375ac3675abff85235fd25a1522a2044cc6027a31b310857246f18c0";
+const ED25519_PUBLIC_KEY: &str = "0x1da5ddd11ba3f961acab68fafee3177d039875eaa94ac5fdbff8b53f0c50bfb9";
+const ED25519_SIGNATURE: &str = "0xc6a40edf9a089f42c18f4ebccb35fe4b578d93b879e99b87f63573324a710d3456b03fb6d1fcc027e6401cbd9581f790ee3ed7a3f68e9c225fcb9f1cd7b7110d";
 
 #[test]
 fn kind() {
@@ -105,30 +109,48 @@ fn build_valid_add_inputs_outputs() {
     assert!(essence.is_ok());
 }
 
-// #[test]
-// fn build_invalid_payload_kind() {
-//     let protocol_parameters = protocol_parameters();
-//     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-//     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-//     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
-//     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-//     let address = Address::from(Ed25519Address::new(bytes));
-//     let amount = 1_000_000;
-//     let output = Output::Basic(
-//         BasicOutput::build_with_amount(amount)
-//             .add_unlock_condition(AddressUnlockCondition::new(address))
-//             .finish(protocol_parameters.token_supply())
-//             .unwrap(),
-//     );
+#[test]
+fn build_invalid_payload_kind() {
+    let protocol_parameters = protocol_parameters();
+    // Construct a transaction essence with two inputs and one output.
+    let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
+    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
+    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
+    let address = Address::from(Ed25519Address::new(bytes));
+    let amount = 1_000_000;
+    let output = Output::Basic(
+        BasicOutput::build_with_amount(amount)
+            .add_unlock_condition(AddressUnlockCondition::new(address))
+            .finish(protocol_parameters.token_supply())
+            .unwrap(),
+    );
+    let essence = TransactionEssence::Regular(
+        RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+            .with_inputs([input1.clone(), input2.clone()])
+            .add_output(output.clone())
+            .finish(&protocol_parameters)
+            .unwrap(),
+    );
 
-//     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-//         .with_inputs(vec![input1, input2])
-//         .add_output(output)
-//         .with_payload(rand_milestone_payload(42))
-//         .finish(&protocol_parameters);
+    // Construct a list of two unlocks, whereas we only have 1 tx input.
+    let pub_key_bytes: [u8; 32] = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
+    let sig_bytes: [u8; 64] = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
+    let signature = Ed25519Signature::new(pub_key_bytes, sig_bytes);
+    let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::Ed25519(signature)));
+    let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
+    let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
-//     assert!(matches!(essence, Err(Error::InvalidPayloadKind(7))));
-// }
+    let tx_payload = TransactionPayload::new(essence.clone(), unlocks.clone()).unwrap();
+
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+        .with_inputs(vec![input1, input2])
+        .add_output(output)
+        .with_payload(tx_payload)
+        .finish(&protocol_parameters);
+
+    assert!(matches!(essence, Err(Error::InvalidPayloadKind(6))));
+}
 
 #[test]
 fn build_invalid_input_count_low() {

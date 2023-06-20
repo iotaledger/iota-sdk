@@ -33,6 +33,7 @@ async fn main() -> Result<()> {
         block_id
     );
 
+    // TODO uncomment when we have a new confirmation logic
     // Get the block metadata.
     // let metadata = client.get_block_metadata(&block_id).await?;
 
