@@ -6,6 +6,8 @@ import type {
     __ComputeFoundryIdMethod__,
     __ParseBech32AddressMethod__,
     __BlockIdMethod__,
+    __MilestoneIdMethod__,
+    __TransactionIdMethod__,
     __Bech32ToHexMethod__,
     __HexToBech32Method__,
     __AliasIdToBech32Method__,
@@ -14,6 +16,7 @@ import type {
     __IsAddressValidMethod__,
     __HashTransactionEssenceMethod__,
     __VerifyEd25519SignatureMethod__,
+    __VerifySecp256k1EcdsaSignatureMethod__,
     __VerifyMnemonicMethod__,
     __FaucetMethod__,
 } from './utils';
@@ -26,6 +29,8 @@ export type __UtilsMethods__ =
     | __ComputeFoundryIdMethod__
     | __ParseBech32AddressMethod__
     | __BlockIdMethod__
+    | __MilestoneIdMethod__
+    | __TransactionIdMethod__
     | __Bech32ToHexMethod__
     | __HexToBech32Method__
     | __AliasIdToBech32Method__
@@ -34,5 +39,6 @@ export type __UtilsMethods__ =
     | __IsAddressValidMethod__
     | __HashTransactionEssenceMethod__
     | __VerifyEd25519SignatureMethod__
+    | __VerifySecp256k1EcdsaSignatureMethod__
     | __VerifyMnemonicMethod__
     | __FaucetMethod__;

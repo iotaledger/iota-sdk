@@ -1,6 +1,6 @@
 [package]
 name = "iota-sdk"
-version = "0.3.0"
+version = "0.4.0"
 authors = [ "IOTA Stiftung" ]
 edition = "2021"
 description = "The IOTA SDK provides developers with a seamless experience to develop on IOTA by providing account abstractions and clients to interact with node APIs."
@@ -73,10 +73,10 @@ wasm-bindgen-futures = { version = "0.4.36", default-features = false, optional 
 
 [dev-dependencies]
 iota-sdk = { path = ".", default-features = false, features = [ "rand" ] }
-tokio = { version = "1.28.2", default-features = false, features = [ "fs", "macros", "rt", "time", "sync" ] }
 
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
+tokio = { version = "1.28.2", default-features = false, features = [ "macros", "rt", "rt-multi-thread", "time", "sync", "fs" ] }
 
 [features]
 default = [ "client", "wallet", "tls" ]
@@ -177,6 +177,18 @@ required-features = [ "rocksdb", "stronghold" ]
 [[example]]
 name = "claim_transaction"
 path = "examples/how_tos/advanced_transactions/claim_transaction.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+# Alias wallet example
+
+[[example]]
+name = "alias_wallet_request_funds"
+path = "examples/how_tos/alias_wallet/request_funds.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "alias_wallet_transaction"
+path = "examples/how_tos/alias_wallet/transaction.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
 # Outputs
@@ -707,18 +719,13 @@ path = "examples/wallet/output_consolidation.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
-name = "ping"
-path = "examples/wallet/ping.rs"
-required-features = [ "wallet", "storage" ]
-
-[[example]]
-name = "pong"
-path = "examples/wallet/pong.rs"
-required-features = [ "wallet", "storage" ]
-
-[[example]]
 name = "recover_accounts"
 path = "examples/wallet/recover_accounts.rs"
+required-features = [ "wallet" ]
+
+[[example]]
+name = "spammer"
+path = "examples/wallet/spammer.rs"
 required-features = [ "wallet" ]
 
 [[example]]
@@ -730,11 +737,6 @@ required-features = [ "wallet" ]
 name = "storage"
 path = "examples/wallet/storage.rs"
 required-features = [ "wallet", "storage" ]
-
-[[example]]
-name = "threads"
-path = "examples/wallet/threads.rs"
-required-features = [ "wallet" ]
 
 [[example]]
 name = "update_alias_output"

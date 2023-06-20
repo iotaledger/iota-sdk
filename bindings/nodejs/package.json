@@ -1,6 +1,6 @@
 {
     "name": "@iota/sdk",
-    "version": "0.1.0",
+    "version": "1.0.0-rc.1",
     "description": "Node.js binding to the IOTA SDK library",
     "main": "out/index.js",
     "types": "out/index.d.ts",
@@ -14,13 +14,12 @@
         "prebuild-x64": "prebuild --runtime napi --target 6 --prepack scripts/neon-build.js --strip --arch x64",
         "prebuild-arm64": "prebuild --runtime napi --target 6 --prepack scripts/neon-build.js --strip --arch arm64",
         "rebuild": "node scripts/neon-build && tsc && node scripts/strip.js",
-        "install": "prebuild-install --runtime napi --tag-prefix='sdk-binding-v' && tsc || npm run rebuild",
+        "install": "prebuild-install --runtime napi --tag-prefix='iota-sdk-nodejs-v' && tsc || npm run rebuild",
         "test": "jest --forceExit"
     },
     "author": "IOTA Foundation <contact@iota.org>",
     "license": "Apache-2.0",
     "dependencies": {
-        "@iota/types": "^1.0.0-beta.15",
         "@types/node": "^18.15.12",
         "cargo-cp-artifact": "^0.1.6",
         "class-transformer": "^0.5.1",

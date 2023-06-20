@@ -1,11 +1,14 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! TODO: Example description
+//! In this example we will write out all wallet logging events to a dedicated log file.
 //!
-//! `cargo run --example logger --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example logger
+//! ```
 
-use std::time::Instant;
+use std::env::var;
 
 use iota_sdk::{
     client::{
@@ -15,11 +18,17 @@ use iota_sdk::{
     wallet::{ClientOptions, Result, Wallet},
 };
 
+// The number of addresses to generate
+const NUM_ADDRESSES_TO_GENERATE: u32 = 5;
+
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Generates a wallet.log file with logs for debugging
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
+
+    // Initialize a logger that writes to the specified file
     let logger_output_config = fern_logger::LoggerOutputConfigBuilder::new()
-        .name("wallet.log")
+        .name("example.log")
         .target_exclusions(&["h2", "hyper", "rustls"])
         .level_filter(log::LevelFilter::Debug);
     let config = fern_logger::LoggerConfig::build()
@@ -27,39 +36,35 @@ async fn main() -> Result<()> {
         .finish();
     fern_logger::logger_init(config).unwrap();
 
-    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
-
+    // Restore a wallet
+    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
-
+        MnemonicSecretManager::try_from_mnemonic(var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
         .await?;
 
-    // Get account or create a new one
-    let account_alias = "logger";
-    let account = match wallet.get_account(account_alias).await {
-        Ok(account) => account,
-        _ => {
-            // first we'll create an example account and store it
-            wallet
-                .create_account()
-                .with_alias(account_alias.to_string())
-                .finish()
-                .await?
-        }
+    // Get or create a new account
+    let alias = "Alice";
+    let account = if let Ok(account) = wallet.get_account(alias).await {
+        account
+    } else {
+        println!("Creating account '{alias}'");
+        wallet.create_account().with_alias(alias).finish().await?
     };
 
-    let _address = account.generate_ed25519_addresses(5, None).await?;
+    println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses...");
+    let _ = account
+        .generate_ed25519_addresses(NUM_ADDRESSES_TO_GENERATE, None)
+        .await?;
 
-    let now = Instant::now();
-    let balance = account.sync(None).await?;
-    println!("Syncing took: {:.2?}", now.elapsed());
+    println!("Syncing account");
+    account.sync(None).await?;
 
-    println!("Balance: {balance:?}");
-
+    println!("Example finished successfully");
     Ok(())
 }

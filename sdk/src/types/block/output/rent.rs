@@ -18,50 +18,6 @@ const DEFAULT_BYTE_COST_FACTOR_DATA: u8 = 1;
 
 type ConfirmationUnixTimestamp = u32;
 
-/// Builder for a [`RentStructure`].
-#[derive(Default, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Deserialize), serde(rename_all = "camelCase"))]
-#[must_use]
-pub struct RentStructureBuilder {
-    v_byte_cost: Option<u32>,
-    v_byte_factor_key: Option<u8>,
-    v_byte_factor_data: Option<u8>,
-}
-
-impl RentStructureBuilder {
-    /// Returns a new [`RentStructureBuilder`].
-    pub fn new() -> Self {
-        Default::default()
-    }
-
-    /// Sets the byte cost for the storage deposit.
-    pub fn byte_cost(mut self, byte_cost: impl Into<Option<u32>>) -> Self {
-        self.v_byte_cost = byte_cost.into();
-        self
-    }
-
-    /// Sets the virtual byte weight for the key fields.
-    pub fn byte_factor_key(mut self, weight: impl Into<Option<u8>>) -> Self {
-        self.v_byte_factor_key = weight.into();
-        self
-    }
-
-    /// Sets the virtual byte weight for the data fields.
-    pub fn byte_factor_data(mut self, weight: impl Into<Option<u8>>) -> Self {
-        self.v_byte_factor_data = weight.into();
-        self
-    }
-
-    /// Returns the built [`RentStructure`].
-    pub fn finish(self) -> RentStructure {
-        RentStructure {
-            v_byte_cost: self.v_byte_cost.unwrap_or(DEFAULT_BYTE_COST),
-            v_byte_factor_key: self.v_byte_factor_key.unwrap_or(DEFAULT_BYTE_COST_FACTOR_KEY),
-            v_byte_factor_data: self.v_byte_factor_data.unwrap_or(DEFAULT_BYTE_COST_FACTOR_DATA),
-        }
-    }
-}
-
 /// Specifies the current parameters for the byte cost computation.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(
@@ -80,23 +36,40 @@ pub struct RentStructure {
 
 impl Default for RentStructure {
     fn default() -> Self {
-        RentStructureBuilder::new().finish()
+        Self {
+            v_byte_cost: DEFAULT_BYTE_COST,
+            v_byte_factor_key: DEFAULT_BYTE_COST_FACTOR_KEY,
+            v_byte_factor_data: DEFAULT_BYTE_COST_FACTOR_DATA,
+        }
     }
 }
 
 impl RentStructure {
     /// Creates a new [`RentStructure`].
     pub fn new(byte_cost: u32, byte_factor_key: u8, byte_factor_data: u8) -> Self {
-        Self::build()
-            .byte_cost(byte_cost)
-            .byte_factor_key(byte_factor_key)
-            .byte_factor_data(byte_factor_data)
-            .finish()
+        Self {
+            v_byte_cost: byte_cost,
+            v_byte_factor_key: byte_factor_key,
+            v_byte_factor_data: byte_factor_data,
+        }
     }
 
-    /// Returns a builder for a [`RentStructure`].
-    pub fn build() -> RentStructureBuilder {
-        RentStructureBuilder::new()
+    /// Sets the byte cost for the storage deposit.
+    pub fn with_byte_cost(mut self, byte_cost: u32) -> Self {
+        self.v_byte_cost = byte_cost;
+        self
+    }
+
+    /// Sets the virtual byte weight for the key fields.
+    pub fn with_byte_factor_key(mut self, byte_factor_key: u8) -> Self {
+        self.v_byte_factor_key = byte_factor_key;
+        self
+    }
+
+    /// Sets the virtual byte weight for the data fields.
+    pub fn with_byte_factor_data(mut self, byte_factor_data: u8) -> Self {
+        self.v_byte_factor_data = byte_factor_data;
+        self
     }
 
     /// Returns the byte cost of the [`RentStructure`].

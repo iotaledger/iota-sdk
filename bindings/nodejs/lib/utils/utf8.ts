@@ -1,3 +1,6 @@
+// Copyright 2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 /** Convert UTF8 string to an array of bytes */
 export const utf8ToBytes = (utf8: string) => {
     const utf8Encode = new TextEncoder();

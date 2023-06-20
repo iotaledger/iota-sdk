@@ -47,7 +47,7 @@ async fn backup_and_restore() -> Result<()> {
         .finish()
         .await?;
 
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
@@ -136,7 +136,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
         .finish()
         .await?;
 
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     let stronghold_password = "some_hopefully_secure_password".to_owned();
 
@@ -226,7 +226,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
         .await?;
 
     // Create one account
-    wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
@@ -311,7 +311,7 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
         .await?;
 
     // Create one account
-    let account_before_backup = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account_before_backup = wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
@@ -394,7 +394,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
         .await?;
 
     // Create one account
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(
@@ -481,7 +481,7 @@ async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
         .finish()
         .await?;
 
-    let account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let account = wallet.create_account().with_alias("Alice").finish().await?;
 
     wallet
         .backup(

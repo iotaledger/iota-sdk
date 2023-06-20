@@ -14,7 +14,7 @@ pub use self::options::{RemainderValueStrategy, TransactionOptions, TransactionO
 use crate::{
     client::{
         api::{verify_semantic, PreparedTransactionData, SignedTransactionData},
-        secret::types::InputSigningData,
+        secret::{types::InputSigningData, SecretManage},
         Error,
     },
     types::{
@@ -34,7 +34,10 @@ use crate::{
     },
 };
 
-impl Account {
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Send a transaction, if sending a block fails, the function will return None for the block_id, but the wallet
     /// will retry sending the transaction during syncing.
     /// ```ignore
@@ -88,16 +91,19 @@ impl Account {
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!("[TRANSACTION] finish_transaction");
+        let options = options.into();
 
-        let prepared_transaction_data = self.prepare_transaction(outputs, options).await?;
+        let prepared_transaction_data = self.prepare_transaction(outputs, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction_data).await
+        self.sign_and_submit_transaction(prepared_transaction_data, options)
+            .await
     }
 
     /// Sign a transaction, submit it to a node and store it in the account
     pub async fn sign_and_submit_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!("[TRANSACTION] sign_and_submit_transaction");
 
@@ -110,18 +116,21 @@ impl Account {
             }
         };
 
-        self.submit_and_store_transaction(signed_transaction_data).await
+        self.submit_and_store_transaction(signed_transaction_data, options)
+            .await
     }
 
     /// Validate the transaction, submit it to a node and store it in the account
     pub async fn submit_and_store_transaction(
         &self,
         signed_transaction_data: SignedTransactionData,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
         log::debug!(
             "[TRANSACTION] submit_and_store_transaction {}",
             signed_transaction_data.transaction_payload.id()
         );
+        let options = options.into();
 
         // Validate transaction before sending and storing it
         let local_time = self.client().get_time_checked().await?;
@@ -176,7 +185,7 @@ impl Account {
             timestamp: crate::utils::unix_timestamp_now().as_millis(),
             inclusion_state: InclusionState::Pending,
             incoming: false,
-            note: None,
+            note: options.and_then(|o| o.note),
             inputs,
         };
 

@@ -15,7 +15,7 @@ use std::path::Path;
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
-        secret::{SecretManager, SignTransactionEssence},
+        secret::{SecretManage, SecretManager},
         Result,
     },
     types::block::payload::transaction::TransactionPayload,

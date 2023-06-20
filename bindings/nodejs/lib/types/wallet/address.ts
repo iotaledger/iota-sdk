@@ -1,11 +1,7 @@
-import type { HexEncodedAmount } from '@iota/types';
+// Copyright 2021-2023 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
 
-/** Address Types */
-export enum AddressType {
-    Ed25519 = 'Ed25519',
-    Alias = 'Alias',
-    Nft = 'Nft',
-}
+import { HexEncodedAmount } from '../utils';
 
 /** An Address of the Account */
 export interface AccountAddress {

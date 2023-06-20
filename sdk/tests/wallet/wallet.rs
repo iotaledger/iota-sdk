@@ -59,7 +59,7 @@ async fn different_seed() -> Result<()> {
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
-    let _account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let _account = wallet.create_account().with_alias("Alice").finish().await?;
 
     drop(_account);
     drop(wallet);
@@ -68,14 +68,7 @@ async fn different_seed() -> Result<()> {
     let wallet = make_wallet(storage_path, None, None).await?;
 
     // Generating a new account needs to return an error, because the seed from the secret_manager is different
-    assert!(
-        wallet
-            .create_account()
-            .with_alias("Bob".to_string())
-            .finish()
-            .await
-            .is_err()
-    );
+    assert!(wallet.create_account().with_alias("Bob").finish().await.is_err());
 
     tear_down(storage_path)
 }
@@ -89,7 +82,7 @@ async fn changed_coin_type() -> Result<()> {
     let mnemonic = DEFAULT_MNEMONIC.to_owned();
 
     let wallet = make_wallet(storage_path, Some(mnemonic.clone()), None).await?;
-    let _account = wallet.create_account().with_alias("Alice".to_string()).finish().await?;
+    let _account = wallet.create_account().with_alias("Alice").finish().await?;
 
     drop(_account);
     drop(wallet);
@@ -122,14 +115,7 @@ async fn changed_coin_type() -> Result<()> {
         .finish()
         .await?;
     // Also still possible to create a new account
-    assert!(
-        wallet
-            .create_account()
-            .with_alias("Bob".to_string())
-            .finish()
-            .await
-            .is_ok()
-    );
+    assert!(wallet.create_account().with_alias("Bob").finish().await.is_ok());
 
     tear_down(storage_path)
 }

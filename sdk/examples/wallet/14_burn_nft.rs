@@ -2,33 +2,45 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will burn an existing nft output.
-//! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --example burn_nft --release`
+//! Make sure that `example.stronghold` and `example.walletdb` already exist by
+//! running the `create_account` example!
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --all-features --example burn_nft
+//! ```
 
-use iota_sdk::wallet::{Result, Wallet};
+use std::env::var;
+
+use iota_sdk::{wallet::Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
+    let wallet = Wallet::builder()
+        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
+    let alias = "Alice";
+    let account = wallet.get_account(alias).await?;
 
-    // Get the account we generated with `01_create_wallet`
-    let account = wallet.get_account("Alice").await?;
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
 
     // Get the first nft
     if let Some(nft_id) = balance.nfts().first() {
-        println!("Balance before burning:\n{balance:?}",);
+        let nfts_before = balance.nfts();
+        println!("NFTs BEFORE destroying:\n{nfts_before:#?}",);
 
         // Set the stronghold password
         wallet
-            .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+            .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
+
+        println!("Sending NFT burn transaction...");
 
         let transaction = account.burn(*nft_id, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
@@ -38,14 +50,18 @@ async fn main() -> Result<()> {
             .await?;
 
         println!(
-            "Block included: {}/block/{}",
-            std::env::var("EXPLORER_URL").unwrap(),
+            "Transaction included: {}/block/{}",
+            var("EXPLORER_URL").unwrap(),
             block_id
         );
 
-        let balance = account.sync(None).await?;
+        println!("Burned NFT '{}'", nft_id);
 
-        println!("Balance after burning:\n{balance:?}",);
+        let balance = account.sync(None).await?;
+        let nfts_after = balance.nfts();
+        println!("NFTs AFTER destroying:\n{nfts_after:#?}",);
+    } else {
+        println!("No NFT available in account '{alias}'");
     }
 
     Ok(())

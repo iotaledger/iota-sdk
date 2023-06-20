@@ -9,11 +9,8 @@
  Create as many sidebars as you want.
  */
 
-// @ts-check
-
-/** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
-const sidebars = {
-    tutorialSidebar: [
+module.exports = {
+    docs: [
       {
         type: 'doc',
         id: 'welcome',
@@ -36,10 +33,8 @@ const sidebars = {
       },
       {
         type: 'doc',
-        id: 'step_by_step',
+        id: 'step-by-step',
         label: 'Step by step'
       },
     ],
 };
-
-module.exports = sidebars;

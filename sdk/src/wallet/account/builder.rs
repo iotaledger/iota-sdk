@@ -6,8 +6,8 @@ use std::collections::{HashMap, HashSet};
 use tokio::sync::RwLock;
 
 use crate::{
-    client::{api::GetAddressesOptions, secret::SecretManager},
-    types::block::address::{Bech32Address, Hrp},
+    client::secret::{SecretManage, SecretManager},
+    types::block::address::{Address, Bech32Address, Ed25519Address, Hrp},
     wallet::{
         account::{types::AccountAddress, Account, AccountDetails},
         Error, Wallet,
@@ -15,16 +15,19 @@ use crate::{
 };
 
 /// The AccountBuilder
-pub struct AccountBuilder {
+pub struct AccountBuilder<S: SecretManage = SecretManager> {
     addresses: Option<Vec<AccountAddress>>,
     alias: Option<String>,
     bech32_hrp: Option<Hrp>,
-    wallet: Wallet,
+    wallet: Wallet<S>,
 }
 
-impl AccountBuilder {
+impl<S: 'static + SecretManage> AccountBuilder<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     /// Create an IOTA client builder
-    pub fn new(wallet: Wallet) -> Self {
+    pub fn new(wallet: Wallet<S>) -> Self {
         Self {
             addresses: None,
             alias: None,
@@ -41,8 +44,8 @@ impl AccountBuilder {
     }
 
     /// Set the alias
-    pub fn with_alias(mut self, alias: impl Into<Option<String>>) -> Self {
-        self.alias = alias.into();
+    pub fn with_alias(mut self, alias: impl Into<String>) -> Self {
+        self.alias = Some(alias.into());
         self
     }
 
@@ -55,7 +58,7 @@ impl AccountBuilder {
     /// Build the Account and add it to the accounts from Wallet
     /// Also generates the first address of the account and if it's not the first account, the address for the first
     /// account will also be generated and compared, so no accounts get generated with different seeds
-    pub async fn finish(&mut self) -> crate::wallet::Result<Account> {
+    pub async fn finish(&mut self) -> crate::wallet::Result<Account<S>> {
         let mut accounts = self.wallet.accounts.write().await;
         let account_index = accounts.len() as u32;
         // If no alias is provided, the account index will be set as alias
@@ -91,7 +94,7 @@ impl AccountBuilder {
                         get_first_public_address(&self.wallet.secret_manager, first_account_coin_type, 0).await?;
                     let first_account_addresses = first_account.public_addresses().await;
 
-                    if first_account_public_address.inner
+                    if Address::Ed25519(first_account_public_address)
                         != first_account_addresses
                             .first()
                             .ok_or(Error::FailedToGetRemainder)?
@@ -160,19 +163,17 @@ impl AccountBuilder {
 }
 
 /// Generate the first public address of an account
-pub(crate) async fn get_first_public_address(
-    secret_manager: &RwLock<SecretManager>,
+pub(crate) async fn get_first_public_address<S: SecretManage>(
+    secret_manager: &RwLock<S>,
     coin_type: u32,
     account_index: u32,
-) -> crate::wallet::Result<Bech32Address> {
+) -> crate::wallet::Result<Ed25519Address>
+where
+    crate::wallet::Error: From<S::Error>,
+{
     Ok(secret_manager
         .read()
         .await
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_coin_type(coin_type)
-                .with_account_index(account_index)
-                .with_range(0..1),
-        )
+        .generate_ed25519_addresses(coin_type, account_index, 0..1, None)
         .await?[0])
 }
