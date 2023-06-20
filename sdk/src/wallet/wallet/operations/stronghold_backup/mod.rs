@@ -187,7 +187,7 @@ impl Wallet {
                 .with_storage_path(
                     &self
                         .storage_options
-                        .path
+                        .storage_path
                         .clone()
                         .into_os_string()
                         .into_string()
@@ -350,7 +350,7 @@ impl Wallet<StrongholdSecretManager> {
                 .with_storage_path(
                     &self
                         .storage_options
-                        .path
+                        .storage_path
                         .clone()
                         .into_os_string()
                         .into_string()
