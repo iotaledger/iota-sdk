@@ -7,7 +7,6 @@ use iota_sdk::{
     client::{api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, Client, NodeInfoWrapper},
     types::block::{
         output::{Output, OutputId},
-        payload::Payload,
         Block,
     },
 };
@@ -159,117 +158,6 @@ async fn test_get_output_raw() {
 #[tokio::test]
 async fn test_get_peers() {
     let r = setup_client_with_node_health_ignored().await.get_peers().await.unwrap();
-
-    println!("{r:#?}");
-}
-
-#[ignore]
-#[tokio::test]
-async fn test_get_milestone_by_id() {
-    let client = setup_client_with_node_health_ignored().await;
-
-    let node_info = client.get_info().await.unwrap();
-
-    let r = client
-        .get_milestone_by_id(&node_info.node_info.status.latest_milestone.milestone_id.unwrap())
-        .await
-        .unwrap();
-
-    println!("{r:#?}");
-}
-
-#[ignore]
-#[tokio::test]
-async fn test_get_milestone_by_id_raw() {
-    let client = setup_client_with_node_health_ignored().await;
-
-    let latest_milestone_id = client
-        .get_info()
-        .await
-        .unwrap()
-        .node_info
-        .status
-        .latest_milestone
-        .milestone_id
-        .unwrap();
-
-    let milestone = client.get_milestone_by_id(&latest_milestone_id).await.unwrap();
-    let milestone_raw = Payload::unpack_verified(
-        client.get_milestone_by_id_raw(&latest_milestone_id).await.unwrap(),
-        &client.get_protocol_parameters().await.unwrap(),
-    )
-    .unwrap();
-
-    if let Payload::Milestone(milestone_raw) = milestone_raw {
-        assert_eq!(milestone, *milestone_raw);
-    } else {
-        panic!("expected a milestone payload")
-    }
-}
-
-#[ignore]
-#[tokio::test]
-async fn test_get_milestone_by_index() {
-    let client = setup_client_with_node_health_ignored().await;
-
-    let node_info = client.get_info().await.unwrap();
-
-    let r = client
-        .get_milestone_by_index(node_info.node_info.status.latest_milestone.index)
-        .await
-        .unwrap();
-
-    println!("{r:#?}");
-}
-
-#[ignore]
-#[tokio::test]
-async fn test_get_milestone_by_index_raw() {
-    let client = setup_client_with_node_health_ignored().await;
-
-    let milestone_index = client.get_info().await.unwrap().node_info.status.latest_milestone.index;
-
-    let milestone = client.get_milestone_by_index(milestone_index).await.unwrap();
-    let milestone_raw = Payload::unpack_verified(
-        client.get_milestone_by_index_raw(milestone_index).await.unwrap(),
-        &client.get_protocol_parameters().await.unwrap(),
-    )
-    .unwrap();
-
-    if let Payload::Milestone(milestone_raw) = milestone_raw {
-        assert_eq!(milestone, *milestone_raw);
-    } else {
-        panic!("expected a milestone payload")
-    }
-}
-
-#[ignore]
-#[tokio::test]
-async fn test_get_utxo_changes_by_id() {
-    let client = setup_client_with_node_health_ignored().await;
-
-    let node_info = client.get_info().await.unwrap();
-
-    let r = client
-        .get_utxo_changes_by_id(&node_info.node_info.status.confirmed_milestone.milestone_id.unwrap())
-        .await
-        .unwrap();
-
-    println!("{r:#?}");
-}
-
-#[ignore]
-#[tokio::test]
-async fn test_get_utxo_changes_by_index() {
-    let client = setup_client_with_node_health_ignored().await;
-
-    let node_info = client.get_info().await.unwrap();
-
-    let r = client
-        .get_utxo_changes_by_index(node_info.node_info.status.confirmed_milestone.index)
-        .await
-        .unwrap();
-    assert_eq!(r.index, node_info.node_info.status.confirmed_milestone.index);
 
     println!("{r:#?}");
 }

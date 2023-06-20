@@ -22,7 +22,7 @@ use iota_sdk::{
             unlock_condition::dto::UnlockConditionDto,
             AliasId, FoundryId, NativeToken, NftId, OutputId,
         },
-        payload::{dto::PayloadDto, milestone::MilestoneId, transaction::TransactionId},
+        payload::{dto::PayloadDto, transaction::TransactionId},
         BlockDto, BlockId,
     },
 };
@@ -221,39 +221,6 @@ pub enum ClientMethod {
     GetOutputMetadata {
         /// Output ID
         output_id: OutputId,
-    },
-    /// Get the milestone by the given milestone id.
-    #[serde(rename_all = "camelCase")]
-    GetMilestoneById {
-        /// Milestone ID
-        milestone_id: MilestoneId,
-    },
-    /// Get the raw milestone by the given milestone id.
-    #[serde(rename_all = "camelCase")]
-    GetMilestoneByIdRaw {
-        /// Milestone ID
-        milestone_id: MilestoneId,
-    },
-    /// Get the milestone by the given index.
-    GetMilestoneByIndex {
-        /// Milestone Index
-        index: u32,
-    },
-    /// Get the raw milestone by the given index.
-    GetMilestoneByIndexRaw {
-        /// Milestone Index
-        index: u32,
-    },
-    /// Get the UTXO changes by the given milestone id.
-    #[serde(rename_all = "camelCase")]
-    GetUtxoChangesById {
-        /// Milestone ID
-        milestone_id: MilestoneId,
-    },
-    /// Get the UTXO changes by the given milestone index.
-    GetUtxoChangesByIndex {
-        /// Milestone Index
-        index: u32,
     },
     /// Returns the included block of the transaction.
     #[serde(rename_all = "camelCase")]

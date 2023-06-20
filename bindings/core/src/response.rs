@@ -17,7 +17,6 @@ use iota_sdk::{
         api::{
             core::response::{
                 BlockMetadataResponse, InfoResponse as NodeInfo, OutputWithMetadataResponse, PeerResponse,
-                UtxoChangesResponse as MilestoneUTXOChanges,
             },
             plugins::indexer::OutputIdsResponse,
         },
@@ -25,11 +24,7 @@ use iota_sdk::{
             address::{dto::AddressDto, Bech32Address, Hrp},
             input::dto::UtxoInputDto,
             output::{dto::OutputDto, AliasId, FoundryId, NftId, OutputId, OutputMetadata, TokenId},
-            payload::{
-                dto::{MilestonePayloadDto, TransactionPayloadDto},
-                milestone::MilestoneId,
-                transaction::TransactionId,
-            },
+            payload::{dto::TransactionPayloadDto, transaction::TransactionId},
             protocol::ProtocolParameters,
             signature::dto::Ed25519SignatureDto,
             unlock::dto::UnlockDto,
@@ -144,14 +139,6 @@ pub enum Response {
     /// - [`GetOutputsIgnoreErrors`](crate::method::ClientMethod::GetOutputsIgnoreErrors)
     Outputs(Vec<OutputWithMetadataResponse>),
     /// Response for:
-    /// - [`GetMilestoneById`](crate::method::ClientMethod::GetMilestoneById)
-    /// - [`GetMilestoneByIndex`](crate::method::ClientMethod::GetMilestoneByIndex)
-    Milestone(MilestonePayloadDto),
-    /// Response for:
-    /// - [`GetUtxoChangesById`](crate::method::ClientMethod::GetUtxoChangesById)
-    /// - [`GetUtxoChangesByIndex`](crate::method::ClientMethod::GetUtxoChangesByIndex)
-    MilestoneUtxoChanges(MilestoneUTXOChanges),
-    /// Response for:
     /// - [`AliasOutputId`](crate::method::ClientMethod::AliasOutputId)
     /// - [`FoundryOutputId`](crate::method::ClientMethod::FoundryOutputId)
     /// - [`NftOutputId`](crate::method::ClientMethod::NftOutputId)
@@ -194,9 +181,6 @@ pub enum Response {
     /// Response for:
     /// - [`MnemonicToHexSeed`](crate::method::UtilsMethod::MnemonicToHexSeed)
     MnemonicHexSeed(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
-    /// Response for:
-    /// - [`MilestoneId`](crate::method::UtilsMethod::MilestoneId)
-    MilestoneId(MilestoneId),
     /// Response for:
     /// - [`ComputeTokenId`](crate::method::UtilsMethod::ComputeTokenId)
     TokenId(TokenId),

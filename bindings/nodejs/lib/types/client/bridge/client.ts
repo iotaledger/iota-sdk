@@ -189,33 +189,6 @@ export interface __GetBlockRawMethod__ {
     };
 }
 
-export interface __GetMilestoneByIdMethod__ {
-    name: 'getMilestoneById';
-    data: {
-        milestoneId: string;
-    };
-}
-
-export interface __GetUtxoChangesByIdMethod__ {
-    name: 'getUtxoChangesById';
-    data: {
-        milestoneId: string;
-    };
-}
-export interface __GetMilestoneByIndexMethod__ {
-    name: 'getMilestoneByIndex';
-    data: {
-        index: number;
-    };
-}
-
-export interface __GetUtxoChangesByIndexMethod__ {
-    name: 'getUtxoChangesByIndex';
-    data: {
-        index: number;
-    };
-}
-
 export interface __GetIncludedBlockMethod__ {
     name: 'getIncludedBlock';
     data: {

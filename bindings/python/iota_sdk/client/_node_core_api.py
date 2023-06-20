@@ -122,62 +122,6 @@ class NodeCoreAPI():
             'outputId': output_id_str
         }))
 
-    def get_milestone_by_id(self, milestone_id: HexStr) -> MilestonePayload:
-        """Get the milestone corresponding to the given milestone id.
-
-        Returns:
-            The milestone payload.
-        """
-        result = self._call_method('getMilestoneById', {
-            'milestoneId': milestone_id
-        })
-        return MilestonePayload.from_dict(result)
-
-    def get_milestone_by_id_raw(self, milestone_id: HexStr) -> List[int]:
-        """Get the raw bytes of the milestone corresponding to the given milestone id.
-
-        Returns:
-            The raw bytes of the milestone.
-        """
-        return self._call_method('getMilestoneByIdRaw', {
-            'milestoneId': milestone_id
-        })
-
-    def get_milestone_by_index(self, index: int) -> MilestonePayload:
-        """Get the milestone by the given milestone index.
-
-        Returns:
-            The milestone payload.
-        """
-        result = self._call_method('getMilestoneByIndex', {
-            'index': index
-        })
-        return MilestonePayload.from_dict(result)
-
-    def get_milestone_by_index_raw(self, index: int) -> List[int]:
-        """Get the raw bytes of the milestone corresponding to the given milestone index.
-
-        Returns:
-            The raw bytes of the milestone.
-        """
-        return self._call_method('getMilestoneByIndexRaw', {
-            'index': index
-        })
-
-    def get_utxo_changes_by_id(self, milestone_id: HexStr) -> UtxoChanges:
-        """Get the UTXO changes applied in the given milestone.
-        """
-        return from_dict(UtxoChanges, self._call_method('getUtxoChangesById', {
-            'milestoneId': milestone_id
-        }))
-
-    def get_utxo_changes_by_index(self, index: int) -> UtxoChanges:
-        """Get the UTXO changes applied at the given milestone index.
-        """
-        return from_dict(UtxoChanges, self._call_method('getUtxoChangesByIndex', {
-            'index': index
-        }))
-
     def get_included_block(self, transaction_id: HexStr) -> Block:
         """Returns the included block of the given transaction.
 

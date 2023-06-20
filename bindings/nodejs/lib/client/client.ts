@@ -34,7 +34,6 @@ import {
     UnlockCondition,
     Payload,
     TransactionPayload,
-    MilestonePayload,
     Output,
 } from '../types/block';
 import { HexEncodedString } from '../utils';
@@ -47,11 +46,7 @@ import {
     Response,
     OutputId,
 } from '../types';
-import {
-    IMilestoneUtxoChangesResponse,
-    OutputResponse,
-    IOutputsResponse,
-} from '../types/models/api';
+import { OutputResponse, IOutputsResponse } from '../types/models/api';
 
 import { plainToInstance } from 'class-transformer';
 
@@ -467,65 +462,6 @@ export class Client {
             name: 'getBlockRaw',
             data: {
                 blockId,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Look up a milestone by a given milestone index.
-     */
-    async getMilestoneById(milestoneId: string): Promise<MilestonePayload> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getMilestoneById',
-            data: {
-                milestoneId,
-            },
-        });
-        const parsed = JSON.parse(response) as Response<MilestonePayload>;
-        return plainToInstance(MilestonePayload, parsed.payload);
-    }
-
-    /**
-     * Returns all UTXO changes that happened at a specific milestone.
-     */
-    async getUtxoChangesById(
-        milestoneId: string,
-    ): Promise<IMilestoneUtxoChangesResponse> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getUtxoChangesById',
-            data: {
-                milestoneId,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-    /**
-     * Look up a milestone by a given milestone index.
-     */
-    async getMilestoneByIndex(index: number): Promise<MilestonePayload> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getMilestoneByIndex',
-            data: {
-                index,
-            },
-        });
-        const parsed = JSON.parse(response) as Response<MilestonePayload>;
-        return plainToInstance(MilestonePayload, parsed.payload);
-    }
-
-    /**
-     * Returns all UTXO changes that happened at a specific milestone.
-     */
-    async getUtxoChangesByIndex(
-        index: number,
-    ): Promise<IMilestoneUtxoChangesResponse> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getUtxoChangesByIndex',
-            data: {
-                index,
             },
         });
 

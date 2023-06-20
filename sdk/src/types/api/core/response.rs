@@ -4,8 +4,7 @@
 use alloc::{string::String, vec::Vec};
 
 use crate::types::block::{
-    output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
-    payload::milestone::MilestoneId,
+    output::{dto::OutputDto, OutputMetadata, OutputWithMetadata},
     protocol::ProtocolParameters,
     BlockId,
 };
@@ -65,7 +64,7 @@ pub struct LatestMilestoneResponse {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub timestamp: Option<u32>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub milestone_id: Option<MilestoneId>,
+    pub milestone_id: Option<String>,
 }
 
 /// Returned in [`StatusResponse`].
@@ -81,7 +80,7 @@ pub struct ConfirmedMilestoneResponse {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub timestamp: Option<u32>,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub milestone_id: Option<MilestoneId>,
+    pub milestone_id: Option<String>,
 }
 
 /// Returned in [`InfoResponse`].
@@ -223,20 +222,6 @@ impl From<OutputWithMetadata> for OutputWithMetadataResponse {
     fn from(value: OutputWithMetadata) -> Self {
         Self::from(&value)
     }
-}
-
-/// Response of GET /api/core/v2/milestone/{milestone_index}/utxo-changes.
-/// Returns all UTXO changes that happened at a specific milestone.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct UtxoChangesResponse {
-    pub index: u32,
-    pub created_outputs: Vec<OutputId>,
-    pub consumed_outputs: Vec<OutputId>,
 }
 
 /// Describes the heartbeat of a node.

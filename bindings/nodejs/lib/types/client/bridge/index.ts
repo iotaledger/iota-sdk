@@ -51,10 +51,6 @@ import type {
     __PromoteMethod__,
     __PromoteUncheckedMethod__,
     __UnhealthyNodesMethod__,
-    __GetMilestoneByIdMethod__,
-    __GetUtxoChangesByIdMethod__,
-    __GetMilestoneByIndexMethod__,
-    __GetUtxoChangesByIndexMethod__,
     __BuildBasicOutputMethod__,
     __BuildAliasOutputMethod__,
     __BuildFoundryOutputMethod__,
@@ -95,10 +91,6 @@ export type __ClientMethods__ =
     | __GetPeersMethod__
     | __PostBlockRawMethod__
     | __GetBlockRawMethod__
-    | __GetMilestoneByIdMethod__
-    | __GetUtxoChangesByIdMethod__
-    | __GetMilestoneByIndexMethod__
-    | __GetUtxoChangesByIndexMethod__
     | __GetIncludedBlockMethod__
     | __GetIncludedBlockMetadataMethod__
     | __HexToBech32Method__

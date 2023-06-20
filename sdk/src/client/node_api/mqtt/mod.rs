@@ -17,7 +17,7 @@ use tokio::sync::watch::Receiver as WatchReceiver;
 pub use self::{error::Error, types::*};
 use crate::{
     client::{Client, ClientInner},
-    types::block::{payload::Payload, Block},
+    types::block::Block,
 };
 
 impl Client {
@@ -196,27 +196,6 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
                                             }),
                                             Err(e) => {
                                                 warn!("Block unpacking failed: {:?}", e);
-                                                Err(())
-                                            }
-                                        }
-                                    } else if p.topic.contains("milestones") {
-                                        let payload = &*p.payload;
-                                        let protocol_parameters = &client.network_info.read().await.protocol_parameters;
-
-                                        match Payload::unpack_verified(payload, protocol_parameters) {
-                                            Ok(Payload::Milestone(milestone)) => Ok(TopicEvent {
-                                                topic: p.topic.clone(),
-                                                payload: MqttPayload::MilestonePayload(milestone.as_ref().into()),
-                                            }),
-                                            Ok(p) => {
-                                                warn!(
-                                                    "'milestone' topic returned non-milestone payload, kind: {:?}",
-                                                    p.kind()
-                                                );
-                                                Err(())
-                                            }
-                                            Err(e) => {
-                                                warn!("MilestonePayload unpacking failed: {:?}", e);
                                                 Err(())
                                             }
                                         }

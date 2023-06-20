@@ -16,14 +16,11 @@ use crate::{
     types::{
         api::core::response::{
             BlockMetadataResponse, InfoResponse, OutputWithMetadataResponse, PeerResponse, RoutesResponse,
-            SubmitBlockResponse, TipsResponse, UtxoChangesResponse,
+            SubmitBlockResponse, TipsResponse,
         },
         block::{
             output::{Output, OutputId, OutputMetadata, OutputWithMetadata},
-            payload::{
-                milestone::{dto::MilestonePayloadDto, MilestoneId, MilestonePayload},
-                transaction::TransactionId,
-            },
+            payload::transaction::TransactionId,
             Block, BlockDto, BlockId,
         },
         TryFromDto,
@@ -344,84 +341,6 @@ impl ClientInner {
             .read()
             .await
             .get_request(path, None, self.get_timeout().await, true, true)
-            .await
-    }
-
-    // Milestones routes.
-
-    /// Gets the milestone by the given milestone id.
-    /// GET /api/core/v2/milestones/{milestoneId}
-    pub async fn get_milestone_by_id(&self, milestone_id: &MilestoneId) -> Result<MilestonePayload> {
-        let path = &format!("api/core/v2/milestones/{milestone_id}");
-
-        Ok(self
-            .node_manager
-            .read()
-            .await
-            .get_request::<MilestonePayloadDto>(path, None, self.get_timeout().await, false, true)
-            .await?
-            .try_into()?)
-    }
-
-    /// Gets the milestone by the given milestone id.
-    /// GET /api/core/v2/milestones/{milestoneId}
-    pub async fn get_milestone_by_id_raw(&self, milestone_id: &MilestoneId) -> Result<Vec<u8>> {
-        let path = &format!("api/core/v2/milestones/{milestone_id}");
-
-        self.node_manager
-            .read()
-            .await
-            .get_request_bytes(path, None, self.get_timeout().await)
-            .await
-    }
-
-    /// Gets all UTXO changes of a milestone by its milestone id.
-    /// GET /api/core/v2/milestones/{milestoneId}/utxo-changes
-    pub async fn get_utxo_changes_by_id(&self, milestone_id: &MilestoneId) -> Result<UtxoChangesResponse> {
-        let path = &format!("api/core/v2/milestones/{milestone_id}/utxo-changes");
-
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, self.get_timeout().await, false, false)
-            .await
-    }
-
-    /// Gets the milestone by the given milestone index.
-    /// GET /api/core/v2/milestones/{index}
-    pub async fn get_milestone_by_index(&self, index: u32) -> Result<MilestonePayload> {
-        let path = &format!("api/core/v2/milestones/by-index/{index}");
-
-        Ok(self
-            .node_manager
-            .read()
-            .await
-            .get_request::<MilestonePayloadDto>(path, None, self.get_timeout().await, false, true)
-            .await?
-            .try_into()?)
-    }
-
-    /// Gets the milestone by the given milestone index.
-    /// GET /api/core/v2/milestones/{index}
-    pub async fn get_milestone_by_index_raw(&self, index: u32) -> Result<Vec<u8>> {
-        let path = &format!("api/core/v2/milestones/by-index/{index}");
-
-        self.node_manager
-            .read()
-            .await
-            .get_request_bytes(path, None, self.get_timeout().await)
-            .await
-    }
-
-    /// Gets all UTXO changes of a milestone by its milestone index.
-    /// GET /api/core/v2/milestones/by-index/{index}/utxo-changes
-    pub async fn get_utxo_changes_by_index(&self, index: u32) -> Result<UtxoChangesResponse> {
-        let path = &format!("api/core/v2/milestones/by-index/{index}/utxo-changes");
-
-        self.node_manager
-            .read()
-            .await
-            .get_request(path, None, self.get_timeout().await, false, false)
             .await
     }
 

@@ -2,18 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
-    payload::{
-        milestone::{MilestoneEssence, MilestoneOptions, MilestonePayload},
-        tagged_data::TaggedDataPayload,
-        Payload,
-    },
-    rand::{
-        bytes::rand_bytes,
-        milestone::{rand_merkle_root, rand_milestone_id, rand_milestone_index},
-        number::{rand_number, rand_number_range},
-        parents::rand_parents,
-        signature::rand_signature,
-    },
+    payload::{tagged_data::TaggedDataPayload, Payload},
+    rand::{bytes::rand_bytes, number::rand_number_range},
 };
 
 /// Generates a random tagged data payload.
@@ -23,25 +13,6 @@ pub fn rand_tagged_data_payload() -> TaggedDataPayload {
         rand_bytes(rand_number_range(0..10000)),
     )
     .unwrap()
-}
-
-/// Generates a random milestone payload.
-pub fn rand_milestone_payload(protocol_version: u8) -> MilestonePayload {
-    let essence = MilestoneEssence::new(
-        rand_milestone_index(),
-        rand_number(),
-        protocol_version,
-        rand_milestone_id(),
-        rand_parents(),
-        rand_merkle_root(),
-        rand_merkle_root(),
-        rand_bytes(32),
-        MilestoneOptions::from_vec(Vec::new()).unwrap(),
-    )
-    .unwrap();
-    let signatures = [rand_signature()];
-
-    MilestonePayload::new(essence, signatures).unwrap()
 }
 
 /// Generates a random payload for a block.

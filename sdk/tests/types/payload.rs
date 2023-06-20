@@ -6,17 +6,11 @@ use iota_sdk::types::block::{
     input::{Input, UtxoInput},
     output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
     payload::{
-        milestone::{option::MilestoneOptions, MilestoneEssence, MilestoneIndex, MilestonePayload},
         transaction::{RegularTransactionEssence, TransactionEssence, TransactionId, TransactionPayload},
         Payload, TaggedDataPayload,
     },
     protocol::protocol_parameters,
-    rand::{
-        bytes::rand_bytes,
-        milestone::{rand_merkle_root, rand_milestone_id},
-        output::rand_inputs_commitment,
-        parents::rand_parents,
-    },
+    rand::{bytes::rand_bytes, output::rand_inputs_commitment},
     signature::{Ed25519Signature, Signature},
     unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
 };
@@ -65,42 +59,6 @@ fn transaction() {
     assert_eq!(payload.kind(), 6);
     assert_eq!(payload.packed_len(), packed.len());
     assert!(matches!(payload, Payload::Transaction(_)));
-    assert_eq!(
-        payload,
-        PackableExt::unpack_verified(packed.as_slice(), &protocol_parameters).unwrap()
-    );
-}
-
-#[test]
-fn milestone() {
-    let protocol_parameters = protocol_parameters();
-    let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
-    let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
-    let payload: Payload = MilestonePayload::new(
-        MilestoneEssence::new(
-            MilestoneIndex(0),
-            0,
-            protocol_parameters.protocol_version(),
-            rand_milestone_id(),
-            rand_parents(),
-            rand_merkle_root(),
-            rand_merkle_root(),
-            [],
-            MilestoneOptions::from_vec(vec![]).unwrap(),
-        )
-        .unwrap(),
-        vec![Signature::from(
-            Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap(),
-        )],
-    )
-    .unwrap()
-    .into();
-
-    let packed = payload.pack_to_vec();
-
-    assert_eq!(payload.kind(), 7);
-    assert_eq!(payload.packed_len(), packed.len());
-    assert!(matches!(payload, Payload::Milestone(_)));
     assert_eq!(
         payload,
         PackableExt::unpack_verified(packed.as_slice(), &protocol_parameters).unwrap()

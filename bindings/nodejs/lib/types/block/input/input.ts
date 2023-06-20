@@ -10,7 +10,6 @@ import { OutputId } from '../output';
  */
 enum InputType {
     UTXO = 0,
-    Treasury = 1,
 }
 
 abstract class Input {
@@ -25,21 +24,6 @@ abstract class Input {
      */
     getType(): InputType {
         return this.type;
-    }
-}
-
-/**
- * Treasury Input.
- */
-class TreasuryInput extends Input {
-    /**
-     * The milestone id of the input.
-     */
-    milestoneId: HexEncodedString;
-
-    constructor(milestoneId: HexEncodedString) {
-        super(InputType.Treasury);
-        this.milestoneId = milestoneId;
     }
 }
 
@@ -81,10 +65,7 @@ class UTXOInput extends Input {
 
 const InputDiscriminator = {
     property: 'type',
-    subTypes: [
-        { value: TreasuryInput, name: InputType.Treasury as any },
-        { value: UTXOInput, name: InputType.UTXO as any },
-    ],
+    subTypes: [{ value: UTXOInput, name: InputType.UTXO as any }],
 };
 
-export { InputDiscriminator, InputType, Input, TreasuryInput, UTXOInput };
+export { InputDiscriminator, InputType, Input, UTXOInput };
