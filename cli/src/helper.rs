@@ -241,7 +241,7 @@ pub fn to_utc_date_time(ts_millis: u128) -> Result<DateTime<Utc>, Error> {
     Ok(DateTime::from_utc(naive_time, Utc))
 }
 
-pub async fn check_file_exits(path: &Path) -> Result<(), Error> {
+pub async fn check_file_exists(path: &Path) -> Result<(), Error> {
     if !fs::try_exists(path).await.map_err(|e| {
         Error::Miscellaneous(format!(
             "Error while accessing the file '{path}': '{e}'",

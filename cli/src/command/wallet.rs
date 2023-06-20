@@ -17,7 +17,7 @@ use log::LevelFilter;
 
 use crate::{
     error::Error,
-    helper::{check_file_exits, enter_or_generate_mnemonic, generate_mnemonic, get_password, import_mnemonic},
+    helper::{check_file_exists, enter_or_generate_mnemonic, generate_mnemonic, get_password, import_mnemonic},
     println_log_info,
 };
 
@@ -197,7 +197,7 @@ pub async fn new_command(
 }
 
 pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<Wallet, Error> {
-    check_file_exits(backup_path).await?;
+    check_file_exists(backup_path).await?;
 
     let password = get_password("Stronghold password", false)?;
     let secret_manager = SecretManager::Stronghold(
