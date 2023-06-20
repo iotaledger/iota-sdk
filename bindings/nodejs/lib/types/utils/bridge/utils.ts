@@ -9,7 +9,6 @@ import {
     TokenSchemeType,
     Output,
     IRent,
-    HexEncodedAmount,
 } from '../../';
 import { AliasId } from '../../block/id';
 

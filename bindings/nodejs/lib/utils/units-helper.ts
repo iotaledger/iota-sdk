@@ -30,7 +30,7 @@ export class UnitsHelper {
      * @param decimalPlaces The number of decimal places to display.
      * @returns The formated value.
      */
-    public static formatBest(value: number, decimalPlaces: number = 2): string {
+    public static formatBest(value: number, decimalPlaces = 2): string {
         return UnitsHelper.formatUnits(
             value,
             UnitsHelper.calculateBest(value),
@@ -48,7 +48,7 @@ export class UnitsHelper {
     public static formatUnits(
         value: number,
         magnitude: Magnitudes,
-        decimalPlaces: number = 2,
+        decimalPlaces = 2,
     ): string {
         if (!UnitsHelper.MAGNITUDE_MAP[magnitude]) {
             throw new Error(`Unrecognized magnitude ${magnitude}`);
