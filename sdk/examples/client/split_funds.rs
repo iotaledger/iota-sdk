@@ -3,9 +3,14 @@
 
 //! In this example we will send 100 basic outputs to our first address.
 //!
-//! `cargo run --example split_funds --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --example client_split_funds
+//! ```
 
-use iota_sdk::client::{request_funds_from_faucet, secret::SecretManager, Client, Result};
+use std::env;
+
+use iota_sdk::client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -14,18 +19,20 @@ async fn main() -> Result<()> {
     // balance.
     dotenvy::dotenv().ok();
 
-    let node_url = std::env::var("NODE_URL").unwrap();
-    let faucet_url = std::env::var("FAUCET_URL").unwrap();
-
-    let client = Client::builder().with_node(&node_url)?.finish().await?;
+    let client = Client::builder()
+        .with_node(&env::var("NODE_URL").unwrap())?
+        .finish()
+        .await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let address = client.get_addresses(&secret_manager).with_range(0..1).get_raw().await?[0];
+    let address = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .await?[0];
     println!(
         "Requesting funds (waiting 15s): {}",
-        request_funds_from_faucet(&faucet_url, &address.to_bech32(client.get_bech32_hrp().await?)).await?
+        request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &address,).await?
     );
     // wait so the faucet can send the funds
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
@@ -35,8 +42,7 @@ async fn main() -> Result<()> {
     for _ in 0..100 {
         block_builder = block_builder
             .with_output(
-                // We generate an address from our seed so that we send the funds to ourselves
-                &client.get_addresses(&secret_manager).with_range(0..1).finish().await?[0],
+                address, // &client.get_addresses(&secret_manager).with_range(0..1).finish().await?[0],
                 1_000_000,
             )
             .await?;
@@ -45,8 +51,9 @@ async fn main() -> Result<()> {
 
     println!(
         "Block with split funds sent: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
+        env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
+
     Ok(())
 }

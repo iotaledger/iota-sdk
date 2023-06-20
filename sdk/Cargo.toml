@@ -92,7 +92,7 @@ rocksdb = [ "dep:rocksdb", "storage" ]
 serde = [ "serde_repr", "serde-big-array", "hashbrown/serde", "packable/serde", "primitive-types/serde_no_std", "zeroize?/serde" ]
 std = [ "packable/std", "prefix-hex/std", "primitive-types/std", "bech32/std", "bitflags/std", "rand?/std_rng", "regex?/std", "backtrace?/std", "derive_builder?/std", "iota_stronghold?/std", "iota-crypto/std", "once_cell?/std" ]
 storage = [ "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
-stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell" ]
+stronghold = [ "iota_stronghold", "derive_builder", "iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell", "dep:heck" ]
 tls = [ "reqwest?/rustls-tls", "rumqttc?/use-rustls" ]
 
 client = [ "pow", "tokio", "zeroize", "url", "reqwest", "async-trait", "log", "thiserror", "futures", "serde", "instant", "iota-crypto/bip39", "iota-crypto/bip39-en", "iota-crypto/slip10" ]
@@ -455,6 +455,11 @@ path = "examples/client/ledger_nano_transaction.rs"
 required-features = [ "client", "ledger_nano" ]
 
 [[example]]
+name = "client_logger"
+path = "examples/client/logger.rs"
+required-features = [ "client" ]
+
+[[example]]
 name = "stronghold"
 path = "examples/client/stronghold.rs"
 required-features = [ "client", "stronghold" ]
@@ -548,6 +553,26 @@ required-features = [ "client" ]
 name = "participation"
 path = "examples/client/participation.rs"
 required-features = [ "client", "participation" ]
+
+[[example]]
+name = "quorum"
+path = "examples/client/quorum.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "send_all"
+path = "examples/client/send_all.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "client_split_funds"
+path = "examples/client/split_funds.rs"
+required-features = [ "client" ]
+
+[[example]]
+name = "tagged_data_to_utf8"
+path = "examples/client/tagged_data_to_utf8.rs"
+required-features = [ "client" ]
 
 ### Wallet
 
