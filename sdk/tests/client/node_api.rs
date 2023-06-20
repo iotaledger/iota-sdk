@@ -6,7 +6,7 @@
 use iota_sdk::{
     client::{
         api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
-        request_funds_from_faucet, secret::SecretManager, Client, Error,
+        request_funds_from_faucet, secret::SecretManager, Client,
     },
     types::block::{
         address::ToBech32Ext,
@@ -433,7 +433,7 @@ async fn test_plugin_fetch() {
     let route = format!("outputs/nft/{nft_id}");
 
     let nft_1 = c
-        .plugin_fetch::<OutputId>("api/indexer/v1/", &"GET", &route, vec![], None)
+        .plugin_fetch::<OutputId>("api/indexer/v1/", "GET", &route, vec![], None)
         .await;
     let nft_2 = c.nft_output_id(nft_id).await;
 
