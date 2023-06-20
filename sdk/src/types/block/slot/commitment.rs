@@ -40,6 +40,26 @@ impl SlotCommitment {
         }
     }
 
+    /// Returns the index of the [`SlotCommitment`].
+    pub fn index(&self) -> SlotIndex {
+        self.index
+    }
+
+    /// Returns the previous slot commitment ID of the [`SlotCommitment`].
+    pub fn previous_slot_commitment_id(&self) -> &SlotCommitmentId {
+        &self.previous_slot_commitment_id
+    }
+
+    /// Returns the roots ID of the [`SlotCommitment`].
+    pub fn roots_id(&self) -> &RootsId {
+        &self.roots_id
+    }
+
+    /// Returns the cumulative weight of the [`SlotCommitment`].
+    pub fn cumulative_weight(&self) -> u64 {
+        self.cumulative_weight
+    }
+
     /// Derives a [`SlotCommitmentId`] from the [`SlotCommitment`] and a [`SlotIndex`].
     pub fn id(&self, index: SlotIndex) -> SlotCommitmentId {
         let mut bytes = [0u8; SlotCommitmentId::LENGTH];
