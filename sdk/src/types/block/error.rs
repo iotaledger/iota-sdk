@@ -15,10 +15,7 @@ use crate::types::block::{
         NativeTokenCount, NftId, OutputIndex, StateMetadataLength, TagFeatureLength,
     },
     parent::ParentCount,
-    payload::{
-        milestone::BinaryParametersLength, InputCount, MilestoneMetadataLength, MilestoneOptionCount, OutputCount,
-        SignatureCount, TagLength, TaggedDataLength,
-    },
+    payload::{InputCount, OutputCount, TagLength, TaggedDataLength},
     unlock::{UnlockCount, UnlockIndex},
 };
 
@@ -44,7 +41,6 @@ pub enum Error {
     InsufficientStorageDepositAmount { amount: u64, required: u64 },
     StorageDepositReturnExceedsOutputAmount { deposit: u64, amount: u64 },
     InsufficientStorageDepositReturnAmount { deposit: u64, required: u64 },
-    InvalidBinaryParametersLength(<BinaryParametersLength as TryFrom<usize>>::Error),
     InvalidEssenceKind(u8),
     InvalidFeatureCount(<FeatureCount as TryFrom<usize>>::Error),
     InvalidFeatureKind(u8),
@@ -57,10 +53,6 @@ pub enum Error {
     InvalidBlockLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
-    InvalidMilestoneMetadataLength(<MilestoneMetadataLength as TryFrom<usize>>::Error),
-    InvalidMilestoneOptionCount(<MilestoneOptionCount as TryFrom<usize>>::Error),
-    InvalidMilestoneOptionKind(u8),
-    InvalidMigratedFundsEntryAmount(u64),
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
     InvalidNetworkName(FromUtf8Error),
     InvalidNftIndex(<UnlockIndex as TryFrom<u16>>::Error),
@@ -89,10 +81,6 @@ pub enum Error {
     InvalidUnlockConditionCount(<UnlockConditionCount as TryFrom<usize>>::Error),
     InvalidUnlockConditionKind(u8),
     InvalidFoundryZeroSerialNumber,
-    MilestoneInvalidSignatureCount(<SignatureCount as TryFrom<usize>>::Error),
-    MilestonePublicKeysSignaturesCountMismatch { key_count: usize, sig_count: usize },
-    MilestoneOptionsNotUniqueSorted,
-    MilestoneSignaturesNotUniqueSorted,
     MissingAddressUnlockCondition,
     MissingGovernorUnlockCondition,
     MissingStateControllerUnlockCondition,
@@ -109,7 +97,6 @@ pub enum Error {
     SelfDepositNft(NftId),
     SignaturePublicKeyMismatch { expected: String, actual: String },
     StorageDepositReturnOverflow,
-    TailTransactionHashNotUnique { previous: usize, current: usize },
     TimelockUnlockConditionZero,
     UnallowedFeature { index: usize, kind: u8 },
     UnallowedUnlockCondition { index: usize, kind: u8 },
@@ -154,9 +141,6 @@ impl fmt::Display for Error {
             Self::InvalidAddressKind(k) => write!(f, "invalid address kind: {k}"),
             Self::InvalidAliasIndex(index) => write!(f, "invalid alias index: {index}"),
             Self::InvalidBech32Hrp(err) => write!(f, "invalid bech32 hrp: {err}"),
-            Self::InvalidBinaryParametersLength(length) => {
-                write!(f, "invalid binary parameters length: {length}")
-            }
             Self::InvalidStorageDepositAmount(amount) => {
                 write!(f, "invalid storage deposit amount: {amount}")
             }
@@ -191,14 +175,6 @@ impl fmt::Display for Error {
             Self::InvalidStateMetadataLength(length) => write!(f, "invalid state metadata length {length}"),
             Self::InvalidMetadataFeatureLength(length) => {
                 write!(f, "invalid metadata feature length {length}")
-            }
-            Self::InvalidMilestoneMetadataLength(length) => {
-                write!(f, "invalid milestone metadata length {length}")
-            }
-            Self::InvalidMilestoneOptionCount(count) => write!(f, "invalid milestone option count: {count}"),
-            Self::InvalidMilestoneOptionKind(k) => write!(f, "invalid milestone option kind: {k}"),
-            Self::InvalidMigratedFundsEntryAmount(amount) => {
-                write!(f, "invalid migrated funds entry amount: {amount}")
             }
             Self::InvalidNativeTokenCount(count) => write!(f, "invalid native token count: {count}"),
             Self::InvalidNetworkName(err) => write!(f, "invalid network name: {err}"),
@@ -246,21 +222,6 @@ impl fmt::Display for Error {
             Self::InvalidUnlockConditionCount(count) => write!(f, "invalid unlock condition count: {count}"),
             Self::InvalidUnlockConditionKind(k) => write!(f, "invalid unlock condition kind: {k}"),
             Self::InvalidFoundryZeroSerialNumber => write!(f, "invalid foundry zero serial number"),
-            Self::MilestoneInvalidSignatureCount(count) => {
-                write!(f, "invalid milestone signature count: {count}")
-            }
-            Self::MilestonePublicKeysSignaturesCountMismatch { key_count, sig_count } => {
-                write!(
-                    f,
-                    "milestone public keys and signatures count mismatch: {key_count} != {sig_count}",
-                )
-            }
-            Self::MilestoneOptionsNotUniqueSorted => {
-                write!(f, "milestone options are not unique and/or sorted")
-            }
-            Self::MilestoneSignaturesNotUniqueSorted => {
-                write!(f, "milestone signatures are not unique and/or sorted")
-            }
             Self::MissingAddressUnlockCondition => write!(f, "missing address unlock condition"),
             Self::MissingGovernorUnlockCondition => write!(f, "missing governor unlock condition"),
             Self::MissingStateControllerUnlockCondition => write!(f, "missing state controller unlock condition"),
@@ -296,12 +257,6 @@ impl fmt::Display for Error {
             }
             Self::StorageDepositReturnOverflow => {
                 write!(f, "storage deposit return overflow",)
-            }
-            Self::TailTransactionHashNotUnique { previous, current } => {
-                write!(
-                    f,
-                    "tail transaction hash is not unique at indices: {previous} and {current}",
-                )
             }
             Self::TimelockUnlockConditionZero => {
                 write!(
