@@ -54,7 +54,6 @@ pub enum Error {
     InvalidBlockLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
-    InvalidMigratedFundsEntryAmount(u64),
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
     InvalidNetworkName(FromUtf8Error),
     InvalidNftIndex(<UnlockIndex as TryFrom<u16>>::Error),
@@ -83,7 +82,6 @@ pub enum Error {
     InvalidUnlockConditionCount(<UnlockConditionCount as TryFrom<usize>>::Error),
     InvalidUnlockConditionKind(u8),
     InvalidFoundryZeroSerialNumber,
-    MigratedFundsNotSorted,
     MissingAddressUnlockCondition,
     MissingGovernorUnlockCondition,
     MissingPayload,
@@ -183,9 +181,6 @@ impl fmt::Display for Error {
             Self::InvalidMetadataFeatureLength(length) => {
                 write!(f, "invalid metadata feature length {length}")
             }
-            Self::InvalidMigratedFundsEntryAmount(amount) => {
-                write!(f, "invalid migrated funds entry amount: {amount}")
-            }
             Self::InvalidNativeTokenCount(count) => write!(f, "invalid native token count: {count}"),
             Self::InvalidNetworkName(err) => write!(f, "invalid network name: {err}"),
             Self::InvalidNftIndex(index) => write!(f, "invalid nft index: {index}"),
@@ -232,9 +227,6 @@ impl fmt::Display for Error {
             Self::InvalidUnlockConditionCount(count) => write!(f, "invalid unlock condition count: {count}"),
             Self::InvalidUnlockConditionKind(k) => write!(f, "invalid unlock condition kind: {k}"),
             Self::InvalidFoundryZeroSerialNumber => write!(f, "invalid foundry zero serial number"),
-            Self::MigratedFundsNotSorted => {
-                write!(f, "migrated funds are not sorted")
-            }
             Self::MissingAddressUnlockCondition => write!(f, "missing address unlock condition"),
             Self::MissingGovernorUnlockCondition => write!(f, "missing governor unlock condition"),
             Self::MissingPayload => write!(f, "missing payload"),
