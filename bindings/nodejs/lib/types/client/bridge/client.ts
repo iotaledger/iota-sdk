@@ -436,7 +436,7 @@ export type __PluginFetchMethodMethod__ = {
     name: 'pluginFetch';
     data: {
         basePluginPath: string;
-        method: "GET" | "POST";
+        method: 'GET' | 'POST';
         methodPath: string;
         queryParams: string[];
         request?: string;
