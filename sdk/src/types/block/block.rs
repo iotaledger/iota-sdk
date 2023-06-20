@@ -243,7 +243,7 @@ impl Packable for Block {
 fn verify_payload(payload: Option<&Payload>) -> Result<(), Error> {
     if !matches!(
         payload,
-        None | Some(Payload::Transaction(_)) | Some(Payload::Milestone(_)) | Some(Payload::TaggedData(_))
+        None | Some(Payload::Transaction(_)) | Some(Payload::TaggedData(_))
     ) {
         // Safe to unwrap since it's known not to be None.
         Err(Error::InvalidPayloadKind(payload.unwrap().kind()))

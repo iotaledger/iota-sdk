@@ -8,7 +8,6 @@ use crate::types::block::{
         dto::{OutputDto, OutputMetadataDto},
         OutputWithMetadata,
     },
-    payload::dto::MilestonePayloadDto,
     protocol::dto::ProtocolParametersDto,
     BlockDto,
 };
@@ -247,34 +246,6 @@ impl From<OutputWithMetadata> for OutputWithMetadataResponse {
 pub enum OutputResponse {
     Json(Box<OutputWithMetadataResponse>),
     Raw(Vec<u8>),
-}
-
-/// Response of GET /api/core/v2/milestone/{milestone_index}.
-/// Returns information about a milestone.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase"),
-    serde(untagged)
-)]
-pub enum MilestoneResponse {
-    Json(MilestonePayloadDto),
-    Raw(Vec<u8>),
-}
-
-/// Response of GET /api/core/v2/milestone/{milestone_index}/utxo-changes.
-/// Returns all UTXO changes that happened at a specific milestone.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct UtxoChangesResponse {
-    pub index: u32,
-    pub created_outputs: Vec<String>,
-    pub consumed_outputs: Vec<String>,
 }
 
 /// Describes the heartbeat of a node.

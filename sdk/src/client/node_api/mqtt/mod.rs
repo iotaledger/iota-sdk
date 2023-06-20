@@ -17,7 +17,7 @@ use tokio::sync::watch::Receiver as WatchReceiver;
 pub use self::{error::Error, types::*};
 use crate::{
     client::{Client, ClientInner},
-    types::block::{payload::MilestonePayload, Block},
+    types::block::Block,
 };
 
 impl Client {
@@ -196,20 +196,6 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
                                             }),
                                             Err(e) => {
                                                 warn!("Block unpacking failed: {:?}", e);
-                                                Err(())
-                                            }
-                                        }
-                                    } else if p.topic.contains("milestones") {
-                                        let payload = &*p.payload;
-                                        let protocol_parameters = &client.network_info.read().await.protocol_parameters;
-
-                                        match MilestonePayload::unpack_verified(payload, protocol_parameters) {
-                                            Ok(milestone_payload) => Ok(TopicEvent {
-                                                topic: p.topic.clone(),
-                                                payload: MqttPayload::MilestonePayload(milestone_payload),
-                                            }),
-                                            Err(e) => {
-                                                warn!("MilestonePayload unpacking failed: {:?}", e);
                                                 Err(())
                                             }
                                         }

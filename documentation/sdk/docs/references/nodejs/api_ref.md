@@ -27,7 +27,6 @@
 - [MetadataFeature](classes/MetadataFeature.md)
 - [TagFeature](classes/TagFeature.md)
 - [CommonOutput](classes/CommonOutput.md)
-- [TreasuryOutput](classes/TreasuryOutput.md)
 - [BasicOutput](classes/BasicOutput.md)
 - [NftOutput](classes/NftOutput.md)
 - [FoundryOutput](classes/FoundryOutput.md)

@@ -6,7 +6,7 @@ use iota_sdk::{
     types::block::{
         address::{dto::AddressDto, Address, ToBech32Ext},
         output::{AliasId, FoundryId, NftId},
-        payload::{transaction::TransactionEssence, MilestonePayload, TransactionPayload},
+        payload::{transaction::TransactionEssence, TransactionPayload},
         signature::Ed25519Signature,
         Block,
     },
@@ -38,10 +38,6 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::BlockId { block } => {
             let block = Block::try_from_dto_unverified(block)?;
             Response::BlockId(block.id())
-        }
-        UtilsMethod::MilestoneId { payload } => {
-            let payload = MilestonePayload::try_from_dto_unverified(payload)?;
-            Response::MilestoneId(payload.id())
         }
         UtilsMethod::TransactionId { payload } => {
             let payload = TransactionPayload::try_from_dto_unverified(payload)?;
