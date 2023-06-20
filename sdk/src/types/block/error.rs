@@ -100,7 +100,6 @@ pub enum Error {
     SelfDepositNft(NftId),
     SignaturePublicKeyMismatch { expected: String, actual: String },
     StorageDepositReturnOverflow,
-    TailTransactionHashNotUnique { previous: usize, current: usize },
     TimelockUnlockConditionZero,
     UnallowedFeature { index: usize, kind: u8 },
     UnallowedUnlockCondition { index: usize, kind: u8 },
@@ -264,12 +263,6 @@ impl fmt::Display for Error {
             }
             Self::StorageDepositReturnOverflow => {
                 write!(f, "storage deposit return overflow",)
-            }
-            Self::TailTransactionHashNotUnique { previous, current } => {
-                write!(
-                    f,
-                    "tail transaction hash is not unique at indices: {previous} and {current}",
-                )
             }
             Self::TimelockUnlockConditionZero => {
                 write!(
