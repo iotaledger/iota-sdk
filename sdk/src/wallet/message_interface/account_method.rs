@@ -24,6 +24,7 @@ use crate::{
             AliasId, FoundryId, NativeToken, NftId, OutputId, TokenId,
         },
         payload::transaction::TransactionId,
+        signature::dto::Ed25519SignatureDto,
     },
     wallet::{
         account::{
@@ -33,7 +34,7 @@ use crate::{
                 transaction::{
                     high_level::{
                         create_alias::CreateAliasParams,
-                        minting::{mint_native_token::MintNativeTokenParams, mint_nfts::MintNftParamsDto},
+                        minting::{mint_native_token::MintNativeTokenParams, mint_nfts::MintNftParams},
                     },
                     prepare_output::OutputParams,
                     TransactionOptionsDto,
@@ -171,6 +172,22 @@ pub enum AccountMethod {
     /// Expected response:
     /// [`GeneratedEvmAddresses`](crate::wallet::message_interface::Response::GeneratedEvmAddresses)
     GenerateEvmAddresses { options: GetAddressesOptions },
+    /// Verify an ed25519 signature against a message.
+    /// Expected response:
+    /// [`Bool`](crate::wallet::message_interface::Response::Bool)
+    VerifyEd25519Signature {
+        signature: Ed25519SignatureDto,
+        message: String,
+    },
+    /// Verify a Secp256k1Ecdsa signature against a message.
+    /// Expected response:
+    /// [`Bool`](crate::wallet::message_interface::Response::Bool)
+    #[serde(rename_all = "camelCase")]
+    VerifySecp256k1EcdsaSignature {
+        public_key: String,
+        signature: String,
+        message: String,
+    },
     /// Signs a message with an Secp256k1Ecdsa private key.
     SignSecp256k1Ecdsa {
         /// The message to sign, hex encoded String
@@ -257,7 +274,7 @@ pub enum AccountMethod {
     /// Expected response: [`SentTransaction`](crate::wallet::message_interface::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     MintNfts {
-        params: Vec<MintNftParamsDto>,
+        params: Vec<MintNftParams>,
         options: Option<TransactionOptionsDto>,
     },
     /// Get account balance information.

@@ -58,7 +58,7 @@ class UTXOInput extends Input {
         transactionId: HexEncodedString,
         transactionInputIndex: number,
     ) {
-        super(InputType.Treasury);
+        super(InputType.UTXO);
         this.transactionId = transactionId;
         this.transactionInputIndex = transactionInputIndex;
     }

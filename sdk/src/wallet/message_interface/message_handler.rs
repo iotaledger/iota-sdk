@@ -31,6 +31,7 @@ use crate::{
             dto::{OutputBuilderAmountDto, OutputDto},
             AliasOutput, BasicOutput, FoundryOutput, NativeToken, NftOutput, Output, Rent,
         },
+        signature::Ed25519Signature,
         ConvertTo, Error,
     },
     wallet::{
@@ -44,7 +45,7 @@ use crate::{
         message_interface::{
             account_method::AccountMethod, dtos::AccountDetailsDto, message::Message, response::Response,
         },
-        MintNftParams, Result, Wallet,
+        Result, Wallet,
     },
 };
 
@@ -182,7 +183,7 @@ impl WalletMessageHandler {
             Message::IsStrongholdPasswordAvailable => {
                 convert_async_panics(|| async {
                     let is_available = self.wallet.is_stronghold_password_available().await?;
-                    Ok(Response::StrongholdPasswordIsAvailable(is_available))
+                    Ok(Response::Bool(is_available))
                 })
                 .await
             }
@@ -576,6 +577,24 @@ impl WalletMessageHandler {
                     .await?;
                 Ok(Response::GeneratedEvmAddresses(addresses))
             }
+            AccountMethod::VerifyEd25519Signature { signature, message } => {
+                let signature = Ed25519Signature::try_from(signature)?;
+                let message: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
+                Ok(Response::Bool(signature.verify(&message)?))
+            }
+            AccountMethod::VerifySecp256k1EcdsaSignature {
+                public_key,
+                signature,
+                message,
+            } => {
+                use crypto::signatures::secp256k1_ecdsa;
+                let public_key = prefix_hex::decode(public_key).map_err(|_| Error::InvalidField("publicKey"))?;
+                let public_key = secp256k1_ecdsa::PublicKey::try_from_bytes(&public_key)?;
+                let signature = prefix_hex::decode(signature).map_err(|_| Error::InvalidField("signature"))?;
+                let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature)?;
+                let message: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
+                Ok(Response::Bool(public_key.verify(&signature, &message)))
+            }
             AccountMethod::SignSecp256k1Ecdsa { message, chain } => {
                 let msg: Vec<u8> = prefix_hex::decode(message).map_err(crate::client::Error::from)?;
                 let (public_key, signature) = account
@@ -715,13 +734,7 @@ impl WalletMessageHandler {
             AccountMethod::MintNfts { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .mint_nfts(
-                            params
-                                .into_iter()
-                                .map(MintNftParams::try_from)
-                                .collect::<Result<Vec<MintNftParams>>>()?,
-                            options.map(TransactionOptions::try_from_dto).transpose()?,
-                        )
+                        .mint_nfts(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
@@ -869,7 +882,9 @@ impl WalletMessageHandler {
                         signed_transaction_data,
                         &account.client().get_protocol_parameters().await?,
                     )?;
-                    let transaction = account.submit_and_store_transaction(signed_transaction_data).await?;
+                    let transaction = account
+                        .submit_and_store_transaction(signed_transaction_data, None)
+                        .await?;
                     Ok(Response::SentTransaction(TransactionDto::from(&transaction)))
                 })
                 .await
