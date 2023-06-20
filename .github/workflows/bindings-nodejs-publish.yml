@@ -1,4 +1,4 @@
-name: Create Covector release (wallet)
+name: Node.js publish to NPM
 
 on: workflow_dispatch
 
@@ -6,58 +6,55 @@ env:
   CARGO_INCREMENTAL: 0
 
 jobs:
-  version-or-publish:
-    runs-on: ubuntu-20.04
-    outputs:
-      change: ${{ steps.covector.outputs.change }}
-      commandRan: ${{ steps.covector.outputs.commandRan }}
-      successfulPublish: ${{ steps.covector.outputs.successfulPublish }}
+  publish-nodejs:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: bindings/nodejs
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
+
+      # Required for ledger-nano
+      - name: Install required packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install libudev-dev libusb-1.0-0-dev
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 18
+          node-version: "18.x"
           registry-url: "https://registry.npmjs.org"
 
-      - name: git config
-        run: |
-          git config --global user.name "${{ github.event.pusher.name }}"
-          git config --global user.email "${{ github.event.pusher.email }}"
+      - name: Install Yarn
+        run: npm i -g yarn
 
-      - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
+      - name: Install JS dependencies
+        run: yarn
 
-      - name: Install Dasel
-        run: |
-          brew update --preinstall
-          brew install dasel
+      - name: Build project
+        run: yarn build
 
-      - name: covector version or publish (publish when no change files present)
-        uses: jbolda/covector/packages/action@covector-v0
-        id: covector
+      - name: Update Cargo.toml with git
+        run:  sed -i 's#path = "../core"#git = "https://github.com/iotaledger/iota-sdk", rev = "'$GITHUB_SHA'"#g' Cargo.toml 
+
+      - name: Print Cargo.toml
+        run: cat Cargo.toml
+
+      - name: Publish nodejs bindings to NPM
+        shell: sh
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          command: "version-or-publish"
-      - name: Create Pull Request With Versions Bumped
-        if: steps.covector.outputs.commandRan == 'version'
-        uses: tauri-apps/create-pull-request@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: release/version-updates
-          title: Apply Version Updates From Current Changes
-          commit-message: "apply version updates"
-          labels: "i-release"
-          body: ${{ steps.covector.outputs.change }}
+        run: npm publish --access public
 
   nodejs-binding-prebuild:
     runs-on: ${{ matrix.os }}
-    needs: version-or-publish
-    if: needs.version-or-publish.outputs.successfulPublish == 'true'
+    needs: publish-nodejs
     strategy:
       fail-fast: false
       matrix:
@@ -75,6 +72,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Install Yarn
+        run: npm i -g yarn
+
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
         if: matrix.os == 'macos-13'
@@ -82,7 +82,6 @@ jobs:
           xcode-version: '14.3'
 
         # Temporary fix for "ValueError: invalid mode: 'rU' while trying to load binding.gyp"
-        # See <PR link>
         # This can be removed when "prebuild" updates "node-gyp"
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
@@ -103,7 +102,7 @@ jobs:
           $NodeVersion = (node --version) -replace '^.'
           $NodeFallbackVersion = "16.19.0"
           & .\scripts\download-node-lib-win-arm64.ps1 $NodeVersion $NodeFallbackVersion
-        working-directory: sdk/src/wallet/bindings/nodejs
+        working-directory: bindings/nodejs
 
       - name: Install LLVM and Clang (Windows) # required for bindgen to work, see https://github.com/rust-lang/rust-bindgen/issues/1797
         uses: KyleMayes/install-llvm-action@32c4866ebb71e0949e8833eb49beeebed48532bd
@@ -166,17 +165,17 @@ jobs:
           cargo patch
 
       - name: Install dependencies
-        run: npm install typescript && npm ci
-        working-directory: sdk/src/wallet/bindings/nodejs
+        run: yarn install --frozen-lockfile
+        working-directory: bindings/nodejs
 
       - name: Build Node.js prebuild (x64)
-        run: npm run prebuild-x64
-        working-directory: sdk/src/wallet/bindings/nodejs
+        run: yarn run prebuild-x64
+        working-directory: bindings/nodejs
 
       - name: Build Node.js prebuild (arm64)
-        run: npm run prebuild-arm64
-        working-directory: sdk/src/wallet/bindings/nodejs
+        run: yarn run prebuild-arm64
+        working-directory: bindings/nodejs
 
       - name: Upload prebuild to GitHub release
-        run: npx prebuild --upload-all ${{ secrets.GITHUB_TOKEN }} --tag-prefix wallet-nodejs-binding-v
-        working-directory: sdk/src/wallet/bindings/nodejs
+        run: npx prebuild --upload-all ${{ secrets.GITHUB_TOKEN }} --tag-prefix iota-sdk-nodejs-v
+        working-directory: bindings/nodejs

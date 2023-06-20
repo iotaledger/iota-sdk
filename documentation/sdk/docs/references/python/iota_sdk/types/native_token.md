@@ -17,10 +17,10 @@ def __init__(id: HexStr, amount: int)
 
 Initialize NativeToken
 
-Parameters
-----------
-id : string
+#### Parameters
+
+* __id__*: string*  
     Id of the token
-amount : int
+* __amount__*: int*  
     Native token amount
 

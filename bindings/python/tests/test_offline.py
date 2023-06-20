@@ -45,29 +45,11 @@ def test_sign_verify_ed25519():
     )
     assert signature['signature'] == '0x72bf2bc8fbc5dc56d657d7de8afa5208be1db025851e81031c754b371c7a29ce9f352d12df8207f9163316f81f59eb7725e5c0e4f3228e71ffe3764a9de6b10e'
 
-    bech32_address = client.hex_public_key_to_bech32_address(
-        signature['publicKey'],
-        'iota',
-    )
-    assert bech32_address == 'iota1qpg2xkj66wwgn8p2ggnp7p582gj8g6p79us5hve2tsudzpsr2ap4skprwjg'
-
-    pub_key_hash = Utils.bech32_to_hex(bech32_address)
-    assert pub_key_hash == '0x50a35a5ad39c899c2a42261f0687522474683e2f214bb32a5c38d10603574358'
-
     valid_signature = Utils.verify_ed25519_signature(
         signature,
         message,
-        {'type': 0, 'pubKeyHash': pub_key_hash},
     )
     assert valid_signature
-
-    valid_signature = Utils.verify_ed25519_signature(
-        signature,
-        message,
-        {'type': 0, 'pubKeyHash': '0x0000000000000000000000000000000000000000000000000000000000000000'},
-    )
-    # false, because the pubKeyHash is null
-    assert not valid_signature
 
 
 class TestTypes(unittest.TestCase):
