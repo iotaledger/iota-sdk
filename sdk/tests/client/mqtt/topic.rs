@@ -5,9 +5,6 @@ use iota_sdk::client::mqtt::{Error, Topic};
 
 #[test]
 fn valid_topics() {
-    assert!(Topic::new("milestone-info/latest").is_ok());
-    assert!(Topic::new("milestone-info/confirmed").is_ok());
-    assert!(Topic::new("milestones").is_ok());
     assert!(Topic::new("blocks").is_ok());
     assert!(Topic::new("blocks/transaction").is_ok());
     assert!(Topic::new("blocks/transaction/tagged-data").is_ok());

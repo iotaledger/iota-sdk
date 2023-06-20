@@ -239,84 +239,6 @@ async fn test_get_peers() {
 
 #[ignore]
 #[tokio::test]
-async fn test_get_milestone_by_id() {
-    let client = setup_client_with_node_health_ignored().await;
-
-    let node_info = client.get_info().await.unwrap();
-
-    let r = client
-        .get_milestone_by_id(
-            &node_info
-                .node_info
-                .status
-                .latest_milestone
-                .milestone_id
-                .unwrap()
-                .parse()
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-
-    println!("{r:#?}");
-}
-
-#[ignore]
-#[tokio::test]
-async fn test_get_milestone_by_index() {
-    let client = setup_client_with_node_health_ignored().await;
-
-    let node_info = client.get_info().await.unwrap();
-
-    let r = client
-        .get_milestone_by_index(node_info.node_info.status.latest_milestone.index)
-        .await
-        .unwrap();
-
-    println!("{r:#?}");
-}
-
-#[ignore]
-#[tokio::test]
-async fn test_get_utxo_changes_by_id() {
-    let client = setup_client_with_node_health_ignored().await;
-
-    let node_info = client.get_info().await.unwrap();
-
-    let r = client
-        .get_utxo_changes_by_id(
-            &node_info
-                .node_info
-                .status
-                .latest_milestone
-                .milestone_id
-                .unwrap()
-                .parse()
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-
-    println!("{r:#?}");
-}
-
-#[ignore]
-#[tokio::test]
-async fn test_get_utxo_changes_by_index() {
-    let client = setup_client_with_node_health_ignored().await;
-
-    let node_info = client.get_info().await.unwrap();
-
-    let r = client
-        .get_utxo_changes_by_index(node_info.node_info.status.latest_milestone.index)
-        .await
-        .unwrap();
-
-    println!("{r:#?}");
-}
-
-#[ignore]
-#[tokio::test]
 async fn test_get_included_block() {
     let (_block_id, transaction_id) = setup_transaction_block().await;
 
@@ -343,27 +265,20 @@ async fn test_mqtt() {
     let (tx, mut rx) = tokio::sync::mpsc::channel(BUFFER_SIZE);
 
     client
-        .subscribe(
-            [
-                Topic::new("milestone-info/latest").unwrap(),
-                Topic::new("blocks").unwrap(),
-            ],
-            move |evt| {
-                match &evt.payload {
-                    MqttPayload::Block(_) => {
-                        assert_eq!(evt.topic, "blocks");
-                    }
-                    MqttPayload::Json(_) => {
-                        assert_eq!(evt.topic, "milestone-info/latest");
-                    }
-                    _ => panic!("unexpected mqtt payload type: {:?}", evt),
+        .subscribe([Topic::new("blocks").unwrap()], move |evt| {
+            match &evt.payload {
+                MqttPayload::Block(_) => {
+                    assert_eq!(evt.topic, "blocks");
                 }
-                match tx.try_send(()) {
-                    Ok(_) | Err(TrySendError::Full(_)) => (),
-                    e => e.unwrap(),
+                MqttPayload::Json(_) => {
+                    panic!("unexpected mqtt payload type: {:?}", evt)
                 }
-            },
-        )
+            }
+            match tx.try_send(()) {
+                Ok(_) | Err(TrySendError::Full(_)) => (),
+                e => e.unwrap(),
+            }
+        })
         .await
         .unwrap();
 
