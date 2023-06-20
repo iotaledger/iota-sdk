@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::addresses_balance` method accepting addresses to get balance for;
 - `Wallet::get_secret_manager` method;
 - `Password` type which is `Zeroize` and `ZeroizeOnDrop`;
+- `WalletBuilder::with_storage_options` method, allowing storage encryption;
 
 ### Changed
 
@@ -101,6 +102,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Default number of workers for nonce `Miner` changed from `1` to `num_cpu::get()`;
 - Made `Account::get_basic_outputs_for_additional_inputs` private;
 - `Account::get_unlockable_outputs_with_additional_unlock_conditions` renamed to `claimable_outputs`;
+- Made `ManagerStorage` public and renamed it to `StorageKind`;
+- Fields of `StorageOptions` are now public;
 
 ### Removed
 
