@@ -3,7 +3,12 @@
 
 //! In this example we will get a block and its metadata.
 //!
-//! `cargo run --example get_block --release`
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release get_block
+//! ```
+
+use std::env;
 
 use iota_sdk::client::{Client, Result};
 
@@ -12,10 +17,8 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let node_url = std::env::var("NODE_URL").unwrap();
-
     let client = Client::builder()
-        .with_node(&node_url)?
+        .with_node(&env::var("NODE_URL").unwrap())?
         .with_pow_worker_count(1)
         .finish()
         .await?;
@@ -29,5 +32,6 @@ async fn main() -> Result<()> {
 
     let block_metadata = client.get_block_metadata(&block_id).await?;
     println!("{block_metadata:#?}");
+
     Ok(())
 }

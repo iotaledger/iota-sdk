@@ -1,11 +1,20 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will create addresses with a ledger nano hardware wallet.
-//! To use the ledger nano simulator clone https://github.com/iotaledger/ledger-shimmer-app, run `git submodule init && git submodule update --recursive`,
-//! then `./build.sh -m nanos|nanox|nanosplus -s` and use `true` in `LedgerSecretManager::new(true)`.
+//! In this example we will create testnet addresses with a simulated ledger nano hardware wallet.
 //!
-//! `cargo run --example ledger_nano --features=ledger_nano --release`
+//! To use the ledger nano simulator, run the following commands:
+//! 1. `clone https://github.com/iotaledger/ledger-shimmer-app`
+//! 2. `cd ledger-shimmer-app`
+//! 3. `git submodule init && git submodule update --recursive`
+//! 4. `./build.sh -m nanos|nanox|nanosplus -s`
+//!
+//! Then, open the ledger nano web interface at `http://localhost:5000`.
+//!
+//! Rename `.env.example` to `.env` first, then run the command:
+//! ```sh
+//! cargo run --release --features=ledger_nano --example ledger_nano [IS SIMULATOR]
+//! ```
 
 use iota_sdk::client::{
     api::GetAddressesOptions,
@@ -19,7 +28,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let ledger_nano = LedgerSecretManager::new(false);
+    let ledger_nano = LedgerSecretManager::new(true);
 
     println!("{:?}", ledger_nano.get_ledger_nano_status().await);
 
