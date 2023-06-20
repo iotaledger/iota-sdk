@@ -66,6 +66,7 @@ import type {
     __ClearListenersMethod__,
     __SignatureUnlockMethod__,
     __RequestFundsFromFaucetMethod__,
+    __PluginFetchMethodMethod__,
 } from './client';
 
 export type __ClientMethods__ =
@@ -132,4 +133,5 @@ export type __ClientMethods__ =
     | __BuildFoundryOutputMethod__
     | __BuildNftOutputMethod__
     | __ClearListenersMethod__
-    | __RequestFundsFromFaucetMethod__;
+    | __RequestFundsFromFaucetMethod__
+    | __PluginFetchMethodMethod__;

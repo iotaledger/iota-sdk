@@ -1001,4 +1001,23 @@ export class Client {
 
         return JSON.parse(response).payload;
     }
+
+    /**
+     * Extension method which provides request methods for plugins.
+     * @param basePluginPath The base path for the plugin eg indexer/v1/ .
+     * @param method The http method.
+     * @param methodPath The path for the plugin request.
+     * @param queryParams Additional query params for the request.
+     * @param request The request object.
+     * @returns The response Uint8Array.
+     */
+    async pluginFetch(basePluginPath: string, method: "GET" | "POST", methodPath: string, queryParams?: string[], request?: string): Promise<Uint8Array> {
+        
+        const response = await this.methodHandler.callMethod({
+            name: 'pluginFetch',
+            data: { basePluginPath, method, methodPath, queryParams: queryParams ?? [], request },
+        });
+
+        return JSON.parse(response).payload;
+    }
 }

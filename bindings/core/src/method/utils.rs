@@ -3,7 +3,7 @@
 
 use derivative::Derivative;
 use iota_sdk::types::block::{
-    address::{AliasAddress, Bech32Address, Hrp},
+    address::{Bech32Address, Hrp},
     output::{dto::OutputDto, AliasId, NftId, OutputId, RentStructure, TokenScheme},
     payload::{
         dto::MilestonePayloadDto,
