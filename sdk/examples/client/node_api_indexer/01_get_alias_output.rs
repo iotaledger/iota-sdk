@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! Gets the alias output from the corresponding alias id by querying the
-//! `api/indexer/v1/outputs/alias/{aliasId}` node endpoint.
+//! `api/indexer/v2/outputs/alias/{aliasId}` node endpoint.
 //!
 //! Make sure that the node has the indexer plugin enabled.
 //!

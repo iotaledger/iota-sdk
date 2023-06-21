@@ -72,7 +72,7 @@ impl NodeManager {
     ) -> Result<Vec<Node>> {
         let mut nodes_with_modified_url: Vec<Node> = Vec::new();
 
-        if prefer_permanode || (path == "api/core/v2/blocks" && query.is_some()) {
+        if prefer_permanode || (path == "api/core/v3/blocks" && query.is_some()) {
             if let Some(permanodes) = self.permanodes.clone() {
                 for permanode in permanodes {
                     if !nodes_with_modified_url.iter().any(|n| n.url == permanode.url) {
@@ -284,7 +284,7 @@ impl NodeManager {
         }
     }
 
-    // Only used for api/core/v2/blocks/{blockID}, that's why we don't need the quorum stuff
+    // Only used for api/core/v3/blocks/{blockID}, that's why we don't need the quorum stuff
     pub(crate) async fn get_request_bytes(
         &self,
         path: &str,

@@ -1,8 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Gets all basic output ids accociated with an address by querying the
-//! `api/indexer/v1/outputs/basic` node endpoint.
+//! Gets all basic output ids associated with an address by querying the
+//! `api/indexer/v2/outputs/basic` node endpoint.
 //!
 //! Make sure that the node has the indexer plugin enabled.
 //! Make sure to provide a somewhat recently used address to make this example run successfully!
