@@ -29,7 +29,7 @@ use crate::{
 };
 
 /// Info path is the exact path extension for node APIs to request their info.
-pub(crate) static INFO_PATH: &str = "api/core/v2/info";
+pub(crate) static INFO_PATH: &str = "api/core/v3/info";
 
 /// NodeInfo wrapper which contains the node info and the url from the node (useful when multiple nodes are used)
 #[derive(Debug, Serialize, Deserialize)]
@@ -82,7 +82,7 @@ impl ClientInner {
     }
 
     /// Returns general information about the node.
-    /// GET /api/core/v2/info
+    /// GET /api/core/v3/info
     pub async fn get_info(&self) -> Result<NodeInfoWrapper> {
         self.node_manager
             .read()
@@ -94,9 +94,9 @@ impl ClientInner {
     // Tangle routes.
 
     /// Returns tips that are ideal for attaching a block.
-    /// GET /api/core/v2/tips
+    /// GET /api/core/v3/tips
     pub async fn get_tips(&self) -> Result<Vec<BlockId>> {
-        let path = "api/core/v2/tips";
+        let path = "api/core/v3/tips";
 
         let resp = self
             .node_manager
@@ -114,9 +114,9 @@ impl ClientInner {
     // Blocks routes.
 
     /// Returns the BlockId of the submitted block.
-    /// POST JSON to /api/core/v2/blocks
+    /// POST JSON to /api/core/v3/blocks
     pub async fn post_block(&self, block: &Block) -> Result<BlockId> {
-        let path = "api/core/v2/blocks";
+        let path = "api/core/v3/blocks";
         let local_pow = self.get_local_pow().await;
         let timeout = if local_pow {
             self.get_timeout().await
@@ -169,9 +169,9 @@ impl ClientInner {
     }
 
     /// Returns the BlockId of the submitted block.
-    /// POST /api/core/v2/blocks
+    /// POST /api/core/v3/blocks
     pub async fn post_block_raw(&self, block: &Block) -> Result<BlockId> {
-        let path = "api/core/v2/blocks";
+        let path = "api/core/v3/blocks";
         let local_pow = self.get_local_pow().await;
         let timeout = if local_pow {
             self.get_timeout().await
@@ -221,9 +221,9 @@ impl ClientInner {
     }
 
     /// Finds a block by its BlockId. This method returns the given block object.
-    /// GET /api/core/v2/blocks/{BlockId}
+    /// GET /api/core/v3/blocks/{BlockId}
     pub async fn get_block(&self, block_id: &BlockId) -> Result<Block> {
-        let path = &format!("api/core/v2/blocks/{block_id}");
+        let path = &format!("api/core/v3/blocks/{block_id}");
 
         let resp = self
             .node_manager
@@ -239,9 +239,9 @@ impl ClientInner {
     }
 
     /// Finds a block by its BlockId. This method returns the given block raw data.
-    /// GET /api/core/v2/blocks/{BlockId}
+    /// GET /api/core/v3/blocks/{BlockId}
     pub async fn get_block_raw(&self, block_id: &BlockId) -> Result<Vec<u8>> {
-        let path = &format!("api/core/v2/blocks/{block_id}");
+        let path = &format!("api/core/v3/blocks/{block_id}");
 
         self.node_manager
             .read()
@@ -251,9 +251,9 @@ impl ClientInner {
     }
 
     /// Returns the metadata of a block.
-    /// GET /api/core/v2/blocks/{BlockId}/metadata
+    /// GET /api/core/v3/blocks/{BlockId}/metadata
     pub async fn get_block_metadata(&self, block_id: &BlockId) -> Result<BlockMetadataResponse> {
-        let path = &format!("api/core/v2/blocks/{block_id}/metadata");
+        let path = &format!("api/core/v3/blocks/{block_id}/metadata");
 
         self.node_manager
             .read()
@@ -265,9 +265,9 @@ impl ClientInner {
     // UTXO routes.
 
     /// Finds an output, as JSON, by its OutputId (TransactionId + output_index).
-    /// GET /api/core/v2/outputs/{outputId}
+    /// GET /api/core/v3/outputs/{outputId}
     pub async fn get_output(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
-        let path = &format!("api/core/v2/outputs/{output_id}");
+        let path = &format!("api/core/v3/outputs/{output_id}");
 
         let response: OutputWithMetadataResponse = self
             .node_manager
@@ -284,9 +284,9 @@ impl ClientInner {
     }
 
     /// Finds an output, as raw bytes, by its OutputId (TransactionId + output_index).
-    /// GET /api/core/v2/outputs/{outputId}
+    /// GET /api/core/v3/outputs/{outputId}
     pub async fn get_output_raw(&self, output_id: &OutputId) -> Result<Vec<u8>> {
-        let path = &format!("api/core/v2/outputs/{output_id}");
+        let path = &format!("api/core/v3/outputs/{output_id}");
 
         self.node_manager
             .read()
@@ -296,9 +296,9 @@ impl ClientInner {
     }
 
     /// Get the metadata for a given `OutputId` (TransactionId + output_index).
-    /// GET /api/core/v2/outputs/{outputId}/metadata
+    /// GET /api/core/v3/outputs/{outputId}/metadata
     pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadataDto> {
-        let path = &format!("api/core/v2/outputs/{output_id}/metadata");
+        let path = &format!("api/core/v3/outputs/{output_id}/metadata");
 
         self.node_manager
             .read()
@@ -308,9 +308,9 @@ impl ClientInner {
     }
 
     /// Returns the block, as object, that was included in the ledger for a given TransactionId.
-    /// GET /api/core/v2/transactions/{transactionId}/included-block
+    /// GET /api/core/v3/transactions/{transactionId}/included-block
     pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<Block> {
-        let path = &format!("api/core/v2/transactions/{transaction_id}/included-block");
+        let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
 
         let resp = self
             .node_manager
@@ -326,9 +326,9 @@ impl ClientInner {
     }
 
     /// Returns the block, as raw bytes, that was included in the ledger for a given TransactionId.
-    /// GET /api/core/v2/transactions/{transactionId}/included-block
+    /// GET /api/core/v3/transactions/{transactionId}/included-block
     pub async fn get_included_block_raw(&self, transaction_id: &TransactionId) -> Result<Vec<u8>> {
-        let path = &format!("api/core/v2/transactions/{transaction_id}/included-block");
+        let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
 
         self.node_manager
             .read()
@@ -338,9 +338,9 @@ impl ClientInner {
     }
 
     /// Returns the metadata of the block that was included in the ledger for a given TransactionId.
-    /// GET /api/core/v2/transactions/{transactionId}/included-block/metadata
+    /// GET /api/core/v3/transactions/{transactionId}/included-block/metadata
     pub async fn get_included_block_metadata(&self, transaction_id: &TransactionId) -> Result<BlockMetadataResponse> {
-        let path = &format!("api/core/v2/transactions/{transaction_id}/included-block/metadata");
+        let path = &format!("api/core/v3/transactions/{transaction_id}/included-block/metadata");
 
         self.node_manager
             .read()
@@ -351,9 +351,9 @@ impl ClientInner {
 
     // Peers routes.
 
-    /// GET /api/core/v2/peers
+    /// GET /api/core/v3/peers
     pub async fn get_peers(&self) -> Result<Vec<PeerResponse>> {
-        let path = "api/core/v2/peers";
+        let path = "api/core/v3/peers";
 
         let resp = self
             .node_manager
@@ -387,7 +387,7 @@ impl ClientInner {
 }
 
 impl Client {
-    /// GET /api/core/v2/info endpoint
+    /// GET /api/core/v3/info endpoint
     pub async fn get_node_info(url: &str, auth: Option<NodeAuth>) -> Result<InfoResponse> {
         let mut url = crate::client::node_manager::builder::validate_url(Url::parse(url)?)?;
         if let Some(auth) = &auth {
@@ -398,7 +398,7 @@ impl Client {
                     .map_err(|_| crate::client::Error::UrlAuth("password"))?;
             }
         }
-        let path = "api/core/v2/info";
+        let path = "api/core/v3/info";
         url.set_path(path);
 
         let resp: InfoResponse =
