@@ -21,6 +21,7 @@ use crate::{
         block::{
             output::{Output, OutputId, OutputMetadata, OutputWithMetadata},
             payload::transaction::TransactionId,
+            slot::{SlotCommitment, SlotCommitmentId, SlotIndex},
             Block, BlockDto, BlockId,
         },
         TryFromDto,
@@ -90,7 +91,7 @@ impl ClientInner {
             .await
     }
 
-    // Tangle routes.
+    // Blocks routes.
 
     /// Returns tips that are ideal for attaching a block.
     /// GET /api/core/v3/tips
@@ -106,8 +107,6 @@ impl ClientInner {
 
         Ok(response.tips)
     }
-
-    // Blocks routes.
 
     /// Returns the BlockId of the submitted block.
     /// POST JSON to /api/core/v3/blocks
@@ -341,6 +340,56 @@ impl ClientInner {
             .read()
             .await
             .get_request(path, None, self.get_timeout().await, true, true)
+            .await
+    }
+
+    // Commitments routes.
+
+    /// Gets the slot commitment by the given slot commitment id.
+    /// GET /api/core/v3/commitments/{commitmentId}
+    pub async fn get_slot_commitment_by_id(&self, slot_commitment_id: &SlotCommitmentId) -> Result<SlotCommitment> {
+        let path = &format!("api/core/v3/commitments/{slot_commitment_id}");
+
+        self.node_manager
+            .read()
+            .await
+            .get_request::<SlotCommitment>(path, None, self.get_timeout().await, false, true)
+            .await
+    }
+
+    /// Gets the slot commitment, as raw bytes, by the given slot commitment id.
+    /// GET /api/core/v3/commitments/{commitmentId}
+    pub async fn get_slot_commitment_by_id_raw(&self, slot_commitment_id: &SlotCommitmentId) -> Result<Vec<u8>> {
+        let path = &format!("api/core/v3/commitments/{slot_commitment_id}");
+
+        self.node_manager
+            .read()
+            .await
+            .get_request_bytes(path, None, self.get_timeout().await)
+            .await
+    }
+
+    /// Gets the slot commitment by the given slot index.
+    /// GET /api/core/v3/commitments/by-index/{index}
+    pub async fn get_slot_commitment_by_index(&self, slot_index: &SlotIndex) -> Result<SlotCommitment> {
+        let path = &format!("api/core/v3/commitments/by-index/{slot_index}");
+
+        self.node_manager
+            .read()
+            .await
+            .get_request::<SlotCommitment>(path, None, self.get_timeout().await, false, true)
+            .await
+    }
+
+    /// Gets the slot commitment, as raw bytes, by the given slot index.
+    /// GET /api/core/v3/commitments/by-index/{index}
+    pub async fn get_slot_commitment_by_index_raw(&self, slot_index: &SlotIndex) -> Result<Vec<u8>> {
+        let path = &format!("api/core/v3/commitments/by-index/{slot_index}");
+
+        self.node_manager
+            .read()
+            .await
+            .get_request_bytes(path, None, self.get_timeout().await)
             .await
     }
 
