@@ -9,12 +9,17 @@ use crate::types::block::slot::{RootsId, SlotCommitmentId, SlotIndex};
 /// Contains a summary of a slot.
 /// It is linked to the commitment of the previous slot, which forms a commitment chain.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, derive_more::From, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub struct SlotCommitment {
     /// The slot index of this commitment.
     /// It is calculated based on genesis timestamp and the duration of a slot.
     index: SlotIndex,
     /// The commitment ID of the previous slot.
+    #[cfg_attr(feature = "serde", serde(rename = "prevId"))]
     previous_slot_commitment_id: SlotCommitmentId,
     /// A BLAKE2b-256 hash of concatenating multiple sparse merkle tree roots of a slot.
     roots_id: RootsId,
