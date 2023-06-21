@@ -10,7 +10,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --example quorum [NODE 1] [NODE 2] [NODE 3]
+//! cargo run --release --example quorum <NODE 1> <NODE 2> <NODE 3>
 //! ```
 
 use std::env;

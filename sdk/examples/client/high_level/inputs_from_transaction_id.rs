@@ -7,7 +7,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --example inputs_from_transaction_id [TRANSACTION_ID]
+//! cargo run --release --example inputs_from_transaction_id <TRANSACTION_ID>
 //! ```
 
 use std::env;
