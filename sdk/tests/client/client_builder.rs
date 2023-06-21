@@ -51,7 +51,9 @@ async fn client_builder() {
                 "vByteFactorKey":10,
                 "vByteFactorData":1
             },
-            "tokenSupply":1813620509061365
+            "tokenSupply":1813620509061365,
+            "genesisUnixTimestamp":1582328545,
+            "slotDurationInSeconds":10
         },
         "localPow":true,
         "fallbackToLocalPow":true,
@@ -105,7 +107,9 @@ async fn client_builder() {
                 "vByteFactorKey":10,
                 "vByteFactorData":1
             },
-            "tokenSupply":1813620509061365
+            "tokenSupply":1813620509061365,
+            "genesisUnixTimestamp":1582328545,
+            "slotDurationInSeconds":10
         },
         "localPow":true,
         "fallbackToLocalPow":true,
