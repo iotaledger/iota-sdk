@@ -18,12 +18,10 @@ use crate::{
 // pub(crate) fn dedup_inputs(
 //     mandatory_inputs: &mut Vec<InputSigningData>,
 //     additional_inputs: &mut Vec<InputSigningData>,
-// ) {
-//     // Sorting inputs by OutputId so duplicates can be safely removed.
-//     mandatory_inputs.sort_by_key(|input| *input.output_metadata.output_id());
-//     mandatory_inputs.dedup_by_key(|input| *input.output_metadata.output_id());
-//     additional_inputs.sort_by_key(|input| *input.output_metadata.output_id());
-//     additional_inputs.dedup_by_key(|input| *input.output_metadata.output_id());
+// ) { // Sorting inputs by OutputId so duplicates can be safely removed. mandatory_inputs.sort_by_key(|input|
+//   *input.output_metadata.output_id()); mandatory_inputs.dedup_by_key(|input| *input.output_metadata.output_id());
+//   additional_inputs.sort_by_key(|input| *input.output_metadata.output_id()); additional_inputs.dedup_by_key(|input|
+//   *input.output_metadata.output_id());
 
 //     // Remove additional inputs that are already mandatory.
 //     // TODO: could be done more efficiently with itertools unique?
