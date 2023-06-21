@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! TODO: <insert example description> by calling
-//! `GET api/indexer/v1/outputs/foundry`.
+//! `GET api/indexer/v2/outputs/foundry`.
 //!
 //! `cargo run --example node_api_indexer_get_foundry_outputs --release -- [NODE URL] [ADDRESS]`
 

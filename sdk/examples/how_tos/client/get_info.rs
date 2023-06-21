@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Returns general information about the node by calling `GET /api/core/v2/info`.
+//! Returns general information about the node by calling `GET /api/core/v3/info`.
 //!
 //! `cargo run --release --example get_info -- [NODE URL]`
 
