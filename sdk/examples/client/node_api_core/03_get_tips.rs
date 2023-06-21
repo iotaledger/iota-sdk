@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Returns tips that are ideal for attaching a block by calling `GET /api/core/v2/tips`.
+//! Returns tips that are ideal for attaching a block by calling `GET /api/core/v3/tips`.
 //!
 //! `cargo run --example node_api_core_get_tips --release -- [NODE URL]`
 

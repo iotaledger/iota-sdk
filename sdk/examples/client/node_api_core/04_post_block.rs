@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Submits a block as a JSON payload by calling `POST /api/core/v2/blocks`.
+//! Submits a block as a JSON payload by calling `POST /api/core/v3/blocks`.
 //!
 //! `cargo run --example node_api_core_post_block --release -- [NODE URL]`
 
