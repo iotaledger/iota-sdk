@@ -28,11 +28,7 @@ async fn main() -> Result<()> {
     let node_url = std::env::var("NODE_URL").unwrap();
 
     // Create a node client.
-    let online_client = Client::builder()
-        // Insert your node URL in the .env.
-        .with_node(&node_url)?
-        .finish()
-        .await?;
+    let online_client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let signed_transaction_payload = read_signed_transaction_from_file(SIGNED_TRANSACTION_FILE_NAME).await?;
 

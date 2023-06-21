@@ -41,11 +41,7 @@ async fn main() -> Result<()> {
         .unwrap_or(1_000_000u64);
 
     // Create a node client.
-    let online_client = Client::builder()
-        // Insert your node URL in the .env.
-        .with_node(&node_url)?
-        .finish()
-        .await?;
+    let online_client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Recovers addresses from the previous example.
     let addresses = read_addresses_from_file(ADDRESS_FILE_NAME).await?;

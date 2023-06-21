@@ -28,10 +28,7 @@ async fn main() -> Result<()> {
     let amount = args.next().map(|s| s.parse::<u64>().unwrap()).unwrap_or(1_000_000u64);
 
     // Create a node client.
-    let client = Client::builder()
-        .with_node(&node_url)? // Insert your node URL here
-        .finish()
-        .await?;
+    let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =
         SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
