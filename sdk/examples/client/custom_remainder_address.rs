@@ -6,7 +6,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release custom_remainder_address [AMOUNT]
+//! cargo run --release --example custom_remainder_address [AMOUNT]
 //! ```
 
 use std::env;

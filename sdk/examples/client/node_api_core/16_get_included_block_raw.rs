@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
         .nth(2)
         .unwrap_or_else(|| env::var("NODE_URL").expect("NODE_URL not set"));
 
-    // Create a client.
+    // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Take the transaction id from the command line, or panic.

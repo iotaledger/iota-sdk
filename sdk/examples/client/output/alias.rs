@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
     // non-zero balance.
     dotenvy::dotenv().ok();
 
-    // Create a client instance.
+    // Create a node client.
     let client = Client::builder()
         .with_node(&env::var("NODE_URL").unwrap())?
         .finish()

@@ -29,6 +29,7 @@ async fn main() -> Result<()> {
 
     fern_logger::logger_init(config).unwrap();
 
+    // Create a node client.
     let client = Client::builder()
         .with_node(&env::var("NODE_URL").unwrap())?
         .finish()

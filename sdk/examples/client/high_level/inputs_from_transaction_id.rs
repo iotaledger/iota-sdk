@@ -26,6 +26,7 @@ async fn main() -> Result<()> {
 
     let mut args = env::args().skip(1);
 
+    // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
     let transaction_id = args
         .next()

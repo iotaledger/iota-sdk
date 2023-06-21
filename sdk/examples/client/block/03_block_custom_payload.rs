@@ -22,7 +22,7 @@ async fn main() -> Result<()> {
 
     let node_url = env::var("NODE_URL").unwrap();
 
-    // Create a client with that node.
+    // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Create a custom payload.

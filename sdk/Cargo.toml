@@ -422,8 +422,8 @@ required-features = [ "client" ]
 #######
 
 [[example]]
-name = "client_list_addresses"
-path = "examples/client/01_list_addresses.rs"
+name = "01_generate_addresses"
+path = "examples/client/01_generate_addresses.rs"
 required-features = [ "client" ]
 
 [[example]]

@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
         .unwrap_or("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r".to_string())
         .parse()?;
 
-    // Create a client instance.
+    // Create a node client.
     let client = Client::builder()
         .with_node("https://api.testnet.shimmer.network")?
         .with_mqtt_broker_options(BrokerOptions::new().use_ws(true))

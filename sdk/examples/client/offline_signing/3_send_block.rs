@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
 
     let node_url = env::var("NODE_URL").unwrap();
 
-    // Create a client instance.
+    // Create a node client.
     let online_client = Client::builder()
         // Insert your node URL in the .env.
         .with_node(&node_url)?

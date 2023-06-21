@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
     let metadata = env::args().nth(1).unwrap_or("hello".to_string());
     let metadata = metadata.as_bytes();
 
-    // Create a client instance.
+    // Create a node client.
     let client = Client::builder()
         .with_node(&env::var("NODE_URL").unwrap())?
         .finish()

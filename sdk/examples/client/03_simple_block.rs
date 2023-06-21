@@ -17,6 +17,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    // Create a node client.
     let client = Client::builder()
         .with_node(&env::var("NODE_URL").unwrap())?
         .finish()

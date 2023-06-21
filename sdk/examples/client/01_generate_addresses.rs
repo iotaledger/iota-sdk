@@ -5,7 +5,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --example client_list_addresses
+//! cargo run --release --example 01_generate_addresses
 //! ```
 
 use std::env;
@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Create a client instance.
+    // Create a node client.
     let client = Client::builder()
         .with_node(&env::var("NODE_URL").unwrap())?
         .finish()

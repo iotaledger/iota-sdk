@@ -23,6 +23,7 @@ async fn main() -> Result<()> {
     let mut args = env::args().skip(1);
     let amount = args.next().map(|s| s.parse::<u64>().unwrap()).unwrap_or(1_000_000u64);
 
+    // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =

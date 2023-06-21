@@ -46,7 +46,7 @@ async fn main() -> Result<()> {
         .map(|s| s.parse::<u64>().unwrap())
         .unwrap_or(1_000_000u64);
 
-    // Create a client instance.
+    // Create a node client.
     let online_client = Client::builder()
         // Insert your node URL in the .env.
         .with_node(&node_url)?

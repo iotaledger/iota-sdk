@@ -26,7 +26,7 @@ async fn main() -> Result<()> {
     let tag = args.next().unwrap_or_else(|| "Hello".to_string());
     let data = args.next().unwrap_or_else(|| "Tangle".to_string());
 
-    // Create a client with that node.
+    // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Create and send the block with tag and data.

@@ -29,6 +29,7 @@ async fn main() -> Result<()> {
     let node_2 = env::args().nth(2).expect("missing example argument: NODE 2");
     let node_3 = env::args().nth(3).expect("missing example argument: NODE 3");
 
+    // Create a node client.
     let client = Client::builder()
         .with_node(&node_1)?
         .with_node(&node_2)?

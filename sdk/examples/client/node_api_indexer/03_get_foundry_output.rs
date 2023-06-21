@@ -26,7 +26,7 @@ async fn main() -> Result<()> {
     // Take the node URL from command line argument or use one from env as default.
     let node_url = env::args().nth(2).unwrap_or_else(|| env::var("NODE_URL").unwrap());
 
-    // Create a client with that node.
+    // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Take the foundry id from the command line, or panic.

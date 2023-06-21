@@ -5,7 +5,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release client_config
+//! cargo run --release --example client_config
 //! ```
 
 use iota_sdk::client::{Client, Result};

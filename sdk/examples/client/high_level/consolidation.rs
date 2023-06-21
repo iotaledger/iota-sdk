@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
     let address_range = address_range_start..address_range_start + address_range_len;
     println!("Address consolidation range: {:?}", address_range);
 
-    // Create a client instance
+    // Create a node client.
     let client = Client::builder()
         .with_node(&env::var("NODE_URL").unwrap())?
         .finish()
