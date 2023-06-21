@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Find an output, as raw bytes, by its identifier by querying the `/api/core/v2/outputs/{outputId}` node endpoint.
+//! Find an output, as raw bytes, by its identifier by querying the `/api/core/v3/outputs/{outputId}` node endpoint.
 //!
 //! Make sure to provide a somewhat recent output id to make this example run successfully!
 //!

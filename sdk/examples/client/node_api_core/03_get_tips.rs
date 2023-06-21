@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Returns tips that are ideal for attaching a block by querying its `/api/core/v2/tips` endpoint.
+//! Returns tips that are ideal for attaching a block by querying its `/api/core/v3/tips` endpoint.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh

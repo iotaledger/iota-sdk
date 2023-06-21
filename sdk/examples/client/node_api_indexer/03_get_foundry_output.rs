@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! Gets the foundry output from the corresponding foundry id by querying the
-//! `api/indexer/v1/outputs/foundry/{foundryId}` node endpoint.
+//! `api/indexer/v2/outputs/foundry/{foundryId}` node endpoint.
 //!
 //! Make sure that the node has the indexer plugin enabled.
 //!

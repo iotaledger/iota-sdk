@@ -1,8 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Gets all alias output ids accociated with an address by querying the
-//! `api/indexer/v1/outputs/alias` node endpoint.
+//! Gets all alias output ids associated with an address by querying the
+//! `api/indexer/v2/outputs/alias` node endpoint.
 //!
 //! Make sure that the node has the indexer plugin enabled.
 //!

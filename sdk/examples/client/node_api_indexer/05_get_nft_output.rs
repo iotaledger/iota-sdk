@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! Gets the nft output from the corresponding nft id by querying the
-//! `api/indexer/v1/outputs/nft/{nftId}` node endpoint.
+//! `api/indexer/v2/outputs/nft/{nftId}` node endpoint.
 //!
 //! Make sure that the node has the indexer plugin enabled.
 //!
