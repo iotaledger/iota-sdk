@@ -21,6 +21,3 @@ mod native_tokens;
 mod output_preparation;
 mod syncing;
 mod transactions;
-#[cfg(not(target_os = "windows"))]
-#[cfg(feature = "rocksdb")]
-mod wallet_storage;
