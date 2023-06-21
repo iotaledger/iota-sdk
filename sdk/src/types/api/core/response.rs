@@ -326,18 +326,6 @@ pub struct PeerResponse {
     pub gossip: Option<Gossip>,
 }
 
-/// Response of GET /api/plugins/debug/whiteflag.
-/// Returns the computed merkle tree hash for the given white flag traversal.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct WhiteFlagResponse {
-    pub merkle_tree_hash: String,
-}
-
 /// Response of GET /api/routes.
 /// Returns the available API route groups of the node.
 #[derive(Clone, Debug, Eq, PartialEq)]
