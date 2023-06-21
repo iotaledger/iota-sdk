@@ -60,7 +60,7 @@ impl SlotCommitment {
         self.cumulative_weight
     }
 
-    /// Derives a [`SlotCommitmentId`] from the [`SlotCommitment`] and a [`SlotIndex`].
+    /// Derives the [`SlotCommitmentId`] of the [`SlotCommitment`].
     pub fn id(&self) -> SlotCommitmentId {
         let mut bytes = [0u8; SlotCommitmentId::LENGTH];
         let mut packer = SlicePacker::new(&mut bytes);
