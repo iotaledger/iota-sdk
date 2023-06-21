@@ -33,7 +33,7 @@ const ED25519_SIGNATURE: &str = "0xc6a40edf9a089f42c18f4ebccb35fe4b578d93b879e99
 
 #[test]
 fn kind() {
-    assert_eq!(RegularTransactionEssence::KIND, 1);
+    assert_eq!(RegularTransactionEssence::KIND, 2);
 }
 
 #[test]
