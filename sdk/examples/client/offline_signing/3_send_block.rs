@@ -10,8 +10,6 @@
 //! cargo run --release --example 3_send_block
 //! ```
 
-use std::{env, path::Path};
-
 use iota_sdk::{
     client::{
         api::{verify_semantic, SignedTransactionData, SignedTransactionDataDto},
@@ -19,7 +17,6 @@ use iota_sdk::{
     },
     types::block::{payload::Payload, semantic::ConflictReason},
 };
-use tokio::{fs::File, io::AsyncReadExt};
 
 const SIGNED_TRANSACTION_FILE_NAME: &str = "examples/client/offline_signing/signed_transaction.json";
 
@@ -28,7 +25,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let node_url = env::var("NODE_URL").unwrap();
+    let node_url = std::env::var("NODE_URL").unwrap();
 
     // Create a node client.
     let online_client = Client::builder()
@@ -61,15 +58,17 @@ async fn main() -> Result<()> {
 
     println!(
         "Posted block: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
 
     Ok(())
 }
 
-async fn read_signed_transaction_from_file(path: impl AsRef<Path>) -> Result<SignedTransactionData> {
-    let mut file = File::open(path).await.expect("failed to open file");
+async fn read_signed_transaction_from_file(path: impl AsRef<std::path::Path>) -> Result<SignedTransactionData> {
+    use tokio::io::AsyncReadExt;
+
+    let mut file = tokio::fs::File::open(path).await.expect("failed to open file");
     let mut json = String::new();
     file.read_to_string(&mut json).await.expect("failed to read file");
 

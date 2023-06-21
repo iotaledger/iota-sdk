@@ -8,8 +8,6 @@
 //! cargo run --release --example client_split_funds
 //! ```
 
-use std::env;
-
 use iota_sdk::client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result};
 
 #[tokio::main]
@@ -21,19 +19,19 @@ async fn main() -> Result<()> {
 
     // Create a node client.
     let client = Client::builder()
-        .with_node(&env::var("NODE_URL").unwrap())?
+        .with_node(&std::env::var("NODE_URL").unwrap())?
         .finish()
         .await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let address = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
         .await?[0];
     println!(
         "Requesting funds (waiting 15s): {}",
-        request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &address,).await?
+        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &address,).await?
     );
     // wait so the faucet can send the funds
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
@@ -52,7 +50,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Block with split funds sent: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
 

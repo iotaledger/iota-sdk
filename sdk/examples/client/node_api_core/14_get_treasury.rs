@@ -8,8 +8,6 @@
 //! cargo run --release --example node_api_core_get_treasury [NODE URL]
 //! ```
 
-use std::env;
-
 use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
@@ -18,7 +16,9 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Take the node URL from command line argument or use one from env as default.
-    let node_url = env::args().nth(1).unwrap_or_else(|| env::var("NODE_URL").unwrap());
+    let node_url = std::env::args()
+        .nth(1)
+        .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;

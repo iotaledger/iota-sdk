@@ -8,8 +8,6 @@
 //! cargo run --release --example build_alias_output [METADATA] [ADDRESS]
 //! ```
 
-use std::env;
-
 use iota_sdk::{
     client::{Client, Result},
     types::block::{
@@ -27,19 +25,19 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let metadata = env::args().nth(1).unwrap_or("hello".to_string());
+    let metadata = std::env::args().nth(1).unwrap_or("hello".to_string());
     let metadata = metadata.as_bytes();
 
     // Create a node client.
     let client = Client::builder()
-        .with_node(&env::var("NODE_URL").unwrap())?
+        .with_node(&std::env::var("NODE_URL").unwrap())?
         .finish()
         .await?;
 
     let token_supply = client.get_token_supply().await?;
     let rent_structure = client.get_rent_structure().await?;
 
-    let address = env::args()
+    let address = std::env::args()
         .nth(1)
         .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string());
     let address = Address::try_from_bech32(address)?;

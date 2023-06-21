@@ -10,11 +10,6 @@
 //! cargo run --release --example native_tokens [TOKEN ID]
 //! ```
 
-use std::{
-    env,
-    time::{Duration, SystemTime, UNIX_EPOCH},
-};
-
 use iota_sdk::{
     client::{api::GetAddressesOptions, secret::SecretManager, utils::request_funds_from_faucet, Client, Result},
     types::block::output::{
@@ -22,7 +17,6 @@ use iota_sdk::{
         BasicOutputBuilder, NativeToken, TokenId,
     },
 };
-use primitive_types::U256;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -33,12 +27,12 @@ async fn main() -> Result<()> {
 
     // Create a node client.
     let client = Client::builder()
-        .with_node(&env::var("NODE_URL").unwrap())?
+        .with_node(&std::env::var("NODE_URL").unwrap())?
         .finish()
         .await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let addresses = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..2))
@@ -50,19 +44,19 @@ async fn main() -> Result<()> {
 
     println!(
         "Requesting funds (waiting 15s): {}",
-        request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &sender_address).await?,
+        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &sender_address).await?,
     );
-    tokio::time::sleep(Duration::from_secs(15)).await;
+    tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
-    let tomorrow = (SystemTime::now() + Duration::from_secs(24 * 3600))
-        .duration_since(UNIX_EPOCH)
+    let tomorrow = (std::time::SystemTime::now() + std::time::Duration::from_secs(24 * 3600))
+        .duration_since(std::time::UNIX_EPOCH)
         .expect("clock went backwards")
         .as_secs()
         .try_into()
         .unwrap();
 
     // Replace with the token ID of native tokens you own.
-    let token_id = env::args()
+    let token_id = std::env::args()
         .nth(1)
         .unwrap_or("0x08e68f7616cd4948efebc6a77c4f935eaed770ac53869cba56d104f2b472a8836d0100000000".to_string());
     let token_id: [u8; 38] = prefix_hex::decode(token_id)?;
@@ -72,13 +66,19 @@ async fn main() -> Result<()> {
         // tokens
         BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
-            .add_native_token(NativeToken::new(TokenId::new(token_id), U256::from(10))?)
+            .add_native_token(NativeToken::new(
+                TokenId::new(token_id),
+                primitive_types::U256::from(10),
+            )?)
             .finish_output(token_supply)?,
         // With StorageDepositReturnUnlockCondition, the receiver can consume the output to get the native tokens, but
         // he needs to send the amount back
         BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(receiver_address))
-            .add_native_token(NativeToken::new(TokenId::new(token_id), U256::from(10))?)
+            .add_native_token(NativeToken::new(
+                TokenId::new(token_id),
+                primitive_types::U256::from(10),
+            )?)
             // Return the full amount.
             .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                 sender_address,
@@ -100,7 +100,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Block with native tokens sent: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
 

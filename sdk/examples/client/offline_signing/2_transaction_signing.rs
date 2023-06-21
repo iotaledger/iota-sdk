@@ -10,8 +10,6 @@
 //! cargo run --release --example 2_transaction_signing
 //! ```
 
-use std::{env, path::Path};
-
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
@@ -19,10 +17,6 @@ use iota_sdk::{
         Result,
     },
     types::block::payload::transaction::TransactionPayload,
-};
-use tokio::{
-    fs::File,
-    io::{AsyncReadExt, AsyncWriteExt, BufWriter},
 };
 
 const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/client/offline_signing/prepared_transaction.json";
@@ -34,7 +28,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let prepared_transaction_data = read_prepared_transaction_from_file(PREPARED_TRANSACTION_FILE_NAME).await?;
 
@@ -56,8 +50,10 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn read_prepared_transaction_from_file(path: impl AsRef<Path>) -> Result<PreparedTransactionData> {
-    let mut file = File::open(&path).await.expect("failed to open file");
+async fn read_prepared_transaction_from_file(path: impl AsRef<std::path::Path>) -> Result<PreparedTransactionData> {
+    use tokio::io::AsyncReadExt;
+
+    let mut file = tokio::fs::File::open(&path).await.expect("failed to open file");
     let mut json = String::new();
     file.read_to_string(&mut json).await.expect("failed to read file");
 
@@ -67,12 +63,14 @@ async fn read_prepared_transaction_from_file(path: impl AsRef<Path>) -> Result<P
 }
 
 async fn write_signed_transaction_to_file(
-    path: impl AsRef<Path>,
+    path: impl AsRef<std::path::Path>,
     signed_transaction_data: &SignedTransactionData,
 ) -> Result<()> {
+    use tokio::io::AsyncWriteExt;
+
     let dto = SignedTransactionDataDto::from(signed_transaction_data);
     let json = serde_json::to_string_pretty(&dto)?;
-    let mut file = BufWriter::new(File::create(path).await.expect("failed to create file"));
+    let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(path).await.expect("failed to create file"));
     println!("{json}");
     file.write_all(json.as_bytes()).await.expect("failed to write file");
 

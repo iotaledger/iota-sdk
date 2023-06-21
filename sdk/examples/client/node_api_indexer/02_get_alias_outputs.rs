@@ -11,8 +11,6 @@
 //! cargo run --release --example node_api_indexer_get_alias_outputs <ADDRESS> [NODE URL]
 //! ```
 
-use std::env;
-
 use iota_sdk::{
     client::{node_api::indexer::query_parameters::QueryParameter, Client, Result},
     types::block::address::Bech32Address,
@@ -24,7 +22,9 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Take the node URL from command line argument or use one from env as default.
-    let node_url = env::args().nth(2).unwrap_or_else(|| env::var("NODE_URL").unwrap());
+    let node_url = std::env::args()
+        .nth(2)
+        .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
 
     // Create a node client.
     let client = Client::builder()
@@ -34,7 +34,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Take the address from the command line, or panic.
-    let address = env::args()
+    let address = std::env::args()
         .nth(1)
         .expect("missing example argument: ADDRESS")
         .parse::<Bech32Address>()?;

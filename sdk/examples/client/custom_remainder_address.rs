@@ -9,8 +9,6 @@
 //! cargo run --release --example custom_remainder_address [AMOUNT]
 //! ```
 
-use std::env;
-
 use iota_sdk::client::{
     api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
     secret::SecretManager, Client, Result,
@@ -18,7 +16,7 @@ use iota_sdk::client::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let amount = env::args()
+    let amount = std::env::args()
         .nth(1)
         .map(|s| s.parse::<u64>().unwrap())
         .unwrap_or(9_000_000);
@@ -28,12 +26,12 @@ async fn main() -> Result<()> {
 
     // Create a client instance.
     let client = Client::builder()
-        .with_node(&env::var("NODE_URL").unwrap())?
+        .with_node(&std::env::var("NODE_URL").unwrap())?
         .finish()
         .await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let addresses = secret_manager
         .generate_ed25519_addresses(
@@ -54,7 +52,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Requesting funds (waiting 15s): {}",
-        request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), sender_address).await?,
+        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), sender_address).await?,
     );
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
@@ -74,7 +72,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Block with custom remainder sent: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
 

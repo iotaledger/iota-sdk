@@ -9,8 +9,6 @@
 //! cargo run --release --example node_api_core_get_utxo_changes_by_id [MILESTONE ID] [NODE URL]
 //! ```
 
-use std::env;
-
 use iota_sdk::{
     client::{Client, Result},
     types::block::payload::milestone::MilestoneId,
@@ -22,13 +20,15 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Take the node URL from command line argument or use one from env as default.
-    let node_url = env::args().nth(2).unwrap_or_else(|| env::var("NODE_URL").unwrap());
+    let node_url = std::env::args()
+        .nth(2)
+        .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Take the milestone id from the command line, or use a default.
-    let milestone_id = if let Some(s) = env::args().nth(1) {
+    let milestone_id = if let Some(s) = std::env::args().nth(1) {
         s
     } else {
         client

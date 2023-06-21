@@ -8,7 +8,7 @@
 //! cargo run --release --example node_api_core_get_block [BLOCK ID] [NODE URL]
 //! ```
 
-use std::{env, str::FromStr};
+use std::str::FromStr;
 
 use iota_sdk::{
     client::{Client, Result},
@@ -21,13 +21,15 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Take the node URL from command line argument or use one from env as default.
-    let node_url = env::args().nth(2).unwrap_or_else(|| env::var("NODE_URL").unwrap());
+    let node_url = std::env::args()
+        .nth(2)
+        .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Take the block ID from command line argument or...
-    let block_id = if let Some(Ok(block_id)) = env::args().nth(1).map(|s| BlockId::from_str(&s)) {
+    let block_id = if let Some(Ok(block_id)) = std::env::args().nth(1).map(|s| BlockId::from_str(&s)) {
         block_id
     } else {
         // ... fetch one from the node.

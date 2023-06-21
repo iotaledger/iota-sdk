@@ -8,8 +8,6 @@
 //! cargo run --release --example recursive_alias
 //! ```
 
-use std::env;
-
 use iota_sdk::{
     client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::{
@@ -32,12 +30,12 @@ async fn main() -> Result<()> {
 
     // Create a node client.
     let client = Client::builder()
-        .with_node(&env::var("NODE_URL").unwrap())?
+        .with_node(&std::env::var("NODE_URL").unwrap())?
         .finish()
         .await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let address = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
@@ -45,7 +43,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Requesting funds (waiting 15s): {}",
-        request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &address).await?,
+        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &address).await?,
     );
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
@@ -73,7 +71,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Block with new alias outputs sent: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_1.id()
     );
 
@@ -120,7 +118,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Block with alias id set and ownership assigned to the first alias sent: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_2.id()
     );
     let _ = client.retry_until_included(&block_2.id(), None, None).await?;
@@ -145,7 +143,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Block with state metadata of the third alias updated sent: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_3.id()
     );
 
@@ -170,7 +168,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Another block with state metadata of the third alias updated sent: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_3.id()
     );
 

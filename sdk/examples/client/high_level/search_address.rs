@@ -8,8 +8,6 @@
 //! cargo run --release --example search_address [BECH32_ADDRESS] [START_INDEX] [RANGE_SIZE]
 //! ```
 
-use std::env;
-
 use iota_sdk::client::{
     api::{search_address, GetAddressesOptions},
     constants::IOTA_COIN_TYPE,
@@ -22,15 +20,15 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let node_url = env::var("NODE_URL").unwrap();
+    let node_url = std::env::var("NODE_URL").unwrap();
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
-    let mut args = env::args().skip(1);
+    let mut args = std::env::args().skip(1);
     let address = if let Some(addr) = args.next().map(|addr| addr.parse().expect("invalid address")) {
         addr
     } else {

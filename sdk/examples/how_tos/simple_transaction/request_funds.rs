@@ -11,8 +11,6 @@
 //! cargo run --release --all-features --example request_funds
 //! ```
 
-use std::env::var;
-
 use iota_sdk::{client::request_funds_from_faucet, wallet::Result, Wallet};
 
 #[tokio::main]
@@ -21,7 +19,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
     let account = wallet.get_account("Alice").await?;
@@ -35,7 +33,8 @@ async fn main() -> Result<()> {
     println!("Current available funds: {funds_before}");
 
     println!("Requesting funds from faucet...");
-    let faucet_response = request_funds_from_faucet(&var("FAUCET_URL").unwrap(), addresses[0].address()).await?;
+    let faucet_response =
+        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), addresses[0].address()).await?;
 
     println!("Response from faucet: {}", faucet_response.trim_end());
 

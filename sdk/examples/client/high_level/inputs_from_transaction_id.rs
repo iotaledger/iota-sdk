@@ -10,8 +10,6 @@
 //! cargo run --release --example inputs_from_transaction_id <TRANSACTION_ID>
 //! ```
 
-use std::env;
-
 use iota_sdk::{
     client::{Client, Result},
     types::block::payload::transaction::TransactionId,
@@ -22,9 +20,9 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let node_url = env::var("NODE_URL").unwrap();
+    let node_url = std::env::var("NODE_URL").unwrap();
 
-    let mut args = env::args().skip(1);
+    let mut args = std::env::args().skip(1);
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;

@@ -11,11 +11,6 @@
 //! cargo run --release --example expiration
 //! ```
 
-use std::{
-    env,
-    time::{Duration, SystemTime, UNIX_EPOCH},
-};
-
 use iota_sdk::{
     client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::output::{
@@ -35,12 +30,12 @@ async fn main() -> Result<()> {
 
     // Create a node client.
     let client = Client::builder()
-        .with_node(&env::var("NODE_URL").unwrap())?
+        .with_node(&std::env::var("NODE_URL").unwrap())?
         .finish()
         .await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let addresses = secret_manager
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..2))
@@ -52,12 +47,12 @@ async fn main() -> Result<()> {
 
     println!(
         "Requesting funds (waiting 15s): {}",
-        request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &sender_address).await?,
+        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &sender_address).await?,
     );
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
-    let tomorrow = (SystemTime::now() + Duration::from_secs(24 * 3600))
-        .duration_since(UNIX_EPOCH)
+    let tomorrow = (std::time::SystemTime::now() + std::time::Duration::from_secs(24 * 3600))
+        .duration_since(std::time::UNIX_EPOCH)
         .expect("clock went backwards")
         .as_secs()
         .try_into()
@@ -82,7 +77,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Block with ExpirationUnlockCondition transaction sent: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;

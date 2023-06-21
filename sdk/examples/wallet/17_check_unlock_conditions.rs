@@ -10,8 +10,6 @@
 //! cargo run --release --all-features --example check_unlock_conditions
 //! ```
 
-use std::env::var;
-
 use iota_sdk::{
     types::block::{
         address::Bech32Address,
@@ -30,7 +28,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let wallet = Wallet::builder()
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
     let account = wallet.get_account("Alice").await?;

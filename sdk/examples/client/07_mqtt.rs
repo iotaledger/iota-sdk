@@ -8,8 +8,6 @@
 //! cargo run --release --features=mqtt --example 07_mqtt [NUM_EVENTS] [ADDRESS]
 //! ```
 
-use std::env;
-
 use iota_sdk::{
     client::{
         mqtt::{BrokerOptions, MqttEvent, MqttPayload, Topic},
@@ -21,9 +19,9 @@ use iota_sdk::{
 // Connecting to a MQTT broker using raw ip doesn't work with TCP. This is a limitation of rustls.
 #[tokio::main]
 async fn main() -> Result<()> {
-    let num_events: usize = env::args().nth(1).map(|s| s.parse().unwrap()).unwrap_or(10);
+    let num_events: usize = std::env::args().nth(1).map(|s| s.parse().unwrap()).unwrap_or(10);
 
-    let address: Bech32Address = env::args()
+    let address: Bech32Address = std::env::args()
         .nth(2)
         .unwrap_or("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r".to_string())
         .parse()?;

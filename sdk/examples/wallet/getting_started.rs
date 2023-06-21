@@ -11,8 +11,6 @@
 //! cargo run --release --all-features --example wallet_getting_started
 //! ```
 
-use std::env::var;
-
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -28,15 +26,15 @@ async fn main() -> Result<()> {
 
     // Setup Stronghold secret_manager
     let secret_manager = StrongholdSecretManager::builder()
-        .password(var("STRONGHOLD_PASSWORD").unwrap())
-        .build(var("STRONGHOLD_SNAPSHOT_PATH").unwrap())?;
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .build(std::env::var("STRONGHOLD_SNAPSHOT_PATH").unwrap())?;
 
-    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     // Create the wallet
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
-        .with_storage_path(&var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()

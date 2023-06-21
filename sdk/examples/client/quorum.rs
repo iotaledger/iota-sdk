@@ -13,8 +13,6 @@
 //! cargo run --release --example quorum <NODE 1> <NODE 2> <NODE 3>
 //! ```
 
-use std::env;
-
 use iota_sdk::client::{
     api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, secret::SecretManager, Client,
     Result,
@@ -25,9 +23,9 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let node_1 = env::args().nth(1).expect("missing example argument: NODE 1");
-    let node_2 = env::args().nth(2).expect("missing example argument: NODE 2");
-    let node_3 = env::args().nth(3).expect("missing example argument: NODE 3");
+    let node_1 = std::env::args().nth(1).expect("missing example argument: NODE 1");
+    let node_2 = std::env::args().nth(2).expect("missing example argument: NODE 2");
+    let node_3 = std::env::args().nth(3).expect("missing example argument: NODE 3");
 
     // Create a node client.
     let client = Client::builder()
@@ -41,7 +39,7 @@ async fn main() -> Result<()> {
         .await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     // Generate the first address
     let addresses = secret_manager

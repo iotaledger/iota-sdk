@@ -10,18 +10,12 @@
 //! cargo run --release --example 1_transaction_preparation [RECV ADDRESS] [AMOUNT]
 //! ```
 
-use std::{env, path::Path};
-
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, PreparedTransactionDataDto},
         Client, Result,
     },
     types::block::address::Bech32Address,
-};
-use tokio::{
-    fs::File,
-    io::{AsyncReadExt, AsyncWriteExt, BufWriter},
 };
 
 const ADDRESS_FILE_NAME: &str = "examples/client/offline_signing/address.json";
@@ -32,16 +26,16 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let node_url = env::var("NODE_URL").unwrap();
+    let node_url = std::env::var("NODE_URL").unwrap();
 
     // Address to which we want to send the amount.
-    let recv_address = env::args()
+    let recv_address = std::env::args()
         .nth(1)
         .unwrap_or_else(|| "rms1qruzprxum2934lr3p77t96pzlecxv8pjzvtjrzdcgh2f5exa22n6ga0vm69".to_string());
     let recv_address = recv_address.as_str();
 
     // The amount to send.
-    let amount = env::args()
+    let amount = std::env::args()
         .nth(2)
         .map(|s| s.parse::<u64>().unwrap())
         .unwrap_or(1_000_000u64);
@@ -77,8 +71,10 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn read_addresses_from_file(path: impl AsRef<Path>) -> Result<Vec<Bech32Address>> {
-    let mut file = File::open(&path).await.expect("failed to open file");
+async fn read_addresses_from_file(path: impl AsRef<std::path::Path>) -> Result<Vec<Bech32Address>> {
+    use tokio::io::AsyncReadExt;
+
+    let mut file = tokio::fs::File::open(&path).await.expect("failed to open file");
     let mut json = String::new();
     file.read_to_string(&mut json).await.expect("failed to read file");
 
@@ -86,11 +82,13 @@ async fn read_addresses_from_file(path: impl AsRef<Path>) -> Result<Vec<Bech32Ad
 }
 
 async fn write_prepared_transaction_to_file(
-    path: impl AsRef<Path>,
+    path: impl AsRef<std::path::Path>,
     prepared_transaction: &PreparedTransactionData,
 ) -> Result<()> {
+    use tokio::io::AsyncWriteExt;
+
     let json = serde_json::to_string_pretty(&PreparedTransactionDataDto::from(prepared_transaction))?;
-    let mut file = BufWriter::new(File::create(path).await.expect("failed to create file"));
+    let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(path).await.expect("failed to create file"));
 
     println!("{json}");
 

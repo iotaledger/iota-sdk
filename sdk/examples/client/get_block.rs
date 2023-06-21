@@ -8,8 +8,6 @@
 //! cargo run --release --example get_block
 //! ```
 
-use std::env;
-
 use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
@@ -19,7 +17,7 @@ async fn main() -> Result<()> {
 
     // Create a node client.
     let client = Client::builder()
-        .with_node(&env::var("NODE_URL").unwrap())?
+        .with_node(&std::env::var("NODE_URL").unwrap())?
         .with_pow_worker_count(1)
         .finish()
         .await?;

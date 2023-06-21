@@ -8,8 +8,6 @@
 //! cargo run --release --example block_tagged_data [TAG] [DATA]
 //! ```
 
-use std::env;
-
 use iota_sdk::{
     client::{Client, Result},
     types::block::payload::Payload,
@@ -20,9 +18,9 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let node_url = env::var("NODE_URL").unwrap();
+    let node_url = std::env::var("NODE_URL").unwrap();
 
-    let mut args = env::args().skip(1);
+    let mut args = std::env::args().skip(1);
     let tag = args.next().unwrap_or_else(|| "Hello".to_string());
     let data = args.next().unwrap_or_else(|| "Tangle".to_string());
 
@@ -52,7 +50,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Block with tag and data sent: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
 

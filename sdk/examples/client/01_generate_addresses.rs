@@ -8,8 +8,6 @@
 //! cargo run --release --example 01_generate_addresses
 //! ```
 
-use std::env;
-
 use iota_sdk::client::{
     api::GetAddressesOptions,
     secret::{GenerateAddressOptions, SecretManager},
@@ -23,12 +21,12 @@ async fn main() -> Result<()> {
 
     // Create a node client.
     let client = Client::builder()
-        .with_node(&env::var("NODE_URL").unwrap())?
+        .with_node(&std::env::var("NODE_URL").unwrap())?
         .finish()
         .await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     // Generate addresses with default account index and range
     let addresses = secret_manager

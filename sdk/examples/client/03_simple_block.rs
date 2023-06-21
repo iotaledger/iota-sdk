@@ -8,8 +8,6 @@
 //! cargo run --release --example 03_simple_block
 //! ```
 
-use std::env;
-
 use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
@@ -19,7 +17,7 @@ async fn main() -> Result<()> {
 
     // Create a node client.
     let client = Client::builder()
-        .with_node(&env::var("NODE_URL").unwrap())?
+        .with_node(&std::env::var("NODE_URL").unwrap())?
         .finish()
         .await?;
 
@@ -27,7 +25,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Empty block sent: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
 

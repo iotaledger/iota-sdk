@@ -8,8 +8,6 @@
 //! cargo run --release --features=wallet --example spammer
 //! ```
 
-use std::{env::var, time::Duration};
-
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -18,10 +16,6 @@ use iota_sdk::{
     },
     types::block::{address::Bech32Address, output::BasicOutput, payload::transaction::TransactionId},
     wallet::{account::FilterOptions, Account, ClientOptions, Result, SendAmountParams, Wallet},
-};
-use tokio::{
-    task::JoinSet,
-    time::{sleep, Instant},
 };
 
 // The account alias used in this example.
@@ -43,9 +37,9 @@ async fn main() -> Result<()> {
     println!("Spammer set up to issue {num_simultaneous_txs} transactions simultaneously.");
 
     // Restore wallet from a mnemonic phrase.
-    let client_options = ClientOptions::new().with_node(&var("NODE_URL").unwrap())?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
     let secret_manager =
-        MnemonicSecretManager::try_from_mnemonic(var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        MnemonicSecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
@@ -87,9 +81,9 @@ async fn main() -> Result<()> {
     println!("Spamming transactions...");
     for i in 1..=NUM_ROUNDS {
         println!("ROUND {i}/{NUM_ROUNDS}");
-        let round_timer = Instant::now();
+        let round_timer = tokio::time::Instant::now();
 
-        let mut tasks = JoinSet::<std::result::Result<(), (usize, iota_sdk::wallet::Error)>>::new();
+        let mut tasks = tokio::task::JoinSet::<std::result::Result<(), (usize, iota_sdk::wallet::Error)>>::new();
 
         for n in 0..num_simultaneous_txs {
             let account_clone = account.clone();
@@ -97,14 +91,14 @@ async fn main() -> Result<()> {
             tasks.spawn(async move {
                 println!("Thread {n}: sending {SEND_AMOUNT} coins to own address");
 
-                let thread_timer = Instant::now();
+                let thread_timer = tokio::time::Instant::now();
                 let outputs = vec![SendAmountParams::new(recv_address, SEND_AMOUNT).map_err(|err| (n, err))?];
                 let transaction = account_clone.send_amount(outputs, None).await.map_err(|err| (n, err))?;
                 let elapsed = thread_timer.elapsed();
 
                 println!(
                     "Thread {n}: sent in {elapsed:.2?}: {}/transaction/{}",
-                    var("EXPLORER_URL").unwrap(),
+                    std::env::var("EXPLORER_URL").unwrap(),
                     transaction.transaction_id
                 );
 
@@ -131,7 +125,7 @@ async fn main() -> Result<()> {
 
             while balance.base_coin().available() == 0 {
                 println!("No funds available");
-                sleep(Duration::from_secs(2)).await;
+                tokio::time::sleep(std::time::Duration::from_secs(2)).await;
                 balance = account.sync(None).await?;
                 println!("Account synced");
             }
@@ -162,7 +156,7 @@ async fn ensure_enough_funds(account: &Account, bech32_address: &Bech32Address) 
     println!("Min required funds: {min_required_funds}");
     if available_funds < min_required_funds {
         println!("Requesting funds from faucet...");
-        let faucet_response = request_funds_from_faucet(&var("FAUCET_URL").unwrap(), bech32_address).await?;
+        let faucet_response = request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), bech32_address).await?;
         println!("Response from faucet: {}", faucet_response.trim_end());
         if faucet_response.contains("error") {
             panic!("Requesting funds failed (error response)");
@@ -198,7 +192,7 @@ async fn ensure_enough_funds(account: &Account, bech32_address: &Bech32Address) 
 async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         transaction_id
     );
     // Wait for transaction to get included
@@ -207,7 +201,7 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
     Ok(())

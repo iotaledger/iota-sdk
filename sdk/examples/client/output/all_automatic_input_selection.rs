@@ -8,8 +8,6 @@
 //! cargo run --release --example all_automatic_input_selection
 //! ```
 
-use std::env;
-
 use iota_sdk::{
     client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::{
@@ -38,12 +36,12 @@ async fn main() -> Result<()> {
 
     // Create a node client.
     let client = Client::builder()
-        .with_node(&env::var("NODE_URL").unwrap())?
+        .with_node(&std::env::var("NODE_URL").unwrap())?
         .finish()
         .await?;
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     let token_supply = client.get_token_supply().await?;
 
@@ -53,7 +51,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Requesting funds (waiting 15s): {}",
-        request_funds_from_faucet(&env::var("FAUCET_URL").unwrap(), &address).await?,
+        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &address).await?,
     );
     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
 
@@ -89,7 +87,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Block with new nft and alias output sent: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -139,7 +137,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Block with alias id, foundry output with minted native tokens, and nfts sent: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id(),
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;
@@ -202,7 +200,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Block with all outputs sent: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
     let _ = client.retry_until_included(&block.id(), None, None).await?;

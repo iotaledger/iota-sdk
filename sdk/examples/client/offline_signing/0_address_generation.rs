@@ -8,15 +8,9 @@
 //! cargo run --release --example 0_address_generation
 //! ```
 
-use std::{env, path::Path};
-
 use iota_sdk::{
     client::{api::GetAddressesOptions, constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Result},
     types::block::address::Bech32Address,
-};
-use tokio::{
-    fs::File,
-    io::{AsyncWriteExt, BufWriter},
 };
 
 const ADDRESS_FILE_NAME: &str = "examples/client/offline_signing/address.json";
@@ -27,7 +21,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let secret_manager =
-        SecretManager::try_from_mnemonic(env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
+        SecretManager::try_from_mnemonic(std::env::var("NON_SECURE_USE_OF_DEVELOPMENT_MNEMONIC_1").unwrap())?;
 
     // Generates an address offline.
     let address = secret_manager
@@ -44,9 +38,11 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn write_address_to_file(path: impl AsRef<Path>, address: &[Bech32Address]) -> Result<()> {
+async fn write_address_to_file(path: impl AsRef<std::path::Path>, address: &[Bech32Address]) -> Result<()> {
+    use tokio::io::AsyncWriteExt;
+
     let json = serde_json::to_string_pretty(&address)?;
-    let mut file = BufWriter::new(File::create(path).await.expect("failed to create file"));
+    let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(path).await.expect("failed to create file"));
 
     println!("{json}");
 

@@ -17,8 +17,6 @@
 //! cargo run --release --features=ledger_nano --example ledger_nano_transaction
 //! ```
 
-use std::env;
-
 use iota_sdk::client::{
     api::GetAddressesOptions,
     secret::{ledger_nano::LedgerSecretManager, SecretManager},
@@ -34,7 +32,7 @@ async fn main() -> Result<()> {
 
     // Create a client instance
     let client = Client::builder()
-        .with_node(&env::var("NODE_URL").unwrap())?
+        .with_node(&std::env::var("NODE_URL").unwrap())?
         .finish()
         .await?;
 
@@ -65,7 +63,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Block using ledger nano sent: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block.id()
     );
 

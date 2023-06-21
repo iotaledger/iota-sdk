@@ -8,8 +8,6 @@
 //! cargo run --release --example block_confirmation_time
 //! ```
 
-use std::env;
-
 use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
@@ -17,7 +15,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let node_url = env::var("NODE_URL").unwrap();
+    let node_url = std::env::var("NODE_URL").unwrap();
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
@@ -32,7 +30,7 @@ async fn main() -> Result<()> {
     client.retry_until_included(&block_id, None, None).await?;
     println!(
         "Block with no payload included: {}/block/{}",
-        env::var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
 

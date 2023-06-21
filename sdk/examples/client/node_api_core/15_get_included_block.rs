@@ -11,8 +11,6 @@
 //! cargo run --release --example node_api_core_get_included_block <TRANSACTION_ID> [NODE URL]
 //! ```
 
-use std::env;
-
 use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
@@ -21,15 +19,15 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Take the node URL from command line argument or use one from env as default.
-    let node_url = env::args()
+    let node_url = std::env::args()
         .nth(2)
-        .unwrap_or_else(|| env::var("NODE_URL").expect("NODE_URL not set"));
+        .unwrap_or_else(|| std::env::var("NODE_URL").expect("NODE_URL not set"));
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Take the transaction id from the command line, or panic.
-    let transaction_id = env::args()
+    let transaction_id = std::env::args()
         .nth(1)
         .expect("missing example argument: TRANSACTION ID")
         .parse()?;
