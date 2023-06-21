@@ -21,7 +21,7 @@ where
     /// Function to melt native tokens. This happens with the foundry output which minted them, by increasing it's
     /// `melted_tokens` field. This should be preferred over burning, because after burning, the foundry can never be
     /// destroyed anymore.
-    pub async fn decrease_native_token_supply(
+    pub async fn melt_native_token(
         &self,
         token_id: TokenId,
         melt_amount: U256,
@@ -29,21 +29,21 @@ where
     ) -> crate::wallet::Result<Transaction> {
         let options = options.into();
         let prepared_transaction = self
-            .prepare_decrease_native_token_supply(token_id, melt_amount, options.clone())
+            .prepare_melt_native_token(token_id, melt_amount, options.clone())
             .await?;
 
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Function to prepare the transaction for
-    /// [Account.decrease_native_token_supply()](crate::account::Account.decrease_native_token_supply)
-    pub async fn prepare_decrease_native_token_supply(
+    /// [Account.melt_native_token()](crate::account::Account.melt_native_token)
+    pub async fn prepare_melt_native_token(
         &self,
         token_id: TokenId,
         melt_amount: U256,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
-        log::debug!("[TRANSACTION] prepare_decrease_native_token_supply");
+        log::debug!("[TRANSACTION] prepare_melt_native_token");
 
         let foundry_id = FoundryId::from(token_id);
         let alias_id = *foundry_id.alias_address().alias_id();

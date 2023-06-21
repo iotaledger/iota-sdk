@@ -42,7 +42,7 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{AccountAddress, AddressWithUnspentOutputs, Balance, OutputDataDto, TransactionDto},
-            PreparedMintTokenTransactionDto,
+            PreparedNativeTokenTransactionDto,
         },
         message_interface::dtos::AccountDetailsDto,
     },
@@ -322,7 +322,7 @@ pub enum Response {
     /// [`PrepareBurn`](crate::method::AccountMethod::PrepareBurn),
     /// [`PrepareConsolidateOutputs`](crate::method::AccountMethod::PrepareConsolidateOutputs)
     /// [`PrepareCreateAliasOutput`](crate::method::AccountMethod::PrepareCreateAliasOutput)
-    /// [`PrepareDecreaseNativeTokenSupply`](crate::method::AccountMethod::PrepareDecreaseNativeTokenSupply)
+    /// [`PrepareMeltNativeToken`](crate::method::AccountMethod::PrepareMeltNativeToken)
     /// [`PrepareDecreaseVotingPower`](crate::method::AccountMethod::PrepareDecreaseVotingPower)
     /// [`PrepareIncreaseVotingPower`](crate::method::AccountMethod::PrepareIncreaseVotingPower)
     /// [`PrepareMintNfts`](crate::method::AccountMethod::PrepareMintNfts),
@@ -334,9 +334,9 @@ pub enum Response {
     /// [`PrepareVote`](crate::method::AccountMethod::PrepareVote)
     PreparedTransaction(PreparedTransactionDataDto),
     /// Response for
-    /// - [`PrepareIncreaseNativeTokenSupply`](crate::method::AccountMethod::PrepareIncreaseNativeTokenSupply),
+    /// - [`PrepareCreateNativeToken`](crate::method::AccountMethod::PrepareCreateNativeToken),
     /// - [`PrepareMintNativeToken`](crate::method::AccountMethod::PrepareMintNativeToken),
-    PreparedMintTokenTransaction(PreparedMintTokenTransactionDto),
+    PreparedNativeTokenTransaction(PreparedNativeTokenTransactionDto),
     /// Response for
     /// - [`GetTransaction`](crate::method::AccountMethod::GetTransaction),
     /// - [`GetIncomingTransaction`](crate::method::AccountMethod::GetIncomingTransaction)

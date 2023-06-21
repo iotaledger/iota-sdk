@@ -39,7 +39,7 @@ export type CustomAddress = {
 };
 
 /** Native token options for minting */
-export interface MintNativeTokenParams {
+export interface CreateNativeTokenParams {
     aliasId?: string;
     /** Hex encoded number */
     circulatingSupply: HexEncodedAmount;

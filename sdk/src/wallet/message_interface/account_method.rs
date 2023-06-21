@@ -34,7 +34,7 @@ use crate::{
                 transaction::{
                     high_level::{
                         create_alias::CreateAliasParams,
-                        minting::{mint_native_token::MintNativeTokenParams, mint_nfts::MintNftParams},
+                        minting::{create_native_token::CreateNativeTokenParams, mint_nfts::MintNftParams},
                     },
                     prepare_output::OutputParams,
                     TransactionOptionsDto,
@@ -266,8 +266,8 @@ pub enum AccountMethod {
     /// Mint native token.
     /// Expected response: [`MintTokenTransaction`](crate::wallet::message_interface::Response::MintTokenTransaction)
     #[serde(rename_all = "camelCase")]
-    MintNativeToken {
-        params: MintNativeTokenParams,
+    CreateNativeToken {
+        params: CreateNativeTokenParams,
         options: Option<TransactionOptionsDto>,
     },
     /// Mint nft.

@@ -225,7 +225,18 @@ class Account:
             'pendingTransactions'
         )
 
-    def prepare_decrease_native_token_supply(self,
+    def prepare_create_native_token(self, params, options=None):
+        """Create a native token.
+        """
+        prepared = self._call_account_method(
+            'prepareCreateNativeToken', {
+                'params': params,
+                'options': options
+            }
+        )
+        return PreparedMintTokenTransaction(account=self, prepared_transaction_data=prepared)
+
+    def prepare_melt_native_token(self,
                                      token_id: HexStr,
                                      melt_amount: int,
                                      options=None):
@@ -233,7 +244,7 @@ class Account:
         `melted_tokens` field.
         """
         prepared = self._call_account_method(
-            'prepareDecreaseNativeTokenSupply', {
+            'prepareMeltNativeToken', {
                 'tokenId': token_id,
                 'meltAmount': hex(melt_amount),
                 'options': options
@@ -241,24 +252,13 @@ class Account:
         )
         return PreparedTransactionData(self, prepared)
 
-    def prepare_increase_native_token_supply(self, token_id: HexStr, mint_amount: int, options=None):
-        """Mint more native token.
-        """
-        prepared = self._call_account_method(
-            'prepareIncreaseNativeTokenSupply', {
-                'tokenId': token_id,
-                'mintAmount': hex(mint_amount),
-                'options': options
-            }
-        )
-        return PreparedMintTokenTransaction(account=self, prepared_transaction_data=prepared)
-
-    def prepare_mint_native_token(self, params, options=None):
-        """Mint native token.
+    def prepare_mint_native_token(self, token_id: HexStr, mint_amount: int, options=None):
+        """Mint more native tokens.
         """
         prepared = self._call_account_method(
             'prepareMintNativeToken', {
-                'params': params,
+                'tokenId': token_id,
+                'mintAmount': hex(mint_amount),
                 'options': options
             }
         )

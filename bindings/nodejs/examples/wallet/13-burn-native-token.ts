@@ -5,7 +5,7 @@ import { getUnlockedWallet } from './common';
 
 // The native token id. Replace it with a TokenId that is available in the account, the foundry output which minted it,
 // also needs to be available. You can check this by running the `get_balance` example. You can mint a new native token
-// by running the `mint_native_token` example.
+// by running the `create_native_token` example.
 // eslint-disable-next-line prefer-const
 let TOKEN_ID =
     '0x08dc44610c24f32f26330440f3f0d4afb562a8dfd81afe7c2f79024f8f1b9e21940100000000';

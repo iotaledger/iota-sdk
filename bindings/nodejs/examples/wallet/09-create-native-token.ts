@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { MintNativeTokenParams } from '@iota/sdk';
+import { CreateNativeTokenParams } from '@iota/sdk';
 
 import { getUnlockedWallet } from './common';
 
@@ -48,12 +48,12 @@ async function run() {
         console.log('Sending the minting transaction...');
 
         // If we omit the AccountAddress field the first address of the account is used by default
-        const params: MintNativeTokenParams = {
+        const params: CreateNativeTokenParams = {
             circulatingSupply: CIRCULATING_SUPPLY,
             maximumSupply: MAXIMUM_SUPPLY,
         };
 
-        const prepared = await account.prepareMintNativeToken(params);
+        const prepared = await account.prepareCreateNativeToken(params);
         transaction = await prepared.send();
 
         console.log(`Transaction sent: ${transaction.transactionId}`);

@@ -572,8 +572,8 @@ path = "examples/wallet/08_send_nft.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
-name = "mint_native_token"
-path = "examples/wallet/09_mint_native_token.rs"
+name = "create_native_token"
+path = "examples/wallet/09_create_native_token.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
@@ -582,13 +582,13 @@ path = "examples/wallet/10_mint_nft.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
-name = "decrease_native_token_supply"
-path = "examples/wallet/11_decrease_native_token_supply.rs"
+name = "melt_native_token"
+path = "examples/wallet/11_melt_native_token.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
-name = "increase_native_token_supply"
-path = "examples/wallet/12_increase_native_token_supply.rs"
+name = "mint_native_token"
+path = "examples/wallet/12_mint_native_token.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]

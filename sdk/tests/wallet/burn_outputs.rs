@@ -7,7 +7,7 @@ use iota_sdk::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         NativeToken, NftId, NftOutputBuilder, OutputId, UnlockCondition,
     },
-    wallet::{Account, MintNativeTokenParams, MintNftParams, Result},
+    wallet::{Account, CreateNativeTokenParams, MintNftParams, Result},
     U256,
 };
 
@@ -101,8 +101,8 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn mint_and_decrease_native_token_supply() -> Result<()> {
-    let storage_path = "test-storage/mint_and_decrease_native_token_supply";
+async fn create_and_melt_native_token() -> Result<()> {
+    let storage_path = "test-storage/create_and_melt_native_token";
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
@@ -118,14 +118,14 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     account.sync(None).await?;
 
     let circulating_supply = U256::from(60i32);
-    let params = MintNativeTokenParams {
+    let params = CreateNativeTokenParams {
         alias_id: None,
         circulating_supply,
         maximum_supply: U256::from(100i32),
         foundry_metadata: None,
     };
 
-    let mint_transaction = account.mint_native_token(params, None).await.unwrap();
+    let mint_transaction = account.create_native_token(params, None).await.unwrap();
 
     account
         .retry_transaction_until_included(&mint_transaction.transaction.transaction_id, None, None)
@@ -142,7 +142,7 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     // Melt some of the circulating supply
     let melt_amount = U256::from(40i32);
     let transaction = account
-        .decrease_native_token_supply(mint_transaction.token_id, melt_amount, None)
+        .melt_native_token(mint_transaction.token_id, melt_amount, None)
         .await
         .unwrap();
 
@@ -160,7 +160,7 @@ async fn mint_and_decrease_native_token_supply() -> Result<()> {
     // Then melt the rest of the supply
     let melt_amount = circulating_supply - melt_amount;
     let transaction = account
-        .decrease_native_token_supply(mint_transaction.token_id, melt_amount, None)
+        .melt_native_token(mint_transaction.token_id, melt_amount, None)
         .await
         .unwrap();
 
@@ -230,8 +230,8 @@ async fn destroy_alias(account: &Account) -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn mint_and_burn_native_tokens() -> Result<()> {
-    let storage_path = "test-storage/mint_and_burn_native_tokens";
+async fn create_and_burn_native_tokens() -> Result<()> {
+    let storage_path = "test-storage/create_and_burn_native_tokens";
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
@@ -247,8 +247,8 @@ async fn mint_and_burn_native_tokens() -> Result<()> {
     account.sync(None).await?;
 
     let mint_tx = account
-        .mint_native_token(
-            MintNativeTokenParams {
+        .create_native_token(
+            CreateNativeTokenParams {
                 alias_id: None,
                 circulating_supply: native_token_amount,
                 maximum_supply: native_token_amount,

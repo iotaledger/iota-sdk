@@ -8,7 +8,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example decrease_native_token_supply
+//! cargo run --release --all-features --example melt_native_token
 //! ```
 
 use std::{env::var, str::FromStr};
@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
     // Melt some of the circulating supply
     let melt_amount = U256::from(MELT_AMOUNT);
     let transaction = account
-        .decrease_native_token_supply(token_id, melt_amount, None)
+        .melt_native_token(token_id, melt_amount, None)
         .await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 

@@ -37,7 +37,7 @@ use crate::{
     wallet::{
         account::{
             operations::transaction::{
-                high_level::minting::mint_native_token::MintTokenTransactionDto, TransactionOptions,
+                high_level::minting::create_native_token::NativeTokenTransactionDto, TransactionOptions,
             },
             types::{AccountIdentifier, TransactionDto},
             OutputDataDto,
@@ -678,7 +678,7 @@ impl WalletMessageHandler {
             } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .decrease_native_token_supply(
+                        .melt_native_token(
                             token_id,
                             U256::try_from(&melt_amount).map_err(|_| Error::InvalidField("melt_amount"))?,
                             options.map(TransactionOptions::try_from_dto).transpose()?,
@@ -695,24 +695,24 @@ impl WalletMessageHandler {
             } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .increase_native_token_supply(
+                        .mint_native_token(
                             token_id,
                             U256::try_from(&mint_amount).map_err(|_| Error::InvalidField("mint_amount"))?,
                             options.map(TransactionOptions::try_from_dto).transpose()?,
                         )
                         .await?;
-                    Ok(Response::MintTokenTransaction(MintTokenTransactionDto::from(
+                    Ok(Response::CreateNativeTokenTransaction(NativeTokenTransactionDto::from(
                         &transaction,
                     )))
                 })
                 .await
             }
-            AccountMethod::MintNativeToken { params, options } => {
+            AccountMethod::CreateNativeToken { params, options } => {
                 convert_async_panics(|| async {
                     let transaction = account
-                        .mint_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
+                        .create_native_token(params, options.map(TransactionOptions::try_from_dto).transpose()?)
                         .await?;
-                    Ok(Response::MintTokenTransaction(MintTokenTransactionDto::from(
+                    Ok(Response::CreateNativeTokenTransaction(NativeTokenTransactionDto::from(
                         &transaction,
                     )))
                 })

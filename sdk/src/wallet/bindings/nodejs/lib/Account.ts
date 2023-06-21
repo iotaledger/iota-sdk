@@ -16,7 +16,7 @@ import type {
     FilterOptions,
     GenerateAddressOptions,
     MintTokenTransaction,
-    MintNativeTokenParams,
+    CreateNativeTokenParams,
     MintNftParams,
     Node,
     OutputData,
@@ -260,7 +260,7 @@ export class Account {
      * or custom inputs.
      * @returns The transaction.
      */
-    async decreaseNativeTokenSupply(
+    async meltNativeToken(
         tokenId: string,
         meltAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
@@ -268,7 +268,7 @@ export class Account {
         const resp = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'decreaseNativeTokenSupply',
+                name: 'meltNativeToken',
                 data: {
                     tokenId,
                     meltAmount,
@@ -766,7 +766,7 @@ export class Account {
      * or custom inputs.
      * @returns The minting transaction and the token ID.
      */
-    async increaseNativeTokenSupply(
+    async mintNativeToken(
         tokenId: string,
         mintAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
@@ -774,7 +774,7 @@ export class Account {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'increaseNativeTokenSupply',
+                name: 'mintNativeToken',
                 data: {
                     tokenId,
                     mintAmount,
@@ -793,14 +793,14 @@ export class Account {
      * or custom inputs.
      * @returns The minting transaction and the token ID.
      */
-    async mintNativeToken(
-        params: MintNativeTokenParams,
+    async createNativeToken(
+        params: CreateNativeTokenParams,
         transactionOptions?: TransactionOptions,
     ): Promise<MintTokenTransaction> {
         const response = await this.messageHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'mintNativeToken',
+                name: 'createNativeToken',
                 data: {
                     params: params,
                     options: transactionOptions,

@@ -15,7 +15,7 @@ import {
     AliasOutputParams,
     FilterOptions,
     GenerateAddressOptions,
-    MintNativeTokenParams,
+    CreateNativeTokenParams,
     MintNftParams,
     OutputData,
     OutputParams,
@@ -313,7 +313,7 @@ export class Account {
      * or custom inputs.
      * @returns The transaction.
      */
-    async prepareDecreaseNativeTokenSupply(
+    async prepareMeltNativeToken(
         tokenId: string,
         meltAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
@@ -321,7 +321,7 @@ export class Account {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareDecreaseNativeTokenSupply',
+                name: 'prepareMeltNativeToken',
                 data: {
                     tokenId,
                     meltAmount,
@@ -756,7 +756,7 @@ export class Account {
      * or custom inputs.
      * @returns The minting transaction and the token ID.
      */
-    async prepareIncreaseNativeTokenSupply(
+    async prepareMintNativeToken(
         tokenId: string,
         mintAmount: HexEncodedAmount,
         transactionOptions?: TransactionOptions,
@@ -764,7 +764,7 @@ export class Account {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareIncreaseNativeTokenSupply',
+                name: 'prepareMintNativeToken',
                 data: {
                     tokenId,
                     mintAmount,
@@ -789,14 +789,14 @@ export class Account {
      * or custom inputs.
      * @returns The minting transaction and the token ID.
      */
-    async prepareMintNativeToken(
-        params: MintNativeTokenParams,
+    async prepareCreateNativeToken(
+        params: CreateNativeTokenParams,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedMintTokenTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareMintNativeToken',
+                name: 'prepareCreateNativeToken',
                 data: {
                     params: params,
                     options: transactionOptions,

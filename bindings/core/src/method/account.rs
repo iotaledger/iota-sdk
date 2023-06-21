@@ -18,7 +18,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            CreateAliasParams, FilterOptions, MintNativeTokenParams, MintNftParams, OutputParams, OutputsToClaim,
+            CreateAliasParams, CreateNativeTokenParams, FilterOptions, MintNftParams, OutputParams, OutputsToClaim,
             SyncOptions, TransactionOptionsDto,
         },
         SendAmountParams, SendNativeTokensParams, SendNftParams,
@@ -159,7 +159,7 @@ pub enum AccountMethod {
     /// `melted_tokens` field.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
-    PrepareDecreaseNativeTokenSupply {
+    PrepareMeltNativeToken {
         /// Native token id
         token_id: TokenId,
         /// To be melted amount
@@ -183,7 +183,7 @@ pub enum AccountMethod {
     /// Mint more native token.
     /// Expected response: [`PreparedMintTokenTransaction`](crate::Response::PreparedMintTokenTransaction)
     #[serde(rename_all = "camelCase")]
-    PrepareIncreaseNativeTokenSupply {
+    PrepareMintNativeToken {
         /// Native token id
         token_id: TokenId,
         /// To be minted amount
@@ -196,10 +196,10 @@ pub enum AccountMethod {
         params: Vec<MintNftParams>,
         options: Option<TransactionOptionsDto>,
     },
-    /// Prepare to Mint native token.
+    /// Prepare to Create native token.
     /// Expected response: [`PreparedMintTokenTransaction`](crate::Response::PreparedMintTokenTransaction)
-    PrepareMintNativeToken {
-        params: MintNativeTokenParams,
+    PrepareCreateNativeToken {
+        params: CreateNativeTokenParams,
         options: Option<TransactionOptionsDto>,
     },
     /// Prepare an output.

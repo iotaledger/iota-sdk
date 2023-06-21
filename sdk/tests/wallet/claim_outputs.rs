@@ -8,7 +8,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{OutputsToClaim, TransactionOptions},
-        MintNativeTokenParams, Result, SendAmountParams, SendNativeTokensParams,
+        CreateNativeTokenParams, Result, SendAmountParams, SendNativeTokensParams,
     },
     U256,
 };
@@ -190,8 +190,8 @@ async fn claim_2_native_tokens() -> Result<()> {
     accounts[1].sync(None).await?;
 
     let mint_tx_0 = accounts[1]
-        .mint_native_token(
-            MintNativeTokenParams {
+        .create_native_token(
+            CreateNativeTokenParams {
                 alias_id: None,
                 circulating_supply: native_token_amount,
                 maximum_supply: native_token_amount,
@@ -206,8 +206,8 @@ async fn claim_2_native_tokens() -> Result<()> {
     accounts[1].sync(None).await?;
 
     let mint_tx_1 = accounts[1]
-        .mint_native_token(
-            MintNativeTokenParams {
+        .create_native_token(
+            CreateNativeTokenParams {
                 alias_id: None,
                 circulating_supply: native_token_amount,
                 maximum_supply: native_token_amount,
@@ -290,8 +290,8 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
     account_0.sync(None).await?;
 
     let mint_tx_0 = account_0
-        .mint_native_token(
-            MintNativeTokenParams {
+        .create_native_token(
+            CreateNativeTokenParams {
                 alias_id: None,
                 circulating_supply: native_token_amount,
                 maximum_supply: native_token_amount,
@@ -306,8 +306,8 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
     account_0.sync(None).await?;
 
     let mint_tx_1 = account_0
-        .mint_native_token(
-            MintNativeTokenParams {
+        .create_native_token(
+            CreateNativeTokenParams {
                 alias_id: None,
                 circulating_supply: native_token_amount,
                 maximum_supply: native_token_amount,

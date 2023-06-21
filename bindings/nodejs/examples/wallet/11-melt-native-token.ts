@@ -55,7 +55,7 @@ async function run() {
 
         // Melt some of the circulating supply
         const transaction = await account
-            .prepareDecreaseNativeTokenSupply(token.tokenId, MELT_AMOUNT)
+            .prepareMeltNativeToken(token.tokenId, MELT_AMOUNT)
             .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);

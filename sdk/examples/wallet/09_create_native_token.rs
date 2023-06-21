@@ -8,13 +8,13 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example mint_native_token
+//! cargo run --release --all-features --example create_native_token
 //! ```
 
 use std::env::var;
 
 use iota_sdk::{
-    wallet::{MintNativeTokenParams, Result},
+    wallet::{CreateNativeTokenParams, Result},
     Wallet, U256,
 };
 
@@ -60,14 +60,14 @@ async fn main() -> Result<()> {
 
     println!("Sending the minting transaction...");
 
-    let params = MintNativeTokenParams {
+    let params = CreateNativeTokenParams {
         alias_id: None,
         circulating_supply: U256::from(CIRCULATING_SUPPLY),
         maximum_supply: U256::from(MAXIMUM_SUPPLY),
         foundry_metadata: None,
     };
 
-    let transaction = account.mint_native_token(params, None).await?;
+    let transaction = account.create_native_token(params, None).await?;
     println!("Transaction sent: {}", transaction.transaction.transaction_id);
 
     // Wait for transaction to get included

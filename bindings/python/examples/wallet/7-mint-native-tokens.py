@@ -5,7 +5,7 @@ import os
 
 load_dotenv()
 
-# In this example we will mint native tokens
+# In this example we will create native tokens
 
 wallet = Wallet('./alice-database')
 
@@ -33,7 +33,7 @@ params = {
     "foundryMetadata": "0xab",
 }
 
-transaction = account.prepare_mint_native_token(params, None)
+transaction = account.prepare_create_native_token(params, None)
 print(f'Token id: {transaction.token_id()}')
 
 transaction = transaction.send()
