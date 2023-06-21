@@ -6,7 +6,7 @@ use alloc::{string::String, vec::Vec};
 use crate::types::block::{
     output::{
         dto::{OutputDto, OutputMetadataDto},
-        OutputWithMetadata,
+        OutputId, OutputWithMetadata,
     },
     protocol::dto::ProtocolParametersDto,
     slot::SlotIndex,
@@ -278,4 +278,20 @@ pub struct PeerResponse {
 )]
 pub struct RoutesResponse {
     pub routes: Vec<String>,
+}
+
+/// Response of
+/// - GET /api/core/v3/commitments/{commitmentId}/utxo-changes
+/// - GET /api/core/v3/commitments/by-index/{index}/utxo-changes
+/// Returns all UTXO changes that happened at a specific slot.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct UtxoChangesResponse {
+    pub index: u32,
+    pub created_outputs: Vec<OutputId>,
+    pub consumed_outputs: Vec<OutputId>,
 }
