@@ -10,7 +10,7 @@ use crate::types::block::{
     },
     protocol::dto::ProtocolParametersDto,
     slot::SlotIndex,
-    BlockDto, BlockId,
+    BlockDto, BlockId, IssuerId,
 };
 
 /// Response of GET /api/core/v3/info.
@@ -24,7 +24,7 @@ use crate::types::block::{
 pub struct InfoResponse {
     pub name: String,
     pub version: String,
-    // "issuerId": "0x11a37a8e65fe5dca25cbeb896000eca615eaf88b97ca8dc70d8b1839b53dbf1c",
+    pub issuer_id: IssuerId,
     pub status: StatusResponse,
     pub metrics: MetricsResponse,
     pub supported_protocol_versions: Vec<u8>,
