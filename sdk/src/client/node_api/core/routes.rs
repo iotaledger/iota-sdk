@@ -18,7 +18,7 @@ use crate::{
     types::{
         api::core::response::{
             BlockMetadataResponse, BlockResponse, InfoResponse, OutputWithMetadataResponse, PeerResponse,
-            RoutesResponse, SubmitBlockResponse, TipsResponse,
+            RoutesResponse, SubmitBlockResponse, TipsResponse, UtxoChangesResponse,
         },
         block::{
             output::{dto::OutputMetadataDto, Output, OutputId, OutputMetadata, OutputWithMetadata},
@@ -374,6 +374,21 @@ impl ClientInner {
             .await
     }
 
+    /// Get all UTXO changes of a given slot by slot commitment ID.
+    /// GET /api/core/v3/commitments/{commitmentId}/utxo-changes
+    pub async fn get_utxo_changes_by_slot_commitment_id(
+        &self,
+        slot_commitment_id: &SlotCommitmentId,
+    ) -> Result<UtxoChangesResponse> {
+        let path = &format!("api/core/v3/commitments/{slot_commitment_id}/utxo-changes");
+
+        self.node_manager
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, false, false)
+            .await
+    }
+
     /// Gets the slot commitment by the given slot index.
     /// GET /api/core/v3/commitments/by-index/{index}
     pub async fn get_slot_commitment_by_index(&self, slot_index: &SlotIndex) -> Result<SlotCommitment> {
@@ -395,6 +410,18 @@ impl ClientInner {
             .read()
             .await
             .get_request_bytes(path, None, self.get_timeout().await)
+            .await
+    }
+
+    /// Get all UTXO changes of a given slot by its index.
+    /// GET /api/core/v3/commitments/by-index/{index}/utxo-changes
+    pub async fn get_utxo_changes_by_slot_index(&self, slot_index: &SlotIndex) -> Result<UtxoChangesResponse> {
+        let path = &format!("api/core/v3/commitments/by-index/{slot_index}/utxo-changes");
+
+        self.node_manager
+            .read()
+            .await
+            .get_request(path, None, self.get_timeout().await, false, false)
             .await
     }
 
