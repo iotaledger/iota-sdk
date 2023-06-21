@@ -388,7 +388,7 @@ impl ClientInner {
 
     /// Gets the slot commitment, as raw bytes, by the given slot index.
     /// /api/core/v3/commitments/by-index/{index}
-    pub async fn get_slot_commitment_by_id_index(&self, slot_index: &SlotIndex) -> Result<Vec<u8>> {
+    pub async fn get_slot_commitment_by_index_raw(&self, slot_index: &SlotIndex) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/commitments/by-index/{slot_index}");
 
         self.node_manager
