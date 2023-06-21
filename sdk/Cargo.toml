@@ -211,6 +211,18 @@ name = "send_native_tokens"
 path = "examples/how_tos/native_tokens/send.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
+# Alias wallet example
+
+[[example]]
+name = "alias_wallet_request_funds"
+path = "examples/how_tos/alias_wallet/request_funds.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "alias_wallet_transaction"
+path = "examples/how_tos/alias_wallet/transaction.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
 # Outputs
 
 [[example]]

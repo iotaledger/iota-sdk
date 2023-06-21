@@ -64,10 +64,12 @@ pub(crate) async fn call_secret_manager_method_internal(
                 .await?;
             Response::Ed25519Signature(Ed25519SignatureDto::from(&signature))
         }
-        SecretManagerMethod::SignEvm { message, chain } => {
+        SecretManagerMethod::SignSecp256k1Ecdsa { message, chain } => {
             let msg: Vec<u8> = prefix_hex::decode(message)?;
-            let (public_key, signature) = secret_manager.sign_evm(&msg, &Chain::from_u32(chain)).await?;
-            Response::EvmSignature {
+            let (public_key, signature) = secret_manager
+                .sign_secp256k1_ecdsa(&msg, &Chain::from_u32(chain))
+                .await?;
+            Response::Secp256k1EcdsaSignature {
                 public_key: prefix_hex::encode(public_key.to_bytes()),
                 signature: prefix_hex::encode(signature.to_bytes()),
             }

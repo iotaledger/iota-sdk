@@ -83,7 +83,7 @@ pub trait SecretManage: Send + Sync {
     async fn sign_ed25519(&self, msg: &[u8], chain: &Chain) -> Result<Ed25519Signature, Self::Error>;
 
     /// Signs msg using the given [`Chain`] using Secp256k1.
-    async fn sign_evm(
+    async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
         chain: &Chain,
@@ -314,17 +314,17 @@ impl SecretManage for SecretManager {
         }
     }
 
-    async fn sign_evm(
+    async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
         chain: &Chain,
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::Signature), Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
-            Self::Stronghold(secret_manager) => Ok(secret_manager.sign_evm(msg, chain).await?),
+            Self::Stronghold(secret_manager) => Ok(secret_manager.sign_secp256k1_ecdsa(msg, chain).await?),
             #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_evm(msg, chain).await?),
-            Self::Mnemonic(secret_manager) => secret_manager.sign_evm(msg, chain).await,
+            Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_secp256k1_ecdsa(msg, chain).await?),
+            Self::Mnemonic(secret_manager) => secret_manager.sign_secp256k1_ecdsa(msg, chain).await,
             Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
     }
@@ -364,6 +364,16 @@ impl SecretManage for SecretManager {
             Self::Mnemonic(secret_manager) => secret_manager.sign_transaction(prepared_transaction_data).await,
             Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
+    }
+}
+
+pub trait DowncastSecretManager: SecretManage {
+    fn downcast<T: 'static + SecretManage>(&self) -> Option<&T>;
+}
+
+impl<S: 'static + SecretManage + Send + Sync> DowncastSecretManager for S {
+    fn downcast<T: 'static + SecretManage>(&self) -> Option<&T> {
+        (self as &(dyn std::any::Any + Send + Sync)).downcast_ref::<T>()
     }
 }
 
@@ -495,11 +505,15 @@ where
     let unlocks = secret_manager
         .sign_transaction_essence(&prepared_transaction_data, Some(current_time))
         .await?;
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+
+    let PreparedTransactionData {
+        essence, inputs_data, ..
+    } = prepared_transaction_data;
+    let tx_payload = TransactionPayload::new(essence, unlocks)?;
 
     validate_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, current_time)?;
+    let conflict = verify_semantic(&inputs_data, &tx_payload, current_time)?;
 
     if conflict != ConflictReason::None {
         log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);

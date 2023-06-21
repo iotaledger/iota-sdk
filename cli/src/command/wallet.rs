@@ -17,7 +17,7 @@ use log::LevelFilter;
 
 use crate::{
     error::Error,
-    helper::{enter_or_generate_mnemonic, generate_mnemonic, get_password, import_mnemonic},
+    helper::{check_file_exists, enter_or_generate_mnemonic, generate_mnemonic, get_password, import_mnemonic},
     println_log_info,
 };
 
@@ -63,17 +63,19 @@ pub enum WalletCommand {
     /// Generate a random mnemonic.
     Mnemonic,
     /// Create a new account.
-    New {
+    NewAccount {
         /// Account alias, next available account index if not provided.
         alias: Option<String>,
     },
+    /// Get information about currently set node.
+    NodeInfo,
     /// Restore a stronghold backup file.
     Restore {
         /// Path of the to be restored stronghold backup file.
         backup_path: String,
     },
-    /// Set the node to use.
-    SetNode {
+    /// Set the URL of the node to use.
+    SetNodeUrl {
         /// Node URL to use for all future operations.
         url: String,
     },
@@ -183,7 +185,7 @@ pub async fn mnemonic_command() -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn new_command(
+pub async fn new_account_command(
     storage_path: &Path,
     snapshot_path: &Path,
     alias: Option<String>,
@@ -196,7 +198,18 @@ pub async fn new_command(
     Ok((wallet, alias))
 }
 
+pub async fn node_info_command(storage_path: &Path) -> Result<Wallet, Error> {
+    let wallet = unlock_wallet(storage_path, None, None).await?;
+    let node_info = wallet.client().get_info().await?;
+
+    println_log_info!("Current node info: {}", serde_json::to_string_pretty(&node_info)?);
+
+    Ok(wallet)
+}
+
 pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<Wallet, Error> {
+    check_file_exists(backup_path).await?;
+
     let password = get_password("Stronghold password", false)?;
     let secret_manager = SecretManager::Stronghold(
         StrongholdSecretManager::builder()
@@ -215,10 +228,15 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
 
     wallet.restore_backup(backup_path.into(), password, None, None).await?;
 
+    println_log_info!(
+        "Wallet has been restored from the backup file \"{}\".",
+        backup_path.display()
+    );
+
     Ok(wallet)
 }
 
-pub async fn set_node_command(storage_path: &Path, snapshot_path: &Path, url: String) -> Result<Wallet, Error> {
+pub async fn set_node_url_command(storage_path: &Path, snapshot_path: &Path, url: String) -> Result<Wallet, Error> {
     let password = get_password("Stronghold password", !snapshot_path.exists())?;
     let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
     wallet.set_client_options(ClientOptions::new().with_node(&url)?).await?;
@@ -236,12 +254,22 @@ pub async fn sync_command(storage_path: &Path, snapshot_path: &Path) -> Result<W
     Ok(wallet)
 }
 
-pub async fn unlock_wallet(storage_path: &Path, snapshot_path: &Path, password: Password) -> Result<Wallet, Error> {
-    let secret_manager = SecretManager::Stronghold(
-        StrongholdSecretManager::builder()
-            .password(password)
-            .build(snapshot_path)?,
-    );
+pub async fn unlock_wallet(
+    storage_path: &Path,
+    snapshot_path: impl Into<Option<&Path>>,
+    password: impl Into<Option<Password>>,
+) -> Result<Wallet, Error> {
+    let secret_manager = if let Some(password) = password.into() {
+        let snapshot_path = snapshot_path.into();
+        Some(SecretManager::Stronghold(
+            StrongholdSecretManager::builder()
+                .password(password)
+                .build(snapshot_path.ok_or(Error::Miscellaneous("Snapshot file path is not given".to_string()))?)?,
+        ))
+    } else {
+        None
+    };
+
     let wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))

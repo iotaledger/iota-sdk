@@ -49,8 +49,7 @@ async fn client_builder() {
             "rentStructure":{
                 "vByteCost":100,
                 "vByteFactorKey":10,
-                "vByteFactorData":1,
-                "vByteOffset":380
+                "vByteFactorData":1
             },
             "tokenSupply":1813620509061365
         },
@@ -104,8 +103,7 @@ async fn client_builder() {
             "rentStructure":{
                 "vByteCost":100,
                 "vByteFactorKey":10,
-                "vByteFactorData":1,
-                "vByteOffset":380
+                "vByteFactorData":1
             },
             "tokenSupply":1813620509061365
         },

@@ -22,8 +22,10 @@ impl Account {
         burn: impl Into<Burn> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<Transaction> {
-        let prepared = self.prepare_burn(burn, options).await?;
-        self.sign_and_submit_transaction(prepared).await
+        let options = options.into();
+        let prepared = self.prepare_burn(burn, options.clone()).await?;
+
+        self.sign_and_submit_transaction(prepared, options).await
     }
 
     /// A generic `prepare_burn()` function that can be used to prepare the burn of native tokens, nfts, foundries and

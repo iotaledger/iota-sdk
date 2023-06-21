@@ -52,8 +52,8 @@ export interface __SignEd25519Method__ {
     };
 }
 
-export interface __SignEvmMethod__ {
-    name: 'signEvm';
+export interface __SignSecp256k1EcdsaMethod__ {
+    name: 'signSecp256k1Ecdsa';
     data: {
         message: HexEncodedString;
         chain: IBip32Chain;

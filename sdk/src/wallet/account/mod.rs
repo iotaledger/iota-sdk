@@ -43,7 +43,7 @@ pub use self::{
                     mint_native_token::{
                         MintNativeTokenParams, MintTokenTransactionDto, PreparedMintTokenTransactionDto,
                     },
-                    mint_nfts::{MintNftParams, MintNftParamsDto},
+                    mint_nfts::MintNftParams,
                 },
             },
             prepare_output::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},

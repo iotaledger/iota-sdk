@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 0.4.0 - 2023-06-14
+## 0.4.0 - 2023-xx-xx
 
 ### Added
 
@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::addresses_balance` method accepting addresses to get balance for;
 - `Wallet::get_secret_manager` method;
 - `Password` type which is `Zeroize` and `ZeroizeOnDrop`;
+- `TransactionOptions` parameter to `Account::{sign_and_submit_transaction, submit_and_store_transaction}`;
 
 ### Changed
 
@@ -99,6 +100,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename `WalletOptions::build_manager` to `build`;
 - `PeerDto` renamed to `PeerResponse`, `ReceiptDto` to `ReceiptResponse`, `LedgerInclusionStateDto` to `LedgerInclusionState`, `HeartbeatDto` to `Heartbeat`, `MetricsDto` tp `Metrics`, `GossipDto` to `Gossip`, `RelationDto` to `Relation`;
 - Default number of workers for nonce `Miner` changed from `1` to `num_cpu::get()`;
+- Made `Account::get_basic_outputs_for_additional_inputs` private;
+- `Account::get_unlockable_outputs_with_additional_unlock_conditions` renamed to `claimable_outputs`;
 
 ### Removed
 
@@ -117,9 +120,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Client::generate_ed25519_addresses`
 - `Wallet::get_node_info`
 - `NativeTokenDto`, which required a migration;
-- `RentStructureDto`, `CreateAliasParamsDto`, `AssetsDto`, `OutputParamsDto` and `MintNativeTokenParamsDto`;
+- `RentStructureDto`, `CreateAliasParamsDto`, `AssetsDto`, `OutputParamsDto`, `MintNativeTokenParamsDto` and `MintNftParamsDto`;
+- `NativeTokensBalanceDto` and `BalanceDto`;
 - `RentStructureBuilder`;
 - `PlaceholderSecretManager`;
+- `block::Error::{InvalidControllerKind, MigratedFundsNotSorted, MissingPayload, MissingRequiredSenderBlock}` variants;
+- `client::Error::InvalidBIP32ChainData`;
 
 ### Fixed
 
