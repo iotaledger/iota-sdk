@@ -227,9 +227,9 @@ class Account:
         )
 
     def prepare_melt_native_token(self,
-                                             token_id: HexStr,
-                                             melt_amount: int,
-                                             options: Optional[TransactionOptions] = None):
+                                  token_id: HexStr,
+                                  melt_amount: int,
+                                  options: Optional[TransactionOptions] = None):
         """Melt native tokens. This happens with the foundry output which minted them, by increasing it's
         `melted_tokens` field.
         """
