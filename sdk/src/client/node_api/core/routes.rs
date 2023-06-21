@@ -302,7 +302,7 @@ impl ClientInner {
         self.node_manager
             .read()
             .await
-            .get_request::<OutputMetadataDto>(path, None, self.get_timeout().await, false, true)
+            .get_request(path, None, self.get_timeout().await, false, true)
             .await
     }
 
