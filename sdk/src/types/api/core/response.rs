@@ -9,7 +9,8 @@ use crate::types::block::{
         OutputWithMetadata,
     },
     protocol::dto::ProtocolParametersDto,
-    BlockId,
+    slot::SlotIndex,
+    BlockId, IssuerId,
 };
 
 /// Response of GET /api/core/v3/info.
@@ -23,12 +24,12 @@ use crate::types::block::{
 pub struct InfoResponse {
     pub name: String,
     pub version: String,
+    pub issuer_id: IssuerId,
     pub status: StatusResponse,
+    pub metrics: MetricsResponse,
     pub supported_protocol_versions: Vec<u8>,
     pub protocol: ProtocolParametersDto,
-    pub pending_protocol_parameters: Vec<PendingProtocolParameter>,
     pub base_token: BaseTokenResponse,
-    pub metrics: MetricsResponse,
     pub features: Vec<String>,
 }
 
@@ -49,57 +50,33 @@ impl core::fmt::Display for InfoResponse {
 )]
 pub struct StatusResponse {
     pub is_healthy: bool,
-    pub latest_milestone: LatestMilestoneResponse,
-    pub confirmed_milestone: ConfirmedMilestoneResponse,
-    pub pruning_index: u32,
-}
-
-/// Returned in [`StatusResponse`].
-/// Information about the latest milestone.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct LatestMilestoneResponse {
-    pub index: u32,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub timestamp: Option<u32>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub milestone_id: Option<String>,
-}
-
-/// Returned in [`StatusResponse`].
-/// Information about the confirmed milestone.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct ConfirmedMilestoneResponse {
-    pub index: u32,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub timestamp: Option<u32>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub milestone_id: Option<String>,
+    pub last_accepted_block_id: BlockId,
+    pub last_confirmed_block_id: BlockId,
+    pub finalized_slot: SlotIndex,
+    #[cfg_attr(feature = "serde", serde(rename = "ATT"))]
+    pub att: u64,
+    #[cfg_attr(feature = "serde", serde(rename = "RATT"))]
+    pub ratt: u64,
+    #[cfg_attr(feature = "serde", serde(rename = "CTT"))]
+    pub ctt: u64,
+    #[cfg_attr(feature = "serde", serde(rename = "RCTT"))]
+    pub rctt: u64,
+    pub latest_committed_slot: SlotIndex,
+    pub pruning_slot: SlotIndex,
 }
 
 /// Returned in [`InfoResponse`].
-/// Pending protocol parameters.
-#[derive(Clone, Debug, Eq, PartialEq)]
+/// Metric information about the node.
+#[derive(Clone, Debug, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-pub struct PendingProtocolParameter {
-    #[cfg_attr(feature = "serde", serde(rename = "type"))]
-    pub kind: u8,
-    pub target_milestone_index: u32,
-    pub protocol_version: u8,
-    pub params: String,
+pub struct MetricsResponse {
+    pub blocks_per_second: f64,
+    pub confirmed_blocks_per_second: f64,
+    pub confirmed_rate: f64,
 }
 
 /// Returned in [`InfoResponse`].
@@ -116,22 +93,8 @@ pub struct BaseTokenResponse {
     pub unit: String,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub subunit: Option<String>,
-    pub decimals: u8,
+    pub decimals: u32,
     pub use_metric_prefix: bool,
-}
-
-/// Returned in [`InfoResponse`].
-/// Metric information about the node.
-#[derive(Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct MetricsResponse {
-    pub blocks_per_second: f64,
-    pub referenced_blocks_per_second: f64,
-    pub referenced_rate: f64,
 }
 
 /// Response of GET /api/core/v3/tips.
@@ -303,18 +266,6 @@ pub struct PeerResponse {
     pub connected: bool,
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub gossip: Option<Gossip>,
-}
-
-/// Response of GET /api/plugins/debug/whiteflag.
-/// Returns the computed merkle tree hash for the given white flag traversal.
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct WhiteFlagResponse {
-    pub merkle_tree_hash: String,
 }
 
 /// Response of GET /api/routes.
