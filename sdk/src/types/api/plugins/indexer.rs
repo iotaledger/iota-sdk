@@ -8,7 +8,7 @@ use core::ops::Deref;
 
 use crate::types::block::output::OutputId;
 
-/// Response of GET /api/indexer/v1/*
+/// Response of GET /api/indexer/v2/*
 /// Returns the output_ids for the provided query parameters.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(

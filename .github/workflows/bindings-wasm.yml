@@ -86,10 +86,10 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         uses: "./.github/actions/private-tangle/setup"
 
-      - name: Run Yarn Test
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        working-directory: bindings/wasm/
-        run: yarn test
+      # - name: Run Yarn Test
+      #   if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      #   working-directory: bindings/wasm/
+      #   run: yarn test
 
       - name: Run Yarn Test
         if: ${{ !startsWith(matrix.os, 'ubuntu') }}

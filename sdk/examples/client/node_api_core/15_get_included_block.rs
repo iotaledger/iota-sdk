@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! Returns the included block, as JSON, of a transaction by calling
-//! `GET /api/core/v2/transactions/{transactionId}/included-block`.
+//! `GET /api/core/v3/transactions/{transactionId}/included-block`.
 //!
 //! `cargo run --example node_api_core_get_included_block --release -- [NODE URL]`
 
