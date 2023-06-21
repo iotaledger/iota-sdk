@@ -17,7 +17,7 @@ use log::LevelFilter;
 
 use crate::{
     error::Error,
-    helper::{enter_or_generate_mnemonic, generate_mnemonic, get_password, import_mnemonic},
+    helper::{check_file_exists, enter_or_generate_mnemonic, generate_mnemonic, get_password, import_mnemonic},
     println_log_info,
 };
 
@@ -208,6 +208,8 @@ pub async fn node_info_command(storage_path: &Path) -> Result<Wallet, Error> {
 }
 
 pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<Wallet, Error> {
+    check_file_exists(backup_path).await?;
+
     let password = get_password("Stronghold password", false)?;
     let secret_manager = SecretManager::Stronghold(
         StrongholdSecretManager::builder()
@@ -225,6 +227,11 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
         .await?;
 
     wallet.restore_backup(backup_path.into(), password, None, None).await?;
+
+    println_log_info!(
+        "Wallet has been restored from the backup file \"{}\".",
+        backup_path.display()
+    );
 
     Ok(wallet)
 }
