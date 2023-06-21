@@ -21,6 +21,7 @@ use crate::{
             AliasId, Feature, FoundryId, NativeToken, NftId, Output, OutputId, TokenId, TokenScheme, UnlockCondition,
         },
         payload::transaction::TransactionId,
+        signature::dto::Ed25519SignatureDto,
     },
     wallet::{
         account::{
@@ -168,6 +169,22 @@ pub enum AccountMethod {
     /// Expected response:
     /// [`GeneratedEvmAddresses`](crate::wallet::message_interface::Response::GeneratedEvmAddresses)
     GenerateEvmAddresses { options: GetAddressesOptions },
+    /// Verify an ed25519 signature against a message.
+    /// Expected response:
+    /// [`Bool`](crate::wallet::message_interface::Response::Bool)
+    VerifyEd25519Signature {
+        signature: Ed25519SignatureDto,
+        message: String,
+    },
+    /// Verify a Secp256k1Ecdsa signature against a message.
+    /// Expected response:
+    /// [`Bool`](crate::wallet::message_interface::Response::Bool)
+    #[serde(rename_all = "camelCase")]
+    VerifySecp256k1EcdsaSignature {
+        public_key: String,
+        signature: String,
+        message: String,
+    },
     /// Signs a message with an Secp256k1Ecdsa private key.
     SignSecp256k1Ecdsa {
         /// The message to sign, hex encoded String

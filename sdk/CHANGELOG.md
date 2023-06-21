@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 0.4.0 - 2023-06-14
+## 0.4.0 - 2023-xx-xx
 
 ### Added
 
@@ -125,6 +125,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `NativeTokensBalanceDto` and `BalanceDto`;
 - `RentStructureBuilder`;
 - `PlaceholderSecretManager`;
+- `block::Error::{InvalidControllerKind, MigratedFundsNotSorted, MissingPayload, MissingRequiredSenderBlock}` variants;
+- `client::Error::InvalidBIP32ChainData`;
 
 ### Fixed
 

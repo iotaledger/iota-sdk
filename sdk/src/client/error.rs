@@ -56,9 +56,6 @@ pub enum Error {
     /// Invalid amount in API response
     #[error("invalid amount in API response: {0}")]
     InvalidAmount(String),
-    /// Invalid BIP32 chain data
-    #[error("invalid BIP32 chain data")]
-    InvalidBIP32ChainData,
     /// Invalid mnemonic error
     #[error("invalid mnemonic {0}")]
     InvalidMnemonic(String),
