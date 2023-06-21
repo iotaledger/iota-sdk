@@ -2,17 +2,53 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk import call_wallet_method
+import humps
 import json
-from json import dumps
+from json import dumps, JSONEncoder
+from enum import Enum
 
 
 def _call_method_routine(func):
     """The routine of dump json string and call call_wallet_method()
     """
     def wrapper(*args, **kwargs):
-        message = func(*args, **kwargs)
-        message = dumps(message)
+        class MyEncoder(JSONEncoder):
+            def default(self, obj):
+                as_dict_method = getattr(obj, "as_dict", None)
+                if callable(as_dict_method):
+                    return obj.as_dict()
+                if isinstance(obj, str):
+                    return obj
+                if isinstance(obj, Enum):
+                    return obj.__dict__
+                if isinstance(obj, dict):
+                    return obj
+                if hasattr(obj, "__dict__"):
+                    obj_dict = obj.__dict__
 
+                    items_method = getattr(self, "items", None)
+                    if callable(items_method):
+                        for k, v in obj_dict.items():
+                            obj_dict[k] = dumps(v, cls=MyEncoder)
+                            return obj_dict
+                    return obj_dict
+                return obj
+        message = func(*args, **kwargs)
+
+        message = dumps(list(message.values()), cls=MyEncoder)
+        deserialized = json.loads(message)
+
+        def remove_none(obj):
+            if isinstance(obj, (list, tuple, set)):
+                return type(obj)(remove_none(x) for x in obj if x is not None)
+            elif isinstance(obj, dict):
+                return type(obj)((remove_none(k), remove_none(v))
+                                 for k, v in obj.items() if k is not None and v is not None)
+            else:
+                return obj
+        deserialized_null_filtered = remove_none(deserialized)
+
+        message = dumps(humps.camelize(deserialized_null_filtered))
         # Send message to the Rust library
         response = call_wallet_method(args[0].handle, message)
 
