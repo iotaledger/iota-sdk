@@ -179,6 +179,38 @@ name = "claim_transaction"
 path = "examples/how_tos/advanced_transactions/claim_transaction.rs"
 required-features = [ "rocksdb", "stronghold" ]
 
+# Native Tokens Examples
+
+[[example]]
+name = "mint_native_token"
+path = "examples/how_tos/native_tokens/mint.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "destroy_foundry"
+path = "examples/how_tos/native_tokens/destroy_foundry.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "burn_native_token"
+path = "examples/how_tos/native_tokens/burn.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "decrease_native_token_supply"
+path = "examples/how_tos/native_tokens/decrease_supply.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "increase_native_token_supply"
+path = "examples/how_tos/native_tokens/increase_supply.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
+[[example]]
+name = "send_native_tokens"
+path = "examples/how_tos/native_tokens/send.rs"
+required-features = [ "rocksdb", "stronghold" ]
+
 # Alias wallet example
 
 [[example]]
@@ -562,18 +594,8 @@ path = "examples/wallet/offline_signing/3_send_transaction.rs"
 required-features = [ "wallet", "storage" ]
 
 [[example]]
-name = "send_native_tokens"
-path = "examples/wallet/07_send_native_tokens.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
 name = "send_nft"
 path = "examples/wallet/08_send_nft.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "mint_native_token"
-path = "examples/wallet/09_mint_native_token.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
@@ -582,28 +604,8 @@ path = "examples/wallet/10_mint_nft.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
-name = "decrease_native_token_supply"
-path = "examples/wallet/11_decrease_native_token_supply.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "increase_native_token_supply"
-path = "examples/wallet/12_increase_native_token_supply.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "burn_native_token"
-path = "examples/wallet/13_burn_native_token.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
 name = "burn_nft"
 path = "examples/wallet/14_burn_nft.rs"
-required-features = [ "wallet", "stronghold" ]
-
-[[example]]
-name = "destroy_foundry"
-path = "examples/wallet/15_destroy_foundry.rs"
 required-features = [ "wallet", "stronghold" ]
 
 [[example]]
