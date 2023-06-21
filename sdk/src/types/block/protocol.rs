@@ -9,6 +9,22 @@ use packable::{prefix::StringPrefix, Packable};
 use super::address::Hrp;
 use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
 
+//     "protocol": {
+//       "networkName": "iota-core-testnet",
+//       "bech32Hrp": "rms",
+//       "tokenSupply": "2779530283277761",
+//       "version": 3,
+//       "minPowScore": 1000,
+//       "belowMaxDepth": 15,
+//       "rentStructure": {
+//         "vByteCost": 500,
+//         "vByteFactorData": 1,
+//         "vByteFactorKey": 10
+//       },
+//       "genesisUnixTimestamp": 1582328545,
+//       "slotDurationInSeconds": 10
+//     },
+
 /// Defines the parameters of the protocol.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
