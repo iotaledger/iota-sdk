@@ -4,7 +4,7 @@
 /**
  * Reason for block conflicts.
  */
-export declare enum ConflictReason {
+export enum ConflictReason {
     /**
      * The block has no conflict.
      */
