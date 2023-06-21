@@ -9,49 +9,35 @@ use packable::{prefix::StringPrefix, Packable};
 use super::address::Hrp;
 use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
 
-//     "protocol": {
-//       "networkName": "iota-core-testnet",
-//       "bech32Hrp": "rms",
-//       "tokenSupply": "2779530283277761",
-//       "version": 3,
-//       "minPowScore": 1000,
-//       "belowMaxDepth": 15,
-//       "rentStructure": {
-//         "vByteCost": 500,
-//         "vByteFactorData": 1,
-//         "vByteFactorKey": 10
-//       },
-//       "genesisUnixTimestamp": 1582328545,
-//       "slotDurationInSeconds": 10
-//     },
-
 /// Defines the parameters of the protocol.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 #[packable(unpack_error = Error)]
 pub struct ProtocolParameters {
-    // The version of the protocol running.
-    #[cfg_attr(feature = "serde", serde(alias = "protocolVersion"))]
+    /// The version of the protocol running.
+    #[cfg_attr(feature = "serde", serde(rename = "version"))]
     protocol_version: u8,
-    // The human friendly name of the network.
+    /// The human friendly name of the network.
     #[packable(unpack_error_with = |err| Error::InvalidNetworkName(err.into_item_err()))]
-    #[cfg_attr(feature = "serde", serde(alias = "networkName"))]
     network_name: StringPrefix<u8>,
-    // The HRP prefix used for Bech32 addresses in the network.
-    #[cfg_attr(feature = "serde", serde(alias = "bech32Hrp"))]
+    /// The HRP prefix used for Bech32 addresses in the network.
     bech32_hrp: Hrp,
-    // The minimum pow score of the network.
-    #[cfg_attr(feature = "serde", serde(alias = "minPowScore"))]
+    /// The minimum pow score of the network.
     min_pow_score: u32,
-    // The below max depth parameter of the network.
-    #[cfg_attr(feature = "serde", serde(alias = "belowMaxDepth"))]
+    /// The below max depth parameter of the network.
     below_max_depth: u8,
-    // The rent structure used by given node/network.
-    #[cfg_attr(feature = "serde", serde(alias = "rentStructure"))]
+    /// The rent structure used by given node/network.
     rent_structure: RentStructure,
-    // TokenSupply defines the current token supply on the network.
-    #[cfg_attr(feature = "serde", serde(alias = "tokenSupply"))]
+    /// TokenSupply defines the current token supply on the network.
     token_supply: u64,
+    /// Genesis timestamp at which the slots start to count.
+    genesis_unix_timestamp: u32,
+    /// Duration of each slot in seconds.
+    slot_duration_in_seconds: u8,
 }
 
 // This implementation is required to make [`ProtocolParameters`] a [`Packable`] visitor.
@@ -66,12 +52,14 @@ impl Default for ProtocolParameters {
         // PANIC: These values are known to be correct.
         Self::new(
             PROTOCOL_VERSION,
-            String::from("shimmer"),
+            String::from("iota-core-testnet"),
             "smr",
             1500,
             15,
             RentStructure::default(),
             1_813_620_509_061_365,
+            1582328545,
+            10,
         )
         .unwrap()
     }
@@ -79,6 +67,7 @@ impl Default for ProtocolParameters {
 
 impl ProtocolParameters {
     /// Creates a new [`ProtocolParameters`].
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         protocol_version: u8,
         network_name: String,
@@ -87,6 +76,8 @@ impl ProtocolParameters {
         below_max_depth: u8,
         rent_structure: RentStructure,
         token_supply: u64,
+        genesis_unix_timestamp: u32,
+        slot_duration_in_seconds: u8,
     ) -> Result<Self, Error> {
         Ok(Self {
             protocol_version,
@@ -96,6 +87,8 @@ impl ProtocolParameters {
             below_max_depth,
             rent_structure,
             token_supply,
+            genesis_unix_timestamp,
+            slot_duration_in_seconds,
         })
     }
 
@@ -138,6 +131,14 @@ impl ProtocolParameters {
     pub fn token_supply(&self) -> u64 {
         self.token_supply
     }
+
+    pub fn genesis_unix_timestamp(&self) -> u32 {
+        self.genesis_unix_timestamp
+    }
+
+    pub fn slot_duration_in_seconds(&self) -> u8 {
+        self.slot_duration_in_seconds
+    }
 }
 
 /// Returns a [`ProtocolParameters`] for testing purposes.
@@ -152,6 +153,8 @@ pub fn protocol_parameters() -> ProtocolParameters {
         15,
         crate::types::block::output::RentStructure::new(500, 10, 1),
         1_813_620_509_061_365,
+        1582328545,
+        10,
     )
     .unwrap()
 }
@@ -177,6 +180,8 @@ pub mod dto {
         pub below_max_depth: u8,
         pub rent_structure: RentStructure,
         pub token_supply: String,
+        pub genesis_unix_timestamp: u32,
+        pub slot_duration_in_seconds: u8,
     }
 
     impl TryFrom<ProtocolParametersDto> for ProtocolParameters {
@@ -194,6 +199,8 @@ pub mod dto {
                     .token_supply
                     .parse()
                     .map_err(|_| Error::InvalidField("token_supply"))?,
+                value.genesis_unix_timestamp,
+                value.slot_duration_in_seconds,
             )
         }
     }
