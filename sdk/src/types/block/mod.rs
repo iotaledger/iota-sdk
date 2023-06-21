@@ -32,6 +32,8 @@ pub mod rand;
 pub mod semantic;
 /// A module that provides types and syntactic validations of signatures.
 pub mod signature;
+/// A module that provides types and syntactic validations of slots.
+pub mod slot;
 /// A module that provides types and syntactic validations of unlocks.
 pub mod unlock;
 
