@@ -210,6 +210,8 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                     params.rent_structure().byte_factor_data(),
                 ),
                 token_supply: params.token_supply().to_string(),
+                genesis_unix_timestamp: params.genesis_unix_timestamp(),
+                slot_duration_in_seconds: params.slot_duration_in_seconds(),
             };
             Response::ProtocolParameters(protocol_response)
         }
