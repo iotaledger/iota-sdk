@@ -50,7 +50,7 @@ impl SlotCommitment {
         &self.previous_slot_commitment_id
     }
 
-    /// Returns the roots ID of the [`SlotCommitment`].
+    /// Returns the [`RootsId`] of the [`SlotCommitment`].
     pub fn roots_id(&self) -> &RootsId {
         &self.roots_id
     }
