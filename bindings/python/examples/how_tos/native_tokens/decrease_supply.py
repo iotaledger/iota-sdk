@@ -17,7 +17,6 @@ balance = account.sync()
 # Find first foundry and corresponding token id
 token_id = balance['foundries'][0]
 
-# TODO Convert to decimal
 available_balance = int([native_balance for native_balance in balance['nativeTokens'] if native_balance['tokenId'] == token_id][0]['available'], 0)
 print(f'Balance before melting: {available_balance}')
 

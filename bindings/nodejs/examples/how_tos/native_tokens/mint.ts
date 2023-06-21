@@ -25,8 +25,6 @@ async function run() {
         // Get the account we generated with `01-create-wallet`
         const account = await wallet.getAccount('Alice');
 
-        console.log('Preparing alias output transaction...');
-
         const balance = await account.sync();
 
         // We can first check if we already have an alias in our account, because an alias can have many foundry outputs and therefore we can reuse an existing one

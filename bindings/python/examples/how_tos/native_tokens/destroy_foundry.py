@@ -32,4 +32,4 @@ blockId = account.retry_transaction_until_included(transaction['transactionId'])
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')
 
 balance = account.sync()
-print(f'Foundries before destroying: {len(balance["foundries"])}')
+print(f'Foundries after destroying: {len(balance["foundries"])}')

@@ -40,8 +40,6 @@ async fn main() -> Result<()> {
         .set_stronghold_password(var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    println!("Preparing alias output transaction...");
-
     // We can first check if we already have an alias in our account, because an alias can have many foundry outputs and
     // therefore we can reuse an existing one
     if balance.aliases().is_empty() {
