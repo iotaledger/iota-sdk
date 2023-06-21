@@ -75,6 +75,8 @@ impl From<NetworkInfo> for NetworkInfoDto {
                     info.protocol_parameters.rent_structure().byte_factor_data(),
                 ),
                 token_supply: info.protocol_parameters.token_supply().to_string(),
+                genesis_unix_timestamp: info.protocol_parameters.genesis_unix_timestamp(),
+                slot_duration_in_seconds: info.protocol_parameters.slot_duration_in_seconds(),
             },
             local_pow: info.local_pow,
             fallback_to_local_pow: info.fallback_to_local_pow,
