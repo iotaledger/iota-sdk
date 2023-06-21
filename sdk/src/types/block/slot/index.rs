@@ -10,6 +10,12 @@ use derive_more::{Deref, From};
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SlotIndex(u64);
 
+impl std::fmt::Display for SlotIndex {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 impl SlotIndex {
     /// Creates a new [`SlotIndex`].
     pub fn new(index: u64) -> Self {
