@@ -263,7 +263,7 @@ impl ClientInner {
 
     // UTXO routes.
 
-    /// Finds an output, as JSON, by its OutputId (TransactionId + output_index).
+    /// Finds an output, as JSON, by its identifier.
     /// GET /api/core/v3/outputs/{outputId}
     pub async fn get_output(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
         let path = &format!("api/core/v3/outputs/{output_id}");
@@ -282,7 +282,7 @@ impl ClientInner {
         Ok(OutputWithMetadata::new(output, metadata))
     }
 
-    /// Finds an output, as raw bytes, by its OutputId (TransactionId + output_index).
+    /// Finds an output, as raw bytes, by its identifier.
     /// GET /api/core/v3/outputs/{outputId}
     pub async fn get_output_raw(&self, output_id: &OutputId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/outputs/{output_id}");
@@ -294,7 +294,7 @@ impl ClientInner {
             .await
     }
 
-    /// Get the metadata for a given `OutputId` (TransactionId + output_index).
+    /// Finds output metadata by its identifier.
     /// GET /api/core/v3/outputs/{outputId}/metadata
     pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadataDto> {
         let path = &format!("api/core/v3/outputs/{output_id}/metadata");

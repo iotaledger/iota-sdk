@@ -13,6 +13,7 @@ use iota_sdk::{
         address::Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutput, OutputId, OutputMetadata},
         protocol::protocol_parameters,
+        slot::SlotCommitmentId,
         BlockId,
     },
 };
@@ -37,11 +38,10 @@ fn input_signing_data_conversion() {
             OutputId::from_str("0xbce525324af12eda02bf7927e92cea3a8e8322d0f41966271443e6c3b245a4400000").unwrap(),
             false,
             None,
-            None,
-            None,
-            0,
-            0,
-            0,
+            SlotCommitmentId::from_str(
+                "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689",
+            )
+            .unwrap(),
         ),
         chain: Some(Chain::from_u32_hardened(bip32_chain)),
     };

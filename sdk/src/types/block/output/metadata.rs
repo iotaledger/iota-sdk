@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::{output::OutputId, payload::transaction::TransactionId, BlockId};
+use crate::types::block::{output::OutputId, payload::transaction::TransactionId, slot::SlotCommitmentId, BlockId};
 
 /// Metadata of an [`Output`](crate::types::block::output::Output).
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
@@ -17,21 +17,11 @@ pub struct OutputMetadata {
     output_id: OutputId,
     /// Whether the output is spent or not.
     is_spent: bool,
-    /// If spent, the index of the milestone in which the output was spent.
+    /// Commitment ID that includes the output.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    milestone_index_spent: Option<u32>,
-    /// If spent, the timestamp of the milestone in which the output was spent.
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    milestone_timestamp_spent: Option<u32>,
-    /// If spent, the identifier of the transaction that spent the output.
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    transaction_id_spent: Option<TransactionId>,
-    /// The index of the milestone that booked the output.
-    milestone_index_booked: u32,
-    /// The timestamp of the milestone that booked the output.
-    milestone_timestamp_booked: u32,
-    /// The index of ledger when the output was fetched.
-    ledger_index: u32,
+    included_commitment_id: Option<SlotCommitmentId>,
+    /// Latest commitment ID of the node.
+    latest_commitment_id: SlotCommitmentId,
 }
 
 impl OutputMetadata {
@@ -41,23 +31,15 @@ impl OutputMetadata {
         block_id: BlockId,
         output_id: OutputId,
         is_spent: bool,
-        milestone_index_spent: Option<u32>,
-        milestone_timestamp_spent: Option<u32>,
-        transaction_id_spent: Option<TransactionId>,
-        milestone_index_booked: u32,
-        milestone_timestamp_booked: u32,
-        ledger_index: u32,
+        included_commitment_id: Option<SlotCommitmentId>,
+        latest_commitment_id: SlotCommitmentId,
     ) -> Self {
         Self {
             block_id,
             output_id,
             is_spent,
-            milestone_index_spent,
-            milestone_timestamp_spent,
-            transaction_id_spent,
-            milestone_index_booked,
-            milestone_timestamp_booked,
-            ledger_index,
+            included_commitment_id,
+            latest_commitment_id,
         }
     }
 
@@ -91,34 +73,14 @@ impl OutputMetadata {
         self.is_spent = spent;
     }
 
-    /// Returns the milestone index spent of the [`OutputMetadata`].
-    pub fn milestone_index_spent(&self) -> Option<u32> {
-        self.milestone_index_spent
+    /// Returns the included commitment ID of the [`OutputMetadata`].
+    pub fn included_commitment_id(&self) -> Option<&SlotCommitmentId> {
+        self.included_commitment_id.as_ref()
     }
 
-    /// Returns the milestone timestamp spent of the [`OutputMetadata`].
-    pub fn milestone_timestamp_spent(&self) -> Option<u32> {
-        self.milestone_timestamp_spent
-    }
-
-    /// Returns the transaction id spent of the [`OutputMetadata`].
-    pub fn transaction_id_spent(&self) -> Option<&TransactionId> {
-        self.transaction_id_spent.as_ref()
-    }
-
-    /// Returns the milestone index booked of the [`OutputMetadata`].
-    pub fn milestone_index_booked(&self) -> u32 {
-        self.milestone_index_booked
-    }
-
-    /// Returns the milestone timestamp booked of the [`OutputMetadata`].
-    pub fn milestone_timestamp_booked(&self) -> u32 {
-        self.milestone_timestamp_booked
-    }
-
-    /// Returns the ledger index of the [`OutputMetadata`].
-    pub fn ledger_index(&self) -> u32 {
-        self.ledger_index
+    /// Returns the latest commitment ID of the [`OutputMetadata`].
+    pub fn latest_commitment_id(&self) -> &SlotCommitmentId {
+        &self.latest_commitment_id
     }
 }
 
@@ -141,14 +103,8 @@ pub mod dto {
         pub output_index: u16,
         pub is_spent: bool,
         #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-        pub milestone_index_spent: Option<u32>,
-        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-        pub milestone_timestamp_spent: Option<u32>,
-        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-        pub transaction_id_spent: Option<String>,
-        pub milestone_index_booked: u32,
-        pub milestone_timestamp_booked: u32,
-        pub ledger_index: u32,
+        pub included_commitment_id: Option<SlotCommitmentId>,
+        pub latest_commitment_id: SlotCommitmentId,
     }
 
     impl OutputMetadataDto {
@@ -169,16 +125,8 @@ pub mod dto {
                     response.output_index,
                 )?,
                 is_spent: response.is_spent,
-                milestone_index_spent: response.milestone_index_spent,
-                milestone_timestamp_spent: response.milestone_timestamp_spent,
-                transaction_id_spent: response
-                    .transaction_id_spent
-                    .as_ref()
-                    .map(|s| TransactionId::from_str(s))
-                    .transpose()?,
-                milestone_index_booked: response.milestone_index_booked,
-                milestone_timestamp_booked: response.milestone_timestamp_booked,
-                ledger_index: response.ledger_index,
+                included_commitment_id: response.included_commitment_id,
+                latest_commitment_id: response.latest_commitment_id,
             })
         }
     }
@@ -190,12 +138,8 @@ pub mod dto {
                 transaction_id: output_metadata.transaction_id().to_string(),
                 output_index: output_metadata.output_index(),
                 is_spent: output_metadata.is_spent(),
-                milestone_index_spent: output_metadata.milestone_index_spent(),
-                milestone_timestamp_spent: output_metadata.milestone_timestamp_spent(),
-                transaction_id_spent: output_metadata.transaction_id_spent().map(|t| t.to_string()),
-                milestone_index_booked: output_metadata.milestone_index_booked(),
-                milestone_timestamp_booked: output_metadata.milestone_timestamp_booked(),
-                ledger_index: output_metadata.ledger_index(),
+                included_commitment_id: output_metadata.included_commitment_id().cloned(),
+                latest_commitment_id: *output_metadata.latest_commitment_id(),
             }
         }
     }
