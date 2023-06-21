@@ -105,7 +105,8 @@ impl ClientInner {
             if let Some((info, _node_url)) = nodes.first() {
                 let mut network_info = self.network_info.write().await;
 
-                network_info.latest_milestone_timestamp = info.status.latest_milestone.timestamp;
+                // TODO change to one of the new timestamps, which ones ?
+                // network_info.latest_milestone_timestamp = info.status.latest_milestone.timestamp;
                 network_info.protocol_parameters = info.protocol.clone();
             }
 

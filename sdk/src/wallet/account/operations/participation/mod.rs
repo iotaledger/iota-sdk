@@ -273,7 +273,9 @@ where
         participations: &mut Participations,
     ) -> crate::wallet::Result<()> {
         log::debug!("[remove_ended_participation_events]");
-        let latest_milestone_index = self.client().get_info().await?.node_info.status.latest_milestone.index;
+        // TODO change to one of the new timestamps, which ones ?
+        let latest_milestone_index = 0;
+        // let latest_milestone_index = self.client().get_info().await?.node_info.status.latest_milestone.index;
 
         let account_index = self.details().await.index;
         let events = self

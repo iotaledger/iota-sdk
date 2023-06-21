@@ -8,6 +8,7 @@ mod r#macro;
 mod block_id;
 mod convert;
 mod error;
+mod issuer_id;
 
 /// A module that provides types and syntactic validations of addresses.
 pub mod address;
@@ -46,6 +47,7 @@ pub use self::{
     convert::ConvertTo,
     core::{dto::BlockDto, Block, BlockBuilder},
     error::Error,
+    issuer_id::IssuerId,
 };
 
 pub(crate) const PROTOCOL_VERSION: u8 = 2;
