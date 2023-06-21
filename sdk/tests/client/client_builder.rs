@@ -50,7 +50,6 @@ async fn client_builder() {
                 "vByteCost":100,
                 "vByteFactorKey":10,
                 "vByteFactorData":1,
-                "vByteOffset":380
             },
             "tokenSupply":1813620509061365
         },
@@ -105,7 +104,6 @@ async fn client_builder() {
                 "vByteCost":100,
                 "vByteFactorKey":10,
                 "vByteFactorData":1,
-                "vByteOffset":380
             },
             "tokenSupply":1813620509061365
         },
