@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! TODO: <insert example description> by calling
-//! `GET api/indexer/v1/outputs/nft/{nftId}`.
+//! `GET api/indexer/v2/outputs/nft/{nftId}`.
 //!
 //! `cargo run --example node_api_indexer_get_nft_output --release -- [NODE URL] [NFT ID]`
 

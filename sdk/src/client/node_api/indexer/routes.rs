@@ -28,12 +28,12 @@ impl ClientInner {
     /// Query parameters: "address", "hasStorageDepositReturn", "storageDepositReturnAddress",
     /// "hasExpiration", "expiresBefore", "expiresAfter", "hasTimelock", "timelockedBefore",
     /// "timelockedAfter", "sender", "tag", "createdBefore" and "createdAfter". Returns an empty Vec if no results
-    /// are found. api/indexer/v1/outputs/basic
+    /// are found. api/indexer/v2/outputs/basic
     pub async fn basic_output_ids(
         &self,
         query_parameters: impl Into<Vec<QueryParameter>> + Send,
     ) -> Result<OutputIdsResponse> {
-        let route = "api/indexer/v1/outputs/basic";
+        let route = "api/indexer/v2/outputs/basic";
 
         let query_parameters = verify_query_parameters_basic_outputs(query_parameters.into())?;
 
@@ -44,12 +44,12 @@ impl ClientInner {
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
     /// Query parameters: "stateController", "governor", "issuer", "sender", "createdBefore", "createdAfter"
     /// Returns an empty list if no results are found.
-    /// api/indexer/v1/outputs/alias
+    /// api/indexer/v2/outputs/alias
     pub async fn alias_output_ids(
         &self,
         query_parameters: impl Into<Vec<QueryParameter>> + Send,
     ) -> Result<OutputIdsResponse> {
-        let route = "api/indexer/v1/outputs/alias";
+        let route = "api/indexer/v2/outputs/alias";
 
         let query_parameters = verify_query_parameters_alias_outputs(query_parameters.into())?;
 
@@ -57,9 +57,9 @@ impl ClientInner {
     }
 
     /// Get alias output by its aliasID.
-    /// api/indexer/v1/outputs/alias/:{AliasId}
+    /// api/indexer/v2/outputs/alias/:{AliasId}
     pub async fn alias_output_id(&self, alias_id: AliasId) -> Result<OutputId> {
-        let route = format!("api/indexer/v1/outputs/alias/{alias_id}");
+        let route = format!("api/indexer/v2/outputs/alias/{alias_id}");
 
         Ok(*(self
             .get_output_ids(&route, QueryParameters::empty(), true, false)
@@ -72,12 +72,12 @@ impl ClientInner {
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
     /// Query parameters: "address", "createdBefore", "createdAfter"
     /// Returns an empty list if no results are found.
-    /// api/indexer/v1/outputs/foundry
+    /// api/indexer/v2/outputs/foundry
     pub async fn foundry_output_ids(
         &self,
         query_parameters: impl Into<Vec<QueryParameter>> + Send,
     ) -> Result<OutputIdsResponse> {
-        let route = "api/indexer/v1/outputs/foundry";
+        let route = "api/indexer/v2/outputs/foundry";
 
         let query_parameters = verify_query_parameters_foundry_outputs(query_parameters.into())?;
 
@@ -85,9 +85,9 @@ impl ClientInner {
     }
 
     /// Get foundry output by its foundryID.
-    /// api/indexer/v1/outputs/foundry/:{FoundryID}
+    /// api/indexer/v2/outputs/foundry/:{FoundryID}
     pub async fn foundry_output_id(&self, foundry_id: FoundryId) -> Result<OutputId> {
-        let route = format!("api/indexer/v1/outputs/foundry/{foundry_id}");
+        let route = format!("api/indexer/v2/outputs/foundry/{foundry_id}");
 
         Ok(*(self
             .get_output_ids(&route, QueryParameters::empty(), true, false)
@@ -101,12 +101,12 @@ impl ClientInner {
     /// "hasExpiration", "expiresBefore", "expiresAfter", "hasTimelock", "timelockedBefore",
     /// "timelockedAfter", "issuer", "sender", "tag", "createdBefore", "createdAfter"
     /// Returns an empty list if no results are found.
-    /// api/indexer/v1/outputs/nft
+    /// api/indexer/v2/outputs/nft
     pub async fn nft_output_ids(
         &self,
         query_parameters: impl Into<Vec<QueryParameter>> + Send,
     ) -> Result<OutputIdsResponse> {
-        let route = "api/indexer/v1/outputs/nft";
+        let route = "api/indexer/v2/outputs/nft";
 
         let query_parameters = verify_query_parameters_nft_outputs(query_parameters.into())?;
 
@@ -114,9 +114,9 @@ impl ClientInner {
     }
 
     /// Get NFT output by its nftID.
-    /// api/indexer/v1/outputs/nft/:{NftId}
+    /// api/indexer/v2/outputs/nft/:{NftId}
     pub async fn nft_output_id(&self, nft_id: NftId) -> Result<OutputId> {
-        let route = format!("api/indexer/v1/outputs/nft/{nft_id}");
+        let route = format!("api/indexer/v2/outputs/nft/{nft_id}");
 
         Ok(*(self
             .get_output_ids(&route, QueryParameters::empty(), true, false)
