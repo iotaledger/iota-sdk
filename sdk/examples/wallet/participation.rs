@@ -16,11 +16,8 @@
 //! cargo run --release --all-features --example wallet_participation
 //! ```
 
-use std::{env::var, str::FromStr};
-
 use iota_sdk::{
     client::node_manager::node::Node,
-    types::api::plugins::participation::types::ParticipationEventId,
     wallet::{account::types::participation::ParticipationEventRegistrationOptions, Result},
     Url, Wallet,
 };
@@ -55,7 +52,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let event_id = ParticipationEventId::from_str(PARTICIPATION_EVENT_ID_1)?;
+    let event_id = PARTICIPATION_EVENT_ID_1.parse()?;
     let node = Node {
         url: Url::parse(PARTICPATION_NODE_URL).map_err(iota_sdk::client::Error::Url)?,
         auth: None,
@@ -66,7 +63,7 @@ async fn main() -> Result<()> {
             node,
             // We ignore this particular event
             events_to_ignore: (!IGNORED_PARTICIPATION_EVENT_ID.is_empty())
-                .then_some(vec![ParticipationEventId::from_str(IGNORED_PARTICIPATION_EVENT_ID)?]),
+                .then_some(vec![IGNORED_PARTICIPATION_EVENT_ID.parse()?]),
             // We register all others. If you want to register only particular events provide their ids with a
             // `Some(vec![...])`
             events_to_register: None,
@@ -103,7 +100,7 @@ async fn main() -> Result<()> {
     ////////////////////////////////////////////////
     if !DEREGISTERED_PARTICIPATION_EVENT.is_empty() {
         account
-            .deregister_participation_event(&ParticipationEventId::from_str(DEREGISTERED_PARTICIPATION_EVENT)?)
+            .deregister_participation_event(&DEREGISTERED_PARTICIPATION_EVENT.parse()?)
             .await?;
 
         println!("Registered events (updated):");
@@ -140,7 +137,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
 
@@ -165,7 +162,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
 
@@ -190,7 +187,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
 
@@ -217,7 +214,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
 
@@ -241,7 +238,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
 

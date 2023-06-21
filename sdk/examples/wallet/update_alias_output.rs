@@ -11,10 +11,8 @@
 //! cargo run --release --all-features --example update_alias_output
 //! ```
 
-use std::{env::var, str::FromStr, time::Instant};
-
 use iota_sdk::{
-    types::block::output::{AliasId, AliasOutputBuilder, Output},
+    types::block::output::{AliasOutputBuilder, Output},
     wallet::{Account, Result},
     Wallet,
 };
@@ -43,7 +41,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get the alias output by its alias id
-    let alias_id = AliasId::from_str(ALIAS_ID)?;
+    let alias_id = ALIAS_ID.parse()?;
     if let Some(alias_output_data) = account.unspent_alias_output(&alias_id).await? {
         println!(
             "Alias '{ALIAS_ID}' found in unspent output: '{}'",
@@ -76,7 +74,7 @@ async fn main() -> Result<()> {
 
 async fn sync_and_print_balance(account: &Account) -> Result<()> {
     let alias = account.alias().await;
-    let now = Instant::now();
+    let now = tokio::time::Instant::now();
     let balance = account.sync(None).await?;
     println!("{alias}'s account synced in: {:.2?}", now.elapsed());
     println!("{alias}'s base coin balance:\n{:#?}", balance.base_coin());
@@ -88,7 +86,7 @@ async fn send_and_wait_for_inclusion(account: &Account, outputs: Vec<Output>) ->
     let transaction = account.send(outputs, None).await?;
     println!(
         "Transaction sent: {}/transaction/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         transaction.transaction_id
     );
     // Wait for transaction to get included
@@ -97,7 +95,7 @@ async fn send_and_wait_for_inclusion(account: &Account, outputs: Vec<Output>) ->
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
     Ok(())

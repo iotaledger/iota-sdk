@@ -8,12 +8,7 @@
 //! cargo run --release --example node_api_core_get_block [BLOCK ID] [NODE URL]
 //! ```
 
-use std::str::FromStr;
-
-use iota_sdk::{
-    client::{Client, Result},
-    types::block::BlockId,
-};
+use iota_sdk::client::{Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -29,7 +24,7 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Take the block ID from command line argument or...
-    let block_id = if let Some(Ok(block_id)) = std::env::args().nth(1).map(|s| BlockId::from_str(&s)) {
+    let block_id = if let Some(Ok(block_id)) = std::env::args().nth(1).map(|s| s.parse()) {
         block_id
     } else {
         // ... fetch one from the node.

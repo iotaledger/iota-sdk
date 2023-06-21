@@ -16,8 +16,6 @@
 //! cargo run --release --all-features --example wallet
 //! ```
 
-use std::{env::var, time::Instant};
-
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -100,7 +98,7 @@ async fn generate_addresses(account: &Account, max: usize) -> Result<()> {
     if account.addresses().await?.len() < max {
         let num_addresses_to_generate = max - account.addresses().await?.len();
         println!("Generating {num_addresses_to_generate} addresses ...");
-        let now = Instant::now();
+        let now = tokio::time::Instant::now();
         account
             .generate_ed25519_addresses(num_addresses_to_generate as u32, None)
             .await?;
@@ -120,7 +118,7 @@ async fn print_addresses(account: &Account) -> Result<()> {
 
 async fn sync_print_balance(account: &Account, full_report: bool) -> Result<()> {
     let alias = account.alias().await;
-    let now = Instant::now();
+    let now = tokio::time::Instant::now();
     let balance = account.sync(None).await?;
     println!("{alias}'s account synced in: {:.2?}", now.elapsed());
     if full_report {
@@ -151,7 +149,7 @@ async fn print_addresses_with_funds(account: &Account) -> Result<()> {
 async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         transaction_id
     );
     // Wait for transaction to get included
@@ -160,7 +158,7 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
     Ok(())

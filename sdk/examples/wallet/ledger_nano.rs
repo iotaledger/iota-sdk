@@ -14,8 +14,6 @@
 //! cargo run --release --all-features --example ledger_nano
 //! ```
 
-use std::{env::var, time::Instant};
-
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -59,7 +57,7 @@ async fn main() -> Result<()> {
     };
 
     println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses...");
-    let now = Instant::now();
+    let now = tokio::time::Instant::now();
     let addresses = account
         .generate_ed25519_addresses(NUM_ADDRESSES_TO_GENERATE, None)
         .await?;
@@ -67,7 +65,7 @@ async fn main() -> Result<()> {
 
     println!("ADDRESSES:\n{addresses:#?}");
 
-    let now = Instant::now();
+    let now = tokio::time::Instant::now();
     let balance = account.sync(None).await?;
     println!("Account synced in: {:.2?}", now.elapsed());
 
@@ -83,11 +81,11 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
 
-    let now = Instant::now();
+    let now = tokio::time::Instant::now();
     let balance = account.sync(None).await?;
     println!("Account synced in: {:.2?}", now.elapsed());
 

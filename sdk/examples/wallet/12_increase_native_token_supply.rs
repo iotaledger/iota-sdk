@@ -11,9 +11,7 @@
 //! cargo run --release --all-features --example increase_native_token_supply
 //! ```
 
-use std::{env::var, str::FromStr};
-
-use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet, U256};
+use iota_sdk::{wallet::Result, Wallet, U256};
 
 // The native token id. Replace it with a TokenId that is available in the account, the foundry output which minted it,
 // also needs to be available. You can check this by running the `get_balance` example. You can mint a new native token
@@ -38,7 +36,7 @@ async fn main() -> Result<()> {
         .await?;
     let account = wallet.get_account("Alice").await?;
 
-    let token_id = TokenId::from_str(TOKEN_ID)?;
+    let token_id = TOKEN_ID.parse()?;
 
     // May want to ensure the account is synced before sending a transaction.
     let balance = account.sync(None).await?;
@@ -73,7 +71,7 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
     println!("Minted {} native tokens ({})", mint_amount, transaction.token_id);

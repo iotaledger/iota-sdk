@@ -11,8 +11,6 @@
 //! cargo run --release --all-features --example split_funds
 //! ```
 
-use std::{env::var, time::Instant};
-
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -83,7 +81,7 @@ async fn main() -> Result<()> {
         let transaction = account.send(outputs_per_transaction, None).await?;
         println!(
             "Transaction sent: {}/transaction/{}",
-            var("EXPLORER_URL").unwrap(),
+            std::env::var("EXPLORER_URL").unwrap(),
             transaction.transaction_id
         );
 
@@ -94,7 +92,7 @@ async fn main() -> Result<()> {
 
         println!(
             "Transaction included: {}/block/{}",
-            var("EXPLORER_URL").unwrap(),
+            std::env::var("EXPLORER_URL").unwrap(),
             block_id
         );
     }
@@ -123,7 +121,7 @@ async fn create_account(wallet: &Wallet, alias: &str) -> Result<Account> {
 
 async fn sync_print_balance(account: &Account) -> Result<()> {
     let alias = account.alias().await;
-    let now = Instant::now();
+    let now = tokio::time::Instant::now();
     let balance = account.sync(None).await?;
     println!("{alias}'s account synced in: {:.2?}", now.elapsed());
     println!("{alias}'s balance:\n{:#?}", balance.base_coin());

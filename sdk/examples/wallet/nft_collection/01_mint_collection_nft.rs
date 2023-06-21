@@ -12,8 +12,6 @@
 //! cargo run --release --all-features --example mint_collection_nft
 //! ```
 
-use std::{env::var, str::FromStr};
-
 use iota_sdk::{
     types::block::{
         address::{Bech32Address, NftAddress},
@@ -36,7 +34,7 @@ async fn main() -> Result<()> {
     let issuer_nft_id = if ISSUER_NFT_ID == "0x13c490ac052e575cffd40e170c2d46c6029b8b68cdf0e899b34cde93d2a7b28a" {
         panic!("You need to change the ISSUER_NFT_ID constant before you can run this example successfully!");
     } else {
-        NftId::from_str(ISSUER_NFT_ID)?
+        ISSUER_NFT_ID.parse()?
     };
 
     // This example uses secrets in environment variables for simplicity which should not be done in production.
@@ -105,7 +103,7 @@ fn get_immutable_metadata(index: usize, issuer_nft_id: NftId) -> String {
 async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         transaction_id
     );
     // Wait for transaction to get included
@@ -114,7 +112,7 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -
         .await?;
     println!(
         "Transaction included: {}/block/{}",
-        var("EXPLORER_URL").unwrap(),
+        std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
     Ok(())
