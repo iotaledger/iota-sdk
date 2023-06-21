@@ -14,32 +14,32 @@ use crate::types::block::{helper::network_name_to_id, output::RentStructure, Con
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
 pub struct ProtocolParameters {
-    /// The version of the protocol running.
+    // The version of the protocol running.
     #[cfg_attr(feature = "serde", serde(alias = "protocolVersion"))]
     protocol_version: u8,
-    /// The human friendly name of the network.
+    // The human friendly name of the network.
     #[packable(unpack_error_with = |err| Error::InvalidNetworkName(err.into_item_err()))]
     #[cfg_attr(feature = "serde", serde(alias = "networkName"))]
     network_name: StringPrefix<u8>,
-    /// The HRP prefix used for Bech32 addresses in the network.
+    // The HRP prefix used for Bech32 addresses in the network.
     #[cfg_attr(feature = "serde", serde(alias = "bech32Hrp"))]
     bech32_hrp: Hrp,
-    /// The minimum pow score of the network.
+    // The minimum pow score of the network.
     #[cfg_attr(feature = "serde", serde(alias = "minPowScore"))]
     min_pow_score: u32,
-    /// The below max depth parameter of the network.
+    // The below max depth parameter of the network.
     #[cfg_attr(feature = "serde", serde(alias = "belowMaxDepth"))]
     below_max_depth: u8,
-    /// The rent structure used by given node/network.
+    // The rent structure used by given node/network.
     #[cfg_attr(feature = "serde", serde(alias = "rentStructure"))]
     rent_structure: RentStructure,
-    /// TokenSupply defines the current token supply on the network.
+    // TokenSupply defines the current token supply on the network.
     #[cfg_attr(feature = "serde", serde(alias = "tokenSupply"))]
     token_supply: u64,
-    /// Genesis timestamp at which the slots start to count.
+    // Genesis timestamp at which the slots start to count.
     #[cfg_attr(feature = "serde", serde(alias = "genesisUnixTimestamp"))]
     genesis_unix_timestamp: u32,
-    /// Duration of each slot in seconds.
+    // Duration of each slot in seconds.
     #[cfg_attr(feature = "serde", serde(alias = "slotDurationInSeconds"))]
     slot_duration_in_seconds: u8,
 }
