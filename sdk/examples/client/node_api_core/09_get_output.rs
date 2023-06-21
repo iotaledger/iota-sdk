@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Find an output, as JSON, by its identifier by calling `GET /api/core/v2/outputs/{outputId}`.
+//! Find an output, as JSON, by its identifier by calling `GET /api/core/v3/outputs/{outputId}`.
 //!
 //! `cargo run --example node_api_core_get_output --release -- [NODE URL] [OUTPUT ID]`
 

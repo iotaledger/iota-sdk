@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! TODO: <insert example description> by calling
-//! `GET api/indexer/v1/outputs/basic`.
+//! `GET api/indexer/v2/outputs/basic`.
 //!
 //! `cargo run --release --example get_outputs -- [NODE_URL] [ADDRESS]`.
 

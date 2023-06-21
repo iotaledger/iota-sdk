@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Finds the metadata of a given block by calling `GET /api/core/v2/blocks/{blockId}/metadata`.
+//! Finds the metadata of a given block by calling `GET /api/core/v3/blocks/{blockId}/metadata`.
 //!
 //! `cargo run --example node_api_core_get_block_metadata --release -- [NODE URL]`
 
