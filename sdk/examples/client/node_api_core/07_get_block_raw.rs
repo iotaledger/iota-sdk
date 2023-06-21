@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Returns block data as raw bytes by its identifier by querying the `/api/core/v2/blocks/{blockId}` node endpoint.
+//! Returns block data as raw bytes by its identifier by querying the `/api/core/v3/blocks/{blockId}` node endpoint.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh

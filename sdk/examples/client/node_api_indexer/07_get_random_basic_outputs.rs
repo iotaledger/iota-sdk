@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! Gets the first page of output ids when querying the
-//! `api/indexer/v1/outputs/basic` node endpoint.
+//! `api/indexer/v2/outputs/basic` node endpoint.
 //!
 //! Make sure that the node has the indexer plugin enabled.
 //!

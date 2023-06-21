@@ -9,7 +9,7 @@ use crate::types::block::{
     BlockId,
 };
 
-/// Response of GET /api/core/v2/info.
+/// Response of GET /api/core/v3/info.
 /// Returns general information about the node.
 #[derive(Clone, Debug, PartialEq)]
 #[cfg_attr(
@@ -131,7 +131,7 @@ pub struct MetricsResponse {
     pub referenced_rate: f64,
 }
 
-/// Response of GET /api/core/v2/tips.
+/// Response of GET /api/core/v3/tips.
 /// Returns non-lazy tips.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
@@ -143,7 +143,7 @@ pub struct TipsResponse {
     pub tips: Vec<BlockId>,
 }
 
-/// Response of POST /api/core/v2/blocks.
+/// Response of POST /api/core/v3/blocks.
 /// Returns the block identifier of the submitted block.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
@@ -168,7 +168,7 @@ pub enum LedgerInclusionState {
     NoTransaction,
 }
 
-/// Response of GET /api/core/v2/blocks/{block_id}/metadata.
+/// Response of GET /api/core/v3/blocks/{block_id}/metadata.
 /// Returns the metadata of a block.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
@@ -196,7 +196,7 @@ pub struct BlockMetadataResponse {
     pub should_reattach: Option<bool>,
 }
 
-/// Response of GET /api/core/v2/outputs/{output_id}.
+/// Response of GET /api/core/v3/outputs/{output_id}.
 /// Returns an output and its metadata.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
@@ -282,8 +282,8 @@ pub enum Relation {
 }
 
 /// Response of
-/// - GET /api/core/v2/peer/{peer_id}
-/// - POST /api/core/v2/peers
+/// - GET /api/core/v3/peer/{peer_id}
+/// - POST /api/core/v3/peers
 /// Returns information about a peer.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(

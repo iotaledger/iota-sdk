@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! Returns the included block, as raw bytes, of a transaction by querying the
-//! `/api/core/v2/transactions/{transactionId}/included-block` node endpoint.
+//! `/api/core/v3/transactions/{transactionId}/included-block` node endpoint.
 //!
 //! Make sure to provide a somewhat recent transaction id to make this example run successfully!
 //!

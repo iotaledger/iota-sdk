@@ -1,8 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Gets all foundry output ids accociated with an alias address by querying the
-//! `api/indexer/v1/outputs/foundry` node endpoint.
+//! Gets all foundry output ids associated with an alias address by querying the
+//! `api/indexer/v2/outputs/foundry` node endpoint.
 //!
 //! Make sure that the node has the indexer plugin enabled.
 //!

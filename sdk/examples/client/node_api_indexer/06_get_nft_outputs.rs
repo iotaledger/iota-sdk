@@ -1,8 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Gets all nft output ids accociated with an address by querying the
-//! `api/indexer/v1/outputs/nft` node endpoint.
+//! Gets all nft output ids associated with an address by querying the
+//! `api/indexer/v2/outputs/nft` node endpoint.
 //!
 //! Make sure that the node has the indexer plugin enabled.
 //!
