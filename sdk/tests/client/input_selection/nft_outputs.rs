@@ -10,12 +10,9 @@ use iota_sdk::{
     },
     types::block::{
         address::Address,
-        output::{
-            feature::MetadataFeature, unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output,
-            OutputMetadata,
-        },
+        output::{feature::MetadataFeature, unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
         protocol::protocol_parameters,
-        rand::{block::rand_block_id, output::rand_output_id},
+        rand::output::rand_output_metadata,
     },
 };
 
@@ -1199,7 +1196,7 @@ fn changed_immutable_metadata() {
 
     let inputs = [InputSigningData {
         output: nft_output.clone(),
-        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        output_metadata: rand_output_metadata(),
         chain: None,
     }];
 
