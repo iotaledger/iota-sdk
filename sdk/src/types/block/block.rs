@@ -13,7 +13,7 @@ use packable::{
 };
 
 use crate::types::block::{
-    parent::Parents,
+    parent::StrongParents,
     payload::{OptionalPayload, Payload},
     protocol::ProtocolParameters,
     BlockId, Error, PROTOCOL_VERSION,
@@ -24,7 +24,7 @@ use crate::types::block::{
 #[must_use]
 pub struct BlockBuilder {
     protocol_version: Option<u8>,
-    parents: Parents,
+    strong_parents: StrongParents,
     payload: OptionalPayload,
     nonce: Option<u64>,
 }
@@ -34,10 +34,10 @@ impl BlockBuilder {
 
     /// Creates a new [`BlockBuilder`].
     #[inline(always)]
-    pub fn new(parents: Parents) -> Self {
+    pub fn new(strong_parents: StrongParents) -> Self {
         Self {
             protocol_version: None,
-            parents,
+            strong_parents,
             payload: OptionalPayload::default(),
             nonce: None,
         }
@@ -69,7 +69,7 @@ impl BlockBuilder {
 
         let block = Block {
             protocol_version: self.protocol_version.unwrap_or(PROTOCOL_VERSION),
-            parents: self.parents,
+            strong_parents: self.strong_parents,
             payload: self.payload,
             nonce: self.nonce.unwrap_or(Self::DEFAULT_NONCE),
         };
@@ -105,8 +105,8 @@ impl BlockBuilder {
 pub struct Block {
     /// Protocol version of the block.
     protocol_version: u8,
-    /// The [`BlockId`]s that this block directly approves.
-    parents: Parents,
+    /// Blocks that are strongly directly approved.
+    strong_parents: StrongParents,
     /// The optional [Payload] of the block.
     payload: OptionalPayload,
     /// The result of the Proof of Work in order for the block to be accepted into the tangle.
@@ -121,8 +121,8 @@ impl Block {
 
     /// Creates a new [`BlockBuilder`] to construct an instance of a [`Block`].
     #[inline(always)]
-    pub fn build(parents: Parents) -> BlockBuilder {
-        BlockBuilder::new(parents)
+    pub fn build(strong_parents: StrongParents) -> BlockBuilder {
+        BlockBuilder::new(strong_parents)
     }
 
     /// Returns the protocol version of a [`Block`].
@@ -131,10 +131,10 @@ impl Block {
         self.protocol_version
     }
 
-    /// Returns the parents of a [`Block`].
+    /// Returns the strong parents of a [`Block`].
     #[inline(always)]
-    pub fn parents(&self) -> &Parents {
-        &self.parents
+    pub fn strong_parents(&self) -> &StrongParents {
+        &self.strong_parents
     }
 
     /// Returns the optional payload of a [`Block`].
@@ -155,10 +155,10 @@ impl Block {
         BlockId::new(Blake2b256::digest(self.pack_to_vec()).into())
     }
 
-    /// Consumes the [`Block`], and returns ownership over its [`Parents`].
+    /// Consumes the [`Block`], and returns ownership over its [`StrongParents`].
     #[inline(always)]
-    pub fn into_parents(self) -> Parents {
-        self.parents
+    pub fn into_strong_parents(self) -> StrongParents {
+        self.strong_parents
     }
 
     /// Unpacks a [`Block`] from a sequence of bytes doing syntactical checks and verifying that
@@ -185,7 +185,7 @@ impl Packable for Block {
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.protocol_version.pack(packer)?;
-        self.parents.pack(packer)?;
+        self.strong_parents.pack(packer)?;
         self.payload.pack(packer)?;
         self.nonce.pack(packer)?;
 
@@ -207,7 +207,7 @@ impl Packable for Block {
             }));
         }
 
-        let parents = Parents::unpack::<_, VERIFY>(unpacker, &())?;
+        let strong_parents = StrongParents::unpack::<_, VERIFY>(unpacker, &())?;
         let payload = OptionalPayload::unpack::<_, VERIFY>(unpacker, visitor)?;
 
         if VERIFY {
@@ -218,7 +218,7 @@ impl Packable for Block {
 
         let block = Self {
             protocol_version,
-            parents,
+            strong_parents,
             payload,
             nonce,
         };
@@ -268,7 +268,7 @@ pub mod dto {
         ///
         pub protocol_version: u8,
         ///
-        pub parents: Vec<String>,
+        pub strong_parents: Vec<String>,
         ///
         #[serde(skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
@@ -280,7 +280,7 @@ pub mod dto {
         fn from(value: &Block) -> Self {
             Self {
                 protocol_version: value.protocol_version(),
-                parents: value.parents().iter().map(BlockId::to_string).collect(),
+                strong_parents: value.strong_parents().iter().map(BlockId::to_string).collect(),
                 payload: value.payload().map(Into::into),
                 nonce: value.nonce().to_string(),
             }
@@ -289,15 +289,15 @@ pub mod dto {
 
     impl Block {
         pub fn try_from_dto(value: BlockDto, protocol_parameters: &ProtocolParameters) -> Result<Self, Error> {
-            let parents = Parents::from_vec(
+            let strong_parents = StrongParents::from_vec(
                 value
-                    .parents
+                    .strong_parents
                     .into_iter()
                     .map(|m| m.parse::<BlockId>().map_err(|_| Error::InvalidField("parents")))
                     .collect::<Result<Vec<BlockId>, Error>>()?,
             )?;
 
-            let mut builder = BlockBuilder::new(parents)
+            let mut builder = BlockBuilder::new(strong_parents)
                 .with_protocol_version(value.protocol_version)
                 .with_nonce(value.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?);
 
@@ -309,15 +309,15 @@ pub mod dto {
         }
 
         pub fn try_from_dto_unverified(value: BlockDto) -> Result<Self, Error> {
-            let parents = Parents::from_vec(
+            let strong_parents = StrongParents::from_vec(
                 value
-                    .parents
+                    .strong_parents
                     .into_iter()
                     .map(|m| m.parse::<BlockId>().map_err(|_| Error::InvalidField("parents")))
                     .collect::<Result<Vec<BlockId>, Error>>()?,
             )?;
 
-            let mut builder = BlockBuilder::new(parents)
+            let mut builder = BlockBuilder::new(strong_parents)
                 .with_protocol_version(value.protocol_version)
                 .with_nonce(value.nonce.parse::<u64>().map_err(|_| Error::InvalidField("nonce"))?);
 

@@ -12,8 +12,6 @@ use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
 use crate::types::block::{BlockId, Error};
 
-pub(crate) type ParentCount = BoundedU8<{ *Parents::COUNT_RANGE.start() }, { *Parents::COUNT_RANGE.end() }>;
-
 /// A [`Block`](crate::types::block::Block)'s [`Parents`] are the [`BlockId`]s of the blocks it directly approves.
 ///
 /// Parents must be:
@@ -24,12 +22,14 @@ pub(crate) type ParentCount = BoundedU8<{ *Parents::COUNT_RANGE.start() }, { *Pa
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[deref(forward)]
 #[packable(unpack_error = Error, with = |e| Error::InvalidParentCount(e.into_prefix_err().into()))]
-pub struct Parents(#[packable(verify_with = verify_parents)] BoxedSlicePrefix<BlockId, ParentCount>);
+pub(crate) struct Parents<const MIN: u8, const MAX: u8>(
+    #[packable(verify_with = verify_parents)] BoxedSlicePrefix<BlockId, BoundedU8<MIN, MAX>>,
+);
 
 #[allow(clippy::len_without_is_empty)]
-impl Parents {
+impl<const MIN: u8, const MAX: u8> Parents<MIN, MAX> {
     /// The range representing the valid number of parents.
-    pub const COUNT_RANGE: RangeInclusive<u8> = 1..=8;
+    pub const COUNT_RANGE: RangeInclusive<u8> = MIN..=MAX;
 
     /// Creates new [`Parents`] from a vec.
     pub fn from_vec(mut inner: Vec<BlockId>) -> Result<Self, Error> {
@@ -70,3 +70,7 @@ fn verify_parents<const VERIFY: bool>(parents: &[BlockId], _: &()) -> Result<(),
         Ok(())
     }
 }
+
+pub type StrongParents = Parents<1, 8>;
+pub type WeakParents = Parents<0, 8>;
+pub type ShallowLikeParents = Parents<0, 8>;
