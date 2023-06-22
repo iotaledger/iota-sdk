@@ -37,7 +37,7 @@ use iota_sdk::{
             AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NativeTokens, NftId,
             NftOutputBuilder, Output, OutputId, OutputMetadata, SimpleTokenScheme, TokenId, TokenScheme,
         },
-        rand::{block::rand_block_id, transaction::rand_transaction_id},
+        rand::{block::rand_block_id, slot::rand_slot_commitment_id, transaction::rand_transaction_id},
     },
 };
 use primitive_types::U256;
@@ -319,9 +319,7 @@ fn build_inputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<InputSi
                     None,
                     None,
                     None,
-                    0,
-                    0,
-                    0,
+                    rand_slot_commitment_id(),
                 ),
                 chain,
             }

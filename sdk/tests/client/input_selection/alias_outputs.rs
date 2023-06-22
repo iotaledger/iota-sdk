@@ -12,10 +12,10 @@ use iota_sdk::{
         address::Address,
         output::{
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-            AliasId, AliasOutputBuilder, AliasTransition, Output, OutputMetadata,
+            AliasId, AliasOutputBuilder, AliasTransition, Output,
         },
         protocol::protocol_parameters,
-        rand::{block::rand_block_id, output::rand_output_id},
+        rand::output::rand_output_metadata,
     },
 };
 
@@ -2326,7 +2326,7 @@ fn new_state_metadata() {
 
     let inputs = [InputSigningData {
         output: alias_output.clone(),
-        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        output_metadata: rand_output_metadata(),
         chain: None,
     }];
 
@@ -2372,7 +2372,7 @@ fn new_state_metadata_but_same_state_index() {
 
     let inputs = [InputSigningData {
         output: alias_output.clone(),
-        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        output_metadata: rand_output_metadata(),
         chain: None,
     }];
 

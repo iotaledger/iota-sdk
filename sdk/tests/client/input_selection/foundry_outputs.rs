@@ -12,11 +12,10 @@ use iota_sdk::{
         address::{Address, AliasAddress},
         output::{
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-            AliasId, AliasOutputBuilder, AliasTransition, FoundryId, Output, OutputMetadata, SimpleTokenScheme,
-            TokenId,
+            AliasId, AliasOutputBuilder, AliasTransition, FoundryId, Output, SimpleTokenScheme, TokenId,
         },
         protocol::protocol_parameters,
-        rand::{block::rand_block_id, output::rand_output_id},
+        rand::output::rand_output_metadata,
     },
 };
 use primitive_types::U256;
@@ -248,7 +247,7 @@ fn melt_native_tokens() {
         .unwrap();
     inputs.push(InputSigningData {
         output: alias_output,
-        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        output_metadata: rand_output_metadata(),
         chain: None,
     });
     let outputs = build_outputs([Foundry(
@@ -509,7 +508,7 @@ fn simple_foundry_transition_basic_not_needed() {
         .unwrap();
     inputs.push(InputSigningData {
         output: alias_output,
-        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        output_metadata: rand_output_metadata(),
         chain: None,
     });
 
@@ -584,7 +583,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         .unwrap();
     inputs.push(InputSigningData {
         output: alias_output,
-        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        output_metadata: rand_output_metadata(),
         chain: None,
     });
     let outputs = build_outputs([Foundry(
@@ -734,7 +733,7 @@ fn mint_and_burn_at_the_same_time() {
         .unwrap();
     inputs.push(InputSigningData {
         output: alias_output,
-        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        output_metadata: rand_output_metadata(),
         chain: None,
     });
 
@@ -791,7 +790,7 @@ fn take_amount_from_alias_and_foundry_to_fund_basic() {
         .unwrap();
     inputs.push(InputSigningData {
         output: alias_output,
-        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        output_metadata: rand_output_metadata(),
         chain: None,
     });
     let outputs = build_outputs([Basic(
@@ -1005,7 +1004,7 @@ fn foundry_in_outputs_and_required() {
         .unwrap();
     inputs.push(InputSigningData {
         output: alias_output,
-        output_metadata: OutputMetadata::new(rand_block_id(), rand_output_id(), false, None, None, None, 0, 0, 0),
+        output_metadata: rand_output_metadata(),
         chain: None,
     });
     let outputs = build_outputs([Foundry(
