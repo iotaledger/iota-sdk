@@ -288,7 +288,8 @@ pub(crate) fn verify_query_parameters_nft_outputs(query_parameters: Vec<QueryPar
         QueryParameter::CreatedBefore,
         QueryParameter::CreatedAfter,
         QueryParameter::PageSize,
-        QueryParameter::Cursor
+        QueryParameter::Cursor,
+        QueryParameter::Issuer
     )?;
 
     Ok(QueryParameters::new(query_parameters))
