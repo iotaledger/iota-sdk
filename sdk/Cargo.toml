@@ -621,17 +621,17 @@ required-features = [ "wallet", "stronghold" ]
 [[example]]
 name = "check_unlock_conditions"
 path = "examples/wallet/17_check_unlock_conditions.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "accounts"
 path = "examples/wallet/accounts.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "background_syncing"
 path = "examples/wallet/background_syncing.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "events"
@@ -661,7 +661,7 @@ required-features = [ "wallet", "stronghold" ]
 [[example]]
 name = "recover_accounts"
 path = "examples/wallet/recover_accounts.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "spammer"
@@ -671,7 +671,7 @@ required-features = [ "wallet" ]
 [[example]]
 name = "split_funds"
 path = "examples/wallet/split_funds.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "storage"
@@ -686,7 +686,7 @@ required-features = [ "wallet", "stronghold" ]
 [[example]]
 name = "wallet"
 path = "examples/wallet/wallet.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "migrate_stronghold_snapshot_v2_to_v3"
