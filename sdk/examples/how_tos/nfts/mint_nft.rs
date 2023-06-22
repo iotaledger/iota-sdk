@@ -42,6 +42,9 @@ async fn main() -> Result<()> {
     // Get the account we generated with `01_create_wallet`
     let account = wallet.get_account("Alice").await?;
 
+    // Ensure the account is synced after minting.
+    account.sync(None).await?;
+
     // We send from the first address in the account.
     let sender_address = *account.addresses().await?[0].address();
 
