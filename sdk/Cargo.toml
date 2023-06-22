@@ -236,6 +236,12 @@ name = "output_features"
 path = "examples/how_tos/outputs/features.rs"
 required-features = [ "client" ]
 
+# Client Examples
+
+[[example]]
+name = "node_api_core_get_info"
+path = "examples/how_tos/client/get_info.rs"
+
 # Block examples
 
 [[example]]
@@ -288,11 +294,6 @@ required-features = [ "client" ]
 [[example]]
 name = "node_api_core_get_routes"
 path = "examples/client/node_api_core/01_get_routes.rs"
-required-features = [ "client" ]
-
-[[example]]
-name = "node_api_core_get_info"
-path = "examples/client/node_api_core/02_get_info.rs"
 required-features = [ "client" ]
 
 [[example]]
