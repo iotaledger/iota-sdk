@@ -9,7 +9,9 @@ use std::sync::{
 use std::{collections::HashSet, path::PathBuf, sync::atomic::Ordering};
 
 use futures::{future::try_join_all, FutureExt};
-use serde::{Deserialize, Serialize};
+#[cfg(feature = "storage")]
+use serde::Deserialize;
+use serde::Serialize;
 use tokio::sync::RwLock;
 
 use super::operations::storage::SaveLoadWallet;
@@ -53,9 +55,9 @@ impl<S: SecretManage> Default for WalletBuilder<S> {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg(feature = "storage")]
 #[cfg_attr(docsrs, doc(cfg(feature = "storage")))]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct StorageOptions {
     pub(crate) storage_path: PathBuf,
     pub(crate) storage_file_name: Option<String>,

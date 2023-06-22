@@ -39,7 +39,6 @@ pub enum Error {
     InvalidAddress,
     InvalidAddressKind(u8),
     InvalidAliasIndex(<UnlockIndex as TryFrom<u16>>::Error),
-    InvalidControllerKind(u8),
     InvalidStorageDepositAmount(u64),
     // The above is used by `Packable` to denote out-of-range values. The following denotes the actual amount.
     InsufficientStorageDepositAmount { amount: u64, required: u64 },
@@ -93,15 +92,12 @@ pub enum Error {
     InvalidUnlockConditionCount(<UnlockConditionCount as TryFrom<usize>>::Error),
     InvalidUnlockConditionKind(u8),
     InvalidFoundryZeroSerialNumber,
-    MigratedFundsNotSorted,
     MilestoneInvalidSignatureCount(<SignatureCount as TryFrom<usize>>::Error),
     MilestonePublicKeysSignaturesCountMismatch { key_count: usize, sig_count: usize },
     MilestoneOptionsNotUniqueSorted,
     MilestoneSignaturesNotUniqueSorted,
     MissingAddressUnlockCondition,
     MissingGovernorUnlockCondition,
-    MissingPayload,
-    MissingRequiredSenderBlock,
     MissingStateControllerUnlockCondition,
     NativeTokensNotUniqueSorted,
     NativeTokensNullAmount,
@@ -165,7 +161,6 @@ impl fmt::Display for Error {
             Self::InvalidBinaryParametersLength(length) => {
                 write!(f, "invalid binary parameters length: {length}")
             }
-            Self::InvalidControllerKind(k) => write!(f, "invalid controller kind: {k}"),
             Self::InvalidStorageDepositAmount(amount) => {
                 write!(f, "invalid storage deposit amount: {amount}")
             }
@@ -258,9 +253,6 @@ impl fmt::Display for Error {
             Self::InvalidUnlockConditionCount(count) => write!(f, "invalid unlock condition count: {count}"),
             Self::InvalidUnlockConditionKind(k) => write!(f, "invalid unlock condition kind: {k}"),
             Self::InvalidFoundryZeroSerialNumber => write!(f, "invalid foundry zero serial number"),
-            Self::MigratedFundsNotSorted => {
-                write!(f, "migrated funds are not sorted")
-            }
             Self::MilestoneInvalidSignatureCount(count) => {
                 write!(f, "invalid milestone signature count: {count}")
             }
@@ -278,8 +270,6 @@ impl fmt::Display for Error {
             }
             Self::MissingAddressUnlockCondition => write!(f, "missing address unlock condition"),
             Self::MissingGovernorUnlockCondition => write!(f, "missing governor unlock condition"),
-            Self::MissingPayload => write!(f, "missing payload"),
-            Self::MissingRequiredSenderBlock => write!(f, "missing required sender block"),
             Self::MissingStateControllerUnlockCondition => write!(f, "missing state controller unlock condition"),
             Self::NativeTokensNotUniqueSorted => write!(f, "native tokens are not unique and/or sorted"),
             Self::NativeTokensNullAmount => write!(f, "native tokens null amount"),

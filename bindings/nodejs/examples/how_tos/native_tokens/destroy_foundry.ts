@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { getUnlockedWallet } from './common';
+import { getUnlockedWallet } from '../../wallet/common';
 
 // In this example we will try to destroy the first foundry there is in the account. This is only possible if its
 // circulating supply is 0 and no native tokens were burned.
@@ -28,8 +28,7 @@ async function run() {
         // We try to destroy the first foundry in the account
         const foundry = balance.foundries[0];
 
-        console.log(`Foundries BEFORE destroying:\n`, balance.foundries);
-        console.log('Sending the destroy-foundry transaction...');
+        console.log(`Foundries before destroying: ${balance.foundries.length}`);
 
         // Burn a foundry
         const transaction = await account
@@ -45,10 +44,9 @@ async function run() {
         console.log(
             `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
-        console.log(`Destroyed foundry ${foundry}`);
 
         balance = await account.sync();
-        console.log(`Foundries AFTER destroying:\n`, balance.foundries);
+        console.log(`Foundries after destroying: ${balance.foundries.length}`);
     } catch (error) {
         console.log('Error: ', error);
     }

@@ -31,32 +31,35 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
     let account = wallet.get_account("Alice").await?;
+    let balance = account.sync(None).await?;
 
     // Set the stronghold password
     wallet
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    println!("Sending alias output transaction...");
+    // We can first check if we already have an alias in our account, because an alias can have many foundry outputs and
+    // therefore we can reuse an existing one
+    if balance.aliases().is_empty() {
+        // If we don't have an alias, we need to create one
+        let transaction = account.create_alias_output(None, None).await?;
+        println!("Transaction sent: {}", transaction.transaction_id);
 
-    // First create an alias output, this needs to be done only once, because an alias can have many foundry outputs
-    let transaction = account.create_alias_output(None, None).await?;
-    println!("Transaction sent: {}", transaction.transaction_id);
+        // Wait for transaction to get included
+        let block_id = account
+            .retry_transaction_until_included(&transaction.transaction_id, None, None)
+            .await?;
+        println!(
+            "Block included: {}/block/{}",
+            std::env::var("EXPLORER_URL").unwrap(),
+            block_id
+        );
 
-    // Wait for transaction to get included
-    let block_id = account
-        .retry_transaction_until_included(&transaction.transaction_id, None, None)
-        .await?;
-    println!(
-        "Transaction included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
-        block_id
-    );
+        account.sync(None).await?;
+        println!("Account synced");
+    }
 
-    account.sync(None).await?;
-    println!("Account synced");
-
-    println!("Sending the minting transaction...");
+    println!("Preparing minting transaction...");
 
     let params = MintNativeTokenParams {
         alias_id: None,
@@ -73,11 +76,11 @@ async fn main() -> Result<()> {
         .retry_transaction_until_included(&transaction.transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Transaction included: {}/block/{}",
+        "Block included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
-    println!("Minted token: {} ", transaction.token_id);
+    println!("Minted token: {}", transaction.token_id);
 
     // Ensure the account is synced after minting.
     account.sync(None).await?;
