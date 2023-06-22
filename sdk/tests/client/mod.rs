@@ -316,6 +316,8 @@ fn build_inputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<InputSi
                     OutputId::new(rand_transaction_id(), 0).unwrap(),
                     false,
                     None,
+                    None,
+                    None,
                     rand_slot_commitment_id(),
                 ),
                 chain,

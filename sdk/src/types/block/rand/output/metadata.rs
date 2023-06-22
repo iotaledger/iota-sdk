@@ -5,7 +5,7 @@ use crate::types::block::{
     output::OutputMetadata,
     rand::{
         block::rand_block_id, bool::rand_bool, option::rand_option, output::rand_output_id,
-        slot::rand_slot_commitment_id,
+        slot::rand_slot_commitment_id, transaction::rand_transaction_id,
     },
 };
 
@@ -15,6 +15,8 @@ pub fn rand_output_metadata() -> OutputMetadata {
         rand_block_id(),
         rand_output_id(),
         rand_bool(),
+        rand_option(rand_slot_commitment_id()),
+        rand_option(rand_transaction_id()),
         rand_option(rand_slot_commitment_id()),
         rand_slot_commitment_id(),
     )

@@ -17,6 +17,12 @@ pub struct OutputMetadata {
     output_id: OutputId,
     /// Whether the output is spent or not.
     is_spent: bool,
+    // Commitment ID that includes the spent output.
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    commitment_id_spent: Option<SlotCommitmentId>,
+    // Transaction ID that spends the output.
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    transaction_id_spent: Option<TransactionId>,
     /// Commitment ID that includes the output.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     included_commitment_id: Option<SlotCommitmentId>,
@@ -31,6 +37,8 @@ impl OutputMetadata {
         block_id: BlockId,
         output_id: OutputId,
         is_spent: bool,
+        commitment_id_spent: Option<SlotCommitmentId>,
+        transaction_id_spent: Option<TransactionId>,
         included_commitment_id: Option<SlotCommitmentId>,
         latest_commitment_id: SlotCommitmentId,
     ) -> Self {
@@ -38,6 +46,8 @@ impl OutputMetadata {
             block_id,
             output_id,
             is_spent,
+            commitment_id_spent,
+            transaction_id_spent,
             included_commitment_id,
             latest_commitment_id,
         }
@@ -73,6 +83,16 @@ impl OutputMetadata {
         self.is_spent = spent;
     }
 
+    /// Returns the commitment ID spent of the [`OutputMetadata`].
+    pub fn commitment_id_spent(&self) -> Option<&SlotCommitmentId> {
+        self.commitment_id_spent.as_ref()
+    }
+
+    /// Returns the transaction ID spent of the [`OutputMetadata`].
+    pub fn transaction_id_spent(&self) -> Option<&TransactionId> {
+        self.transaction_id_spent.as_ref()
+    }
+
     /// Returns the included commitment ID of the [`OutputMetadata`].
     pub fn included_commitment_id(&self) -> Option<&SlotCommitmentId> {
         self.included_commitment_id.as_ref()
@@ -103,6 +123,10 @@ pub mod dto {
         pub output_index: u16,
         pub is_spent: bool,
         #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+        pub commitment_id_spent: Option<SlotCommitmentId>,
+        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+        pub transaction_id_spent: Option<TransactionId>,
+        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
         pub included_commitment_id: Option<SlotCommitmentId>,
         pub latest_commitment_id: SlotCommitmentId,
     }
@@ -125,6 +149,8 @@ pub mod dto {
                     response.output_index,
                 )?,
                 is_spent: response.is_spent,
+                commitment_id_spent: response.commitment_id_spent,
+                transaction_id_spent: response.transaction_id_spent,
                 included_commitment_id: response.included_commitment_id,
                 latest_commitment_id: response.latest_commitment_id,
             })
@@ -138,6 +164,8 @@ pub mod dto {
                 transaction_id: output_metadata.transaction_id().to_string(),
                 output_index: output_metadata.output_index(),
                 is_spent: output_metadata.is_spent(),
+                commitment_id_spent: output_metadata.commitment_id_spent().cloned(),
+                transaction_id_spent: output_metadata.transaction_id_spent().cloned(),
                 included_commitment_id: output_metadata.included_commitment_id().cloned(),
                 latest_commitment_id: *output_metadata.latest_commitment_id(),
             }
