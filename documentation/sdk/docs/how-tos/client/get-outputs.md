@@ -21,12 +21,6 @@ import AccountClient from '../../_admonitions/_account-client.md'
 
 You can use the indexer to query for specific outputs. You can query for any output type, just change the function to the output type you need
 
-:::tip info
-
-To check if the node has an indexer plugin enabled, you can check its [routes](./get-routes.md)
-
-:::
-
 <AccountClient/>
 
 The following code example will:
