@@ -34,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Utils::verifyEd25519Signature`'s `address` parameter;
 
+### Fixed
+
+- `UTXOInput` constructs with type the proper `InputType`;
+
 ## 1.0.0-rc.0 - 2023-06-15
 
 Initial release of the Node.js SDK bindings.

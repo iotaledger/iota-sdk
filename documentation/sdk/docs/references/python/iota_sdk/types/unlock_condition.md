@@ -21,17 +21,17 @@ def __init__(type=None,
 
 Initialize an UnlockCondition
 
-Parameters
-----------
-type : UnlockConditionType
+#### Parameters
+
+* __type__*: UnlockConditionType*  
     The type of unlock condition
-address : Address
+* __address__*: Address*  
     Address for unlock condition
-amount : int
+* __amount__*: int*  
     Amount for storage deposit unlock condition
-unix_time : int
+* __unix_time__*: int*  
     Unix timestamp for timelock and expiration unlock condition
-return_address : Address
+* __return_address__*: Address*  
     Return address for expiration and storage deposit unlock condition
 
 ## AddressUnlockCondition Objects
@@ -48,9 +48,9 @@ def __init__(address)
 
 Initialize an AddressUnlockCondition
 
-Parameters
-----------
-address : Address
+#### Parameters
+
+* __address__*: Address*  
     Address
 
 ## StorageDepositReturnUnlockCondition Objects
@@ -67,11 +67,11 @@ def __init__(amount, return_address)
 
 Initialize a StorageDepositReturnUnlockCondition
 
-Parameters
-----------
-amount : int
+#### Parameters
+
+* __amount__*: int*  
     Amount
-return_address : Address
+* __return_address__*: Address*  
     Return address
 
 ## TimelockUnlockCondition Objects
@@ -88,9 +88,9 @@ def __init__(unix_time)
 
 Initialize a TimelockUnlockCondition
 
-Parameters
-----------
-unix_time : int
+#### Parameters
+
+* __unix_time__*: int*  
     Unix timestamp at which to unlock output
 
 ## ExpirationUnlockCondition Objects
@@ -107,11 +107,11 @@ def __init__(unix_time, return_address)
 
 Initialize an ExpirationUnlockCondition
 
-Parameters
-----------
-unix_time : int
+#### Parameters
+
+* __unix_time__*: int*  
     Unix timestamp
-return_address : Address
+* __return_address__*: Address*  
     Return address
 
 ## StateControllerAddressUnlockCondition Objects
@@ -128,9 +128,9 @@ def __init__(address)
 
 Initialize a StateControllerAddressUnlockCondition
 
-Parameters
-----------
-address : Address
+#### Parameters
+
+* __address__*: Address*  
     Address for unlock condition
 
 ## GovernorAddressUnlockCondition Objects
@@ -147,9 +147,9 @@ def __init__(address)
 
 Initialize a GovernorAddressUnlockCondition
 
-Parameters
-----------
-address : Address
+#### Parameters
+
+* __address__*: Address*  
     Address for unlock condition
 
 ## ImmutableAliasAddressUnlockCondition Objects
@@ -166,8 +166,8 @@ def __init__(address)
 
 Initialize an ImmutableAliasAddressUnlockCondition
 
-Parameters
-----------
-address : Address
+#### Parameters
+
+* __address__*: Address*  
     Address for unlock condition
 

@@ -20,7 +20,6 @@ use crate::wallet::common::{setup, tear_down, NODE_LOCAL};
 const PBKDF_SALT: &str = "wallet.rs";
 const PBKDF_ITER: u32 = 100;
 
-#[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn stronghold_snapshot_v2_v3_migration() {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
@@ -117,7 +116,6 @@ async fn stronghold_snapshot_v2_v3_migration() {
     tear_down(storage_path).unwrap();
 }
 
-#[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn stronghold_snapshot_v2_v3_migration_same_path() {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
@@ -155,7 +153,6 @@ async fn stronghold_snapshot_v2_v3_migration_same_path() {
     std::fs::remove_file("./tests/wallet/fixtures/v2-copy.stronghold").unwrap();
 }
 
-#[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn stronghold_snapshot_v2_v3_migration_with_backup() {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
