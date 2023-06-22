@@ -22,7 +22,7 @@ async function run() {
 
     try {
         const nodeInfo = (await client.getInfo()).nodeInfo;
-        console.log('Node info: ', nodeInfo);
+        console.log(nodeInfo);
     } catch (error) {
         console.error('Error: ', error);
     }
