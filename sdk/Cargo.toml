@@ -239,7 +239,7 @@ required-features = [ "client" ]
 # Client Examples
 
 [[example]]
-name = "node_api_core_get_info"
+name = "get_info"
 path = "examples/how_tos/client/get_info.rs"
 
 # Block examples

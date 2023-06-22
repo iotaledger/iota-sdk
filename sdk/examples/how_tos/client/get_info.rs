@@ -3,7 +3,7 @@
 
 //! Returns general information about the node by calling `GET /api/core/v2/info`.
 //!
-//! `cargo run --example node_api_core_get_info --release -- [NODE URL]`
+//! `cargo run --example get_info --release -- [NODE URL]`
 
 use iota_sdk::client::{Client, Result};
 
