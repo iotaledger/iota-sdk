@@ -103,7 +103,7 @@ wallet = [ "client" ]
 [[example]]
 name = "sign_and_verify_ed25519"
 path = "examples/how_tos/sign_and_verify_ed25519/sign_ed25519.rs"
-required-features = [ "stronghold" ]
+required-features = [ "wallet", "stronghold" ]
 
 [[example]]
 name = "verify_ed25519_signature"
@@ -114,6 +114,7 @@ path = "examples/how_tos/sign_and_verify_ed25519/verify_ed25519_signature.rs"
 [[example]]
 name = "create_mnemonic"
 path = "examples/how_tos/accounts_and_addresses/create_mnemonic.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "create_account"
@@ -228,10 +229,12 @@ required-features = [ "rocksdb", "stronghold" ]
 [[example]]
 name = "output_unlock_conditions"
 path = "examples/how_tos/outputs/unlock_conditions.rs"
+required-features = [ "client" ]
 
 [[example]]
 name = "output_features"
 path = "examples/how_tos/outputs/features.rs"
+required-features = [ "client" ]
 
 # Block examples
 
@@ -621,17 +624,17 @@ required-features = [ "wallet", "stronghold" ]
 [[example]]
 name = "check_unlock_conditions"
 path = "examples/wallet/17_check_unlock_conditions.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "accounts"
 path = "examples/wallet/accounts.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "background_syncing"
 path = "examples/wallet/background_syncing.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "events"
@@ -661,7 +664,7 @@ required-features = [ "wallet", "stronghold" ]
 [[example]]
 name = "recover_accounts"
 path = "examples/wallet/recover_accounts.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "spammer"
@@ -671,7 +674,7 @@ required-features = [ "wallet" ]
 [[example]]
 name = "split_funds"
 path = "examples/wallet/split_funds.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "storage"
@@ -686,7 +689,7 @@ required-features = [ "wallet", "stronghold" ]
 [[example]]
 name = "wallet"
 path = "examples/wallet/wallet.rs"
-required-features = [ "wallet" ]
+required-features = [ "wallet", "storage" ]
 
 [[example]]
 name = "migrate_stronghold_snapshot_v2_to_v3"
