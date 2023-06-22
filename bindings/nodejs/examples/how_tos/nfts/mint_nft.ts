@@ -47,10 +47,6 @@ async function run() {
             `${process.env.ACCOUNT_ALIAS_1}`,
         );
 
-        // May want to ensure the account is synced before sending a transaction.
-        let balance = await account.sync();
-        const nftsBefore = balance.nfts;
-
         // We send from the first address in the account.
         const senderAddress = (await account.addresses())[0].address;
 
