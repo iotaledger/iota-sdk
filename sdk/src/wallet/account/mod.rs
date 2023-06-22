@@ -348,16 +348,17 @@ impl AccountInner {
                     _ => {}
                 }
 
-                if let Some(lower_bound_booked_timestamp) = filter.lower_bound_booked_timestamp {
-                    if output.metadata.milestone_timestamp_booked() < lower_bound_booked_timestamp {
-                        continue;
-                    }
-                }
-                if let Some(upper_bound_booked_timestamp) = filter.upper_bound_booked_timestamp {
-                    if output.metadata.milestone_timestamp_booked() > upper_bound_booked_timestamp {
-                        continue;
-                    }
-                }
+                // TODO check if we can still filter since milestone_timestamp_booked is gone
+                // if let Some(lower_bound_booked_timestamp) = filter.lower_bound_booked_timestamp {
+                //     if output.metadata.milestone_timestamp_booked() < lower_bound_booked_timestamp {
+                //         continue;
+                //     }
+                // }
+                // if let Some(upper_bound_booked_timestamp) = filter.upper_bound_booked_timestamp {
+                //     if output.metadata.milestone_timestamp_booked() > upper_bound_booked_timestamp {
+                //         continue;
+                //     }
+                // }
 
                 if let Some(output_types) = &filter.output_types {
                     if !output_types.contains(&output.output.kind()) {
@@ -451,10 +452,12 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
             .first()
             .and_then(|i| BlockId::from_str(&i.metadata.block_id).ok()),
         inclusion_state: InclusionState::Confirmed,
-        timestamp: inputs
-            .first()
-            .and_then(|i| i.metadata.milestone_timestamp_spent.map(|t| t as u128 * 1000))
-            .unwrap_or_else(|| crate::utils::unix_timestamp_now().as_millis()),
+        timestamp: 0,
+        // TODO check if we keep a timestamp in Transaction since milestone_timestamp_spent is gone
+        // inputs
+        //     .first()
+        //     .and_then(|i| i.metadata.milestone_timestamp_spent.map(|t| t as u128 * 1000))
+        //     .unwrap_or_else(|| crate::utils::unix_timestamp_now().as_millis()),
         transaction_id: tx_id,
         network_id: tx_essence.network_id(),
         incoming: true,
