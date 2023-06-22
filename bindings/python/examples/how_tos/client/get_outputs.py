@@ -1,5 +1,6 @@
 from iota_sdk import Client, NodeIndexerAPI
 from dotenv import load_dotenv
+import json
 import os
 
 load_dotenv()
@@ -18,8 +19,9 @@ query_parameters = NodeIndexerAPI.QueryParameters(
 
 # Get output ids of basic outputs that can be controlled by this address without further unlock constraints
 output_ids_response = client.basic_output_ids(query_parameters)
-print(f'{output_ids_response}')
+print('First output of query:')
+print(f'ID: {output_ids_response.items[0]}')
 
 # Get the outputs by their id
 outputs = client.get_outputs(output_ids_response.items)
-print(f'{outputs}')
+print(f'{json.dumps(outputs[0], indent=4)}')

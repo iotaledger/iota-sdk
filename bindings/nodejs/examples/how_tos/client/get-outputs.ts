@@ -5,7 +5,7 @@ import { Client, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./client/03-get-address-outputs.ts
+// yarn run-example ./how_tos/client/get-outputs.ts
 
 // In this example we will get the outputs of a known address
 async function run() {
@@ -30,10 +30,11 @@ async function run() {
             { hasTimelock: false },
             { hasStorageDepositReturn: false },
         ]);
-        console.log('Output ids: ', outputIdsResponse, '\n');
+        console.log!('First output of query:');
+        console.log('ID: ', outputIdsResponse.items[0]);
 
-        const addressOutputs = await client.getOutputs(outputIdsResponse.items);
-        console.log('Address outputs: ', addressOutputs);
+        const outputs = await client.getOutputs(outputIdsResponse.items);
+        console.log(outputs[0]);
     } catch (error) {
         console.error('Error: ', error);
     }
