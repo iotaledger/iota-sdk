@@ -21,6 +21,8 @@ pub mod output;
 pub mod parents;
 /// Module providing random payload generation utilities.
 pub mod payload;
+/// Module providing random slot generation utilities.
+pub mod slot;
 /// Module providing random string generation utilities.
 pub mod string;
 /// Module providing random transaction generation utilities.
