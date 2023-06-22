@@ -294,7 +294,7 @@ impl ClientInner {
             .await
     }
 
-    /// Finds output metadata by its identifier.
+    /// Finds output metadata by output identifier.
     /// GET /api/core/v3/outputs/{outputId}/metadata
     pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadataDto> {
         let path = &format!("api/core/v3/outputs/{output_id}/metadata");
