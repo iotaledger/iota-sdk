@@ -94,9 +94,14 @@ impl RegularTransactionEssenceBuilder {
 
         verify_payload::<true>(&self.payload)?;
 
+        let creation_time = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("Time went backwards")
+            .as_nanos() as u64;
+
         Ok(RegularTransactionEssence {
             network_id: self.network_id,
-            creation_time: 0,
+            creation_time,
             inputs,
             inputs_commitment: self.inputs_commitment,
             outputs,
@@ -124,9 +129,14 @@ impl RegularTransactionEssenceBuilder {
 
         verify_payload::<true>(&self.payload)?;
 
+        let creation_time = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("Time went backwards")
+            .as_nanos() as u64;
+
         Ok(RegularTransactionEssence {
             network_id: self.network_id,
-            creation_time: 0,
+            creation_time,
             inputs,
             inputs_commitment: self.inputs_commitment,
             outputs,
